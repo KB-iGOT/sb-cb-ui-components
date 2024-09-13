@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core'
 import { SelectionModel } from '@angular/cdk/collections'
 import { MatTableDataSource } from '@angular/material/table'
-import { MatPaginator } from '@angular/material'
+import { MatPaginator } from '@angular/material/paginator'
 import { MatSort } from '@angular/material/sort'
 import * as _ from 'lodash'
 
@@ -39,8 +39,8 @@ export class OrgUserTableComponent implements OnInit, AfterViewInit, OnChanges {
   length!: number
   pageSize = 20
   pageSizeOptions = [20, 30, 40]
-  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator
-  @ViewChild(MatSort, { static: false }) set matSort(sort: MatSort) {
+  @ViewChild(MatPaginator) paginator!: MatPaginator
+  @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (!this.dataSource.sort) {
       this.dataSource.sort = sort
     }

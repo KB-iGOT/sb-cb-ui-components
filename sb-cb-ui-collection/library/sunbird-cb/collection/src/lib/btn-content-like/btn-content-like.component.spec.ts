@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { BtnContentLikeComponent } from './btn-content-like.component'
 
@@ -6,7 +6,7 @@ describe('BtnContentLikeComponent', () => {
   let component: BtnContentLikeComponent
   let fixture: ComponentFixture<BtnContentLikeComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnContentLikeComponent],
     })

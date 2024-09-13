@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { LayoutTabComponent } from './layout-tab.component'
 
@@ -6,7 +6,7 @@ describe('LayoutTabComponent', () => {
   let component: LayoutTabComponent
   let fixture: ComponentFixture<LayoutTabComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [LayoutTabComponent],
     })

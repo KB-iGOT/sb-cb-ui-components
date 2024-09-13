@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { AtGlanceComponent } from './at-glance.component'
 
@@ -6,7 +6,7 @@ describe('AtGlanceComponent', () => {
   let component: AtGlanceComponent
   let fixture: ComponentFixture<AtGlanceComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AtGlanceComponent],
     })

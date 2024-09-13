@@ -5,7 +5,9 @@ import { RestrictedComponent } from './restricted/restricted.component'
 import { InvalidRegistrationComponent } from './invalid-registration/invalid-registration.component'
 import { InvalidPermissionComponent } from './invalid-permission/invalid-permission.component'
 import { UnresolvedComponent } from './unresolved/unresolved.component'
-import { MatButtonModule, MatIconModule, MatCardModule } from '@angular/material'
+import { MatButtonModule } from '@angular/material/button'
+import { MatCardModule } from '@angular/material/card'
+import { MatIconModule } from '@angular/material/icon'
 import { NsWidgetResolver } from './widget-resolver.model'
 import { WidgetResolverService } from './widget-resolver.service'
 import { ConfigurationsService } from '@sunbird-cb/utils'
@@ -35,7 +37,7 @@ import { WidgetBaseComponent } from './widget-base.component'
   providers: [ConfigurationsService],
 })
 export class WidgetResolverModule {
-  static forRoot(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders {
+  static forRoot(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders<WidgetResolverModule> {
     return {
       ngModule: WidgetResolverModule,
       providers: [
@@ -51,7 +53,7 @@ export class WidgetResolverModule {
       ],
     }
   }
-  static forChild(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders {
+  static forChild(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders<WidgetResolverModule> {
     return {
       ngModule: WidgetResolverModule,
       providers: [

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { BtnLinkedinShareComponent } from './btn-linkedin-share.component'
 
@@ -6,7 +6,7 @@ describe('BtnLinkedinShareComponent', () => {
   let component: BtnLinkedinShareComponent
   let fixture: ComponentFixture<BtnLinkedinShareComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnLinkedinShareComponent],
     }).compileComponents()
