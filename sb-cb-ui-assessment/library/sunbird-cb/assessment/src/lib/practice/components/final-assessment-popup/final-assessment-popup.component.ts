@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core'
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { MatTableDataSource } from '@angular/material/table'
 import { ITableData } from '../../../interface/ITable.model'
 import * as _ from 'lodash'
