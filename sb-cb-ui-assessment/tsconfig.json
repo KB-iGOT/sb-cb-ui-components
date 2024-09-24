@@ -25,6 +25,7 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
+    "compilationMode": "partial",
     "target": "es2015",
     "typeRoots": ["node_modules/@types", "./custom_typings"],
     "plugins": [{

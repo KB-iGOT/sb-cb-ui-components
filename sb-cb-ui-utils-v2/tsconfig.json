@@ -8,7 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "lib": ["es2018", "dom"],
-    "module": "es2020",
+    "module": "esnext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -26,6 +26,7 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "target": "es2015",
+    "compilationMode": "partial",
     "typeRoots": ["node_modules/@types", "./custom_typings"],
     "plugins": [{
         "name": "@angular/language-service"
