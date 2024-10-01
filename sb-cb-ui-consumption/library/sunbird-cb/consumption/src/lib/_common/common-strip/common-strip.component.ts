@@ -18,7 +18,7 @@ import { WidgetUserService } from '../../_services/widget-user.service';
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { MatTabChangeEvent } from '@angular/material';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import { CommonMethodsService } from '../../_services/common-methods.service';
 
