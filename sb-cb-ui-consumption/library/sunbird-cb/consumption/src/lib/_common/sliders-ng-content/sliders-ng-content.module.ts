@@ -1,21 +1,22 @@
-import { NgModule } from '@angular/core'
+import { NgModule, Injectable } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { SlidersNgContentLibComponent } from './sliders-ng-content.component'
 import { RouterModule } from '@angular/router'
 import {  ImageResponsiveModule } from '../../_directives/image-responsive/image-responsive.module'
-import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser'
+// import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser'
 /* tslint:disable */
-import  Hammer from 'hammerjs'
+// import  Hammer from 'hammerjs'
 import { NavigationModule } from '../../_directives/navigation/navigation.module'
 /* tslint:enable */
-export class MyHammerConfig extends HammerGestureConfig {
-  buildHammer(element: HTMLElement) {
-    const mc = new Hammer(element, {
-      touchAction: 'pan-y',
-    })
-    return mc
-  }
-}
+@Injectable()
+// export class MyHammerConfig extends HammerGestureConfig {
+//   buildHammer(element: HTMLElement) {
+//     const mc = new Hammer(element, {
+//       touchAction: 'pan-y',
+//     })
+//     return mc
+//   }
+// }
 
 // tslint:disable-next-line: max-classes-per-file
 @NgModule({
@@ -29,10 +30,10 @@ export class MyHammerConfig extends HammerGestureConfig {
   exports: [SlidersNgContentLibComponent],
   entryComponents: [SlidersNgContentLibComponent],
   providers: [
-    {
-      provide: HAMMER_GESTURE_CONFIG,
-      useClass: MyHammerConfig,
-    },
+    // {
+    //   provide: HAMMER_GESTURE_CONFIG,
+    //   useClass: MyHammerConfig,
+    // },
   ],
 })
 export class SlidersNgContentLibModule { }

@@ -13,7 +13,7 @@ import { BtnContentLikeModule } from '../btn-content-like/btn-content-like.modul
 import { BtnContentMailMeModule } from '../btn-content-mail-me/btn-content-mail-me.module'
 import { MatPaginatorModule } from '@angular/material/paginator'
 import { MatButtonModule } from '@angular/material/button'
-import { MatCardModule } from '@angular/material'
+import { MatCardModule } from '@angular/material/card'
 import { OrgUserTableComponent } from './user-list/org-user-table.component'
 import { OrgUserTableV2Component } from './org-user-table-v2/org-user-table-v2.component'
 @NgModule({

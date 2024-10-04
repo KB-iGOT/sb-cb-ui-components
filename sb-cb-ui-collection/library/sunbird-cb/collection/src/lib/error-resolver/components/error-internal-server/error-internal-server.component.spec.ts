@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ErrorInternalServerComponent } from './error-internal-server.component'
 
@@ -6,7 +6,7 @@ describe('ErrorInternalServerComponent', () => {
   let component: ErrorInternalServerComponent
   let fixture: ComponentFixture<ErrorInternalServerComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorInternalServerComponent],
     })

@@ -13,7 +13,9 @@ import {
   // SimpleChange,
   ViewChild,
 } from '@angular/core'
-import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material'
+import { MatPaginator } from '@angular/material/paginator'
+import { MatSort } from '@angular/material/sort'
+import { MatTableDataSource } from '@angular/material/table'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
 import { IColums, ITable } from './card-table.model'
 /* tslint:disable */
@@ -43,7 +45,7 @@ export class CardTableComponent extends WidgetBaseComponent
   dataSource = new MatTableDataSource<any>()
   display = 'table'
   cardTableColumns!: IColums[]
-  @ViewChild(MatSort, { static: false }) set matSort(sort: MatSort) {
+  @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (!this.dataSource.sort) {
       this.dataSource.sort = sort
     }

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { BtnFullscreenComponent } from './btn-fullscreen.component'
 
@@ -6,7 +6,7 @@ describe('BtnFullscreenComponent', () => {
   let component: BtnFullscreenComponent
   let fixture: ComponentFixture<BtnFullscreenComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnFullscreenComponent],
     })

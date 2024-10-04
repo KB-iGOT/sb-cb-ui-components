@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges, SimpleChanges, AfterViewChecked, ChangeDetectorRef } from '@angular/core'
 import { SelectionModel } from '@angular/cdk/collections'
 import { MatTableDataSource } from '@angular/material/table'
-import { MatPaginator, PageEvent } from '@angular/material'
+import { MatPaginator, PageEvent } from '@angular/material/paginator'
 import { MatSort } from '@angular/material/sort'
 import * as _ from 'lodash'
 import { ITableData, IColums } from '../interface/interfaces'
@@ -41,12 +41,12 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   @Input()totalRecords?: any
   @Input()tabChangeIndex?: any
   // @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator
-  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator
-  @ViewChild(MatPaginator, { static: false }) set matPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator) paginator!: MatPaginator
+  @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
     this.paginator = paginator
     // this.setDataSourceAttributes()
   }
-  @ViewChild(MatSort, { static: false }) set matSort(sort: MatSort) {
+  @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (!this.dataSource.sort) {
       this.dataSource.sort = sort
     }

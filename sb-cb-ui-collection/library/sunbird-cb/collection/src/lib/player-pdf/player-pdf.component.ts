@@ -12,7 +12,7 @@ import { FormControl } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
 import { EventService, LoggerService, WsEvents, ValueService } from '@sunbird-cb/utils'
-import * as PDFJS from 'pdfjs-dist/webpack'
+import * as PDFJS from 'pdfjs-dist'
 import { fromEvent, interval, merge, Subject, Subscription } from 'rxjs'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 // import { ViewerUtilService } from '../../../../../../project/ws/viewer/src/lib/viewer-util.service'
@@ -356,7 +356,7 @@ export class PlayerPdfComponent extends WidgetBaseComponent
       },
       to: '',
       data: {
-        // object: {},
+        object: {},
         eventSubType: eventType,
         activityType: activity,
         currentPage: this.currentPage.value,

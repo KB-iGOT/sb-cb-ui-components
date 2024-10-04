@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ContentStripNewMultipleComponent } from './network-strip-multiple.component'
 
@@ -6,7 +6,7 @@ describe('ContentStripNewMultipleComponent', () => {
   let component: ContentStripNewMultipleComponent
   let fixture: ComponentFixture<ContentStripNewMultipleComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ContentStripNewMultipleComponent],
     })

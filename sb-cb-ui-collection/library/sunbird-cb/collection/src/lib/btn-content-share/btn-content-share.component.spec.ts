@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { BtnContentShareComponent } from './btn-content-share.component'
 
@@ -6,7 +6,7 @@ describe('BtnContentShareComponent', () => {
   let component: BtnContentShareComponent
   let fixture: ComponentFixture<BtnContentShareComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnContentShareComponent],
     })
