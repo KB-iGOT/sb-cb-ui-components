@@ -116,8 +116,13 @@
     margin-top: -5px;
   }
 
-  // width:98%;
-  word-wrap: break-word;
+  width:98%;
+  word-break: break-word;
+}
+
+.paragraph {
+  width: 98%;
+  word-break: break-word;
 }
 
 .mtf-flag {

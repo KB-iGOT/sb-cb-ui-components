@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-assessment",
-  "version": "0.0.12-ang-9-12",
+  "version": "0.0.17-ang-9-12",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
