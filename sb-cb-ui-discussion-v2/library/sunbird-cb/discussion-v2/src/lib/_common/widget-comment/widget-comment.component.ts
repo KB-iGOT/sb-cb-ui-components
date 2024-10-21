@@ -106,8 +106,8 @@ export class WidgetCommentComponent implements OnInit {
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
 
     const payload = {
-      workflow,
       entityType,
+      workflow,
       commentTreeId: commentTreeId || '',
       entityId: this.entityId,
       limit: this.commentListLimit,
@@ -156,10 +156,9 @@ export class WidgetCommentComponent implements OnInit {
         if (res && (res.code === 'Not Found' || !res.result.commentCount)) {
           this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
         }
-      },                                                    (err: any) => {
+      },
+                                                            () => {
         this.loading = false
-        // tslint:disable-next-line: no-console
-        console.error('Error in fetching all comments', err)
       }
     )
   }
@@ -215,14 +214,13 @@ export class WidgetCommentComponent implements OnInit {
       userId: this.loogedInUserProfile.userId,
     }
     this.discussV2Svc.likeUnlikeComment(payload).subscribe(res => {
-      // console.log(res, 'likeResponse')
       if (res.responseCode === 'OK') {
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
-        const comment = this.commentData.comments.find((commentEle: any) => commentEle.commentId === commentId)
+        const comment = this.commentData.comments.find((comm: any) => comm.commentId === commentId)
         if (flag === 'like') {
-          comment.like = comment.like ? comment.like + 1 : 1
+          comment.commentData.like = comment.commentData.like ? comment.commentData.like + 1 : 1
         } else {
-          comment.like = comment.like - 1
+          comment.commentData.like = comment.commentData.like - 1
         }
       }
     })

@@ -24,7 +24,7 @@
                 </span>
                 <span class="mr-4" *ngIf="cardConfig?.actions?.like?.showCount">
                     <!-- {{(comment?.like && comment?.like?.length) || 0}} {{comment?.likes && comment?.likes?.length > 1 ? -->
-                    {{(comment?.like && comment?.like) || 0}} {{comment?.like && comment?.like > 1 ?
+                    {{(comment?.commentData?.like && comment?.commentData?.like) || 0}} {{comment?.commentData?.like && comment?.commentData?.like > 1 ?
                     'Likes' : 'Like'}}
                 </span>
             </ng-container>
