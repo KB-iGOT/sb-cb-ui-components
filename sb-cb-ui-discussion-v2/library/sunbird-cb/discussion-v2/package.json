@@ -1,6 +1,10 @@
 {
   "name": "@sunbird-cb/discussion-v2",
+<<<<<<< HEAD
   "version": "0.0.1-ang-9-12",
+=======
+  "version": "0.0.3",
+>>>>>>> 50fab9b4b7dec4a4049ff62d6276f0abec3a0899
   "main": "src/public-api.ts",
   "dependencies": {
     "tslib": "^2.0.0"

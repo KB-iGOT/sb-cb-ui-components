@@ -1,6 +1,10 @@
 {
   "name": "sb-cb-ui-consumption",
+<<<<<<< HEAD
   "version": "0.0.88-ang-9-12",
+=======
+  "version": "0.0.96",
+>>>>>>> 50fab9b4b7dec4a4049ff62d6276f0abec3a0899
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch=true",

@@ -2,7 +2,7 @@ import { Component, OnInit, Input, OnDestroy, HostBinding, Inject, EventEmitter,
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2';
 import { NsContentStripWithFacets, ApiRequestFor } from './content-strip-facet-filter.model';
 // import { HttpClient } from '@angular/common/http'
-import { WidgetContentService } from '../../../_services/widget-content.service';
+import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
 import { NsContent } from '../../../_models/widget-content.model';
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@sunbird-cb/utils-v2';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { WidgetUserService } from '../../../_services/widget-user.service';
+import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service';
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
@@ -81,7 +81,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
   @Input() widgetData!: NsContentStripWithFacets.IContentStripMultiple;
   @Output() emptyResponse = new EventEmitter<any>()
   @Output() viewAllResponse = new EventEmitter<any>()
-  @Output() telemtryResponse = new EventEmitter<any>()
+  @Output() telemtryLearningContentResponse = new EventEmitter<any>()
   @Input() providerId : any = ''
   @Input() emitViewAll : boolean = false
   @Input() channnelName: any = ''
@@ -104,17 +104,16 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
   defaultMaxWidgets = 12;
   enrollInterval: any;
   todaysEvents: any = [];
-  enrollmentMapData: any
   facetForm: any
   constructor(
     @Inject('environment') environment: any,
-    private contentSvc: WidgetContentService,
+    private contentSvc: WidgetContentLibService,
     private loggerSvc: LoggerService,
     private eventSvc: EventService,
     private configSvc: ConfigurationsService,
     public utilitySvc: UtilityService,
     public router: Router,
-    private userSvc: WidgetUserService,
+    private userSvc: WidgetUserServiceLib,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
     private _fb: FormBuilder
@@ -134,9 +133,9 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
 
   ngOnInit() {
     this.initData();
-    this.contentSvc.telemetryData$.subscribe((data: any) => {
-      this.telemtryResponse.emit(data)
-    })
+    // this.contentSvc.telemetryData$.subscribe((data: any) => {
+    //   this.telemtryLearningContentResponse.emit(data)
+    // })
     this.facetForm = this._fb.group({
       org: ['0']
     })
@@ -326,7 +325,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
   }
 
   raiseTelemetry(stripData: any){
-    this.telemtryResponse.emit(stripData)
+    this.telemtryLearningContentResponse.emit(stripData)
   }
   setHiddenForStrip(key: string) {
     this.stripsResultDataMap[key].showStrip = false;
@@ -364,7 +363,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
     this.eventSvc.raiseInteractTelemetry(
       {
         type: WsEvents.EnumInteractTypes.CLICK,
-        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+        subType: 'explore-learning-content',
         id: `${_.camelCase(data.label)}-tab`,
       },
       {},
@@ -635,7 +634,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
           const response = await this.postRequestMethod(strip, strip.request.requestBody, strip.request.apiUrl, calculateParentStatus);
           let tabIndex=0
           let pillIndex= 0
-          if (response.results && response.results.result) {
+          if (response.results && response.results.result && response.results.result.content && response.results.result.content.length > 0) {
             this.mapAllDataWithFacets(strip, response.results.result.content, response.results.result.facets, calculateParentStatus)
             const widgets = this.transformContentsToWidgets(response.results.result.content, strip);
             let tabResults: any[] = [];
@@ -668,6 +667,8 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
             //   response.viewMoreUrl,
             //   tabResults // tabResults as widgets
             // );
+          } else {
+            this.processStrip(strip, [], 'error', calculateParentStatus, null);
           }
         } catch (error) {
           // Handle errors

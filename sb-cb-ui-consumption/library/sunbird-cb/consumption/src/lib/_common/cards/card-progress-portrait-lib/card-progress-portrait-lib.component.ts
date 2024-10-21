@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
-import { WidgetContentService } from '../../../_services/widget-content.service';
+import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
 import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2';
 import * as _ from "lodash";
 import { CertificateService } from '../../../_services/certificate.service';
@@ -40,7 +40,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
     private events: EventService,
     private langtranslations: MultilingualTranslationsService,
     private configSvc: ConfigurationsService,
-    private contSvc: WidgetContentService,
+    private contSvc: WidgetContentLibService,
     private certificateService: CertificateService,
     private dialog: MatDialog,
     ) { 
