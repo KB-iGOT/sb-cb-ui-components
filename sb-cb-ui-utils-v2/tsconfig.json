@@ -26,7 +26,6 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "target": "es2015",
-    "compilationMode": "partial",
     "typeRoots": ["node_modules/@types", "./custom_typings"],
     "plugins": [{
         "name": "@angular/language-service"

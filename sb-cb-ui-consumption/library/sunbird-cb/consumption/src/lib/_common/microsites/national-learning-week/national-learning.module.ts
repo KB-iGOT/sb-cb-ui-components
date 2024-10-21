@@ -1,6 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatChipsModule, MatIconModule, MatTabsModule } from '@angular/material';
 import { SkeletonLoaderLibModule } from '../../skeleton-loader-lib/skeleton-loader-lib.module';
 import { NationalLearningComponent } from './national-learning/national-learning.component';
 import { CommonMethodsService } from '../../../_services/common-methods.service';
@@ -14,6 +13,9 @@ import { HighlightsOfWeekModule } from '../../highlights-of-week/highlights-of-w
 import { SpeakersModule } from '../../speakers/speakers.module';
 import { UserProgressModule } from '../../user-progress/user-progress.module';
 import { ContentStripFacetFilterModule } from '../../strips/content-strip-facet-filter/content-strip-facet-filter.module';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 

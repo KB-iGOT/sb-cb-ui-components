@@ -4,12 +4,11 @@
     "alwaysStrict": true,
     "baseUrl": "./",
     "declaration": false,
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "lib": ["es2018", "dom"],
-    "module": "ESNext",
+    "module": "es2020",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -21,7 +20,7 @@
     "outDir": "./dist/out-tsc",
     "paths": {
       "@sunbird-cb/resolver": ["library/sunbird-cb/resolver"],
-      "@sunbird-cb/resolver/*": ["library/sunbird-cb/resolver/*"],
+      "@sunbird-cb/resolver/*": ["library/sunbird-cb/resolver/*"]
     },
     "removeComments": true,
     "sourceMap": true,
@@ -43,5 +42,8 @@
         "suppressWhileTypeErrorsPresent": false
       }
     ]
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial"
   }
 }

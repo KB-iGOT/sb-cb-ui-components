@@ -68,3 +68,13 @@ export * from './lib/_common/microsites/mdo-channels/mdo-channel-v2/mdo-channel-
 export * from './lib/_common/microsites/providers/providers-v2/providers-v2.component'
 export * from './lib/_common/key-highlights/key-highlights.module'
 export * from './lib/_common/events/events.module'
+
+export * from './lib/_common/strips/content-strip-facet-filter/content-strip-facet-filter.component'
+export * from './lib/_common/microsites/national-learning-week/national-learning/national-learning.component'
+export * from './lib/_common/key-highlights/key-highlights.component'
+export * from './lib/_common/events/events.component'
+export * from './lib/_common/events/event-card/event-card.component'
+export * from './lib/_common/mdo-leaderboard/mdo-leaderboard.component'
+export * from './lib/_common/highlights-of-week/highlights-of-week.component'
+export * from './lib/_common/speakers/speakers.component'
+export * from './lib/_common/user-progress/user-progress.component'
