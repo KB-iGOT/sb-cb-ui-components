@@ -13,7 +13,7 @@ export class WidgetCommentComponent implements OnInit {
   commentData!: any
   loading = false
   entityId = ''
-  @Input() widgetData!: NsDiscussionV2.ICommentWidgetData
+  @Input() widgetData!: NsDiscussionV2.ICommentWidgetData | any
   commentTreeId = ''
   loogedInUserProfile: any = {}
   commentListLimit = 20
@@ -153,12 +153,13 @@ export class WidgetCommentComponent implements OnInit {
           this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
         }
 
-        if (res && (res.code === 'Not Found' || !res.result.commentCount)) {
+        if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
           this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
         }
       },
                                                             () => {
         this.loading = false
+
       }
     )
   }
@@ -229,6 +230,10 @@ export class WidgetCommentComponent implements OnInit {
   loadMoreComments() {
     this.commentListOffSet = this.commentListOffSet + 1
     this.fetchInitialComments_v2Addmore(this.widgetData.newCommentSection.commentTreeData.commentTreeId)
+  }
+
+  ngOnDestroy(): void {
+    this.widgetData = null
   }
 
 }
