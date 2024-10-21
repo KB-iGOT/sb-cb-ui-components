@@ -41,7 +41,7 @@ export class AvatarPhotoComponent implements OnInit {
   ]
 
   ngOnInit() {
-    if (!this.photoUrl) {
+    if (!this.photoUrl || !(this.photoUrl.startsWith('http://') || this.photoUrl.startsWith('https://'))) {
       this.showInitials = true
       if (!this.initials) {
         this.createInititals()
