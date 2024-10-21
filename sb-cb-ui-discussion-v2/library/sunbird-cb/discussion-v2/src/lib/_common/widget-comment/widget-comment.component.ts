@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
@@ -9,7 +9,7 @@ import { MatSnackBar } from '@angular/material'
   templateUrl: './widget-comment.component.html',
   styleUrls: ['./widget-comment.component.scss'],
 })
-export class WidgetCommentComponent implements OnInit {
+export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentData!: any
   loading = false
   entityId = ''
