@@ -85,7 +85,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
     this.newComment.emit({ response: res, type: 'comment' })
     this.searchControl.setValue('')
   }
-  
+
   ngOnDestroy(): void {
     this.config.commentTreeData.commentTreeId = ''
   }
