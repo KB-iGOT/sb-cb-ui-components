@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { InsiteDataService } from '../../_services/insite-data.service';
 
 @Component({
@@ -13,9 +13,12 @@ export class MdoLeaderboardComponent implements OnInit {
   filteredData: any
   searchTerm: string = ''
   expand: boolean = true
+  disableLeft: boolean = true
+  disableRight: boolean = false
 
   @Input() object: any
   @Output() tabClicked = new EventEmitter<any>()
+  @ViewChild('scrollableContent', { static: false }) scrollableContent: ElementRef;
   constructor(private insiteDataService: InsiteDataService) { }
 
   ngOnInit() {
@@ -92,6 +95,25 @@ export class MdoLeaderboardComponent implements OnInit {
 
   toggleWeekHightlits() {
     this.expand = !this.expand
+  }
+
+  scrollToRight() {
+    this.scrollableContent.nativeElement.scrollBy({
+      left: 200,
+      behavior: 'smooth'
+    })
+    this.disableLeft = false
+    this.disableRight = true
+  }
+
+
+  scrollToLeft() {
+    this.scrollableContent.nativeElement.scrollBy({
+      left: -200,
+      behavior: 'smooth'
+    })
+    this.disableLeft = true
+    this.disableRight = false
   }
 
 }
