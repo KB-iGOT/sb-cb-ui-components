@@ -16,12 +16,16 @@
     </div>
     <div class="l-content" *ngIf="expand">
         <div class="horizontal-scroll-container">
-            <div class="scroll-content">
-                <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XL' }" (click)="getTabData('XL')">Greater than 50K</span>
-                <span class="tab-title"  [ngClass]="{'active' : currentTab === 'L' }" (click)="getTabData('L')">10K-50K</span>
-                <span class="tab-title"  [ngClass]="{'active' : currentTab === 'M' }" (click)="getTabData('M')">1K-10K</span>
-                <span class="tab-title"  [ngClass]="{'active' : currentTab === 'S' }" (click)="getTabData('S')">500-1K</span>
-                <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XS' }" (click)="getTabData('XS')">Less than 500</span>
+            <div class="flex gap-1">
+                <mat-icon class="material-icons left-icon cursor-pointer {{disableLeft ? 'disableArrow': ''}}" (click)="scrollToLeft()" >chevron_left</mat-icon>
+                <div #scrollableContent class="scroll-content">
+                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XL' }" (click)="getTabData('XL')">> 50K</span>
+                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'L' }" (click)="getTabData('L')">10K-50K</span>
+                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'M' }" (click)="getTabData('M')">1K-10K</span>
+                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'S' }" (click)="getTabData('S')">500-1K</span>
+                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XS' }" (click)="getTabData('XS')">< 500</span>
+                </div>
+                <mat-icon class="material-icons icon-right cursor-pointer {{disableRight ? 'disableArrow': ''}}" (click)="scrollToRight()">chevron_right</mat-icon>
             </div>
         </div>
         <div class="relative search-wrapper margin-top-m mb-5">
