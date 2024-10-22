@@ -15,19 +15,17 @@
     padding: 16px;
 }
 
-.horizontal-scroll-container {
-    overflow-x: auto;
-    white-space: nowrap;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    height: 32px;
-}
   .horizontal-scroll-container::-webkit-scrollbar {
     display: none;
   }
   
   .scroll-content {
     display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    height: 32px;
   }
   .tab-title {
     /* stylelint-disable */
@@ -187,6 +185,11 @@
     background: #c3c3c3;
     margin-top: -25px;
     border-radius: 10px;
+}
+
+.disableArrow {
+    cursor: default;
+    opacity: 0.4;
 }
 
 
