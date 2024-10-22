@@ -10,6 +10,7 @@ import { MatButtonModule, MatIconModule, MatInputModule } from '@angular/materia
 import { AvatarPhotoComponent } from './_common/avatar-photo/avatar-photo.component'
 import { DiscussionV2Service } from './_services/discussion-v2.service'
 import { PipesModule } from './_pipes/pipes.module'
+import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { PipesModule } from './_pipes/pipes.module'
     MatButtonModule,
     MatIconModule,
     PipesModule,
+    SkeletonLoaderModule,
   ],
   providers: [
     DiscussionV2Service,
