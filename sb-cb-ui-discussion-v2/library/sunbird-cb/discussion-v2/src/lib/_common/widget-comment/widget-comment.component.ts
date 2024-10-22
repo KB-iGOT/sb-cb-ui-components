@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { MatSnackBar } from '@angular/material'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 @Component({
   selector: 'd-v2-widget-comment',

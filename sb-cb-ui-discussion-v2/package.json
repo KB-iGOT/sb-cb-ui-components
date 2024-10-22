@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch=true",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
     "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
@@ -26,7 +26,7 @@
     "@angular/router": "~12.2.17",
     "@ngx-translate/core": "12.0.0",
     "@ngx-translate/http-loader": "4.0.0",
-    "@sunbird-cb/utils-v2": "0.0.15-ang-9-12",
+    "@sunbird-cb/utils-v2": "0.0.19-ang-9-12",
     "@types/lodash": "4.14.168",
     "@sunbird-cb/design-system": "0.0.1",
     "rxjs": "~6.5.2",
