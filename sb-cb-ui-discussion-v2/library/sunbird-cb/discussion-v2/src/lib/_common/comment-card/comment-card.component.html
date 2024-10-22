@@ -9,7 +9,7 @@
                     [photoUrl]="comment?.commentData?.commentSource?.userPic"
                     [color]="
                         comment?.commentData?.commentSource?.userName === loogedInUserProfile?.firstName ? 
-                        cardConfig?.avatarPhoto?.color : ''
+                        cardConfig?.actions?.avatarPhoto?.color || '#006400' : ''
                     ">
                 </d-v2-avatar-photo>
             </div>
@@ -30,7 +30,6 @@
                         aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
                 </span>
                 <span class="mr-4" *ngIf="cardConfig?.actions?.like?.showCount">
-                    <!-- {{(comment?.like && comment?.like?.length) || 0}} {{comment?.likes && comment?.likes?.length > 1 ? -->
                     {{(comment?.commentData?.like && comment?.commentData?.like) || 0}} {{comment?.commentData?.like && comment?.commentData?.like > 1 ?
                     'Likes' : 'Like'}}
                 </span>

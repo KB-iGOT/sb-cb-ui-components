@@ -52,6 +52,9 @@ export class CommentCardComponent implements OnInit {
           this.fetchedReplyData = [...reply]
           this.loading = false
         }
+      },
+                                                                        () => {
+        this.loading = false
       })
     }
   }

@@ -38,6 +38,13 @@ export namespace NsDiscussionV2 {
     export interface ICommentCardActions {
        like?: ICommentCardActionsObj,
        comments?: ICommentCardActionsObj,
+       avatarPhoto?: {
+        show: boolean,
+        size: string,
+        photoUrl: string,
+        name: string,
+        color: string
+    },
     }
 
     export interface ICommentCardConfig {
@@ -51,13 +58,6 @@ export namespace NsDiscussionV2 {
         },
         noCommentsSection?: {
             text: string
-        },
-        avatarPhoto: {
-            show: boolean,
-            size: string,
-            photoUrl: string,
-            name: string,
-            color: string
         },
     }
 

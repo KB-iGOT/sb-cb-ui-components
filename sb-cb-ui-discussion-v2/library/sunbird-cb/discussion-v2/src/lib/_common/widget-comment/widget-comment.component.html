@@ -22,7 +22,7 @@
             </ng-container>
         </ng-container>
 
-        <ng-container *ngIf="loading">
+        <ng-container *ngIf="loading || loadingMore">
             <div class="skeleton-loader mb-4">
                 <div class="flex gap-4 items-center p-4 rounded bg-white">
                     <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'" [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
@@ -35,7 +35,7 @@
 </div>
 
 <ng-template #noCommentsSection>
-    <ng-container *ngIf="!loading">
+    <ng-container *ngIf="!loading && !loadingMore">
         <div class="flex flex-1 items-center justify-center ">
             {{widgetData?.commentsList?.noCommentsSection?.text}}
         </div>
