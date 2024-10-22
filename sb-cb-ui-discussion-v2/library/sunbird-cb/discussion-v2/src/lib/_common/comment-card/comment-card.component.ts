@@ -58,7 +58,6 @@ export class CommentCardComponent implements OnInit {
   }
 
   likeUnlikeEvent(event: any) {
-    // console.log(event)
 
     this.discussV2Svc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
       if (res.result && Object.keys(res.result).length > 0) {
@@ -72,18 +71,18 @@ export class CommentCardComponent implements OnInit {
 
   likeUnlikeCommentApi(flag: string, commentId: string) {
     const payload = {
-      commentId,
       flag,
+      commentId,
       userId: this.loogedInUserProfile.userId,
     }
     this.discussV2Svc.likeUnlikeComment(payload).subscribe(res => {
       if (res.responseCode === 'OK') {
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
-        const comment = this.fetchedReplyData.find((commentEle: any) => commentEle.commentId === commentId)
+        const comment = this.fetchedReplyData.find((comm: any) => comm.commentId === commentId)
         if (flag === 'like') {
-          comment.like = comment.like ? comment.like + 1 : 1
+          comment.commentData.like = comment.commentData.like ? comment.commentData.like + 1 : 1
         } else {
-          comment.like = comment.like - 1
+          comment.commentData.like = comment.commentData.like - 1
         }
       }
     })

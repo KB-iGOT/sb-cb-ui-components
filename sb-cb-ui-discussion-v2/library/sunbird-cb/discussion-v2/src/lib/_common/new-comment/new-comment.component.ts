@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
@@ -9,7 +9,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service'
   templateUrl: './new-comment.component.html',
   styleUrls: ['./new-comment.component.scss'],
 })
-export class NewCommentComponent implements OnInit {
+export class NewCommentComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewCommentConfig
   @Input() hierarchyPath = []
   @Output() newComment = new EventEmitter<any>()
@@ -57,7 +57,7 @@ export class NewCommentComponent implements OnInit {
         file: files,
         commentSource: {
           userId: this.loogedInUserProfile.userId,
-          userPic: this.loogedInUserProfile.profileImageUrl || this.loogedInUserProfile.firstName.splice(0, 2),
+          userPic: this.loogedInUserProfile.profileImageUrl || this.loogedInUserProfile.firstName.substring(0, 2),
           userName: this.loogedInUserProfile.firstName,
           userRole: 'public', // TODO: replace original roles array
         },
@@ -86,4 +86,7 @@ export class NewCommentComponent implements OnInit {
     this.searchControl.setValue('')
   }
 
+  ngOnDestroy(): void {
+    this.config.commentTreeData.commentTreeId = ''
+  }
 }
