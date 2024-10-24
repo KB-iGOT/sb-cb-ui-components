@@ -1,3 +1,4 @@
+
 <div class="w-full mb-4">
     <div class="flex flex-col ratings-div" id="ratingsDiv">
         <div class="mb-5" *ngIf="widgetData?.newCommentSection?.show">
@@ -20,11 +21,23 @@
                 </div>
             </ng-container>
         </ng-container>
+
+        <ng-container *ngIf="loading || loadingMore">
+            <div class="skeleton-loader mb-4">
+                <div class="flex gap-4 items-center p-4 rounded bg-white">
+                    <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'" [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
+                    <d-v2-widget-skeleton-loader [width]="'600px'" [height]="'43px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+                    <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+                </div>
+            </div>
+        </ng-container>
     </div>
 </div>
 
 <ng-template #noCommentsSection>
-    <div class="flex flex-1 items-center justify-center ">
-        {{widgetData?.commentsList?.noCommentsSection?.text}}
-    </div>
+    <ng-container *ngIf="!loading && !loadingMore">
+        <div class="flex flex-1 items-center justify-center ">
+            {{widgetData?.commentsList?.noCommentsSection?.text}}
+        </div>
+    </ng-container>
 </ng-template>

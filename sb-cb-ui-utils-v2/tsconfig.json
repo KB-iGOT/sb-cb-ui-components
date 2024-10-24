@@ -6,7 +6,7 @@
     "declaration": false,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "lib": ["es2018", "dom"],
     "module": "esnext",
     "moduleResolution": "node",

@@ -18,7 +18,8 @@ export namespace NsDiscussionV2 {
             show: boolean,
             size: string,
             photoUrl: string,
-            name: string
+            name: string,
+            color: string
         },
         commentBox: {
             placeholder: string
@@ -37,6 +38,13 @@ export namespace NsDiscussionV2 {
     export interface ICommentCardActions {
        like?: ICommentCardActionsObj,
        comments?: ICommentCardActionsObj,
+       avatarPhoto?: {
+        show: boolean,
+        size: string,
+        photoUrl: string,
+        name: string,
+        color: string
+    },
     }
 
     export interface ICommentCardConfig {
@@ -50,7 +58,7 @@ export namespace NsDiscussionV2 {
         },
         noCommentsSection?: {
             text: string
-        }
+        },
     }
 
     export interface ICommentWidgetData {

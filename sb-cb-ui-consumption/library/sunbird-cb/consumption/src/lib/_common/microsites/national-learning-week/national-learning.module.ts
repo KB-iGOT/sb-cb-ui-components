@@ -16,6 +16,7 @@ import { ContentStripFacetFilterModule } from '../../strips/content-strip-facet-
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
+import { PipeSafeSanitizerModule } from '@sunbird-cb/utils-v2';
 
 
 
@@ -36,7 +37,8 @@ import { MatTabsModule } from '@angular/material/tabs';
     HighlightsOfWeekModule,
     SpeakersModule,
     UserProgressModule,
-    ContentStripFacetFilterModule
+    ContentStripFacetFilterModule,
+    PipeSafeSanitizerModule
   ],
   exports: [
     NationalLearningComponent,

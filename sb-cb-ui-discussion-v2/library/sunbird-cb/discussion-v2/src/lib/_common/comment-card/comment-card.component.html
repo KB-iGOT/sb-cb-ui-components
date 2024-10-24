@@ -1,10 +1,17 @@
 <div class="topLevel-card" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
-'reply-card' : cardType=== 'reply'}">
+'reply-card mb-3' : cardType=== 'reply'}">
     <div class="flex user-info">
         <div>
             <div class="mr-4">
-                <d-v2-avatar-photo [size]="'ml'" [name]="comment?.commentData?.commentSource?.userName"
-                    [photoUrl]="comment?.commentData?.commentSource?.userPic"></d-v2-avatar-photo>
+                <d-v2-avatar-photo
+                    [size]="'ml'"
+                    [name]="comment?.commentData?.commentSource?.userName"
+                    [photoUrl]="comment?.commentData?.commentSource?.userPic"
+                    [color]="
+                        comment?.commentData?.commentSource?.userName === loogedInUserProfile?.firstName ? 
+                        cardConfig?.actions?.avatarPhoto?.color || '#006400' : ''
+                    ">
+                </d-v2-avatar-photo>
             </div>
         </div>
         <div class="flex flex-1 flex-col">
@@ -12,7 +19,7 @@
             <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
         </div>
     </div>
-    <div class="comment mb-4">
+    <div class="comment mb-4 mt-2">
         {{comment?.commentData?.comment}}
     </div>
     <div class="actions" *ngIf="cardConfig?.showActions">
@@ -23,7 +30,6 @@
                         aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
                 </span>
                 <span class="mr-4" *ngIf="cardConfig?.actions?.like?.showCount">
-                    <!-- {{(comment?.like && comment?.like?.length) || 0}} {{comment?.likes && comment?.likes?.length > 1 ? -->
                     {{(comment?.commentData?.like && comment?.commentData?.like) || 0}} {{comment?.commentData?.like && comment?.commentData?.like > 1 ?
                     'Likes' : 'Like'}}
                 </span>
@@ -54,12 +60,24 @@
                         [comment]="reply" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                 </ng-container>
             </ng-container>
+
+            <ng-container *ngIf="loading">
+                <div class="skeleton-loader mb-4">
+                    <div class="flex gap-4 items-center p-4 rounded bg-white">
+                        <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'" [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
+                        <d-v2-widget-skeleton-loader [width]="'545px'" [height]="'43px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+                        <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+                    </div>
+                </div>
+            </ng-container>
         </div>
     </ng-container>
 </div>
 
 <ng-template #noReplies>
-    <div class="flex flex-1 items-center justify-center  justify-center">
-        No comments found!
-    </div>
+    <ng-container *ngIf="!loading">
+        <div class="flex flex-1 items-center justify-center  justify-center">
+            No comments found!
+        </div>
+    </ng-container>
 </ng-template>

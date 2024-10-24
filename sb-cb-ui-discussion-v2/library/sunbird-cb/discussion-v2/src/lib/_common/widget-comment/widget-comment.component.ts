@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentData!: any
   loading = false
+  loadingMore = false
   entityId = ''
   @Input() widgetData!: NsDiscussionV2.ICommentWidgetData | any
   commentTreeId = ''
@@ -100,7 +101,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   }
 
   fetchInitialComments_v2Addmore(commentTreeId?: string) {
-    this.loading = true
+    this.loadingMore = true
     this.entityId = this.widgetData.newCommentSection.commentTreeData.entityId || ''
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
@@ -115,8 +116,6 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     }
 
     this.discussV2Svc.fetchAllComment_V2(payload).subscribe(res => {
-        this.loading = false
-
         if (res && res.result.commentCount) {
           const newComments = res.result.comments
 
@@ -156,9 +155,12 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
         if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
           this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
         }
+
+        this.loadingMore = false
+
       },
                                                             () => {
-        this.loading = false
+        this.loadingMore = false
 
       }
     )

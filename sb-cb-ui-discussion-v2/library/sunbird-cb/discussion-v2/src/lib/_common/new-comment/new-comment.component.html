@@ -10,7 +10,7 @@
     <div class="flex gap-4 items-center" id="start-comment" >
         <div class="" *ngIf="config?.avatarPhoto?.show">
             <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"  [name]="loogedInUserProfile?.firstName || config?.avatarPhoto?.name"
-                    [photoUrl]="loogedInUserProfile?.profileImageUrl || ''"></d-v2-avatar-photo>
+                    [photoUrl]="loogedInUserProfile?.profileImageUrl || ''" [color]="config?.avatarPhoto?.color"></d-v2-avatar-photo>
         </div>
         <div class="flex flex-1 items-center">
             <form class="flex flex-1 items-center">

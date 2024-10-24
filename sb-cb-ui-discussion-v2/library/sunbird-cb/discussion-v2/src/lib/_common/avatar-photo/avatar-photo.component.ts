@@ -7,6 +7,7 @@ import { Component, Input, OnInit } from '@angular/core'
 })
 export class AvatarPhotoComponent implements OnInit {
   @Input() datalen: any
+  @Input() color = ''
 
   @Input()
   public photoUrl!: string
@@ -19,8 +20,7 @@ export class AvatarPhotoComponent implements OnInit {
   public showInitials = false
   public circleColor!: string
   random = Math.random().toString(36).slice(2)
-
-  // public initials!: string
+  loogedInUserProfile: any = {}
 
   private colors = [
     '#EB7181', // red
@@ -40,6 +40,8 @@ export class AvatarPhotoComponent implements OnInit {
     '#7E4C8D',
   ]
 
+  // public initials!: string
+
   ngOnInit() {
     if (!this.photoUrl || !(this.photoUrl.startsWith('http://') || this.photoUrl.startsWith('https://'))) {
       this.showInitials = true
@@ -58,7 +60,6 @@ export class AvatarPhotoComponent implements OnInit {
         this.circleColor = this.randomcolors[randomIndex1]
       }
     }
-
   }
 
   private createInititals(): void {
