@@ -72,6 +72,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       entityId: this.entityId,
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
+      ...(commentTreeId  ? { overrideCache: true } : null),
     }
 
     this.discussV2Svc.fetchAllComment_V2(payload).subscribe(res => {
