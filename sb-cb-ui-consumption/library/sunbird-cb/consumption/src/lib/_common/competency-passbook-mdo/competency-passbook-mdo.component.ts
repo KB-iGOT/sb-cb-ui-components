@@ -53,13 +53,38 @@ export class CompetencyPassbookMdoComponent implements OnInit {
   ngOnInit() {
     this.comeptencyKeys = this.configSvc.compentency[this.environment.compentencyVersionKey]
     
-    this.getAllCompetencies()
+    if(this.comeptencyKeys.vKey === 'competencies_v5') {
+      this.getAllCompetencies()
+    }
+    else {
+      this.getAllCompetenciesV2()
+    }
   }
 
 
   getAllCompetencies(){
     this.loadCometency = true
     let request = {"search":{"type":"Competency Area"},"filter":{"isDetail":true}}
+    this.competencySvc.getCompetencyList(request).subscribe((response: any) => {
+      this.allcompetencyTheme = {}
+      if(response && response.result && response.result.competency) {debugger
+        this.originalCompetencyArray = response.result.competency
+        this.getMdoCompetencies()
+        // this.getCompetencyArea()
+        response.result.competency.forEach(element => {
+          element.children.forEach((childEle) => {
+            let name = childEle.name.toLowerCase()
+            this.allcompetencyTheme[name] = childEle
+            this.allcompetencyTheme[name]['viewMore'] = false
+          });
+        });
+      }
+      this.loadCometency = false
+    })
+  }
+  
+  getAllCompetenciesV2(){
+    this.loadCometency = true
     this.competencySvc.getCompetencyListv_V2().subscribe((response: any) => {
       this.allcompetencyTheme = {}
       if(response && response.result && response.result.content) {
@@ -77,14 +102,13 @@ export class CompetencyPassbookMdoComponent implements OnInit {
       this.loadCometency = false
     })
   }
-  
 
 
   async getMdoCompetencies(){
     try {
       this.loadCometency = true
       const response = await this.getMdoCompetency();
-      if (response && response.results) {
+      if (response && response.results) {debugger
         if(response.results.result.facets && response.results.result.facets.length){
           let facetData = response.results.result.facets
           facetData.forEach((facet: any) => {
@@ -110,7 +134,7 @@ export class CompetencyPassbookMdoComponent implements OnInit {
   }
 
   getCompetencyTheme(){
-    this.originalCompetencyArray.forEach((element: any) => {
+    this.originalCompetencyArray.forEach((element: any) => {debugger
       if(element.name.toLowerCase() === this.selectedValue) {
         this.competencyTheme = this.competencyThemeData.filter((ele1: any) => {
           return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
