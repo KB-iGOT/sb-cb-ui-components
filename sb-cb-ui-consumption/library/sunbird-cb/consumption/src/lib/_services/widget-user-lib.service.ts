@@ -205,7 +205,7 @@ export class WidgetUserServiceLib {
 
   fetchEnrollmentDataByContentId(userId, contentdata) {
     let path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST(userId)
-    path = `${path}&courseIds=${contentdata}&cache=false'`
+    path = `${path}&courseIds=${contentdata}&cache=true'`
     const headers = new HttpHeaders({
       'Cache-Control':  'no-cache, no-store, must-revalidate, post-check=0, pre-check=0',
       Pragma: 'no-cache',
