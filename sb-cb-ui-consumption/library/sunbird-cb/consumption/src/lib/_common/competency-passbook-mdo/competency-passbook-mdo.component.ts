@@ -67,7 +67,7 @@ export class CompetencyPassbookMdoComponent implements OnInit {
     let request = {"search":{"type":"Competency Area"},"filter":{"isDetail":true}}
     this.competencySvc.getCompetencyList(request).subscribe((response: any) => {
       this.allcompetencyTheme = {}
-      if(response && response.result && response.result.competency) {debugger
+      if(response && response.result && response.result.competency) {
         this.originalCompetencyArray = response.result.competency
         this.getMdoCompetencies()
         // this.getCompetencyArea()
@@ -134,7 +134,7 @@ export class CompetencyPassbookMdoComponent implements OnInit {
   }
 
   getCompetencyTheme(){
-    this.originalCompetencyArray.forEach((element: any) => {debugger
+    this.originalCompetencyArray.forEach((element: any) => {
       if(element.name.toLowerCase() === this.selectedValue) {
         this.competencyTheme = this.competencyThemeData.filter((ele1: any) => {
           return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
