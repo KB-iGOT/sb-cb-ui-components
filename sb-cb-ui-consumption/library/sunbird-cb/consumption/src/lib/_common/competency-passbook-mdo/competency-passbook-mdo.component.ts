@@ -108,7 +108,7 @@ export class CompetencyPassbookMdoComponent implements OnInit {
     try {
       this.loadCometency = true
       const response = await this.getMdoCompetency();
-      if (response && response.results) {debugger
+      if (response && response.results) {
         if(response.results.result.facets && response.results.result.facets.length){
           let facetData = response.results.result.facets
           facetData.forEach((facet: any) => {
