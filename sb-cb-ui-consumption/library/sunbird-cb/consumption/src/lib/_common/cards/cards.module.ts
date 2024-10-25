@@ -5,7 +5,6 @@ import { RouterModule } from '@angular/router';
 import { CardResourceComponent } from './card-resource/card-resource.component';
 import { CardsComponent } from './cards.component';
 import { CardPortraitComponent } from './card-portrait/card-portrait.component';
-import { PipePublicURLModule } from '../../_pipes/pipe-public-URL/pipe-public-URL.module';
 import { ObjectToArrayPipeModule } from '../../_pipes/object-to-array/object-to-array.pipe.module';
 import { DisplayContentTypeLibModule } from '../display-content-type-lib/display-content-type-lib.module';
 import { DefaultThumbnailModule } from '../../_directives/default-thumbnail/default-thumbnail.module';
@@ -30,6 +29,7 @@ import { HttpClient } from '@angular/common/http';
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module';
 import { CardMdoChannelV1Component } from './card-mdo-channel-v1/card-mdo-channel-v1.component';
 import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.module';
+import { PipePublicURLModule } from '@sunbird-cb/utils-v2';
 
 
 @NgModule({

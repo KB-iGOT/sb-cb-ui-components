@@ -476,6 +476,13 @@ export class WidgetContentLibService {
   }
 
   async getResourseLink(content: any) {
+    if(content && content.content && content.content.eventId) {
+      const urlData: any = {
+        url: `app/event-hub/home/${content.content.eventId}`,
+        queryParams: {},
+      };
+      return urlData
+    }
     if(content.externalId) {
         const urlData: any = {
           url: `app/toc/ext/${content.contentId}`,

@@ -1,9 +1,9 @@
 <ng-container *ngIf="!isCardLoading">
   <mat-card class="card-portrait card-progress-portrait-lib cursor-pointer" [ngClass]="widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : ''" (click)="raiseTelemetry();getRedirectUrlData(widgetData?.content); $event.stopPropagation()" >
-    <div class="course_widget portrait_widget flex  margin-bottom-xs" [ngClass]="{'retiredCards': widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage === 100}">
-      <div class="flex flex-end flex-middle course_port">
+    <div class="course_widget portrait_widget flex  margin-bottom-xs" [ngClass]="{'retiredCards': widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage === 100,'margin-bottom-xl':!widgetData?.content?.primaryCategory}">
+      <div class="flex flex-end flex-middle course_port" *ngIf="widgetData?.content?.primaryCategory">
         <mat-icon class="mat-icon main_icon  ws-mat-default-text margin-right-xs">video_library</mat-icon>
-        <sb-uic-display-content-type i18n-title title="Content Type" *ngIf="widgetData?.content?.primaryCategory"
+        <sb-uic-display-content-type i18n-title title="Content Type" 
           class="ws-mat-black60-text font-normal mat-caption " [displayContentType]="widgetData?.content?.primaryCategory==='Course Unit'
           ?'Module'
           :widgetData?.content?.primaryCategory">
@@ -65,8 +65,8 @@
       </div>
     </div>
     <ng-container *ngIf="widgetData?.content?.completionPercentage < 100">
-      <div class="flex flex-align-end progress-wrapper flex-between" >
-        <div class="progress-block" >
+      <div class="flex flex-align-end progress-wrapper flex-between" [ngClass]="{'flex-end':!widgetData?.content?.primaryCategory}">
+        <div class="progress-block" *ngIf="!widgetData?.content?.externalId">
           <div class="completed-time">
             <mat-icon class="mat-icon  schedule margin-right-xs">schedule</mat-icon>
             <span>{{widgetData?.content?.completionPercentage}}%</span>
