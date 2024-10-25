@@ -34,6 +34,7 @@ const API_END_POINTS = {
 })
 export class WidgetUserServiceLib {
   environment: any;
+  enrollmentDataIds: any = []
   constructor(
     @Inject('environment') environment: any,
     private http: HttpClient) {
@@ -75,6 +76,7 @@ export class WidgetUserServiceLib {
                 if (content.contentStatus) {
                   delete content.contentStatus
                 }
+                this.enrollmentDataIds.push(content.contentId)
                 coursesData.push(content)
               })
               this.storeUserEnrollmentInfo(data.result.userCourseEnrolmentInfo,
