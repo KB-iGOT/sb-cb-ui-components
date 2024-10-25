@@ -243,37 +243,37 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   getContineuLearningLenth(data: IStripUnitContentData) {
     return data.widgets ? data.widgets.length : 0;
   }
-  getLength(data: IStripUnitContentData) {
+  getLength(data: IStripUnitContentData) {  
     if (!data.tabs || !data.tabs.length) {
       return data.widgets ? data.widgets.length : 0;
     } {
       // if tabs are there check if each tab has widgets and get the tab with max widgets
-      let tabWithMaxWidgets: any = {}
-      data.tabs.forEach((tab: any)=>{
-        if(tab.pillsData && tab.pillsData.length){
-          tabWithMaxWidgets = tab.pillsData.reduce(
-            (prev: any, current: any) => {
-              if (!prev.widgets && !current.widgets) {
-                return current;
-              }
-              if (prev.widgets && current.widgets) {
-                return (prev.widgets.length > current.widgets.length) ? prev : current;
-              }
-              if (current.widgets && !prev.widgets) {
-                return current;
-              }
-              if (!current.widgets && prev.widgets) {
-                return prev;
-              }
-              return current;
-              // return (prev.widgets && current.widgets && (prev.widgets.length > current.widgets.length) ) ? prev : current
-              // tslint:disable-next-line: align
-            }, data.tabs[0]);
+      // let tabWithMaxWidgets: any = {}
+      // data.tabs.forEach((tab: any)=>{
+      //   if(tab.pillsData && tab.pillsData.length){
+      //     tabWithMaxWidgets = tab.pillsData.reduce(
+      //       (prev: any, current: any) => {
+      //         if (!prev.widgets && !current.widgets) {
+      //           return current;
+      //         }
+      //         if (prev.widgets && current.widgets) {
+      //           return (prev.widgets.length > current.widgets.length) ? prev : current;
+      //         }
+      //         if (current.widgets && !prev.widgets) {
+      //           return current;
+      //         }
+      //         if (!current.widgets && prev.widgets) {
+      //           return prev;
+      //         }
+      //         return current;
+      //         // return (prev.widgets && current.widgets && (prev.widgets.length > current.widgets.length) ) ? prev : current
+      //         // tslint:disable-next-line: align
+      //       }, data.tabs[0]);
 
-        }
-      })
+      //   }
+      // })
       // if tabs has atleast 1 widgets then strip will show or else not
-      return tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0;
+      return true;
     }
   }
 
@@ -343,6 +343,8 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchForYouData(strip, calculateParentStatus)
     this.fetchAllCbpPlans(strip, calculateParentStatus);
+    this.fetchUserEnrolledData(strip,0, calculateParentStatus)
+    // this.fetchFromEnrollmentList(strip, calculateParentStatus);
     
     // this.enrollInterval = setInterval(() => {
     //   this.fetchAllCbpPlans(strip, calculateParentStatus)
@@ -908,7 +910,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           pillSelected: currentPillFromMap.value,
         };
       }
-
       if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
         if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
           // call API to get tab data and process
@@ -922,7 +923,14 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           //   stripMap.tabs[tabEvent.index].tabLoading = false;
           // }
 
-        stripMap.tabs[tabEvent.index].pillsData[pillIndex].tabLoading = false;
+          stripMap.tabs[tabEvent.index].pillsData[pillIndex].tabLoading = false;
+        } else if (currentTabFromMap.requestRequired && currentTabFromMap.request) {
+          if(currentStrip.tabs[tabEvent.index].request && currentStrip.tabs[tabEvent.index].request.enrollmentList) {
+            this.fetchFromEnrollmentList(currentStrip, tabEvent.index, true)
+          } else if(currentStrip.tabs[tabEvent.index].request && currentStrip.tabs[tabEvent.index].request.eventEnrollmentList){
+            this.fetchFromEventEnrollmentList(currentStrip, tabEvent.index, true)
+            
+          }
         } else {
           // this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
           // setTimeout(() => {
@@ -1210,6 +1218,256 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         pill['selected'] = false
       });
     }
+  }
+
+
+  // MY learning Strip methods starts here
+  fetchUserEnrolledData(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex:number, calculateParentStatus = true) {
+    if (strip.request && strip.request.enrollmentList && Object.keys(strip.request.enrollmentList).length) {
+      if(strip && strip.tabs && strip.tabs.length) {
+        if(strip.tabs[tabIndex].request && strip.tabs[tabIndex].request.enrollmentList) {
+          this.fetchFromEnrollmentList(strip, tabIndex, calculateParentStatus)
+        } else if(strip.tabs[tabIndex].request && strip.tabs[tabIndex].request.eventEnrollmentList){
+          this.fetchFromEventEnrollmentList(strip, tabIndex, calculateParentStatus)
+          
+        }
+      }
+    }
+  }
+  fetchFromEventEnrollmentList(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex: number, calculateParentStatus = true) {
+    let userId: any = ''
+    let viewMoreUrl : any = {}
+    let content: NsContent.IContent[];
+    let contentNew: NsContent.IContent[];
+    let tabResults: any[] = [];
+    if (this.configSvc.userProfile) {
+      userId = this.configSvc.userProfile.userId;
+    }
+    this,this.userSvc.fetchEventEnrollData(userId).subscribe((res: any)=> {
+      if(res && res.result && res.result.events && res.result.events.length) {
+        this.formatEnrollmentData(strip, tabIndex, res.result.events,content, contentNew ,tabResults, calculateParentStatus)
+        
+      }
+    },(err: any) => {
+      this.processStrip(
+        strip,
+        this.transformContentsToWidgets([], strip),
+        'done',
+        calculateParentStatus,
+        viewMoreUrl,
+        strip.tabs      );
+    }) 
+  }
+
+
+  fetchFromEnrollmentList(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex: number, calculateParentStatus = true) {
+    if (strip.request && strip.request.enrollmentList && Object.keys(strip.request.enrollmentList).length) {
+      let userId = '';
+      let content: NsContent.IContent[];
+      let contentNew: NsContent.IContent[];
+      let tabResults: any[] = [];
+      const queryParams = _.get(strip.request.enrollmentList, 'queryParams');
+      // if (queryParams && queryParams.batchDetails) {
+      //   if (!queryParams.batchDetails.includes('&retiredCoursesEnabled=true')) {
+      //     queryParams.batchDetails += '&retiredCoursesEnabled=true'
+      //   }
+      // }
+      if (this.configSvc.userProfile) {
+        userId = this.configSvc.userProfile.userId;
+      }
+      // this.userSvc.resetTime('enrollmentService')
+      // tslint:disable-next-line: deprecation
+      this.userSvc.fetchUserBatchList(userId, queryParams).subscribe(
+        (result: any) => {
+          this.userSvc.fetchExtEnrollData().subscribe((res: any)=> {
+            if(res && res.result && res.result.courses && res.result.courses.length){
+                let enrolledCourses = result && result.courses;
+                let enrolledExtCourses = res.result && res.result.courses;
+                const courses = [...enrolledExtCourses,...enrolledCourses]
+                this.formatEnrollmentData(strip,tabIndex, courses,content, contentNew ,tabResults,calculateParentStatus)
+          } else {
+            let enrolledCourses = result && result.courses;
+            const courses = [...enrolledCourses]
+            this.formatEnrollmentData(strip, tabIndex, courses,content, contentNew ,tabResults,calculateParentStatus)
+
+          }
+          console.log(res,'res=======')
+        },(err: any)=> {
+          let enrolledCourses = result && result.courses;
+            const courses = [...enrolledCourses]
+            this.formatEnrollmentData(strip, tabIndex, courses,content, contentNew ,tabResults,calculateParentStatus)
+        })
+        },
+        () => {
+          this.processStrip(strip, [], 'error', calculateParentStatus, null);
+        }
+        
+      );
+    }
+  }
+
+  formatEnrollmentData(strip: any, tabIndex:number, courses: any,content: any, contentNew: any ,tabResults: any, calculateParentStatus: any){
+    const showViewMore = Boolean(
+      courses.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+    );
+    const viewMoreUrl = showViewMore
+      ? {
+        path: (strip.viewMoreUrl && strip.viewMoreUrl.path) || '',
+        queryParams: {
+          q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
+          f:
+            strip.request && strip.request.searchV6 && strip.request.searchV6.filters
+              ? JSON.stringify(
+                // this.searchServSvc.transformSearchV6Filters(
+                strip.request.searchV6.filters
+                // ),
+              )
+              : {},
+        },
+      }
+      : null;
+    if (courses && courses.length) {
+      content = courses.map((c: any) => {
+        const contentTemp: NsContent.IContent = c.content || c.event || {};
+        contentTemp.completionPercentage = c.completionPercentage || c.progress || 0;
+        contentTemp.completionStatus = c.completionStatus || c.status || 0;
+        contentTemp.enrolledDate = c.enrolledDate || '';
+        contentTemp.lastContentAccessTime = c.lastContentAccessTime || '';
+        contentTemp.lastReadContentStatus = c.lastReadContentStatus || '';
+        contentTemp.lastReadContentId = c.lastReadContentId || '';
+        contentTemp.lrcProgressDetails = c.lrcProgressDetails || '';
+        contentTemp.issuedCertificates = c.issuedCertificates || [];
+        contentTemp.batchId = c.batchId || '';
+        contentTemp.content = c.content || c.event || {};
+        contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || '';
+        return contentTemp;
+      });
+    }
+    // To filter content with completionPercentage > 0,
+    // so that only those content will show in home page
+    // continue learing strip
+    // if (content && content.length) {
+    //   contentNew = content.filter((c: any) => {
+    //     /** commented as both are 0 after enrolll */
+    //     if (c.completionPercentage && c.completionPercentage > 0) {
+    //       return c
+    //     }
+    //   })
+    // }
+
+    // To sort in descending order of the enrolled date
+    contentNew = (content || []).sort((a: any, b: any) => {
+      const dateA: any = new Date(a.lastContentAccessTime || 0);
+      const dateB: any = new Date(b.lastContentAccessTime || 0);
+      return dateB - dateA;
+    });
+
+    if (strip.tabs && strip.tabs.length) {
+      tabResults = this.splitEnrollmentTabsData(contentNew, tabIndex, strip);
+      this.processStrip(
+        strip,
+        this.transformContentsToWidgets(contentNew, strip),
+        'done',
+        calculateParentStatus,
+        viewMoreUrl,
+        tabResults
+      );
+    } else {
+      this.processStrip(
+        strip,
+        this.transformContentsToWidgets(contentNew, strip),
+        'done',
+        calculateParentStatus,
+        viewMoreUrl,
+      );
+    }
+  }
+
+  splitEnrollmentTabsData(contentNew: NsContent.IContent[], tabIndex:any, strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
+    const tabResults: any[] = [];
+    const pillsResults: any[] = [];
+    const splitData = this.getInprogressAndCompleted(
+      contentNew,
+      (e: any) => e.completionStatus === 1 || e.completionPercentage < 100,
+      strip,
+    );
+
+    if (strip.tabs && strip.tabs.length) {
+      if(strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length)
+        // tabResults.push(
+        //   {
+        //     ...strip.tabs[i],
+        //     fetchTabStatus: 'done',
+        //     ...(splitData.find(itmInner => {
+        //       if (strip.tabs && strip.tabs[i] && itmInner.value === strip.tabs[i].value) {
+        //         return itmInner;
+        //       }
+        //       return undefined;
+        //     })),
+        //   }
+        // );
+      for (let i = 0; i < strip.tabs[tabIndex].pillsData.length; i += 1) {
+
+        if (strip.tabs[tabIndex].pillsData[i]) {
+          pillsResults.push(
+            {
+              ...strip.tabs[tabIndex].pillsData[i],
+              fetchTabStatus: 'done',
+              selected: tabIndex === i ? true: false,
+              tabLoading: false,
+              ...(splitData.find(itmInner => {
+                if (strip.tabs && strip.tabs[tabIndex].pillsData[i] && itmInner.value === strip.tabs[tabIndex].pillsData[i].value) {
+                  return itmInner;
+                }
+                return undefined;
+              })),
+            }
+          );
+        }
+      }
+      strip.tabs[tabIndex].pillsData = pillsResults
+    }
+    return strip.tabs;
+  }
+
+  getInprogressAndCompleted(array: NsContent.IContent[],
+                            customFilter: any,
+                            strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
+                              const inprogress: any[] = []
+    const completed: any[] = []
+    // array.forEach((e: any, idx: number, arr: any[]) => (customFilter(e, idx, arr) ? inprogress : completed).push(e))
+    array.forEach((e, idx, arr) => {
+    const status = e.status ? (e.status as string).toLowerCase() : ''
+    const statusRetired = status === 'retired'
+    if (customFilter(e, idx, arr)) {
+    if (!statusRetired) {
+      inprogress.push(e)
+    }
+   } else {
+    completed.push(e)
+   }
+    })
+    // Sort the completed array with 'Live' status first and 'Retired' status second
+    completed.sort((a: any, b: any) => {
+      const statusA = a.status ? a.status.toLowerCase() : ''
+      const statusB = b.status ? b.status.toLowerCase() : ''
+      if (statusA === 'live' && statusB !== 'live') {
+        return -1
+      }
+      if (statusA !== 'live' && statusB === 'live') {
+        return 1
+      }
+      if (statusA === 'retired' && statusB !== 'retired') {
+        return 1
+      }
+      if (statusA !== 'retired' && statusB === 'retired') {
+        return -1
+      }
+      return 0
+    })
+    return [
+      { value: 'inprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
+      { value: 'completed', widgets: this.transformContentsToWidgets(completed, strip) }];
   }
 
 }
