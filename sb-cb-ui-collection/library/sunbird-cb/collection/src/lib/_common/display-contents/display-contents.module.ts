@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common'
 import { DisplayContentsComponent } from './display-contents.component'
 import { DisplayContentTypeModule } from '../display-content-type/display-content-type.module'
 import { PipeDurationTransformModule, PipeLimitToModule, DefaultThumbnailModule } from '@sunbird-cb/utils'
-import { MatButtonModule } from '@angular/material/button'
-import { MatCardModule } from '@angular/material/card'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatIconModule } from '@angular/material/icon'
-import { MatProgressBarModule } from '@angular/material/progress-bar'
+import { MatLegacyProgressBarModule as MatProgressBarModule } from '@angular/material/legacy-progress-bar'
 import { RouterModule } from '@angular/router'
 
 @NgModule({

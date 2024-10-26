@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common'
 import { NgModule } from '@angular/core'
-import { MatButtonModule } from '@angular/material/button'
-import { MatCardModule } from '@angular/material/card'
-import { MatChipsModule } from '@angular/material/chips'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
+import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatIconModule } from '@angular/material/icon'
-import { MatInputModule } from '@angular/material/input'
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
 import { HorizontalScrollerModule, PipeNameTransformModule } from '@sunbird-cb/utils'
 import { CardNetWorkService } from './card-network.service'
 import { ActivityCardModule } from '../activity-card/activity-card.module'
@@ -19,28 +19,27 @@ import { MatGridListModule } from '@angular/material/grid-list'
 import { FormsModule } from '@angular/forms'
 
 @NgModule({
-  declarations: [CardNetworkComponent],
-  imports: [
-    CommonModule,
-    AvatarPhotoModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatIconModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    HorizontalScrollerModule,
-    ActivityCardModule,
-    TourModule,
-    PipeNameTransformModule,
-    ChallengeModule,
-    MatInputModule,
-    MatGridListModule,
-    FormsModule,
-  ],
-  entryComponents: [CardNetworkComponent],
-  providers: [CardNetWorkService],
+    declarations: [CardNetworkComponent],
+    imports: [
+        CommonModule,
+        AvatarPhotoModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatDividerModule,
+        MatExpansionModule,
+        MatIconModule,
+        MatCardModule,
+        MatProgressSpinnerModule,
+        HorizontalScrollerModule,
+        ActivityCardModule,
+        TourModule,
+        PipeNameTransformModule,
+        ChallengeModule,
+        MatInputModule,
+        MatGridListModule,
+        FormsModule,
+    ],
+    providers: [CardNetWorkService]
 })
 export class CardNetworkModule {
 

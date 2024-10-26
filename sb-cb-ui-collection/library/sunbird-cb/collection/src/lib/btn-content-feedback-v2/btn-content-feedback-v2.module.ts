@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { MatButtonModule } from '@angular/material/button'
-import { MatDialogModule } from '@angular/material/dialog'
-import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field'
 import { MatIconModule } from '@angular/material/icon'
-import { MatInputModule } from '@angular/material/input'
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
-import { MatSnackBarModule } from '@angular/material/snack-bar'
-import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar'
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 
 import { EditorQuillModule } from '../discussion-forum/editor-quill/editor-quill.module'
 
@@ -17,30 +17,29 @@ import { FeedbackSnackbarComponent } from './components/feedback-snackbar/feedba
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 
 @NgModule({
-  declarations: [
-    BtnContentFeedbackV2Component,
-    BtnContentFeedbackDialogV2Component,
-    FeedbackSnackbarComponent,
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    EditorQuillModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSnackBarModule,
-  ],
-  exports: [
-    BtnContentFeedbackV2Component,
-    BtnContentFeedbackDialogV2Component,
-    FeedbackSnackbarComponent,
-  ],
-  entryComponents: [BtnContentFeedbackDialogV2Component, FeedbackSnackbarComponent],
+    declarations: [
+        BtnContentFeedbackV2Component,
+        BtnContentFeedbackDialogV2Component,
+        FeedbackSnackbarComponent,
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        EditorQuillModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSnackBarModule,
+    ],
+    exports: [
+        BtnContentFeedbackV2Component,
+        BtnContentFeedbackDialogV2Component,
+        FeedbackSnackbarComponent,
+    ]
 })
 export class BtnContentFeedbackV2Module { }

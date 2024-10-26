@@ -7,8 +7,7 @@
       "lodash": "_",
       "date-fns": "DateFns",
       "moment": "moment",
-      "ngx-image-cropper": "ngxImageCropper",
-      "keycloak-angular": "keycloak-angular"
+      "ngx-image-cropper": "ngxImageCropper"
     },
     "styleIncludePaths": [
       "~/src/styles/_theme.scss"

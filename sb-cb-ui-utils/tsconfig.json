@@ -42,5 +42,8 @@
         "suppressWhileTypeErrorsPresent": false
       }
     ]
+  },
+   "angularCompilerOptions": {
+    "compilationMode": "partial",
   }
 }

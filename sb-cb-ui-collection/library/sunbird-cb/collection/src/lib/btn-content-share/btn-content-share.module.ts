@@ -1,13 +1,13 @@
 import { NgModule, ModuleWithProviders } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { MatButtonModule } from '@angular/material/button'
-import { MatChipsModule } from '@angular/material/chips'
-import { MatDialogModule } from '@angular/material/dialog'
-import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field'
 import { MatIconModule } from '@angular/material/icon'
-import { MatInputModule } from '@angular/material/input'
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
-import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 
 import { UserAutocompleteModule } from '../_common/user-autocomplete/user-autocomplete.module'
 
@@ -18,24 +18,23 @@ import { BtnFacebookShareModule } from '../btn-facebook-share/btn-facebook-share
 import { BtnTwitterShareModule } from '../btn-twitter-share/btn-twitter-share.module'
 
 @NgModule({
-  declarations: [BtnContentShareComponent, BtnContentShareDialogComponent],
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatChipsModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    UserAutocompleteModule,
-    BtnLinkedinShareModule,
-    BtnFacebookShareModule,
-    BtnTwitterShareModule,
-  ],
-  exports: [BtnContentShareComponent],
-  entryComponents: [BtnContentShareComponent, BtnContentShareDialogComponent],
+    declarations: [BtnContentShareComponent, BtnContentShareDialogComponent],
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatChipsModule,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        UserAutocompleteModule,
+        BtnLinkedinShareModule,
+        BtnFacebookShareModule,
+        BtnTwitterShareModule,
+    ],
+    exports: [BtnContentShareComponent]
 })
 export class BtnContentShareModule {
   public static forRoot(environment: any): ModuleWithProviders<BtnContentShareModule> {

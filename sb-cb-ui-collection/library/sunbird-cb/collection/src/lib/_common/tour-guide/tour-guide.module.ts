@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { NgModule } from '@angular/core'
-import { MatCardModule } from '@angular/material/card'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatIconModule } from '@angular/material/icon'
 import { TourComponent } from './tour-guide.component'
 

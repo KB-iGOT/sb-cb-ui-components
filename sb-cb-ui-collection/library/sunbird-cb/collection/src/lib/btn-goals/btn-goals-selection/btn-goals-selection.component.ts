@@ -10,8 +10,8 @@ import {
 import { TFetchStatus } from '@sunbird-cb/utils'
 import { NsGoal } from '../btn-goals.model'
 import { BtnGoalsService } from '../btn-goals.service'
-import { MatListOption } from '@angular/material/list'
-import { MatSnackBar } from '@angular/material/snack-bar'
+import { MatLegacyListOption as MatListOption } from '@angular/material/legacy-list'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { BtnGoalsErrorComponent } from '../btn-goals-error/btn-goals-error.component'
 
 @Component({

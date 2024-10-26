@@ -28,23 +28,10 @@
             "tsConfig": "library/sunbird-cb/collection/tsconfig.spec.json",
             "karmaConfig": "library/sunbird-cb/collection/karma.conf.js"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "library/sunbird-cb/collection/tsconfig.lib.json",
-              "library/sunbird-cb/collection/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
         }
       }
     }
   },
-  "defaultProject": "@sunbird-cb/collection",
   "schematics": {
     "@schematics/angular:component": {
       "style": "scss"
