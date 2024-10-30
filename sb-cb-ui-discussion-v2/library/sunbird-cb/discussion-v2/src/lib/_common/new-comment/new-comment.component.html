@@ -19,7 +19,7 @@
                     [placeholder]="config?.commentBox?.placeholder || 'post a comment'">
                 <!-- </mat-form-field> -->
                 <button mat-flat-button color="secondary" class="primary-button" (click)="submitComment()"
-                [disabled]="!comment.value || comment.value.length < 3">{{config?.postBtn.text || 'Post'}}</button>
+                [disabled]="!comment.value || comment.value.length < 8">{{config?.postBtn.text || 'Post'}}</button>
             </form>
         </div>
             <!-- <div class="text-box">Ask a question or post an idea</div> 

@@ -51,7 +51,12 @@ export class CompetencyPassbookComponent implements OnInit {
   ngOnInit() {
     this.comeptencyKeys = this.configSvc.compentency[this.environment.compentencyVersionKey]
     
-    this.getAllCompetencies()
+    if(this.comeptencyKeys.vKey === 'competencies_v5') {
+      this.getAllCompetencies()
+    }
+    else {
+      this.getAllCompetenciesV2()
+    }
     // this.competencyData = this.objectData
     // this.filter(this.currentFilter)
   }
@@ -165,7 +170,27 @@ export class CompetencyPassbookComponent implements OnInit {
     this.getThemeDataByArea(e)
     this.selectedValue = e.name
   }
+
   getAllCompetencies(){
+    this.loadCometency = true
+    let request = {"search":{"type":"Competency Area"},"filter":{"isDetail":true}}
+    this.competencySvc.getCompetencyList(request).subscribe((response: any) => {
+      this.allcompetencyTheme = {}
+      if(response && response.result && response.result.competency) {
+        this.originalCompetencyArray = response.result.competency
+        this.getCompetencyArea()
+        response.result.competency.forEach(element => {
+          element.children.forEach((childEle) => {
+            let name = childEle.name.toLowerCase()
+            this.allcompetencyTheme[name] = childEle
+            this.allcompetencyTheme[name]['viewMore'] = false
+          });
+        });
+      }
+      this.loadCometency = false
+    })
+  }
+  getAllCompetenciesV2(){
     this.loadCometency = true
     this.competencySvc.getCompetencyListv_V2().subscribe((response: any) => {
       this.allcompetencyTheme = {}
@@ -367,7 +392,7 @@ export class CompetencyPassbookComponent implements OnInit {
               this.allcompetencyTheme[themeEle.name.toLowerCase()].children.length) {
                 let data = this.allcompetencyTheme[themeEle.name.toLowerCase()].children.filter(obj1 => 
                   competencySubThemeData.some(obj2 => 
-                    Object.keys(obj1).every(key => obj1['name'] === (obj2['name']))
+                    Object.keys(obj1).every(key => obj1['name'].toLowerCase() === (obj2['name'].toLowerCase()))
                   )
                 );
                 
