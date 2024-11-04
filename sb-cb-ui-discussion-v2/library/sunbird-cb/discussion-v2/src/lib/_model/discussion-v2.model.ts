@@ -50,6 +50,12 @@ export namespace NsDiscussionV2 {
     export interface ICommentCardConfig {
         cardType: string,
         showActions: boolean,
+        reportIcon?: {
+            show: boolean,
+            icon: string,
+            successMsg: string,
+            errorMsg: string
+        },
         actions: ICommentCardActions,
         repliesSection: {
             show: boolean,
