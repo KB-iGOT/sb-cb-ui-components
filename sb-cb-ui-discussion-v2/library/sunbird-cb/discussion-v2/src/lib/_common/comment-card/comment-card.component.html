@@ -1,5 +1,6 @@
 <div class="topLevel-card" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
-'reply-card mb-3' : cardType=== 'reply'}">
+'reply-card mb-3' : cardType=== 'reply', 
+'suspended': comment && comment.status === 'suspended'}">
     <div class="flex user-info">
         <div>
             <div class="mr-4">
@@ -17,6 +18,12 @@
         <div class="flex flex-1 flex-col">
             <span class="mat-body-1">{{comment?.commentData?.commentSource?.userName}} </span>
             <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
+        </div>
+        <div *ngIf="cardConfig?.reportIcon?.show">
+            <button [disabled]="reportPending" mat-icon-button>
+                <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label matTooltip="Report"
+                            aria-label="Report" (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
+            </button>
         </div>
     </div>
     <div class="comment mb-4 mt-2">
@@ -40,8 +47,8 @@
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
                 </span>
                 <span class="mr-4" *ngIf="cardConfig?.actions?.comments?.showCount">
-                    {{(replyData && replyData?.length) || 0}} {{replyData && replyData?.length > 1 ? 'comments' :
-                    'comment'}}
+                    {{(replyData && replyData?.length) || 0}} {{replyData && replyData?.length > 1 ? 'Comments' :
+                    'Comment'}}
                 </span>
             </ng-container>
         </div>
