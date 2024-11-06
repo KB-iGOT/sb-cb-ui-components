@@ -17,16 +17,16 @@ const API_END_POINTS = {
   FETCH_USER_GROUPS: (userId: string) =>
     `${PROTECTED_SLAG_V8}/user/group/fetchUserGroup?userId=${userId}`,
     FETCH_CPB_PLANS: `/apis/proxies/v8/user/v1/cbplan`,
-  FETCH_USER_ENROLLMENT_LIST: (userId: string | undefined) =>
+  FETCH_USER_ENROLLMENT_LIST: (userId: string | undefined, competencyKey: string) =>
     // tslint:disable-next-line: max-line-length
-    `/apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=orgName,email&licenseDetails=name,description,url&fields=contentType,primaryCategory,courseCategory,topic,name,channel,mimeType,appIcon,gradeLevel,resourceType,identifier,medium,pkgVersion,board,subject,trackable,posterImage,duration,creatorLogo,license,version,versionKey,avgRating,additionalTags,${NsCardContent.IGOTConst.COMPETENCIES}&batchDetails=name,endDate,startDate,status,enrollmentType,createdBy,certificates,batchAttributes`,
-  FETCH_USER_ENROLLMENT_LIST_PROFILE: (userId: string | undefined) =>
+    `/apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=orgName,email&licenseDetails=name,description,url&fields=contentType,primaryCategory,courseCategory,topic,name,channel,mimeType,appIcon,gradeLevel,resourceType,identifier,medium,pkgVersion,board,subject,trackable,posterImage,duration,creatorLogo,license,version,versionKey,avgRating,additionalTags,${competencyKey}&batchDetails=name,endDate,startDate,status,enrollmentType,createdBy,certificates,batchAttributes`,
+  FETCH_USER_ENROLLMENT_LIST_PROFILE: (userId: string | undefined, competencyKey: string) =>
     // tslint:disable-next-line: max-line-length
-    `/apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=orgName,email&licenseDetails=name,description,url&fields=contentType,primaryCategory,courseCategory,topic,name,channel,mimeType,appIcon,gradeLevel,resourceType,identifier,medium,pkgVersion,board,subject,trackable,posterImage,duration,creatorLogo,license,version,versionKey,avgRating,additionalTags,${NsCardContent.IGOTConst.COMPETENCIES}&batchDetails=name,endDate,startDate,status,enrollmentType,createdBy,certificates,batchAttributes&retiredCoursesEnabled=true`,
+    `/apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=orgName,email&licenseDetails=name,description,url&fields=contentType,primaryCategory,courseCategory,topic,name,channel,mimeType,appIcon,gradeLevel,resourceType,identifier,medium,pkgVersion,board,subject,trackable,posterImage,duration,creatorLogo,license,version,versionKey,avgRating,additionalTags,${competencyKey}&batchDetails=name,endDate,startDate,status,enrollmentType,createdBy,certificates,batchAttributes&retiredCoursesEnabled=true`,
   // tslint:disable-next-line: max-line-length
-  FETCH_USER_ENROLLMENT_LIST_V2: (userId: string | undefined, orgdetails: string, licenseDetails: string, fields: string, batchDetails: string) =>
+  FETCH_USER_ENROLLMENT_LIST_V2: (userId: string | undefined, orgdetails: string, licenseDetails: string, fields: string, batchDetails: string, competencyKey: string) =>
     // tslint:disable-next-line: max-line-length
-    `apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=${orgdetails}&licenseDetails=${licenseDetails}&fields=${fields},courseCategory,${NsCardContent.IGOTConst.COMPETENCIES}&batchDetails=${batchDetails}`,
+    `apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=${orgdetails}&licenseDetails=${licenseDetails}&fields=${fields},courseCategory,${competencyKey}&batchDetails=${batchDetails}`,
 };
 
 @Injectable({
@@ -59,9 +59,9 @@ export class WidgetUserServiceLib {
     let path = ''
     if (queryParams) {
        // tslint:disable-next-line: max-line-length
-      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST_V2(userId, queryParams.orgdetails, queryParams.licenseDetails, queryParams.fields, queryParams.batchDetails)
+      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST_V2(userId, queryParams.orgdetails, queryParams.licenseDetails, queryParams.fields, queryParams.batchDetails, this.environment.compentencyVersionKey)
     } else {
-      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST(userId)
+      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST(userId, this.environment.compentencyVersionKey)
     }
     const headers = new HttpHeaders({
       'Cache-Control':  'no-cache, no-store, must-revalidate, post-check=0, pre-check=0',
@@ -95,9 +95,9 @@ export class WidgetUserServiceLib {
     let path = ''
     if (queryParams) {
        // tslint:disable-next-line: max-line-length
-      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST_V2(userId, queryParams.orgdetails, queryParams.licenseDetails, queryParams.fields, queryParams.batchDetails)
+      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST_V2(userId, queryParams.orgdetails, queryParams.licenseDetails, queryParams.fields, queryParams.batchDetails, this.environment.compentencyVersionKey)
     } else {
-      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST_PROFILE(userId)
+      path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST_PROFILE(userId, this.environment.compentencyVersionKey)
     }
     const headers = new HttpHeaders({
       'Cache-Control':  'no-cache, no-store, must-revalidate, post-check=0, pre-check=0',
@@ -206,7 +206,7 @@ export class WidgetUserServiceLib {
 
 
   fetchEnrollmentDataByContentId(userId, contentdata) {
-    let path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST(userId)
+    let path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST(userId, this.environment.compentencyVersionKey)
     path = `${path}&courseIds=${contentdata}&cache=true'`
     const headers = new HttpHeaders({
       'Cache-Control':  'no-cache, no-store, must-revalidate, post-check=0, pre-check=0',
