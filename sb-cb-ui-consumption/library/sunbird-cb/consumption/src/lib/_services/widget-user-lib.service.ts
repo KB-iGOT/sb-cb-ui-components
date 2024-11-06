@@ -36,6 +36,7 @@ const API_END_POINTS = {
 })
 export class WidgetUserServiceLib {
   environment: any;
+  enrollmentDataIds: any = []
   constructor(
     @Inject('environment') environment: any,
     private http: HttpClient) {
@@ -77,6 +78,7 @@ export class WidgetUserServiceLib {
                 if (content.contentStatus) {
                   delete content.contentStatus
                 }
+                this.enrollmentDataIds.push(content.contentId)
                 coursesData.push(content)
               })
               this.storeUserEnrollmentInfo(data.result.userCourseEnrolmentInfo,
@@ -207,7 +209,7 @@ export class WidgetUserServiceLib {
 
   fetchEnrollmentDataByContentId(userId, contentdata) {
     let path = API_END_POINTS.FETCH_USER_ENROLLMENT_LIST(userId)
-    path = `${path}&courseIds=${contentdata}&cache=false'`
+    path = `${path}&courseIds=${contentdata}&cache=true'`
     const headers = new HttpHeaders({
       'Cache-Control':  'no-cache, no-store, must-revalidate, post-check=0, pre-check=0',
       Pragma: 'no-cache',

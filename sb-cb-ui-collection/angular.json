@@ -10,12 +10,17 @@
       "prefix": "sunbird-cb",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "tsConfig": "library/sunbird-cb/collection/tsconfig.lib.json",
             "project": "library/sunbird-cb/collection/ng-package.json"
           }
-        },
+        ,          "configurations": {
+            "production": {
+              "tsConfig": "library/sunbird-cb/collection/tsconfig.lib.prod.json"
+            }
+          }
+},
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
@@ -42,7 +47,7 @@
   "defaultProject": "@sunbird-cb/collection",
   "schematics": {
     "@schematics/angular:component": {
-      "styleext": "scss"
+      "style": "scss"
     }
   },
   "cli": {

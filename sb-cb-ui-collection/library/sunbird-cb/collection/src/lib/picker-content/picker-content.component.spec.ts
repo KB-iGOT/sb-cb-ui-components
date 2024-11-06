@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { PickerContentComponent } from './picker-content.component'
 
@@ -6,7 +6,7 @@ describe('PickerContentComponent', () => {
   let component: PickerContentComponent
   let fixture: ComponentFixture<PickerContentComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PickerContentComponent],
     })

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { MarkAsCompleteComponent } from './mark-as-complete.component'
 
@@ -6,7 +6,7 @@ describe('MarkAsCompleteComponent', () => {
   let component: MarkAsCompleteComponent
   let fixture: ComponentFixture<MarkAsCompleteComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MarkAsCompleteComponent],
     })

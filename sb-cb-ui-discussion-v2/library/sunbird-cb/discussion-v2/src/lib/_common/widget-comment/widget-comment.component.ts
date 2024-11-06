@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { MatSnackBar } from '@angular/material'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 @Component({
   selector: 'd-v2-widget-comment',
@@ -72,6 +72,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       entityId: this.entityId,
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
+      ...(commentTreeId  ? { overrideCache: true } : null),
     }
 
     this.discussV2Svc.fetchAllComment_V2(payload).subscribe(res => {

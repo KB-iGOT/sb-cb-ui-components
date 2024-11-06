@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef, Input } from '@angular/core'
 import { TFetchStatus } from '@sunbird-cb/utils'
-import { MatMenuTrigger } from '@angular/material'
+import { MatMenuTrigger } from '@angular/material/menu'
 import { NSSearch } from '../../_services/widget-search.model'
 
 @Component({

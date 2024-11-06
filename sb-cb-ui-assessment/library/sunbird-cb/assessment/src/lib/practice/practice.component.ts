@@ -10,7 +10,9 @@ import {
   ViewChild, ViewChildren,
   Renderer2,
 } from '@angular/core'
-import { MatDialog, MatSidenav, MatSnackBar, MatSnackBarConfig } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSidenav } from '@angular/material/sidenav'
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar'
 import { Subscription, interval } from 'rxjs'
 import { filter, map } from 'rxjs/operators'
 import { NSPractice } from './practice.model'
@@ -82,10 +84,10 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
     primaryCategory: NsContent.EPrimaryCategory.PRACTICE_RESOURCE,
   }
   @ViewChildren('questionsReference') questionsReference: QueryList<QuestionComponent> | null = null
-  @ViewChild('sidenav', { static: false }) sideNav: MatSidenav | null = null
-  @ViewChild('submitModal', { static: false }) submitModal: ElementRef | null = null
-  @ViewChild('itemTooltip', { static: false }) itemTooltip: ElementRef | null = null
-  @ViewChild('tooltipTrigger', { static: false }) tooltipTrigger: ElementRef | null = null
+  @ViewChild('sidenav') sideNav: MatSidenav | null = null
+  @ViewChild('submitModal') submitModal: ElementRef | null = null
+  @ViewChild('itemTooltip') itemTooltip: ElementRef | null = null
+  @ViewChild('tooltipTrigger') tooltipTrigger: ElementRef | null = null
   resourceName: string | null = ''
   currentQuestionIndex = 0
   currentTheme = ''

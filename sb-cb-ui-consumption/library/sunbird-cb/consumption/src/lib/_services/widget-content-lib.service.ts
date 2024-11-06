@@ -462,17 +462,21 @@ export class WidgetContentLibService {
   }
 
   async getEnrolledData(doId: string) {
+    let enrolledDoId: any = this.userSvc.enrollmentDataIds.includes(doId)
     let userId = this.configSvc.userProfile.userId
-    const responseData =  await this.userSvc.fetchEnrollmentDataByContentId(userId,doId).toPromise().then(async (res: any) => {
-      if (res && res.courses && res.courses.length) {
-        return res.courses
-      } else {
+    if(enrolledDoId) {
+      const responseData =  await this.userSvc.fetchEnrollmentDataByContentId(userId,doId).toPromise().then(async (res: any) => {
+        if (res && res.courses && res.courses.length) {
+          return res.courses
+        } else {
+          return []
+        }
+      }).catch((_err: any) => {
         return []
-      }
-    }).catch((_err: any) => {
-      return []
-    });
-    return responseData || []
+      });
+      return responseData || []
+    }
+    return []
   }
 
   async getResourseLink(content: any) {

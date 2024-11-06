@@ -13,6 +13,7 @@ const API_END_POINTS = {
   LIKE_UNLIKE_COMMENT: '/apis/proxies/v8/comment/v1/like',
   CHCECK_IF_LIKED_UNLIKED: (commentId: string, userId: string) =>
     `/apis/proxies/v8/comment/v1/like/read?commentId=${commentId}&userId=${userId}`,
+  REPORT_COMMENT: `/apis/proxies/v8/comment/report`,
 }
 
 @Injectable({
@@ -40,6 +41,10 @@ export class DiscussionV2Service {
 
   addNewComment(req: any) {
     return this.http.post(API_END_POINTS.ADD_NEW_COMMENT, req)
+  }
+
+  reportComment(commentId: string) {
+    return this.http.post<any>(`${API_END_POINTS.REPORT_COMMENT}`, { commentId })
   }
 
   getListOfCommentsById(payload: string[]): Observable<any> {

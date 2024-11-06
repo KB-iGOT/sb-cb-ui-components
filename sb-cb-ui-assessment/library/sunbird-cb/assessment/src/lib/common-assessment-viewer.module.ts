@@ -2,7 +2,9 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CommonAssessmentViewerComponent } from './common-assessment-viewer.component'
 import { PracticePlModule } from './practice/practice.module'
-import { MatIconModule, MatProgressSpinnerModule, MatDialogModule } from '@angular/material'
+import { MatDialogModule } from '@angular/material/dialog'
+import { MatIconModule } from '@angular/material/icon'
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 
 @NgModule({
   declarations: [CommonAssessmentViewerComponent],

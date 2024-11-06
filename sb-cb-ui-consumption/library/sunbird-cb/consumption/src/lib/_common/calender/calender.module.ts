@@ -1,7 +1,8 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { CalenderComponent } from './calender.component';
-import { MatIconModule, MatSelectModule } from '@angular/material';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module';
 import { CalenderDayComponent } from './calender-day/calender-day.component';
 import { InsiteDataService } from '../../_services/insite-data.service';

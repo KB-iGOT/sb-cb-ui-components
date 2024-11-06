@@ -5,7 +5,9 @@ import { RestrictedComponent } from './restricted/restricted.component'
 import { InvalidRegistrationComponent } from './invalid-registration/invalid-registration.component'
 import { InvalidPermissionComponent } from './invalid-permission/invalid-permission.component'
 import { UnresolvedComponent } from './unresolved/unresolved.component'
-import { MatButtonModule, MatIconModule, MatCardModule } from '@angular/material'
+import { MatButtonModule } from '@angular/material/button'
+import { MatCardModule } from '@angular/material/card'
+import { MatIconModule } from '@angular/material/icon'
 import { NsWidgetResolver } from './sb-ui-resolver.model'
 import { SbUiResolverService } from './sb-ui-resolver.service'
 import {
@@ -33,7 +35,7 @@ import { WidgetBaseComponent } from './sb-ui-base.component'
   ],
 })
 export class SbUiResolverModule {
-  static forRoot(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders {
+  static forRoot(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders<SbUiResolverModule> {
     return {
       ngModule: SbUiResolverModule,
       providers: [
@@ -49,7 +51,7 @@ export class SbUiResolverModule {
       ],
     }
   }
-  static forChild(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders {
+  static forChild(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders<SbUiResolverModule> {
     return {
       ngModule: SbUiResolverModule,
       providers: [

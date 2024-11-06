@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ErrorFeatureUnavailableComponent } from './error-feature-unavailable.component'
 
@@ -6,7 +6,7 @@ describe('ErrorFeatureUnavailableComponent', () => {
   let component: ErrorFeatureUnavailableComponent
   let fixture: ComponentFixture<ErrorFeatureUnavailableComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorFeatureUnavailableComponent],
     })
