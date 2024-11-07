@@ -53,11 +53,11 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   newComment(event: any) {
-    if(event.response && event.response.comment && event.response.comment.commentId){
+    if (event.response && event.response.comment && event.response.comment.commentId) {
       this.loading = true
       this.replyDataCopy.push(event.response.comment.commentId)
       this.replyDataCopy = this.replyDataCopy.slice()
-      this.ref.markForCheck();
+      this.ref.markForCheck()
       this.getListOfReplies()
       this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyData })
     }
@@ -79,7 +79,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         this.loading = false
       }
     },
-                                                                      () => {
+                                                                          () => {
       this.loading = false
     })
   }
