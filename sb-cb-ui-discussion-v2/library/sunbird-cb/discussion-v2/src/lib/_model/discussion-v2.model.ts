@@ -54,7 +54,9 @@ export namespace NsDiscussionV2 {
             show: boolean,
             icon: string,
             successMsg: string,
-            errorMsg: string
+            errorMsg: string,
+            showToolTip: boolean,
+            toolTipText: string
         },
         actions: ICommentCardActions,
         repliesSection: {
