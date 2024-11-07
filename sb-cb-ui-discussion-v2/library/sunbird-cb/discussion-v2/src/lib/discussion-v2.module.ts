@@ -13,6 +13,7 @@ import { AvatarPhotoComponent } from './_common/avatar-photo/avatar-photo.compon
 import { DiscussionV2Service } from './_services/discussion-v2.service'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
+import { MatTooltipModule } from '@angular/material/tooltip'
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
     PipesModule,
     SkeletonLoaderModule,
   ],
