@@ -580,7 +580,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   }
 
   redirectViewAll(stripData: any, path: string, queryParamsData: any) {
-    debugger
     if(this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
