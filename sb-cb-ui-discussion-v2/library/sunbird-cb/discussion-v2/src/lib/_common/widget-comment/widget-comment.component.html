@@ -10,7 +10,7 @@
                     <div class="w-full mt-2">
                         <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType" [cardConfig]="widgetData?.commentsList"
                         [comment]="getComment(item)" [replyData]="getReplies(item)" [hierarchyPath]="getHierarchyPath"
-                        (newReply)="refreshComments($event)" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
+                        (newReply)="updateRepliesData($event)" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </div>
 
                 </ng-container>

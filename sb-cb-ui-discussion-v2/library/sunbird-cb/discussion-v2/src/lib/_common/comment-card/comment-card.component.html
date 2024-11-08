@@ -19,11 +19,22 @@
             <span class="mat-body-1">{{comment?.commentData?.commentSource?.userName}} </span>
             <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
         </div>
-        <div *ngIf="cardConfig?.reportIcon?.show">
-            <button [disabled]="reportPending" mat-icon-button>
-                <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label matTooltip="Report"
-                            aria-label="Report" (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
-            </button>
+        <div *ngIf="cardConfig?.reportIcon?.show && !(comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId)">
+            <!-- With tooltip -->
+            <ng-container *ngIf="cardConfig?.reportIcon?.showToolTip">
+                <button [disabled]="reportPending" mat-icon-button [matTooltip]="cardConfig?.reportIcon?.toolTipText" [matTooltipClass]="'reportComment'">
+                    <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label 
+                                aria-label="Report" (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
+                </button>
+            </ng-container>
+
+            <!-- Without tooltip -->
+            <ng-container *ngIf="!cardConfig?.reportIcon?.showToolTip">
+                <button [disabled]="reportPending" mat-icon-button>
+                    <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label 
+                                aria-label="Report" (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
+                </button>
+            </ng-container>
         </div>
     </div>
     <div class="comment mb-4 mt-2">
@@ -47,7 +58,7 @@
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
                 </span>
                 <span class="mr-4" *ngIf="cardConfig?.actions?.comments?.showCount">
-                    {{(replyData && replyData?.length) || 0}} {{replyData && replyData?.length > 1 ? 'Comments' :
+                    {{(replyDataCopy && replyDataCopy?.length) || 0}} {{replyDataCopy && replyDataCopy?.length > 1 ? 'Comments' :
                     'Comment'}}
                 </span>
             </ng-container>
@@ -60,22 +71,18 @@
                     [hierarchyPath]="getHierarchyPath" (newComment)="newComment($event)">
                 </d-v2-new-comment>
             </div>
-            <ng-container *ngIf="replyData && replyData?.length > 0; else noReplies">
-                <ng-container *ngFor="let reply of fetchedReplyData">
-                    <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
-                        [cardConfig]="cardConfig?.repliesSection?.replyCardConfig"
-                        [comment]="reply" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
+            <ng-container *ngIf="replyDataCopy && replyDataCopy?.length > 0; else noReplies">
+                <ng-container *ngIf="!loading">
+                    <ng-container *ngFor="let reply of fetchedReplyData">
+                        <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
+                            [cardConfig]="cardConfig?.repliesSection?.replyCardConfig"
+                            [comment]="reply" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
+                    </ng-container>
                 </ng-container>
             </ng-container>
 
             <ng-container *ngIf="loading">
-                <div class="skeleton-loader mb-4">
-                    <div class="flex gap-4 items-center p-4 rounded bg-white">
-                        <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'" [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
-                        <d-v2-widget-skeleton-loader [width]="'545px'" [height]="'43px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
-                        <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
-                    </div>
-                </div>
+                <ng-container [ngTemplateOutlet]="skeletonLoader"></ng-container>
             </ng-container>
         </div>
     </ng-container>
@@ -87,4 +94,14 @@
             No comments found!
         </div>
     </ng-container>
+</ng-template>
+
+<ng-template #skeletonLoader>
+    <div class="skeleton-loader mb-4">
+        <div class="flex gap-4 items-center p-4 rounded bg-white">
+            <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'" [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
+            <d-v2-widget-skeleton-loader [width]="'545px'" [height]="'43px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+            <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+        </div>
+    </div>
 </ng-template>
