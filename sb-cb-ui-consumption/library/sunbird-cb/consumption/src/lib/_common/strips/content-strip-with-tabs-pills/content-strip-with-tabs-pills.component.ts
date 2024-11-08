@@ -1298,7 +1298,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             const courses = [...enrolledCourses]
             this.formatEnrollmentData(strip, tabIndex, courses,content, contentNew ,tabResults,calculateParentStatus)
           }
-          console.log(res,'res=======')
         },(err: any)=> {
           let enrolledCourses = result && result.courses;
             const courses = [...enrolledCourses]

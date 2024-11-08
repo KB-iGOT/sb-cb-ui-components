@@ -375,7 +375,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             const courses = [...enrolledCourses]
             this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
           }
-          console.log(res,'res=======')
         },(_err: any)=>{
           let enrolledCourses = result && result.courses;
           const courses = [...enrolledCourses]
