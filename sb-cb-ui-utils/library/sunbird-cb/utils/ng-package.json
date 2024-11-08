@@ -6,8 +6,5 @@
     "styleIncludePaths": [
       "~/src/styles/_theme.scss"
     ]
-  },
-  "whitelistedNonPeerDependencies": [
-    "."
-  ]
+  }
 }
