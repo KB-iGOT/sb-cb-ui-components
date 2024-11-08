@@ -1,15 +1,17 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { MatSnackBar } from '@angular/material/snack-bar'
+// tslint:disable-next-line
+import _ from 'lodash'
 
 @Component({
   selector: 'd-v2-comment-card',
   templateUrl: './comment-card.component.html',
   styleUrls: ['./comment-card.component.scss'],
 })
-export class CommentCardComponent implements OnInit {
+export class CommentCardComponent implements OnInit, OnChanges {
   @Input() cardType = 'topLevel'
   @Input() cardConfig!: NsDiscussionV2.ICommentCardConfig
   @Input() comment!: any
@@ -18,20 +20,32 @@ export class CommentCardComponent implements OnInit {
   @Output() newReply = new EventEmitter<any>()
   @Output() likeUnlikeData = new EventEmitter<any>()
 
+  reportPending = false
+
   data = {
     replyToggle: false,
   }
-
+  replyDataCopy: any[] = []
   fetchedReplyData: any = []
   loogedInUserProfile: any = {}
   loading = false
 
   constructor(
-    private discussV2Svc: DiscussionV2Service, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
+    private discussV2Svc: DiscussionV2Service,
+    private configSvc: ConfigurationsService,
+    private _snackBar: MatSnackBar,
+    private ref: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.loogedInUserProfile = this.configSvc.userProfile
+    this.replyDataCopy = [...this.replyData]
+  }
+
+  ngOnChanges(_changes: SimpleChanges): void {
+    // if (changes.replyData && changes.replyData.currentValue) {
+    //   this.replyDataCopy = [...changes.replyData.currentValue]
+    // }
   }
 
   get getHierarchyPath() {
@@ -39,24 +53,52 @@ export class CommentCardComponent implements OnInit {
   }
 
   newComment(event: any) {
-    this.newReply.emit({ response: event.response, type: 'reply' })
+    if (event.response && event.response.comment && event.response.comment.commentId) {
+      this.loading = true
+      this.replyDataCopy.push(event.response.comment.commentId)
+      this.replyDataCopy = this.replyDataCopy.slice()
+      this.ref.markForCheck()
+      this.getListOfReplies()
+      this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyData })
+    }
   }
 
   expandReplyComment() {
     this.data.replyToggle = !this.data.replyToggle
     if (this.data.replyToggle && this.replyData.length) {
       this.loading = true
-      this.discussV2Svc.getListOfCommentsById(this.replyData).subscribe(res => {
-        if (res.result && res.result.comments.length) {
-          const reply = res.result.comments
-          this.fetchedReplyData = [...reply]
-          this.loading = false
-        }
-      },
-                                                                        () => {
-        this.loading = false
-      })
+      this.getListOfReplies()
     }
+  }
+
+  getListOfReplies() {
+    this.discussV2Svc.getListOfCommentsById(this.replyDataCopy).subscribe(res => {
+      if (res.result && res.result.comments.length) {
+        const reply = res.result.comments
+        this.fetchedReplyData = [...reply]
+        this.loading = false
+      }
+    },
+                                                                          () => {
+      this.loading = false
+    })
+  }
+
+  reportComment() {
+    this.reportPending = true
+    this.discussV2Svc.reportComment(this.comment.commentId).subscribe(res => {
+        if (res && res.responseCode === 'OK') {
+        this.loading = false
+        }
+        this.reportPending = false
+        this.comment = res.result
+        this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
+    },
+                                                                      () => {
+      this._snackBar.open(_.get(this.cardConfig, 'reportIcon.errorMsg') || 'Something went wrong! please try reporting again later.')
+      this.reportPending = false
+      this.loading = false
+    })
   }
 
   likeUnlikeComment(comment: any) {
