@@ -580,6 +580,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   }
 
   redirectViewAll(stripData: any, path: string, queryParamsData: any) {
+    debugger
     if(this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
@@ -1229,7 +1230,15 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           this.fetchFromEnrollmentList(strip, tabIndex, calculateParentStatus)
         } else if(strip.tabs[tabIndex].request && strip.tabs[tabIndex].request.eventEnrollmentList){
           this.fetchFromEventEnrollmentList(strip, tabIndex, calculateParentStatus)
-          
+        }
+        if (strip && strip.tabs && strip.tabs.length) {
+          let currentTabFromMap : any = strip.tabs[tabIndex]
+          let currentPillFromMap : any = strip.tabs[tabIndex].pillsData[0]
+          strip.viewMoreUrl.queryParams = {
+            ...strip.viewMoreUrl.queryParams,
+            tabSelected: currentTabFromMap.value,
+            pillSelected: currentPillFromMap.value,
+          };
         }
       }
     }
@@ -1364,6 +1373,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
 
     if (strip.tabs && strip.tabs.length) {
       tabResults = this.splitEnrollmentTabsData(contentNew, tabIndex, strip);
+      tabResults[tabIndex].pillsData[0]['selected'] = true
       this.processStrip(
         strip,
         this.transformContentsToWidgets(contentNew, strip),
@@ -1413,7 +1423,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             {
               ...strip.tabs[tabIndex].pillsData[i],
               fetchTabStatus: 'done',
-              selected: tabIndex === i ? true: false,
               tabLoading: false,
               ...(splitData.find(itmInner => {
                 if (strip.tabs && strip.tabs[tabIndex].pillsData[i] && itmInner.value === strip.tabs[tabIndex].pillsData[i].value) {
