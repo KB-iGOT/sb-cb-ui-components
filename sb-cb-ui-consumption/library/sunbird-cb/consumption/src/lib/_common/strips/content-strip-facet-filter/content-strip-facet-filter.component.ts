@@ -19,12 +19,12 @@ import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { MatTabChangeEvent } from '@angular/material/tabs';
+import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs';
 import { NsCardContent } from '../../../_models/card-content-v2.model';
 import { ITodayEvents } from '../../../_models/event';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 
 interface IStripUnitContentData {
   key: string;
@@ -116,7 +116,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
     private userSvc: WidgetUserServiceLib,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    private _fb: FormBuilder
+    private _fb: UntypedFormBuilder
   ) {
     super();
     if (localStorage.getItem('websiteLanguage')) {

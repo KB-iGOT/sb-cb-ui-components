@@ -3,12 +3,6 @@
   "dest": "../../../dist/sunbird-cb/utils",
   "lib": {
     "entryFile": "src/public-api.ts",
-    "umdModuleIds": {
-      "lodash": "_",
-      "date-fns": "DateFns",
-      "moment": "moment",
-      "ngx-image-cropper": "ngxImageCropper"
-    },
     "styleIncludePaths": [
       "~/src/styles/_theme.scss"
     ]

@@ -20,20 +20,19 @@ import { NavigationModule } from '../../_directives/navigation/navigation.module
 
 // tslint:disable-next-line: max-classes-per-file
 @NgModule({
-  declarations: [SlidersNgContentLibComponent],
-  imports: [
-    CommonModule,
-    RouterModule,
-    NavigationModule,
-    ImageResponsiveModule,
-  ],
-  exports: [SlidersNgContentLibComponent],
-  entryComponents: [SlidersNgContentLibComponent],
-  providers: [
+    declarations: [SlidersNgContentLibComponent],
+    imports: [
+        CommonModule,
+        RouterModule,
+        NavigationModule,
+        ImageResponsiveModule,
+    ],
+    exports: [SlidersNgContentLibComponent],
+    providers: [
     // {
     //   provide: HAMMER_GESTURE_CONFIG,
     //   useClass: MyHammerConfig,
     // },
-  ],
+    ]
 })
 export class SlidersNgContentLibModule { }

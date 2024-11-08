@@ -5,8 +5,8 @@ import { RestrictedComponent } from './restricted/restricted.component'
 import { InvalidRegistrationComponent } from './invalid-registration/invalid-registration.component'
 import { InvalidPermissionComponent } from './invalid-permission/invalid-permission.component'
 import { UnresolvedComponent } from './unresolved/unresolved.component'
-import { MatButtonModule } from '@angular/material/button'
-import { MatCardModule } from '@angular/material/card'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatIconModule } from '@angular/material/icon'
 import { NsWidgetResolver } from './widget-resolver.model'
 import { WidgetResolverService } from './widget-resolver.service'
@@ -17,24 +17,17 @@ import {
 } from './widget-resolver.constant'
 import { WidgetBaseComponent } from './widget-base.component'
 @NgModule({
-  declarations: [
-    WidgetBaseComponent,
-    WidgetResolverDirective,
-    RestrictedComponent,
-    InvalidRegistrationComponent,
-    InvalidPermissionComponent,
-    UnresolvedComponent,
-  ],
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule],
-  exports: [WidgetResolverDirective, WidgetBaseComponent],
-  entryComponents: [
-    RestrictedComponent,
-    InvalidRegistrationComponent,
-    InvalidPermissionComponent,
-    UnresolvedComponent,
-    WidgetBaseComponent,
-  ],
-  providers: [ConfigurationsService],
+    declarations: [
+        WidgetBaseComponent,
+        WidgetResolverDirective,
+        RestrictedComponent,
+        InvalidRegistrationComponent,
+        InvalidPermissionComponent,
+        UnresolvedComponent,
+    ],
+    imports: [CommonModule, MatButtonModule, MatIconModule, MatCardModule],
+    exports: [WidgetResolverDirective, WidgetBaseComponent],
+    providers: [ConfigurationsService]
 })
 export class WidgetResolverModule {
   static forRoot(config: NsWidgetResolver.IRegistrationConfig[]): ModuleWithProviders<WidgetResolverModule> {

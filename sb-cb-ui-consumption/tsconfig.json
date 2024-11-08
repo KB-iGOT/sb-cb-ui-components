@@ -10,7 +10,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2015",
+    "target": "ES2022",
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -19,9 +19,14 @@
       "dom"
     ],
     "paths": {
-      "@sunbird-cb/consumption": ["library/sunbird-cb/consumption"],
-      "@sunbird-cb/consumption/*": ["library/sunbird-cb/consumption/*"],
+      "@sunbird-cb/consumption": [
+        "library/sunbird-cb/consumption"
+      ],
+      "@sunbird-cb/consumption/*": [
+        "library/sunbird-cb/consumption/*"
+      ]
     },
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
