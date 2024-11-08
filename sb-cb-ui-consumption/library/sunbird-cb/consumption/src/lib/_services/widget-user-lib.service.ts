@@ -338,10 +338,13 @@ export class WidgetUserServiceLib {
         extRes.result.courses.forEach((ele: any) => {
           ele['completionPercentage'] = ele['completionpercentage']
           // ele['content']['appIcon'] = ele['completionpercentage']
-          ele['lastContentAccessTime'] = new Date(ele.content.lastUpdatedOn).getTime()
-          ele['content']['organisation'] = [ele.content.contentPartner.contentPartnerName]
-          ele['content']['completionStatus'] = ele['completionpercentage']< 100 ? 1: 2
-          ele['content']['creatorLogo'] = ele['content']['contentPartner']['link']
+          ele['lastContentAccessTime'] =  ele.content && ele.content.lastUpdatedOn ? new Date(ele.content.lastUpdatedOn).getTime(): ''
+          if(ele.content){
+            ele['content']['organisation'] = ele.content && ele.content.contentPartner && ele.content.contentPartner.contentPartnerName ? [ele.content.contentPartner.contentPartnerName]: []
+            ele['content']['completionStatus'] = ele['completionpercentage']< 100 ? 1: 2
+            ele['content']['creatorLogo'] = ele['content']['contentPartner']['link']
+
+          }
         })
       }
       return extRes

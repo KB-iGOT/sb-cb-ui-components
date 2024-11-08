@@ -374,12 +374,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             let enrolledCourses = result && result.courses;
             const courses = [...enrolledCourses]
             this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
-
           }
           console.log(res,'res=======')
+        },(_err: any)=>{
+          let enrolledCourses = result && result.courses;
+          const courses = [...enrolledCourses]
+          this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
         })
         },
-        () => {
+        (_err:any) => {
           this.processStrip(strip, [], 'error', calculateParentStatus, null);
         }
         
@@ -409,7 +412,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       : null;
     if (courses && courses.length) {
       content = courses.map((c: any) => {
-        const contentTemp: NsContent.IContent = c.content;
+        const contentTemp: NsContent.IContent = c.content || {};
         contentTemp.completionPercentage = c.completionPercentage || c.progress || 0;
         contentTemp.completionStatus = c.completionStatus || c.status || 0;
         contentTemp.enrolledDate = c.enrolledDate || '';
