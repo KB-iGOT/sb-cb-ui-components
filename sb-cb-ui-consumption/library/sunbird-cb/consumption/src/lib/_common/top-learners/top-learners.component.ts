@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import * as moment_ from 'moment';
+import moment from 'moment';
 import { InsiteDataService } from '../../_services/insite-data.service';
-const moment = moment_;
 @Component({
   selector: 'sb-uic-top-learners',
   templateUrl: './top-learners.component.html',

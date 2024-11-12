@@ -5,8 +5,8 @@ import { catchError, map } from 'rxjs/operators';
 import { IUserGroupDetails } from '../_models/widget-user.model';
 import { NsContent } from '../_models/widget-content.model';
 import 'rxjs/add/observable/of'
-import * as dayjs_ from 'dayjs';
-const dayjs = dayjs_
+import dayjs from 'dayjs';
+// const dayjs = dayjs_
 // import { environment } from 'src/environments/environment'
 import { NsCardContent } from '../_models/card-content-v2.model';
 import * as lodash from 'lodash';
@@ -14,6 +14,8 @@ import * as lodash from 'lodash';
 
 const PROTECTED_SLAG_V8 = '/apis/protected/v8';
 const API_END_POINTS = {
+  FETCH_EXTERNAL_ENROLLMENT_LIST: 'apis/proxies/v8/cios-enroll/v1/courselist/byuserid',
+  FETCH_EVENTS_ENROLLMENT_LIST: (userId:string) => `apis/proxies/v8/user/events/list/${userId}`,
   FETCH_USER_GROUPS: (userId: string) =>
     `${PROTECTED_SLAG_V8}/user/group/fetchUserGroup?userId=${userId}`,
     FETCH_CPB_PLANS: `/apis/proxies/v8/user/v1/cbplan`,
@@ -328,5 +330,36 @@ export class WidgetUserServiceLib {
       })
     }
     return enrollData
+  }
+
+  fetchExtEnrollData() {
+    return this.http.get(API_END_POINTS.FETCH_EXTERNAL_ENROLLMENT_LIST).pipe(map((extRes: any)=> {
+      if(extRes && extRes.result && extRes.result.courses) {
+        extRes.result.courses.forEach((ele: any) => {
+          ele['completionPercentage'] = ele['completionpercentage']
+          // ele['content']['appIcon'] = ele['completionpercentage']
+          ele['lastContentAccessTime'] =  ele.content && ele.content.lastUpdatedOn ? new Date(ele.content.lastUpdatedOn).getTime(): ''
+          if(ele.content){
+            ele['content']['organisation'] = ele.content && ele.content.contentPartner && ele.content.contentPartner.contentPartnerName ? [ele.content.contentPartner.contentPartnerName]: []
+            ele['content']['completionStatus'] = ele['completionpercentage']< 100 ? 1: 2
+            ele['content']['creatorLogo'] = ele['content']['contentPartner']['link']
+
+          }
+        })
+      }
+      return extRes
+    }))
+  }
+
+  fetchEventEnrollData(userId: any) {
+    return this.http.get(API_END_POINTS.FETCH_EVENTS_ENROLLMENT_LIST(userId)).pipe(map((eventRes: any)=> {
+      if(eventRes && eventRes.result && eventRes.result.events) {
+        eventRes.result.events.forEach((ele: any) => {
+          ele['event']['eventId'] = ele.contentId
+          ele['completionPercentage'] = ele['completionpercentage'] > 50 ? 100: ele['completionpercentage']
+        })
+      }
+      return eventRes
+    }))
   }
 }

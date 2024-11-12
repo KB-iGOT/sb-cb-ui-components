@@ -10,8 +10,7 @@ import { NSSearch } from '../_models/widget-search.model';
 import * as _ from 'lodash'
 import {  viewerRouteGenerator } from './viewer-route-util'
 import {WidgetUserServiceLib} from './widget-user-lib.service'
-import * as moment_ from 'moment';
-const moment = moment_;
+import moment from 'moment';
 // tslint:enable
 
 // TODO: move this in some common place
@@ -480,6 +479,13 @@ export class WidgetContentLibService {
   }
 
   async getResourseLink(content: any) {
+    if(content && content.content && content.content.eventId) {
+      const urlData: any = {
+        url: `app/event-hub/home/${content.content.eventId}`,
+        queryParams: {},
+      };
+      return urlData
+    }
     if(content.externalId) {
         const urlData: any = {
           url: `app/toc/ext/${content.contentId}`,

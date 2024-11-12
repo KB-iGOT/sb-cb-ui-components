@@ -6,14 +6,14 @@ import { CommentCardComponent } from './_common/comment-card/comment-card.compon
 import { WidgetCommentComponent } from './_common/widget-comment/widget-comment.component'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import { MatButtonModule } from '@angular/material/button'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatIconModule } from '@angular/material/icon'
-import { MatInputModule } from '@angular/material/input'
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
 import { AvatarPhotoComponent } from './_common/avatar-photo/avatar-photo.component'
 import { DiscussionV2Service } from './_services/discussion-v2.service'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
-import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 
 @NgModule({
   declarations: [

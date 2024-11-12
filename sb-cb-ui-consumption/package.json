@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.0.104-ang-13-16",
+  "version": "0.0.106-ang-13-16",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -28,7 +28,7 @@
     "@sunbird-cb/design-system": "0.0.2",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@sunbird-cb/utils-v2": "0.0.22-ang-13-16",
-    "dayjs": "^1.9.7",
+    "dayjs": "^1.10.7",
     "keycloak-angular": "^6.1.0",
     "moment": "^2.29.1",
     "ngx-image-cropper": "^3.3.4",

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
-import { FormControl } from '@angular/forms'
+import { UntypedFormControl } from '@angular/forms'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service'
@@ -14,7 +14,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   @Input() hierarchyPath = []
   @Output() newComment = new EventEmitter<any>()
 
-  searchControl = new FormControl('')
+  searchControl = new UntypedFormControl('')
   loogedInUserProfile: any = {}
 
   constructor(
