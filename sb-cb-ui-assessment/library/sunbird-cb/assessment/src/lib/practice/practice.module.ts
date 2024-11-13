@@ -9,24 +9,24 @@ import { SubmitQuizDialogComponent } from './components/submit-quiz-dialog/submi
 import { PipeDurationTransformModule } from './../pipes/pipe-duration-transform/pipe-duration-transform.module'
 import { PipeLimitToModule } from './../pipes/pipe-limit-to/pipe-limit-to.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
-import { MatButtonModule } from '@angular/material/button'
-import { MatCardModule } from '@angular/material/card'
-import { MatCheckboxModule } from '@angular/material/checkbox'
-import { MatChipsModule } from '@angular/material/chips'
-import { MatDialogModule } from '@angular/material/dialog'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
+import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
+import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
 import { MatExpansionModule } from '@angular/material/expansion'
-import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field'
 import { MatIconModule } from '@angular/material/icon'
-import { MatInputModule } from '@angular/material/input'
-import { MatListModule } from '@angular/material/list'
-import { MatMenuModule } from '@angular/material/menu'
-import { MatProgressBarModule } from '@angular/material/progress-bar'
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
-import { MatRadioModule } from '@angular/material/radio'
-import { MatSelectModule } from '@angular/material/select'
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
+import { MatLegacyListModule as MatListModule } from '@angular/material/legacy-list'
+import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
+import { MatLegacyProgressBarModule as MatProgressBarModule } from '@angular/material/legacy-progress-bar'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
+import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
+import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select'
 import { MatSidenavModule } from '@angular/material/sidenav'
-import { MatTableModule } from '@angular/material/table'
-import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table'
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 
 import { ResultComponent } from './components/result/result.component'
 import { FillInTheBlankComponent } from './components/question/fitb/fitb.component'
@@ -44,72 +44,68 @@ import { AssessmentPerformanceInsightSummaryComponent } from './components/asses
 import { FinalAssessmentPopupComponent } from './components/final-assessment-popup/final-assessment-popup.component'
 import { QuestionSafeUrlPipe } from './question-safe-pipe.pipe'
 @NgModule({
-  declarations: [
-    FillInTheBlankComponent,
-    MatchTheFollowingQuesComponent,
-    MultipleChoiseQuesComponent,
-    OverviewComponent,
-    PracticeComponent,
-    QuestionComponent,
-    ResultComponent,
-    SingleChoiseQuesComponent,
-    SubmitQuizDialogComponent,
-    StandaloneAssessmentComponent,
-    AssessmentHeaderComponent,
-    AssessmentFooterComponent,
-    AssessmentQuestionContainerComponent,
-    AssessmentQuestionCountContainerComponent,
-    AssessmentPerformanceSummaryComponent,
-    AssessmentPerformanceInsightSummaryComponent,
-    FinalAssessmentPopupComponent,
-    QuestionSafeUrlPipe,
-  ],
-  entryComponents: [
-    SubmitQuizDialogComponent,
-    FinalAssessmentPopupComponent,
-  ],
-  imports: [
-    CommonModule,
-    PipeDurationTransformModule,
-    PipeLimitToModule,
-    MatCardModule,
-    MatDialogModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatListModule,
-    MatProgressBarModule,
-    MatRadioModule,
-    MatSidenavModule,
-    MatExpansionModule,
-    MatTableModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    SkeletonLoaderModule,
-    // TranslateModule,
-    MatMenuModule,
-    MatSelectModule,
-  ],
-  exports: [
-    PracticeComponent,
-    StandaloneAssessmentComponent,
-    AssessmentHeaderComponent,
-    AssessmentFooterComponent,
-    AssessmentQuestionContainerComponent,
-    AssessmentQuestionCountContainerComponent,
-    AssessmentPerformanceSummaryComponent,
-    AssessmentPerformanceInsightSummaryComponent,
-    SkeletonLoaderModule,
-    FillInTheBlankComponent,
-    MatchTheFollowingQuesComponent,
-    MultipleChoiseQuesComponent,
-    OverviewComponent,
-    PracticeComponent,
-    QuestionComponent,
-    ResultComponent,
-  ],
+    declarations: [
+        FillInTheBlankComponent,
+        MatchTheFollowingQuesComponent,
+        MultipleChoiseQuesComponent,
+        OverviewComponent,
+        PracticeComponent,
+        QuestionComponent,
+        ResultComponent,
+        SingleChoiseQuesComponent,
+        SubmitQuizDialogComponent,
+        StandaloneAssessmentComponent,
+        AssessmentHeaderComponent,
+        AssessmentFooterComponent,
+        AssessmentQuestionContainerComponent,
+        AssessmentQuestionCountContainerComponent,
+        AssessmentPerformanceSummaryComponent,
+        AssessmentPerformanceInsightSummaryComponent,
+        FinalAssessmentPopupComponent,
+        QuestionSafeUrlPipe,
+    ],
+    imports: [
+        CommonModule,
+        PipeDurationTransformModule,
+        PipeLimitToModule,
+        MatCardModule,
+        MatDialogModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatListModule,
+        MatProgressBarModule,
+        MatRadioModule,
+        MatSidenavModule,
+        MatExpansionModule,
+        MatTableModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatCheckboxModule,
+        MatChipsModule,
+        SkeletonLoaderModule,
+        // TranslateModule,
+        MatMenuModule,
+        MatSelectModule,
+    ],
+    exports: [
+        PracticeComponent,
+        StandaloneAssessmentComponent,
+        AssessmentHeaderComponent,
+        AssessmentFooterComponent,
+        AssessmentQuestionContainerComponent,
+        AssessmentQuestionCountContainerComponent,
+        AssessmentPerformanceSummaryComponent,
+        AssessmentPerformanceInsightSummaryComponent,
+        SkeletonLoaderModule,
+        FillInTheBlankComponent,
+        MatchTheFollowingQuesComponent,
+        MultipleChoiseQuesComponent,
+        OverviewComponent,
+        PracticeComponent,
+        QuestionComponent,
+        ResultComponent,
+    ]
 })
 export class PracticePlModule { }
