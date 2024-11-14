@@ -129,7 +129,8 @@
                         <div class="w-full flex flex-col items-center justify-center">
                           <img alt="" class="mt-4 mb-4" src="assets/icons/home/nodataDefault.svg">
                           <div class="mat-subheading-1 text-center info-content">{{ 'contentstripmultiple.getReadyForLearningAdventure' | translate }} -
-                            <a class="click-here" [routerLink]="'/page/learn'">{{ 'contentstripmultiple.clickHere' | translate }}</a> {{ 'contentstripmultiple.toEnrollNextCourse' | translate }}</div>
+                            <a class="click-here" [routerLink]="tab?.label === 'Events' ? '/app/event-hub/home':'/page/learn'">{{ 'contentstripmultiple.clickHere' | translate }}</a> <span *ngIf=" tab?.label === 'Events'">{{'contentstripmultiple.toEnrollNextEvents' | translate }}</span>
+                          <span *ngIf=" tab?.label !== 'Events'">{{ 'contentstripmultiple.toEnrollNextCourse' | translate }}</span></div>
                         </div>
                       </ng-container>
                       <ng-template #msgTemp>
