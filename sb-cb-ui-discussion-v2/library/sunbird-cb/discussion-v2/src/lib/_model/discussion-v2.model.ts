@@ -26,7 +26,8 @@ export namespace NsDiscussionV2 {
         },
         postBtn: {
             text: string
-        }
+        },
+        styles: any
     }
 
     export interface ICommentCardActionsObj {

@@ -24,7 +24,18 @@
 }
 
 .discuss-input {
-    border-radius: 4px;
+    border-radius: 48px;
     height: 40px;
-    padding: 0 12px;
+    padding: 0 16px;
+    border: 1px solid #00000029;
+}
+
+.custom-rounded {
+    height: 40px;
+    min-width: 72px;
+    border-radius: 30px;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

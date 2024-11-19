@@ -16,6 +16,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
 
   searchControl = new UntypedFormControl('')
   loogedInUserProfile: any = {}
+  showEmojiPicker = false
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -84,6 +85,17 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   performSuccessEvents(res: any) {
     this.newComment.emit({ response: res, type: 'comment' })
     this.searchControl.setValue('')
+  }
+
+  toggleEmojiPicker() {
+    this.showEmojiPicker = !this.showEmojiPicker;
+  }
+  addEmoji(event: any) {
+    const text = `${this.searchControl.value}${event.emoji.native}`;
+    this.searchControl.patchValue(text)
+  }
+  onFocus() {
+    this.showEmojiPicker = false;
   }
 
   ngOnDestroy(): void {

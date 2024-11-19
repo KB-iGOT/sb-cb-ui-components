@@ -2,9 +2,12 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, O
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+
 // tslint:disable-next-line
 import _ from 'lodash'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { FlagDialogueComponent } from '../flag-dialogue/flag-dialogue.component'
 
 @Component({
   selector: 'd-v2-comment-card',
@@ -29,12 +32,25 @@ export class CommentCardComponent implements OnInit, OnChanges {
   fetchedReplyData: any = []
   loogedInUserProfile: any = {}
   loading = false
+  flagSelectionList = [
+    "Sexual content",
+    "Violent or repulsive content",
+    "Hateful or abusive content",
+    "Harassment or bullying",
+    "Harmful or dangerous acts",
+    "Misinformation",
+    "Child abuse",
+    "Promotes terrorism",
+    "Spam or misleading",
+    "Others"
+  ]
 
   constructor(
     private discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
     private _snackBar: MatSnackBar,
-    private ref: ChangeDetectorRef
+    private ref: ChangeDetectorRef,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -60,6 +76,12 @@ export class CommentCardComponent implements OnInit, OnChanges {
       this.ref.markForCheck()
       this.getListOfReplies()
       this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyData })
+    }
+  }
+
+  viewMoreOrLess(item: any) {
+    if (item.comment.length > 152) {
+      item.expanded = !item.expanded
     }
   }
 
@@ -132,6 +154,19 @@ export class CommentCardComponent implements OnInit, OnChanges {
         } else {
           comment.commentData.like = comment.commentData.like - 1
         }
+      }
+    })
+  }
+
+  openFlagDialogue(comment: any) {
+    const confirmDialog = this.dialog.open(FlagDialogueComponent, {
+      width: '600px',
+      panelClass: 'flag-dialog',
+      backdropClass: 'flag-dialog-backdrop',
+      data: {comment,  flagSelectionList: this.flagSelectionList},
+    })
+    confirmDialog.afterClosed().subscribe((result: any) => {
+      if (result) {
       }
     })
   }
