@@ -16,8 +16,16 @@
             </div>
         </div>
         <div class="flex flex-1 flex-col">
-            <span class="mat-body-1">{{comment?.commentData?.commentSource?.userName}} </span>
-            <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
+            <div class="flex items-center">
+                <span class="mat-body-1 bold mr-1">{{comment?.commentData?.commentSource?.userName}} </span>
+                <mat-icon class="icon verified mr-1" i18n-aria-label aria-label="verified">check_circle</mat-icon>
+                <div class="source-tag text-center">
+                    Author
+                </div>
+            </div>
+            <div class="ws-mat-black60-text mat-body-2">
+                Tech Hiring Specialist 
+            </div>
         </div>
         <div *ngIf="cardConfig?.reportIcon?.show && !(comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId)">
             <!-- With tooltip -->
@@ -36,36 +44,50 @@
                 </button>
             </ng-container>
         </div>
+        <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
+        <div>
+            <mat-icon class="icon" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
+            aria-label="more">more_vertical</mat-icon>
+        </div>
     </div>
-    <div class="comment mb-4 mt-2">
-        {{comment?.commentData?.comment}}
+    <div class="comment mb-4 mt-2 ">
+        <div class="comment-txt {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}" [innerHTML]="comment?.commentData?.comment">
+        </div>
+        <div class="more-or-less" *ngIf="comment?.commentData?.comment.length > 152">
+            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)" *ngIf="!comment?.commentData?.expanded">View more</div>
+            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)" *ngIf="comment?.commentData?.expanded">View less</div>
+        </div>
     </div>
+                    
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
             <ng-container *ngIf="cardConfig?.actions?.like?.show ">
-                <span class="mr-2 cursor-pointer" (click)="likeUnlikeComment(comment)">
-                    <mat-icon class="icon" aria-hidden="false" i18n-aria-label
-                        aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
-                </span>
-                <span class="mr-4" *ngIf="cardConfig?.actions?.like?.showCount">
-                    {{(comment?.commentData?.like && comment?.commentData?.like) || 0}} {{comment?.commentData?.like && comment?.commentData?.like > 1 ?
-                    'Likes' : 'Like'}}
-                </span>
+                <div class="mr-4 cursor-pointer circleBtn" (click)="likeUnlikeComment(comment)">
+                        <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                            aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
+                            <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
+                                {{(comment?.commentData?.like && comment?.commentData?.like) || 0}}
+                            </span>
+                </div>
             </ng-container>
             <ng-container *ngIf="cardConfig?.actions?.comments?.show">
-                <span class="mr-2 cursor-pointer" (click)="expandReplyComment()">
-                    <mat-icon class="icon" aria-hidden="false" i18n-aria-label
-                        aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
-                </span>
-                <span class="mr-4" *ngIf="cardConfig?.actions?.comments?.showCount">
-                    {{(replyDataCopy && replyDataCopy?.length) || 0}} {{replyDataCopy && replyDataCopy?.length > 1 ? 'Comments' :
-                    'Comment'}}
-                </span>
+                <div class="mr-4 cursor-pointer circleBtn" (click)="expandReplyComment()">
+                    <mat-icon *ngIf="!data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
+                        aria-label="Dropdown-open">arrow_drop_down</mat-icon>
+                    <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
+                        aria-label="Dropdown-close">arrow_drop_up</mat-icon>
+                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                            aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
+                    <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
+                         {{replyDataCopy && replyDataCopy?.length > 1 ? 'Replies' :
+                        'Reply'}} ({{(replyDataCopy && replyDataCopy?.length) || 0}})
+                    </span>
+                </div>
             </ng-container>
         </div>
     </div>
     <ng-container *ngIf="cardConfig?.repliesSection?.show">
-        <div *ngIf="data.replyToggle" class="pl-6 mt-4 repliesSection">
+        <div *ngIf="data.replyToggle" class="mt-4 repliesSection" [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
                 <d-v2-new-comment [config]="cardConfig?.repliesSection?.newCommentReply"
                     [hierarchyPath]="getHierarchyPath" (newComment)="newComment($event)">
@@ -105,3 +127,18 @@
         </div>
     </div>
 </ng-template>
+
+<mat-menu #cardMenu="matMenu" xPosition="after">
+    <button mat-menu-item (click)="openFlagDialogue(comment)">
+      <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
+      <span>Flag</span>
+    </button>
+    <button mat-menu-item [disabled]="true">
+      <mat-icon [ngStyle]="{'color': '#1B4CA1'}">edit</mat-icon>
+      <span>Edit</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon [ngStyle]="{'color': '#FF8268'}">delete</mat-icon>
+      <span>Delete</span>
+    </button>
+</mat-menu>

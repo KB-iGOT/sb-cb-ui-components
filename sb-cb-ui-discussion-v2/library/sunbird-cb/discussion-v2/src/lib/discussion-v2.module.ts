@@ -14,6 +14,12 @@ import { DiscussionV2Service } from './_services/discussion-v2.service'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import {MatMenuModule} from '@angular/material/menu';
+import { FlagDialogueComponent } from './_common/flag-dialogue/flag-dialogue.component'
+import { MatSnackBarModule } from '@angular/material/snack-bar'
+import { MatCardModule }from '@angular/material/card'
+import { MatDialogModule } from '@angular/material/dialog'
+import { MatCheckboxModule } from '@angular/material/checkbox'
 
 @NgModule({
   declarations: [
@@ -22,6 +28,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
     CommentCardComponent,
     WidgetCommentComponent,
     AvatarPhotoComponent,
+    FlagDialogueComponent
   ],
   imports: [
     CommonModule,
@@ -34,6 +41,11 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
     MatTooltipModule,
     PipesModule,
     SkeletonLoaderModule,
+    MatMenuModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatCardModule,
+    MatCheckboxModule
   ],
   providers: [
     DiscussionV2Service,
