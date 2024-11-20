@@ -61,7 +61,6 @@ export class CompetencyPassbookMdoComponent implements OnInit {
     }
   }
 
-
   getAllCompetencies(){
     this.loadCometency = true
     let request = {"search":{"type":"Competency Area"},"filter":{"isDetail":true}}
@@ -69,8 +68,7 @@ export class CompetencyPassbookMdoComponent implements OnInit {
       this.allcompetencyTheme = {}
       if(response && response.result && response.result.competency) {
         this.originalCompetencyArray = response.result.competency
-        this.getMdoCompetencies()
-        // this.getCompetencyArea()
+        this.getCompetencyArea()
         response.result.competency.forEach(element => {
           element.children.forEach((childEle) => {
             let name = childEle.name.toLowerCase()
@@ -82,89 +80,236 @@ export class CompetencyPassbookMdoComponent implements OnInit {
       this.loadCometency = false
     })
   }
-  
-  getAllCompetenciesV2(){
-    this.loadCometency = true
-    this.competencySvc.getCompetencyListv_V2().subscribe((response: any) => {
-      this.allcompetencyTheme = {}
-      if(response && response.result && response.result.content) {
-        this.originalCompetencyArray = response.result.content
-        this.getMdoCompetencies()
-        // this.getCompetencyArea()
-        response.result.content.forEach(element => {
-          element.children.forEach((childEle) => {
-            let name = childEle.name.toLowerCase()
-            this.allcompetencyTheme[name] = childEle
-            this.allcompetencyTheme[name]['viewMore'] = false
-          });
-        });
+
+  // to get competency area from facets
+  async getCompetencyArea(){
+    let addfilter: any = {}
+    if(this.providerId) {
+      addfilter = {
+        "createdFor": [
+          this.providerId
+       ],
       }
-      this.loadCometency = false
-    })
-  }
+    }
+      this.loadCompetencyArea = true
+      let request = {
+          "request": {
+              "query": "",
+              "filters": {
+                  "contentType":"Course",
+                  ...addfilter,
+                  "status": [
+                      "Live"
+                  ]
+              },
+              "sort_by": {
+                  "lastUpdatedOn": "desc"
+              },
+              "facets": [
+                  `${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyArea}`
+              ],
+              "limit": 0,
+              "offset": 0,
+              "fields": [
+              ]
+          }
+        }
+      try {
+        this.competencyStrength =  0
+        const response = await this.callCompetencySearch(request);
+        if (response && response.results) {
+          if(response.results.result.facets){
+            response.results.result.facets.forEach((fact: any) => {
+  
+              if(fact.name ===   `${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyArea}`) {
+                this.competencyArea = fact.values
+              }
+            });
+            this.selectedValue  = this.competencyArea[0].name.toLowerCase()
+            this.competencyArea.forEach(async (area: any, indexValue: any)=> {
+              let addFilter = {
+                "createdFor": [
+                  this.providerId
+               ]
+              }
+              let data = await this.getcompetencyThemeCount(area, addFilter)
+              area['themeData'] = data
+              area['count'] = data.length
+              this.competencyStrength = this.competencyStrength + data.length
+              if(indexValue === 0) {
+                this.getThemeDataByArea(area)
+              }
+            })
+            this.loadCompetencyArea = false
+          }
+        }
+      } catch (error) {
+        this.loadCompetencyArea = false
+        this.emptyResponse.emit(true)
+        // Handle errors
+        // console.error('Error:', error);
+      }
+    }
 
+    async callCompetencySearch(request){
+      return new Promise<any>((resolve, reject) => {
+        if (request && request) {
+          this.contentSvc.searchV6(request).subscribe(results => {
+              resolve({ results });
+            },(error: any) => {
+              reject(error);
+            },
+          );
+        }
+      });
+    }
 
-  async getMdoCompetencies(){
+    async getcompetencyThemeCount(area: any,addFilter?: any) {
+      let request = {
+        "request": {
+            "query": "",
+            "filters": {
+                "contentType":"Course",
+                ...addFilter,
+                [`${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyArea}`] : area.name,
+                "status": [
+                    "Live"
+                ]
+            },
+            "sort_by": {
+                "lastUpdatedOn": "desc"
+            },
+            "facets": [
+                `${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyTheme}`
+            ],
+            "limit": 0,
+            "offset": 0,
+            "fields": [
+            ]
+        }
+      }
     try {
+      let returnedData : any
       this.loadCometency = true
-      const response = await this.getMdoCompetency();
+      const response = await this.callCompetencySearch(request);
       if (response && response.results) {
-        if(response.results.result.facets && response.results.result.facets.length){
-          let facetData = response.results.result.facets
-          facetData.forEach((facet: any) => {
-            if(facet.name ===   `${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyArea}`) {
-              this.competencyArea = facet.values
-              this.selectedValue = facet.values[0].name
-            } else if(facet.name ===   `${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyTheme}`) {
-              this.competencyThemeData = facet.values
-              this.getCompetencyTheme()
+        if(response.results.result.facets){
+          let competencyThemeData : any = response.results.result.facets[0].values
+          this.originalCompetencyArray.forEach((element: any) => {
+            if(element.name.toLowerCase() === area.name) {
+             returnedData = competencyThemeData.filter((ele1: any) => {
+                return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
+              })
+              this.showAllTheme = [{name:'Show all', showAll: false}]
+              this.competencyThemeLength = 6
             }
           });
-
-        } else {
-          this.emptyResponse.emit(true)
         }
         this.loadCometency = false
+        return returnedData
       }
     } catch (error) {
       // Handle errors
       // console.error('Error:', error);
-          this.emptyResponse.emit(true)
     }
   }
 
-  getCompetencyTheme(){
-    this.originalCompetencyArray.forEach((element: any) => {
-      if(element.name.toLowerCase() === this.selectedValue) {
-        this.competencyTheme = this.competencyThemeData.filter((ele1: any) => {
-          return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
-        })
-        this.showAllTheme = [{name:'Show all', showAll: false}]
-        this.competencyThemeLength = 6
-      } else if('Behavioral'.toLowerCase()  === this.selectedValue) {
-        this.competencyTheme = this.competencyThemeData.filter((ele1: any) => {
-          return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
-        })
-        this.showAllTheme = [{name:'Show all', showAll: false}]
-        this.competencyThemeLength = 6
-      }
-    });
-    this.resetViewMore()
+  getThemeDataByArea(areaData: any){
+    let competencyThemeData : any = areaData.themeData
+        this.originalCompetencyArray.forEach((element: any) => {
+          if(element.name.toLowerCase() === areaData.name) {
+           this.competencyTheme = competencyThemeData.filter((ele1: any) => {
+              return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
+            })
+            this.showAllTheme = [{name:'Show all', showAll: false}]
+            this.competencyThemeLength = 6
+          }
+        });
+        let addfilter: any = {}
+        if(this.providerId) {
+          addfilter = {
+            "createdFor": [
+              this.providerId
+           ],
+          }
+        }
+        this.getcompetencySubTheme(areaData,addfilter)
   }
 
-
-  async getMdoCompetency(){
-    return new Promise<any>((resolve, reject) => {
-      if (this.providerId) {
-        this.competencySvc.mdoCompetency(this.providerId).subscribe(results => {
-            resolve({ results });
-          },(error: any) => {
-            reject(error);
+  async getcompetencySubTheme(compArea: any,addFilter?: any) {
+    let request = {
+      "request": {
+          "query": "",
+          "filters": {
+              "contentType":"Course",
+              ...addFilter,
+             [`${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencyArea}`] : compArea.name,
+              "status": [
+                  "Live"
+              ]
           },
-        );
+          "sort_by": {
+              "lastUpdatedOn": "desc"
+          },
+          "facets": [
+               `${this.environment.compentencyVersionKey}.${this.comeptencyKeys.vCompetencySubTheme}`
+          ],
+          "limit": 0,
+          "offset": 0,
+          "fields": [
+          ]
       }
-    });
+    }
+  try {
+    this.loadCometency = true
+    const response = await this.callCompetencySearch(request);
+    if (response && response.results) {
+      if(response.results.result.facets){
+        let competencySubThemeData : any = response.results.result.facets[0].values
+        this.competencyArea.forEach((areaEle: any) => {
+          if(areaEle.name === compArea.name) {
+            areaEle.themeData.forEach((themeEle) => {
+              if(this.allcompetencyTheme[themeEle.name.toLowerCase()] &&
+              this.allcompetencyTheme[themeEle.name.toLowerCase()].children &&
+              this.allcompetencyTheme[themeEle.name.toLowerCase()].children.length) {
+                let data = this.allcompetencyTheme[themeEle.name.toLowerCase()].children.filter(obj1 =>
+                  competencySubThemeData.some(obj2 =>
+                    Object.keys(obj1).every(key => obj1['name'].toLowerCase() === (obj2['name'].toLowerCase()))
+                  )
+                );
+                this.allcompetencyTheme[themeEle.name.toLowerCase()]['children'] = data
+              }
+            });
+          }
+        })
+      }
+
+      this.loadCometency = false
+    }
+  } catch (error) {
+    // Handle errors
+    // console.error('Error:', error);
   }
+}
+
+getAllCompetenciesV2(){
+  this.loadCometency = true
+  this.competencySvc.getCompetencyListv_V2().subscribe((response: any) => {
+    this.allcompetencyTheme = {}
+    if(response && response.result && response.result.content) {
+      this.originalCompetencyArray = response.result.content
+      this.getCompetencyArea()
+      response.result.content.forEach(element => {
+        element.children.forEach((childEle) => {
+          let name = childEle.name.toLowerCase()
+          this.allcompetencyTheme[name] = childEle
+          this.allcompetencyTheme[name]['viewMore'] = false
+        });
+      });
+    }
+    this.loadCometency = false
+  })
+}
 
   // competency theam change
   competencyChange(e){
@@ -179,10 +324,8 @@ export class CompetencyPassbookMdoComponent implements OnInit {
 
     this.temeletryResponse.emit(e.name)
     this.selectedValue = e.name
-    this.getCompetencyTheme()
+    this.getThemeDataByArea(e)
   }
-
-
 
   resetViewMore(){
     Object.keys(this.allcompetencyTheme).forEach((comp: any) => {
