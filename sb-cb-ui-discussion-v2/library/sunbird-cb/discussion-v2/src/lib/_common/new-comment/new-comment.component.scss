@@ -1,3 +1,4 @@
+@import '@ctrl/ngx-emoji-mart/picker';
 .start-comment-container {
     background: #fff;
     padding: 16px;
@@ -28,6 +29,7 @@
     height: 40px;
     padding: 0 16px;
     border: 1px solid #00000029;
+    padding-right: 40px; // for emoji icon at right
 }
 
 .custom-rounded {
@@ -38,4 +40,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.emoji-picker{
+    position: absolute;
+    right: 24px;
+    top: 8px;
+    color: #FF8400;
+    cursor: pointer;
+}
+
+.emoji-mart {
+    top: 40px;
+    left: 16px;
+    max-width: 100%;
+    z-index: 1;
 }
