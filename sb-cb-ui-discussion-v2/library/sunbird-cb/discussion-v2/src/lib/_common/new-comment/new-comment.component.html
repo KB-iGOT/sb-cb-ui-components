@@ -15,17 +15,19 @@
         <div class="flex flex-1 items-center">
             <form class="flex flex-1 items-center">
                 <!-- <mat-form-field appearance="outline" class="w-full pl-1"> -->
-                    <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl" i18n-placeholder 
-                    [placeholder]="config?.commentBox?.placeholder || 'Add a comment'">
-                    <button class="emoji-picker" (click)="toggleEmojiPicker()">😀</button>
-    <br />
-    <emoji-mart
-      class="emoji-mart"
-      set="google"
-      *ngIf="showEmojiPicker"
-      (emojiSelect)="addEmoji($event)"
-      title="Pick your emoji…"
-    ></emoji-mart>
+                    <div class="relative w-full flex ">
+                        <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl" i18n-placeholder 
+                        [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()">
+                        <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                        <br />
+                        <emoji-mart 
+                        class="emoji-mart absolute"
+                        set="google"
+                        *ngIf="showEmojiPicker"
+                        (emojiSelect)="addEmoji($event)"
+                        title="Pick your emoji…"
+                        ></emoji-mart>
+                    </div>
                 <!-- </mat-form-field> -->
                 <button mat-flat-button color="secondary" class="primary-button custom-rounded" (click)="submitComment()"
                 [disabled]="!comment.value || comment.value.length < 1">

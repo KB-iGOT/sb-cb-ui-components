@@ -20,6 +20,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule }from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
+import { PickerModule } from '@ctrl/ngx-emoji-mart'
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox'
     MatSnackBarModule,
     MatDialogModule,
     MatCardModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    PickerModule
   ],
   providers: [
     DiscussionV2Service,
@@ -55,6 +57,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox'
     NewCommentComponent,
     CommentCardComponent,
     WidgetCommentComponent,
+    PickerModule
   ],
 })
 export class DiscussionV2Module { }
