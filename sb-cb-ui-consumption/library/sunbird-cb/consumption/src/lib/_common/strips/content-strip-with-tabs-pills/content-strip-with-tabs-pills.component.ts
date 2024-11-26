@@ -1255,6 +1255,9 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       if(res && res.result && res.result.events && res.result.events.length) {
         this.formatEnrollmentData(strip, tabIndex, res.result.events,content, contentNew ,tabResults, calculateParentStatus)
         
+      } else {
+        strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+        this.processStrip(strip, this.transformContentsToWidgets([], strip), 'done', calculateParentStatus, viewMoreUrl, strip.tabs);
       }
     },(err: any) => {
       this.processStrip(
