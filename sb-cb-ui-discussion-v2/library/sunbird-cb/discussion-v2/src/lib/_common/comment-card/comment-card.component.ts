@@ -8,6 +8,8 @@ import _ from 'lodash'
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { FlagDialogueComponent } from '../flag-dialogue/flag-dialogue.component'
+import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue.component'
+
 
 @Component({
   selector: 'd-v2-comment-card',
@@ -24,6 +26,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   @Output() likeUnlikeData = new EventEmitter<any>()
 
   reportPending = false
+  showEmojiPicker = false
 
   data = {
     replyToggle: false,
@@ -32,21 +35,23 @@ export class CommentCardComponent implements OnInit, OnChanges {
   fetchedReplyData: any = []
   loogedInUserProfile: any = {}
   loading = false
+  isEditMode: boolean = false
+  editCommentData: any = ''
   flagSelectionList = [
-    "Sexual content",
-    "Violent or repulsive content",
-    "Hateful or abusive content",
-    "Harassment or bullying",
-    "Harmful or dangerous acts",
-    "Misinformation",
-    "Child abuse",
-    "Promotes terrorism",
-    "Spam or misleading",
-    "Others"
+    // "Sexual content",
+    // "Violent or repulsive content",
+    // "Hateful or abusive content",
+    // "Harassment or bullying",
+    // "Harmful or dangerous acts",
+    // "Misinformation",
+    // "Child abuse",
+    // "Promotes terrorism",
+    // "Spam or misleading",
+    // "Others"
   ]
 
   constructor(
-    private discussV2Svc: DiscussionV2Service,
+    public discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
     private _snackBar: MatSnackBar,
     private ref: ChangeDetectorRef,
@@ -56,6 +61,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData]
+
   }
 
   ngOnChanges(_changes: SimpleChanges): void {
@@ -66,6 +72,13 @@ export class CommentCardComponent implements OnInit, OnChanges {
 
   get getHierarchyPath() {
     return [...this.hierarchyPath, this.comment.commentId]
+  }
+
+  get getParentHierarchyPath() {
+    // debugger
+
+    return [...this.hierarchyPath, this.comment.commentId]
+
   }
 
   newComment(event: any) {
@@ -101,26 +114,31 @@ export class CommentCardComponent implements OnInit, OnChanges {
         this.loading = false
       }
     },
-                                                                          () => {
-      this.loading = false
-    })
+      () => {
+        this.loading = false
+      })
   }
 
-  reportComment() {
+  reportComment(flagDetails: any) {
     this.reportPending = true
-    this.discussV2Svc.reportComment(this.comment.commentId).subscribe(res => {
-        if (res && res.responseCode === 'OK') {
+    let requestData: any = {
+      "commentId": this.comment.commentId
+    }
+    requestData = { ...requestData, ...flagDetails }
+
+    this.discussV2Svc.reportComment(requestData).subscribe(res => {
+      if (res && res.responseCode === 'OK') {
         this.loading = false
-        }
-        this.reportPending = false
-        this.comment = res.result
-        this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
-    },
-                                                                      () => {
-      this._snackBar.open(_.get(this.cardConfig, 'reportIcon.errorMsg') || 'Something went wrong! please try reporting again later.')
+      }
       this.reportPending = false
-      this.loading = false
-    })
+      this.comment = res.result
+      this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
+    },
+      () => {
+        this._snackBar.open(_.get(this.cardConfig, 'reportIcon.errorMsg') || 'Something went wrong! please try reporting again later.')
+        this.reportPending = false
+        this.loading = false
+      })
   }
 
   likeUnlikeComment(comment: any) {
@@ -159,16 +177,90 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   openFlagDialogue(comment: any) {
-    const confirmDialog = this.dialog.open(FlagDialogueComponent, {
-      width: '600px',
-      panelClass: 'flag-dialog',
-      backdropClass: 'flag-dialog-backdrop',
-      data: {comment,  flagSelectionList: this.flagSelectionList},
-    })
-    confirmDialog.afterClosed().subscribe((result: any) => {
-      if (result) {
+    this.getAllFlagList(comment)
+    // const confirmDialog = this.dialog.open(FlagDialogueComponent, {
+    //   width: '600px',
+    //   panelClass: 'flag-dialog',
+    //   backdropClass: 'flag-dialog-backdrop',
+    //   data: { comment, flagSelectionList: this.flagSelectionList },
+    // })
+    // confirmDialog.afterClosed().subscribe((result: any) => {
+    //   if (result) {
+    //   }
+    // })
+  }
+
+  getAllFlagList(comment: any) {
+    this.discussV2Svc.fetchAllFlags().subscribe((res: any) => {
+      if (res && res.result
+        && res.result.response
+        && res.result.response.value
+        && res.result.response.value.length) {
+        this.flagSelectionList = res.result.response.value
+        const confirmDialog = this.dialog.open(FlagDialogueComponent, {
+          width: '600px',
+          panelClass: 'flag-dialog',
+          backdropClass: 'flag-dialog-backdrop',
+          data: { comment, flagSelectionList: this.flagSelectionList },
+        })
+        confirmDialog.afterClosed().subscribe((result: any) => {
+          if (result) {
+            this.reportComment(result)
+          }
+        })
       }
     })
   }
+  openDeleteDialogue(comment: any) {
+    const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
+      width: '600px',
+      panelClass: 'flag-dialog',
+      backdropClass: 'flag-dialog-backdrop',
+      data: {
+        comment,
+        flagSelectionList: this.flagSelectionList
+      },
+    })
+    confirmDialog.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.deleteCommentMethod(comment)
+      }
+    })
 
+  }
+  deleteCommentMethod(comment: any) {
+    this.discussV2Svc.deleteComment(comment.commentId, this.discussV2Svc.entityType, this.discussV2Svc.entityId, this.discussV2Svc.workflow).subscribe((_res: any) => {
+      comment.status = 'inactive'
+    })
+  }
+
+  toggelEdit(commentData:any) {
+    this.editCommentData = commentData
+    this.isEditMode = !this.isEditMode
+  }
+
+  toggleEmojiPicker() {
+    this.showEmojiPicker = !this.showEmojiPicker
+  }
+  onFocus() {
+    this.showEmojiPicker = false
+  }
+  addEmoji(event: any) {
+    const text = `${this.editCommentData.comment}${event.emoji.native}`
+    this.editCommentData['comment'] = text
+  }
+
+  updateComment(){
+    let requestData = {
+      "commentTreeId": this.discussV2Svc.commentTreeId,
+      "commentId": this.comment.commentId,
+      "commentData": this.editCommentData
+    }
+    this.discussV2Svc.updateComment(requestData).subscribe((_res: any)=> {
+      this.isEditMode = false
+      this._snackBar.open('Comment Updated successfully.')
+    },()=>{
+      this._snackBar.open('Comment Updated failed.')
+    })
+  }
 }

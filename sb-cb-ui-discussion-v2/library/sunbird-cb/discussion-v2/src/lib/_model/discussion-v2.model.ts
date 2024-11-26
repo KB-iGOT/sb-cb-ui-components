@@ -27,7 +27,8 @@ export namespace NsDiscussionV2 {
         postBtn: {
             text: string
         },
-        styles: any
+        styles: any,
+
     }
 
     export interface ICommentCardActionsObj {
@@ -37,15 +38,15 @@ export namespace NsDiscussionV2 {
     }
 
     export interface ICommentCardActions {
-       like?: ICommentCardActionsObj,
-       comments?: ICommentCardActionsObj,
-       avatarPhoto?: {
-        show: boolean,
-        size: string,
-        photoUrl: string,
-        name: string,
-        color: string
-    },
+        like?: ICommentCardActionsObj,
+        comments?: ICommentCardActionsObj,
+        avatarPhoto?: {
+            show: boolean,
+            size: string,
+            photoUrl: string,
+            name: string,
+            color: string
+        },
     }
 
     export interface ICommentCardConfig {
@@ -68,10 +69,12 @@ export namespace NsDiscussionV2 {
         noCommentsSection?: {
             text: string
         },
+        newCommentReply?: INewCommentConfig
     }
 
     export interface ICommentWidgetData {
         newCommentSection: INewCommentConfig,
-        commentsList: ICommentCardConfig
+        commentsList: ICommentCardConfig,
+        enrolledContent?: boolean
     }
 }
