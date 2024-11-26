@@ -1,11 +1,9 @@
-@use '@sunbird-cb/design-system/src/styles/ws-common';
-@use '@sunbird-cb/design-system/src/styles/ws-vars';
-@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
-
+@use "@sunbird-cb/design-system/src/styles/ws-common";
+@use "@sunbird-cb/design-system/src/styles/ws-vars";
+@use "@sunbird-cb/design-system/src/styles/ws-mixins" as *;
 
 .min-wid {
-  min-width: 240px;
-
+  min-width: 263px;
 }
 
 .outline-1 {
@@ -17,7 +15,8 @@
 }
 
 .img {
-  width: 184px;
+  width: 136px;
+  border: 1px solid #00000029;
   // height: 74px;
 }
 
@@ -31,7 +30,7 @@
 
   /* width */
   &::-webkit-scrollbar {
-    width: 5px;
+    width: 2px;
   }
 
   /* Track */
@@ -48,5 +47,43 @@
   /* Handle on hover */
   &::-webkit-scrollbar-thumb:hover {
     background: #555;
+  }
+}
+
+:host ::ng-deep {
+  .mat-expansion-panel {
+    --mat-expansion-header-expanded-state-height: 48px;
+    background-color: inherit !important;
+    border-radius: 0 !important;
+
+    .mat-list-item-content {
+      padding: 0 16px 0 32px !important;
+    }
+  }
+  .mat-expansion-panel:not([class*="mat-elevation-z"]) {
+    box-shadow: none !important;
+  }
+
+  .menu-text,
+  .mat-expansion-panel-header-title {
+    font-family: Lato;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16.8px;
+  }
+  .mat-expansion-panel-body {
+    background-color: #fff;
+    padding: 0px !important;
+    .mat-list-base {
+      padding-top: 0 !important ;
+    }
+  }
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description,
+  .mat-content.mat-content-hide-toggle {
+    margin-right: 0 !important;
+  }
+  .mat-expansion-panel-header-description {
+    justify-content: flex-end;
   }
 }
