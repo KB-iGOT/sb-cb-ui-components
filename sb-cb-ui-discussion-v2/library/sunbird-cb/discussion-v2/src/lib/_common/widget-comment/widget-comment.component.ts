@@ -208,7 +208,11 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
 
   refreshComments(_event: any) {
     this.commentListOffSet = 0
-    this.fetchInitialComments_v2(_event.response.commentTree.commentTreeId)
+    if(_event.response 
+      && _event.response.commentTree 
+      && _event.response.commentTree.commentTreeId) {
+      this.fetchInitialComments_v2(_event.response.commentTree.commentTreeId)
+    }
   }
 
   updateRepliesData(_event: any) {
