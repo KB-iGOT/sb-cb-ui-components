@@ -1,93 +1,133 @@
-<div class="topLevel-card" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
-'reply-card mb-3' : cardType=== 'reply', 
+<div class="topLevel-card" *ngIf="comment.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
+'reply-card mb-3' : cardType=== 'reply',
 'suspended': comment && comment.status === 'suspended'}">
     <div class="flex user-info">
         <div>
             <div class="mr-4">
-                <d-v2-avatar-photo
-                    [size]="'ml'"
-                    [name]="comment?.commentData?.commentSource?.userName"
-                    [photoUrl]="comment?.commentData?.commentSource?.userPic"
-                    [color]="
-                        comment?.commentData?.commentSource?.userName === loogedInUserProfile?.firstName ? 
+                <d-v2-avatar-photo [size]="'ml'" [name]="comment?.commentData?.commentSource?.userName"
+                    [photoUrl]="comment?.commentData?.commentSource?.userPic" [color]="
+                        comment?.commentData?.commentSource?.userName === loogedInUserProfile?.firstName ?
                         cardConfig?.actions?.avatarPhoto?.color || '#006400' : ''
                     ">
                 </d-v2-avatar-photo>
             </div>
         </div>
+
         <div class="flex flex-1 flex-col">
             <div class="flex items-center">
                 <span class="mat-body-1 bold mr-1">{{comment?.commentData?.commentSource?.userName}} </span>
-                <mat-icon class="icon verified mr-1" i18n-aria-label aria-label="verified">check_circle</mat-icon>
+                <mat-icon class="icon verified mr-1"
+                    *ngIf="comment?.commentData?.commentSource?.profileStatus?.toLowerCase() === 'verified'"
+                    i18n-aria-label aria-label="verified">check_circle</mat-icon>
                 <div class="source-tag text-center">
                     Author
                 </div>
             </div>
             <div class="ws-mat-black60-text mat-body-2">
-                Tech Hiring Specialist 
+                {{comment?.commentData?.commentSource?.designation}}
             </div>
         </div>
-        <div *ngIf="cardConfig?.reportIcon?.show && !(comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId)">
+        <div
+            *ngIf="cardConfig?.reportIcon?.show && !(comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId)">
             <!-- With tooltip -->
-            <ng-container *ngIf="cardConfig?.reportIcon?.showToolTip">
-                <button [disabled]="reportPending" mat-icon-button [matTooltip]="cardConfig?.reportIcon?.toolTipText" [matTooltipClass]="'reportComment'">
-                    <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label 
-                                aria-label="Report" (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
+            <!-- <ng-container *ngIf="cardConfig?.reportIcon?.showToolTip">
+                <button [disabled]="reportPending" mat-icon-button [matTooltip]="cardConfig?.reportIcon?.toolTipText"
+                    [matTooltipClass]="'reportComment'">
+                    <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label aria-label="Report"
+                        (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
                 </button>
-            </ng-container>
+            </ng-container> -->
 
             <!-- Without tooltip -->
-            <ng-container *ngIf="!cardConfig?.reportIcon?.showToolTip">
+            <!-- <ng-container *ngIf="!cardConfig?.reportIcon?.showToolTip">
                 <button [disabled]="reportPending" mat-icon-button>
-                    <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label 
-                                aria-label="Report" (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
+                    <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label aria-label="Report"
+                        (click)="reportComment()">{{cardConfig?.reportIcon?.icon}}</mat-icon>
                 </button>
-            </ng-container>
+            </ng-container> -->
         </div>
         <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
         <div>
             <mat-icon class="icon" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
-            aria-label="more">more_vertical</mat-icon>
+                aria-label="more">more_vertical</mat-icon>
         </div>
     </div>
-    <div class="comment mb-4 mt-2 ">
-        <div class="comment-txt {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}" [innerHTML]="comment?.commentData?.comment">
+    <div class="comment mb-4 mt-2 " *ngIf="!isEditMode">
+        <div class="comment-txt {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}"
+            [innerHTML]="comment?.commentData?.comment">
         </div>
         <div class="more-or-less" *ngIf="comment?.commentData?.comment.length > 152">
-            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)" *ngIf="!comment?.commentData?.expanded">View more</div>
-            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)" *ngIf="comment?.commentData?.expanded">View less</div>
+            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)"
+                *ngIf="!comment?.commentData?.expanded">View more</div>
+            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)"
+                *ngIf="comment?.commentData?.expanded">View less</div>
         </div>
     </div>
-                    
+    <div class="mt-4"  *ngIf="isEditMode">
+        <div class="relative w-full flex ">
+            <input #comment name="comment" class="flex-1 discuss-input " [(ngModel)]="editCommentData.comment"   i18n-placeholder
+            [placeholder]="'Add a comment'" (focus)="onFocus()" >
+            <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+            <br />
+            <emoji-mart 
+            class="emoji-mart absolute"
+            set="google"
+            *ngIf="showEmojiPicker"
+            (emojiSelect)="addEmoji($event)"
+            title="Pick your emoji…"
+            ></emoji-mart>
+        </div>
+        <div class="edit-options flex items-center justify-end">
+            <mat-icon class="icon warning" aria-hidden="false" i18n-aria-label 
+            aria-label="more">close</mat-icon>
+            <mat-icon class="icon success" aria-hidden="false" i18n-aria-label (click)="updateComment()"
+            aria-label="more">check_small</mat-icon>
+        </div>
+    </div>
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
             <ng-container *ngIf="cardConfig?.actions?.like?.show ">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="likeUnlikeComment(comment)">
-                        <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
-                            aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
-                            <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
-                                {{(comment?.commentData?.like && comment?.commentData?.like) || 0}}
-                            </span>
+                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                        aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
+                    <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
+                        {{(comment?.commentData?.like && comment?.commentData?.like) || 0}}
+                    </span>
                 </div>
             </ng-container>
-            <ng-container *ngIf="cardConfig?.actions?.comments?.show">
+            <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType !== 'reply'">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="expandReplyComment()">
                     <mat-icon *ngIf="!data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
                         aria-label="Dropdown-open">arrow_drop_down</mat-icon>
                     <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
                         aria-label="Dropdown-close">arrow_drop_up</mat-icon>
                     <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
-                            aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
+                        aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
-                         {{replyDataCopy && replyDataCopy?.length > 1 ? 'Replies' :
+                        {{replyDataCopy && replyDataCopy?.length > 1 ? 'Replies' :
+                        'Reply'}} ({{(replyDataCopy && replyDataCopy?.length) || 0}})
+                    </span>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType === 'reply'">
+                <div class="mr-4 cursor-pointer circleBtn" (click)="data.replyToggle = !data.replyToggle">
+                    <mat-icon *ngIf="!data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
+                        aria-label="Dropdown-open">arrow_drop_down</mat-icon>
+                    <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
+                        aria-label="Dropdown-close">arrow_drop_up</mat-icon>
+                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                        aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
+                    <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
+                        {{replyDataCopy && replyDataCopy?.length > 1 ? 'Replies' :
                         'Reply'}} ({{(replyDataCopy && replyDataCopy?.length) || 0}})
                     </span>
                 </div>
             </ng-container>
         </div>
     </div>
-    <ng-container *ngIf="cardConfig?.repliesSection?.show">
-        <div *ngIf="data.replyToggle" class="mt-4 repliesSection" [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
+    <ng-container *ngIf="cardConfig?.repliesSection?.show && cardType !== 'reply'">
+        <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
+            [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
                 <d-v2-new-comment [config]="cardConfig?.repliesSection?.newCommentReply"
                     [hierarchyPath]="getHierarchyPath" (newComment)="newComment($event)">
@@ -97,8 +137,8 @@
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
-                            [cardConfig]="cardConfig?.repliesSection?.replyCardConfig"
-                            [comment]="reply" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
+                            [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply"
+                            (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </ng-container>
                 </ng-container>
             </ng-container>
@@ -106,6 +146,16 @@
             <ng-container *ngIf="loading">
                 <ng-container [ngTemplateOutlet]="skeletonLoader"></ng-container>
             </ng-container>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="cardType === 'reply'">
+        <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
+            [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
+            <div class="mb-4">
+                <d-v2-new-comment [config]="cardConfig?.newCommentReply" [hierarchyPath]="getParentHierarchyPath"
+                    (newComment)="newComment($event)">
+                </d-v2-new-comment>
+            </div>
         </div>
     </ng-container>
 </div>
@@ -121,24 +171,27 @@
 <ng-template #skeletonLoader>
     <div class="skeleton-loader mb-4">
         <div class="flex gap-4 items-center p-4 rounded bg-white">
-            <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'" [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
-            <d-v2-widget-skeleton-loader [width]="'545px'" [height]="'43px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
-            <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'" [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+            <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'"
+                [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
+            <d-v2-widget-skeleton-loader [width]="'545px'" [height]="'43px'"
+                [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+            <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'"
+                [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
         </div>
     </div>
 </ng-template>
 
 <mat-menu #cardMenu="matMenu" xPosition="after">
-    <button mat-menu-item (click)="openFlagDialogue(comment)">
-      <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
-      <span>Flag</span>
+    <button mat-menu-item (click)="openFlagDialogue(comment)"  *ngIf="comment?.commentData?.commentSource?.userId !== loogedInUserProfile?.userId">
+        <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
+        <span>Flag</span>
     </button>
-    <button mat-menu-item [disabled]="true">
-      <mat-icon [ngStyle]="{'color': '#1B4CA1'}">edit</mat-icon>
-      <span>Edit</span>
+    <button mat-menu-item  (click)="toggelEdit(comment?.commentData)" *ngIf="comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId">
+        <mat-icon [ngStyle]="{'color': '#1B4CA1'}">edit</mat-icon>
+        <span>Edit</span>
     </button>
-    <button mat-menu-item>
-      <mat-icon [ngStyle]="{'color': '#FF8268'}">delete</mat-icon>
-      <span>Delete</span>
+    <button mat-menu-item (click)="openDeleteDialogue(comment)"  *ngIf="comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId">
+        <mat-icon [ngStyle]="{'color': '#FF8268'}">delete</mat-icon>
+        <span>Delete</span>
     </button>
 </mat-menu>

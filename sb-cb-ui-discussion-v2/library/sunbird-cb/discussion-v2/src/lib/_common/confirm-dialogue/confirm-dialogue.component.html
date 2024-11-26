@@ -1,0 +1,31 @@
+<mat-card class=" px-6 py-4">
+    <button mat-icon-button class="close-button" [mat-dialog-close]="false">
+        <mat-icon class="close-icon">close</mat-icon>
+    </button>
+    <mat-card-title>
+        <div class="flex">
+            <h1 class="mat-heading flex items-center">
+                <mat-icon class="flag-icon mr-2" color="#D13924">comment</mat-icon>
+                Delete
+            </h1>
+        </div>
+        <div class="divider mb-4"></div>
+    </mat-card-title>
+    <mat-card-content class="no-padding">
+        <section>
+            <h2 class="mat-heading">Are you sure want to delete comment?</h2>
+            <p class="mat-body-1"></p>
+        </section>
+
+    </mat-card-content>
+    <mat-card-actions class="flex flex-row-reverse gap-4">
+        <button mat-flat-button color="secondary" (click)="cancel()" class="secondary-button custom-rounded"
+            [disabled]="false">
+            <span class="">Cancel</span>
+        </button>
+        <button mat-flat-button color="secondary" (click)="submit()" class="primary-button custom-rounded"
+            [disabled]="false">
+            <span class="">Confirm</span>
+        </button>
+    </mat-card-actions>
+</mat-card>

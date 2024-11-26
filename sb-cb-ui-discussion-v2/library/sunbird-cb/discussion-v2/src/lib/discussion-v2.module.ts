@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { DiscussionV2Component } from './discussion-v2.component'
 import { NewCommentComponent } from './_common/new-comment/new-comment.component'
@@ -14,13 +14,14 @@ import { DiscussionV2Service } from './_services/discussion-v2.service'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
-import {MatMenuModule} from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu'
 import { FlagDialogueComponent } from './_common/flag-dialogue/flag-dialogue.component'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
-import { MatCardModule }from '@angular/material/card'
+import { MatCardModule } from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PickerModule } from '@ctrl/ngx-emoji-mart'
+import { ConfirmDialogueComponent } from './_common/confirm-dialogue/confirm-dialogue.component'
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart'
     CommentCardComponent,
     WidgetCommentComponent,
     AvatarPhotoComponent,
-    FlagDialogueComponent
+    FlagDialogueComponent,
+    ConfirmDialogueComponent
   ],
   imports: [
     CommonModule,
@@ -59,5 +61,6 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart'
     WidgetCommentComponent,
     PickerModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DiscussionV2Module { }

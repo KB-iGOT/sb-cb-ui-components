@@ -1,5 +1,5 @@
 <mat-card class="no-shadow px-6 py-4">
-    <button mat-icon-button class="close-button" [mat-dialog-close]="true">
+    <button mat-icon-button class="close-button" [mat-dialog-close]="false">
         <mat-icon class="close-icon">close</mat-icon>
     </button>
     <mat-card-title>
@@ -14,28 +14,47 @@
     <mat-card-content class="no-padding">
         <section>
             <h2 class="mat-heading">What happened?</h2>
-            <p class="mat-body-1">We'll check for all Community Guidelines, so don't worry about making the perfect choice.</p>
+            <p class="mat-body-1">We'll check for all Community Guidelines, so don't worry about making the perfect
+                choice.</p>
         </section>
         <section class="flag-selection-list flex flex-col gap-2">
             <ng-container *ngFor="let item of data?.flagSelectionList">
-                <mat-checkbox class="example-margin">{{item}}</mat-checkbox>
+                <ng-container *ngIf="item?.toLowerCase() !== 'others';else othersTemplate">
+                    <ng-container *ngIf="!(selectedFlags?.includes('others') || selectedFlags?.includes('Others') )">
+                        <mat-checkbox (change)="handleSelectedFlags($event, item)" [checked]="selectedFlags?.includes(item)"
+                        class="example-margin">{{item}}</mat-checkbox>
+                    </ng-container>
+                </ng-container>
+                <ng-template #othersTemplate>
+                    <mat-checkbox (change)="handleSelectedFlags($event, item)" #othersCheck
+                        class="example-margin">{{item}}</mat-checkbox>
+                    <ng-container *ngIf="othersCheck && othersCheck?.checked">
+                        <textarea matInput [(ngModel)]="othersTextData" [cdkTextareaAutosize] [cdkAutosizeMaxRows]="10"
+                            [cdkAutosizeMinRows]="3" #othersTextarea class="custom-textarea"
+                            placeholder="Tell us what happend?" i18n-placeholder maxlength="200"></textarea>
+                        <div class="w-100 mt-1 ws-mat-black60-text mat-body-2 text-right">
+                            <span id="current">{{othersTextarea.value.length}}/ 200</span>
+                        </div>
+                    </ng-container>
+                </ng-template>
             </ng-container>
             <!-- <ng-container *ngIf="config?.otherOption"> -->
-            <ng-container>
+            <!-- <ng-container>
                 <mat-checkbox #othersCheck class="example-margin">Others</mat-checkbox>
-                <ng-container *ngIf="othersCheck.checked">
+                <ng-container *ngIf="othersCheck && othersCheck?.checked">
                     <textarea matInput [cdkTextareaAutosize] [cdkAutosizeMaxRows]="10" [cdkAutosizeMinRows]="3"
-                        #othersTextarea class="custom-textarea" placeholder="Tell us what happend?" i18n-placeholder maxlength="200"></textarea>
+                        #othersTextarea class="custom-textarea" placeholder="Tell us what happend?" i18n-placeholder
+                        maxlength="200"></textarea>
                     <div class="w-100 mt-1 ws-mat-black60-text mat-body-2 text-right">
                         <span id="current">{{othersTextarea.value.length}}/ 200</span>
                     </div>
                 </ng-container>
-            </ng-container>
+            </ng-container> -->
         </section>
     </mat-card-content>
     <mat-card-actions class="flex flex-row-reverse gap-4">
-        <button mat-flat-button color="secondary" class="primary-button custom-rounded"
-        [disabled]="false">
+        <button mat-flat-button color="secondary" (click)="submitFlag()" class="primary-button custom-rounded"
+            [disabled]="false">
             <span class="">Submit</span>
         </button>
     </mat-card-actions>

@@ -22,7 +22,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentsLength = 0
   isReversed = false
   constructor(
-    private discussV2Svc: DiscussionV2Service,  private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
+    private discussV2Svc: DiscussionV2Service, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
@@ -36,12 +36,17 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.entityId = this.widgetData.newCommentSection.commentTreeData.entityId || ''
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
+    this.discussV2Svc.entityId = this.entityId
+    this.discussV2Svc.entityType = entityType
+    this.discussV2Svc.workflow = workflow
     this.discussV2Svc.fetchAllComment(entityType, this.entityId, workflow).subscribe(res => {
       // tslint:disable-next-line: no-console
       console.log('fetchAllComment Response', res)
       this.loading = false
       if (res && res.commentCount) {
         this.commentData = res
+        this.discussV2Svc.commentTreeId =''
+        this.discussV2Svc.commentTreeId = this.commentData.commentTree.commentTreeId
         this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
           // tslint:disable-next-line:max-line-length
@@ -52,7 +57,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       if (res && res.code === 'Not Found' || !res.commentCount) {
         this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
       }
-    },                                                                               (err: any) => {
+    }, (err: any) => {
       this.loading = false
       // tslint:disable-next-line: no-console
       console.error('Error in fetching all comments', err)
@@ -65,6 +70,9 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
 
+    this.discussV2Svc.entityId = this.entityId
+    this.discussV2Svc.entityType = entityType
+    this.discussV2Svc.workflow = workflow
     const payload = {
       entityType,
       workflow,
@@ -94,7 +102,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       if (res && res.code === 'Not Found' || !res.result.commentCount) {
         this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
       }
-    },                                                      (err: any) => {
+    }, (err: any) => {
       this.loading = false
       // tslint:disable-next-line: no-console
       console.error('Error in fetching all comments', err)
@@ -107,6 +115,9 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
 
+    this.discussV2Svc.entityId = this.entityId
+    this.discussV2Svc.entityType = entityType
+    this.discussV2Svc.workflow = workflow
     const payload = {
       entityType,
       workflow,
@@ -117,50 +128,50 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     }
 
     this.discussV2Svc.fetchAllComment_V2(payload).subscribe(res => {
-        if (res && res.result.commentCount) {
-          const newComments = res.result.comments
+      if (res && res.result.commentCount) {
+        const newComments = res.result.comments
 
-          if (!this.commentData) {
-            this.commentData = res.result
-          } else {
-            const existingCommentIds = this.commentData.comments.map(
-              (comment: any) => comment.commentId
-            )
+        if (!this.commentData) {
+          this.commentData = res.result
+        } else {
+          const existingCommentIds = this.commentData.comments.map(
+            (comment: any) => comment.commentId
+          )
 
-            const filteredNewComments = newComments.filter(
-              (comment: any) => !existingCommentIds.includes(comment.commentId)
-            )
+          const filteredNewComments = newComments.filter(
+            (comment: any) => !existingCommentIds.includes(comment.commentId)
+          )
 
-            this.commentData.comments.push(...filteredNewComments)
-          }
+          this.commentData.comments.push(...filteredNewComments)
+        }
 
-          if (this.commentListOffSet === 0 && !this.isReversed) {
-            this.commentData.commentTree.commentTreeData.comments.reverse()
-            this.isReversed = true
-          }
+        if (this.commentListOffSet === 0 && !this.isReversed) {
+          this.commentData.commentTree.commentTreeData.comments.reverse()
+          this.isReversed = true
+        }
 
-          this.widgetData.newCommentSection.commentTreeData.commentTreeId =
+        this.widgetData.newCommentSection.commentTreeData.commentTreeId =
+          this.commentData.commentTree.commentTreeId
+
+        if (
+          this.widgetData.commentsList.repliesSection &&
+          this.widgetData.commentsList.repliesSection.newCommentReply
+        ) {
+          this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId =
             this.commentData.commentTree.commentTreeId
-
-          if (
-            this.widgetData.commentsList.repliesSection &&
-            this.widgetData.commentsList.repliesSection.newCommentReply
-          ) {
-            this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId =
-              this.commentData.commentTree.commentTreeId
-          }
-
-          this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
         }
 
-        if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
-          this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
-        }
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
+      }
 
-        this.loadingMore = false
+      if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+      }
 
-      },
-                                                            () => {
+      this.loadingMore = false
+
+    },
+      () => {
         this.loadingMore = false
 
       }
@@ -171,7 +182,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     let replies = []
     if (comment && comment.children) {
       // replies =  comment.children.map((child: any) => this.commentData.comments.find((c: any) => c.commentId === child.commentId))
-      replies =  comment.children.map((ele: any) => ele.commentId)
+      replies = comment.children.map((ele: any) => ele.commentId)
     }
     return replies
   }
@@ -191,6 +202,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   }
 
   get getHierarchyPath() {
+    this.discussV2Svc.enrolledContent = this.widgetData.enrolledContent
     return []
   }
 

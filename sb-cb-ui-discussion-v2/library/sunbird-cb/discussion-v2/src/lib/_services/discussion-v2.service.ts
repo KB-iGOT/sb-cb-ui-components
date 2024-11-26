@@ -14,6 +14,10 @@ const API_END_POINTS = {
   CHCECK_IF_LIKED_UNLIKED: (commentId: string, userId: string) =>
     `/apis/proxies/v8/comment/v1/like/read?commentId=${commentId}&userId=${userId}`,
   REPORT_COMMENT: `/apis/proxies/v8/comment/report`,
+  FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
+  UPDATE_COMMENT: `/apis/proxies/v8/comment/v1/update`,
+  DELETE_COMMENT: (commentId: string, entityType: string, entityId: string, workflow: string) =>
+    `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`
 }
 
 @Injectable({
@@ -21,7 +25,11 @@ const API_END_POINTS = {
 })
 export class DiscussionV2Service {
   baseUrl = this.configSvc.sitePath
-
+  enrolledContent: boolean = false
+  entityId: string = ''
+  entityType: string = ''
+  workflow: string = ''
+  commentTreeId: string =''
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService
@@ -29,6 +37,10 @@ export class DiscussionV2Service {
 
   fetchAllComment(entityType: string, entityId: string, workflow: string): Observable<any> {
     return this.http.get<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS(entityType, entityId, workflow)}`)
+  }
+
+  fetchAllFlags(): Observable<any> {
+    return this.http.get<any>(`${API_END_POINTS.FLAG_LIST}`)
   }
 
   fetchAllComment_V2(payload: any): Observable<any> {
@@ -43,8 +55,8 @@ export class DiscussionV2Service {
     return this.http.post(API_END_POINTS.ADD_NEW_COMMENT, req)
   }
 
-  reportComment(commentId: string) {
-    return this.http.post<any>(`${API_END_POINTS.REPORT_COMMENT}`, { commentId })
+  reportComment(requestData: any) {
+    return this.http.post<any>(`${API_END_POINTS.REPORT_COMMENT}`, requestData)
   }
 
   getListOfCommentsById(payload: string[]): Observable<any> {
@@ -59,5 +71,13 @@ export class DiscussionV2Service {
   checkIfUserlikedUnlikedComment(commentId: string, userId: string): Observable<any> {
     return this.http.get<any>(API_END_POINTS.CHCECK_IF_LIKED_UNLIKED(commentId, userId))
 
+  }
+
+  deleteComment(commentId: string, entityType: string, entityId: string, workflow: string): Observable<any> {
+    return this.http.delete<any>(`${API_END_POINTS.DELETE_COMMENT(commentId, entityType, entityId, workflow)}`)
+  }
+
+  updateComment(request: any) {
+    return this.http.put(API_END_POINTS.UPDATE_COMMENT, request)
   }
 }
