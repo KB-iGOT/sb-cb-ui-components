@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
-import { DiscussionV2Service } from '../../_services/discussion-v2.service'
+import { CommentsService } from '../../_services/comments.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 // tslint:disable-next-line
@@ -25,6 +25,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   @Output() newReply = new EventEmitter<any>()
   @Output() likeUnlikeData = new EventEmitter<any>()
 
+  @Input() tagUserData: any = {}
   reportPending = false
   showEmojiPicker = false
 
@@ -51,7 +52,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   ]
 
   constructor(
-    public discussV2Svc: DiscussionV2Service,
+    public commentSvc: CommentsService,
     private configSvc: ConfigurationsService,
     private _snackBar: MatSnackBar,
     private ref: ChangeDetectorRef,
@@ -75,20 +76,19 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   get getParentHierarchyPath() {
-    // debugger
-
-    return [...this.hierarchyPath, this.comment.commentId]
-
+    return [...this.hierarchyPath, this.comment.parentCommentId]
   }
 
   newComment(event: any) {
+    
     if (event.response && event.response.comment && event.response.comment.commentId) {
       this.loading = true
+      
       this.replyDataCopy.push(event.response.comment.commentId)
       this.replyDataCopy = this.replyDataCopy.slice()
       this.ref.markForCheck()
       this.getListOfReplies()
-      this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyData })
+      // this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
     }
   }
 
@@ -107,10 +107,18 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   getListOfReplies() {
-    this.discussV2Svc.getListOfCommentsById(this.replyDataCopy).subscribe(res => {
+    this.commentSvc.getListOfCommentsById(this.replyDataCopy).subscribe(res => {
+      console.log(this.comment)
+      
       if (res.result && res.result.comments.length) {
+        let taggedUsersList = res.result.taggedUsers
+        this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
         const reply = res.result.comments
-        this.fetchedReplyData = [...reply]
+        // parrent comment id is user for sencond level comments only
+        const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
+        this.fetchedReplyData = [...replayModified]
+        this.newReply.emit({ response: [], type: 'reply', replyData: this.fetchedReplyData })
+        
         this.loading = false
       }
     },
@@ -126,7 +134,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     }
     requestData = { ...requestData, ...flagDetails }
 
-    this.discussV2Svc.reportComment(requestData).subscribe(res => {
+    this.commentSvc.reportComment(requestData).subscribe(res => {
       if (res && res.responseCode === 'OK') {
         this.loading = false
       }
@@ -147,7 +155,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
 
   likeUnlikeEvent(event: any) {
 
-    this.discussV2Svc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
+    this.commentSvc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
       if (res.result && Object.keys(res.result).length > 0) {
         this.likeUnlikeCommentApi('unlike', event.commentId)
       } else {
@@ -163,7 +171,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
       commentId,
       userId: this.loogedInUserProfile.userId,
     }
-    this.discussV2Svc.likeUnlikeComment(payload).subscribe(res => {
+    this.commentSvc.likeUnlikeComment(payload).subscribe(res => {
       if (res.responseCode === 'OK') {
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
         const comment = this.fetchedReplyData.find((comm: any) => comm.commentId === commentId)
@@ -191,7 +199,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   getAllFlagList(comment: any) {
-    this.discussV2Svc.fetchAllFlags().subscribe((res: any) => {
+    this.commentSvc.fetchAllFlags().subscribe((res: any) => {
       if (res && res.result
         && res.result.response
         && res.result.response.value
@@ -229,7 +237,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
 
   }
   deleteCommentMethod(comment: any) {
-    this.discussV2Svc.deleteComment(comment.commentId, this.discussV2Svc.entityType, this.discussV2Svc.entityId, this.discussV2Svc.workflow).subscribe((_res: any) => {
+    this.commentSvc.deleteComment(comment.commentId, this.commentSvc.entityType, this.commentSvc.entityId, this.commentSvc.workflow).subscribe((_res: any) => {
       comment.status = 'inactive'
     })
   }
@@ -252,15 +260,21 @@ export class CommentCardComponent implements OnInit, OnChanges {
 
   updateComment(){
     let requestData = {
-      "commentTreeId": this.discussV2Svc.commentTreeId,
+      "commentTreeId": this.commentSvc.commentTreeId,
       "commentId": this.comment.commentId,
       "commentData": this.editCommentData
     }
-    this.discussV2Svc.updateComment(requestData).subscribe((_res: any)=> {
+    this.commentSvc.updateComment(requestData).subscribe((_res: any)=> {
       this.isEditMode = false
       this._snackBar.open('Comment Updated successfully.')
     },()=>{
       this._snackBar.open('Comment Updated failed.')
     })
+  }
+
+  updateRepliesData(eventData: any) {
+    
+    console.log(eventData)
+    return this.fetchedReplyData = [...eventData.replyData]
   }
 }
