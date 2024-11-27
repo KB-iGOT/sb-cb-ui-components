@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { UntypedFormControl } from '@angular/forms'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { DiscussionV2Service } from '../../_services/discussion-v2.service'
+import { CommentsService } from '../../_services/comments.service'
 
 @Component({
   selector: 'd-v2-new-comment',
@@ -12,6 +12,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service'
 export class NewCommentComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewCommentConfig
   @Input() hierarchyPath = []
+  @Input() taggedUsers = []
   @Output() newComment = new EventEmitter<any>()
   @Input() disableActions: boolean = false
 
@@ -22,7 +23,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
 
   constructor(
     private configSvc: ConfigurationsService,
-    public discussV2Svc: DiscussionV2Service
+    public commentSvc: CommentsService
   ) { }
 
   ngOnInit() {
@@ -31,17 +32,18 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   }
 
   submitComment() {
+    
     const req = this.createReq(this.searchControl.value, [])
     console.log(req, this.loggedInUserData)
     if (this.config.commentTreeData && this.config.commentTreeData.isFirstComment) {
-      this.discussV2Svc.addFirstComment(req).subscribe(res => {
+      this.commentSvc.addFirstComment(req).subscribe(res => {
         this.performSuccessEvents(res)
       }, (err: any) => {
         // tslint:disable-next-line: no-console
         console.error('Error in posting, please try again later!', err)
       })
     } else {
-      this.discussV2Svc.addNewComment(req).subscribe(res => {
+      this.commentSvc.addNewComment(req).subscribe(res => {
         this.performSuccessEvents(res)
       }, (err: any) => {
         // tslint:disable-next-line: no-console
@@ -83,8 +85,10 @@ export class NewCommentComponent implements OnInit, OnDestroy {
           designation: designation,
           userRole: 'public', // TODO: replace original roles array
         },
+        taggedUsers:this.taggedUsers
       }
     }
+
     if (this.config.commentTreeData && this.config.commentTreeData.isFirstComment) {
       commentTreeData = {
         entityType: this.config.commentTreeData.entityType,
@@ -92,7 +96,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
         workflow: this.config.commentTreeData.workflow,
       }
     } else {
-      commentTreeId = this.config.commentTreeData.commentTreeId
+      commentTreeId = this.config.commentTreeData.commentTreeId || this.commentSvc.commentTreeId
       hierarchyPath = this.hierarchyPath
     }
     return {
@@ -124,7 +128,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   }
 
   toggleDisable() {
-    if (this.discussV2Svc && this.discussV2Svc.enrolledContent) {
+    if (this.commentSvc && this.commentSvc.enrolledContent) {
       this.searchControl.enable()
     } else {
       this.searchControl.disable()

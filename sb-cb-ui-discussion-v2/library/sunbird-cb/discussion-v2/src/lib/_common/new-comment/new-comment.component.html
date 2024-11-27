@@ -34,7 +34,7 @@
                 <!-- </mat-form-field> -->
                 <button mat-flat-button color="secondary" class="primary-button custom-rounded"
                     (click)="submitComment()"
-                    [disabled]="(!comment.value || comment.value.length < 1 )||!discussV2Svc?.enrolledContent">
+                    [disabled]="(!comment.value || comment.value.length < 1 )||!commentSvc?.enrolledContent">
                     <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer" aria-hidden="false"
                         i18n-aria-label aria-label="Report">{{config?.postBtn?.icon || 'send'}}</mat-icon>
                     <span *ngIf="config?.postBtn?.text" class="ml-1">{{config?.postBtn?.text}}</span>

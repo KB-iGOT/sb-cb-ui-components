@@ -53,8 +53,13 @@
         </div>
     </div>
     <div class="comment mb-4 mt-2 " *ngIf="!isEditMode">
-        <div class="comment-txt {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}"
-            [innerHTML]="comment?.commentData?.comment">
+        <div class="flex">
+            <ng-container *ngFor="let tagUser of comment?.commentData?.taggedUsers">
+                <span class="mr-2 font-semibold ws-mat-default-text">Replying to {{tagUserData[tagUser]?.first_name}}</span>
+            </ng-container>
+            <div class="comment-txt {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}"
+                [innerHTML]="comment?.commentData?.comment">
+            </div>
         </div>
         <div class="more-or-less" *ngIf="comment?.commentData?.comment.length > 152">
             <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)"
@@ -129,7 +134,7 @@
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
-                <d-v2-new-comment [config]="cardConfig?.repliesSection?.newCommentReply"
+                <d-v2-new-comment [config]="cardConfig?.repliesSection?.newCommentReply"  [taggedUsers]="[comment?.commentData?.commentSource?.userId]"
                     [hierarchyPath]="getHierarchyPath" (newComment)="newComment($event)">
                 </d-v2-new-comment>
             </div>
@@ -137,7 +142,8 @@
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
-                            [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply"
+                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)" 
+                            [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply" [tagUserData]="tagUserData"
                             (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </ng-container>
                 </ng-container>
@@ -153,7 +159,7 @@
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
                 <d-v2-new-comment [config]="cardConfig?.newCommentReply" [hierarchyPath]="getParentHierarchyPath"
-                    (newComment)="newComment($event)">
+                    (newComment)="newComment($event)" [taggedUsers]="[comment?.commentData?.commentSource?.userId]">
                 </d-v2-new-comment>
             </div>
         </div>
