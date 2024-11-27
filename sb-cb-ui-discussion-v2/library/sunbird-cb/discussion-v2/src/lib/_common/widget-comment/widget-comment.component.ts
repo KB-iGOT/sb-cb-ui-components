@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
-import { DiscussionV2Service } from '../../_services/discussion-v2.service'
+import { CommentsService } from '../../_services/comments.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 
@@ -22,7 +22,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentsLength = 0
   isReversed = false
   constructor(
-    private discussV2Svc: DiscussionV2Service, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
+    private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
@@ -36,17 +36,17 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.entityId = this.widgetData.newCommentSection.commentTreeData.entityId || ''
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
-    this.discussV2Svc.entityId = this.entityId
-    this.discussV2Svc.entityType = entityType
-    this.discussV2Svc.workflow = workflow
-    this.discussV2Svc.fetchAllComment(entityType, this.entityId, workflow).subscribe(res => {
+    this.commentSvc.entityId = this.entityId
+    this.commentSvc.entityType = entityType
+    this.commentSvc.workflow = workflow
+    this.commentSvc.fetchAllComment(entityType, this.entityId, workflow).subscribe(res => {
       // tslint:disable-next-line: no-console
       console.log('fetchAllComment Response', res)
       this.loading = false
       if (res && res.commentCount) {
         this.commentData = res
-        this.discussV2Svc.commentTreeId =''
-        this.discussV2Svc.commentTreeId = this.commentData.commentTree.commentTreeId
+        this.commentSvc.commentTreeId =''
+        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
         this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
           // tslint:disable-next-line:max-line-length
@@ -70,9 +70,9 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
 
-    this.discussV2Svc.entityId = this.entityId
-    this.discussV2Svc.entityType = entityType
-    this.discussV2Svc.workflow = workflow
+    this.commentSvc.entityId = this.entityId
+    this.commentSvc.entityType = entityType
+    this.commentSvc.workflow = workflow
     const payload = {
       entityType,
       workflow,
@@ -83,7 +83,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       overrideCache: true,
     }
 
-    this.discussV2Svc.fetchAllComment_V2(payload).subscribe(res => {
+    this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
       // tslint:disable-next-line: no-console
       this.loading = false
       if (res && res.result.commentCount) {
@@ -92,6 +92,8 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
 
         this.commentData.commentTree.commentTreeData.comments.reverse()
 
+        this.commentSvc.commentTreeId =''
+        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
         this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
           // tslint:disable-next-line:max-line-length
@@ -115,9 +117,9 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
     const workflow = this.widgetData.newCommentSection.commentTreeData.workflow || ''
 
-    this.discussV2Svc.entityId = this.entityId
-    this.discussV2Svc.entityType = entityType
-    this.discussV2Svc.workflow = workflow
+    this.commentSvc.entityId = this.entityId
+    this.commentSvc.entityType = entityType
+    this.commentSvc.workflow = workflow
     const payload = {
       entityType,
       workflow,
@@ -127,7 +129,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       offset: this.commentListOffSet,
     }
 
-    this.discussV2Svc.fetchAllComment_V2(payload).subscribe(res => {
+    this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
       if (res && res.result.commentCount) {
         const newComments = res.result.comments
 
@@ -150,6 +152,8 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
           this.isReversed = true
         }
 
+        this.commentSvc.commentTreeId =''
+        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
         this.widgetData.newCommentSection.commentTreeData.commentTreeId =
           this.commentData.commentTree.commentTreeId
 
@@ -202,7 +206,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   }
 
   get getHierarchyPath() {
-    this.discussV2Svc.enrolledContent = this.widgetData.enrolledContent
+    this.commentSvc.enrolledContent = this.widgetData.enrolledContent
     return []
   }
 
@@ -221,7 +225,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
 
   likeUnlikeEvent(event: any) {
 
-    this.discussV2Svc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
+    this.commentSvc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
       if (res.result && Object.keys(res.result).length > 0) {
         this.likeUnlikeCommentApi('unlike', event.commentId)
       } else {
@@ -236,8 +240,9 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       commentId,
       flag,
       userId: this.loogedInUserProfile.userId,
+      courseId: this.commentSvc.entityId
     }
-    this.discussV2Svc.likeUnlikeComment(payload).subscribe(res => {
+    this.commentSvc.likeUnlikeComment(payload).subscribe(res => {
       if (res.responseCode === 'OK') {
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
         const comment = this.commentData.comments.find((comm: any) => comm.commentId === commentId)
