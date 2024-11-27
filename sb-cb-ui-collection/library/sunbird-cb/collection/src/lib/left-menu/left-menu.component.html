@@ -39,7 +39,7 @@
   </mat-nav-list> -->
 
   <mat-nav-list>
-    <ng-container *ngFor="let menuItem of widgetData.menus">
+    <ng-container *ngFor="let menuItem of widgetData.menus; let i = index;">
       <ng-container *ngIf="menuItem.subMenu && menuItem.subMenu.length > 0; else singleLink">
         <mat-expansion-panel *ngIf="menuItem.enabled && isAllowed(menuItem)" hideToggle [expanded]="false" #expansion>
           <mat-expansion-panel-header>
