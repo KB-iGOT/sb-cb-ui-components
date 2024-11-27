@@ -3,11 +3,20 @@
     <div class="course_widget portrait_widget flex  margin-bottom-xs" [ngClass]="{'retiredCards': widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage === 100,'margin-bottom-xl':!widgetData?.content?.primaryCategory}">
       <div class="flex flex-end flex-middle course_port" *ngIf="widgetData?.content?.primaryCategory">
         <mat-icon class="mat-icon main_icon  ws-mat-default-text margin-right-xs">video_library</mat-icon>
-        <sb-uic-display-content-type i18n-title title="Content Type" 
-          class="ws-mat-black60-text font-normal mat-caption " [displayContentType]="widgetData?.content?.primaryCategory==='Course Unit'
-          ?'Module'
-          :widgetData?.content?.primaryCategory">
-        </sb-uic-display-content-type>
+        <ng-container *ngIf="widgetData?.content?.courseCategory === 'Case Study'">
+          <sb-uic-display-content-type i18n-title title="Content Type"
+            class="ws-mat-black60-text font-normal mat-caption"
+            [displayContentType]="widgetData?.content?.courseCategory">
+          </sb-uic-display-content-type>
+        </ng-container>
+        <ng-container *ngIf="widgetData?.content?.courseCategory !== 'Case Study'">
+          <sb-uic-display-content-type i18n-title title="Content Type"
+            class="ws-mat-black60-text font-normal mat-caption"
+            [displayContentType]="widgetData?.content?.primaryCategory==='Course Unit'
+            ?'Module'
+            :widgetData?.content?.primaryCategory">
+          </sb-uic-display-content-type>
+        </ng-container>
       </div>
     </div>
     <div class="flex" [ngClass]="{'retiredCards': widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage === 100}">
@@ -93,7 +102,7 @@
         </div>
       </div>
     </ng-container>
-    <ng-container *ngIf="widgetData?.content?.completionPercentage === 100">
+    <ng-container *ngIf="widgetData?.content?.completionPercentage === 100 && widgetData?.content?.courseCategory !== 'Case Study'">
       <div class="flex flex-align-end progress-wrapper flex-end mt-1">
         <div class="progress-btn">
           <button class="resume-btn flex flex-middle flex-between view-btn" [ngClass]="{'disable-btn': downloadCertificateLoading || widgetData?.content?.issuedCertificates?.length === 0}" (click)="!downloadCertificateLoading && downloadCertificate(widgetData?.content);$event.stopPropagation()" 
