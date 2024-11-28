@@ -22,6 +22,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   @Input() comment!: any
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
+  @Input() userLikedComments: any = []
   @Output() newReply = new EventEmitter<any>()
   @Output() likeUnlikeData = new EventEmitter<any>()
 
@@ -38,6 +39,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   loading = false
   isEditMode: boolean = false
   editCommentData: any = ''
+  replayCommentsCount: any = 10
   flagSelectionList = [
     // "Sexual content",
     // "Violent or repulsive content",
@@ -83,7 +85,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     
     if (event.response && event.response.comment && event.response.comment.commentId) {
       this.loading = true
-      
+
       this.replyDataCopy.push(event.response.comment.commentId)
       this.replyDataCopy = this.replyDataCopy.slice()
       this.ref.markForCheck()
@@ -102,23 +104,25 @@ export class CommentCardComponent implements OnInit, OnChanges {
     this.data.replyToggle = !this.data.replyToggle
     if (this.data.replyToggle && this.replyData.length) {
       this.loading = true
+      this.replayCommentsCount = 10
       this.getListOfReplies()
     }
   }
 
   getListOfReplies() {
-    this.commentSvc.getListOfCommentsById(this.replyDataCopy).subscribe(res => {
-      console.log(this.comment)
-      
+
+    let reveseReplayDataCopy = [...this.replyDataCopy]
+    reveseReplayDataCopy.reverse()
+    let ids:any = reveseReplayDataCopy.slice(0,10)
+    this.commentSvc.getListOfCommentsById(ids).subscribe(res => {
       if (res.result && res.result.comments.length) {
         let taggedUsersList = res.result.taggedUsers
         this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
         const reply = res.result.comments
         // parrent comment id is user for sencond level comments only
         const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
-        this.fetchedReplyData = [...replayModified]
-        this.newReply.emit({ response: [], type: 'reply', replyData: this.fetchedReplyData })
-        
+        this.fetchedReplyData = [...replayModified,]
+        this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
         this.loading = false
       }
     },
@@ -154,14 +158,18 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   likeUnlikeEvent(event: any) {
-
-    this.commentSvc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
-      if (res.result && Object.keys(res.result).length > 0) {
-        this.likeUnlikeCommentApi('unlike', event.commentId)
-      } else {
-        this.likeUnlikeCommentApi('like', event.commentId)
-      }
-    })
+    // this.commentSvc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
+    //   if (res.result && Object.keys(res.result).length > 0) {
+    //     this.likeUnlikeCommentApi('unlike', event.commentId)
+    //   } else {
+    //     this.likeUnlikeCommentApi('like', event.commentId)
+    //   }
+    // })
+    if(this.userLikedComments.includes(event.commentId)) {
+      this.likeUnlikeCommentApi('dislike', event.commentId)
+    } else {
+      this.likeUnlikeCommentApi('like', event.commentId)
+    }
 
   }
 
@@ -170,6 +178,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
       flag,
       commentId,
       userId: this.loogedInUserProfile.userId,
+      courseId: this.commentSvc.entityId
     }
     this.commentSvc.likeUnlikeComment(payload).subscribe(res => {
       if (res.responseCode === 'OK') {
@@ -177,8 +186,11 @@ export class CommentCardComponent implements OnInit, OnChanges {
         const comment = this.fetchedReplyData.find((comm: any) => comm.commentId === commentId)
         if (flag === 'like') {
           comment.commentData.like = comment.commentData.like ? comment.commentData.like + 1 : 1
+          this.userLikedComments.push(commentId)
         } else {
           comment.commentData.like = comment.commentData.like - 1
+          const index = this.userLikedComments.findIndex((x: any) => x === commentId)
+          this.userLikedComments.splice(index, 1)
         }
       }
     })
@@ -243,8 +255,10 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   toggelEdit(commentData:any) {
-    this.editCommentData = commentData
-    this.isEditMode = !this.isEditMode
+    this.editCommentData = {}
+    this.editCommentData = {...commentData}
+    this.isEditMode = true
+    this.replayCommentsCount = this.replayCommentsCount + 10
   }
 
   toggleEmojiPicker() {
@@ -262,19 +276,59 @@ export class CommentCardComponent implements OnInit, OnChanges {
     let requestData = {
       "commentTreeId": this.commentSvc.commentTreeId,
       "commentId": this.comment.commentId,
-      "commentData": this.editCommentData
+      "commentData": {
+        "comment":this.editCommentData.comment,
+        "commentResolved":this.editCommentData.commentResolved,
+        "commentSource":this.editCommentData.commentSource,
+        "taggedUsers":this.editCommentData.taggedUsers
+      } 
     }
     this.commentSvc.updateComment(requestData).subscribe((_res: any)=> {
       this.isEditMode = false
+      this.comment['commentData'] = this.editCommentData
       this._snackBar.open('Comment Updated successfully.')
     },()=>{
       this._snackBar.open('Comment Updated failed.')
     })
   }
 
+  cancelComment() {
+    this.isEditMode = false
+    this.editCommentData
+  }
+
   updateRepliesData(eventData: any) {
-    
     console.log(eventData)
-    return this.fetchedReplyData = [...eventData.replyData]
+    this.replyDataCopy = eventData.replyDataCopy
+    this.fetchedReplyData = [...eventData.replyData]
+    return this.fetchedReplyData 
+  }
+  loadMoreComments() {
+    this.replayCommentsCount = this.replayCommentsCount + 10
+    this.loadMoreReplies()
+  }
+
+  loadMoreReplies() {
+    let start: number = this.replayCommentsCount - 10
+    let reveseReplayDataCopy = [...this.replyDataCopy]
+    reveseReplayDataCopy.reverse()
+    let ids:any = reveseReplayDataCopy.slice(start,this.replayCommentsCount)
+    debugger
+    this.commentSvc.getListOfCommentsById(ids).subscribe(res => {
+      if (res.result && res.result.comments.length) {
+        let taggedUsersList = res.result.taggedUsers
+        this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
+        const reply = res.result.comments
+        // parrent comment id is user for sencond level comments only
+        const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
+        this.fetchedReplyData = [...replayModified, ...this.fetchedReplyData]
+        this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
+        
+        this.loading = false
+      }
+    },
+      () => {
+        this.loading = false
+      })
   }
 }
