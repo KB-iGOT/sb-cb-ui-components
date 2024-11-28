@@ -12,7 +12,7 @@
                         <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType"
                             [cardConfig]="widgetData?.commentsList" [comment]="getComment(item)"
                             [replyData]="getReplies(item)" [hierarchyPath]="getHierarchyPath"
-                            (newReply)="updateRepliesData($event)"
+                            (newReply)="updateRepliesData($event)" [userLikedComments]="userLikedComments"
                             (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </div>
 

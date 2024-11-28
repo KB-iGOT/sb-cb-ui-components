@@ -21,6 +21,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentListOffSet = 0
   commentsLength = 0
   isReversed = false
+  userLikedComments: any = []
   constructor(
     private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
   ) { }
@@ -29,6 +30,15 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     // this.fetchInitialComments()
     this.loogedInUserProfile = this.configSvc.userProfile
     this.fetchInitialComments_v2()
+    this.getLikedComments()
+  }
+
+  getLikedComments() {
+    this.commentSvc.getAllLikedCommentIds(this.commentSvc.entityId).subscribe((res: any)=> {
+      if(res && res.result && res.result.commentId && res.result.commentId.length) {
+        this.userLikedComments = res.result.commentId
+      }
+    })
   }
 
   fetchInitialComments() {
@@ -41,7 +51,6 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.commentSvc.workflow = workflow
     this.commentSvc.fetchAllComment(entityType, this.entityId, workflow).subscribe(res => {
       // tslint:disable-next-line: no-console
-      console.log('fetchAllComment Response', res)
       this.loading = false
       if (res && res.commentCount) {
         this.commentData = res
@@ -89,7 +98,28 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       if (res && res.result.commentCount) {
         this.commentData = res.result
         this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
+        if(res && res.result && res.result.courseDetails){
 
+          res.result.courseDetails['curators'] = []
+          res.result.courseDetails['authors'] = []
+          if(res.result.courseDetails.creatorDetails) {
+            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+            let creatorIds: any = []
+            creatorDetails.forEach((ele: any) => {
+              creatorIds.push(ele.id)
+            });
+            res.result.courseDetails['authors'] = creatorIds
+          }
+          if(res.result.courseDetails.creatorContacts) {
+            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+            let creatorContactsIds: any = []
+            creatorContacts.forEach((ele: any) => {
+              creatorContactsIds.push(ele.id)
+            });
+            res.result.courseDetails['curators'] = creatorContactsIds
+          }
+          this.commentSvc.courseDetails = res.result.courseDetails
+        }
         this.commentData.commentTree.commentTreeData.comments.reverse()
 
         this.commentSvc.commentTreeId =''
@@ -132,6 +162,28 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
       if (res && res.result.commentCount) {
         const newComments = res.result.comments
+        if(res && res.result && res.result.courseDetails){
+
+          res.result.courseDetails['curators'] = []
+          res.result.courseDetails['authors'] = []
+          if(res.result.courseDetails.creatorDetails) {
+            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+            let creatorIds: any = []
+            creatorDetails.forEach((ele: any) => {
+              creatorIds.push(ele.id)
+            });
+            res.result.courseDetails['authors'] = creatorIds
+          }
+          if(res.result.courseDetails.creatorContacts) {
+            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+            let creatorContactsIds: any = []
+            creatorContacts.forEach((ele: any) => {
+              creatorContactsIds.push(ele.id)
+            });
+            res.result.courseDetails['curators'] = creatorContactsIds
+          }
+          this.commentSvc.courseDetails = res.result.courseDetails
+        }
 
         if (!this.commentData) {
           this.commentData = res.result
@@ -225,14 +277,18 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
 
   likeUnlikeEvent(event: any) {
 
-    this.commentSvc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
-      if (res.result && Object.keys(res.result).length > 0) {
-        this.likeUnlikeCommentApi('unlike', event.commentId)
-      } else {
-        this.likeUnlikeCommentApi('like', event.commentId)
-      }
-    })
-
+    // this.commentSvc.checkIfUserlikedUnlikedComment(event.commentId, event.commentId).subscribe(res => {
+    //   if (res.result && Object.keys(res.result).length > 0) {
+    //     this.likeUnlikeCommentApi('unlike', event.commentId)
+    //   } else {
+    //     this.likeUnlikeCommentApi('like', event.commentId)
+    //   }
+    // })
+    if(this.userLikedComments.includes(event.commentId)) {
+      this.likeUnlikeCommentApi('dislike', event.commentId)
+    } else {
+      this.likeUnlikeCommentApi('like', event.commentId)
+    }
   }
 
   likeUnlikeCommentApi(flag: string, commentId: string) {
@@ -248,8 +304,11 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
         const comment = this.commentData.comments.find((comm: any) => comm.commentId === commentId)
         if (flag === 'like') {
           comment.commentData.like = comment.commentData.like ? comment.commentData.like + 1 : 1
+          this.userLikedComments.push(commentId)
         } else {
           comment.commentData.like = comment.commentData.like - 1
+          const index = this.userLikedComments.findIndex((x: any) => x === commentId)
+          this.userLikedComments.splice(index, 1)
         }
       }
     })

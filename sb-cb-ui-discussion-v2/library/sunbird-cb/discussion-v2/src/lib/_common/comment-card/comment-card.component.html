@@ -19,8 +19,11 @@
                 <mat-icon class="icon verified mr-1"
                     *ngIf="comment?.commentData?.commentSource?.profileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
-                <div class="source-tag text-center">
-                    Author
+                <div class="source-tag text-center" *ngIf="commentSvc?.courseDetails?.authors?.includes(comment?.commentData?.commentSource?.userId)">
+                    <span >Author</span>
+                </div>
+                <div class="source-tag text-center" *ngIf="commentSvc?.courseDetails?.curators?.includes(comment?.commentData?.commentSource?.userId)">
+                    <span >Curator</span>
                 </div>
             </div>
             <div class="ws-mat-black60-text mat-body-2">
@@ -68,7 +71,7 @@
                 *ngIf="comment?.commentData?.expanded">View less</div>
         </div>
     </div>
-    <div class="mt-4"  *ngIf="isEditMode">
+    <div class="mt-4 mb-4"  *ngIf="isEditMode">
         <div class="relative w-full flex ">
             <input #comment name="comment" class="flex-1 discuss-input " [(ngModel)]="editCommentData.comment"   i18n-placeholder
             [placeholder]="'Add a comment'" (focus)="onFocus()" >
@@ -82,8 +85,8 @@
             title="Pick your emoji…"
             ></emoji-mart>
         </div>
-        <div class="edit-options flex items-center justify-end">
-            <mat-icon class="icon warning" aria-hidden="false" i18n-aria-label 
+        <div class="edit-options flex items-center gap-2 justify-end">
+            <mat-icon class="icon warning" aria-hidden="false" i18n-aria-label (click)="cancelComment()"
             aria-label="more">close</mat-icon>
             <mat-icon class="icon success" aria-hidden="false" i18n-aria-label (click)="updateComment()"
             aria-label="more">check_small</mat-icon>
@@ -93,7 +96,7 @@
         <div class="flex">
             <ng-container *ngIf="cardConfig?.actions?.like?.show ">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="likeUnlikeComment(comment)">
-                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                    <mat-icon class="icon like-icon mr-2" aria-hidden="false" i18n-aria-label [ngClass]="{'user-liked': userLikedComments?.includes(comment?.commentId)}"
                         aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
                         {{(comment?.commentData?.like && comment?.commentData?.like) || 0}}
@@ -142,10 +145,17 @@
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
-                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)" 
+                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)" [userLikedComments]="userLikedComments"
                             [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply" [tagUserData]="tagUserData"
                             (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </ng-container>
+                </ng-container>
+
+                <ng-container *ngIf="replayCommentsCount < replyDataCopy?.length">
+                    <div class="load-more-comments  my-4">
+                        <button mat-flat-button  class="w-full underline" (click)="loadMoreComments()">Load
+                            More</button>
+                    </div>
                 </ng-container>
             </ng-container>
 
