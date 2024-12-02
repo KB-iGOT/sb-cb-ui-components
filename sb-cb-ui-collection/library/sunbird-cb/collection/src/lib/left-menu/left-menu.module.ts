@@ -12,6 +12,8 @@ import { MatLegacyListModule as MatListModule } from '@angular/material/legacy-l
 import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
 import { MatSidenavModule } from '@angular/material/sidenav'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatExpansionModule } from "@angular/material/expansion";
+
 
 @NgModule({
     declarations: [LeftMenuComponent],
@@ -27,6 +29,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
         MatChipsModule,
         MatCardModule,
         MatListModule,
+        MatExpansionModule,
     ],
     exports: [
         LeftMenuComponent,
