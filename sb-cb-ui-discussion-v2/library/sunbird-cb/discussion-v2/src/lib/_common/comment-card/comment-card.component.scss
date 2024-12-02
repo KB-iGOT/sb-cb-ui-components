@@ -97,7 +97,7 @@
     padding: 0 16px;
     border: 1px solid #00000029;
     border-bottom: none;
-    padding-right: 40px; // for emoji icon at right
+    padding-right: 54px; // for emoji icon at right
     &:focus-visible{
         outline: none;
     }
@@ -142,4 +142,8 @@
         border: 1px solid #1B4CA1;
         border-radius: 24px;
     }
+}
+
+.reply-icon {
+    color: #1B4CA1;
 }

@@ -321,7 +321,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         const reply = res.result.comments
         // parrent comment id is user for sencond level comments only
         const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
-        this.fetchedReplyData = [...replayModified, ...this.fetchedReplyData]
+        this.fetchedReplyData = [ ...this.fetchedReplyData,...replayModified]
         this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
         
         this.loading = false
@@ -330,5 +330,18 @@ export class CommentCardComponent implements OnInit, OnChanges {
       () => {
         this.loading = false
       })
+  }
+  getCommentMsg(taggedUsers: any, commentText: any){
+    let users: any = ''
+    let replayData = ``
+    if(taggedUsers && taggedUsers.length){
+      taggedUsers.forEach((tagUser: any) => {
+        users = users + this.tagUserData[tagUser]?.first_name
+      });
+    }
+    if(users) {
+      replayData = `<span class="mr-2 font-semibold ws-mat-default-text">Replying to ${users}</span>`
+    }
+    return replayData + commentText
   }
 }

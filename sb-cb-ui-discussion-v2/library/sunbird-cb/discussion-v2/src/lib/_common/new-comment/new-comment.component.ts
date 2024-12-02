@@ -16,6 +16,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   @Output() newComment = new EventEmitter<any>()
   @Input() disableActions: boolean = false
 
+  addNewCommentBool : Boolean  = false
   searchControl = new UntypedFormControl('')
   loogedInUserProfile: any = {}
   loggedInUserData: any = {}
@@ -35,20 +36,27 @@ export class NewCommentComponent implements OnInit, OnDestroy {
     
     const req = this.createReq(this.searchControl.value, [])
     console.log(req, this.loggedInUserData)
-    if (this.config.commentTreeData && this.config.commentTreeData.isFirstComment) {
-      this.commentSvc.addFirstComment(req).subscribe(res => {
-        this.performSuccessEvents(res)
-      }, (err: any) => {
-        // tslint:disable-next-line: no-console
-        console.error('Error in posting, please try again later!', err)
-      })
-    } else {
-      this.commentSvc.addNewComment(req).subscribe(res => {
-        this.performSuccessEvents(res)
-      }, (err: any) => {
-        // tslint:disable-next-line: no-console
-        console.error('Error in posting, please try again later!', err)
-      })
+    if(!this.addNewCommentBool){
+      this.addNewCommentBool = true
+      if (this.config.commentTreeData && this.config.commentTreeData.isFirstComment) {
+        this.commentSvc.addFirstComment(req).subscribe(res => {
+          this.addNewCommentBool = false
+          this.performSuccessEvents(res)
+        }, (err: any) => {
+          // tslint:disable-next-line: no-console
+          console.error('Error in posting, please try again later!', err)
+          this.addNewCommentBool = false
+        })
+      } else {
+        this.commentSvc.addNewComment(req).subscribe(res => {
+          this.addNewCommentBool = false
+          this.performSuccessEvents(res)
+        }, (err: any) => {
+          // tslint:disable-next-line: no-console
+          console.error('Error in posting, please try again later!', err)
+          this.addNewCommentBool = false
+        })
+      }
     }
 
   }
@@ -134,4 +142,6 @@ export class NewCommentComponent implements OnInit, OnDestroy {
       this.searchControl.disable()
     }
   }
+
+  
 }
