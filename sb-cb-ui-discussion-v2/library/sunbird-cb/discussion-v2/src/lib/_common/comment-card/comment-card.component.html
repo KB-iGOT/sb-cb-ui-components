@@ -57,11 +57,11 @@
     </div>
     <div class="comment mb-4 mt-2 " *ngIf="!isEditMode">
         <div class="flex">
-            <ng-container *ngFor="let tagUser of comment?.commentData?.taggedUsers">
+            <!-- <ng-container *ngFor="let tagUser of comment?.commentData?.taggedUsers">
                 <span class="mr-2 font-semibold ws-mat-default-text">Replying to {{tagUserData[tagUser]?.first_name}}</span>
-            </ng-container>
+            </ng-container> -->
             <div class="comment-txt {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}"
-                [innerHTML]="comment?.commentData?.comment">
+                [innerHTML]="getCommentMsg(comment?.commentData?.taggedUsers, comment?.commentData?.comment)">
             </div>
         </div>
         <div class="more-or-less" *ngIf="comment?.commentData?.comment.length > 152">
@@ -95,7 +95,8 @@
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
             <ng-container *ngIf="cardConfig?.actions?.like?.show ">
-                <div class="mr-4 cursor-pointer circleBtn" (click)="likeUnlikeComment(comment)">
+                <div class="mr-4 circleBtn"
+                [ngClass]="{'cursor-not-allowed': !commentSvc?.enrolledContent, 'cursor-pointer': commentSvc?.enrolledContent}" (click)="commentSvc?.enrolledContent && likeUnlikeComment(comment)" >
                     <mat-icon class="icon like-icon mr-2" aria-hidden="false" i18n-aria-label [ngClass]="{'user-liked': userLikedComments?.includes(comment?.commentId)}"
                         aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
@@ -109,7 +110,7 @@
                         aria-label="Dropdown-open">arrow_drop_down</mat-icon>
                     <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
                         aria-label="Dropdown-close">arrow_drop_up</mat-icon>
-                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label *ngIf="cardConfig?.actions?.comments?.iconDisplay"
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
                         {{replyDataCopy && replyDataCopy?.length > 1 ? 'Replies' :
@@ -117,17 +118,12 @@
                     </span>
                 </div>
             </ng-container>
-            <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType === 'reply'">
+            <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType === 'reply' && commentSvc?.enrolledContent">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="data.replyToggle = !data.replyToggle">
-                    <mat-icon *ngIf="!data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
-                        aria-label="Dropdown-open">arrow_drop_down</mat-icon>
-                    <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
-                        aria-label="Dropdown-close">arrow_drop_up</mat-icon>
-                    <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
+                    <mat-icon class="icon mr-2 reply-icon" aria-hidden="false" color="#1B4CA1" i18n-aria-label *ngIf="cardConfig?.actions?.comments?.iconDisplay"
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
-                    <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
-                        {{replyDataCopy && replyDataCopy?.length > 1 ? 'Replies' :
-                        'Reply'}} ({{(replyDataCopy && replyDataCopy?.length) || 0}})
+                    <span class="" >
+                        Reply
                     </span>
                 </div>
             </ng-container>
@@ -136,7 +132,7 @@
     <ng-container *ngIf="cardConfig?.repliesSection?.show && cardType !== 'reply'">
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
-            <div class="mb-4">
+            <div class="mb-4" *ngIf="commentSvc?.enrolledContent">
                 <d-v2-new-comment [config]="cardConfig?.repliesSection?.newCommentReply"  [taggedUsers]="[comment?.commentData?.commentSource?.userId]"
                     [hierarchyPath]="getHierarchyPath" (newComment)="newComment($event)">
                 </d-v2-new-comment>
@@ -151,7 +147,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="replayCommentsCount < replyDataCopy?.length">
+                <ng-container *ngIf="replayCommentsCount < replyDataCopy?.length && !loading">
                     <div class="load-more-comments  my-4">
                         <button mat-flat-button  class="w-full underline" (click)="loadMoreComments()">Load
                             More</button>
@@ -167,7 +163,7 @@
     <ng-container *ngIf="cardType === 'reply'">
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
-            <div class="mb-4">
+            <div class="mb-4" *ngIf="commentSvc?.enrolledContent">
                 <d-v2-new-comment [config]="cardConfig?.newCommentReply" [hierarchyPath]="getParentHierarchyPath"
                     (newComment)="newComment($event)" [taggedUsers]="[comment?.commentData?.commentSource?.userId]">
                 </d-v2-new-comment>
@@ -189,7 +185,7 @@
         <div class="flex gap-4 items-center p-4 rounded bg-white">
             <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'"
                 [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
-            <d-v2-widget-skeleton-loader [width]="'545px'" [height]="'43px'"
+            <d-v2-widget-skeleton-loader class="w-full" [width]="'100%'" [height]="'43px'"
                 [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
             <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'"
                 [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
