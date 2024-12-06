@@ -5,7 +5,7 @@
         <div>
             <div class="mr-4">
                 <d-v2-avatar-photo [size]="'ml'" [name]="comment?.commentData?.commentSource?.userName"
-                    [photoUrl]="comment?.commentData?.commentSource?.userPic" [color]="
+                    [photoUrl]="commentUsersData[comment?.commentData?.commentSource?.userId]?.user_profile_img_url" [color]="
                         comment?.commentData?.commentSource?.userName === loogedInUserProfile?.firstName ?
                         cardConfig?.actions?.avatarPhoto?.color || '#006400' : ''
                     ">
@@ -17,7 +17,7 @@
             <div class="flex items-center">
                 <span class="mat-body-1 bold mr-1">{{comment?.commentData?.commentSource?.userName}} </span>
                 <mat-icon class="icon verified mr-1"
-                    *ngIf="comment?.commentData?.commentSource?.profileStatus?.toLowerCase() === 'verified'"
+                    *ngIf="commentUsersData[comment?.commentData?.commentSource?.userId]?.userProfileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
                 <div class="source-tag text-center" *ngIf="commentSvc?.courseDetails?.authors?.includes(comment?.commentData?.commentSource?.userId)">
                     <span >Author</span>
@@ -27,7 +27,8 @@
                 </div>
             </div>
             <div class="ws-mat-black60-text mat-body-2">
-                {{comment?.commentData?.commentSource?.designation}}
+                {{commentUsersData[comment?.commentData?.commentSource?.userId]?.designation}}
+                <!-- {{comment?.commentData?.commentSource?.designation}} -->
             </div>
         </div>
         <div
@@ -49,8 +50,12 @@
                 </button>
             </ng-container> -->
         </div>
-        <span class="mat-body-2">{{comment?.createdDate | pipeRelativeTime}}</span>
-        <div>
+        
+        <span class="mat-body-2">
+            <span class="mr-1">{{comment?.createdDate  === comment?.lastUpdatedDate?'':'(Edited)'}}</span>
+            <span>{{comment?.lastUpdatedDate | pipeRelativeTime}}</span>
+        </span>
+        <div *ngIf="commentSvc?.enrolledContent">
             <mat-icon class="icon" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
                 aria-label="more">more_vertical</mat-icon>
         </div>
@@ -142,7 +147,7 @@
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
                             [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)" [userLikedComments]="userLikedComments"
-                            [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply" [tagUserData]="tagUserData"
+                            [commentUsersData]="commentUsersData" [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply" [tagUserData]="tagUserData"
                             (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </ng-container>
                 </ng-container>

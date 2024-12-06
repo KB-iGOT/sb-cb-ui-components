@@ -23,6 +23,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedComments: any = []
+  @Input() commentUsersData: any = {}
   @Output() newReply = new EventEmitter<any>()
   @Output() likeUnlikeData = new EventEmitter<any>()
 
@@ -251,6 +252,9 @@ export class CommentCardComponent implements OnInit, OnChanges {
   deleteCommentMethod(comment: any) {
     this.commentSvc.deleteComment(comment.commentId, this.commentSvc.entityType, this.commentSvc.entityId, this.commentSvc.workflow).subscribe((_res: any) => {
       comment.status = 'inactive'
+      this._snackBar.open('Comment deleted successfully')
+    }, (_err: any)=> {
+      this._snackBar.open('Something went wrong! please try again later.')
     })
   }
 
@@ -285,6 +289,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     }
     this.commentSvc.updateComment(requestData).subscribe((_res: any)=> {
       this.isEditMode = false
+      this.comment['lastUpdatedDate'] = new Date().toISOString()
       this.comment['commentData'] = this.editCommentData
       this._snackBar.open('Comment Updated successfully.')
     },()=>{

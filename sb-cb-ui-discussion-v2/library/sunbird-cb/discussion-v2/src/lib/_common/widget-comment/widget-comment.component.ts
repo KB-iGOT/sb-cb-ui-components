@@ -4,6 +4,9 @@ import { CommentsService } from '../../_services/comments.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 
+// tslint:disable-next-line
+import _ from 'lodash'
+
 @Component({
   selector: 'd-v2-widget-comment',
   templateUrl: './widget-comment.component.html',
@@ -22,6 +25,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentsLength = 0
   isReversed = false
   userLikedComments: any = []
+  commentUsersData: any = {}
   constructor(
     private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
   ) { }
@@ -96,10 +100,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       // tslint:disable-next-line: no-console
       this.loading = false
       if (res && res.result.commentCount) {
+        debugger
         this.commentData = res.result
         this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
         if(res && res.result && res.result.courseDetails){
-
           res.result.courseDetails['curators'] = []
           res.result.courseDetails['authors'] = []
           if(res.result.courseDetails.creatorDetails) {
@@ -129,6 +133,11 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
           // tslint:disable-next-line:max-line-length
           this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         }
+
+        if(res.result && res.result.users && res.result.users.length) {
+          let commentUsersDataObj = res.result.users
+          this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+        } 
         this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
       }
       if (res && res.code === 'Not Found' || !res.result.commentCount) {
@@ -158,9 +167,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
     }
-
+debugger
     this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
       if (res && res.result.commentCount) {
+        debugger
         const newComments = res.result.comments
         if(res && res.result && res.result.courseDetails){
 
@@ -182,6 +192,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
             });
             res.result.courseDetails['curators'] = creatorContactsIds
           }
+          if(res.result && res.result.users && res.result.users.length) {
+            let commentUsersDataObj = res.result.users
+            this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+          } 
           this.commentSvc.courseDetails = res.result.courseDetails
         }
 

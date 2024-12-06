@@ -9,7 +9,7 @@
             <ng-container *ngFor="let item of commentData?.commentTree?.commentTreeData?.comments">
                 <ng-container *ngIf="isCommentPresent(item.commentId)">
                     <div class="w-full mt-4">
-                        <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType"
+                        <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType" [commentUsersData]="commentUsersData"
                             [cardConfig]="widgetData?.commentsList" [comment]="getComment(item)"
                             [replyData]="getReplies(item)" [hierarchyPath]="getHierarchyPath"
                             (newReply)="updateRepliesData($event)" [userLikedComments]="userLikedComments"
