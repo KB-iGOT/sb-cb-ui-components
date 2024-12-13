@@ -1042,15 +1042,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     return false;
   }
 
-  public tabClicked(tabEvent: MatTabChangeEvent, stripMap: IStripUnitContentData, stripKey: string) {
-    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-      stripMap.tabs[tabEvent.index].fetchTabStatus = 'inprogress';
-      stripMap.tabs[tabEvent.index].tabLoading = true;
+  public tabClicked(tabEvent: any, stripMap: IStripUnitContentData, stripKey: string) {
+    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+      stripMap.tabs[tabEvent].fetchTabStatus = 'inprogress';
+      stripMap.tabs[tabEvent].tabLoading = true;
       stripMap.showOnLoader = true;
     }
     const data: WsEvents.ITelemetryTabData = {
-      label: `${tabEvent.tab.textLabel}`,
-      index: tabEvent.index,
+      label: `${stripMap.tabs[tabEvent].label}`,
+      index: tabEvent,
     };
     this.eventSvc.raiseInteractTelemetry(
       {
@@ -1063,7 +1063,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         module: WsEvents.EnumTelemetrymodules.HOME,
       }
     );
-    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent.index];
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
@@ -1076,25 +1076,25 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         // call API to get tab data and process
         // this.processStrip(currentStrip, [], 'fetching', true, null)
         if (currentTabFromMap.request.searchV6) {
-          this.getTabDataByNewReqSearchV6(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqSearchV6(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.trendingSearch) {
-          this.getTabDataByNewReqTrending(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqTrending(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.topContent) {
-          this.getTabDataByNewReqTopContent(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqTopContent(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.playlistRead) {
-          this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.ciosContent) {
-          this.getTabDataByCiosSearch(currentStrip, tabEvent.index, currentTabFromMap, true)
+          this.getTabDataByCiosSearch(currentStrip, tabEvent, currentTabFromMap, true)
         }
-        if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-          stripMap.tabs[tabEvent.index].tabLoading = false;
+        if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+          stripMap.tabs[tabEvent].tabLoading = false;
         }
       } else {
         this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
         setTimeout(() => {
-          if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-            stripMap.tabs[tabEvent.index].tabLoading = false;
-            stripMap.tabs[tabEvent.index].fetchTabStatus = 'done';
+          if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+            stripMap.tabs[tabEvent].tabLoading = false;
+            stripMap.tabs[tabEvent].fetchTabStatus = 'done';
             stripMap.showOnLoader = false;
           }
         }, 200);

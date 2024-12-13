@@ -80,7 +80,7 @@
               <ng-container *ngIf="stripsResultDataMap[key].tabs && stripsResultDataMap[key].tabs.length">
                 <mat-tab-group animationDuration="0ms" [selectedIndex]="getSelectedIndex(stripsResultDataMap[key], key)"
                 class="mat-tab-labels w-full strips-tabgroup" dynamicHeight
-                  (selectedTabChange)="tabClicked($event, 0, stripsResultDataMap[key], key)">
+                  (selectedIndexChange)="tabClicked($event, 0, stripsResultDataMap[key], key)">
                   <mat-tab label="{{tab?.label}}" *ngFor="let tab of stripsResultDataMap[key].tabs; let last = last;let tabIndex = index">
                     <ng-template mat-tab-label>
                       <span><span *ngIf="!tab?.disableTranslate">{{ translateLabels(tab?.label, 'home') }}</span>

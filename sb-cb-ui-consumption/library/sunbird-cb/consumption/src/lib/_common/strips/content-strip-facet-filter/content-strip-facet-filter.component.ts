@@ -350,15 +350,15 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
 
   }
 
-  public tabClicked(tabEvent: MatTabChangeEvent, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
-    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-      stripMap.tabs[tabEvent.index].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-      stripMap.tabs[tabEvent.index].pillsData[pillIndex].tabLoading = true;
+  public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
+    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+      stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
+      stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = true;
       stripMap.showOnLoader = true;
     }
     const data: WsEvents.ITelemetryTabData = {
-      label: `${tabEvent.tab.textLabel}`,
-      index: tabEvent.index,
+      label: `${stripMap.tabs[tabEvent].label}`,
+      index: tabEvent,
     };
     this.eventSvc.raiseInteractTelemetry(
       {
@@ -372,8 +372,8 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
       }
     );
 
-    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent.index];
-    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent.index].pillsData[pillIndex];
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
@@ -388,22 +388,22 @@ NsWidgetResolver.IWidgetData<NsContentStripWithFacets.IContentStripMultiple> {
         if (currentPillFromMap.request.searchV6) {
           // this.getTabDataByNewReqSearchV6(currentStrip, tabEvent.index, currentTabFromMap, true);
         }
-      stripMap.tabs[tabEvent.index].pillsData[pillIndex].tabLoading = false;
+      stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false;
       } else {
         this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
-        if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-          stripMap.tabs[tabEvent.index].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-          stripMap.tabs[tabEvent.index].pillsData[pillIndex].tabLoading = false;
+        if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+          stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
+          stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false;
           stripMap.showOnLoader = true;
-          this.resetFilter(stripMap, tabEvent.index ,pillIndex)
+          this.resetFilter(stripMap, tabEvent ,pillIndex)
         }
         setTimeout(() => {
-          if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-            stripMap.tabs[tabEvent.index].pillsData[pillIndex].fetchTabStatus = 'done';
-            stripMap.tabs[tabEvent.index].pillsData[pillIndex].tabLoading = false;
+          if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+            stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'done';
+            stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false;
             stripMap.showOnLoader = false;
-            this.resetSelectedPill(stripMap.tabs[tabEvent.index].pillsData)
-            stripMap.tabs[tabEvent.index].pillsData[pillIndex]['selected']=true
+            this.resetSelectedPill(stripMap.tabs[tabEvent].pillsData)
+            stripMap.tabs[tabEvent].pillsData[pillIndex]['selected']=true
           }
         },         200);
       }
