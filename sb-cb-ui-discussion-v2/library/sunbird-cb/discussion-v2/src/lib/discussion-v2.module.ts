@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+// import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { CommentsService } from './_services/comments.service'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
@@ -50,7 +50,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatSelectModule,
     MatChipsModule,
     PickerModule,
-    CKEditorModule,
+    // CKEditorModule,
     WidgetCommentModule,
     WidgetDiscussionv2Module,
   ],

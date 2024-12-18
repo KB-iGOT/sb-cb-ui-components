@@ -220,7 +220,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         const confirmDialog = this.dialog.open(FlagDialogueComponent, {
           width: '600px',
           panelClass: 'flag-dialog',
-          backdropClass: 'flag-dialog-backdrop',
+          backdropClass: '',
           data: { comment, flagSelectionList: this.flagSelectionList },
         })
         confirmDialog.afterClosed().subscribe((result: any) => {
@@ -235,7 +235,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
       width: '600px',
       panelClass: 'flag-dialog',
-      backdropClass: 'flag-dialog-backdrop',
+      backdropClass: '',
       data: {
         comment,
         flagSelectionList: this.flagSelectionList

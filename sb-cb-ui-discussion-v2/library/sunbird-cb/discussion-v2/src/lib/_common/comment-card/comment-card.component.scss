@@ -147,3 +147,8 @@
 .reply-icon {
     color: #1B4CA1;
 }
+
+::ng-deep .comment-card-menu {
+    min-width: 32px !important;
+    padding: 0px 8px;
+}
