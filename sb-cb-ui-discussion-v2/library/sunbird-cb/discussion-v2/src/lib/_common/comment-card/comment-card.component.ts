@@ -7,7 +7,7 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import _ from 'lodash'
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
-import { FlagDialogueComponent } from '../flag-dialogue/flag-dialogue.component'
+import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component'
 import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue.component'
 
 
@@ -111,7 +111,6 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   getListOfReplies() {
-
     let reveseReplayDataCopy = [...this.replyDataCopy]
     reveseReplayDataCopy.reverse()
     let ids:any = reveseReplayDataCopy.slice(0,10)

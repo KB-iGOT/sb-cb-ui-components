@@ -1,0 +1,94 @@
+<ng-container *ngIf="!config?.openAsDialogue">
+    <div class="flex flex-1 flex-col start-comment-container" [ngStyle]="config?.styles">
+        <div class="flex flex-1 flex-col mb-6" *ngIf="config?.showTopInfo">
+            <div class=" w-full text-center">
+                <mat-icon class="icon new-post-icon" aria-hidden="false" i18n-aria-label
+                    aria-label="Fail">{{config?.topInfo?.icon}}</mat-icon>
+            </div>
+            <div class="flex items-center justify-center" [innerHTML]="config?.topInfo?.text">
+
+            </div>
+        </div>
+        <div class="flex gap-2 items-center" id="start-comment">
+            <div class="" *ngIf="config?.avatarPhoto?.show">
+                <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"
+                    [name]="loogedInUserProfile?.firstName || config?.avatarPhoto?.name"
+                    [photoUrl]="loogedInUserProfile?.profileImageUrl || ''"
+                    [color]="config?.avatarPhoto?.color"></d-v2-avatar-photo>
+            </div>
+            <div class="flex flex-1 items-center">
+                <form class="flex flex-1 items-center">
+                    <!-- <mat-form-field appearance="outline" class="w-full pl-1"> -->
+                    <div class="relative w-full flex ">
+                        <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl"
+                            [attr.disabled]="toggleDisable()" i18n-placeholder
+                            [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()">
+                        <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail"
+                            (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                        <br />
+                        <!-- <emoji-mart 
+                            class="emoji-mart absolute"
+                            set="google"
+                            *ngIf="showEmojiPicker"
+                            (emojiSelect)="addEmoji($event)"
+                            title="Pick your emoji…"
+                            ></emoji-mart> -->
+                    </div>
+                    <!-- </mat-form-field> -->
+                    <button mat-flat-button color="secondary" class="primary-button custom-rounded"
+                        (click)="submitComment()" [disabled]="(!comment.value || comment.value.length < 1 )">
+                        <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer" aria-hidden="false"
+                            i18n-aria-label aria-label="Report">{{config?.postBtn?.icon || 'send'}}</mat-icon>
+                        <span *ngIf="config?.postBtn?.text" class="ml-1">{{config?.postBtn?.text}}</span>
+                    </button>
+
+                </form>
+            </div>
+            <!-- <div class="text-box">Ask a question or post an idea</div>
+          <div class="buton">start discussion</div> -->
+        </div>
+
+        <button mat-button (click)="openNewPostDialog()">Open New Post Dialog</button>
+    </div>
+</ng-container>
+
+<!-- Static UI to show, when clicked will open the dialogue for post creation -->
+<ng-container *ngIf="config?.openAsDialogue">
+        <div class="flex gap-4 start-comment-container cursor-pointer"
+            (click)="openNewPostDialog()">
+            <!-- Avatar -->
+            <div *ngIf="config?.avatarPhoto?.show">
+                <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"
+                    [name]="loogedInUserProfile?.firstName || config?.avatarPhoto?.name"
+                    [photoUrl]="loogedInUserProfile?.profileImageUrl || ''" [color]="config?.avatarPhoto?.color">
+                </d-v2-avatar-photo>
+            </div>
+
+            <!-- Input field -->
+            <div class="flex flex-1 items-center">
+                <form class="flex flex-1 items-center gap-2">
+                    <div class="flex relative flex-1 input-container">
+                        <input #comment name="comment" class="w-full rounded-full px-4 py-2 focus:outline-none"
+                            [placeholder]="config?.commentBox?.placeholder || 'What you want to say?'">
+                        <button mat-icon-button color="primary" class="postIcon emoji-icon">
+                            <mat-icon>sentiment_satisfied</mat-icon>
+                        </button>
+                        <button mat-icon-button color="primary" class="postIcon image-icon">
+                            <mat-icon>image</mat-icon>
+                        </button>
+                        <button mat-icon-button color="primary" class="postIcon poll-icon">
+                            <mat-icon>sort</mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="flex items-center gap-2">
+                        <button mat-flat-button color="primary" class="rounded-full px-6" (click)="submitComment()"
+                            [disabled]="(!comment.value || comment.value.length < 1)">
+                            Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+</ng-container>
