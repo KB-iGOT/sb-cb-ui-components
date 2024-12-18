@@ -16,7 +16,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+// import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
 
@@ -44,7 +44,7 @@ import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
-    CKEditorModule,
+    // CKEditorModule,
     SharedModule,
     ImageSlidersModule
   ],

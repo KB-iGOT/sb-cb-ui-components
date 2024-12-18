@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
-import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
@@ -19,7 +19,7 @@ export class NewPostDialogueComponent implements OnInit {
   showFileUpload = false;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   uploadedFiles: File[] = [];
-  public Editor = ClassicEditor;
+  // public Editor = ClassicEditor;
   public editorConfig = {
     toolbar: {
       items: [

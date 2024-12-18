@@ -198,7 +198,7 @@
     </div>
 </ng-template>
 
-<mat-menu #cardMenu="matMenu" xPosition="after">
+<mat-menu #cardMenu="matMenu" class="comment-card-menu" xPosition="after">
     <button mat-menu-item (click)="openFlagDialogue(comment)"  *ngIf="comment?.commentData?.commentSource?.userId !== loogedInUserProfile?.userId">
         <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
         <span>Flag</span>
