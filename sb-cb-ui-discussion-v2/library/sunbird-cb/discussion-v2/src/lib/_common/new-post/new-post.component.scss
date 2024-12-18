@@ -1,0 +1,79 @@
+@import '@ctrl/ngx-emoji-mart/picker';
+.start-comment-container {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: white;
+}
+
+.new-post-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    color: #f69953;
+}
+
+.primary-button {
+    background: #1a4ca1 !important;
+    color: #fff !important;
+    height: 40px;
+}
+
+.primary-button:disabled {
+    opacity: 0.5;
+}
+
+.discuss-input {
+    border-radius: 48px;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #00000029;
+    padding-right: 40px; // for emoji icon at right
+}
+
+.custom-rounded {
+    height: 40px;
+    min-width: 72px;
+    border-radius: 30px;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host {
+    display: block;
+}
+  
+input {
+    border: none;
+    background: transparent;
+
+    &:focus {
+        outline: none;
+        box-shadow: none;
+    }
+}
+
+.input-container {
+    border: 1px solid #00000029;
+    border-radius: 72px;
+    height: 40px;
+}
+
+.mat-mdc-icon-button.postIcon {
+    padding: 0 !important;
+    &.emoji-icon {
+        color: #FF8400 !important;
+    }
+    
+    &.image-icon {
+        color: #8458FF !important;
+    }
+    
+    &.poll-icon {
+        color: #49C951 !important;
+    }
+}
+
