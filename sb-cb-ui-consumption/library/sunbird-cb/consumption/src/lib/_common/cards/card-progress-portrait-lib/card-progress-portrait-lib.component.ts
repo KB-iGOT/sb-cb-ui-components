@@ -118,7 +118,9 @@ export class CardProgressPortraitLibComponent implements OnInit {
       })
     if(certificateData.issuedCertificates.length > 0) {
       this.downloadCertificateLoading = true
-      let certData: any = certificateData.issuedCertificates[0]
+      const certificate: any = certificateData.issuedCertificates.sort((a: any, b: any) =>
+        new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
+      let certData: any = certificate.issuedCertificates[0]
       this.certificateService.downloadCertificate_v2(certData.identifier).subscribe((res: any)=>{
         this.downloadCertificateLoading = false
         const cet = res.result.printUri
