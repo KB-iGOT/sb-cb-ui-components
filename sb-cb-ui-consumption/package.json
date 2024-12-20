@@ -3,7 +3,7 @@
   "version": "0.0.113-ang-13-16",
   "scripts": {
     "ng": "ng",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch=true",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
     "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
