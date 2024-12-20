@@ -17,6 +17,7 @@ export class NewPostDialogueComponent implements OnInit {
   selectedFiles: File[] = [];
   selectedTags: string[] = [];
   showFileUpload = false;
+  mediaUrls: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   uploadedFiles: File[] = [];
   // public Editor = ClassicEditor;
@@ -73,8 +74,9 @@ export class NewPostDialogueComponent implements OnInit {
   onFileSelected(event: any) {
     const files = event.target.files;
     if (files) {
-      // Add new files to uploadedFiles array
+      // Add new files to both arrays
       this.uploadedFiles.push(...Array.from(files as FileList));
+      this.selectedFiles.push(...Array.from(files as FileList));
       // Update form control
       this.uploadForm.patchValue({
         files: this.uploadedFiles
@@ -83,8 +85,9 @@ export class NewPostDialogueComponent implements OnInit {
   }
 
   removeFile(index: number) {
-    // Remove file from array
+    // Remove file from both arrays
     this.uploadedFiles.splice(index, 1);
+    this.selectedFiles.splice(index, 1);
     
     // Update form control with new array
     this.uploadForm.patchValue({
@@ -119,24 +122,59 @@ export class NewPostDialogueComponent implements OnInit {
     if (this.uploadForm.valid) {
       const formData = {
         ...this.uploadForm.value,
-        tags: this.selectedTags,
-        files: this.selectedFiles
+        tags: this.selectedTags
       };
       console.log('Form submitted:', formData);
+      this.uploadImages();
+    }
+  }
 
-      switch (this.data.type) {
-        case NsDiscussionV2.EPostType.QUESTION:
-          this.createPost();
-          break;
-        case NsDiscussionV2.EPostType.ANSWER_POST:
-          this.createAnswerPost();
-          break;
-        default:
-          this.data.type = NsDiscussionV2.EPostType.QUESTION;
-          break;
-      }
-      
-      
+  uploadImages() {
+    if (this.selectedFiles.length === 0) {
+      this.handlePostCreation();
+      return;
+    }
+
+    console.log('selectedFiles:', this.selectedFiles)
+
+    const uploadPromises = this.selectedFiles.map(file => {
+      return new Promise<string>((resolve, reject) => {
+        // Create FormData object to properly send the file
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        this.discussV2Svc.uploadFile(formData).subscribe({
+          next: (res: any) => {
+            if (res && res.result && res.result.url) {
+              resolve(res.result.url);
+            } else {
+              reject('No URL in response');
+            }
+          },
+          error: (error) => reject(error)
+        });
+      });
+    });
+
+    Promise.all(uploadPromises)
+      .then(uploadedUrls => {
+        this.mediaUrls = uploadedUrls;
+        this.handlePostCreation();
+      })
+      .catch(error => {
+        console.error('Error uploading files:', error);
+        // Handle error appropriately
+      });
+  }
+
+  private handlePostCreation(): void {
+    switch (this.data.type) {
+      case NsDiscussionV2.EPostType.QUESTION:
+        this.createPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST:
+        this.createAnswerPost();
+        break;
     }
   }
 
@@ -169,12 +207,14 @@ export class NewPostDialogueComponent implements OnInit {
   createReq(formData: any, type: string) {
     const req = {
       type,
-      ...(this.data.parentDiscussionId? {parentDiscussionId: this.data.parentDiscussionId}: null),
-      ...this.uploadForm.value,
+      ...(this.data.parentDiscussionId ? {parentDiscussionId: this.data.parentDiscussionId} : null),
+      community: formData.value.community,
+      title: formData.value.title,
+      description: formData.value.description,
       targetTopic: 'testing',
-      tags: formData.tags,
-      mediaUrls: ['https://picsum.photos/id/11/500/300', 'https://picsum.photos/id/12/500/300']
+      tags: this.selectedTags,
+      mediaUrls: this.mediaUrls || []
     }
-    return req
+    return req;
   }
 }
