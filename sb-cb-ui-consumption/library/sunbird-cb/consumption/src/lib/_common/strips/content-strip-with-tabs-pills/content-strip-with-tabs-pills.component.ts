@@ -756,7 +756,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       }
     } catch (error) {
       // Handle errors
-      this.processStrip(strip, [], 'error', calculateParentStatus, null);
+     this.processStrip(strip, [], 'error', calculateParentStatus, null);
     }
   }
 
