@@ -51,7 +51,6 @@ implements OnInit, NsWidgetResolver.IWidgetData<NsCardContent.ICard>  {
     return false
   }
   async getRedirectUrlData(content: any){
-    console.log('redirect url')
     if(content.externalId) {
       this.router.navigate(
         [`app/toc/ext/${content.contentId}`])
