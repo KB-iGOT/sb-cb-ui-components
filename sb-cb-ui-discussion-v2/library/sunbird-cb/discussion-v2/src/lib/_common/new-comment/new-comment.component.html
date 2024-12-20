@@ -21,7 +21,7 @@
                     <div class="relative w-full flex ">
                         <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl" [attr.disabled]="toggleDisable()" i18n-placeholder 
                         [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()">
-                        <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                        <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail" (click)="commentSvc?.enrolledContent && toggleEmojiPicker()">sentiment_satisfied</mat-icon>
                         <br />
                         <emoji-mart 
                         class="emoji-mart absolute"

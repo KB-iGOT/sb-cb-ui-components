@@ -1,0 +1,132 @@
+<form [formGroup]="uploadForm" class="p-4">
+    <!-- Community Dropdown -->
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-medium mb-2">
+        Community <span class="text-red-500">*</span>
+      </label>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-select formControlName="community" placeholder="Select">
+          <mat-option value="community1">Community 1</mat-option>
+          <mat-option value="community2">Community 2</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  
+    <!-- Title -->
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-medium mb-2">
+        Title <span class="text-red-500">*</span>
+      </label>
+      <mat-form-field appearance="outline" class="w-full">
+        <input matInput
+          formControlName="title"
+          placeholder="Enter your question title"
+          maxlength="100">
+        <mat-hint align="end">{{uploadForm.get('title')?.value?.length || 0}}/100</mat-hint>
+      </mat-form-field>
+    </div>
+  
+    <!-- Question Description -->
+    <div class="mb-4 w-full">
+      <label class="block text-gray-700 text-sm font-medium mb-2">
+        Question Description <span class="text-red-500">*</span>
+      </label>
+      <textarea matInput #description formControlName="description" [cdkTextareaAutosize] [cdkAutosizeMaxRows]="10"
+          [cdkAutosizeMinRows]="3" #othersTextarea class="custom-textarea w-full"
+          placeholder="Description" i18n-placeholder maxlength="500"></textarea>
+      <div class="w-100 mt-1 ws-mat-black60-text mat-body-2 text-right">
+          <span id="current">{{description.value.length}}/ 500</span>
+      </div>
+      <!-- <ckeditor
+        [editor]="Editor"
+        formControlName="description"
+        [config]="{ placeholder: 'Type the description here...' }">
+      </ckeditor> -->
+      <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p>
+    </div>
+  
+    <!-- Action Buttons -->
+    <div class="flex gap-2 mb-4">
+      <button mat-stroked-button type="button" (click)="createPoll()">
+        <mat-icon>poll</mat-icon>
+        Create a poll
+      </button>
+      <button mat-stroked-button type="button" (click)="addMedia()">
+        <mat-icon>image</mat-icon>
+        Add media
+      </button>
+      <button mat-stroked-button type="button" (click)="addFile()">
+        <mat-icon>attach_file</mat-icon>
+        Add file
+      </button>
+    </div>
+  
+    <!-- File Upload Section (Initially Hidden) -->
+    <div class="mb-4" *ngIf="showFileUpload">
+      <div class="flex items-center justify-center w-full">
+        <label for="fileUpload" 
+          class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <mat-icon class="text-gray-500 mb-2">cloud_upload</mat-icon>
+            <p class="mb-2 text-sm text-gray-500">
+              <span class="font-semibold">Click to upload</span> or drag and drop
+            </p>
+            <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX, JPG, PNG</p>
+          </div>
+          <input 
+            id="fileUpload" 
+            type="file" 
+            class="hidden" 
+            multiple 
+            (change)="onFileSelected($event)"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+        </label>
+      </div>
+    </div>
+
+    <!-- Display Uploaded Files -->
+    <div class="mb-4" *ngIf="uploadedFiles.length > 0">
+    <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
+    <ul>
+      <li *ngFor="let file of uploadedFiles; let i = index" class="flex items-center justify-between mb-2">
+        <span>{{ file.name }}</span>
+        <button mat-icon-button (click)="removeFile(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </li>
+    </ul>
+  </div>
+  
+    <!-- Tags -->
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-medium mb-2">
+        Tags <span class="text-red-500">*</span>
+      </label>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-chip-grid #chipGrid aria-label="Tag selection">
+          <mat-chip-row *ngFor="let tag of selectedTags" (removed)="removeTag(tag)">
+            {{tag}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        </mat-chip-grid>
+        <input placeholder="Add tags..."
+               [matChipInputFor]="chipGrid"
+               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+               (matChipInputTokenEnd)="addTag($event)">
+      </mat-form-field>
+    </div>
+  
+    <!-- Submit Button -->
+    <div class="mt-4">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        class="w-full"
+        [disabled]="!uploadForm.valid"
+        (click)="onSubmit()">
+        Publish your question
+      </button>
+    </div>
+  </form>

@@ -1,4 +1,26 @@
-.load-more-comments {
+.widget-container {
+
+}
+
+.side-menu-container {
+    width: 282px;
+}
+.post-container {
+
+}
+.other-container {
+    width: 282px;
+}
+
+.otherCard{
+    background-color: #fff;
+    border: 1px solid #00000014;
+    border-radius: 12px;
+    padding: 16px;
+    height: fit-content;
+}
+
+.load-more-posts {
     button {
         color: #1B4CA1 !important;
         font-family: Lato;

@@ -9,10 +9,10 @@
             <ng-container *ngFor="let item of commentData?.commentTree?.commentTreeData?.comments">
                 <ng-container *ngIf="isCommentPresent(item.commentId)">
                     <div class="w-full mt-4">
-                        <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType"
+                        <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType" [commentUsersData]="commentUsersData"
                             [cardConfig]="widgetData?.commentsList" [comment]="getComment(item)"
                             [replyData]="getReplies(item)" [hierarchyPath]="getHierarchyPath"
-                            (newReply)="updateRepliesData($event)"
+                            (newReply)="updateRepliesData($event)" [userLikedComments]="userLikedComments"
                             (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </div>
 
@@ -31,7 +31,7 @@
                 <div class="flex gap-4 items-center p-4 rounded bg-white">
                     <d-v2-widget-skeleton-loader [width]="'55px'" [height]="'55px'"
                         [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
-                    <d-v2-widget-skeleton-loader [width]="'600px'" [height]="'43px'"
+                    <d-v2-widget-skeleton-loader class="w-full" [width]="'100%'" [height]="'43px'"
                         [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
                     <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'40px'"
                         [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>

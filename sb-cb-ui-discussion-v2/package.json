@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-discussion-v2",
-  "version": "0.0.14-ang-13-16",
+  "version": "0.0.19-ang-13-16",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
@@ -25,11 +25,14 @@
     "@angular/platform-browser": "^16.2.12",
     "@angular/platform-browser-dynamic": "^16.2.12",
     "@angular/router": "^16.2.12",
+    "@ckeditor/ckeditor5-angular": "^7.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^44.0.0",
     "@ctrl/ngx-emoji-mart": "^7.1.0",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "4.0.0",
     "@sunbird-cb/design-system": "0.0.1",
     "@sunbird-cb/utils-v2": "0.0.22-ang-13-16",
+    "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@types/lodash": "4.14.168",
     "moment": "^2.29.1",
     "ngx-image-cropper": "^6.3.4",

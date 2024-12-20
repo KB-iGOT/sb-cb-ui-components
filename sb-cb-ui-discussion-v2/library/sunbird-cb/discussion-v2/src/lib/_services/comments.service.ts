@@ -17,7 +17,8 @@ const API_END_POINTS = {
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
   UPDATE_COMMENT: `/apis/proxies/v8/comment/v1/update`,
   DELETE_COMMENT: (commentId: string, entityType: string, entityId: string, workflow: string) =>
-    `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`
+    `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
+  LIKED_COMMENTS:(entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`
 }
 
 @Injectable({
@@ -30,6 +31,7 @@ export class CommentsService {
   entityType: string = ''
   workflow: string = ''
   commentTreeId: string =''
+  courseDetails: any = {}
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService
@@ -79,5 +81,8 @@ export class CommentsService {
 
   updateComment(request: any) {
     return this.http.put(API_END_POINTS.UPDATE_COMMENT, request)
+  }
+  getAllLikedCommentIds(entityId: any): Observable<any> {
+    return this.http.get<any>(`${API_END_POINTS.LIKED_COMMENTS(entityId)}`)
   }
 }
