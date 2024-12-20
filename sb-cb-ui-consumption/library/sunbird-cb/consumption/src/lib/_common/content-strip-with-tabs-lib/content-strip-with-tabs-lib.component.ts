@@ -164,6 +164,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     if (this.widgetData.loader && this.widgetData.strips.length) {
       this.showParentLoader = true;
     }
+    console.log('initData')
     // Fetch the data
     for (const strip of this.widgetData.strips) {
       if (this.checkForEmptyWidget(strip)) {

@@ -161,6 +161,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   }
 
   private initData() {
+    console.log('init')
     this.stripsKeyOrder = this.widgetData && this.widgetData.strips && this.widgetData.strips.map(strip => strip.key) || [];
     if (this.widgetData.loader && this.widgetData.strips.length) {
       this.showParentLoader = true;
@@ -695,68 +696,68 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.trendingSearchRequest(strip, currentTab.request, calculateParentStatus);
-      let tabResults: any[] = [];
-      if (response && response.results && response.results.response) {
-        const content = response.results.response[currentTab.value] || [];
-        const widgets = this.transformContentsToWidgets(content, strip);
+      // const response = await this.trendingSearchRequest(strip, currentTab.request, calculateParentStatus);
+      // let tabResults: any[] = [];
+      // if (response && response.results && response.results.response) {
+      //   const content = response.results.response[currentTab.value] || [];
+      //   const widgets = this.transformContentsToWidgets(content, strip);
        
-        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
-          this.resetSelectedPill(allPills)
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if(allPills && allPills.length && allPills[pillIndex]){
-              allPills[pillIndex] = {
-                ...allPills[pillIndex],
-                widgets,
-                fetchTabStatus: 'done',
-                selected: true
-              };
-            }
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              widgets,
-              fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
-          }
-        }
-        this.processStrip(
-          strip,
-          widgets,
-          'done',
-          calculateParentStatus,
-          response.viewMoreUrl,
-          tabResults // tabResults as widgets
-        );
-      } else {
-        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
-          this.resetSelectedPill(allPills)
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if(allPills && allPills.length && allPills[pillIndex]){
-              allPills[pillIndex] = {
-                ...allPills[pillIndex],
-                widgets:[],
-                fetchTabStatus: 'done',
-                selected: true
-              };
-            }
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              widgets:[],
-              fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
-          }
-        }
-        this.processStrip(strip, [], 'done', calculateParentStatus, null);
-      }
+      //   if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+      //     const allTabs = this.stripsResultDataMap[strip.key].tabs;
+      //     const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+      //     this.resetSelectedPill(allPills)
+      //     if (allTabs && allTabs.length && allTabs[tabIndex]) {
+      //       if(allPills && allPills.length && allPills[pillIndex]){
+      //         allPills[pillIndex] = {
+      //           ...allPills[pillIndex],
+      //           widgets,
+      //           fetchTabStatus: 'done',
+      //           selected: true
+      //         };
+      //       }
+      //       allTabs[tabIndex] = {
+      //         ...allTabs[tabIndex],
+      //         widgets,
+      //         fetchTabStatus: 'done',
+      //       };
+      //       tabResults = allTabs;
+      //     }
+      //   }
+      //   this.processStrip(
+      //     strip,
+      //     widgets,
+      //     'done',
+      //     calculateParentStatus,
+      //     response.viewMoreUrl,
+      //     tabResults // tabResults as widgets
+      //   );
+      // } else {
+      //   if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+      //     const allTabs = this.stripsResultDataMap[strip.key].tabs;
+      //     const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+      //     this.resetSelectedPill(allPills)
+      //     if (allTabs && allTabs.length && allTabs[tabIndex]) {
+      //       if(allPills && allPills.length && allPills[pillIndex]){
+      //         allPills[pillIndex] = {
+      //           ...allPills[pillIndex],
+      //           widgets:[],
+      //           fetchTabStatus: 'done',
+      //           selected: true
+      //         };
+      //       }
+      //       allTabs[tabIndex] = {
+      //         ...allTabs[tabIndex],
+      //         widgets:[],
+      //         fetchTabStatus: 'done',
+      //       };
+      //       tabResults = allTabs;
+      //     }
+      //   }
+      //   this.processStrip(strip, [], 'done', calculateParentStatus, null);
+      // }
     } catch (error) {
       // Handle errors
-      this.processStrip(strip, [], 'error', calculateParentStatus, null);
+     // this.processStrip(strip, [], 'error', calculateParentStatus, null);
     }
   }
 
@@ -767,47 +768,47 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     currentTab: NsContentStripWithTabsAndPills.IContentStripTab,
     calculateParentStatus: boolean
   ) {
-    try {
-      const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus);
-      if (response && response.results) {
-        const widgets = this.transformContentsToWidgets(response.results.result.content, strip);
-        let tabResults: any[] = [];
-        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
-          this.resetSelectedPill(allPills)
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if(allPills && allPills.length && allPills[pillIndex]){
-              allPills[pillIndex] = {
-                ...allPills[pillIndex],
-                widgets,
-                fetchTabStatus: 'done',
-                selected: true
-              };
-            }
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              widgets,
-              fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
-          }
-        }
-        this.processStrip(
-          strip,
-          widgets,
-          'done',
-          calculateParentStatus,
-          response.viewMoreUrl,
-          tabResults // tabResults as widgets
-        );
-      } else {
-        this.processStrip(strip, [], 'error', calculateParentStatus, null);
-      }
-    } catch (error) {
-      // Handle errors
-      // console.error('Error:', error);
-    }
+    // try {
+    //   const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus);
+    //   if (response && response.results) {
+    //     const widgets = this.transformContentsToWidgets(response.results.result.content, strip);
+    //     let tabResults: any[] = [];
+    //     if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+    //       const allTabs = this.stripsResultDataMap[strip.key].tabs;
+    //       const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+    //       this.resetSelectedPill(allPills)
+    //       if (allTabs && allTabs.length && allTabs[tabIndex]) {
+    //         if(allPills && allPills.length && allPills[pillIndex]){
+    //           allPills[pillIndex] = {
+    //             ...allPills[pillIndex],
+    //             widgets,
+    //             fetchTabStatus: 'done',
+    //             selected: true
+    //           };
+    //         }
+    //         allTabs[tabIndex] = {
+    //           ...allTabs[tabIndex],
+    //           widgets,
+    //           fetchTabStatus: 'done',
+    //         };
+    //         tabResults = allTabs;
+    //       }
+    //     }
+    //     this.processStrip(
+    //       strip,
+    //       widgets,
+    //       'done',
+    //       calculateParentStatus,
+    //       response.viewMoreUrl,
+    //       tabResults // tabResults as widgets
+    //     );
+    //   } else {
+    //     this.processStrip(strip, [], 'error', calculateParentStatus, null);
+    //   }
+    // } catch (error) {
+    //   // Handle errors
+    //   // console.error('Error:', error);
+    // }
   }
 
   async trendingSearchRequest(strip: NsContentStripWithTabsAndPills.IContentStripUnit,
