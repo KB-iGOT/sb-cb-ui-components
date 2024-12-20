@@ -1,9 +1,9 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.0.108-ang-9-12",
+  "version": "0.0.109-ang-9-12",
   "scripts": {
     "ng": "ng",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch=true",
     "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
