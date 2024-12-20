@@ -14,6 +14,7 @@ const API_END_POINTS = {
   DELETE_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/delete/${id}`,
   REPORT_POST: `/apis/proxies/v8/feedDiscussion/report`,
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
+  UPLOAD_FILE: `/apis/proxies/v8/feedDiscussion/uploadFile`
 }
 
 @Injectable({
@@ -69,5 +70,9 @@ export class DiscussionV2Service {
 
   reportPost(requestData: any) {
     return this.http.post<any>(`${API_END_POINTS.REPORT_POST}`, requestData)
+  }
+
+  uploadFile(req: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.UPLOAD_FILE}`, req)
   }
 }

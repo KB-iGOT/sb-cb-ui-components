@@ -62,11 +62,14 @@ export class NewPostComponent {
 
   openNewPostDialog() {
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
-        width: '600px', // Adjust the width as needed
-        data: {
-          type: this.type,
-          parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
-        } 
+      width: '600px',
+      maxHeight: '90vh', // Add maximum height (90% of viewport height)
+      data: {
+        type: this.type,
+        panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
+        backdropClass: 'post-dialog-backdrop',
+        parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
+      } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
       if (result) {
