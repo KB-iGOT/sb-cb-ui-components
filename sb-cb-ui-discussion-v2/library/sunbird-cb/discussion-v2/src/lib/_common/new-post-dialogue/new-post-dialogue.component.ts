@@ -41,12 +41,14 @@ export class NewPostDialogueComponent implements OnInit {
     },
     placeholder: 'Type the description here...'
   };
+  environment: any
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<NewPostDialogueComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private discussV2Svc: DiscussionV2Service,
+    @Inject('environment') environment: any
   ) {
     this.uploadForm = this.fb.group({
       community: ['', Validators.required],
@@ -55,6 +57,7 @@ export class NewPostDialogueComponent implements OnInit {
       tags: [[]],
       files: [[]]
     });
+    this.environment = environment
   }
 
   ngOnInit(): void {}
@@ -146,7 +149,12 @@ export class NewPostDialogueComponent implements OnInit {
         this.discussV2Svc.uploadFile(formData).subscribe({
           next: (res: any) => {
             if (res && res.result && res.result.url) {
-              resolve(res.result.url);
+              const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
+              // const finalURL = `${this.environment.contentHost}/${this.environment.contentBucket}${mainUrl}`
+              const finalURL = `${this.environment.contentHost}/content-store/discussionhub/${mainUrl}`
+              
+              console.log('finalURL: ',finalURL)
+              resolve(finalURL);
             } else {
               reject('No URL in response');
             }
@@ -159,6 +167,7 @@ export class NewPostDialogueComponent implements OnInit {
     Promise.all(uploadPromises)
       .then(uploadedUrls => {
         this.mediaUrls = uploadedUrls;
+        console.log('this.mediaUrls', this.mediaUrls)
         this.handlePostCreation();
       })
       .catch(error => {
