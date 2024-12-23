@@ -12,7 +12,7 @@
         'border-width': isMobile?  styleData?.responsive?.imageBorderWidth : styleData?.imageBorderWidth,
         'border-color': isMobile? styleData?.responsive?.imageBorderColor : styleData?.imageBorderColor,
         'border-style': isMobile? styleData?.responsive?.imageBorderStyle: styleData?.imageBorderStyle}">
-      <img i18n-alt alt="Page Banner" [src]="slide" class=" banner-image"  />
+      <img i18n-alt alt="Image{{i}}" [src]="slide" class=" banner-image"  />
     </div>
   </a>
   <ng-container *ngIf="isMobile && styleData?.responsive?.dots !== 'hidden' || !isMobile && styleData?.dots !== 'hidden'">
@@ -35,7 +35,7 @@
   </div>
 </div>
 <div class="banner-container-solo" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight" *ngIf="imageUrls?.length == 1">
-  <img i18n-alt alt="Page Banner" width="100%" height="100%" [src]="imageUrls[0]" wsUtilsImageResponsive class="banner-image-solo" />
+  <img i18n-alt alt="Image" width="100%" height="100%" [src]="imageUrls[0]" wsUtilsImageResponsive class="banner-image-solo" />
 </div>
 <!-- <div class="banner-container" (swipeleft)="slideTo(currentIndex + 1)" (swiperight)="slideTo(currentIndex - 1)"
   *ngIf="widgetData?.length">
