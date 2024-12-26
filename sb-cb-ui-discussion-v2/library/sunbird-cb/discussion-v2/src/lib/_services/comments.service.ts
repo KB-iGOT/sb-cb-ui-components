@@ -85,4 +85,16 @@ export class CommentsService {
   getAllLikedCommentIds(entityId: any): Observable<any> {
     return this.http.get<any>(`${API_END_POINTS.LIKED_COMMENTS(entityId)}`)
   }
+
+
+  emptyCommentSearch(){
+    const payload = {
+      entityType: this.entityType,
+      workflow: this.workflow,
+      commentTreeId: this.commentTreeId || '',
+      entityId: this.entityId,
+      overrideCache: true,
+    }
+    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
+  }
 }
