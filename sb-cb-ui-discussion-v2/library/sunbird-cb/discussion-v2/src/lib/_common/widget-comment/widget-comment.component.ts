@@ -77,7 +77,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     })
   }
 
-  fetchInitialComments_v2(commentTreeId?: string) {
+  fetchInitialComments_v2(commentTreeId?: string, overrideCacheValue?: boolean) {
     this.loading = true
     this.entityId = this.widgetData.newCommentSection.commentTreeData.entityId || ''
     const entityType = this.widgetData.newCommentSection.commentTreeData.entityType || ''
@@ -93,7 +93,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       entityId: this.entityId,
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
-      overrideCache: true,
+      overrideCache: overrideCacheValue || false,
     }
 
     this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
@@ -281,7 +281,7 @@ debugger
     if(_event.response 
       && _event.response.commentTree 
       && _event.response.commentTree.commentTreeId) {
-      this.fetchInitialComments_v2(_event.response.commentTree.commentTreeId)
+      this.fetchInitialComments_v2(_event.response.commentTree.commentTreeId, true)
     }
   }
 
@@ -314,6 +314,7 @@ debugger
     }
     this.commentSvc.likeUnlikeComment(payload).subscribe(res => {
       if (res.responseCode === 'OK') {
+        this.emptySearch()
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
         const comment = this.commentData.comments.find((comm: any) => comm.commentId === commentId)
         if (flag === 'like') {
@@ -335,6 +336,10 @@ debugger
 
   ngOnDestroy(): void {
     this.widgetData = null
+  }
+
+  emptySearch() {
+    this.commentSvc.emptyCommentSearch().subscribe((_res: any) => {})
   }
 
 }

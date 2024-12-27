@@ -86,7 +86,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     
     if (event.response && event.response.comment && event.response.comment.commentId) {
       this.loading = true
-
+      this.emptySearch()
       this.replyDataCopy.push(event.response.comment.commentId)
       this.replyDataCopy = this.replyDataCopy.slice()
       this.ref.markForCheck()
@@ -141,6 +141,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     this.commentSvc.reportComment(requestData).subscribe(res => {
       if (res && res.responseCode === 'OK') {
         this.loading = false
+        this.emptySearch()
       }
       this.reportPending = false
       this.comment = res.result
@@ -182,6 +183,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     }
     this.commentSvc.likeUnlikeComment(payload).subscribe(res => {
       if (res.responseCode === 'OK') {
+        this.emptySearch()
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
         const comment = this.fetchedReplyData.find((comm: any) => comm.commentId === commentId)
         if (flag === 'like') {
@@ -225,6 +227,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         })
         confirmDialog.afterClosed().subscribe((result: any) => {
           if (result) {
+            this.emptySearch()
             this.reportComment(result)
           }
         })
@@ -243,6 +246,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     })
     confirmDialog.afterClosed().subscribe((result: any) => {
       if (result) {
+        this.emptySearch()
         this.deleteCommentMethod(comment)
       }
     })
@@ -288,6 +292,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     }
     this.commentSvc.updateComment(requestData).subscribe((_res: any)=> {
       this.isEditMode = false
+      this.emptySearch()
       this.comment['lastUpdatedDate'] = new Date().toISOString()
       this.comment['commentData'] = this.editCommentData
       this._snackBar.open('Comment Updated successfully.')
@@ -347,5 +352,8 @@ export class CommentCardComponent implements OnInit, OnChanges {
       replayData = `<span class="mr-2 font-semibold ws-mat-default-text">Replying to ${users}</span>`
     }
     return replayData + commentText
+  }
+  emptySearch() {
+    this.commentSvc.emptyCommentSearch().subscribe((_res: any) => {})
   }
 }
