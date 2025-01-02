@@ -123,3 +123,8 @@ export * from './lib/directives/navigation/navigation.directive'
 export * from './lib/directives/permission/permission.directive'
 export * from './lib/helpers/horizontal-scroller/horizontal-scroller.component'
 export * from './lib/helpers/horizontal-scroller-v2/horizontal-scroller-v2.component'
+
+
+//ENROLL SERVICES
+export * from './lib/services-new/widget-enroll.service'
+export * from './lib/services-new/data-transfer.service'

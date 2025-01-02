@@ -81,8 +81,8 @@ export class WidgetUserServiceLib {
                 this.enrollmentDataIds.push(content.contentId)
                 coursesData.push(content)
               })
-              this.storeUserEnrollmentInfo(data.result.userCourseEnrolmentInfo,
-                                           data.result.courses.length)
+              // this.storeUserEnrollmentInfo(data.result.userCourseEnrolmentInfo,
+              //                              data.result.courses.length)
               data.result.courses = coursesData
             }
             return data.result
@@ -197,14 +197,14 @@ export class WidgetUserServiceLib {
     return this.getData('cbpData')
   }
 
-  storeUserEnrollmentInfo(enrollmentData: any, enrolledCourseCount: number) {
-    const userData = {
-      enrolledCourseCount,
-      userCourseEnrolmentInfo: enrollmentData,
-    }
-    localStorage.removeItem('userEnrollmentCount')
-    localStorage.setItem('userEnrollmentCount', JSON.stringify(userData))
-  }
+  // storeUserEnrollmentInfo(enrollmentData: any, enrolledCourseCount: number) {
+  //   const userData = {
+  //     enrolledCourseCount,
+  //     userCourseEnrolmentInfo: enrollmentData,
+  //   }
+  //   localStorage.removeItem('userEnrollmentCount')
+  //   localStorage.setItem('userEnrollmentCount', JSON.stringify(userData))
+  // }
 
 
   fetchEnrollmentDataByContentId(userId, contentdata) {
@@ -361,5 +361,11 @@ export class WidgetUserServiceLib {
       }
       return eventRes
     }))
+  }
+
+  fetchEnrollStats(userId: any): Observable<NsContent.IContent[]> {
+      return this.http.get<NsContent.IContent[]>(
+        `apis/proxies/v8/learner/course/v4/user/enrollment/summary/${userId}`
+      )
   }
 }
