@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 // import { environment } from 'src/environments/environment'
 import { NsCardContent } from '../_models/card-content-v2.model';
 import * as lodash from 'lodash';
+import { WidgetEnrollService } from '@sunbird-cb/utils-v2';
 
 
 const PROTECTED_SLAG_V8 = '/apis/protected/v8';
@@ -39,6 +40,7 @@ export class WidgetUserServiceLib {
   enrollmentDataIds: any = []
   constructor(
     @Inject('environment') environment: any,
+    private enrollSvc: WidgetEnrollService,
     private http: HttpClient) {
     this.environment = environment;
    }
@@ -170,13 +172,20 @@ export class WidgetUserServiceLib {
         const result: any = this.http.get(API_END_POINTS.FETCH_CPB_PLANS).pipe(catchError(this.handleError), map(
           async (data: any) => {
             if(data.result && data.result.content && data.result.content.length) {
+              
               let cbpData: any = this.getCbpFormatedData(data.result.content)
               let cbpDoIds = cbpData.contentIds.join(',')
               let cbpContentData: any = cbpData.cbpContentData || []
-              const responseData =  await this.fetchEnrollmentDataByContentId(userId,cbpDoIds).toPromise().then(async (res: any) => {
+              let request = {
+                "request": {
+                    "courseId": cbpData.contentIds
+                }
+              }
+              const responseData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+                
                 const enrollData: any = {}
-                if (res && res.courses && res.courses.length) {
-                  res.courses.forEach((data: any) => {
+                if (res && res.result && res.result.courses && res.result.courses.length) {
+                  res.result.courses.forEach((data: any) => {
                     enrollData[data.collectionId] = data
                   })
                   return enrollData
