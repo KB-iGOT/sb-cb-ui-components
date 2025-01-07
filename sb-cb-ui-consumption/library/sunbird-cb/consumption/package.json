@@ -8,7 +8,7 @@
     "@angular/common": "^16.2.12",
     "@angular/core": "^16.2.12",
     "@sunbird-cb/design-system": "0.0.2",
-    "@sunbird-cb/utils-v2": "0.0.22-ang-13-16",
+    "@sunbird-cb/utils-v2": "0.0.26-ang-13-16",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16"
   }
 }

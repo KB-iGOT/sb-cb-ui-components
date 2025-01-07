@@ -363,9 +363,4 @@ export class WidgetUserServiceLib {
     }))
   }
 
-  fetchEnrollStats(userId: any): Observable<NsContent.IContent[]> {
-      return this.http.get<NsContent.IContent[]>(
-        `apis/proxies/v8/learner/course/v4/user/enrollment/summary/${userId}`
-      )
-  }
 }
