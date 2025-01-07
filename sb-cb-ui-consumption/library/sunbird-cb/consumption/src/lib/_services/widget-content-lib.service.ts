@@ -73,6 +73,7 @@ export class WidgetContentLibService {
 
   tocConfigData: any = new BehaviorSubject<any>({});
   tocConfigData$  = this.tocConfigData.asObservable();
+  oneStepResumeEnable:boolean = false;
 
   private telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
@@ -478,7 +479,7 @@ export class WidgetContentLibService {
     return []
   }
 
-  async getResourseLink(content: any) {
+  async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean) {
     if(content && content.content && content.content.eventId) {
       const urlData: any = {
         url: `app/event-hub/home/${content.content.eventId}`,
@@ -493,25 +494,30 @@ export class WidgetContentLibService {
         };
         return urlData
     } else {
-      const enrolledCourse: any = await this.getEnrolledData(content.identifier);
-      if (enrolledCourse && enrolledCourse.length) {
-        const enrolledCourseData = enrolledCourse[0]
-        if (enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.BLENDED_PROGRAM ||
-          enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
-          enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.MODERATED_PROGRAM ||
-          enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
-          enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.PROGRAM) {
-            if (!this.isBatchInProgress(enrolledCourseData.batch)) {
-              return this.gotoTocPage(content);
-            }
+      if(checkForResume) {
+        // const enrolledCourse: any = await this.getEnrolledData(content.identifier);
+        const enrolledCourse: any = enrollmentList;
+        if (enrolledCourse && enrolledCourse.length) {
+          const enrolledCourseData = enrolledCourse[0]
+          if (enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.BLENDED_PROGRAM ||
+            enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
+            enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.MODERATED_PROGRAM ||
+            enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
+            enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.PROGRAM) {
+              if (!this.isBatchInProgress(enrolledCourseData.batch)) {
+                return this.gotoTocPage(content);
+              }
+              const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
+              return data;
+          }  {
             const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
             return data;
-        }  {
-          const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
-          return data;
+          }
         }
+      } else {
+        this.oneStepResumeEnable = true;
+        return this.gotoTocPage(content);
       }
-      return this.gotoTocPage(content);
     }
   }
   async checkForDataToFormUrl(content: any, enrollData: any) {
