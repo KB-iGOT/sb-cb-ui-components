@@ -1270,7 +1270,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                 '',
                 tabResults
               );
-              console.log("strip.tabs ", strip.tabs)
             } else {
               this.processStrip(
                 strip,
