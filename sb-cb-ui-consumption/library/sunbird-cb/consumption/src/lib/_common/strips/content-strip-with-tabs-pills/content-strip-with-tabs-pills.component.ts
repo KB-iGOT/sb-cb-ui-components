@@ -948,7 +948,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     ) {
       if(strip.tabs[tabIndex].request.designationsList) {
         let response = await this.userSvc.fetchDesigantionsData().toPromise()
-        console.log("response ", response)
         if (response) {
           let request = {
             "request": {
@@ -1030,8 +1029,9 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             this.transformContentsToWidgets([], strip),
             'done',
             calculateParentStatus,
-            'viewMoreUrl', strip.tabs
-          )
+            '',
+            strip.tabs
+          );
         }
       }
     }
@@ -1039,7 +1039,8 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     resetPills(data: any) {
       data.forEach((pill: any) => {
         pill.fetchTabStatus = 'done'
-        pill.tabLoading = false
+        delete pill.tabLoading
+        pill.widgets = []
       })
     }
 
@@ -1269,6 +1270,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                 '',
                 tabResults
               );
+              console.log("strip.tabs ", strip.tabs)
             } else {
               this.processStrip(
                 strip,
