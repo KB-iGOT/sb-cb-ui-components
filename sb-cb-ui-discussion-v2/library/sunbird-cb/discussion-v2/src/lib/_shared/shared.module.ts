@@ -14,13 +14,15 @@ import { MatCheckboxModule } from '@angular/material/checkbox'
 import { AvatarPhotoComponent } from './avatar-photo/avatar-photo.component'
 import { FlagDialogueComponent } from './flag-dialogue/flag-dialogue.component';
 import { FormsModule } from '@angular/forms';
+import { ConfirmDialogueComponent } from './confirm-dialogue/confirm-dialogue.component';
 
 
 
 @NgModule({
   declarations: [
     AvatarPhotoComponent,
-    FlagDialogueComponent
+    FlagDialogueComponent,
+    ConfirmDialogueComponent,
   ],
   imports: [
     CommonModule,
@@ -39,7 +41,8 @@ import { FormsModule } from '@angular/forms';
   ],
   exports: [
     AvatarPhotoComponent,
-    FlagDialogueComponent
+    FlagDialogueComponent,
+    ConfirmDialogueComponent
   ],
 })
 export class SharedModule { }

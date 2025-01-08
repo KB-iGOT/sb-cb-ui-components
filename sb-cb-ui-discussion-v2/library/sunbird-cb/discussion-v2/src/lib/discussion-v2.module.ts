@@ -23,6 +23,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
 
 
 @NgModule({
@@ -50,7 +51,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatSelectModule,
     MatChipsModule,
     PickerModule,
-    // CKEditorModule,
+    CKEditorModule,
     WidgetCommentModule,
     WidgetDiscussionv2Module,
   ],

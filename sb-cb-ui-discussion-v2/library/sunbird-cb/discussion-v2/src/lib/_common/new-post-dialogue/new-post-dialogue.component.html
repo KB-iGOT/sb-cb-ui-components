@@ -27,21 +27,16 @@
     </div>
   
     <!-- Question Description -->
-    <div class="mb-4 w-full">
+    <div class="mb-4 flex flex-col w-full">
       <label class="block text-gray-700 text-sm font-medium mb-2">
         Question Description <span class="text-red-500">*</span>
       </label>
-      <textarea matInput #description formControlName="description" [cdkTextareaAutosize] [cdkAutosizeMaxRows]="10"
-          [cdkAutosizeMinRows]="3" #othersTextarea class="custom-textarea w-full"
-          placeholder="Description" i18n-placeholder maxlength="500"></textarea>
-      <div class="w-100 mt-1 ws-mat-black60-text mat-body-2 text-right">
-          <span id="current">{{description.value.length}}/ 500</span>
-      </div>
-      <!-- <ckeditor
+      <ckeditor
         [editor]="Editor"
         formControlName="description"
-        [config]="{ placeholder: 'Type the description here...' }">
-      </ckeditor> -->
+        [config]="editorConfig"
+        (ready)="onReady($event)">
+      </ckeditor>
       <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p>
     </div>
   

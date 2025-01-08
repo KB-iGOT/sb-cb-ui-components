@@ -7,6 +7,7 @@ import _ from 'lodash'
 import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 
 @Component({
   selector: 'd-v2-post-card',
@@ -37,6 +38,7 @@ export class PostCardComponent {
   loogedInUserProfile: any = {}
   flagSelectionList: any
   reportPending = false
+  viewMoreLength = 200
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -72,7 +74,8 @@ export class PostCardComponent {
     // let ids:any = reveseReplayDataCopy.slice(0,this.answerPostLimit)
     const req = {
       "filterCriteriaMap": {
-        discussionId : [...this.replyDataCopy]
+        discussionId : [...this.replyDataCopy],
+        isActive: true // this is to get only active posts, deleted posts won't be returned
       },
       "requestedFields": [],
       "pageNumber": this.answerPostPage,
@@ -98,7 +101,8 @@ export class PostCardComponent {
     // let ids:any = reveseReplayDataCopy.slice(start,this.answerPostCount)
     const req = {
       "filterCriteriaMap": {
-        discussionId : [...this.replyDataCopy]
+        discussionId : [...this.replyDataCopy],
+        isActive: true // this is to get only active posts, deleted posts won't be returned
       },
       "requestedFields": [],
       "pageNumber": this.answerPostPage,
@@ -117,7 +121,7 @@ export class PostCardComponent {
   
 
   viewMoreOrLess(item: any) {
-    if (item.description.length > 152) {
+    if (item.description.length > this.viewMoreLength) {
       item.expanded = !item.expanded
     }
   }
@@ -200,31 +204,31 @@ export class PostCardComponent {
       })
   }
 
-  openDeleteDialogue(_comment: any) {
-    // const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
-    //   width: '600px',
-    //   panelClass: 'flag-dialog',
-    //   backdropClass: 'flag-dialog-backdrop',
-    //   data: {
-    //     comment,
-    //     flagSelectionList: this.flagSelectionList
-    //   },
-    // })
-    // confirmDialog.afterClosed().subscribe((result: any) => {
-    //   if (result) {
-    //     // this.deleteCommentMethod(comment)
-    //   }
-    // })
+  openDeleteDialogue(post: any) {
+    const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
+      width: '600px',
+      panelClass: 'flag-dialog',
+      backdropClass: 'flag-dialog-backdrop',
+      data: {
+        post,
+        flagSelectionList: this.flagSelectionList
+      },
+    })
+    confirmDialog.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.deleteCommentMethod(post)
+      }
+    })
 
   }
-  // deleteCommentMethod(comment: any) {
-  //   this.commentSvc.deleteComment(comment.commentId, this.commentSvc.entityType, this.commentSvc.entityId, this.commentSvc.workflow).subscribe((_res: any) => {
-  //     comment.status = 'inactive'
-  //     this._snackBar.open('Comment deleted successfully')
-  //   }, (_err: any)=> {
-  //     this._snackBar.open('Something went wrong! please try again later.')
-  //   })
-  // }
+  deleteCommentMethod(post: any) {
+    this.discussV2Svc.deletePost(post.discussionId).subscribe((_res: any) => {
+      post.status = 'inactive'
+      this._snackBar.open('Comment deleted successfully')
+    }, (_err: any)=> {
+      this._snackBar.open('Something went wrong! please try again later.')
+    })
+  }
 
   toggelEdit(postData:any) {
     this.editCommentData = {}
