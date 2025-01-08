@@ -215,7 +215,8 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
     this.loadingPosts = true
     const req = {
         "filterCriteriaMap": {
-          "type": "question"
+          "type": "question",
+          isActive: true // this is to get only active posts, deleted posts won't be returned
         },
         "requestedFields": [],
         "pageNumber": this.commentListOffSet,
@@ -240,7 +241,8 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
     this.loadingMore = true
     const req = {
         "filterCriteriaMap": {
-          "type": "question"
+          "type": "question",
+          isActive: true // this is to get only active posts, deleted posts won't be returned
         },
         "requestedFields": [],
         "pageNumber": this.commentListOffSet,
