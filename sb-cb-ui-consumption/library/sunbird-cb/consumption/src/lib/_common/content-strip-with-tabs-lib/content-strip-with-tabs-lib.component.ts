@@ -12,6 +12,7 @@ import {
   ConfigurationsService,
   UtilityService,
   WsEvents,
+  WidgetEnrollService,
 } from '@sunbird-cb/utils-v2';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -115,7 +116,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     public router: Router,
     private userSvc: WidgetUserServiceLib,
     private translate: TranslateService,
-    private langtranslations: MultilingualTranslationsService
+    private langtranslations: MultilingualTranslationsService,
+    private enrollSvc: WidgetEnrollService
   ) {
     super();
     if (localStorage.getItem('websiteLanguage')) {
@@ -577,10 +579,16 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
               if (strip.key === 'scheduledAssessment') {
               
                 let result = response.results.result.content.map(a => a.identifier);
-                const responseData =  await this.userSvc.fetchEnrollmentDataByContentId(this.configSvc.userProfile.userId,result.join(',')).toPromise().then(async (res: any) => {
+                
+                let request = {
+                  "request": {
+                      "courseId": result
+                  }
+                }
+                const responseData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
                   const enrollData: any = {}
-                  if (res && res.courses && res.courses.length) {
-                    res.courses.forEach((data: any) => {
+                  if (res && res.result && res.result.courses && res.result.courses.length) {
+                    res.result.courses.forEach((data: any) => {
                       enrollData[data.collectionId] = data
                     })
                     return enrollData
