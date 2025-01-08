@@ -884,6 +884,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = true;
         stripMap.showOnLoader = true;
+        this.resetSelectedPill(stripMap.tabs[tabEvent].pillsData)
       }
       const data: WsEvents.ITelemetryTabData = {
         label: `${stripMap.tabs[tabEvent].label}`,
@@ -928,13 +929,193 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           //   stripMap.tabs[tabEvent.index].tabLoading = false;
           // }
 
-          stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false;
-        } 
-        // else if (currentTabFromMap.requestRequired && currentTabFromMap.request) {
-         
-        // }
-        
+          stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
+        } else if (currentTabFromMap.requestRequired && currentTabFromMap.request) {
+          if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.designationsList){
+            this.fetchDesignationBasedCourses(currentStrip,tabEvent, true)
+          } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList){
+            this.fetchAllCbpPlans(currentStrip, true)
+          }
+          stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
+        }
       }
+    }
+
+    async fetchDesignationBasedCourses(
+      strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+      tabIndex: number,
+      calculateParentStatus: boolean
+    ) {
+      if(strip.tabs[tabIndex].request.designationsList) {
+        let response = await this.userSvc.fetchDesigantionsData().toPromise()
+        if (response) {
+          let request = {
+            "request": {
+                "courseId": response
+            }
+          }
+          let enollData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+            if (res && res.result && res.result.courses && res.result.courses.length) {
+              res.result.courses
+              return res.result.courses
+            } else {
+              return {}
+            }
+          }).catch((_err: any) => {
+            return {}
+          })
+          const sRequest: any = {
+            "searchV6": {
+              "request": {
+                "filters": {
+                  "identifier": response
+                },
+                "offset": 0,
+                "query": "",
+                "sort_by": {
+                    "lastUpdatedOn": "desc"
+                },
+              }
+            }
+          }
+          this.contentSvc.searchV6(sRequest.searchV6).subscribe(results => {
+            if (results && results.result && results.result.content) {
+              let courses = results.result.content
+              let tabResults: any
+              if (strip.tabs && strip.tabs.length) {
+                tabResults = this.splitDesignationsTabData(courses, strip, enollData)
+                let countOfWidget = true
+                if(strip && strip.tabs && strip.tabs.length) {
+                  strip.tabs.forEach((tab:any)=> {
+                    if(tab.value === 'designation' && tab.pillsData && tab.pillsData.length) {
+                      tab.pillsData.forEach((pill: any) => {
+                        if(pill && pill.widgets && pill.widgets.length){
+                          if(countOfWidget){
+                            pill.selected = true
+                            countOfWidget= false
+                          }
+                        }
+                      });
+                    }
+                  })
+                }
+                this.processStrip(
+                  strip,
+                  this.transformContentsToWidgets(courses, strip),
+                  'done',
+                  calculateParentStatus,
+                  '',
+                  tabResults
+                )
+              } else {
+                this.processStrip(
+                  strip,
+                  this.transformContentsToWidgets(courses, strip),
+                  'done',
+                  calculateParentStatus,
+                  'viewMoreUrl', strip.tabs
+                )
+              }
+            }
+          })
+        } else {
+          this.resetPills(strip.tabs[tabIndex].pillsData)
+          console.log("before ",this.stripsResultDataMap.cbpPlan)
+          this.stripsResultDataMap.cbpPlan.showOnLoader = false
+          console.log("after ", this.stripsResultDataMap.cbpPlan)
+          strip.tabs[tabIndex]
+          this.processStrip(
+            strip,
+            this.transformContentsToWidgets([], strip),
+            'done',
+            calculateParentStatus,
+            '',
+            strip.tabs
+          );
+        }
+      }
+    }
+
+    resetPills(data: any) {
+      data.forEach((pill: any) => {
+        pill.fetchTabStatus = 'done'
+        delete pill.tabLoading
+        pill.widgets = []
+      })
+    }
+
+    splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any) {
+      let tabResults: any[] = [];
+      const splitData = this.getTabsDesignationsList(
+        contentNew,
+        strip, enollData
+      );
+      if (strip.tabs && strip.tabs.length) {
+        for (let i = 0; i < strip.tabs.length; i += 1) {
+          if (strip.tabs[i].value === "designation") {
+            let checkWidgetAndActivePill = true
+            if (strip.tabs[i].pillsData && strip.tabs[i].pillsData.length) {
+              for (let j = 0; j < strip.tabs[i].pillsData.length; j += 1) {
+                if (strip.tabs[i].pillsData[j]) {
+                  tabResults.push(
+                    {
+                      ...strip.tabs[i].pillsData[j],
+                      fetchTabStatus: 'done',
+                      tabLoading: false,
+                      ...(splitData.find(itmInner => {
+                        if (strip.tabs[i].pillsData&& strip.tabs[i].pillsData[j] && itmInner.value === strip.tabs[i].pillsData[j].value) {
+                          return itmInner
+                        }
+                        return undefined
+                      })),
+                    }
+                  )
+                }
+              }
+              strip.tabs[i].pillsData = tabResults
+            }
+          }
+        }
+      }
+      return strip.tabs
+    }
+
+    getTabsDesignationsList(array: NsContent.IContent[],
+      strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any) {
+        let avaialable: any[] = []
+        let inprogress: any[] = []
+        let allCompleted: any[] = []
+        let cbpData: any
+        this.userSvc.getData('cbpData').subscribe((result => {
+          cbpData = result
+        }))
+        array.forEach((course: any) => {
+          if (cbpData) {
+            const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
+            if (cbpelem) {
+              return
+            }
+          }
+          if (enollData) {
+            const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
+            if (elem) {
+              if (elem.status === 2) {
+                allCompleted.push(course)
+              } else {
+                inprogress.push(course)
+              }
+            } else {
+              avaialable.push(course)
+            }
+          } else {
+            avaialable.push(course)
+          }
+        })
+        return [
+          { value: 'available', widgets: this.transformContentsToWidgets(avaialable, strip) },
+          { value: 'inprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
+          { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
+        ]
     }
 
     pillClicked(event: any, stripMap: IStripUnitContentData, stripKey: any, pillIndex: any, tabIndex: any) {

@@ -30,6 +30,7 @@ const API_END_POINTS = {
   FETCH_USER_ENROLLMENT_LIST_V2: (userId: string | undefined, orgdetails: string, licenseDetails: string, fields: string, batchDetails: string, competencyKey: string) =>
     // tslint:disable-next-line: max-line-length
     `apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=${orgdetails}&licenseDetails=${licenseDetails}&fields=${fields},courseCategory,${competencyKey}&batchDetails=${batchDetails}`,
+  FETCH_DESIGNATION_COURSES: `/apis/proxies/v8/courseRecommend/v1/courses`
 };
 
 @Injectable({
@@ -370,6 +371,17 @@ export class WidgetUserServiceLib {
       }
       return eventRes
     }))
+  }
+  fetchDesigantionsData() {
+    const result: any = this.http.get(API_END_POINTS.FETCH_DESIGNATION_COURSES).pipe(catchError(this.handleError), map(
+      async (data: any) => {
+        if(data.result && data.result.courseList) {
+          return data.result && data.result.courseList
+        }
+        return ''
+      })
+    )
+    return result
   }
 
 }
