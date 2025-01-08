@@ -165,7 +165,7 @@ export class NewPostDialogueComponent implements OnInit {
             if (res && res.result && res.result.url) {
               const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
               // const finalURL = `${this.environment.contentHost}/${this.environment.contentBucket}${mainUrl}`
-              const finalURL = `${this.environment.contentHost}/content-store/discussionhub/${mainUrl}`
+              const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
 
               console.log('finalURL: ', finalURL)
               resolve(finalURL);
