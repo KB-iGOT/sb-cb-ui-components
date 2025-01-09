@@ -102,6 +102,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   defaultMaxWidgets = 12;
   enrollInterval: any;
   todaysEvents: any = [];
+  activeTabIndex: number = 0
 
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
@@ -584,7 +585,13 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     if(this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
-      this.router.navigate([path], {  queryParams: queryParamsData })
+      if (queryParamsData && queryParamsData.tabSelected && queryParamsData.tabSelected === 'designation') {
+        delete queryParamsData.key
+        this.router.navigate(['/page/recommended-learnings'], {queryParams: queryParamsData})
+      } else {
+        this.router.navigate([path], {  queryParams: queryParamsData })
+      }
+      
     }
   }
 
@@ -880,6 +887,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     }
 
     public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
+      this.activeTabIndex = tabEvent
       if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
         stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = true;
