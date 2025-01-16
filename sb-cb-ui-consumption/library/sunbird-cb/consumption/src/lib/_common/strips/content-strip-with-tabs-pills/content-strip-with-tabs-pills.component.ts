@@ -103,6 +103,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   enrollInterval: any;
   todaysEvents: any = [];
   activeTabIndex: number = 0
+  activePillIndex: number = 0
 
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
@@ -134,10 +135,22 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     // const url = window.location.href
     this.initData();
     this.contentSvc.telemetryData$.subscribe((data: any) => {
-      this.telemtryResponse.emit(data)
+      if (this.widgetData && this.widgetData.strips[0] && this.widgetData.strips[0].key === 'cbpPlan') {
+        const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
+        const pill = tab.pillsData[this.activePillIndex]
+        if (tab && pill) {
+          data.selectedTab = this.parametrizedText(tab.label)
+          data.selectedPill = this.parametrizedText(pill.value)
+          this.telemtryResponse.emit(data)
+        }
+      } else {
+        this.telemtryResponse.emit(data)
+      }
     })
+  }
 
-  
+  parametrizedText(str: string) {
+    return str.toLocaleLowerCase().replace(" ", "-")
   }
 
   ngOnDestroy() {
@@ -384,6 +397,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
           cardCustomeClass: strip.customeClass ? strip.customeClass : '',
           context: { pageSection: strip.key, position: idx },
+
           intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
           deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
           contentTags: strip.stripConfig && strip.stripConfig.contentTags,
@@ -1127,6 +1141,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     }
 
     pillClicked(event: any, stripMap: IStripUnitContentData, stripKey: any, pillIndex: any, tabIndex: any) {
+      this.activePillIndex = pillIndex
       if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
         stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
         stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true;
