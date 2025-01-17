@@ -20,7 +20,6 @@ import { MatCardModule } from '@angular/material/card'
 import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PickerModule } from '@ctrl/ngx-emoji-mart'
-import { ConfirmDialogueComponent } from '../../_common/confirm-dialogue/confirm-dialogue.component'
 import { SharedModule } from '../../_shared/shared.module'
 
 @NgModule({
@@ -29,7 +28,6 @@ import { SharedModule } from '../../_shared/shared.module'
     NewCommentComponent,
     CommentCardComponent,
     WidgetCommentComponent,
-    ConfirmDialogueComponent
   ],
   imports: [
     CommonModule,

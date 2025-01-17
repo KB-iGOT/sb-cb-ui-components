@@ -8,7 +8,7 @@ import _ from 'lodash'
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component'
-import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue.component'
+import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component'
 
 
 @Component({
@@ -115,6 +115,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     reveseReplayDataCopy.reverse()
     let ids:any = reveseReplayDataCopy.slice(0,10)
     this.commentSvc.getListOfCommentsById(ids).subscribe(res => {
+      this.loading = false
       if (res.result && res.result.comments.length) {
         let taggedUsersList = res.result.taggedUsers
         this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
@@ -123,7 +124,6 @@ export class CommentCardComponent implements OnInit, OnChanges {
         const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
         this.fetchedReplyData = [...replayModified,]
         this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
-        this.loading = false
       }
     },
       () => {
