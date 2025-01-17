@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
-// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
@@ -20,26 +20,40 @@ export class NewPostDialogueComponent implements OnInit {
   mediaUrls: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   uploadedFiles: File[] = [];
-  // public Editor = ClassicEditor;
+  public Editor = ClassicEditor;
   public editorConfig = {
+    plugins: [...ClassicEditor.builtinPlugins],
+    placeholder: 'Type the description here...',
     toolbar: {
       items: [
-        'heading',
-        '|',
-        'bold',
-        'italic',
-        'underline',
-        '|',
-        'bulletedList',
-        'numberedList',
-        '|',
-        'link',
-        '|',
-        'undo',
-        'redo'
+        'undo', 'redo',
+        '|', 'heading',
+        '|', 'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor',
+        '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+        '|', 'alignment',
+        'link', 'blockQuote', 'codeBlock',
+        '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
+      ],
+      shouldNotGroupWhenFull: true
+    },
+    fontFamily: {
+      supportAllValues: true,
+      options: [
+        'default',
+        'Arial, Helvetica, sans-serif',
+        'Courier New, Courier, monospace',
+        'Georgia, serif',
+        'Lucida Sans Unicode, Lucida Grande, sans-serif',
+        'Tahoma, Geneva, sans-serif',
+        'Times New Roman, Times, serif',
+        'Trebuchet MS, Helvetica, sans-serif',
+        'Verdana, Geneva, sans-serif'
       ]
     },
-    placeholder: 'Type the description here...'
+    fontSize: {
+      options: [10, 12, 14, 'default', 18, 20, 22],
+      supportAllValues: true
+    },
   };
   environment: any
 
@@ -60,7 +74,7 @@ export class NewPostDialogueComponent implements OnInit {
     this.environment = environment
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   createPoll(): void {
     // Implement poll creation logic
@@ -91,7 +105,7 @@ export class NewPostDialogueComponent implements OnInit {
     // Remove file from both arrays
     this.uploadedFiles.splice(index, 1);
     this.selectedFiles.splice(index, 1);
-    
+
     // Update form control with new array
     this.uploadForm.patchValue({
       files: this.uploadedFiles
@@ -145,15 +159,15 @@ export class NewPostDialogueComponent implements OnInit {
         // Create FormData object to properly send the file
         const formData = new FormData();
         formData.append('file', file);
-        
+
         this.discussV2Svc.uploadFile(formData).subscribe({
           next: (res: any) => {
             if (res && res.result && res.result.url) {
               const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
               // const finalURL = `${this.environment.contentHost}/${this.environment.contentBucket}${mainUrl}`
-              const finalURL = `${this.environment.contentHost}/content-store/discussionhub/${mainUrl}`
-              
-              console.log('finalURL: ',finalURL)
+              const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
+
+              console.log('finalURL: ', finalURL)
               resolve(finalURL);
             } else {
               reject('No URL in response');
@@ -192,8 +206,8 @@ export class NewPostDialogueComponent implements OnInit {
     const req = this.createReq(this.uploadForm, this.data.type)
     console.log('req:', req);
     this.discussV2Svc.createPost(req).subscribe(res => {
-      if(res && res.result){
-        this.dialogRef.close({result: res.result, type: this.data.type})
+      if (res && res.result) {
+        this.dialogRef.close({ result: res.result, type: this.data.type })
       }
     }, (err: any) => {
       console.log('Create post failed', err)
@@ -205,8 +219,8 @@ export class NewPostDialogueComponent implements OnInit {
     const req = this.createReq(this.uploadForm, this.data.type)
     console.log('req:', req);
     this.discussV2Svc.createAnswerPost(req).subscribe(res => {
-      if(res && res.result){
-        this.dialogRef.close({result: res.result, type: this.data.type})
+      if (res && res.result) {
+        this.dialogRef.close({ result: res.result, type: this.data.type })
       }
     }, (err: any) => {
       console.log('Create post failed', err)
@@ -216,7 +230,7 @@ export class NewPostDialogueComponent implements OnInit {
   createReq(formData: any, type: string) {
     const req = {
       type,
-      ...(this.data.parentDiscussionId ? {parentDiscussionId: this.data.parentDiscussionId} : null),
+      ...(this.data.parentDiscussionId ? { parentDiscussionId: this.data.parentDiscussionId } : null),
       community: formData.value.community,
       title: formData.value.title,
       description: formData.value.description,
@@ -225,5 +239,16 @@ export class NewPostDialogueComponent implements OnInit {
       mediaUrls: this.mediaUrls || []
     }
     return req;
+  }
+
+  onReady(editor: any) {
+    // You can customize the editor instance here
+    editor.editing.view.change((writer: any) => {
+      writer.setStyle(
+        'min-height',
+        '200px',
+        editor.editing.view.document.getRoot()
+      );
+    });
   }
 }

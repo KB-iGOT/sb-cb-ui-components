@@ -61,7 +61,7 @@ export class DiscussionV2Service {
   }
 
   deletePost(id: string) {
-    return this.http.get<any>(`${API_END_POINTS.DELETE_POST(id)}`)
+    return this.http.delete<any>(`${API_END_POINTS.DELETE_POST(id)}`)
   }
 
   fetchAllFlags(): Observable<any> {
