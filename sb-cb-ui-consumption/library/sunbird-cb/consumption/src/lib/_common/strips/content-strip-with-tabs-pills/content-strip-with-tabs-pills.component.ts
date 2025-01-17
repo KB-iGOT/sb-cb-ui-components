@@ -140,7 +140,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         const pill = tab.pillsData[this.activePillIndex]
         if (tab && pill) {
           data.selectedTab = this.parametrizedText(tab.label)
-          data.selectedPill = this.parametrizedText(pill.value)
+          data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
           this.telemtryResponse.emit(data)
         }
       } else {
@@ -1042,10 +1042,11 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           })
         } else {
           this.resetPills(strip.tabs[tabIndex].pillsData)
-          console.log("before ",this.stripsResultDataMap.cbpPlan)
-          this.stripsResultDataMap.cbpPlan.showOnLoader = false
-          console.log("after ", this.stripsResultDataMap.cbpPlan)
-          strip.tabs[tabIndex]
+          strip.tabs[tabIndex].pillsData[0].selected = true
+          strip.tabs[tabIndex].pillsData[0].widgets = []
+          strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+          strip.showOnLoader = false
+          strip.tabs[tabIndex].pillsData[0].tabLoading = false
           this.processStrip(
             strip,
             this.transformContentsToWidgets([], strip),
@@ -1134,9 +1135,9 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           }
         })
         return [
-          { value: 'available', widgets: this.transformContentsToWidgets(avaialable, strip) },
-          { value: 'inprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
-          { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
+          { value: 'ravailable', widgets: this.transformContentsToWidgets(avaialable, strip) },
+          { value: 'rinprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
+          { value: 'rcompleted', widgets: this.transformContentsToWidgets(allCompleted, strip) },
         ]
     }
 
@@ -1261,7 +1262,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
 
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
-
       let courses: NsContent.IContent[];
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
@@ -1303,13 +1303,18 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
               );
             }
       } else {
+        strip.tabs[0].pillsData[0].selected = true
+        strip.tabs[0].pillsData[0].widgets = []
+        strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
+        strip.showOnLoader = false
+        strip.tabs[0].pillsData[0].tabLoading = false
         this.processStrip(
           strip,
           this.transformContentsToWidgets(courses, strip),
           'done',
           calculateParentStatus,
           '',
-          tabResults
+          strip.tabs
         );
       }
       clearInterval(this.enrollInterval);

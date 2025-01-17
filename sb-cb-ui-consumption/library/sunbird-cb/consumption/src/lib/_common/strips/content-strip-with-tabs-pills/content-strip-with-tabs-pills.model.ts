@@ -88,6 +88,7 @@ export namespace NsContentStripWithTabsAndPills {
       path: string
     };
     data?: [];
+    showOnLoader?: boolean
   }
 
   export interface IStripRequestApi {
