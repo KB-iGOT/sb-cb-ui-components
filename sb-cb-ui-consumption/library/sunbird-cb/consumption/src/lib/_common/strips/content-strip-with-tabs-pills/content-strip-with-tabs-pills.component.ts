@@ -978,13 +978,12 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           }
           let enollData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
             if (res && res.result && res.result.courses && res.result.courses.length) {
-              res.result.courses
               return res.result.courses
             } else {
-              return {}
+              return []
             }
           }).catch((_err: any) => {
-            return {}
+            return []
           })
           const sRequest: any = {
             "searchV6": {
@@ -1021,6 +1020,10 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                     }
                   })
                 }
+                strip.tabs[tabIndex].pillsData[0].selected = true
+                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                strip.showOnLoader = false
+                strip.tabs[tabIndex].pillsData[0].tabLoading = false
                 this.processStrip(
                   strip,
                   this.transformContentsToWidgets(courses, strip),
@@ -1030,6 +1033,10 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                   tabResults
                 )
               } else {
+                strip.tabs[tabIndex].pillsData[0].selected = true
+                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                strip.showOnLoader = false
+                strip.tabs[tabIndex].pillsData[0].tabLoading = false
                 this.processStrip(
                   strip,
                   this.transformContentsToWidgets(courses, strip),
@@ -1119,7 +1126,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
               return
             }
           }
-          if (enollData) {
+          if (enollData && enollData.length) {
             const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
             if (elem) {
               if (elem.status === 2) {
