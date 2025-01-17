@@ -1452,7 +1452,18 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           }
           this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
         },(_err: any) => {
-
+          if(courses && courses.length){
+            this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
+          } else {
+            this.processStrip(
+              strip,
+              [],
+              'done',
+              calculateParentStatus,
+              {},
+              strip.tabs
+            );
+          }
         })
       },(_err: any) => {
         let courses: any = []
