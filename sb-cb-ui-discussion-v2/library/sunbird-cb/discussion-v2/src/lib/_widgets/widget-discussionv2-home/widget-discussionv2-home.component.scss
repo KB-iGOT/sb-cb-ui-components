@@ -1,0 +1,40 @@
+.community-search{
+    input {
+
+        border: 1px solid #00000029;
+    }
+}
+
+.community-groups {
+    .title {
+        //styleName: Sub heading 2;
+        font-family: Montserrat;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 17.07px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+
+    }
+    .show-more {
+        color: #1B4CA1;
+        //styleName: Button;
+        font-family: Lato;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 16.8px;
+        text-align: center;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+        mat-icon {
+            color: #1B4CA1;
+        }
+
+    }
+}
+
+
+
+
+  

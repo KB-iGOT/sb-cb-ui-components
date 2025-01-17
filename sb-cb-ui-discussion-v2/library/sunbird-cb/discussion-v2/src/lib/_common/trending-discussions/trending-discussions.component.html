@@ -1,0 +1,46 @@
+<mat-card class="trending-wrapper">
+    <mat-card-header>
+      <mat-card-title>Trending Discussions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="trending-content-list">
+      <div class="space-y-4">
+        <div *ngFor="let discussion of data"
+             class="flex items-start space-x-3">
+            <div class="trending-data">
+                <div class="flex items-center justify-between mb-4 user-info">
+                        <div class="flex items-center ">
+                            <d-v2-avatar-photo [size]="'s'"
+                                [name]="discussion?.author"
+                                [photoUrl]="discussion?.avatar1 || ''"></d-v2-avatar-photo>
+                            <div class="ml-2 user-name">
+                                <span class="font-medium">{{discussion.author}}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600 post-time">
+                            <span>{{discussion.time}}</span>
+                        </div>
+                </div>
+                <div class="post-data">
+                    <p [innerHtml]="discussion.title"></p>
+                </div>
+                <div class="mt-2 flex items-center justify-between space-x-4 text-sm text-gray-600 w-4/5 post-details">
+                    <span class="flex items-center">
+                        <mat-icon class="mat-icon ">thumb_up</mat-icon>
+                        <span class="ml-2">{{discussion.likes}}</span> 
+                    </span>
+                    <span class="mx-2">•</span>
+                    <span class="flex items-center">
+                        <mat-icon class="mat-icon ">visibility</mat-icon>
+                        <span class="ml-2">{{discussion.views}}</span>
+                    </span>
+                    <span class="mx-2">•</span>
+                    <span class="flex items-center">
+                        <mat-icon class="mat-icon ">chat_bubble</mat-icon>
+                        <span class="ml-2">{{discussion.comments}}</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </mat-card-content>
+</mat-card>
