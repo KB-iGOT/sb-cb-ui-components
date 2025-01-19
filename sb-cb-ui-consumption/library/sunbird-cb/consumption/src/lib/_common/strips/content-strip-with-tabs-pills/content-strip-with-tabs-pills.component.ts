@@ -1054,13 +1054,18 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
           strip.showOnLoader = false
           strip.tabs[tabIndex].pillsData[0].tabLoading = false
+          strip.tabs[tabIndex].hideTab = true
+          let tabs = strip.tabs
+          if (strip.tabs[0] && strip.tabs[0].hideTab){
+            tabs = []
+          }
           this.processStrip(
             strip,
             this.transformContentsToWidgets([], strip),
             'done',
             calculateParentStatus,
             '',
-            strip.tabs
+            tabs
           );
         }
       }
@@ -1309,12 +1314,15 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                 'viewMoreUrl',
               );
             }
+            this.canShowRecommendedLearningsTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
         strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
         strip.showOnLoader = false
         strip.tabs[0].pillsData[0].tabLoading = false
+        strip.tabs[0].hideTab = true
+        this.fetchDesignationBasedCourses(strip, 1, true)
         this.processStrip(
           strip,
           this.transformContentsToWidgets(courses, strip),
@@ -1325,6 +1333,13 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         );
       }
       clearInterval(this.enrollInterval);
+    }
+  }
+
+  async canShowRecommendedLearningsTab(strip: any) {
+    let response = await this.userSvc.fetchDesigantionsData().toPromise()
+    if (!response) {
+      strip.tabs[1].hideTab = true
     }
   }
 
