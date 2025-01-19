@@ -153,5 +153,6 @@ export namespace NsContentStripWithTabsAndPills {
     fetchTabStatus?: string;
     nodataMsg?: string;
     tabLoading?: boolean;
+    hideTab?: boolean;
   }
 }
