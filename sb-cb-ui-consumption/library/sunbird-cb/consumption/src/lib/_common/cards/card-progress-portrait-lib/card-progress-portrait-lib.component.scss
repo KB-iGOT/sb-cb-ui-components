@@ -249,3 +249,8 @@ $secondary-color: #EF951E;
     padding: 0;
   }
 }
+.disable-btn {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
