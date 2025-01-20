@@ -1,9 +1,9 @@
 .trending-wrapper {
-    background-color: white;
-    border: 1px solid #00000029;
-    border-radius: 12px;
     .trending-content-list {
         padding-top: 16px;
+        .divider {
+            border: 1px solid #00000029;
+        }
     }
     .trending-data {
         .user-info{
@@ -62,3 +62,5 @@
     }
     
 }
+
+

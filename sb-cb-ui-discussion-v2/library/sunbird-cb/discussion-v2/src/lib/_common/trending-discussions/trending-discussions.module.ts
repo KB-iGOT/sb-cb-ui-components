@@ -4,6 +4,7 @@ import { TrendingDiscussionsComponent } from './trending-discussions.component';
 import { MatCardModule } from '@angular/material/card';
 import { SharedModule } from '../../_shared/shared.module';
 import { MatIconModule } from '@angular/material/icon';
+import { CardToggleModule } from '../card-toggle/card-toggle.module';
 
 
 
@@ -16,7 +17,8 @@ import { MatIconModule } from '@angular/material/icon';
     CommonModule,
     MatCardModule,
     SharedModule,
-    MatIconModule
+    MatIconModule,
+    CardToggleModule
   ],
   exports:[TrendingDiscussionsComponent]
 })

@@ -7,4 +7,5 @@ import { Component, Input } from '@angular/core';
 })
 export class TrendingDiscussionsComponent {
  @Input() data: any = []
+ hideCardBody:boolean | undefined
 }
