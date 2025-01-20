@@ -102,6 +102,8 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   defaultMaxWidgets = 12;
   enrollInterval: any;
   todaysEvents: any = [];
+  activeTabIndex: number = 0
+  activePillIndex: number = 0
 
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
@@ -133,10 +135,22 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     // const url = window.location.href
     this.initData();
     this.contentSvc.telemetryData$.subscribe((data: any) => {
-      this.telemtryResponse.emit(data)
+      if (this.widgetData && this.widgetData.strips[0] && this.widgetData.strips[0].key === 'cbpPlan') {
+        const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
+        const pill = tab.pillsData[this.activePillIndex]
+        if (tab && pill) {
+          data.selectedTab = this.parametrizedText(tab.label)
+          data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
+          this.telemtryResponse.emit(data)
+        }
+      } else {
+        this.telemtryResponse.emit(data)
+      }
     })
+  }
 
-  
+  parametrizedText(str: string) {
+    return str.toLocaleLowerCase().replace(" ", "-")
   }
 
   ngOnDestroy() {
@@ -383,6 +397,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
           cardCustomeClass: strip.customeClass ? strip.customeClass : '',
           context: { pageSection: strip.key, position: idx },
+
           intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
           deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
           contentTags: strip.stripConfig && strip.stripConfig.contentTags,
@@ -584,7 +599,13 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     if(this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
-      this.router.navigate([path], {  queryParams: queryParamsData })
+      if (queryParamsData && queryParamsData.tabSelected && queryParamsData.tabSelected === 'designation') {
+        delete queryParamsData.key
+        this.router.navigate(['/page/recommended-learnings'], {queryParams: queryParamsData})
+      } else {
+        this.router.navigate([path], {  queryParams: queryParamsData })
+      }
+      
     }
   }
 
@@ -880,6 +901,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     }
 
     public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
+      this.activeTabIndex = tabEvent
       if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
         stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = true;
@@ -956,13 +978,12 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           }
           let enollData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
             if (res && res.result && res.result.courses && res.result.courses.length) {
-              res.result.courses
               return res.result.courses
             } else {
-              return {}
+              return []
             }
           }).catch((_err: any) => {
-            return {}
+            return []
           })
           const sRequest: any = {
             "searchV6": {
@@ -999,6 +1020,10 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                     }
                   })
                 }
+                strip.tabs[tabIndex].pillsData[0].selected = true
+                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                strip.showOnLoader = false
+                strip.tabs[tabIndex].pillsData[0].tabLoading = false
                 this.processStrip(
                   strip,
                   this.transformContentsToWidgets(courses, strip),
@@ -1008,6 +1033,10 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                   tabResults
                 )
               } else {
+                strip.tabs[tabIndex].pillsData[0].selected = true
+                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                strip.showOnLoader = false
+                strip.tabs[tabIndex].pillsData[0].tabLoading = false
                 this.processStrip(
                   strip,
                   this.transformContentsToWidgets(courses, strip),
@@ -1020,17 +1049,23 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           })
         } else {
           this.resetPills(strip.tabs[tabIndex].pillsData)
-          console.log("before ",this.stripsResultDataMap.cbpPlan)
-          this.stripsResultDataMap.cbpPlan.showOnLoader = false
-          console.log("after ", this.stripsResultDataMap.cbpPlan)
-          strip.tabs[tabIndex]
+          strip.tabs[tabIndex].pillsData[0].selected = true
+          strip.tabs[tabIndex].pillsData[0].widgets = []
+          strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+          strip.showOnLoader = false
+          strip.tabs[tabIndex].pillsData[0].tabLoading = false
+          strip.tabs[tabIndex].hideTab = true
+          let tabs = strip.tabs
+          if (strip.tabs[0] && strip.tabs[0].hideTab){
+            tabs = []
+          }
           this.processStrip(
             strip,
             this.transformContentsToWidgets([], strip),
             'done',
             calculateParentStatus,
             '',
-            strip.tabs
+            tabs
           );
         }
       }
@@ -1096,7 +1131,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
               return
             }
           }
-          if (enollData) {
+          if (enollData && enollData.length) {
             const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
             if (elem) {
               if (elem.status === 2) {
@@ -1112,13 +1147,14 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           }
         })
         return [
-          { value: 'available', widgets: this.transformContentsToWidgets(avaialable, strip) },
-          { value: 'inprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
-          { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
+          { value: 'ravailable', widgets: this.transformContentsToWidgets(avaialable, strip) },
+          { value: 'rinprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
+          { value: 'rcompleted', widgets: this.transformContentsToWidgets(allCompleted, strip) },
         ]
     }
 
     pillClicked(event: any, stripMap: IStripUnitContentData, stripKey: any, pillIndex: any, tabIndex: any) {
+      this.activePillIndex = pillIndex
       if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
         stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
         stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true;
@@ -1238,7 +1274,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
 
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
-
       let courses: NsContent.IContent[];
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
@@ -1279,17 +1314,32 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                 'viewMoreUrl',
               );
             }
+            this.canShowRecommendedLearningsTab(strip)
       } else {
+        strip.tabs[0].pillsData[0].selected = true
+        strip.tabs[0].pillsData[0].widgets = []
+        strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
+        strip.showOnLoader = false
+        strip.tabs[0].pillsData[0].tabLoading = false
+        strip.tabs[0].hideTab = true
+        this.fetchDesignationBasedCourses(strip, 1, true)
         this.processStrip(
           strip,
           this.transformContentsToWidgets(courses, strip),
           'done',
           calculateParentStatus,
           '',
-          tabResults
+          strip.tabs
         );
       }
       clearInterval(this.enrollInterval);
+    }
+  }
+
+  async canShowRecommendedLearningsTab(strip: any) {
+    let response = await this.userSvc.fetchDesigantionsData().toPromise()
+    if (!response) {
+      strip.tabs[1].hideTab = true
     }
   }
 
@@ -1444,7 +1494,18 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           }
           this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
         },(_err: any) => {
-
+          if(courses && courses.length){
+            this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
+          } else {
+            this.processStrip(
+              strip,
+              [],
+              'done',
+              calculateParentStatus,
+              {},
+              strip.tabs
+            );
+          }
         })
       },(_err: any) => {
         let courses: any = []

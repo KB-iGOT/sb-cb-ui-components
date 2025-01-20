@@ -88,6 +88,7 @@ export namespace NsContentStripWithTabsAndPills {
       path: string
     };
     data?: [];
+    showOnLoader?: boolean
   }
 
   export interface IStripRequestApi {
@@ -152,5 +153,6 @@ export namespace NsContentStripWithTabsAndPills {
     fetchTabStatus?: string;
     nodataMsg?: string;
     tabLoading?: boolean;
+    hideTab?: boolean;
   }
 }

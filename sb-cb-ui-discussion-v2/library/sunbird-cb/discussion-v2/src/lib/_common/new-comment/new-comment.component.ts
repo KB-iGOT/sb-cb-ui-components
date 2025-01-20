@@ -66,7 +66,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
     let commentTreeData = {}
     let commentTreeId = ''
     let hierarchyPath: any = []
-    let designation = []
+    let designation : any = ''
     let profileStatus = ''
     if (this.loggedInUserData
       && this.loggedInUserData.profileDetails) {
