@@ -1526,7 +1526,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         contentTemp.lastReadContentStatus = c.lastReadContentStatus || '';
         contentTemp.lastReadContentId = c.lastReadContentId || '';
         contentTemp.lrcProgressDetails = c.lrcProgressDetails || '';
-        contentTemp.issuedCertificates = c.issuedCertificates || [];
+        contentTemp.issuedCertificates = c.issuedCertificates || c.issued_certificates || [];
         contentTemp.batchId = c.batchId || '';
         contentTemp.content = c.content || c.event || {};
         contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || '';
