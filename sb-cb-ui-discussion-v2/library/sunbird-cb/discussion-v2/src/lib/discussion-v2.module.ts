@@ -24,6 +24,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
+import { WidgetPostdetailsModule } from './_common/widget-postdetails/widget-postdetails.module'
 
 
 @NgModule({
@@ -54,6 +55,7 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
     CKEditorModule,
     WidgetCommentModule,
     WidgetDiscussionv2Module,
+    WidgetPostdetailsModule,
   ],
   providers: [
     CommentsService,
@@ -61,7 +63,8 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
   exports: [
     NewPostDialogueComponent,
     WidgetCommentModule,
-    WidgetDiscussionv2Module
+    WidgetDiscussionv2Module,
+    WidgetPostdetailsModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
