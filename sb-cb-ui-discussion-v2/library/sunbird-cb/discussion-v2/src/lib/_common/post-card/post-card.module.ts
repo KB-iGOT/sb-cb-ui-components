@@ -1,6 +1,5 @@
-import { NgModule,CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WidgetDiscussionv2Component } from './widget-discussionv2.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { MatButtonModule } from '@angular/material/button'
@@ -14,17 +13,16 @@ import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
+import { PostCardComponent } from './post-card.component';
 import { NewPostModule } from '../new-post/new-post.module';
-import { PostCardModule } from '../post-card/post-card.module';
 
 
 
 @NgModule({
   declarations: [
-    WidgetDiscussionv2Component,
+    PostCardComponent
   ],
   imports: [
     CommonModule,
@@ -42,15 +40,10 @@ import { PostCardModule } from '../post-card/post-card.module';
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
-    CKEditorModule,
     SharedModule,
     ImageSlidersModule,
-    PostCardModule,
     NewPostModule
-  ],
-  exports: [
-    WidgetDiscussionv2Component,
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  ], 
+  exports: [PostCardComponent]
 })
-export class WidgetDiscussionv2Module { }
+export class PostCardModule { }

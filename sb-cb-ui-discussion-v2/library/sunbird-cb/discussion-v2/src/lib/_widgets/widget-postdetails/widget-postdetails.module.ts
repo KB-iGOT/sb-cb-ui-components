@@ -1,6 +1,5 @@
 import { NgModule,CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WidgetDiscussionv2Component } from './widget-discussionv2.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { MatButtonModule } from '@angular/material/button'
@@ -16,15 +15,13 @@ import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { SharedModule } from '../../_shared/shared.module';
-import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
-import { NewPostModule } from '../new-post/new-post.module';
-import { PostCardModule } from '../post-card/post-card.module';
-
+import { ImageSlidersModule } from '../../_common/image-sliders/image-sliders.module';
+import { WidgetPostdetailsComponent } from './widget-postdetails.component';
 
 
 @NgModule({
   declarations: [
-    WidgetDiscussionv2Component,
+    WidgetPostdetailsComponent
   ],
   imports: [
     CommonModule,
@@ -44,13 +41,11 @@ import { PostCardModule } from '../post-card/post-card.module';
     MatCheckboxModule,
     CKEditorModule,
     SharedModule,
-    ImageSlidersModule,
-    PostCardModule,
-    NewPostModule
+    ImageSlidersModule
   ],
   exports: [
-    WidgetDiscussionv2Component,
+    WidgetPostdetailsComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class WidgetDiscussionv2Module { }
+export class WidgetPostdetailsModule { }
