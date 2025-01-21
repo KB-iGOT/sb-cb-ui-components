@@ -16,3 +16,10 @@ export * from './lib/_common/widget-discussionv2/widget-discussionv2.component'
 export * from './lib/_common/new-post/new-post.component'
 export * from './lib/_common/new-post-dialogue/new-post-dialogue.component'
 export * from './lib/_common/post-card/post-card.component'
+
+
+export * from './lib/_widgets/widget-discussionv2-home/widget-discussionv2-home.module'
+export * from './lib/_widgets/widget-discussionv2-home/widget-discussionv2-home.component'
+
+export * from './lib/_widgets/widget-community-home/widget-community-home.component'
+export * from './lib/_widgets/widget-community-home/widget-community-home.module'
