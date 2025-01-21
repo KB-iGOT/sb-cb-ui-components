@@ -105,7 +105,7 @@
     <ng-container *ngIf="widgetData?.content?.completionPercentage === 100 && widgetData?.content?.courseCategory !== 'Case Study'">
       <div class="flex flex-align-end progress-wrapper flex-end mt-1">
         <div class="progress-btn">
-          <button class="resume-btn flex flex-middle flex-between view-btn" [ngClass]="{'disable-btn': downloadCertificateLoading || widgetData?.content?.issuedCertificates?.length === 0}" (click)="!downloadCertificateLoading && downloadCertificate(widgetData?.content);$event.stopPropagation()" 
+          <button class="resume-btn flex flex-middle flex-between view-btn" [ngClass]="{'disable-btn': downloadCertificateLoading || widgetData?.content?.issuedCertificates?.length === 0}" (click)="!downloadCertificateLoading && downloadCertificate(widgetData?.content, $event);$event.stopPropagation()" 
           [matTooltipPosition]="'below'"
           [matTooltipDisabled]="(translateLabels('viewCertificate', 'cardcontentv2')).length < 11"
           matTooltip="{{'cardcontentv2.viewCertificate' | translate }}">
