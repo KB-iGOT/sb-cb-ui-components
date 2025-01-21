@@ -1,0 +1,128 @@
+$text-primary: #1B4CA1;
+.banner-container {
+    img {
+        width: 100%;
+        height: 100%;
+    }
+}
+.community-basic-info {
+    margin-bottom: 32px;
+    .community-info {
+        h2 {
+            //styleName: Heading 1;
+            font-family: Montserrat;
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 29.26px;
+            text-align: left;
+            text-underline-position: from-font;
+            text-decoration-skip-ink: none;
+            margin: 0;
+        }
+        .community-metrix {
+            display: flex;
+            align-items: center;
+            //styleName: Caption;
+            font-family: Lato;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 14.4px;
+            text-align: left;
+            text-underline-position: from-font;
+            text-decoration-skip-ink: none;
+            color: #666666;
+            mat-icon {
+                width: 12px;
+                height: 12px;
+                font-size: 12px;
+            }
+        }
+    }
+    .community-action {
+        button {
+            background: $text-primary;
+            border-color: $text-primary;
+            border: none;
+        }
+    }
+}
+
+.about-community {
+    h2 {
+        //styleName: Sub Heading 1;
+        font-family: Montserrat;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 19.5px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+        margin: 0;
+    }
+    p {
+        font-family: Lato;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 19.2px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+
+    }
+}
+
+.community-tabs {
+    mat-tab-group {
+        mat-tab-header {
+            .mat-mdc-tab-label-container {
+                border-bottom-style: solid !important;
+                border-bottom-width: var(--mat-tab-header-divider-height, 1px) !important;
+                border-bottom-color: var(--mat-tab-header-divider-color, var(--mat-sys-surface-variant)) !important;
+            }
+        }
+    }
+    
+}
+
+.custom-tab-container .mat-mdc-tab-label-container {
+    border-bottom-style: solid;
+    border-bottom-width:  1px;
+    border-bottom-color:#00000014;
+  }
+  .custom-tab-container  .mdc-tab-indicator .mdc-tab-indicator__content {
+    border-color: $text-primary;
+  }
+  .custom-tab-container  .mat-mdc-focus-indicator:hover{
+    border-color: $text-primary;
+  }
+
+
+
+
+
+
+
+
+  .custom-tab-container .mat-mdc-ink-bar {
+    background-color: #3f51b5;
+  }
+  /* Default active tab bottom line */
+  .custom-tab-container .mat-mdc-ink-bar {
+    background-color: #3f51b5;
+  }
+  
+  /* Change ink bar color on hover */
+  .custom-tab-container:hover .mat-mdc-tab-label-active .mat-mdc-ink-bar {
+    background-color: #ff5722;
+  }
+  
+  /* Change ink bar color when focused */
+  .custom-tab-container .mat-mdc-tab-label-active:focus-within .mat-mdc-ink-bar {
+    background-color: #4caf50;
+  }
+  
+  /* Optional: Customize tab label hover color */
+  .custom-tab-container .mat-mdc-tab-label:hover {
+    color: #ff5722; /* Label color on hover */
+  }
+  

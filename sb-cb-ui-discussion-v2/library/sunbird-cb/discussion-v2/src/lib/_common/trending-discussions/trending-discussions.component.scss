@@ -1,0 +1,66 @@
+.trending-wrapper {
+    .trending-content-list {
+        padding-top: 16px;
+        .divider {
+            border: 1px solid #00000029;
+        }
+    }
+    .trending-data {
+        .user-info{
+            .user-name {
+                //styleName: Sub heading 2;
+                font-family: Montserrat;
+                font-size: 14px;
+                font-weight: 600;
+                line-height: 17.07px;
+                text-align: center;
+                text-underline-position: from-font;
+                text-decoration-skip-ink: none;
+                color: #000000;
+
+            }
+            .post-time {
+                //styleName: Label;
+                font-family: Lato;
+                font-size: 10px;
+                font-weight: 400;
+                line-height: 12px;
+                text-align: center;
+                text-underline-position: from-font;
+                text-decoration-skip-ink: none;
+                color: #666666;
+            }
+            
+        }
+        .post-data {
+            //styleName: Body 2;
+            font-family: Lato;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 16.8px;
+            text-align: left;
+            text-underline-position: from-font;
+            text-decoration-skip-ink: none;
+            color: #212121;            
+        }
+        .post-details {
+            color: #00000099;
+            //styleName: Caption;
+            font-family: Lato;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 14.4px;
+            text-align: center;
+            text-underline-position: from-font;
+            text-decoration-skip-ink: none;
+            mat-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 16px;
+            }
+        }
+    }
+    
+}
+
+

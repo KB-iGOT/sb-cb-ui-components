@@ -1004,7 +1004,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
               let courses = results.result.content
               let tabResults: any
               if (strip.tabs && strip.tabs.length) {
-                tabResults = this.splitDesignationsTabData(courses, strip, enollData)
+                tabResults = this.splitDesignationsTabData(courses, strip, enollData, response)
                 let countOfWidget = true
                 if(strip && strip.tabs && strip.tabs.length) {
                   strip.tabs.forEach((tab:any)=> {
@@ -1079,11 +1079,12 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       })
     }
 
-    splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any) {
+    splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+      enollData: any, coursesArray: any) {
       let tabResults: any[] = [];
       const splitData = this.getTabsDesignationsList(
         contentNew,
-        strip, enollData
+        strip, enollData, coursesArray
       );
       if (strip.tabs && strip.tabs.length) {
         for (let i = 0; i < strip.tabs.length; i += 1) {
@@ -1116,7 +1117,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     }
 
     getTabsDesignationsList(array: NsContent.IContent[],
-      strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any) {
+      strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any, coursesArray: any) {
         let avaialable: any[] = []
         let inprogress: any[] = []
         let allCompleted: any[] = []
@@ -1124,26 +1125,29 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         this.userSvc.getData('cbpData').subscribe((result => {
           cbpData = result
         }))
-        array.forEach((course: any) => {
-          if (cbpData) {
-            const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
-            if (cbpelem) {
-              return
+        coursesArray.forEach((courseId: any) => {
+          let course = array.find((item: any) => item.identifier === courseId)
+          if (course) {
+            if (cbpData) {
+              const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
+              if (cbpelem) {
+                return
+              }
             }
-          }
-          if (enollData && enollData.length) {
-            const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
-            if (elem) {
-              if (elem.status === 2) {
-                allCompleted.push(course)
+            if (enollData && enollData.length) {
+              const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
+              if (elem) {
+                if (elem.status === 2) {
+                  allCompleted.push(course)
+                } else {
+                  inprogress.push(course)
+                }
               } else {
-                inprogress.push(course)
+                avaialable.push(course)
               }
             } else {
               avaialable.push(course)
             }
-          } else {
-            avaialable.push(course)
           }
         })
         return [

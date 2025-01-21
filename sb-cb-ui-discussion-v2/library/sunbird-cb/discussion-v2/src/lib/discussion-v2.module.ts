@@ -25,6 +25,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
 import { WidgetPostdetailsModule } from './_common/widget-postdetails/widget-postdetails.module'
+import { WidgetDiscussionv2HomeModule } from './_widgets/widget-discussionv2-home/widget-discussionv2-home.module'
 
 
 @NgModule({
@@ -56,6 +57,7 @@ import { WidgetPostdetailsModule } from './_common/widget-postdetails/widget-pos
     WidgetCommentModule,
     WidgetDiscussionv2Module,
     WidgetPostdetailsModule,
+    WidgetDiscussionv2HomeModule,
   ],
   providers: [
     CommentsService,
@@ -65,6 +67,7 @@ import { WidgetPostdetailsModule } from './_common/widget-postdetails/widget-pos
     WidgetCommentModule,
     WidgetDiscussionv2Module,
     WidgetPostdetailsModule
+    WidgetDiscussionv2HomeModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
