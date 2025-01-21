@@ -109,8 +109,15 @@ export namespace NsDiscussionV2 {
     }
 
     export interface IPostCardConfig {
+        listType?: string, 
         cardType: string,
         type:string,
+        cardClick?: {
+          enabled: boolean,
+          position: string,
+          redirectUrl: string,
+          id: string
+        }
         showActions: boolean,
         sliderData?: any,
         reportIcon?: {
@@ -154,6 +161,10 @@ export namespace NsDiscussionV2 {
 
     export interface IDiscussV2WidgetData {
         newPostSection: INewPostConfig,
+        postsList: IPostCardConfig,
+    }
+
+    export interface IPostDetailsWidget{
         postsList: IPostCardConfig,
     }
 

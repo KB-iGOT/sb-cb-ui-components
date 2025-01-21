@@ -7,12 +7,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import _ from 'lodash'
 
 @Component({
-  selector: 'd-v2-widget-discussionv2',
-  templateUrl: './widget-discussionv2.component.html',
-  styleUrls: ['./widget-discussionv2.component.scss']
+  selector: 'd-v2-widget-postdetails',
+  templateUrl: './widget-postdetails.component.html',
+  styleUrls: ['./widget-postdetails.component.scss']
 })
-export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
-  @Input() widgetData!: NsDiscussionV2.IDiscussV2WidgetData | null
+export class WidgetPostdetailsComponent implements OnInit, OnDestroy {
+  @Input() widgetData!: NsDiscussionV2.IPostDetailsWidget | null
   loogedInUserProfile: any = {}
   loadingPosts = false
   pageNumber = 0
@@ -30,40 +30,10 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // this.fetchInitialComments()
     this.loogedInUserProfile = this.configSvc.userProfile
     this.widgetData = {
-      newPostSection: {
-        "show": true,
-        "type": "question",
-        "openAsDialogue": true,
-        "showTopInfo": false,
-        "topInfo": {
-          "icon": "forum",
-          "text": "<span>Do you have any questions, suggestions or ideas in your mind?Post it.</span>"
-        },
-        "avatarPhoto": {
-          "show": true,
-          "size": "m",
-          "photoUrl": "https://portal.dev.karmayogibharat.net/assets/public/profileImage/1725443303744_images.jpeg",
-          "name": "Christopher Fernandes",
-          "color": "#006400"
-        },
-        "commentBox": {
-          "placeholder": "Start a discussion"
-        },
-        "postBtn": {
-          "text": "",
-          "icon": "send",
-          show: true
-        },
-        "styles": {
-          "background-color": "#fff", 
-          "border": "1px solid rgba(0, 0, 0, 0.08)"
-        }
-      },
       postsList: {
-        "listType": "multiple", 
+        "listType": "multiple",
         "cardType": "topLevel",
         "type": "question",
         "showActions": true,
@@ -71,7 +41,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
           enabled: false,
           position: 'title',
           redirectUrl: '/post/',
-          id:''
+          id: ''
         },
         sliderData: {
           styleData: {
@@ -100,7 +70,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
           "successMsg": "Reported successfully! Thank you for reporting.",
           "errorMsg": "Something went wrong! please try reporting again later.",
           "showToolTip": true,
-          "toolTipText":"Report this comment"
+          "toolTipText": "Report this comment"
         },
         "actions": {
           "like": {
@@ -149,7 +119,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
               show: true
             },
             "styles": {
-              "background-color": "#1B4CA10D", 
+              "background-color": "#1B4CA10D",
               "border": "none"
             }
           },
@@ -163,7 +133,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
               "successMsg": "Reported successfully! Thank you for reporting.",
               "errorMsg": "Something went wrong! please try reporting again later.",
               "showToolTip": true,
-              "toolTipText":"Report this comment"
+              "toolTipText": "Report this comment"
             },
             "actions": {
               "like": {
@@ -177,7 +147,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
                 "icon": "comment"
               },
             },
-  
+
             "repliesSection": {
               "show": false
             },
@@ -204,7 +174,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
                 "icon": "send"
               },
               "styles": {
-                "background-color": "#1B4CA10D", 
+                "background-color": "#1B4CA10D",
                 "border": "none"
               }
             }
@@ -221,50 +191,25 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
   fetchPosts() {
     this.loadingPosts = true
     const req = {
-        "filterCriteriaMap": {
-          "type": "question",
-          isActive: true // this is to get only active posts, deleted posts won't be returned
-        },
-        "requestedFields": [],
-        "pageNumber": this.commentListOffSet,
-        "pageSize": this.commentListLimit,
-        "orderBy": "createdOn",
-        "orderDirection": "ASC",
-        "facets": []
+      "filterCriteriaMap": {
+        "type": "question",
+        "discussionId": 'a6263290-ce88-11ef-abed-bb5c1a83d6d1',
+        isActive: true // this is to get only active posts, deleted posts won't be returned
+      },
+      "requestedFields": [],
+      "pageNumber": this.commentListOffSet,
+      "pageSize": this.commentListLimit,
+      "orderBy": "createdOn",
+      "orderDirection": "ASC",
+      "facets": []
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []
-    },(err: any) => {
+    }, (err: any) => {
       this.loadingPosts = false
-      this._snackBar.open('Something went wrong! please try reporting again later.')
-      console.error(err)
-    })
-  }
-
-  fetchPostsMore() {
-    this.loadingMore = true
-    const req = {
-        "filterCriteriaMap": {
-          "type": "question",
-          isActive: true // this is to get only active posts, deleted posts won't be returned
-        },
-        "requestedFields": [],
-        "pageNumber": this.commentListOffSet,
-        "pageSize": this.commentListLimit,
-        "orderBy": "createdOn",
-        "orderDirection": "ASC",
-        "facets": []
-    }
-    this.discussV2Svc.searchPosts(req).subscribe(res => {
-      this.loadingMore = false
-      console.log('res = > ', res)
-      this.searchResults = _.get(res, 'result.search_results') || {}
-      this.posts = [...this.posts, ...(_.get(res, 'result.search_results.data') || [])]
-    },(err: any) => {
-      this.loadingMore = false
       this._snackBar.open('Something went wrong! please try reporting again later.')
       console.error(err)
     })
@@ -272,7 +217,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
 
   newCommentEvent(event: any) {
     console.log('Widget catch event :', event)
-    if(event && event.type === 'question'){
+    if (event && event.type === 'question') {
       this.fetchPosts()
     }
   }
@@ -281,7 +226,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
     // if(this.userLikedComments.includes(event.commentId)) {
     //   this.likeUnlikeCommentApi('dislike', event.commentId)
     // } else {
-      this.upVotePost('like', event.discussionId)
+    this.upVotePost('like', event.discussionId)
     // }
   }
 
@@ -294,7 +239,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
           post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
           // this.userLikedComments.push(commentId)
         } else {
-          post.downVoteCount = post.downVoteCount? post.downVoteCount + 1 : 1
+          post.downVoteCount = post.downVoteCount ? post.downVoteCount + 1 : 1
           // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
           // this.userLikedComments.splice(index, 1)
         }
@@ -302,10 +247,6 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
     })
   }
 
-  loadMoreComments() {
-    this.commentListOffSet = this.commentListOffSet + 1
-    this.fetchPostsMore()
-  }
 
   ngOnDestroy(): void {
     this.widgetData = null
