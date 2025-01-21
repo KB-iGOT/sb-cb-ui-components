@@ -24,7 +24,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
-import { WidgetPostdetailsModule } from './_common/widget-postdetails/widget-postdetails.module'
+import { WidgetPostdetailsModule } from './_widgets/widget-postdetails/widget-postdetails.module'
 import { WidgetDiscussionv2HomeModule } from './_widgets/widget-discussionv2-home/widget-discussionv2-home.module'
 
 
@@ -66,7 +66,7 @@ import { WidgetDiscussionv2HomeModule } from './_widgets/widget-discussionv2-hom
     NewPostDialogueComponent,
     WidgetCommentModule,
     WidgetDiscussionv2Module,
-    WidgetPostdetailsModule
+    WidgetPostdetailsModule,
     WidgetDiscussionv2HomeModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]

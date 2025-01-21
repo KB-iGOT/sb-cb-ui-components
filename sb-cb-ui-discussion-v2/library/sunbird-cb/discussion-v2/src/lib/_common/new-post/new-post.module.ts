@@ -1,4 +1,4 @@
-import { NgModule,CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -13,15 +13,15 @@ import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
-import { WidgetPostdetailsComponent } from './widget-postdetails.component';
+import { NewPostComponent } from './new-post.component';
+
 
 
 @NgModule({
   declarations: [
-    WidgetPostdetailsComponent
+    NewPostComponent
   ],
   imports: [
     CommonModule,
@@ -39,13 +39,9 @@ import { WidgetPostdetailsComponent } from './widget-postdetails.component';
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
-    CKEditorModule,
     SharedModule,
     ImageSlidersModule
   ],
-  exports: [
-    WidgetPostdetailsComponent
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  exports: [NewPostComponent]
 })
-export class WidgetPostdetailsModule { }
+export class NewPostModule { }
