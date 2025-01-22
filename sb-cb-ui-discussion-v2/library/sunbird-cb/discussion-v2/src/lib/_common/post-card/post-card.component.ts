@@ -17,11 +17,11 @@ import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm
 export class PostCardComponent {
   @Input() cardType = 'topLevel'
   @Input() cardConfig!: NsDiscussionV2.IPostCardConfig
+  @Input() type!: string
   @Input() post!: any
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedPosts: any = []
-  @Input() type: any
   @Input() userJoinedCommunity: boolean = false
   @Output() likeUnlikeData = new EventEmitter<any>()
 

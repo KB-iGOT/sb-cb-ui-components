@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
@@ -11,8 +11,9 @@ import _ from 'lodash'
   templateUrl: './widget-postdetails.component.html',
   styleUrls: ['./widget-postdetails.component.scss']
 })
-export class WidgetPostdetailsComponent implements OnInit, OnDestroy {
+export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges {
   @Input() widgetData!: NsDiscussionV2.IPostDetailsWidget | null
+  @Input() discussionId!: string
   loogedInUserProfile: any = {}
   loadingPosts = false
   pageNumber = 0
@@ -28,6 +29,14 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy {
     private discussV2Svc: DiscussionV2Service,
     private _snackBar: MatSnackBar
   ) { }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.discussionId) {
+      if(this.discussionId) {
+        this.fetchPosts()
+      }
+    }
+  }
 
   ngOnInit() {
     this.loogedInUserProfile = this.configSvc.userProfile
@@ -185,7 +194,6 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy {
         }
       }
     }
-    this.fetchPosts()
   }
 
   fetchPosts() {
@@ -193,7 +201,7 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy {
     const req = {
       "filterCriteriaMap": {
         "type": "question",
-        "discussionId": 'a6263290-ce88-11ef-abed-bb5c1a83d6d1',
+        "discussionId": this.discussionId,
         isActive: true // this is to get only active posts, deleted posts won't be returned
       },
       "requestedFields": [],

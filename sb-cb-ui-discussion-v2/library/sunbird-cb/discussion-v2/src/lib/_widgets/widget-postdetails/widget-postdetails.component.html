@@ -4,16 +4,16 @@
             <h1>Side menu...</h1>
         </div> -->
         <div class="flex-1 post-container">
-            <div class="mb-4">
-                <mat-icon>arrow_back</mat-icon> Community Name - To be integrated
+            <div class="mb-4 flex gap-4 items-center">
+                <mat-icon class="cursor-pointer">arrow_back</mat-icon> Community Name - To be integrated
             </div>
 
             <ng-container *ngIf="posts && posts.length && !loadingPosts;else noPostsSection;">
                 <div class="flex flex-col gap-4">
                     <ng-container *ngFor="let post of posts" >
-                        <!-- <d-v2-post-card [cardType]="widgetData?.postsList?.cardType"
+                        <d-v2-post-card [cardType]="widgetData?.postsList?.cardType"
                         [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts"
-                        (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-post-card> -->
+                        (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-post-card>
                     </ng-container>
                 </div>
             </ng-container>

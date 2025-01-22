@@ -17,6 +17,8 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../../_common/image-sliders/image-sliders.module';
 import { WidgetPostdetailsComponent } from './widget-postdetails.component';
+import { NewPostModule } from '../../_common/new-post/new-post.module';
+import { PostCardModule } from '../../_common/post-card/post-card.module';
 
 
 @NgModule({
@@ -41,7 +43,9 @@ import { WidgetPostdetailsComponent } from './widget-postdetails.component';
     MatCheckboxModule,
     CKEditorModule,
     SharedModule,
-    ImageSlidersModule
+    ImageSlidersModule,
+    PostCardModule,
+    NewPostModule
   ],
   exports: [
     WidgetPostdetailsComponent
