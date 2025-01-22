@@ -17,6 +17,7 @@ export class NewPostComponent {
   @Input() type = 'question'
   @Output() newComment = new EventEmitter<any>()
   @Input() disableActions: boolean = false
+  @Input() community: any
 
   loogedInUserProfile: any = {}
   loggedInUserData: any = {}

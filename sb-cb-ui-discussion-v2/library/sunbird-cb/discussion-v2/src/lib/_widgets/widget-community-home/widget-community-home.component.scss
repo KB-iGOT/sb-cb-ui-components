@@ -43,6 +43,20 @@ $text-primary: #1B4CA1;
             background: $text-primary;
             border-color: $text-primary;
             border: none;
+            //styleName: Button;
+            font-family: Lato;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 16.8px;
+            text-align: center;
+            text-underline-position: from-font;
+            text-decoration-skip-ink: none;
+        }
+        .un-join-btn{
+            color: $text-primary;
+            background-color: white !important;
+            border: 1px solid $text-primary !important;
+        
         }
     }
 }
@@ -84,45 +98,16 @@ $text-primary: #1B4CA1;
     
 }
 
+
+
 .custom-tab-container .mat-mdc-tab-label-container {
     border-bottom-style: solid;
     border-bottom-width:  1px;
     border-bottom-color:#00000014;
-  }
-  .custom-tab-container  .mdc-tab-indicator .mdc-tab-indicator__content {
-    border-color: $text-primary;
-  }
-  .custom-tab-container  .mat-mdc-focus-indicator:hover{
-    border-color: $text-primary;
-  }
-
-
-
-
-
-
-
-
-  .custom-tab-container .mat-mdc-ink-bar {
-    background-color: #3f51b5;
-  }
-  /* Default active tab bottom line */
-  .custom-tab-container .mat-mdc-ink-bar {
-    background-color: #3f51b5;
-  }
-  
-  /* Change ink bar color on hover */
-  .custom-tab-container:hover .mat-mdc-tab-label-active .mat-mdc-ink-bar {
-    background-color: #ff5722;
-  }
-  
-  /* Change ink bar color when focused */
-  .custom-tab-container .mat-mdc-tab-label-active:focus-within .mat-mdc-ink-bar {
-    background-color: #4caf50;
-  }
-  
-  /* Optional: Customize tab label hover color */
-  .custom-tab-container .mat-mdc-tab-label:hover {
-    color: #ff5722; /* Label color on hover */
-  }
-  
+}
+.custom-tab-container  .mdc-tab-indicator .mdc-tab-indicator__content {
+border-color: $text-primary;
+}
+.custom-tab-container  .mat-mdc-focus-indicator:hover{
+border-color: $text-primary;
+}

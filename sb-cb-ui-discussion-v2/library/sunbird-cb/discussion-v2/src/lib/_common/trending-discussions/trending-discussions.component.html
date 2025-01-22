@@ -5,39 +5,39 @@
         </div>
         <div contentBodyBlock>
             <div class="space-y-4 pt-4">
-                <div *ngFor="let discussion of data;let isFirst = first" class="flex flex-wrap items-start space-x-3">
+                <div *ngFor="let discussion of posts;let isFirst = first" class="flex flex-wrap items-start space-x-3">
                     <hr class="divider w-full" *ngIf="!isFirst" >
-                    <div class="trending-data margin-remove">
+                    <div class="trending-data margin-remove" (click)="navigateToPost(discussion)">
                         <div class="flex items-center justify-between mb-4 user-info">
                                 <div class="flex items-center ">
                                     <d-v2-avatar-photo [size]="'s'"
-                                        [name]="discussion?.author"
-                                        [photoUrl]="discussion?.avatar1 || ''"></d-v2-avatar-photo>
+                                        [name]="discussion?.createdBy?.first_name"
+                                        [photoUrl]="discussion?.createdBy?.user_profile_img_url || ''"></d-v2-avatar-photo>
                                     <div class="ml-2 user-name">
-                                        <span class="font-medium">{{discussion.author}}</span>
+                                        <span class="font-medium">{{discussion?.createdBy?.first_name}}</span>
                                     </div>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600 post-time">
-                                    <span>{{discussion.time}}</span>
+                                    <span>{{discussion?.createdOn| date:'MMM d, y h:mm a'}}</span>
                                 </div>
                         </div>
                         <div class="post-data">
-                            <p [innerHtml]="discussion.title"></p>
+                            <p [innerHtml]="discussion?.title"></p>
                         </div>
                         <div class="mt-2 flex items-center justify-between space-x-4 text-sm text-gray-600 w-4/5 post-details">
                             <span class="flex items-center">
                                 <mat-icon class="mat-icon ">thumb_up</mat-icon>
-                                <span class="ml-2">{{discussion.likes}}</span> 
+                                <span class="ml-2">{{discussion?.likes}}</span> 
                             </span>
                             <span class="mx-2">•</span>
                             <span class="flex items-center">
                                 <mat-icon class="mat-icon ">visibility</mat-icon>
-                                <span class="ml-2">{{discussion.views}}</span>
+                                <span class="ml-2">{{discussion?.views}}</span>
                             </span>
                             <span class="mx-2">•</span>
                             <span class="flex items-center">
                                 <mat-icon class="mat-icon ">chat_bubble</mat-icon>
-                                <span class="ml-2">{{discussion.comments}}</span>
+                                <span class="ml-2">{{discussion?.comments}}</span>
                             </span>
                         </div>
                     </div>
