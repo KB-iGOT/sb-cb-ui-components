@@ -3,9 +3,9 @@
     <div class="banner-container">
         <img src="https://s3-alpha-sig.figma.com/img/f6bc/5417/601803742072ef1bdc6258233c4dcbc7?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=o17gMWoxguI~ecIIVvvF7nH8PA2JaoO7PIcUlIiYb764uGN68keh1Bz6Gu6DftpmCrqMLK~8t86inI~vPe2lslGDt9okUzKyenfBm79tsqxKGOcUk6tsNOjqEWa3VVhxV~7B6IMQs7whRBvCMnNnNEHZD8WzbhX5JahBH5SPqNlOr0KU0SXXcEgjeBh8Oy8244wdnjqQOakm5RfipcN7P~dVaW2A9ZUkSpWSAzBCzWXoxHOh2wllM1Kao3KL~-XKRDnjYTK9maGPrylG7bV0Dt9~fJ0FJufGbVQ5HS0gsF-FduUkhfhY846yBDWSWKT58GKr45IFALcIltFSjysuxA__" alt="">
     </div>
-    <div class="community-basic-info flex justify-between items-center">
+    <div class="community-basic-info flex justify-between items-center mt-2">
         <div class="community-info">
-            <h2>Community Name</h2>
+            <h2>{{communityData?.communityName}}</h2>
             <div class="community-metrix">
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">group</mat-icon>
@@ -32,9 +32,10 @@
                 </span>
             </div>
         </div>
-        <div class="community-action flex items-center">
-            <button class="btn rounded-full text-white w-32 h-8 mr-2">Join</button>
-            <mat-icon class="mr-2">share</mat-icon>
+        <div class="community-action flex gap-2 items-center ">
+            <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button>
+            <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer " (click)="joinCommunity()">Join</button>
+            <mat-icon class="">share</mat-icon>
             <mat-icon>more_vert</mat-icon>
         </div>
     </div>
@@ -42,32 +43,66 @@
         <h2>About the community</h2>
         <p>Community Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex a commodo consequat. sunt in culpa erunt mollit anim id est laborum.</p>
     </div>
+    
+    <div class="container-balanced mt-8 mb-12 mob-12">
+        <!-- <div class="container mx-auto px-4 py-6"> -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Sidebar -->
+            <div class="lg:w-64">
+                <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts>
+            </div>
+            <!-- Main Content -->
+            <div class="flex-1">
+                <mat-tab-group class="custom-tab-container " mat-stretch-tabs="false" mat-align-tabs="center">
+                    <ng-container *ngFor="let tab of communityWidgetData?.tabs">
+                        <mat-tab [label]="tab.label">
+                            <div class="mt-2">
+                                <ng-container *ngIf="tab?.value === 'feeds'">
+                                    <d-v2-feed [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
+                                </ng-container>
+                            </div>
+                        </mat-tab>
+                    </ng-container>
+                </mat-tab-group>
+            </div>
+            <!-- Right Sidebar -->
+            <div class="lg:w-80">
+                <d-v2-trending-discussions [data]="trendingDiscussions"></d-v2-trending-discussions>
+            </div>
+        </div>
+    </div>
 
-
-
-    <div class="tabs-container">
-        <mat-tab-group>
-          <mat-tab label="Home"></mat-tab>
-          <mat-tab label="Profile"></mat-tab>
-          <mat-tab label="Settings"></mat-tab>
-        </mat-tab-group>
-      </div>
-      <mat-tab-group class="custom-tab-container " mat-stretch-tabs="false" mat-align-tabs="center">
-        <mat-tab label="First">Content 1</mat-tab>
-        <mat-tab label="Second">Content 2</mat-tab>
-        <mat-tab label="Third">Content 3</mat-tab>
-      </mat-tab-group>
-
-
-      <d-v2-card-toggle (hideCardBody)="hideCardBody = $event">
+      <!-- <d-v2-card-toggle (hideCardBody)="hideCardBody = $event">
         <div headderBlock>
             hiii {{hideCardBody}}
         </div>
         <div contentBodyBlock>
             hiii
         </div>
-      </d-v2-card-toggle>
+      </d-v2-card-toggle> -->
 </div>
 
 
-
+<!-- <mat-tab-group class="custom-tab-container " mat-stretch-tabs="false" mat-align-tabs="center">
+    <ng-container *ngFor="let tab of communityWidgetData?.tabs">
+        <mat-tab [label]="tab.label">
+            <div class="container-balanced mt-8 mb-12 mob-12"> -->
+                <!-- <div class="container mx-auto px-4 py-6"> -->
+                <!-- <div class="flex flex-col lg:flex-row gap-8"> -->
+                    <!-- Left Sidebar -->
+                    <!-- <div class="lg:w-64">
+                        <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts>
+                    </div> -->
+                    <!-- Main Content -->
+                    <!-- <div class="flex-1">
+                        center
+                    </div> -->
+                    <!-- Right Sidebar -->
+                    <!-- <div class="lg:w-80">
+                        <d-v2-trending-discussions [data]="trendingDiscussions"></d-v2-trending-discussions>
+                    </div> -->
+                <!-- </div>
+            </div>
+        </mat-tab>
+    </ng-container>
+    </mat-tab-group> -->

@@ -322,7 +322,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     let reveseReplayDataCopy = [...this.replyDataCopy]
     reveseReplayDataCopy.reverse()
     let ids:any = reveseReplayDataCopy.slice(start,this.replayCommentsCount)
-    debugger
+    
     this.commentSvc.getListOfCommentsById(ids).subscribe(res => {
       if (res.result && res.result.comments.length) {
         let taggedUsersList = res.result.taggedUsers
