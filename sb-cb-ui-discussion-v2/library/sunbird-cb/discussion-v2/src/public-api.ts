@@ -25,3 +25,9 @@ export * from './lib/_widgets/widget-discussionv2-home/widget-discussionv2-home.
 
 export * from './lib/_widgets/widget-community-home/widget-community-home.component'
 export * from './lib/_widgets/widget-community-home/widget-community-home.module'
+
+
+export * from './lib/_common/shortcuts/shortcuts.module'
+export * from './lib/_common/shortcuts/shortcuts.component'
+export * from './lib/_common/trending-discussions/trending-discussions.module'
+export * from './lib/_common/trending-discussions/trending-discussions.component'

@@ -39,7 +39,7 @@ export class WidgetEnrollService {
       if(extRes && extRes.result && extRes.result.courses) {
         extRes.result.courses.forEach((ele: any) => {
           ele['completionPercentage'] = ele['completionpercentage']
-          // ele['content']['appIcon'] = ele['completionpercentage']
+          ele['content']['issuedCertificates'] = ele['issued_certificates'] || []
           ele['lastContentAccessTime'] =  ele.content && ele.content.lastUpdatedOn ? new Date(ele.content.lastUpdatedOn).getTime(): ''
           if(ele.content){
             ele['content']['organisation'] = ele.content && ele.content.contentPartner && ele.content.contentPartner.contentPartnerName ? [ele.content.contentPartner.contentPartnerName]: []

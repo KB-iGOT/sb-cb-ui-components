@@ -100,7 +100,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       // tslint:disable-next-line: no-console
       this.loading = false
       if (res && res.result.commentCount) {
-        debugger
+        
         this.commentData = res.result
         this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
         if(res && res.result && res.result.courseDetails){
@@ -167,10 +167,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
     }
-debugger
+
     this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
       if (res && res.result.commentCount) {
-        debugger
+        
         const newComments = res.result.comments
         if(res && res.result && res.result.courseDetails){
 

@@ -21,6 +21,8 @@ export class PostCardComponent {
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedPosts: any = []
+  @Input() type: any
+  @Input() userJoinedCommunity: boolean = false
   @Output() likeUnlikeData = new EventEmitter<any>()
 
   data = {

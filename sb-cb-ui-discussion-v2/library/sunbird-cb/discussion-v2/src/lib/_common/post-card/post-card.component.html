@@ -59,7 +59,7 @@
     <div class="my-4 h-divider"></div>
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
-            <ng-container *ngIf="cardConfig?.actions?.like?.show ">
+            <ng-container *ngIf="cardConfig?.actions?.like?.show && userJoinedCommunity ">
                 <div class="mr-4 circleBtn"
                     (click)="likeUnlikeComment(post)">
                     <mat-icon class="icon like-icon mr-2" aria-hidden="false" i18n-aria-label

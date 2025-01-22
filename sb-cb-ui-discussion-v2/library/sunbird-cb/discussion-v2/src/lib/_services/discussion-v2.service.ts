@@ -14,8 +14,15 @@ const API_END_POINTS = {
   DELETE_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/delete/${id}`,
   REPORT_POST: `/apis/proxies/v8/feedDiscussion/report`,
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
-  UPLOAD_FILE: `/apis/proxies/v8/feedDiscussion/uploadFile`
+  UPLOAD_FILE: `/apis/proxies/v8/feedDiscussion/uploadFile`,
+  COMMUNITY_JOIN: `/apis/proxies/v8/community/v1/join`,
+  COMMUNITY_UNJOIN:`apis/proxies/v8/community/v1/unjoin`,
+  COMMUNITY_READ: (id: string) => `/apis/proxies/v8/community/v1/read/${id}`,
+  COMMUNITY_SEARCH: `/apis/proxies/v8/community/v1/search`,
+  COMMUNITY_USER_LIST: (id: string) => `/apis/proxies/v8/community/v1/community/listuser/${id}`,
+  USERS_COMMUNITY_LIST: `/apis/proxies/v8/community/v1/user/communities`,
 }
+
 
 @Injectable({
   providedIn: 'root',
@@ -75,4 +82,32 @@ export class DiscussionV2Service {
   uploadFile(req: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.UPLOAD_FILE}`, req)
   }
+
+  communityJoin(req: any) {
+    return this.http.put<any>(`${API_END_POINTS.COMMUNITY_JOIN}`, req)
+  }
+
+  communityUnjoin(req: any) {
+    return this.http.put<any>(`${API_END_POINTS.COMMUNITY_UNJOIN}`, req)
+  }
+
+  communityDetailRead(communityId: any) {
+    return this.http.get<any>(`${API_END_POINTS.COMMUNITY_READ(communityId)}`)
+  }
+
+  communityUserList(communityId: any) {
+    return this.http.get<any>(`${API_END_POINTS.COMMUNITY_USER_LIST(communityId)}`)
+  }
+
+  usersJoinedCommunityList() {
+    return this.http.get<any>(`${API_END_POINTS.USERS_COMMUNITY_LIST}`)
+  }
+
+  communitySearch(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.COMMUNITY_SEARCH}`, req)
+  }
 }
+
+
+
+
