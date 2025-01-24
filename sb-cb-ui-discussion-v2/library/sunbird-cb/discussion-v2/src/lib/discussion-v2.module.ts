@@ -1,10 +1,8 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
+import {  CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
-// import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import { CommentsService } from './_services/comments.service'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
@@ -14,7 +12,6 @@ import { MatCardModule } from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PickerModule } from '@ctrl/ngx-emoji-mart'
-import { WidgetCommentModule } from './_common/widget-comment/widget-comment.module'
 import { WidgetDiscussionv2Module } from './_common/widget-discussionv2/widget-discussionv2.module'
 import { NewPostDialogueComponent } from './_common/new-post-dialogue/new-post-dialogue.component'
 import { MatListModule } from '@angular/material/list'
@@ -26,6 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
 import { WidgetPostdetailsModule } from './_widgets/widget-postdetails/widget-postdetails.module'
 import { WidgetDiscussionv2HomeModule } from './_widgets/widget-discussionv2-home/widget-discussionv2-home.module'
+import { UserEnrollCommunityService } from './_services/user-enroll-community.service'
 
 
 @NgModule({
@@ -54,17 +52,15 @@ import { WidgetDiscussionv2HomeModule } from './_widgets/widget-discussionv2-hom
     MatChipsModule,
     PickerModule,
     CKEditorModule,
-    WidgetCommentModule,
     WidgetDiscussionv2Module,
     WidgetPostdetailsModule,
     WidgetDiscussionv2HomeModule,
   ],
   providers: [
-    CommentsService,
+    UserEnrollCommunityService
   ],
   exports: [
     NewPostDialogueComponent,
-    WidgetCommentModule,
     WidgetDiscussionv2Module,
     WidgetPostdetailsModule,
     WidgetDiscussionv2HomeModule

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'd-v2-card-toggle',
@@ -6,8 +6,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
   styleUrls: ['./card-toggle.component.scss']
 })
 export class CardToggleComponent {
-  toggleViewBoolean: boolean = false;
-  
+  @Input() toggleViewBoolean: boolean = false;
   @Output() hideCardBody = new EventEmitter<Boolean>()
   toggleViewMethod(){
     this.toggleViewBoolean = !this.toggleViewBoolean
