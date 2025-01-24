@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'd-v2-community-card',
@@ -6,5 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./community-card.component.scss']
 })
 export class CommunityCardComponent {
+  @Input() community: any;
 
 }

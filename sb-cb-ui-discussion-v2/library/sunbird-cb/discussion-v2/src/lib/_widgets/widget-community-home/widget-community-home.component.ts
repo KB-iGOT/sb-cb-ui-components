@@ -1,6 +1,7 @@
 import { Component, Input, ViewEncapsulation, OnInit } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 @Component({
   selector: 'd-v2-widget-community-home',
@@ -75,6 +76,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
   
   constructor(private discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
+    private userEnrollSvc: UserEnrollCommunityService
   ) { }
 
   ngOnInit() {
@@ -93,18 +95,19 @@ export class WidgetCommunityHomeComponent implements OnInit {
     // Fetch community data using id
   }
 
-  checkUserJoinedCommunity() {
-    this.discussV2Svc.usersJoinedCommunityList().subscribe((resData: any) => {
-      
-      console.log(resData,'resData')
-      if(resData.result && resData.result.communityDetails && resData.result.communityDetails.length){
-        this.userJoinedCommunityList = resData.result.communityDetails
-        this.manageUserCommunityStatus()
-      }
-    })
+  async checkUserJoinedCommunity() {
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    this.manageUserCommunityStatus()
+    // this.discussV2Svc.usersJoinedCommunityList().subscribe((resData: any) => {
+    //   console.log(resData,'resData')
+    //   if(resData.result && resData.result.communityDetails && resData.result.communityDetails.length){
+    //     this.userJoinedCommunityList = resData.result.communityDetails
+    //     this.manageUserCommunityStatus()
+    //   }
+    // })
   }
+
   manageUserCommunityStatus(){
-    
     this.userJoinedCommunityList.forEach((community: any) => {
       if(community.communityid === this.communityId){
         this.userJoinedCommunity = community.status
@@ -120,7 +123,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
       if(resData.params && resData.params.status === 'success'){
         let resultData = [
           {
-            "userid": this.getUserId(),
+            "communityid": this.communityId,
             "status": true
           }
         ]
@@ -129,6 +132,8 @@ export class WidgetCommunityHomeComponent implements OnInit {
           community.status = true;
         } else {
           this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData];
+          this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
+          
         }
         this.manageUserCommunityStatus()
       }
@@ -141,13 +146,13 @@ export class WidgetCommunityHomeComponent implements OnInit {
     
     let request = { "communityId":this.communityId }
     this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
-      
       if(resData.params && resData.params.status === 'success'){
         const community = this.userJoinedCommunityList.find((community: any) => community.communityid === this.communityId);
         if (community) {
           community.status = false;
         }
-        this.userJoinedCommunity = false
+        this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
+        this.manageUserCommunityStatus()
       }
     })
   }

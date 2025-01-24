@@ -5,6 +5,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 // tslint:disable-next-line
 import _ from 'lodash'
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 @Component({
   selector: 'd-v2-widget-postdetails',
@@ -23,11 +24,14 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
   posts: any[] = []
   loadingMore = false
   searchResults: any
-
+  userJoinedCommunityList: any = []
+  userJoinedCommunity: boolean = false
+  communityId: string = ''
   constructor(
     private configSvc: ConfigurationsService,
     private discussV2Svc: DiscussionV2Service,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    private userEnrollSvc: UserEnrollCommunityService
   ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -216,6 +220,8 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []
+      this.communityId = this.posts[0].communityId
+      this.getUserJoinedCommunityList()
     }, (err: any) => {
       this.loadingPosts = false
       this._snackBar.open('Something went wrong! please try reporting again later.')
@@ -260,4 +266,17 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
     this.widgetData = null
   }
 
+  async getUserJoinedCommunityList() {
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    this.manageUserCommunityStatus()
+  }
+
+
+  manageUserCommunityStatus(){
+    this.userJoinedCommunityList.forEach((community: any) => {
+      if(community.communityid === this.communityId){
+        this.userJoinedCommunity = community.status
+      }
+    })
+  }
 }

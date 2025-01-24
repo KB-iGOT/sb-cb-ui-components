@@ -10,7 +10,8 @@ import { Router } from '@angular/router';
   styleUrls: ['./trending-discussions.component.scss']
 })
 export class TrendingDiscussionsComponent implements OnInit {
- @Input() data: any = []
+ @Input() data: any = [] 
+ @Input() expandCard: boolean= false
  hideCardBody:boolean | undefined
  searchResults: any
  loadingPosts: boolean = true
