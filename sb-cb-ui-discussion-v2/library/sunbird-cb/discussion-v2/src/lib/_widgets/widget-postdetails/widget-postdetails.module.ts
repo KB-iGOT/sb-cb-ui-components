@@ -19,6 +19,7 @@ import { ImageSlidersModule } from '../../_common/image-sliders/image-sliders.mo
 import { WidgetPostdetailsComponent } from './widget-postdetails.component';
 import { NewPostModule } from '../../_common/new-post/new-post.module';
 import { PostCardModule } from '../../_common/post-card/post-card.module';
+import { TrendingDiscussionsModule } from '../../_common/trending-discussions/trending-discussions.module';
 
 
 @NgModule({
@@ -45,7 +46,8 @@ import { PostCardModule } from '../../_common/post-card/post-card.module';
     SharedModule,
     ImageSlidersModule,
     PostCardModule,
-    NewPostModule
+    NewPostModule,
+    TrendingDiscussionsModule,
   ],
   exports: [
     WidgetPostdetailsComponent
