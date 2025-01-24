@@ -1,6 +1,7 @@
 .community-card {
     width: 172px;
     height: 212px;
+
     .card-img-block{
         height: 96px;
         position: relative;
@@ -41,6 +42,7 @@
 
     }
     .card-details-block{
+        min-height: 91px;
         padding: 16px;
         background-color: white;
         border-bottom-left-radius: 12px;
@@ -63,6 +65,7 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;   
+            min-height: 34.14px;
         }
         .community-info {
             //styleName: Label;
@@ -74,7 +77,10 @@
             text-underline-position: from-font;
             text-decoration-skip-ink: none;
             color: #666666;
-
+            margin-bottom: 12px;
+            p {
+                margin-bottom: 0;
+            }
         }
         .community-owner-info {
            .owner-icon {

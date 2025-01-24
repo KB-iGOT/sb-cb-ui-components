@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 export interface Community {
   id: number;
   name: string;
@@ -15,6 +16,7 @@ export interface Community {
   styleUrls: ['./widget-discussionv2-home.component.scss']
 })
 export class WidgetDiscussionv2HomeComponent implements OnInit {
+
   shortCutData: any[]= [
     {
       name:"Saved Posts",
@@ -84,47 +86,8 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
 
 
 
-  popularCommunities: any[] = [
-    {
-      name: 'DevOps Enthusiasts',
-      members: '1.1K',
-      posts: '10K',
-      status: 'closed',
-      image: 'https://portal.dev.karmayogibharat.net/assets/public/content/do_11408384025512345617/artifact/do_11408384025512345617_1719218781302_assessment1719218781448.jpg'
-    },
-    {
-      name: 'Open Source Collaboratives',
-      members: '1.1K',
-      posts: '10K',
-      status: 'open',
-      image: 'https://portal.dev.karmayogibharat.net/assets/public/content/do_11408384025512345617/artifact/do_11408384025512345617_1719218781302_assessment1719218781448.jpg'
-    },
-    {
-      name: 'Python Developers Forum',
-      members: '1.1K',
-      posts: '10K',
-      status: 'closed',
-      image: 'https://portal.dev.karmayogibharat.net/assets/public/content/do_11408384025512345617/artifact/do_11408384025512345617_1719218781302_assessment1719218781448.jpg'
-    }
-  ];
-  // communities: Community[] = [
-  //   {
-  //     id: 1,
-  //     name: 'DevOps Enthusiasts',
-  //     members: '1.1K',
-  //     posts: '10K',
-  //     status: 'closed',
-  //     image: '/assets/devops.jpg',
-  //     category: 'Software Development'
-  //   },
-  //   // Add more communities...
-  // ];
+ 
 
-  categories = [
-    { name: 'Government and Public Administration', count: 8 },
-    { name: 'Software Development', count: 11 },
-    { name: 'Interpersonal Communication', count: 29 }
-  ];
   communities = [
     {
       name: 'Civil Servants Associations',
@@ -153,15 +116,26 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
     // Add more communities...
   ];
 
+  @Output() searchText = new EventEmitter<any>();
+  @Output() showAllByTopic = new EventEmitter<any>();
 
 
  
+  constructor(private userEnrollSvc: UserEnrollCommunityService) { }
+  async ngOnInit() {
+      let data = await this.userEnrollSvc.getEnrollData()
+      console.log(data)
+  }
 
-  // getCommunityByCategory(category: string): Community[] {
-  //   return this.communities.filter(c => c.category === category);
-  // }
-  ngOnInit(): void {
-      
+  onSearch(event: any): void {
+    const searchValue = event.target.value;
+    this.searchText.emit(searchValue);
+    console.log('Search text:', searchValue);
+    // Add your search logic here
+  }
+
+  showAllCommunitiesByTopic(topic: any) {
+    this.showAllByTopic.emit(topic);
   }
 
 }
