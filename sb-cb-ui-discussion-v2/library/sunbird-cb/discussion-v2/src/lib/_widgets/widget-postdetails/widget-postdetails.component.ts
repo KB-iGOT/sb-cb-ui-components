@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 // tslint:disable-next-line
 import _ from 'lodash'
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'd-v2-widget-postdetails',
@@ -25,13 +26,14 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
   loadingMore = false
   searchResults: any
   userJoinedCommunityList: any = []
-  userJoinedCommunity: boolean = false
+  userJoinedCommunity: any
   communityId: string = ''
   constructor(
     private configSvc: ConfigurationsService,
     private discussV2Svc: DiscussionV2Service,
     private _snackBar: MatSnackBar,
-    private userEnrollSvc: UserEnrollCommunityService
+    private userEnrollSvc: UserEnrollCommunityService,
+    private router: Router
   ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -275,8 +277,12 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
   manageUserCommunityStatus(){
     this.userJoinedCommunityList.forEach((community: any) => {
       if(community.communityid === this.communityId){
-        this.userJoinedCommunity = community.status
+        this.userJoinedCommunity = community
       }
     })
+  }
+
+  navigateToCommunityPage() {
+    this.router.navigate(['/app/discussion-forum-v2/community/', this.userJoinedCommunity.communityid])
   }
 }
