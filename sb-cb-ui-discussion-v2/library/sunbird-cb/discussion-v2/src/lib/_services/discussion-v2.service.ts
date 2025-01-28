@@ -14,7 +14,7 @@ const API_END_POINTS = {
   DELETE_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/delete/${id}`,
   REPORT_POST: `/apis/proxies/v8/feedDiscussion/report`,
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
-  UPLOAD_FILE: `/apis/proxies/v8/feedDiscussion/uploadFile`,
+  UPLOAD_FILE: (communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/uploadFile/${communityId}/${discussionId}`,
   COMMUNITY_JOIN: `/apis/proxies/v8/community/v1/join`,
   COMMUNITY_UNJOIN:`apis/proxies/v8/community/v1/unjoin`,
   COMMUNITY_READ: (id: string) => `/apis/proxies/v8/community/v1/read/${id}`,
@@ -52,6 +52,7 @@ export class DiscussionV2Service {
   }
 
   updatePost(req: any) {
+    console.log('updatePost req::', req)
     return this.http.post<any>(`${API_END_POINTS.UPDATE_POST}`, req)
   }
 
@@ -79,8 +80,8 @@ export class DiscussionV2Service {
     return this.http.post<any>(`${API_END_POINTS.REPORT_POST}`, requestData)
   }
 
-  uploadFile(req: any): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.UPLOAD_FILE}`, req)
+  uploadFile(req: any, communityId: string, discussionId:string): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.UPLOAD_FILE(communityId, discussionId)}`, req)
   }
 
   communityJoin(req: any) {

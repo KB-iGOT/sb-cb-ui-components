@@ -1,6 +1,6 @@
 <form [formGroup]="uploadForm" class="p-4">
     <!-- Community Dropdown -->
-    <div class="mb-4">
+    <!-- <div class="mb-4">
       <label class="block text-gray-700 text-sm font-medium mb-2">
         Community <span class="text-red-500">*</span>
       </label>
@@ -10,7 +10,8 @@
           <mat-option value="community2">Community 2</mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
+    </div> -->
+    <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
   
     <!-- Title -->
     <div class="mb-4">
