@@ -71,6 +71,7 @@ export class NewPostComponent {
         backdropClass: 'post-dialog-backdrop',
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
         community: this.community,
+        config: this.config
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {

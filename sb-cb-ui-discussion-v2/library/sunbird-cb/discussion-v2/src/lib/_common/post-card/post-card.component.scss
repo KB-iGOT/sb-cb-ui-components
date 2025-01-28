@@ -20,6 +20,11 @@
     pointer-events: none;
 }
 
+.disabled {
+    cursor: none;
+    pointer-events: none;
+}
+
 .circleBtn{
     display: flex;
     align-items: center;

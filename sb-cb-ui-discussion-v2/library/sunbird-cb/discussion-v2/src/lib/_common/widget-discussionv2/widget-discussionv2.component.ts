@@ -53,7 +53,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
           "placeholder": "Start a discussion"
         },
         "postBtn": {
-          "text": "",
+          "text": "Post",
           "icon": "send",
           show: true
         },
@@ -144,7 +144,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
               "placeholder": "Add a comment"
             },
             "postBtn": {
-              "text": "",
+              "text": "Post",
               "icon": "send",
               show: true
             },
@@ -200,7 +200,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
                 "placeholder": "Add a comment"
               },
               "postBtn": {
-                "text": "",
+                "text": "Post",
                 "icon": "send"
               },
               "styles": {

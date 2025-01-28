@@ -129,7 +129,7 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
               "placeholder": "Add a comment"
             },
             "postBtn": {
-              "text": "",
+              "text": "Post",
               "icon": "send",
               show: true
             },
@@ -185,7 +185,7 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
                 "placeholder": "Add a comment"
               },
               "postBtn": {
-                "text": "",
+                "text": "Post",
                 "icon": "send"
               },
               "styles": {
