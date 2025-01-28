@@ -18,7 +18,6 @@ export class UserEnrollCommunityService {
     this.userEnrolledCommunityList = data;
   }
   async getEnrollData() {
-    ;
     if(this.userEnrolledCommunityList.length) {
       return this.userEnrolledCommunityList;
     } else {

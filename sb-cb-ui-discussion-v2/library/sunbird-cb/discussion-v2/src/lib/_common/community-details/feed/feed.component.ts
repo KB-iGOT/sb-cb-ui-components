@@ -35,19 +35,7 @@ export class FeedComponent implements OnInit{
 
   fetchPosts() {
     this.loadingPosts = true
-    const req = {
-        "filterCriteriaMap": {
-          "type": "question",
-          // "communityId": this.community.communityId,
-          isActive: true // this is to get only active posts, deleted posts won't be returned
-        },
-        "requestedFields": [],
-        "pageNumber": this.commentListOffSet,
-        "pageSize": this.commentListLimit,
-        "orderBy": "createdOn",
-        "orderDirection": "ASC",
-        "facets": []
-    }
+    const req = this.fetchPostRequest()
     this.discussV2Svc.searchPosts(req).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
@@ -59,7 +47,72 @@ export class FeedComponent implements OnInit{
       console.error(err)
     })
   }
-  loadMoreComments(){}
-  likeUnlikeEvent(_e: any){} 
-  newCommentEvent(_e: any){}
+
+  fetchPostsMore() {
+    this.loadingPosts = true
+    const req = this.fetchPostRequest()
+    this.discussV2Svc.searchPosts(req).subscribe(res => {
+      console.log('res = > ', res)
+      this.loadingPosts = false
+      this.searchResults = _.get(res, 'result.search_results') || {}
+      this.posts = [...this.posts, ...(_.get(res, 'result.search_results.data') || [])]
+    },(err: any) => {
+      this.loadingPosts = false
+      this._snackBar.open('Something went wrong! please try reporting again later.')
+      console.error(err)
+    })
+  }
+
+  fetchPostRequest() {
+    const req = {
+      "filterCriteriaMap": {
+        "type": "question",
+        // "communityId": this.community.communityId,
+        isActive: true // this is to get only active posts, deleted posts won't be returned
+      },
+      "requestedFields": [],
+      "pageNumber": this.commentListOffSet,
+      "pageSize": this.commentListLimit,
+      "orderBy": "createdOn",
+      "orderDirection": "ASC",
+      "facets": []
+    }
+    return req
+  }
+
+  likeUnlikeEvent(event: any) {
+    // if(this.userLikedComments.includes(event.commentId)) {
+    //   this.likeUnlikeCommentApi('dislike', event.commentId)
+    // } else {
+      this.upVotePost('like', event.discussionId)
+    // }
+  }
+
+  upVotePost(flag: string, discussionId: string) {
+    this.discussV2Svc.upVotePost(discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
+        const post = this.posts.find((comm: any) => comm.discussionId === discussionId)
+        if (flag === 'like') {
+          post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
+          // this.userLikedComments.push(commentId)
+        } else {
+          post.downVoteCount = post.downVoteCount? post.downVoteCount + 1 : 1
+          // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
+          // this.userLikedComments.splice(index, 1)
+        }
+      }
+    })
+  }
+  newCommentEvent(event: any){
+    console.log('Widget catch event :', event)
+    if(event && event.type === 'question'){
+      this.fetchPosts()
+    }
+  }
+
+  loadMoreComments() {
+    this.commentListOffSet = this.commentListOffSet + 1
+    this.fetchPostsMore()
+  }
 }
