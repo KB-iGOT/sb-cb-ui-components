@@ -113,16 +113,15 @@
                (matChipInputTokenEnd)="addTag($event)">
       </mat-form-field>
     </div>
-  
     <!-- Submit Button -->
     <div class="mt-4">
       <button 
         mat-raised-button 
-        color="primary" 
-        class="w-full"
+        color="" 
+        class="w-full primary-button"
         [disabled]="!uploadForm.valid"
         (click)="onSubmit()">
-        Publish your question
+        {{data?.config?.postBtn?.text || 'Post'}}
       </button>
     </div>
   </form>
