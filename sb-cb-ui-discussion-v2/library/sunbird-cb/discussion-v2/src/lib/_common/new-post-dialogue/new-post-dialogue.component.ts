@@ -65,7 +65,7 @@ export class NewPostDialogueComponent implements OnInit {
     @Inject('environment') environment: any
   ) {
     this.uploadForm = this.fb.group({
-      community: ['', Validators.required],
+      community: [''],
       title: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
       tags: [[]],
@@ -142,13 +142,63 @@ export class NewPostDialogueComponent implements OnInit {
         tags: this.selectedTags
       };
       console.log('Form submitted:', formData);
-      this.uploadImages();
+      this.handlePostCreation();
     }
   }
 
-  uploadImages() {
+  private handlePostCreation(): void {
+    switch (this.data.type) {
+      case NsDiscussionV2.EPostType.QUESTION:
+        this.createPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST:
+        this.createAnswerPost();
+        break;
+    }
+  }
+
+  createPost() {
+    const req = this.createReq(this.uploadForm, this.data.type)
+    console.log('req:', req);
+    this.discussV2Svc.createPost(req).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          const discussionId = res.result.discussionId; // Get the discussion ID
+          if (this.selectedFiles.length > 0) {
+            this.uploadImages(discussionId, res.result);
+          } else {
+            this.dialogRef.close({ result: res.result, type: this.data.type });
+          }
+        }
+      },
+      error: (err: any) => {
+        console.log('Create post failed', err);
+      }
+    });
+  }
+
+  createAnswerPost() {
+    const req = this.createReq(this.uploadForm, this.data.type)
+    console.log('req:', req);
+    this.discussV2Svc.createAnswerPost(req).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          const discussionId = res.result.discussionId; // Get the discussion ID
+          if (this.selectedFiles.length > 0) {
+            this.uploadImages(discussionId, res.result);
+          } else {
+            this.dialogRef.close({ result: res.result, type: this.data.type });
+          }
+        }
+      },
+      error: (err: any) => {
+        console.log('Create post failed', err);
+      }
+    });
+  }
+
+  uploadImages(discussionId: string, postResult: any) {
     if (this.selectedFiles.length === 0) {
-      this.handlePostCreation();
       return;
     }
 
@@ -158,15 +208,16 @@ export class NewPostDialogueComponent implements OnInit {
       return new Promise<string>((resolve, reject) => {
         // Create FormData object to properly send the file
         const formData = new FormData();
+        // Append file with a specific field name that API expects
         formData.append('file', file);
-
-        this.discussV2Svc.uploadFile(formData).subscribe({
+        // formData.append('discussionId', discussionId);
+        // formData.append('communityId', this.data.community.communityId || '');
+        const communityId = this.data.community.communityId || ''
+        this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
           next: (res: any) => {
             if (res && res.result && res.result.url) {
               const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
-              // const finalURL = `${this.environment.contentHost}/${this.environment.contentBucket}${mainUrl}`
               const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
-
               console.log('finalURL: ', finalURL)
               resolve(finalURL);
             } else {
@@ -181,62 +232,81 @@ export class NewPostDialogueComponent implements OnInit {
     Promise.all(uploadPromises)
       .then(uploadedUrls => {
         this.mediaUrls = uploadedUrls;
-        console.log('this.mediaUrls', this.mediaUrls)
-        this.handlePostCreation();
+        console.log('this.mediaUrls', this.mediaUrls);
+        this.handlePostUpdation(discussionId, postResult);
       })
       .catch(error => {
         console.error('Error uploading files:', error);
-        // Handle error appropriately
+        // Even if image upload fails, the post was created
+        this.dialogRef.close({ result: postResult, type: this.data.type });
       });
   }
 
-  private handlePostCreation(): void {
+  private handlePostUpdation(discussionId: string, postResult: any): void {
+    console.log('discussionId', discussionId)
+    console.log('postResult', postResult)
     switch (this.data.type) {
       case NsDiscussionV2.EPostType.QUESTION:
-        this.createPost();
+        this.updatePostWithMediaUrls(discussionId, postResult);
         break;
       case NsDiscussionV2.EPostType.ANSWER_POST:
-        this.createAnswerPost();
+        this.updateAnswerPostWithMediaUrls(discussionId, postResult);
         break;
     }
   }
 
-  // create question post
-  createPost() {
-    const req = this.createReq(this.uploadForm, this.data.type)
-    console.log('req:', req);
-    this.discussV2Svc.createPost(req).subscribe(res => {
-      if (res && res.result) {
-        this.dialogRef.close({ result: res.result, type: this.data.type })
+  updatePostWithMediaUrls(discussionId: string, postResult: any) {
+    const communityId = postResult.communityId
+    const updateReq = {
+      discussionId,
+      communityId,
+      mediaUrls: this.mediaUrls
+    };
+    
+    this.discussV2Svc.updatePost(updateReq).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          this.dialogRef.close({ result: res.result, type: this.data.type });
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post with media URLs:', err);
+        // Even if update fails, the post was created
+        this.dialogRef.close({ result: postResult, type: this.data.type });
       }
-    }, (err: any) => {
-      console.log('Create post failed', err)
-    })
+    });
   }
 
-  // create answer post
-  createAnswerPost() {
-    const req = this.createReq(this.uploadForm, this.data.type)
-    console.log('req:', req);
-    this.discussV2Svc.createAnswerPost(req).subscribe(res => {
-      if (res && res.result) {
-        this.dialogRef.close({ result: res.result, type: this.data.type })
+  updateAnswerPostWithMediaUrls(discussionId: string, postResult: any) {
+    const updateReq = {
+      discussionId,
+      mediaUrls: this.mediaUrls
+    };
+    
+    this.discussV2Svc.updatePost(updateReq).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          this.dialogRef.close({ result: res.result, type: this.data.type });
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post with media URLs:', err);
+        // Even if update fails, the post was created
+        this.dialogRef.close({ result: postResult, type: this.data.type });
       }
-    }, (err: any) => {
-      console.log('Create post failed', err)
-    })
+    });
   }
 
   createReq(formData: any, type: string) {
     const req = {
       type,
       ...(this.data.parentDiscussionId ? { parentDiscussionId: this.data.parentDiscussionId } : null),
-      community: formData.value.community,
+      communityId: this.data.community.communityId || '',
       title: formData.value.title,
       description: formData.value.description,
       targetTopic: 'testing',
       tags: this.selectedTags,
-      mediaUrls: this.mediaUrls || []
+      // mediaUrls: this.mediaUrls || []
     }
     return req;
   }

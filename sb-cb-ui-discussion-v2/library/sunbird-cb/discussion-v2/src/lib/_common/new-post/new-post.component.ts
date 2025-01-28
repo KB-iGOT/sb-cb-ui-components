@@ -70,6 +70,7 @@ export class NewPostComponent {
         panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
         backdropClass: 'post-dialog-backdrop',
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
+        community: this.community,
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
