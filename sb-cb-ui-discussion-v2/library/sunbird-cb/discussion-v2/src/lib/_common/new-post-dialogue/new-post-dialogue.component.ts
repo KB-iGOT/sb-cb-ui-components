@@ -139,7 +139,8 @@ export class NewPostDialogueComponent implements OnInit {
     if (this.uploadForm.valid) {
       const formData = {
         ...this.uploadForm.value,
-        tags: this.selectedTags
+        // TODO: hastags will come in future
+        // tags: this.selectedTags
       };
       console.log('Form submitted:', formData);
       this.handlePostCreation();
@@ -279,11 +280,11 @@ export class NewPostDialogueComponent implements OnInit {
 
   updateAnswerPostWithMediaUrls(discussionId: string, postResult: any) {
     const updateReq = {
-      discussionId,
+      answerPostId: discussionId,
       mediaUrls: this.mediaUrls
     };
     
-    this.discussV2Svc.updatePost(updateReq).subscribe({
+    this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
         if (res && res.result) {
           this.dialogRef.close({ result: res.result, type: this.data.type });
@@ -316,7 +317,7 @@ export class NewPostDialogueComponent implements OnInit {
     editor.editing.view.change((writer: any) => {
       writer.setStyle(
         'min-height',
-        '200px',
+        '150px',
         editor.editing.view.document.getRoot()
       );
     });

@@ -12,7 +12,7 @@
                 <div *ngIf="userJoinedCommunity?.status">
                     <span class="mat-body-1 ws-mat-black60-text">You have already joined this community </span>
                 </div>
-                <div *ngIf="!userJoinedCommunity?.status">
+                <div class="flex flex-col " *ngIf="!userJoinedCommunity?.status">
                     <span class="mat-body-1 ws-mat-black60-text">You have not joined this community yet.</span>
                     <span class="mat-body-1 ws-mat-black60-text">Join community to create post and interact with other posts</span>
                 </div>

@@ -13,14 +13,14 @@
             </div>
         </div>
 
-        <div class="flex flex-1 flex-col">
+        <div class="flex flex-1 items-start justify-center  flex-col">
             <div class="flex items-center">
                 <span class="mat-body-1 bold mr-1"> {{post?.createdBy?.first_name}} </span>
                 <mat-icon class="icon verified mr-1"
                 *ngIf="post?.createdBy?.userProfileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
             </div>
-            <div class="ws-mat-black60-text mat-body-2">
+            <div class="ws-mat-black60-text mat-body-2" *ngIf="post?.createdBy?.designation">
                 {{post?.createdBy?.designation}}
             </div>
         </div>
@@ -102,7 +102,7 @@
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
-                <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply"
+                <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community"
                     [type]="cardConfig?.repliesSection?.newPostReply?.type" (newComment)="newCommentEvent($event)"
                     [taggedUsers]="[post?.createdBy?.user_id]" [hierarchyPath]="[post?.discussionId]">
                 </d-v2-new-post>
