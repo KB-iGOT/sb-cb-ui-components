@@ -6,6 +6,11 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { CardToggleModule } from '../../_common/card-toggle/card-toggle.module';
 import { ShortcutsModule, TrendingDiscussionsModule } from '../../../public-api';
 import { CommunityDetailsModule } from '../../_common/community-details/community-details.module';
+import { MemberCardModule } from '../../_common/member-card/member-card.module';
+import { SharedModule } from '../../_shared/shared.module';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { PipesModule } from '../../_pipes/pipes.module';
 
 
 
@@ -20,7 +25,12 @@ import { CommunityDetailsModule } from '../../_common/community-details/communit
     CardToggleModule,
     TrendingDiscussionsModule,
     ShortcutsModule,
-    CommunityDetailsModule
+    CommunityDetailsModule,
+    MemberCardModule,
+    SharedModule,
+    MatButtonModule,
+    MatMenuModule,
+    PipesModule
   ],
   exports: [
     WidgetCommunityHomeComponent

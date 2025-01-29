@@ -13,17 +13,23 @@ export class WidgetCommunitySearchComponent {
   communityDataList: any = [];
   @Output() searchText = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
+  isLoading: boolean = false;
   
   constructor(private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
     this.activatedRoute.queryParams.subscribe((params: any) => {
       if(params['c']) {
         this.searchTextValue = params['c'];
+        this.isLoading = true;
+        this.communityDataList = [0,1,2,3,4,5,6,7,8,9,10];
         this.fetchCommunityList(this.searchTextValue)
+      } else {
+        this.communityDataList = [0,1,2,3,4,5,6,7,8,9,10];
+        this.fetchCommunityList()
       }
     })
    }
 
-   fetchCommunityList(_searchText?: any){
+   fetchCommunityList(searchText?: any){
     let request: any = {
       "filterCriteriaMap": {
           "status": "active"
@@ -33,16 +39,15 @@ export class WidgetCommunitySearchComponent {
       "pageNumber": 0,
       "pageSize": 200
     }
-    // if(searchText) {
-    //   request['searchString'] = searchText
-    // }
+    if(searchText) {
+      request['searchString'] = searchText
+    }
 
     this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
-      
       if(res.result && res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length){
         this.communityDataList = res.result.search_results.data;
       }
-      console.log(res);
+      this.isLoading = false;
     })
    }
 

@@ -15,6 +15,7 @@ import { AvatarPhotoComponent } from './avatar-photo/avatar-photo.component'
 import { FlagDialogueComponent } from './flag-dialogue/flag-dialogue.component';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogueComponent } from './confirm-dialogue/confirm-dialogue.component';
+import { ShareDiscussionModule } from './share-discussion/share-toc.module';
 
 
 
@@ -38,11 +39,13 @@ import { ConfirmDialogueComponent } from './confirm-dialogue/confirm-dialogue.co
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
+    ShareDiscussionModule
   ],
   exports: [
     AvatarPhotoComponent,
     FlagDialogueComponent,
-    ConfirmDialogueComponent
+    ConfirmDialogueComponent,
+    ShareDiscussionModule
   ],
 })
 export class SharedModule { }
