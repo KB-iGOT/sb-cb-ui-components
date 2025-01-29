@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommunityCardComponent } from './community-card.component';
 import { MatIconModule } from '@angular/material/icon';
+import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module';
 
 
 
@@ -11,7 +12,8 @@ import { MatIconModule } from '@angular/material/icon';
   ],
   imports: [
     CommonModule,
-    MatIconModule
+    MatIconModule,
+    SkeletonLoaderModule
   ],
   exports: [CommunityCardComponent]
 })

@@ -26,7 +26,7 @@
        </div>
        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div *ngFor="let community of communityDataList">
-            <d-v2-community-card [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
+         <d-v2-community-card [isLoading]="isLoading" [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
         </div>
      </div>
     </div>

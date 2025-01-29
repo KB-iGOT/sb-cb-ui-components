@@ -7,5 +7,6 @@ import { Component, Input } from '@angular/core';
 })
 export class CommunityCardComponent {
   @Input() community: any;
+  @Input() isLoading: boolean = false;
 
 }

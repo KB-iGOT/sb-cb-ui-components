@@ -1,7 +1,7 @@
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto  py-6">
   <div class="flex flex-col lg:flex-row gap-8">
      <!-- Left Sidebar -->
-     <div class="lg:w-64">
+     <div class="lg:w-80">
       <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts>
      </div>
      <!-- Main Content -->
@@ -33,8 +33,8 @@
                     </a>
                  </div>
                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div *ngFor="let community of communities">
-                       <d-v2-community-card></d-v2-community-card>
+                    <div *ngFor="let community of communities?.slice(0,3)">
+                       <d-v2-community-card [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
                     </div>
                  </div>
               </div>

@@ -1,0 +1,23 @@
+.members-wrapper {
+    background: #FFFFFF;
+    border: 1px solid #00000033;
+    border-radius: 12px;
+    padding: 16px;
+    .community-search{
+        input {
+    
+            border: 1px solid #00000029;
+        }
+    }
+    .member-title {
+        //styleName: Heading 2;
+        font-family: Montserrat;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 24.38px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+
+    }
+}
