@@ -17,6 +17,8 @@ export class WidgetCommunityHomeComponent implements OnInit {
   userJoinedCommunityList: any = []
   userJoinedCommunity: boolean = false
   hideCardBody:boolean | undefined
+  enableShare: boolean = false
+  rootOrgId: String= ''
   shortCutData: any[]= [
     {
       name:"Saved Posts",
@@ -77,7 +79,13 @@ export class WidgetCommunityHomeComponent implements OnInit {
   constructor(private discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
     private userEnrollSvc: UserEnrollCommunityService
-  ) { }
+  ) { 
+    if(this.configSvc 
+      && this.configSvc.userProfile
+      && this.configSvc.userProfile.rootOrgId){
+      this.rootOrgId = this.configSvc.userProfile.rootOrgId
+    }
+  }
 
   ngOnInit() {
     console.log(this.communityId)
@@ -163,5 +171,9 @@ export class WidgetCommunityHomeComponent implements OnInit {
       userId = this.configSvc.userProfile.userId
     }
     return userId
+  }
+
+  resetEnableShare(_event: any) {
+    this.enableShare = false
   }
 }

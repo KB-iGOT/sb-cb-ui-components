@@ -19,11 +19,14 @@ import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
 import { NewPostModule } from '../new-post/new-post.module';
 import { PostCardModule } from '../post-card/post-card.module';
+import { MemberDetailsComponent } from './member-details/member-details.component';
+import { MemberCardModule } from '../member-card/member-card.module';
 
 
 @NgModule({
   declarations: [
-    FeedComponent
+    FeedComponent,
+    MemberDetailsComponent
   ],
   imports: [
     CommonModule,
@@ -45,10 +48,12 @@ import { PostCardModule } from '../post-card/post-card.module';
     SharedModule,
     ImageSlidersModule,
     PostCardModule,
-    NewPostModule
+    NewPostModule,
+    MemberCardModule
   ],
   exports: [
-    FeedComponent
+    FeedComponent,
+    MemberDetailsComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

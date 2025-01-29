@@ -1,4 +1,4 @@
-<div class="community-card">
+<div class="community-card" *ngIf="!isLoading">
     <div class="card-img-block">
         <img src="https://portal.dev.karmayogibharat.net/assets/public/content/do_1139557259796398081160/artifact/do_1139557259796398081160_1703579832066_1000_f_619659267_wspvvzailzypsdkpbb50qgj5zcchjoc6.jpg" alt="">
         <div class="community-type flex items-center">
@@ -18,6 +18,45 @@
                 <img src="https://portal.dev.karmayogibharat.net/assets/public/content/do_1139557259796398081160/artifact/do_1139557259796398081160_1703579832066_1000_f_619659267_wspvvzailzypsdkpbb50qgj5zcchjoc6.jpg" alt="">
             </div>
             <p class="owner-name margin-remove">By MDO Name</p>
+        </div>
+    </div>
+</div>
+<div class="community-card" *ngIf="isLoading">
+    <div class="card-img-block">
+        <d-v2-widget-skeleton-loader [width]="'100%'" [height]="'96px'"
+        [bindingClass]="'flex rounded-tl-xl rounded-tr-xl'"></d-v2-widget-skeleton-loader>
+        <!-- <div class="community-type flex items-center">
+            <mat-icon class="mat-icon ">lock</mat-icon>
+            <span class="title">Private</span>
+        </div> -->
+    </div>
+    <div class="card-details-block">
+        <p class="community-title">
+            <d-v2-widget-skeleton-loader [width]="'100%'" [height]="'14px'"
+            [bindingClass]="'flex rounded mb-1'"></d-v2-widget-skeleton-loader>
+            <d-v2-widget-skeleton-loader [width]="'80%'" [height]="'14px'"
+            [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+        </p>
+        <div class="flex items-center justify-between community-info">
+            <p>
+                <d-v2-widget-skeleton-loader [width]="'50px'" [height]="'12px'"
+                [bindingClass]="'flex rounded '"></d-v2-widget-skeleton-loader>
+            </p>
+            <span class="mx-2">•</span>
+            <p>
+                <d-v2-widget-skeleton-loader [width]="'50px'" [height]="'12px'"
+                [bindingClass]="'flex rounded '"></d-v2-widget-skeleton-loader>
+            </p>
+        </div>
+        <div class="flex items-center justify-start community-owner-info">
+            <div class="owner-icon mr-2">
+                <d-v2-widget-skeleton-loader [width]="'18px'" [height]="'18px'"
+                [bindingClass]="'flex rounded '"></d-v2-widget-skeleton-loader>
+            </div>
+            <p class="owner-name margin-remove">
+                <d-v2-widget-skeleton-loader [width]="'66px'" [height]="'12px'"
+                [bindingClass]="'flex  '"></d-v2-widget-skeleton-loader>
+            </p>
         </div>
     </div>
 </div>
