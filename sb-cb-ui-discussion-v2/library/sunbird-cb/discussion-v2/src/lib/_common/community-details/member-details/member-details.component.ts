@@ -23,4 +23,8 @@ export class MemberDetailsComponent implements OnInit{
       }
     })
   }
+  onSearch(event: any){
+   console.log(event);
+
+  }
 }

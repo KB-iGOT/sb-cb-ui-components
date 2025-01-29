@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class NumberShortenerPipe implements PipeTransform {
   private readonly SUFFIXES = ['', 'K', 'M', 'B', 'T'];
 
-  transform(value: number | null | undefined, decimals: number = 1): string {
+  transform(value: number | string | null | undefined, decimals: number = 1): string {
     if (value === null || value === undefined) {
       return '0';
     }
@@ -14,6 +14,7 @@ export class NumberShortenerPipe implements PipeTransform {
     if (value === 0) {
       return '0';
     }
+    value = Number(value);
 
     if (Math.abs(value) < 1000) {
       return value.toString();
