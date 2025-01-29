@@ -218,7 +218,6 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
       "facets": []
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
-      console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []

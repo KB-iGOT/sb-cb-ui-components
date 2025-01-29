@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 // import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -9,10 +9,10 @@ import _ from 'lodash'
   templateUrl: './feed.component.html',
   styleUrls: ['./feed.component.scss']
 })
-export class FeedComponent implements OnInit{
+export class FeedComponent implements OnInit, OnChanges{
   @Input() widgetData: any = []
   @Input() userJoinedCommunity: boolean = false
-  @Input() community: any = []
+  @Input() community!: any
   loadingPosts: boolean = false
   loogedInUserProfile: any = {}
   pageNumber = 0
@@ -30,14 +30,21 @@ export class FeedComponent implements OnInit{
   ) { }
 
   ngOnInit(): void {
-    this.fetchPosts()
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.community) {
+      if(this.community) {
+        console.log('on changes calling fetchPosts() ', this.community, changes.community)
+        this.fetchPosts()
+      }
+    }
   }
 
   fetchPosts() {
     this.loadingPosts = true
     const req = this.fetchPostRequest()
     this.discussV2Svc.searchPosts(req).subscribe(res => {
-      console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []
@@ -64,10 +71,11 @@ export class FeedComponent implements OnInit{
   }
 
   fetchPostRequest() {
+    debugger;
     const req = {
       "filterCriteriaMap": {
         "type": "question",
-        // "communityId": this.community.communityId,
+        "communityId": this.community.communityId,
         isActive: true // this is to get only active posts, deleted posts won't be returned
       },
       "requestedFields": [],

@@ -1,6 +1,31 @@
+<div class=" p-4">
+  <div class="flex user-info">
+    <div>
+      <div class="mr-4">
+        <d-v2-avatar-photo [size]="'ml'" [name]="data?.currentUser?.firstName"
+          [photoUrl]="data?.currentUser?.profileImageUrl" [color]="
+                data?.currentUser?.firstName ? '#006400' : '#000'
+            ">
+        </d-v2-avatar-photo>
+      </div>
+    </div>
+
+    <div class="flex items-start justify-center  flex-1 flex-col">
+      <div class="flex items-center">
+        <span class="mat-body-1 bold mr-1"> {{data?.currentUser?.firstName}} </span>
+        <mat-icon class="icon verified mr-1" *ngIf="data?.currentUser?.profileDetails?.profileStatus?.toLowerCase() === 'verified'"
+          i18n-aria-label aria-label="verified">check_circle</mat-icon>
+      </div>
+      <div class="ws-mat-black60-text mat-body-2" *ngIf="data?.currentUser?.professionalDetails[0]?.designation">
+        {{data?.currentUser?.professionalDetails[0]?.designation}}
+      </div>
+    </div>
+  </div>
+</div>
+<div class=" h-divider"></div>
 <form [formGroup]="uploadForm" class="p-4">
-    <!-- Community Dropdown -->
-    <!-- <div class="mb-4">
+  <!-- Community Dropdown -->
+  <!-- <div class="mb-4">
       <label class="block text-gray-700 text-sm font-medium mb-2">
         Community <span class="text-red-500">*</span>
       </label>
@@ -11,77 +36,66 @@
         </mat-select>
       </mat-form-field>
     </div> -->
-    <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
-  
-    <!-- Title -->
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-medium mb-2">
-        Title <span class="text-red-500">*</span>
-      </label>
-      <mat-form-field appearance="outline" class="w-full">
-        <input matInput
-          formControlName="title"
-          placeholder="Enter your question title"
-          maxlength="100">
-        <mat-hint align="end">{{uploadForm.get('title')?.value?.length || 0}}/100</mat-hint>
-      </mat-form-field>
-    </div>
-  
-    <!-- Question Description -->
-    <div class="mb-4 flex flex-col w-full">
-      <label class="block text-gray-700 text-sm font-medium mb-2">
-        Question Description <span class="text-red-500">*</span>
-      </label>
-      <ckeditor
-        [editor]="Editor"
-        formControlName="description"
-        [config]="editorConfig"
-        (ready)="onReady($event)">
-      </ckeditor>
-      <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p>
-    </div>
-  
-    <!-- Action Buttons -->
-    <div class="flex gap-2 mb-4">
-      <button mat-stroked-button type="button" (click)="createPoll()">
-        <mat-icon>poll</mat-icon>
-        Create a poll
-      </button>
-      <button mat-stroked-button type="button" (click)="addMedia()">
-        <mat-icon>image</mat-icon>
-        Add media
-      </button>
-      <button mat-stroked-button type="button" (click)="addFile()">
-        <mat-icon>attach_file</mat-icon>
-        Add file
-      </button>
-    </div>
-  
-    <!-- File Upload Section (Initially Hidden) -->
-    <div class="mb-4" *ngIf="showFileUpload">
-      <div class="flex items-center justify-center w-full">
-        <label for="fileUpload" 
-          class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-          <div class="flex flex-col items-center justify-center pt-5 pb-6">
-            <mat-icon class="text-gray-500 mb-2">cloud_upload</mat-icon>
-            <p class="mb-2 text-sm text-gray-500">
-              <span class="font-semibold">Click to upload</span> or drag and drop
-            </p>
-            <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX, JPG, PNG</p>
-          </div>
-          <input 
-            id="fileUpload" 
-            type="file" 
-            class="hidden" 
-            multiple 
-            (change)="onFileSelected($event)"
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-        </label>
-      </div>
-    </div>
+  <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
 
-    <!-- Display Uploaded Files -->
-    <div class="mb-4" *ngIf="uploadedFiles.length > 0">
+  <!-- Title -->
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-medium mb-2">
+      Title <span class="text-red-500">*</span>
+    </label>
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput formControlName="title" placeholder="Enter your question title" maxlength="100">
+      <mat-hint align="end">{{uploadForm.get('title')?.value?.length || 0}}/100</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <!-- Question Description -->
+  <div class="mb-4 flex flex-col w-full">
+    <label class="block text-gray-700 text-sm font-medium mb-2">
+      Description <span class="text-red-500">*</span>
+    </label>
+    <ckeditor [editor]="Editor" formControlName="description" [config]="editorConfig" (ready)="onReady($event)">
+    </ckeditor>
+    <!-- <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p> -->
+    <p class="text-sm text-gray-500 mt-1">{{uploadForm.get('description')?.value?.length || 0}}/500</p>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex gap-2 mb-4">
+    <button mat-stroked-button type="button" (click)="createPoll()">
+      <mat-icon>poll</mat-icon>
+      Create a poll
+    </button>
+    <button mat-stroked-button type="button" (click)="addMedia()">
+      <mat-icon>image</mat-icon>
+      Add media
+    </button>
+    <button mat-stroked-button type="button" (click)="addFile()">
+      <mat-icon>attach_file</mat-icon>
+      Add file
+    </button>
+  </div>
+
+  <!-- File Upload Section (Initially Hidden) -->
+  <div class="mb-4" *ngIf="showFileUpload">
+    <div class="flex items-center justify-center w-full">
+      <label for="fileUpload"
+        class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+          <mat-icon class="text-gray-500 mb-2">cloud_upload</mat-icon>
+          <p class="mb-2 text-sm text-gray-500">
+            <span class="font-semibold">Click to upload</span> or drag and drop
+          </p>
+          <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX, JPG, PNG</p>
+        </div>
+        <input id="fileUpload" type="file" class="hidden" multiple (change)="onFileSelected($event)"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+      </label>
+    </div>
+  </div>
+
+  <!-- Display Uploaded Files -->
+  <div class="mb-4" *ngIf="uploadedFiles.length > 0">
     <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
     <ul>
       <li *ngFor="let file of uploadedFiles; let i = index" class="flex items-center justify-between mb-2">
@@ -92,9 +106,9 @@
       </li>
     </ul>
   </div>
-  
-    <!-- Tags -->
-    <div class="mb-4">
+
+  <!-- Tags -->
+  <!-- <div class="mb-4">
       <label class="block text-gray-700 text-sm font-medium mb-2">
         Tags <span class="text-red-500">*</span>
       </label>
@@ -112,16 +126,13 @@
                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                (matChipInputTokenEnd)="addTag($event)">
       </mat-form-field>
-    </div>
-    <!-- Submit Button -->
-    <div class="mt-4">
-      <button 
-        mat-raised-button 
-        color="" 
-        class="w-full primary-button"
-        [disabled]="!uploadForm.valid"
-        (click)="onSubmit()">
-        {{data?.config?.postBtn?.text || 'Post'}}
-      </button>
-    </div>
-  </form>
+    </div> -->
+
+  <!-- Submit Button -->
+  <div class="mt-4">
+    <button mat-raised-button color="" class="w-full primary-button" [disabled]="!uploadForm.valid"
+      (click)="onSubmit()">
+      {{data?.config?.postBtn?.text || 'Post'}}
+    </button>
+  </div>
+</form>

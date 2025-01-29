@@ -13,7 +13,7 @@
                 <div class="flex flex-col gap-4">
                     <ng-container *ngFor="let post of posts" >
                         <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="userJoinedCommunity"
-                        [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts"
+                        [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts" [community]="community"
                         (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-post-card>
                     </ng-container>
                     <ng-container *ngIf="searchResults?.totalCount > posts.length">
