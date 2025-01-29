@@ -46,12 +46,12 @@
     <div class="container mx-auto p-4 md:p-0 mt-6">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
             <!-- Column 1 -->
-            <div class="bg-blue-200 p-2 rounded-lg md:col-span-3">
+            <div class=" p-2 rounded-lg md:col-span-3">
                 <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts>
             </div>
         
             <!-- Column 2 (Double Width on Large Screens) -->
-            <div class="bg-green-200 p-2 rounded-lg md:col-span-6">
+            <div class=" p-2 rounded-lg md:col-span-6">
                 
                 <mat-tab-group class="custom-tab-container " mat-stretch-tabs="false" mat-align-tabs="center">
                     <ng-container *ngFor="let tab of communityWidgetData?.tabs">
@@ -71,7 +71,7 @@
             </div>
         
             <!-- Column 3 -->
-            <div class="bg-red-200 p-2 rounded-lg md:col-span-3">
+            <div class=" p-2 rounded-lg md:col-span-3">
                 <d-v2-trending-discussions [data]="trendingDiscussions"></d-v2-trending-discussions>
             </div>
         </div>
