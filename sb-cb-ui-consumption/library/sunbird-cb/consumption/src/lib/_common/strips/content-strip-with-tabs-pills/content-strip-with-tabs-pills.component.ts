@@ -249,7 +249,14 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     if (wData.strips[0].stripConfig && wData.strips[0].stripConfig.hideShowAll) {
       return !wData.strips[0].stripConfig.hideShowAll;
     }
-    return wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4;
+    if (data.key === 'cbpPlan') {
+      const selectedPill = data.tabs[this.activeTabIndex].pillsData.find((pill: any) => pill.selected)
+      if (selectedPill) {
+        return selectedPill.widgets && selectedPill.widgets.length > 4
+      }
+    } else {
+      wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4
+    }
   }
   checkVisible(data: IStripUnitContentData) {
     return data.stripInfo && data.stripInfo.visibilityMode === 'visible';
