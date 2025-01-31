@@ -104,7 +104,7 @@
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community"
                     [type]="cardConfig?.repliesSection?.newPostReply?.type" (newComment)="newCommentEvent($event)"
-                    [taggedUsers]="[post?.createdBy?.user_id]" [hierarchyPath]="[post?.discussionId]">
+                    [taggedUsers]="[post?.createdBy?.user_id]" [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]">
                 </d-v2-new-post>
             </div>
             <ng-container *ngIf="replyDataCopy && replyDataCopy?.length > 0 && !loading; else noReplies">
@@ -134,7 +134,7 @@
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
-                <d-v2-new-post [config]="cardConfig?.newPostReply"
+                <d-v2-new-post [config]="cardConfig?.newPostReply" [userJoinedCommunity]="userJoinedCommunity" 
                     [taggedUsers]="[post?.commentData?.commentSource?.userId]">
                 </d-v2-new-post>
             </div>
