@@ -71,7 +71,6 @@ export class FeedComponent implements OnInit, OnChanges{
   }
 
   fetchPostRequest() {
-    debugger;
     const req = {
       "filterCriteriaMap": {
         "type": "question",

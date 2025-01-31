@@ -16,7 +16,7 @@ export class NewPostComponent {
   @Input() taggedUsers = []
   @Input() type = 'question'
   @Output() newComment = new EventEmitter<any>()
-  @Input() disableActions: boolean = false
+  @Input() userJoinedCommunity: boolean = false
   @Input() community: any
 
   loogedInUserProfile: any = {}

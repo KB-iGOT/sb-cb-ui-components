@@ -1,3 +1,4 @@
+$text-primary: #1B4CA1;
 .community-search{
     input {
 
@@ -34,6 +35,18 @@
     }
 }
 
+
+.custom-tab-container .mat-mdc-tab-label-container {
+    border-bottom-style: solid;
+    border-bottom-width:  1px;
+    border-bottom-color:#00000014;
+}
+.custom-tab-container  .mdc-tab-indicator .mdc-tab-indicator__content {
+border-color: $text-primary;
+}
+.custom-tab-container  .mat-mdc-focus-indicator:hover{
+border-color: $text-primary;
+}
 
 
 

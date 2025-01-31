@@ -85,18 +85,6 @@ $text-primary: #1B4CA1;
     }
 }
 
-.community-tabs {
-    mat-tab-group {
-        mat-tab-header {
-            .mat-mdc-tab-label-container {
-                border-bottom-style: solid !important;
-                border-bottom-width: var(--mat-tab-header-divider-height, 1px) !important;
-                border-bottom-color: var(--mat-tab-header-divider-color, var(--mat-sys-surface-variant)) !important;
-            }
-        }
-    }
-    
-}
 
 
 
