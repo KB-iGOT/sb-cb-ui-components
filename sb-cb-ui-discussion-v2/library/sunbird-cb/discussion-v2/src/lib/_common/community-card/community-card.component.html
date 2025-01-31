@@ -1,15 +1,15 @@
 <div class="community-card" *ngIf="!isLoading">
     <div class="card-img-block">
         <img src="https://portal.dev.karmayogibharat.net/assets/public/content/do_1139557259796398081160/artifact/do_1139557259796398081160_1703579832066_1000_f_619659267_wspvvzailzypsdkpbb50qgj5zcchjoc6.jpg" alt="">
-        <div class="community-type flex items-center">
+        <div class="community-type flex items-center" *ngIf="community?.communityAccessLevel === 'private'">
             <mat-icon class="mat-icon ">lock</mat-icon>
             <span class="title">Private</span>
         </div>
     </div>
     <div class="card-details-block">
-        <p class="community-title">{{community?.communityName}}</p>
+        <p class="community-title">{{community?.communityName || community?.data?.communityName}}</p>
         <div class="flex items-center justify-between community-info">
-            <p>{{community?.countOfPeopleJoined}} Members</p>
+            <p>{{community?.countOfPeopleJoined  || community?.data?.countOfPeopleJoined}} Members</p>
             <span class="mx-2">•</span>
             <p>10K Posts</p>
         </div>

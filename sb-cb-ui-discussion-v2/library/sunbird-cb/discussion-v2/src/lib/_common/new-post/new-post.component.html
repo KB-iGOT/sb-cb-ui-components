@@ -22,7 +22,7 @@
                     <div class="relative w-full flex ">
                         <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl"
                             [attr.disabled]="toggleDisable()" i18n-placeholder
-                            [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()">
+                            [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'" (focus)="onFocus()">
                         <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail"
                             (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
                         <br />
@@ -54,8 +54,8 @@
 
 <!-- Static UI to show, when clicked will open the dialogue for post creation -->
 <ng-container *ngIf="config?.openAsDialogue">
-        <div class="flex gap-4 start-comment-container cursor-pointer"
-            (click)="openNewPostDialog()">
+        <div class="flex gap-4 start-comment-container "
+            >
             <!-- Avatar -->
             <div *ngIf="config?.avatarPhoto?.show">
                 <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"
@@ -67,9 +67,9 @@
             <!-- Input field -->
             <div class="flex flex-1 items-center">
                 <form class="flex flex-1 items-center gap-2">
-                    <div class="flex relative flex-1 input-container">
-                        <input #comment name="comment" class="w-full rounded-full px-4 py-2 focus:outline-none"
-                            [placeholder]="config?.commentBox?.placeholder || 'What you want to say?'">
+                    <div class="flex relative flex-1 input-container cursor-pointer" (click)="userJoinedCommunity && openNewPostDialog()" [class.disabled]="!userJoinedCommunity">
+                        <input #comment name="comment" class="w-full rounded-full px-4 py-2 focus:outline-none" [disabled]="!userJoinedCommunity"
+                            [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'">
                         <button mat-icon-button color="primary" class="postIcon emoji-icon">
                             <mat-icon>sentiment_satisfied</mat-icon>
                         </button>

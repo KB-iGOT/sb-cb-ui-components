@@ -22,6 +22,7 @@ const API_END_POINTS = {
   COMMUNITY_SEARCH: `/apis/proxies/v8/community/v1/search`,
   COMMUNITY_USER_LIST: (id: string) => `/apis/proxies/v8/community/v1/community/listuser/${id}`,
   USERS_COMMUNITY_LIST: `/apis/proxies/v8/community/v1/user/communities`,
+  TOPIC_WISE_COMMUNITIES: `/apis/proxies/v8/community/v1/category/listAll`,
 }
 
 
@@ -110,6 +111,10 @@ export class DiscussionV2Service {
 
   communitySearch(req: any) {
     return this.http.post<any>(`${API_END_POINTS.COMMUNITY_SEARCH}`, req)
+  }
+
+  topicWiseCommunities() {
+    return this.http.get<any>(`${API_END_POINTS.TOPIC_WISE_COMMUNITIES}`)
   }
 }
 

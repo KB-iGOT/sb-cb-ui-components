@@ -96,7 +96,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
   fetchCommunityData(id: string) {
     this.discussV2Svc.communityDetailRead(id).subscribe((resData: any) => {
       if(resData.result && resData.result.communityDetails){
-        this.communityData = resData.result.communityDetails
+        this.communityData = {...resData.result.communityDetails , ...resData.result.communityDetails.data}
       }
       console.log(resData,'resData')
     })

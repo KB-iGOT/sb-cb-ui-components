@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 
 @Component({
   selector: 'd-v2-community-card',
@@ -8,5 +9,20 @@ import { Component, Input } from '@angular/core';
 export class CommunityCardComponent {
   @Input() community: any;
   @Input() isLoading: boolean = false;
+  defaultThumbnail
+  sourceLogos
+  defaultSLogo
+  constructor(private configSvc: ConfigurationsService) { 
+
+    const instanceConfig = this.configSvc.instanceConfig
+    if (instanceConfig) {
+      this.defaultThumbnail = instanceConfig.logos.defaultContent || ''
+      this.sourceLogos = instanceConfig.sources
+      this.defaultSLogo = instanceConfig.logos.defaultSourceLogo || ''
+    } else {
+      this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
+      this.defaultSLogo =  '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
+    }
+  }
 
 }
