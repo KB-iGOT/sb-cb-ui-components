@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import { FormsModule } from '@angular/forms'
 import { MatSortModule } from '@angular/material/sort'
 import { MatIconModule } from '@angular/material/icon'
 import { AppButtonModule } from '../app-button/app-button.module'
@@ -36,6 +37,7 @@ import { OrgUserTableV2Component } from './org-user-table-v2/org-user-table-v2.c
     MatButtonModule,
     MatCardModule,
     AppButtonModule,
+    FormsModule
   ],
 
   exports: [OrgUserTableComponent, OrgUserTableV2Component],

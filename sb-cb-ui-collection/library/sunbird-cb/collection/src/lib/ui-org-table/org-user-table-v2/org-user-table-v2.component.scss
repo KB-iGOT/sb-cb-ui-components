@@ -759,3 +759,8 @@ mat-header-row {
   width: 64px;
   margin: 10px 8px 10px 0px;
 }
+.disabled-cls {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
