@@ -116,6 +116,13 @@ export class DiscussionV2Service {
   topicWiseCommunities() {
     return this.http.get<any>(`${API_END_POINTS.TOPIC_WISE_COMMUNITIES}`)
   }
+
+  convertOrgArrayToObject(data: any) {
+    return data.reduce((acc: any, item: any) => {
+      acc[item.id] = item;
+      return acc;
+    }, {});
+  }
 }
 
 

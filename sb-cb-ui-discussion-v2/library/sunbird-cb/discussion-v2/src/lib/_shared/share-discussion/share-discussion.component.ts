@@ -29,6 +29,8 @@ export class ShareDiscussionComponent implements OnInit {
    userProfile: any
    maxEmailsLimit = 30
    showLoader = false
+   shareUrl: any
+   @Input() shareType: String = 'share'
    @Input() rootOrgId: any
    @Input() content: any
    @Input() contentLink: any = ''
@@ -41,6 +43,7 @@ export class ShareDiscussionComponent implements OnInit {
               private snackBar: MatSnackBar,
               public configSvc: ConfigurationsService,
               private events: EventService) {
+                this.shareUrl = window.location.href
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
         this.translate.setDefaultLang('en')
@@ -280,6 +283,10 @@ export class ShareDiscussionComponent implements OnInit {
   resetEnableShareFlag() {
     this.resetEnableShare.emit(false);
   }
-}
+
+
+ 
+  onButtonClick()
+{}}
 
 

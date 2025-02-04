@@ -21,12 +21,15 @@ import { NewPostModule } from '../new-post/new-post.module';
 import { PostCardModule } from '../post-card/post-card.module';
 import { MemberDetailsComponent } from './member-details/member-details.component';
 import { MemberCardModule } from '../member-card/member-card.module';
+import { CommunityGuidelinesComponent } from './community-guidelines/community-guidelines.component';
+import { CardToggleModule } from '../card-toggle/card-toggle.module';
 
 
 @NgModule({
   declarations: [
     FeedComponent,
-    MemberDetailsComponent
+    MemberDetailsComponent,
+    CommunityGuidelinesComponent
   ],
   imports: [
     CommonModule,
@@ -49,11 +52,13 @@ import { MemberCardModule } from '../member-card/member-card.module';
     ImageSlidersModule,
     PostCardModule,
     NewPostModule,
-    MemberCardModule
+    MemberCardModule,
+    CardToggleModule
   ],
   exports: [
     FeedComponent,
-    MemberDetailsComponent
+    MemberDetailsComponent,
+    CommunityGuidelinesComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

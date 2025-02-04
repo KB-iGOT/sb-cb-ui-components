@@ -8,6 +8,7 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 })
 export class CommunityCardComponent {
   @Input() community: any;
+  @Input() orgDetails: any;
   @Input() isLoading: boolean = false;
   defaultThumbnail
   sourceLogos
@@ -23,6 +24,14 @@ export class CommunityCardComponent {
       this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
       this.defaultSLogo =  '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
     }
+  }
+
+  changeToDefaultImg($event: any) {
+    $event.target.src = '/assets/instances/eagle/app_logos/Karmayogi_logo_icon.svg'
+  }
+
+  changeToDefaultThumbnailImg($event: any) {
+    $event.target.src = this.defaultThumbnail
   }
 
 }

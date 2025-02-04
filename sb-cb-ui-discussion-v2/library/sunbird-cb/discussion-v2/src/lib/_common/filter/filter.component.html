@@ -1,0 +1,30 @@
+<mat-card class="filter-wrapper mt-4">
+    <mat-card-header>
+      <mat-card-title class="card-title margin-bottom-s">Filter by</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <ng-container *ngFor="let filter of filterData">
+            <div class="body-title mb-2">{{filter?.label}}</div>
+            <div class="search-container mb-2">
+                <div class="rsearch">
+                    <mat-icon class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">
+                        search
+                    </mat-icon>
+                    <input #searchInput id="searchInput"  class="sinput color-60" label=""
+                    placeholder="{{filter?.placeholder}}" type="Standard" />
+                </div>
+            </div>
+            <!-- placeholder="{{'widgetCbpFilters.enterCompetencyTheme' | translate}}" -->
+            <div class="mb-4">
+                <div class="flex flex-row category-item" *ngFor="let sort of sortData">
+                    <mat-checkbox #checkboxes disableRipple class="example-margin" [checked]="sort?.checked"
+                        (change)="handleGetFilterType($event, sort, 'sort')">
+                        <span class="checkbox-label">
+                            {{ sort?.value }}
+                        </span>
+                    </mat-checkbox>
+                </div>
+            </div>
+        </ng-container>
+    </mat-card-content>
+  </mat-card>
