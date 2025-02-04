@@ -16,12 +16,15 @@ import { MatCheckboxModule } from '@angular/material/checkbox'
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
 import { NewPostComponent } from './new-post.component';
-
-
-
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
+import { PostPreviewComponent } from '../new-post-dialogue/post-preview/post-preview.component';
+ 
 @NgModule({
   declarations: [
-    NewPostComponent
+    NewPostComponent,
+    NewPostDialogueComponent,
+    PostPreviewComponent
   ],
   imports: [
     CommonModule,
@@ -39,9 +42,14 @@ import { NewPostComponent } from './new-post.component';
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
+    CKEditorModule,
     SharedModule,
-    ImageSlidersModule
+    ImageSlidersModule,
   ],
-  exports: [NewPostComponent]
+  exports: [
+    NewPostComponent,
+    NewPostDialogueComponent,
+    PostPreviewComponent
+  ]
 })
 export class NewPostModule { }

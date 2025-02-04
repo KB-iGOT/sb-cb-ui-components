@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="media" *ngIf="post?.mediaUrls && post?.mediaUrls.length">
-            <d-v2-image-sliders [title]="'Christy'" [imageUrls]="post?.mediaUrls" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
+            <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaUrls" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
         </div>
         <div class="comment-txt mat-body-1 ws-mat-black60-text description {{post?.description.length > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
              [innerHTML]="post?.description">

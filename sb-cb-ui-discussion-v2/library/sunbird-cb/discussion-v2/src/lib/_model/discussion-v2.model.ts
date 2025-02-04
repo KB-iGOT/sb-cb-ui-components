@@ -118,6 +118,13 @@ export namespace NsDiscussionV2 {
           redirectUrl: string,
           id: string
         }
+        avatarPhoto?: {
+            show: boolean,
+            size: string,
+            photoUrl: string,
+            name: string,
+            color: string
+        },
         showActions: boolean,
         sliderData?: any,
         reportIcon?: {
