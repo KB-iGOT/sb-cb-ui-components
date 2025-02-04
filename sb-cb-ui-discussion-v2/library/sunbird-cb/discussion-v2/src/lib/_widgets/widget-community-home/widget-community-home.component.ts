@@ -243,7 +243,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
 
 
   loadCompetencies(): void {
-    debugger
+    
     if (this.communityData && this.communityData['competencies'] && this.communityData['competencies'].length) {
       const competenciesObject: any = {}
       if (typeof this.communityData['competencies'] === 'string'

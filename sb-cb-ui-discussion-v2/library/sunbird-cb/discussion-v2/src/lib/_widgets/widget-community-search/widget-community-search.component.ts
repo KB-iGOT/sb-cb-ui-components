@@ -18,7 +18,7 @@ export class WidgetCommunitySearchComponent {
   isLoading: boolean = false;
   
   constructor(private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
-    debugger
+    
     
     combineLatest([
       this.activatedRoute.queryParams,
@@ -44,7 +44,7 @@ export class WidgetCommunitySearchComponent {
    }
 
    fetchCommunityList(searchText?: any, topicName?:any) {
-    debugger
+    
     let request: any = {
       "filterCriteriaMap": {
           "status": "active"

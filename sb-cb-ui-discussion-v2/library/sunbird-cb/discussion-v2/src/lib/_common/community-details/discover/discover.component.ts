@@ -31,7 +31,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
   }
 
   constructor(private discussV2Svc:DiscussionV2Service) { 
-    debugger
+    
     this.topicDataList
     this.topicWiseData();
     setTimeout(() => {
@@ -41,7 +41,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.topicDataList) {
       console.log('topicDataList changed:', this.topicDataList);
-      debugger
+      
       this.loadTopicData();  
     }
   }
@@ -85,7 +85,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
         };
         return acc;
       }, {});
-      debugger
+      
       this.toppicWiseCommunitiesCopy = topicBycomunities
       await this.loadCommunities(topicBycomunities,0);
       
@@ -105,7 +105,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
         topicBycomunities[key].topicId = data[0].topicId;
       }
     }
-    debugger
+    
     this.toppicWiseCommunities = {...this.toppicWiseCommunities, ...topicBycomunities}
   }
 
