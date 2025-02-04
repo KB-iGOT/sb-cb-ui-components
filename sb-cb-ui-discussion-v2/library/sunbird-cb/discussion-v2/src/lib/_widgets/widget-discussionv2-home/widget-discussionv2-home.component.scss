@@ -47,6 +47,9 @@ border-color: $text-primary;
 .custom-tab-container  .mat-mdc-focus-indicator:hover{
 border-color: $text-primary;
 }
+.custom-tab-container .mat-mdc-tab-body-content {
+    overflow: hidden;
+}
 
 
 

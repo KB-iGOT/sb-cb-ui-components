@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
 
 @Component({
@@ -7,13 +7,15 @@ import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
   templateUrl: './discover.component.html',
   styleUrls: ['./discover.component.scss']
 })
-export class DiscoverComponent implements OnInit {
+export class DiscoverComponent implements OnInit, OnChanges {
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
-  topicDataList: any;
-  toppicWiseCommunities: any;
+  @Input() topicDataList: any;
+  orgDetails: any;
+  toppicWiseCommunities: any = {};
   loadTopicsCount: number = 1;
   topicDataLoading: boolean = false
+  toppicWiseCommunitiesCopy: any = {}
 
   ngOnInit(): void {
     this.toppicWiseCommunities = {
@@ -29,10 +31,20 @@ export class DiscoverComponent implements OnInit {
   }
 
   constructor(private discussV2Svc:DiscussionV2Service) { 
-    this.getAllTopics();
+    
+    this.topicDataList
     this.topicWiseData();
+    setTimeout(() => {
+    }, 1000);
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.topicDataList) {
+      console.log('topicDataList changed:', this.topicDataList);
+      
+      this.loadTopicData();  
+    }
+  }
   topicWiseData() {
     this.discussV2Svc.topicWiseCommunities().subscribe((res: any) => {  
       
@@ -50,45 +62,53 @@ export class DiscoverComponent implements OnInit {
     this.showAllByTopic.emit(topic);
   }
 
-
-  getAllTopics(){ 
-    this.topicDataLoading = true
-    let request: any = {
-      "filterCriteriaMap": {
-          "status": "active"
-      },
-      "requestedFields": [],
-      "pageNumber": 0,
-      "pageSize": 200,
-      "facets":["topicName"]
+  loadMoreTopics(){
+    if(this.loadTopicsCount < this.topicDataList.length){
+      let startIndex = this.loadTopicsCount
+      this.loadTopicsCount += 1;
+      this.loadCommunities(this.toppicWiseCommunitiesCopy,startIndex)
     }
-
-    this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
-      
-      if(res.result && res.result && res.result.search_results && res.result.search_results.facets && res.result.search_results.facets.topicName && res.result.search_results.facets.topicName.length){
-        this.topicDataList = res.result.search_results.facets.topicName;
-        this.topicDataList.forEach((element: any) => {
-            this.toppicWiseCommunities[element.value] = {
-              topicName: element.value,
-              isLoading: true,
-              communities: [],
-              count: element.count,
-              topicId:''
-            }
-        });
-        Object.keys(this.toppicWiseCommunities).forEach(async (key: any) => {
-          
-          let data = await this.getCommunitiesByTopic(key);
-          
-          this.toppicWiseCommunities[key].isLoading = false;
-          this.toppicWiseCommunities[key].communities = data;
-          this.toppicWiseCommunities[key].topicId = data[0].topicId;
-        })
-
-        this.topicDataLoading = false
-      }
-    })
   }
+
+
+
+
+  async loadTopicData() {
+    try {
+      let topicBycomunities: any = this.topicDataList.reduce((acc: any, element: any) => {
+        acc[element.value] = {
+          topicName: element.value,
+          isLoading: true,
+          communities: [],
+          count: element.count,
+          topicId: ''
+        };
+        return acc;
+      }, {});
+      
+      this.toppicWiseCommunitiesCopy = topicBycomunities
+      await this.loadCommunities(topicBycomunities,0);
+      
+    } catch (error) {
+      console.error('Error fetching topic data:', error);
+    } finally {
+      this.topicDataLoading = false;
+    }
+  }
+
+  async loadCommunities(topicBycomunities: any, startIndex:number) {
+    for (const key of Object.keys(topicBycomunities).slice(startIndex, this.loadTopicsCount)) {
+      const data = await this.getCommunitiesByTopic(key);
+      topicBycomunities[key].isLoading = false;
+      topicBycomunities[key].communities = data;
+      if (data.length > 0) {
+        topicBycomunities[key].topicId = data[0].topicId;
+      }
+    }
+    
+    this.toppicWiseCommunities = {...this.toppicWiseCommunities, ...topicBycomunities}
+  }
+
   async getCommunitiesByTopic(topic: any): Promise<any[]> {
     let request: any = {
       filterCriteriaMap: {
@@ -97,23 +117,22 @@ export class DiscoverComponent implements OnInit {
       },
       requestedFields: [],
       pageNumber: 0,
-      pageSize: 3
+      pageSize: 200
     };
 
     try {
       const res: any = await this.discussV2Svc.communitySearch(request).toPromise();
       if (res.result && res.result.search_results && res.result.search_results.data) {
+        if(res.result && res.result && res.result.search_results && res.result.search_results.additionalInfo && res.result.search_results.additionalInfo.length){
+          this.orgDetails = {...this.orgDetails, ...this.discussV2Svc.convertOrgArrayToObject(res.result.search_results.additionalInfo)}
+        }
         return res.result.search_results.data;
       }
+      
       return [];
     } catch (error) {
       console.error('Error fetching communities by topic:', error);
       return [];
-    }
-  }
-  loadMoreTopics(){
-    if(this.loadTopicsCount < this.topicDataList.length){
-      this.loadTopicsCount += 1;
     }
   }
 }

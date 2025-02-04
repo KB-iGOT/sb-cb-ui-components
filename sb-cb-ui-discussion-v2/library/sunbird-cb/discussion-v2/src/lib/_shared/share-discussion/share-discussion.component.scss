@@ -197,3 +197,24 @@ button:disabled {
     background-color: rgb(27, 76, 161) !important;
     color: #fff !important
   }
+
+
+
+
+.copy-input-wrapper {
+  width: 100%;
+  input {
+    border: 1px solid #00000029;
+    padding: 16px;
+    border-radius: 8px;
+    padding-right: 96px;  
+    position: relative;
+    width:80%;
+  }
+  button {
+    border: unset;
+    top: 11px;
+    left: 86%;
+    width: fit-content;
+  }
+}

@@ -1,0 +1,23 @@
+<div class="comminity-details">
+    <d-v2-card-toggle (hideCardBody)="hideCardBody = $event" [toggleViewBoolean]="expandCard">
+        <div headderBlock>
+           <div class="headding">Similar to Your Communities</div>
+        </div>
+        <div contentBodyBlock>
+            <div class="space-y-4 pt-4" *ngIf="communityData && communityData?.length">
+                <ng-container *ngFor="let community of communityData">
+                    <div class="flex gap-4 items-center comminity-details">
+                        <d-v2-avatar-photo [size]="'s'"
+                            [name]="community?.communityName"
+                            [photoUrl]="community?.posterImageUrl || ''" >
+                        </d-v2-avatar-photo>
+                        <div class="community-name">
+                            <span>{{community?.communityName}}</span>
+                        </div>
+                    </div>
+                </ng-container>
+                
+            </div>
+        </div>
+    </d-v2-card-toggle>
+</div>

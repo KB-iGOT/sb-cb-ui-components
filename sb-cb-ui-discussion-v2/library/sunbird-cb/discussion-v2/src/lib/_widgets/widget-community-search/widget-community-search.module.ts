@@ -4,6 +4,9 @@ import { WidgetCommunitySearchComponent } from './widget-community-search.compon
 import { MatIconModule } from '@angular/material/icon';
 import { CommunityCardModule } from '../../_common/community-card/community-card.module';
 import { FormsModule } from '@angular/forms';
+import { SortByModule } from '../../_common/sort-by/sort-by.module';
+import { FilterModule } from '../../_common/filter/filter.module';
+import { SimilarCommunityCardModule } from '../../_common/similar-community-card/similar-community-card.module';
 
 
 
@@ -15,7 +18,10 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     MatIconModule,
     CommunityCardModule,
-    FormsModule
+    FormsModule,
+    SortByModule,
+    FilterModule,
+    SimilarCommunityCardModule
   ],
   exports: [
     WidgetCommunitySearchComponent

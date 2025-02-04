@@ -8,8 +8,8 @@
                 <div *ngFor="let discussion of posts;let isFirst = first" class="flex flex-wrap items-start space-x-3">
                     <hr class="divider w-full" *ngIf="!isFirst" >
                     <div class="trending-data margin-remove" (click)="navigateToPost(discussion)">
-                        <div class="flex items-center justify-between mb-4 user-info">
-                                <div class="flex items-center ">
+                        <div class="flex items-center justify-between mb-4 user-info w-full">
+                                <div class="flex items-center w-3/4">
                                     <d-v2-avatar-photo [size]="'s'"
                                         [name]="discussion?.createdBy?.first_name"
                                         [photoUrl]="discussion?.createdBy?.user_profile_img_url || ''"></d-v2-avatar-photo>
@@ -17,8 +17,8 @@
                                         <span class="font-medium text-start">{{discussion?.createdBy?.first_name}}</span>
                                     </div>
                                 </div>
-                                <div class="flex items-center text-sm text-gray-600 post-time">
-                                    <span>{{discussion?.createdOn| date:'MMM d, y h:mm a'}}</span>
+                                <div class="flex items-center justify-end w-1/4 text-sm text-gray-600 post-time">
+                                    <span>{{discussion?.createdOn| pipeRelativeTime}}</span>
                                 </div>
                         </div>
                         <div class="post-data">

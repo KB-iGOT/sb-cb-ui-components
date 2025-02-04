@@ -16,7 +16,8 @@ import { CommunityCardModule } from '../../_common/community-card/community-card
 import { ShortcutsModule } from '../../_common/shortcuts/shortcuts.module';
 import { TrendingDiscussionsModule } from '../../_common/trending-discussions/trending-discussions.module';
 import { TrendingTagsModule } from '../../_common/trending-tags/trending-tags.module';
-import { DiscoverModule } from '../../_common/community-details/discover/discover.module';
+import { DiscoverModule } from '../../_common/discover/discover.module';
+import { TopicCardModule } from '../../_common/topic-card/topic-card.module';
 
 
 @NgModule({
@@ -37,7 +38,8 @@ import { DiscoverModule } from '../../_common/community-details/discover/discove
     ShortcutsModule,
     TrendingDiscussionsModule,
     TrendingTagsModule,
-    DiscoverModule
+    DiscoverModule,
+    TopicCardModule
   ],
   exports: [
     WidgetDiscussionv2HomeComponent

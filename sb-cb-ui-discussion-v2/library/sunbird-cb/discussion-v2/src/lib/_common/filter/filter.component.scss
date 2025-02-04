@@ -1,0 +1,69 @@
+
+.filter-wrapper {
+    background-color: white;
+    border: 1px solid #00000029;
+    border-radius: 12px;
+    .card-title {
+        //styleName: Heading 2;
+        font-family: Montserrat;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 24.38px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+
+    }
+    .body-title {
+        //styleName: Sub Heading 1(Mobile);
+        font-family: Lato;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 19.2px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+
+    }
+    .checkbox-label {
+        //styleName: Body 2;
+        font-family: Lato;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 16.8px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+
+    }
+}
+
+
+.search-container{
+    /** Search **/
+    .rsearch {
+        position: relative;
+        margin-top: 8px;
+    }
+
+    .search {
+        margin-left: 16px;
+        width: 78%;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 9px;
+        font-size: 20px;
+        left: 10px;
+    }
+
+    .sinput {
+        border-radius: 64px;
+        border: 1px solid #d5d0d0;
+        padding: 8px 36px;
+        font: 400 14px Lato;
+        // width: 224px;
+        height: 20px;
+    }
+}
