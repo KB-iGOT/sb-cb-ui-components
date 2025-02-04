@@ -1348,8 +1348,13 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   }
 
   async canShowRecommendedLearningsTab(strip: any) {
-    let response = await this.userSvc.fetchDesigantionsData().toPromise()
-    if (!response) {
+    try {
+      let response = await this.userSvc.fetchDesigantionsData().toPromise();
+      if (!response) {
+        strip.tabs[1].hideTab = true
+      }
+    } catch (error) {
+      console.error("API Error:", error)
       strip.tabs[1].hideTab = true
     }
   }

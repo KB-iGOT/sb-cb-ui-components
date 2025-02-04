@@ -54,6 +54,14 @@ export class WidgetUserServiceLib {
     return throwError(errorMessage)
   }
 
+  handleError1(error: ErrorEvent) {
+    let errorMessage = ''
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Error: ${error.error.message}`
+    }
+    return throwError('')
+  }
+
   fetchUserGroupDetails(userId: string): Observable<IUserGroupDetails[]> {
     return this.http
       .get<IUserGroupDetails[]>(API_END_POINTS.FETCH_USER_GROUPS(userId))
@@ -373,7 +381,7 @@ export class WidgetUserServiceLib {
     }))
   }
   fetchDesigantionsData() {
-    const result: any = this.http.get(API_END_POINTS.FETCH_DESIGNATION_COURSES).pipe(catchError(this.handleError), map(
+    const result: any = this.http.get(API_END_POINTS.FETCH_DESIGNATION_COURSES).pipe(catchError(this.handleError1), map(
       async (data: any) => {
         if(data.result && data.result.courseList) {
           return data.result.courseList
