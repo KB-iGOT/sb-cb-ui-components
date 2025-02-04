@@ -1,28 +1,38 @@
-import { Component, Inject, OnInit } from '@angular/core'
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
-import { DiscussionV2Service } from '../../_services/discussion-v2.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
+import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
 @Component({
   selector: 'd-v2-new-post-dialogue',
   templateUrl: './new-post-dialogue.component.html',
   styleUrls: ['./new-post-dialogue.component.scss']
 })
-export class NewPostDialogueComponent implements OnInit {
+export class NewPostDialogueComponent implements OnInit, OnDestroy {
+  widgetData!: NsDiscussionV2.IPostDetailsWidget | null
   uploadForm: FormGroup;
   selectedFiles: File[] = [];
   selectedTags: string[] = [];
   showFileUpload = false;
   mediaUrls: string[] = [];
+  previewUrls: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  uploadedFiles: File[] = [];
+  postPreview: any = {
+    title: '',
+    description: '',
+    createdOn: new Date(),
+    files: [],
+    mediaUrls: [],
+    tags: [],
+    createdBy: {}
+  }
   public Editor = ClassicEditor;
   public editorConfig = {
-    plugins: [...ClassicEditor.builtinPlugins],
+    plugins: [...ClassicEditor.builtinPlugins, ],
     placeholder: 'Type the description here...',
     toolbar: {
       items: [
@@ -56,6 +66,7 @@ export class NewPostDialogueComponent implements OnInit {
     },
   };
   environment: any
+  
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +75,167 @@ export class NewPostDialogueComponent implements OnInit {
     private discussV2Svc: DiscussionV2Service,
     @Inject('environment') environment: any
   ) {
+    this.widgetData = {
+      postsList: {
+        "listType": "multiple",
+        "cardType": "topLevel",
+        "type": "question",
+        "showActions": true,
+        "cardClick": {
+          enabled: false,
+          position: 'title',
+          redirectUrl: '/post/',
+          id: ''
+        },
+        "avatarPhoto": {
+            "show": true,
+            "size": "ml",
+            "photoUrl": "https://portal.dev.karmayogibharat.net/assets/public/profileImage/1725443303744_images.jpeg",
+            "name": "Christopher Fernandes",
+            "color": "#006400"
+          },
+        sliderData: {
+          styleData: {
+            "bannerMetaClass": "meta",
+            "bannerMeta": "visible",
+            "bannerMetaAlign": "middle",
+            "navigationArrows": "visible",
+            "borderRadius": "0",
+            "customHeight": "360px",
+            "arrowsPlacement": "middle-inline",
+            autoplay: false,
+            "responsive": {
+              "bannerMetaClass": "meta",
+              "customHeight": "232px",
+              "bannerMetaAlign": "middle",
+              "navigationArrows": "visible",
+              "dots": "hidden",
+              "arrowsPlacement": "middle-inline",
+              autoplay: false,
+            }
+          }
+        },
+        "reportIcon": {
+          "show": true,
+          "icon": "report",
+          "successMsg": "Reported successfully! Thank you for reporting.",
+          "errorMsg": "Something went wrong! please try reporting again later.",
+          "showToolTip": true,
+          "toolTipText": "Report this comment"
+        },
+        "actions": {
+          "like": {
+            "show": true,
+            "showCount": true,
+            "icon": "thumb_up"
+          },
+          "comments": {
+            "show": true,
+            "showCount": true,
+            "icon": "comment"
+          },
+          "avatarPhoto": {
+            "show": true,
+            "size": "ml",
+            "photoUrl": "https://portal.dev.karmayogibharat.net/assets/public/profileImage/1725443303744_images.jpeg",
+            "name": "Christopher Fernandes",
+            "color": "#006400"
+          }
+        },
+        "repliesSection": {
+          "show": true,
+          "indented": true,
+          "newPostReply": {
+            "show": true,
+            "type": "answerPost",
+            "openAsDialogue": true,
+            "showTopInfo": false,
+            "topInfo": {
+              "icon": "forum",
+              "text": "<div>Do you have any questions, suggestions or ideas in your mind?Post it.</div>"
+            },
+            "avatarPhoto": {
+              "show": true,
+              "size": "m",
+              "photoUrl": "https://portal.dev.karmayogibharat.net/assets/public/profileImage/1725443303744_images.jpeg",
+              "name": "Christopher Fernandes",
+              "color": "#006400"
+            },
+            "commentBox": {
+              "placeholder": "Add a comment"
+            },
+            "postBtn": {
+              "text": "Post",
+              "icon": "send",
+              show: true
+            },
+            "styles": {
+              "background-color": "#1B4CA10D",
+              "border": "none"
+            }
+          },
+          "replyCardConfig": {
+            "cardType": "reply",
+            "type": "answerPost",
+            "showActions": true,
+            "reportIcon": {
+              "show": true,
+              "icon": "report",
+              "successMsg": "Reported successfully! Thank you for reporting.",
+              "errorMsg": "Something went wrong! please try reporting again later.",
+              "showToolTip": true,
+              "toolTipText": "Report this comment"
+            },
+            "actions": {
+              "like": {
+                "show": true,
+                "showCount": true,
+                "icon": "thumb_up"
+              },
+              "comments": {
+                "show": true,
+                "showCount": false,
+                "icon": "comment"
+              },
+            },
+
+            "repliesSection": {
+              "show": false
+            },
+            "newPostReply": {
+              "show": true,
+              "showTopInfo": false,
+              "type": "answerPost",
+              "topInfo": {
+                "icon": "forum",
+                "text": "<div>Do you have any questions, suggestions or ideas in your mind?Post it.</div>"
+              },
+              "avatarPhoto": {
+                "show": true,
+                "size": "m",
+                "photoUrl": "https://portal.dev.karmayogibharat.net/assets/public/profileImage/1725443303744_images.jpeg",
+                "name": "Christopher Fernandes",
+                "color": "#006400"
+              },
+              "commentBox": {
+                "placeholder": "Add a comment"
+              },
+              "postBtn": {
+                "text": "Post",
+                "icon": "send"
+              },
+              "styles": {
+                "background-color": "#1B4CA10D",
+                "border": "none"
+              }
+            }
+          }
+        },
+        "noPostsSection": {
+          "text": "No posts found!"
+        }
+      }
+    }
     this.uploadForm = this.fb.group({
       community: [''],
       title: ['', [Validators.required, Validators.maxLength(100)]],
@@ -72,9 +244,33 @@ export class NewPostDialogueComponent implements OnInit {
       files: [[]]
     });
     this.environment = environment
+
+    // Subscribe to form value changes
+    this.uploadForm.valueChanges.subscribe(formValue => {
+      this.updatePostPreview(formValue);
+    });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    // Set initial user data
+    this.postPreview.user = {
+      name: this.data.community?.currentUser?.name || '',
+      photoUrl: this.data.community?.currentUser?.photoUrl || '',
+      // Add other user properties you need
+    };
+  }
+
+  private updatePostPreview(formValue: any): void {
+    this.postPreview = {
+      ...this.postPreview,
+      title: formValue.title,
+      description: formValue.description,
+      tags: this.selectedTags,
+      files: this.selectedFiles,
+      mediaUrls: [...this.previewUrls, ...this.mediaUrls],
+      updatedOn: new Date()
+    };
+  }
 
   createPoll(): void {
     // Implement poll creation logic
@@ -91,28 +287,37 @@ export class NewPostDialogueComponent implements OnInit {
   onFileSelected(event: any) {
     const files = event.target.files;
     if (files) {
-      // Add new files to both arrays
-      this.uploadedFiles.push(...Array.from(files as FileList));
       this.selectedFiles.push(...Array.from(files as FileList));
-      // Update form control
-      this.uploadForm.patchValue({
-        files: this.uploadedFiles
+      
+      // Type assertion to File which extends Blob
+      Array.from(files as FileList).forEach(file => {
+        const previewUrl = URL.createObjectURL(file as Blob);
+        this.previewUrls.push(previewUrl);
       });
+
+      this.uploadForm.patchValue({
+        files: this.selectedFiles
+      });
+      
+      this.updatePostPreview(this.uploadForm.value);
     }
   }
 
   removeFile(index: number) {
-    // Remove file from both arrays
-    this.uploadedFiles.splice(index, 1);
+    // Revoke the URL to prevent memory leaks
+    URL.revokeObjectURL(this.previewUrls[index]);
+    
+    // Remove from both arrays
     this.selectedFiles.splice(index, 1);
+    this.previewUrls.splice(index, 1);
 
-    // Update form control with new array
     this.uploadForm.patchValue({
-      files: this.uploadedFiles
+      files: this.selectedFiles
     });
+    
+    this.updatePostPreview(this.uploadForm.value);
 
-    // If no files left and you want to reset the input
-    if (this.uploadedFiles.length === 0) {
+    if (this.selectedFiles.length === 0) {
       const fileInput = document.getElementById('fileUpload') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
@@ -124,6 +329,8 @@ export class NewPostDialogueComponent implements OnInit {
     const value = (event.value || '').trim();
     if (value) {
       this.selectedTags.push(value);
+      // Update preview
+      this.updatePostPreview(this.uploadForm.value);
     }
     event.chipInput!.clear();
   }
@@ -132,6 +339,8 @@ export class NewPostDialogueComponent implements OnInit {
     const index = this.selectedTags.indexOf(tag);
     if (index >= 0) {
       this.selectedTags.splice(index, 1);
+      // Update preview
+      this.updatePostPreview(this.uploadForm.value);
     }
   }
 
@@ -139,7 +348,6 @@ export class NewPostDialogueComponent implements OnInit {
     if (this.uploadForm.valid) {
       const formData = {
         ...this.uploadForm.value,
-        // TODO: hastags will come in future
         // tags: this.selectedTags
       };
       console.log('Form submitted:', formData);
@@ -218,6 +426,7 @@ export class NewPostDialogueComponent implements OnInit {
           next: (res: any) => {
             if (res && res.result && res.result.url) {
               const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
+              // const finalURL = `${this.environment.contentHost}/${this.environment.contentBucket}${mainUrl}`
               const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
               console.log('finalURL: ', finalURL)
               resolve(finalURL);
@@ -321,5 +530,11 @@ export class NewPostDialogueComponent implements OnInit {
         editor.editing.view.document.getRoot()
       );
     });
+  }
+
+  // Clean up URLs when component is destroyed
+  ngOnDestroy() {
+    // Revoke all object URLs to prevent memory leaks
+    this.previewUrls.forEach(url => URL.revokeObjectURL(url));
   }
 }

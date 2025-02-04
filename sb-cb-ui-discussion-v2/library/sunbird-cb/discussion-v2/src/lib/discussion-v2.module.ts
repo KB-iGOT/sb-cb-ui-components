@@ -13,7 +13,6 @@ import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PickerModule } from '@ctrl/ngx-emoji-mart'
 import { WidgetDiscussionv2Module } from './_common/widget-discussionv2/widget-discussionv2.module'
-import { NewPostDialogueComponent } from './_common/new-post-dialogue/new-post-dialogue.component'
 import { MatListModule } from '@angular/material/list'
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
@@ -29,7 +28,6 @@ import { SharedModule } from './_shared/shared.module'
 
 @NgModule({
   declarations: [
-    NewPostDialogueComponent,
   ],
   imports: [
     CommonModule,
@@ -62,7 +60,6 @@ import { SharedModule } from './_shared/shared.module'
     UserEnrollCommunityService
   ],
   exports: [
-    NewPostDialogueComponent,
     WidgetDiscussionv2Module,
     WidgetPostdetailsModule,
     WidgetDiscussionv2HomeModule

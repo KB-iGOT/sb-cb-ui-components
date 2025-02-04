@@ -63,7 +63,7 @@ export class NewPostComponent {
 
   openNewPostDialog() {
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
-      width: '600px',
+      width: '996px',
       maxHeight: '90vh', // Add maximum height (90% of viewport height)
       data: {
         type: this.type,
