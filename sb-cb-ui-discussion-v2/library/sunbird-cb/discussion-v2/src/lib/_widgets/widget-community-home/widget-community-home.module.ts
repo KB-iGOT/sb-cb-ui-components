@@ -11,6 +11,10 @@ import { SharedModule } from '../../_shared/shared.module';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { PipesModule } from '../../_pipes/pipes.module';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { HorizontalScrollerV2Module } from '@sunbird-cb/utils-v2';
+import { CompetencyCardModule } from '../../_common/competency-card/competency-card.module';
 
 
 
@@ -30,7 +34,11 @@ import { PipesModule } from '../../_pipes/pipes.module';
     SharedModule,
     MatButtonModule,
     MatMenuModule,
-    PipesModule
+    PipesModule,
+    TranslateModule,
+    MatTooltipModule,
+    HorizontalScrollerV2Module,
+    CompetencyCardModule
   ],
   exports: [
     WidgetCommunityHomeComponent

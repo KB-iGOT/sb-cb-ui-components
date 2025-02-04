@@ -1,0 +1,16 @@
+<mat-card class="sort-by-wrapper mt-4">
+    <mat-card-header>
+      <mat-card-title class="card-title margin-bottom-s">Sort by</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <div class="body-title mb-2">sort</div>
+        <div class="flex flex-row category-item" *ngFor="let sort of sortData">
+            <mat-checkbox #checkboxes disableRipple class="example-margin" [checked]="sort?.checked"
+                (change)="handleGetFilterType($event, sort, 'sort')">
+                <span class="checkbox-label">
+                    {{ sort?.value }}
+                </span>
+            </mat-checkbox>
+        </div>
+    </mat-card-content>
+  </mat-card>

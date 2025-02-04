@@ -18,6 +18,9 @@
                 text-underline-position: from-font;
                 text-decoration-skip-ink: none;
                 color: #000000;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
 
             }
             .post-time {

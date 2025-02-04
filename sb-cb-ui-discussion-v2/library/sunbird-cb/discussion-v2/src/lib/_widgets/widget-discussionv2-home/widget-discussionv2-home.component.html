@@ -23,9 +23,33 @@
                </div>
             </div>
          </div>
+         <div class="py-4">
+            <div class="flex justify-between items-center mb-4 community-groups">
+               <h2 class="text-xl font-medium title margin-remove">All Topics <span *ngIf="topicDataList?.length">({{topicDataList?.length}})</span></h2>
+               <a class="show-more flex items-center" *ngIf="topicDataList?.length > 3" (click)="showAllCommunitiesByTopic(1029)">
+                 <span>Show all</span> 
+                 <mat-icon>chevron_right</mat-icon>
+               </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
+               <div *ngFor="let topic of topicDataList" >
+                <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
+                    [topicTitle]="topic?.value">
+                </d-v2-topic-card>
+               </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="topicDataLoading">
+                <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
+                <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
+                <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
+            </div>
+         </div>
          <mat-tab-group animationDuration="0ms" class="custom-tab-container ">
             <mat-tab label="Discover">
-               <d-v2-discover (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
+               <ng-container *ngIf="topicDataList?.length">
+                  <d-v2-discover [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
+               </ng-container>
+               
             </mat-tab>
             <mat-tab label="Your Communities">
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">

@@ -1,29 +1,8 @@
-<div class="py-4">
-    <div class="py-4">
-        <div class="flex justify-between items-center mb-4 community-groups">
-           <h2 class="text-xl font-medium title margin-remove">All Topics <span *ngIf="topicDataList?.length">({{topicDataList?.length}})</span></h2>
-           <a class="show-more flex items-center" *ngIf="topicDataList?.length > 3" (click)="showAllCommunitiesByTopic(1029)">
-             <span>Show all</span> 
-             <mat-icon>chevron_right</mat-icon>
-           </a>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
-           <div *ngFor="let topic of topicDataList" >
-            <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false"
-                [topicTitle]="topic?.value">
-            </d-v2-topic-card>
-           </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="topicDataLoading">
-            <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
-            <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
-            <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
-        </div>
-     </div>
+<div class="py-4" *ngIf="!topicDataLoading">
     <ng-container *ngFor="let community of (toppicWiseCommunities | keyvalue).slice(0, loadTopicsCount)">
         <div class="flex justify-between items-center mb-4 mt-8 community-groups">
             <h2 class="text-xl font-medium title margin-remove">{{ community.value?.topicName }} ({{ community.value?.count}})</h2>
-            <a class="show-more flex items-center" *ngIf="community.value?.count > 3" (click)="showAllCommunitiesByTopic(1029)">
+            <a class="show-more flex items-center cursor-pointer" *ngIf="community.value?.count > 3" (click)="showAllCommunitiesByTopic(community.value?.topicName)">
               <span>Show all</span> 
               <mat-icon>chevron_right</mat-icon>
             </a>
@@ -36,7 +15,7 @@
              </div>
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!community?.value?.isLoading">
                  <div  *ngFor="let item of community?.value?.communities.slice(0, 3)">
-                     <d-v2-community-card [community]="item" [isLoading]="community?.value?.isLoading"  (click)="onCardClick(item)"></d-v2-community-card>
+                     <d-v2-community-card [community]="item" [isLoading]="community?.value?.isLoading" [orgDetails]="orgDetails" (click)="onCardClick(item)"></d-v2-community-card>
                  </div>
              </div>
          </div>

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
+import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 export interface Community {
   id: number;
   name: string;
@@ -17,30 +18,19 @@ export interface Community {
     encapsulation: ViewEncapsulation.None
 })
 export class WidgetDiscussionv2HomeComponent implements OnInit {
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
   @Output() searchText = new EventEmitter<any>();
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
+  @Output() topicCardClick = new EventEmitter<any>();
   userEnrollDetailsData: any;
-
+  topicDataList: any = []
+  topicDataLoading: boolean = false
  
-  constructor(private userEnrollSvc: UserEnrollCommunityService) { }
+  constructor(private userEnrollSvc: UserEnrollCommunityService,
+    private discussV2Svc: DiscussionV2Service
+  ) { }
   async ngOnInit() {
+    this.getAllTopics()
       let data = await this.userEnrollSvc.getEnrollData()
       this.userEnrollDetailsData = this.userEnrollSvc.userEnrolledCommunityDetailList
       console.log(data)
@@ -61,6 +51,30 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
     
     console.log(cardData)
     this.cardClick.emit(cardData);
+  }
+
+  getAllTopics(){ 
+    this.topicDataLoading = true
+    let request: any = {
+      "filterCriteriaMap": {
+          "status": "active"
+      },
+      "requestedFields": [],
+      "pageNumber": 0,
+      "pageSize": 0,
+      "facets":["topicName"]
+    }
+
+    this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
+      
+      if(res.result && res.result && res.result.search_results && res.result.search_results.facets && res.result.search_results.facets.topicName && res.result.search_results.facets.topicName.length){
+        this.topicDataList = res.result.search_results.facets.topicName;
+        this.topicDataLoading = false
+      }
+    })
+  }
+  topicCardMethod(topicData: any) {
+    this.topicCardClick.emit(topicData)
   }
 
 }
