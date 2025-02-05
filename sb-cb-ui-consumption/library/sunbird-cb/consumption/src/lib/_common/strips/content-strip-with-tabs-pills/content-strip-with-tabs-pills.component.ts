@@ -34,7 +34,7 @@ interface IStripUnitContentData {
   widgets?: NsWidgetResolver.IRenderConfigWithAnyData[];
   stripTitle: string;
   stripTitleLink?: {
-    link:  {
+    link: {
       queryParams: string
     },
     icon: string,
@@ -62,7 +62,7 @@ interface IStripUnitContentData {
   secondaryHeading?: any;
   viewMoreUrl: any;
   request?: any
-  
+
 }
 
 
@@ -72,16 +72,16 @@ interface IStripUnitContentData {
   styleUrls: ['./content-strip-with-tabs-pills.component.scss']
 })
 export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
-implements
-OnInit,
-OnDestroy,
-NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultiple> {
+  implements
+  OnInit,
+  OnDestroy,
+  NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultiple> {
   @Input() widgetData!: NsContentStripWithTabsAndPills.IContentStripMultiple;
   @Output() emptyResponse = new EventEmitter<any>()
   @Output() viewAllResponse = new EventEmitter<any>()
   @Output() telemtryResponse = new EventEmitter<any>()
-  @Input() providerId : any = ''
-  @Input() emitViewAll : boolean = false
+  @Input() providerId: any = ''
+  @Input() emitViewAll: boolean = false
   @Input() channnelName: any = ''
   @HostBinding('id')
   public id = `ws-strip-miltiple_${Math.random()}`;
@@ -216,7 +216,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
 
   isStripShowing(data: any) {
     let count = 0;
-    
+
     if (data && data.key === this.environment.programStripKey && (!data.tabs || !data.tabs.length) &&
       data.stripTitle === this.environment.programStripName && data.widgets.length > 0) {
       data.widgets.forEach((key: any) => {
@@ -265,7 +265,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   getContineuLearningLenth(data: IStripUnitContentData) {
     return data.widgets ? data.widgets.length : 0;
   }
-  getLength(data: IStripUnitContentData) {  
+  getLength(data: IStripUnitContentData) {
     if (!data.tabs || !data.tabs.length) {
       return data.widgets ? data.widgets.length : 0;
     } {
@@ -340,7 +340,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     } else if (filters.organisation &&
       filters.organisation.indexOf('<orgID>') >= 0
     ) {
-      if(this.providerId) {
+      if (this.providerId) {
         filters.organisation = this.providerId;
       } else {
         filters.organisation = userData && userData.rootOrgId;
@@ -350,7 +350,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             userData.professionalDetails[0].designation : '';
         }
       }
-      
+
     }
     return filters;
   }
@@ -365,9 +365,9 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchForYouData(strip, calculateParentStatus)
     this.fetchAllCbpPlans(strip, calculateParentStatus);
-    this.fetchUserEnrolledData(strip,0, 0, calculateParentStatus)
+    this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
     // this.fetchFromEnrollmentList(strip, calculateParentStatus);
-    
+
     // this.enrollInterval = setInterval(() => {
     //   this.fetchAllCbpPlans(strip, calculateParentStatus)
     // },                                1000)
@@ -598,21 +598,21 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     return _.get(item, 'widgetData.content.identifier')
   }
 
-  raiseTelemetry(stripData: any){
+  raiseTelemetry(stripData: any) {
     this.telemtryResponse.emit(stripData)
   }
 
   redirectViewAll(stripData: any, path: string, queryParamsData: any) {
-    if(this.emitViewAll) {
+    if (this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
       if (queryParamsData && queryParamsData.tabSelected && queryParamsData.tabSelected === 'designation') {
         delete queryParamsData.key
-        this.router.navigate(['/page/recommended-learnings'], {queryParams: queryParamsData})
+        this.router.navigate(['/page/recommended-learnings'], { queryParams: queryParamsData })
       } else {
-        this.router.navigate([path], {  queryParams: queryParamsData })
+        this.router.navigate([path], { queryParams: queryParamsData })
       }
-      
+
     }
   }
 
@@ -631,14 +631,14 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             if (this.stripsResultDataMap[strip.key] && currenPillsFromMap) {
               this.stripsResultDataMap[strip.key].viewMoreUrl.queryParams = {
                 ...this.stripsResultDataMap[strip.key].viewMoreUrl.queryParams,
-                key:strip.key,
+                key: strip.key,
                 tabSelected: firstTab.value,
                 pillSelected: pillData.value,
               };
             }
           }
         }
-  
+
       }
     }
   }
@@ -683,16 +683,16 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           if (response && response.results) {
             // console.log('calling  after-- ')
             if (response.results.result.content) {
-              
-                this.processStrip(
-                  strip,
-                  this.transformContentsToWidgets(response.results.result.content, strip),
-                  'done',
-                  calculateParentStatus,
-                  response.viewMoreUrl,
-                );
-              
-            
+
+              this.processStrip(
+                strip,
+                this.transformContentsToWidgets(response.results.result.content, strip),
+                'done',
+                calculateParentStatus,
+                response.viewMoreUrl,
+              );
+
+
             } else if (response.results.result.Event) {
               this.processStrip(
                 strip,
@@ -729,13 +729,13 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       if (response && response.results && response.results.response) {
         const content = response.results.response[currentTab.value] || [];
         const widgets = this.transformContentsToWidgets(content, strip);
-       
+
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
           const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if(allPills && allPills.length && allPills[pillIndex]){
+            if (allPills && allPills.length && allPills[pillIndex]) {
               allPills[pillIndex] = {
                 ...allPills[pillIndex],
                 widgets,
@@ -765,17 +765,17 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if(allPills && allPills.length && allPills[pillIndex]){
+            if (allPills && allPills.length && allPills[pillIndex]) {
               allPills[pillIndex] = {
                 ...allPills[pillIndex],
-                widgets:[],
+                widgets: [],
                 fetchTabStatus: 'done',
                 selected: true
               };
             }
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
-              widgets:[],
+              widgets: [],
               fetchTabStatus: 'done',
             };
             tabResults = allTabs;
@@ -785,7 +785,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       }
     } catch (error) {
       // Handle errors
-     this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      this.processStrip(strip, [], 'error', calculateParentStatus, null);
     }
   }
 
@@ -806,7 +806,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if(allPills && allPills.length && allPills[pillIndex]){
+            if (allPills && allPills.length && allPills[pillIndex]) {
               allPills[pillIndex] = {
                 ...allPills[pillIndex],
                 widgets,
@@ -842,148 +842,149 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   async trendingSearchRequest(strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     request: NsContentStripWithTabsAndPills.IContentStripUnit['request'],
     calculateParentStatus: boolean
-    ): Promise<any> {
-      const originalFilters: any = [];
-      return new Promise<any>((resolve, reject) => {
-        if (request && request.trendingSearch) {
+  ): Promise<any> {
+    const originalFilters: any = [];
+    return new Promise<any>((resolve, reject) => {
+      if (request && request.trendingSearch) {
         // check for the request if it has dynamic values]
-          if (request.trendingSearch.request.filters.organisation &&
+        if (request.trendingSearch.request.filters.organisation &&
           request.trendingSearch.request.filters.organisation.indexOf('<orgID>') >= 0
-          ) {
+        ) {
           let userRootOrgId;
           if (this.configSvc.userProfile) {
-          userRootOrgId = this.configSvc.userProfile.rootOrgId;
+            userRootOrgId = this.configSvc.userProfile.rootOrgId;
           }
           request.trendingSearch.request.filters.organisation = userRootOrgId;
-          }
-          this.contentSvc.trendingContentSearch(request.trendingSearch).subscribe(results => {
-            const showViewMore = Boolean(
+        }
+        this.contentSvc.trendingContentSearch(request.trendingSearch).subscribe(results => {
+          const showViewMore = Boolean(
             results.result &&
             strip.request &&
             results.result[strip.request.trendingSearch.responseKey] &&
             results.result[strip.request.trendingSearch.responseKey].length > 5 &&
             strip.stripConfig && strip.stripConfig.postCardForSearch,
-            );
+          );
 
-            const viewMoreUrl = showViewMore
+          const viewMoreUrl = showViewMore
             ? {
-            path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
-            queryParams: {
-            tab: 'Learn',
-            q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
-            f:
-            request &&
-            request.trendingSearch &&
-            request.trendingSearch.request &&
-            request.trendingSearch.request.filters
-            ? JSON.stringify(
-            this.transformSearchV6FiltersV2(
-            originalFilters,
-            )
-            )
-            : {},
-            },
+              path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
+              queryParams: {
+                tab: 'Learn',
+                q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
+                f:
+                  request &&
+                    request.trendingSearch &&
+                    request.trendingSearch.request &&
+                    request.trendingSearch.request.filters
+                    ? JSON.stringify(
+                      this.transformSearchV6FiltersV2(
+                        originalFilters,
+                      )
+                    )
+                    : {},
+              },
             }
             : null;
 
-            let proccesedResult: any = []
-            if (results && results.response && results.response.certifications) {
-              results.response.certifications.map((result: any) => {
-                if (result.source === this.channnelName) {
-                  proccesedResult.push(result)
-                }
-              })
-              results = {response: {certifications: proccesedResult}}
-            }
-            resolve({ results, viewMoreUrl });
-          },                                                                      (error: any) => {
-            if (error.error && error.error.status === 400) {
-              this.processStrip(strip, [], 'done', calculateParentStatus, null);
-            }
-            // this.processStrip(strip, [], 'done', calculateParentStatus, null)
-            reject(error);
-          },);
-        }
-      });
-    }
-
-    public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
-      this.activeTabIndex = tabEvent
-      if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
-        stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-        stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = true;
-        stripMap.showOnLoader = true;
-        this.resetSelectedPill(stripMap.tabs[tabEvent].pillsData)
+          let proccesedResult: any = []
+          if (results && results.response && results.response.certifications) {
+            results.response.certifications.map((result: any) => {
+              if (result.source === this.channnelName) {
+                proccesedResult.push(result)
+              }
+            })
+            results = { response: { certifications: proccesedResult } }
+          }
+          resolve({ results, viewMoreUrl });
+        }, (error: any) => {
+          if (error.error && error.error.status === 400) {
+            this.processStrip(strip, [], 'done', calculateParentStatus, null);
+          }
+          // this.processStrip(strip, [], 'done', calculateParentStatus, null)
+          reject(error);
+        },);
       }
-      const data: WsEvents.ITelemetryTabData = {
-        label: `${stripMap.tabs[tabEvent].label}`,
-        index: tabEvent,
+    });
+  }
+
+  public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
+    this.activeTabIndex = tabEvent
+    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+      stripMap.tabs[tabEvent].pillsData[pillIndex].fetchTabStatus = 'inprogress';
+      stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = true;
+      stripMap.showOnLoader = true;
+      this.resetSelectedPill(stripMap.tabs[tabEvent].pillsData)
+    }
+    const data: WsEvents.ITelemetryTabData = {
+      label: `${stripMap.tabs[tabEvent].label}`,
+      index: tabEvent,
+    };
+    this.eventSvc.raiseInteractTelemetry(
+      {
+        type: WsEvents.EnumInteractTypes.CLICK,
+        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+        id: `${_.camelCase(data.label)}-tab`,
+      },
+      {},
+      {
+        module: WsEvents.EnumTelemetrymodules.HOME,
+      }
+    );
+
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
+    const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
+    if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
+      this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
+        ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
+        tabSelected: currentTabFromMap.value,
+        pillSelected: currentPillFromMap.value,
       };
-      this.eventSvc.raiseInteractTelemetry(
-        {
-          type: WsEvents.EnumInteractTypes.CLICK,
-          subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
-          id: `${_.camelCase(data.label)}-tab`,
-        },
-        {},
-        {
-          module: WsEvents.EnumTelemetrymodules.HOME,
+    }
+    if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
+      if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
+        // call API to get tab data and process
+        // this.processStrip(currentStrip, [], 'fetching', true, null)
+        if (currentPillFromMap.request.searchV6) {
+          this.getTabDataByNewReqSearchV6(currentStrip, tabEvent, 0, currentPillFromMap, true);
+        } else if (currentPillFromMap.request.trendingSearch) {
+          this.getTabDataByNewReqTrending(currentStrip, tabEvent, 0, currentPillFromMap, true);
+        } else if (currentPillFromMap.request.type === 'eventEnrollment') {
+          this.fetchEventEnrollmentList(currentStrip, tabEvent, pillIndex, true)
+        } else if (currentPillFromMap.request.type === 'enrollment') {
+          this.fetchFromInternalEnrollmentList(currentStrip, tabEvent, pillIndex, true)
         }
-      );
+        // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
+        //   stripMap.tabs[tabEvent.index].tabLoading = false;
+        // }
 
-      const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
-      const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
-      const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
-      if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
-        this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
-          ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
-          tabSelected: currentTabFromMap.value,
-          pillSelected: currentPillFromMap.value,
-        };
-      }
-      if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
-        if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
-          // call API to get tab data and process
-          // this.processStrip(currentStrip, [], 'fetching', true, null)
-          if (currentPillFromMap.request.searchV6) {
-            this.getTabDataByNewReqSearchV6(currentStrip, tabEvent, 0, currentPillFromMap, true);
-          } else if (currentPillFromMap.request.trendingSearch) {
-            this.getTabDataByNewReqTrending(currentStrip, tabEvent, 0, currentPillFromMap, true);
-          } else if (currentPillFromMap.request.type === 'eventEnrollment') {
-            this.fetchEventEnrollmentList(currentStrip, tabEvent, pillIndex, true)
-          } else if (currentPillFromMap.request.type === 'enrollment') {
-            this.fetchFromInternalEnrollmentList(currentStrip, tabEvent, pillIndex, true)
-          }
-          // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-          //   stripMap.tabs[tabEvent.index].tabLoading = false;
-          // }
-
-          stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
-        } else if (currentTabFromMap.requestRequired && currentTabFromMap.request) {
-          if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.designationsList){
-            this.fetchDesignationBasedCourses(currentStrip,tabEvent, true)
-          } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList){
-            this.fetchAllCbpPlans(currentStrip, true)
-          }
-          stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
+        stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
+      } else if (currentTabFromMap.requestRequired && currentTabFromMap.request) {
+        if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.designationsList) {
+          this.fetchDesignationBasedCourses(currentStrip, tabEvent, true)
+        } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList) {
+          this.fetchAllCbpPlans(currentStrip, true)
         }
+        stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
       }
     }
+  }
 
-    async fetchDesignationBasedCourses(
-      strip: NsContentStripWithTabsAndPills.IContentStripUnit,
-      tabIndex: number,
-      calculateParentStatus: boolean
-    ) {
-      if(strip.tabs[tabIndex].request.designationsList) {
+  async fetchDesignationBasedCourses(
+    strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+    tabIndex: number,
+    calculateParentStatus: boolean
+  ) {
+    if (strip.tabs[tabIndex].request.designationsList) {
+      try {
         let response = await this.userSvc.fetchDesigantionsData().toPromise()
         if (response) {
           let request = {
             "request": {
-                "courseId": response
+              "courseId": response
             }
           }
-          let enollData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+          let enollData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
             if (res && res.result && res.result.courses && res.result.courses.length) {
               return res.result.courses
             } else {
@@ -1001,7 +1002,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                 "offset": 0,
                 "query": "",
                 "sort_by": {
-                    "lastUpdatedOn": "desc"
+                  "lastUpdatedOn": "desc"
                 },
               }
             }
@@ -1013,14 +1014,14 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
               if (strip.tabs && strip.tabs.length) {
                 tabResults = this.splitDesignationsTabData(courses, strip, enollData, response)
                 let countOfWidget = true
-                if(strip && strip.tabs && strip.tabs.length) {
-                  strip.tabs.forEach((tab:any)=> {
-                    if(tab.value === 'designation' && tab.pillsData && tab.pillsData.length) {
+                if (strip && strip.tabs && strip.tabs.length) {
+                  strip.tabs.forEach((tab: any) => {
+                    if (tab.value === 'designation' && tab.pillsData && tab.pillsData.length) {
                       tab.pillsData.forEach((pill: any) => {
-                        if(pill && pill.widgets && pill.widgets.length){
-                          if(countOfWidget){
+                        if (pill && pill.widgets && pill.widgets.length) {
+                          if (countOfWidget) {
                             pill.selected = true
-                            countOfWidget= false
+                            countOfWidget = false
                           }
                         }
                       });
@@ -1063,7 +1064,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           strip.tabs[tabIndex].pillsData[0].tabLoading = false
           strip.tabs[tabIndex].hideTab = true
           let tabs = strip.tabs
-          if (strip.tabs[0] && strip.tabs[0].hideTab){
+          if (strip.tabs[0] && strip.tabs[0].hideTab) {
             tabs = []
           }
           this.processStrip(
@@ -1075,202 +1076,224 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             tabs
           );
         }
+      } catch (error) {
+        this.resetPills(strip.tabs[tabIndex].pillsData)
+        strip.tabs[tabIndex].pillsData[0].selected = true
+        strip.tabs[tabIndex].pillsData[0].widgets = []
+        strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+        strip.showOnLoader = false
+        strip.tabs[tabIndex].pillsData[0].tabLoading = false
+        strip.tabs[tabIndex].hideTab = true
+        let tabs = strip.tabs
+        if (strip.tabs[0] && strip.tabs[0].hideTab) {
+          tabs = []
+        }
+        this.processStrip(
+          strip,
+          this.transformContentsToWidgets([], strip),
+          'done',
+          calculateParentStatus,
+          '',
+          tabs
+        );
       }
-    }
 
-    resetPills(data: any) {
-      data.forEach((pill: any) => {
-        pill.fetchTabStatus = 'done'
-        delete pill.tabLoading
-        pill.widgets = []
-      })
     }
+  }
 
-    splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit,
-      enollData: any, coursesArray: any) {
-      let tabResults: any[] = [];
-      const splitData = this.getTabsDesignationsList(
-        contentNew,
-        strip, enollData, coursesArray
-      );
-      if (strip.tabs && strip.tabs.length) {
-        for (let i = 0; i < strip.tabs.length; i += 1) {
-          if (strip.tabs[i].value === "designation") {
-            let checkWidgetAndActivePill = true
-            if (strip.tabs[i].pillsData && strip.tabs[i].pillsData.length) {
-              for (let j = 0; j < strip.tabs[i].pillsData.length; j += 1) {
-                if (strip.tabs[i].pillsData[j]) {
-                  tabResults.push(
-                    {
-                      ...strip.tabs[i].pillsData[j],
-                      fetchTabStatus: 'done',
-                      tabLoading: false,
-                      ...(splitData.find(itmInner => {
-                        if (strip.tabs[i].pillsData&& strip.tabs[i].pillsData[j] && itmInner.value === strip.tabs[i].pillsData[j].value) {
-                          return itmInner
-                        }
-                        return undefined
-                      })),
-                    }
-                  )
-                }
+  resetPills(data: any) {
+    data.forEach((pill: any) => {
+      pill.fetchTabStatus = 'done'
+      delete pill.tabLoading
+      pill.widgets = []
+    })
+  }
+
+  splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+    enollData: any, coursesArray: any) {
+    let tabResults: any[] = [];
+    const splitData = this.getTabsDesignationsList(
+      contentNew,
+      strip, enollData, coursesArray
+    );
+    if (strip.tabs && strip.tabs.length) {
+      for (let i = 0; i < strip.tabs.length; i += 1) {
+        if (strip.tabs[i].value === "designation") {
+          let checkWidgetAndActivePill = true
+          if (strip.tabs[i].pillsData && strip.tabs[i].pillsData.length) {
+            for (let j = 0; j < strip.tabs[i].pillsData.length; j += 1) {
+              if (strip.tabs[i].pillsData[j]) {
+                tabResults.push(
+                  {
+                    ...strip.tabs[i].pillsData[j],
+                    fetchTabStatus: 'done',
+                    tabLoading: false,
+                    ...(splitData.find(itmInner => {
+                      if (strip.tabs[i].pillsData && strip.tabs[i].pillsData[j] && itmInner.value === strip.tabs[i].pillsData[j].value) {
+                        return itmInner
+                      }
+                      return undefined
+                    })),
+                  }
+                )
               }
-              strip.tabs[i].pillsData = tabResults
             }
+            strip.tabs[i].pillsData = tabResults
           }
         }
       }
-      return strip.tabs
     }
+    return strip.tabs
+  }
 
-    getTabsDesignationsList(array: NsContent.IContent[],
-      strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any, coursesArray: any) {
-        let avaialable: any[] = []
-        let inprogress: any[] = []
-        let allCompleted: any[] = []
-        let cbpData: any
-        this.userSvc.getData('cbpData').subscribe((result => {
-          cbpData = result
-        }))
-        coursesArray.forEach((courseId: any) => {
-          let course = array.find((item: any) => item.identifier === courseId)
-          if (course) {
-            if (cbpData) {
-              const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
-              if (cbpelem) {
-                return
-              }
-            }
-            if (enollData && enollData.length) {
-              const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
-              if (elem) {
-                if (elem.status === 2) {
-                  allCompleted.push(course)
-                } else {
-                  inprogress.push(course)
-                }
-              } else {
-                avaialable.push(course)
-              }
+  getTabsDesignationsList(array: NsContent.IContent[],
+    strip: NsContentStripWithTabsAndPills.IContentStripUnit, enollData: any, coursesArray: any) {
+    let avaialable: any[] = []
+    let inprogress: any[] = []
+    let allCompleted: any[] = []
+    let cbpData: any
+    this.userSvc.getData('cbpData').subscribe((result => {
+      cbpData = result
+    }))
+    coursesArray.forEach((courseId: any) => {
+      let course = array.find((item: any) => item.identifier === courseId)
+      if (course) {
+        if (cbpData) {
+          const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
+          if (cbpelem) {
+            return
+          }
+        }
+        if (enollData && enollData.length) {
+          const elem = enollData.find((eCourse: any) => eCourse.contentId === course.identifier)
+          if (elem) {
+            if (elem.status === 2) {
+              allCompleted.push(course)
             } else {
-              avaialable.push(course)
+              inprogress.push(course)
             }
+          } else {
+            avaialable.push(course)
           }
-        })
-        return [
-          { value: 'ravailable', widgets: this.transformContentsToWidgets(avaialable, strip) },
-          { value: 'rinprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
-          { value: 'rcompleted', widgets: this.transformContentsToWidgets(allCompleted, strip) },
-        ]
-    }
+        } else {
+          avaialable.push(course)
+        }
+      }
+    })
+    return [
+      { value: 'ravailable', widgets: this.transformContentsToWidgets(avaialable, strip) },
+      { value: 'rinprogress', widgets: this.transformContentsToWidgets(inprogress, strip) },
+      { value: 'rcompleted', widgets: this.transformContentsToWidgets(allCompleted, strip) },
+    ]
+  }
 
-    pillClicked(event: any, stripMap: IStripUnitContentData, stripKey: any, pillIndex: any, tabIndex: any) {
-      this.activePillIndex = pillIndex
-      if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
-        stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-        stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true;
-        stripMap.showOnLoader = true;
-      }
-      const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex];
-      const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex].pillsData[pillIndex];
-      const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
-      if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
-        this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
-          ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
-          tabSelected: currentTabFromMap.value,
-          pillSelected: currentPillFromMap.value,
-        };
-      }
-      if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
-        if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
-          // call API to get tab data and process
-          // this.processStrip(currentStrip, [], 'fetching', true, null)
-          if (currentPillFromMap.request.searchV6) {
-            this.getTabDataByNewReqSearchV6(currentStrip, tabIndex, pillIndex, currentPillFromMap, true);
-          } else if (currentPillFromMap.request.trendingSearch) {
-            this.getTabDataByNewReqTrending(currentStrip, tabIndex, pillIndex, currentPillFromMap, true);
-          } else if (currentPillFromMap.request.type === 'enrollment') {
-            this.fetchFromInternalEnrollmentList(currentStrip, tabIndex, pillIndex, true)
-          }  else if (currentPillFromMap.request.type === 'eventEnrollment') {
-            this.fetchEventEnrollmentList(currentStrip, tabIndex, pillIndex, true) 
-            
-          }
-          // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-          //   stripMap.tabs[tabEvent.index].tabLoading = false;
-          // }
-          setTimeout(() => {
+  pillClicked(event: any, stripMap: IStripUnitContentData, stripKey: any, pillIndex: any, tabIndex: any) {
+    this.activePillIndex = pillIndex
+    if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
+      stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
+      stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true;
+      stripMap.showOnLoader = true;
+    }
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex];
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex].pillsData[pillIndex];
+    const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
+    if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
+      this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
+        ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
+        tabSelected: currentTabFromMap.value,
+        pillSelected: currentPillFromMap.value,
+      };
+    }
+    if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
+      if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
+        // call API to get tab data and process
+        // this.processStrip(currentStrip, [], 'fetching', true, null)
+        if (currentPillFromMap.request.searchV6) {
+          this.getTabDataByNewReqSearchV6(currentStrip, tabIndex, pillIndex, currentPillFromMap, true);
+        } else if (currentPillFromMap.request.trendingSearch) {
+          this.getTabDataByNewReqTrending(currentStrip, tabIndex, pillIndex, currentPillFromMap, true);
+        } else if (currentPillFromMap.request.type === 'enrollment') {
+          this.fetchFromInternalEnrollmentList(currentStrip, tabIndex, pillIndex, true)
+        } else if (currentPillFromMap.request.type === 'eventEnrollment') {
+          this.fetchEventEnrollmentList(currentStrip, tabIndex, pillIndex, true)
+
+        }
+        // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
+        //   stripMap.tabs[tabEvent.index].tabLoading = false;
+        // }
+        setTimeout(() => {
+          stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
+          stripMap.showOnLoader = false;
+        }, 200);
+      } else {
+        this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
+        if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
+          stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
+          stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
+          stripMap.showOnLoader = true;
+        }
+        setTimeout(() => {
+          if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
+            stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'done';
             stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
             stripMap.showOnLoader = false;
-          },         200);
-        } else {
-          this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
-          if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
-            stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-            stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
-            stripMap.showOnLoader = true;
+            this.resetSelectedPill(stripMap.tabs[tabIndex].pillsData)
+            stripMap.tabs[tabIndex].pillsData[pillIndex]['selected'] = true
           }
-          setTimeout(() => {
-            if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
-              stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'done';
-              stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
-              stripMap.showOnLoader = false;
-              this.resetSelectedPill(stripMap.tabs[tabIndex].pillsData)
-              stripMap.tabs[tabIndex].pillsData[pillIndex]['selected']=true
-            }
-          },         200);
-        }
+        }, 200);
       }
     }
+  }
 
-    async searchV6Request(strip: NsContentStripWithTabsAndPills.IContentStripUnit,
-      request: NsContentStripWithTabsAndPills.IContentStripUnit['request'],
-      calculateParentStatus: boolean
-        ): Promise<any> {
-        const originalFilters: any = [];
-        return new Promise<any>((resolve, reject) => {
-        if (request && request.searchV6) {
+  async searchV6Request(strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+    request: NsContentStripWithTabsAndPills.IContentStripUnit['request'],
+    calculateParentStatus: boolean
+  ): Promise<any> {
+    const originalFilters: any = [];
+    return new Promise<any>((resolve, reject) => {
+      if (request && request.searchV6) {
         this.contentSvc.searchV6(request.searchV6).subscribe(results => {
-        const showViewMore = Boolean(
-        results.result.content && results.result.content.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
-        );
-        const viewMoreUrl = showViewMore
-        ? {
-        path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
-        queryParams: {
-        tab: 'Learn',
-        q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
-        f:
-        request &&
-          request.searchV6 &&
-          request.searchV6.request &&
-          request.searchV6.request.filters
-          ? JSON.stringify(
-            this.transformSearchV6FiltersV2(
-              originalFilters,
-            )
-          )
-          : {},
+          const showViewMore = Boolean(
+            results.result.content && results.result.content.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+          );
+          const viewMoreUrl = showViewMore
+            ? {
+              path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
+              queryParams: {
+                tab: 'Learn',
+                q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
+                f:
+                  request &&
+                    request.searchV6 &&
+                    request.searchV6.request &&
+                    request.searchV6.request.filters
+                    ? JSON.stringify(
+                      this.transformSearchV6FiltersV2(
+                        originalFilters,
+                      )
+                    )
+                    : {},
+              },
+            }
+            : null;
+          // if (viewMoreUrl && viewMoreUrl.queryParams) {
+          //   viewMoreUrl.queryParams = viewMoreUrl.queryParams
+          // }
+          resolve({ results, viewMoreUrl });
+        }, (error: any) => {
+          this.processStrip(strip, [], 'error', calculateParentStatus, null);
+          reject(error);
         },
-        }
-        : null;
-        // if (viewMoreUrl && viewMoreUrl.queryParams) {
-        //   viewMoreUrl.queryParams = viewMoreUrl.queryParams
-        // }
-        resolve({ results, viewMoreUrl });
-        },                                                   (error: any) => {
-        this.processStrip(strip, [], 'error', calculateParentStatus, null);
-        reject(error);
-        },
         );
-        }
-        });
+      }
+    });
   }
 
 
   getSelectedPillIndex(tabdata: any, tabIndex: any) {
-    if(tabdata.pillsData && tabdata.pillsData.length) {
+    if (tabdata.pillsData && tabdata.pillsData.length) {
       let index = tabdata.pillsData.findIndex((pill: any) => {
-          return pill.selected
+        return pill.selected
       });
       return index
     }
@@ -1290,42 +1313,42 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
       if (response) {
-            courses = response;
-            if (strip.tabs && strip.tabs.length) {
-              tabResults = this.splitCbpTabsData(courses, strip);
-              let countOfWidget = true
-              if(strip && strip.tabs && strip.tabs.length) {
-                strip.tabs.forEach((tab:any)=> {
-                  if(tab.pillsData && tab.pillsData.length) {
-                    tab.pillsData.forEach((pill: any) => {
-                      if(pill && pill.widgets && pill.widgets.length){
-                        if(countOfWidget){
-                          pill.selected = true
-                          countOfWidget= false
-                        }
-                      }
-                    });
+        courses = response;
+        if (strip.tabs && strip.tabs.length) {
+          tabResults = this.splitCbpTabsData(courses, strip);
+          let countOfWidget = true
+          if (strip && strip.tabs && strip.tabs.length) {
+            strip.tabs.forEach((tab: any) => {
+              if (tab.pillsData && tab.pillsData.length) {
+                tab.pillsData.forEach((pill: any) => {
+                  if (pill && pill.widgets && pill.widgets.length) {
+                    if (countOfWidget) {
+                      pill.selected = true
+                      countOfWidget = false
+                    }
                   }
-                })
+                });
               }
-              await this.processStrip(
-                strip,
-                this.transformContentsToWidgets(courses, strip),
-                'done',
-                calculateParentStatus,
-                '',
-                tabResults
-              );
-            } else {
-              this.processStrip(
-                strip,
-                this.transformContentsToWidgets(courses, strip),
-                'done',
-                calculateParentStatus,
-                'viewMoreUrl',
-              );
-            }
-            this.canShowRecommendedLearningsTab(strip)
+            })
+          }
+          await this.processStrip(
+            strip,
+            this.transformContentsToWidgets(courses, strip),
+            'done',
+            calculateParentStatus,
+            '',
+            tabResults
+          );
+        } else {
+          this.processStrip(
+            strip,
+            this.transformContentsToWidgets(courses, strip),
+            'done',
+            calculateParentStatus,
+            'viewMoreUrl',
+          );
+        }
+        this.canShowRecommendedLearningsTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
@@ -1367,16 +1390,16 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     );
     if (strip.tabs && strip.tabs.length) {
       for (let i = 0; i < strip.tabs.length; i += 1) {
-        if( strip.tabs[i].value === "myIgotPlans") {
+        if (strip.tabs[i].value === "myIgotPlans") {
           let checkWidgetAndActivePill = true
           if (strip.tabs[i].pillsData && strip.tabs[i].pillsData.length) {
             for (let j = 0; j < strip.tabs[i].pillsData.length; j += 1) {
               // if(j === 0 ){
-                // if(strip.tabs[i].pillsData[j].widgets && strip.tabs[i].pillsData[j].widgets.length ) {
-                //   strip.tabs[i].pillsData[j].selected = true
-                //   checkWidgetAndActivePill = false
-                // }
-                // strip.tabs[i].pillsData[j].selected = true
+              // if(strip.tabs[i].pillsData[j].widgets && strip.tabs[i].pillsData[j].widgets.length ) {
+              //   strip.tabs[i].pillsData[j].selected = true
+              //   checkWidgetAndActivePill = false
+              // }
+              // strip.tabs[i].pillsData[j].selected = true
               // }
               if (strip.tabs[i].pillsData[j]) {
                 tabResults.push(
@@ -1384,7 +1407,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
                     ...strip.tabs[i].pillsData[j],
                     fetchTabStatus: 'done',
                     ...(splitData.find(itmInner => {
-                      if (strip.tabs[i].pillsData&& strip.tabs[i].pillsData[j] && itmInner.value === strip.tabs[i].pillsData[j].value) {
+                      if (strip.tabs[i].pillsData && strip.tabs[i].pillsData[j] && itmInner.value === strip.tabs[i].pillsData[j].value) {
                         return itmInner;
                       }
                       return undefined;
@@ -1398,12 +1421,12 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
         }
       }
     }
-    
+
     return strip.tabs;
   }
 
   getTabsList(array: NsContent.IContent[],
-              strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
+    strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
     let all: any[] = [];
     let upcoming: any[] = [];
     let overdue: any[] = [];
@@ -1419,13 +1442,13 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     let allInCompleted = all.filter((allData: any) => allData.contentStatus < 2);
 
     let allCompletedOverDue = allCompleted.filter((allData: any) => allData.planDuration === NsCardContent.ACBPConst.OVERDUE);
-    const allCompletedAll = allCompleted.filter((allData: any) =>  allData.planDuration !== NsCardContent.ACBPConst.OVERDUE);
+    const allCompletedAll = allCompleted.filter((allData: any) => allData.planDuration !== NsCardContent.ACBPConst.OVERDUE);
 
     allCompletedOverDue = allCompletedOverDue.sort((a: any, b: any): any => {
       if (a.planDuration === NsCardContent.ACBPConst.OVERDUE && b.planDuration === NsCardContent.ACBPConst.OVERDUE) {
         const firstDate: any = new Date(a.endDate);
         const secondDate: any = new Date(b.endDate);
-        return  firstDate > secondDate  ? -1 : 1;
+        return firstDate > secondDate ? -1 : 1;
       }
     });
 
@@ -1433,7 +1456,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       if (a.planDuration === NsCardContent.ACBPConst.OVERDUE && b.planDuration === NsCardContent.ACBPConst.OVERDUE) {
         const firstDate: any = new Date(a.endDate);
         const secondDate: any = new Date(b.endDate);
-        return  firstDate > secondDate  ? -1 : 1;
+        return firstDate > secondDate ? -1 : 1;
       }
     });
 
@@ -1444,23 +1467,23 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     });
 
     overdue = overdue.sort((a: any, b: any): any => {
-        const firstDate: any = new Date(a.endDate);
-        const secondDate: any = new Date(b.endDate);
-        return  firstDate > secondDate  ? -1 : 1;
+      const firstDate: any = new Date(a.endDate);
+      const secondDate: any = new Date(b.endDate);
+      return firstDate > secondDate ? -1 : 1;
     });
 
     upcoming = upcoming.filter((data: any): any => {
       return data.contentStatus < 2;
     });
-    
+
     return [
-    { value: 'all', widgets: this.transformContentsToWidgets(all, strip) },
-    { value: 'upcoming', widgets: this.transformContentsToWidgets(upcoming, strip) },
-    { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
-    { value: 'overdue', widgets: this.transformContentsToWidgets(overdue, strip) }];
+      { value: 'all', widgets: this.transformContentsToWidgets(all, strip) },
+      { value: 'upcoming', widgets: this.transformContentsToWidgets(upcoming, strip) },
+      { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
+      { value: 'overdue', widgets: this.transformContentsToWidgets(overdue, strip) }];
   }
-  resetSelectedPill(pillData: any){
-    if(pillData && pillData.length){
+  resetSelectedPill(pillData: any) {
+    if (pillData && pillData.length) {
       pillData.forEach((pill: any) => {
         pill['selected'] = false
       });
@@ -1469,17 +1492,17 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
 
 
   // MY learning Strip methods starts here
-  fetchUserEnrolledData(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex:number, pillIndex: number, calculateParentStatus = true) {
+  fetchUserEnrolledData(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex: number, pillIndex: number, calculateParentStatus = true) {
     if (strip.request && strip.request.enrollmentList && Object.keys(strip.request.enrollmentList).length) {
-      if(strip && strip.tabs && strip.tabs.length) {
-        if(!strip.tabs[tabIndex].requestRequired) {
-          if(strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length) {
+      if (strip && strip.tabs && strip.tabs.length) {
+        if (!strip.tabs[tabIndex].requestRequired) {
+          if (strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length) {
             this.fetchFromInternalEnrollmentList(strip, tabIndex, pillIndex, calculateParentStatus)
           }
         }
         if (strip && strip.tabs && strip.tabs.length) {
-          let currentTabFromMap : any = strip.tabs[tabIndex]
-          let currentPillFromMap : any = strip.tabs[tabIndex].pillsData[0]
+          let currentTabFromMap: any = strip.tabs[tabIndex]
+          let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[0]
           strip.viewMoreUrl.queryParams = {
             ...strip.viewMoreUrl.queryParams,
             tabSelected: currentTabFromMap.value,
@@ -1492,25 +1515,25 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
 
 
   fetchFromInternalEnrollmentList(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex: number, pillIndex: number, calculateParentStatus = true) {
-    if(strip.tabs && strip.tabs[tabIndex] && strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData[pillIndex]){
-      let currentPillFromMap : any = strip.tabs[tabIndex].pillsData[pillIndex]
+    if (strip.tabs && strip.tabs[tabIndex] && strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData[pillIndex]) {
+      let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
       let userId = ''
       if (this.configSvc.userProfile) {
         userId = this.configSvc.userProfile.userId;
       }
       this.enrollSvc.fetchInternalEnrollmentData(userId, currentPillFromMap.request.payload).subscribe((res: any) => {
         let courses: any = []
-        if(res && res.result && res.result.courses && res.result.courses.length){
-          courses  = [...courses, ...res.result.courses]
+        if (res && res.result && res.result.courses && res.result.courses.length) {
+          courses = [...courses, ...res.result.courses]
         }
         this.enrollSvc.fetchExternalEnrollmentData(currentPillFromMap.request.payload).subscribe((res: any) => {
-          
-          if(res && res.result && res.result.courses && res.result.courses.length){
-            courses  = [...courses, ...res.result.courses]
+
+          if (res && res.result && res.result.courses && res.result.courses.length) {
+            courses = [...courses, ...res.result.courses]
           }
           this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
-        },(_err: any) => {
-          if(courses && courses.length){
+        }, (_err: any) => {
+          if (courses && courses.length) {
             this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
           } else {
             this.processStrip(
@@ -1523,15 +1546,15 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
             );
           }
         })
-      },(_err: any) => {
+      }, (_err: any) => {
         let courses: any = []
-        this.enrollSvc.fetchExternalEnrollmentData( currentPillFromMap.request.payload).subscribe((res: any) => {
-          
-          if(res && res.result && res.result.courses && res.result.courses.length){
-            courses  = [...courses, ...res.result.courses]
+        this.enrollSvc.fetchExternalEnrollmentData(currentPillFromMap.request.payload).subscribe((res: any) => {
+
+          if (res && res.result && res.result.courses && res.result.courses.length) {
+            courses = [...courses, ...res.result.courses]
           }
           this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
-        },(_err: any) => {
+        }, (_err: any) => {
           this.processStrip(
             strip,
             [],
@@ -1546,8 +1569,8 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
   }
 
   fetchEventEnrollmentList(strip: NsContentStripWithTabsAndPills.IContentStripUnit, tabIndex: number, pillIndex: number, calculateParentStatus = true) {
-    if(strip.tabs && strip.tabs[tabIndex] && strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData[pillIndex]){
-      let currentPillFromMap : any = strip.tabs[tabIndex].pillsData[pillIndex]
+    if (strip.tabs && strip.tabs[tabIndex] && strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData[pillIndex]) {
+      let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
       let userId = ''
       if (this.configSvc.userProfile) {
         userId = this.configSvc.userProfile.userId;
@@ -1555,11 +1578,11 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       this.enrollSvc.fetchEventsEnrollmentData(userId, currentPillFromMap.request.payload).subscribe((res: any) => {
 
         let events: any = []
-        if(res && res.result && res.result.events && res.result.events.length){
-          events  = [...events, ...res.result.events]
+        if (res && res.result && res.result.events && res.result.events.length) {
+          events = [...events, ...res.result.events]
         }
         this.formatNewEnrollmentData(strip, tabIndex, pillIndex, events, calculateParentStatus)
-      },(_err: any) => {
+      }, (_err: any) => {
         this.processStrip(
           strip,
           [],
@@ -1572,7 +1595,7 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
     }
   }
 
-  formatNewEnrollmentData(strip: any, tabIndex:number, pillIndex: number, courses: any, calculateParentStatus: any = true){
+  formatNewEnrollmentData(strip: any, tabIndex: number, pillIndex: number, courses: any, calculateParentStatus: any = true) {
     let content: NsContent.IContent[];
     if (courses && courses.length) {
       content = courses.map((c: any) => {
@@ -1592,15 +1615,15 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
       });
     }
 
-    let sortedContent : any = (content || []).sort((a: any, b: any) => {
+    let sortedContent: any = (content || []).sort((a: any, b: any) => {
       const dateA: any = new Date(a.lastContentAccessTime || 0);
       const dateB: any = new Date(b.lastContentAccessTime || 0);
       return dateB - dateA;
     });
-    
-    if(strip && strip.tabs && strip.tabs.length){
-      if(strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length){
-        let currentPillFromMap : any = strip.tabs[tabIndex].pillsData[pillIndex]
+
+    if (strip && strip.tabs && strip.tabs.length) {
+      if (strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length) {
+        let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
         currentPillFromMap['fetchTabStatus'] = 'done'
         this.resetSelectedPill(strip.tabs[tabIndex].pillsData)
         strip.tabs[tabIndex].pillsData[pillIndex]['selected'] = true
@@ -1615,6 +1638,6 @@ NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultipl
           strip.tabs
         );
       }
-      }
+    }
   }
 }
