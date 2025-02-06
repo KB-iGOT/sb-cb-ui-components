@@ -8,6 +8,7 @@ import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
+import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
 
 @Component({
   selector: 'd-v2-post-card',
@@ -34,7 +35,6 @@ export class PostCardComponent {
   fetchedSearchData: any
   loading = false
   loadingMore = false
-  isEditMode: boolean = false
   editCommentData: any = ''
   answerPostLimit: any = 2
   answerPostPage = 0
@@ -233,10 +233,28 @@ export class PostCardComponent {
     })
   }
 
-  toggelEdit(postData:any) {
-    this.editCommentData = {}
-    this.editCommentData = {...postData}
-    this.isEditMode = true
+  openEditDialogue(post: any) {
+    const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
+      width: '996px',
+      maxHeight: '90vh', // Add maximum height (90% of viewport height)
+      data: {
+        type: this.type,
+        panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
+        backdropClass: 'post-dialog-backdrop',
+        parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
+        community: this.community,
+        config: this.cardConfig,
+        currentUser: {...this.loogedInUserProfile},
+        post: post,
+        editMode: true
+      } 
+    });
+    newPostDialog.afterClosed().subscribe((result: any) => {
+      if (result) {
+        console.log(result)
+        // this.newComment.emit({result: result.result, type: result.type})
+      }
+    })
   }
 
   updateRepliesData(eventData: any) {

@@ -30,7 +30,7 @@
                 aria-label="more">more_vertical</mat-icon>
         </div>
     </div>
-    <div class="comment mb-4 mt-2 " *ngIf="!isEditMode">
+    <div class="comment mb-4 mt-2 ">
         <div class="flex mb-2">
             <div class="ws-mat-black-text mat-body-1"
                 [innerHTML]="post?.title">
@@ -190,7 +190,7 @@
         <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
         <span>Flag</span>
     </button>
-    <button mat-menu-item (click)="toggelEdit(post)"
+    <button mat-menu-item (click)="openEditDialogue(post)"
         *ngIf="post?.createdBy?.user_id === loogedInUserProfile?.userId">
         <mat-icon [ngStyle]="{'color': '#1B4CA1'}">edit</mat-icon>
         <span>Edit</span>
