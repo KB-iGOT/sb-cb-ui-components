@@ -12,6 +12,7 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
   @Input() styleData!: IImageCarouselStyle
   @Input() title: any = ''
   @Input() imageUrls: any[] = []
+  @Input() objectArray: any[] = []
   @HostBinding('id')
   public id = `banner_${Math.random()}`
   private defaultMenuSubscribe: Subscription | null = null
@@ -99,6 +100,52 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
   ngOnDestroy() {
     if (this.defaultMenuSubscribe) {
       this.defaultMenuSubscribe.unsubscribe()
+    }
+  }
+
+
+  reInitiateObjectSlideInterval() {
+    if(this.styleData && this.styleData.autoplay) {
+      if (this.objectArray && this.objectArray.length > 1) {
+        try {
+          if (this.slideInterval) {
+            this.slideInterval.unsubscribe()
+          }
+        } catch (e) {
+        } finally {
+          this.slideInterval = interval(8000).subscribe(() => {
+            if (this.currentIndex === this.objectArray.length - 1) {
+              this.currentIndex = 0
+            } else {
+              this.currentIndex += 1
+            }
+          })
+        }
+      }
+    }
+  }
+  slideToObject(index: number) {
+    if (index >= 0 && index < this.objectArray.length) {
+      this.currentIndex = index
+    } else if (index === this.objectArray.length) {
+      this.currentIndex = 0
+    } else {
+      this.currentIndex = this.objectArray.length + index
+    }
+    this.reInitiateObjectSlideInterval()
+  }
+
+  get isOpenObjectInNewTab() {
+    const currentData = this.objectArray[this.currentIndex]
+    if (currentData.redirectUrl && currentData.redirectUrl.includes('mailto') || this.objectArray[this.currentIndex].openInNewTab) {
+      return true
+    } return false
+  }
+
+  openInNewTabObject() {
+    const currentData = this.objectArray[this.currentIndex]
+    if (currentData.redirectUrl && currentData.redirectUrl.includes('mailto') || this.objectArray[this.currentIndex].openInNewTab) {
+      window.open(currentData.redirectUrl)
     }
   }
 }

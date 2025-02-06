@@ -16,6 +16,39 @@ export class DiscoverComponent implements OnInit, OnChanges {
   loadTopicsCount: number = 1;
   topicDataLoading: boolean = false
   toppicWiseCommunitiesCopy: any = {}
+  popularCommunities: any = [
+    {
+      banner:"https://portal.dev.karmayogibharat.net/content-store/discussionhub/1d08a92b-07fa-41e4-8060-93a221d416e6/c430d380-de32-11ef-a141-db1d6b1d6df7/1738149509610_1000078002.png",
+      name: "Quantum Computing Forum testing competencies"
+    },
+    {
+      banner:"https://portal.dev.karmayogibharat.net/content-store/discussionhub/1d08a92b-07fa-41e4-8060-93a221d416e6/c430d380-de32-11ef-a141-db1d6b1d6df7/1738149509610_1000078002.png",
+      name: "Quantum Computing Stack Exchange"
+    }
+  ]
+  sliderStyleData: any = {
+    styleData: {
+      "bannerMetaClass": "meta",
+      "bannerMeta": "visible",
+      "bannerMetaAlign": "middle",
+      "navigationArrows": "visible",
+      "borderRadius": "12px",
+      "customHeight": "141px",
+      "customMinHeight": "141px",
+      "arrowsPlacement": "middle-inline",
+      autoplay: false,
+      "responsive": {
+        "bannerMetaClass": "meta",
+        "customHeight": "232px",
+        "bannerMetaAlign": "middle",
+        "navigationArrows": "visible",
+        "customMinHeight": "141px",
+        "dots": "hidden",
+        "arrowsPlacement": "middle-inline",
+        autoplay: false,
+      }
+    }
+  }
 
   ngOnInit(): void {
     this.toppicWiseCommunities = {

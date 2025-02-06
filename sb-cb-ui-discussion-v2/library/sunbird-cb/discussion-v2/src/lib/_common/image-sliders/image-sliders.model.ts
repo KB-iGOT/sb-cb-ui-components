@@ -5,6 +5,7 @@ export interface IImageCarouselStyle {
   dots?: "hidden" | "visible",
   borderRadius?: string,
   customHeight?: string,
+  customMinHeight?: string,
   arrowsPlacement?: "bottom-right" | "bottom-center" | "bottom-left" | "middle-inline",
   imageBorderWidth: number
   imageBorderColor: string
