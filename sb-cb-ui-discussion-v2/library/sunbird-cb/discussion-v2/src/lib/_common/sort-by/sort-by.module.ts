@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { SortByComponent } from './sort-by.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
+import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
+
 
 
 
@@ -16,7 +17,7 @@ import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/
     CommonModule,
     MatCardModule,
     MatIconModule,
-    MatCheckboxModule
+    MatRadioModule
   ],
   exports:[
     SortByComponent

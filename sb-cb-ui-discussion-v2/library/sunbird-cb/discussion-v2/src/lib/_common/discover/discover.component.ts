@@ -32,10 +32,10 @@ export class DiscoverComponent implements OnInit, OnChanges {
 
   constructor(private discussV2Svc:DiscussionV2Service) { 
     
-    this.topicDataList
-    this.topicWiseData();
-    setTimeout(() => {
-    }, 1000);
+    // this.topicDataList
+    // this.topicWiseData();
+    // setTimeout(() => {
+    // }, 1000);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -45,12 +45,12 @@ export class DiscoverComponent implements OnInit, OnChanges {
       this.loadTopicData();  
     }
   }
-  topicWiseData() {
-    this.discussV2Svc.topicWiseCommunities().subscribe((res: any) => {  
+  // topicWiseData() {
+  //   this.discussV2Svc.topicWiseCommunities().subscribe((res: any) => {  
       
-      console.log(res);
-    })
-  }
+  //     console.log(res);
+  //   })
+  // }
 
   onCardClick(cardData: any){
     
@@ -97,16 +97,24 @@ export class DiscoverComponent implements OnInit, OnChanges {
   }
 
   async loadCommunities(topicBycomunities: any, startIndex:number) {
+    let tempAllApiData: any = {}
     for (const key of Object.keys(topicBycomunities).slice(startIndex, this.loadTopicsCount)) {
+      
+      let tempApiData : any= {}
+      tempApiData[key] = {}
       const data = await this.getCommunitiesByTopic(key);
-      topicBycomunities[key].isLoading = false;
-      topicBycomunities[key].communities = data;
+      tempApiData[key]['isLoading'] = false;
+      tempApiData[key]['communities'] = data;
+      tempApiData[key]['count'] = topicBycomunities[key].count;
+      tempApiData[key]['topicName'] = topicBycomunities[key].topicName;
       if (data.length > 0) {
-        topicBycomunities[key].topicId = data[0].topicId;
+        tempApiData[key]['topicId']  = data[0].topicId;
       }
+      tempAllApiData = { ...tempApiData,...tempAllApiData}
     }
-    
-    this.toppicWiseCommunities = {...this.toppicWiseCommunities, ...topicBycomunities}
+    console.log(this.toppicWiseCommunities,'before')
+    this.toppicWiseCommunities = { ...this.toppicWiseCommunities,...tempAllApiData}
+    console.log(this.toppicWiseCommunities,'after')
   }
 
   async getCommunitiesByTopic(topic: any): Promise<any[]> {

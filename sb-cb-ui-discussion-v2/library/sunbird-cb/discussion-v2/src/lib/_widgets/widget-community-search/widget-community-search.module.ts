@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { SortByModule } from '../../_common/sort-by/sort-by.module';
 import { FilterModule } from '../../_common/filter/filter.module';
 import { SimilarCommunityCardModule } from '../../_common/similar-community-card/similar-community-card.module';
+import { PipesModule } from '../../_pipes/pipes.module';
 
 
 
@@ -21,7 +22,8 @@ import { SimilarCommunityCardModule } from '../../_common/similar-community-card
     FormsModule,
     SortByModule,
     FilterModule,
-    SimilarCommunityCardModule
+    SimilarCommunityCardModule,
+    PipesModule
   ],
   exports: [
     WidgetCommunitySearchComponent

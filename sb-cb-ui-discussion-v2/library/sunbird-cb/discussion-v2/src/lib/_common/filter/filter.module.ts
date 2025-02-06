@@ -5,6 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
+import { PipesModule } from '../../_pipes/pipes.module';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -13,11 +15,13 @@ import { TranslateModule } from '@ngx-translate/core';
     FilterComponent
   ],
   imports: [
+    FormsModule,
     CommonModule,
     MatCardModule,
     MatLegacyCheckboxModule,
     MatIconModule,
-    TranslateModule
+    TranslateModule,
+    PipesModule
   ],
   exports:[
     FilterComponent
