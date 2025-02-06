@@ -5,7 +5,7 @@
         </div> -->
         <div class="flex-1 post-container">
             <div class="mb-4" *ngIf="widgetData?.newPostSection?.show">
-                <d-v2-new-post [community]="community" [userJoinedCommunity]="userJoinedCommunity" [config]="widgetData?.newPostSection" (newComment)="newCommentEvent($event)"
+                <d-v2-new-post [community]="community" [userJoinedCommunity]="userJoinedCommunity" [config]="widgetData?.newPostSection" [postsListconfig]="widgetData?.postsList" (newComment)="newCommentEvent($event)"
                 [type]="widgetData?.newPostSection?.type"></d-v2-new-post>
             </div>
 

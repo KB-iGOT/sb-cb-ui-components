@@ -367,3 +367,15 @@ $banner-min-height: 243px;
   }
 
 }
+
+.image-info {
+  background: linear-gradient(90.39deg, #000000 0%, rgba(0, 0, 0, 0) 100%);
+  position: absolute;
+  top: 0;
+  border-top-left-radius: 12px;
+  color: white;
+  padding: 8px;
+  p{
+    margin: 0;
+  }
+}
