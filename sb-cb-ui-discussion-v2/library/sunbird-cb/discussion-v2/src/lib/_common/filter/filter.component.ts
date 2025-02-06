@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { communityConstants } from '../../_model/filter-constants.model'
 
 @Component({
   selector: 'd-v2-filter',
@@ -6,6 +7,16 @@ import { Component } from '@angular/core';
   styleUrls: ['./filter.component.scss']
 })
 export class FilterComponent {
+  @Input() filterObjectList: any = {}
+  @Input() filterKeys: any = {}
+  @Output() filterOptionSelected = new EventEmitter<any>();
+
+  selectedOptions: any = {}
+  constants: any = communityConstants
+
+
+
+
   sortData: any
   filterData: any
 
@@ -49,9 +60,33 @@ export class FilterComponent {
         placeholder:"Search Competency Sub Theme"
       }
     ]
+
+    this.selectedOptions = {
+      [this.constants.orgId] : [],
+      [this.constants.topicName] : [],
+      [this.constants.competencyArea] : [],
+      [this.constants.competencyTheme] : [],
+      [this.constants.competencySubTheme] : []
+    }
   }
   
-  handleGetFilterType(event: any, type: any, filterType: any) {
-    console.log(event,type,filterType)
+  handleGetFilterType(event: any, selectedOption: any, filterType: any) {
+    selectedOption['checked']= event.checked
+    if(event.checked){
+      selectedOption['checked']= event.checked
+    } else {
+
+    }
+
+    if(this.selectedOptions[filterType] && this.selectedOptions[filterType].includes(selectedOption.value)){
+      const index = this.selectedOptions[filterType].findIndex((x: any) => x === selectedOption.value)
+      this.selectedOptions[filterType].splice(index, 1)
+    } else {
+      this.selectedOptions[filterType].push(selectedOption.value)
+    }
+    
+    console.log(event,selectedOption,filterType)
+    console.log(this.selectedOptions)
+    this.filterOptionSelected.emit(this.selectedOptions)
   }
 }

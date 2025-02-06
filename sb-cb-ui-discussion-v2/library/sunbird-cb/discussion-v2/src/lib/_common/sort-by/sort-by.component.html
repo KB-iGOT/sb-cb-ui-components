@@ -4,13 +4,13 @@
     </mat-card-header>
     <mat-card-content>
         <div class="body-title mb-2">sort</div>
-        <div class="flex flex-row category-item" *ngFor="let sort of sortData">
-            <mat-checkbox #checkboxes disableRipple class="example-margin" [checked]="sort?.checked"
-                (change)="handleGetFilterType($event, sort, 'sort')">
-                <span class="checkbox-label">
-                    {{ sort?.value }}
-                </span>
-            </mat-checkbox>
+        <div class="flex flex-row category-item" >
+            <mat-radio-group aria-label="Select an option">
+                <ng-container *ngFor="let sort of sortData">
+                    <mat-radio-button class="category-item" (change)="handleGetFilterType($event,sort,'timeDuration')"  [value]="sort">{{sort.value}}</mat-radio-button>
+                    <br>
+                </ng-container>
+            </mat-radio-group>
         </div>
     </mat-card-content>
   </mat-card>
