@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommunityCardModule } from '../community-card/community-card.module';
 import { MatButtonModule } from '@angular/material/button';
 import { TopicCardModule } from '../topic-card/topic-card.module';
+import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
 
 
 
@@ -17,7 +18,8 @@ import { TopicCardModule } from '../topic-card/topic-card.module';
     MatIconModule,
     CommunityCardModule,
     MatButtonModule,
-    TopicCardModule
+    TopicCardModule,
+    ImageSlidersModule
   ], exports: [
     DiscoverComponent
   ]

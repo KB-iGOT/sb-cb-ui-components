@@ -12,6 +12,7 @@ import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue
 })
 export class NewPostComponent {
   @Input() config!: NsDiscussionV2.INewPostConfig
+  @Input() postsListconfig!: NsDiscussionV2.IPostCardConfig
   @Input() hierarchyPath = []
   @Input() taggedUsers = []
   @Input() type = 'question'
@@ -71,7 +72,7 @@ export class NewPostComponent {
         backdropClass: 'post-dialog-backdrop',
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
         community: this.community,
-        config: this.config,
+        config: {postsList: this.postsListconfig},
         currentUser: {...this.loggedInUserData, ...this.loogedInUserProfile}
       } 
     });
