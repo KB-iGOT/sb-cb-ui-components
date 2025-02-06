@@ -7,6 +7,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
+interface UploadFile {
+  file?: File;
+  uploaded?: boolean;
+  name: string;
+}
+
 @Component({
   selector: 'd-v2-new-post-dialogue',
   templateUrl: './new-post-dialogue.component.html',
@@ -15,9 +21,10 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 export class NewPostDialogueComponent implements OnInit, OnDestroy {
   widgetData!: NsDiscussionV2.IPostDetailsWidget | null
   uploadForm: FormGroup;
-  selectedFiles: File[] = [];
+  selectedFiles: UploadFile[] = [];
   selectedTags: string[] = [];
   showFileUpload = false;
+  showMediaUpload = false
   mediaUrls: string[] = [];
   previewUrls: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
@@ -245,10 +252,29 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     });
     this.environment = environment
 
+    if(this.data && this.data.editMode && this.data.post) {
+      this.uploadForm.patchValue({
+        title: this.data.post.title,
+        description: this.data.post.description,
+        files: this.data.post.mediaUrls
+      })
+      this.selectedFiles = this.data.post.mediaUrls.map((url: string) => ({
+        name: url.split('/').slice(-1)[0],
+        uploaded: true
+      }))
+      if (this.selectedFiles.length) {
+        this.showMediaUpload = true
+        this.previewUrls = [...this.data.post.mediaUrls]
+      } 
+      this.updatePostPreview(this.uploadForm.value)
+    }
+
     // Subscribe to form value changes
     this.uploadForm.valueChanges.subscribe(formValue => {
       this.updatePostPreview(formValue);
     });
+
+
   }
 
   ngOnInit(): void {
@@ -258,6 +284,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       photoUrl: this.data.community?.currentUser?.photoUrl || '',
       // Add other user properties you need
     };
+
   }
 
   private updatePostPreview(formValue: any): void {
@@ -277,7 +304,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   addMedia(): void {
-    this.showFileUpload = true;
+    this.showMediaUpload = true;
   }
 
   addFile(): void {
@@ -287,14 +314,17 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   onFileSelected(event: any) {
     const files = event.target.files;
     if (files) {
-      this.selectedFiles.push(...Array.from(files as FileList));
+      this.selectedFiles.push(...Array.from(files as FileList).map(file => ({
+        file: file,  // Store the original File object
+        name: file.name,
+        uploaded: false
+      })));
       
-      // Type assertion to File which extends Blob
       Array.from(files as FileList).forEach(file => {
         const previewUrl = URL.createObjectURL(file as Blob);
         this.previewUrls.push(previewUrl);
       });
-
+  
       this.uploadForm.patchValue({
         files: this.selectedFiles
       });
@@ -351,7 +381,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         // tags: this.selectedTags
       };
       console.log('Form submitted:', formData);
-      this.handlePostCreation();
+      if(this.data.editMode){
+        this.handleEditFlow();
+      } else {
+        this.handlePostCreation();
+      }
     }
   }
 
@@ -413,16 +447,15 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
     console.log('selectedFiles:', this.selectedFiles)
 
-    const uploadPromises = this.selectedFiles.map(file => {
+    const uploadPromises = this.selectedFiles.map(fileObj => {
       return new Promise<string>((resolve, reject) => {
         // Create FormData object to properly send the file
         const formData = new FormData();
         // Append file with a specific field name that API expects
-        formData.append('file', file);
-        // formData.append('discussionId', discussionId);
-        // formData.append('communityId', this.data.community.communityId || '');
-        const communityId = this.data.community.communityId || ''
-        this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
+        if (fileObj.file) {
+          formData.append('file', fileObj.file);
+          const communityId = this.data.community.communityId || ''
+          this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
           next: (res: any) => {
             if (res && res.result && res.result.url) {
               const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
@@ -435,7 +468,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
             }
           },
           error: (error) => reject(error)
-        });
+          });
+        } else {
+          // If it's an already uploaded file, resolve with the name
+          resolve(fileObj.name);
+        }
       });
     });
 
@@ -519,6 +556,110 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       // mediaUrls: this.mediaUrls || []
     }
     return req;
+  }
+
+  handleEditFlow(){
+    switch (this.data.type) {
+      case NsDiscussionV2.EPostType.QUESTION:
+        this.editPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST:
+        this.editAnswerPost();
+        break;
+    }
+  }
+
+  private async handleEditWithFiles(): Promise<string[]> {
+    const newFiles = this.selectedFiles.filter(file => !file.uploaded);
+    
+    if (newFiles.length > 0) {
+      try {
+        const uploadPromises = newFiles.map(fileObj => {
+          const formData = new FormData();
+          if (fileObj.file) {
+            formData.append('file', fileObj.file);
+            const communityId = this.data.community.communityId || '';
+            return new Promise<string>((resolve, reject) => {
+              this.discussV2Svc.uploadFile(formData, communityId, this.data.post.discussionId).subscribe({
+                next: (res: any) => {
+                  if (res?.result?.url) {
+                    const mainUrl = res.result.url.split(`discussionhub/`).pop() || '';
+                    const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`;
+                    resolve(finalURL);
+                  } else {
+                    reject('No URL in response');
+                  }
+                },
+                error: (error) => reject(error)
+              });
+            });
+          } else {
+            return Promise.resolve(fileObj.name);
+          }
+        });
+
+        const newUrls = await Promise.all(uploadPromises);
+        // Keep the full URLs for existing files instead of just names
+        const existingUrls = this.selectedFiles
+          .filter(file => file.uploaded)
+          .map(file => this.data.post.mediaUrls.find((url: string) => url.includes(file.name)) || file.name);
+        return [...existingUrls, ...newUrls];
+      } catch (error) {
+        console.error('Error uploading new files:', error);
+        return [];
+      }
+    }
+    
+    // If no new files, return the existing full URLs
+    return this.selectedFiles
+      .filter(file => file.uploaded)
+      .map(file => this.data.post.mediaUrls.find((url: string) => url.includes(file.name)) || file.name);
+  }
+
+  async editPost() {
+    const mediaUrls = await this.handleEditWithFiles();
+    const updateReq = {
+      discussionId: this.data.post.discussionId,
+      communityId: this.data.post.communityId,
+      title: this.uploadForm.value.title,
+      description: this.uploadForm.value.description,
+      mediaUrls,
+      tags: this.selectedTags
+    };
+
+    this.discussV2Svc.updatePost(updateReq).subscribe({
+      next: (res) => {
+        if (res?.result) {
+          this.dialogRef.close({ result: res.result, type: this.data.type });
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post:', err);
+      }
+    });
+  }
+
+  async editAnswerPost() {
+    const mediaUrls = await this.handleEditWithFiles();
+    const updateReq = {
+      discussionId: this.data.post.discussionId,
+      communityId: this.data.post.communityId,
+      title: this.uploadForm.value.title,
+      description: this.uploadForm.value.description,
+      mediaUrls,
+      tags: this.selectedTags
+    };
+
+    this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
+      next: (res) => {
+        if (res?.result) {
+          this.dialogRef.close({ result: res.result, type: this.data.type });
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post:', err);
+      }
+    });
   }
 
   onReady(editor: any) {
