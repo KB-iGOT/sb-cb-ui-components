@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'd-v2-sort-by',
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 })
 export class SortByComponent {
   sortData: any
+  @Output() sortOptionSelection = new EventEmitter<any>();
   constructor() {
     this.sortData = [
       {
@@ -42,5 +43,7 @@ export class SortByComponent {
 
   handleGetFilterType(event: any, type: any, filterType: any) {
     console.log(event,type,filterType)
+    type.checked = !type.checked 
+    this.sortOptionSelection.emit(type)
   }
 }

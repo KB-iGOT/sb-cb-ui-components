@@ -9,7 +9,7 @@
     <div class="flex-1">
        <div class="md:col-span-2">
           <div class="mb-6">
-             <div class="relative flex community-search">
+             <div class="relative flex community-search" *ngIf="searchTextValue">
                 <input
                    type="text"
                    [value]="searchTextValue"
@@ -21,6 +21,18 @@
                    search
                 </mat-icon>
              </div>
+             <div class="relative flex community-search" *ngIf="topicName">
+               <input
+               #searchInput id="searchInput"
+                  type="text"
+                  [(ngModel)]="localSearchTextValue"
+                  placeholder="Search Communities local"
+                  class="w-full px-4 py-2 pl-10  rounded-full "
+                  />
+               <mat-icon class="absolute left-3 top-1.5 h-5 w-5 text-gray-400">
+                  search
+               </mat-icon>
+            </div>
           </div>
        </div>
        <div class="info-text">
@@ -29,14 +41,14 @@
          
        </div>
        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let community of communityDataList">
+        <div *ngFor="let community of communityDataList | filterSearch: localSearchTextValue">
          <d-v2-community-card [isLoading]="isLoading" [orgDetails]="orgDetails" [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
         </div>
      </div>
     </div>
     <!-- Right Sidebar -->
     <div class="lg:w-64">
-        <d-v2-sort-by></d-v2-sort-by>
-        <d-v2-filter></d-v2-filter>
+        <d-v2-sort-by (sortOptionSelection)="sortOptionSelection($event)"></d-v2-sort-by>
+        <d-v2-filter [filterKeys]="filterKeys" (filterOptionSelected)="selectedFilters($event)" [filterObjectList]="filterObjectList"></d-v2-filter>
     </div>
  </div>
