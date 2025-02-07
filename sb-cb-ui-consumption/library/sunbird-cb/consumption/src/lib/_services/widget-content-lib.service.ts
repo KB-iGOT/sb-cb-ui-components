@@ -8,8 +8,8 @@ import { NsContent } from '../_models/widget-content.model';
 import { NSSearch } from '../_models/widget-search.model';
 // tslint:disable
 import * as _ from 'lodash'
-import {  viewerRouteGenerator } from './viewer-route-util'
-import {WidgetUserServiceLib} from './widget-user-lib.service'
+import { viewerRouteGenerator } from './viewer-route-util'
+import { WidgetUserServiceLib } from './widget-user-lib.service'
 import moment from 'moment';
 // tslint:enable
 
@@ -72,8 +72,8 @@ export class WidgetContentLibService {
   }
 
   tocConfigData: any = new BehaviorSubject<any>({});
-  tocConfigData$  = this.tocConfigData.asObservable();
-  oneStepResumeEnable:boolean = false;
+  tocConfigData$ = this.tocConfigData.asObservable();
+  oneStepResumeEnable: boolean = false;
 
   private telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
@@ -205,7 +205,7 @@ export class WidgetContentLibService {
 
   autoAssignCuratedBatchApi(request: any, programType: any): Observable<NsContent.IBatchListResponse> {
     const url = programType === NsContent.ECourseCategory.MODERATED_PROGRAM ?
-    API_END_POINTS.AUTO_ASSIGN_OPEN_PROGRAM : API_END_POINTS.AUTO_ASSIGN_CURATED_BATCH;
+      API_END_POINTS.AUTO_ASSIGN_OPEN_PROGRAM : API_END_POINTS.AUTO_ASSIGN_CURATED_BATCH;
     return this.http.post<NsContent.IBatchListResponse>(`${url}`, request)
       .pipe(
         retry(1),
@@ -265,8 +265,8 @@ export class WidgetContentLibService {
       `${API_END_POINTS.CONTENT_HISTORYV2}/${req.request.courseId}`, req
     );
     data.subscribe((subscribeData: any) => {
-          this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId });
-        });
+      this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId });
+    });
     return data;
   }
 
@@ -464,8 +464,8 @@ export class WidgetContentLibService {
   async getEnrolledData(doId: string) {
     let enrolledDoId: any = this.userSvc.enrollmentDataIds.includes(doId)
     let userId = this.configSvc.userProfile.userId
-    if(enrolledDoId) {
-      const responseData =  await this.userSvc.fetchEnrollmentDataByContentId(userId,doId).toPromise().then(async (res: any) => {
+    if (enrolledDoId) {
+      const responseData = await this.userSvc.fetchEnrollmentDataByContentId(userId, doId).toPromise().then(async (res: any) => {
         if (res && res.courses && res.courses.length) {
           return res.courses
         } else {
@@ -480,37 +480,37 @@ export class WidgetContentLibService {
   }
 
   async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean) {
-    if(content && content.content && content.content.eventId) {
+    if (content && content.content && content.content.category === 'Event') {
       const urlData: any = {
-        url: `app/event-hub/home/${content.content.eventId}`,
-        queryParams: {},
+        url: `app/event-hub/home/${content.content.identifier}`,
+        queryParams: { batchId: content.batchId },
       };
       return urlData
     }
-    if(content.externalId) {
-        const urlData: any = {
-          url: `app/toc/ext/${content.contentId}`,
-          queryParams: { batchId: content.batchId },
-        };
-        return urlData
+    if (content.externalId) {
+      const urlData: any = {
+        url: `app/toc/ext/${content.contentId}`,
+        queryParams: { batchId: content.batchId },
+      };
+      return urlData
     } else {
-      if(checkForResume) {
+      if (checkForResume) {
         // const enrolledCourse: any = await this.getEnrolledData(content.identifier);
         const enrolledCourse: any = enrollmentList;
         if (enrolledCourse && enrolledCourse.length) {
           const enrolledCourseData = enrolledCourse[0]
-          if (enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.BLENDED_PROGRAM ||
-            enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
-            enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.MODERATED_PROGRAM ||
-            enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
-            enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.PROGRAM) {
-              if (!this.isBatchInProgress(enrolledCourseData.batch)) {
-                return this.gotoTocPage(content);
-              }
-              const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
-              return data;
-          }  {
-            const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
+          if (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
+            enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
+            enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
+            enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
+            enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM) {
+            if (!this.isBatchInProgress(enrolledCourseData.batch)) {
+              return this.gotoTocPage(content);
+            }
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
+            return data;
+          } {
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
             return data;
           }
         }
@@ -522,11 +522,11 @@ export class WidgetContentLibService {
   }
   async checkForDataToFormUrl(content: any, enrollData: any) {
     let urlData: any;
-    if (enrollData.completionPercentage  === 100) {
+    if (enrollData.completionPercentage === 100) {
       return this.gotoTocPage(enrollData);
     }
     if (enrollData.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
-      const modifyEnrollData  = {
+      const modifyEnrollData = {
         ...enrollData,
         identifier: enrollData.collectionId,
         primaryCategory: enrollData.content.primaryCategory,
@@ -534,33 +534,33 @@ export class WidgetContentLibService {
       };
       if (modifyEnrollData.lastReadContentId) {
         return this.getResourseDataWithData(modifyEnrollData,
-                                            enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType);
+          enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType);
       }
       if (modifyEnrollData.firstChildId) {
         return this.getResourseDataWithData(modifyEnrollData,
-                                            enrollData.firstChildId,
-                                            enrollData.lrcProgressDetails.mimeType);
+          enrollData.firstChildId,
+          enrollData.lrcProgressDetails.mimeType);
       }
     }
     if (enrollData.firstChildId || enrollData.lastReadContentId) {
-        const doId = enrollData.firstChildId || enrollData.lastReadContentId;
-        const responseData = await this.fetchProgramContent(doId).toPromise().then(async (res: any) => {
-          if (res && res.result && res.result.content) {
-            const contentData: any = res.result.content;
-            const modifyEnrollData  = {
-              ...enrollData,
-              identifier: enrollData.collectionId,
-              primaryCategory: enrollData.content.primaryCategory,
-              name: enrollData.content.name,
-            };
-            urlData =  this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType);
-            if (urlData) {
-              return urlData;
-            }
+      const doId = enrollData.firstChildId || enrollData.lastReadContentId;
+      const responseData = await this.fetchProgramContent(doId).toPromise().then(async (res: any) => {
+        if (res && res.result && res.result.content) {
+          const contentData: any = res.result.content;
+          const modifyEnrollData = {
+            ...enrollData,
+            identifier: enrollData.collectionId,
+            primaryCategory: enrollData.content.primaryCategory,
+            name: enrollData.content.name,
+          };
+          urlData = this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType);
+          if (urlData) {
+            return urlData;
           }
-        });
-        return responseData ? responseData : this.gotoTocPage(content);
-      }
+        }
+      });
+      return responseData ? responseData : this.gotoTocPage(content);
+    }
     return this.gotoTocPage(content);
 
   }
@@ -599,10 +599,10 @@ export class WidgetContentLibService {
       const startDate = moment(batchData.startDate).format('YYYY-MM-DD');
       const endDate = batchData.endDate ? moment(batchData.endDate).format('YYYY-MM-DD') : now;
       return (
-            // batch.status &&
-            moment(startDate).isSameOrBefore(now)
-            && moment(endDate).isSameOrAfter(now)
-          );
+        // batch.status &&
+        moment(startDate).isSameOrBefore(now)
+        && moment(endDate).isSameOrAfter(now)
+      );
     } return true;
   }
   postApiMethod(apiUrl: any, req: any): Observable<NsContent.IContent> {
@@ -615,9 +615,9 @@ export class WidgetContentLibService {
 
 
   getEnrolledDataFromList(enrollmentList: any, collectionId: string) {
-    if(enrollmentList && enrollmentList.length) {
+    if (enrollmentList && enrollmentList.length) {
       let enrolledData = enrollmentList.filter((ele: any) => ele.collectionId === collectionId)
-      return enrolledData.length ? enrolledData[0]: {}
+      return enrolledData.length ? enrolledData[0] : {}
     }
   }
 }
