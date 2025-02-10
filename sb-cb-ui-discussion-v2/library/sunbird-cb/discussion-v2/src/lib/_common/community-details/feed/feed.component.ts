@@ -111,6 +111,38 @@ export class FeedComponent implements OnInit, OnChanges{
       }
     })
   }
+
+  bookmarkEvent(event: any) {
+    if(event.bookmark){
+      this.bookmarkPost(event.post)
+    } else {
+      this.unbookmarkPost(event.post)
+    }
+  }
+
+  bookmarkPost(post: any) {
+    const communityId = post.communityId
+    const discussionId = post.discussionId
+    this.discussV2Svc.bookmarkPost(communityId, discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open('Post bookmarked successffuly!')
+        const post = this.posts.find((comm: any) => comm.discussionId === discussionId)
+        post.bookmark = true
+      }
+    })
+  }
+  unbookmarkPost(post: any) {
+    const communityId = post.communityId
+    const discussionId = post.discussionId
+    this.discussV2Svc.UnBookmarkPost(communityId, discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open('Post un-bookmarked successffuly!')
+        const post = this.posts.find((comm: any) => comm.discussionId === discussionId)
+        post.bookmark = false
+      }
+    })
+  }
+
   newCommentEvent(event: any){
     console.log('Widget catch event :', event)
     if(event && event.type === 'question'){

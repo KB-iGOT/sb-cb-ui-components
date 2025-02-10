@@ -14,7 +14,7 @@
                     <ng-container *ngFor="let post of posts" >
                         <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="userJoinedCommunity"
                         [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts" [community]="community"
-                        (likeUnlikeData)="likeUnlikeEvent($event)" [type]="widgetData?.newPostSection?.type"></d-v2-post-card>
+                        (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)" [type]="widgetData?.newPostSection?.type"></d-v2-post-card>
                     </ng-container>
                     <ng-container *ngIf="searchResults?.totalCount > posts.length">
                         <div class="load-more-posts my-4">

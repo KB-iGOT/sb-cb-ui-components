@@ -26,6 +26,7 @@ export class PostCardComponent {
   @Input() userJoinedCommunity: boolean = false
   @Input() community!: string
   @Output() likeUnlikeData = new EventEmitter<any>()
+  @Output() bookmarkEvent = new EventEmitter<any>()
 
   data = {
     replyToggle: false,
@@ -131,6 +132,13 @@ export class PostCardComponent {
 
   likeUnlikeComment(post: any) {
     this.likeUnlikeData.emit(post)
+  }
+
+  bookmark(bookmark:boolean, post: any) {
+    this.bookmarkEvent.emit({
+      bookmark,
+      post
+    })
   }
 
   likeUnlikeEvent(event: any) {

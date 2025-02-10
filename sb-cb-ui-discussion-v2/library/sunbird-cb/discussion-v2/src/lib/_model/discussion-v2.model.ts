@@ -157,6 +157,7 @@ export namespace NsDiscussionV2 {
     export interface IPostCardActions {
         like?: IPostCardActionsObj,
         comments?: IPostCardActionsObj,
+        bookmark?: IPostCardActionsObj
         avatarPhoto?: {
             show: boolean,
             size: string,

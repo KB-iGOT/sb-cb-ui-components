@@ -42,7 +42,7 @@
       <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
 
       <!-- Title -->
-      <div class="mb-4">
+      <!-- <div class="mb-4">
         <label class="block text-gray-700 text-sm font-medium mb-2">
           Title <span class="text-red-500">*</span>
         </label>
@@ -50,13 +50,13 @@
           <input matInput formControlName="title" placeholder="Enter your question title" maxlength="100">
           <mat-hint align="end">{{uploadForm.get('title')?.value?.length || 0}}/100</mat-hint>
         </mat-form-field>
-      </div>
+      </div> -->
 
       <!-- Question Description -->
       <div class="mb-4 flex flex-col w-full">
-        <label class="block text-gray-700 text-sm font-medium mb-2">
+        <!-- <label class="block text-gray-700 text-sm font-medium mb-2">
           Description <span class="text-red-500">*</span>
-        </label>
+        </label> -->
         <ckeditor [editor]="Editor" formControlName="description" [config]="editorConfig" (ready)="onReady($event)">
         </ckeditor>
         <!-- <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p> -->
@@ -65,10 +65,10 @@
 
       <!-- Action Buttons -->
       <div class="flex gap-2 mb-4">
-        <button mat-stroked-button type="button" (click)="createPoll()">
+        <!-- <button mat-stroked-button type="button" (click)="createPoll()">
           <mat-icon>poll</mat-icon>
           Create a poll
-        </button>
+        </button> -->
         <button mat-stroked-button type="button" (click)="addMedia()">
           <mat-icon>image</mat-icon>
           Add media
@@ -77,38 +77,81 @@
           <mat-icon>attach_file</mat-icon>
           Add file
         </button>
+        <button mat-stroked-button type="button" (click)="createLink()">
+          <mat-icon>link</mat-icon>
+          Add link
+        </button>
       </div>
 
-      <!-- File Upload Section (Initially Hidden) -->
-      <div class="mb-4" *ngIf="showMediaUpload">
-        <div class="flex items-center justify-center w-full">
-          <label for="fileUpload"
-            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-              <mat-icon class="text-gray-500 mb-2">cloud_upload</mat-icon>
-              <p class="mb-2 text-sm text-gray-500">
-                <span class="font-semibold">Click to upload</span> or drag and drop
-              </p>
-              <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX, JPG, PNG</p>
-            </div>
-            <input id="fileUpload" type="file" class="hidden" multiple (change)="onFileSelected($event)"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-          </label>
+      <ng-container *ngIf="showMediaUpload">
+        <!-- File Upload Section (Initially Hidden) -->
+        <div class="mb-4" *ngIf="showMediaUpload">
+          <div class="flex items-center justify-center w-full">
+            <label for="fileUpload"
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <mat-icon class="text-gray-500 mb-2">cloud_upload</mat-icon>
+                <p class="mb-2 text-sm text-gray-500">
+                  <span class="font-semibold">Click to upload</span> or drag and drop
+                </p>
+                <p class="text-xs text-gray-500">Supported files: JPG, PNG</p>
+              </div>
+              <input id="fileUpload" type="file" class="hidden" multiple (change)="onFileSelected($event)"
+                accept=".jpg,.jpeg,.png">
+            </label>
+          </div>
         </div>
-      </div>
 
-      <!-- Display Uploaded Files -->
-      <div class="mb-4" *ngIf="selectedFiles.length > 0">
-        <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
-        <ul>
-          <li *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-2">
-            <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
-            <button mat-icon-button (click)="removeFile(i)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </li>
-        </ul>
-      </div>
+        <!-- Display Uploaded Files -->
+        <div class="mb-4" *ngIf="selectedFiles.length > 0">
+          <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
+          <ul>
+            <li *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-2">
+              <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
+              <button mat-icon-button (click)="removeFile(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="showDocumentUpload">
+        <!-- File Upload Section (Initially Hidden) -->
+        <div class="mb-4" *ngIf="showDocumentUpload">
+          <div class="flex items-center justify-center w-full">
+            <label for="fileUpload"
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <mat-icon class="text-gray-500 mb-2">cloud_upload</mat-icon>
+                <p class="mb-2 text-sm text-gray-500">
+                  <span class="font-semibold">Click to upload</span> or drag and drop
+                </p>
+                <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX</p>
+              </div>
+              <input id="fileUpload" type="file" class="hidden" multiple (change)="onDocSelected($event)"
+                accept=".pdf,.doc,.docx">
+            </label>
+          </div>
+        </div>
+
+        <!-- Display Uploaded Files -->
+        <div class="mb-4" *ngIf="selectedFiles.length > 0">
+          <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
+          <ul>
+            <li *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-2">
+              <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
+              <button mat-icon-button (click)="removeDoc(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </ng-container>
+      
+      <ng-container *ngIf="showLinkCreate">
+        Link Create
+      </ng-container>
 
       <!-- Tags -->
       <!-- <div class="mb-4">
