@@ -25,11 +25,13 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   selectedTags: string[] = [];
   showFileUpload = false;
   showMediaUpload = false
+  showDocumentUpload = false
+  showLinkCreate = false
   mediaUrls: string[] = [];
   previewUrls: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   postPreview: any = {
-    title: '',
+    // title: '',
     description: '',
     createdOn: new Date(),
     files: [],
@@ -40,7 +42,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   public Editor = ClassicEditor;
   public editorConfig = {
     plugins: [...ClassicEditor.builtinPlugins, ],
-    placeholder: 'Type the description here...',
+    placeholder: 'What you want to say?',
     toolbar: {
       items: [
         'undo', 'redo',
@@ -86,7 +88,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.widgetData = this.data.config
     this.uploadForm = this.fb.group({
       community: [''],
-      title: ['', [Validators.required, Validators.maxLength(100)]],
+      // title: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
       tags: [[]],
       files: [[]]
@@ -95,7 +97,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
     if(this.data && this.data.editMode && this.data.post) {
       this.uploadForm.patchValue({
-        title: this.data.post.title,
+        // title: this.data.post.title,
         description: this.data.post.description,
         files: this.data.post.mediaUrls
       })
@@ -131,7 +133,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   private updatePostPreview(formValue: any): void {
     this.postPreview = {
       ...this.postPreview,
-      title: formValue.title,
+      // title: formValue.title,
       description: formValue.description,
       tags: this.selectedTags,
       files: this.selectedFiles,
@@ -146,10 +148,20 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
   addMedia(): void {
     this.showMediaUpload = true;
+    this.showDocumentUpload = false;
+    this.showLinkCreate = false;
   }
 
   addFile(): void {
-    this.showFileUpload = true;
+    this.showDocumentUpload = true;
+    this.showMediaUpload = false;
+    this.showLinkCreate = false;
+  }
+
+  createLink(): void {
+    this.showLinkCreate = true;
+    this.showDocumentUpload = false;
+    this.showMediaUpload = false;
   }
 
   onFileSelected(event: any) {
@@ -174,7 +186,51 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     }
   }
 
+  onDocSelected(event: any) {
+    const files = event.target.files;
+    if (files) {
+      this.selectedFiles.push(...Array.from(files as FileList).map(file => ({
+        file: file,  // Store the original File object
+        name: file.name,
+        uploaded: false
+      })));
+      
+      Array.from(files as FileList).forEach(file => {
+        const previewUrl = URL.createObjectURL(file as Blob);
+        this.previewUrls.push(previewUrl);
+      });
+  
+      this.uploadForm.patchValue({
+        files: this.selectedFiles
+      });
+      
+      this.updatePostPreview(this.uploadForm.value);
+    }
+  }
+
   removeFile(index: number) {
+    // Revoke the URL to prevent memory leaks
+    URL.revokeObjectURL(this.previewUrls[index]);
+    
+    // Remove from both arrays
+    this.selectedFiles.splice(index, 1);
+    this.previewUrls.splice(index, 1);
+
+    this.uploadForm.patchValue({
+      files: this.selectedFiles
+    });
+    
+    this.updatePostPreview(this.uploadForm.value);
+
+    if (this.selectedFiles.length === 0) {
+      const fileInput = document.getElementById('fileUpload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    }
+  }
+
+  removeDoc(index: number) {
     // Revoke the URL to prevent memory leaks
     URL.revokeObjectURL(this.previewUrls[index]);
     
@@ -390,7 +446,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       type,
       ...(this.data.parentDiscussionId ? { parentDiscussionId: this.data.parentDiscussionId } : null),
       communityId: this.data.community.communityId || '',
-      title: formData.value.title,
+      // title: formData.value.title,
       description: formData.value.description,
       targetTopic: 'testing',
       tags: this.selectedTags,
@@ -462,7 +518,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     const updateReq = {
       discussionId: this.data.post.discussionId,
       communityId: this.data.post.communityId,
-      title: this.uploadForm.value.title,
+      // title: this.uploadForm.value.title,
       description: this.uploadForm.value.description,
       mediaUrls,
       tags: this.selectedTags
@@ -485,7 +541,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     const updateReq = {
       discussionId: this.data.post.discussionId,
       communityId: this.data.post.communityId,
-      title: this.uploadForm.value.title,
+      // title: this.uploadForm.value.title,
       description: this.uploadForm.value.description,
       mediaUrls,
       tags: this.selectedTags

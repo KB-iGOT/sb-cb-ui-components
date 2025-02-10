@@ -14,6 +14,8 @@ const API_END_POINTS = {
   DOWN_VOTE: (id: string) => `/apis/proxies/v8/feedDiscussion/downVote/${id}`,
   DELETE_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/delete/${id}`,
   REPORT_POST: `/apis/proxies/v8/feedDiscussion/report`,
+  BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/bookmark/${communityId}/${discussionId}`,
+  UN_BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/unbookmark/${communityId}/${discussionId}`,
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
   UPLOAD_FILE: (communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/uploadFile/${communityId}/${discussionId}`,
   COMMUNITY_JOIN: `/apis/proxies/v8/community/v1/join`,
@@ -84,6 +86,14 @@ export class DiscussionV2Service {
 
   reportPost(requestData: any) {
     return this.http.post<any>(`${API_END_POINTS.REPORT_POST}`, requestData)
+  }
+
+  bookmarkPost(communityId: string, discussionId:string) {
+    return this.http.get<any>(`${API_END_POINTS.BOOKMARK_POST(communityId, discussionId)}`)
+  }
+
+  UnBookmarkPost(communityId: string, discussionId:string) {
+    return this.http.post<any>(`${API_END_POINTS.UN_BOOKMARK_POST(communityId, discussionId)}`, {})
   }
 
   uploadFile(req: any, communityId: string, discussionId:string): Observable<any> {

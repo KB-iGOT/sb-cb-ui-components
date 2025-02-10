@@ -31,15 +31,13 @@
         </div>
     </div>
     <div class="comment mb-4 mt-2 ">
-        <div class="flex mb-2">
+        <!-- <div class="flex mb-2">
             <div class="ws-mat-black-text mat-body-1"
                 [innerHTML]="post?.title">
             </div>
-        </div>
-        <div class="media" *ngIf="post?.mediaUrls && post?.mediaUrls.length">
-            <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaUrls" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
-        </div>
-        <div class="comment-txt mat-body-1 ws-mat-black60-text description {{post?.description.length > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+        </div> -->
+        
+        <div class="comment-txt mat-body-1 ws-mat-black-text description {{post?.description.length > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
              [innerHTML]="post?.description">
         </div>
         <div class="more-or-less text-right" *ngIf="post?.description.length > viewMoreLength">
@@ -47,6 +45,9 @@
                 *ngIf="!post?.expanded">View more</div>
             <div class="cursor-pointer" (click)="viewMoreOrLess(post)"
                 *ngIf="post?.expanded">View less</div>
+        </div>
+        <div class="media" *ngIf="post?.mediaUrls && post?.mediaUrls.length">
+            <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaUrls" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
         </div>
     </div>
     <div class="flex mt-4 tags-section">
@@ -94,6 +95,20 @@
                     <span class="">
                         Reply
                     </span>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="cardConfig?.actions?.bookmark?.show && cardType !== 'reply'">
+                <div class=" flex bookmarkDiv cursor-pointer" *ngIf="!post.bookmark" (click)="bookmark(true, post)">
+                    <mat-icon role="button" aria-hidden="false" aria-label="bookmark" 
+                    class="mat-icon notranslate icon material-icons mat-ligature-font mat-icon-no-color">
+                    bookmark_outline
+                    </mat-icon>
+                </div>
+                <div class=" flex bookmarkDiv cursor-pointer" *ngIf="post.bookmark" (click)="bookmark(false, post)">
+                    <mat-icon role="button" aria-hidden="false" aria-label="bookmark" 
+                    class="mat-icon notranslate icon material-icons mat-ligature-font mat-icon-no-color bookmarked-icon">
+                    bookmark
+                    </mat-icon>
                 </div>
             </ng-container>
         </div>
