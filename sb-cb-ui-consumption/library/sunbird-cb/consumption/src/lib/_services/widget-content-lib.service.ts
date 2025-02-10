@@ -58,6 +58,7 @@ const API_END_POINTS = {
   USER_KARMA_POINTS: '/apis/proxies/v8/user/totalkarmapoints',
   AGGREGATION_SEARCH: '/apis/proxies/v8/content/aggregation/search',
   FEATURE_SEARCH: '/apis/proxies/v8/featured/content/search',
+  SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`
 };
 
 @Injectable({
@@ -82,6 +83,8 @@ export class WidgetContentLibService {
   currentBatchEnrollmentList!: NsContent.ICourse[];
   programChildCourseResumeData = new BehaviorSubject<any>({});
   programChildCourseResumeData$ = this.programChildCourseResumeData.asObservable();
+  releventNotRelevent = new Subject<{ isRelevent: boolean; widgetData: any }>();
+  releventNotRelevent$ = this.releventNotRelevent.asObservable()
 
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
@@ -619,5 +622,18 @@ export class WidgetContentLibService {
       let enrolledData = enrollmentList.filter((ele: any) => ele.collectionId === collectionId)
       return enrolledData.length ? enrolledData[0] : {}
     }
+  }
+
+  setReleventNotReleventData(data: {isRelevent: boolean, widgetData: any}) {
+    this.releventNotRelevent.next(data)
+  }
+
+  saveFeedbackSakshamAI(requestBody: any) {
+    const result: any = this.http.post(API_END_POINTS.SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK, requestBody).pipe(map(
+      async (data: any) => {
+        return data
+      })
+    )
+    return result
   }
 }

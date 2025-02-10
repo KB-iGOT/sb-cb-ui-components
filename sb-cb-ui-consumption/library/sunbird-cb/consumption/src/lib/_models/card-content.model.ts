@@ -11,6 +11,7 @@ export namespace NsCardContent {
     contentTags?: IContentTags;
     stateData: any;
     cardCustomeClass?: any;
+    sakshamAIGenerated?: string;
   }
 
   export interface IContentTags {

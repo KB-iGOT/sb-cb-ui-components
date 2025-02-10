@@ -9,12 +9,19 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { HttpLoaderFactory } from '../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module';
 import { HttpClient } from '@angular/common/http';
 import { PipeSafeSanitizerModule } from '@sunbird-cb/utils-v2';
+import { AddCompetencyPopupComponent } from './add-competency-popup/add-competency-popup.component';
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { SnackbarComponent } from './snackbar/snackbar.component';
 
 
 
 @NgModule({
     declarations: [
-        CertificateDialogComponent
+        CertificateDialogComponent, AddCompetencyPopupComponent, SnackbarComponent
     ],
     imports: [
         CommonModule,
@@ -30,9 +37,14 @@ import { PipeSafeSanitizerModule } from '@sunbird-cb/utils-v2';
                 deps: [HttpClient],
             },
         }),
+        MatFormFieldModule,
+        ReactiveFormsModule,
+        MatCheckboxModule,
+        MatInputModule,
+        MatButtonModule
     ],
     exports: [
-        CertificateDialogComponent
+        CertificateDialogComponent, AddCompetencyPopupComponent, SnackbarComponent
     ]
 })
 export class DialogComponentsModule { }

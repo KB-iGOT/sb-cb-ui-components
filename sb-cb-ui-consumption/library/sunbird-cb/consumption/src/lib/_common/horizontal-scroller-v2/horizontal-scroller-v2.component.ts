@@ -30,6 +30,7 @@ export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestr
   @Input() widgetsLength: any;
   @Input() defaultMaxWidgets: any;
   @Input() stripConfig: any;
+  @Input() extraMeta: any;
   @ViewChild('horizontalScrollElem', { static: true })
   horizontalScrollElem: ElementRef | null = null;
 
@@ -65,6 +66,7 @@ export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestr
     this.defaultMenuSubscribe = this.isLtMedium$.subscribe((isLtMedium: boolean) => {
       this.isMobile = isLtMedium
     })
+
   }
 
   ngOnChanges() {

@@ -1,4 +1,4 @@
-@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
+@use "@sunbird-cb/design-system/src/styles/ws-mixins" as *;
 
 .view-more {
   display: flex;
@@ -24,8 +24,7 @@
 }
 
 .view-more:hover {
-  background-color: #DCDFE5;
-
+  background-color: #dcdfe5;
 }
 
 .pad {
@@ -38,17 +37,14 @@
 ::ng-deep.strips-tabgroup .mat-tab-body {
   padding: 20px 0 20px 0 !important;
   box-sizing: border-box;
-  overflow-y: initial!important;
-
+  overflow-y: initial !important;
 
   // .mat-tab-body-active {
   //   overflow-x: initial !important;
   //   overflow-y: initial !important;
   // }
-
 }
 ::ng-deep.strips-tabgroup .mat-tab-body.mat-tab-body-active {
-
   // @include breakpoint-s {
 
   // }
@@ -56,13 +52,11 @@
   // @media(min-width: 767px) and (max-width:1050px) {
   //   overflow-x: initial !important;
   // }
-
 }
 
 ::ng-deep.strips-tabgroup .mat-tab-body-wrapper {
-    overflow: inherit!important;
+  overflow: inherit !important;
 }
-
 
 ::ng-deep.strips-tabgroup .mat-tab-label {
   border-bottom: 0px solid rgba(0, 0, 0, 0.1);
@@ -88,23 +82,88 @@
 }
 .info-content {
   opacity: 1;
-  color: rgba(0,0,0,0.87);
+  color: rgba(0, 0, 0, 0.87);
   font: 700 14px/20px Lato-Bold;
   text-align: center;
 }
 
-
-
 .active {
   .pill-name {
-      color: white !important;
+    color: white !important;
   }
-  background: #1B4CA1 !important;
+  background: #1b4ca1 !important;
 }
 
-::ng-deep .content-pill .mat-chip-selected{
-  background-color: #1B4CA1 !important;
+::ng-deep .content-pill .mat-chip-selected {
+  background-color: #1b4ca1 !important;
   .pill-name {
     color: white !important;
+  }
 }
+
+.saksham-load-text {
+  line-height: 16.8px;
+}
+
+.lato {
+  font-family: Lato;
+}
+.wrapper-saksham {
+  position: relative;
+}
+
+.overlay-max-height {
+  min-height: 348px;
+}
+
+.greet-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 999;
+  background: var(--Black-Alpha-56, #0000008F);
+  border-radius: 12px;
+}
+
+.overlay-text {
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 19.5px;
+  max-width: 454px;
+}
+
+.overlay-button {
+  margin-top: 20px;
+  color: #000 !important;
+  height: 40px;
+  border-radius: 41px;
+  font-size: 14px;
+  font-weight: 700 !important;
+}
+
+.overlay-button-transparent {
+  @extend .overlay-button;
+  background: transparent !important;
+  border: 1px solid #FFFFFF;
+  color: #fff !important;
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  border-radius: 4px;
+}
+
+::ng-deep .request-id-toolTip.mat-icon {
+  width: 16px !important;
+  margin-top: -3px !important;
+  vertical-align: middle;
+  height: 16px;
 }

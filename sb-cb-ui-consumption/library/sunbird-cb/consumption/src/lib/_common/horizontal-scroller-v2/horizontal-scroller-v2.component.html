@@ -23,6 +23,13 @@
     <!-- <div class="nextLoading" *ngIf="loadStatus === 'fetching'">
         <mat-spinner></mat-spinner>
     </div> -->    
+    <ng-container *ngIf="extraMeta?.value === 'sakshamAI'">
+        <div class="flex items-center justify-center">
+            <img src="/assets/images/sakshamAI/ai-icon.svg" alt="loader" width="16" height="16"
+              class="mr-2">
+            <span class="text-xs">{{ 'These are AI generated recommendations' }} &nbsp;</span>
+        </div>
+    </ng-container>
 </section>
 
 <div class="dots-container {{isMobile? sliderConfig?.responsive?.dotsAlign : sliderConfig?.dotsAlign}}" 
