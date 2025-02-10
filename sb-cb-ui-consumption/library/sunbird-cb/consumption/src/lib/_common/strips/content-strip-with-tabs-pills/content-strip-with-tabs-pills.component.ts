@@ -1158,7 +1158,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     coursesArray.forEach((courseId: any) => {
       let course = array.find((item: any) => item.identifier === courseId)
       if (course) {
-        if (cbpData) {
+        if (cbpData && cbpData.length) {
           const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
           if (cbpelem) {
             return
