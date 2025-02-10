@@ -20,9 +20,10 @@ const API_END_POINTS = {
   COMMUNITY_UNJOIN:`apis/proxies/v8/community/v1/unjoin`,
   COMMUNITY_READ: (id: string) => `/apis/proxies/v8/community/v1/read/${id}`,
   COMMUNITY_SEARCH: `/apis/proxies/v8/community/v1/search`,
-  COMMUNITY_USER_LIST: (id: string) => `/apis/proxies/v8/community/v1/community/listuser/${id}`,
+  COMMUNITY_USER_LIST: `/apis/proxies/v8/community/v1/community/listuser`,
   USERS_COMMUNITY_LIST: `/apis/proxies/v8/community/v1/user/communities`,
   TOPIC_WISE_COMMUNITIES: `/apis/proxies/v8/community/v1/category/listAll`,
+  BOOKMART_LIST: `/apis/proxies/v8/feedDiscussion/bookmarkedDiscussions`,
 }
 
 
@@ -101,8 +102,8 @@ export class DiscussionV2Service {
     return this.http.get<any>(`${API_END_POINTS.COMMUNITY_READ(communityId)}`)
   }
 
-  communityUserList(communityId: any) {
-    return this.http.get<any>(`${API_END_POINTS.COMMUNITY_USER_LIST(communityId)}`)
+  communityUserList(requestData: any) {
+    return this.http.post<any>(`${API_END_POINTS.COMMUNITY_USER_LIST}`, requestData)
   }
 
   usersJoinedCommunityList() {
@@ -117,6 +118,10 @@ export class DiscussionV2Service {
     return this.http.get<any>(`${API_END_POINTS.TOPIC_WISE_COMMUNITIES}`)
   }
 
+  getBookmarkDataList(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.BOOKMART_LIST}`, req)
+  }
+
   convertOrgArrayToObject(data: any) {
     return data.reduce((acc: any, item: any) => {
       acc[item.id] = item;
@@ -124,6 +129,8 @@ export class DiscussionV2Service {
     }, {});
   }
 }
+
+
 
 
 
