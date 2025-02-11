@@ -1152,13 +1152,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     let inprogress: any[] = []
     let allCompleted: any[] = []
     let cbpData: any
-    this.userSvc.getData('cbpData').subscribe((result => {
+    this.userSvc.getCBPData('cbpData').subscribe((result => {
       cbpData = result
     }))
     coursesArray.forEach((courseId: any) => {
       let course = array.find((item: any) => item.identifier === courseId)
       if (course) {
-        if (cbpData) {
+        if (cbpData && cbpData.length) {
           const cbpelem = cbpData.find((_course: any) => _course.identifier === course.identifier)
           if (cbpelem) {
             return
