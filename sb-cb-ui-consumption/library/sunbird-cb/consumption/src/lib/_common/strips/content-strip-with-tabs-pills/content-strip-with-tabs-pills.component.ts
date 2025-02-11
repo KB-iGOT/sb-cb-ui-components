@@ -28,7 +28,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { AddCompetencyPopupComponent } from '../../dialog-components/add-competency-popup/add-competency-popup.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.component';
-import { MOCKUP_DATA } from '../../../_constants/misc.constants';
 import { fadeAnimation } from '../../_animations/fade-animation';
 
 interface IStripUnitContentData {
