@@ -8,7 +8,10 @@ import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
 })
 export class MemberDetailsComponent implements OnInit{
   @Input() communityId = '';
-  communityMembersList: any
+  communityMembersList: any = []
+  limit: number = 2
+  offset: number = 0
+  disableLoadmore: boolean = false
   constructor(private discussV2Svc: DiscussionV2Service){
 
   }
@@ -17,14 +20,26 @@ export class MemberDetailsComponent implements OnInit{
     this.getAllMembersOfCommunity();
   }
   getAllMembersOfCommunity(){
-    this.discussV2Svc.communityUserList(this.communityId).subscribe((res: any) => {
+    let request = {
+      "communityId":this.communityId,
+      "offset" :this.offset,
+      "limit" : this.limit
+    }
+    this.discussV2Svc.communityUserList(request).subscribe((res: any) => {
+      
       if(res.result && res.result && res.result.userDetails  && res.result.userDetails.length){
-        this.communityMembersList = res.result.userDetails;
+        this.communityMembersList = [...this.communityMembersList,...res.result.userDetails];
+      } else {
+        this.disableLoadmore = true
       }
     })
   }
   onSearch(event: any){
    console.log(event);
 
+  }
+  loadMoreMembers(){
+    this.offset = this.offset + 1
+    this.getAllMembersOfCommunity()
   }
 }

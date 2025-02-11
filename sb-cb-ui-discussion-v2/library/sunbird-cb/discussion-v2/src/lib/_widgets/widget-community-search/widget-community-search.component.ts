@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { combineLatest } from 'rxjs';
 import { communityConstants } from '../../_model/filter-constants.model'
+import { MatBottomSheet } from '@angular/material/bottom-sheet'
+import { FilterComponent } from '../../_common/filter/filter.component';
 @Component({
   selector: 'd-v2-widget-community-search',
   templateUrl: './widget-community-search.component.html',
@@ -12,6 +14,7 @@ export class WidgetCommunitySearchComponent {
 
   searchTextValue: any = '';
   localSearchTextValue: any = '';
+  globalSearchEnabled: boolean = false;
   communityDataList: any = [];
   topicName: any = ''
   orgDetails: any
@@ -23,7 +26,7 @@ export class WidgetCommunitySearchComponent {
   filterKeys: any =[]
   sortOptionSelected: any= {}
   
-  constructor(private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
+  constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
     
     
     this.constants= communityConstants
@@ -38,10 +41,12 @@ export class WidgetCommunitySearchComponent {
       if (queryParams['c'] || queryParams['c'] === '') {
         this.searchTextValue = queryParams['c'];
         this.fetchCommunityList(this.searchTextValue);
+        this.globalSearchEnabled = true
       } 
       else if (params.get('topicName')) {
         this.topicName = params.get('topicName')
         this.fetchCommunityList(this.searchTextValue, params.get('topicName'));
+        this.globalSearchEnabled = false
       } 
       // Default case
       else {
@@ -52,7 +57,7 @@ export class WidgetCommunitySearchComponent {
     this.getFilterFacets()
    }
 
-   fetchCommunityList(searchText?: any, topicName?:any, sortData?: any,filterApply?:any) {
+   fetchCommunityList(searchText?: any, topicName?:any, sortData?: any,filterApply?:any,factesRequest?:any) {
     
     let request: any = {
       "filterCriteriaMap": {
@@ -77,6 +82,9 @@ export class WidgetCommunitySearchComponent {
     if(filterApply && Object.keys(filterApply).length){
       request['filterCriteriaMap'] = {...request['filterCriteriaMap'],...filterApply}
     }
+    if(factesRequest && factesRequest.length) {
+      request['facets']= factesRequest
+    }
 
     this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
       if(res.result && res.result && res.result.search_results && res.result.search_results.additionalInfo && res.result.search_results.additionalInfo.length ) {
@@ -86,6 +94,22 @@ export class WidgetCommunitySearchComponent {
         this.communityDataList = res.result.search_results.data;
       } else {
         this.communityDataList = []
+      }
+      if(factesRequest && factesRequest.length) {
+        let facets: any = res.result.search_results.facets
+        Object.keys(facets).forEach((ele: any) => {
+          let tempFilter: any = {}
+          tempFilter['label'] = this.constants[`${ele}Label`]
+          let newValues = []
+          if(facets[ele] && facets[ele].length ){
+            newValues = facets[ele].map((v: any) => ({...v, checked: false}))
+          }
+          tempFilter['values'] = newValues
+          this.filterObjectList[ele] =  tempFilter
+        })
+        if(this.filterObjectList[this.constants.competencyTheme].values && this.filterObjectList[this.constants.competencyTheme].values.length === 0  ) {
+          this.filterObjectList[this.constants.competencySubTheme].values = []
+        }
       }
       this.isLoading = false;
     },(_err: any) => {
@@ -124,9 +148,7 @@ export class WidgetCommunitySearchComponent {
       "facets": [
           "topicName",
           "orgId",
-          "competencyArea",
-          "competencyTheme",
-          "competencySubTheme"
+          "competencyArea"
       ]
     }
     this.filterObjectList = {
@@ -136,10 +158,19 @@ export class WidgetCommunitySearchComponent {
       [this.constants.competencyTheme] : {},
       [this.constants.competencySubTheme] : {}
     }
-    this.filterKeys  = [this.constants.orgId,this.constants.topicName,this.constants.competencyArea,this.constants.competencyTheme, this.constants.competencySubTheme]
+    
+    this.filterKeys  = [this.constants.orgId,this.constants.competencyArea,this.constants.competencyTheme, this.constants.competencySubTheme]
+    if(!this.topicName) {
+      this.filterKeys.splice(1, 0, this.constants.topicName);
+    }
     this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
       if(res && res.result && res.result.search_results && res.result.search_results.facets ){
-        let facets: any = res.result.search_results.facets
+        
+        let emptyData = {
+          competencyTheme: [],
+          competencySubTheme:[]
+        }
+        let facets: any = {...res.result.search_results.facets,...emptyData}
         // if(facets[this.constants.competencyArea] ) {
         //   let tempFilter: any = {}
         //   tempFilter['label'] = this.constants.competencyAreaLabel
@@ -170,9 +201,22 @@ export class WidgetCommunitySearchComponent {
   }
 
 
-  selectedFilters(filterRequest: any){
-    console.log(filterRequest,'filterRequest..........')
+  selectedFilters(filterData: any){
+    
+    let filterRequest = filterData.selectedOptions
+    let recentRequestKey = filterData.recentSelectedKey
+    // let recentRequestOption = filterData.recentSelectedOption
+    
+    console.log(filterRequest,recentRequestKey,'filterRequest..........')
     let filterObject: any = {}
+    let factesRequest: any = []
+
+    if(!filterRequest[this.constants.competencyArea].length) {
+      filterRequest[this.constants.competencySubTheme] = []
+      filterRequest[this.constants.competencyTheme] = []
+      this.filterObjectList[this.constants.competencyTheme].values = []
+      this.filterObjectList[this.constants.competencySubTheme].values = []
+    }
     Object.keys(filterRequest).forEach((_ele: any)=> {
       if(filterRequest[_ele] && filterRequest[_ele].length) {
         let data = {
@@ -180,10 +224,48 @@ export class WidgetCommunitySearchComponent {
         }
         filterObject = {...filterObject, ...data}
       }
-      
     })
-    this.fetchCommunityList(this.searchTextValue, this.topicName, this.sortOptionSelected, filterObject)
+    if(recentRequestKey === this.constants.competencyArea 
+      && filterRequest[this.constants.competencyArea].length){
+      factesRequest.push(this.constants.competencyTheme)
+    } else if(recentRequestKey === this.constants.competencyTheme
+      && filterRequest[this.constants.competencyTheme].length
+     )
+    {
+      factesRequest.push(this.constants.competencySubTheme)
+    }
+    this.fetchCommunityList(this.searchTextValue, this.topicName, this.sortOptionSelected, filterObject,factesRequest)
 
+  }
+
+
+  // Bottom sheet open only in mobileview
+  openBottomSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(FilterComponent, {
+      data: {
+        filterObjectList: this.filterObjectList,
+        filterKeys: this.filterKeys,
+        loadBottomSheet: true
+      },
+      panelClass: 'filter-bottomsheet',
+    })
+    bottomSheetRef.afterDismissed().subscribe((_result: any) => {
+    //  if (result) {
+    //   const filter = result.filter
+    //     this.titles = [
+    //       { title: 'Amrit Gyaan Kosh', url: '/app/amrit-gyaan-kosh/all', disableTranslate: true, icon: 'menu_book' },
+    //       { title: this.titleCasePipe.transform(filter[gyaanConstants.resourceCategory] ?
+    //          filter[gyaanConstants.resourceCategory] : ''), url: `none`, icon: '' },
+    //     ]
+    //     this.facetsData = result.facetData
+    //     this.facetsDataCopy = result.facetData
+    //     this.selectedFilter = filter
+    //     this.contentDataList = this.transformSkeletonToWidgets(this.seeAllPageConfig)
+    //     if (this.seeAllPageConfig.request && this.seeAllPageConfig.request.searchV6) {
+    //       this.fetchFromSearchV6(this.seeAllPageConfig, false)
+    //     }
+    //  }
+    })
   }
 
   

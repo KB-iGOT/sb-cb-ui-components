@@ -3,13 +3,14 @@
     <div class="lg:w-64">
       <ng-container *ngIf="!isLoading">
          <d-v2-similar-community-card [communityData]="communityDataList"></d-v2-similar-community-card> 
+         <!-- <mat-icon (click)="openBottomSheet()" class="">filter_list</mat-icon> -->
       </ng-container>
     </div>
     <!-- Main Content -->
     <div class="flex-1">
        <div class="md:col-span-2">
           <div class="mb-6">
-             <div class="relative flex community-search" *ngIf="searchTextValue">
+             <div class="relative flex community-search" *ngIf="globalSearchEnabled">
                 <input
                    type="text"
                    [value]="searchTextValue"

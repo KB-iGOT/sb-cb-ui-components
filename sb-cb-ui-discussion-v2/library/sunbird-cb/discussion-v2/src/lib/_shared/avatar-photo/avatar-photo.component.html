@@ -8,7 +8,7 @@
 'circle-l-s' : size=== 'l-s',
 'circle-xl-s' : size=== 'xl-s',
 'circle-xxl-s': size=== 'xxl-s'}" [ngStyle]="{'background-color':  color ? color : circleColor }">
-  <img *ngIf="!showInitials" src="{{photoUrl}}" [alt]="photoUrl? '' :(name || initials || size || random)">
+  <img *ngIf="!showInitials" src="{{photoUrl}}" [alt]="photoUrl? '' :(name || initials || size || random)" (error)="changeToDefaultImg($event)">
 
   <div *ngIf="showInitials" class="initials" i18n-aria-label>
     {{ initials }}
