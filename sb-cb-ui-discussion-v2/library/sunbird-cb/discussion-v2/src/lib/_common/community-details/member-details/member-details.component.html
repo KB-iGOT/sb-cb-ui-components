@@ -20,9 +20,15 @@
         <div class="flex justify-start">
             <div class="flex gap-2 flex-wrap justify-start">
                 <ng-container *ngFor="let member of communityMembersList">
-                    <d-v2-member-card ></d-v2-member-card>
+                    <d-v2-member-card [memeberData]="member"></d-v2-member-card>
                 </ng-container>
             </div>
         </div>
+        <ng-container *ngIf="!disableLoadmore">
+            <div class="load-more-posts my-4 mt-8">
+                <button mat-flat-button color="primary" class="w-full underline" (click)="loadMoreMembers()">Load
+                    More</button>
+            </div>
+        </ng-container>
     </div>
 </mat-card>
