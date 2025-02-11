@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
+import { communityList } from '../../_model/filter-constants.model';
 export interface Community {
   id: number;
   name: string;
@@ -22,9 +23,11 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
   @Output() topicCardClick = new EventEmitter<any>();
+  @Output() showAllTopics = new EventEmitter<any>();
   userEnrollDetailsData: any;
   topicDataList: any = []
   topicDataLoading: boolean = false
+    communityDataList: any = communityList
  
   constructor(private userEnrollSvc: UserEnrollCommunityService,
     private discussV2Svc: DiscussionV2Service
@@ -45,6 +48,9 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
 
   showAllCommunitiesByTopic(topic: any) {
     this.showAllByTopic.emit(topic);
+  }
+  showAllTopicsMethod() {
+    this.showAllTopics.emit();
   }
 
   onCardClick(cardData: any){

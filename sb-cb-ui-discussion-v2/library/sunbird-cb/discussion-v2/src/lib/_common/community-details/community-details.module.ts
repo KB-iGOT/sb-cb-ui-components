@@ -23,13 +23,15 @@ import { MemberDetailsComponent } from './member-details/member-details.componen
 import { MemberCardModule } from '../member-card/member-card.module';
 import { CommunityGuidelinesComponent } from './community-guidelines/community-guidelines.component';
 import { CardToggleModule } from '../card-toggle/card-toggle.module';
+import { BookmarkListComponent } from './bookmark-list/bookmark-list.component';
 
 
 @NgModule({
   declarations: [
     FeedComponent,
     MemberDetailsComponent,
-    CommunityGuidelinesComponent
+    CommunityGuidelinesComponent,
+    BookmarkListComponent
   ],
   imports: [
     CommonModule,
@@ -58,7 +60,8 @@ import { CardToggleModule } from '../card-toggle/card-toggle.module';
   exports: [
     FeedComponent,
     MemberDetailsComponent,
-    CommunityGuidelinesComponent
+    CommunityGuidelinesComponent,
+    BookmarkListComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
