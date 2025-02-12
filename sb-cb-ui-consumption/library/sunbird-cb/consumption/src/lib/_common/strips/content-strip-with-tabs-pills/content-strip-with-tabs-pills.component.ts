@@ -117,6 +117,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   recommendedCoursesId: string
   releventNotReleventSubscription: Subscription | null = null;
   feedbackCourseId = ''
+  currentStripG: any;
+  tabEventG: any;
+  firstTimeLoaded = false
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
     @Inject('environment') environment: any,
@@ -951,11 +954,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       {
         module: WsEvents.EnumTelemetrymodules.HOME,
       }
+
     );
 
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
+    this.currentStripG = currentStrip;
+    this.tabEventG = tabEvent
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
         ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
@@ -987,8 +993,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList) {
           this.fetchAllCbpPlans(currentStrip, true)
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.courseRecommendation){
-          this.generateCourseRecommendation(currentStrip,tabEvent, true)
-
+          const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
+          this.generateCourseRecommendation(currentStrip, tabEvent, true, localRecommended)
         }
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
       }
@@ -1684,7 +1690,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     tabIndex: number,
     calculateParentStatus: boolean,
-    getCourseRecommendation = false
+    courseRecommendationId: string
   ) {
     if(strip.tabs[tabIndex].request.courseRecommendation) {
       this.sakshamLoader = true
@@ -1699,16 +1705,23 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let response: any
       let coursesIds: any
 
-      if(getCourseRecommendation) {
-        response = await this.userSvc.getRecommendedCoursesSakshamAI(this.configSvc.userProfile.userId).toPromise()
+      if(courseRecommendationId) {
+        response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise()
       } else {
         response = await this.userSvc.generateCoursesSakshamAI(
           strip.tabs[tabIndex].request.courseRecommendation.path, payload)
           .toPromise()
       }
+
       if(response.recommended_courses && response.recommended_courses.length) {
         this.sakshamLoader = false
         this.recommendedCoursesId = response?.id || ''
+        this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
+
+        if (response.feedbacks.length) {
+          this.contentSvc.setFeedbackData(response.feedbacks)
+        }
+
         this.subscribeToReleventEmmitter()
         coursesIds = response.recommended_courses.map(course => course.course_id)
         if (coursesIds.length) {
@@ -1743,8 +1756,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           this.contentSvc.searchV6(sRequest.searchV6).subscribe(results => {
             // if (results && results.result && results.result.content) {
             if (true) {
-              let courses = results.result.content
-              // let courses: any = MOCKUP_DATA
+              // let courses = results.result.content
+              let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
               let tabResults: any
               if (strip.tabs && strip.tabs.length) {
                 tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, 'sakshamAI')
@@ -1776,7 +1789,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                   tabResults
                 )
                 setTimeout(() => {
-                  this.recommendationPopup = true
+                  if(!this.firstTimeLoaded) {
+                    this.recommendationPopup = true
+                    this.firstTimeLoaded = true
+                  }
                 }, 4000);
               } else {
                 strip.tabs[tabIndex].pillsData[0].selected = true
@@ -1831,6 +1847,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         data: { message: 'Thank you for your feedback.', type: 'success',
         }, duration: 3000, panelClass: 'course-success-snackbar',
       })
+      if(rating === 0) {
+        const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
+        this.generateCourseRecommendation(this.currentStripG, this.tabEventG, true, localRecommended)
+      }
     } else if (!response) {
       this.snackBar.openFromComponent(SnackbarComponent, {
         data: { message: 'Something is wrong. Please try again later', type: 'error',
@@ -1859,4 +1879,5 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.sakshamFeedbackPopup = false;
     this.feedbackCourseId = ''
   }
+
 }

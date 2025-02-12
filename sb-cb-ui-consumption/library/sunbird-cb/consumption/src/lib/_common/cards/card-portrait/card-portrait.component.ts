@@ -41,7 +41,7 @@ export class CardPortraitComponent implements OnInit {
     private langtranslations: MultilingualTranslationsService,
     private configSvc: ConfigurationsService,
     private contSvc: WidgetContentLibService,) { 
-      this.langtranslations.languageSelectedObservable.subscribe(() => {
+      this.langtranslations.languageSelectedObservable.subscribe(() => {debugger
         if (localStorage.getItem('websiteLanguage')) {
           this.translate.setDefaultLang('en')
           const lang = localStorage.getItem('websiteLanguage')!
@@ -59,6 +59,9 @@ export class CardPortraitComponent implements OnInit {
     } else {
       this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
       this.defaultSLogo =  '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
+    }
+    if(this.widgetData?.sakshamAIGenerated) {
+      this.isRelevent = this.contSvc.getFeedbackData(this.widgetData?.content?.identifier) || false
     }
   }
 

@@ -85,6 +85,8 @@ export class WidgetContentLibService {
   programChildCourseResumeData$ = this.programChildCourseResumeData.asObservable();
   releventNotRelevent = new Subject<{ isRelevent: boolean; widgetData: any }>();
   releventNotRelevent$ = this.releventNotRelevent.asObservable()
+  storedRecommendedIds: any = {};
+  feedbackDataForCourse: any = {};
 
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
@@ -635,5 +637,44 @@ export class WidgetContentLibService {
       })
     )
     return result
+  }
+
+  setRecommendedIds(recommendedIds: string, userId: string) {
+    localStorage.getItem('recommendedIds') ? 
+    this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+
+    this.storedRecommendedIds[userId] = recommendedIds
+
+    localStorage.setItem('recommendedIds', JSON.stringify(this.storedRecommendedIds))
+  }
+
+  getRecommendedIds(userId: string) {
+    localStorage.getItem('recommendedIds') ? 
+      this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+    return this.storedRecommendedIds[userId]
+  }
+
+  setFeedbackData(feedbackDataArray: any[]) {
+    feedbackDataArray.forEach(feedbackData => {
+      this.feedbackDataForCourse[feedbackData.course_id] = feedbackData;
+    });
+  }
+
+  getFeedbackData(courseId: string) {
+    return this.feedbackDataForCourse[courseId]
+  }
+
+  filterCoursesWithNoRating(response: any, courses: any[]) {
+    if (!response?.feedbacks?.length) {
+      return courses; 
+    }
+    
+    const coursesWithZeroRating = new Set(
+      response.feedbacks
+        .filter((feedback: any) => feedback.rating === 0)
+        .map((feedback: any) => feedback.course_id)
+    );
+  
+    return courses.filter((course: any) => !coursesWithZeroRating.has(course.identifier));
   }
 }
