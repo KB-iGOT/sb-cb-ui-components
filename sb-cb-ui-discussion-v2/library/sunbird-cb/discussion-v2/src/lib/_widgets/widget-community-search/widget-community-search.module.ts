@@ -8,6 +8,7 @@ import { SortByModule } from '../../_common/sort-by/sort-by.module';
 import { FilterModule } from '../../_common/filter/filter.module';
 import { SimilarCommunityCardModule } from '../../_common/similar-community-card/similar-community-card.module';
 import { PipesModule } from '../../_pipes/pipes.module';
+import { MatBottomSheetModule, MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet'
 
 
 
@@ -23,10 +24,13 @@ import { PipesModule } from '../../_pipes/pipes.module';
     SortByModule,
     FilterModule,
     SimilarCommunityCardModule,
-    PipesModule
+    PipesModule,
+    MatBottomSheetModule,
   ],
   exports: [
     WidgetCommunitySearchComponent
-  ]
+  ],
+  providers:[{ provide: MAT_BOTTOM_SHEET_DATA, useValue: {} },
+    { provide: MatBottomSheetRef, useValue: {} },]
 })
 export class WidgetCommunitySearchModule { }

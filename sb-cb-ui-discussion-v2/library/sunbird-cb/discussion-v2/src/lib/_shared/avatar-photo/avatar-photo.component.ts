@@ -85,4 +85,7 @@ export class AvatarPhotoComponent implements OnInit {
     }
     this.initials = initials.toUpperCase()
   }
+  changeToDefaultImg($event: any) {
+    $event.target.src = '/assets/instances/eagle/app_logos/default.png'
+  }
 }

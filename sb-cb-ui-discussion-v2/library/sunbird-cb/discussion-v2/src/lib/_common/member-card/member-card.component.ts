@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'd-v2-member-card',
@@ -6,6 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./member-card.component.scss']
 })
 export class MemberCardComponent implements OnInit {
+  @Input() memeberData: any 
   constructor(){
 
   }

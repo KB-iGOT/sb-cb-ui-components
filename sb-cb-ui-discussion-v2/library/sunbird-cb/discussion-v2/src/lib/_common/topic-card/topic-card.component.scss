@@ -1,5 +1,5 @@
 .topic-card-wrapper {
-    width: 135px;
+    // width: 135px;
     height: 135px;
     border-left: 4px solid;
     border-top: 4px solid;
@@ -31,7 +31,7 @@
             -webkit-line-clamp: 4;
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            text-align: justify;
+            text-align: start;
 
         }
     }
