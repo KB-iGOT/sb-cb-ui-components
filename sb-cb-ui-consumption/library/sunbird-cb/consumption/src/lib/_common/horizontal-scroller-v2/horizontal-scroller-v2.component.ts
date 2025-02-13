@@ -9,6 +9,7 @@ import { TFetchStatus } from '../../_constants/misc.constants';
 import { ValueService } from '@sunbird-cb/utils-v2';
 import { NsCommonStrip } from '../common-strip/common-strip.model';
 import { NsContentStripMultiple } from '../../_models/content-strip-multiple.model';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'sb-uic-horizontal-scroller-v2',
@@ -44,7 +45,14 @@ export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestr
   private defaultMenuSubscribe: Subscription | null = null
   isLtMedium$ = this.valueSvc.isLtMedium$
 
-  constructor(private valueSvc: ValueService) { }
+  constructor(private valueSvc: ValueService, private translate: TranslateService) {
+    if (localStorage.getItem('websiteLanguage')) {
+      this.translate.setDefaultLang('en');
+      let lang = JSON.stringify(localStorage.getItem('websiteLanguage'));
+      lang = lang.replace(/\"/g, '');
+      this.translate.use(lang);
+    }
+   }
 
   ngOnInit() {
     this.cardSubType = this.stripConfig && this.stripConfig.cardSubType ? this.stripConfig.cardSubType : 'standard';

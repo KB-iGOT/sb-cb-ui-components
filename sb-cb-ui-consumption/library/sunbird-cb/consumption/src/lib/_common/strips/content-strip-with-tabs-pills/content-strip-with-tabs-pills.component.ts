@@ -1788,12 +1788,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                   '',
                   tabResults
                 )
-                setTimeout(() => {
-                  if(!this.firstTimeLoaded) {
-                    this.recommendationPopup = true
-                    this.firstTimeLoaded = true
-                  }
-                }, 4000);
+                if(!this.firstTimeLoaded) {
+                  this.recommendationPopup = true
+                  this.firstTimeLoaded = true
+                }
               } else {
                 strip.tabs[tabIndex].pillsData[0].selected = true
                 strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
