@@ -1,3 +1,14 @@
+$darkerShadeBorder: #00000066;
+$brandAccentColor: #1b4ca1;
+$brandAccentDarkShade: #1b4ca129;
+$darkColor: #00000099;
+$white: #ffffff;
+$whiteSmoke: #f5f5f5;
+$whiteWhisper: #f1f1f1;
+$scrollTumbBg: #888;
+$dimGray: #555;
+$borderGrey1: #00000014;
+$borderGrey2: rgba(0, 0, 0, 0.08);
 .ff-montserrat {
   font-family: Montserrat;
 }
@@ -5,25 +16,25 @@
 .section-btn {
   height: 32px;
   width: 100px;
-  background-color: white !important;
-  color: #00000066 !important;
+  background-color: $white !important;
+  color: $darkerShadeBorder !important;
   font: 700 14px "Lato";
   border-radius: 16px;
-  border: 1px solid #00000066;
+  border: 1px solid $darkerShadeBorder;
 
   &.active-section-btn {
-    background-color: #1b4ca129 !important;
-    border: 1px solid #1b4ca1;
-    color: #1b4ca1 !important;
+    background-color: $brandAccentDarkShade !important;
+    border: 1px solid $brandAccentColor;
+    color: $brandAccentColor !important;
   }
 }
 
 .subtite-color {
-  color: #00000099;
+  color: $darkColor;
 }
 
 .border-bottom-c {
-  border-bottom: 2px solid #00000014 !important;
+  border-bottom: 2px solid $borderGrey1 !important;
 }
 
 .long-text-wrap {
@@ -61,7 +72,7 @@
 }
 
 .orgBox {
-  background-color: #f5f5f5;
+  background-color: $whiteSmoke;
   border-radius: 5px;
 }
 
@@ -76,18 +87,18 @@
 
   /* Track */
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: $whiteWhisper;
   }
 
   /* Handle */
   &::-webkit-scrollbar-thumb {
-    background: #888;
+    background: $scrollTumbBg;
     border-radius: 100vw;
   }
 
   /* Handle on hover */
   &::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: $dimGray;
   }
 }
 
@@ -111,17 +122,17 @@
 
 .border-section {
   border-radius: 8px;
-  border: 1px solid #00000014;
+  border: 1px solid $borderGrey1;
   padding: 16px;
-  background-color: #fff;
+  background-color: $white;
   padding: 1.2rem;
 }
 
 .orgBoxChip {
   border-radius: 27px;
-  background-color: white;
+  background-color: $white;
   border-radius: 27px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid $borderGrey2;
   height: 23px;
 }
 

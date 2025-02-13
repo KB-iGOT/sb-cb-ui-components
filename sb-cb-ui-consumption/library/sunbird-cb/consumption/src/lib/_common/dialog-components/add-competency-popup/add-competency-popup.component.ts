@@ -166,18 +166,6 @@ export class AddCompetencyPopupComponent implements OnInit {
   }
 
   clearAll() {
-    // const uncheckedArr: any = []
-    // this.orgList.filter((item: any) => {
-    //   if (item.sbOrgId !== this.defaultOrdData) {
-    //     item.checked = false
-    //   }
-    // })
-    // this.selectedList.filter((item: any) => {
-    //   if (item.sbOrgId !== this.defaultOrdData) {
-    //     uncheckedArr.push(item.id)
-    //   }
-    // })
-    // this.selectedList = this.selectedList.filter((item: any) => !uncheckedArr.includes(item.id))
     this.orgList.forEach((item: any) => { item.checked = false })
     this.selectedList = []
     this.showMore = false

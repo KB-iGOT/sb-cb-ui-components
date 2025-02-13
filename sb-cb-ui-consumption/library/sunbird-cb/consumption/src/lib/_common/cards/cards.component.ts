@@ -58,7 +58,7 @@ implements OnInit, NsWidgetResolver.IWidgetData<NsCardContent.ICard>  {
       let urlData = await this.contSvc.getResourseLink(content)
       const queryParams = {
         ...urlData.queryParams,
-        ...(this.widgetData?.sakshamAIGenerated ? { g: this.widgetData?.sakshamAIGenerated } : {})
+        ...(this.widgetData?.sakshamAIGenerated ? { recommendationId: this.widgetData?.sakshamAIGenerated } : {})
       };
       this.router.navigate(
         [urlData.url],

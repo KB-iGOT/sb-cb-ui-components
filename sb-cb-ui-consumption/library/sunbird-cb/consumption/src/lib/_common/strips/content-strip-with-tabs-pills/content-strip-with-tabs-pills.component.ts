@@ -69,7 +69,7 @@ interface IStripUnitContentData {
   request?: any
 
 }
-
+const SNACKBAR_DURATION = 3000
 
 @Component({
   selector: 'sb-uic-content-strip-with-tabs-pills',
@@ -1843,7 +1843,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     if(response && response?.message) {
       this.snackBar.openFromComponent(SnackbarComponent, {
         data: { message: 'Thank you for your feedback.', type: 'success',
-        }, duration: 3000, panelClass: 'course-success-snackbar',
+        }, duration: SNACKBAR_DURATION, panelClass: 'course-success-snackbar',
       })
       if(rating === 0) {
         const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
@@ -1852,7 +1852,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     } else if (!response) {
       this.snackBar.openFromComponent(SnackbarComponent, {
         data: { message: 'Something is wrong. Please try again later', type: 'error',
-        }, duration: 3000, panelClass: 'course-error-snackbar',
+        }, duration: SNACKBAR_DURATION, panelClass: 'course-error-snackbar',
       })
     }
     this.sakshamFeedbackPopup = false;

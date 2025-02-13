@@ -41,7 +41,7 @@ export class CardPortraitComponent implements OnInit {
     private langtranslations: MultilingualTranslationsService,
     private configSvc: ConfigurationsService,
     private contSvc: WidgetContentLibService,) { 
-      this.langtranslations.languageSelectedObservable.subscribe(() => {debugger
+      this.langtranslations.languageSelectedObservable.subscribe(() => {
         if (localStorage.getItem('websiteLanguage')) {
           this.translate.setDefaultLang('en')
           const lang = localStorage.getItem('websiteLanguage')!
