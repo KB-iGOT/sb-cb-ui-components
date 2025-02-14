@@ -112,12 +112,25 @@
 }
 
 .custom-delete {
-  position: absolute;
+  // position: absolute;
   right: 0;
   top: 0;
   color: red;
   border: 1px solid;
   border-radius: 12px;
+}
+
+.remove-image-btn {
+  // position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  transform: scale(0.8);
+}
+
+.absolute-imp{
+  position: absolute !important;
 }
 
 .doc-height {

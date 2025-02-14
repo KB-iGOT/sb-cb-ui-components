@@ -128,7 +128,6 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
             })
           }
         })
-        this.selectedFilesFinal
       }
       this.updatePostPreview(this.uploadForm.value)
     }
@@ -273,23 +272,34 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
 
   addNewUrl() {
-    this.updateCategory('link')
-    this.selectedFilesFinal['link'] = this.selectedFilesFinal['link'] || [];
+    const category = 'link'
+    this.updateCategory(category)
+    this.selectedFilesFinal[category] = this.selectedFilesFinal[category] || [];
+    this.previewCategory[category] = this.previewCategory[category] || []
+
     const value = (this.linkInput || '').trim();
     if (value) {
-      this.selectedFilesFinal['link'] .push(value);
+      this.selectedFilesFinal['link'] .push({
+        name: value,
+        previewUrl: value
+      });
+      this.previewCategory[category].push(value)
       // Update preview
       this.updatePostPreview(this.uploadForm.value);
     }
     // clearInput
+    this.linkInput = ''
   }
 
   removeUrl(index: number) {
     this.selectedFilesFinal['link'].splice(index, 1);
+    this.previewCategory['link'].splice(index, 1);
     // If all URLs are removed, add one empty field
     if (this.selectedFilesFinal['link'].length === 0) {
       _.remove(this.categoryType, 'link');
     }
+     // Update preview
+     this.updatePostPreview(this.uploadForm.value);
   }
 
   addTag(event: MatChipInputEvent): void {
@@ -388,36 +398,44 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       let temp: any = {}
       // Convert forEach to for...of for sequential processing
       for (const cat of this.categoryType) {
-        if (this.selectedFilesFinal[cat] && this.selectedFilesFinal[cat].length) {
-          // Wait for all file uploads in this category to complete
-          const uploadedUrls = await Promise.all(
-            this.selectedFilesFinal[cat].map((fileObj: any) => {
-              return new Promise<string>((resolve, reject) => {
-                if (fileObj.file) {
-                  const formData = new FormData();
-                  formData.append('file', fileObj.file);
-                  const communityId = this.data.community.communityId || ''
-                  this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
-                    next: (res: any) => {
-                      if (res && res.result && res.result.url) {
-                        const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
-                        const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
-                        resolve(finalURL);
-                      } else {
-                        reject('No URL in response');
-                      }
-                    },
-                    error: (error) => reject(error)
-                  });
-                } else {
-                  resolve(fileObj.name);
-                }
-              });
-            })
-          );
-
-          temp[cat] = uploadedUrls;
-          console.log('temp - ', temp);
+        // except link, for all follow below steps to upload and process URL
+        if(cat !== 'link') {
+          if (this.selectedFilesFinal[cat] && this.selectedFilesFinal[cat].length) {
+            // Wait for all file uploads in this category to complete
+            const uploadedUrls = await Promise.all(
+              this.selectedFilesFinal[cat].map((fileObj: any) => {
+                return new Promise<string>((resolve, reject) => {
+                  if (fileObj.file) {
+                    const formData = new FormData();
+                    formData.append('file', fileObj.file);
+                    const communityId = this.data.community.communityId || ''
+                    this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
+                      next: (res: any) => {
+                        if (res && res.result && res.result.url) {
+                          const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
+                          const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
+                          resolve(finalURL);
+                        } else {
+                          reject('No URL in response');
+                        }
+                      },
+                      error: (error) => reject(error)
+                    });
+                  } else {
+                    resolve(fileObj.name);
+                  }
+                });
+              })
+            );
+  
+            temp[cat] = uploadedUrls;
+            console.log('temp - ', temp);
+          }
+        } else{
+          if(this.selectedFilesFinal['link'] && this.selectedFilesFinal['link'].length){
+            temp['link'] = temp['link'] || []
+            temp['link'] = this.selectedFilesFinal['link'].map((link:any) => {return link.previewUrl})
+          }
         }
       }
 
@@ -518,36 +536,43 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     try{
     const temp: any = {}
     for(const cat in this.selectedFilesFinal) {
-      if (this.selectedFilesFinal[cat] && this.selectedFilesFinal[cat].length) {
-        const newFiles = this.selectedFilesFinal[cat].filter( (x: any) => !x.uploaded)
-        // Wait for all file uploads in this category to complete
-        const uploadedUrls = await Promise.all(
-          newFiles.map((fileObj: any) => {
-            return new Promise<string>((resolve, reject) => {
-              if (fileObj.file) {
-                const formData = new FormData();
-                formData.append('file', fileObj.file);
-                const communityId = this.data.community.communityId || ''
-                this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
-                  next: (res: any) => {
-                    if (res && res.result && res.result.url) {
-                      const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
-                      const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
-                      resolve(finalURL);
-                    } else {
-                      reject('No URL in response');
-                    }
-                  },
-                  error: (error) => reject(error)
-                });
-              } else {
-                resolve(fileObj.name);
-              }
-            });
-          })
-        );
-        temp[cat] = uploadedUrls;
-        console.log('temp - ', temp);
+      if(cat !== 'link'){
+        if (this.selectedFilesFinal[cat] && this.selectedFilesFinal[cat].length) {
+          const newFiles = this.selectedFilesFinal[cat].filter( (x: any) => !x.uploaded)
+          // Wait for all file uploads in this category to complete
+          const uploadedUrls = await Promise.all(
+            newFiles.map((fileObj: any) => {
+              return new Promise<string>((resolve, reject) => {
+                if (fileObj.file) {
+                  const formData = new FormData();
+                  formData.append('file', fileObj.file);
+                  const communityId = this.data.community.communityId || ''
+                  this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
+                    next: (res: any) => {
+                      if (res && res.result && res.result.url) {
+                        const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
+                        const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
+                        resolve(finalURL);
+                      } else {
+                        reject('No URL in response');
+                      }
+                    },
+                    error: (error) => reject(error)
+                  });
+                } else {
+                  resolve(fileObj.name);
+                }
+              });
+            })
+          );
+          temp[cat] = uploadedUrls;
+          console.log('temp - ', temp);
+        }
+      } else {
+        if(this.selectedFilesFinal['link'] && this.selectedFilesFinal['link'].length){
+          temp['link'] = temp['link'] || []
+          temp['link'] = this.selectedFilesFinal['link'].filter((l:any) => !l.uploaded).map((link:any) => {return link.previewUrl})
+        }
       }
     }
     return temp
