@@ -7,7 +7,7 @@
             <div class="space-y-4 pt-4">
                 <div *ngFor="let discussion of posts;let isFirst = first" class="flex flex-wrap items-start space-x-3">
                     <hr class="divider w-full" *ngIf="!isFirst" >
-                    <div class="trending-data margin-remove" (click)="navigateToPost(discussion)">
+                    <div class="trending-data margin-remove cursor-pointer" (click)="navigateToPost(discussion)">
                         <div class="flex items-center justify-between mb-4 user-info w-full">
                                 <div class="flex items-center w-3/4">
                                     <d-v2-avatar-photo [size]="'s'"
@@ -22,7 +22,7 @@
                                 </div>
                         </div>
                         <div class="post-data">
-                            <p [innerHtml]="discussion?.title"></p>
+                            <p [innerHtml]="discussion?.description" ></p>
                         </div>
                         <div class="mt-2 flex items-center justify-between space-x-4 text-sm text-gray-600 w-4/5 post-details">
                             <span class="flex items-center">

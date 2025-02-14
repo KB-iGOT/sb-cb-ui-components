@@ -307,7 +307,6 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   updateRepliesData(eventData: any) {
-    console.log(eventData)
     this.replyDataCopy = eventData.replyDataCopy
     this.fetchedReplyData = [...eventData.replyData]
     return this.fetchedReplyData 

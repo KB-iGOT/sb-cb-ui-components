@@ -57,17 +57,22 @@
                     </div>
                 </div>
                 <div class="mb-4" >
-                    <div class="flex flex-row category-item" *ngFor="let filterKey of filterObjectList[filter]?.values  | filterSearch: searchInput?.value">
-                        <mat-checkbox #checkboxes disableRipple class="filters-checkbox" [checked]="filterKey?.checked"
-                            (change)="handleGetFilterType($event, filterKey, filter)">
-                            <!-- <div class="checkbox-label">
-                                {{ filterKey?.value }}
-                            </div> -->
-                            <span class="line-clamp-2 overflow-hidden text-ellipsis">
-                                {{ filterKey?.value }}
-                            </span>
-                        </mat-checkbox>
-                    </div>
+                    <ng-container *ngIf="(filterObjectList[filter]?.values | filterSearch: searchInput?.value).length;else noData">
+                        <div class="flex flex-row category-item" *ngFor="let filterKey of filterObjectList[filter]?.values  | filterSearch: searchInput?.value">
+                            <mat-checkbox #checkboxes disableRipple class="filters-checkbox" [checked]="filterKey?.checked"
+                                (change)="handleGetFilterType($event, filterKey, filter)">
+                                <!-- <div class="checkbox-label">
+                                    {{ filterKey?.value }}
+                                </div> -->
+                                <span class="line-clamp-2 overflow-hidden text-ellipsis">
+                                    {{ filterKey?.value }}
+                                </span>
+                            </mat-checkbox>
+                        </div>
+                    </ng-container>
+                    <ng-template #noData>
+                        No {{filter}}
+                    </ng-template>
                 </div>
             </ng-container>
                         <!-- placeholder="{{'widgetCbpFilters.enterCompetencyTheme' | translate}}" -->

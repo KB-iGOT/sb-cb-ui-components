@@ -2,7 +2,6 @@ import { Component, Input, ViewEncapsulation, OnInit, Inject } from '@angular/co
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
-import { communityList } from '../../_model/filter-constants.model';
 
 @Component({
   selector: 'd-v2-widget-community-home',
@@ -24,7 +23,6 @@ export class WidgetCommunityHomeComponent implements OnInit {
   environment: any
   competenciesObject: any = []
   competencySelected = ''
-  communityDataList: any = communityList
   shortCutData: any[]= [
     {
       name:"Saved Posts",

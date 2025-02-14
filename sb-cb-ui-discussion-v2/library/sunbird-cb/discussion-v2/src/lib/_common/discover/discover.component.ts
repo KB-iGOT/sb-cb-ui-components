@@ -10,6 +10,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 export class DiscoverComponent implements OnInit, OnChanges {
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
+  @Output() popularCommunityClick = new EventEmitter<any>();
   @Input() topicDataList: any;
   orgDetails: any;
   toppicWiseCommunities: any = {};
@@ -60,6 +61,8 @@ export class DiscoverComponent implements OnInit, OnChanges {
       //   count: 0
       // }
     }
+
+    this.getPopularCommunities()
       
   }
 
@@ -175,5 +178,38 @@ export class DiscoverComponent implements OnInit, OnChanges {
       console.error('Error fetching communities by topic:', error);
       return [];
     }
+  }
+  async getPopularCommunities() {
+    let request: any = {
+      "filterCriteriaMap": {
+          "status": "active"
+      },
+      "requestedFields": [],
+      "pageNumber": 0,
+      "pageSize": 3,
+      "orderBy":"countOfPeopleJoined",
+      "orderDirection": "desc"
+    }
+
+    try {
+      const res: any = await this.discussV2Svc.communitySearch(request).toPromise();
+      if (res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length) {
+        
+          
+          let newValues = res.result.search_results.data.map((v: any) => ({...v, name: v.communityName, banner: v.posterImageUrl}))
+          this.popularCommunities = newValues
+        
+        return res.result.search_results.data;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error fetching communities by topic:', error);
+      return [];
+    }
+  }
+
+  popularCommunity(popularData: any){
+    this.popularCommunityClick.emit(popularData)
   }
 }
