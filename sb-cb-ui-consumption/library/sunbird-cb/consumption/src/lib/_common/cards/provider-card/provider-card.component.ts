@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NsCardContent } from '../../../_models/card-content.model';
 import { Router } from '@angular/router';
+import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
 
 @Component({
   selector: 'sb-uic-provider-card',
@@ -17,7 +18,7 @@ export class ProviderCardComponent implements OnInit {
     '#254092', '#926525', '#4F72DF'
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private contSvc: WidgetContentLibService) {}
 
   ngOnInit() {
     this.setRandomColor()
@@ -37,6 +38,8 @@ export class ProviderCardComponent implements OnInit {
 
   redirectTo(content: any) {  
     this.router.navigate([`/app/learn/browse-by/provider/${content.name}/${content.orgId}/micro-sites`])
+    content['typeOfTelemetry'] = this.widgetData.context.pageSection
+    this.contSvc.changeTelemetryData(content)
   }
 
 

@@ -169,7 +169,9 @@
       width: 100%;
     }
     .mat-subheading-1 {
+      /* stylelint-disable */
       font: 600 14px/24px Montserrat;
+      /* stylelint-enable */
     }
   
     .complexity {
@@ -288,7 +290,7 @@
     // padding-top: 4px;
     p {
       opacity: 1;
-      background-color: white;
+      background-color: $white;
       padding: 4px;
       opacity: 1;
       color: rgba(27, 33, 51, 1);
@@ -367,16 +369,18 @@
   }
   .relevent-success {
     .text-relevent, mat-icon {
-      color: #1D8923;
+      color: $successText;
     }
   }
 
   .text-no {
-    color: #1B4CA1;
+    color: $brandAccentColor;
   }
 
   .ff-lato {
+    /* stylelint-disable */
     font-family: Lato;
+    /* stylelint-enable */
   }
 
   .relevent-normal.relevent-btn {
@@ -387,7 +391,7 @@
     font-size: 16px;
     font-weight: bold;
     color: $releventBtn;
-    background-color: white;
+    background-color: $white;
     border-radius: 21px;
     text-decoration: none;
     overflow: hidden;

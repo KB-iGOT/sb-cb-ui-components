@@ -116,6 +116,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   sakshamLoader = false
   recommendedCoursesId: string
   releventNotReleventSubscription: Subscription | null = null;
+  telementrySubscription: Subscription | null = null;
   feedbackCourseId = ''
   currentStripG: any;
   tabEventG: any;
@@ -151,23 +152,30 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ngOnInit() {
     // const url = window.location.href
     this.initData();
-    this.contentSvc.telemetryData$.subscribe((data: any) => {
-      if (this.widgetData && this.widgetData.strips[0] && this.widgetData.strips[0].key === 'cbpPlan') {
-        const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
-        const pill = tab.pillsData[this.activePillIndex]
-        if (tab && pill) {
-          data.selectedTab = this.parametrizedText(tab.label)
-          data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
-          this.telemtryResponse.emit(data)
-        }
-      } else {
-        this.telemtryResponse.emit(data)
-      }
-
-    })
-
+    this.subscribeToTelementry()
   }
 
+  subscribeToTelementry() {
+    if(!this.telementrySubscription) {
+      this.telementrySubscription = this.contentSvc.telemetryData$.subscribe((data: any) => {
+        if (this.widgetData && this.widgetData.strips[0] && 
+          (this.widgetData.strips[0]?.key === 'cbpPlan') 
+          || this.widgetData.strips[0]?.key === 'forYou'
+          || this.widgetData.strips[0]?.key === 'continueLearning') {
+          const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
+          // const pill = tab.pillsData[this.activePillIndex]
+          const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) =>  pill?.selected );
+          if (tab && pill) {
+            data.selectedTab = this.parametrizedText(tab.label)
+            data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
+            this.telemtryResponse.emit(data)
+          }
+        } else {
+          this.telemtryResponse.emit(data)
+        }
+      })
+    }
+  }
   parametrizedText(str: string) {
     return str.toLocaleLowerCase().replace(" ", "-")
   }
@@ -179,6 +187,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
     if(this.releventNotReleventSubscription) {
       this.releventNotReleventSubscription.unsubscribe()
+    }
+    
+    if(this.telementrySubscription) {
+      this.telementrySubscription.unsubscribe()
     }
   }
 

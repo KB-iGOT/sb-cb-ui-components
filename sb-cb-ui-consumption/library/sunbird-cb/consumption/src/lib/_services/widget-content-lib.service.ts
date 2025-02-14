@@ -76,7 +76,7 @@ export class WidgetContentLibService {
   tocConfigData$ = this.tocConfigData.asObservable();
   oneStepResumeEnable: boolean = false;
 
-  private telemetryData: any = new Subject<any>()
+  public telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
   currentMetaData!: NsContent.IContent;
   currentContentReadMetaData!: NsContent.IContent;
