@@ -1,36 +1,82 @@
-<mat-card class="filter-wrapper mt-4">
-    <mat-card-header>
-      <mat-card-title class="card-title margin-bottom-s">Filter by</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-        <ng-container *ngFor="let filter of filterKeys">
-            <div class="body-title mb-2">{{filterObjectList[filter]?.label}}</div>
-            <div class="search-container mb-2">
-                <div class="rsearch">
-                    <mat-icon class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">
-                        search
-                    </mat-icon>
-                    <input #searchInput id="searchInput"  class="sinput color-60" label=""
-                    placeholder="Search {{filterObjectList[filter]?.label}}" type="Standard" />
+<div class="hidden md:block">
+    <div class="filter-wrapper mt-4">
+        <div class="w-8/10">
+            <div class="card-title margin-bottom-s w-full">
+                <div class="flex items-center justify-between">
+                    <span>Filter by</span>
+                    <span (click)="clearFilterWhileSearch()" class="flex items-center cursor-pointer clear-all">
+                    <mat-icon>delete</mat-icon> Clear all
+                    </span>
                 </div>
             </div>
-            <div class="mb-4">
+        </div>
+        <ng-container [ngTemplateOutlet]="filter"></ng-container>
+    </div>
+</div>
 
-                {{searchInput?.value}}
-                <div class="flex flex-row category-item" *ngFor="let filterKey of filterObjectList[filter]?.values  | filterSearch: searchInput?.value">
-                    <mat-checkbox #checkboxes disableRipple class="filters-checkbox" [checked]="filterKey?.checked"
-                        (change)="handleGetFilterType($event, filterKey, filter)">
-                        <!-- <div class="checkbox-label">
-                            {{ filterKey?.value }}
-                        </div> -->
-                        <span class="line-clamp-2 overflow-hidden text-ellipsis">
-                            {{ filterKey?.value }}
-                        </span>
-                    </mat-checkbox>
+<div class="block md:hidden filter-block">
+    <div class="flex sticky filter-headder justify-between">
+        <div class="w-full">
+            <div class="card-title margin-bottom-s w-full">
+                <div class="flex items-center justify-between">
+                    <span>Filter by</span>
+                    <span (click)="clearFilterWhileSearch()" class="flex items-center cursor-pointer clear-all-filter">
+                    <mat-icon>delete</mat-icon> Clear all
+                    </span>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="filter-body">
+        <ng-container [ngTemplateOutlet]="filter"></ng-container>
+    </div>
+
+
+
+</div>
+<div class="sticky bottom-nav-wrapper md:hidden" *ngIf="loadBottomSheet">
+    <div class=" footer-block">
+        <button class="btn btn-primary clear-btn w-full" (click)="openLink('apply')">{{'gyaanKarmayogi.apply'| translate}}</button>
+        <!-- <button class="btn btn-primary apply-btn" (click)="openLink('apply')">{{'gyaanKarmayogi.apply'| translate}}</button> -->
+    </div>
+</div>
+
+
+<ng-template #filter>
+    <div>
+        <ng-container *ngFor="let filter of filterKeys">
+            <ng-container *ngIf="filterObjectList[filter]?.values?.length">
+                <div class="body-title mb-2">{{filterObjectList[filter]?.label}}</div>
+                <div class="search-container mb-2">
+                    <div class="rsearch">
+                        <mat-icon class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">
+                            search
+                        </mat-icon>
+                        <input #searchInput id="searchInput"  class="sinput color-60" label=""
+                        placeholder="Search {{filterObjectList[filter]?.label}}" type="Standard" />
+                    </div>
+                </div>
+                <div class="mb-4" >
+                    <ng-container *ngIf="(filterObjectList[filter]?.values | filterSearch: searchInput?.value).length;else noData">
+                        <div class="flex flex-row category-item" *ngFor="let filterKey of filterObjectList[filter]?.values  | filterSearch: searchInput?.value">
+                            <mat-checkbox #checkboxes disableRipple class="filters-checkbox" [checked]="filterKey?.checked"
+                                (change)="handleGetFilterType($event, filterKey, filter)">
+                                <!-- <div class="checkbox-label">
+                                    {{ filterKey?.value }}
+                                </div> -->
+                                <span class="line-clamp-2 overflow-hidden text-ellipsis">
+                                    {{ filterKey?.value }}
+                                </span>
+                            </mat-checkbox>
+                        </div>
+                    </ng-container>
+                    <ng-template #noData>
+                        No {{filter}}
+                    </ng-template>
+                </div>
+            </ng-container>
                         <!-- placeholder="{{'widgetCbpFilters.enterCompetencyTheme' | translate}}" -->
 
         </ng-container>
-    </mat-card-content>
-  </mat-card>
+    </div>
+</ng-template>

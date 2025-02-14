@@ -1,5 +1,5 @@
 <div class="py-4">
-    <div class="flex justify-between items-center mb-4 mt-8 community-groups">
+    <div class="flex justify-between items-center mb-4  community-groups">
         <h2 class="text-xl font-medium title margin-remove">{{ 'Popular Communities' }} ({{ popularCommunities?.length}})</h2>
         <a class="show-more flex items-center cursor-pointer" *ngIf="popularCommunities?.count > 3" (click)="showAllCommunitiesByTopic(popularCommunities)">
             <span>Show all</span> 
@@ -8,7 +8,7 @@
     </div>
     <div>
         <div class="media" *ngIf="popularCommunities && popularCommunities?.length">
-            <d-v2-image-sliders [title]="'Images'" [objectArray]="popularCommunities" [styleData]="sliderStyleData?.styleData"></d-v2-image-sliders>
+            <d-v2-image-sliders [title]="'Images'" (imageClickEmit)="popularCommunity($event)" [objectArray]="popularCommunities" [styleData]="sliderStyleData?.styleData"></d-v2-image-sliders>
         </div>
     </div>
 </div>
@@ -54,4 +54,9 @@
             </div>
         </div>
     </div> -->
+ </div>
+ <div *ngIf="!topicDataList?.length">
+    <div>
+        <d-v2-no-data [iconName]="'forum'" [noText]="'No Topics found'"></d-v2-no-data>
+    </div>
  </div>

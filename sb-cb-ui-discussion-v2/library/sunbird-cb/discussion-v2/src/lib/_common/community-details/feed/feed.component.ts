@@ -33,7 +33,7 @@ export class FeedComponent implements OnInit, OnChanges{
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.community) {
+    if (changes.community && Object.keys(changes.community.currentValue).length) {
       if(this.community) {
         console.log('on changes calling fetchPosts() ', this.community, changes.community)
         this.fetchPosts()
@@ -43,8 +43,9 @@ export class FeedComponent implements OnInit, OnChanges{
 
   fetchPosts() {
     this.loadingPosts = true
+    
     const req = this.fetchPostRequest()
-    this.discussV2Svc.searchPosts(req).subscribe(res => {
+    this.discussV2Svc.feedPosts(req).subscribe(res => {
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []
@@ -57,8 +58,9 @@ export class FeedComponent implements OnInit, OnChanges{
 
   fetchPostsMore() {
     this.loadingPosts = true
+    
     const req = this.fetchPostRequest()
-    this.discussV2Svc.searchPosts(req).subscribe(res => {
+    this.discussV2Svc.feedPosts(req).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
@@ -84,6 +86,7 @@ export class FeedComponent implements OnInit, OnChanges{
       "orderDirection": "ASC",
       "facets": []
     }
+    
     return req
   }
 

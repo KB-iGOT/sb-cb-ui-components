@@ -3,10 +3,10 @@
     <div class="banner-container">
         <img src="https://s3-alpha-sig.figma.com/img/f6bc/5417/601803742072ef1bdc6258233c4dcbc7?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=URbgUl7gxYt6vaU2dw1WtlTOYtwKZqsO-tcvXTNkekIO5m~FvQXubLRNeFW2Ds1q1YFZDiVBuzwVUftSezp8e2yyXtQk5OOXsVeKo7YPfGKf7YUdQhIInRNJBgbCTGIwJKR-i5GtCPchYWiVCp0v~eg74X2bh7MUwFWmIDGDf59gbejitTu~jzKi~cAaB30lrckmW3IT5F~BS8RBWGOHCBegQE8LGUF93600Mii7MwVvmW2BqNn5JnVzLXUQHfkEyyIxtjI~CIS4KZ4GWg31Es2NGB57JmUn1mMc~Hz29jXbRtHcgDTsCSwPzwdVcwJG5Yk5BKFRIcFZUt83eUIyEw__" alt="">
     </div>
-    <div class="community-basic-info flex justify-between items-center mt-2">
+    <div class="community-basic-info p-4 md:p-0 flex flex-wrap justify-between items-center mt-2">
         <div class="community-info">
             <h2>{{communityData?.communityName}}</h2>
-            <div class="community-metrix mt-2">
+            <div class="community-metrix mt-2 flex-wrap">
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">group</mat-icon>
                     <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
@@ -35,16 +35,16 @@
         <div class="community-action flex gap-2 items-center ">
             <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
             <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer " (click)="joinCommunity()">Join</button>
-            <mat-icon class="cursor-pointer" (click)="enableShare = true">share</mat-icon>
+            <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
             <mat-icon *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
         </div>
     </div>
-    <div class="about-community">
+    <div class="about-community p-4 md:p-0">
         <h2>About the community</h2>
         <p class="margin-top-xs">{{communityData?.description}}</p>
     </div>
 
-    <div>
+    <div class="mt-8 p-4 md:p-0">
         <ng-container *ngIf="!strip?.loaderWidgets?.length || !competenciesObject">
             <div class="flex flex-col">
                 <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
@@ -81,41 +81,47 @@
             </div>
         </ng-container>
     </div>
-    <div class="container mx-auto p-4 md:p-0 mt-6">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+    <div class="container mx-auto  mt-6">
+        <div class="grid grid-cols-1 p-4 md:p-0 md:grid-cols-12 gap-4">
             <!-- Column 1 -->
-            <div class=" p-2 rounded-lg md:col-span-3">
-                <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts>
+            <div class=" rounded-lg col-span-1 md:col-span-3">
+                <!-- <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts> -->
+                <d-v2-similar-community-card ></d-v2-similar-community-card> 
             </div>
         <!-- 282,372 -->
             <!-- Column 2 (Double Width on Large Screens) -->
-            <div class=" p-2 rounded-lg md:col-span-6">
+            <div class=" rounded-lg col-span-1 md:col-span-6">
                 
-                <mat-tab-group class="custom-tab-container " mat-stretch-tabs="false" mat-align-tabs="center">
+                <mat-tab-group class="custom-tab-container " (selectedTabChange)="onTabChange($event)" mat-stretch-tabs="false" mat-align-tabs="center">
                     <ng-container *ngFor="let tab of communityWidgetData?.tabs">
                         <mat-tab [label]="tab.label">
-                            <div class="mt-2">
-                                <ng-container *ngIf="tab?.value === 'feeds'">
-                                    <d-v2-feed [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
-                                </ng-container>
-                                
-                                <ng-container *ngIf="tab?.value === 'members'">
-                                    <d-v2-member-details [communityId]="communityId"></d-v2-member-details>
-                                </ng-container>
-                            </div>
+                            <ng-template matTabContent>
+                                <div class="mt-2">
+                                    <ng-container *ngIf="tab?.value === 'feeds'">
+                                        <d-v2-feed [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
+                                    </ng-container>
+                                    
+                                    <ng-container *ngIf="tab?.value === 'members'">
+                                        <d-v2-member-details [communityId]="communityId"></d-v2-member-details>
+                                    </ng-container>
+                                    <ng-container *ngIf="tab?.value === 'bookmarked'">
+                                        <d-v2-bookmark-list [userJoinedCommunity]="userJoinedCommunity" [communityId]="communityId" [communityData]="communityData" [widgetData]="feedWidgetData"></d-v2-bookmark-list>
+                                    </ng-container>
+                                </div>
+                            </ng-template>
                         </mat-tab>
                     </ng-container>
                 </mat-tab-group>
             </div>
         
             <!-- Column 3 -->
-            <div class=" p-2 rounded-lg md:col-span-3">
+            <div class=" rounded-lg col-span-1 md:col-span-3">
                 <ng-container *ngIf="communityData?.communityGuideLines">
                     <div class="mb-4">
                         <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
                     </div>
                 </ng-container>
-                <d-v2-trending-discussions [data]="trendingDiscussions"></d-v2-trending-discussions>
+                <d-v2-trending-discussions [communityId]="communityId"></d-v2-trending-discussions>
             </div>
         </div>
     </div>

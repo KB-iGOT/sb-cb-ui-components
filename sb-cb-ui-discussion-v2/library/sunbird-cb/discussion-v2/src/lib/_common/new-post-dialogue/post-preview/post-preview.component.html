@@ -43,9 +43,44 @@
             <div class="cursor-pointer" (click)="viewMoreOrLess(post)"
                 *ngIf="post?.expanded">View less</div>
         </div>
-        <div class="media" *ngIf="post?.mediaUrls && post?.mediaUrls.length">
-            <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaUrls" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
+        <ng-container *ngIf="post?.categoryType?.includes('image')">
+            <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.image">
+                <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaCategory?.image" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
+            </div>
+        </ng-container>
+         <!-- IF Doc  -->
+        <ng-container *ngIf="post?.categoryType?.includes('document')">
+           <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.document">
+               <div *ngFor="let doc of post?.mediaCategory?.document" class="doc-item flex items-center gap-2 mb-2">
+                   <mat-icon class="doc-icon" [ngClass]="{
+                       'pdf-icon': getFileExtension(doc) === 'pdf',
+                       'doc-icon': getFileExtension(doc) === 'doc',
+                       'docx-icon': getFileExtension(doc) === 'docx'
+                   }">
+                       {{getFileIcon(doc)}}
+                   </mat-icon>
+                   <a [href]="" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      class="doc-name doc-link">
+                       {{getFileName(doc)}}
+                   </a>
+               </div>
+           </div>
+       </ng-container>
+       <ng-container *ngIf="post?.categoryType?.includes('link')">
+        <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.link">
+            <div *ngFor="let linkUrl of post?.mediaCategory?.link" class="doc-item flex items-center gap-2 mb-2">
+                <mat-icon class="doc-icon">link</mat-icon>
+                <a [href]="linkUrl" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="doc-name doc-link">
+                    {{linkUrl}}
+                </a>
+            </div>
         </div>
+    </ng-container>
     </div>
     <div class="flex mt-4 tags-section">
         <ng-container *ngFor="let tag of post?.tags">

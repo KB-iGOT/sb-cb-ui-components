@@ -30,6 +30,9 @@ export * from './lib/_widgets/widget-community-search/widget-community-search.co
 export * from './lib/_widgets/widget-community-search/widget-community-search.module'
 
 
+export * from './lib/_widgets/widget-topics-all/widget-topics-all.component'
+export * from './lib/_widgets/widget-topics-all/widget-topics-all.module'
+
 export * from './lib/_common/shortcuts/shortcuts.module'
 export * from './lib/_common/shortcuts/shortcuts.component'
 export * from './lib/_common/trending-discussions/trending-discussions.module'

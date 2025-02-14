@@ -25,7 +25,7 @@
 }
 
 .discuss-input {
-    border-radius: 48px;
+    border-radius: 15px;
     height: 40px;
     padding: 0 16px;
     border: 1px solid #00000029;
@@ -56,6 +56,8 @@ input {
     }
 }
 
+
+
 .input-container {
     border: 1px solid #00000029;
     border-radius: 72px;
@@ -81,3 +83,64 @@ input {
     pointer-events: none;
     opacity: 0.6; /* Optional: to visually indicate that the div is disabled */
   }
+
+  .discuss-input {
+    min-height: 40px;
+    max-height: 200px;
+    resize: none;
+    overflow-y: hidden;
+  }
+  
+  .image-preview-container {
+    .remove-image-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      transform: scale(0.8);
+    }
+  } 
+
+.wrapper {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #00000029;
+    padding: 12px;
+}
+
+.input-wrapper {
+  background: white;
+  transition: all 0.3s ease;
+  
+  &.expanded {
+    border-radius: 12px;
+  }
+}
+
+.discuss-input {
+  min-height: 24px;
+  max-height: 200px;
+  overflow-y: hidden;
+}
+
+// Hide icons by default when they have the hidden class
+.single-line-icons.hidden,
+.multi-line-icons.hidden {
+  display: none !important;
+}
+
+.multi-line-icons {
+  display: flex;
+}
+
+.image-preview-container {
+  .remove-image-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    transform: scale(0.8);
+  }
+} 

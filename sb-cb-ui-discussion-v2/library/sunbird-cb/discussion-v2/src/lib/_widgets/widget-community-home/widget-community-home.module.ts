@@ -12,9 +12,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { PipesModule } from '../../_pipes/pipes.module';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { HorizontalScrollerV2Module } from '@sunbird-cb/utils-v2';
 import { CompetencyCardModule } from '../../_common/competency-card/competency-card.module';
+import { SimilarCommunityCardModule } from '../../_common/similar-community-card/similar-community-card.module';
 
 
 
@@ -38,7 +39,8 @@ import { CompetencyCardModule } from '../../_common/competency-card/competency-c
     TranslateModule,
     MatTooltipModule,
     HorizontalScrollerV2Module,
-    CompetencyCardModule
+    CompetencyCardModule,
+    SimilarCommunityCardModule
   ],
   exports: [
     WidgetCommunityHomeComponent

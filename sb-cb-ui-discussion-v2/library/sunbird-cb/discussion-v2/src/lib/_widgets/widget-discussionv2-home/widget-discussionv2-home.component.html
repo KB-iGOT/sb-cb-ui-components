@@ -1,8 +1,8 @@
-<div class="container mx-auto py-6 ">
+<div class="container mx-auto ">
    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
        <!-- Column 1 -->
        <div class=" p-2 rounded-lg md:col-span-3">
-           <!-- <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts> -->
+         <d-v2-similar-community-card ></d-v2-similar-community-card> 
        </div>
    
        <!-- Column 2 (Double Width on Large Screens) -->
@@ -23,12 +23,13 @@
                </div>
             </div>
          </div>
-         <div class="py-4">
+         <div class="py-4" *ngIf="topicDataList?.length">
             <div class="flex justify-between items-center mb-4 community-groups">
                <h2 class="text-xl font-medium title margin-remove">All Topics <span *ngIf="topicDataList?.length">({{topicDataList?.length}})</span></h2>
-               <a class="show-more flex items-center" *ngIf="topicDataList?.length > 3" (click)="showAllCommunitiesByTopic(1029)">
+               <a class="show-more flex items-center cursor-pointer"  (click)="showAllTopicsMethod()">
                  <span>Show all</span> 
                  <mat-icon>chevron_right</mat-icon>
+                 <!-- *ngIf="topicDataList?.length > 3" -->
                </a>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
@@ -47,7 +48,7 @@
          <mat-tab-group animationDuration="0ms" class="custom-tab-container ">
             <mat-tab label="Discover">
                <ng-container *ngIf="topicDataList?.length">
-                  <d-v2-discover [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
+                  <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
                </ng-container>
                
             </mat-tab>
@@ -58,14 +59,13 @@
                 </div>
              </div>
             </mat-tab>
-            <!-- <mat-tab label="Pending Community Request (12)"></mat-tab> -->
          </mat-tab-group>
            
        </div>
    
        <!-- Column 3 -->
        <div class=" p-2 rounded-lg md:col-span-3">
-           <d-v2-trending-discussions ></d-v2-trending-discussions>
+           <d-v2-trending-discussions [expandCard]="true"></d-v2-trending-discussions>
        </div>
    </div>
 </div>

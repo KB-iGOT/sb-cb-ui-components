@@ -22,6 +22,8 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
   @Output() topicCardClick = new EventEmitter<any>();
+  @Output() showAllTopics = new EventEmitter<any>();
+  @Output() popularCommunityData = new EventEmitter<any>();
   userEnrollDetailsData: any;
   topicDataList: any = []
   topicDataLoading: boolean = false
@@ -45,6 +47,9 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
 
   showAllCommunitiesByTopic(topic: any) {
     this.showAllByTopic.emit(topic);
+  }
+  showAllTopicsMethod() {
+    this.showAllTopics.emit();
   }
 
   onCardClick(cardData: any){
@@ -75,6 +80,11 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   }
   topicCardMethod(topicData: any) {
     this.topicCardClick.emit(topicData)
+  }
+
+
+  popularCommunity(popularData: any) {
+    this.popularCommunityData.emit(popularData)
   }
 
 }

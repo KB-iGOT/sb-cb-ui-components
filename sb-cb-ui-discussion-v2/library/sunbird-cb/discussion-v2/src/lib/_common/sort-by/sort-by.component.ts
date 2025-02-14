@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'd-v2-sort-by',
@@ -6,7 +6,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
   styleUrls: ['./sort-by.component.scss']
 })
 export class SortByComponent {
-  sortData: any
+  @Input() sortData: any
   @Output() sortOptionSelection = new EventEmitter<any>();
   constructor() {
     this.sortData = [
