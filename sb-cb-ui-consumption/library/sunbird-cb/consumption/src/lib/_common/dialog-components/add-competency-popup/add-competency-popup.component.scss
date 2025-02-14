@@ -3,9 +3,10 @@
 @use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
 
 
-
 .ff-montserrat {
-  font-family: Montserrat;
+    /* stylelint-disable */
+    font-family: Montserrat;
+  /* stylelint-enable */
 }
 
 .section-btn {
