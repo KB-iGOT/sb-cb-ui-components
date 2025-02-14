@@ -132,9 +132,10 @@ export class FilterComponent {
 
   // this openLink method is used to close the bottomsheet
   openLink(type: any): void {
+    
     if (type === 'apply') {
       this.bottomSheetRef.dismiss({
-        // filter: this.mobileSelectedFilter,
+        filter: this.selectedOptions,
         // facetData: this.facetsData,
       })
     } else {

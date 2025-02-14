@@ -4,7 +4,7 @@
            <div class="headding">Similar to Your Communities</div>
         </div>
         <div contentBodyBlock>
-            <div class="space-y-4 pt-4" *ngIf="communityData && communityData?.length">
+            <div class="space-y-4 pt-4" *ngIf="communityData && communityData?.length; else noData">
                 <ng-container *ngFor="let community of communityData">
                     <div class="flex gap-4 items-center comminity-details">
                         <d-v2-avatar-photo [size]="'s'"
@@ -18,6 +18,9 @@
                 </ng-container>
                 
             </div>
+            <ng-template #noData>
+                <d-v2-no-data [iconName]="'forum'" [noText]="'No Communities'"></d-v2-no-data>
+            </ng-template>
         </div>
     </d-v2-card-toggle>
 </div>

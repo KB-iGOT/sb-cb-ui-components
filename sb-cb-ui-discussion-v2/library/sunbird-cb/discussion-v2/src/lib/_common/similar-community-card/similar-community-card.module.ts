@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SimilarCommunityCardComponent } from './similar-community-card.component';
 import { CardToggleModule } from '../card-toggle/card-toggle.module';
 import { SharedModule } from '../../_shared/shared.module';
+import { NoDataModule } from '../no-data/no-data.module';
 
 
 
@@ -13,7 +14,8 @@ import { SharedModule } from '../../_shared/shared.module';
   imports: [
     CommonModule,
     CardToggleModule,
-    SharedModule
+    SharedModule,
+    NoDataModule
   ],
   exports: [
     SimilarCommunityCardComponent

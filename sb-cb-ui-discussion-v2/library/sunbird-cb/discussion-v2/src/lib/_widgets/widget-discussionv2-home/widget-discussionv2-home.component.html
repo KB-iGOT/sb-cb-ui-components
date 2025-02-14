@@ -2,7 +2,7 @@
    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
        <!-- Column 1 -->
        <div class=" p-2 rounded-lg md:col-span-3">
-         <d-v2-similar-community-card [communityData]="communityDataList"></d-v2-similar-community-card> 
+         <d-v2-similar-community-card ></d-v2-similar-community-card> 
        </div>
    
        <!-- Column 2 (Double Width on Large Screens) -->
@@ -23,7 +23,7 @@
                </div>
             </div>
          </div>
-         <div class="py-4">
+         <div class="py-4" *ngIf="topicDataList?.length">
             <div class="flex justify-between items-center mb-4 community-groups">
                <h2 class="text-xl font-medium title margin-remove">All Topics <span *ngIf="topicDataList?.length">({{topicDataList?.length}})</span></h2>
                <a class="show-more flex items-center cursor-pointer"  (click)="showAllTopicsMethod()">
@@ -48,7 +48,7 @@
          <mat-tab-group animationDuration="0ms" class="custom-tab-container ">
             <mat-tab label="Discover">
                <ng-container *ngIf="topicDataList?.length">
-                  <d-v2-discover [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
+                  <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
                </ng-container>
                
             </mat-tab>

@@ -11,7 +11,7 @@ export class MemberDetailsComponent implements OnInit{
   communityMembersList: any = []
   limit: number = 2
   offset: number = 0
-  disableLoadmore: boolean = false
+  totalNumberOfMembers: any = 0
   constructor(private discussV2Svc: DiscussionV2Service){
 
   }
@@ -29,8 +29,7 @@ export class MemberDetailsComponent implements OnInit{
       
       if(res.result && res.result && res.result.userDetails  && res.result.userDetails.length){
         this.communityMembersList = [...this.communityMembersList,...res.result.userDetails];
-      } else {
-        this.disableLoadmore = true
+        this.totalNumberOfMembers =  res.result.usersJoinedCount
       }
     })
   }
@@ -39,7 +38,9 @@ export class MemberDetailsComponent implements OnInit{
 
   }
   loadMoreMembers(){
-    this.offset = this.offset + 1
-    this.getAllMembersOfCommunity()
+    if( !(this.communityMembersList.length >= this.totalNumberOfMembers)) {
+      this.offset = this.offset + 1
+      this.getAllMembersOfCommunity()
+    }
   }
 }

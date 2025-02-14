@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 export class TrendingDiscussionsComponent implements OnInit {
  @Input() data: any = [] 
  @Input() expandCard: boolean= false
+ @Input() communityId!: string
  hideCardBody:boolean | undefined
  searchResults: any
  loadingPosts: boolean = true
@@ -31,9 +32,12 @@ export class TrendingDiscussionsComponent implements OnInit {
          "requestedFields": [],
          "pageNumber": 0,
          "pageSize": 5,
-         "orderBy": "createdOn",
-         "orderDirection": "ASC",
+         "orderBy": "answerPosts",
+         "orderDirection": "desc",
          "facets": []
+     }
+     if(this.communityId) {
+      req['filterCriteriaMap'] = {...req['filterCriteriaMap'], ...{communityId:this.communityId}}
      }
      this.discussV2Svc.searchPosts(req).subscribe(res => {
        this.loadingPosts = false

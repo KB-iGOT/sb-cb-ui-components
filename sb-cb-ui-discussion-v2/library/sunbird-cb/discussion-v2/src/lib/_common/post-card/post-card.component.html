@@ -105,8 +105,8 @@
                         *ngIf="cardConfig?.actions?.comments?.iconDisplay"
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
-                        {{post?.answerPostCount && post?.answerPostCount > 1 ? 'Answers' :
-                        'Answer'}} ({{(post?.answerPostCount && post?.answerPostCount) || 0}})
+                        {{post?.answerPostCount && post?.answerPostCount > 1 ? 'Comments' :
+                        'Comment'}} ({{(post?.answerPostCount && post?.answerPostCount) || 0}})
                     </span>
                 </div>
             </ng-container>
