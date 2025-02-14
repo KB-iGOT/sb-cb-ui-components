@@ -10,6 +10,7 @@ const API_END_POINTS = {
   UPDATE_POST: `/apis/proxies/v8/feedDiscussion/update`,
   UPDATE_ANSWER_POST: `/apis/proxies/v8/feedDiscussion/updateAnswerPost`,
   SEARCH_POSTS: `/apis/proxies/v8/feedDiscussion/search`,
+  FEED_POSTS: `/apis/proxies/v8/feedDiscussion/communityFeed`,
   UP_VOTE: (id: string) => `/apis/proxies/v8/feedDiscussion/upVote/${id}`,
   DOWN_VOTE: (id: string) => `/apis/proxies/v8/feedDiscussion/downVote/${id}`,
   DELETE_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/delete/${id}`,
@@ -66,6 +67,10 @@ export class DiscussionV2Service {
 
   searchPosts(req: any) {
     return this.http.post<any>(`${API_END_POINTS.SEARCH_POSTS}`, req) 
+  }
+
+  feedPosts(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.FEED_POSTS}`, req) 
   }
 
   upVotePost(id: string) {

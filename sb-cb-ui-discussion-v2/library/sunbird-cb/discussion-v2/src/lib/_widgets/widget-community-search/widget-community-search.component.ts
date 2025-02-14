@@ -129,7 +129,6 @@ export class WidgetCommunitySearchComponent {
   }
 
   onCardClick(community: any){
-    console.log(community);
     this.cardClick.emit(community);
   }
   sortOptionSelection(sortData: any){
@@ -185,7 +184,6 @@ export class WidgetCommunitySearchComponent {
             newValues = facets[ele].map((v: any) => ({...v, checked: false}))
           }
           tempFilter['values'] = newValues
-          console.log(ele)
           if(ele === 'topicName') {
             newValues.forEach((element: any) => {
               if(element.value === this.topicName ){
@@ -195,7 +193,6 @@ export class WidgetCommunitySearchComponent {
           }
           this.filterObjectList[ele] =  tempFilter
         })
-        console.log('this.filterObjectList', this.filterObjectList)
       }
     })
   }
@@ -204,10 +201,9 @@ export class WidgetCommunitySearchComponent {
   selectedFilters(filterData: any){
     
     let filterRequest = filterData.selectedOptions
-    let recentRequestKey = filterData.recentSelectedKey
+    let recentRequestKey = filterData.recentSelectedKey|| ''
     // let recentRequestOption = filterData.recentSelectedOption
     
-    console.log(filterRequest,recentRequestKey,'filterRequest..........')
     let filterObject: any = {}
     let factesRequest: any = []
 
@@ -249,22 +245,12 @@ export class WidgetCommunitySearchComponent {
       },
       panelClass: 'filter-bottomsheet',
     })
-    bottomSheetRef.afterDismissed().subscribe((_result: any) => {
-    //  if (result) {
-    //   const filter = result.filter
-    //     this.titles = [
-    //       { title: 'Amrit Gyaan Kosh', url: '/app/amrit-gyaan-kosh/all', disableTranslate: true, icon: 'menu_book' },
-    //       { title: this.titleCasePipe.transform(filter[gyaanConstants.resourceCategory] ?
-    //          filter[gyaanConstants.resourceCategory] : ''), url: `none`, icon: '' },
-    //     ]
-    //     this.facetsData = result.facetData
-    //     this.facetsDataCopy = result.facetData
-    //     this.selectedFilter = filter
-    //     this.contentDataList = this.transformSkeletonToWidgets(this.seeAllPageConfig)
-    //     if (this.seeAllPageConfig.request && this.seeAllPageConfig.request.searchV6) {
-    //       this.fetchFromSearchV6(this.seeAllPageConfig, false)
-    //     }
-    //  }
+    bottomSheetRef.afterDismissed().subscribe((result: any) => {
+     if (result) {
+      const filter = result.filter
+
+      this.selectedFilters({selectedOptions:filter})
+     }
     })
   }
 

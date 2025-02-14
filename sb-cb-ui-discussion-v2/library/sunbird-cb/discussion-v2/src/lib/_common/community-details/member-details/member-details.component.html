@@ -14,7 +14,8 @@
         </div>
      </div>
     <div class="member-title">
-        <h2>Members</h2>
+        <h2>Members <span class="ml-2" *ngIf="totalNumberOfMembers">({{totalNumberOfMembers}})</span></h2>
+
     </div>
     <div>
         <div class="flex justify-start">
@@ -24,7 +25,7 @@
                 </ng-container>
             </div>
         </div>
-        <ng-container *ngIf="!disableLoadmore">
+        <ng-container *ngIf="!(this.communityMembersList.length >= this.totalNumberOfMembers)">
             <div class="load-more-posts my-4 mt-8">
                 <button mat-flat-button color="primary" class="w-full underline" (click)="loadMoreMembers()">Load
                     More</button>

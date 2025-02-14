@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core'
+import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { IImageCarouselStyle } from './image-sliders.model'
 import { Subscription, interval } from 'rxjs'
 import { EventService, WsEvents, ValueService } from '@sunbird-cb/utils-v2'
@@ -13,6 +13,7 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
   @Input() title: any = ''
   @Input() imageUrls: any[] = []
   @Input() objectArray: any[] = []
+  @Output() imageClickEmit = new EventEmitter<any>();
   @HostBinding('id')
   public id = `banner_${Math.random()}`
   private defaultMenuSubscribe: Subscription | null = null
@@ -147,5 +148,9 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
     if (currentData.redirectUrl && currentData.redirectUrl.includes('mailto') || this.objectArray[this.currentIndex].openInNewTab) {
       window.open(currentData.redirectUrl)
     }
+  }
+
+  imageClick(slideData: any) {
+    this.imageClickEmit.emit(slideData)
   }
 }

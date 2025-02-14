@@ -1,16 +1,16 @@
-<div class="flex flex-col lg:flex-row gap-8">
+<div class="flex flex-col lg:flex-row gap-8 px-4 md:px-0">
     <!-- Left Sidebar -->
     <div class="lg:w-64">
       <ng-container *ngIf="!isLoading">
-         <d-v2-similar-community-card [communityData]="communityDataList"></d-v2-similar-community-card> 
-         <!-- <mat-icon (click)="openBottomSheet()" class="">filter_list</mat-icon> -->
+         <d-v2-similar-community-card ></d-v2-similar-community-card> 
+         
       </ng-container>
     </div>
     <!-- Main Content -->
     <div class="flex-1">
        <div class="md:col-span-2">
-          <div class="mb-6">
-             <div class="relative flex community-search" *ngIf="globalSearchEnabled">
+          <div class="flex items-center gap-2 mb-6">
+             <div class="relative flex-1 flex community-search" *ngIf="globalSearchEnabled">
                 <input
                    type="text"
                    [value]="searchTextValue"
@@ -22,7 +22,7 @@
                    search
                 </mat-icon>
              </div>
-             <div class="relative flex community-search" *ngIf="topicName">
+             <div class="relative flex-1 flex community-search" *ngIf="topicName">
                <input
                #searchInput id="searchInput"
                   type="text"
@@ -34,6 +34,7 @@
                   search
                </mat-icon>
             </div>
+            <mat-icon (click)="openBottomSheet()" class="block md:hidden">filter_list</mat-icon>
           </div>
        </div>
        <div class="info-text">
@@ -49,7 +50,10 @@
     </div>
     <!-- Right Sidebar -->
     <div class="lg:w-64">
-        <d-v2-sort-by (sortOptionSelection)="sortOptionSelection($event)"></d-v2-sort-by>
-        <d-v2-filter [filterKeys]="filterKeys" (filterOptionSelected)="selectedFilters($event)" [filterObjectList]="filterObjectList"></d-v2-filter>
+      <div class="hidden md:block">
+         <d-v2-sort-by (sortOptionSelection)="sortOptionSelection($event)"></d-v2-sort-by>
+         <d-v2-filter [filterKeys]="filterKeys" (filterOptionSelected)="selectedFilters($event)" [filterObjectList]="filterObjectList"></d-v2-filter>
+      </div>
+        
     </div>
  </div>

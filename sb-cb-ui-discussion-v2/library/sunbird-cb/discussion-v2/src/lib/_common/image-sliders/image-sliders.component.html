@@ -1,22 +1,23 @@
 <ng-container *ngIf="objectArray?.length">
-  <div class="banner-container {{isMobile? styleData?.responsive?.bannerMetaClass : styleData?.bannerMetaClass}}"  (swipeleft)="slideToObject(currentIndex + 1)" (swiperight)="slideToObject(currentIndex - 1)"
+  <div class="banner-container cursor-pointer {{isMobile? styleData?.responsive?.bannerMetaClass : styleData?.bannerMetaClass}}"  (swipeleft)="slideToObject(currentIndex + 1)" (swiperight)="slideToObject(currentIndex - 1)"
   *ngIf="objectArray?.length > 1" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight"
   [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"
   [ngStyle]="{'border-radius': styleData?.borderRadius || '12px'}">
   <a 
-    class="banner-overlay {{objectArray[currentIndex] && objectArray[currentIndex].redirectUrl ? '' : 'pointer-events-none'}}"
+    class="banner-overlay {{objectArray[currentIndex] && objectArray[currentIndex].redirectUrl ? '' : ''}}"
     [routerLink]=" !isOpenObjectInNewTab && objectArray[currentIndex].redirectUrl? objectArray[currentIndex].redirectUrl : null"
-    [ngClass]="{'cursor-auto': !objectArray[currentIndex].redirectUrl}">
-    <div class="banner WidgetInstanceId" 
+    [ngClass]="{'cursor-pointer': !objectArray[currentIndex].redirectUrl}">
+    <div class="banner WidgetInstanceId " 
     *ngFor="let slide of objectArray; let i = index" 
     [hidden]="i !== currentIndex"
+    (click)="imageClick(slide)"
     [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"
     [ngStyle]="{
         'border-width': isMobile?  styleData?.responsive?.imageBorderWidth : styleData?.imageBorderWidth,
         'border-color': isMobile? styleData?.responsive?.imageBorderColor : styleData?.imageBorderColor,
         'border-style': isMobile? styleData?.responsive?.imageBorderStyle: styleData?.imageBorderStyle}">
       <img i18n-alt alt="Image{{i}}"
-      [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight" [src]="slide?.banner" class=" banner-image"  />
+      [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"  [src]="slide?.banner" class=" banner-image "  />
       <div class="image-info">
         <p>{{slide?.name}}</p>
       </div>
@@ -25,7 +26,7 @@
   <ng-container *ngIf="isMobile && styleData?.responsive?.dots !== 'hidden' || !isMobile && styleData?.dots !== 'hidden'">
     <div class="banner-meta {{isMobile? styleData?.responsive?.bannerMetaAlign : styleData?.bannerMetaAlign}}">
       <a [routerLink]=" !isOpenObjectInNewTab && objectArray[currentIndex].redirectUrl? objectArray[currentIndex].redirectUrl : null"
-      class="banner-title text-truncate {{objectArray[currentIndex] && objectArray[currentIndex].redirectUrl ? '' : 'pointer-events-none'}}"
+      class="banner-title text-truncate "
         *ngIf="objectArray[currentIndex].title" [title]="objectArray[currentIndex].title">
         {{ objectArray[currentIndex].title }}
       </a>
