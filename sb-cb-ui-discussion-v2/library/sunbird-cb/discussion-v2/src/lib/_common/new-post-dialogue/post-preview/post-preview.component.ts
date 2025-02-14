@@ -33,4 +33,27 @@ export class PostPreviewComponent {
     }
   }
 
+  getFileExtension(file: string): string {
+    return file.split('.').pop() || '';
+  }
+
+  getFileName(url: string): string {
+    const filename = url.split('/').pop() || '';
+    // Decode the URL-encoded filename
+    return decodeURIComponent(filename);
+  }
+
+  getFileIcon(url: string): string {
+    const extension = this.getFileExtension(url);
+    switch(extension) {
+      case 'pdf':
+        return 'picture_as_pdf';
+      case 'doc':
+      case 'docx':
+        return 'description';
+      default:
+        return 'insert_drive_file';
+    }
+  }
+
 }

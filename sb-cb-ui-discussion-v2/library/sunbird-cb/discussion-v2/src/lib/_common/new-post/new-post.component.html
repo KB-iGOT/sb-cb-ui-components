@@ -19,20 +19,45 @@
             <div class="flex flex-1 items-center">
                 <form class="flex flex-1 items-center">
                     <!-- <mat-form-field appearance="outline" class="w-full pl-1"> -->
-                    <div class="relative w-full flex ">
-                        <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl"
-                            [attr.disabled]="toggleDisable()" i18n-placeholder
-                            [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'" (focus)="onFocus()">
-                        <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail"
-                            (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
-                        <br />
-                        <!-- <emoji-mart 
-                            class="emoji-mart absolute"
-                            set="google"
-                            *ngIf="showEmojiPicker"
-                            (emojiSelect)="addEmoji($event)"
-                            title="Pick your emoji…"
-                            ></emoji-mart> -->
+                    <div class="relative w-full wrapper">
+                        <div class="input-wrapper flex items-center rounded-full border px-4 py-2">
+                            <textarea #comment name="comment" class="flex-1 discuss-input mr-2 border-none outline-none resize-none bg-transparent"
+                                [formControl]="searchControl"
+                                [attr.disabled]="toggleDisable()" 
+                                i18n-placeholder rows="1"
+                                [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'" 
+                                (focus)="onFocus()"
+                                (input)="autoGrow($event)"></textarea>
+                            
+                            <!-- Icons that show inline when single line -->
+                            <div class="flex items-center single-line-icons" [class.hidden]="isMultiLine">
+                                <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
+                                    aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                                <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="fileInput.click()">
+                                    <mat-icon>image</mat-icon>
+                                </button>
+                                <input type="file" hidden #fileInput (change)="onImageSelected($event)" accept="image/*">
+                            </div>
+                        </div>
+
+                        <!-- Image preview section -->
+                        <div class="image-preview-container mt-2" *ngIf="selectedImage">
+                            <div class="relative inline-block">
+                                <img [src]="selectedImagePreview" class="max-h-32 rounded">
+                                <button mat-icon-button class="remove-image-btn" (click)="removeImage()">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Icons that show at bottom when multi-line -->
+                        <div class="flex items-center mt-2 multi-line-icons" [class.hidden]="!isMultiLine">
+                            <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
+                                aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                            <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="fileInput.click()">
+                                <mat-icon>image</mat-icon>
+                            </button>
+                        </div>
                     </div>
                     <!-- </mat-form-field> -->
                     <button mat-flat-button color="secondary" class="primary-button custom-rounded"

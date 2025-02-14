@@ -83,9 +83,9 @@
         </button>
       </div>
 
-      <ng-container *ngIf="showMediaUpload">
+      <ng-container *ngIf="uploadControlVisibility['image']">
         <!-- File Upload Section (Initially Hidden) -->
-        <div class="mb-4" *ngIf="showMediaUpload">
+        <div class="mb-4">
           <div class="flex items-center justify-center w-full">
             <label for="fileUpload"
               class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -96,29 +96,16 @@
                 </p>
                 <p class="text-xs text-gray-500">Supported files: JPG, PNG</p>
               </div>
-              <input id="fileUpload" type="file" class="hidden" multiple (change)="onFileSelected($event)"
+              <input id="fileUpload" type="file" class="hidden" multiple (change)="onFileInputChange($event, 'image')"
                 accept=".jpg,.jpeg,.png">
             </label>
           </div>
         </div>
-
-        <!-- Display Uploaded Files -->
-        <div class="mb-4" *ngIf="selectedFiles.length > 0">
-          <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
-          <ul>
-            <li *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-2">
-              <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
-              <button mat-icon-button (click)="removeFile(i)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </li>
-          </ul>
-        </div>
       </ng-container>
 
-      <ng-container *ngIf="showDocumentUpload">
+      <ng-container *ngIf="uploadControlVisibility['document']">
         <!-- File Upload Section (Initially Hidden) -->
-        <div class="mb-4" *ngIf="showDocumentUpload">
+        <div class="mb-4">
           <div class="flex items-center justify-center w-full">
             <label for="fileUpload"
               class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -129,29 +116,96 @@
                 </p>
                 <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX</p>
               </div>
-              <input id="fileUpload" type="file" class="hidden" multiple (change)="onDocSelected($event)"
+              <input id="fileUpload" type="file" class="hidden" multiple (change)="onFileInputChange($event, 'document')"
                 accept=".pdf,.doc,.docx">
             </label>
           </div>
         </div>
+      </ng-container>
 
-        <!-- Display Uploaded Files -->
-        <div class="mb-4" *ngIf="selectedFiles.length > 0">
-          <h3 class="text-gray-700 text-sm font-medium mb-2">Uploaded Files</h3>
-          <ul>
-            <li *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-2">
-              <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
-              <button mat-icon-button (click)="removeDoc(i)">
-                <mat-icon>delete</mat-icon>
+      <ng-container *ngIf="uploadControlVisibility['link']">
+        <div class="mb-4">
+          <div class="flex flex-col gap-3">
+            <!-- Add new URL button -->
+            <div class="flex justify-end">
+              <input matInput  [(ngModel)]="linkInput"  [ngModelOptions]="{standalone: true}" placeholder="Enter URL" [name]="'linkInput'">
+              <button mat-stroked-button color="primary" (click)="addNewUrl()">
+                <mat-icon>add</mat-icon>
+                Add
               </button>
-            </li>
-          </ul>
+            </div>
+            <!-- Existing URLs list -->
+            <div *ngFor="let link of selectedFilesFinal['link']; let i = index" class="flex items-center gap-2">
+              <div class="relative flex flex-col items-center justify-center doc-item items-center gap-2">
+                <mat-icon class="doc-icon">
+                    link
+                </mat-icon>
+                <a [href]="link" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="doc-name doc-link">
+                    {{link}}
+                </a>
+                <button mat-icon-button class="custom-delete" (click)="removeUrl(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- For displaying all the media -->
+      <ng-container>
+        <div class="mb-4" *ngIf="categoryType.length > 0">
+          <h3 class="text-gray-700 text-sm font-medium mb-2">Uploads</h3>
+          <ng-container *ngFor="let cat of categoryType">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+              <ng-container *ngFor="let file of selectedFilesFinal[cat]; let i = index">
+                <div class="md:col-span-4 relative flex items-center doc-item justify-between mb-2">
+                  <ng-container *ngIf="cat === 'image'">
+                    <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
+                    <button mat-icon-button (click)="removeFileNew(i, cat)">
+                      <mat-icon>delete</mat-icon>
+                    </button> -->
+                    <div  class="relative flex doc-height">
+                      <img i18n-alt alt="{{file.name}}" [src]="file.previewUrl" class="doc-height"/>
+                      <button mat-icon-button class="custom-delete" (click)="removeFileNew(i, cat)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </ng-container>
+                  <ng-container *ngIf="cat === 'document'">
+                    <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
+                    <button mat-icon-button (click)="removeFileNew(i, cat)">
+                      <mat-icon>delete</mat-icon>
+                    </button> -->
+                    <div class="relative flex flex-col items-center justify-center doc-item items-center gap-2">
+                        <mat-icon class="doc-icon" [ngClass]="{
+                            'pdf-icon': getFileExtension(file.previewUrl) === 'pdf',
+                            'doc-icon': getFileExtension(file.previewUrl) === 'doc',
+                            'docx-icon': getFileExtension(file.previewUrl) === 'docx'
+                        }">
+                            {{getFileIcon(file.previewUrl)}}
+                        </mat-icon>
+                        <a [href]="" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="doc-name doc-link">
+                            {{getFileName(file.previewUrl)}}
+                        </a>
+                        <button mat-icon-button class="custom-delete" (click)="removeFileNew(i, cat)">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
         </div>
       </ng-container>
       
-      <ng-container *ngIf="showLinkCreate">
-        Link Create
-      </ng-container>
 
       <!-- Tags -->
       <!-- <div class="mb-4">
