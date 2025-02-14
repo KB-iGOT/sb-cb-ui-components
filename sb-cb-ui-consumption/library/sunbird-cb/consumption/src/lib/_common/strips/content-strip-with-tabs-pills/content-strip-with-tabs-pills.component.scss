@@ -1,6 +1,5 @@
 @use "@sunbird-cb/design-system/src/styles/ws-mixins" as *;
-$blackAlpha56: #0000008F;
-$white: #ffffff;
+@use "@sunbird-cb/design-system/src/styles/ws-vars";
 
 .view-more {
   display: flex;
@@ -116,7 +115,9 @@ $white: #ffffff;
 }
 
 .lato {
+  /* stylelint-disable */
   font-family: Lato;
+  /* stylelint-enable */
 }
 .wrapper-saksham {
   position: relative;
@@ -144,7 +145,9 @@ $white: #ffffff;
 }
 
 .overlay-text {
+  /* stylelint-disable */
   font-family: Montserrat;
+  /* stylelint-enable */
   font-size: 16px;
   font-weight: 600;
   line-height: 19.5px;
@@ -153,7 +156,7 @@ $white: #ffffff;
 
 .overlay-button {
   margin-top: 20px;
-  color: #000 !important;
+  color: $dark !important;
   height: 40px;
   border-radius: 41px;
   font-size: 14px;
@@ -164,7 +167,7 @@ $white: #ffffff;
   @extend .overlay-button;
   background: transparent !important;
   border: 1px solid $white;
-  color: #fff !important;
+  color: $white !important;
 }
 
 :host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
