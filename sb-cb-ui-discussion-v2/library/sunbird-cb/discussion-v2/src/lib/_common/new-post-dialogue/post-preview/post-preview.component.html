@@ -68,6 +68,19 @@
                </div>
            </div>
        </ng-container>
+       <ng-container *ngIf="post?.categoryType?.includes('link')">
+        <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.link">
+            <div *ngFor="let linkUrl of post?.mediaCategory?.link" class="doc-item flex items-center gap-2 mb-2">
+                <mat-icon class="doc-icon">link</mat-icon>
+                <a [href]="linkUrl" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="doc-name doc-link">
+                    {{linkUrl}}
+                </a>
+            </div>
+        </div>
+    </ng-container>
     </div>
     <div class="flex mt-4 tags-section">
         <ng-container *ngFor="let tag of post?.tags">
