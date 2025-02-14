@@ -50,17 +50,21 @@ implements OnInit, NsWidgetResolver.IWidgetData<NsCardContent.ICard>  {
     }
     return false
   }
-  async getRedirectUrlData(content: any){
+  async getRedirectUrlData(content: any){    
     if(content.externalId) {
       this.router.navigate(
         [`app/toc/ext/${content.contentId}`])
     } else {
       let urlData = await this.contSvc.getResourseLink(content)
+      const queryParams = {
+        ...urlData.queryParams,
+        ...(this.widgetData?.sakshamAIGenerated ? { recommendationId: this.widgetData?.sakshamAIGenerated } : {})
+      };
       this.router.navigate(
         [urlData.url],
-        {
-          queryParams: urlData.queryParams
-        })
+        // { queryParams: urlData.queryParams }
+        { queryParams }
+      )
     }
     
   }
