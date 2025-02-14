@@ -1,16 +1,18 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { UntypedFormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'd-v2-new-post',
   templateUrl: './new-post.component.html',
   styleUrls: ['./new-post.component.scss']
 })
-export class NewPostComponent {
+export class NewPostComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewPostConfig
   @Input() postsListconfig!: NsDiscussionV2.IPostCardConfig
   @Input() hierarchyPath = []
@@ -25,6 +27,15 @@ export class NewPostComponent {
   searchControl = new UntypedFormControl('')
   showEmojiPicker = false
 
+  selectedImage: File | null = null;
+  selectedImagePreview: string | null = null;
+
+  isMultiLine = false;
+
+  private heightCheckSubject = new Subject<any>();
+  private readonly LINE_HEIGHT = 40;
+  private readonly HEIGHT_BUFFER = 20; // Buffer to prevent flickering
+
   constructor(
     private configSvc: ConfigurationsService,
     // private discussV2Svc: DiscussionV2Service,
@@ -36,6 +47,17 @@ export class NewPostComponent {
   ngOnInit() {
     this.loogedInUserProfile = this.configSvc.userProfile
     this.loggedInUserData = this.configSvc.unMappedUser
+
+    // Debounce height checks
+    this.heightCheckSubject.pipe(
+      debounceTime(100) // Wait 100ms before processing height changes
+    ).subscribe((event: any) => {
+      this.processHeightChange(event);
+    });
+  }
+
+  ngOnDestroy() {
+    this.heightCheckSubject.complete();
   }
 
   submitComment() {
@@ -82,6 +104,44 @@ export class NewPostComponent {
         this.newComment.emit({result: result.result, type: result.type})
       }
     })
+  }
+
+  autoGrow(event: any): void {
+    const element = event.target;
+    element.style.height = 'auto';
+    element.style.height = element.scrollHeight + 'px';
+    this.heightCheckSubject.next(element);
+  }
+
+  private processHeightChange(element: HTMLElement): void {
+    const wrapper = element.closest('.input-wrapper');
+    const shouldBeMultiLine = element.scrollHeight > (this.LINE_HEIGHT + this.HEIGHT_BUFFER);
+    
+    if (shouldBeMultiLine !== this.isMultiLine) {
+      this.isMultiLine = shouldBeMultiLine;
+      if (this.isMultiLine) {
+        wrapper?.classList.add('expanded');
+      } else {
+        wrapper?.classList.remove('expanded');
+      }
+    }
+  }
+  
+  onImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedImage = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.selectedImagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  
+  removeImage(): void {
+    this.selectedImage = null;
+    this.selectedImagePreview = null;
   }
 
 }

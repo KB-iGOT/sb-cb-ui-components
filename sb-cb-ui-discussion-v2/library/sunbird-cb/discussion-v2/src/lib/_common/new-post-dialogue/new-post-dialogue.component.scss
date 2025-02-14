@@ -54,3 +54,73 @@
 .success {
   color: #1D8923;
 }
+
+:host ::ng-deep .ck-toolbar-bottom {
+  .ck.ck-editor__main {
+    order: 1;
+  }
+  
+  .ck.ck-editor__top {
+    order: 2;
+  }
+
+  .ck-editor__editable {
+    border-bottom: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  .ck-toolbar {
+    border-top: none !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
+} 
+
+.doc-item {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+.doc-icon {
+  font-size: 24px;
+}
+
+.pdf-icon {
+  color: #ff5252;
+}
+
+.doc-icon, .docx-icon {
+  color: #2196f3;
+}
+
+.doc-name {
+  font-size: 14px;
+  color: #333;
+  word-break: break-all;
+}
+
+.doc-link {
+  text-decoration: none;
+  color: #1B4CA1;  // Using your app's primary blue color
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.custom-delete {
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: red;
+  border: 1px solid;
+  border-radius: 12px;
+}
+
+.doc-height {
+  height: 150px;
+  width: 100%;
+}
