@@ -1,14 +1,9 @@
-$darkerShadeBorder: #00000066;
-$brandAccentColor: #1b4ca1;
-$brandAccentDarkShade: #1b4ca129;
-$darkColor: #00000099;
-$white: #ffffff;
-$whiteSmoke: #f5f5f5;
-$whiteWhisper: #f1f1f1;
-$scrollTumbBg: #888;
-$dimGray: #555;
-$borderGrey1: #00000014;
-$borderGrey2: rgba(0, 0, 0, 0.08);
+@use '@sunbird-cb/design-system/src/styles/ws-common';
+@use '@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
+
+
+
 .ff-montserrat {
   font-family: Montserrat;
 }
@@ -43,7 +38,7 @@ $borderGrey2: rgba(0, 0, 0, 0.08);
   overflow: hidden;
   line-height: 14px;
   font-family: Lato;
-  color: #000000de;
+  color: $darkColorText;
 }
 
 .long-text-wrap-new-ui {
