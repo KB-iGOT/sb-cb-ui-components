@@ -15,7 +15,7 @@ import moment from 'moment';
 
 // TODO: move this in some common place
 const PROTECTED_SLAG_V8 = '/apis/protected/v8';
-
+const PROD_BASE_ENDPOINT = 'https://portal.igotkarmayogi.gov.in'
 const API_END_POINTS = {
   CONTENT: `${PROTECTED_SLAG_V8}/content`,
   AUTHORING_CONTENT: `/api/course/v1/hierarchy`,
@@ -365,6 +365,15 @@ export class WidgetContentLibService {
       return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
     }
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
+  }
+
+  searchV6_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
+    const apiPath = _.get(req, 'api.path');
+    req.query = req.query || '';
+    if (apiPath) {
+      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+    }
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH_V6, req);
   }
 
   searchRelatedCBPV6(req: NSSearch.ISearchV6RequestV2): Observable<NSSearch.ISearchV6ApiResultV2> {
