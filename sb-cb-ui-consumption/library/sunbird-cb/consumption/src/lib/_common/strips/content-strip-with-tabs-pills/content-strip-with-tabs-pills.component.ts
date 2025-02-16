@@ -1765,7 +1765,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               }
             }
           }
-          this.contentSvc.searchV6(sRequest.searchV6).subscribe(results => {
+          this.contentSvc.searchV6_PROD(sRequest.searchV6).subscribe(results => {
             // if (results && results.result && results.result.content) {
             if (true) {
               // let courses = results.result.content
