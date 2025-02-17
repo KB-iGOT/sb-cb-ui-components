@@ -15,7 +15,7 @@ import moment from 'moment';
 
 // TODO: move this in some common place
 const PROTECTED_SLAG_V8 = '/apis/protected/v8';
-
+const PROD_BASE_ENDPOINT = 'https://portal.igotkarmayogi.gov.in'
 const API_END_POINTS = {
   CONTENT: `${PROTECTED_SLAG_V8}/content`,
   AUTHORING_CONTENT: `/api/course/v1/hierarchy`,
@@ -58,6 +58,7 @@ const API_END_POINTS = {
   USER_KARMA_POINTS: '/apis/proxies/v8/user/totalkarmapoints',
   AGGREGATION_SEARCH: '/apis/proxies/v8/content/aggregation/search',
   FEATURE_SEARCH: '/apis/proxies/v8/featured/content/search',
+  SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`
 };
 
 @Injectable({
@@ -75,13 +76,17 @@ export class WidgetContentLibService {
   tocConfigData$ = this.tocConfigData.asObservable();
   oneStepResumeEnable: boolean = false;
 
-  private telemetryData: any = new Subject<any>()
+  public telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
   currentMetaData!: NsContent.IContent;
   currentContentReadMetaData!: NsContent.IContent;
   currentBatchEnrollmentList!: NsContent.ICourse[];
   programChildCourseResumeData = new BehaviorSubject<any>({});
   programChildCourseResumeData$ = this.programChildCourseResumeData.asObservable();
+  releventNotRelevent = new Subject<{ isRelevent: boolean; widgetData: any }>();
+  releventNotRelevent$ = this.releventNotRelevent.asObservable()
+  storedRecommendedIds: any = {};
+  feedbackDataForCourse: any = {};
 
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
@@ -362,6 +367,15 @@ export class WidgetContentLibService {
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
   }
 
+  searchV6_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
+    const apiPath = _.get(req, 'api.path');
+    req.query = req.query || '';
+    if (apiPath) {
+      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+    }
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH_V6, req);
+  }
+
   searchRelatedCBPV6(req: NSSearch.ISearchV6RequestV2): Observable<NSSearch.ISearchV6ApiResultV2> {
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_RELATED_CBP_V6, req);
   }
@@ -619,5 +633,57 @@ export class WidgetContentLibService {
       let enrolledData = enrollmentList.filter((ele: any) => ele.collectionId === collectionId)
       return enrolledData.length ? enrolledData[0] : {}
     }
+  }
+
+  setReleventNotReleventData(data: {isRelevent: boolean, widgetData: any}) {
+    this.releventNotRelevent.next(data)
+  }
+
+  saveFeedbackSakshamAI(requestBody: any) {
+    const result: any = this.http.post(API_END_POINTS.SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK, requestBody).pipe(map(
+      async (data: any) => {
+        return data
+      })
+    )
+    return result
+  }
+
+  setRecommendedIds(recommendedIds: string, userId: string) {
+    localStorage.getItem('recommendedIds') ? 
+    this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+
+    this.storedRecommendedIds[userId] = recommendedIds
+
+    localStorage.setItem('recommendedIds', JSON.stringify(this.storedRecommendedIds))
+  }
+
+  getRecommendedIds(userId: string) {
+    localStorage.getItem('recommendedIds') ? 
+      this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+    return this.storedRecommendedIds[userId]
+  }
+
+  setFeedbackData(feedbackDataArray: any[]) {
+    feedbackDataArray.forEach(feedbackData => {
+      this.feedbackDataForCourse[feedbackData.course_id] = feedbackData;
+    });
+  }
+
+  getFeedbackData(courseId: string) {
+    return this.feedbackDataForCourse[courseId]
+  }
+
+  filterCoursesWithNoRating(response: any, courses: any[]) {
+    if (!response?.feedbacks?.length) {
+      return courses; 
+    }
+    
+    const coursesWithZeroRating = new Set(
+      response.feedbacks
+        .filter((feedback: any) => feedback.rating === 0)
+        .map((feedback: any) => feedback.course_id)
+    );
+  
+    return courses.filter((course: any) => !coursesWithZeroRating.has(course.identifier));
   }
 }

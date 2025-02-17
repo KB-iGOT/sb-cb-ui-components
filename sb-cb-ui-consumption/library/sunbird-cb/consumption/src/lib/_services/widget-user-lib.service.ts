@@ -30,7 +30,8 @@ const API_END_POINTS = {
   FETCH_USER_ENROLLMENT_LIST_V2: (userId: string | undefined, orgdetails: string, licenseDetails: string, fields: string, batchDetails: string, competencyKey: string) =>
     // tslint:disable-next-line: max-line-length
     `apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=${orgdetails}&licenseDetails=${licenseDetails}&fields=${fields},courseCategory,${competencyKey}&batchDetails=${batchDetails}`,
-  FETCH_DESIGNATION_COURSES: `/apis/proxies/v8/courseRecommend/v1/courses`
+  FETCH_DESIGNATION_COURSES: `/apis/proxies/v8/courseRecommend/v1/courses`,
+  GET_RECOMMENDED_COURSES_WITH_FEEDBACK: (userId: string) => `/apis/proxies/v8/courseRecommendation/read/${userId}`,
 };
 
 @Injectable({
@@ -391,6 +392,23 @@ export class WidgetUserServiceLib {
           return data.result.courseList
         }
         return ''
+      })
+    )
+    return result
+  }
+  generateCoursesSakshamAI(apiEndpoint: string, requestBody: any) {
+    const result: any = this.http.post(apiEndpoint, requestBody).pipe(catchError(this.handleError1), map(
+      async (data: any) => {
+        return data
+      })
+    )
+    return result
+  }
+
+  getRecommendedCoursesSakshamAI(userId: string) {
+    const result: any = this.http.get(API_END_POINTS.GET_RECOMMENDED_COURSES_WITH_FEEDBACK(userId)).pipe(catchError(this.handleError1), map(
+      async (data: any) => {
+        return data
       })
     )
     return result

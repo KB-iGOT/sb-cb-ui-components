@@ -24,6 +24,11 @@ import { NsCardContent } from '../../../_models/card-content-v2.model';
 import { ITodayEvents } from '../../../_models/event';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { AddCompetencyPopupComponent } from '../../dialog-components/add-competency-popup/add-competency-popup.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.component';
+import { fadeAnimation } from '../../_animations/fade-animation';
 
 interface IStripUnitContentData {
   key: string;
@@ -64,12 +69,13 @@ interface IStripUnitContentData {
   request?: any
 
 }
-
+const SNACKBAR_DURATION = 3000
 
 @Component({
   selector: 'sb-uic-content-strip-with-tabs-pills',
   templateUrl: './content-strip-with-tabs-pills.component.html',
-  styleUrls: ['./content-strip-with-tabs-pills.component.scss']
+  styleUrls: ['./content-strip-with-tabs-pills.component.scss'],
+  animations: [fadeAnimation]
 })
 export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   implements
@@ -104,7 +110,17 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   todaysEvents: any = [];
   activeTabIndex: number = 0
   activePillIndex: number = 0
-
+  recommendationPopup = false
+  sakshamFeedbackPopup = false
+  sakshamAddCompetency = false
+  sakshamLoader = false
+  recommendedCoursesId: string
+  releventNotReleventSubscription: Subscription | null = null;
+  telementrySubscription: Subscription | null = null;
+  feedbackCourseId = ''
+  currentStripG: any;
+  tabEventG: any;
+  firstTimeLoaded = false
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
     @Inject('environment') environment: any,
@@ -119,7 +135,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     private userSvc: WidgetUserServiceLib,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    private enrollSvc: WidgetEnrollService
+    private enrollSvc: WidgetEnrollService,
+    private matDialog: MatDialog,
+    public snackBar: MatSnackBar,
   ) {
     super();
     if (localStorage.getItem('websiteLanguage')) {
@@ -134,21 +152,30 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ngOnInit() {
     // const url = window.location.href
     this.initData();
-    this.contentSvc.telemetryData$.subscribe((data: any) => {
-      if (this.widgetData && this.widgetData.strips[0] && this.widgetData.strips[0].key === 'cbpPlan') {
-        const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
-        const pill = tab.pillsData[this.activePillIndex]
-        if (tab && pill) {
-          data.selectedTab = this.parametrizedText(tab.label)
-          data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
-          this.telemtryResponse.emit(data)
-        }
-      } else {
-        this.telemtryResponse.emit(data)
-      }
-    })
+    this.subscribeToTelementry()
   }
 
+  subscribeToTelementry() {
+    if(!this.telementrySubscription) {
+      this.telementrySubscription = this.contentSvc.telemetryData$.subscribe((data: any) => {
+        if (this.widgetData && this.widgetData.strips[0] && 
+          (this.widgetData.strips[0]?.key === 'cbpPlan') 
+          || this.widgetData.strips[0]?.key === 'forYou'
+          || this.widgetData.strips[0]?.key === 'continueLearning') {
+          const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
+          // const pill = tab.pillsData[this.activePillIndex]
+          const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) =>  pill?.selected );
+          if (tab && pill) {
+            data.selectedTab = this.parametrizedText(tab.label)
+            data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
+            this.telemtryResponse.emit(data)
+          }
+        } else {
+          this.telemtryResponse.emit(data)
+        }
+      })
+    }
+  }
   parametrizedText(str: string) {
     return str.toLocaleLowerCase().replace(" ", "-")
   }
@@ -156,6 +183,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ngOnDestroy() {
     if (this.changeEventSubscription) {
       this.changeEventSubscription.unsubscribe();
+    }
+
+    if(this.releventNotReleventSubscription) {
+      this.releventNotReleventSubscription.unsubscribe()
+    }
+    
+    if(this.telementrySubscription) {
+      this.telementrySubscription.unsubscribe()
     }
   }
 
@@ -408,6 +443,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
           deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
           contentTags: strip.stripConfig && strip.stripConfig.contentTags,
+          sakshamAIGenerated: this.activeTabIndex === 1 ? this.recommendedCoursesId : ''
+
         },
       } : {
         widgetType: 'card',
@@ -929,11 +966,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       {
         module: WsEvents.EnumTelemetrymodules.HOME,
       }
+
     );
 
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
+    this.currentStripG = currentStrip;
+    this.tabEventG = tabEvent
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
         ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
@@ -964,6 +1004,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           this.fetchDesignationBasedCourses(currentStrip, tabEvent, true)
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList) {
           this.fetchAllCbpPlans(currentStrip, true)
+        } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.courseRecommendation){
+          const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
+          this.generateCourseRecommendation(currentStrip, tabEvent, true, localRecommended)
         }
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
       }
@@ -1012,7 +1055,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               let courses = results.result.content
               let tabResults: any
               if (strip.tabs && strip.tabs.length) {
-                tabResults = this.splitDesignationsTabData(courses, strip, enollData, response)
+                tabResults = this.splitDesignationsTabData(courses, strip, enollData, response, 'designation')
                 let countOfWidget = true
                 if (strip && strip.tabs && strip.tabs.length) {
                   strip.tabs.forEach((tab: any) => {
@@ -1110,7 +1153,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   }
 
   splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit,
-    enollData: any, coursesArray: any) {
+    enollData: any, coursesArray: any, type: string) {
     let tabResults: any[] = [];
     const splitData = this.getTabsDesignationsList(
       contentNew,
@@ -1118,7 +1161,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     );
     if (strip.tabs && strip.tabs.length) {
       for (let i = 0; i < strip.tabs.length; i += 1) {
-        if (strip.tabs[i].value === "designation") {
+        if (strip.tabs[i].value === type) {
           let checkWidgetAndActivePill = true
           if (strip.tabs[i].pillsData && strip.tabs[i].pillsData.length) {
             for (let j = 0; j < strip.tabs[i].pillsData.length; j += 1) {
@@ -1348,7 +1391,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'viewMoreUrl',
           );
         }
-        this.canShowRecommendedLearningsTab(strip)
+        // this.canShowRecommendedLearningsTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
@@ -1374,11 +1417,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     try {
       let response = await this.userSvc.fetchDesigantionsData().toPromise();
       if (!response) {
-        strip.tabs[1].hideTab = true
+        strip.tabs[1].hideTab = false
       }
     } catch (error) {
       console.error("API Error:", error)
-      strip.tabs[1].hideTab = true
+      strip.tabs[1].hideTab = false
     }
   }
 
@@ -1640,4 +1683,211 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       }
     }
   }
+
+  addCompetency() {
+    const modelRef = this.matDialog.open(AddCompetencyPopupComponent, {
+      width: '70%'
+    })
+
+    modelRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.sakshamLoader = true
+        this.sakshamAddCompetency = false
+        modelRef.close()
+      }
+    })
+  }
+
+  async generateCourseRecommendation(
+    strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+    tabIndex: number,
+    calculateParentStatus: boolean,
+    courseRecommendationId: string
+  ) {
+    if(strip.tabs[tabIndex].request.courseRecommendation) {
+      this.sakshamLoader = true
+      let payload = {
+        "user_id": this.configSvc.userProfile.userId,
+        // "department": this.configSvc.userProfile.departmentName,
+        // "designation": this.configSvc.userProfile.professionalDetails[0]?.designation,
+        "department": 'Ministry of Power',
+        "designation": 'Assistant Section Officer',
+        "device_type": "web"
+      }
+      let response: any
+      let coursesIds: any
+
+      if(courseRecommendationId) {
+        response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise()
+      } else {
+        response = await this.userSvc.generateCoursesSakshamAI(
+          strip.tabs[tabIndex].request.courseRecommendation.path, payload)
+          .toPromise()
+      }
+
+      if(response.recommended_courses && response.recommended_courses.length) {
+        this.sakshamLoader = false
+        this.recommendedCoursesId = response?.id || ''
+        this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
+
+        if (response.feedbacks.length) {
+          this.contentSvc.setFeedbackData(response.feedbacks)
+        }
+
+        this.subscribeToReleventEmmitter()
+        coursesIds = response.recommended_courses.map(course => course.course_id)
+        if (coursesIds.length) {
+          let request = {
+            "request": {
+                "courseId": coursesIds
+            }
+          }
+          let enollData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+            if (res && res.result && res.result.courses && res.result.courses.length) {
+              return res.result.courses
+            } else {
+              return []
+            }
+          }).catch((_err: any) => {
+            return []
+          })
+          const sRequest: any = {
+            "searchV6": {
+              "request": {
+                "filters": {
+                  "identifier": coursesIds
+                },
+                "offset": 0,
+                "query": "",
+                "sort_by": {
+                    "lastUpdatedOn": "desc"
+                },
+              }
+            }
+          }
+          this.contentSvc.searchV6_PROD(sRequest.searchV6).subscribe(results => {
+            // if (results && results.result && results.result.content) {
+            if (true) {
+              // let courses = results.result.content
+              let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
+              let tabResults: any
+              if (strip.tabs && strip.tabs.length) {
+                tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, 'sakshamAI')
+                let countOfWidget = true
+                if(strip && strip.tabs && strip.tabs.length) {
+                  strip.tabs.forEach((tab:any)=> {
+                    if(tab.value === 'sakshamAI' && tab.pillsData && tab.pillsData.length) {
+                      tab.pillsData.forEach((pill: any) => {
+                        if(pill && pill.widgets && pill.widgets.length){
+                          if(countOfWidget){
+                            pill.selected = true
+                            countOfWidget= false
+                          }
+                        }
+                      });
+                    }
+                  })
+                }
+                strip.tabs[tabIndex].pillsData[0].selected = true
+                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                strip.showOnLoader = false
+                strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                this.processStrip(
+                  strip,
+                  this.transformContentsToWidgets(courses, strip),
+                  'done',
+                  calculateParentStatus,
+                  '',
+                  tabResults
+                )
+                if(!this.firstTimeLoaded) {
+                  this.recommendationPopup = true
+                  this.firstTimeLoaded = true
+                }
+              } else {
+                strip.tabs[tabIndex].pillsData[0].selected = true
+                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                strip.showOnLoader = false
+                strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                this.processStrip(
+                  strip,
+                  this.transformContentsToWidgets(courses, strip),
+                  'done',
+                  calculateParentStatus,
+                  'viewMoreUrl', strip.tabs
+                )
+              }
+            }
+          })
+        } else {
+          this.resetPills(strip.tabs[tabIndex].pillsData)
+          strip.tabs[tabIndex].pillsData[0].selected = true
+          strip.tabs[tabIndex].pillsData[0].widgets = []
+          strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+          strip.showOnLoader = false
+          strip.tabs[tabIndex].pillsData[0].tabLoading = false
+          strip.tabs[tabIndex].hideTab = true
+          let tabs = strip.tabs
+          if (strip.tabs[0] && strip.tabs[0].hideTab){
+            tabs = []
+          }
+          this.processStrip(
+            strip,
+            this.transformContentsToWidgets([], strip),
+            'done',
+            calculateParentStatus,
+            '',
+            tabs
+          );
+        }
+      }
+    }
+  }
+
+  async saveFeedback(comment: string, rating = 0) {
+    const payload = {
+      "recommendation_id": this.recommendedCoursesId,
+      "course_id": this.feedbackCourseId,
+      "rating": rating,
+      "comments": comment
+    }
+    const response = await this.contentSvc.saveFeedbackSakshamAI(payload).toPromise().catch(() => {})
+    if(response && response?.message) {
+      this.snackBar.openFromComponent(SnackbarComponent, {
+        data: { message: 'Thank you for your feedback.', type: 'success',
+        }, duration: SNACKBAR_DURATION, panelClass: 'course-success-snackbar',
+      })
+      if(rating === 0) {
+        const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
+        this.generateCourseRecommendation(this.currentStripG, this.tabEventG, true, localRecommended)
+      }
+    } else if (!response) {
+      this.snackBar.openFromComponent(SnackbarComponent, {
+        data: { message: 'Something is wrong. Please try again later', type: 'error',
+        }, duration: SNACKBAR_DURATION, panelClass: 'course-error-snackbar',
+      })
+    }
+    this.sakshamFeedbackPopup = false;
+  }
+  
+  subscribeToReleventEmmitter() {
+    if (!this.releventNotReleventSubscription) {
+      this.releventNotReleventSubscription = this.contentSvc.releventNotRelevent$.subscribe(data => {
+        if (data && data.widgetData && data.widgetData?.content?.identifier !== this.feedbackCourseId ) {
+          this.feedbackCourseId = data.widgetData?.content?.identifier
+          if(data.isRelevent) {
+            this.saveFeedback('', 1)
+          } else if(!data.isRelevent) {
+            this.sakshamFeedbackPopup = true    
+          }
+        }
+      });
+    }
+  }
+
+  cancelFeedbackPopup() {
+    this.sakshamFeedbackPopup = false;
+    this.feedbackCourseId = ''
+  }
+
 }
