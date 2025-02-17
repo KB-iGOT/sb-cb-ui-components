@@ -23,7 +23,7 @@ export class PostCardComponent {
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedPosts: any = []
-  @Input() userJoinedCommunity: boolean = false
+  @Input() userJoinedCommunity!: boolean 
   @Input() community!: string
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()

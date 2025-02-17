@@ -18,7 +18,6 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   widgetData!: NsDiscussionV2.IPostDetailsWidget | null
   uploadForm: FormGroup;
   selectedFilesFinal: any = {}
-  links: string[] = [];
   selectedTags: string[] = [];
   linkInput: any
   uploadControlVisibility: any = {
@@ -265,7 +264,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     // if(this.mediaCategory && this.mediaCategory[category] && (this.mediaCategory[category].length === 0)) {
     //   delete this.mediaCategory[category]
     // }
-    if(this.previewCategory[category] && this.previewCategory[category].length <= 0) {
+    if(this.selectedFilesFinal[category] && this.selectedFilesFinal[category].length <= 0) {
       _.remove(this.categoryType, category);
     }
   }
@@ -616,16 +615,19 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   async editAnswerPost() {
-    // const mediaUrls = await this.handleEditWithFiles();
+    const newMedia = await this.editUploadHandler(this.data.post.discussionId);
+    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.data.post.mediaCategory)
     const updateReq = {
-      discussionId: this.data.post.discussionId,
-      communityId: this.data.post.communityId,
+      answerPostId: this.data.post.discussionId,
+      // communityId: this.data.post.communityId,
       // title: this.uploadForm.value.title,
       description: this.uploadForm.value.description,
       // mediaUrls,
+      categoryType: [...this.categoryType],
+      mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
     };
-
+    console.log('updateReq :', updateReq)
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
         if (res?.result) {
