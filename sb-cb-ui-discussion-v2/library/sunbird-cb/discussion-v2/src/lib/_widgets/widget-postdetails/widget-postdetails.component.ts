@@ -78,7 +78,6 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
   }
 
   newCommentEvent(event: any) {
-    console.log('Widget catch event :', event)
     if (event && event.type === 'question') {
       this.fetchPosts()
     }

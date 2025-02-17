@@ -2,7 +2,7 @@
     <!-- Left Sidebar -->
     <div class="lg:w-64">
       <ng-container>
-         <d-v2-similar-community-card [communityData]="communityDataList"></d-v2-similar-community-card> 
+         <d-v2-similar-community-card (communityClick)="onCommunityClick($event)" ></d-v2-similar-community-card> 
       </ng-container>
     </div>
     <!-- Main Content -->

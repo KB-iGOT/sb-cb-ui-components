@@ -39,7 +39,6 @@ export class FlagDialogueComponent {
       reportedDueTo: this.selectedFlags,
       otherReasons: this.othersTextData
     }
-    console.log(flagData)
     this.dialogRef.close(flagData)
   }
 }

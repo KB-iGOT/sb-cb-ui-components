@@ -35,7 +35,6 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   submitComment() {
     
     const req = this.createReq(this.searchControl.value, [])
-    console.log(req, this.loggedInUserData)
     if(!this.addNewCommentBool){
       this.addNewCommentBool = true
       if (this.config.commentTreeData && this.config.commentTreeData.isFirstComment) {
@@ -77,8 +76,6 @@ export class NewCommentComponent implements OnInit, OnDestroy {
         designation = profileDetails.professionalDetails[0].designation
       }
       profileStatus = profileDetails.profileStatus
-      console.log(profileDetails)
-      // if (profileDetails)
 
     }
     if (this.loogedInUserProfile) {

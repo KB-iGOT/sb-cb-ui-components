@@ -9,6 +9,7 @@ import { FilterModule } from '../../_common/filter/filter.module';
 import { SimilarCommunityCardModule } from '../../_common/similar-community-card/similar-community-card.module';
 import { PipesModule } from '../../_pipes/pipes.module';
 import { MatBottomSheetModule, MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet'
+import { NoDataModule } from '../../_common/no-data/no-data.module';
 
 
 
@@ -26,6 +27,7 @@ import { MatBottomSheetModule, MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '
     SimilarCommunityCardModule,
     PipesModule,
     MatBottomSheetModule,
+    NoDataModule
   ],
   exports: [
     WidgetCommunitySearchComponent

@@ -8,7 +8,7 @@
     </div>
     <div>
         <div class="media" *ngIf="popularCommunities && popularCommunities?.length">
-            <d-v2-image-sliders [title]="'Images'" (imageClickEmit)="popularCommunity($event)" [objectArray]="popularCommunities" [styleData]="sliderStyleData?.styleData"></d-v2-image-sliders>
+            <d-v2-image-sliders [title]="'Images'" [defaultImg]="'assets/instances/eagle/banners/discussion/community-banner.svg'" (imageClickEmit)="popularCommunity($event)" [objectArray]="popularCommunities" [styleData]="sliderStyleData?.styleData"></d-v2-image-sliders>
         </div>
     </div>
 </div>
@@ -54,9 +54,4 @@
             </div>
         </div>
     </div> -->
- </div>
- <div *ngIf="!topicDataList?.length">
-    <div>
-        <d-v2-no-data [iconName]="'forum'" [noText]="'No Topics found'"></d-v2-no-data>
-    </div>
  </div>

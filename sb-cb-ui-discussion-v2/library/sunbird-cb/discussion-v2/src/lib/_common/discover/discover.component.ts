@@ -35,6 +35,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
       "navigationArrows": "visible",
       "borderRadius": "12px",
       "customHeight": "141px",
+      "customImgHeight": "fit-content",
       "customMinHeight": "141px",
       "arrowsPlacement": "middle-inline",
       autoplay: false,
@@ -43,6 +44,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
         "customHeight": "232px",
         "bannerMetaAlign": "middle",
         "navigationArrows": "visible",
+        "customImgHeight": "fit-content",
         "customMinHeight": "141px",
         "dots": "hidden",
         "arrowsPlacement": "middle-inline",
@@ -76,7 +78,6 @@ export class DiscoverComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.topicDataList) {
-      console.log('topicDataList changed:', this.topicDataList);
       
       this.loadTopicData();  
     }
@@ -89,8 +90,6 @@ export class DiscoverComponent implements OnInit, OnChanges {
   // }
 
   onCardClick(cardData: any){
-    
-    console.log(cardData)
     this.cardClick.emit(cardData);
   }
 
@@ -148,9 +147,8 @@ export class DiscoverComponent implements OnInit, OnChanges {
       }
       tempAllApiData = { ...tempApiData,...tempAllApiData}
     }
-    console.log(this.toppicWiseCommunities,'before')
     this.toppicWiseCommunities = { ...this.toppicWiseCommunities,...tempAllApiData}
-    console.log(this.toppicWiseCommunities,'after')
+
   }
 
   async getCommunitiesByTopic(topic: any): Promise<any[]> {
