@@ -17,7 +17,8 @@
         'border-color': isMobile? styleData?.responsive?.imageBorderColor : styleData?.imageBorderColor,
         'border-style': isMobile? styleData?.responsive?.imageBorderStyle: styleData?.imageBorderStyle}">
       <img i18n-alt alt="Image{{i}}"
-      [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"  [src]="slide?.banner" class=" banner-image "  />
+      [style.height]="isMobile? styleData?.responsive?.customImgHeight : styleData?.customImgHeight"
+      [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"  [src]="slide?.posterImageUrl" class=" banner-image " (error)="changeToDefaultImg($event)"  />
       <div class="image-info">
         <p>{{slide?.name}}</p>
       </div>

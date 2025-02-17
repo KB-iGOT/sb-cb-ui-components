@@ -2,7 +2,7 @@
    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
        <!-- Column 1 -->
        <div class=" p-2 rounded-lg md:col-span-3">
-         <d-v2-similar-community-card ></d-v2-similar-community-card> 
+         <d-v2-similar-community-card (communityClick)="onCardClick($event)"></d-v2-similar-community-card> 
        </div>
    
        <!-- Column 2 (Double Width on Large Screens) -->
@@ -47,17 +47,31 @@
          </div>
          <mat-tab-group animationDuration="0ms" class="custom-tab-container ">
             <mat-tab label="Discover">
-               <ng-container *ngIf="topicDataList?.length">
-                  <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
-               </ng-container>
+               <ng-template matTabContent>
+                  <ng-container *ngIf="topicDataList?.length;else noDataTemplateCall">
+                     <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
+                  </ng-container>
+                  <ng-template #noDataTemplateCall>
+                     <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{'iconName':'forum', 'noTextValue':'No Topics found'}"></ng-container>
+                  </ng-template>
+               </ng-template>
                
             </mat-tab>
             <mat-tab label="Your Communities">
-             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                <div  *ngFor="let item of userEnrollDetailsData">
-                    <d-v2-community-card [community]="item"   (click)="onCardClick(item)"></d-v2-community-card>
-                </div>
-             </div>
+               <ng-template matTabContent>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"  *ngIf="userEnrollDetailsData?.length; else noDataTemplateCall">
+                     <ng-container>
+                        <div  *ngFor="let item of userEnrollDetailsData">
+                           <d-v2-community-card [community]="item"   (click)="onCardClick(item)"></d-v2-community-card>
+                        </div>
+                     </ng-container>
+
+                  </div>
+
+                  <ng-template #noDataTemplateCall>
+                     <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{iconName:'forum', noTextValue:'you have not joined for any communities'}"></ng-container>
+                  </ng-template>
+               </ng-template>
             </mat-tab>
          </mat-tab-group>
            
@@ -70,4 +84,10 @@
    </div>
 </div>
   
-  
+<ng-template #noData let-iconName="iconName" let-noTextValue="noTextValue">
+   <div class="mt-8">
+      <d-v2-no-data [iconName]="iconName" [noText]="noTextValue"></d-v2-no-data>
+   </div>
+</ng-template>
+ 
+   

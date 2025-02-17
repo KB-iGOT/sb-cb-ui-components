@@ -11,9 +11,9 @@ export class BookmarkListComponent implements OnInit{
   @Input() widgetData: any
   @Input() communityId: any
   @Input() userJoinedCommunity: boolean = false
-  disableLoadmore: boolean = false
   page: any = 0
   pageSize: any = 1
+  totalNumberOfBookmarksCount: any = 0
 
   bookmarkPosts: any = []
   constructor(private discussV2Svc: DiscussionV2Service){
@@ -24,25 +24,27 @@ export class BookmarkListComponent implements OnInit{
     this.getBookmarkData()
   }
 
-  getBookmarkData() {
-    
+  getBookmarkData() { 
     let request : any = {
       "communityId": this.communityId,
     "page" : this.page,
       "pageSize" :  this.pageSize
     }
     this.discussV2Svc.getBookmarkDataList(request).subscribe((res: any) => {
-      if(res && res.result && res.result.data && res.result.data.length) {
-        let newData = res.result.data.map((v: any) => ({...v, bookmark: true}))
+      if(res && res.result && res.result.search_results 
+        && res.result.search_results.data 
+        && res.result.search_results.data.length) {
+        let newData = res.result.search_results.data.map((v: any) => ({...v, bookmark: true}))
         this.bookmarkPosts = [...this.bookmarkPosts, ...newData]
-      } else {
-        this.disableLoadmore = true
+        this.totalNumberOfBookmarksCount = res.result.search_results.totalCount
       }
     })
   }
   loadMoreMembers(){
-    this.page = this.page + 1
-    this.getBookmarkData()
+    if( !(this.bookmarkPosts.length >= this.totalNumberOfBookmarksCount)) {
+      this.page = this.page + 1
+      this.getBookmarkData()
+    }
   }
 
 }

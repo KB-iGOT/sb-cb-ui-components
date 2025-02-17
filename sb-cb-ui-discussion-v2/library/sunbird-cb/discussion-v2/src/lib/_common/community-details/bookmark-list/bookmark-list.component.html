@@ -5,7 +5,14 @@
         [type]="widgetData?.newPostSection?.type" ></d-v2-post-card>
     </ng-container>
 </div>
-<ng-container *ngIf="!disableLoadmore">
+
+<ng-container *ngIf="bookmarkPosts?.length === 0">
+    <div class="mt-8">
+       <d-v2-no-data [iconName]="'forum'" [noText]="'No Bookmarks found'"></d-v2-no-data>
+    </div>
+</ng-container>
+
+<ng-container *ngIf="!(bookmarkPosts.length >= totalNumberOfBookmarksCount)">
     <div class="load-more-posts my-4 mt-8">
         <button mat-flat-button color="primary" class="w-full underline" (click)="loadMoreMembers()">Load
             More</button>
