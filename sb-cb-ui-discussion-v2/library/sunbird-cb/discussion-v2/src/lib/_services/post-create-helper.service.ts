@@ -17,7 +17,6 @@ export class PostCreateHelperService {
 
   createAnswerPost(formData: any, type: string, categoryType: any, parentDiscussionId: any, community: any) {
     const req = this.createReq(formData, type, parentDiscussionId, community)
-    console.log('req:', req);
     this.discussV2Svc.createAnswerPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {

@@ -10,6 +10,7 @@ export interface IImageCarouselStyle {
   imageBorderWidth: number
   imageBorderColor: string
   imageBorderStyle: string
+  customImgHeight?: string
   autoplay: boolean
   responsive: {
     bannerMetaClass?: "inline-meta", 

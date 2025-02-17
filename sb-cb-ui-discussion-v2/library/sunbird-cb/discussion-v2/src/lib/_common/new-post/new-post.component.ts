@@ -103,7 +103,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log(result)
         this.newComment.emit({result: result.result, type: result.type})
       }
     })
@@ -200,11 +199,10 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.uploadForm.valid) {
-      const formData = {
-        ...this.uploadForm.value,
-        // tags: this.selectedTags
-      };
-      console.log('Form submitted:', formData);
+      // const formData = {
+      //   ...this.uploadForm.value,
+      //   // tags: this.selectedTags
+      // };
       if (this.editMode) {
         this.handleEditFlow();
       } else {
@@ -226,7 +224,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   createPost() {
     const req = this.createReq(this.uploadForm, this.type)
-    console.log('req:', req);
     this.discussV2Svc.createPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -246,7 +243,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   createAnswerPost() {
     const req = this.createReq(this.uploadForm, this.type)
-    console.log('req:', req);
     this.discussV2Svc.createAnswerPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -300,7 +296,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
             );
   
             temp[cat] = uploadedUrls;
-            console.log('temp - ', temp);
           }
         } else{
           if(this.selectedFilesFinal['link'] && this.selectedFilesFinal['link'].length){
@@ -320,8 +315,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
   private handlePostUpdation(discussionId: string, postResult: any): void {
-    console.log('discussionId', discussionId)
-    console.log('postResult', postResult)
     switch (this.type) {
       case NsDiscussionV2.EPostType.QUESTION:
         this.updatePostWithMediaUrls(discussionId, postResult);
@@ -340,7 +333,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
       categoryType: this.categoryType,
       mediaCategory: this.mediaCategory
     };
-    console.log('updateReq', updateReq)
     this.discussV2Svc.updatePost(updateReq).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -438,7 +430,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
             })
           );
           temp[cat] = uploadedUrls;
-          console.log('temp - ', temp);
         }
       } else {
         if(this.selectedFilesFinal['link'] && this.selectedFilesFinal['link'].length){
@@ -458,10 +449,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   async editPost() {
     const newMedia = await this.editUploadHandler(this.post.discussionId);
-    console.log('newMedia', newMedia)
-    console.log('this.mediaCategory', this.mediaCategory)
-    console.log('this.slected final', this.selectedFilesFinal)
-    console.log('this.slected final', this.post.mediaCategory)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
     const updateReq = {
       discussionId: this.post.discussionId,
@@ -473,7 +460,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
     };
-    console.log('updateReq :', updateReq)
 
     this.discussV2Svc.updatePost(updateReq).subscribe({
       next: (res) => {
@@ -501,7 +487,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
     };
-    console.log('updateReq :', updateReq)
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
         if (res?.result) {

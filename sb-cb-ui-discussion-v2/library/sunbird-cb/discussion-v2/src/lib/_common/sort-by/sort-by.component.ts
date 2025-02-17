@@ -41,8 +41,7 @@ export class SortByComponent {
     ]
   }
 
-  handleGetFilterType(event: any, type: any, filterType: any) {
-    console.log(event,type,filterType)
+  handleGetFilterType(_event: any, type: any, _filterType: any) {
     type.checked = !type.checked 
     this.sortOptionSelection.emit(type)
   }

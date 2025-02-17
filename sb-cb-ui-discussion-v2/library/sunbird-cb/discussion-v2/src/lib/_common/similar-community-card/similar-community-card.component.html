@@ -6,7 +6,7 @@
         <div contentBodyBlock>
             <div class="space-y-4 pt-4" *ngIf="communityData && communityData?.length; else noData">
                 <ng-container *ngFor="let community of communityData">
-                    <div class="flex gap-4 items-center comminity-details">
+                    <div class="flex gap-4 items-center comminity-details cursor-pointer" (click)="communicityClickMethod(community)">
                         <d-v2-avatar-photo [size]="'s'"
                             [name]="community?.communityName"
                             [photoUrl]="community?.posterImageUrl || ''" >
@@ -19,7 +19,9 @@
                 
             </div>
             <ng-template #noData>
-                <d-v2-no-data [iconName]="'forum'" [noText]="'No Communities'"></d-v2-no-data>
+                <div class="mt-4">
+                    <d-v2-no-data [iconName]="'forum'" [noText]="'No Communities'"></d-v2-no-data>
+                </div>
             </ng-template>
         </div>
     </d-v2-card-toggle>

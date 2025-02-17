@@ -1,12 +1,22 @@
 
 <div class="container mx-auto ">
     <div class="banner-container">
-        <img src="https://s3-alpha-sig.figma.com/img/f6bc/5417/601803742072ef1bdc6258233c4dcbc7?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=URbgUl7gxYt6vaU2dw1WtlTOYtwKZqsO-tcvXTNkekIO5m~FvQXubLRNeFW2Ds1q1YFZDiVBuzwVUftSezp8e2yyXtQk5OOXsVeKo7YPfGKf7YUdQhIInRNJBgbCTGIwJKR-i5GtCPchYWiVCp0v~eg74X2bh7MUwFWmIDGDf59gbejitTu~jzKi~cAaB30lrckmW3IT5F~BS8RBWGOHCBegQE8LGUF93600Mii7MwVvmW2BqNn5JnVzLXUQHfkEyyIxtjI~CIS4KZ4GWg31Es2NGB57JmUn1mMc~Hz29jXbRtHcgDTsCSwPzwdVcwJG5Yk5BKFRIcFZUt83eUIyEw__" alt="">
+        <img src="assets/instances/eagle/banners/discussion/community-banner.svg" alt="">
     </div>
-    <div class="community-basic-info p-4 md:p-0 flex flex-wrap justify-between items-center mt-2">
+    <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-center mt-2">
         <div class="community-info">
-            <h2>{{communityData?.communityName}}</h2>
-            <div class="community-metrix mt-2 flex-wrap">
+            <div class="flex">
+                <h2 class="">{{communityData?.communityName}}</h2>
+                <div class="community-action flex  gap-2 items-start ">
+                    <div class="block md:hidden">
+                        <div class="flex items-center ">
+                            <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
+                            <mat-icon *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="community-metrix mt-2 gap-y-4 flex-wrap">
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">group</mat-icon>
                     <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
@@ -15,7 +25,7 @@
                 <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">list_alt</mat-icon>
-                    <span class="mr-1">{{'99900000' | numberShortener}}</span> 
+                    <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
                     <span>Post</span>
                 </span>
                 <span class="mx-2 self-end">•</span>
@@ -24,19 +34,28 @@
                     <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
                     <span>Likes</span>
                 </span>
-                <span class="mx-2 self-end">•</span>
+                <!-- <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">group</mat-icon>
                     <span class="mr-1">{{'99900000' | numberShortener}}</span> 
                     <span>Comments</span>
-                </span>
+                </span> -->
             </div>
         </div>
         <div class="community-action flex gap-2 items-center ">
-            <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
-            <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer " (click)="joinCommunity()">Join</button>
-            <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
-            <mat-icon *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+            <div class="hidden md:block">
+                <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
+                <div class="flex items-center">
+                    <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 " (click)="joinCommunity()">Join</button>
+                    <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true">share</mat-icon>
+                    <mat-icon *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="block  md:hidden">
+        <div class="community-action flex gap-2 items-center ">
+            <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer " (click)="joinCommunity()">Join</button>
         </div>
     </div>
     <div class="about-community p-4 md:p-0">
@@ -86,13 +105,13 @@
             <!-- Column 1 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
                 <!-- <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts> -->
-                <d-v2-similar-community-card ></d-v2-similar-community-card> 
+                <d-v2-similar-community-card (communityClick)="similarCommunity($event)"></d-v2-similar-community-card> 
             </div>
         <!-- 282,372 -->
             <!-- Column 2 (Double Width on Large Screens) -->
             <div class=" rounded-lg col-span-1 md:col-span-6">
                 
-                <mat-tab-group class="custom-tab-container " (selectedTabChange)="onTabChange($event)" mat-stretch-tabs="false" mat-align-tabs="center">
+                <mat-tab-group class="custom-discuss-tab-container " (selectedTabChange)="onTabChange($event)"  [mat-stretch-tabs]="false"  mat-align-tabs="start">
                     <ng-container *ngFor="let tab of communityWidgetData?.tabs">
                         <mat-tab [label]="tab.label">
                             <ng-template matTabContent>
@@ -100,9 +119,22 @@
                                     <ng-container *ngIf="tab?.value === 'feeds'">
                                         <d-v2-feed [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
                                     </ng-container>
-                                    
+
+                                    <ng-container *ngIf="tab?.value === 'links'">
+                                        <d-v2-feed [postCategoryTypeFilter]="{'categoryType':['link']}"
+                                        [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="tab?.value === 'docs'">
+                                        <d-v2-feed [postCategoryTypeFilter]="{'categoryType':['document']}"
+                                        [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
+                                    </ng-container>
                                     <ng-container *ngIf="tab?.value === 'members'">
                                         <d-v2-member-details [communityId]="communityId"></d-v2-member-details>
+                                    </ng-container>
+                                    <ng-container *ngIf="tab?.value === 'yourPost'">
+                                        <d-v2-feed [postCategoryTypeFilter]="{'createdBy': userId}"
+                                        [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
                                     </ng-container>
                                     <ng-container *ngIf="tab?.value === 'bookmarked'">
                                         <d-v2-bookmark-list [userJoinedCommunity]="userJoinedCommunity" [communityId]="communityId" [communityData]="communityData" [widgetData]="feedWidgetData"></d-v2-bookmark-list>
@@ -121,7 +153,7 @@
                         <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
                     </div>
                 </ng-container>
-                <d-v2-trending-discussions [communityId]="communityId"></d-v2-trending-discussions>
+                <d-v2-trending-discussions [communityId]="communityId" [expandCard]="true"></d-v2-trending-discussions>
             </div>
         </div>
     </div>
@@ -138,44 +170,3 @@
         <span>leave community</span>
     </button>
 </mat-menu>
-
-
-<!-- <div class="container-balanced mt-8 mb-12 mob-12">
-    <div class="flex flex-col lg:flex-row gap-8">
-        Left Sidebar
-        <div class="lg:w-96">
-            <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts>
-        </div>
-        Main Content
-        <div class="flex-1">
-            <mat-tab-group class="custom-tab-container " mat-stretch-tabs="false" mat-align-tabs="center">
-                <ng-container *ngFor="let tab of communityWidgetData?.tabs">
-                    <mat-tab [label]="tab.label">
-                        <div class="mt-2">
-                            <ng-container *ngIf="tab?.value === 'feeds'">
-                                <d-v2-feed [userJoinedCommunity]="userJoinedCommunity" [community]="communityData" [widgetData]="feedWidgetData"></d-v2-feed>
-                            </ng-container>
-                            
-                            <ng-container *ngIf="tab?.value === 'members'">
-                                <d-v2-member-details [communityId]="communityId"></d-v2-member-details>
-                            </ng-container>
-                        </div>
-                    </mat-tab>
-                </ng-container>
-            </mat-tab-group>
-        </div>
-         Right Sidebar 
-        <div class="lg:w-96">
-            <d-v2-trending-discussions [data]="trendingDiscussions"></d-v2-trending-discussions>
-        </div>
-    </div>
-</div> -->
-
-  <!-- <d-v2-card-toggle (hideCardBody)="hideCardBody = $event">
-    <div headderBlock>
-        hiii {{hideCardBody}}
-    </div>
-    <div contentBodyBlock>
-        hiii
-    </div>
-  </d-v2-card-toggle> -->

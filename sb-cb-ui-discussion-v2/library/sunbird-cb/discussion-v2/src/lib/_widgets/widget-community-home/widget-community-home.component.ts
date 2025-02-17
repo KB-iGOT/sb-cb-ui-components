@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation, OnInit, Inject } from '@angular/core';
+import { Component, Input, OnInit, Inject, Output, EventEmitter } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
@@ -6,13 +6,13 @@ import { UserEnrollCommunityService } from '../../_services/user-enroll-communit
 @Component({
   selector: 'd-v2-widget-community-home',
   templateUrl: './widget-community-home.component.html',
-  styleUrls: ['./widget-community-home.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./widget-community-home.component.scss']
 })
 export class WidgetCommunityHomeComponent implements OnInit {
   @Input() communityId!: string
   @Input() feedWidgetData: any | undefined
   @Input() communityWidgetData: any | undefined
+  @Output() similarCommunityClick = new EventEmitter<any>();
   communityData: any = {}
   userJoinedCommunityList: any = []
   userJoinedCommunity: boolean = false
@@ -23,6 +23,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
   environment: any
   competenciesObject: any = []
   competencySelected = ''
+  userId: any
   shortCutData: any[]= [
     {
       name:"Saved Posts",
@@ -81,6 +82,9 @@ export class WidgetCommunityHomeComponent implements OnInit {
       && this.configSvc.userProfile.rootOrgId){
       this.rootOrgId = this.configSvc.userProfile.rootOrgId
     }
+    if(this.configSvc && this.configSvc.userProfile && this.configSvc.userProfile?.userId){
+      this.userId = this.configSvc.userProfile.userId
+    }
     this.compentencyKey = this.configSvc.compentency[environment.compentencyVersionKey]
     // this.communityData['competencies_v6'] = [
     //     {
@@ -110,8 +114,6 @@ export class WidgetCommunityHomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.communityId)
-    
     this.fetchCommunityData(this.communityId)
     this.checkUserJoinedCommunity()
   }
@@ -122,7 +124,6 @@ export class WidgetCommunityHomeComponent implements OnInit {
 
     this.loadCompetencies()
       }
-      console.log(resData,'resData')
     })
     // Fetch community data using id
   }
@@ -131,7 +132,6 @@ export class WidgetCommunityHomeComponent implements OnInit {
     this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
     this.manageUserCommunityStatus()
     // this.discussV2Svc.usersJoinedCommunityList().subscribe((resData: any) => {
-    //   console.log(resData,'resData')
     //   if(resData.result && resData.result.communityDetails && resData.result.communityDetails.length){
     //     this.userJoinedCommunityList = resData.result.communityDetails
     //     this.manageUserCommunityStatus()
@@ -293,7 +293,12 @@ export class WidgetCommunityHomeComponent implements OnInit {
       }
     ))
   }
-  onTabChange(tabIndex: any) {
-    console.log(tabIndex)
+  onTabChange(_tabIndex: any) {
+  }
+
+  similarCommunity(communityData: any) {
+    this.similarCommunityClick.emit(communityData)
+    this.communityId =communityData.communityId
+    this.ngOnInit()
   }
 }

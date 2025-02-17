@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
-import { communityList } from '../../_model/filter-constants.model';
 
 @Component({
   selector: 'd-v2-widget-topics-all',
@@ -9,12 +8,12 @@ import { communityList } from '../../_model/filter-constants.model';
 })
 export class WidgetTopicsAllComponent {
   localSearchTextValue: any = ''
-  communityDataList: any = communityList
   sortOptionSelected: any
   topicDataLoading: boolean = false
   topicDataList: any = []
   sortData: any = []
     @Output() topicCardClick = new EventEmitter<any>();
+    @Output() communityCardClick = new EventEmitter<any>();
   constructor(private discussV2Svc: DiscussionV2Service){
 
     this.getAllTopics()
@@ -37,7 +36,6 @@ export class WidgetTopicsAllComponent {
   }
   sortOptionSelection(sortData: any){
     this.sortOptionSelected = sortData
-    console.log('sortData', sortData)
     if(sortData && sortData.orderDirection === 'asc') {
       this.topicDataList = [...this.topicDataList].sort((a, b) => a.value.localeCompare(b.value));
     } else {
@@ -82,5 +80,9 @@ export class WidgetTopicsAllComponent {
 
     // Sort by count descending (highest to lowest)
     // const sortByCountDesc = [...items].sort((a, b) => b.count - a.count);
+  }
+
+  onCommunityClick(communityData: any){
+    this.communityCardClick.emit(communityData)
   }
 }
