@@ -53,8 +53,6 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   }
 
   onCardClick(cardData: any){
-    
-    console.log(cardData)
     this.cardClick.emit(cardData);
   }
 

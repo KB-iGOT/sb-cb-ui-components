@@ -23,7 +23,7 @@ export class PostCardComponent {
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedPosts: any = []
-  @Input() userJoinedCommunity: boolean = false
+  @Input() userJoinedCommunity!: boolean 
   @Input() community!: string
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
@@ -198,7 +198,6 @@ export class PostCardComponent {
       "discussionId": this.post.discussionId
     }
     requestData = { ...requestData, ...flagDetails }
-    console.log('requestData: ', requestData)
 
     this.discussV2Svc.reportPost(requestData).subscribe(res => {
       if (res && res.responseCode === 'OK') {
@@ -257,23 +256,21 @@ export class PostCardComponent {
         editMode: true
       } 
     });
-    newPostDialog.afterClosed().subscribe((result: any) => {
-      if (result) {
-        console.log(result)
-        // this.newComment.emit({result: result.result, type: result.type})
-      }
+    newPostDialog.afterClosed().subscribe((_result: any) => {
+      // if (result) {
+      //   // this.newComment.emit({result: result.result, type: result.type})
+      // }
     })
   }
 
   updateRepliesData(eventData: any) {
-    console.log(eventData)
     this.replyDataCopy = eventData.replyDataCopy
     this.fetchedReplyData = [...eventData.replyData]
     return this.fetchedReplyData 
   }
 
-  newCommentEvent(event: any) {
-    console.log('newCommentEvent::', event)
+  newCommentEvent(_event: any) {
+    // console.log('newCommentEvent::', event)
   }
 
   getFileExtension(file: string): string {

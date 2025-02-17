@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, Inject } from '@angular/core';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
-import { UntypedFormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
-import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { DiscussionV2Service } from '../../_services/discussion-v2.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+// tslint:disable-next-line
+import _ from 'lodash'
 
 @Component({
   selector: 'd-v2-new-post',
@@ -21,6 +23,20 @@ export class NewPostComponent implements OnInit, OnDestroy {
   @Output() newComment = new EventEmitter<any>()
   @Input() userJoinedCommunity: boolean = false
   @Input() community: any
+  @Input() editMode: boolean = false
+  @Input() post: any
+
+
+  selectedFilesFinal: any = {}
+  categoryType: any[] = []
+  mediaCategory: any = {}
+  environment: any
+  uploadForm: FormGroup
+  uploadControlVisibility: any = {
+    document: false,
+    image: false,
+    link: false
+  }
 
   loogedInUserProfile: any = {}
   loggedInUserData: any = {}
@@ -32,37 +48,32 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   isMultiLine = false;
 
-  private heightCheckSubject = new Subject<any>();
-  private readonly LINE_HEIGHT = 40;
-  private readonly HEIGHT_BUFFER = 20; // Buffer to prevent flickering
 
   constructor(
+    private fb: FormBuilder,
+    private discussV2Svc: DiscussionV2Service,
+    @Inject('environment') environment: any,
     private configSvc: ConfigurationsService,
-    // private discussV2Svc: DiscussionV2Service,
+    private _snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {
-
+    this.uploadForm = this.fb.group({
+      // title: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.required, Validators.maxLength(500)]],
+      tags: [[]],
+      files: [[]]
+    });
+    this.environment = environment
   }
 
   ngOnInit() {
     this.loogedInUserProfile = this.configSvc.userProfile
     this.loggedInUserData = this.configSvc.unMappedUser
-
-    // Debounce height checks
-    this.heightCheckSubject.pipe(
-      debounceTime(100) // Wait 100ms before processing height changes
-    ).subscribe((event: any) => {
-      this.processHeightChange(event);
-    });
   }
 
   ngOnDestroy() {
-    this.heightCheckSubject.complete();
   }
 
-  submitComment() {
-
-  }
 
   toggleEmojiPicker() {
     this.showEmojiPicker = !this.showEmojiPicker
@@ -74,14 +85,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   onFocus() {
     this.showEmojiPicker = false
-  }
-
-  toggleDisable() {
-    // if (this.commentSvc && this.commentSvc.enrolledContent) {
-    //   this.searchControl.enable()
-    // } else {
-    //   this.searchControl.disable()
-    // }
   }
 
   openNewPostDialog() {
@@ -100,7 +103,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log(result)
         this.newComment.emit({result: result.result, type: result.type})
       }
     })
@@ -110,38 +112,415 @@ export class NewPostComponent implements OnInit, OnDestroy {
     const element = event.target;
     element.style.height = 'auto';
     element.style.height = element.scrollHeight + 'px';
-    this.heightCheckSubject.next(element);
+  }
+  
+  getNewAndOldMerged(newMedia: any, oldMedia: any) {
+    // Merge values from both objects
+    for(let cat of this.categoryType) {
+      oldMedia[cat] = [...oldMedia[cat], ...newMedia[cat]]
+    }
+    return oldMedia
   }
 
-  private processHeightChange(element: HTMLElement): void {
-    const wrapper = element.closest('.input-wrapper');
-    const shouldBeMultiLine = element.scrollHeight > (this.LINE_HEIGHT + this.HEIGHT_BUFFER);
-    
-    if (shouldBeMultiLine !== this.isMultiLine) {
-      this.isMultiLine = shouldBeMultiLine;
-      if (this.isMultiLine) {
-        wrapper?.classList.add('expanded');
+  createPoll(): void {
+    // Implement poll creation logic
+  }
+
+  addMedia(): void {
+    this.uploadControlVisibility['image'] = true
+    this.uploadControlVisibility['document'] = false
+    this.uploadControlVisibility['link'] = false
+  }
+
+  addFile(): void {
+    this.uploadControlVisibility['image'] = false
+    this.uploadControlVisibility['document'] = true
+    this.uploadControlVisibility['link'] = false
+  }
+
+  createLink(): void {
+    this.uploadControlVisibility['image'] = false
+    this.uploadControlVisibility['document'] = false
+    this.uploadControlVisibility['link'] = true
+  }
+
+  onFileInputChange(event: any, category: string) {
+    const files = event.target.files;
+    if (files) {
+      this.selectedFilesFinal[category] = this.selectedFilesFinal[category] || [];
+
+      Array.from(files as FileList).forEach(file => {
+        // Add to selectedFilesFinal
+        const previewUrl = URL.createObjectURL(file as Blob);
+
+        this.selectedFilesFinal[category].push({
+          file: file,
+          name: file.name,
+          category: category,
+          previewUrl: previewUrl,
+          uploaded: false
+        });
+
+      });
+
+      this.uploadForm.patchValue({
+        files: this.selectedFilesFinal
+      });
+
+      this.updateCategory(category);
+    }
+  }
+
+  updateCategory(type: string) {
+    if (this.categoryType.indexOf(type) === -1) {
+      this.categoryType.push(type)
+    }
+  }
+
+  removeFileNew(index: number, category: string) {
+    if (index && category) {
+      if (this.selectedFilesFinal[category]) {
+        this.selectedFilesFinal[category].splice(index, 1);
+      }
+    }
+
+    this.uploadForm.patchValue({
+      files: this.selectedFilesFinal
+    });
+
+    this.removeCategoryType(category)
+  }
+
+  removeCategoryType(category: string) {
+    if(this.selectedFilesFinal[category] && this.selectedFilesFinal[category].length <= 0) {
+      _.remove(this.categoryType, category);
+    }
+  }
+
+  onSubmit(): void {
+    if (this.uploadForm.valid) {
+      // const formData = {
+      //   ...this.uploadForm.value,
+      //   // tags: this.selectedTags
+      // };
+      if (this.editMode) {
+        this.handleEditFlow();
       } else {
-        wrapper?.classList.remove('expanded');
+        this.handlePostCreation();
       }
     }
   }
-  
-  onImageSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedImage = file;
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.selectedImagePreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
+
+  private handlePostCreation(): void {
+    switch (this.type) {
+      case NsDiscussionV2.EPostType.QUESTION:
+        this.createPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST:
+        this.createAnswerPost();
+        break;
     }
   }
+
+  createPost() {
+    const req = this.createReq(this.uploadForm, this.type)
+    this.discussV2Svc.createPost(req).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          const discussionId = res.result.discussionId; // Get the discussion ID
+          if (this.categoryType.length) {
+            this.uploadHandler(discussionId, res.result);
+          } else {
+            this._snackBar.open('Post created successfully!')
+          }
+        }
+      },
+      error: (err: any) => {
+        console.log('Create post failed', err);
+      }
+    });
+  }
+
+  createAnswerPost() {
+    const req = this.createReq(this.uploadForm, this.type)
+    this.discussV2Svc.createAnswerPost(req).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          const discussionId = res.result.discussionId; // Get the discussion ID
+          if (this.categoryType.length) {
+            this.uploadHandler(discussionId, res.result);
+          } else {
+            this._snackBar.open('Post created successfully!')
+          }
+        }
+      },
+      error: (err: any) => {
+        console.log('Create post failed', err);
+      }
+    });
+  }
+
+  async uploadHandler(discussionId: string, postResult: any) {
+    try {
+      let temp: any = {}
+      // Convert forEach to for...of for sequential processing
+      for (const cat of this.categoryType) {
+        // except link, for all follow below steps to upload and process URL
+        if(cat !== 'link') {
+          if (this.selectedFilesFinal[cat] && this.selectedFilesFinal[cat].length) {
+            // Wait for all file uploads in this category to complete
+            const uploadedUrls = await Promise.all(
+              this.selectedFilesFinal[cat].map((fileObj: any) => {
+                return new Promise<string>((resolve, reject) => {
+                  if (fileObj.file) {
+                    const formData = new FormData();
+                    formData.append('file', fileObj.file);
+                    const communityId = this.community.communityId || ''
+                    this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
+                      next: (res: any) => {
+                        if (res && res.result && res.result.url) {
+                          const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
+                          const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
+                          resolve(finalURL);
+                        } else {
+                          reject('No URL in response');
+                        }
+                      },
+                      error: (error) => reject(error)
+                    });
+                  } else {
+                    resolve(fileObj.name);
+                  }
+                });
+              })
+            );
   
-  removeImage(): void {
-    this.selectedImage = null;
-    this.selectedImagePreview = null;
+            temp[cat] = uploadedUrls;
+          }
+        } else{
+          if(this.selectedFilesFinal['link'] && this.selectedFilesFinal['link'].length){
+            temp['link'] = temp['link'] || []
+            temp['link'] = this.selectedFilesFinal['link'].map((link:any) => {return link.previewUrl})
+          }
+        }
+      }
+
+      // After all categories are processed, update mediaCategory and call update
+      this.mediaCategory = temp;
+      this.handlePostUpdation(discussionId, postResult);
+    } catch (error) {
+      console.error('Error in upload handler:', error);
+      this._snackBar.open('Error in upload handler')
+    }
+  }
+
+  private handlePostUpdation(discussionId: string, postResult: any): void {
+    switch (this.type) {
+      case NsDiscussionV2.EPostType.QUESTION:
+        this.updatePostWithMediaUrls(discussionId, postResult);
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST:
+        this.updateAnswerPostWithMediaUrls(discussionId, postResult);
+        break;
+    }
+  }
+
+  updatePostWithMediaUrls(discussionId: string, postResult: any) {
+    const communityId = postResult.communityId
+    const updateReq = {
+      discussionId,
+      communityId,
+      categoryType: this.categoryType,
+      mediaCategory: this.mediaCategory
+    };
+    this.discussV2Svc.updatePost(updateReq).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          this._snackBar.open('Post created successfully!')
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post with media URLs:', err);
+        // Even if update fails, the post was created
+        this._snackBar.open('Error updating post with media URLs')
+      }
+    });
+  }
+
+  updateAnswerPostWithMediaUrls(discussionId: string, _postResult: any) {
+    const updateReq = {
+      answerPostId: discussionId,
+      categoryType: this.categoryType,
+      mediaCategory: this.mediaCategory
+    };
+
+    this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          this._snackBar.open('Post created successfully!')
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post with media URLs:', err);
+        // Even if update fails, the post was created
+        this._snackBar.open('Error updating post with media URLs')
+      }
+    });
+  }
+
+  createReq(formData: any, type: string) {
+    const parentDiscussionId = this.hierarchyPath.length ? this.hierarchyPath[0] : ''
+    const req = {
+      type,
+      ...(parentDiscussionId ? { parentDiscussionId: parentDiscussionId } : null),
+      communityId: this.community.communityId || '',
+      // title: formData.value.title,
+      description: formData.value.description,
+      // categoryType: [...this.categoryType],
+      // mediaCategory: this.mediaCategory,
+      // targetTopic: 'testing',
+      // tags: this.selectedTags,
+      // mediaUrls: this.mediaUrls || []
+    }
+    return req;
+  }
+
+  handleEditFlow() {
+    switch (this.type) {
+      case NsDiscussionV2.EPostType.QUESTION:
+        this.editPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST:
+        this.editAnswerPost();
+        break;
+    }
+  }
+
+  private async editUploadHandler(discussionId: string) {
+    try{
+    const temp: any = {}
+    for(const cat in this.selectedFilesFinal) {
+      if(cat !== 'link'){
+        if (this.selectedFilesFinal[cat] && this.selectedFilesFinal[cat].length) {
+          const newFiles = this.selectedFilesFinal[cat].filter( (x: any) => !x.uploaded)
+          // Wait for all file uploads in this category to complete
+          const uploadedUrls = await Promise.all(
+            newFiles.map((fileObj: any) => {
+              return new Promise<string>((resolve, reject) => {
+                if (fileObj.file) {
+                  const formData = new FormData();
+                  formData.append('file', fileObj.file);
+                  const communityId = this.community.communityId || ''
+                  this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
+                    next: (res: any) => {
+                      if (res && res.result && res.result.url) {
+                        const mainUrl = res.result.url.split(`discussionhub/`).pop() || ''
+                        const finalURL = `${this.environment.contentHost}/${this.environment.dicussV2Bucket}/${mainUrl}`
+                        resolve(finalURL);
+                      } else {
+                        reject('No URL in response');
+                      }
+                    },
+                    error: (error) => reject(error)
+                  });
+                } else {
+                  resolve(fileObj.name);
+                }
+              });
+            })
+          );
+          temp[cat] = uploadedUrls;
+        }
+      } else {
+        if(this.selectedFilesFinal['link'] && this.selectedFilesFinal['link'].length){
+          temp['link'] = temp['link'] || []
+          temp['link'] = this.selectedFilesFinal['link'].filter((l:any) => !l.uploaded).map((link:any) => {return link.previewUrl})
+        }
+      }
+    }
+    return temp
+    } catch (error) {
+      console.error('Error in edit  upload handler:', error);
+    }
+
+
+  }
+  
+
+  async editPost() {
+    const newMedia = await this.editUploadHandler(this.post.discussionId);
+    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
+    const updateReq = {
+      discussionId: this.post.discussionId,
+      communityId: this.post.communityId,
+      // title: this.uploadForm.value.title,
+      description: this.uploadForm.value.description,
+      // mediaUrls,
+      categoryType: [...this.categoryType],
+      mediaCategory: mergedMediaCategory,
+      // tags: this.selectedTags
+    };
+
+    this.discussV2Svc.updatePost(updateReq).subscribe({
+      next: (res) => {
+        if (res?.result) {
+          this._snackBar.open('Post updated successfully!')
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post:', err);
+        this._snackBar.open('Error updating post!')
+      }
+    });
+  }
+
+  async editAnswerPost() {
+    const newMedia = await this.editUploadHandler(this.post.discussionId);
+    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
+    const updateReq = {
+      answerPostId: this.post.discussionId,
+      // communityId: this.post.communityId,
+      // title: this.uploadForm.value.title,
+      description: this.uploadForm.value.description,
+      // mediaUrls,
+      categoryType: [...this.categoryType],
+      mediaCategory: mergedMediaCategory,
+      // tags: this.selectedTags
+    };
+    this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
+      next: (res) => {
+        if (res?.result) {
+          this._snackBar.open('Post updated successfully!')
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post:', err);
+      }
+    });
+  }
+
+
+  getFileExtension(file: string): string {
+    return file.split('.').pop() || '';
+  }
+
+  getFileName(url: string): string {
+    const filename = url.split('/').pop() || '';
+    // Decode the URL-encoded filename
+    return decodeURIComponent(filename);
+  }
+
+  getFileIcon(url: string): string {
+    const extension = this.getFileExtension(url);
+    switch(extension) {
+      case 'pdf':
+        return 'picture_as_pdf';
+      case 'doc':
+      case 'docx':
+        return 'description';
+      default:
+        return 'insert_drive_file';
+    }
   }
 
 }

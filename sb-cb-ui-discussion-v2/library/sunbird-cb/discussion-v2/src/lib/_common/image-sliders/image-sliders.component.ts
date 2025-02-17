@@ -14,6 +14,7 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
   @Input() imageUrls: any[] = []
   @Input() objectArray: any[] = []
   @Output() imageClickEmit = new EventEmitter<any>();
+  @Input() defaultImg: any
   @HostBinding('id')
   public id = `banner_${Math.random()}`
   private defaultMenuSubscribe: Subscription | null = null
@@ -103,6 +104,11 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
       this.defaultMenuSubscribe.unsubscribe()
     }
   }
+
+  changeToDefaultImg($event: any) {
+    $event.target.src = this.defaultImg
+  }
+
 
 
   reInitiateObjectSlideInterval() {

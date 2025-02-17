@@ -2,51 +2,59 @@
     <!-- Left Sidebar -->
     <div class="lg:w-64">
       <ng-container *ngIf="!isLoading">
-         <d-v2-similar-community-card ></d-v2-similar-community-card> 
-         
+         <d-v2-similar-community-card (communityClick)="onCardClick($event)"></d-v2-similar-community-card> 
       </ng-container>
     </div>
     <!-- Main Content -->
     <div class="flex-1">
-       <div class="md:col-span-2">
-          <div class="flex items-center gap-2 mb-6">
-             <div class="relative flex-1 flex community-search" *ngIf="globalSearchEnabled">
-                <input
-                   type="text"
-                   [value]="searchTextValue"
-                   (keydown.enter)="onSearch($event)"
-                   placeholder="Search Communities"
-                   class="w-full px-4 py-2 pl-10  rounded-full "
-                   />
-                <mat-icon class="absolute left-3 top-1.5 h-5 w-5 text-gray-400">
-                   search
-                </mat-icon>
-             </div>
-             <div class="relative flex-1 flex community-search" *ngIf="topicName">
-               <input
-               #searchInput id="searchInput"
-                  type="text"
-                  [(ngModel)]="localSearchTextValue"
-                  placeholder="Search Communities local"
-                  class="w-full px-4 py-2 pl-10  rounded-full "
-                  />
-               <mat-icon class="absolute left-3 top-1.5 h-5 w-5 text-gray-400">
-                  search
-               </mat-icon>
+      <div class="md:col-span-2" >
+      <div class="flex items-center gap-2 mb-6">
+      <div class="relative flex-1 flex community-search" *ngIf="globalSearchEnabled">
+         <input
+            type="text"
+            [value]="searchTextValue"
+            (keydown.enter)="onSearch($event)"
+            placeholder="Search Communities"
+            class="w-full px-4 py-2 pl-10  rounded-full "
+            />
+         <mat-icon class="absolute left-3 top-1.5 h-5 w-5 text-gray-400">
+            search
+         </mat-icon>
+      </div>
+      <div class="relative flex-1 flex community-search" *ngIf="topicName">
+         <input
+         #searchInput id="searchInput"
+            type="text"
+            [(ngModel)]="localSearchTextValue"
+            placeholder="Search Communities"
+            class="w-full px-4 py-2 pl-10  rounded-full "
+            />
+         <mat-icon class="absolute left-3 top-1.5 h-5 w-5 text-gray-400">
+            search
+         </mat-icon>
+      </div>
+      <div class="block md:hidden">
+         <mat-icon (click)="openBottomSheet()" >filter_list</mat-icon>
+
+      </div>
+      </div>
+      </div>
+      <div class="info-text">
+         <h2  *ngIf="searchTextValue">Showing results for <span >"{{searchTextValue}}"</span></h2>
+         <h2 *ngIf="topicName">Communities under <span >"{{topicName}}"</span> ({{communityDataList?.length}})</h2>
+      </div>
+      <ng-container *ngIf="communityDataList?.length;else noDataTemplateCall">
+         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div *ngFor="let community of communityDataList | filterSearch: localSearchTextValue">
+               <d-v2-community-card [isLoading]="isLoading" [orgDetails]="orgDetails" [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
             </div>
-            <mat-icon (click)="openBottomSheet()" class="block md:hidden">filter_list</mat-icon>
-          </div>
-       </div>
-       <div class="info-text">
-        <h2  *ngIf="searchTextValue">Showing results for <span >"{{searchTextValue}}"</span></h2>
-        <h2 *ngIf="topicName">Communities under <span >"{{topicName}}"</span> ({{communityDataList?.length}})</h2>
-         
-       </div>
-       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let community of communityDataList | filterSearch: localSearchTextValue">
-         <d-v2-community-card [isLoading]="isLoading" [orgDetails]="orgDetails" [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
-        </div>
-     </div>
+         </div>
+      </ng-container>
+
+      <ng-template #noDataTemplateCall>
+         <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{'iconName':'forum', 'noTextValue':'No Communnities found'}"></ng-container>
+      </ng-template>
+      
     </div>
     <!-- Right Sidebar -->
     <div class="lg:w-64">
@@ -57,3 +65,9 @@
         
     </div>
  </div>
+
+ <ng-template #noData let-iconName="iconName" let-noTextValue="noTextValue">
+   <div class="mt-8">
+      <d-v2-no-data [iconName]="iconName" [noText]="noTextValue"></d-v2-no-data>
+   </div>
+</ng-template>

@@ -13,6 +13,7 @@ export class FeedComponent implements OnInit, OnChanges{
   @Input() widgetData: any = []
   @Input() userJoinedCommunity: boolean = false
   @Input() community!: any
+  @Input() postCategoryTypeFilter: any
   loadingPosts: boolean = false
   loogedInUserProfile: any = {}
   pageNumber = 0
@@ -35,7 +36,6 @@ export class FeedComponent implements OnInit, OnChanges{
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.community && Object.keys(changes.community.currentValue).length) {
       if(this.community) {
-        console.log('on changes calling fetchPosts() ', this.community, changes.community)
         this.fetchPosts()
       }
     }
@@ -85,6 +85,10 @@ export class FeedComponent implements OnInit, OnChanges{
       "orderBy": "createdOn",
       "orderDirection": "ASC",
       "facets": []
+    }
+
+    if(this.postCategoryTypeFilter && Object.keys(this.postCategoryTypeFilter).length) {
+      req.filterCriteriaMap = {...req.filterCriteriaMap, ...this.postCategoryTypeFilter}
     }
     
     return req
@@ -147,7 +151,6 @@ export class FeedComponent implements OnInit, OnChanges{
   }
 
   newCommentEvent(event: any){
-    console.log('Widget catch event :', event)
     if(event && event.type === 'question'){
       this.fetchPosts()
     }

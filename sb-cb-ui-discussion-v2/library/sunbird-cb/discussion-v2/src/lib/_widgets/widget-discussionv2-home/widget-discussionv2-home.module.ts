@@ -19,6 +19,7 @@ import { TrendingTagsModule } from '../../_common/trending-tags/trending-tags.mo
 import { DiscoverModule } from '../../_common/discover/discover.module';
 import { TopicCardModule } from '../../_common/topic-card/topic-card.module';
 import { SimilarCommunityCardModule } from '../../_common/similar-community-card/similar-community-card.module';
+import { NoDataModule } from '../../_common/no-data/no-data.module';
 
 
 @NgModule({
@@ -41,7 +42,8 @@ import { SimilarCommunityCardModule } from '../../_common/similar-community-card
     TrendingTagsModule,
     DiscoverModule,
     TopicCardModule,
-    SimilarCommunityCardModule
+    SimilarCommunityCardModule,
+    NoDataModule
   ],
   exports: [
     WidgetDiscussionv2HomeComponent
