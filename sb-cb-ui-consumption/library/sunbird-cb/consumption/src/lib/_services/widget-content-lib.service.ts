@@ -88,7 +88,7 @@ export class WidgetContentLibService {
   releventNotRelevent$ = this.releventNotRelevent.asObservable()
   storedRecommendedIds: any = {};
   feedbackDataForCourse: any = {};
-
+  isTelementrySubscribed = false
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
   }
@@ -686,5 +686,9 @@ export class WidgetContentLibService {
     );
   
     return courses.filter((course: any) => !coursesWithZeroRating.has(course.identifier));
+  }
+
+  setTelementrySubscription(event: boolean) {
+    this.isTelementrySubscribed = event
   }
 }

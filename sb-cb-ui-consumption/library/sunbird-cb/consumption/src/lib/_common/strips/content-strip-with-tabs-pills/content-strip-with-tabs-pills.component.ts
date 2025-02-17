@@ -121,6 +121,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   currentStripG: any;
   tabEventG: any;
   firstTimeLoaded = false
+  localRecommended: any;
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
     @Inject('environment') environment: any,
@@ -151,13 +152,16 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   ngOnInit() {
     // const url = window.location.href
+    this.localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
     this.initData();
     this.subscribeToTelementry()
   }
 
   subscribeToTelementry() {
-    if(!this.telementrySubscription) {
+
+    if(!this.telementrySubscription && !this.contentSvc.isTelementrySubscribed) {
       this.telementrySubscription = this.contentSvc.telemetryData$.subscribe((data: any) => {
+        this.contentSvc.setTelementrySubscription(true)
         if (this.widgetData && this.widgetData.strips[0] && 
           (this.widgetData.strips[0]?.key === 'cbpPlan') 
           || this.widgetData.strips[0]?.key === 'forYou'
@@ -176,6 +180,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       })
     }
   }
+
   parametrizedText(str: string) {
     return str.toLocaleLowerCase().replace(" ", "-")
   }
@@ -191,6 +196,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     
     if(this.telementrySubscription) {
       this.telementrySubscription.unsubscribe()
+      this.contentSvc.setTelementrySubscription(false)
     }
   }
 
@@ -401,6 +407,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.fetchForYouData(strip, calculateParentStatus)
     this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
+
+    if(strip.tabs[0]?.value === 'sakshamAI') {
+      this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
+    }
     // this.fetchFromEnrollmentList(strip, calculateParentStatus);
 
     // this.enrollInterval = setInterval(() => {
@@ -1005,8 +1015,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList) {
           this.fetchAllCbpPlans(currentStrip, true)
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.courseRecommendation){
-          const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
-          this.generateCourseRecommendation(currentStrip, tabEvent, true, localRecommended)
+          this.generateCourseRecommendation(currentStrip, tabEvent, true, this.localRecommended)
         }
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
       }
@@ -1355,7 +1364,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      if (response) {
+      if (response.length && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
           tabResults = this.splitCbpTabsData(courses, strip);
@@ -1399,7 +1408,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         strip.showOnLoader = false
         strip.tabs[0].pillsData[0].tabLoading = false
         strip.tabs[0].hideTab = true
-        this.fetchDesignationBasedCourses(strip, 1, true)
+        // this.fetchDesignationBasedCourses(strip, 1, true)
+        this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
         this.processStrip(
           strip,
           this.transformContentsToWidgets(courses, strip),
@@ -1750,21 +1760,33 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             return []
           })
           const sRequest: any = {
-            "request": {
-              "filters": {
-                  "primaryCategory": [
-                      "Course"
-                  ],
+            // "request": {
+            //   "filters": {
+            //       "primaryCategory": [
+            //           "Course"
+            //       ],
+            //       "identifier": coursesIds
+            //   },
+            //   "sortBy": {
+            //       "lastUpdatedOn": "Desc"
+            //   }
+            // }
+            "searchV6": {
+              "request": {
+                "filters": {
                   "identifier": coursesIds
-              },
-              "sortBy": {
-                  "lastUpdatedOn": "Desc"
+                },
+                "offset": 0,
+                "sort_by": {
+                  "lastUpdatedOn": "desc"
+                },
               }
             }
           }
-          this.contentSvc.searchContentSearch_PROD(sRequest).subscribe(results => {
-            // if (results && results.result && results.result.content) {
-            if (true) {
+          // this.contentSvc.searchContentSearch_PROD(sRequest).subscribe(results => {
+          this.contentSvc.searchV6(sRequest.searchV6).subscribe(results => {
+            if (results && results.result && results.result.content) {
+            // if (true) {
               // let courses = results.result.content
               let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
               let tabResults: any
@@ -1856,8 +1878,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         }, duration: SNACKBAR_DURATION, panelClass: 'course-success-snackbar',
       })
       if(rating === 0) {
-        const localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
-        this.generateCourseRecommendation(this.currentStripG, this.tabEventG, true, localRecommended)
+        this.generateCourseRecommendation(this.currentStripG, this.tabEventG, true, this.localRecommended)
       }
     } else if (!response) {
       this.snackBar.openFromComponent(SnackbarComponent, {
