@@ -1698,7 +1698,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     })
   }
 
-  async generateCourseRecommendation(
+  async generateCourseRecommendation( 
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     tabIndex: number,
     calculateParentStatus: boolean,
@@ -1708,10 +1708,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       this.sakshamLoader = true
       let payload = {
         "user_id": this.configSvc.userProfile.userId,
-        // "department": this.configSvc.userProfile.departmentName,
-        // "designation": this.configSvc.userProfile.professionalDetails[0]?.designation,
-        "department": 'Ministry of Power',
-        "designation": 'Assistant Section Officer',
+        "department": this.configSvc.userProfile.departmentName,
+        "designation": this.configSvc.userProfile.professionalDetails[0]?.designation,
         "device_type": "web"
       }
       let response: any
@@ -1752,20 +1750,19 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             return []
           })
           const sRequest: any = {
-            "searchV6": {
-              "request": {
-                "filters": {
+            "request": {
+              "filters": {
+                  "primaryCategory": [
+                      "Course"
+                  ],
                   "identifier": coursesIds
-                },
-                "offset": 0,
-                "query": "",
-                "sort_by": {
-                    "lastUpdatedOn": "desc"
-                },
+              },
+              "sortBy": {
+                  "lastUpdatedOn": "Desc"
               }
             }
           }
-          this.contentSvc.searchV6_PROD(sRequest.searchV6).subscribe(results => {
+          this.contentSvc.searchContentSearch_PROD(sRequest).subscribe(results => {
             // if (results && results.result && results.result.content) {
             if (true) {
               // let courses = results.result.content
@@ -1849,7 +1846,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       "recommendation_id": this.recommendedCoursesId,
       "course_id": this.feedbackCourseId,
       "rating": rating,
-      "comments": comment
+      "comments": comment,
+      "user_id": this.configSvc.userProfile.userId
     }
     const response = await this.contentSvc.saveFeedbackSakshamAI(payload).toPromise().catch(() => {})
     if(response && response?.message) {

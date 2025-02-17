@@ -58,7 +58,8 @@ const API_END_POINTS = {
   USER_KARMA_POINTS: '/apis/proxies/v8/user/totalkarmapoints',
   AGGREGATION_SEARCH: '/apis/proxies/v8/content/aggregation/search',
   FEATURE_SEARCH: '/apis/proxies/v8/featured/content/search',
-  SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`
+  SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`,
+  CONTENT_SEARCH: `/api/content/v1/search`
 };
 
 @Injectable({
@@ -367,13 +368,13 @@ export class WidgetContentLibService {
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
   }
 
-  searchV6_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
+  searchContentSearch_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
     const apiPath = _.get(req, 'api.path');
     req.query = req.query || '';
     if (apiPath) {
       return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
     }
-    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH_V6, req);
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH, req);
   }
 
   searchRelatedCBPV6(req: NSSearch.ISearchV6RequestV2): Observable<NSSearch.ISearchV6ApiResultV2> {
