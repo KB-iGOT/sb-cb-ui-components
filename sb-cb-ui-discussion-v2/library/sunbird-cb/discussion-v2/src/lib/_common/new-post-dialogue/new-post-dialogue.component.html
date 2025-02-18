@@ -21,6 +21,9 @@
         {{data?.currentUser?.professionalDetails[0]?.designation}}
       </div>
     </div>
+    <button mat-icon-button (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 </div>
 <div class=" h-divider"></div>
@@ -265,5 +268,14 @@
         <p class="mat-body-1">Post preview</p>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="calculate-overlay calculate-overlay flex flex-col items-center justify-center" *ngIf="loading">
+  <div>
+    <mat-spinner [diameter]="50"></mat-spinner>
+  </div>
+  <div>
+    <span class="mat-heading" i18n>{{loaderMsg}}</span>
   </div>
 </div>

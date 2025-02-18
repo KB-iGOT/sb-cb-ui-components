@@ -91,6 +91,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
       width: '996px',
       maxHeight: '90vh', // Add maximum height (90% of viewport height)
+      disableClose: true,
       data: {
         type: this.type,
         panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
@@ -110,8 +111,21 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   autoGrow(event: any): void {
     const element = event.target;
-    element.style.height = 'auto';
-    element.style.height = element.scrollHeight + 'px';
+    element.style.minHeight = 'auto'; // Reset minHeight to auto to get the correct scrollHeight
+    element.style.minHeight = element.scrollHeight + 'px';
+
+    if (element.scrollHeight > 200) {
+      element.style.minHeight = '200px';
+    }
+    this.checkMultiline(event.target.value)
+  }
+
+  checkMultiline(val: string) {
+    if (val || (this.categoryType && this.categoryType.length)) {
+      this.isMultiLine = true;
+    } else {
+      this.isMultiLine = false;
+    }
   }
   
   getNewAndOldMerged(newMedia: any, oldMedia: any) {
@@ -168,6 +182,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
       });
 
       this.updateCategory(category);
+      if(this.categoryType && this.categoryType.length) {
+        this.isMultiLine = true
+      }
     }
   }
 
@@ -194,6 +211,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
   removeCategoryType(category: string) {
     if(this.selectedFilesFinal[category] && this.selectedFilesFinal[category].length <= 0) {
       _.remove(this.categoryType, category);
+    }
+    if(this.categoryType && this.categoryType.length) {
+      this.isMultiLine = true
     }
   }
 

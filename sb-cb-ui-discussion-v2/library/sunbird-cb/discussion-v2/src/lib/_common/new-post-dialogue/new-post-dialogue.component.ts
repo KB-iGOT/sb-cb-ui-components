@@ -8,6 +8,7 @@ import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 // tslint:disable-next-line
 import _ from 'lodash'
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'd-v2-new-post-dialogue',
@@ -78,7 +79,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       supportAllValues: true
     },
   };
+  loaderMsg = 'Please wait...'
   environment: any
+  loading: boolean = false
 
 
   constructor(
@@ -86,7 +89,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<NewPostDialogueComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private discussV2Svc: DiscussionV2Service,
-    @Inject('environment') environment: any
+    @Inject('environment') environment: any,
+    private _snackBar: MatSnackBar
   ) {
 
     this.widgetData = this.data.config
@@ -351,6 +355,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   createPost() {
+    this.loading = true
+    this.loaderMsg = 'Creating the post!'
     const req = this.createReq(this.uploadForm, this.data.type)
     this.discussV2Svc.createPost(req).subscribe({
       next: (res) => {
@@ -359,12 +365,16 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
           if (this.categoryType.length) {
             this.uploadHandler(discussionId, res.result);
           } else {
+            this.loading = false
+            this.loaderMsg = 'Post created successfully!'
+            this._snackBar.open('Post created successfully!')
             this.dialogRef.close({ result: res.result, type: this.data.type });
           }
         }
       },
       error: (err: any) => {
         console.log('Create post failed', err);
+        this._snackBar.open('Post creation failed, please try again after sometime...!')
       }
     });
   }
@@ -379,11 +389,13 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
             this.uploadHandler(discussionId, res.result);
           } else {
             this.dialogRef.close({ result: res.result, type: this.data.type });
+            this._snackBar.open('Post created successfully!') 
           }
         }
       },
       error: (err: any) => {
         console.log('Create post failed', err);
+        this._snackBar.open('Post creation failed, please try again after sometime...!')  
       }
     });
   }
@@ -391,6 +403,10 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   async uploadHandler(discussionId: string, postResult: any) {
     try {
       let temp: any = {}
+
+      this.loading = true
+      this.loaderMsg = 'Uploading the files...!'
+
       // Convert forEach to for...of for sequential processing
       for (const cat of this.categoryType) {
         // except link, for all follow below steps to upload and process URL
@@ -437,6 +453,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       this.mediaCategory = temp;
       this.handlePostUpdation(discussionId, postResult);
     } catch (error) {
+      this.loading = false
+      this.loaderMsg = 'Uploading the files failed, Please try again later!'
       console.error('Error in upload handler:', error);
       this.dialogRef.close({ result: postResult, type: this.data.type });
     }
@@ -454,6 +472,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   updatePostWithMediaUrls(discussionId: string, postResult: any) {
+    this.loading = true
+    this.loaderMsg = 'Updating the post with files!'
     const communityId = postResult.communityId
     const updateReq = {
       discussionId,
@@ -464,11 +484,17 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.discussV2Svc.updatePost(updateReq).subscribe({
       next: (res) => {
         if (res && res.result) {
+          this.loading = false
+          this.loaderMsg = 'Post updated successfully!'
+          this._snackBar.open('Post updated successfully!')   
           this.dialogRef.close({ result: res.result, type: this.data.type });
         }
       },
       error: (err) => {
+        this.loading = false
+        this.loaderMsg = 'Post updation failed, please try agian later!'
         console.error('Error updating post with media URLs:', err);
+        this._snackBar.open('Post updation failed, please try agian later!...!')  
         // Even if update fails, the post was created
         this.dialogRef.close({ result: postResult, type: this.data.type });
       }
@@ -485,11 +511,13 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
         if (res && res.result) {
+          this._snackBar.open('Post updated successfully!')
           this.dialogRef.close({ result: res.result, type: this.data.type });
         }
       },
       error: (err) => {
         console.error('Error updating post with media URLs:', err);
+        this._snackBar.open('Post updation failed, please try agian later!...!') 
         // Even if update fails, the post was created
         this.dialogRef.close({ result: postResult, type: this.data.type });
       }
@@ -591,10 +619,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.discussV2Svc.updatePost(updateReq).subscribe({
       next: (res) => {
         if (res?.result) {
+          this._snackBar.open('Post updated successfully!')
           this.dialogRef.close({ result: res.result, type: this.data.type });
         }
       },
       error: (err) => {
+        this._snackBar.open('Post updation failed, please try agian later!...!') 
         console.error('Error updating post:', err);
       }
     });
@@ -616,10 +646,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
         if (res?.result) {
+          this._snackBar.open('Post updated successfully!')
           this.dialogRef.close({ result: res.result, type: this.data.type });
         }
       },
       error: (err) => {
+        this._snackBar.open('Post updation failed, please try agian later!...!') 
         console.error('Error updating post:', err);
       }
     });

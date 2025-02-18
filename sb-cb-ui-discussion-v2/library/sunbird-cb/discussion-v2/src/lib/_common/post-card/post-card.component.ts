@@ -243,7 +243,8 @@ export class PostCardComponent {
   openEditDialogue(post: any) {
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
       width: '996px',
-      maxHeight: '90vh', // Add maximum height (90% of viewport height)
+      maxHeight: '90vh',// Add maximum height (90% of viewport height)
+      disableClose: true,
       data: {
         type: this.type,
         panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
