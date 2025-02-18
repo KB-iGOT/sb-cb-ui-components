@@ -50,6 +50,12 @@
             </div>
          </div>
       </ng-container>
+      <ng-container *ngIf="!(this.communityDataList.length >= this.totalCount)">
+         <div class="load-more-posts my-4 mt-8">
+             <button mat-flat-button color="primary" class="w-full underline" (click)="loadMoreMembers()">Load
+                 More</button>
+         </div>
+     </ng-container>
 
       <ng-template #noDataTemplateCall>
          <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{'iconName':'forum', 'noTextValue':'No Communnities found'}"></ng-container>

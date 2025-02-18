@@ -2,6 +2,11 @@ import { Component, Input, OnInit, Inject, Output, EventEmitter } from '@angular
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
+import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+// tslint:disable-next-line
+import _ from 'lodash'
 
 @Component({
   selector: 'd-v2-widget-community-home',
@@ -24,6 +29,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
   competenciesObject: any = []
   competencySelected = ''
   userId: any
+  flagSelectionList: any
   shortCutData: any[]= [
     {
       name:"Saved Posts",
@@ -71,9 +77,11 @@ export class WidgetCommunityHomeComponent implements OnInit {
   
   constructor(
     @Inject('environment') environment: any,
+    private dialog:MatDialog,
     private discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
-    private userEnrollSvc: UserEnrollCommunityService
+    private userEnrollSvc: UserEnrollCommunityService,
+    private snackbar: MatSnackBar
   ) { 
     
     this.environment = environment
@@ -205,13 +213,13 @@ export class WidgetCommunityHomeComponent implements OnInit {
 
   loadCompetencies(): void {
     
-    if (this.communityData && this.communityData['competencies'] && this.communityData['competencies'].length) {
+    if (this.communityData && this.communityData[this.compentencyKey.vKey] && this.communityData[this.compentencyKey.vKey].length) {
       const competenciesObject: any = {}
-      if (typeof this.communityData['competencies'] === 'string'
-        && this.checkValidJSON(this.communityData['competencies'])) {
-        this.communityData['competencies'] = JSON.parse(this.communityData['competencies'])
+      if (typeof this.communityData[this.compentencyKey.vKey] === 'string'
+        && this.checkValidJSON(this.communityData[this.compentencyKey.vKey])) {
+        this.communityData[this.compentencyKey.vKey] = JSON.parse(this.communityData[this.compentencyKey.vKey])
       }
-      this.communityData['competencies'].forEach((_obj: any) => {
+      this.communityData[this.compentencyKey.vKey].forEach((_obj: any) => {
         if (competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]) {
           if (competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]
             [_obj[this.compentencyKey.vCompetencyTheme]]) {
@@ -300,5 +308,43 @@ export class WidgetCommunityHomeComponent implements OnInit {
     this.similarCommunityClick.emit(communityData)
     this.communityId =communityData.communityId
     this.ngOnInit()
+  }
+
+  getAllFlagList() {
+    this.discussV2Svc.fetchAllFlags().subscribe((res: any) => {
+      if (res && res.result
+        && res.result.response
+        && res.result.response.value
+        && res.result.response.value.length) {
+        this.flagSelectionList = res.result.response.value
+        const confirmDialog = this.dialog.open(FlagDialogueComponent, {
+          width: '600px',
+          panelClass: 'flag-dialog',
+          backdropClass: 'flag-dialog-backdrop',
+          data: { comment: {}, flagSelectionList: this.flagSelectionList },
+        })
+        confirmDialog.afterClosed().subscribe((result: any) => {
+          if (result) {
+            this.reportPost(result)
+          }
+        })
+      }
+    })
+  }
+  reportPost(flagDetails: any) {
+    let requestData: any = {
+      "communityId": this.communityId
+    }
+    requestData = { ...requestData, ...flagDetails }
+  
+    this.discussV2Svc.communityFlag(requestData).subscribe((_res: any) => {
+      if (_res && _res.responseCode === 'OK') {
+        // this.loading = false
+      }
+      this.snackbar.open(_.get(this.feedWidgetData, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
+    },
+      () => {
+        this.snackbar.open(_.get(this.feedWidgetData, 'reportIcon.errorMsg') || 'Something went wrong! please try reporting again later.')
+      })
   }
 }

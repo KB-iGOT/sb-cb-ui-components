@@ -27,6 +27,7 @@ const API_END_POINTS = {
   USERS_COMMUNITY_LIST: `/apis/proxies/v8/community/v1/user/communities`,
   TOPIC_WISE_COMMUNITIES: `/apis/proxies/v8/community/v1/category/listAll`,
   BOOKMART_LIST: `/apis/proxies/v8/feedDiscussion/bookmarkedDiscussions`,
+  COMMUNITY_REPORT: `/apis/proxies/v8/community/v1/report`
 }
 
 
@@ -88,7 +89,10 @@ export class DiscussionV2Service {
   fetchAllFlags(): Observable<any> {
     return this.http.get<any>(`${API_END_POINTS.FLAG_LIST}`)
   }
-
+  communityFlag(request: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.COMMUNITY_REPORT}`, request)
+  }
+  
   reportPost(requestData: any) {
     return this.http.post<any>(`${API_END_POINTS.REPORT_POST}`, requestData)
   }
