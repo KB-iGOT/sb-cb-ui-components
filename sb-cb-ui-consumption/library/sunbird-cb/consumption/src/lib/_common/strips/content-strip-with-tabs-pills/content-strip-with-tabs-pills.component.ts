@@ -1759,19 +1759,20 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }).catch((_err: any) => {
             return []
           })
+          const sRequestV1: any = {
+             "request": {
+              "filters": {
+                  "primaryCategory": [
+                      "Course"
+                  ],
+                  "identifier": coursesIds
+              },
+              "sortBy": {
+                  "lastUpdatedOn": "Desc"
+              }
+            }
+          }
           const sRequest: any = {
-            // "request": {
-            //   "filters": {
-            //       "primaryCategory": [
-            //           "Course"
-            //       ],
-            //       "identifier": coursesIds
-            //   },
-            //   "sortBy": {
-            //       "lastUpdatedOn": "Desc"
-            //   }
-            // }
-            "searchV6": {
               "request": {
                 "filters": {
                   "identifier": coursesIds
@@ -1781,10 +1782,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                   "lastUpdatedOn": "desc"
                 },
               }
-            }
           }
-          // this.contentSvc.searchContentSearch_PROD(sRequest).subscribe(results => {
-          this.contentSvc.searchV6(sRequest.searchV6).subscribe(results => {
+          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          // this.contentSvc.searchV6(sRequest).subscribe(results => {
             if (results && results.result && results.result.content) {
             // if (true) {
               // let courses = results.result.content
