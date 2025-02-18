@@ -1382,7 +1382,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      if (response.length && response.length > 0) {
+      if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
           tabResults = this.splitCbpTabsData(courses, strip);
