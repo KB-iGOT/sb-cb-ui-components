@@ -52,24 +52,21 @@
                      <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
                   </ng-container>
                   <ng-template #noDataTemplateCall>
-                     <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{'iconName':'forum', 'noTextValue':'No Topics found'}"></ng-container>
+                     <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{'iconName':'forum', 'noTextValue':'Coming Soon!'}"></ng-container>
                   </ng-template>
                </ng-template>
                
             </mat-tab>
             <mat-tab label="Your Communities">
                <ng-template matTabContent>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"  *ngIf="userEnrollDetailsData?.length; else noDataTemplateCall">
-                     <ng-container>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"  *ngIf="userEnrollDetailsData?.length; else noEnrolledCommunity">
                         <div  *ngFor="let item of userEnrollDetailsData">
                            <d-v2-community-card [community]="item"   (click)="onCardClick(item)"></d-v2-community-card>
                         </div>
-                     </ng-container>
-
                   </div>
 
-                  <ng-template #noDataTemplateCall>
-                     <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{iconName:'forum', noTextValue:'you have not joined for any communities'}"></ng-container>
+                  <ng-template #noEnrolledCommunity>
+                     <ng-container [ngTemplateOutlet]="noData" [ngTemplateOutletContext]="{'iconName':'forum', 'noTextValue':'Join a community to get started!'}"></ng-container>
                   </ng-template>
                </ng-template>
             </mat-tab>
