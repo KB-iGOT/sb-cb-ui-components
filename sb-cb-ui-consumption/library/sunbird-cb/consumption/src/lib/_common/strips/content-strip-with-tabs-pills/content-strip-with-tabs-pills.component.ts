@@ -453,7 +453,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
           deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
           contentTags: strip.stripConfig && strip.stripConfig.contentTags,
-          sakshamAIGenerated: this.activeTabIndex === 1 ? this.recommendedCoursesId : ''
+          sakshamAIGenerated: this.getRecommendedId(strip)
 
         },
       } : {
@@ -611,6 +611,24 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return false;
   }
 
+  getRecommendedId(strip: any): string {
+    if (!strip?.tabs || !Array.isArray(strip.tabs)) {
+      return '';
+    }
+  
+    if (strip.tabs[0]?.hideTab === true) {
+      return this.recommendedCoursesId;
+    }
+  
+    else if (
+      (strip.tabs[0]?.value === 'sakshamAI' && this.activeTabIndex === 0) ||
+      (strip.tabs[1]?.value === 'sakshamAI' && this.activeTabIndex === 1)
+    ) {
+      return this.recommendedCoursesId;
+    }
+  
+    return ''; 
+  }
 
   getTabDataByfilter(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
