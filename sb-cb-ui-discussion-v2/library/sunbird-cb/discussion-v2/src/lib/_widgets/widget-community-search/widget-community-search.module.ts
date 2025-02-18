@@ -10,6 +10,7 @@ import { SimilarCommunityCardModule } from '../../_common/similar-community-card
 import { PipesModule } from '../../_pipes/pipes.module';
 import { MatBottomSheetModule, MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet'
 import { NoDataModule } from '../../_common/no-data/no-data.module';
+import { MatButtonModule } from '@angular/material/button';
 
 
 
@@ -27,7 +28,8 @@ import { NoDataModule } from '../../_common/no-data/no-data.module';
     SimilarCommunityCardModule,
     PipesModule,
     MatBottomSheetModule,
-    NoDataModule
+    NoDataModule,
+    MatButtonModule
   ],
   exports: [
     WidgetCommunitySearchComponent

@@ -9,7 +9,7 @@ import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
 export class MemberDetailsComponent implements OnInit{
   @Input() communityId = '';
   communityMembersList: any = []
-  limit: number = 2
+  limit: number = 10
   offset: number = 0
   totalNumberOfMembers: any = 0
   constructor(private discussV2Svc: DiscussionV2Service){

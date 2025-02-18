@@ -251,7 +251,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
             this.uploadHandler(discussionId, res.result);
           } else {
             this._snackBar.open('Post created successfully!')
+            this.newComment.emit({result: res.result, type: res.result.type})
           }
+
         }
       },
       error: (err: any) => {
@@ -358,6 +360,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       next: (res) => {
         if (res && res.result) {
           this._snackBar.open('Post created successfully!')
+          this.newComment.emit({result: res.result, type: res.result.type})
         }
       },
       error: (err) => {

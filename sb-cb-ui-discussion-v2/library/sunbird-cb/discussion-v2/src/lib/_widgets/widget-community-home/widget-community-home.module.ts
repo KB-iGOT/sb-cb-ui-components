@@ -9,7 +9,7 @@ import { CommunityDetailsModule } from '../../_common/community-details/communit
 import { MemberCardModule } from '../../_common/member-card/member-card.module';
 import { SharedModule } from '../../_shared/shared.module';
 import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
 import { PipesModule } from '../../_pipes/pipes.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
