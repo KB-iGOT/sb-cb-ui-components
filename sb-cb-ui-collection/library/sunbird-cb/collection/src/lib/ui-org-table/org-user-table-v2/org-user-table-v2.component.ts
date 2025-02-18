@@ -178,7 +178,9 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   onSearchEnter(event: any) {
     if (event === '') {
       this.searchByEnterKey.emit('')
-    } 
+    } else if (event?.length > 2) {
+      this.searchByEnterKey.emit(event)
+    }
     if (event?.target?.value === '') {
       this.searchByEnterKey.emit('')
     } else if (event?.target?.value?.length > 2){
