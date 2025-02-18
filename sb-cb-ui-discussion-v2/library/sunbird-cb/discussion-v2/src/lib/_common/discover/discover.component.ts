@@ -18,14 +18,6 @@ export class DiscoverComponent implements OnInit, OnChanges {
   topicDataLoading: boolean = false
   toppicWiseCommunitiesCopy: any = {}
   popularCommunities: any = [
-    {
-      banner:"https://portal.dev.karmayogibharat.net/content-store/discussionhub/1d08a92b-07fa-41e4-8060-93a221d416e6/c430d380-de32-11ef-a141-db1d6b1d6df7/1738149509610_1000078002.png",
-      name: "Quantum Computing Forum testing competencies"
-    },
-    {
-      banner:"https://portal.dev.karmayogibharat.net/content-store/discussionhub/1d08a92b-07fa-41e4-8060-93a221d416e6/c430d380-de32-11ef-a141-db1d6b1d6df7/1738149509610_1000078002.png",
-      name: "Quantum Computing Stack Exchange"
-    }
   ]
   sliderStyleData: any = {
     styleData: {
@@ -192,8 +184,6 @@ export class DiscoverComponent implements OnInit, OnChanges {
     try {
       const res: any = await this.discussV2Svc.communitySearch(request).toPromise();
       if (res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length) {
-        
-          
           let newValues = res.result.search_results.data.map((v: any) => ({...v, name: v.communityName, banner: v.posterImageUrl}))
           this.popularCommunities = newValues
         

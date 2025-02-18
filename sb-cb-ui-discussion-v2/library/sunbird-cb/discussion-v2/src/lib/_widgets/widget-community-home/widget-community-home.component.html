@@ -11,7 +11,7 @@
                     <div class="block md:hidden">
                         <div class="flex items-center ">
                             <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
-                            <mat-icon *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                            <mat-icon  class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
                         </div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                 <div class="flex items-center">
                     <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 " (click)="joinCommunity()">Join</button>
                     <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true">share</mat-icon>
-                    <mat-icon *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                    <mat-icon class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
                 </div>
             </div>
         </div>
@@ -165,8 +165,12 @@
 <d-v2-share-discussion *ngIf="enableShare" [shareType]="'copy'" [rootOrgId]="rootOrgId" [content]="communityData" (resetEnableShare)="resetEnableShare($event)"></d-v2-share-discussion>
 
 
-<mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="unJoinCommunity()" *ngIf="userJoinedCommunity">
-        <span>leave community</span>
+<mat-menu #menu="matMenu" class="comment-card-menu" xPosition="after">
+    <button mat-menu-item (click)="getAllFlagList()" >
+        <mat-icon class="material material-icons-outlined report-icons">flag</mat-icon><span>Report</span>
     </button>
+    <button mat-menu-item (click)="unJoinCommunity()" *ngIf="userJoinedCommunity">
+        <mat-icon class="report-icons">logout</mat-icon><span>Leave</span>
+    </button>
+    
 </mat-menu>

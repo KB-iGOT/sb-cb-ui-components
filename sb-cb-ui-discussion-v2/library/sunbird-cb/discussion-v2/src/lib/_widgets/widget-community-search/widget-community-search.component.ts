@@ -16,6 +16,7 @@ export class WidgetCommunitySearchComponent {
   localSearchTextValue: any = '';
   globalSearchEnabled: boolean = false;
   communityDataList: any = [];
+  communityDataListLoader: any = []
   topicName: any = ''
   orgDetails: any
   @Output() searchText = new EventEmitter<any>();
@@ -25,6 +26,10 @@ export class WidgetCommunitySearchComponent {
   constants: any
   filterKeys: any =[]
   sortOptionSelected: any= {}
+  pageSize: any = 1
+  pageNumber: any = 0
+  totalCount: any
+  
   
   constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
     
@@ -36,7 +41,7 @@ export class WidgetCommunitySearchComponent {
     ]).subscribe(([queryParams, params]) => {
       
       this.isLoading = true;
-      this.communityDataList = [0,1,2,3,4,5,6,7,8,9,10];
+      this.communityDataListLoader = [0,1,2,3,4,5,6,7,8,9,10];
       // Check query params first
       if (queryParams['c'] || queryParams['c'] === '') {
         this.searchTextValue = queryParams['c'];
@@ -65,8 +70,8 @@ export class WidgetCommunitySearchComponent {
       },
       "requestedFields": [
       ],
-      "pageNumber": 0,
-      "pageSize": 200
+      "pageNumber": this.pageNumber,
+      "pageSize": this.pageSize
     }
     if(searchText) {
       request['searchString'] = searchText
@@ -90,10 +95,10 @@ export class WidgetCommunitySearchComponent {
       if(res.result && res.result && res.result.search_results && res.result.search_results.additionalInfo && res.result.search_results.additionalInfo.length ) {
         this.orgDetails = this.discussV2Svc.convertOrgArrayToObject(res.result.search_results.additionalInfo)
       }
+      
       if(res.result && res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length){
-        this.communityDataList = res.result.search_results.data;
-      } else {
-        this.communityDataList = []
+        this.communityDataList = [...this.communityDataList, ...res.result.search_results.data];
+        this.totalCount = res.result.search_results.totalCount
       }
       if(factesRequest && factesRequest.length) {
         let facets: any = res.result.search_results.facets
@@ -142,8 +147,8 @@ export class WidgetCommunitySearchComponent {
           "status": "active"
       },
       "requestedFields": [],
-      "pageNumber": 0,
-      "pageSize": 100,
+      "pageNumber": this.pageNumber,
+      "pageSize": this.pageSize,
       "facets": [
           "topicName",
           "orgId",
@@ -253,6 +258,12 @@ export class WidgetCommunitySearchComponent {
      }
     })
   }
-
+  loadMoreMembers(){
+    
+    if( !(this.communityDataList.length >= this.totalCount)) {
+      this.pageNumber = this.pageNumber + 1
+      this.fetchCommunityList(this.searchTextValue, this.topicName, this.sortOptionSelected)
+    }
+  }
   
 }
