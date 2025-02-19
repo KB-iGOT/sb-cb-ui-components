@@ -1,4 +1,5 @@
 @import '@ctrl/ngx-emoji-mart/picker';
+
 .start-comment-container {
     background: #fff;
     padding: 16px;
@@ -45,7 +46,7 @@
 :host {
     display: block;
 }
-  
+
 input {
     border: none;
     background: transparent;
@@ -66,14 +67,15 @@ input {
 
 .mat-mdc-icon-button.postIcon {
     padding: 0 !important;
+
     &.emoji-icon {
         color: #FF8400 !important;
     }
-    
+
     &.image-icon {
         color: #8458FF !important;
     }
-    
+
     &.poll-icon {
         color: #49C951 !important;
     }
@@ -81,26 +83,33 @@ input {
 
 .disabled {
     pointer-events: none;
-    opacity: 0.6; /* Optional: to visually indicate that the div is disabled */
-  }
+    opacity: 0.6;
+    /* Optional: to visually indicate that the div is disabled */
+}
 
-  .discuss-input {
+.discuss-input {
     min-height: 40px;
     max-height: 200px;
     resize: none;
     overflow-y: hidden;
-  }
-  
-  .image-preview-container {
+}
+
+.image-preview-container {
+    background: #eee;
+
     .remove-image-btn {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      transform: scale(0.8);
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        transform: scale(0.8);
     }
-  } 
+
+    .preview-img {
+        overflow: hidden;
+    }
+}
 
 .wrapper {
     background: white;
@@ -110,37 +119,26 @@ input {
 }
 
 .input-wrapper {
-  background: white;
-  transition: all 0.3s ease;
-  
-  &.expanded {
-    border-radius: 12px;
-  }
+    background: white;
+    transition: all 0.3s ease;
+
+    &.expanded {
+        border-radius: 12px;
+    }
 }
 
 .discuss-input {
-  min-height: 24px;
-  max-height: 200px;
-  overflow-y: hidden;
+    min-height: 24px;
+    max-height: 200px;
+    overflow-y: hidden;
 }
 
 // Hide icons by default when they have the hidden class
 .single-line-icons.hidden,
 .multi-line-icons.hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .multi-line-icons {
-  display: flex;
+    display: flex;
 }
-
-.image-preview-container {
-  .remove-image-btn {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    transform: scale(0.8);
-  }
-} 

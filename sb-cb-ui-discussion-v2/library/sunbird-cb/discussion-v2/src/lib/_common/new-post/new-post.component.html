@@ -9,7 +9,7 @@
 
             </div>
         </div>
-        <div class="flex gap-4 items-start" id="start-comment">
+        <div class="flex gap-4" [ngClass]="isMultiLine ? 'items-start': 'items-center'" id="start-comment">
             <div class="" *ngIf="config?.avatarPhoto?.show">
                 <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"
                     [name]="loogedInUserProfile?.firstName || config?.avatarPhoto?.name"
@@ -20,99 +20,95 @@
                 <form [formGroup]="uploadForm" class="flex flex-1  gap-4 items-center">
                     <!-- <mat-form-field appearance="outline" class="w-full pl-1"> -->
                     <div class="relative w-full">
-                        <div class="input-wrapper flex items-center rounded-xl border px-2 py-2">
-                            <textarea #description name="description" class="flex-1 discuss-input mr-2 border-none outline-none resize-none bg-transparent"
-                                formControlName="description"
+                        <!-- single line show -->
+                        <div class="input-wrapper flex  rounded-xl border px-2 py-2" [ngClass]="isMultiLine? 'flex-col items-start': 'items-center'">
+                            <textarea #description name="description" class="flex-1 discuss-input  border-none outline-none resize-none bg-transparent"
+                                formControlName="description" [ngClass]="{'w-full ': isMultiLine}"
                                 i18n-placeholder rows="1"
                                 [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'" 
                                 (focus)="onFocus()"
                                 (input)="autoGrow($event)"></textarea>
-                            
-                            <!-- Icons that show inline when single line -->
                             <div class="flex items-center single-line-icons" [class.hidden]="isMultiLine">
                                 <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
                                     aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
                                 <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="addMedia(); fileInput.click()">
                                     <mat-icon>image</mat-icon>
                                 </button>
-                                <input type="file" hidden #fileInput (change)="onFileInputChange($event, 'image')" accept="image/*">
+                                <input type="file" hidden #fileInput (change)="onFileInputChange($event, 'image')" multiple accept="image/*">
                             </div>
-                        </div>
+                            <!-- Image preview section -->
+                             <div class="grid gap-2 grid-cols-12" *ngIf="categoryType && categoryType.length">
+                                 <ng-container *ngFor="let cat of categoryType">
+                                     <ng-container *ngFor="let file of selectedFilesFinal[cat]; let i = index">
+                                         <div class="md:col-span-4 max-h-32 relative flex items-center image-preview-container justify-center">
+                                             <!-- Preview images list -->
+                                             <ng-container *ngIf="cat === 'image'">
+                                             <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
+                                             <button mat-icon-button (click)="removeFileNew(i, cat)">
+                                                 <mat-icon>delete</mat-icon>
+                                             </button> -->
+                                             <!-- <div class="relative inline-block flex doc-height"> -->
+                                                 <img i18n-alt alt="{{file.name}}" [src]="file.previewUrl" class="max-h-32 preview-img rounded" />
+                                                 <!-- <button mat-icon-button class="custom-delete absolute-imp" (click)="removeFileNew(i, cat)">
+                                                 <mat-icon>delete</mat-icon>
+                                                 </button> -->
+                                                 <button mat-icon-button class="remove-image-btn absolute-imp" (click)="removeFileNew(i, cat)">
+                                                 <mat-icon>close</mat-icon>
+                                                 </button>
+                                             <!-- </div> -->
+                                             </ng-container>
+                                             <!-- Preview files list -->
+                                             <ng-container *ngIf="cat === 'document'">
+                                             <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
+                                             <button mat-icon-button (click)="removeFileNew(i, cat)">
+                                                 <mat-icon>delete</mat-icon>
+                                             </button> -->
+                                             <div class="relative flex flex-col items-center justify-center doc-item items-center gap-2">
+                                                 <mat-icon class="doc-icon" [ngClass]="{
+                                                     'pdf-icon': getFileExtension(file.previewUrl) === 'pdf',
+                                                     'doc-icon': getFileExtension(file.previewUrl) === 'doc',
+                                                     'docx-icon': getFileExtension(file.previewUrl) === 'docx'
+                                                 }">
+                                                 {{getFileIcon(file.previewUrl)}}
+                                                 </mat-icon>
+                                                 <a [href]="" target="_blank" rel="noopener noreferrer" class="doc-name doc-link">
+                                                 {{getFileName(file.previewUrl)}}
+                                                 </a>
+                                                 <!-- <button mat-icon-button class="custom-delete absolute-imp" (click)="removeFileNew(i, cat)">
+                                                 <mat-icon>delete</mat-icon>
+                                                 </button> -->
+                                                 <button mat-icon-button class="remove-image-btn absolute-imp" (click)="removeFileNew(i, cat)">
+                                                 <mat-icon>close</mat-icon>
+                                                 </button>
+                                             </div>
+                                             </ng-container>
+                                         </div>
+                                     </ng-container>
+                                 </ng-container>
+                             </div>
 
-                        <!-- Image preview section -->
-                        <!-- <div class="image-preview-container mt-2" *ngIf="selectedImage">
-                            <div class="relative inline-block">
-                                <img [src]="selectedImagePreview" class="max-h-32 rounded">
-                                <button mat-icon-button class="remove-image-btn" (click)="removeImage()">
-                                    <mat-icon>close</mat-icon>
+                            <!-- Icons that show at bottom when multi-line -->
+                        <div class="flex w-full items-center mt-2 multi-line-icons" [class.hidden]="!isMultiLine">
+                            <div class="flex-1">
+                                <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
+                                    aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                                <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="fileInput.click()">
+                                    <mat-icon>image</mat-icon>
                                 </button>
                             </div>
-                        </div> -->
-                        <ng-container *ngFor="let cat of categoryType">
-                            <ng-container *ngFor="let file of selectedFilesFinal[cat]; let i = index">
-                                  <div class="md:col-span-4 relative flex items-center image-preview-container justify-between mb-2">
-                                     <!-- Preview images list -->
-                                    <ng-container *ngIf="cat === 'image'">
-                                      <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
-                                      <button mat-icon-button (click)="removeFileNew(i, cat)">
-                                        <mat-icon>delete</mat-icon>
-                                      </button> -->
-                                      <div class="relative inline-block flex doc-height">
-                                        <img i18n-alt alt="{{file.name}}" [src]="file.previewUrl" class="max-h-32 rounded" />
-                                        <!-- <button mat-icon-button class="custom-delete absolute-imp" (click)="removeFileNew(i, cat)">
-                                          <mat-icon>delete</mat-icon>
-                                        </button> -->
-                                        <button mat-icon-button class="remove-image-btn absolute-imp" (click)="removeFileNew(i, cat)">
-                                          <mat-icon>close</mat-icon>
-                                        </button>
-                                      </div>
-                                    </ng-container>
-                                    <!-- Preview files list -->
-                                    <ng-container *ngIf="cat === 'document'">
-                                      <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
-                                      <button mat-icon-button (click)="removeFileNew(i, cat)">
-                                        <mat-icon>delete</mat-icon>
-                                      </button> -->
-                                      <div class="relative flex flex-col items-center justify-center doc-item items-center gap-2">
-                                        <mat-icon class="doc-icon" [ngClass]="{
-                                              'pdf-icon': getFileExtension(file.previewUrl) === 'pdf',
-                                              'doc-icon': getFileExtension(file.previewUrl) === 'doc',
-                                              'docx-icon': getFileExtension(file.previewUrl) === 'docx'
-                                          }">
-                                          {{getFileIcon(file.previewUrl)}}
-                                        </mat-icon>
-                                        <a [href]="" target="_blank" rel="noopener noreferrer" class="doc-name doc-link">
-                                          {{getFileName(file.previewUrl)}}
-                                        </a>
-                                        <!-- <button mat-icon-button class="custom-delete absolute-imp" (click)="removeFileNew(i, cat)">
-                                          <mat-icon>delete</mat-icon>
-                                        </button> -->
-                                        <button mat-icon-button class="remove-image-btn absolute-imp" (click)="removeFileNew(i, cat)">
-                                          <mat-icon>close</mat-icon>
-                                        </button>
-                                      </div>
-                                    </ng-container>
-                                  </div>
-                              </ng-container>
-                        </ng-container>
-
-                        <!-- Icons that show at bottom when multi-line -->
-                        <div class="flex items-center mt-2 multi-line-icons" [class.hidden]="!isMultiLine">
-                            <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
-                                aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
-                            <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="fileInput.click()">
-                                <mat-icon>image</mat-icon>
-                            </button>
+                            <div>
+                                <button mat-flat-button color="secondary" class="primary-button custom-rounded"
+                                (click)="onSubmit()" [disabled]="(!description.value || description.value.length < 1 )">
+                                <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer" aria-hidden="false"
+                                    i18n-aria-label aria-label="Report">{{config?.postBtn?.icon || 'send'}}</mat-icon>
+                                <span *ngIf="config?.postBtn?.text" class="ml-1">{{config?.postBtn?.text}}</span>
+                                </button>
+                            </div>
+                        
+                        </div>
                         </div>
                     </div>
                     <!-- </mat-form-field> -->
-                    <button mat-flat-button color="secondary" class="primary-button custom-rounded"
-                        (click)="onSubmit()" [disabled]="(!description.value || description.value.length < 1 )">
-                        <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer" aria-hidden="false"
-                            i18n-aria-label aria-label="Report">{{config?.postBtn?.icon || 'send'}}</mat-icon>
-                        <span *ngIf="config?.postBtn?.text" class="ml-1">{{config?.postBtn?.text}}</span>
-                    </button>
-
                 </form>
             </div>
         </div>
