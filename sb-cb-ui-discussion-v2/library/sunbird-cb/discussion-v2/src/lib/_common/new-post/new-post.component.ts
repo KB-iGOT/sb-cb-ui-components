@@ -195,7 +195,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
   removeFileNew(index: number, category: string) {
-    if (index && category) {
+    if (category) {
       if (this.selectedFilesFinal[category]) {
         this.selectedFilesFinal[category].splice(index, 1);
       }
@@ -210,7 +210,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   removeCategoryType(category: string) {
     if(this.selectedFilesFinal[category] && this.selectedFilesFinal[category].length <= 0) {
-      _.remove(this.categoryType, category);
+      _.remove(this.categoryType, (cat) => cat === category);
     }
     if(this.categoryType && this.categoryType.length) {
       this.isMultiLine = true
@@ -252,6 +252,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
             this.uploadHandler(discussionId, res.result);
           } else {
             this._snackBar.open('Post created successfully!')
+            this.uploadForm.controls.description.setValue('')
           }
         }
       },
@@ -271,6 +272,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
             this.uploadHandler(discussionId, res.result);
           } else {
             this._snackBar.open('Post created successfully!')
+            this.uploadForm.controls.description.setValue('')
             this.newComment.emit({result: res.result, type: res.result.type})
           }
 

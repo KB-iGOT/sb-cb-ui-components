@@ -248,7 +248,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   removeFileNew(index: number, category: string) {
-    if (index && category) {
+    if (category) {
       if (this.selectedFilesFinal[category]) {
         this.selectedFilesFinal[category].splice(index, 1);
         this.previewCategory[category].splice(index, 1);
@@ -268,7 +268,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     //   delete this.mediaCategory[category]
     // }
     if(this.selectedFilesFinal[category] && this.selectedFilesFinal[category].length <= 0) {
-      _.remove(this.categoryType, category);
+      _.remove(this.categoryType, (cat) => cat === category);
     }
   }
 

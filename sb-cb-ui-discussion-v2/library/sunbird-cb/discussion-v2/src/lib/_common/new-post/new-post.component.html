@@ -37,25 +37,25 @@
                                 <input type="file" hidden #fileInput (change)="onFileInputChange($event, 'image')" multiple accept="image/*">
                             </div>
                             <!-- Image preview section -->
-                             <div class="grid grid-cols-12">
+                             <div class="grid gap-2 grid-cols-12" *ngIf="categoryType && categoryType.length">
                                  <ng-container *ngFor="let cat of categoryType">
                                      <ng-container *ngFor="let file of selectedFilesFinal[cat]; let i = index">
-                                         <div class="md:col-span-4 relative flex items-start image-preview-container justify-between mb-2">
+                                         <div class="md:col-span-4 max-h-32 relative flex items-center image-preview-container justify-center">
                                              <!-- Preview images list -->
                                              <ng-container *ngIf="cat === 'image'">
                                              <!-- <span [ngClass]="{'success': file.uploaded}">{{ file.name }}</span>
                                              <button mat-icon-button (click)="removeFileNew(i, cat)">
                                                  <mat-icon>delete</mat-icon>
                                              </button> -->
-                                             <div class="relative inline-block flex doc-height">
-                                                 <img i18n-alt alt="{{file.name}}" [src]="file.previewUrl" class="max-h-32 rounded" />
+                                             <!-- <div class="relative inline-block flex doc-height"> -->
+                                                 <img i18n-alt alt="{{file.name}}" [src]="file.previewUrl" class="max-h-32 preview-img rounded" />
                                                  <!-- <button mat-icon-button class="custom-delete absolute-imp" (click)="removeFileNew(i, cat)">
                                                  <mat-icon>delete</mat-icon>
                                                  </button> -->
                                                  <button mat-icon-button class="remove-image-btn absolute-imp" (click)="removeFileNew(i, cat)">
                                                  <mat-icon>close</mat-icon>
                                                  </button>
-                                             </div>
+                                             <!-- </div> -->
                                              </ng-container>
                                              <!-- Preview files list -->
                                              <ng-container *ngIf="cat === 'document'">

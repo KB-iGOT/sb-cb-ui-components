@@ -128,16 +128,16 @@
 
       <ng-container *ngIf="uploadControlVisibility['link']">
         <div class="mb-4">
-          <div class="flex flex-col gap-3">
-            <!-- Add new URL button -->
-            <div class="flex justify-end">
+          <!-- Add new URL button -->
+          <div class="flex gap-4 items-center">
+            <mat-form-field appearance="outline" class="flex-1 mat">
               <input matInput [(ngModel)]="linkInput" [ngModelOptions]="{standalone: true}" placeholder="Enter URL"
-                [name]="'linkInput'">
-              <button mat-stroked-button color="primary" (click)="addNewUrl()">
-                <mat-icon>add</mat-icon>
-                Add
-              </button>
-            </div>
+              [name]="'linkInput'">
+            </mat-form-field>
+            <button mat-raised-button color="" class="primary-button"  (click)="addNewUrl()" [disabled]="!linkInput">
+              <mat-icon>add</mat-icon>
+              Add
+            </button>
           </div>
         </div>
       </ng-container>

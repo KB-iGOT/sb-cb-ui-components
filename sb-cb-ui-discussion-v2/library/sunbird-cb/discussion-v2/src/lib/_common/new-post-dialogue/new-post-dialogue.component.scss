@@ -37,6 +37,13 @@
   cursor: pointer;
 }
 
+.primary-button:disabled {
+  background: #1a4ca1 !important;
+  color: #fff !important;
+  opacity: 0.6;
+  cursor: none
+}
+
 .h-divider{
   height: 0;
   border-bottom: 1px solid #00000033;
@@ -122,8 +129,8 @@
 
 .remove-image-btn {
   // position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -3px;
+  right: -3px;
   background: rgba(0, 0, 0, 0.5);
   color: white;
   transform: scale(0.8);
