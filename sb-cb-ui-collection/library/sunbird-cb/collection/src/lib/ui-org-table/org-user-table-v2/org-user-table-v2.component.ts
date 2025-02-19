@@ -38,6 +38,8 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   pageLength?: number
   pageSize = 20
   pageSizeOptions = [20, 30, 40]
+  searchValue: string = ''
+  moreThanTwoChar = false
   @Input()totalRecords?: any
   @Input()tabChangeIndex?: any
   // @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator
@@ -100,12 +102,13 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   }
 
   applyFilter(filterValue: any) {
-    if (filterValue) {
-      let fValue = filterValue.trim()
-      fValue = filterValue.toLowerCase()
-      this.dataSource.filter = fValue
+    if (filterValue?.length === 0) {
+      this.onSearchEnter('')
+    }
+    if (filterValue?.length > 2) {
+      this.moreThanTwoChar = true
     } else {
-      this.dataSource.filter = ''
+      this.moreThanTwoChar = false
     }
   }
 
@@ -173,7 +176,16 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   }
 
   onSearchEnter(event: any) {
-    this.searchByEnterKey.emit(event.target.value)
+    if (event === '') {
+      this.searchByEnterKey.emit('')
+    } else if (event?.length > 2) {
+      this.searchByEnterKey.emit(event)
+    }
+    if (event?.target?.value === '') {
+      this.searchByEnterKey.emit('')
+    } else if (event?.target?.value?.length > 2){
+      this.searchByEnterKey.emit(event?.target?.value)
+    }
   }
 
   onPageChange(event: PageEvent) {
