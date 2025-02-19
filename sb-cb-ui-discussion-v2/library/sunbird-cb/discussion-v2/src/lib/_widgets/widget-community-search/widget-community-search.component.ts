@@ -26,9 +26,9 @@ export class WidgetCommunitySearchComponent {
   constants: any
   filterKeys: any =[]
   sortOptionSelected: any= {}
-  pageSize: any = 1
+  pageSize: any = 50
   pageNumber: any = 0
-  totalCount: any
+  totalCount: any = 0
   
   
   constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
@@ -64,6 +64,7 @@ export class WidgetCommunitySearchComponent {
 
    fetchCommunityList(searchText?: any, topicName?:any, sortData?: any,filterApply?:any,factesRequest?:any) {
     
+    this.isLoading = true;
     let request: any = {
       "filterCriteriaMap": {
           "status": "active"
