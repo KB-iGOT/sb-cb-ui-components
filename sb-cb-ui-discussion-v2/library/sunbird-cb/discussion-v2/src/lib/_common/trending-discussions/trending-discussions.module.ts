@@ -6,6 +6,7 @@ import { SharedModule } from '../../_shared/shared.module';
 import { MatIconModule } from '@angular/material/icon';
 import { CardToggleModule } from '../card-toggle/card-toggle.module';
 import { PipesModule } from '../../_pipes/pipes.module';
+import { NoDataModule } from '../no-data/no-data.module';
 
 
 
@@ -20,7 +21,8 @@ import { PipesModule } from '../../_pipes/pipes.module';
     SharedModule,
     MatIconModule,
     CardToggleModule,
-    PipesModule
+    PipesModule,
+    NoDataModule
   ],
   exports:[TrendingDiscussionsComponent]
 })

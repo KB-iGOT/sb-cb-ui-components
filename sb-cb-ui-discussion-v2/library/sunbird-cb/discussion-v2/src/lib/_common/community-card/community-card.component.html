@@ -10,9 +10,15 @@
     <div class="card-details-block">
         <p class="community-title">{{community?.communityName || community?.data?.communityName}}</p>
         <div class="flex items-center justify-between community-info">
-            <p>{{community?.countOfPeopleJoined  || community?.data?.countOfPeopleJoined || 0}} Members</p>
+            <p>
+                <span *ngIf="community?.countOfPeopleJoined">{{community?.countOfPeopleJoined | numberShortener}}</span>
+                <span *ngIf="community?.data?.countOfPeopleJoined">{{community?.data?.countOfPeopleJoined | numberShortener}}</span>
+                 Members
+            </p>
             <span class="mx-2">•</span>
-            <p>10K Posts</p>
+            <p>
+                <span *ngIf="community?.countOfPostCreated">{{community?.countOfPostCreated | numberShortener}}</span>
+                <span *ngIf="community?.data?.countOfPostCreated">{{community?.data?.countOfPostCreated | numberShortener}}</span> Posts</p>
         </div>
         <div class="flex items-center justify-start community-owner-info" *ngIf="orgDetails && orgDetails[community?.orgId]">
             <div class="owner-icon mr-2">
