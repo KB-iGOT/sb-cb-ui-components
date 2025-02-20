@@ -4,7 +4,7 @@
            <div>Trending Discussions</div>
         </div>
         <div contentBodyBlock>
-            <div class="space-y-4 pt-4">
+            <div class="space-y-4 pt-4" *ngIf="posts?.length ;else noData">
                 <div *ngFor="let discussion of posts;let isFirst = first" class="flex flex-wrap items-start space-x-3">
                     <hr class="divider w-full" *ngIf="!isFirst" >
                     <div class="trending-data margin-remove cursor-pointer" (click)="navigateToPost(discussion)">
@@ -42,7 +42,13 @@
                         </div>
                     </div>
                 </div>
-              </div>
+            </div>
+
+            <ng-template #noData >
+                <div class="mt-8">
+                   <d-v2-no-data [iconName]="'forum'" [noText]="'No data'"></d-v2-no-data>
+                </div>
+             </ng-template>
         </div>
     </d-v2-card-toggle>
 </div>

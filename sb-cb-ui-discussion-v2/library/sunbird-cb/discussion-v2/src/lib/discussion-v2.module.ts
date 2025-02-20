@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { PipesModule } from './_pipes/pipes.module'
 import { SkeletonLoaderModule } from './skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
 import { MatMenuModule } from '@angular/material/menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
@@ -38,6 +39,7 @@ import { SharedModule } from './_shared/shared.module'
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
+    MatProgressSpinnerModule,
     MatTooltipModule,
     PipesModule,
     SkeletonLoaderModule,

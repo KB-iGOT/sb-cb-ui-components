@@ -37,6 +37,13 @@
   cursor: pointer;
 }
 
+.primary-button:disabled {
+  background: #1a4ca1 !important;
+  color: #fff !important;
+  opacity: 0.6;
+  cursor: none
+}
+
 .h-divider{
   height: 0;
   border-bottom: 1px solid #00000033;
@@ -122,8 +129,8 @@
 
 .remove-image-btn {
   // position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -3px;
+  right: -3px;
   background: rgba(0, 0, 0, 0.5);
   color: white;
   transform: scale(0.8);
@@ -136,4 +143,40 @@
 .doc-height {
   height: 150px;
   width: 100%;
+}
+
+.calculate-overlay {
+  position: fixed;
+  display: block;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
+  cursor: pointer;
+  color: #fff;
+}
+.overlay {
+  width: 50%;
+  height: 50%;
+  position: absolute;
+  top: 40%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  color: #fff;
+  text-align: center;
+}
+
+.margin-center {
+  margin-left: 0.25rem;
+  margin-top: 0.15rem;
+}
+.calculate-overlay .mat-spinner circle {
+  stroke: orange !important;
+  stroke-width: 8px !important;
 }

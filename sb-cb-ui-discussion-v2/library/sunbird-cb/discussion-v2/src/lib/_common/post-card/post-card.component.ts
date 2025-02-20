@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { MatDialog } from '@angular/material/dialog';
@@ -27,6 +27,7 @@ export class PostCardComponent {
   @Input() community!: string
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
+  @Output() newReply = new EventEmitter<any>()
 
   data = {
     replyToggle: false,
@@ -48,7 +49,8 @@ export class PostCardComponent {
     private configSvc: ConfigurationsService,
     private dialog: MatDialog,
     private discussV2Svc: DiscussionV2Service,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    private ref: ChangeDetectorRef,
   ) {
 
   }
@@ -72,7 +74,7 @@ export class PostCardComponent {
     this.getListOfRepliesMore()
   }
 
-  getListOfReplies() {
+    getListOfReplies() {
     // let reveseReplayDataCopy = [...this.replyDataCopy]
     // reveseReplayDataCopy.reverse()
     // let ids:any = reveseReplayDataCopy.slice(0,this.answerPostLimit)
@@ -92,6 +94,7 @@ export class PostCardComponent {
       this.fetchedSearchData = _.get(res, 'result.search_results') || {}
       this.fetchedReplyData = (_.get(res, 'result.search_results.data') || [])
       this.loading = false
+      this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
       }, () => {
         this.loading = false
       })
@@ -168,6 +171,7 @@ export class PostCardComponent {
 
   openFlagDialogue(comment: any) {
     this.getAllFlagList(comment)
+
   }
 
   getAllFlagList(comment: any) {
@@ -243,7 +247,8 @@ export class PostCardComponent {
   openEditDialogue(post: any) {
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
       width: '996px',
-      maxHeight: '90vh', // Add maximum height (90% of viewport height)
+      maxHeight: '90vh',// Add maximum height (90% of viewport height)
+      disableClose: true,
       data: {
         type: this.type,
         panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
@@ -269,8 +274,17 @@ export class PostCardComponent {
     return this.fetchedReplyData 
   }
 
-  newCommentEvent(_event: any) {
-    // console.log('newCommentEvent::', event)
+  newCommentEvent(event: any) {
+    console.log('newCommentEvent::', event)
+    if (event.result && event.result.discussionId) {
+      this.loading = true
+      // this.emptySearch()
+      this.replyDataCopy.push(event.result.discussionId)
+      this.replyDataCopy = this.replyDataCopy.slice()
+      this.ref.markForCheck()
+      this.getListOfReplies()
+      // this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
+    }
   }
 
   getFileExtension(file: string): string {
@@ -300,5 +314,7 @@ export class PostCardComponent {
     event.preventDefault();
     window.open(url, '_blank');
   }
+
+
 
 }

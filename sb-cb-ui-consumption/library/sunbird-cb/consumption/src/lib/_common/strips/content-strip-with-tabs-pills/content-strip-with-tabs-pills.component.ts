@@ -453,7 +453,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
           deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
           contentTags: strip.stripConfig && strip.stripConfig.contentTags,
-          sakshamAIGenerated: this.activeTabIndex === 1 ? this.recommendedCoursesId : ''
+          sakshamAIGenerated: this.getRecommendedId(strip)
 
         },
       } : {
@@ -611,6 +611,24 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return false;
   }
 
+  getRecommendedId(strip: any): string {
+    if (!strip?.tabs || !Array.isArray(strip.tabs)) {
+      return '';
+    }
+  
+    if (strip.tabs[0]?.hideTab === true) {
+      return this.recommendedCoursesId;
+    }
+  
+    else if (
+      (strip.tabs[0]?.value === 'sakshamAI' && this.activeTabIndex === 0) ||
+      (strip.tabs[1]?.value === 'sakshamAI' && this.activeTabIndex === 1)
+    ) {
+      return this.recommendedCoursesId;
+    }
+  
+    return ''; 
+  }
 
   getTabDataByfilter(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
@@ -1364,7 +1382,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      if (response.length && response.length > 0) {
+      if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
           tabResults = this.splitCbpTabsData(courses, strip);
@@ -1759,19 +1777,20 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }).catch((_err: any) => {
             return []
           })
+          const sRequestV1: any = {
+             "request": {
+              "filters": {
+                  "primaryCategory": [
+                      "Course"
+                  ],
+                  "identifier": coursesIds
+              },
+              "sortBy": {
+                  "lastUpdatedOn": "Desc"
+              }
+            }
+          }
           const sRequest: any = {
-            // "request": {
-            //   "filters": {
-            //       "primaryCategory": [
-            //           "Course"
-            //       ],
-            //       "identifier": coursesIds
-            //   },
-            //   "sortBy": {
-            //       "lastUpdatedOn": "Desc"
-            //   }
-            // }
-            "searchV6": {
               "request": {
                 "filters": {
                   "identifier": coursesIds
@@ -1781,10 +1800,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                   "lastUpdatedOn": "desc"
                 },
               }
-            }
           }
-          // this.contentSvc.searchContentSearch_PROD(sRequest).subscribe(results => {
-          this.contentSvc.searchV6(sRequest.searchV6).subscribe(results => {
+          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          // this.contentSvc.searchV6(sRequest).subscribe(results => {
             if (results && results.result && results.result.content) {
             // if (true) {
               // let courses = results.result.content

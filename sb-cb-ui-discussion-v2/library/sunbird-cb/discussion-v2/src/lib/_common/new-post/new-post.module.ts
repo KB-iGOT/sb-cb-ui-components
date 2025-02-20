@@ -8,6 +8,7 @@ import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy
 import { PipesModule } from '../../_pipes/pipes.module'
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
 import { MatMenuModule } from '@angular/material/menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
@@ -42,6 +43,7 @@ import { PostPreviewComponent } from '../new-post-dialogue/post-preview/post-pre
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
+    MatProgressSpinnerModule,
     CKEditorModule,
     SharedModule,
     ImageSlidersModule,

@@ -1,6 +1,6 @@
 <ng-container *ngIf="objectArray?.length">
   <div class="banner-container cursor-pointer {{isMobile? styleData?.responsive?.bannerMetaClass : styleData?.bannerMetaClass}}"  (swipeleft)="slideToObject(currentIndex + 1)" (swiperight)="slideToObject(currentIndex - 1)"
-  *ngIf="objectArray?.length > 1" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight"
+  *ngIf="objectArray?.length" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight"
   [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"
   [ngStyle]="{'border-radius': styleData?.borderRadius || '12px'}">
   <a 
@@ -16,6 +16,7 @@
         'border-width': isMobile?  styleData?.responsive?.imageBorderWidth : styleData?.imageBorderWidth,
         'border-color': isMobile? styleData?.responsive?.imageBorderColor : styleData?.imageBorderColor,
         'border-style': isMobile? styleData?.responsive?.imageBorderStyle: styleData?.imageBorderStyle}">
+       
       <img i18n-alt alt="Image{{i}}"
       [style.height]="isMobile? styleData?.responsive?.customImgHeight : styleData?.customImgHeight"
       [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"  [src]="slide?.posterImageUrl" class=" banner-image " (error)="changeToDefaultImg($event)"  />
@@ -37,21 +38,20 @@
       </div>
     </div>
   </ng-container>
-  <div class="navigation {{isMobile? styleData?.responsive?.arrowsPlacement : styleData?.arrowsPlacement}}" 
-  *ngIf="isMobile && styleData?.responsive?.navigationArrows !== 'hidden' || !isMobile && styleData?.navigationArrows !== 'hidden'">
-    <a *ngIf="objectArray?.length > 1" role="button" class="prev" (click)="slideToObject(currentIndex - 1)">&#10094;</a>
-    <a *ngIf="objectArray?.length > 1" role="button" class="next" (click)="slideToObject(currentIndex + 1)">&#10095;</a>
-  </div>
-  </div>
-  <div class="banner-container-solo" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight" *ngIf="objectArray?.length == 1">
-    <img i18n-alt alt="Image" width="100%" height="100%" [src]="objectArray[0]" class="banner-image-solo" />
+  <ng-container *ngIf="objectArray?.length > 1">
+    <div class="navigation {{isMobile? styleData?.responsive?.arrowsPlacement : styleData?.arrowsPlacement}}" 
+    *ngIf="isMobile && styleData?.responsive?.navigationArrows !== 'hidden' || !isMobile && styleData?.navigationArrows !== 'hidden'">
+      <a *ngIf="objectArray?.length > 1" role="button" class="prev" (click)="slideToObject(currentIndex - 1)">&#10094;</a>
+      <a *ngIf="objectArray?.length > 1" role="button" class="next" (click)="slideToObject(currentIndex + 1)">&#10095;</a>
+    </div>
+  </ng-container>
   </div>
 </ng-container>
 
 
 <ng-container *ngIf="imageUrls?.length">
   <div class="banner-container {{isMobile? styleData?.responsive?.bannerMetaClass : styleData?.bannerMetaClass}}"  (swipeleft)="slideTo(currentIndex + 1)" (swiperight)="slideTo(currentIndex - 1)"
-  *ngIf="imageUrls?.length > 1" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight"
+  *ngIf="imageUrls?.length" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight"
   [ngStyle]="{'border-radius': styleData?.borderRadius || '12px'}">
   <a 
     class="banner-overlay {{imageUrls[currentIndex] && imageUrls[currentIndex].redirectUrl ? '' : 'pointer-events-none'}}"
@@ -80,15 +80,15 @@
       </div>
     </div>
   </ng-container>
-  <div class="navigation {{isMobile? styleData?.responsive?.arrowsPlacement : styleData?.arrowsPlacement}}" 
-  *ngIf="isMobile && styleData?.responsive?.navigationArrows !== 'hidden' || !isMobile && styleData?.navigationArrows !== 'hidden'">
-    <a *ngIf="imageUrls?.length > 1" role="button" class="prev" (click)="slideTo(currentIndex - 1)">&#10094;</a>
-    <a *ngIf="imageUrls?.length > 1" role="button" class="next" (click)="slideTo(currentIndex + 1)">&#10095;</a>
-  </div>
+  <ng-container *ngIf="imageUrls?.length > 1">
+    <div class="navigation {{isMobile? styleData?.responsive?.arrowsPlacement : styleData?.arrowsPlacement}}" 
+    *ngIf="isMobile && styleData?.responsive?.navigationArrows !== 'hidden' || !isMobile && styleData?.navigationArrows !== 'hidden'">
+      <a *ngIf="imageUrls?.length > 1" role="button" class="prev" (click)="slideTo(currentIndex - 1)">&#10094;</a>
+      <a *ngIf="imageUrls?.length > 1" role="button" class="next" (click)="slideTo(currentIndex + 1)">&#10095;</a>
+    </div>
+  </ng-container>
 </div>
-<div class="banner-container-solo" [style.height]="isMobile? styleData?.responsive?.customHeight : styleData?.customHeight" *ngIf="imageUrls?.length == 1">
-  <img i18n-alt alt="Image" width="100%" height="100%" [src]="imageUrls[0]" class="banner-image-solo" />
-</div>
+
 </ng-container>
 <!-- 
 <ng-container *ngIf="!imageUrls?.length">
