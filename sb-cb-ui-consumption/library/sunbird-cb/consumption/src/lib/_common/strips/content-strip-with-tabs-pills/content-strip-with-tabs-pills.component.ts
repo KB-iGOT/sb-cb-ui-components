@@ -105,7 +105,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   veifiedKarmayogi = false;
   environment!: any;
   changeEventSubscription: Subscription | null = null;
-  defaultMaxWidgets = 12;
+  defaultMaxWidgets = 100;
   enrollInterval: any;
   todaysEvents: any = [];
   activeTabIndex: number = 0
@@ -216,7 +216,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return Boolean(storageItem !== '1');
   }
 
-  private initData() {
+  public initData() {
     this.stripsKeyOrder = this.widgetData && this.widgetData.strips && this.widgetData.strips.map(strip => strip.key) || [];
     if (this.widgetData.loader && this.widgetData.strips.length) {
       this.showParentLoader = true;
@@ -1370,12 +1370,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return 0
   }
 
-
-
-
-
   // cbp plans
-
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
       let courses: NsContent.IContent[];
@@ -1810,6 +1805,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               let tabResults: any
               if (strip.tabs && strip.tabs.length) {
                 tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, 'sakshamAI')
+                debugger
                 let countOfWidget = true
                 if(strip && strip.tabs && strip.tabs.length) {
                   strip.tabs.forEach((tab:any)=> {

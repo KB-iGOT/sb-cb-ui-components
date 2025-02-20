@@ -21,7 +21,8 @@
 }
 
 .margin-bottom-custom {
-  margin-bottom: 60px;
+  // margin-bottom: 60px;
+  margin-bottom: 4pxpx;
 }
 
 .view-more:hover {
@@ -36,8 +37,8 @@
 ::ng-deep.strips-tabgroup .mat-tab-header {
   border-bottom: 2px solid rgba(0, 0, 0, 0.12);
 }
-::ng-deep.strips-tabgroup .mat-tab-body {
-  padding: 20px 0 20px 0 !important;
+::ng-deep.strips-tabgroup.padding-bottom-tabs .mat-tab-body {
+  padding: 20px 0 0 0 !important;
   box-sizing: border-box;
   overflow-y: initial!important;
 
