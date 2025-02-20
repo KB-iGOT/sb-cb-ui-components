@@ -1805,7 +1805,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               let tabResults: any
               if (strip.tabs && strip.tabs.length) {
                 tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, 'sakshamAI')
-                debugger
                 let countOfWidget = true
                 if(strip && strip.tabs && strip.tabs.length) {
                   strip.tabs.forEach((tab:any)=> {
