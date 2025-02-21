@@ -10,6 +10,7 @@ import { ValueService } from '@sunbird-cb/utils-v2';
 import { NsCommonStrip } from '../common-strip/common-strip.model';
 import { NsContentStripMultiple } from '../../_models/content-strip-multiple.model';
 import { TranslateService } from '@ngx-translate/core';
+import { SakshamAI } from '../../consumption.config';
 
 @Component({
   selector: 'sb-uic-horizontal-scroller-v2',
@@ -44,7 +45,7 @@ export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestr
   isMobile = false
   private defaultMenuSubscribe: Subscription | null = null
   isLtMedium$ = this.valueSvc.isLtMedium$
-
+  sakshamAIEnum = SakshamAI
   constructor(private valueSvc: ValueService, private translate: TranslateService) {
     if (localStorage.getItem('websiteLanguage')) {
       this.translate.setDefaultLang('en');
