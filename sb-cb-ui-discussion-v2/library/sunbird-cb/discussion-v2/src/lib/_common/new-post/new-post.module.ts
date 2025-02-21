@@ -20,6 +20,7 @@ import { NewPostComponent } from './new-post.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
 import { PostPreviewComponent } from '../new-post-dialogue/post-preview/post-preview.component';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
  
 @NgModule({
   declarations: [
@@ -47,6 +48,7 @@ import { PostPreviewComponent } from '../new-post-dialogue/post-preview/post-pre
     CKEditorModule,
     SharedModule,
     ImageSlidersModule,
+    PickerModule
   ],
   exports: [
     NewPostComponent,

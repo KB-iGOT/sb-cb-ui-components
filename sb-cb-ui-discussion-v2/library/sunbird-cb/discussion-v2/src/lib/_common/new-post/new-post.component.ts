@@ -25,6 +25,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   @Input() community: any
   @Input() editMode: boolean = false
   @Input() post: any
+  @Output() editEvents = new EventEmitter<any>()
 
 
   selectedFilesFinal: any = {}
@@ -69,6 +70,38 @@ export class NewPostComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loogedInUserProfile = this.configSvc.userProfile
     this.loggedInUserData = this.configSvc.unMappedUser
+
+    if(this.editMode) {
+      this.uploadForm.patchValue({
+        // title: this.post.title,
+        description: this.post.description,
+        files: this.post.mediaUrls
+      })
+
+      // this.selectedFiles = this.editData.post.mediaUrls.map((url: string) => ({
+      //   name: url.split('/').slice(-1)[0],
+      //   uploaded: true
+      // }))
+      if (this.post.mediaCategory && this.post.categoryType) {
+        // this.mediaCategory = {...this.post.mediaCategory}
+        this.categoryType = [...this.post.categoryType]
+        this.categoryType.map((cat) => {
+          if (this.post.mediaCategory[cat]) {
+            this.selectedFilesFinal[cat] = this.selectedFilesFinal[cat] || []
+            this.selectedFilesFinal[cat] = _.map(this.post.mediaCategory[cat] || [], function (url) {
+              return {
+                name: url.split('/').slice(-1)[0],
+                uploaded: true,
+                category: cat,
+                previewUrl: url,
+              }
+            })
+          }
+        })
+      }
+      this.checkMultiline(this.post.description)
+    }
+      
   }
 
   ngOnDestroy() {
@@ -79,8 +112,10 @@ export class NewPostComponent implements OnInit, OnDestroy {
     this.showEmojiPicker = !this.showEmojiPicker
   }
   addEmoji(event: any) {
-    const text = `${this.searchControl.value}${event.emoji.native}`
-    this.searchControl.patchValue(text)
+    const text = `${this.uploadForm.controls.description.value}${event.emoji.native}`
+    this.uploadForm.patchValue({
+      description: text
+    })
   }
 
   onFocus() {
@@ -128,12 +163,19 @@ export class NewPostComponent implements OnInit, OnDestroy {
     }
   }
   
-  getNewAndOldMerged(newMedia: any, oldMedia: any) {
+  getNewAndOldMerged(newMedia: any, _oldMedia: any) {
     // Merge values from both objects
+    let mergedVal: any = {}
     for(let cat of this.categoryType) {
-      oldMedia[cat] = [...oldMedia[cat], ...newMedia[cat]]
+      const oldUploaded = this.selectedFilesFinal[cat]
+        .filter((x: any) => x.uploaded)
+        .map((x: any) => x.previewUrl);
+      // if(oldMedia[cat].uploaded) {
+      mergedVal[cat] = []
+      mergedVal[cat] = [...oldUploaded, ...newMedia[cat]]
+      // }
     }
-    return oldMedia
+    return mergedVal
   }
 
   createPoll(): void {
@@ -229,6 +271,11 @@ export class NewPostComponent implements OnInit, OnDestroy {
         this.handlePostCreation();
       }
     }
+  }
+  onCancel() {
+    this.editEvents.emit({
+      cancelEdit : true
+    })
   }
 
   private handlePostCreation(): void {
@@ -474,7 +521,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   async editPost() {
     const newMedia = await this.editUploadHandler(this.post.discussionId);
-    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
+    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory )
     const updateReq = {
       discussionId: this.post.discussionId,
       communityId: this.post.communityId,
@@ -516,6 +563,11 @@ export class NewPostComponent implements OnInit, OnDestroy {
       next: (res) => {
         if (res?.result) {
           this._snackBar.open('Post updated successfully!')
+          this.editEvents.emit({
+            cancelEdit : false,
+            edit: true,
+            post: res.result
+          })
         }
       },
       error: (err) => {

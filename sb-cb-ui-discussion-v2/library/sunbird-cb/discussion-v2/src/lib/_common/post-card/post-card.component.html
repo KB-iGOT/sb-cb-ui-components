@@ -37,57 +37,65 @@
                 [innerHTML]="post?.title">
             </div>
         </div> -->
+        <ng-container *ngIf="!editMode">
+            <div class="comment-txt mat-body-1 ws-mat-black-text description  break-all {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+                 [innerHTML]="post?.description">
+            </div>
+            <div class="more-or-less text-right" *ngIf="getEditorTextLength(post?.description) > viewMoreLength">
+                <div class="cursor-pointer" (click)="viewMoreOrLess(post)"
+                    *ngIf="!post?.expanded">View more</div>
+                <div class="cursor-pointer" (click)="viewMoreOrLess(post)"
+                    *ngIf="post?.expanded">View less</div>
+            </div>
         
-        <div class="comment-txt mat-body-1 ws-mat-black-text description  break-all {{post?.description.length > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
-             [innerHTML]="post?.description">
-        </div>
-        <div class="more-or-less text-right" *ngIf="post?.description.length > viewMoreLength">
-            <div class="cursor-pointer" (click)="viewMoreOrLess(post)"
-                *ngIf="!post?.expanded">View more</div>
-            <div class="cursor-pointer" (click)="viewMoreOrLess(post)"
-                *ngIf="post?.expanded">View less</div>
-        </div>
-        <!-- IF image  -->
-         <ng-container *ngIf="post?.categoryType?.includes('image')">
-             <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.image">
-                 <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaCategory?.image" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
-             </div>
-         </ng-container>
-          <!-- IF Doc  -->
-         <ng-container *ngIf="post?.categoryType?.includes('document')">
-            <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.document">
-                <div *ngFor="let doc of post?.mediaCategory?.document" class="doc-item flex items-center gap-2 mb-2">
-                    <mat-icon class="doc-icon" [ngClass]="{
-                        'pdf-icon': getFileExtension(doc) === 'pdf',
-                        'doc-icon': getFileExtension(doc) === 'doc',
-                        'docx-icon': getFileExtension(doc) === 'docx'
-                    }">
-                        {{getFileIcon(doc)}}
-                    </mat-icon>
-                    <a [href]="doc" 
-                       target="_blank" 
-                       rel="noopener noreferrer" 
-                       class="doc-name doc-link"
-                       (click)="openDocument($event, doc)">
-                        {{getFileName(doc)}}
-                    </a>
+       
+            <!-- IF image  -->
+            <ng-container *ngIf="post?.categoryType?.includes('image')">
+                <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.image">
+                    <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaCategory?.image" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
                 </div>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="post?.categoryType?.includes('link')">
-            <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.link">
-                <div *ngFor="let linkUrl of post?.mediaCategory?.link" class="doc-item flex items-center gap-2 mb-2">
-                    <mat-icon class="doc-icon">link</mat-icon>
-                    <a [href]="linkUrl" 
-                       target="_blank" 
-                       rel="noopener noreferrer" 
-                       class="doc-name doc-link">
-                        {{linkUrl}}
-                    </a>
+            </ng-container>
+            <!-- IF Doc  -->
+            <ng-container *ngIf="post?.categoryType?.includes('document')">
+                <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.document">
+                    <div *ngFor="let doc of post?.mediaCategory?.document" class="doc-item flex items-center gap-2 mb-2">
+                        <mat-icon class="doc-icon" [ngClass]="{
+                            'pdf-icon': getFileExtension(doc) === 'pdf',
+                            'doc-icon': getFileExtension(doc) === 'doc',
+                            'docx-icon': getFileExtension(doc) === 'docx'
+                        }">
+                            {{getFileIcon(doc)}}
+                        </mat-icon>
+                        <a [href]="doc" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        class="doc-name doc-link"
+                        (click)="openDocument($event, doc)">
+                            {{getFileName(doc)}}
+                        </a>
+                    </div>
                 </div>
-            </div>
+            </ng-container>
+            <ng-container *ngIf="post?.categoryType?.includes('link')">
+                <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.link">
+                    <div *ngFor="let linkUrl of post?.mediaCategory?.link" class="doc-item flex items-center gap-2 mb-2">
+                        <mat-icon class="doc-icon">link</mat-icon>
+                        <a [href]="linkUrl" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        class="doc-name doc-link">
+                            {{linkUrl}}
+                        </a>
+                    </div>
+                </div>
+            </ng-container>
         </ng-container>
-        </div>
+        <ng-container *ngIf="editMode">
+            <d-v2-new-post [type]="cardConfig?.type" [config]="cardConfig" [config]="cardConfig?.newPostReply"  (newReply)="updateRepliesData($event)"  (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" 
+              (editEvents)="editEventsHandler($event)" [community]="community"  [taggedUsers]="[post?.commentData?.commentSource?.userId]" [editMode]="true" [post]="post">
+            </d-v2-new-post>
+        </ng-container>
+    </div>
     <div class="flex mt-4 tags-section">
         <ng-container *ngFor="let tag of post?.tags">
             <div class="circleBtn mr-3">
@@ -243,7 +251,7 @@
         <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
         <span>Flag</span>
     </button>
-    <button mat-menu-item (click)="openEditDialogue(post)"
+    <button mat-menu-item (click)="editHandler(post)"
         *ngIf="post?.createdBy?.user_id === loogedInUserProfile?.userId">
         <mat-icon [ngStyle]="{'color': '#1B4CA1'}">edit</mat-icon>
         <span>Edit</span>

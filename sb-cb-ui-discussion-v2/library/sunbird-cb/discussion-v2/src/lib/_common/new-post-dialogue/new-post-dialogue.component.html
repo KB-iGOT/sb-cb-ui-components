@@ -63,7 +63,7 @@
         <ckeditor [editor]="Editor" formControlName="description" [config]="editorConfig" (ready)="onReady($event)">
         </ckeditor>
         <!-- <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p> -->
-        <p class="text-sm text-gray-500 mt-1">{{uploadForm.get('description')?.value?.length || 0}}/500</p>
+        <p class="text-sm text-gray-500 mt-1">{{getEditorTextLength(uploadForm.get('description')?.value) || 0}}/3000</p>
       </div>
 
       <!-- Action Buttons -->

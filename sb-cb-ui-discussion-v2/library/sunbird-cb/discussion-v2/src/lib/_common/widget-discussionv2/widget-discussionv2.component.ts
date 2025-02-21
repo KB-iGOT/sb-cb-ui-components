@@ -157,6 +157,7 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
             "cardType": "reply",
             "type": "answerPost",
             "showActions": true,
+            editAsDialogue: false,
             "reportIcon": {
               "show": true,
               "icon": "report",
