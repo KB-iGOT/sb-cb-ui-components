@@ -56,7 +56,7 @@
                         placeholder="Search {{filterObjectList[filter]?.label}}" type="Standard" />
                     </div>
                 </div>
-                <div class="mb-4" >
+                <div class="mb-4 filter-list" >
                     <ng-container *ngIf="(filterObjectList[filter]?.values | filterSearch: searchInput?.value).length;else noData">
                         <div class="flex flex-row category-item" *ngFor="let filterKey of filterObjectList[filter]?.values  | filterSearch: searchInput?.value">
                             <mat-checkbox #checkboxes disableRipple class="filters-checkbox" [checked]="filterKey?.checked"

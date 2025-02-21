@@ -1,7 +1,9 @@
 .community-card {
-    // width: 172px;
+    width: 170px;
     height: 222px;
     cursor: pointer;
+    border: 1px solid #999999;
+    border-radius: 12px;
 
     .card-img-block{
         height: 96px;

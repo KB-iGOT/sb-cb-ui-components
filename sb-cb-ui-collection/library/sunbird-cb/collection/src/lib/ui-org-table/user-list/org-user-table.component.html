@@ -7,10 +7,13 @@
                 <div class="flex-1">
                     <div class="search" *ngIf="isSearchBar">
                         <div class=rsearch>
-                            <mat-icon class="color-60 search-icon">search</mat-icon>
-                            <input class="sinput color-60" type="Standard" label=""
+                            <div class="sinput">
+                                <mat-icon class="material-icons">search</mat-icon>
+                            <input type="Standard" label=""
                                 (input)="applyFilter($event.target.value)" (keydown.enter)="onSearchEnter($event)"
                                 placeholder="Search">
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
