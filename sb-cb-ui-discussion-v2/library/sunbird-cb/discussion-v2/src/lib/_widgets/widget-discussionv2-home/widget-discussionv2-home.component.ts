@@ -27,6 +27,7 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   userEnrollDetailsData: any;
   topicDataList: any = []
   topicDataLoading: boolean = false
+  totalCommunitiesCount: any = 0
  
   constructor(private userEnrollSvc: UserEnrollCommunityService,
     private discussV2Svc: DiscussionV2Service
@@ -72,6 +73,7 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
       
       if(res.result && res.result && res.result.search_results && res.result.search_results.facets && res.result.search_results.facets.topicName && res.result.search_results.facets.topicName.length){
         this.topicDataList = res.result.search_results.facets.topicName;
+        this.totalCommunitiesCount =  res.result.search_results.facets.topicName.reduce((sum: any, item: any) => sum + item.count, 0);
         this.topicDataLoading = false
       }
     })

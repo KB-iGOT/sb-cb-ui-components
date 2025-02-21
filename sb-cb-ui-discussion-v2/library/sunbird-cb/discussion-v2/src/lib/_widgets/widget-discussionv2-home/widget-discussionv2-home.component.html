@@ -47,6 +47,7 @@
          </div>
          <mat-tab-group animationDuration="0ms" class="custom-tab-container ">
             <mat-tab label="Discover">
+               <ng-template mat-tab-label> Discover <span class="ml-2" *ngIf="totalCommunitiesCount">({{ totalCommunitiesCount }})</span> </ng-template>
                <ng-template matTabContent>
                   <ng-container *ngIf="topicDataList?.length;else noDataTemplateCall">
                      <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
@@ -58,11 +59,14 @@
                
             </mat-tab>
             <mat-tab label="Your Communities">
+               <ng-template mat-tab-label> Your Communities <span class="ml-2" *ngIf="userEnrollDetailsData?.length">({{ userEnrollDetailsData?.length }})</span> </ng-template>
                <ng-template matTabContent>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"  *ngIf="userEnrollDetailsData?.length; else noEnrolledCommunity">
                         <div  *ngFor="let item of userEnrollDetailsData">
                            <d-v2-community-card [community]="item"   (click)="onCardClick(item)"></d-v2-community-card>
                         </div>
+
+                     
                   </div>
 
                   <ng-template #noEnrolledCommunity>

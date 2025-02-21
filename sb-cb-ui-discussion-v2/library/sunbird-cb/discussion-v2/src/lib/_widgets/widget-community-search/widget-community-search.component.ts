@@ -29,7 +29,8 @@ export class WidgetCommunitySearchComponent {
   pageSize: any = 50
   pageNumber: any = 0
   totalCount: any = 0
-  
+  factesRequest: any = []
+  filterApply: any = {}
   
   constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
     
@@ -45,25 +46,23 @@ export class WidgetCommunitySearchComponent {
       // Check query params first
       if (queryParams['c'] || queryParams['c'] === '') {
         this.searchTextValue = queryParams['c'];
-        this.fetchCommunityList(this.searchTextValue);
+        this.fetchCommunityList(true,this.searchTextValue);
         this.globalSearchEnabled = true
       } 
       else if (params.get('topicName')) {
         this.topicName = params.get('topicName')
-        this.fetchCommunityList(this.searchTextValue, params.get('topicName'));
+        this.fetchCommunityList(true,this.searchTextValue, params.get('topicName'));
         this.globalSearchEnabled = false
       } 
       // Default case
       else {
-        this.fetchCommunityList();
+        this.fetchCommunityList(true);
       }
       this.onSearch(this.searchTextValue,'t')
     });
-    this.getFilterFacets()
    }
 
-   fetchCommunityList(searchText?: any, topicName?:any, sortData?: any,filterApply?:any,factesRequest?:any) {
-    
+   fetchCommunityList(facetsRender: boolean,searchText?: any, topicName?:any, sortData?: any,loadMoreClick?: boolean, filterApply?:any,factesRequest?:any) {
     this.isLoading = true;
     let request: any = {
       "filterCriteriaMap": {
@@ -72,7 +71,14 @@ export class WidgetCommunitySearchComponent {
       "requestedFields": [
       ],
       "pageNumber": this.pageNumber,
-      "pageSize": this.pageSize
+      "pageSize": this.pageSize,
+    }
+    if(facetsRender) {
+      request['facets']= [
+        "topicName",
+        "orgId",
+        "competencyArea"
+      ]
     }
     if(searchText) {
       request['searchString'] = searchText
@@ -98,8 +104,15 @@ export class WidgetCommunitySearchComponent {
       }
       
       if(res.result && res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length){
-        this.communityDataList = [...this.communityDataList, ...res.result.search_results.data];
+        if(loadMoreClick) {
+          this.communityDataList = [...this.communityDataList, ...res.result.search_results.data];
+        } else {
+          this.communityDataList = res.result.search_results.data
+        }
         this.totalCount = res.result.search_results.totalCount
+      }
+      if(facetsRender) {
+        this.getFilterFacets(res.result.search_results.facets)
       }
       if(factesRequest && factesRequest.length) {
         let facets: any = res.result.search_results.facets
@@ -131,7 +144,6 @@ export class WidgetCommunitySearchComponent {
       this.searchTextValue = searchEvent.target.value;
       this.searchText.emit(this.searchTextValue);
     }
-    // this.fetchCommunityList(this.searchTextValue)
   }
 
   onCardClick(community: any){
@@ -139,23 +151,49 @@ export class WidgetCommunitySearchComponent {
   }
   sortOptionSelection(sortData: any){
     this.sortOptionSelected = sortData
-    this.fetchCommunityList('',this.topicName,sortData)
+    this.fetchCommunityList(false,'',this.topicName,sortData,false,this.filterApply, this.factesRequest)
   }
 
-  getFilterFacets() {
-    let request: any = {
-      "filterCriteriaMap": {
-          "status": "active"
-      },
-      "requestedFields": [],
-      "pageNumber": this.pageNumber,
-      "pageSize": this.pageSize,
-      "facets": [
-          "topicName",
-          "orgId",
-          "competencyArea"
-      ]
-    }
+  // getFilterFacets(facetsData: any) {
+  //   this.filterObjectList = {
+  //     [this.constants.orgId] : {},
+  //     [this.constants.topicName] : {},
+  //     [this.constants.competencyArea] : {},
+  //     [this.constants.competencyTheme] : {},
+  //     [this.constants.competencySubTheme] : {}
+  //   }
+    
+  //   this.filterKeys  = [this.constants.orgId,this.constants.competencyArea,this.constants.competencyTheme, this.constants.competencySubTheme]
+  //   if(!this.topicName) {
+  //     this.filterKeys.splice(1, 0, this.constants.topicName);
+  //   }
+  //     if(facetsData ){
+  //       let emptyData = {
+  //         competencyTheme: [],
+  //         competencySubTheme:[]
+  //       }
+  //       let facets: any = {...facetsData,...emptyData}
+  //       Object.keys(facets).forEach((ele: any) => {
+  //         let tempFilter: any = {}
+  //         tempFilter['label'] = this.constants[`${ele}Label`]
+  //         let newValues = []
+  //         if(facets[ele] && facets[ele].length ){
+  //           newValues = facets[ele].map((v: any) => ({...v, checked: false}))
+  //         }
+  //         tempFilter['values'] = newValues
+  //         if(ele === 'topicName') {
+  //           newValues.forEach((element: any) => {
+  //             if(element.value === this.topicName ){
+  //               element['checked']= true
+  //             }
+  //           });
+  //         }
+  //         this.filterObjectList[ele] =  tempFilter
+  //       })
+  //     }
+  // }
+
+  getFilterFacets(facetsData: any) {
     this.filterObjectList = {
       [this.constants.orgId] : {},
       [this.constants.topicName] : {},
@@ -168,26 +206,22 @@ export class WidgetCommunitySearchComponent {
     if(!this.topicName) {
       this.filterKeys.splice(1, 0, this.constants.topicName);
     }
-    this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
-      if(res && res.result && res.result.search_results && res.result.search_results.facets ){
-        
+      if(facetsData ){
         let emptyData = {
           competencyTheme: [],
           competencySubTheme:[]
         }
-        let facets: any = {...res.result.search_results.facets,...emptyData}
-        // if(facets[this.constants.competencyArea] ) {
-        //   let tempFilter: any = {}
-        //   tempFilter['label'] = this.constants.competencyAreaLabel
-        //   tempFilter['values'] =facets[this.constants.competencyArea]
-        //   this.filterObjectList[this.constants.competencyArea] =  tempFilter
-        // }
+        let facets: any = {...facetsData,...emptyData}
         Object.keys(facets).forEach((ele: any) => {
           let tempFilter: any = {}
           tempFilter['label'] = this.constants[`${ele}Label`]
-          let newValues = []
+          let newValues: any = []
           if(facets[ele] && facets[ele].length ){
-            newValues = facets[ele].map((v: any) => ({...v, checked: false}))
+            // Add "All" option at the beginning
+            newValues = [
+              { value: `All ${this.constants[`${ele}Label`]}`, id: 'all', count: 0, checked: false },
+              ...facets[ele].map((v: any) => ({...v, id: v.value.toLowerCase(), checked: false}))
+            ]
           }
           tempFilter['values'] = newValues
           if(ele === 'topicName') {
@@ -200,9 +234,7 @@ export class WidgetCommunitySearchComponent {
           this.filterObjectList[ele] =  tempFilter
         })
       }
-    })
   }
-
 
   selectedFilters(filterData: any){
     
@@ -236,7 +268,9 @@ export class WidgetCommunitySearchComponent {
     {
       factesRequest.push(this.constants.competencySubTheme)
     }
-    this.fetchCommunityList(this.searchTextValue, this.topicName, this.sortOptionSelected, filterObject,factesRequest)
+    this.filterApply = filterObject
+    this.factesRequest = factesRequest
+    this.fetchCommunityList(false,this.searchTextValue, this.topicName, this.sortOptionSelected,false, filterObject,factesRequest)
 
   }
 
@@ -263,7 +297,7 @@ export class WidgetCommunitySearchComponent {
     
     if( !(this.communityDataList.length >= this.totalCount)) {
       this.pageNumber = this.pageNumber + 1
-      this.fetchCommunityList(this.searchTextValue, this.topicName, this.sortOptionSelected)
+      this.fetchCommunityList(false,this.searchTextValue, this.topicName, this.sortOptionSelected, true)
     }
   }
   
