@@ -32,8 +32,11 @@
     </ng-container>
 </section>
 
-<div class="dots-container {{isMobile? sliderConfig?.responsive?.dotsAlign : sliderConfig?.dotsAlign}}" 
-*ngIf="(isMobile && sliderConfig?.responsive?.showDots) || (!isMobile && sliderConfig?.showDots)">
-    <!-- <span class="dot" [ngClass]="{ active: j === currentIndex }" -->
-    <span class="dot" [ngClass]="{ active: j === activeNav }" *ngFor="let slide of bottomDotsArray; let j = index" (click)="slideTo(j)"></span>
-</div>
+<ng-container *ngIf="bottomDotsArray.length > 0">
+    <div class="dots-container {{isMobile? sliderConfig?.responsive?.dotsAlign : sliderConfig?.dotsAlign}}"
+        *ngIf="(isMobile && sliderConfig?.responsive?.showDots) || (!isMobile && sliderConfig?.showDots)">
+        <!-- <span class="dot" [ngClass]="{ active: j === currentIndex }" -->
+        <span class="dot" [ngClass]="{ active: j === activeNav }" *ngFor="let slide of bottomDotsArray; let j = index"
+            (click)="slideTo(j)"></span>
+    </div>
+</ng-container>

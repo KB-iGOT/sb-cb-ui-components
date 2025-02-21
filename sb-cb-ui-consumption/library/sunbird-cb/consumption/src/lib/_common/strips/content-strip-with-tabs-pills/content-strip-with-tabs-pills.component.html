@@ -105,9 +105,9 @@
                       <div class="wfull wrapper-saksham"
                         *ngIf="tab?.pillsData && tab?.pillsData?.length && !tab?.hideTab"
                         [ngClass]="{'overlay-max-height': recommendationPopup || sakshamFeedbackPopup}">
-                        <div class="flex justify-between item-center margin-bottom-xs">
-                          <div>
-                            <ng-container *ngIf="tab?.value !== 'sakshamAI'">
+                        <div class="flex justify-between item-center">
+                          <ng-container *ngIf="tab?.value !== 'sakshamAI'">
+                            <div class="pt-4">
                               <mat-chip-list class="content-pill" aria-label="Fish selection">
                                 <ng-container *ngFor="let pill of tab?.pillsData;let p = index">
                                   <mat-chip [selected]="pill?.selected"
@@ -115,8 +115,8 @@
                                     <span class="pill-name">{{pill?.label}}</span></mat-chip>
                                 </ng-container>
                               </mat-chip-list>
-                            </ng-container>
-                          </div>
+                            </div>
+                          </ng-container>
                           <!-- viewAll start-->
                           <div
                             *ngIf="checkCondition(widgetData , stripsResultDataMap[key]) && tab?.value !== 'sakshamAI'"
@@ -185,7 +185,7 @@
                               [sliderConfig]="stripsResultDataMap[key]?.sliderConfig"
                               [widgetsLength]="tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.widgets?.length"
                               *ngIf="getContineuLearningLenth(stripsResultDataMap[key]) && showAccordion(key)"
-                              [loadStatus]="'done'" [defaultMaxWidgets]="tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.maxWidgets ||
+                              [loadStatus]="'done'" [defaultMaxWidgets]="tab?.value === 'sakshamAI' ? maxWidgetsSakshamAI : tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.maxWidgets ||
                                stripsResultDataMap[key]?.sliderConfig?.maxWidgets || defaultMaxWidgets"
                               [stripConfig]="stripsResultDataMap[key]?.stripConfig" [extraMeta]="tab">
                               <ng-container

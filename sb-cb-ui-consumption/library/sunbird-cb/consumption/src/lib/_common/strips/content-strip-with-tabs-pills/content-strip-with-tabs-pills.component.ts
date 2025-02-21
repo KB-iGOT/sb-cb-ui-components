@@ -105,7 +105,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   veifiedKarmayogi = false;
   environment!: any;
   changeEventSubscription: Subscription | null = null;
-  defaultMaxWidgets = 100;
+  defaultMaxWidgets = 12;
+  maxWidgetsSakshamAI = 100;
   enrollInterval: any;
   todaysEvents: any = [];
   activeTabIndex: number = 0
