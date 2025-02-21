@@ -136,6 +136,7 @@ export namespace NsDiscussionV2 {
             toolTipText: string
         },
         actions: IPostCardActions,
+        editAsDialogue?: boolean
         repliesSection: {
             show: boolean,
             indented?: boolean,

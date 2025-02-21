@@ -44,7 +44,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
   public Editor = ClassicEditor;
   public editorConfig = {
-    plugins: [...ClassicEditor.builtinPlugins,],
+    plugins: [...ClassicEditor.builtinPlugins],
     placeholder: 'What you want to say?',
     toolbarLocation: 'bottom',
     toolbar: {
@@ -97,7 +97,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.uploadForm = this.fb.group({
       community: [''],
       // title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.maxLength(500)]],
+      description: ['', [Validators.required, Validators.maxLength(3000)]],
       tags: [[]],
       files: [[]]
     });
@@ -700,5 +700,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         this.previewCategory[key].forEach((url: any) => URL.revokeObjectURL(url));
       }
     }
+  }
+
+  getEditorTextLength(content: any) {
+    let test = content.replace(/<[^>]*>/g, '')
+    test = test.replace(/&nbsp;/gi, ' ')
+    test = test.trim()
+    return test.length
   }
 }
