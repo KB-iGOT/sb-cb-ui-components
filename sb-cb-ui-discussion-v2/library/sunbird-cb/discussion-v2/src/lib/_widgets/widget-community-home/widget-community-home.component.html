@@ -11,7 +11,7 @@
                     <div class="block md:hidden">
                         <div class="flex items-center ">
                             <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
-                            <mat-icon  class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                            <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
                         </div>
                     </div>
                 </div>
@@ -20,19 +20,19 @@
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">group</mat-icon>
                     <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
-                    <span>Members</span>
+                    <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
                 </span>
                 <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">list_alt</mat-icon>
                     <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
-                    <span>Post</span>
+                    <span>{{ communityData?.countOfPostCreated | plural:'post':'Posts' }}</span>
                 </span>
                 <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">thumb_up</mat-icon>
                     <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
-                    <span>Likes</span>
+                    <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
                 </span>
                 <!-- <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
@@ -48,7 +48,7 @@
                 <div class="flex items-center">
                     <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 " (click)="joinCommunity()">Join</button>
                     <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true">share</mat-icon>
-                    <mat-icon class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                    <mat-icon  *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
                 </div>
             </div>
         </div>
@@ -166,9 +166,9 @@
 
 
 <mat-menu #menu="matMenu" class="comment-card-menu" xPosition="after">
-    <button mat-menu-item (click)="getAllFlagList()" >
+    <!-- <button mat-menu-item (click)="getAllFlagList()" >
         <mat-icon class="material material-icons-outlined report-icons">flag</mat-icon><span>Report</span>
-    </button>
+    </button> -->
     <button mat-menu-item (click)="unJoinCommunity()" *ngIf="userJoinedCommunity">
         <mat-icon class="report-icons">logout</mat-icon><span>Leave</span>
     </button>

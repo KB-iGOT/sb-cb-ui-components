@@ -22,12 +22,12 @@
             </a>
          </div>
          <div >
-             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"  *ngIf="community?.value?.isLoading">
+             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"  *ngIf="community?.value?.isLoading">
                 <d-v2-community-card [isLoading]="community?.value?.isLoading" ></d-v2-community-card>
                 <d-v2-community-card [isLoading]="community?.value?.isLoading" ></d-v2-community-card>
                 <d-v2-community-card [isLoading]="community?.value?.isLoading" ></d-v2-community-card>
              </div>
-             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!community?.value?.isLoading">
+             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!community?.value?.isLoading">
                  <div  *ngFor="let item of community?.value?.communities.slice(0, 3)">
                      <d-v2-community-card [community]="item" [isLoading]="community?.value?.isLoading" [orgDetails]="orgDetails" (click)="onCardClick(item)"></d-v2-community-card>
                  </div>

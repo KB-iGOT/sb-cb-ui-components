@@ -176,6 +176,8 @@ export class WidgetCommunityHomeComponent implements OnInit {
           
         }
         this.manageUserCommunityStatus()
+
+        this.snackbar.open('You\’ve successfully joined the community.')
       }
     })
   }
@@ -193,7 +195,9 @@ export class WidgetCommunityHomeComponent implements OnInit {
         }
         this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
         this.manageUserCommunityStatus()
+        this.snackbar.open('You\'ve successfully left the community.')
       }
+
     })
   }
 
