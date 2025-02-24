@@ -65,17 +65,41 @@ export class FilterComponent {
   }
   
   handleGetFilterType(event: any, selectedOption: any, filterType: any) {
-    
     selectedOption['checked']= event.checked
     if(event.checked){
       selectedOption['checked']= event.checked
     }
-
-    if(this.selectedOptions[filterType] && this.selectedOptions[filterType].includes(selectedOption.value)){
-      const index = this.selectedOptions[filterType].findIndex((x: any) => x === selectedOption.value)
-      this.selectedOptions[filterType].splice(index, 1)
+    
+    if(selectedOption['id'] === 'all') {
+      // Handle "all" option selection
+      if(event.checked) {
+        // If "all" is checked, uncheck all other options and clear the array
+        this.filterObjectList[filterType].values.forEach((option: any) => {
+          option.checked = option.id !== 'all' ? false : true;
+        })
+        // Add all values to the selected options
+        this.selectedOptions[filterType] = this.filterObjectList[filterType].values
+          .filter((option: any) => option.id !== 'all')
+          .map((option: any) => option.value);
+      } else {
+        // If "all" is unchecked, clear the array
+        this.selectedOptions[filterType] = [];
+      }
     } else {
-      this.selectedOptions[filterType].push(selectedOption.value)
+      this.filterObjectList[filterType].values.forEach((option: any) => {
+        if(option.id === 'all' && option.checked === true) {
+          option.checked = false
+          this.selectedOptions[filterType] = []
+        }
+      })
+  
+      // selectedOption['checked']= event.checked
+      if(this.selectedOptions[filterType].includes(selectedOption.value)){
+        const index = this.selectedOptions[filterType].findIndex((x: any) => x === selectedOption.value);
+        this.selectedOptions[filterType].splice(index, 1);
+      } else {
+        this.selectedOptions[filterType].push(selectedOption.value);
+      }
     }
     
     if (window.innerWidth < 768) {

@@ -44,6 +44,7 @@ export class PostCardComponent {
   flagSelectionList: any
   reportPending = false
   viewMoreLength = 200
+  editMode: boolean =  false
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -244,6 +245,25 @@ export class PostCardComponent {
     })
   }
 
+  editHandler(post: any) {
+    if(this.cardConfig && this.cardConfig.editAsDialogue){
+      this.openEditDialogue(post)
+    } else {
+      this.editMode = true
+    }
+  }
+
+  editEventsHandler(event: any) {
+    if(event && event.cancelEdit) {
+      this.editMode = false
+    }
+    if(event && event.edit){
+      event.post.createdBy = this.post.createdBy
+      this.post = event.post
+      this.editMode = false
+    }
+  }
+
   openEditDialogue(post: any) {
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
       width: '996px',
@@ -315,6 +335,11 @@ export class PostCardComponent {
     window.open(url, '_blank');
   }
 
-
+  getEditorTextLength(content: any) {
+    let test = content.replace(/<[^>]*>/g, '')
+    test = test.replace(/&nbsp;/gi, ' ')
+    test = test.trim()
+    return test.length
+  }
 
 }
