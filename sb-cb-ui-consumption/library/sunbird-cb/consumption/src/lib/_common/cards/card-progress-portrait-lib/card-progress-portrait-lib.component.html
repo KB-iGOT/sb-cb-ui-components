@@ -1,5 +1,5 @@
 <ng-container *ngIf="!isCardLoading">
-  <mat-card class="card-portrait card-progress-portrait-lib cursor-pointer" [ngClass]="widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : ''" (click)="raiseTelemetry();getRedirectUrlData(widgetData?.content); $event.stopPropagation()" >
+  <mat-card class="card-portrait card-progress-portrait-lib cursor-pointer mt-4" [ngClass]="widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : ''" (click)="raiseTelemetry();getRedirectUrlData(widgetData?.content); $event.stopPropagation()" >
     <div class="course_widget portrait_widget flex  margin-bottom-xs" [ngClass]="{'retiredCards': widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage === 100,'margin-bottom-xl':!widgetData?.content?.primaryCategory}">
       <div class="flex flex-end flex-middle course_port" *ngIf="widgetData?.content?.primaryCategory">
         <mat-icon class="mat-icon main_icon  ws-mat-default-text margin-right-xs">video_library</mat-icon>
