@@ -188,11 +188,22 @@
                               [loadStatus]="'done'" [defaultMaxWidgets]="tab?.value === sakshamAIEnum.SakshamAI ? maxWidgetsSakshamAI : tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.maxWidgets ||
                                stripsResultDataMap[key]?.sliderConfig?.maxWidgets || defaultMaxWidgets"
                               [stripConfig]="stripsResultDataMap[key]?.stripConfig" [extraMeta]="tab">
-                              <ng-container
+                              <!-- <ng-container
                                 *ngFor="let widget of tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.widgets| slice:0:(tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.maxWidgets ||
                                stripsResultDataMap[key]?.sliderConfig?.maxWidgets || defaultMaxWidgets); trackBy: tracker">
                                 <ng-container [sbUiResolverWidget]="widget"></ng-container>
+                              </ng-container> -->
+                              <ng-container
+                                *ngFor="let widget of tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.widgets | slice:0:(
+                                  tab?.value === sakshamAIEnum.SakshamAI 
+                                    ? maxWidgetsSakshamAI 
+                                    : tab?.pillsData[getSelectedPillIndex(tab ,tabIndex)]?.maxWidgets ||
+                                      stripsResultDataMap[key]?.sliderConfig?.maxWidgets || 
+                                      defaultMaxWidgets
+                                ); trackBy: tracker">
+                                <ng-container [sbUiResolverWidget]="widget"></ng-container>
                               </ng-container>
+
                             </sb-uic-horizontal-scroller-v2>
                           </ng-container>
                         </ng-container>
