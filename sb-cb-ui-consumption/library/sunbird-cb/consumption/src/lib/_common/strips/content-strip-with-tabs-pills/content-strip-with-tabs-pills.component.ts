@@ -1742,7 +1742,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let coursesIds: any
 
       if(courseRecommendationId) {
-        response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise()
+        response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise().catch(async (_err: any) => {
+          response = await this.userSvc.generateCoursesSakshamAI(strip.tabs[tabIndex].request.courseRecommendation.path, payload)
+            .toPromise()
+        })
       } else {
         response = await this.userSvc.generateCoursesSakshamAI(
           strip.tabs[tabIndex].request.courseRecommendation.path, payload)
@@ -1775,6 +1778,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }).catch((_err: any) => {
             return []
           })
+         
           const sRequestV1: any = {
              "request": {
               "filters": {
