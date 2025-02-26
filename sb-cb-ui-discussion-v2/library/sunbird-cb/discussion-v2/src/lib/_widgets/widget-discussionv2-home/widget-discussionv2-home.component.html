@@ -26,14 +26,13 @@
          <div class="py-4" *ngIf="topicDataList?.length">
             <div class="flex justify-between items-center mb-4 community-groups">
                <h2 class="text-xl font-medium title margin-remove">All Topics <span *ngIf="topicDataList?.length">({{topicDataList?.length}})</span></h2>
-               <a class="show-more flex items-center cursor-pointer"  (click)="showAllTopicsMethod()">
+               <a class="show-more flex items-center cursor-pointer" *ngIf="topicDataList?.length > 3" (click)="showAllTopicsMethod()">
                  <span>Show all</span> 
                  <mat-icon>chevron_right</mat-icon>
-                 <!-- *ngIf="topicDataList?.length > 3" -->
                </a>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
-               <div *ngFor="let topic of topicDataList" >
+               <div *ngFor="let topic of topicDataList | slice:0:3" >
                 <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
                     [topicTitle]="topic?.value">
                 </d-v2-topic-card>
@@ -45,7 +44,7 @@
                 <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
             </div>
          </div>
-         <mat-tab-group animationDuration="0ms" class="custom-tab-container ">
+         <mat-tab-group animationDuration="0ms" class="custom-discuss-home-tab-container "  [mat-stretch-tabs]="false"  mat-align-tabs="start">
             <mat-tab label="Discover">
                <ng-template mat-tab-label> Discover <span class="ml-2" *ngIf="totalCommunitiesCount">({{ totalCommunitiesCount }})</span> </ng-template>
                <ng-template matTabContent>

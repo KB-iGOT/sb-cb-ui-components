@@ -11,19 +11,20 @@
         <p class="community-title">{{community?.communityName || community?.data?.communityName}}</p>
         <div class="flex items-center justify-between community-info">
             <p>
-                <span >{{community?.countOfPeopleJoined | numberShortener}}</span>
+                <span class="mr-1">{{community?.countOfPeopleJoined | numberShortener}}</span>
                 <span>{{ community?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
             </p>
             <span class="mx-2">•</span>
             <p>
-                <span>{{community?.countOfPostCreated | numberShortener}}</span>
-                <span>{{ community?.countOfPostCreated | plural:'Post':'Posts' }}</span> </p>
+                <span class="mr-1">{{community?.countOfPostCreated | numberShortener}}</span>
+                <span>{{ community?.countOfPostCreated | plural:'Post':'Posts' }}</span> 
+            </p>
         </div>
-        <div class="flex items-center justify-start community-owner-info" *ngIf="orgDetails && orgDetails[community?.orgId]">
+        <div class="flex items-center justify-start community-owner-info" >
             <div class="owner-icon mr-2">
-                <img src="{{orgDetails[community?.orgId]?.logo}}" alt="" (error)="changeToDefaultImg($event)">
+                <img src="{{orgDetails[community?.orgId]?.logo || community?.orgName}}" alt="" (error)="changeToDefaultImg($event)">
             </div>
-            <p class="owner-name margin-remove">By {{orgDetails[community?.orgId]?.orgname}}</p>
+            <p class="owner-name margin-remove">By {{community?.orgName}}</p>
         </div>
     </div>
 </div>

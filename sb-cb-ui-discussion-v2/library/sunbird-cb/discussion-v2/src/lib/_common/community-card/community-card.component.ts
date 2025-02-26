@@ -8,7 +8,7 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 })
 export class CommunityCardComponent {
   @Input() community: any;
-  @Input() orgDetails: any;
+  @Input() orgDetails: any = {};
   @Input() isLoading: boolean = false;
   defaultThumbnail
   sourceLogos

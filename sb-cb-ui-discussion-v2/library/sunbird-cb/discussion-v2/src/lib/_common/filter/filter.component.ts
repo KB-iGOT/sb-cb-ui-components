@@ -56,7 +56,7 @@ export class FilterComponent {
     ]
 
     this.selectedOptions = {
-      [this.constants.orgId] : [],
+      [this.constants.orgName] : [],
       [this.constants.topicName] : [],
       [this.constants.competencyArea] : [],
       [this.constants.competencyTheme] : [],
