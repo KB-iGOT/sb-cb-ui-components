@@ -27,7 +27,8 @@ const API_END_POINTS = {
   USERS_COMMUNITY_LIST: `/apis/proxies/v8/community/v1/user/communities`,
   TOPIC_WISE_COMMUNITIES: `/apis/proxies/v8/community/v1/category/listAll`,
   BOOKMART_LIST: `/apis/proxies/v8/feedDiscussion/bookmarkedDiscussions`,
-  COMMUNITY_REPORT: `/apis/proxies/v8/community/v1/report`
+  COMMUNITY_REPORT: `/apis/proxies/v8/community/v1/report`,
+  USER_SEARCH:`/apis/proxies/v8/user/v1/search`
 }
 
 
@@ -146,6 +147,16 @@ export class DiscussionV2Service {
       acc[item.id] = item;
       return acc;
     }, {});
+  }
+
+  /**
+   * Searches for users based on the request parameters.
+   * @param req - The request object containing search parameters.
+   * @returns An observable containing the search results.
+   */
+  userSearch(req: any) {
+    // Make a POST request to the USER_SEARCH endpoint with the request data
+    return this.http.post<any>(`${API_END_POINTS.USER_SEARCH}`, req)
   }
 }
 

@@ -19,7 +19,7 @@
     </div>
     <div>
         <div class="flex justify-start">
-            <div class="flex gap-2 flex-wrap justify-start">
+            <div class="flex gap-2 flex-wrap justify-start" *ngIf="communityMembersList?.length;else noData ">
                 <ng-container *ngFor="let member of communityMembersList">
                     <d-v2-member-card [memeberData]="member"></d-v2-member-card>
                 </ng-container>
@@ -33,3 +33,9 @@
         </ng-container>
     </div>
 </mat-card>
+
+<ng-template #noData >
+    <div class="mt-8">
+       <d-v2-no-data [iconName]="'forum'" [noText]="'No data'"></d-v2-no-data>
+    </div>
+ </ng-template>
