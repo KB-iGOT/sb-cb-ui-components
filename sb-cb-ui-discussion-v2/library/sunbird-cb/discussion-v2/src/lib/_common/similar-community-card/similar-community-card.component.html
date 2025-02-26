@@ -9,9 +9,9 @@
                     <div class="flex gap-4 items-center comminity-details cursor-pointer" (click)="communicityClickMethod(community)">
                         <d-v2-avatar-photo [size]="'s'"
                             [name]="community?.communityName"
-                            [photoUrl]="community?.posterImageUrl || ''" >
+                            [photoUrl]="community?.imageUrl || ''" >
                         </d-v2-avatar-photo>
-                        <div class="community-name">
+                        <div class="community-name " dV2SingleLineTooltip>
                             <span>{{community?.communityName}}</span>
                         </div>
                     </div>

@@ -31,7 +31,7 @@ export class TrendingDiscussionsComponent implements OnInit {
          },
          "requestedFields": [],
          "pageNumber": 0,
-         "pageSize": 5,
+         "pageSize": 3,
          "orderBy": "answerPosts",
          "orderDirection": "desc",
          "facets": []

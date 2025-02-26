@@ -4,6 +4,7 @@ import { SimilarCommunityCardComponent } from './similar-community-card.componen
 import { CardToggleModule } from '../card-toggle/card-toggle.module';
 import { SharedModule } from '../../_shared/shared.module';
 import { NoDataModule } from '../no-data/no-data.module';
+import { SingleLineTooltipModule } from '../../_directives/single-line-tooltip/single-line-tooltip.module';
 
 
 
@@ -15,7 +16,8 @@ import { NoDataModule } from '../no-data/no-data.module';
     CommonModule,
     CardToggleModule,
     SharedModule,
-    NoDataModule
+    NoDataModule,
+    SingleLineTooltipModule
   ],
   exports: [
     SimilarCommunityCardComponent
