@@ -3,8 +3,8 @@
     <div class="banner-container">
         <img src="assets/instances/eagle/banners/discussion/community-banner.svg" alt="">
     </div>
-    <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-center mt-2">
-        <div class="community-info">
+    <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-start mt-2">
+        <div class="community-info flex-1">
             <div class="flex">
                 <h2 class="">{{communityData?.communityName}}</h2>
                 <div class="community-action flex  gap-2 items-start ">
@@ -34,12 +34,12 @@
                     <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
                     <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
                 </span>
-                <!-- <span class="mx-2 self-end">•</span>
+                <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
-                    <mat-icon class="mr-1">group</mat-icon>
-                    <span class="mr-1">{{'99900000' | numberShortener}}</span> 
-                    <span>Comments</span>
-                </span> -->
+                    <mat-icon class="mr-1">chat_bubble</mat-icon>
+                    <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
+                    <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
+                </span>
             </div>
         </div>
         <div class="community-action flex gap-2 items-center ">

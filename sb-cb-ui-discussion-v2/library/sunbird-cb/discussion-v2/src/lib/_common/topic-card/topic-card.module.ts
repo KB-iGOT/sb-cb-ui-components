@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TopicCardComponent } from './topic-card.component';
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module';
+import { PipesModule } from '../../_pipes/pipes.module';
 
 
 
@@ -11,7 +12,8 @@ import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.modu
   ],
   imports: [
     CommonModule,
-    SkeletonLoaderModule
+    SkeletonLoaderModule,
+    PipesModule
   ],
   exports: [
     TopicCardComponent

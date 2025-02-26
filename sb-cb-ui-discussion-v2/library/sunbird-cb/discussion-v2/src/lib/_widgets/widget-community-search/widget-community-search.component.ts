@@ -76,7 +76,7 @@ export class WidgetCommunitySearchComponent {
     if(facetsRender) {
       request['facets']= [
         "topicName",
-        "orgId",
+        "orgName",
         "competencyArea"
       ]
     }
@@ -97,13 +97,12 @@ export class WidgetCommunitySearchComponent {
     if(factesRequest && factesRequest.length) {
       request['facets']= factesRequest
     }
-
     this.discussV2Svc.communitySearch(request).subscribe((res: any) => {
       if(res.result && res.result && res.result.search_results && res.result.search_results.additionalInfo && res.result.search_results.additionalInfo.length ) {
         this.orgDetails = this.discussV2Svc.convertOrgArrayToObject(res.result.search_results.additionalInfo)
       }
       
-      if(res.result && res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length){
+      if(res.result && res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data){
         if(loadMoreClick) {
           this.communityDataList = [...this.communityDataList, ...res.result.search_results.data];
         } else {
@@ -195,14 +194,14 @@ export class WidgetCommunitySearchComponent {
 
   getFilterFacets(facetsData: any) {
     this.filterObjectList = {
-      [this.constants.orgId] : {},
+      [this.constants.orgName] : {},
       [this.constants.topicName] : {},
       [this.constants.competencyArea] : {},
       [this.constants.competencyTheme] : {},
       [this.constants.competencySubTheme] : {}
     }
     
-    this.filterKeys  = [this.constants.orgId,this.constants.competencyArea,this.constants.competencyTheme, this.constants.competencySubTheme]
+    this.filterKeys  = [this.constants.orgName,this.constants.competencyArea,this.constants.competencyTheme, this.constants.competencySubTheme]
     if(!this.topicName) {
       this.filterKeys.splice(1, 0, this.constants.topicName);
     }

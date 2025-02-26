@@ -11,10 +11,10 @@ export class DiscoverComponent implements OnInit, OnChanges {
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
   @Output() popularCommunityClick = new EventEmitter<any>();
-  @Input() topicDataList: any;
+  @Input() topicDataList: any = [];
   orgDetails: any;
-  toppicWiseCommunities: any = {};
-  loadTopicsCount: number = 1;
+  toppicWiseCommunities: any;
+  loadTopicsCount: number = 3;
   topicDataLoading: boolean = false
   toppicWiseCommunitiesCopy: any = {}
   popularCommunities: any = [
@@ -46,15 +46,6 @@ export class DiscoverComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.toppicWiseCommunities = {
-      // 'Artificial Intelligence and Machine Learning': {
-      //   topicName: 'Artificial Intelligence and Machine Learning',
-      //   topicId:"1037",
-      //   isLoading: false,
-      //   communityDataList: [],
-      //   count: 0
-      // }
-    }
 
     this.getPopularCommunities()
       
@@ -92,8 +83,8 @@ export class DiscoverComponent implements OnInit, OnChanges {
   loadMoreTopics(){
     if(this.loadTopicsCount < this.topicDataList.length){
       let startIndex = this.loadTopicsCount
-      this.loadTopicsCount += 1;
-      this.loadCommunities(this.toppicWiseCommunitiesCopy,startIndex)
+      this.loadTopicsCount += 3;
+      this.loadCommunities(startIndex)
     }
   }
 
@@ -102,19 +93,29 @@ export class DiscoverComponent implements OnInit, OnChanges {
 
   async loadTopicData() {
     try {
-      let topicBycomunities: any = this.topicDataList.reduce((acc: any, element: any) => {
-        acc[element.value] = {
-          topicName: element.value,
-          isLoading: true,
-          communities: [],
-          count: element.count,
-          topicId: ''
-        };
-        return acc;
-      }, {});
+      // let topicBycomunities: any = this.topicDataList.reduce((acc: any, element: any) => {
+      //   acc[element.value] = {
+      //     topicName: element.value,
+      //     isLoading: true,
+      //     communities: [],
+      //     count: element.count,
+      //     topicId: ''
+      //   };
+      //   return acc;
+      // }, {});
       
-      this.toppicWiseCommunitiesCopy = topicBycomunities
-      await this.loadCommunities(topicBycomunities,0);
+      // this.toppicWiseCommunitiesCopy = topicBycomunities
+      this.toppicWiseCommunities = {}
+      for(const topic of this.topicDataList){
+        this.toppicWiseCommunities[topic.value] =  {
+          isLoading : true,
+          communities : [],
+          count : topic.count,
+          topicName : topic.value,
+          topicId  : '',
+        }
+      }
+      await this.loadCommunities(0);
       
     } catch (error) {
       console.error('Error fetching topic data:', error);
@@ -123,23 +124,37 @@ export class DiscoverComponent implements OnInit, OnChanges {
     }
   }
 
-  async loadCommunities(topicBycomunities: any, startIndex:number) {
-    let tempAllApiData: any = {}
-    for (const key of Object.keys(topicBycomunities).slice(startIndex, this.loadTopicsCount)) {
-      
-      let tempApiData : any= {}
-      tempApiData[key] = {}
-      const data = await this.getCommunitiesByTopic(key);
-      tempApiData[key]['isLoading'] = false;
-      tempApiData[key]['communities'] = data;
-      tempApiData[key]['count'] = topicBycomunities[key].count;
-      tempApiData[key]['topicName'] = topicBycomunities[key].topicName;
+  async loadCommunities(startIndex:number) {
+    // let tempAllApiData: any = {}
+    for(const topic of this.topicDataList.slice(startIndex, this.loadTopicsCount)){
+      this.toppicWiseCommunities[topic.value]['isLoading'] = true;
+      const data = await this.getCommunitiesByTopic(topic.value);
+      this.toppicWiseCommunities[topic.value]['isLoading'] = false;
+      this.toppicWiseCommunities[topic.value]['communities'] = data;
+      this.toppicWiseCommunities[topic.value]['count'] = topic.count;
+      this.toppicWiseCommunities[topic.value]['topicName'] = topic.value;
       if (data.length > 0) {
-        tempApiData[key]['topicId']  = data[0].topicId;
+        this.toppicWiseCommunities[topic.value]['topicId']  = data[0].topicId;
       }
-      tempAllApiData = { ...tempApiData,...tempAllApiData}
     }
-    this.toppicWiseCommunities = { ...this.toppicWiseCommunities,...tempAllApiData}
+    // for (const key of Object.keys(topicBycomunities).slice(startIndex, this.loadTopicsCount)) {
+      
+    //   let tempApiData : any= {}
+    //   tempApiData[key] = {}
+    //   tempApiData[key]['isLoading'] = true;
+    //   tempAllApiData = { ...tempApiData,...tempAllApiData}
+    //   this.toppicWiseCommunities = { ...this.toppicWiseCommunities,...tempAllApiData}
+    //   const data = await this.getCommunitiesByTopic(key);
+    //   tempApiData[key]['isLoading'] = false;
+    //   tempApiData[key]['communities'] = data;
+    //   tempApiData[key]['count'] = topicBycomunities[key].count;
+    //   tempApiData[key]['topicName'] = topicBycomunities[key].topicName;
+    //   if (data.length > 0) {
+    //     tempApiData[key]['topicId']  = data[0].topicId;
+    //   }
+    //   tempAllApiData = { ...tempApiData,...tempAllApiData}
+    // }
+    // this.toppicWiseCommunities = { ...this.toppicWiseCommunities,...tempAllApiData}
 
   }
 
