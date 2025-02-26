@@ -43,7 +43,7 @@ export class PostCardComponent {
   loogedInUserProfile: any = {}
   flagSelectionList: any
   reportPending = false
-  viewMoreLength = 200
+  viewMoreLength = 140
   editMode: boolean =  false
 
   constructor(
@@ -129,7 +129,7 @@ export class PostCardComponent {
   
 
   viewMoreOrLess(item: any) {
-    if (item.description.length > this.viewMoreLength) {
+    if (this.getEditorTextLength(item.description) > this.viewMoreLength) {
       item.expanded = !item.expanded
     }
   }

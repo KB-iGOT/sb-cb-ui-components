@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 // import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -82,6 +82,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   loaderMsg = 'Please wait...'
   environment: any
   loading: boolean = false
+  showEmojiPicker: boolean = false
 
 
   constructor(
@@ -97,7 +98,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.uploadForm = this.fb.group({
       community: [''],
       // title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.maxLength(3000)]],
+      description: ['', [Validators.required, this.textLengthValidator()]],
       tags: [[]],
       files: [[]]
     });
@@ -163,19 +164,18 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 					'italic',
 					'underline',
 					'|',
-					'link',
 					'blockQuote',
 					'|',
 					'bulletedList',
 					'numberedList',
-					'outdent',
-					'indent',
           '|',
 					'fontSize',
 					'fontFamily',
 					'fontColor',
 					'fontBackgroundColor',
 					'|',
+          'outdent',
+					'indent',
           'strikethrough',
 					'subscript',
 					'superscript',
@@ -289,6 +289,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 			placeholder: 'What you want to say...!',
 			table: {
 				contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+			},
+			typing: {
+				transformations: {
+					include: []  // This prevents auto-transformations that might bypass our length check
+				}
 			}
 		}
   }
@@ -848,10 +853,88 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     }
   }
 
+  onEditorChange(event: any): void {
+    const editor = event.editor;
+    const currentLength = this.getEditorTextLength(editor.getData());
+    
+    if (currentLength > 3000) {
+      // Store the last valid content
+      const previousContent = editor.getData();
+      // Find the point to truncate by counting characters
+      let truncated = '';
+      let count = 0;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = previousContent;
+      
+      function processNode(node: Node) {
+        if (count >= 3000) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+          const remaining = 3000 - count;
+          const text = node.textContent || '';
+          truncated += text.slice(0, remaining);
+          count += text.length;
+        } else {
+          const children = Array.from(node.childNodes);
+          truncated += node.nodeType === Node.ELEMENT_NODE ? `<${(node as Element).tagName.toLowerCase()}>` : '';
+          children.forEach(child => processNode(child));
+          truncated += node.nodeType === Node.ELEMENT_NODE ? `</${(node as Element).tagName.toLowerCase()}>` : '';
+        }
+      }
+      
+      Array.from(tempDiv.childNodes).forEach(node => processNode(node));
+      
+      // Set the truncated content back to editor
+      editor.setData(truncated);
+      
+      // Move cursor to end
+      const selection = editor.model.document.selection;
+      const position = editor.model.document.model.createPositionAt(editor.model.document.getRoot(), 'end');
+      selection.setTo(position);
+    }
+    
+    // Update preview
+    this.updatePostPreview(this.uploadForm.value);
+  }
+
+  checkCharacterLimit(event: any) {
+    const length = this.getEditorTextLength(this.uploadForm.get('description')?.value);
+    if (length > 3000) {
+      // Prevent further input
+      event.editor.setData(event.editor.getData());
+      // Optionally show an error message or handle the overflow
+    }
+  }
   getEditorTextLength(content: any) {
     let test = content.replace(/<[^>]*>/g, '')
     test = test.replace(/&nbsp;/gi, ' ')
     test = test.trim()
     return test.length
+  }
+
+  private textLengthValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const text = this.getEditorTextLength(control.value);
+      if (text < 3) {
+        return { minLength: true };
+      }
+      if (text > 3000) {
+        return { maxLength: true };
+      }
+      return null;
+    };
+  }
+
+  toggleEmojiPicker() {
+    this.showEmojiPicker = !this.showEmojiPicker
+  }
+  addEmoji(event: any) {
+    const text = `${this.uploadForm.controls.description.value}${event.emoji.native}`
+    this.uploadForm.patchValue({
+      description: text
+    })
+  }
+
+  onFocus() {
+    this.showEmojiPicker = false
   }
 }

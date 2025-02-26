@@ -188,3 +188,17 @@
   width: 14px;
   font-size: 14px;
 }
+
+.emoji-icon {
+  color: #FF8400 !important;
+}
+.emoji-picker{
+  color: #FF8400;
+  cursor: pointer;
+}
+
+.custom-place {
+  top: -150px;
+  right: 30px;
+  z-index: 1;
+}

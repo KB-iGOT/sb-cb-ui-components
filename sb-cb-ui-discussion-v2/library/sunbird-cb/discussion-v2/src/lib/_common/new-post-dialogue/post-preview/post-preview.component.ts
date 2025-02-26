@@ -14,7 +14,7 @@ export class PostPreviewComponent {
   @Input() cardConfig!: NsDiscussionV2.IPostCardConfig
   @Input() type!: string
   @Input() post!: any
-  viewMoreLength = 200
+  viewMoreLength = 120
 
   loogedInUserProfile: any = {}
   constructor(
@@ -28,9 +28,16 @@ export class PostPreviewComponent {
   }
 
   viewMoreOrLess(item: any) {
-    if (item.description.length > this.viewMoreLength) {
+    if (this.getEditorTextLength(item.description) > this.viewMoreLength) {
       item.expanded = !item.expanded
     }
+  }
+
+  getEditorTextLength(content: any) {
+    let test = content.replace(/<[^>]*>/g, '')
+    test = test.replace(/&nbsp;/gi, ' ')
+    test = test.trim()
+    return test.length
   }
 
   getFileExtension(file: string): string {
