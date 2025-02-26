@@ -6,7 +6,7 @@ import { Observable } from 'rxjs'
 const API_END_POINTS = {
   FETCH_ALL_COMMENTS: (entityType: string, entityId: string, workflow: string) =>
     `/apis/proxies/v8/comment/v1/getAll?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
-  FETCH_ALL_COMMENTS_V2: `/apis/proxies/v8/comment/search`,
+  FETCH_ALL_COMMENTS_V2: `/apis/proxies/v8/comment/v2/search`,
   ADD_FIRST_COMMENT: `/apis/proxies/v8/comment/v1/addFirst`,
   ADD_NEW_COMMENT: '/apis/proxies/v8/comment/v1/addNew',
   LIST_COMMENT: '/apis/proxies/v8/comment/list',

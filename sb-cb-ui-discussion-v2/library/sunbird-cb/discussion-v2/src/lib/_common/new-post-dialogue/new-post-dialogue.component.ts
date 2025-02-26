@@ -2,7 +2,42 @@ import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import {
+	type EditorConfig,
+	ClassicEditor,
+	Autosave,
+	BlockQuote,
+	Bold,
+	Code,
+	Essentials,
+	FontBackgroundColor,
+	FontColor,
+	FontFamily,
+	FontSize,
+	Heading,
+	Highlight,
+	Indent,
+	IndentBlock,
+	Italic,
+	Link,
+	List,
+	Mention,
+	Paragraph,
+	RemoveFormat,
+	SpecialCharacters,
+	Strikethrough,
+	Subscript,
+	Superscript,
+	Table,
+	TableCaption,
+	TableCellProperties,
+	TableColumnResize,
+	TableProperties,
+	TableToolbar,
+	Underline,
+	WordCount
+} from 'ckeditor5';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
@@ -43,42 +78,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     previewCategory: {}
   }
   public Editor = ClassicEditor;
-  public editorConfig = {
-    plugins: [...ClassicEditor.builtinPlugins],
-    placeholder: 'What you want to say?',
-    toolbarLocation: 'bottom',
-    toolbar: {
-      toolbarLocation: 'bottom',
-      items: [
-        'undo', 'redo',
-        '|', 'heading',
-        '|', 'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor',
-        '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
-        '|', 'alignment',
-        'link', 'blockQuote', 'codeBlock',
-        '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
-      ],
-      shouldNotGroupWhenFull: true
-    },
-    fontFamily: {
-      supportAllValues: true,
-      options: [
-        'default',
-        'Arial, Helvetica, sans-serif',
-        'Courier New, Courier, monospace',
-        'Georgia, serif',
-        'Lucida Sans Unicode, Lucida Grande, sans-serif',
-        'Tahoma, Geneva, sans-serif',
-        'Times New Roman, Times, serif',
-        'Trebuchet MS, Helvetica, sans-serif',
-        'Verdana, Geneva, sans-serif'
-      ]
-    },
-    fontSize: {
-      options: [10, 12, 14, 'default', 18, 20, 22],
-      supportAllValues: true
-    },
-  };
+  public editorConfig: EditorConfig = {};
   loaderMsg = 'Please wait...'
   environment: any
   loading: boolean = false
@@ -151,6 +151,146 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       // Add other user properties you need
     };
 
+    this.editorConfig = {
+			toolbar: {
+				items: [
+          'undo',
+          'redo',
+          '|',
+					'heading',
+					'|',
+					'bold',
+					'italic',
+					'underline',
+					'|',
+					'link',
+					'blockQuote',
+					'|',
+					'bulletedList',
+					'numberedList',
+					'outdent',
+					'indent',
+          '|',
+					'fontSize',
+					'fontFamily',
+					'fontColor',
+					'fontBackgroundColor',
+					'|',
+          'strikethrough',
+					'subscript',
+					'superscript',
+					'code',
+					'removeFormat',
+          'highlight',
+          '|',
+          'specialCharacters',
+          'insertTable',
+				],
+				shouldNotGroupWhenFull: false
+			},
+			plugins: [
+				Autosave,
+				BlockQuote,
+				Bold,
+				Code,
+				Essentials,
+				FontBackgroundColor,
+				FontColor,
+				FontFamily,
+				FontSize,
+				Heading,
+				Highlight,
+				Indent,
+				IndentBlock,
+				Italic,
+				Link,
+				List,
+				Mention,
+				Paragraph,
+				RemoveFormat,
+				SpecialCharacters,
+				Strikethrough,
+				Subscript,
+				Superscript,
+				Table,
+				TableCaption,
+				TableCellProperties,
+				TableColumnResize,
+				TableProperties,
+				TableToolbar,
+				Underline,
+				WordCount
+			],
+			fontFamily: {
+				supportAllValues: true
+			},
+			fontSize: {
+				options: [10, 12, 14, 'default', 18, 20, 22],
+				supportAllValues: true
+			},
+			heading: {
+				options: [
+					{
+						model: 'paragraph',
+						title: 'Paragraph',
+						class: 'ck-heading_paragraph'
+					},
+					{
+						model: 'heading1',
+						view: 'h1',
+						title: 'Heading 1',
+						class: 'ck-heading_heading1'
+					},
+					{
+						model: 'heading2',
+						view: 'h2',
+						title: 'Heading 2',
+						class: 'ck-heading_heading2'
+					},
+					{
+						model: 'heading3',
+						view: 'h3',
+						title: 'Heading 3',
+						class: 'ck-heading_heading3'
+					},
+					{
+						model: 'heading4',
+						view: 'h4',
+						title: 'Heading 4',
+						class: 'ck-heading_heading4'
+					},
+					{
+						model: 'heading5',
+						view: 'h5',
+						title: 'Heading 5',
+						class: 'ck-heading_heading5'
+					},
+					{
+						model: 'heading6',
+						view: 'h6',
+						title: 'Heading 6',
+						class: 'ck-heading_heading6'
+					}
+				]
+			},
+			link: {
+				addTargetToExternalLinks: true,
+				defaultProtocol: 'https://',
+				decorators: {
+					// toggleDownloadable: {
+					// 	mode: 'manual',
+					// 	label: 'Downloadable',
+					// 	attributes: {
+					// 		download: 'file'
+					// 	}
+					// }
+				}
+			},
+			placeholder: 'What you want to say...!',
+			table: {
+				contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+			}
+		}
   }
 
   private updatePostPreview(formValue: any): void {
@@ -666,6 +806,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         editor.editing.view.document.getRoot()
       );
     });
+    // public onReady(editor: ClassicEditor): void {
+    //   Array.from(this.editorWordCount.nativeElement.children).forEach(child => child.remove());
+  
+    //   const wordCount = editor.plugins.get('WordCount');
+    //   this.editorWordCount.nativeElement.appendChild(wordCount.wordCountContainer);
+    // }
   }
 
   getFileExtension(file: string): string {
