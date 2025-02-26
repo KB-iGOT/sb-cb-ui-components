@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, Inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, Inject, ViewChild, ElementRef } from '@angular/core';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -26,7 +26,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   @Input() editMode: boolean = false
   @Input() post: any
   @Output() editEvents = new EventEmitter<any>()
-
+  @ViewChild('fileInput') fileInput!: ElementRef;
 
   selectedFilesFinal: any = {}
   categoryType: any[] = []
@@ -112,6 +112,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     this.uploadForm.patchValue({
       description: text
     })
+    this.checkMultiline(this.uploadForm.controls.description.value)
   }
 
   onFocus() {
@@ -236,6 +237,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     if (category) {
       if (this.selectedFilesFinal[category]) {
         this.selectedFilesFinal[category].splice(index, 1);
+        this.fileInput.nativeElement.value = '';
       }
     }
 
@@ -261,6 +263,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       //   ...this.uploadForm.value,
       //   // tags: this.selectedTags
       // };
+      this.showEmojiPicker = false
       if (this.editMode) {
         this.handleEditFlow();
       } else {
