@@ -14,6 +14,7 @@ export class FeedComponent implements OnInit, OnChanges{
   @Input() userJoinedCommunity: boolean = false
   @Input() community!: any
   @Input() postCategoryTypeFilter: any
+  @Input() showNewPost: boolean = true 
   loadingPosts: boolean = false
   loogedInUserProfile: any = {}
   pageNumber = 0
@@ -40,6 +41,7 @@ export class FeedComponent implements OnInit, OnChanges{
       }
     }
   }
+
 
   fetchPosts() {
     this.loadingPosts = true
