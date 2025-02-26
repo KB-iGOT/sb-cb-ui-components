@@ -15,7 +15,7 @@
             <div class="flex items-center">
                 <span class="mat-body-1 bold mr-1"> {{loogedInUserProfile?.firstName}} </span>
                 <mat-icon class="icon verified mr-1"
-                *ngIf="loogedInUserProfile?.userProfileStatus?.toLowerCase() === 'verified'"
+                *ngIf="loogedInUserProfile?.profileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
             </div>
             <div class="ws-mat-black60-text mat-body-2" *ngIf="loogedInUserProfile?.professionalDetails[0]?.designation">
