@@ -29,6 +29,7 @@ import { AddCompetencyPopupComponent } from '../../dialog-components/add-compete
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.component';
 import { fadeAnimation } from '../../_animations/fade-animation';
+import { SakshamAI } from '../../../consumption.config';
 
 interface IStripUnitContentData {
   key: string;
@@ -105,7 +106,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   veifiedKarmayogi = false;
   environment!: any;
   changeEventSubscription: Subscription | null = null;
-  defaultMaxWidgets = 100;
+  defaultMaxWidgets = 12;
+  maxWidgetsSakshamAI = 100;
   enrollInterval: any;
   todaysEvents: any = [];
   activeTabIndex: number = 0
@@ -122,6 +124,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   tabEventG: any;
   firstTimeLoaded = false
   localRecommended: any;
+  sakshamAIEnum = SakshamAI
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
     @Inject('environment') environment: any,
@@ -408,7 +411,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
 
-    if(strip.tabs[0]?.value === 'sakshamAI') {
+    if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
     }
     // this.fetchFromEnrollmentList(strip, calculateParentStatus);
@@ -621,8 +624,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     }
   
     else if (
-      (strip.tabs[0]?.value === 'sakshamAI' && this.activeTabIndex === 0) ||
-      (strip.tabs[1]?.value === 'sakshamAI' && this.activeTabIndex === 1)
+      (strip.tabs[0]?.value === SakshamAI.SakshamAI && this.activeTabIndex === 0) ||
+      (strip.tabs[1]?.value === SakshamAI.SakshamAI && this.activeTabIndex === 1)
     ) {
       return this.recommendedCoursesId;
     }
@@ -1804,11 +1807,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
               let tabResults: any
               if (strip.tabs && strip.tabs.length) {
-                tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, 'sakshamAI')
+                tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
                 let countOfWidget = true
                 if(strip && strip.tabs && strip.tabs.length) {
                   strip.tabs.forEach((tab:any)=> {
-                    if(tab.value === 'sakshamAI' && tab.pillsData && tab.pillsData.length) {
+                    if(tab.value === SakshamAI.SakshamAI && tab.pillsData && tab.pillsData.length) {
                       tab.pillsData.forEach((pill: any) => {
                         if(pill && pill.widgets && pill.widgets.length){
                           if(countOfWidget){

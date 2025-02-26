@@ -5,3 +5,7 @@ export const ROOT_WIDGET_CONFIG = {
     cardResource: 'cardContentLib'
   },
 }
+
+export enum SakshamAI {
+ SakshamAI = 'sakshamAI'
+}
