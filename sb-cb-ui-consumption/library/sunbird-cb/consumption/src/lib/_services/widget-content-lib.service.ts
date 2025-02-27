@@ -514,12 +514,12 @@ export class WidgetContentLibService {
         const enrolledCourse: any = enrollmentList;
         if (enrolledCourse && enrolledCourse.length) {
           const enrolledCourseData = enrolledCourse[0]
-          if (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
+          if (enrolledCourseData && enrolledCourseData.content && (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
             enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
             enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM) {
-            if (!this.isBatchInProgress(enrolledCourseData.batch)) {
+            if (!this.isBatchInProgress(enrolledCourseData.batch))) {
               return this.gotoTocPage(content);
             }
             const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
