@@ -1036,6 +1036,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList) {
           this.fetchAllCbpPlans(currentStrip, true)
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.courseRecommendation){
+          this.localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
           this.generateCourseRecommendation(currentStrip, tabEvent, true, this.localRecommended)
         }
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
