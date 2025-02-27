@@ -32,11 +32,22 @@
                             <div class="flex items-center single-line-icons" [class.hidden]="isMultiLine">
                                 <!-- <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="toggleEmojiPicker()" > -->
                                     <mat-icon class="icon emoji-icon cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
-                                    aria-label="Emoji">sentiment_satisfied</mat-icon>
+                                    aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                                    <ng-container *ngIf="showEmojiPicker">
+                                        <br />
+                                    
+                                        <emoji-mart 
+                                        class="emoji-mart absolute"
+                                        set="google"
+                                        *ngIf="showEmojiPicker"
+                                        (emojiSelect)="addEmoji($event)"
+                                        title="Pick your emoji…"
+                                        ></emoji-mart>
+                                    </ng-container>
                                 <!-- </button> -->
-                                    <!-- <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="addMedia(); fileInput.click()"> -->
-                                        <mat-icon class="icon image-icon cursor-pointer mr-2">image</mat-icon>
-                                    <!-- </button> -->
+                                <!-- <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="addMedia(); fileInput.click()"> -->
+                                    <mat-icon class="icon image-icon cursor-pointer mr-2" (click)="fileInput.click()">image</mat-icon>
+                                <!-- </button> -->
                                     <input type="file" hidden #fileInput (change)="onFileInputChange($event, 'image')" multiple accept="image/*">
                             </div>
                             <!-- Image preview section -->
@@ -95,7 +106,7 @@
                             <div class="flex-1">
                                 <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="toggleEmojiPicker()" >
                                     <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
-                                        aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                                        aria-label="Emoji" >sentiment_satisfied</mat-icon>
                                 </button>
                                 <ng-container *ngIf="showEmojiPicker">
                                     <br />
@@ -168,9 +179,9 @@
                         <button mat-icon-button color="primary" class="postIcon image-icon">
                             <mat-icon>image</mat-icon>
                         </button>
-                        <button mat-icon-button color="primary" class="postIcon poll-icon">
+                        <!-- <button mat-icon-button color="primary" class="postIcon poll-icon">
                             <mat-icon>sort</mat-icon>
-                        </button>
+                        </button> -->
                     </div>
 
                     <!-- Action buttons -->

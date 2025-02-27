@@ -1,8 +1,43 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import {
+	type EditorConfig,
+	ClassicEditor,
+	Autosave,
+	BlockQuote,
+	Bold,
+	Code,
+	Essentials,
+	FontBackgroundColor,
+	FontColor,
+	FontFamily,
+	FontSize,
+	Heading,
+	Highlight,
+	Indent,
+	IndentBlock,
+	Italic,
+	Link,
+	List,
+	Mention,
+	Paragraph,
+	RemoveFormat,
+	SpecialCharacters,
+	Strikethrough,
+	Subscript,
+	Superscript,
+	Table,
+	TableCaption,
+	TableCellProperties,
+	TableColumnResize,
+	TableProperties,
+	TableToolbar,
+	Underline,
+	WordCount
+} from 'ckeditor5';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
@@ -43,45 +78,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     previewCategory: {}
   }
   public Editor = ClassicEditor;
-  public editorConfig = {
-    plugins: [...ClassicEditor.builtinPlugins],
-    placeholder: 'What you want to say?',
-    toolbarLocation: 'bottom',
-    toolbar: {
-      toolbarLocation: 'bottom',
-      items: [
-        'undo', 'redo',
-        '|', 'heading',
-        '|', 'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor',
-        '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
-        '|', 'alignment',
-        'link', 'blockQuote', 'codeBlock',
-        '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
-      ],
-      shouldNotGroupWhenFull: true
-    },
-    fontFamily: {
-      supportAllValues: true,
-      options: [
-        'default',
-        'Arial, Helvetica, sans-serif',
-        'Courier New, Courier, monospace',
-        'Georgia, serif',
-        'Lucida Sans Unicode, Lucida Grande, sans-serif',
-        'Tahoma, Geneva, sans-serif',
-        'Times New Roman, Times, serif',
-        'Trebuchet MS, Helvetica, sans-serif',
-        'Verdana, Geneva, sans-serif'
-      ]
-    },
-    fontSize: {
-      options: [10, 12, 14, 'default', 18, 20, 22],
-      supportAllValues: true
-    },
-  };
+  public editorConfig: EditorConfig = {};
   loaderMsg = 'Please wait...'
   environment: any
   loading: boolean = false
+  showEmojiPicker: boolean = false
 
 
   constructor(
@@ -97,7 +98,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.uploadForm = this.fb.group({
       community: [''],
       // title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.maxLength(3000)]],
+      description: ['', [Validators.required, this.textLengthValidator()]],
       tags: [[]],
       files: [[]]
     });
@@ -151,6 +152,150 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       // Add other user properties you need
     };
 
+    this.editorConfig = {
+			toolbar: {
+				items: [
+          'undo',
+          'redo',
+          '|',
+					'heading',
+					'|',
+					'bold',
+					'italic',
+					'underline',
+					'|',
+					'blockQuote',
+					'|',
+					'bulletedList',
+					'numberedList',
+          '|',
+					'fontSize',
+					'fontFamily',
+					'fontColor',
+					'fontBackgroundColor',
+					'|',
+          'outdent',
+					'indent',
+          'strikethrough',
+					'subscript',
+					'superscript',
+					'code',
+					'removeFormat',
+          'highlight',
+          '|',
+          'specialCharacters',
+          'insertTable',
+				],
+				shouldNotGroupWhenFull: false
+			},
+			plugins: [
+				Autosave,
+				BlockQuote,
+				Bold,
+				Code,
+				Essentials,
+				FontBackgroundColor,
+				FontColor,
+				FontFamily,
+				FontSize,
+				Heading,
+				Highlight,
+				Indent,
+				IndentBlock,
+				Italic,
+				Link,
+				List,
+				Mention,
+				Paragraph,
+				RemoveFormat,
+				SpecialCharacters,
+				Strikethrough,
+				Subscript,
+				Superscript,
+				Table,
+				TableCaption,
+				TableCellProperties,
+				TableColumnResize,
+				TableProperties,
+				TableToolbar,
+				Underline,
+				WordCount
+			],
+			fontFamily: {
+				supportAllValues: true
+			},
+			fontSize: {
+				options: [10, 12, 14, 'default', 18, 20, 22],
+				supportAllValues: true
+			},
+			heading: {
+				options: [
+					{
+						model: 'paragraph',
+						title: 'Paragraph',
+						class: 'ck-heading_paragraph'
+					},
+					{
+						model: 'heading1',
+						view: 'h1',
+						title: 'Heading 1',
+						class: 'ck-heading_heading1'
+					},
+					{
+						model: 'heading2',
+						view: 'h2',
+						title: 'Heading 2',
+						class: 'ck-heading_heading2'
+					},
+					{
+						model: 'heading3',
+						view: 'h3',
+						title: 'Heading 3',
+						class: 'ck-heading_heading3'
+					},
+					{
+						model: 'heading4',
+						view: 'h4',
+						title: 'Heading 4',
+						class: 'ck-heading_heading4'
+					},
+					{
+						model: 'heading5',
+						view: 'h5',
+						title: 'Heading 5',
+						class: 'ck-heading_heading5'
+					},
+					{
+						model: 'heading6',
+						view: 'h6',
+						title: 'Heading 6',
+						class: 'ck-heading_heading6'
+					}
+				]
+			},
+			link: {
+				addTargetToExternalLinks: true,
+				defaultProtocol: 'https://',
+				decorators: {
+					// toggleDownloadable: {
+					// 	mode: 'manual',
+					// 	label: 'Downloadable',
+					// 	attributes: {
+					// 		download: 'file'
+					// 	}
+					// }
+				}
+			},
+			placeholder: 'What you want to say...!',
+			table: {
+				contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+			},
+			typing: {
+				transformations: {
+					include: []  // This prevents auto-transformations that might bypass our length check
+				}
+			}
+		}
   }
 
   private updatePostPreview(formValue: any): void {
@@ -666,6 +811,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         editor.editing.view.document.getRoot()
       );
     });
+    // public onReady(editor: ClassicEditor): void {
+    //   Array.from(this.editorWordCount.nativeElement.children).forEach(child => child.remove());
+  
+    //   const wordCount = editor.plugins.get('WordCount');
+    //   this.editorWordCount.nativeElement.appendChild(wordCount.wordCountContainer);
+    // }
   }
 
   getFileExtension(file: string): string {
@@ -702,10 +853,88 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     }
   }
 
+  onEditorChange(event: any): void {
+    const editor = event.editor;
+    const currentLength = this.getEditorTextLength(editor.getData());
+    
+    if (currentLength > 3000) {
+      // Store the last valid content
+      const previousContent = editor.getData();
+      // Find the point to truncate by counting characters
+      let truncated = '';
+      let count = 0;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = previousContent;
+      
+      function processNode(node: Node) {
+        if (count >= 3000) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+          const remaining = 3000 - count;
+          const text = node.textContent || '';
+          truncated += text.slice(0, remaining);
+          count += text.length;
+        } else {
+          const children = Array.from(node.childNodes);
+          truncated += node.nodeType === Node.ELEMENT_NODE ? `<${(node as Element).tagName.toLowerCase()}>` : '';
+          children.forEach(child => processNode(child));
+          truncated += node.nodeType === Node.ELEMENT_NODE ? `</${(node as Element).tagName.toLowerCase()}>` : '';
+        }
+      }
+      
+      Array.from(tempDiv.childNodes).forEach(node => processNode(node));
+      
+      // Set the truncated content back to editor
+      editor.setData(truncated);
+      
+      // Move cursor to end
+      const selection = editor.model.document.selection;
+      const position = editor.model.document.model.createPositionAt(editor.model.document.getRoot(), 'end');
+      selection.setTo(position);
+    }
+    
+    // Update preview
+    this.updatePostPreview(this.uploadForm.value);
+  }
+
+  checkCharacterLimit(event: any) {
+    const length = this.getEditorTextLength(this.uploadForm.get('description')?.value);
+    if (length > 3000) {
+      // Prevent further input
+      event.editor.setData(event.editor.getData());
+      // Optionally show an error message or handle the overflow
+    }
+  }
   getEditorTextLength(content: any) {
     let test = content.replace(/<[^>]*>/g, '')
     test = test.replace(/&nbsp;/gi, ' ')
     test = test.trim()
     return test.length
+  }
+
+  private textLengthValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const text = this.getEditorTextLength(control.value);
+      if (text < 3) {
+        return { minLength: true };
+      }
+      if (text > 3000) {
+        return { maxLength: true };
+      }
+      return null;
+    };
+  }
+
+  toggleEmojiPicker() {
+    this.showEmojiPicker = !this.showEmojiPicker
+  }
+  addEmoji(event: any) {
+    const text = `${this.uploadForm.controls.description.value}${event.emoji.native}`
+    this.uploadForm.patchValue({
+      description: text
+    })
+  }
+
+  onFocus() {
+    this.showEmojiPicker = false
   }
 }

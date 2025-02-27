@@ -983,22 +983,22 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       stripMap.showOnLoader = true;
       this.resetSelectedPill(stripMap.tabs[tabEvent].pillsData)
     }
-    const data: WsEvents.ITelemetryTabData = {
-      label: `${stripMap.tabs[tabEvent].label}`,
-      index: tabEvent,
-    };
-    this.eventSvc.raiseInteractTelemetry(
-      {
-        type: WsEvents.EnumInteractTypes.CLICK,
-        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
-        id: `${_.camelCase(data.label)}-tab`,
-      },
-      {},
-      {
-        module: WsEvents.EnumTelemetrymodules.HOME,
-      }
+    // const data: WsEvents.ITelemetryTabData = {
+    //   label: `${stripMap.tabs[tabEvent].label}`,
+    //   index: tabEvent,
+    // };
+    // this.eventSvc.raiseInteractTelemetry(
+    //   {
+    //     type: WsEvents.EnumInteractTypes.CLICK,
+    //     subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+    //     id: `${_.camelCase(data.label)}-tab`,
+    //   },
+    //   {},
+    //   {
+    //     module: WsEvents.EnumTelemetrymodules.HOME,
+    //   }
 
-    );
+    // );
 
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
@@ -1742,7 +1742,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let coursesIds: any
 
       if(courseRecommendationId) {
-        response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise()
+        response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise().catch(async (_err: any) => {
+          response = await this.userSvc.generateCoursesSakshamAI(strip.tabs[tabIndex].request.courseRecommendation.path, payload)
+            .toPromise()
+        })
       } else {
         response = await this.userSvc.generateCoursesSakshamAI(
           strip.tabs[tabIndex].request.courseRecommendation.path, payload)
@@ -1775,6 +1778,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }).catch((_err: any) => {
             return []
           })
+         
           const sRequestV1: any = {
              "request": {
               "filters": {

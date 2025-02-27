@@ -35,7 +35,32 @@ export class MemberDetailsComponent implements OnInit{
   }
   onSearch(event: any){
    console.log(event);
-
+   let typeText: any  = event && event.target && event.target.value || ''
+  let request = {
+    "request": {
+        "filters": {
+            "discussionCommunities": [
+                this.communityId
+            ]
+        },
+        "query" : typeText,
+        "fields": [
+            "id",
+            "userName","firstName", "rootOrgName",
+            "profileDetails.profileImageUrl",
+            "profileDetails.employmentDetails.departmentName"
+        ]
+    }
+  }
+  this.discussV2Svc.userSearch(request).subscribe((res: any)=> {
+    debugger
+    if(res && res.result && res.result.response && res.result.response.content) {
+      this.communityMembersList = res.result.response.content
+      this.totalNumberOfMembers =  res.result.response.count
+    } else {
+      this.communityMembersList = []
+    }
+  })
   }
   loadMoreMembers(){
     if( !(this.communityMembersList.length >= this.totalNumberOfMembers)) {

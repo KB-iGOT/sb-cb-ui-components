@@ -88,6 +88,7 @@
     font-weight: 400;
     line-height: 20px;
     font-weight: 600;
+    margin: 8px 0;
 }
 
 .mat-mdc-menu-item .mat-icon {
@@ -190,4 +191,16 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+.bookmarkDiv{
+    align-self: center;
+    margin-left: auto;
+}
+
+.verified {
+    color: #1D8923;
+    height: 14px;
+    width: 14px;
+    font-size: 14px;
 }

@@ -17,6 +17,7 @@ export class AvatarPhotoComponent implements OnInit {
   @Input() public size = ''
   @Input() randomColor = false
   @Input() initials?: string
+  @Input() customeClass?: string
   public showInitials = false
   public circleColor!: string
   random = Math.random().toString(36).slice(2)

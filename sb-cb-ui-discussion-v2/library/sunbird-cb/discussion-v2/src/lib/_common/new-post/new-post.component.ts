@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, Inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, Inject, ViewChild, ElementRef } from '@angular/core';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
-import { FormBuilder, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -26,7 +26,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   @Input() editMode: boolean = false
   @Input() post: any
   @Output() editEvents = new EventEmitter<any>()
-
+  @ViewChild('fileInput') fileInput!: ElementRef;
 
   selectedFilesFinal: any = {}
   categoryType: any[] = []
@@ -41,11 +41,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   loogedInUserProfile: any = {}
   loggedInUserData: any = {}
-  searchControl = new UntypedFormControl('')
   showEmojiPicker = false
-
-  selectedImage: File | null = null;
-  selectedImagePreview: string | null = null;
 
   isMultiLine = false;
 
@@ -116,6 +112,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     this.uploadForm.patchValue({
       description: text
     })
+    this.checkMultiline(this.uploadForm.controls.description.value)
   }
 
   onFocus() {
@@ -240,6 +237,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     if (category) {
       if (this.selectedFilesFinal[category]) {
         this.selectedFilesFinal[category].splice(index, 1);
+        this.fileInput.nativeElement.value = '';
       }
     }
 
@@ -265,6 +263,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       //   ...this.uploadForm.value,
       //   // tags: this.selectedTags
       // };
+      this.showEmojiPicker = false
       if (this.editMode) {
         this.handleEditFlow();
       } else {
@@ -307,6 +306,13 @@ export class NewPostComponent implements OnInit, OnDestroy {
         console.log('Create post failed', err);
       }
     });
+  }
+
+  resetFormAndImages() {
+    this.uploadForm.reset();
+    this.selectedFilesFinal = {};
+    this.categoryType = [];
+    this.isMultiLine = false;
   }
 
   createAnswerPost() {

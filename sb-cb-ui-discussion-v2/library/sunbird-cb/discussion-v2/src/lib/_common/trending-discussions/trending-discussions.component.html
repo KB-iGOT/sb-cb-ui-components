@@ -1,7 +1,7 @@
 <div class="trending-wrapper">
     <d-v2-card-toggle (hideCardBody)="hideCardBody = $event" [toggleViewBoolean]="expandCard">
         <div headderBlock>
-           <div>Trending Discussions</div>
+           <div class="headding">Trending Discussions</div>
         </div>
         <div contentBodyBlock>
             <div class="space-y-4 pt-4" *ngIf="posts?.length ;else noData">
@@ -11,6 +11,7 @@
                         <div class="flex items-center justify-between mb-4 user-info w-full">
                                 <div class="flex items-center w-3/4">
                                     <d-v2-avatar-photo [size]="'s'"
+                                        [customeClass]="'margin-remove'"
                                         [name]="discussion?.createdBy?.first_name"
                                         [photoUrl]="discussion?.createdBy?.user_profile_img_url || ''"></d-v2-avatar-photo>
                                     <div class="ml-2 user-name">

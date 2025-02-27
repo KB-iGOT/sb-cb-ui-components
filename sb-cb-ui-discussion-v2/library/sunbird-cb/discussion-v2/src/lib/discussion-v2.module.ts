@@ -24,11 +24,12 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
 import { WidgetPostdetailsModule } from './_widgets/widget-postdetails/widget-postdetails.module'
 import { WidgetDiscussionv2HomeModule } from './_widgets/widget-discussionv2-home/widget-discussionv2-home.module'
 import { UserEnrollCommunityService } from './_services/user-enroll-community.service'
-import { SharedModule } from './_shared/shared.module'
+import { SharedModule } from './_shared/shared.module';
 
 
 @NgModule({
   declarations: [
+  
   ],
   imports: [
     CommonModule,

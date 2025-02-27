@@ -60,10 +60,47 @@
         <!-- <label class="block text-gray-700 text-sm font-medium mb-2">
           Description <span class="text-red-500">*</span>
         </label> -->
-        <ckeditor [editor]="Editor" formControlName="description" [config]="editorConfig" (ready)="onReady($event)">
-        </ckeditor>
+        <ckeditor [editor]="Editor" formControlName="description" [config]="editorConfig" (ready)="onReady($event)"
+          (change)="onEditorChange($event)" (keyup)="checkCharacterLimit($event)" (focus)="onFocus()">
+        </ckeditor> 
+        <!-- <div class="main-container">
+          <div class="editor-container editor-container_classic-editor editor-container_include-word-count" #editorContainerElement>
+            <div class="editor-container__editor">
+              <div #editorElement>
+                <ckeditor [editor]="Editor" formControlName="description" [config]="editorConfig" (ready)="onReady($event)" />
+              </div>
+            </div>
+            <div class="editor_container__word-count" #editorWordCountElement></div>
+          </div>
+        </div> -->
         <!-- <p class="text-sm text-gray-500 mt-1">Only (a-z/A-Z, 0-9, . - _ $ / : [ ] ' !) characters are supported</p> -->
-        <p class="text-sm text-gray-500 mt-1">{{getEditorTextLength(uploadForm.get('description')?.value) || 0}}/3000</p>
+         <div class="flex ">
+          <p class="text-sm text-gray-500 mt-1 flex-1" 
+              [ngClass]="{
+                'text-red-500': getEditorTextLength(uploadForm.get('description')?.value) > 3000 
+              }">
+             {{getEditorTextLength(uploadForm.get('description')?.value) || 0}}/3000
+             <span *ngIf="getEditorTextLength(uploadForm.get('description')?.value) < 3">(Minimum 3 characters required)</span>
+          </p>
+          <div class="relative">
+
+            <!-- <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="toggleEmojiPicker()" > -->
+                  <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
+                      aria-label="Emoji" (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+            <!-- </button> -->
+            <ng-container *ngIf="showEmojiPicker">
+              <br />
+          
+              <emoji-mart 
+              class="emoji-mart absolute custom-place"
+              set="google"
+              *ngIf="showEmojiPicker"
+              (emojiSelect)="addEmoji($event)"
+              title="Pick your emoji…"
+              ></emoji-mart>
+            </ng-container>
+          </div>
+         </div>
       </div>
 
       <!-- Action Buttons -->
@@ -80,10 +117,10 @@
           <mat-icon>attach_file</mat-icon>
           Add file
         </button>
-        <button mat-stroked-button type="button" (click)="createLink()">
+        <!-- <button mat-stroked-button type="button" (click)="createLink()">
           <mat-icon>link</mat-icon>
           Add link
-        </button>
+        </button> -->
       </div>
 
       <ng-container *ngIf="uploadControlVisibility['image']">
@@ -126,9 +163,8 @@
         </div>
       </ng-container>
 
-      <ng-container *ngIf="uploadControlVisibility['link']">
+      <!-- <ng-container *ngIf="uploadControlVisibility['link']">
         <div class="mb-4">
-          <!-- Add new URL button -->
           <div class="flex gap-4 items-center">
             <mat-form-field appearance="outline" class="flex-1 mat">
               <input matInput [(ngModel)]="linkInput" [ngModelOptions]="{standalone: true}" placeholder="Enter URL"
@@ -140,7 +176,7 @@
             </button>
           </div>
         </div>
-      </ng-container>
+      </ng-container> -->
 
       <!-- For displaying all the media -->
       <ng-container>
@@ -246,7 +282,8 @@
 
       <!-- Submit Button -->
       <div class="mt-4">
-        <button mat-raised-button color="" class="w-full primary-button" [disabled]="!uploadForm.valid"
+        <button mat-raised-button color="" class="w-full primary-button" 
+          [disabled]="!uploadForm.valid || uploadForm.get('description')?.errors?.['maxLength'] || uploadForm.get('description')?.errors?.['minLength']"
           (click)="onSubmit()">
           <ng-container *ngIf="!data.editMode">
             {{data?.config?.postBtn?.text || 'Post'}}
