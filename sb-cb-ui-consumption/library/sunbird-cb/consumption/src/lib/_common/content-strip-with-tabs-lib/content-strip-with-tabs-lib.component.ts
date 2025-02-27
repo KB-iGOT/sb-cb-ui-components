@@ -1056,21 +1056,21 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       stripMap.tabs[tabEvent].tabLoading = true;
       stripMap.showOnLoader = true;
     }
-    const data: WsEvents.ITelemetryTabData = {
-      label: `${stripMap.tabs[tabEvent].label}`,
-      index: tabEvent,
-    };
-    this.eventSvc.raiseInteractTelemetry(
-      {
-        type: WsEvents.EnumInteractTypes.CLICK,
-        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
-        id: `${_.camelCase(data.label)}-tab`,
-      },
-      {},
-      {
-        module: WsEvents.EnumTelemetrymodules.HOME,
-      }
-    );
+    // const data: WsEvents.ITelemetryTabData = {
+    //   label: `${stripMap.tabs[tabEvent].label}`,
+    //   index: tabEvent,
+    // };
+    // this.eventSvc.raiseInteractTelemetry(
+    //   {
+    //     type: WsEvents.EnumInteractTypes.CLICK,
+    //     subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+    //     id: `${_.camelCase(data.label)}-tab`,
+    //   },
+    //   {},
+    //   {
+    //     module: WsEvents.EnumTelemetrymodules.HOME,
+    //   }
+    // );
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
