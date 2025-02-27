@@ -983,22 +983,22 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       stripMap.showOnLoader = true;
       this.resetSelectedPill(stripMap.tabs[tabEvent].pillsData)
     }
-    const data: WsEvents.ITelemetryTabData = {
-      label: `${stripMap.tabs[tabEvent].label}`,
-      index: tabEvent,
-    };
-    this.eventSvc.raiseInteractTelemetry(
-      {
-        type: WsEvents.EnumInteractTypes.CLICK,
-        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
-        id: `${_.camelCase(data.label)}-tab`,
-      },
-      {},
-      {
-        module: WsEvents.EnumTelemetrymodules.HOME,
-      }
+    // const data: WsEvents.ITelemetryTabData = {
+    //   label: `${stripMap.tabs[tabEvent].label}`,
+    //   index: tabEvent,
+    // };
+    // this.eventSvc.raiseInteractTelemetry(
+    //   {
+    //     type: WsEvents.EnumInteractTypes.CLICK,
+    //     subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+    //     id: `${_.camelCase(data.label)}-tab`,
+    //   },
+    //   {},
+    //   {
+    //     module: WsEvents.EnumTelemetrymodules.HOME,
+    //   }
 
-    );
+    // );
 
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
@@ -1036,6 +1036,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.cbpList) {
           this.fetchAllCbpPlans(currentStrip, true)
         } else if (currentStrip.tabs[tabEvent].request && currentStrip.tabs[tabEvent].request.courseRecommendation){
+          this.localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
           this.generateCourseRecommendation(currentStrip, tabEvent, true, this.localRecommended)
         }
         stripMap.tabs[tabEvent].pillsData[pillIndex].tabLoading = false
