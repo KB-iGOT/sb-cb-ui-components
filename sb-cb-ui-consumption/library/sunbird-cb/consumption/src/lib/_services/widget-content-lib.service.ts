@@ -518,8 +518,8 @@ export class WidgetContentLibService {
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
             enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
-            enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM) {
-            if (!this.isBatchInProgress(enrolledCourseData.batch))) {
+            enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM)) {
+            if (!this.isBatchInProgress(enrolledCourseData.batch)) {
               return this.gotoTocPage(content);
             }
             const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
