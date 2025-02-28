@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
+import { Component, Inject, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
@@ -83,6 +83,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   environment: any
   loading: boolean = false
   showEmojiPicker: boolean = false
+  @ViewChild('imageUpload') imageUpload!: ElementRef;
+  @ViewChild('fileUpload') fileUpload!: ElementRef;
 
 
   constructor(
@@ -404,6 +406,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       if (this.selectedFilesFinal[category]) {
         this.selectedFilesFinal[category].splice(index, 1);
         this.previewCategory[category].splice(index, 1);
+        // clear file input
+        this.imageUpload.nativeElement.value = '';
+        this.fileUpload.nativeElement.value = '';
       }
     }
 

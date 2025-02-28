@@ -459,7 +459,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       // targetTopic: 'testing',
       // tags: this.selectedTags,
       // mediaUrls: this.mediaUrls || []
-      ...((this.taggedUsers && this.taggedUsers.length)  ? { taggedUsers: this.taggedUsers } : null),
+      ...((this.taggedUsers && this.taggedUsers.length)  ? { taggedUser: this.taggedUsers.map((x: any)=>x.user_id) } : null),
     }
     return req;
   }
