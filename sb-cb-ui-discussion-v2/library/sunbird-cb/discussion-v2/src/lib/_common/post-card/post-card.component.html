@@ -21,7 +21,7 @@
                 *ngIf="post?.createdBy?.userProfileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
             </div>
-            <div class="ws-mat-black60-text mat-body-2" *ngIf="post?.createdBy?.designation">
+            <div class="ws-mat-black60-text mat-body-2" *ngIf="post?.createdBy?.designation && (post?.createdBy?.designation !== 'null') ">
                 {{post?.createdBy?.designation}}
             </div>
         </div>
@@ -91,8 +91,8 @@
             </ng-container>
         </ng-container>
         <ng-container *ngIf="editMode">
-            <d-v2-new-post [type]="cardConfig?.type" [config]="cardConfig" [config]="cardConfig?.newPostReply"  (newReply)="updateRepliesData($event)"  (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" 
-              (editEvents)="editEventsHandler($event)" [community]="community"  [taggedUsers]="[post?.commentData?.commentSource?.userId]" [editMode]="true" [post]="post">
+            <d-v2-new-post [type]="cardConfig?.type" [config]="cardConfig?.newPostReply"  (newReply)="updateRepliesData($event)"  (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" 
+              (editEvents)="editEventsHandler($event)" [community]="community" [editMode]="true" [post]="post">
             </d-v2-new-post>
         </ng-container>
     </div>
@@ -165,7 +165,7 @@
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community"
                     [type]="cardConfig?.repliesSection?.newPostReply?.type" (newComment)="newCommentEvent($event)"
-                    [taggedUsers]="[post?.createdBy?.user_id]" [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]">
+                     [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]">
                 </d-v2-new-post>
             </div>
             <ng-container *ngIf="replyDataCopy && replyDataCopy?.length > 0 && !loading; else noReplies">
@@ -195,8 +195,10 @@
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
-                <d-v2-new-post [config]="cardConfig?.newPostReply"  (newReply)="updateRepliesData($event)"  (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" 
-                    [taggedUsers]="[post?.commentData?.commentSource?.userId]">
+                <d-v2-new-post [config]="cardConfig?.newPostReply"  [community]="community"
+                (newReply)="updateRepliesData($event)" [type]="cardConfig?.type"
+                 (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" [post]="post"
+                    [taggedUsers]="[post?.createdBy?.user_id]" [hierarchyPath]="[post?.discussionId]">
                 </d-v2-new-post>
             </div>
         </div>
