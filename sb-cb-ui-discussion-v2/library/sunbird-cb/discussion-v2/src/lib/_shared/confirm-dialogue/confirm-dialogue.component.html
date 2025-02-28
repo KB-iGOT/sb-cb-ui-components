@@ -10,9 +10,12 @@
         </div>
     </mat-card-title>
     <mat-card-content class="no-padding">
-        <section class="flex items-center justify-center">
+        <section class="flex items-center justify-center" *ngIf="!data?.question">
             <h2 class="mat-heading">Are you sure you want to delete this post?</h2>
             <p class="mat-body-1"></p>
+        </section>
+        <section class="flex items-center justify-center" *ngIf="data?.question">
+            <p class="mat-body-1">{{data?.question}}</p>
         </section>
 
     </mat-card-content>

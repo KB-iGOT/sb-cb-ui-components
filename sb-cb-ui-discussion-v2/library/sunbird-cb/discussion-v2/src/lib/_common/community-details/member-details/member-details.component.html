@@ -15,10 +15,9 @@
      </div>
     <div class="member-title">
         <h2>Members <span class="ml-2" *ngIf="totalNumberOfMembers">({{totalNumberOfMembers}})</span></h2>
-
     </div>
     <div>
-        <div class="flex justify-start">
+        <div class="flex justify-center">
             <div class="flex gap-2 flex-wrap justify-start" *ngIf="communityMembersList?.length;else noData ">
                 <ng-container *ngFor="let member of communityMembersList">
                     <d-v2-member-card [memeberData]="member"></d-v2-member-card>

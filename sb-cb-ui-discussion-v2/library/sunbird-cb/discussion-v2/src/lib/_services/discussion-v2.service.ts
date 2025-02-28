@@ -18,6 +18,7 @@ const API_END_POINTS = {
   BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/bookmark/${communityId}/${discussionId}`,
   UN_BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/unbookmark/${communityId}/${discussionId}`,
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
+  DISCUSS_FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/discussionReportReasonConfig`,
   UPLOAD_FILE: (communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/uploadFile/${communityId}/${discussionId}`,
   COMMUNITY_JOIN: `/apis/proxies/v8/community/v1/join`,
   COMMUNITY_UNJOIN:`apis/proxies/v8/community/v1/unjoin`,
@@ -28,7 +29,8 @@ const API_END_POINTS = {
   TOPIC_WISE_COMMUNITIES: `/apis/proxies/v8/community/v1/category/listAll`,
   BOOKMART_LIST: `/apis/proxies/v8/feedDiscussion/bookmarkedDiscussions`,
   COMMUNITY_REPORT: `/apis/proxies/v8/community/v1/report`,
-  USER_SEARCH:`/apis/proxies/v8/user/v1/search`
+  USER_SEARCH:`/apis/proxies/v8/user/v1/search`,
+  POPULAR_COMMUNITY:`/apis/proxies/v8/community/v1/popular`
 }
 
 
@@ -88,7 +90,7 @@ export class DiscussionV2Service {
   }
 
   fetchAllFlags(): Observable<any> {
-    return this.http.get<any>(`${API_END_POINTS.FLAG_LIST}`)
+    return this.http.get<any>(`${API_END_POINTS.DISCUSS_FLAG_LIST}`)
   }
   communityFlag(request: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.COMMUNITY_REPORT}`, request)
@@ -157,6 +159,21 @@ export class DiscussionV2Service {
   userSearch(req: any) {
     // Make a POST request to the USER_SEARCH endpoint with the request data
     return this.http.post<any>(`${API_END_POINTS.USER_SEARCH}`, req)
+  }
+
+  getPosts(req: any, type: any) {
+    let requestUrl = type === 'Feeds'? API_END_POINTS.FEED_POSTS: API_END_POINTS.SEARCH_POSTS
+    return this.http.post<any>(`${requestUrl}`, req) 
+  }
+
+  /**
+   * Retrieves the popular communities based on the request parameters.
+   * @param req - The request object containing search parameters.
+   * @returns An observable containing the popular communities.
+   */
+  popularCommunity(req: any) {
+    // Make a POST request to the POPULAR_COMMUNITY endpoint with the request data
+    return this.http.post<any>(`${API_END_POINTS.POPULAR_COMMUNITY}`, req)
   }
 }
 

@@ -1,5 +1,5 @@
 <mat-card class="no-shadow px-6 py-4">
-    <button mat-icon-button class="close-button" [mat-dialog-close]="false">
+    <button mat-icon-button class="close-button" (click)="dialogRef.close(false)">
         <mat-icon class="close-icon">close</mat-icon>
     </button>
     <mat-card-title>

@@ -201,3 +201,8 @@
     text-decoration: underline;
   }
 }
+
+::ng-deep .post-card-menu {
+    min-width: 32px !important;
+    padding: 0px 8px;
+}
