@@ -47,7 +47,7 @@ export class FeedComponent implements OnInit, OnChanges{
   fetchPosts() {
     this.loadingPosts = true
     
-    const req = this.fetchPostRequest()
+    const req = this.fetchPostRequest(true)
     this.discussV2Svc.getPosts(req, this.selectedTab).subscribe(res => {
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
@@ -62,7 +62,7 @@ export class FeedComponent implements OnInit, OnChanges{
   fetchPostsMore() {
     this.loadingPosts = true
     
-    const req = this.fetchPostRequest()
+    const req = this.fetchPostRequest(false)
     this.discussV2Svc.getPosts(req, this.selectedTab).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
@@ -75,7 +75,7 @@ export class FeedComponent implements OnInit, OnChanges{
     })
   }
 
-  fetchPostRequest() {
+  fetchPostRequest(pageReset: boolean) {
     if(this.selectedTab !== 'Feeds') {
       const req = {
         "filterCriteriaMap": {
@@ -84,7 +84,7 @@ export class FeedComponent implements OnInit, OnChanges{
           isActive: true // this is to get only active posts, deleted posts won't be returned
         },
         "requestedFields": [],
-        "pageNumber": this.commentListOffSet,
+        "pageNumber": pageReset? 0 : this.commentListOffSet,
         "pageSize": this.commentListLimit,
         "orderBy": "createdOn",
         "orderDirection": "ASC",
@@ -98,7 +98,7 @@ export class FeedComponent implements OnInit, OnChanges{
     } else {
       let req: any = {
         "communityId": this.community.communityId,
-        "pageNumber": this.commentListOffSet
+        "pageNumber": pageReset? 0 : this.commentListOffSet,
       }
 
       return req

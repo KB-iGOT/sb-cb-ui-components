@@ -18,7 +18,7 @@
                 *ngIf="loogedInUserProfile?.profileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
             </div>
-            <div class="ws-mat-black60-text mat-body-2" *ngIf="loogedInUserProfile?.professionalDetails[0]?.designation">
+            <div class="ws-mat-black60-text mat-body-2" *ngIf="loogedInUserProfile?.professionalDetails[0]?.designation  && (loogedInUserProfile?.professionalDetails[0]?.designation !== 'null') ">
                 {{loogedInUserProfile?.professionalDetails[0]?.designation}}
             </div>
         </div>
@@ -82,14 +82,14 @@
         </div>
     </ng-container>
     </div>
-    <div class="flex mt-4 tags-section">
+    <div class="flex mt-4 tags-section" *ngIf="post?.tags && post?.tags?.length">
         <ng-container *ngFor="let tag of post?.tags">
             <div class="circleBtn mr-3">
                 {{tag}}
             </div>
         </ng-container>
     </div>
-    <div class="my-4 h-divider"></div>
+    <div class="my-3 h-divider"></div>
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
             <ng-container *ngIf="cardConfig?.actions?.like?.show">

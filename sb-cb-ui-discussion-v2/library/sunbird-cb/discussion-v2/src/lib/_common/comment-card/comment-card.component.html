@@ -26,7 +26,7 @@
                     <span >Curator</span>
                 </div>
             </div>
-            <div class="ws-mat-black60-text mat-body-2">
+            <div class="ws-mat-black60-text mat-body-2" *ngIf="commentUsersData[comment?.commentData?.commentSource?.userId]?.designation !== 'null'">
                 {{commentUsersData[comment?.commentData?.commentSource?.userId]?.designation}}
                 <!-- {{comment?.commentData?.commentSource?.designation}} -->
             </div>

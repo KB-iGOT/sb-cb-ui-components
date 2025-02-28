@@ -332,12 +332,19 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     return mergedCategory
   }
 
-  getNewAndOldMerged(newMedia: any, oldMedia: any) {
+  getNewAndOldMerged(newMedia: any, _oldMedia: any) {
     // Merge values from both objects
+    let mergedVal: any = {}
     for(let cat of this.categoryType) {
-      oldMedia[cat] = [...oldMedia[cat], ...newMedia[cat]]
+      const oldUploaded = this.selectedFilesFinal[cat]
+        .filter((x: any) => x.uploaded)
+        .map((x: any) => x.previewUrl);
+      // if(oldMedia[cat].uploaded) {
+      mergedVal[cat] = []
+      mergedVal[cat] = [...oldUploaded, ...newMedia[cat]]
+      // }
     }
-    return oldMedia
+    return mergedVal
   }
 
   createPoll(): void {

@@ -28,6 +28,7 @@ export class PostCardComponent {
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
   @Output() newReply = new EventEmitter<any>()
+  @Output() newComment = new EventEmitter<any>()
 
   data = {
     replyToggle: false,
@@ -38,12 +39,12 @@ export class PostCardComponent {
   loading = false
   loadingMore = false
   editCommentData: any = ''
-  answerPostLimit: any = 2
+  answerPostLimit: any = 10
   answerPostPage = 0
   loogedInUserProfile: any = {}
   flagSelectionList: any
   reportPending = false
-  viewMoreLength = 140
+  viewMoreLength = 246
   editMode: boolean =  false
 
   constructor(
@@ -81,14 +82,17 @@ export class PostCardComponent {
     // let ids:any = reveseReplayDataCopy.slice(0,this.answerPostLimit)
     const req = {
       "filterCriteriaMap": {
-        discussionId : [...this.replyDataCopy],
-        isActive: true // this is to get only active posts, deleted posts won't be returned
+        // discussionId : [...this.replyDataCopy],
+        isActive: true, // this is to get only active posts, deleted posts won't be returned
+        communityId: this.post.communityId,
+        "type": "answerPost",
+        parentDiscussionId: this.post.discussionId,
       },
       "requestedFields": [],
-      "pageNumber": this.answerPostPage,
+      "pageNumber": 0,
       "pageSize": this.answerPostLimit,
       "orderBy": "createdOn",
-      "orderDirection": "ASC",
+      "orderDirection": "DESC",
       "facets": []
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
@@ -282,10 +286,10 @@ export class PostCardComponent {
         editMode: true
       } 
     });
-    newPostDialog.afterClosed().subscribe((_result: any) => {
-      // if (result) {
-      //   // this.newComment.emit({result: result.result, type: result.type})
-      // }
+    newPostDialog.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.newComment.emit({result: result.result, type: result.type})
+      }
     })
   }
 
