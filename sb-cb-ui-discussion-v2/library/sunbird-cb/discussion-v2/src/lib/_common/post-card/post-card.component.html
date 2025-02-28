@@ -27,7 +27,7 @@
         </div>
         <span class="mat-body-2">{{post?.createdOn | pipeRelativeTime}}</span>
         <div>
-            <mat-icon class="icon" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
+            <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
                 aria-label="more">more_vertical</mat-icon>
         </div>
     </div>
@@ -245,11 +245,11 @@
     </div>
 </ng-template>
 
-<mat-menu #cardMenu="matMenu" xPosition="after">
+<mat-menu #cardMenu="matMenu" class="post-card-menu" xPosition="after">
     <button mat-menu-item (click)="openFlagDialogue(post)"
         *ngIf="post?.createdBy?.user_id !== loogedInUserProfile?.userId">
         <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
-        <span>Flag</span>
+        <span>Report</span>
     </button>
     <button mat-menu-item (click)="editHandler(post)"
         *ngIf="post?.createdBy?.user_id === loogedInUserProfile?.userId">

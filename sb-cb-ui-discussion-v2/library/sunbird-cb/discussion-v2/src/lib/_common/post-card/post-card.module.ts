@@ -8,10 +8,11 @@ import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy
 import { PipesModule } from '../../_pipes/pipes.module'
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
-import { MatMenuModule } from '@angular/material/menu'
+
+import { MatLegacyMenuModule  as MatMenuModule } from '@angular/material/legacy-menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
-import { MatDialogModule } from '@angular/material/dialog'
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';

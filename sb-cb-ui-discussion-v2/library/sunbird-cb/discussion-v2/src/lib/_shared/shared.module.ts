@@ -9,7 +9,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
 import { MatMenuModule } from '@angular/material/menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
-import { MatDialogModule } from '@angular/material/dialog'
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { AvatarPhotoComponent } from './avatar-photo/avatar-photo.component'
 import { FlagDialogueComponent } from './flag-dialogue/flag-dialogue.component';

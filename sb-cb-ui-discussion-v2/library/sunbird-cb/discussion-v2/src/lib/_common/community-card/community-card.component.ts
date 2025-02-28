@@ -33,5 +33,6 @@ export class CommunityCardComponent {
   changeToDefaultThumbnailImg($event: any) {
     $event.target.src = this.defaultThumbnail
   }
+  
 
 }

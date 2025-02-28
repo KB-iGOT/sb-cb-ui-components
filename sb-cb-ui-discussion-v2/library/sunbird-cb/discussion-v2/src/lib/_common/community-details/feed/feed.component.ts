@@ -15,10 +15,11 @@ export class FeedComponent implements OnInit, OnChanges{
   @Input() community!: any
   @Input() postCategoryTypeFilter: any
   @Input() showNewPost: boolean = true 
+  @Input() selectedTab: string = 'Feeds' 
   loadingPosts: boolean = false
   loogedInUserProfile: any = {}
   pageNumber = 0
-  commentListLimit = 5
+  commentListLimit = 10
   commentListOffSet = 0
   commentsLength = 0
   posts: any[] = []
@@ -47,7 +48,7 @@ export class FeedComponent implements OnInit, OnChanges{
     this.loadingPosts = true
     
     const req = this.fetchPostRequest()
-    this.discussV2Svc.feedPosts(req).subscribe(res => {
+    this.discussV2Svc.getPosts(req, this.selectedTab).subscribe(res => {
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []
@@ -62,7 +63,7 @@ export class FeedComponent implements OnInit, OnChanges{
     this.loadingPosts = true
     
     const req = this.fetchPostRequest()
-    this.discussV2Svc.feedPosts(req).subscribe(res => {
+    this.discussV2Svc.getPosts(req, this.selectedTab).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
@@ -75,25 +76,34 @@ export class FeedComponent implements OnInit, OnChanges{
   }
 
   fetchPostRequest() {
-    const req = {
-      "filterCriteriaMap": {
-        "type": "question",
+    if(this.selectedTab !== 'Feeds') {
+      const req = {
+        "filterCriteriaMap": {
+          "type": "question",
+          "communityId": this.community.communityId,
+          isActive: true // this is to get only active posts, deleted posts won't be returned
+        },
+        "requestedFields": [],
+        "pageNumber": this.commentListOffSet,
+        "pageSize": this.commentListLimit,
+        "orderBy": "createdOn",
+        "orderDirection": "ASC",
+        "facets": []
+      }
+  
+      if(this.postCategoryTypeFilter && Object.keys(this.postCategoryTypeFilter).length) {
+        req.filterCriteriaMap = {...req.filterCriteriaMap, ...this.postCategoryTypeFilter}
+      }
+      return req
+    } else {
+      let req: any = {
         "communityId": this.community.communityId,
-        isActive: true // this is to get only active posts, deleted posts won't be returned
-      },
-      "requestedFields": [],
-      "pageNumber": this.commentListOffSet,
-      "pageSize": this.commentListLimit,
-      "orderBy": "createdOn",
-      "orderDirection": "ASC",
-      "facets": []
-    }
+        "pageNumber": this.commentListOffSet
+      }
 
-    if(this.postCategoryTypeFilter && Object.keys(this.postCategoryTypeFilter).length) {
-      req.filterCriteriaMap = {...req.filterCriteriaMap, ...this.postCategoryTypeFilter}
+      return req
     }
     
-    return req
   }
 
   likeUnlikeEvent(event: any) {

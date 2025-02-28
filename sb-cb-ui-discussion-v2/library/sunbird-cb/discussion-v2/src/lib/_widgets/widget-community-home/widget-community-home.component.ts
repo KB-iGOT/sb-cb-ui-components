@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 // tslint:disable-next-line
 import _ from 'lodash'
+import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 
 @Component({
   selector: 'd-v2-widget-community-home',
@@ -18,6 +19,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
   @Input() feedWidgetData: any | undefined
   @Input() communityWidgetData: any | undefined
   @Output() similarCommunityClick = new EventEmitter<any>();
+  defaultPosterThumbnail: string = 'assets/instances/eagle/banners/discussion/community-banner.svg'
   communityData: any = {}
   userJoinedCommunityList: any = []
   userJoinedCommunity: boolean = false
@@ -30,6 +32,8 @@ export class WidgetCommunityHomeComponent implements OnInit {
   competencySelected = ''
   userId: any
   flagSelectionList: any
+  selectedTab = 0; 
+  selectedTabName: any = 'Feeds'
   shortCutData: any[]= [
     {
       name:"Saved Posts",
@@ -129,8 +133,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
     this.discussV2Svc.communityDetailRead(id).subscribe((resData: any) => {
       if(resData.result && resData.result.communityDetails){
         this.communityData = {...resData.result.communityDetails , ...resData.result.communityDetails.data}
-
-    this.loadCompetencies()
+        this.loadCompetencies()
       }
     })
     // Fetch community data using id
@@ -185,8 +188,20 @@ export class WidgetCommunityHomeComponent implements OnInit {
     return this.userJoinedCommunityList.some((community: any) => community.communityid === this.communityId);
   }
   unJoinCommunity(){
-    
-    let request = { "communityId":this.communityId }
+      const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
+        width: '600px',
+        panelClass: 'flag-dialog',
+        backdropClass: 'flag-dialog-backdrop',
+        data: {
+          question: 'Are you sure you want to leave the community?',
+          infoMsg:'This is a closed community, if you leave the community you wont be able to join again without the permission of SPV',
+          flagSelectionList: this.flagSelectionList
+        },
+      })
+      confirmDialog.afterClosed().subscribe((result: any) => {
+        if (result) {
+          // this.deleteCommentMethod(post)
+          let request = { "communityId":this.communityId }
     this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
       if(resData.params && resData.params.status === 'success'){
         const community = this.userJoinedCommunityList.find((community: any) => community.communityid === this.communityId);
@@ -199,6 +214,11 @@ export class WidgetCommunityHomeComponent implements OnInit {
       }
 
     })
+        }
+      })
+  
+    
+    
   }
 
   getUserId(){
@@ -305,7 +325,10 @@ export class WidgetCommunityHomeComponent implements OnInit {
       }
     ))
   }
-  onTabChange(_tabIndex: any) {
+  onTabChange(event: any) {
+    this.selectedTab = event.index;
+    this.selectedTabName = event.tab && event.tab.textLabel || 'Feeds'
+
   }
 
   similarCommunity(communityData: any) {
@@ -350,5 +373,9 @@ export class WidgetCommunityHomeComponent implements OnInit {
       () => {
         this.snackbar.open(_.get(this.feedWidgetData, 'reportIcon.errorMsg') || 'Something went wrong! please try reporting again later.')
       })
+  }
+
+  changeToDefaultThumbnailImg($event: any) {
+    $event.target.src = this.defaultPosterThumbnail
   }
 }
