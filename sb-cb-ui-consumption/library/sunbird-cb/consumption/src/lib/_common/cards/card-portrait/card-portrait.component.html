@@ -70,14 +70,14 @@
             }}"></ng-container>
           </ng-container>
           <div class="duration-box right-corner" *ngIf="widgetData?.content?.duration > 0">
-            <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
-            <span class=" ws-mat-white-text duration">
+            <mat-icon class="mat-icon main_icon mr-1 nodtranslate">access_time</mat-icon>
+            <span class=" ws-mat-white-text duration nodtranslate">
               {{ (widgetData?.content?.duration || 120)| pipeDurationTransform: 'hms' }}
             </span>
           </div>
           <div class="duration-box right-corner" *ngIf="widgetData?.content?.programDuration > 0">
-            <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
-            <span class=" ws-mat-white-text duration">
+            <mat-icon class="mat-icon main_icon mr-1 nodtranslate">access_time</mat-icon>
+            <span class=" ws-mat-white-text duration nodtranslate">
               {{widgetData?.content?.programDuration}} {{widgetData?.content?.programDuration === 1 ? 'day' : 'days'}}
             </span>
           </div>
@@ -85,7 +85,7 @@
         <div class="padding-m">
           <div class="course_widget flex margin-remove">
             <div class="flex flex-end course_v2">
-              <mat-icon class="mat-icon main_icon ws-mat-default-text margin-right-xs">video_library</mat-icon>
+              <mat-icon class="mat-icon main_icon ws-mat-default-text margin-right-xs nodtranslate">video_library</mat-icon>
               <sb-uic-display-content-type i18n-title title="Content Type" *ngIf="widgetData.content?.primaryCategory"
                 class="ws-mat-black60-text font-normal mat-caption " [displayContentType]="widgetData.content?.primaryCategory==='Course Unit'
                 ?'Module'
@@ -95,7 +95,7 @@
             </div>
           </div>
           <div [id]="'m-c-'+ widgetData.content?.identifier"
-            class="mat-subheading-1 title-text ws-mat-text-block-fade-gradient">
+            class="mat-subheading-1 title-text ws-mat-text-block-fade-gradient nodtranslate">
             {{ widgetData.content.name }}
           </div>
           <div class="flex w-full flex-wrap flex-middle">
