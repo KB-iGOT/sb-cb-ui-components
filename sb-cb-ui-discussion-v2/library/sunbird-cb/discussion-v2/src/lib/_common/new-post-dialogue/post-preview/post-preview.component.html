@@ -4,7 +4,7 @@
     <div class="flex user-info">
         <div>
             <div class="mr-4">
-                <d-v2-avatar-photo [size]="cardConfig?.avatarPhoto?.size"
+                <d-v2-avatar-photo [size]="cardConfig?.avatarPhoto?.size || 'ml'"
                     [name]="loogedInUserProfile?.firstName || cardConfig?.avatarPhoto?.name"
                     [photoUrl]="loogedInUserProfile?.profileImageUrl || ''" [color]="cardConfig?.avatarPhoto?.color">
                 </d-v2-avatar-photo>
@@ -15,7 +15,7 @@
             <div class="flex items-center">
                 <span class="mat-body-1 bold mr-1"> {{loogedInUserProfile?.firstName}} </span>
                 <mat-icon class="icon verified mr-1"
-                *ngIf="loogedInUserProfile?.profileStatus?.toLowerCase() === 'verified'"
+                *ngIf="loogedInUserProfile?.profileDetails?.profileStatus?.toLowerCase() === 'verified'"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
             </div>
             <div class="ws-mat-black60-text mat-body-2" *ngIf="loogedInUserProfile?.professionalDetails[0]?.designation  && (loogedInUserProfile?.professionalDetails[0]?.designation !== 'null') ">
