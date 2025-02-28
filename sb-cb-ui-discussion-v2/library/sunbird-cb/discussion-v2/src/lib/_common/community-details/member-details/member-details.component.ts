@@ -53,7 +53,7 @@ export class MemberDetailsComponent implements OnInit{
     }
   }
   this.discussV2Svc.userSearch(request).subscribe((res: any)=> {
-    debugger
+    
     if(res && res.result && res.result.response && res.result.response.content) {
       this.communityMembersList = res.result.response.content
       this.totalNumberOfMembers =  res.result.response.count

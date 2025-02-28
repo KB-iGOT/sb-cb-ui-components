@@ -186,23 +186,17 @@ export class DiscoverComponent implements OnInit, OnChanges {
   }
   async getPopularCommunities() {
     let request: any = {
-      "filterCriteriaMap": {
-          "status": "active"
-      },
-      "requestedFields": [],
-      "pageNumber": 0,
-      "pageSize": 3,
-      "orderBy":"countOfPeopleJoined",
-      "orderDirection": "desc"
+      "field":"countOfPeopleJoined"
     }
 
     try {
-      const res: any = await this.discussV2Svc.communitySearch(request).toPromise();
-      if (res.result && res.result.search_results && res.result.search_results.data && res.result.search_results.data.length) {
-          let newValues = res.result.search_results.data.map((v: any) => ({...v, name: v.communityName, banner: v.posterImageUrl}))
-          this.popularCommunities = newValues
+      const res: any = await this.discussV2Svc.popularCommunity(request).toPromise();
+      
+      if (res.result && res.result.data && res.result.data.length) {
+          let newValues = res.result.data.map((v: any) => ({...v, name: v.communityName, banner: v.posterImageUrl}))
+          this.popularCommunities = newValues.slice(0,5)
         
-        return res.result.search_results.data;
+        return res.result.data;
       }
       
       return [];

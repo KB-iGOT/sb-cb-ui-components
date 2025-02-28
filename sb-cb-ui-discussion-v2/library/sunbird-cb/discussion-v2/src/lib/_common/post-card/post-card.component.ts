@@ -193,6 +193,7 @@ export class PostCardComponent {
           data: { comment, flagSelectionList: this.flagSelectionList },
         })
         confirmDialog.afterClosed().subscribe((result: any) => {
+          
           if (result) {
             this.reportPost(result)
           }
