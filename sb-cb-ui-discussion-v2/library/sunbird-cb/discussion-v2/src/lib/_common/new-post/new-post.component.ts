@@ -298,7 +298,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
             this.uploadHandler(discussionId, res.result);
           } else {
             this._snackBar.open('Post created successfully!')
-            this.uploadForm.controls.description.setValue('')
+            this.resetFormAndImages()
           }
         }
       },
@@ -414,6 +414,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
       next: (res) => {
         if (res && res.result) {
           this._snackBar.open('Post created successfully!')
+          this.newComment.emit({result: res.result, type: res.result.type})
+          this.resetFormAndImages()
         }
       },
       error: (err) => {
@@ -435,6 +437,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       next: (res) => {
         if (res && res.result) {
           this._snackBar.open('Post created successfully!')
+          this.resetFormAndImages()
           this.newComment.emit({result: res.result, type: res.result.type})
         }
       },
