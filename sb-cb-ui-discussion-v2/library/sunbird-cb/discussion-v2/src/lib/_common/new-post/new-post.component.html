@@ -9,6 +9,11 @@
 
             </div>
         </div>
+        <ng-container *ngIf="taggedUsers && taggedUsers.length">
+            <span class="mr-2 mb-2 font-semibold ws-mat-default-text">Replying to 
+                <span *ngFor="let user of taggedUsers">{{user?.first_name}}</span>
+            </span>
+        </ng-container>
         <div class="flex gap-4" [ngClass]="isMultiLine ? 'items-start single-line ': 'items-center'" id="start-comment">
             <div class="" *ngIf="config?.avatarPhoto?.show && !editMode">
                 <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"

@@ -25,6 +25,7 @@ export class PostCardComponent {
   @Input() userLikedPosts: any = []
   @Input() userJoinedCommunity!: boolean 
   @Input() community!: string
+  @Input() parentPost!: any
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
   @Output() newReply = new EventEmitter<any>()
@@ -42,6 +43,7 @@ export class PostCardComponent {
   answerPostLimit: any = 10
   answerPostPage = 0
   loogedInUserProfile: any = {}
+  loggedInUserData: any = {}
   flagSelectionList: any
   reportPending = false
   viewMoreLength = 246
@@ -58,6 +60,7 @@ export class PostCardComponent {
   }
 
   ngOnInit() {
+    this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData || [] ]
   }
@@ -84,9 +87,9 @@ export class PostCardComponent {
       "filterCriteriaMap": {
         // discussionId : [...this.replyDataCopy],
         isActive: true, // this is to get only active posts, deleted posts won't be returned
-        communityId: this.post.communityId,
+        communityId: this.parentPost?.communityId,
         "type": "answerPost",
-        parentDiscussionId: this.post.discussionId,
+        parentDiscussionId: this.parentPost?.discussionId,
       },
       "requestedFields": [],
       "pageNumber": 0,
@@ -281,7 +284,7 @@ export class PostCardComponent {
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
         community: this.community,
         config: this.cardConfig,
-        currentUser: {...this.loogedInUserProfile},
+        currentUser: {...this.loogedInUserProfile, ...this.loggedInUserData},
         post: post,
         editMode: true
       } 

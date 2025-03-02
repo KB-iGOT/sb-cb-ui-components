@@ -697,7 +697,7 @@ export class TelemetryService {
                   event.data.edata.id
                   : '',
                 pageid: event.data.pageContext && event.data.pageContext.pageId || page.pageid,
-                // target: { page },
+                ...(event.data.edata.target && { target: event.data.edata.target })
               },
               {
                 context: {

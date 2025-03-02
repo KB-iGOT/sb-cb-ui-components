@@ -1,7 +1,6 @@
 <div class="topLevel-card" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
 'reply-card mb-3' : cardType=== 'reply',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
-
     <div class="flex user-info">
         <div>
             <div class="mr-4">
@@ -38,6 +37,11 @@
             </div>
         </div> -->
         <ng-container *ngIf="!editMode">
+            <ng-container *ngIf="post?.taggedUser && post?.taggedUser.length">
+                <span class="mr-2 mb-2 font-semibold ws-mat-default-text">Replying to 
+                    <span *ngFor="let user of post?.taggedUser">{{user?.first_name}}</span>
+                </span>
+            </ng-container>
             <div class="comment-txt mat-body-1 ws-mat-black-text description  break-all {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
                  [innerHTML]="post?.description">
             </div>
@@ -171,8 +175,8 @@
             <ng-container *ngIf="replyDataCopy && replyDataCopy?.length > 0 && !loading; else noReplies">
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
-                        <d-v2-post-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"  [community]="community"
-                        [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [type]="cardConfig?.repliesSection?.replyCardConfig?.type"
+                        <d-v2-post-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"  [community]="community" [hierarchyPath]="hierarchyPath"
+                        [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [type]="cardConfig?.repliesSection?.replyCardConfig?.type" [parentPost]="post"
                         [post]="reply" [replyData]="reply?.answerPosts" [userJoinedCommunity]="userJoinedCommunity" (likeUnlikeData)="likeUnlikeEvent($event)">
                         </d-v2-post-card>
                     </ng-container>
@@ -198,7 +202,7 @@
                 <d-v2-new-post [config]="cardConfig?.newPostReply"  [community]="community"
                 (newReply)="updateRepliesData($event)" [type]="cardConfig?.type"
                  (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" [post]="post"
-                    [taggedUsers]="[post?.createdBy?.user_id]" [hierarchyPath]="[post?.discussionId]">
+                    [taggedUsers]="[post?.createdBy]" [hierarchyPath]="hierarchyPath">
                 </d-v2-new-post>
             </div>
         </div>
