@@ -30,7 +30,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
       "customImgHeight": "141px",
       "customMinHeight": "141px",
       "arrowsPlacement": "middle-inline",
-      autoplay: false,
+      autoplay: true,
       "responsive": {
         "bannerMetaClass": "meta",
         "customHeight": "232px",
@@ -40,7 +40,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
         "customMinHeight": "141px",
         "dots": "hidden",
         "arrowsPlacement": "middle-inline",
-        autoplay: false,
+        autoplay: true,
       }
     }
   }
@@ -186,7 +186,8 @@ export class DiscoverComponent implements OnInit, OnChanges {
   }
   async getPopularCommunities() {
     let request: any = {
-      "field":"countOfPeopleJoined"
+      "field":"countOfPeopleJoined",
+      "limit":5
     }
 
     try {

@@ -8,7 +8,7 @@
         </div>
     </div>
     <div class="card-details-block">
-        <p class="community-title">{{community?.communityName || community?.data?.communityName}}</p>
+        <p class="community-title" dV2MultiLineElipsis>{{community?.communityName || community?.data?.communityName}}</p>
         <div class="flex items-center justify-between community-info">
             <p>
                 <span class="mr-1">{{community?.countOfPeopleJoined | numberShortener}}</span>

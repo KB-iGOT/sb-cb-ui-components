@@ -4,6 +4,7 @@ import { CommunityCardComponent } from './community-card.component';
 import { MatIconModule } from '@angular/material/icon';
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module';
 import { PipesModule } from '../../_pipes/pipes.module';
+import { MultiLineEllipsisModule } from '../../_directives/multi-line-ellipsis/multi-line-ellipsis.module';
 
 
 
@@ -15,7 +16,8 @@ import { PipesModule } from '../../_pipes/pipes.module';
     CommonModule,
     MatIconModule,
     SkeletonLoaderModule,
-    PipesModule
+    PipesModule,
+    MultiLineEllipsisModule
   ],
   exports: [CommunityCardComponent]
 })

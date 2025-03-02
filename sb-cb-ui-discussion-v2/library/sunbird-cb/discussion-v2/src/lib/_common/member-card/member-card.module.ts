@@ -4,6 +4,8 @@ import { MemberCardComponent } from './member-card.component';
 import { SharedModule } from '../../_shared/shared.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module';
+import { MultiLineEllipsisModule } from '../../_directives/multi-line-ellipsis/multi-line-ellipsis.module';
 
 
 
@@ -15,7 +17,9 @@ import { MatCardModule } from '@angular/material/card';
     CommonModule,
     SharedModule,
     MatIconModule,
-    MatCardModule
+    MatCardModule,
+    SkeletonLoaderModule,
+    MultiLineEllipsisModule
   ],
   exports:[
     MemberCardComponent

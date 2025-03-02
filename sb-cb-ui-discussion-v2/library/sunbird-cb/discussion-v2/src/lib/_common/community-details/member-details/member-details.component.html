@@ -17,10 +17,19 @@
         <h2>Members <span class="ml-2" *ngIf="totalNumberOfMembers">({{totalNumberOfMembers}})</span></h2>
     </div>
     <div>
-        <div class="flex justify-center">
-            <div class="flex gap-2 flex-wrap justify-start" *ngIf="communityMembersList?.length;else noData ">
-                <ng-container *ngFor="let member of communityMembersList">
-                    <d-v2-member-card [memeberData]="member"></d-v2-member-card>
+        <div class="flex justify-start">
+            <ng-container *ngIf="!membersLoading">
+                <div class="flex gap-4 flex-wrap justify-start" *ngIf="communityMembersList?.length;else noData ">
+                    <ng-container *ngFor="let member of communityMembersList">
+                        <d-v2-member-card [memeberData]="member"></d-v2-member-card>
+                    </ng-container>
+                </div>
+            </ng-container>
+            <div class="flex gap-4 flex-wrap justify-start">
+                <ng-container *ngIf="membersLoading">
+                    <ng-container *ngFor="let member of [1,2,3]">
+                        <d-v2-member-card [isLoading]="true" [memeberData]="member"></d-v2-member-card>
+                    </ng-container>
                 </ng-container>
             </div>
         </div>
@@ -34,7 +43,7 @@
 </mat-card>
 
 <ng-template #noData >
-    <div class="mt-8">
+    <div class="flex justify-center w-full mt-8">
        <d-v2-no-data [iconName]="'forum'" [noText]="'No data'"></d-v2-no-data>
     </div>
  </ng-template>

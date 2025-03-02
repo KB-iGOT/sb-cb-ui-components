@@ -31,6 +31,7 @@ export class ImageSlidersComponent implements OnInit, OnDestroy{
 
   ngOnInit() {
     this.reInitiateSlideInterval()
+    this.reInitiateObjectSlideInterval()
     this.defaultMenuSubscribe = this.isLtMedium$.subscribe((isLtMedium: boolean) => {
       this.isMobile = isLtMedium
     })
