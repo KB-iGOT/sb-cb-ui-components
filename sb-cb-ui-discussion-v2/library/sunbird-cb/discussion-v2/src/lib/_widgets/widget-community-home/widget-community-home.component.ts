@@ -156,12 +156,14 @@ export class WidgetCommunityHomeComponent implements OnInit {
     // })
   }
 
-  manageUserCommunityStatus(){
+  async manageUserCommunityStatus(){
     this.userJoinedCommunityList.forEach((community: any) => {
       if(community.communityid === this.communityId){
         this.userJoinedCommunity = community.status
       }
     })
+    this.userEnrollSvc.clearEnrollData()
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
   }
   joinCommunity(){
     let request = {
