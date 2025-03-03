@@ -24,7 +24,7 @@
             <div class="owner-icon mr-2">
                 <img src="{{orgDetails[community?.orgId]?.logo || community?.orgName}}" alt="" (error)="changeToDefaultImg($event)">
             </div>
-            <p class="owner-name margin-remove" dV2SingleLineTooltip>By {{community?.orgName}}</p>
+            <p class="owner-name margin-remove" dV2SingleLineTooltip>By {{community?.orgName || orgDetails[community?.orgId]?.orgname}}</p>
         </div>
     </div>
 </div>
