@@ -12,6 +12,7 @@ export class MemberDetailsComponent implements OnInit{
   limit: number = 10
   offset: number = 0
   totalNumberOfMembers: any = 0
+  membersLoading:Boolean = false
   constructor(private discussV2Svc: DiscussionV2Service){
 
   }
@@ -20,6 +21,7 @@ export class MemberDetailsComponent implements OnInit{
     this.getAllMembersOfCommunity();
   }
   getAllMembersOfCommunity(){
+    this.membersLoading = true
     let request = {
       "communityId":this.communityId,
       "offset" :this.offset,
@@ -27,6 +29,7 @@ export class MemberDetailsComponent implements OnInit{
     }
     this.discussV2Svc.communityUserList(request).subscribe((res: any) => {
       
+      this.membersLoading = false
       if(res.result && res.result && res.result.userDetails  && res.result.userDetails.length){
         this.communityMembersList = [...this.communityMembersList,...res.result.userDetails];
         this.totalNumberOfMembers =  res.result.usersJoinedCount
@@ -34,6 +37,7 @@ export class MemberDetailsComponent implements OnInit{
     })
   }
   onSearch(event: any){
+    this.membersLoading = true
    console.log(event);
    let typeText: any  = event && event.target && event.target.value || ''
   let request = {
@@ -54,6 +58,7 @@ export class MemberDetailsComponent implements OnInit{
   }
   this.discussV2Svc.userSearch(request).subscribe((res: any)=> {
     
+    this.membersLoading = false
     if(res && res.result && res.result.response && res.result.response.content) {
       this.communityMembersList = res.result.response.content
       this.totalNumberOfMembers =  res.result.response.count

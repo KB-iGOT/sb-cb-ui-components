@@ -28,16 +28,25 @@
         <h2 *ngIf="topicName">Communities under <span >"{{topicName}}"</span> ({{communityDataList?.length}})</h2>
          
        </div> -->
-       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
-        <div *ngFor="let topic of topicDataList  | filterSearch: localSearchTextValue" >
-         <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
-             [topicTitle]="topic?.value">
-         </d-v2-topic-card>
-        </div>
-     </div>
+       <ng-container *ngIf="!topicDataLoading">
+         <ng-container *ngIf="(topicDataList | filterSearch: localSearchTextValue).length;else noData">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+               <ng-container *ngFor="let topic of topicDataList  | filterSearch: localSearchTextValue" >
+                  <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
+                     [topicTitle]="topic?.value">
+                  </d-v2-topic-card>
+               </ng-container>
+            </div>
+         </ng-container>
+       </ng-container>
     </div>
     <!-- Right Sidebar -->
     <div class="lg:w-64">
         <d-v2-sort-by [sortData]="sortData" (sortOptionSelection)="sortOptionSelection($event)"></d-v2-sort-by>
     </div>
  </div>
+ <ng-template #noData >
+   <div class="flex justify-center w-full mt-8">
+      <d-v2-no-data [iconName]="'forum'" [noText]="'No data found'"></d-v2-no-data>
+   </div>
+</ng-template>

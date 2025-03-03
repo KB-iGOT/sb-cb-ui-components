@@ -16,6 +16,7 @@ import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm
 })
 export class WidgetCommunityHomeComponent implements OnInit {
   @Input() communityId!: string
+  @Input() discussionId!: string
   @Input() feedWidgetData: any | undefined
   @Input() communityWidgetData: any | undefined
   @Output() similarCommunityClick = new EventEmitter<any>();
@@ -126,8 +127,13 @@ export class WidgetCommunityHomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    
+    if(this.discussionId) {
+
+    }
     this.fetchCommunityData(this.communityId)
     this.checkUserJoinedCommunity()
+
   }
   fetchCommunityData(id: string) {
     this.discussV2Svc.communityDetailRead(id).subscribe((resData: any) => {
@@ -194,6 +200,10 @@ export class WidgetCommunityHomeComponent implements OnInit {
         backdropClass: 'flag-dialog-backdrop',
         data: {
           question: 'Are you sure you want to leave the community?',
+          button: {
+            confirm: 'Leave',
+            cancel: 'Cancel'
+          },
           infoMsg:'This is a closed community, if you leave the community you wont be able to join again without the permission of SPV',
           flagSelectionList: this.flagSelectionList
         },
@@ -377,5 +387,25 @@ export class WidgetCommunityHomeComponent implements OnInit {
 
   changeToDefaultThumbnailImg($event: any) {
     $event.target.src = this.defaultPosterThumbnail
+  }
+  getDiscussionId(discussId: string){
+    this.discussionId = discussId
+  }
+
+  trendingDiscussionIdEmit(event: any) {
+    if(this.discussionId === event) {
+      this.scrollToElement(event)
+    }
+    this.discussionId = event
+    this.selectedTab = 0
+    this.selectedTabName =  'Feeds'
+  }
+  private scrollToElement(discussionId:string) {
+    setTimeout(() => {
+      const element = document.getElementById('post-' + discussionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 1000);
   }
 }

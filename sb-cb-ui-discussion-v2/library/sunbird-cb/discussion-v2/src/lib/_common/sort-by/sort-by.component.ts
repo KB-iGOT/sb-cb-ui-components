@@ -9,40 +9,11 @@ export class SortByComponent {
   @Input() sortData: any
   @Output() sortOptionSelection = new EventEmitter<any>();
   constructor() {
-    this.sortData = [
-      {
-        key: "members",
-        value:"Members",
-        orderDirection: "desc",
-        orderByKey:"countOfPeopleJoined",
-        checked: false
-      },
-      {
-        key: "name",
-        value:"Name",
-        orderDirection: "asc",
-        orderByKey:"communityName",
-        checked: false
-      },
-      {
-        key: "activity",
-        value:"Activity",
-        orderDirection: "desc",
-        orderByKey:"updatedOn",
-        checked: false
-      } ,
-      {
-        key: "date",
-        value:"Date",
-        orderDirection: "asc",
-        orderByKey:"createdOn",
-        checked: false
-      } 
-    ]
+   
   }
 
   handleGetFilterType(_event: any, type: any, _filterType: any) {
-    type.checked = !type.checked 
+    type.checked = true
     this.sortOptionSelection.emit(type)
   }
 }

@@ -16,6 +16,7 @@ export class FeedComponent implements OnInit, OnChanges{
   @Input() postCategoryTypeFilter: any
   @Input() showNewPost: boolean = true 
   @Input() selectedTab: string = 'Feeds' 
+  @Input() discussionId: string = ''
   loadingPosts: boolean = false
   loogedInUserProfile: any = {}
   pageNumber = 0
@@ -29,29 +30,41 @@ export class FeedComponent implements OnInit, OnChanges{
   constructor(
         // private configSvc: ConfigurationsService,
         private discussV2Svc: DiscussionV2Service,
-        private _snackBar: MatSnackBar
+        private _snackBar: MatSnackBar,
   ) { }
 
   ngOnInit(): void {
+    
   }
 
+
   ngOnChanges(changes: SimpleChanges): void {
+    
     if (changes.community && Object.keys(changes.community.currentValue).length) {
       if(this.community) {
         this.fetchPosts()
       }
     }
+    
+    if (changes.discussionId && changes.discussionId.currentValue) {
+      this.scrollToDiscussion();
+    }
   }
 
 
-  fetchPosts() {
+  fetchPosts(searchString?:any) {
     this.loadingPosts = true
     
-    const req = this.fetchPostRequest(true)
-    this.discussV2Svc.getPosts(req, this.selectedTab).subscribe(res => {
+    const req = this.fetchPostRequest(true, searchString)
+    const tabType = searchString ? '' : this.selectedTab
+    this.discussV2Svc.getPosts(req,tabType ).subscribe(res => {
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = _.get(res, 'result.search_results.data') || []
+
+      if(this.discussionId){
+        this.scrollToDiscussion()
+      }
     },(err: any) => {
       this.loadingPosts = false
       this._snackBar.open('Something went wrong! please try reporting again later.')
@@ -59,11 +72,12 @@ export class FeedComponent implements OnInit, OnChanges{
     })
   }
 
-  fetchPostsMore() {
+  fetchPostsMore(searchString?: any) {
     this.loadingPosts = true
     
-    const req = this.fetchPostRequest(false)
-    this.discussV2Svc.getPosts(req, this.selectedTab).subscribe(res => {
+    const req = this.fetchPostRequest(false, searchString)
+    const tabType = searchString ? '' : this.selectedTab
+    this.discussV2Svc.getPosts(req, tabType).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
@@ -75,9 +89,9 @@ export class FeedComponent implements OnInit, OnChanges{
     })
   }
 
-  fetchPostRequest(pageReset: boolean) {
-    if(this.selectedTab !== 'Feeds') {
-      const req = {
+  fetchPostRequest(pageReset: boolean, searchString?: string) {
+    if(this.selectedTab !== 'Feeds' || searchString?.length) {
+      const req: any = {
         "filterCriteriaMap": {
           "type": "question",
           "communityId": this.community.communityId,
@@ -89,6 +103,9 @@ export class FeedComponent implements OnInit, OnChanges{
         "orderBy": "createdOn",
         "orderDirection": "ASC",
         "facets": []
+      }
+      if(searchString?.length) {
+        req['searchString'] = searchString
       }
   
       if(this.postCategoryTypeFilter && Object.keys(this.postCategoryTypeFilter).length) {
@@ -171,5 +188,65 @@ export class FeedComponent implements OnInit, OnChanges{
   loadMoreComments() {
     this.commentListOffSet = this.commentListOffSet + 1
     this.fetchPostsMore()
+  }
+
+  onSearch(event: any){
+    const searchValue = event.target.value;
+    console.log('Search text:', searchValue);
+    // Add your search logic here{
+    this.fetchPosts(searchValue)
+
+  }
+
+  ngAfterViewInit() {
+    // Get the discussion ID from route params or wherever it's coming from
+    
+    if (this.discussionId) {
+      setTimeout(() => {
+        const element = document.getElementById('post-' + this.discussionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 1000); // Small delay to ensure content is loaded
+    }
+  }
+  scrollToDiscussion() {
+    const discussionExists = this.posts.find((comm: any) => comm.discussionId === this.discussionId);
+  
+    if (!discussionExists && this.discussionId) {
+      // Fetch specific discussion if not found in current posts
+      const req = {
+        "filterCriteriaMap":{
+          "type":"question",
+          "communityId": this.community.communityId,
+          "discussionId":this.discussionId,
+          "isActive":true
+        },
+        "requestedFields":[],
+        "pageNumber":0,
+        "pageSize":5
+      }
+  
+      this.discussV2Svc.getPosts(req, '').subscribe(res => {
+        const discussionData = _.get(res, 'result.search_results.data') || [];
+        if (discussionData.length) {
+          this.posts = [ ...this.posts,discussionData[0]];
+          this.scrollToElement();
+        }
+      }, (err: any) => {
+        this._snackBar.open('Unable to fetch the discussion');
+        console.error(err);
+      });
+    } else if (this.discussionId) {
+      this.scrollToElement();
+    }
+  }
+  private scrollToElement() {
+    setTimeout(() => {
+      const element = document.getElementById('post-' + this.discussionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 1000);
   }
 }

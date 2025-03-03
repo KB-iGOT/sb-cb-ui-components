@@ -7,6 +7,7 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class MemberCardComponent implements OnInit {
   @Input() memeberData: any 
+  @Input() isLoading: boolean = false 
   constructor(){
 
   }
