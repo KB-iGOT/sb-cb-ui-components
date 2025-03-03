@@ -83,8 +83,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   environment: any
   loading: boolean = false
   showEmojiPicker: boolean = false
-  @ViewChild('imageUpload') imageUpload!: ElementRef;
-  @ViewChild('fileUpload') fileUpload!: ElementRef;
+  @ViewChild('imageUpload', { static: false }) imageUpload!: ElementRef;
+  @ViewChild('fileUpload', { static: false }) fileUpload!: ElementRef;
 
 
   constructor(
@@ -407,8 +407,15 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         this.selectedFilesFinal[category].splice(index, 1);
         this.previewCategory[category].splice(index, 1);
         // clear file input
-        this.imageUpload.nativeElement.value = '';
-        this.fileUpload.nativeElement.value = '';
+        if (category === 'image') {
+            if (this.imageUpload) {
+              this.imageUpload.nativeElement.value = '';
+            }
+        } else if (category === 'document') {
+          if (this.fileUpload) {
+            this.fileUpload.nativeElement.value = '';
+          }
+        }
       }
     }
 

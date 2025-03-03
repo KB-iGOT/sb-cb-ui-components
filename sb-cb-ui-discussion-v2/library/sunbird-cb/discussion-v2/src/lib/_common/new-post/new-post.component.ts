@@ -237,7 +237,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
     if (category) {
       if (this.selectedFilesFinal[category]) {
         this.selectedFilesFinal[category].splice(index, 1);
-        this.fileInput.nativeElement.value = '';
+        if(this.fileInput && this.fileInput.nativeElement) {
+          this.fileInput.nativeElement.value = '';
+        }
       }
     }
 
