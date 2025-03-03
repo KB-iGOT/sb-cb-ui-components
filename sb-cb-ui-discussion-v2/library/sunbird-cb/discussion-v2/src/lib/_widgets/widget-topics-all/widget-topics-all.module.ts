@@ -7,6 +7,7 @@ import { SimilarCommunityCardModule } from '../../_common/similar-community-card
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { PipesModule } from '../../_pipes/pipes.module';
+import { NoDataModule } from '../../_common/no-data/no-data.module';
 
 
 
@@ -21,7 +22,8 @@ import { PipesModule } from '../../_pipes/pipes.module';
     SimilarCommunityCardModule,
     MatIconModule,
     FormsModule,
-    PipesModule
+    PipesModule,
+    NoDataModule
   ],
   exports:[
     WidgetTopicsAllComponent

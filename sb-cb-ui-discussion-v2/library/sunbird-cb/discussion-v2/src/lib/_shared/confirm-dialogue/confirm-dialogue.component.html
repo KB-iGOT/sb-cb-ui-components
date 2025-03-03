@@ -22,11 +22,11 @@
     <mat-card-actions class="flex flex-row-reverse gap-4">
         <button mat-flat-button  (click)="cancel()" class="secondary-button "
             [disabled]="false">
-            <span class="">Cancel</span>
+            <span class="">{{data?.button?.cancel || 'Cancel'}}</span>
         </button>
         <button mat-flat-button color="secondary" (click)="submit()" class="primary-button "
             [disabled]="false">
-            <span class="">Confirm</span>
+            <span class="">{{data?.button?.confirm || 'Confirm'}}</span>
         </button>
     </mat-card-actions>
 </mat-card>

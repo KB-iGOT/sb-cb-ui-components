@@ -223,7 +223,12 @@
 }
 
 .filter-list {
-    overflow-x: hidden;
-    overflow-y: scroll;
-    height: 96px;
+    // overflow-x: hidden;
+    // overflow-y: scroll;
+    height: 70px;
+    max-height: 96px;
+    overflow-y: auto;
+    // -ms-overflow-style: none;
+    // -webkit-overflow-style: none;
+    // scrollbar-width: none;
 }

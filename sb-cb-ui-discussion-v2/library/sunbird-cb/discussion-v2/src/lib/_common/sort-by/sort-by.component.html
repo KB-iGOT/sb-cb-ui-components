@@ -7,8 +7,8 @@
         <div class="flex flex-row category-item" >
             <mat-radio-group aria-label="Select an option">
                 <ng-container *ngFor="let sort of sortData">
-                    <mat-radio-button class="category-item cursor-pointer " (change)="handleGetFilterType($event,sort,'timeDuration')"  [value]="sort">
-                        <span class="option-value">{{sort.value}}</span></mat-radio-button>
+                    <mat-radio-button class="category-item cursor-pointer " [checked]="sort?.checked" (change)="handleGetFilterType($event,sort,'timeDuration')"  [value]="sort">
+                        <span class="option-value">{{sort?.value}}</span></mat-radio-button>
                     <br>
                 </ng-container>
             </mat-radio-group>

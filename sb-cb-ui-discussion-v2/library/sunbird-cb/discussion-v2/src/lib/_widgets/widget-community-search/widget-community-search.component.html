@@ -76,7 +76,7 @@
        <!-- Column 3 -->
        <div class=" p-2 rounded-lg md:col-span-3">
          <div class="hidden md:block">
-            <d-v2-sort-by (sortOptionSelection)="sortOptionSelection($event)"></d-v2-sort-by>
+            <d-v2-sort-by [sortData]="sortData" (sortOptionSelection)="sortOptionSelection($event)"></d-v2-sort-by>
             <d-v2-filter [filterKeys]="filterKeys" (filterOptionSelected)="selectedFilters($event)" [filterObjectList]="filterObjectList"></d-v2-filter>
          </div>
        </div>

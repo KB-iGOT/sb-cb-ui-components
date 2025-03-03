@@ -31,10 +31,40 @@ export class WidgetCommunitySearchComponent {
   totalCount: any = 0
   factesRequest: any = []
   filterApply: any = {}
+  sortData: any
   
   constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
-    
-    
+    this.sortData = [
+      {
+        key: "members",
+        value:"Members",
+        orderDirection: "desc",
+        orderByKey:"countOfPeopleJoined",
+        checked: true
+      },
+      {
+        key: "name",
+        value:"Name",
+        orderDirection: "asc",
+        orderByKey:"communityName",
+        checked: false
+      },
+      {
+        key: "activity",
+        value:"Activity",
+        orderDirection: "desc",
+        orderByKey:"updatedOn",
+        checked: false
+      } ,
+      {
+        key: "date",
+        value:"Date",
+        orderDirection: "asc",
+        orderByKey:"createdOn",
+        checked: false
+      } 
+    ]
+    this.sortOptionSelected = this.sortData[0]
     this.constants= communityConstants
     combineLatest([
       this.activatedRoute.queryParams,
@@ -46,17 +76,17 @@ export class WidgetCommunitySearchComponent {
       // Check query params first
       if (queryParams['c'] || queryParams['c'] === '') {
         this.searchTextValue = queryParams['c'];
-        this.fetchCommunityList(true,this.searchTextValue);
+        this.fetchCommunityList(true,this.searchTextValue, '',this.sortOptionSelected);
         this.globalSearchEnabled = true
       } 
       else if (params.get('topicName')) {
         this.topicName = params.get('topicName')
-        this.fetchCommunityList(true,this.searchTextValue, params.get('topicName'));
+        this.fetchCommunityList(true,this.searchTextValue, params.get('topicName'),this.sortOptionSelected);
         this.globalSearchEnabled = false
       } 
       // Default case
       else {
-        this.fetchCommunityList(true);
+        this.fetchCommunityList(true,'', '',this.sortOptionSelected);
       }
       this.onSearch(this.searchTextValue,'t')
     });
@@ -150,7 +180,7 @@ export class WidgetCommunitySearchComponent {
   }
   sortOptionSelection(sortData: any){
     this.sortOptionSelected = sortData
-    this.fetchCommunityList(false,'',this.topicName,sortData,false,this.filterApply, this.factesRequest)
+    this.fetchCommunityList(false,this.searchTextValue,this.topicName,sortData,false,this.filterApply, this.factesRequest)
   }
 
   // getFilterFacets(facetsData: any) {
@@ -218,7 +248,7 @@ export class WidgetCommunitySearchComponent {
           if(facets[ele] && facets[ele].length ){
             // Add "All" option at the beginning
             newValues = [
-              { value: `All ${this.constants[`${ele}Label`]}`, id: 'all', count: 0, checked: false },
+              { value: `All ${this.constants[`${ele}Label`]}`, id: 'all', count: 0, checked: true },
               ...facets[ele].map((v: any) => ({...v, id: v.value.toLowerCase(), checked: false}))
             ]
           }
