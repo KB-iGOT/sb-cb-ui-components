@@ -1417,7 +1417,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'viewMoreUrl',
           );
         }
-        // this.canShowRecommendedLearningsTab(strip)
+        this.canShowSakshamAiTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
@@ -1440,15 +1440,16 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     }
   }
 
-  async canShowRecommendedLearningsTab(strip: any) {
+  async canShowSakshamAiTab(strip: any) {
     try {
-      let response = await this.userSvc.fetchDesigantionsData().toPromise();
-      if (!response) {
+      let response = await this.userSvc.getOrgReadData(this.configSvc.userProfile.rootOrgId).toPromise();
+      if(!response?.sakshamAIDisabled) {
+        strip.tabs[1].hideTab = true
+      } else {
         strip.tabs[1].hideTab = false
       }
     } catch (error) {
-      console.error("API Error:", error)
-      strip.tabs[1].hideTab = false
+        strip.tabs[1].hideTab = true
     }
   }
 
