@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'd-v2-bookmark-list',
@@ -16,7 +17,7 @@ export class BookmarkListComponent implements OnInit{
   totalNumberOfBookmarksCount: any = 0
 
   bookmarkPosts: any = []
-  constructor(private discussV2Svc: DiscussionV2Service){
+  constructor(private discussV2Svc: DiscussionV2Service, private _snackBar: MatSnackBar){
     
   }
 
@@ -45,6 +46,24 @@ export class BookmarkListComponent implements OnInit{
       this.page = this.page + 1
       this.getBookmarkData()
     }
+  }
+
+  bookmarkEvent(event: any) {
+    this.unbookmarkPost(event.post)
+  }
+  unbookmarkPost(post: any) {
+    const communityId = post.communityId
+    const discussionId = post.discussionId
+    this.discussV2Svc.UnBookmarkPost(communityId, discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open('Post un-bookmarked successffuly!')
+        const post = this.bookmarkPosts.find((comm: any) => comm.discussionId === discussionId)
+        post.bookmark = false
+        const postIndex = this.bookmarkPosts.findIndex((comm: any) => comm.discussionId === discussionId)
+        this.bookmarkPosts.splice(postIndex, 1)
+        this.totalNumberOfBookmarksCount =  this.totalNumberOfBookmarksCount-1
+      }
+    })
   }
 
 }

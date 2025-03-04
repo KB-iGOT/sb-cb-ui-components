@@ -91,7 +91,7 @@
                         
                         <ws-utils-horizontal-scroller-v2 [loadStatus]="'done'" [stripConfig]="strip?.stripConfig">
                             <ng-container *ngFor="let widget of strip?.loaderWidgets;">
-                                <d-v2-competency-card [widgetData]="widget?.widgetData"></d-v2-competency-card>
+                                <d-v2-competency-card class="mr-2" [widgetData]="widget?.widgetData"></d-v2-competency-card>
                             </ng-container>
                            
                         </ws-utils-horizontal-scroller-v2>

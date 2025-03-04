@@ -25,16 +25,16 @@
                         <div class="post-data">
                             <p [innerHtml]="discussion?.description" ></p>
                         </div>
-                        <div class="mt-2 flex items-center justify-between space-x-4 text-sm text-gray-600 w-4/5 post-details">
+                        <div class="mt-2 flex items-center justify-start space-x-4 text-sm text-gray-600 w-4/5 post-details">
                             <span class="flex items-center">
                                 <mat-icon class="mat-icon ">thumb_up</mat-icon>
                                 <span class="ml-2">{{discussion?.upVoteCount || 0}}</span> 
                             </span>
-                            <span class="mx-2">•</span>
+                            <!-- <span class="mx-2">•</span>
                             <span class="flex items-center">
                                 <mat-icon class="mat-icon ">visibility</mat-icon>
                                 <span class="ml-2">{{discussion?.downVoteCount || 0}}</span>
-                            </span>
+                            </span> -->
                             <span class="mx-2">•</span>
                             <span class="flex items-center">
                                 <mat-icon class="mat-icon ">chat_bubble</mat-icon>
