@@ -31,7 +31,7 @@ export class UserEnrollCommunityService {
     }
   }
   clearEnrollData() {
-    this.userEnrolledCommunityList = null;
+    this.userEnrolledCommunityList = [];
   }
 
   async getUserEnrolledCommunityList() {
