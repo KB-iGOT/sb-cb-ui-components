@@ -1443,10 +1443,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   async canShowSakshamAiTab(strip: any) {
     try {
       let response = await this.userSvc.getOrgReadData(this.configSvc.userProfile.rootOrgId).toPromise();
-      if(!response?.sakshamAIDisabled) {
-        strip.tabs[1].hideTab = true
-      } else {
+      if(response?.sakshamAIenabled) {
         strip.tabs[1].hideTab = false
+      } else {
+        strip.tabs[1].hideTab = true
       }
     } catch (error) {
         strip.tabs[1].hideTab = true
