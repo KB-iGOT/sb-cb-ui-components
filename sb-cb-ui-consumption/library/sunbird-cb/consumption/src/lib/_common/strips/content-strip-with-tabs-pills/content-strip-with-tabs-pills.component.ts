@@ -399,7 +399,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return filters;
   }
 
-  private fetchStripFromRequestData(
+  private async fetchStripFromRequestData(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     calculateParentStatus = true,
   ) {
@@ -408,7 +408,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchForYouData(strip, calculateParentStatus)
-    this.fetchAllCbpPlans(strip, calculateParentStatus);
+    await this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
 
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
@@ -1424,7 +1424,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
         strip.showOnLoader = false
         strip.tabs[0].pillsData[0].tabLoading = false
-        strip.tabs[0].hideTab = true
+        strip.tabs[0].hideTab = false
         // this.fetchDesignationBasedCourses(strip, 1, true)
         this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
         this.processStrip(
