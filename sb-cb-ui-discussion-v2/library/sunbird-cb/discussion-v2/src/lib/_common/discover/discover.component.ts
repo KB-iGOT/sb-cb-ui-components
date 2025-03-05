@@ -33,7 +33,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
       autoplay: true,
       "responsive": {
         "bannerMetaClass": "meta",
-        "customHeight": "232px",
+        "customHeight": "141px",
         "bannerMetaAlign": "middle",
         "navigationArrows": "visible",
         "customImgHeight": "141px",

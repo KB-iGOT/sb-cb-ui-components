@@ -50,7 +50,7 @@
             <ng-container  *ngIf="!isLoading">  
                <ng-container *ngIf="(communityDataList| filterSearch: localSearchTextValue).length;else noDataTemplateCall">
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                     <div *ngFor="let community of communityDataList | filterSearch: localSearchTextValue">
+                     <div class="flex md:block items-center justify-center" *ngFor="let community of communityDataList | filterSearch: localSearchTextValue">
                         <d-v2-community-card [isLoading]="isLoading" [orgDetails]="orgDetails" [community]="community" (click)="onCardClick(community)"></d-v2-community-card>
                      </div>
                   </div>
@@ -65,7 +65,7 @@
             </ng-container>
             <ng-container *ngIf="!(communityDataList?.length >= totalCount)">
                <div class="load-more-posts my-4 mt-8">
-                   <button mat-flat-button color="primary" class="w-full underline" (click)="loadMoreMembers()">Load
+                   <button mat-flat-button color="primary" class="w-full " (click)="loadMoreMembers()">Load
                        More</button>
                </div>
            </ng-container>

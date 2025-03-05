@@ -31,11 +31,24 @@
                  <mat-icon>chevron_right</mat-icon>
                </a>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
-               <div *ngFor="let topic of topicDataList | slice:0:3" >
-                <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
-                    [topicTitle]="topic?.value">
-                </d-v2-topic-card>
+            <!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!topicDataLoading">
+               <div class="">
+                  <div *ngFor="let topic of topicDataList | slice:0:3" >
+                     <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
+                         [topicTitle]="topic?.value">
+                     </d-v2-topic-card>
+                    </div>
+               </div>
+            </div> -->
+            <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4" *ngIf="!topicDataLoading">
+               <div class="flex md:block overflow-x-auto scrollbar-hide -mx-2 px-2">
+                  <div class="flex md:block space-x-4 md:space-x-7">
+                     <div *ngFor="let topic of topicDataList | slice:0:3" class="flex-shrink-0 w-[280px] md:w-auto">
+                        <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
+                            [topicTitle]="topic?.value">
+                        </d-v2-topic-card>
+                     </div>
+                  </div>
                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="topicDataLoading">
