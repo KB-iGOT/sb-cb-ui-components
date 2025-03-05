@@ -43,7 +43,6 @@ export class SingleLineTooltipDirective implements AfterViewInit, OnDestroy {
     
     if (isEllipsisActive ) {
       this.tooltip.message = element.textContent;
-      console.log('elipses')
       this.tooltip.disabled = false;
       // this.tooltip.show();
 

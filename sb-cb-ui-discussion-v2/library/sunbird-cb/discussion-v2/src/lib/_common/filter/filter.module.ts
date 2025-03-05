@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { PipesModule } from '../../_pipes/pipes.module';
 import { FormsModule } from '@angular/forms';
+import { MultiLineEllipsisModule } from '../../_directives/multi-line-ellipsis/multi-line-ellipsis.module';
 
 
 
@@ -21,7 +22,8 @@ import { FormsModule } from '@angular/forms';
     MatLegacyCheckboxModule,
     MatIconModule,
     TranslateModule,
-    PipesModule
+    PipesModule,
+    MultiLineEllipsisModule
   ],
   exports:[
     FilterComponent
