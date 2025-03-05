@@ -41,8 +41,11 @@
             </div>
             </div>
             <div class="info-text">
-               <h2  *ngIf="searchTextValue">Showing results for <span >"{{searchTextValue}}"</span></h2>
-               <h2 *ngIf="topicName">Communities under <span >"{{topicName}}"</span> ({{communityDataList?.length}})</h2>
+               <h2  *ngIf="searchTextValue">Showing results for <span class="higlight-text" >"{{searchTextValue}}"</span></h2>
+               <h2 class="flex" *ngIf="topicName">
+                  <mat-icon class="mr-2 cursor-pointer" (click)="goBackMethod()">arrow_back_ios</mat-icon>
+                  <span>Communities under <span class="higlight-text">"{{topicName}}"</span> ({{totalCount}})</span>
+               </h2>
             </div>
             <ng-container  *ngIf="!isLoading">  
                <ng-container *ngIf="(communityDataList| filterSearch: localSearchTextValue).length;else noDataTemplateCall">

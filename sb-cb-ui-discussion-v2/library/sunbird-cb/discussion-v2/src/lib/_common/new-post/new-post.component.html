@@ -28,9 +28,9 @@
                         <!-- single line show -->
                         <div class="input-wrapper flex  rounded-xl border px-2 py-2" [ngClass]="{'flex-col items-center' : isMultiLine, 
                         'editBorder':  editMode, 'items-start single-line' : !isMultiLine }">
-                            <textarea #description name="description" class="flex-1 discuss-input  border-none outline-none resize-none bg-transparent mat-body-1"
+                            <textarea #description name="description" class="flex-1 discuss-input  border-none outline-none resize-none bg-transparent mat-body-1 custom-scrollbar scrollable-content"
                                 formControlName="description" [ngClass]="{'w-full ': isMultiLine}"
-                                i18n-placeholder rows="1"
+                                i18n-placeholder rows="{{editMode?10: 1}}"
                                 [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'" 
                                 (focus)="onFocus()"
                                 (input)="autoGrow($event)"></textarea>

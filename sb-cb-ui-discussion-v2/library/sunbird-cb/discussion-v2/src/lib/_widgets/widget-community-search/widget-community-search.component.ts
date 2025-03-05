@@ -21,6 +21,7 @@ export class WidgetCommunitySearchComponent {
   orgDetails: any
   @Output() searchText = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
+  @Output() goBack = new EventEmitter<any>();
   isLoading: boolean = false;
   filterObjectList: any = {}
   constants: any
@@ -328,6 +329,10 @@ export class WidgetCommunitySearchComponent {
       this.pageNumber = this.pageNumber + 1
       this.fetchCommunityList(false,this.searchTextValue, this.topicName, this.sortOptionSelected, true)
     }
+  }
+
+  goBackMethod() {
+  this.goBack.emit('home')
   }
   
 }
