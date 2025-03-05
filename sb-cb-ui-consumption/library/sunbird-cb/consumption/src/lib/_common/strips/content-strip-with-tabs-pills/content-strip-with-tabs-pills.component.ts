@@ -1373,6 +1373,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return 0
   }
 
+  canShowHeading(strip: any): boolean {
+    if (!strip?.tabs || !Array.isArray(strip.tabs)) {
+      return true;
+    }
+    const isAllHidden = strip.tabs.every(tab => tab.hasOwnProperty('hideTab') && tab.hideTab === true);
+    return !isAllHidden;
+  }
+  
+
   // cbp plans
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
@@ -1424,7 +1433,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
         strip.showOnLoader = false
         strip.tabs[0].pillsData[0].tabLoading = false
-        strip.tabs[0].hideTab = false
+        strip.tabs[0].hideTab = true
         // this.fetchDesignationBasedCourses(strip, 1, true)
         this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
         this.processStrip(
