@@ -44,6 +44,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   showEmojiPicker = false
 
   isMultiLine = false;
+  commentMaxLength: any =1000
 
 
   constructor(
@@ -56,7 +57,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   ) {
     this.uploadForm = this.fb.group({
       // title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.maxLength(500)]],
+      description: ['', [Validators.required, Validators.maxLength(this.commentMaxLength)]],
       tags: [[]],
       files: [[]]
     });
@@ -611,5 +612,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
         return 'insert_drive_file';
     }
   }
+
 
 }

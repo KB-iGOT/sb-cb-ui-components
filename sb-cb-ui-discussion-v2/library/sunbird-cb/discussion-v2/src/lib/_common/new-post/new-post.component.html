@@ -33,6 +33,7 @@
                                 i18n-placeholder rows="{{editMode?10: 1}}"
                                 [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'" 
                                 (focus)="onFocus()"
+                                [maxlength]="commentMaxLength"
                                 (input)="autoGrow($event)"></textarea>
                             <div class="flex items-center single-line-icons" [class.hidden]="isMultiLine">
                                 <!-- <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="toggleEmojiPicker()" > -->
@@ -107,7 +108,10 @@
                              </div>
 
                             <!-- Icons that show at bottom when multi-line -->
-                        <div class="flex w-full items-center mt-2 multi-line-icons" [class.hidden]="!isMultiLine">
+                        <div class="flex w-full items-center mt-2 multi-line-icons flex-wrap" [class.hidden]="!isMultiLine">
+                            <div class="w-full">
+                                {{ description?.value?.length}}/{{commentMaxLength}}
+                            </div>
                             <div class="flex-1">
                                 <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="toggleEmojiPicker()" >
                                     <mat-icon class="icon emoji-picker cursor-pointer mr-2" aria-hidden="false" i18n-aria-label 
