@@ -1807,10 +1807,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 },
               }
           }
-          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          // this.contentSvc.searchV6(sRequest).subscribe(results => {
+          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          this.contentSvc.searchV6(sRequest).subscribe(results => {
             if (results && results.result && results.result.content) {
-            // if (true) {
               // let courses = results.result.content
               let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
               let tabResults: any
