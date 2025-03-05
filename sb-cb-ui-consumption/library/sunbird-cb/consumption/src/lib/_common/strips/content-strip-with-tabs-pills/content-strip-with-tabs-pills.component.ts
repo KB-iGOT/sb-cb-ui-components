@@ -399,7 +399,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return filters;
   }
 
-  private fetchStripFromRequestData(
+  private async fetchStripFromRequestData(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     calculateParentStatus = true,
   ) {
@@ -408,7 +408,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchForYouData(strip, calculateParentStatus)
-    this.fetchAllCbpPlans(strip, calculateParentStatus);
+    await this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
 
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
@@ -1380,6 +1380,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
+      this.canShowSakshamAiTab(strip)
+
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
@@ -1416,14 +1418,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'viewMoreUrl',
           );
         }
-        this.canShowSakshamAiTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
         strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
         strip.showOnLoader = false
         strip.tabs[0].pillsData[0].tabLoading = false
-        strip.tabs[0].hideTab = true
+        strip.tabs[0].hideTab = false
         // this.fetchDesignationBasedCourses(strip, 1, true)
         this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
         this.processStrip(
@@ -1810,7 +1811,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
           // this.contentSvc.searchV6(sRequest).subscribe(results => {
             if (results && results.result && results.result.content) {
-            // if (true) {
               // let courses = results.result.content
               let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
               let tabResults: any
