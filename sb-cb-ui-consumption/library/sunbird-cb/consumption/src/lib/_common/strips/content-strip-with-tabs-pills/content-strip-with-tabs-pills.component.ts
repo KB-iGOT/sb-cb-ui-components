@@ -1380,6 +1380,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
+      this.canShowSakshamAiTab(strip)
+
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
@@ -1416,7 +1418,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'viewMoreUrl',
           );
         }
-        this.canShowSakshamAiTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
@@ -1807,8 +1808,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 },
               }
           }
-          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          this.contentSvc.searchV6(sRequest).subscribe(results => {
+          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          // this.contentSvc.searchV6(sRequest).subscribe(results => {
             if (results && results.result && results.result.content) {
               // let courses = results.result.content
               let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
