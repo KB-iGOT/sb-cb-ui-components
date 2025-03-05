@@ -84,13 +84,13 @@ export class PostCardComponent {
     // reveseReplayDataCopy.reverse()
     // let ids:any = reveseReplayDataCopy.slice(0,this.answerPostLimit)
     const req = {
-      "filterCriteriaMap": {
-        // discussionId : [...this.replyDataCopy],
-        isActive: true, // this is to get only active posts, deleted posts won't be returned
-        communityId: this.parentPost?.communityId,
-        "type": "answerPost",
-        parentDiscussionId: this.parentPost?.discussionId,
-      },
+    "filterCriteriaMap": {
+      // discussionId : [...this.replyDataCopy],
+      // isActive: true, // this is to get only active posts, deleted posts won't be returned
+      communityId: this.parentPost?.communityId,
+      "type": "answerPost",
+      parentDiscussionId: this.parentPost?.discussionId,
+    },
       "requestedFields": [],
       "pageNumber": 0,
       "pageSize": this.answerPostLimit,
@@ -116,8 +116,11 @@ export class PostCardComponent {
     // let ids:any = reveseReplayDataCopy.slice(start,this.answerPostCount)
     const req = {
       "filterCriteriaMap": {
-        discussionId : [...this.replyDataCopy],
-        isActive: true // this is to get only active posts, deleted posts won't be returned
+        // discussionId : [...this.replyDataCopy],
+        // isActive: true, // this is to get only active posts, deleted posts won't be returned
+        communityId: this.parentPost?.communityId,
+        "type": "answerPost",
+        parentDiscussionId: this.parentPost?.discussionId,
       },
       "requestedFields": [],
       "pageNumber": this.answerPostPage,
