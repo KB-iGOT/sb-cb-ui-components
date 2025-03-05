@@ -294,7 +294,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       return !wData.strips[0].stripConfig.hideShowAll;
     }
     if (data.key === 'cbpPlan') {
-      const selectedPill = data.tabs[this.activeTabIndex].pillsData.find((pill: any) => pill.selected)
+      const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill.selected)
       if (selectedPill) {
         return selectedPill.widgets && selectedPill.widgets.length > 4
       }
@@ -800,7 +800,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -830,7 +830,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       } else {
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -871,7 +871,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         let tabResults: any[] = [];
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -999,9 +999,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     //   }
 
     // );
-
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
-    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent]?.pillsData[pillIndex];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     this.currentStripG = currentStrip;
     this.tabEventG = tabEvent
@@ -1442,11 +1441,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   async canShowSakshamAiTab(strip: any) {
     try {
-      let response = await this.userSvc.getOrgReadData(this.configSvc.userProfile.rootOrgId).toPromise();
-      if(response?.sakshamAIenabled) {
-        strip.tabs[1].hideTab = false
-      } else {
-        strip.tabs[1].hideTab = true
+      let userProfile = this.configSvc && this.configSvc.userProfile
+      if(userProfile.rootOrgId) {
+        let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
+        if(response?.sakshamAIenabled) {
+          strip.tabs[1].hideTab = false
+        } else {
+          strip.tabs[1].hideTab = true
+        }
       }
     } catch (error) {
         strip.tabs[1].hideTab = true
