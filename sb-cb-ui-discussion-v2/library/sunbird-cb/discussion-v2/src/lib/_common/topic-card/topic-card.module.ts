@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TopicCardComponent } from './topic-card.component';
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module';
 import { PipesModule } from '../../_pipes/pipes.module';
+import { MultiLineEllipsisModule } from '../../_directives/multi-line-ellipsis/multi-line-ellipsis.module';
 
 
 
@@ -13,7 +14,8 @@ import { PipesModule } from '../../_pipes/pipes.module';
   imports: [
     CommonModule,
     SkeletonLoaderModule,
-    PipesModule
+    PipesModule,
+    MultiLineEllipsisModule
   ],
   exports: [
     TopicCardComponent

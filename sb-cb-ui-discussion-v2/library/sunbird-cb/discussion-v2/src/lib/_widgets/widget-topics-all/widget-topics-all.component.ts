@@ -13,6 +13,7 @@ export class WidgetTopicsAllComponent {
   topicDataList: any = []
   sortData: any = []
     @Output() topicCardClick = new EventEmitter<any>();
+    @Output() goBack = new EventEmitter<any>();
     @Output() communityCardClick = new EventEmitter<any>();
   constructor(private discussV2Svc: DiscussionV2Service){
 
@@ -84,5 +85,8 @@ export class WidgetTopicsAllComponent {
 
   onCommunityClick(communityData: any){
     this.communityCardClick.emit(communityData)
+  }
+  goBackMethod() {
+    this.goBack.emit()
   }
 }
