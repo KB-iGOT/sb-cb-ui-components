@@ -6,7 +6,7 @@
   <ng-container *ngIf="showParentError" [sbUiResolverWidget]="widgetData.errorWidget"></ng-container>
   <ng-container *ngIf="showParentNoData" [sbUiResolverWidget]="widgetData.noDataWidget"></ng-container>
   <ng-container *ngFor="let key of stripsKeyOrder; let i = index; trackBy: identify">
-    <ng-container *ngIf="isStripShowing(stripsResultDataMap[key])">
+    <ng-container *ngIf="isStripShowing(stripsResultDataMap[key]) && canShowHeading(stripsResultDataMap[key])">
       <a name="{{stripsResultDataMap[key]?.stripTitle}}" [class]="key">
         <div *ngIf="stripsResultDataMap && (getLength(stripsResultDataMap[key]) ||
                     stripsResultDataMap[key]?.showOnNoData ||
