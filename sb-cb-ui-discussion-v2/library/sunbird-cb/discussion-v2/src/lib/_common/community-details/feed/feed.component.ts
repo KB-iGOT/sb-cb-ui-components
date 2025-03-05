@@ -95,7 +95,7 @@ export class FeedComponent implements OnInit, OnChanges{
         "filterCriteriaMap": {
           "type": "question",
           "communityId": this.community.communityId,
-          isActive: true // this is to get only active posts, deleted posts won't be returned
+          // isActive: true // this is to get only active posts, deleted posts won't be returned
         },
         "requestedFields": [],
         "pageNumber": pageReset? 0 : this.commentListOffSet,
