@@ -1831,7 +1831,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                   let countOfWidget = true
                   if(strip && strip?.tabs && strip?.tabs?.length) {
                     strip.tabs.forEach((tab:any)=> {
-                      if(tab.value === SakshamAI.SakshamAI && tab.pillsData && tab.pillsData.length) {
+                      if(tab?.value === SakshamAI.SakshamAI && tab?.pillsData && tab?.pillsData.length) {
                         tab.pillsData.forEach((pill: any) => {
                           if(pill && pill.widgets && pill.widgets.length){
                             if(countOfWidget){
