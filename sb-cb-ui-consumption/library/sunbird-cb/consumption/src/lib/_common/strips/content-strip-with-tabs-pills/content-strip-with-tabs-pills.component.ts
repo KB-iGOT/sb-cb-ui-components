@@ -1088,7 +1088,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               if (strip.tabs && strip.tabs.length) {
                 tabResults = this.splitDesignationsTabData(courses, strip, enollData, response, 'designation')
                 let countOfWidget = true
-                if (strip && strip.tabs && strip.tabs.length) {
+                if (strip && strip?.tabs && strip?.tabs?.length) {
                   strip.tabs.forEach((tab: any) => {
                     if (tab.value === 'designation' && tab.pillsData && tab.pillsData.length) {
                       tab.pillsData.forEach((pill: any) => {
@@ -1821,56 +1821,61 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }
           // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
           this.contentSvc.searchV6(sRequest).subscribe(results => {
-            if (results && results.result && results.result.content) {
-              // let courses = results.result.content
-              let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
-              let tabResults: any
-              if (strip.tabs && strip.tabs.length) {
-                tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
-                let countOfWidget = true
-                if(strip && strip.tabs && strip.tabs.length) {
-                  strip.tabs.forEach((tab:any)=> {
-                    if(tab.value === SakshamAI.SakshamAI && tab.pillsData && tab.pillsData.length) {
-                      tab.pillsData.forEach((pill: any) => {
-                        if(pill && pill.widgets && pill.widgets.length){
-                          if(countOfWidget){
-                            pill.selected = true
-                            countOfWidget= false
+            if(results.result.count > 0) {
+              if (results && results?.result && results?.result?.content) {
+                // let courses = results.result.content
+                let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
+                let tabResults: any
+                if (strip?.tabs && strip?.tabs?.length) {
+                  tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
+                  let countOfWidget = true
+                  if(strip && strip?.tabs && strip?.tabs?.length) {
+                    strip.tabs.forEach((tab:any)=> {
+                      if(tab?.value === SakshamAI.SakshamAI && tab?.pillsData && tab?.pillsData.length) {
+                        tab.pillsData.forEach((pill: any) => {
+                          if(pill && pill.widgets && pill.widgets.length){
+                            if(countOfWidget){
+                              pill.selected = true
+                              countOfWidget= false
+                            }
                           }
-                        }
-                      });
-                    }
-                  })
+                        });
+                      }
+                    })
+                  }
+                  strip.tabs[tabIndex].pillsData[0].selected = true
+                  strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                  strip.showOnLoader = false
+                  strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                  this.processStrip(
+                    strip,
+                    this.transformContentsToWidgets(courses, strip),
+                    'done',
+                    calculateParentStatus,
+                    '',
+                    tabResults
+                  )
+                  if(!this.firstTimeLoaded) {
+                    this.recommendationPopup = true
+                    this.firstTimeLoaded = true
+                  }
+                } else {
+                  strip.tabs[tabIndex].pillsData[0].selected = true
+                  strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                  strip.showOnLoader = false
+                  strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                  this.processStrip(
+                    strip,
+                    this.transformContentsToWidgets(courses, strip),
+                    'done',
+                    calculateParentStatus,
+                    'viewMoreUrl', strip.tabs
+                  )
                 }
-                strip.tabs[tabIndex].pillsData[0].selected = true
-                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
-                strip.showOnLoader = false
-                strip.tabs[tabIndex].pillsData[0].tabLoading = false
-                this.processStrip(
-                  strip,
-                  this.transformContentsToWidgets(courses, strip),
-                  'done',
-                  calculateParentStatus,
-                  '',
-                  tabResults
-                )
-                if(!this.firstTimeLoaded) {
-                  this.recommendationPopup = true
-                  this.firstTimeLoaded = true
-                }
-              } else {
-                strip.tabs[tabIndex].pillsData[0].selected = true
-                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
-                strip.showOnLoader = false
-                strip.tabs[tabIndex].pillsData[0].tabLoading = false
-                this.processStrip(
-                  strip,
-                  this.transformContentsToWidgets(courses, strip),
-                  'done',
-                  calculateParentStatus,
-                  'viewMoreUrl', strip.tabs
-                )
               }
+            }
+            else {
+              strip.tabs[tabIndex].hideTab = true
             }
           })
         } else {
