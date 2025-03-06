@@ -220,7 +220,7 @@ export class PostCardComponent {
         this.loading = false
       }
       this.reportPending = false
-      this.post = res.result
+      // this.post = res.result
       this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
     },
       () => {
