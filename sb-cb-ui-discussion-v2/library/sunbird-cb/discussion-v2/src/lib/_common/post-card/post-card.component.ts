@@ -300,12 +300,12 @@ export class PostCardComponent {
   }
 
   updateRepliesData(eventData: any) {
-    this.replyDataCopy = eventData.replyDataCopy
+    this.replyDataCopy = [...eventData.replyDataCopy]
     this.fetchedReplyData = [...eventData.replyData]
     return this.fetchedReplyData 
   }
 
-  newCommentEvent(event: any) {
+  newCommentEvent(event: any, level?: string) {
     console.log('newCommentEvent::', event)
     if (event.result && event.result.discussionId) {
       this.loading = true
@@ -314,7 +314,9 @@ export class PostCardComponent {
       this.replyDataCopy = this.replyDataCopy.slice()
       this.ref.markForCheck()
       this.getListOfReplies()
-      // this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
+      if(level) {
+        this.newComment.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
+      }
     }
   }
 
