@@ -32,6 +32,7 @@ const API_END_POINTS = {
     `apis/proxies/v8/learner/course/v2/user/enrollment/list/${userId}?orgdetails=${orgdetails}&licenseDetails=${licenseDetails}&fields=${fields},courseCategory,${competencyKey}&batchDetails=${batchDetails}`,
   FETCH_DESIGNATION_COURSES: `/apis/proxies/v8/courseRecommend/v1/courses`,
   GET_RECOMMENDED_COURSES_WITH_FEEDBACK: (userId: string) => `/apis/proxies/v8/courseRecommendation/read/${userId}`,
+  ORG_READ: '/api/org/v1/read',
 };
 
 @Injectable({
@@ -413,5 +414,18 @@ export class WidgetUserServiceLib {
     )
     return result
   }
+
+  getOrgReadData(organisationId: string): Observable<any> {
+      const request = {
+          request: {
+            organisationId,
+          },
+      };
+      return this.http.post<any>(API_END_POINTS.ORG_READ, request).pipe(
+          map((res: any) => {
+          return lodash.get(res, 'result.response');
+          })
+      );
+    }
 
 }

@@ -78,7 +78,7 @@
         <div class="progress-block" *ngIf="!widgetData?.content?.externalId">
           <div class="completed-time">
             <mat-icon class="mat-icon  schedule margin-right-xs">schedule</mat-icon>
-            <span>{{widgetData?.content?.completionPercentage}}%</span>
+            <span>{{widgetData?.content?.completionPercentage | number: '1.0-2'}}%</span>
           </div>
           <div>
             <ng-container *ngIf="widgetData?.content?.completionStatus < 2">

@@ -294,7 +294,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       return !wData.strips[0].stripConfig.hideShowAll;
     }
     if (data.key === 'cbpPlan') {
-      const selectedPill = data.tabs[this.activeTabIndex].pillsData.find((pill: any) => pill.selected)
+      const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill.selected)
       if (selectedPill) {
         return selectedPill.widgets && selectedPill.widgets.length > 4
       }
@@ -399,7 +399,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return filters;
   }
 
-  private fetchStripFromRequestData(
+  private async fetchStripFromRequestData(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     calculateParentStatus = true,
   ) {
@@ -408,12 +408,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchForYouData(strip, calculateParentStatus)
-    this.fetchAllCbpPlans(strip, calculateParentStatus);
+    await this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
 
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
     }
+    this.canShowSakshamAiTab(strip)
     // this.fetchFromEnrollmentList(strip, calculateParentStatus);
 
     // this.enrollInterval = setInterval(() => {
@@ -800,7 +801,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -830,7 +831,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       } else {
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -871,7 +872,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         let tabResults: any[] = [];
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex].pillsData;
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -999,9 +1000,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     //   }
 
     // );
-
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
-    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent].pillsData[pillIndex];
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent]?.pillsData[pillIndex];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     this.currentStripG = currentStrip;
     this.tabEventG = tabEvent
@@ -1374,6 +1374,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return 0
   }
 
+  canShowHeading(strip: any): boolean {
+    if (!strip?.tabs || !Array.isArray(strip.tabs)) {
+      return true;
+    }
+    const isAllHidden = strip.tabs.every(tab => tab.hasOwnProperty('hideTab') && tab.hideTab === true);
+    return !isAllHidden;
+  }
+  
+
   // cbp plans
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
@@ -1381,6 +1390,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
+      
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
@@ -1417,7 +1427,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'viewMoreUrl',
           );
         }
-        // this.canShowRecommendedLearningsTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
@@ -1440,15 +1449,21 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     }
   }
 
-  async canShowRecommendedLearningsTab(strip: any) {
+  async canShowSakshamAiTab(strip: any) {
     try {
-      let response = await this.userSvc.fetchDesigantionsData().toPromise();
-      if (!response) {
-        strip.tabs[1].hideTab = false
+      let userProfile = this.configSvc && this.configSvc.userProfile
+      if(userProfile.rootOrgId) {
+        let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
+        if(response?.sakshamAIenabled) {
+          strip.tabs[1].hideTab = false
+          this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
+
+        } else {
+          strip.tabs[1].hideTab = true
+        }
       }
     } catch (error) {
-      console.error("API Error:", error)
-      strip.tabs[1].hideTab = false
+        strip.tabs[1].hideTab = true
     }
   }
 
@@ -1753,7 +1768,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           .toPromise()
       }
 
-      if(response.recommended_courses && response.recommended_courses.length) {
+      if(response?.recommended_courses && response?.recommended_courses?.length) {
         this.sakshamLoader = false
         this.recommendedCoursesId = response?.id || ''
         this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
@@ -1804,10 +1819,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 },
               }
           }
-          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          // this.contentSvc.searchV6(sRequest).subscribe(results => {
+          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          this.contentSvc.searchV6(sRequest).subscribe(results => {
             if (results && results.result && results.result.content) {
-            // if (true) {
               // let courses = results.result.content
               let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
               let tabResults: any
@@ -1880,6 +1894,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             tabs
           );
         }
+      }
+      else {
+        strip.tabs[tabIndex].hideTab = true
       }
     }
   }
