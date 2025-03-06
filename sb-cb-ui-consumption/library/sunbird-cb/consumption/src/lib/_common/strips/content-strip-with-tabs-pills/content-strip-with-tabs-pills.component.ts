@@ -414,6 +414,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
     }
+    this.canShowSakshamAiTab(strip)
     // this.fetchFromEnrollmentList(strip, calculateParentStatus);
 
     // this.enrollInterval = setInterval(() => {
@@ -1389,8 +1390,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      this.canShowSakshamAiTab(strip)
-
+      
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
@@ -1456,6 +1456,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
         if(response?.sakshamAIenabled) {
           strip.tabs[1].hideTab = false
+          this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
+
         } else {
           strip.tabs[1].hideTab = true
         }
@@ -1766,7 +1768,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           .toPromise()
       }
 
-      if(response.recommended_courses && response.recommended_courses.length) {
+      if(response?.recommended_courses && response?.recommended_courses?.length) {
         this.sakshamLoader = false
         this.recommendedCoursesId = response?.id || ''
         this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
@@ -1892,6 +1894,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             tabs
           );
         }
+      }
+      else {
+        strip.tabs[tabIndex].hideTab = true
       }
     }
   }
