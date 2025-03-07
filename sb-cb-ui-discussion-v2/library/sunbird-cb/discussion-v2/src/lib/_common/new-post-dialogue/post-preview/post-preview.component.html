@@ -34,7 +34,7 @@
                 [innerHTML]="post?.title">
             </div>
         </div> -->
-        <div class="comment-txt mat-body-1 ws-mat-black-text description break-all {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+        <div class="comment-txt mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
              [innerHTML]="post?.description">
         </div>
         <div class="more-or-less text-right" *ngIf="getEditorTextLength(post?.description) > viewMoreLength">
