@@ -117,6 +117,7 @@
 <ng-template #mainContent let-data="data">
     <div class="flex items-center justify-center" [ngStyle]="{'background': data.background}">
         <div class="container">
+            
             <div class="block md:hidden col-span-12 padding-left-m padding-right-m padding-top-m padding-bottom-m">
                 <sb-uic-cbp-plan
                     [layoutType]="'web'"
@@ -152,6 +153,11 @@
             </div>
             <div class="grid grid-cols-12 gap-4 padding-top-m mb-6">
                 <div class="col-span-12 md:col-span-{{data.tabSection.colspan}}">
+                    <div class="" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
+                        <sb-uic-highlights-of-week
+                            [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data">
+                        </sb-uic-highlights-of-week>
+                    </div>
                     <!-- Tabs Section -->
                     <mat-tab-group animationDuration="0ms" class="mat-tab-labels mytabs w-full "
                         [selectedIndex]="selectedIndex" (selectedTabChange)="selectedIndex = $event.index; tabClicked($event)">
