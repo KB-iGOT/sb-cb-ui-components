@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, Inject, Output, EventEmitter } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
-import { ConfigurationsService } from '@sunbird-cb/utils-v2';
+import { ConfigurationsService, UtilityService } from '@sunbird-cb/utils-v2';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +20,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
   @Input() feedWidgetData: any | undefined
   @Input() communityWidgetData: any | undefined
   @Output() similarCommunityClick = new EventEmitter<any>();
-  defaultPosterThumbnail: string = 'assets/instances/eagle/banners/discussion/community-banner.svg'
+  defaultPosterThumbnail: string = ''
   communityData: any = {}
   userJoinedCommunityList: any = []
   userJoinedCommunity: boolean = false
@@ -86,9 +86,11 @@ export class WidgetCommunityHomeComponent implements OnInit {
     private discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
     private userEnrollSvc: UserEnrollCommunityService,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private utilitySvc: UtilityService
   ) { 
-    
+    this.defaultPosterThumbnail = this.utilitySvc.isMobile ? 'assets/instances/eagle/banners/discussion/community-default-mb-banner.svg' : 'assets/instances/eagle/banners/discussion/community-default-pc-banner.svg'
+
     this.environment = environment
     if(this.configSvc 
       && this.configSvc.userProfile

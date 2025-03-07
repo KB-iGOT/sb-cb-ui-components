@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
+import { UtilityService } from '@sunbird-cb/utils-v2';
 
 
 @Component({
@@ -19,6 +20,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
   toppicWiseCommunitiesCopy: any = {}
   popularCommunities: any = [
   ]
+  defaultPosterThumbnail: string = ''
   sliderStyleData: any = {
     styleData: {
       "bannerMetaClass": "meta",
@@ -51,7 +53,8 @@ export class DiscoverComponent implements OnInit, OnChanges {
       
   }
 
-  constructor(private discussV2Svc:DiscussionV2Service) { 
+  constructor(private discussV2Svc:DiscussionV2Service, private utilitySvc: UtilityService) { 
+    this.defaultPosterThumbnail = this.utilitySvc.isMobile ? 'assets/instances/eagle/banners/discussion/community-default-mb-banner.svg' : 'assets/instances/eagle/banners/discussion/community-default-pc-banner.svg'
     
     // this.topicDataList
     // this.topicWiseData();
