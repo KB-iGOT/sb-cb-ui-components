@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs';
 import { MdoChannelV1Component } from './mdo-channel-v1/mdo-channel-v1.component';
 import { SkeletonLoaderLibModule } from '../../skeleton-loader-lib/skeleton-loader-lib.module';
+import { HighlightsOfWeekModule } from '../../highlights-of-week/highlights-of-week.module';
 
 import {
   AnnouncementsModule,
@@ -18,7 +19,7 @@ import {
   SlidersLibModule,
   HttpLoaderFactory,
   TopLearnersModule,
-  CbpPlanModule,
+  CbpPlanModule
 } from './../../../../public-api'
 import { MdoChannelV2Component } from './mdo-channel-v2/mdo-channel-v2.component';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -42,6 +43,7 @@ import { HttpClient } from '@angular/common/http';
     ContentStripWithTabsLibModule,
     DataPointsModule,
     SlidersLibModule,
+    HighlightsOfWeekModule,
     MatTabsModule,
     TranslateModule.forRoot({
       loader: {
