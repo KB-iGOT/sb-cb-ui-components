@@ -1,7 +1,7 @@
 import { Component, HostListener, Input, OnInit } from '@angular/core'
 import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs';
 import { ActivatedRoute, Router } from '@angular/router'
-import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
 /* tslint:disable */
 import * as _ from 'lodash'
 import { TranslateService } from '@ngx-translate/core'
@@ -14,6 +14,9 @@ import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 })
 export class MdoChannelV2Component  implements OnInit {
   @Input() sectionList:any = []
+  // @Input() configDetails: any
+  @Input() nwlConfiguration: any
+  providerId: string = '123456789'
   channnelName = ''
   orgId = ''
   selectedIndex = 0
@@ -38,6 +41,7 @@ export class MdoChannelV2Component  implements OnInit {
     private eventSvc: EventService,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
+    public configSvc: ConfigurationsService
   ) { 
     if (this.route.snapshot.data && this.route.snapshot.data.formData
       && this.route.snapshot.data.formData.data
@@ -67,6 +71,21 @@ export class MdoChannelV2Component  implements OnInit {
 
   }
 
+  raiseTabClick(event) {
+    this.eventSvc.raiseInteractTelemetry(
+      {
+        type: 'click',
+        subType: 'mdo-leaderboard',
+        id: `${event}-tab`,
+      },
+      {
+      },
+      {
+        module: 'National Learning Week',
+      }
+    )
+  }
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.channnelName = params['channel']
@@ -77,6 +96,14 @@ export class MdoChannelV2Component  implements OnInit {
     })
     this.setWidth()
   }
+
+  hideKeyHightlight(event: any, learnerReview: any) {
+    if (event) {
+      learnerReview['hideSection'] = true
+    }
+  }
+
+
 
   public tabClicked(tabEvent: MatTabChangeEvent) {
     this.raiseTelemetry(`${tabEvent.tab.textLabel} tab`)
