@@ -216,7 +216,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
     }
     // console.log('data.key', data, data.key, data.widgets);
-    return data.showStrip;
+    return data ? data.showStrip : false;
   }
 
   get isMobile() {
@@ -324,7 +324,29 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
 
     }
+    if(filters.endDate && filters.endDate['<='].indexOf('<today>') >= 0) {
+      filters.endDate['<='] = this.todayDate
+    }
+    if(filters.endDate && filters.endDate['<'].indexOf('<today>') >= 0) {
+      filters.endDate['<'] = this.todayDate
+    }
+    if(filters.startDate && filters.startDate['>='].indexOf('<today>') >= 0) {
+      filters.startDate['>='] = this.todayDate
+    }
+    if(filters.startDate && filters.startDate['>'].indexOf('<today>') >= 0) {
+      filters.startDate['>'] = this.todayDate
+    }
     return filters;
+  }
+
+  get todayDate(): string {
+    const currentDate = new Date();
+
+    const year = currentDate.getFullYear();
+    const month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Add leading zero if month is less than 10
+    const day = ('0' + currentDate.getDate()).slice(-2); // Add leading zero if day is less than 10
+
+    return `${year}-${month}-${day}`;
   }
 
   private fetchStripFromRequestData(
@@ -333,7 +355,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     // setting initial values
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
-    this.processStrip(strip, [], 'fetching', false, null);
+    if(_.get(strip, 'request.fetchData', '') === 'events') {
+      this.fetchFromSearchV6Events(strip, calculateParentStatus)
+    } else {
+      this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromEnrollmentList(strip, calculateParentStatus);
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchFromTrendingContent(strip, calculateParentStatus);
@@ -344,6 +369,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     this.fetchAllPlaylistSearch(strip, calculateParentStatus);
     this.fetchPlaylistReadData(strip, calculateParentStatus);
     this.fetchCiosContentData(strip, calculateParentStatus);
+    }
 
   }
 
@@ -2010,6 +2036,83 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           this.processStrip(strip, [], 'error', calculateParentStatus, null);
         }
     }
+  }
+
+  async fetchFromSearchV6Events(strip: NsContentStripWithTabs.IContentStripUnit, calculateParentStatus = true) {
+    if (strip.request && strip.request.searchV6 && Object.keys(strip.request.searchV6).length) {
+      // let originalFilters: any = [];
+      if (_.get(strip, 'request.searchV6.request.filters')) {
+        // originalFilters = strip.request.searchV6.request.filters;
+        strip.request.searchV6.request.filters = this.checkForDateFilters(strip.request.searchV6.request.filters);
+        strip.request.searchV6.request.filters = this.getFiltersFromArray(
+          strip.request.searchV6.request.filters,
+        );
+      }
+      if (strip.tabs && strip.tabs.length) {
+        // TODO: Have to extract requestRequired to outer level of tabs config
+        const firstTab = strip.tabs[0];
+        if (firstTab.requestRequired) {
+          if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+            const allTabs = this.stripsResultDataMap[strip.key].tabs;
+            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
+
+            this.getTabDataByNewReqSearchV6(strip, 0, currentTabFromMap, calculateParentStatus);
+          }
+        }
+
+      } else {
+        try {
+          const response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+          if (response && response.results) {
+            if (response.results.result.Event) {
+              console.log(this.transformEventsV2ToWidgets(response.results.result.Event, strip))
+              this.processStrip(
+                strip,
+                this.transformEventsV2ToWidgets(response.results.result.Event, strip),
+                'done',
+                calculateParentStatus,
+                response.viewMoreUrl,
+              );
+            } else {
+              this.processStrip(strip, [], 'error', calculateParentStatus, null);
+            }
+
+          } else {
+            this.processStrip(strip, [], 'error', calculateParentStatus, null);
+          }
+        } catch (error) {
+          // Handle errors
+          // console.error('Error:', error);
+        }
+      }
+    }
+  }
+
+  private transformEventsV2ToWidgets(
+    contents: ITodayEvents[],
+    strip: NsContentStripWithTabs.IContentStripUnit,
+  ) {
+    this.eventSvc.setEventListData(contents);
+    return (contents || []).map((content: any, idx: any) => (content ? {
+      widgetType: 'cardLib',
+      widgetSubType: 'eventCardLib',
+      widgetHostClass: 'mb-2',
+      widgetData: {
+        content,
+        cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
+        cardCustomeClass: strip.customeClass ? strip.customeClass : '',
+        context: { pageSection: strip.key, position: idx },
+        intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
+        deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
+        contentTags: strip.stripConfig && strip.stripConfig.contentTags,
+      },
+    } : {
+      widgetType: 'card',
+      widgetSubType: 'eventHubCard',
+      widgetHostClass: 'mb-2',
+      widgetData: {},
+    }
+    ));
   }
 
 }
