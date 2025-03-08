@@ -53,8 +53,8 @@
                             </div>
                         </div>
                         <div class="col-span-12 md:col-span-6">
-                            <div class="slider slider-box" *ngIf="data.sliderData && data.sliderData.sliders">
-                                <sb-uic-sliders [widgetData]="data.sliderData.sliders"
+                            <div class="slider slider-box" *ngIf="data?.sliderData && data?.sliderData?.sliders">
+                                <sb-uic-sliders [widgetData]="data?.sliderData?.sliders"
                                     [styleData]="data.sliderData.styleData"></sb-uic-sliders>
                             </div>
                         </div>
@@ -80,8 +80,8 @@
     <!-- top section m-site layout -->
     <div class="block md:hidden">
         <div class="col-span-12">
-            <div class="slider slider-box" *ngIf="data.sliderData && data.sliderData.sliders">
-                <sb-uic-sliders [widgetData]="data.sliderData.sliders"
+            <div class="slider slider-box" *ngIf="data?.sliderData && data?.sliderData?.sliders">
+                <sb-uic-sliders [widgetData]="data?.sliderData?.sliders"
                     [styleData]="data.sliderData.styleData"></sb-uic-sliders>
             </div>
         </div>
@@ -187,7 +187,7 @@
                             <ng-template mat-tab-label i18n>
                                 Learn
                             </ng-template>
-                            <ng-container *ngIf="data.tabSection.contentTab.length === contentTabEmptyResponseCount">
+                            <ng-container *ngIf="data?.tabSection?.contentTab?.length === contentTabEmptyResponseCount">
                                 <div class="flex justify-center w-full">
                                     <div class="margin-xl text-center">
                                         <img src="/assets/common/error-pages/empty_search.svg" wsUtilsImageResponsive
@@ -230,8 +230,8 @@
                     </div>
 
                     <div
-                        *ngIf="data?.stateLearningWeekSection?.events.enabled && data?.stateLearningWeekSection?.events.column[0]">
-                        <sb-uic-events [object]="data?.stateLearningWeekSection?.events.column[0]"
+                        *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column[0]">
+                        <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]"
                             [nwlEventsConfig]="nwlConfiguration"></sb-uic-events>
                     </div>
                 </div>
@@ -259,8 +259,8 @@
                         </div>
                     </div>
                     <div class="hidden md:block padding-top-xl padding-bottom-m">
-                        <div *ngIf="data.stateLearningWeekSection?.mdoLeaderboard">
-                            <sb-uic-mdo-leaderboard [object]="data.stateLearningWeekSection?.mdoLeaderboard?.data"
+                        <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard">
+                            <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data"
                                 (tabClicked)="raiseTabClick($event)"></sb-uic-mdo-leaderboard>
                         </div>
                     </div>
