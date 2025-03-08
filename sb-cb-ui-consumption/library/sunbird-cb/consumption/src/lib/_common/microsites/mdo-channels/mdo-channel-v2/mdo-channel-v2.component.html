@@ -55,7 +55,7 @@
                         <div class="col-span-12 md:col-span-6">
                             <div class="slider slider-box" *ngIf="data?.sliderData && data?.sliderData?.sliders">
                                 <sb-uic-sliders [widgetData]="data?.sliderData?.sliders"
-                                    [styleData]="data.sliderData.styleData"></sb-uic-sliders>
+                                    [styleData]="data?.sliderData?.styleData"></sb-uic-sliders>
                             </div>
                         </div>
                     </div>
@@ -82,7 +82,7 @@
         <div class="col-span-12">
             <div class="slider slider-box" *ngIf="data?.sliderData && data?.sliderData?.sliders">
                 <sb-uic-sliders [widgetData]="data?.sliderData?.sliders"
-                    [styleData]="data.sliderData.styleData"></sb-uic-sliders>
+                    [styleData]="data?.sliderData?.styleData"></sb-uic-sliders>
             </div>
         </div>
         <div class="container px-4 flex flex-col mob-container">
@@ -230,7 +230,8 @@
                     </div>
 
                     <div
-                        *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column[0]">
+                        *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column?.length &&
+                         data?.stateLearningWeekSection?.events?.column[0]">
                         <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]"
                             [nwlEventsConfig]="nwlConfiguration"></sb-uic-events>
                     </div>
