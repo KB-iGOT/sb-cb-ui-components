@@ -6,6 +6,8 @@ import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-t
 import { MdoChannelV1Component } from './mdo-channel-v1/mdo-channel-v1.component';
 import { SkeletonLoaderLibModule } from '../../skeleton-loader-lib/skeleton-loader-lib.module';
 import { HighlightsOfWeekModule } from '../../highlights-of-week/highlights-of-week.module';
+import { EventsModule } from '../../events/events.module';
+import { SpeakersModule } from '../../speakers/speakers.module';
 
 import {
   AnnouncementsModule,
@@ -24,6 +26,10 @@ import {
 import { MdoChannelV2Component } from './mdo-channel-v2/mdo-channel-v2.component';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
+import { UserProgressModule } from '../../user-progress/user-progress.module';
+import { MdoLeaderboardModule } from '../../mdo-leaderboard/mdo-leaderboard.module';
+import { KeyHighlightsModule } from '../../key-highlights/key-highlights.module';
+
 
 
 @NgModule({
@@ -44,6 +50,11 @@ import { HttpClient } from '@angular/common/http';
     DataPointsModule,
     SlidersLibModule,
     HighlightsOfWeekModule,
+    UserProgressModule,
+    EventsModule,
+    SpeakersModule,
+    MdoLeaderboardModule,
+    KeyHighlightsModule,
     MatTabsModule,
     TranslateModule.forRoot({
       loader: {
