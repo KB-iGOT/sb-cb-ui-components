@@ -43,9 +43,9 @@
                                     <div class="flex items-center logo-square ">
                                         <img alt="Application Logo" class="logo-img" [src]="data?.logo">
                                     </div>
-                                    <h1 class=" txt-ellipsis-2 break-words pt-10" [style.color]="data.titleColor">
+                                    <h1 class=" txt-ellipsis-2 break-words pt-10" [style.color]="data?.titleColor">
                                         {{data.title || channnelName}}</h1>
-                                    <p class="mat-body-1" [style.color]="data.descriptionColor">
+                                    <p class="mat-body-1" [style.color]="data?.descriptionColor">
                                         {{data?.description | slice:0:descriptionMaxLength}}
                                         <span *ngIf="data?.description?.length > descriptionMaxLength">...</span>
                                     </p>
