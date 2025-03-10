@@ -48,7 +48,7 @@
       <span *ngIf="useTranslation">
         {{ translateLabels(displayContentType, 'searchfilters') }}
       </span>
-      <span *ngIf="!useTranslation">
+      <span *ngIf="!useTranslation" class="nodtranslate">
         {{ displayContentType }}
       </span>
     </ng-container>
