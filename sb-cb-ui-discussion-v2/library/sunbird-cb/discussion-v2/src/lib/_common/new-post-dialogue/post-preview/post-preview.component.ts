@@ -14,7 +14,7 @@ export class PostPreviewComponent {
   @Input() cardConfig!: NsDiscussionV2.IPostCardConfig
   @Input() type!: string
   @Input() post!: any
-  viewMoreLength = 120
+  viewMoreLength = 160
 
   loogedInUserProfile: any = {}
   constructor(

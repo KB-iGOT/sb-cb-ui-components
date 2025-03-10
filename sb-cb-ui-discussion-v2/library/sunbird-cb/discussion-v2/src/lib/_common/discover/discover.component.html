@@ -8,7 +8,7 @@
     </div>
     <div>
         <div class="media" *ngIf="popularCommunities && popularCommunities?.length">
-            <d-v2-image-sliders [title]="'Images'" [defaultImg]="'assets/instances/eagle/banners/discussion/community-banner.svg'" (imageClickEmit)="popularCommunity($event)" [objectArray]="popularCommunities" [styleData]="sliderStyleData?.styleData"></d-v2-image-sliders>
+            <d-v2-image-sliders [title]="'Images'" [defaultImg]="defaultPosterThumbnail" (imageClickEmit)="popularCommunity($event)" [objectArray]="popularCommunities" [styleData]="sliderStyleData?.styleData"></d-v2-image-sliders>
         </div>
     </div>
 </div>
@@ -60,7 +60,7 @@
              </div> -->
 
              <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4" *ngIf="!toppicWiseCommunities[topic.value]?.isLoading">
-                <div class="flex md:block overflow-x-auto scrollbar-hide -mx-2 px-2">
+                <div class="flex md:block overflow-x-auto scrollbar-hide ">
                    <div class="flex md:block space-x-4 md:space-x-7">
                         <div  *ngFor="let item of toppicWiseCommunities[topic.value]?.communities.slice(0, 3)">
                             <d-v2-community-card [community]="item" [isLoading]="toppicWiseCommunities[topic.value]?.isLoading" [orgDetails]="orgDetails" (click)="onCardClick(item)"></d-v2-community-card>
