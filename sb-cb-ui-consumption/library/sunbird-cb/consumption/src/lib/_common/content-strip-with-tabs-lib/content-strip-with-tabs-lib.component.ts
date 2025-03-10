@@ -133,7 +133,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     // const url = window.location.href
     this.initData();
     this.contentSvc.telemetryData$.subscribe((data: any) => {
-      this.telemtryResponse.emit(data)
+      if(
+        this.widgetData.strips && this.widgetData.strips[0] &&
+        this.widgetData.strips[0]?.key !== 'cbpPlan' &&
+        this.widgetData.strips[0]?.key !== 'forYou' &&
+        this.widgetData.strips[0]?.key !== 'continueLearning'
+         && this.widgetData.strips[0]?.key === data.typeOfTelemetry 
+      ) {
+        this.telemtryResponse.emit(data)
+      }
     })
 
 

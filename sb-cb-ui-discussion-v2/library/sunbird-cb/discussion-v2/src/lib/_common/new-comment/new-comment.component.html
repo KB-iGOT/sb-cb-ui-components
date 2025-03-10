@@ -1,7 +1,7 @@
 <div class="flex flex-1 flex-col start-comment-container" [ngStyle]="config?.styles">
     <div class="flex flex-1 flex-col mb-6" *ngIf="config?.showTopInfo">
         <div class=" w-full text-center">
-            <mat-icon class="icon new-post-icon" aria-hidden="false" i18n-aria-label
+            <mat-icon class="icon new-post-icon nodtranslate" aria-hidden="false" i18n-aria-label
                 aria-label="Fail">{{config?.topInfo?.icon}}</mat-icon>
         </div>
         <div class="flex items-center justify-center" [innerHTML]="config?.topInfo?.text">
@@ -18,24 +18,22 @@
         <div class="flex flex-1 items-center">
             <form class="flex flex-1 items-center">
                 <!-- <mat-form-field appearance="outline" class="w-full pl-1"> -->
-                    <div class="relative w-full flex ">
-                        <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl" [attr.disabled]="toggleDisable()" i18n-placeholder 
+                <div class="relative w-full flex ">
+                    <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl"
+                        [attr.disabled]="toggleDisable()" i18n-placeholder
                         [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()">
-                        <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail" (click)="commentSvc?.enrolledContent && toggleEmojiPicker()">sentiment_satisfied</mat-icon>
-                        <br />
-                        <emoji-mart 
-                        class="emoji-mart absolute"
-                        set="google"
-                        *ngIf="showEmojiPicker"
-                        (emojiSelect)="addEmoji($event)"
-                        title="Pick your emoji…"
-                        ></emoji-mart>
-                    </div>
+                    <mat-icon class="icon emoji-picker nodtranslate" aria-hidden="false" i18n-aria-label
+                        aria-label="Fail"
+                        (click)="commentSvc?.enrolledContent && toggleEmojiPicker()">sentiment_satisfied</mat-icon>
+                    <br />
+                    <emoji-mart class="emoji-mart absolute" set="google" *ngIf="showEmojiPicker"
+                        (emojiSelect)="addEmoji($event)" title="Pick your emoji…"></emoji-mart>
+                </div>
                 <!-- </mat-form-field> -->
                 <button mat-flat-button color="secondary" class="primary-button custom-rounded"
                     (click)="submitComment()"
                     [disabled]="(!comment.value || comment.value.length < 1 )||!commentSvc?.enrolledContent">
-                    <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer" aria-hidden="false"
+                    <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer nodtranslate" aria-hidden="false"
                         i18n-aria-label aria-label="Report">{{config?.postBtn?.icon || 'send'}}</mat-icon>
                     <span *ngIf="config?.postBtn?.text" class="ml-1">{{config?.postBtn?.text}}</span>
                 </button>
