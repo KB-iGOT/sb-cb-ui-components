@@ -1,5 +1,5 @@
 <ng-container *ngIf="displayContentType">
-  <span [ngSwitch]="displayContentType" class="content-type-class">
+  <span [ngSwitch]="displayContentType" class="content-type-class nodtranslate">
     <ng-container *ngSwitchCase="displayContentTypeEnum?.ASSESSMENT" i18n>Assessment</ng-container>
     <ng-container *ngSwitchCase="displayContentTypeEnum?.AUDIO" i18n>Audio</ng-container>
     <ng-container *ngSwitchCase="displayContentTypeEnum?.CHANNEL" i18n>Channel</ng-container>
@@ -45,10 +45,10 @@
     <ng-container *ngSwitchCase="displayContentTypeEnum?.WEB_PAGE" i18n>Web Page</ng-container>
     <ng-container *ngSwitchCase="displayContentTypeEnum?.YOUTUBE" i18n>Youtube</ng-container>
     <ng-container *ngSwitchDefault i18n>
-      <span *ngIf="useTranslation">
+      <span *ngIf="useTranslation" class="nodtranslate">
         {{ translateLabels(displayContentType, 'searchfilters') }}
       </span>
-      <span *ngIf="!useTranslation">
+      <span *ngIf="!useTranslation" class="nodtranslate">
         {{ displayContentType }}
       </span>
     </ng-container>

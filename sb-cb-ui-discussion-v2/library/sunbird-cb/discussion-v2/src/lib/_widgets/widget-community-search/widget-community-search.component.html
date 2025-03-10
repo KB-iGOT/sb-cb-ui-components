@@ -3,7 +3,7 @@
        <!-- Column 1 -->
        <div class=" p-2 rounded-lg md:col-span-3">
          <ng-container *ngIf="!isLoading">
-            <d-v2-similar-community-card (communityClick)="onCardClick($event)"></d-v2-similar-community-card> 
+            <d-v2-similar-community-card (communityClick)="onCardClick($event)" [expandCard]="!isMobile"></d-v2-similar-community-card> 
          </ng-container>
        </div>
    

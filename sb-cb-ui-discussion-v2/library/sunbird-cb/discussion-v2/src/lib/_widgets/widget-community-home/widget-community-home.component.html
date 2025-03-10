@@ -1,11 +1,11 @@
 
 <div class="container mx-auto ">
-    <div class="banner-container">
+    <div class="banner-container px-4 md:px-0">
         <img src="{{communityData.posterImageUrl}}" alt="" (error)="changeToDefaultThumbnailImg($event)">
     </div>
     <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-start mt-2">
         <div class="community-info flex-1">
-            <div class="flex">
+            <div class="flex justify-between">
                 <h2 class="">{{communityData?.communityName}}</h2>
                 <div class="community-action flex  gap-2 items-start ">
                     <div class="block md:hidden">
@@ -26,7 +26,7 @@
                 <span class="flex items-end mr-2">
                     <mat-icon class="mr-1">list_alt</mat-icon>
                     <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
-                    <span>{{ communityData?.countOfPostCreated | plural:'post':'Posts' }}</span>
+                    <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
                 </span>
                 <span class="mx-2 self-end">•</span>
                 <span class="flex items-end mr-2">
@@ -112,11 +112,13 @@
         </ng-container>
     </mat-tab-group>
     <div class="container mx-auto  mt-6">
-        <div class="grid grid-cols-1 p-4 md:p-0 md:grid-cols-12 gap-4">
+        <div class="grid grid-cols-1 px-4 md:px-0 md:grid-cols-12 gap-0 md:gap-4">
             <!-- Column 1 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
                 <!-- <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts> -->
-                <d-v2-similar-community-card (communityClick)="similarCommunity($event)"></d-v2-similar-community-card> 
+                 <div class="hidden  md:block">
+                    <d-v2-similar-community-card (communityClick)="similarCommunity($event)"></d-v2-similar-community-card> 
+                 </div>
             </div>
         <!-- 282,372 -->
             <!-- Column 2 (Double Width on Large Screens) -->
@@ -183,12 +185,14 @@
         
             <!-- Column 3 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
+                <div class="hidden  md:block">
                 <ng-container *ngIf="communityData?.communityGuideLines">
                     <div class="mb-4">
                         <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
                     </div>
                 </ng-container>
                 <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [emitId]="true" (discussionId)="getDiscussionId($event)" [communityId]="communityId" [expandCard]="true"></d-v2-trending-discussions>
+                </div>
             </div>
         </div>
     </div>
