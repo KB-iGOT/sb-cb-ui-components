@@ -134,6 +134,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     this.initData();
     this.contentSvc.telemetryData$.subscribe((data: any) => {
       if(
+        this.widgetData.strips && this.widgetData.strips[0] &&
         this.widgetData.strips[0]?.key !== 'cbpPlan' &&
         this.widgetData.strips[0]?.key !== 'forYou' &&
         this.widgetData.strips[0]?.key !== 'continueLearning'

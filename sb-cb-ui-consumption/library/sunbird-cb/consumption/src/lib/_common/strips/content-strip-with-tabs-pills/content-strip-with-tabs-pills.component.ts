@@ -180,6 +180,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             this.telemtryResponse.emit(data)
           }
         } else if(
+          this.widgetData.strips && this.widgetData.strips[0] &&
           this.widgetData.strips[0]?.key !== 'cbpPlan' &&
           this.widgetData.strips[0]?.key !== 'forYou' &&
           this.widgetData.strips[0]?.key !== 'continueLearning'
@@ -300,19 +301,20 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     data: IStripUnitContentData
   ) {
     if (
+      wData.strips && wData.strips[0] &&
       wData.strips[0].stripConfig &&
       wData.strips[0].stripConfig.hideShowAll
     ) {
       return !wData.strips[0].stripConfig.hideShowAll;
     }
-    if (data.key === "cbpPlan") {
+    if (data.key && data.key === "cbpPlan") {
       const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find(
         (pill: any) => pill.selected
       );
       if (selectedPill) {
         return selectedPill.widgets && selectedPill?.widgets.length > 4;
       }
-    } else if (data.key === "continueLearning") {
+    } else if (data.key && data.key === "continueLearning") {
       return (
         wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 1
       );
