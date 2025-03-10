@@ -53,7 +53,7 @@ export class CardMdoChannelV1Component implements OnInit {
   raiseTelemetry(contentData: any) {
     this.emitTelemetry.emit(contentData)
     if (this.widgetData) {
-      contentData['typeOfTelemetry'] = 'mdo-channels'
+      contentData['typeOfTelemetry'] = 'mdoChannel'
     }
     this.contSvc.changeTelemetryData(contentData)
   }
