@@ -64,7 +64,7 @@
         'border-width': isMobile?  styleData?.responsive?.imageBorderWidth : styleData?.imageBorderWidth,
         'border-color': isMobile? styleData?.responsive?.imageBorderColor : styleData?.imageBorderColor,
         'border-style': isMobile? styleData?.responsive?.imageBorderStyle: styleData?.imageBorderStyle}">
-      <img i18n-alt alt="Image{{i}}" [src]="slide" class=" banner-image"  />
+      <img i18n-alt alt="Image{{i}}" [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight" [src]="slide" class=" banner-image"  />
     </div>
   </a>
   <ng-container *ngIf="isMobile && styleData?.responsive?.dots !== 'hidden' || !isMobile && styleData?.dots !== 'hidden'">
