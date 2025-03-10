@@ -44,6 +44,9 @@ export namespace NSSearch {
     isStandAlone?: boolean;
     didYouMean?: boolean;
     request?: ISearchV6Request;
+    api?: {
+      path: string
+    }
   }
 
   export interface ISearchV6RequestV2 {
