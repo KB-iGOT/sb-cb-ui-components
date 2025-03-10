@@ -164,11 +164,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
     if(!this.telementrySubscription && !this.contentSvc.isTelementrySubscribed) {
       this.telementrySubscription = this.contentSvc.telemetryData$.subscribe((data: any) => {
+        if(!data) return 
         this.contentSvc.setTelementrySubscription(true)
         if (this.widgetData && this.widgetData.strips[0] && 
-          (this.widgetData.strips[0]?.key === 'cbpPlan') 
+          ((this.widgetData.strips[0]?.key === 'cbpPlan') 
           || this.widgetData.strips[0]?.key === 'forYou'
-          || this.widgetData.strips[0]?.key === 'continueLearning') {
+          || this.widgetData.strips[0]?.key === 'continueLearning') 
+          && this.widgetData.strips[0].key  === data.typeOfTelemetry) {
           const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
           // const pill = tab.pillsData[this.activePillIndex]
           const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) =>  pill?.selected );
@@ -177,7 +179,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
             this.telemtryResponse.emit(data)
           }
-        } else {
+        } else if(
+          this.widgetData.strips[0]?.key !== 'cbpPlan' &&
+          this.widgetData.strips[0]?.key !== 'forYou' &&
+          this.widgetData.strips[0]?.key !== 'continueLearning'
+        ) {
           this.telemtryResponse.emit(data)
         }
       })
@@ -289,17 +295,31 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return {};
 
   }
-  checkCondition(wData: NsContentStripWithTabsAndPills.IContentStripMultiple, data: IStripUnitContentData) {
-    if (wData.strips[0].stripConfig && wData.strips[0].stripConfig.hideShowAll) {
+  checkCondition(
+    wData: NsContentStripWithTabsAndPills.IContentStripMultiple,
+    data: IStripUnitContentData
+  ) {
+    if (
+      wData.strips[0].stripConfig &&
+      wData.strips[0].stripConfig.hideShowAll
+    ) {
       return !wData.strips[0].stripConfig.hideShowAll;
     }
-    if (data.key === 'cbpPlan') {
-      const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill.selected)
+    if (data.key === "cbpPlan") {
+      const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find(
+        (pill: any) => pill.selected
+      );
       if (selectedPill) {
-        return selectedPill.widgets && selectedPill.widgets.length > 4
+        return selectedPill.widgets && selectedPill?.widgets.length > 4;
       }
+    } else if (data.key === "continueLearning") {
+      return (
+        wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 1
+      );
     } else {
-      wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4
+      return (
+        wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4
+      );
     }
   }
   checkVisible(data: IStripUnitContentData) {
@@ -1705,7 +1725,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       const dateB: any = new Date(b.lastContentAccessTime || 0);
       return dateB - dateA;
     });
-
     if (strip && strip.tabs && strip.tabs.length) {
       if (strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length) {
         let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]

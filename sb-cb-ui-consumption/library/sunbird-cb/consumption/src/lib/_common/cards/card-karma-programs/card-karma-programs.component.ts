@@ -71,8 +71,6 @@ export class CardKarmaProgramsComponent implements OnInit {
     }
   }
 
- 
-
   get getRandomColors(){
     const randomIndex1 = Math.floor(Math.random() * Math.floor(this.randomColors.length))
     return this.randomColors[randomIndex1]
@@ -80,7 +78,7 @@ export class CardKarmaProgramsComponent implements OnInit {
 
   redirectTo(data: any) {
     if (this.widgetData && this.widgetData.context && this.widgetData.context.pageSection) {
-      data['typeOfTelemetry'] = 'karma-programs'
+      data['typeOfTelemetry'] = "karmaProgram"
     }
     this.contSvc.changeTelemetryData(data)
     this.router.navigate(
