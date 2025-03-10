@@ -164,11 +164,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
     if(!this.telementrySubscription && !this.contentSvc.isTelementrySubscribed) {
       this.telementrySubscription = this.contentSvc.telemetryData$.subscribe((data: any) => {
+        if(!data) return 
         this.contentSvc.setTelementrySubscription(true)
         if (this.widgetData && this.widgetData.strips[0] && 
-          (this.widgetData.strips[0]?.key === 'cbpPlan') 
+          ((this.widgetData.strips[0]?.key === 'cbpPlan') 
           || this.widgetData.strips[0]?.key === 'forYou'
-          || this.widgetData.strips[0]?.key === 'continueLearning') {
+          || this.widgetData.strips[0]?.key === 'continueLearning') 
+          && this.widgetData.strips[0].key  === data.typeOfTelemetry) {
           const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
           // const pill = tab.pillsData[this.activePillIndex]
           const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) =>  pill?.selected );
@@ -177,7 +179,12 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
             this.telemtryResponse.emit(data)
           }
-        } else {
+        } else if(
+          this.widgetData.strips && this.widgetData.strips[0] &&
+          this.widgetData.strips[0]?.key !== 'cbpPlan' &&
+          this.widgetData.strips[0]?.key !== 'forYou' &&
+          this.widgetData.strips[0]?.key !== 'continueLearning'
+        ) {
           this.telemtryResponse.emit(data)
         }
       })
@@ -289,17 +296,32 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return {};
 
   }
-  checkCondition(wData: NsContentStripWithTabsAndPills.IContentStripMultiple, data: IStripUnitContentData) {
-    if (wData.strips[0].stripConfig && wData.strips[0].stripConfig.hideShowAll) {
+  checkCondition(
+    wData: NsContentStripWithTabsAndPills.IContentStripMultiple,
+    data: IStripUnitContentData
+  ) {
+    if (
+      wData.strips && wData.strips[0] &&
+      wData.strips[0].stripConfig &&
+      wData.strips[0].stripConfig.hideShowAll
+    ) {
       return !wData.strips[0].stripConfig.hideShowAll;
     }
-    if (data.key === 'cbpPlan') {
-      const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill.selected)
+    if (data.key && data.key === "cbpPlan") {
+      const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find(
+        (pill: any) => pill.selected
+      );
       if (selectedPill) {
-        return selectedPill.widgets && selectedPill.widgets.length > 4
+        return selectedPill.widgets && selectedPill?.widgets.length > 4;
       }
+    } else if (data.key && data.key === "continueLearning") {
+      return (
+        wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 1
+      );
     } else {
-      wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4
+      return (
+        wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4
+      );
     }
   }
   checkVisible(data: IStripUnitContentData) {
@@ -399,7 +421,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return filters;
   }
 
-  private fetchStripFromRequestData(
+  private async fetchStripFromRequestData(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     calculateParentStatus = true,
   ) {
@@ -408,12 +430,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchForYouData(strip, calculateParentStatus)
-    this.fetchAllCbpPlans(strip, calculateParentStatus);
+    await this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
 
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
     }
+    this.canShowSakshamAiTab(strip)
     // this.fetchFromEnrollmentList(strip, calculateParentStatus);
 
     // this.enrollInterval = setInterval(() => {
@@ -1087,7 +1110,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               if (strip.tabs && strip.tabs.length) {
                 tabResults = this.splitDesignationsTabData(courses, strip, enollData, response, 'designation')
                 let countOfWidget = true
-                if (strip && strip.tabs && strip.tabs.length) {
+                if (strip && strip?.tabs && strip?.tabs?.length) {
                   strip.tabs.forEach((tab: any) => {
                     if (tab.value === 'designation' && tab.pillsData && tab.pillsData.length) {
                       tab.pillsData.forEach((pill: any) => {
@@ -1373,6 +1396,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return 0
   }
 
+  canShowHeading(strip: any): boolean {
+    if (!strip?.tabs || !Array.isArray(strip.tabs)) {
+      return true;
+    }
+    const isAllHidden = strip.tabs.every(tab => tab.hasOwnProperty('hideTab') && tab.hideTab === true);
+    return !isAllHidden;
+  }
+  
+
   // cbp plans
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
@@ -1380,6 +1412,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
+      
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
         if (strip.tabs && strip.tabs.length) {
@@ -1416,7 +1449,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'viewMoreUrl',
           );
         }
-        this.canShowSakshamAiTab(strip)
       } else {
         strip.tabs[0].pillsData[0].selected = true
         strip.tabs[0].pillsData[0].widgets = []
@@ -1446,6 +1478,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
         if(response?.sakshamAIenabled) {
           strip.tabs[1].hideTab = false
+          this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
+
         } else {
           strip.tabs[1].hideTab = true
         }
@@ -1693,7 +1727,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       const dateB: any = new Date(b.lastContentAccessTime || 0);
       return dateB - dateA;
     });
-
     if (strip && strip.tabs && strip.tabs.length) {
       if (strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length) {
         let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
@@ -1756,7 +1789,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           .toPromise()
       }
 
-      if(response.recommended_courses && response.recommended_courses.length) {
+      if(response?.recommended_courses && response?.recommended_courses?.length) {
         this.sakshamLoader = false
         this.recommendedCoursesId = response?.id || ''
         this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
@@ -1807,59 +1840,63 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 },
               }
           }
-          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          // this.contentSvc.searchV6(sRequest).subscribe(results => {
-            if (results && results.result && results.result.content) {
-            // if (true) {
-              // let courses = results.result.content
-              let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
-              let tabResults: any
-              if (strip.tabs && strip.tabs.length) {
-                tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
-                let countOfWidget = true
-                if(strip && strip.tabs && strip.tabs.length) {
-                  strip.tabs.forEach((tab:any)=> {
-                    if(tab.value === SakshamAI.SakshamAI && tab.pillsData && tab.pillsData.length) {
-                      tab.pillsData.forEach((pill: any) => {
-                        if(pill && pill.widgets && pill.widgets.length){
-                          if(countOfWidget){
-                            pill.selected = true
-                            countOfWidget= false
+          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          this.contentSvc.searchV6(sRequest).subscribe(results => {
+            if(results.result.count > 0) {
+              if (results && results?.result && results?.result?.content) {
+                // let courses = results.result.content
+                let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
+                let tabResults: any
+                if (strip?.tabs && strip?.tabs?.length) {
+                  tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
+                  let countOfWidget = true
+                  if(strip && strip?.tabs && strip?.tabs?.length) {
+                    strip.tabs.forEach((tab:any)=> {
+                      if(tab?.value === SakshamAI.SakshamAI && tab?.pillsData && tab?.pillsData.length) {
+                        tab.pillsData.forEach((pill: any) => {
+                          if(pill && pill.widgets && pill.widgets.length){
+                            if(countOfWidget){
+                              pill.selected = true
+                              countOfWidget= false
+                            }
                           }
-                        }
-                      });
-                    }
-                  })
+                        });
+                      }
+                    })
+                  }
+                  strip.tabs[tabIndex].pillsData[0].selected = true
+                  strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                  strip.showOnLoader = false
+                  strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                  this.processStrip(
+                    strip,
+                    this.transformContentsToWidgets(courses, strip),
+                    'done',
+                    calculateParentStatus,
+                    '',
+                    tabResults
+                  )
+                  if(!this.firstTimeLoaded) {
+                    this.recommendationPopup = true
+                    this.firstTimeLoaded = true
+                  }
+                } else {
+                  strip.tabs[tabIndex].pillsData[0].selected = true
+                  strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                  strip.showOnLoader = false
+                  strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                  this.processStrip(
+                    strip,
+                    this.transformContentsToWidgets(courses, strip),
+                    'done',
+                    calculateParentStatus,
+                    'viewMoreUrl', strip.tabs
+                  )
                 }
-                strip.tabs[tabIndex].pillsData[0].selected = true
-                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
-                strip.showOnLoader = false
-                strip.tabs[tabIndex].pillsData[0].tabLoading = false
-                this.processStrip(
-                  strip,
-                  this.transformContentsToWidgets(courses, strip),
-                  'done',
-                  calculateParentStatus,
-                  '',
-                  tabResults
-                )
-                if(!this.firstTimeLoaded) {
-                  this.recommendationPopup = true
-                  this.firstTimeLoaded = true
-                }
-              } else {
-                strip.tabs[tabIndex].pillsData[0].selected = true
-                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
-                strip.showOnLoader = false
-                strip.tabs[tabIndex].pillsData[0].tabLoading = false
-                this.processStrip(
-                  strip,
-                  this.transformContentsToWidgets(courses, strip),
-                  'done',
-                  calculateParentStatus,
-                  'viewMoreUrl', strip.tabs
-                )
               }
+            }
+            else {
+              strip.tabs[tabIndex].hideTab = true
             }
           })
         } else {
@@ -1883,6 +1920,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             tabs
           );
         }
+      }
+      else {
+        strip.tabs[tabIndex].hideTab = true
       }
     }
   }

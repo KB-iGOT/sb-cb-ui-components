@@ -84,13 +84,13 @@ export class PostCardComponent {
     // reveseReplayDataCopy.reverse()
     // let ids:any = reveseReplayDataCopy.slice(0,this.answerPostLimit)
     const req = {
-      "filterCriteriaMap": {
-        // discussionId : [...this.replyDataCopy],
-        isActive: true, // this is to get only active posts, deleted posts won't be returned
-        communityId: this.parentPost?.communityId,
-        "type": "answerPost",
-        parentDiscussionId: this.parentPost?.discussionId,
-      },
+    "filterCriteriaMap": {
+      // discussionId : [...this.replyDataCopy],
+      // isActive: true, // this is to get only active posts, deleted posts won't be returned
+      communityId: this.parentPost?.communityId,
+      "type": "answerPost",
+      parentDiscussionId: this.parentPost?.discussionId,
+    },
       "requestedFields": [],
       "pageNumber": 0,
       "pageSize": this.answerPostLimit,
@@ -116,8 +116,11 @@ export class PostCardComponent {
     // let ids:any = reveseReplayDataCopy.slice(start,this.answerPostCount)
     const req = {
       "filterCriteriaMap": {
-        discussionId : [...this.replyDataCopy],
-        isActive: true // this is to get only active posts, deleted posts won't be returned
+        // discussionId : [...this.replyDataCopy],
+        // isActive: true, // this is to get only active posts, deleted posts won't be returned
+        communityId: this.parentPost?.communityId,
+        "type": "answerPost",
+        parentDiscussionId: this.parentPost?.discussionId,
       },
       "requestedFields": [],
       "pageNumber": this.answerPostPage,
@@ -217,7 +220,7 @@ export class PostCardComponent {
         this.loading = false
       }
       this.reportPending = false
-      this.post = res.result
+      // this.post = res.result
       this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
     },
       () => {
@@ -297,12 +300,12 @@ export class PostCardComponent {
   }
 
   updateRepliesData(eventData: any) {
-    this.replyDataCopy = eventData.replyDataCopy
+    this.replyDataCopy = [...eventData.replyDataCopy]
     this.fetchedReplyData = [...eventData.replyData]
     return this.fetchedReplyData 
   }
 
-  newCommentEvent(event: any) {
+  newCommentEvent(event: any, level?: string) {
     console.log('newCommentEvent::', event)
     if (event.result && event.result.discussionId) {
       this.loading = true
@@ -311,7 +314,9 @@ export class PostCardComponent {
       this.replyDataCopy = this.replyDataCopy.slice()
       this.ref.markForCheck()
       this.getListOfReplies()
-      // this.newReply.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
+      if(level) {
+        this.newComment.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
+      }
     }
   }
 

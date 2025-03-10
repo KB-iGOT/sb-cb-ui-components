@@ -42,7 +42,7 @@
                     <span *ngFor="let user of post?.taggedUser">{{user?.first_name}}</span>
                 </span>
             </ng-container>
-            <div class="comment-txt mat-body-1 ws-mat-black-text description  break-all {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+            <div class="comment-txt mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
                  [innerHTML]="post?.description">
             </div>
             <div class="more-or-less text-right" *ngIf="getEditorTextLength(post?.description) > viewMoreLength">
@@ -177,7 +177,8 @@
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-post-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"  [community]="community" [hierarchyPath]="hierarchyPath"
                         [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [type]="cardConfig?.repliesSection?.replyCardConfig?.type" [parentPost]="post"
-                        [post]="reply" [replyData]="reply?.answerPosts" [userJoinedCommunity]="userJoinedCommunity" (likeUnlikeData)="likeUnlikeEvent($event)">
+                        [post]="reply" [replyData]="post?.answerPosts" [userJoinedCommunity]="userJoinedCommunity" (likeUnlikeData)="likeUnlikeEvent($event)"
+                        (newComment)="newCommentEvent($event, 'level2')" (newReply)="updateRepliesData($event)" >
                         </d-v2-post-card>
                     </ng-container>
                 </ng-container>
@@ -201,7 +202,7 @@
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.newPostReply"  [community]="community"
                 (newReply)="updateRepliesData($event)" [type]="cardConfig?.type"
-                 (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity" [post]="post"
+                 (newComment)="newCommentEvent($event, 'level2')" [userJoinedCommunity]="userJoinedCommunity" [post]="post"
                     [taggedUsers]="[post?.createdBy]" [hierarchyPath]="hierarchyPath">
                 </d-v2-new-post>
             </div>

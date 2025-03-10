@@ -163,6 +163,36 @@ input {
     min-height: 24px;
     max-height: 200px;
     overflow-y: hidden;
+
+}
+.custom-scrollbar {
+    /* Hide default scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 100, 100, 0.3) transparent;
+}
+
+/* Webkit (Chrome, Safari, newer versions of Opera) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;  /* Very narrow scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;  /* Transparent track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.3);  /* Light gray with opacity */
+    border-radius: 4px;  /* Rounded corners */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(100, 100, 100, 0.5);  /* Slightly darker on hover */
+}
+
+/* Example usage in HTML */
+.scrollable-content {
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 // Hide icons by default when they have the hidden class

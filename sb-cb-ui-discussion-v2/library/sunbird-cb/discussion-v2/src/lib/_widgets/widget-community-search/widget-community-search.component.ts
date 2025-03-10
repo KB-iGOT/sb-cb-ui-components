@@ -5,6 +5,7 @@ import { combineLatest } from 'rxjs';
 import { communityConstants } from '../../_model/filter-constants.model'
 import { MatBottomSheet } from '@angular/material/bottom-sheet'
 import { FilterComponent } from '../../_common/filter/filter.component';
+import { UtilityService } from '@sunbird-cb/utils-v2';
 @Component({
   selector: 'd-v2-widget-community-search',
   templateUrl: './widget-community-search.component.html',
@@ -21,6 +22,7 @@ export class WidgetCommunitySearchComponent {
   orgDetails: any
   @Output() searchText = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
+  @Output() goBack = new EventEmitter<any>();
   isLoading: boolean = false;
   filterObjectList: any = {}
   constants: any
@@ -32,8 +34,10 @@ export class WidgetCommunitySearchComponent {
   factesRequest: any = []
   filterApply: any = {}
   sortData: any
-  
-  constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute, private discussV2Svc: DiscussionV2Service) {
+  isMobile: boolean = false
+  constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute,
+    private utilitySvc: UtilityService, private discussV2Svc: DiscussionV2Service) {
+    this.isMobile = this.utilitySvc.isMobile
     this.sortData = [
       {
         key: "members",
@@ -328,6 +332,10 @@ export class WidgetCommunitySearchComponent {
       this.pageNumber = this.pageNumber + 1
       this.fetchCommunityList(false,this.searchTextValue, this.topicName, this.sortOptionSelected, true)
     }
+  }
+
+  goBackMethod() {
+  this.goBack.emit('home')
   }
   
 }
