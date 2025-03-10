@@ -6,7 +6,7 @@
 </div>
 
 <ng-template #cardEventV2>
-  <mat-card class="card-resource-container mr-5 padding-remove cursor-pointer">
+  <mat-card class="card-resource-container mr-5 padding-remove cursor-pointer card-resource-container-small" [ngClass]="widgetData?.customeClass">
     <div class="display-contents">
       <ng-container *ngIf="widgetData?.content">
         <a class="w-full"

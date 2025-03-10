@@ -2062,7 +2062,20 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
 
       } else {
         try {
-          const response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+          let response: any
+          if(strip && strip.request && strip.request.hasIdentifiersApi) {
+            const identifierStrip: any = JSON.parse(JSON.stringify(strip))
+            identifierStrip.request.searchV6['api'] = {
+              'path': identifierStrip.request.identifiersApiUrl
+            }
+            const identifiersResponse = await this.searchV6Request(identifierStrip, identifierStrip.request, calculateParentStatus)
+            if(_.get(identifiersResponse, 'results.result') && _.get(strip, 'request.searchV6.request.filters')) {
+              strip.request.searchV6.request.filters['identifier'] = _.get(identifiersResponse, 'results.result.events')
+            }
+            response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+          } else {
+            response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+          }
           if (response && response.results) {
             if (response.results.result.Event) {
               console.log(this.transformEventsV2ToWidgets(response.results.result.Event, strip))
@@ -2100,7 +2113,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       widgetData: {
         content,
         cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
-        cardCustomeClass: strip.customeClass ? strip.customeClass : '',
+        cardCustomeClass: strip.customeClass ? strip.customeClass : 'card-resource-container-small',
         context: { pageSection: strip.key, position: idx },
         intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
         deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,

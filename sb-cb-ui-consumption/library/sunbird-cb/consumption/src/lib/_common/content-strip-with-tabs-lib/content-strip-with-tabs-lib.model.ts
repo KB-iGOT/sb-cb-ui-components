@@ -71,7 +71,9 @@ export namespace NsContentStripWithTabs {
       masterCompetency?: any
       trendingSearch?: any,
       fetchData?: string,
-      payloda?: any
+      payloda?: any,
+      hasIdentifiersApi?: boolean,
+      identifiersApiUrl?: string,
     };
     searchV6Type?: 'KB' | 'Collections' | 'searchQuery' | null;
     stripBackground?: string;
