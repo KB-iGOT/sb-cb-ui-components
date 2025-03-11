@@ -1902,6 +1902,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
               fetchTabStatus: 'done',
+              widgets: [],
             };
             tabResults = allTabs;
           }
@@ -1916,6 +1917,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
+              widgets: [],
               fetchTabStatus: 'done',
             };
             tabResults = allTabs;

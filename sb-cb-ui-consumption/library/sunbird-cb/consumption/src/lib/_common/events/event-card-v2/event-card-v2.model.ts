@@ -13,6 +13,7 @@ export namespace NsCardContent {
     likes?: number
     contentTags?: IContentTags
     stateData: any
+    customeClass?: string
   }
 
   export interface IContentTags {
