@@ -123,6 +123,7 @@
     </div>
 </ng-template>
 
+
 <ng-template #mainContent let-data="data">
     <div class="flex items-center justify-center" [ngStyle]="{'background': data.background}">
         <div class="container">
@@ -217,6 +218,7 @@
                         <div
                             *ngIf="data?.stateLearningWeekSection?.mandatoryCourse?.enabled && data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data">
                             <div class="margin-top-l nlw-mandatoryCourse">
+                                <h3>mendatory courses===</h3>
                                 <sb-uic-content-strip-with-tabs [emitViewAll]="false" (viewAllResponse)="''"
                                     (telemtryResponse)="raiseTelemetryInteratEvent($event)" (emptyResponse)="''"
                                     [providerId]="'123456789'"
@@ -227,9 +229,10 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div class="">
+                        {{ data?.stateLearningWeekSection?.exploreLearningContent?.strips[0] | json }}exploreLearningContent?.strips[0]-----
                         <div
-                            *ngIf="data?.stateLearningWeekSection?.exploreLearningContent?.enabled && data?.stateLearningWeekSection?.exploreLearningContent?.strips.length
+                            *ngIf="data?.stateLearningWeekSection?.exploreLearningContent?.enabled 
                              && data?.stateLearningWeekSection?.exploreLearningContent?.strips[0]">
                             <div class="margin-top-l nlw-mandatoryCourse">
                                 <sb-uic-content-strip-with-tabs [emitViewAll]="false" (viewAllResponse)="''"
