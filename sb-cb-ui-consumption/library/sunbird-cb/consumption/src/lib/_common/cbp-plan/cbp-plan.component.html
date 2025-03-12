@@ -1,5 +1,5 @@
 <div class="w-full">
-    <div class="flex item-center cbp-logo">
+    <div class="flex item-center cbp-logo" *ngIf="contentdata.length">
         <div class="cbp-heading"
             [style.backgroundColor]="objectData?.header?.background"
             [style.color]="objectData?.header?.color">

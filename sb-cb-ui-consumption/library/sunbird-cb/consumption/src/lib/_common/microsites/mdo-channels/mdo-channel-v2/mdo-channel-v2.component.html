@@ -123,12 +123,45 @@
     </div>
 </ng-template>
 
+
 <ng-template #mainContent let-data="data">
     <div class="flex items-center justify-center" [ngStyle]="{'background': data.background}">
         <div class="container">
+            
+            <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
+                <sb-uic-key-highlights
+                    (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
+                    [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId"
+                    [mode]="'mobile'"></sb-uic-key-highlights>
+            </div>
+            <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
+                <sb-uic-highlights-of-week [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data">
+                </sb-uic-highlights-of-week>
+            </div>
+
+            <div class="block md:hidden ">
+                <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
+                    <sb-uic-user-progress [layoutType]="'web'" [mobileHeight]="false"
+                        [objectData]="data?.stateLearningWeekSection?.myprogress?.data"
+                        [rootOrgId]="configSvc?.unMappedUser?.rootOrgId">
+                    </sb-uic-user-progress>
+                </div>
+            </div>
+            <div class="block md:hidden ">
+                <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
+                    <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
+                        [objectData]="data?.stateLearningWeekSection?.speakerOftheDay?.data">
+                    </sb-uic-speakers>
+                </div>
+            </div>
+            <div class="block md:hidden ">
+                <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard">
+                    <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data"
+                        (tabClicked)="raiseTabClick($event)"></sb-uic-mdo-leaderboard>
+                </div>
+            </div>
 
             <div class="block md:hidden col-span-12 padding-left-m padding-right-m padding-top-m padding-bottom-m">
-
                 <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
                     [channelId]="orgId" [objectData]="data?.cbpPlanSection?.data">
                 </sb-uic-cbp-plan>
@@ -152,32 +185,56 @@
             <div class="col-span-12">
                 <div class="flex items-center justify-center">
                     <div class="container margin-top-xl">
-                        <div class="hidden md:block">
+                        <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
                             <sb-uic-key-highlights
                                 (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
                                 [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId"
                                 [mode]="'desktop'"></sb-uic-key-highlights>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-span-12">
-                <div class="flex items-center justify-center">
-                    <div class="container">
-                        <div class="block md:hidden" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
-                            <sb-uic-key-highlights
-                                (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
-                                [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId"
-                                [mode]="'mobile'"></sb-uic-key-highlights>
-                        </div>
+
                     </div>
                 </div>
             </div>
             <div class="grid grid-cols-12 gap-4 padding-top-m mb-6">
                 <div class="col-span-12 md:col-span-{{data.tabSection.colspan}}">
-                    <div *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
+                    <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
                         <sb-uic-highlights-of-week [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data">
                         </sb-uic-highlights-of-week>
+                    </div>
+
+                    <div>
+                        <div
+                            *ngIf="data?.stateLearningWeekSection?.mandatoryCourse?.enabled && data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data">
+                            <div class="margin-top-l nlw-mandatoryCourse">
+                                <sb-uic-content-strip-with-tabs [emitViewAll]="false" 
+                                    (telemtryResponse)="raiseTelemetryInteratEvent($event)" 
+                                    [providerId]="orgId"
+                                    [widgetData]="data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data"
+                                    [channnelName]="'channnelName'">
+                                </sb-uic-content-strip-with-tabs>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="">
+                        <div
+                            *ngIf="data?.stateLearningWeekSection?.exploreLearningContent?.enabled 
+                             && data?.stateLearningWeekSection?.exploreLearningContent?.strips[0]">
+                            <div class="margin-top-l nlw-mandatoryCourse">
+                                <sb-uic-content-strip-with-tabs [emitViewAll]="false" 
+                                    (telemtryResponse)="raiseTelemetryInteratEvent($event)" 
+                                    [providerId]="orgId"
+                                    [widgetData]="data?.stateLearningWeekSection?.exploreLearningContent"
+                                    [channnelName]="'channnelName'">
+                                </sb-uic-content-strip-with-tabs>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column?.length &&
+                         data?.stateLearningWeekSection?.events?.column[0]">
+                        <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]"
+                            [nwlEventsConfig]="nwlConfiguration"></sb-uic-events>
                     </div>
                     <!-- Tabs Section -->
                     <mat-tab-group animationDuration="0ms" class="mat-tab-labels mytabs w-full "
@@ -212,29 +269,6 @@
                             </div>
                         </mat-tab>
                     </mat-tab-group>
-
-                    <div>
-                        <div *ngIf="data?.stateLearningWeekSection?.mandatoryCourse?.enabled && data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data">
-                            <div class="margin-top-l nlw-mandatoryCourse">
-                                <sb-uic-content-strip-with-tabs
-                                    [emitViewAll]="false"
-                                    (viewAllResponse)="''"
-                                    (telemtryResponse)="raiseTelemetryInteratEvent($event)"
-                                    (emptyResponse)="''"
-                                    [providerId]="'123456789'"
-                                    [widgetData]="data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data"
-                                    [channnelName]="'channnelName'">
-                                </sb-uic-content-strip-with-tabs>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column?.length &&
-                         data?.stateLearningWeekSection?.events?.column[0]">
-                        <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]"
-                            [nwlEventsConfig]="nwlConfiguration"></sb-uic-events>
-                    </div>
                 </div>
                 <!-- <div class="col-span-12 md:col-span-8">
                     <div
@@ -378,6 +412,14 @@
 </ng-template>
 
 <ng-template #topLearners let-data="data">
+    <div class="flex items-center justify-center">
+        <div class="container mt-4 mb-4">
+            <iframe class="w-full " height="{{iframeHeight}}"
+            src="https://lookerstudio.google.com/embed/reporting/a5c74f6a-d077-40ef-b832-9c703be5029a/page/fyd9D"
+            frameborder="0" style="border:0" allowfullscreen
+            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </div>
+    </div>
     <div class="flex items-center justify-center">
         <div class="container top-learners margin-bottom-l margin-top-l">
             <sb-uic-top-learners [objectData]="data" [channnelName]="channnelName" [channelId]="orgId">

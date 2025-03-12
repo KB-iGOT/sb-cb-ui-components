@@ -34,6 +34,7 @@ export class MdoChannelV2Component  implements OnInit {
   descriptionMaxLength = 500
   isTelemetryRaised: boolean = false
   stripWidth: any
+  iframeHeight: any = '240px'
 
   constructor(
     private route: ActivatedRoute,
@@ -59,6 +60,8 @@ export class MdoChannelV2Component  implements OnInit {
         this.translate.use(lang)
       }
     })
+
+    this.iframeHeight = `${window.innerWidth *0.667}px`
   }
 
   @HostListener('window:resize')
@@ -109,6 +112,7 @@ export class MdoChannelV2Component  implements OnInit {
     this.raiseTelemetry(`${tabEvent.tab.textLabel} tab`)
   }
   hideContentStrip(event: any, colData: any) {
+
     if (event) {
       colData.contentStripData['hideSection'] = true
       this.contentTabEmptyResponseCount = this.contentTabEmptyResponseCount + 1
