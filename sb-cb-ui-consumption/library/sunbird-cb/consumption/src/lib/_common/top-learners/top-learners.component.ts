@@ -11,6 +11,7 @@ export class TopLearnersComponent implements OnInit {
   @Input() objectData: any
   @Input() channelId: any
   @Input() channnelName: any
+  @Input() slwConfig: any = {}
   loading: boolean = false
   month: string = ''
   results: any = []
@@ -31,7 +32,11 @@ export class TopLearnersComponent implements OnInit {
   constructor(public insightSvc: InsiteDataService,) { }
 
   ngOnInit() {
-    this.getData()
+    if(this.slwConfig && this.slwConfig.enabled) {
+      this.getSlwData()
+    } else {
+      this.getData()
+    }
     this.month = new Date().toLocaleString('default', { month: 'long' })
   }
 
@@ -49,6 +54,19 @@ export class TopLearnersComponent implements OnInit {
     })
   }
 
+  getSlwData() {
+    this.loading = true
+    this.insightSvc.fetchSlwLearner(this.channelId).subscribe((res: any)=> {
+      if (res && res.result && res.result.result && res.result.result.length) {
+        this.results =  res.result.result
+        this.month = moment().month(Number(res.result.result[0].month) - 1).format('MMMM')
+      }
+      this.loading = false
+    }, (_error: any) => {
+      // tslint:disable-next-line: align
+      this.loading = false
+    })
+  }
   getRank(rank: number) {
     if (rank === 1) {
       return "1st"

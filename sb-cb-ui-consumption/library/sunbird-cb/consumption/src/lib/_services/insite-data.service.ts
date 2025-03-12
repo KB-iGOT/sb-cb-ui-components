@@ -12,6 +12,9 @@ const API_END_POINTS = {
   NLW_LEADERBOARD: `apis/proxies/v8/national/learning/week/insights`,
   INSIGHTS: `apis/proxies/v8/read/user/insights`,
   USER_PROGRESS: `apis/proxies/v8/halloffame/v1/userleaderboard`,
+  SLW_LEADERBOARD: `apis/proxies/v8/halloffame/v1/state/mdoleaderboard`,
+  SLW_TOP_LEARNERS: (stateOrgId: any) =>  `apis/proxies/v8/halloffame/state/top/learners/${stateOrgId}`,
+  SLW_INSIGHTS: `apis/proxies/v8/state/learning/week/insights`
 }
 
 @Injectable({
@@ -33,6 +36,18 @@ export class InsiteDataService {
 
   fetchTrainingDetails(request: any): Observable<any> {
     return this.http.post<any>(API_END_POINTS.TRAINING_DETAILS, request)
+  }
+
+  fetchSlwLeaderboard(request: any): Observable<any> {
+    return this.http.post<any>(API_END_POINTS.SLW_LEADERBOARD, request)
+  }
+
+  fetchSwlStats(request:any) {
+    return this.http.post(`${API_END_POINTS.SLW_INSIGHTS}`, request)
+  }
+
+  fetchSlwLearner(stateOrgId: any): Observable<any> {
+    return this.http.get(`${API_END_POINTS.SLW_TOP_LEARNERS}/${stateOrgId}`)
   }
 
   fetchLearner(channelId: any): Observable<any> {
