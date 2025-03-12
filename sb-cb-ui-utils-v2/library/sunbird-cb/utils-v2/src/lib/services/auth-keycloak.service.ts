@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
 // import { KeycloakEvent, KeycloakEventType, KeycloakInitOptions, KeycloakService } from 'keycloak-angular'
 import { ReplaySubject } from 'rxjs'
 // import { filter } from 'rxjs/operators'
@@ -21,12 +21,14 @@ const storageKey = 'kc'
   providedIn: 'root',
 })
 export class AuthKeycloakService {
+  environment: any
   private loginChangeSubject = new ReplaySubject<boolean>(1)
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
     // private keycloakSvc: KeycloakService,
     private msAuthSvc: AuthMicrosoftService,
+    @Inject('environment') environment: any,
   ) {
     this.loginChangeSubject.subscribe((isLoggedIn: boolean) => {
       this.configSvc.isAuthenticated = isLoggedIn
@@ -42,6 +44,7 @@ export class AuthKeycloakService {
         }
       }
     })
+    this.environment = environment
   }
 
   // Getters
@@ -164,6 +167,7 @@ export class AuthKeycloakService {
     storage.removeItem(storageKey)
     // alert(`${redirectUrl}apis/reset`)
     window.location.href = `${redirectUrl}apis/reset`
+
     // window.location.href = 'http://localhost:3003/reset'
     //  await this.http.get('/apis/reset').toPromise()
     // setTimeout(window.location.href = `${redirectUrl}apis/reset`, 13000)
@@ -180,8 +184,13 @@ export class AuthKeycloakService {
     } else {
       // window.location.href = '/public/home'
       storage.removeItem(storageKey)
-      await this.http.get('/apis/reset').toPromise()
+      // window.location.href = `${this.environment.staticHomePageUrl}`
+      // await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
+      // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
+      window.location.href = `https://${this.environment.sitePath}/apis/reset`
       await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()
+
+
     }
     try {
       sessionStorage.clear()
@@ -190,9 +199,33 @@ export class AuthKeycloakService {
 
     }
     storage.removeItem(storageKey)
-    await this.http.get('/apis/reset').toPromise()
+    // window.location.href = `${this.environment.staticHomePageUrl}`
+    //await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
+    window.location.href = `https://${this.environment.sitePath}/apis/reset`
+    // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
+    // window.location.href = `${this.environment.staticHomePageUrl}`
     await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()
+
+
   }
+
+  openInvisibleIframe(url: string): void {
+    // Create an iframe element
+    const iframe = document.createElement('iframe')
+
+    // Set iframe attributes and make it invisible
+    iframe.src = url // The URL you want to load
+    iframe.style.position = 'absolute'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = 'none'
+    iframe.style.visibility = 'hidden' // Alternatively, use display: none
+    iframe.style.opacity = '0' // Make it invisible, while still loading content
+
+    // Append the iframe to the body or any specific container element
+    document.body.appendChild(iframe)
+  }
+
   private addKeycloakEventListener() {
     // this.keycloakSvc.keycloakEvents$.subscribe((event: KeycloakEvent) => {
     //   switch (event.type) {
