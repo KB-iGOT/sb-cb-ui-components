@@ -15,14 +15,41 @@ export class MdoLeaderboardComponent implements OnInit {
   expand: boolean = true
   disableLeft: boolean = true
   disableRight: boolean = false
+  @Input() orgId:any = ''
 
   @Input() object: any
+  @Input() slwConfig: any = {}
   @Output() tabClicked = new EventEmitter<any>()
   @ViewChild('scrollableContent', { static: false }) scrollableContent: ElementRef;
   constructor(private insiteDataService: InsiteDataService) { }
 
   ngOnInit() {
-    this.getData()
+     
+    if(this.slwConfig && this.slwConfig.enabled) {
+      this.getSlwData()
+    } else {
+      this.getData()
+    }
+   
+  }
+
+  getSlwData() {
+    let request = {
+      "request": {
+        "mdoId": this.orgId
+    }
+    }
+    this.insiteDataService.fetchSlwLeaderboard(request).subscribe((res: any) => {
+      if (res && res.result) {
+          this.result = res.result
+          this.filteredData = this.result.mdoLeaderBoard
+              .filter((user:any) => user.size === this.currentTab) 
+              .map((user:any) => ({ ...user, children: [], selected: false })).slice(0, 5)
+      }
+      
+  }, error => {
+      console.log(error)
+  })
   }
 
   getData() {
