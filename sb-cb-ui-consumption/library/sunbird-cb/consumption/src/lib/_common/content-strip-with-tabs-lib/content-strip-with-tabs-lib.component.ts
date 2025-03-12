@@ -143,6 +143,11 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         this.telemtryResponse.emit(data)
       }
     })
+    this.contentSvc.telemetryEventData$.subscribe((data: any) => {
+      if(_.get(this.widgetData, 'strips[0].key') === _.get(data, 'context.pageSection')) {
+        this.telemtryResponse.emit(data)
+      }
+    })
 
 
   }
@@ -1094,7 +1099,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       stripMap.tabs[tabEvent].fetchTabStatus = 'inprogress';
       stripMap.tabs[tabEvent].tabLoading = true;
       stripMap.showOnLoader = true;
-      debugger
     }
     // const data: WsEvents.ITelemetryTabData = {
     //   label: `${stripMap.tabs[tabEvent].label}`,

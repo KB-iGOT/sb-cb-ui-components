@@ -79,6 +79,8 @@ export class WidgetContentLibService {
 
   public telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
+  telemetryEventData: any = new Subject<any>()
+  telemetryEventData$ = this.telemetryEventData.asObservable()
   currentMetaData!: NsContent.IContent;
   currentContentReadMetaData!: NsContent.IContent;
   currentBatchEnrollmentList!: NsContent.ICourse[];
@@ -91,6 +93,10 @@ export class WidgetContentLibService {
   isTelementrySubscribed = false
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
+  }
+
+  changeTelemetryEventData(data: any) {
+    this.telemetryEventData.next(data);
   }
   isResource(primaryCategory: string) {
     if (primaryCategory) {
