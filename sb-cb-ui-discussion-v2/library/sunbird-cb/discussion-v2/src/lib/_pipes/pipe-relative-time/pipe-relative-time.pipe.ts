@@ -28,7 +28,7 @@ export class PipeRelativeTimePipe implements PipeTransform {
             if (counter === 1) {
               return `${counter} ${i} ago`// singular (1 day ago)
             }
-            return `${counter} ${i} ago`// plural (2 days ago)
+            return `${counter} ${i}s ago`// plural (2 days ago)
           }
         }
       }

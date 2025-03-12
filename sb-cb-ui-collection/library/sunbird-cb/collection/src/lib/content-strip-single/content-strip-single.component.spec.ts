@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ContentStripSingleComponent } from './content-strip-single.component'
 
@@ -6,7 +6,7 @@ describe('ContentStripSingleComponent', () => {
   let component: ContentStripSingleComponent
   let fixture: ComponentFixture<ContentStripSingleComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ContentStripSingleComponent],
     })

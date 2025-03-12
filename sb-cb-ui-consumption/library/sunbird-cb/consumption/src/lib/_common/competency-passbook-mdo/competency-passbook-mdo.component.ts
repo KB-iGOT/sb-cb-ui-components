@@ -119,7 +119,12 @@ export class CompetencyPassbookMdoComponent implements OnInit {
               this.competencyThemeData = facet.values
               this.getCompetencyTheme()
             }
-          });
+          })
+
+          this.competencyArea.forEach((area: any) => {
+            let _count = this.getCompetencyThemeCount(area.name)
+            area.count = _count
+          })
 
         } else {
           this.emptyResponse.emit(true)
@@ -131,6 +136,18 @@ export class CompetencyPassbookMdoComponent implements OnInit {
       // console.error('Error:', error);
           this.emptyResponse.emit(true)
     }
+  }
+
+  getCompetencyThemeCount(area: any) {
+    let returnedData = []
+    this.originalCompetencyArray.forEach((element: any) => {
+      if(element.name.toLowerCase() === area) {
+        returnedData = this.competencyThemeData.filter((ele1: any) => {
+           return  element.children.find((ele2: any) => ele2.name.toLowerCase() === ele1.name.toLowerCase())
+         })
+       }
+    })
+    return returnedData.length
   }
 
   getCompetencyTheme(){

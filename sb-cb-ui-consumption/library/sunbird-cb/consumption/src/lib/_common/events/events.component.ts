@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { InsiteDataService } from '../../_services/insite-data.service'
-import * as moment_ from 'moment';
-const moment = moment_;
+import  moment from 'moment';
+
 
 @Component({
   selector: 'sb-uic-events',

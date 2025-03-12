@@ -1,4 +1,5 @@
-@import '~@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
 $card-padding: $size-m;
 $action-btn-size: 2.5 * $size-m; // 40px
 

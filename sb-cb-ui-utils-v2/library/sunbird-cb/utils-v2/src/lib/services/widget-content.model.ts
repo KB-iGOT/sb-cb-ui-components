@@ -385,4 +385,16 @@ export namespace NsContent {
   export enum ETagType {
     NEWLY_ADDED = 'NEWLY ADDED',
   }
+
+  export enum ECourseCategory {
+    INVITE_ONLY_PROGRAM = 'Invite-Only Program',
+    MODERATED_PROGRAM = 'Moderated Program',
+    BLENDED_PROGRAM = 'Blended Program',
+    CURATED_PROGRAM = 'Curated Program',
+    COURSE = 'Course',
+    MODERATED_COURSE = 'Moderated Course',
+    STANDALONE_ASSESSMENT = 'Standalone Assessment',
+    MODERATED_ASSESSEMENT = 'Moderated Assessment',
+    CASE_STUDY = 'Case Study',
+  }
 }

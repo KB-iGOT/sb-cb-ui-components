@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NsCardContent } from '../../../_models/card-content.model';
-import { MatDialog, MatSnackBar } from '@angular/material'
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
@@ -104,7 +105,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
       })
   }
 
-  downloadCertificate(certificateData: any) {
+  downloadCertificate(certificateData: any, event: any) {
+    event.stopPropagation();
     this.events.raiseInteractTelemetry(
       {
         type: WsEvents.EnumInteractTypes.CLICK,
@@ -112,12 +114,14 @@ export class CardProgressPortraitLibComponent implements OnInit {
         subType: WsEvents.EnumInteractSubTypes.CERTIFICATE,
       },
       {
-        id: certificateData.issuedCertificates[0].identifier,   // id of the certificate
+        id: certificateData.issuedCertificates && certificateData.issuedCertificates.length && certificateData.issuedCertificates[0].identifier,   // id of the certificate
         type: WsEvents.EnumInteractSubTypes.CERTIFICATE,
       })
     if(certificateData.issuedCertificates.length > 0) {
       this.downloadCertificateLoading = true
-      let certData: any = certificateData.issuedCertificates[0]
+      const certificate: any = certificateData.issuedCertificates.sort((a: any, b: any) =>
+        new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
+      let certData: any = certificate && certificate.length && certificate[0]
       this.certificateService.downloadCertificate_v2(certData.identifier).subscribe((res: any)=>{
         this.downloadCertificateLoading = false
         const cet = res.result.printUri

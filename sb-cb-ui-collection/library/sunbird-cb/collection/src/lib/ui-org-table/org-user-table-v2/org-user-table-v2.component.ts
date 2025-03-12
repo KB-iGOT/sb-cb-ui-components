@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges, SimpleChanges, AfterViewChecked, ChangeDetectorRef } from '@angular/core'
 import { SelectionModel } from '@angular/cdk/collections'
-import { MatTableDataSource } from '@angular/material/table'
-import { MatPaginator, PageEvent } from '@angular/material'
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatLegacyPaginator as MatPaginator, LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator'
 import { MatSort } from '@angular/material/sort'
 import * as _ from 'lodash'
 import { ITableData, IColums } from '../interface/interfaces'
@@ -38,15 +38,17 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   pageLength?: number
   pageSize = 20
   pageSizeOptions = [20, 30, 40]
+  searchValue: string = ''
+  moreThanTwoChar = false
   @Input()totalRecords?: any
   @Input()tabChangeIndex?: any
   // @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator
-  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator
-  @ViewChild(MatPaginator, { static: false }) set matPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator) paginator!: MatPaginator
+  @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
     this.paginator = paginator
     // this.setDataSourceAttributes()
   }
-  @ViewChild(MatSort, { static: false }) set matSort(sort: MatSort) {
+  @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (!this.dataSource.sort) {
       this.dataSource.sort = sort
     }
@@ -100,12 +102,13 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   }
 
   applyFilter(filterValue: any) {
-    if (filterValue) {
-      let fValue = filterValue.trim()
-      fValue = filterValue.toLowerCase()
-      this.dataSource.filter = fValue
+    if (filterValue?.length === 0) {
+      this.onSearchEnter('')
+    }
+    if (filterValue?.length > 2) {
+      this.moreThanTwoChar = true
     } else {
-      this.dataSource.filter = ''
+      this.moreThanTwoChar = false
     }
   }
 
@@ -173,7 +176,16 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   }
 
   onSearchEnter(event: any) {
-    this.searchByEnterKey.emit(event.target.value)
+    if (event === '') {
+      this.searchByEnterKey.emit('')
+    } else if (event?.length > 2) {
+      this.searchByEnterKey.emit(event)
+    }
+    if (event?.target?.value === '') {
+      this.searchByEnterKey.emit('')
+    } else if (event?.target?.value?.length > 2){
+      this.searchByEnterKey.emit(event?.target?.value)
+    }
   }
 
   onPageChange(event: PageEvent) {

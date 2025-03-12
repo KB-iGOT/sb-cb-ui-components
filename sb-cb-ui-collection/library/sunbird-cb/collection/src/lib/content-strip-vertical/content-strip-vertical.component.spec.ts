@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ContentStripVerticalComponent } from './content-strip-vertical.component'
 
@@ -6,7 +6,7 @@ describe('ContentStripVerticalComponent', () => {
   let component: ContentStripVerticalComponent
   let fixture: ComponentFixture<ContentStripVerticalComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ContentStripVerticalComponent],
     })

@@ -4,18 +4,16 @@ import { ContentPickerV2Component } from './content-picker-v2.component'
 import { RouterModule } from '@angular/router'
 import { DefaultThumbnailModule, PipeDurationTransformModule } from '@sunbird-cb/utils'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import {
-  MatSidenavModule,
-  MatListModule,
-  MatTooltipModule,
-  MatInputModule,
-  MatIconModule,
-  MatButtonModule,
-  MatMenuModule,
-  MatExpansionModule,
-  MatCheckboxModule,
-  MatRadioModule,
-} from '@angular/material'
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
+import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
+import { MatExpansionModule } from '@angular/material/expansion'
+import { MatIconModule } from '@angular/material/icon'
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
+import { MatLegacyListModule as MatListModule } from '@angular/material/legacy-list'
+import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
+import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
+import { MatSidenavModule } from '@angular/material/sidenav'
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { SearchInputComponent } from './components/search-input/search-input.component'
 import { FiltersComponent } from './components/filters/filters.component'
 

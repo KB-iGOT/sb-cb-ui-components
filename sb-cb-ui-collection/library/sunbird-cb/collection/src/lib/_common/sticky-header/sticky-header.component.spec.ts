@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { StickyHeaderComponent } from './sticky-header.component'
 
@@ -6,7 +6,7 @@ describe('StickyHeaderComponent', () => {
   let component: StickyHeaderComponent
   let fixture: ComponentFixture<StickyHeaderComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [StickyHeaderComponent],
     })

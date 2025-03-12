@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { PlayerPdfComponent } from './player-pdf.component'
 
@@ -6,7 +6,7 @@ describe('PlayerPdfComponent', () => {
   let component: PlayerPdfComponent
   let fixture: ComponentFixture<PlayerPdfComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PlayerPdfComponent],
     })

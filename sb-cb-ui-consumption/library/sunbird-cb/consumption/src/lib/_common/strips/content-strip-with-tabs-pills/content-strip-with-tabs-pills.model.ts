@@ -63,6 +63,7 @@ export namespace NsContentStripWithTabsAndPills {
       bookmarkRead?: any
       enrollmentList?: any
       cbpList?: any,
+      designationsList?: any,
       apiUrl: string
       searchRegionRecommendation?: NSSearch.ISearchOrgRegionRecommendationRequest
       api?: IStripRequestApi
@@ -87,6 +88,7 @@ export namespace NsContentStripWithTabsAndPills {
       path: string
     };
     data?: [];
+    showOnLoader?: boolean
   }
 
   export interface IStripRequestApi {
@@ -151,5 +153,6 @@ export namespace NsContentStripWithTabsAndPills {
     fetchTabStatus?: string;
     nodataMsg?: string;
     tabLoading?: boolean;
+    hideTab?: boolean;
   }
 }

@@ -1,6 +1,7 @@
 import { COMMA, ENTER, SEMICOLON } from '@angular/cdk/keycodes'
 import { Component, Inject, OnInit } from '@angular/core'
-import { MatDialogRef, MatSnackBar, MAT_DIALOG_DATA } from '@angular/material'
+import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { ConfigurationsService } from '@sunbird-cb/utils'
 import { NsAutoComplete } from '../../_common/user-autocomplete/user-autocomplete.model'
 import { WidgetContentShareService } from '../../_services/widget-content-share.service'

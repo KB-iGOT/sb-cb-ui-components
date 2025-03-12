@@ -110,6 +110,7 @@ export class ConfigurationsService {
 
   // variable setting for csJwtToken
   cstoken = ''
+  netcoreConfig: any = {}
 
   changeNavBarFullView = new Subject()
   openExploreMenuForMWeb = new Subject()

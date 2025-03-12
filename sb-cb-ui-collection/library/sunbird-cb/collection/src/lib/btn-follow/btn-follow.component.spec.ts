@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { BtnFollowComponent } from './btn-follow.component'
 
@@ -6,7 +6,7 @@ describe('BtnFollowComponent', () => {
   let component: BtnFollowComponent
   let fixture: ComponentFixture<BtnFollowComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnFollowComponent],
     })

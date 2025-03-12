@@ -110,12 +110,12 @@ export class PageComponent extends WidgetBaseComponent
             ),
           )
           .subscribe(async (event: MessageEvent) => {
-            const contentWindow = event.source as Window
+            // const contentWindow = event.source as Window
             if (event.data.requestId) {
               switch (event.data.requestId) {
-                case 'LOADED':
-                  this.respondSvc.loadedRespond(contentWindow, event.data.subApplicationName)
-                  break
+                // case 'LOADED':
+                //   this.respondSvc.loadedRespond(contentWindow, event.data.subApplicationName)
+                //   break
                 default:
                   break
               }

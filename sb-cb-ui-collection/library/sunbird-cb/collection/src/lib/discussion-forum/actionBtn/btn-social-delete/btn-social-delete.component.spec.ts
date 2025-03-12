@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { BtnSocialDeleteComponent } from './btn-social-delete.component'
 
@@ -6,7 +6,7 @@ describe('BtnSocialDeleteComponent', () => {
   let component: BtnSocialDeleteComponent
   let fixture: ComponentFixture<BtnSocialDeleteComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnSocialDeleteComponent],
     })

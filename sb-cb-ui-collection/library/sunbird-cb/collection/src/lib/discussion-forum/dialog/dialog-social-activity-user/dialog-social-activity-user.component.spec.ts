@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { DialogSocialActivityUserComponent } from './dialog-social-activity-user.component'
 
@@ -6,7 +6,7 @@ describe('DialogSocialActivityUserComponent', () => {
   let component: DialogSocialActivityUserComponent
   let fixture: ComponentFixture<DialogSocialActivityUserComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DialogSocialActivityUserComponent],
     })

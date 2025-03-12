@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule } from '@angular/material';
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner';
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
 import { RouterModule } from '@angular/router';
 import { CardResourceComponent } from './card-resource/card-resource.component';
 import { CardsComponent } from './cards.component';
 import { CardPortraitComponent } from './card-portrait/card-portrait.component';
-import { PipePublicURLModule } from '../../_pipes/pipe-public-URL/pipe-public-URL.module';
 import { ObjectToArrayPipeModule } from '../../_pipes/object-to-array/object-to-array.pipe.module';
 import { DisplayContentTypeLibModule } from '../display-content-type-lib/display-content-type-lib.module';
 import { DefaultThumbnailModule } from '../../_directives/default-thumbnail/default-thumbnail.module';
@@ -30,64 +33,64 @@ import { HttpClient } from '@angular/common/http';
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module';
 import { CardMdoChannelV1Component } from './card-mdo-channel-v1/card-mdo-channel-v1.component';
 import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.module';
+import { PipePublicURLModule } from '@sunbird-cb/utils-v2';
 
 
 @NgModule({
-  declarations: [
-    CardResourceComponent,
-    CardsComponent,CardPortraitComponent,
-    CardUserComponent,
-    CardLandscapeComponent,
-    CardWideComponent,
-    CardMDOChannelComponent,
-    CardWideV2Component,
-    CardKarmaProgramsComponent,
-    CardKarmaProgramsV2Component,
-    ProviderCardComponent,
-    CardPortraitExtComponent,
-    CardAssessmentComponent,
-    CardProgressPortraitLibComponent,
-    CardMdoChannelV1Component
-  ],
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatTooltipModule,
-    MatIconModule,
-    MatTooltipModule,
-    RouterModule,
-    PipePublicURLModule,
-    ObjectToArrayPipeModule,
-    DisplayContentTypeLibModule,
-    DefaultThumbnailModule,
-    PipeDurationTransformModule,
-    SkeletonLoaderLibModule,
-    MatProgressSpinnerModule,
-    ContentProgressModule,
-    DialogComponentsModule,
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
-    AvatarPhotoLibModule
-  ],
-  entryComponents:[CardsComponent],
-  exports: [
-    CardsComponent,
-    CardResourceComponent,
-    CardPortraitComponent, 
-    CardLandscapeComponent,
-    CardUserComponent,
-    CardWideComponent,
-    CardMDOChannelComponent,
-    CardWideV2Component,
-    CardKarmaProgramsComponent,
-    CardKarmaProgramsV2Component,
-    CardPortraitExtComponent,
-  ],
+    declarations: [
+        CardResourceComponent,
+        CardsComponent, CardPortraitComponent,
+        CardUserComponent,
+        CardLandscapeComponent,
+        CardWideComponent,
+        CardMDOChannelComponent,
+        CardWideV2Component,
+        CardKarmaProgramsComponent,
+        CardKarmaProgramsV2Component,
+        ProviderCardComponent,
+        CardPortraitExtComponent,
+        CardAssessmentComponent,
+        CardProgressPortraitLibComponent,
+        CardMdoChannelV1Component
+    ],
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatButtonModule,
+        MatTooltipModule,
+        MatIconModule,
+        MatTooltipModule,
+        RouterModule,
+        PipePublicURLModule,
+        ObjectToArrayPipeModule,
+        DisplayContentTypeLibModule,
+        DefaultThumbnailModule,
+        PipeDurationTransformModule,
+        SkeletonLoaderLibModule,
+        MatProgressSpinnerModule,
+        ContentProgressModule,
+        DialogComponentsModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient],
+            },
+        }),
+        AvatarPhotoLibModule
+    ],
+    exports: [
+        CardsComponent,
+        CardResourceComponent,
+        CardPortraitComponent,
+        CardLandscapeComponent,
+        CardUserComponent,
+        CardWideComponent,
+        CardMDOChannelComponent,
+        CardWideV2Component,
+        CardKarmaProgramsComponent,
+        CardKarmaProgramsV2Component,
+        CardPortraitExtComponent,
+    ]
 })
 export class CardsModule { }

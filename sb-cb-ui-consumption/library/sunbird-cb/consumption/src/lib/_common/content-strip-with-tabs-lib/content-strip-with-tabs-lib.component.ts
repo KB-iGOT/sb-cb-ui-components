@@ -12,6 +12,7 @@ import {
   ConfigurationsService,
   UtilityService,
   WsEvents,
+  WidgetEnrollService,
 } from '@sunbird-cb/utils-v2';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -19,7 +20,7 @@ import { WidgetUserServiceLib } from '../../_services/widget-user-lib.service';
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { MatTabChangeEvent } from '@angular/material';
+import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs';
 import { NsCardContent } from '../../_models/card-content-v2.model';
 import { ITodayEvents } from '../../_models/event';
 import { TranslateService } from '@ngx-translate/core';
@@ -115,7 +116,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     public router: Router,
     private userSvc: WidgetUserServiceLib,
     private translate: TranslateService,
-    private langtranslations: MultilingualTranslationsService
+    private langtranslations: MultilingualTranslationsService,
+    private enrollSvc: WidgetEnrollService
   ) {
     super();
     if (localStorage.getItem('websiteLanguage')) {
@@ -131,7 +133,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     // const url = window.location.href
     this.initData();
     this.contentSvc.telemetryData$.subscribe((data: any) => {
-      this.telemtryResponse.emit(data)
+      if(
+        this.widgetData.strips && this.widgetData.strips[0] &&
+        this.widgetData.strips[0]?.key !== 'cbpPlan' &&
+        this.widgetData.strips[0]?.key !== 'forYou' &&
+        this.widgetData.strips[0]?.key !== 'continueLearning'
+         && this.widgetData.strips[0]?.key === data.typeOfTelemetry 
+      ) {
+        this.telemtryResponse.emit(data)
+      }
     })
 
 
@@ -214,7 +224,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
     }
     // console.log('data.key', data, data.key, data.widgets);
-    return data.showStrip;
+    return data ? data.showStrip : false;
   }
 
   get isMobile() {
@@ -322,7 +332,29 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
 
     }
+    if(filters.endDate && filters.endDate['<='].indexOf('<today>') >= 0) {
+      filters.endDate['<='] = this.todayDate
+    }
+    if(filters.endDate && filters.endDate['<'].indexOf('<today>') >= 0) {
+      filters.endDate['<'] = this.todayDate
+    }
+    if(filters.startDate && filters.startDate['>='].indexOf('<today>') >= 0) {
+      filters.startDate['>='] = this.todayDate
+    }
+    if(filters.startDate && filters.startDate['>'].indexOf('<today>') >= 0) {
+      filters.startDate['>'] = this.todayDate
+    }
     return filters;
+  }
+
+  get todayDate(): string {
+    const currentDate = new Date();
+
+    const year = currentDate.getFullYear();
+    const month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Add leading zero if month is less than 10
+    const day = ('0' + currentDate.getDate()).slice(-2); // Add leading zero if day is less than 10
+
+    return `${year}-${month}-${day}`;
   }
 
   private fetchStripFromRequestData(
@@ -331,7 +363,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     // setting initial values
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
-    this.processStrip(strip, [], 'fetching', false, null);
+    if(_.get(strip, 'request.fetchData', '') === 'events') {
+      this.fetchFromSearchV6Events(strip, calculateParentStatus)
+    } else {
+      this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromEnrollmentList(strip, calculateParentStatus);
     this.fetchFromSearchV6(strip, calculateParentStatus);
     this.fetchFromTrendingContent(strip, calculateParentStatus);
@@ -342,6 +377,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     this.fetchAllPlaylistSearch(strip, calculateParentStatus);
     this.fetchPlaylistReadData(strip, calculateParentStatus);
     this.fetchCiosContentData(strip, calculateParentStatus);
+    }
 
   }
 
@@ -364,83 +400,102 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       // tslint:disable-next-line: deprecation
       this.userSvc.fetchUserBatchList(userId, queryParams).subscribe(
         (result: any) => {
-          const courses = result && result.courses;
-          const showViewMore = Boolean(
-            courses.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
-          );
-          const viewMoreUrl = showViewMore
-            ? {
-              path: (strip.viewMoreUrl && strip.viewMoreUrl.path) || '',
-              queryParams: {
-                q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
-                f:
-                  strip.request && strip.request.searchV6 && strip.request.searchV6.filters
-                    ? JSON.stringify(
-                      // this.searchServSvc.transformSearchV6Filters(
-                      strip.request.searchV6.filters
-                      // ),
-                    )
-                    : {},
-              },
-            }
-            : null;
-          if (courses && courses.length) {
-            content = courses.map((c: any) => {
-              const contentTemp: NsContent.IContent = c.content;
-              contentTemp.completionPercentage = c.completionPercentage || c.progress || 0;
-              contentTemp.completionStatus = c.completionStatus || c.status || 0;
-              contentTemp.enrolledDate = c.enrolledDate || '';
-              contentTemp.lastContentAccessTime = c.lastContentAccessTime || '';
-              contentTemp.lastReadContentStatus = c.lastReadContentStatus || '';
-              contentTemp.lastReadContentId = c.lastReadContentId || '';
-              contentTemp.lrcProgressDetails = c.lrcProgressDetails || '';
-              contentTemp.issuedCertificates = c.issuedCertificates || [];
-              contentTemp.batchId = c.batchId || '';
-              return contentTemp;
-            });
-          }
-          // To filter content with completionPercentage > 0,
-          // so that only those content will show in home page
-          // continue learing strip
-          // if (content && content.length) {
-          //   contentNew = content.filter((c: any) => {
-          //     /** commented as both are 0 after enrolll */
-          //     if (c.completionPercentage && c.completionPercentage > 0) {
-          //       return c
-          //     }
-          //   })
-          // }
-
-          // To sort in descending order of the enrolled date
-          contentNew = (content || []).sort((a: any, b: any) => {
-            const dateA: any = new Date(a.lastContentAccessTime || 0);
-            const dateB: any = new Date(b.lastContentAccessTime || 0);
-            return dateB - dateA;
-          });
-
-          if (strip.tabs && strip.tabs.length) {
-            tabResults = this.splitEnrollmentTabsData(contentNew, strip);
-            this.processStrip(
-              strip,
-              this.transformContentsToWidgets(contentNew, strip),
-              'done',
-              calculateParentStatus,
-              viewMoreUrl,
-              tabResults
-            );
+          this.userSvc.fetchExtEnrollData().subscribe((res: any)=> {
+            if(res && res.result && res.result.courses && res.result.courses.length){
+                let enrolledCourses = result && result.courses;
+                let enrolledExtCourses = res.result && res.result.courses;
+                const courses = [...enrolledExtCourses,...enrolledCourses]
+                this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
           } else {
-            this.processStrip(
-              strip,
-              this.transformContentsToWidgets(contentNew, strip),
-              'done',
-              calculateParentStatus,
-              viewMoreUrl,
-            );
+            let enrolledCourses = result && result.courses;
+            const courses = [...enrolledCourses]
+            this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
           }
+        },(_err: any)=>{
+          let enrolledCourses = result && result.courses;
+          const courses = [...enrolledCourses]
+          this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
+        })
         },
-        () => {
+        (_err:any) => {
           this.processStrip(strip, [], 'error', calculateParentStatus, null);
         }
+        
+      );
+    }
+  }
+
+  formatEnrollmentData(strip: any, courses: any,content: any, contentNew: any ,tabResults: any, calculateParentStatus: any){
+    const showViewMore = Boolean(
+      courses.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+    );
+    const viewMoreUrl = showViewMore
+      ? {
+        path: (strip.viewMoreUrl && strip.viewMoreUrl.path) || '',
+        queryParams: {
+          q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
+          f:
+            strip.request && strip.request.searchV6 && strip.request.searchV6.filters
+              ? JSON.stringify(
+                // this.searchServSvc.transformSearchV6Filters(
+                strip.request.searchV6.filters
+                // ),
+              )
+              : {},
+        },
+      }
+      : null;
+    if (courses && courses.length) {
+      content = courses.map((c: any) => {
+        const contentTemp: NsContent.IContent = c.content || {};
+        contentTemp.completionPercentage = c.completionPercentage || c.progress || 0;
+        contentTemp.completionStatus = c.completionStatus || c.status || 0;
+        contentTemp.enrolledDate = c.enrolledDate || '';
+        contentTemp.lastContentAccessTime = c.lastContentAccessTime || '';
+        contentTemp.lastReadContentStatus = c.lastReadContentStatus || '';
+        contentTemp.lastReadContentId = c.lastReadContentId || '';
+        contentTemp.lrcProgressDetails = c.lrcProgressDetails || '';
+        contentTemp.issuedCertificates = c.issuedCertificates || [];
+        contentTemp.batchId = c.batchId || '';
+        return contentTemp;
+      });
+    }
+    // To filter content with completionPercentage > 0,
+    // so that only those content will show in home page
+    // continue learing strip
+    // if (content && content.length) {
+    //   contentNew = content.filter((c: any) => {
+    //     /** commented as both are 0 after enrolll */
+    //     if (c.completionPercentage && c.completionPercentage > 0) {
+    //       return c
+    //     }
+    //   })
+    // }
+
+    // To sort in descending order of the enrolled date
+    contentNew = (content || []).sort((a: any, b: any) => {
+      const dateA: any = new Date(a.lastContentAccessTime || 0);
+      const dateB: any = new Date(b.lastContentAccessTime || 0);
+      return dateB - dateA;
+    });
+
+    if (strip.tabs && strip.tabs.length) {
+      tabResults = this.splitEnrollmentTabsData(contentNew, strip);
+      this.processStrip(
+        strip,
+        this.transformContentsToWidgets(contentNew, strip),
+        'done',
+        calculateParentStatus,
+        viewMoreUrl,
+        tabResults
+      );
+    } else {
+      this.processStrip(
+        strip,
+        this.transformContentsToWidgets(contentNew, strip),
+        'done',
+        calculateParentStatus,
+        viewMoreUrl,
       );
     }
   }
@@ -558,10 +613,16 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
               if (strip.key === 'scheduledAssessment') {
               
                 let result = response.results.result.content.map(a => a.identifier);
-                const responseData =  await this.userSvc.fetchEnrollmentDataByContentId(this.configSvc.userProfile.userId,result.join(',')).toPromise().then(async (res: any) => {
+                
+                let request = {
+                  "request": {
+                      "courseId": result
+                  }
+                }
+                const responseData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
                   const enrollData: any = {}
-                  if (res && res.courses && res.courses.length) {
-                    res.courses.forEach((data: any) => {
+                  if (res && res.result && res.result.courses && res.result.courses.length) {
+                    res.result.courses.forEach((data: any) => {
                       enrollData[data.collectionId] = data
                     })
                     return enrollData
@@ -1023,28 +1084,28 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     return false;
   }
 
-  public tabClicked(tabEvent: MatTabChangeEvent, stripMap: IStripUnitContentData, stripKey: string) {
-    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-      stripMap.tabs[tabEvent.index].fetchTabStatus = 'inprogress';
-      stripMap.tabs[tabEvent.index].tabLoading = true;
+  public tabClicked(tabEvent: any, stripMap: IStripUnitContentData, stripKey: string) {
+    if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+      stripMap.tabs[tabEvent].fetchTabStatus = 'inprogress';
+      stripMap.tabs[tabEvent].tabLoading = true;
       stripMap.showOnLoader = true;
     }
-    const data: WsEvents.ITelemetryTabData = {
-      label: `${tabEvent.tab.textLabel}`,
-      index: tabEvent.index,
-    };
-    this.eventSvc.raiseInteractTelemetry(
-      {
-        type: WsEvents.EnumInteractTypes.CLICK,
-        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
-        id: `${_.camelCase(data.label)}-tab`,
-      },
-      {},
-      {
-        module: WsEvents.EnumTelemetrymodules.HOME,
-      }
-    );
-    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent.index];
+    // const data: WsEvents.ITelemetryTabData = {
+    //   label: `${stripMap.tabs[tabEvent].label}`,
+    //   index: tabEvent,
+    // };
+    // this.eventSvc.raiseInteractTelemetry(
+    //   {
+    //     type: WsEvents.EnumInteractTypes.CLICK,
+    //     subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+    //     id: `${_.camelCase(data.label)}-tab`,
+    //   },
+    //   {},
+    //   {
+    //     module: WsEvents.EnumTelemetrymodules.HOME,
+    //   }
+    // );
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
@@ -1057,25 +1118,25 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         // call API to get tab data and process
         // this.processStrip(currentStrip, [], 'fetching', true, null)
         if (currentTabFromMap.request.searchV6) {
-          this.getTabDataByNewReqSearchV6(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqSearchV6(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.trendingSearch) {
-          this.getTabDataByNewReqTrending(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqTrending(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.topContent) {
-          this.getTabDataByNewReqTopContent(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqTopContent(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.playlistRead) {
-          this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEvent.index, currentTabFromMap, true);
+          this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.ciosContent) {
-          this.getTabDataByCiosSearch(currentStrip, tabEvent.index, currentTabFromMap, true)
+          this.getTabDataByCiosSearch(currentStrip, tabEvent, currentTabFromMap, true)
         }
-        if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-          stripMap.tabs[tabEvent.index].tabLoading = false;
+        if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+          stripMap.tabs[tabEvent].tabLoading = false;
         }
       } else {
         this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
         setTimeout(() => {
-          if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
-            stripMap.tabs[tabEvent.index].tabLoading = false;
-            stripMap.tabs[tabEvent.index].fetchTabStatus = 'done';
+          if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
+            stripMap.tabs[tabEvent].tabLoading = false;
+            stripMap.tabs[tabEvent].fetchTabStatus = 'done';
             stripMap.showOnLoader = false;
           }
         }, 200);
@@ -1841,6 +1902,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
               fetchTabStatus: 'done',
+              widgets: [],
             };
             tabResults = allTabs;
           }
@@ -1855,6 +1917,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
+              widgets: [],
               fetchTabStatus: 'done',
             };
             tabResults = allTabs;
@@ -1983,6 +2046,96 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           this.processStrip(strip, [], 'error', calculateParentStatus, null);
         }
     }
+  }
+
+  async fetchFromSearchV6Events(strip: NsContentStripWithTabs.IContentStripUnit, calculateParentStatus = true) {
+    if (strip.request && strip.request.searchV6 && Object.keys(strip.request.searchV6).length) {
+      // let originalFilters: any = [];
+      if (_.get(strip, 'request.searchV6.request.filters')) {
+        // originalFilters = strip.request.searchV6.request.filters;
+        strip.request.searchV6.request.filters = this.checkForDateFilters(strip.request.searchV6.request.filters);
+        strip.request.searchV6.request.filters = this.getFiltersFromArray(
+          strip.request.searchV6.request.filters,
+        );
+      }
+      if (strip.tabs && strip.tabs.length) {
+        // TODO: Have to extract requestRequired to outer level of tabs config
+        const firstTab = strip.tabs[0];
+        if (firstTab.requestRequired) {
+          if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+            const allTabs = this.stripsResultDataMap[strip.key].tabs;
+            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
+
+            this.getTabDataByNewReqSearchV6(strip, 0, currentTabFromMap, calculateParentStatus);
+          }
+        }
+
+      } else {
+        try {
+          let response: any
+          if(strip && strip.request && strip.request.hasIdentifiersApi) {
+            const identifierStrip: any = JSON.parse(JSON.stringify(strip))
+            identifierStrip.request.searchV6['api'] = {
+              'path': identifierStrip.request.identifiersApiUrl
+            }
+            const identifiersResponse = await this.searchV6Request(identifierStrip, identifierStrip.request, calculateParentStatus)
+            if(_.get(identifiersResponse, 'results.result') && _.get(strip, 'request.searchV6.request.filters')) {
+              strip.request.searchV6.request.filters['identifier'] = _.get(identifiersResponse, 'results.result.events')
+            }
+            response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+          } else {
+            response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+          }
+          if (response && response.results) {
+            if (response.results.result.Event) {
+              console.log(this.transformEventsV2ToWidgets(response.results.result.Event, strip))
+              this.processStrip(
+                strip,
+                this.transformEventsV2ToWidgets(response.results.result.Event, strip),
+                'done',
+                calculateParentStatus,
+                response.viewMoreUrl,
+              );
+            } else {
+              this.processStrip(strip, [], 'error', calculateParentStatus, null);
+            }
+
+          } else {
+            this.processStrip(strip, [], 'error', calculateParentStatus, null);
+          }
+        } catch (error) {
+          // Handle errors
+          // console.error('Error:', error);
+        }
+      }
+    }
+  }
+
+  private transformEventsV2ToWidgets(
+    contents: ITodayEvents[],
+    strip: NsContentStripWithTabs.IContentStripUnit,
+  ) {
+    this.eventSvc.setEventListData(contents);
+    return (contents || []).map((content: any, idx: any) => (content ? {
+      widgetType: 'cardLib',
+      widgetSubType: 'eventCardLib',
+      widgetHostClass: 'mb-2',
+      widgetData: {
+        content,
+        cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
+        cardCustomeClass: strip.customeClass ? strip.customeClass : 'card-resource-container-small',
+        context: { pageSection: strip.key, position: idx },
+        intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,
+        deletedMode: strip.stripConfig && strip.stripConfig.deletedMode,
+        contentTags: strip.stripConfig && strip.stripConfig.contentTags,
+      },
+    } : {
+      widgetType: 'card',
+      widgetSubType: 'eventHubCard',
+      widgetHostClass: 'mb-2',
+      widgetData: {},
+    }
+    ));
   }
 
 }

@@ -8,15 +8,14 @@ import { NsContent } from '../_models/widget-content.model';
 import { NSSearch } from '../_models/widget-search.model';
 // tslint:disable
 import * as _ from 'lodash'
-import {  viewerRouteGenerator } from './viewer-route-util'
-import {WidgetUserServiceLib} from './widget-user-lib.service'
-import * as moment_ from 'moment';
-const moment = moment_;
+import { viewerRouteGenerator } from './viewer-route-util'
+import { WidgetUserServiceLib } from './widget-user-lib.service'
+import moment from 'moment';
 // tslint:enable
 
 // TODO: move this in some common place
 const PROTECTED_SLAG_V8 = '/apis/protected/v8';
-
+const PROD_BASE_ENDPOINT = 'https://portal.igotkarmayogi.gov.in'
 const API_END_POINTS = {
   CONTENT: `${PROTECTED_SLAG_V8}/content`,
   AUTHORING_CONTENT: `/api/course/v1/hierarchy`,
@@ -59,6 +58,8 @@ const API_END_POINTS = {
   USER_KARMA_POINTS: '/apis/proxies/v8/user/totalkarmapoints',
   AGGREGATION_SEARCH: '/apis/proxies/v8/content/aggregation/search',
   FEATURE_SEARCH: '/apis/proxies/v8/featured/content/search',
+  SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`,
+  CONTENT_SEARCH: `/api/content/v1/search`
 };
 
 @Injectable({
@@ -73,16 +74,21 @@ export class WidgetContentLibService {
   }
 
   tocConfigData: any = new BehaviorSubject<any>({});
-  tocConfigData$  = this.tocConfigData.asObservable();
+  tocConfigData$ = this.tocConfigData.asObservable();
+  oneStepResumeEnable: boolean = false;
 
-  private telemetryData: any = new Subject<any>()
+  public telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
   currentMetaData!: NsContent.IContent;
   currentContentReadMetaData!: NsContent.IContent;
   currentBatchEnrollmentList!: NsContent.ICourse[];
   programChildCourseResumeData = new BehaviorSubject<any>({});
   programChildCourseResumeData$ = this.programChildCourseResumeData.asObservable();
-
+  releventNotRelevent = new Subject<{ isRelevent: boolean; widgetData: any }>();
+  releventNotRelevent$ = this.releventNotRelevent.asObservable()
+  storedRecommendedIds: any = {};
+  feedbackDataForCourse: any = {};
+  isTelementrySubscribed = false
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
   }
@@ -205,7 +211,7 @@ export class WidgetContentLibService {
 
   autoAssignCuratedBatchApi(request: any, programType: any): Observable<NsContent.IBatchListResponse> {
     const url = programType === NsContent.ECourseCategory.MODERATED_PROGRAM ?
-    API_END_POINTS.AUTO_ASSIGN_OPEN_PROGRAM : API_END_POINTS.AUTO_ASSIGN_CURATED_BATCH;
+      API_END_POINTS.AUTO_ASSIGN_OPEN_PROGRAM : API_END_POINTS.AUTO_ASSIGN_CURATED_BATCH;
     return this.http.post<NsContent.IBatchListResponse>(`${url}`, request)
       .pipe(
         retry(1),
@@ -265,8 +271,8 @@ export class WidgetContentLibService {
       `${API_END_POINTS.CONTENT_HISTORYV2}/${req.request.courseId}`, req
     );
     data.subscribe((subscribeData: any) => {
-          this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId });
-        });
+      this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId });
+    });
     return data;
   }
 
@@ -360,6 +366,15 @@ export class WidgetContentLibService {
       return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
     }
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
+  }
+
+  searchContentSearch_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
+    const apiPath = _.get(req, 'api.path');
+    req.query = req.query || '';
+    if (apiPath) {
+      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+    }
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH, req);
   }
 
   searchRelatedCBPV6(req: NSSearch.ISearchV6RequestV2): Observable<NSSearch.ISearchV6ApiResultV2> {
@@ -464,8 +479,8 @@ export class WidgetContentLibService {
   async getEnrolledData(doId: string) {
     let enrolledDoId: any = this.userSvc.enrollmentDataIds.includes(doId)
     let userId = this.configSvc.userProfile.userId
-    if(enrolledDoId) {
-      const responseData =  await this.userSvc.fetchEnrollmentDataByContentId(userId,doId).toPromise().then(async (res: any) => {
+    if (enrolledDoId) {
+      const responseData = await this.userSvc.fetchEnrollmentDataByContentId(userId, doId).toPromise().then(async (res: any) => {
         if (res && res.courses && res.courses.length) {
           return res.courses
         } else {
@@ -479,42 +494,54 @@ export class WidgetContentLibService {
     return []
   }
 
-  async getResourseLink(content: any) {
-    if(content.externalId) {
-        const urlData: any = {
-          url: `app/toc/ext/${content.contentId}`,
-          queryParams: { batchId: content.batchId },
-        };
-        return urlData
+  async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean) {
+    if (content && content.content && content.content.category === 'Event') {
+      const urlData: any = {
+        url: `app/event-hub/home/${content.content.identifier}`,
+        queryParams: { batchId: content.batchId },
+      };
+      return urlData
+    }
+    if (content.externalId) {
+      const urlData: any = {
+        url: `app/toc/ext/${content.contentId}`,
+        queryParams: { batchId: content.batchId },
+      };
+      return urlData
     } else {
-      const enrolledCourse: any = await this.getEnrolledData(content.identifier);
-      if (enrolledCourse && enrolledCourse.length) {
-        const enrolledCourseData = enrolledCourse[0]
-        if (enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.BLENDED_PROGRAM ||
-          enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
-          enrolledCourseData.content.courseCategory ===  NsContent.ECourseCategory.MODERATED_PROGRAM ||
-          enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
-          enrolledCourseData.content.primaryCategory ===  NsContent.EPrimaryCategory.PROGRAM) {
+      if (checkForResume) {
+        // const enrolledCourse: any = await this.getEnrolledData(content.identifier);
+        const enrolledCourse: any = enrollmentList;
+        if (enrolledCourse && enrolledCourse.length) {
+          const enrolledCourseData = enrolledCourse[0]
+          if (enrolledCourseData && enrolledCourseData.content && (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
+            enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
+            enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
+            enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
+            enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM)) {
             if (!this.isBatchInProgress(enrolledCourseData.batch)) {
               return this.gotoTocPage(content);
             }
-            const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
             return data;
-        }  {
-          const data =  await this.checkForDataToFormUrl(content, enrolledCourseData);
-          return data;
+          } {
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
+            return data;
+          }
         }
+      } else {
+        this.oneStepResumeEnable = true;
+        return this.gotoTocPage(content);
       }
-      return this.gotoTocPage(content);
     }
   }
   async checkForDataToFormUrl(content: any, enrollData: any) {
     let urlData: any;
-    if (enrollData.completionPercentage  === 100) {
+    if (enrollData.completionPercentage === 100) {
       return this.gotoTocPage(enrollData);
     }
     if (enrollData.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
-      const modifyEnrollData  = {
+      const modifyEnrollData = {
         ...enrollData,
         identifier: enrollData.collectionId,
         primaryCategory: enrollData.content.primaryCategory,
@@ -522,33 +549,33 @@ export class WidgetContentLibService {
       };
       if (modifyEnrollData.lastReadContentId) {
         return this.getResourseDataWithData(modifyEnrollData,
-                                            enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType);
+          enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType);
       }
       if (modifyEnrollData.firstChildId) {
         return this.getResourseDataWithData(modifyEnrollData,
-                                            enrollData.firstChildId,
-                                            enrollData.lrcProgressDetails.mimeType);
+          enrollData.firstChildId,
+          enrollData.lrcProgressDetails.mimeType);
       }
     }
     if (enrollData.firstChildId || enrollData.lastReadContentId) {
-        const doId = enrollData.firstChildId || enrollData.lastReadContentId;
-        const responseData = await this.fetchProgramContent(doId).toPromise().then(async (res: any) => {
-          if (res && res.result && res.result.content) {
-            const contentData: any = res.result.content;
-            const modifyEnrollData  = {
-              ...enrollData,
-              identifier: enrollData.collectionId,
-              primaryCategory: enrollData.content.primaryCategory,
-              name: enrollData.content.name,
-            };
-            urlData =  this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType);
-            if (urlData) {
-              return urlData;
-            }
+      const doId = enrollData.firstChildId || enrollData.lastReadContentId;
+      const responseData = await this.fetchProgramContent(doId).toPromise().then(async (res: any) => {
+        if (res && res.result && res.result.content) {
+          const contentData: any = res.result.content;
+          const modifyEnrollData = {
+            ...enrollData,
+            identifier: enrollData.collectionId,
+            primaryCategory: enrollData.content.primaryCategory,
+            name: enrollData.content.name,
+          };
+          urlData = this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType);
+          if (urlData) {
+            return urlData;
           }
-        });
-        return responseData ? responseData : this.gotoTocPage(content);
-      }
+        }
+      });
+      return responseData ? responseData : this.gotoTocPage(content);
+    }
     return this.gotoTocPage(content);
 
   }
@@ -587,10 +614,10 @@ export class WidgetContentLibService {
       const startDate = moment(batchData.startDate).format('YYYY-MM-DD');
       const endDate = batchData.endDate ? moment(batchData.endDate).format('YYYY-MM-DD') : now;
       return (
-            // batch.status &&
-            moment(startDate).isSameOrBefore(now)
-            && moment(endDate).isSameOrAfter(now)
-          );
+        // batch.status &&
+        moment(startDate).isSameOrBefore(now)
+        && moment(endDate).isSameOrAfter(now)
+      );
     } return true;
   }
   postApiMethod(apiUrl: any, req: any): Observable<NsContent.IContent> {
@@ -603,9 +630,65 @@ export class WidgetContentLibService {
 
 
   getEnrolledDataFromList(enrollmentList: any, collectionId: string) {
-    if(enrollmentList && enrollmentList.length) {
+    if (enrollmentList && enrollmentList.length) {
       let enrolledData = enrollmentList.filter((ele: any) => ele.collectionId === collectionId)
-      return enrolledData.length ? enrolledData[0]: {}
+      return enrolledData.length ? enrolledData[0] : {}
     }
+  }
+
+  setReleventNotReleventData(data: {isRelevent: boolean, widgetData: any}) {
+    this.releventNotRelevent.next(data)
+  }
+
+  saveFeedbackSakshamAI(requestBody: any) {
+    const result: any = this.http.post(API_END_POINTS.SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK, requestBody).pipe(map(
+      async (data: any) => {
+        return data
+      })
+    )
+    return result
+  }
+
+  setRecommendedIds(recommendedIds: string, userId: string) {
+    localStorage.getItem('recommendedIds') ? 
+    this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+
+    this.storedRecommendedIds[userId] = recommendedIds
+
+    localStorage.setItem('recommendedIds', JSON.stringify(this.storedRecommendedIds))
+  }
+
+  getRecommendedIds(userId: string) {
+    localStorage.getItem('recommendedIds') ? 
+      this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+    return this.storedRecommendedIds[userId]
+  }
+
+  setFeedbackData(feedbackDataArray: any[]) {
+    feedbackDataArray.forEach(feedbackData => {
+      this.feedbackDataForCourse[feedbackData.course_id] = feedbackData;
+    });
+  }
+
+  getFeedbackData(courseId: string) {
+    return this.feedbackDataForCourse[courseId]
+  }
+
+  filterCoursesWithNoRating(response: any, courses: any[]) {
+    if (!response?.feedbacks?.length) {
+      return courses; 
+    }
+    
+    const coursesWithZeroRating = new Set(
+      response.feedbacks
+        .filter((feedback: any) => feedback.rating === 0)
+        .map((feedback: any) => feedback.course_id)
+    );
+  
+    return courses.filter((course: any) => !coursesWithZeroRating.has(course.identifier));
+  }
+
+  setTelementrySubscription(event: boolean) {
+    this.isTelementrySubscribed = event
   }
 }

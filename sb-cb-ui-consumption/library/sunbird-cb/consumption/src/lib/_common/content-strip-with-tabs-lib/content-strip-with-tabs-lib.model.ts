@@ -69,7 +69,11 @@ export namespace NsContentStripWithTabs {
       ids?: string[]
       recommendedCourses?: any,
       masterCompetency?: any
-      trendingSearch?: any
+      trendingSearch?: any,
+      fetchData?: string,
+      payloda?: any,
+      hasIdentifiersApi?: boolean,
+      identifiersApiUrl?: string,
     };
     searchV6Type?: 'KB' | 'Collections' | 'searchQuery' | null;
     stripBackground?: string;
