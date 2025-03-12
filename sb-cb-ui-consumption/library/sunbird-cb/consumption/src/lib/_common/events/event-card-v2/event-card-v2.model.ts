@@ -14,6 +14,7 @@ export namespace NsCardContent {
     contentTags?: IContentTags
     stateData: any
     customeClass?: string
+    cardCustomeClass?: string
   }
 
   export interface IContentTags {

@@ -79,6 +79,8 @@ export class WidgetContentLibService {
 
   public telemetryData: any = new Subject<any>()
   public telemetryData$ = this.telemetryData.asObservable()
+  telemetryEventData: any = new Subject<any>()
+  telemetryEventData$ = this.telemetryEventData.asObservable()
   currentMetaData!: NsContent.IContent;
   currentContentReadMetaData!: NsContent.IContent;
   currentBatchEnrollmentList!: NsContent.ICourse[];
@@ -91,6 +93,10 @@ export class WidgetContentLibService {
   isTelementrySubscribed = false
   changeTelemetryData(message: string) {
     this.telemetryData.next(message);
+  }
+
+  changeTelemetryEventData(data: any) {
+    this.telemetryEventData.next(data);
   }
   isResource(primaryCategory: string) {
     if (primaryCategory) {
@@ -364,6 +370,21 @@ export class WidgetContentLibService {
     req.query = req.query || '';
     if (apiPath) {
       return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+    }
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
+  }
+
+  searchRequest(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
+    const apiPath = _.get(req, 'api.path');
+    req.query = req.query || '';
+    if (apiPath) {
+      if(_.get(req, 'api.type') === 'get' ) {
+        return this.http.get<any>(apiPath);
+      } else if(_.get(req, 'api.type') === 'post' ) {
+        return this.http.post<any>(apiPath, req.request || {});
+      } else {
+        return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+      }
     }
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
   }

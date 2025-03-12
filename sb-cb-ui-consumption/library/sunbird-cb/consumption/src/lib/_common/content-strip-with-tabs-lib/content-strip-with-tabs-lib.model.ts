@@ -52,6 +52,7 @@ export namespace NsContentStripWithTabs {
     filters?: any[];
     selectAll?: boolean | null;
     request?: {
+      myEvents?: any;
       playlistRead: any;
       playlistSearch?: any;
       ciosContent?:any;
