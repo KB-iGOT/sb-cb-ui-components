@@ -10,64 +10,70 @@ export class DataPointsComponent implements OnInit {
   @Input() objectData: any
   @Input() layoutType: string = ''
   @Input() fetchDataFromApi: boolean = false
-  @Input() providerId : any = ''
+  @Input() providerId: any = ''
   @Input() pageLayout: any = ''
   @Input() title: any
+  @Input() slwConfig: any = {}
   customArray: any[][] = []
   isDataLoading: boolean = false
   apiResults: any
-  
+
   constructor(public insightSvc: InsiteDataService) { }
 
   ngOnInit() {
     if (this.objectData && this.layoutType === 'gridLayout') {
       this.customArray = this.createCustomArray(this.objectData.metrics)
     }
-    if(this.fetchDataFromApi) {
+    if (this.fetchDataFromApi) {
       this.isDataLoading = true
       if (this.pageLayout === 'nlw') {
-        this.getStats()
+        if (this.slwConfig && this.slwConfig.enabled) {
+          this.getSwlStats()
+        } else {
+          this.getStats()
+        }
+
       } else {
         this.getInsiteData()
       }
     }
-  }  
+  }
 
   createCustomArray(arr: any[]): any[][] {
     const nByn: any[][] = []
     for (let i = 0; i < arr.length; i += this.objectData.dataColSpan) {
       nByn.push(arr.slice(i, i + this.objectData.dataColSpan))
     }
-    return nByn   
+    return nByn
   }
 
-  getInsiteData(){
+  getInsiteData() {
     let request: any = {}
-    request  = {
+    request = {
       "request": {
-          "filters": {
-              "organisations": [
-                  this.providerId
-              ]
-          }
-      }
-    }
-    if (this.pageLayout && this.pageLayout === 'mdo') {
-      request  = {
-        "request": {
-            "filters": {
-              "requestType": "MDO_INSIGHT",
-                "organisations": [
-                    this.providerId
-                ]
-            }
+        "filters": {
+          "organisations": [
+            this.providerId
+          ]
         }
       }
     }
-    this.insightSvc.fetchSearchData(request).subscribe((res: any)=> {
-      if(res && res.result && res.result.response && res.result.response.nudges && res.result.response.nudges.length) {
+    if (this.pageLayout && this.pageLayout === 'mdo') {
+      request = {
+        "request": {
+          "filters": {
+            "requestType": "MDO_INSIGHT",
+            "organisations": [
+              this.providerId
+            ]
+          }
+        }
+      }
+    }
+    this.insightSvc.fetchSearchData(request).subscribe((res: any) => {
+      if (res && res.result && res.result.response && res.result.response.nudges && res.result.response.nudges.length) {
         res.result.response.nudges.forEach((nudgeData: any) => {
-          if(this.providerId && this.providerId === nudgeData.orgId) {
+          if (this.providerId && this.providerId === nudgeData.orgId) {
             this.objectData = nudgeData.data
           }
         })
@@ -79,7 +85,25 @@ export class DataPointsComponent implements OnInit {
 
   getStats() {
     this.insightSvc.fetchNwlStats().subscribe((res: any) => {
-      if(res && res.result && res.result.data) {
+      if (res && res.result && res.result.data) {
+        this.objectData = res.result.data
+      }
+      this.isDataLoading = false
+    }, error => {
+      console.log(error)
+      this.isDataLoading = false
+    })
+  }
+
+  getSwlStats() {
+    let request = {
+      "request": {
+        "mdoId": this.providerId
+      }
+    }
+    this.insightSvc.fetchSwlStats(request).subscribe((res: any) => {
+      console.log(res, "fetchSwlStats response----")
+      if (res && res.result && res.result.data) {
         this.objectData = res.result.data
       }
       this.isDataLoading = false
@@ -99,7 +123,7 @@ export class DataPointsComponent implements OnInit {
         lastThree = ',' + lastThree;
       }
       let formattedIntegerPart = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
-      const result = decimalPart ? `${formattedIntegerPart}.${decimalPart.substr(0,2)}` : formattedIntegerPart;
+      const result = decimalPart ? `${formattedIntegerPart}.${decimalPart.substr(0, 2)}` : formattedIntegerPart;
       return result
     }
   }

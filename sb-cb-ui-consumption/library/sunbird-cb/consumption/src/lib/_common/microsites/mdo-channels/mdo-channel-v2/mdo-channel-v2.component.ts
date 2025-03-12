@@ -16,6 +16,7 @@ export class MdoChannelV2Component  implements OnInit {
   @Input() sectionList:any = []
   // @Input() configDetails: any
   @Input() nwlConfiguration: any
+  @Input() slwConfiguration: any
   providerId: string = '123456789'
   channnelName = ''
   orgId = ''
