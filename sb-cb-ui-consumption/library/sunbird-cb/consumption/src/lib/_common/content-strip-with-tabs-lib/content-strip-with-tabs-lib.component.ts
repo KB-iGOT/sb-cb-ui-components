@@ -363,6 +363,9 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     // setting initial values
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
+    if(strip.request.myEvents) {
+      this.fetchMyEventsData(strip, calculateParentStatus)
+    }
     if(_.get(strip, 'request.fetchData', '') === 'events') {
       this.fetchFromSearchV6Events(strip, calculateParentStatus)
     } else {
@@ -377,6 +380,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     this.fetchAllPlaylistSearch(strip, calculateParentStatus);
     this.fetchPlaylistReadData(strip, calculateParentStatus);
     this.fetchCiosContentData(strip, calculateParentStatus);
+
     }
 
   }
@@ -1076,7 +1080,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         (strip.request.bookmarkRead && Object.keys(strip.request.bookmarkRead).length) ||
         (strip.request.playlistSearch && Object.keys(strip.request.playlistSearch).length) ||
         (strip.request.playlistRead && Object.keys(strip.request.playlistRead).length) ||
-        (strip.request.ciosContent && Object.keys(strip.request.ciosContent).length)
+        (strip.request.ciosContent && Object.keys(strip.request.ciosContent).length) ||
+        (strip.request.myEvents && Object.keys(strip.request.myEvents).length)
       )
     ) {
       return true;
@@ -1089,6 +1094,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       stripMap.tabs[tabEvent].fetchTabStatus = 'inprogress';
       stripMap.tabs[tabEvent].tabLoading = true;
       stripMap.showOnLoader = true;
+      debugger
     }
     // const data: WsEvents.ITelemetryTabData = {
     //   label: `${stripMap.tabs[tabEvent].label}`,
@@ -1127,6 +1133,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.ciosContent) {
           this.getTabDataByCiosSearch(currentStrip, tabEvent, currentTabFromMap, true)
+        } else if(currentTabFromMap.request.myEvents) {
+          this.getMyEventsByTabs(currentStrip, tabEvent, currentTabFromMap, true)
         }
         if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
           stripMap.tabs[tabEvent].tabLoading = false;
@@ -1578,6 +1586,21 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             }
               : null;
             resolve({ results, viewMoreUrl });
+          } if (results.result && results.result.events) {
+            const showViewMore = Boolean(
+              results.result.events && results.result.events.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+            );
+            const viewMoreUrl = showViewMore
+              ? {
+                path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
+                queryParams: {
+                  tab: 'Learn',
+                  q: strip.viewMoreUrl && strip.viewMoreUrl.queryParams,
+                  f: {},
+                },
+              }
+              : null;
+            resolve({ results, viewMoreUrl });
           }
 
         }, (error: any) => {
@@ -1641,7 +1664,9 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       formedUrl = formedUrl.replace('<orgID>', this.providerId) 
     } else if(apiUrl.indexOf('<doId>') >= 0) {
       formedUrl = apiUrl.replace('<doId>', this.environment.providerDataKey) 
-    } 
+    } else if(apiUrl.indexOf('<userId>') >= 0) {
+      formedUrl = apiUrl.replace('<userId>', id) 
+    }
     return formedUrl
   }
 
@@ -2050,9 +2075,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
 
   async fetchFromSearchV6Events(strip: NsContentStripWithTabs.IContentStripUnit, calculateParentStatus = true) {
     if (strip.request && strip.request.searchV6 && Object.keys(strip.request.searchV6).length) {
-      // let originalFilters: any = [];
       if (_.get(strip, 'request.searchV6.request.filters')) {
-        // originalFilters = strip.request.searchV6.request.filters;
         strip.request.searchV6.request.filters = this.checkForDateFilters(strip.request.searchV6.request.filters);
         strip.request.searchV6.request.filters = this.getFiltersFromArray(
           strip.request.searchV6.request.filters,
@@ -2066,7 +2089,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             const allTabs = this.stripsResultDataMap[strip.key].tabs;
             const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
 
-            this.getTabDataByNewReqSearchV6(strip, 0, currentTabFromMap, calculateParentStatus);
+            this.getEventsTabDataByNewReqSearchV6(strip, 0, currentTabFromMap, calculateParentStatus);
           }
         }
 
@@ -2115,7 +2138,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     contents: ITodayEvents[],
     strip: NsContentStripWithTabs.IContentStripUnit,
   ) {
-    this.eventSvc.setEventListData(contents);
     return (contents || []).map((content: any, idx: any) => (content ? {
       widgetType: 'cardLib',
       widgetSubType: 'eventCardLib',
@@ -2136,6 +2158,114 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       widgetData: {},
     }
     ));
+  }
+
+  async getEventsTabDataByNewReqSearchV6(
+    strip: NsContentStripWithTabs.IContentStripUnit,
+    tabIndex: number,
+    currentTab: NsContentStripWithTabs.IContentStripTab,
+    calculateParentStatus: boolean
+  ) {
+    try {
+      const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus);
+      if (response && response.results) {
+        const widgets = this.transformEventsV2ToWidgets(response.results.result.events, strip);
+        let tabResults: any[] = [];
+          const allTabs = this.stripsResultDataMap[strip.key].tabs;
+          if (allTabs && allTabs.length && allTabs[tabIndex]) {
+            allTabs[tabIndex] = {
+              ...allTabs[tabIndex],
+              widgets,
+              fetchTabStatus: 'done',
+            };
+            tabResults = allTabs;
+          }
+        this.processStrip(
+          strip,
+          widgets,
+          'done',
+          calculateParentStatus,
+          response.viewMoreUrl,
+          tabResults // tabResults as widgets
+        );
+      } else {
+        this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      }
+    } catch (error) {
+      // Handle errors
+      // console.error('Error:', error);
+    }
+  }
+
+
+  fetchMyEventsData(strip, calculateParentStatus) {
+    if(strip && strip.tabs && strip.tabs.length) {
+        const firstTab = strip.tabs[0];
+        if (firstTab.requestRequired) {
+            const allTabs = strip.tabs;
+            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
+            this.getMyEventsByTabs(strip, 0, currentTabFromMap, calculateParentStatus);
+        } 
+        
+    }
+  }
+
+  async getMyEventsByTabs(strip, tabIndex, currentTabData, calculateParentStatus) {
+    let apiUrl = ''
+    let postReqestData: any = {}
+    if(currentTabData && currentTabData.request &&  currentTabData.request.apiUrl ) {
+      apiUrl = this.getFullUrl(currentTabData.request.apiUrl, this.getUserId )
+    } 
+    if(currentTabData && currentTabData.request &&  currentTabData.request.myEvents ) {
+      postReqestData = this.postMethodFilters(currentTabData.request.myEvents )
+    } 
+  try {
+          const response = await this.postRequestMethod(strip, postReqestData, apiUrl, calculateParentStatus);
+          if (response && response.results) {
+            if (response.results.result.events && response.results.result.events.length) {
+              const widgets = this.transformEventsV2ToWidgets(response.results.result.events, strip);
+              let tabResults: any[] = [];
+              if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+                const allTabs = this.stripsResultDataMap[strip.key].tabs;
+                if (allTabs && allTabs.length && allTabs[tabIndex]) {
+                  allTabs[tabIndex] = {
+                    ...allTabs[tabIndex],
+                    widgets,
+                    fetchTabStatus: 'done',
+                  };
+                  tabResults = allTabs;
+                }
+              }
+              strip.loader = false
+              this.processStrip(
+                strip,
+                widgets,
+                'done',
+                calculateParentStatus,
+                response.viewMoreUrl,
+                tabResults // tabResults as widgets
+              );
+            } else {
+              this.processStrip(strip, [], 'error', calculateParentStatus, null);
+              this.emptyResponse.emit(true)
+            }
+
+          } else {
+            this.processStrip(strip, [], 'error', calculateParentStatus, null);
+            this.emptyResponse.emit(true)
+          }
+        } catch (error) {
+          // Handle errors
+          // console.error('Error:', error);
+        }
+  }
+
+  get getUserId(){
+    let userId: string= ''
+    if (this.configSvc.userProfile) {
+      userId = this.configSvc.userProfile.userId;
+    }
+    return userId
   }
 
 }

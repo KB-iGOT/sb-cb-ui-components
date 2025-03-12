@@ -45,7 +45,8 @@ export namespace NSSearch {
     didYouMean?: boolean;
     request?: ISearchV6Request;
     api?: {
-      path: string
+      path: string,
+      type?: string
     }
   }
 

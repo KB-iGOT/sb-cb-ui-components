@@ -24,6 +24,7 @@ export class EventCardV2Component extends WidgetBaseComponent
   defaultSLogo = ''
 
   sourceLogos: NsInstanceConfig.ISourceLogo[] | undefined
+  eventDetails: any
 
   isIntranetAllowedSettings = false
   constructor(
@@ -49,6 +50,7 @@ export class EventCardV2Component extends WidgetBaseComponent
   }
   ngOnInit() {
     // this.widgetInstanceId=his.id
+    this.eventDetails = _.get(this.widgetData, 'content.event', _.get(this.widgetData, 'content', {}))
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || ''
@@ -64,7 +66,15 @@ export class EventCardV2Component extends WidgetBaseComponent
   }
 
   getStartDate(startDate: any, startTime: any) {
-    return `${startDate} ${startTime}`
+    if(typeof(startDate) === 'string') {
+      return `${startDate} ${startTime}`
+    } else {
+      const dateFormate = new Date(startDate)
+      const year = dateFormate.getFullYear();
+      const month = String(dateFormate.getMonth() + 1).padStart(2, '0');  // months are zero-based, so we add 1
+      const day = String(dateFormate.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day} ${startTime}`
+    }
   }
 
   redirectToUrl() {

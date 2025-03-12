@@ -368,6 +368,21 @@ export class WidgetContentLibService {
     return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
   }
 
+  searchRequest(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
+    const apiPath = _.get(req, 'api.path');
+    req.query = req.query || '';
+    if (apiPath) {
+      if(_.get(req, 'api.type') === 'get' ) {
+        return this.http.get<any>(apiPath);
+      } else if(_.get(req, 'api.type') === 'post' ) {
+        return this.http.post<any>(apiPath, req.request || {});
+      } else {
+        return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+      }
+    }
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
+  }
+
   searchContentSearch_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
     const apiPath = _.get(req, 'api.path');
     req.query = req.query || '';
