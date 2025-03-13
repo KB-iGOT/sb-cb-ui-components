@@ -34,6 +34,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
 import { EventCardV2Component } from './event-card-v2.component'
 import { ContentProgressModule } from '../../content-progress/content-progress.module'
 import { HttpLoaderFactory } from '../../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { SkeletonLoaderLibModule } from '../../skeleton-loader-lib/skeleton-loader-lib.module'
 @NgModule({
     declarations: [EventCardV2Component],
     imports: [
@@ -56,6 +57,7 @@ import { HttpLoaderFactory } from '../../content-strip-with-tabs-lib/content-str
         PipeHtmlTagRemovalModule,
         PipePublicURLModule,
         ContentProgressModule,
+        SkeletonLoaderLibModule,
         // BtnKbModule,
         // BtnContentDownloadModule,
         // BtnContentLikeModule,
