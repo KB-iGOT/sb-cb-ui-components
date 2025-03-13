@@ -33,7 +33,20 @@
     background-position: right;
     background-repeat: no-repeat;
 }
+.sub-title {
+    font-size: 24px;
+    font-weight: 400;
+}
+.sub-title-two {
+    font-size: 24px;
+    font-weight: 600;
+}
+.main-title {
+    font-size: 32px;
+    font-size: 48px;
+    font-weight: 700;
 
+}
 .sticky-logo-square {
     position: absolute;
     top: 215px;
@@ -50,7 +63,7 @@
 }
 
 .logo-square {
-    width: 112px;
+    width: fit-content;
     max-height: 73px;
     border-radius: 12px;
     background: #fff;
@@ -58,6 +71,7 @@
     align-items: center;
     justify-content: center;
     padding: 16px;
+    padding-left: 0;
     box-sizing: border-box;
 }
 

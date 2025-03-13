@@ -29,6 +29,8 @@ import { HttpClient } from '@angular/common/http';
 import { UserProgressModule } from '../../user-progress/user-progress.module';
 import { MdoLeaderboardModule } from '../../mdo-leaderboard/mdo-leaderboard.module';
 import { KeyHighlightsModule } from '../../key-highlights/key-highlights.module';
+import { OrderByPipeModule } from '../../../_pipes/order-by/order-by.pipe.module';
+import { SafeUrlPipeModule } from '../../../_pipes/safe-url/safe-url.module';
 
 
 
@@ -56,6 +58,8 @@ import { KeyHighlightsModule } from '../../key-highlights/key-highlights.module'
     MdoLeaderboardModule,
     KeyHighlightsModule,
     MatTabsModule,
+    OrderByPipeModule,
+    SafeUrlPipeModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
