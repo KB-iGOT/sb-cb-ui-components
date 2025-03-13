@@ -6,8 +6,8 @@
         <ng-container *ngIf="sectionList?.length">
             <ng-container *ngFor="let section of sectionList  | orderBy: 'order'">
                 <ng-container *ngIf="section?.enabled">
-                    <section id="{{section?.key}}" class="w-full grid grid-cols-12 gap-4"
-                        [ngClass]="{'container': section.wrapperClass}">
+                    <section id="{{section?.key}}" class="w-full grid grid-cols-12 gap-4 {{section?.customClass}}"
+                        [ngClass]="{'container': section.wrapperClass}" >
                         <ng-container *ngFor="let column of section.column">
                             <div id="{{column?.key}}" class="col-span-{{column.colspan || 12}} ">
                                 <ng-container *ngIf="column?.enabled" [ngSwitch]="column?.key">
@@ -19,6 +19,8 @@
                                         [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
                                     <ng-container *ngSwitchCase="'mainContent'" [ngTemplateOutlet]="mainContent"
                                         [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                                        <ng-container *ngSwitchCase="'supportSection'" [ngTemplateOutlet]="supportSection"
+                                            [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
                                 </ng-container>
                             </div>
                         </ng-container>
@@ -95,11 +97,16 @@
         <div class="container px-4 flex flex-col mob-container">
             <div class="mr-4 logo-box-container">
                 <div class="flex logo-box-square top mr-4">
-                    <img alt="Application Logo" class="logo-img" [src]="data?.logo">
+                    <img alt="Application Logo" class="logo-img" [src]="data?.logoMobile || data?.logo">
                 </div>
             </div>
             <div class="w-full md:w-9/12 flex-1 flex flex-col">
                 <h1 class=" txt-ellipsis-2 break-words">{{data?.title || channnelName}}</h1>
+                <h4 *ngIf="data?.subTitle" class=" sub-title txt-ellipsis-2 break-words " [style.color]="data?.subTitleColorMobile">
+                    {{data?.subTitle}}</h4>
+
+                <h4 *ngIf="data?.subTitleTwo" class=" sub-title-two txt-ellipsis-2 break-words pt-4 mb-8" [style.color]="data?.subTitleColorTwoMobile">
+                    {{data?.subTitleTwo}}</h4>
                 <p class="mat-body-2">
                     {{data?.description | slice:0:descriptionMaxLength}}
                     <span *ngIf="data?.description?.length > descriptionMaxLength">...</span>
@@ -438,6 +445,13 @@
             [src]="lookerProUrl"
             frameborder="0" style="border:0" allowfullscreen
             sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </div>
+    </div>
+</ng-template>
+<ng-template #supportSection let-data="data">
+    <div class="flex items-center justify-center">
+        <div class="container support-section">
+            <sb-uic-video-conference [videoConf]="data"></sb-uic-video-conference>
         </div>
     </div>
 </ng-template>
