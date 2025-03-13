@@ -101,6 +101,7 @@ export class PostCardComponent {
     this.discussV2Svc.searchPosts(req).subscribe(res => {
       this.fetchedSearchData = _.get(res, 'result.search_results') || {}
       this.fetchedReplyData = (_.get(res, 'result.search_results.data') || [])
+      this.replyDataCopy = [...this.fetchedReplyData.map((x: any) => x.discussionId)]
       this.loading = false
       this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
       }, () => {
@@ -159,12 +160,12 @@ export class PostCardComponent {
     // if(this.userLikedComments.includes(event.commentId)) {
     //   this.likeUnlikeCommentApi('dislike', event.commentId)
     // } else {
-      this.upVotePost('like', event.discussionId)
+      this.upVotePost('like', event.type, event.discussionId)
     // }
   }
 
-  upVotePost(flag: string, discussionId: string) {
-    this.discussV2Svc.upVotePost(discussionId).subscribe(res => {
+  upVotePost(flag: string, type: string, discussionId: string) {
+    this.discussV2Svc.upVotePost(type, discussionId).subscribe(res => {
       if (res.responseCode === 'OK') {
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
         const post = this.fetchedReplyData.find((comm: any) => comm.discussionId === discussionId)
@@ -211,7 +212,8 @@ export class PostCardComponent {
   reportPost(flagDetails: any) {
     this.reportPending = true
     let requestData: any = {
-      "discussionId": this.post.discussionId
+      "discussionId": this.post.discussionId,
+      "type": this.post.type,
     }
     requestData = { ...requestData, ...flagDetails }
 
@@ -248,7 +250,7 @@ export class PostCardComponent {
 
   }
   deleteCommentMethod(post: any) {
-    this.discussV2Svc.deletePost(post.discussionId).subscribe((_res: any) => {
+    this.discussV2Svc.deletePost(post.type, post.discussionId).subscribe((_res: any) => {
       post.status = 'inactive'
       this._snackBar.open('Comment deleted successfully')
     }, (_err: any)=> {

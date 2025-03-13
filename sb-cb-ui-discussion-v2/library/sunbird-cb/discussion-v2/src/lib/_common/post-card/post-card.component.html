@@ -111,7 +111,7 @@
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
             <ng-container *ngIf="cardConfig?.actions?.like?.show">
-                <div class="mr-4 circleBtn"
+                <div class="mr-4 cursor-pointer circleBtn"
                     (click)="likeUnlikeComment(post)">
                     <mat-icon class="icon like-icon mr-2" aria-hidden="false" i18n-aria-label
                         [ngClass]="{'user-liked': userLikedPosts?.includes(post?.commentId)}"
