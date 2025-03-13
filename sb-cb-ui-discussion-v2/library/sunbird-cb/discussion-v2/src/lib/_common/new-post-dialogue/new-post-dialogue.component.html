@@ -136,7 +136,9 @@
                 </p>
                 <p class="text-xs text-gray-500">Supported files: JPG, PNG</p>
               </div>
-              <input id="fileUpload" #imageUpload type="file" class="hidden" multiple (change)="onFileInputChange($event, 'image')"
+              <input id="fileUpload" #imageUpload type="file" class="hidden" multiple 
+                [attr.max]="MAX_TOTAL_FILES" 
+                (change)="onFileInputChange($event, 'image')" 
                 accept=".jpg,.jpeg,.png">
             </label>
           </div>
@@ -156,8 +158,10 @@
                 </p>
                 <p class="text-xs text-gray-500">Supported files: PDF, DOC, DOCX</p>
               </div>
-              <input id="fileUpload" #fileUpload type="file" class="hidden" multiple
-                (change)="onFileInputChange($event, 'document')" accept=".pdf,.doc,.docx">
+              <input id="fileUpload" #fileUpload type="file" class="hidden" multiple 
+                [attr.max]="MAX_TOTAL_FILES" 
+                (change)="onFileInputChange($event, 'document')" 
+                accept=".pdf,.doc,.docx">
             </label>
           </div>
         </div>

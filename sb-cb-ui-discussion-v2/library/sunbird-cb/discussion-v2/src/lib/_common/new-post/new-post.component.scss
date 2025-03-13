@@ -91,6 +91,9 @@ input {
     &.poll-icon {
         color: #49C951 !important;
     }
+    &[disabled] {
+        opacity: 0.5;
+    }
 }
 .emoji-icon {
     color: #FF8400 !important;

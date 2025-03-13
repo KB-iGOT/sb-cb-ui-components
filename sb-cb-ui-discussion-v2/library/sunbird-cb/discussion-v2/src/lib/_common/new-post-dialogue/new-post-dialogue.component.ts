@@ -86,6 +86,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   @ViewChild('imageUpload', { static: false }) imageUpload!: ElementRef;
   @ViewChild('fileUpload', { static: false }) fileUpload!: ElementRef;
 
+  private readonly MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+  private readonly MAX_DOC_SIZE = 50 * 1024 * 1024;   // 50MB in bytes
+  public readonly MAX_TOTAL_FILES = 10;
 
   constructor(
     private fb: FormBuilder,
@@ -308,12 +311,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       tags: this.selectedTags,
       files: formValue.files,
       categoryType: this.categoryType,
-      mediaCategory: this.getLocalAndUploadedMerged(),
+      mediaCategory: this.getLocalAndUploaded(),
       updatedOn: new Date()
     };
   }
 
-  getLocalAndUploadedMerged() {
+  getLocalAndUploaded() {
     const mergedCategory: { [key: string]: any[] } = {};
     // Merge values from both objects
     // for (const key in this.mediaCategory) {
@@ -376,20 +379,35 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     if (files) {
       this.selectedFilesFinal[category] = this.selectedFilesFinal[category] || [];
       this.previewCategory[category] = this.previewCategory[category] || [];
+      // Calculate total files across all categories
+      const totalFiles = (Object.values(this.selectedFilesFinal) as any[][])
+        .reduce((sum: number, files: any[]) => sum + files.length, 0);
+
+      // Check if adding new files would exceed the total limit
+      if (totalFiles + files.length > this.MAX_TOTAL_FILES) {
+        this._snackBar.open(`You can only upload up to ${this.MAX_TOTAL_FILES} files in total`, '', { duration: 3000 });
+        return;
+      }
 
       Array.from(files as FileList).forEach(file => {
+        // Check file size
+        const maxSize = category === 'image' ? this.MAX_IMAGE_SIZE : this.MAX_DOC_SIZE;
+        if (file.size > maxSize) {
+          const sizeInMB = maxSize / (1024 * 1024);
+          this._snackBar.open(`${file.name} exceeds maximum ${category} size of ${sizeInMB}MB`, '', { duration: 3000 });
+          return;
+        }
+
         // Add to selectedFilesFinal
         const previewUrl = URL.createObjectURL(file as Blob);
         this.previewCategory[category].push(previewUrl);
-
-        this.selectedFilesFinal[category].push({
+          this.selectedFilesFinal[category].push({
           file: file,
           name: file.name,
           category: category,
           previewUrl: previewUrl,
           uploaded: false
         });
-
       });
 
       this.uploadForm.patchValue({
