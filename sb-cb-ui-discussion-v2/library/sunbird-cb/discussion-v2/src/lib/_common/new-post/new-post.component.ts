@@ -46,6 +46,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
 
   isMultiLine = false;
   commentMaxLength: any =1000
+  private readonly MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+  private readonly MAX_DOC_SIZE = 50 * 1024 * 1024;   // 50MB in bytes
+  public readonly MAX_TOTAL_FILES = 10;
 
 
   constructor(
@@ -207,7 +210,24 @@ export class NewPostComponent implements OnInit, OnDestroy {
     if (files) {
       this.selectedFilesFinal[category] = this.selectedFilesFinal[category] || [];
 
+      // Calculate total files across all categories
+      const totalFiles = (Object.values(this.selectedFilesFinal) as any[][])
+        .reduce((sum: number, files: any[]) => sum + files.length, 0);
+
+      // Check if adding new files would exceed the total limit
+      if (totalFiles + files.length > this.MAX_TOTAL_FILES) {
+        this._snackBar.open(`You can only upload up to ${this.MAX_TOTAL_FILES} files in total`, '', { duration: 3000 });
+        return;
+      }
+
       Array.from(files as FileList).forEach(file => {
+        // Check file size
+        const maxSize = category === 'image' ? this.MAX_IMAGE_SIZE : this.MAX_DOC_SIZE;
+        if (file.size > maxSize) {
+          const sizeInMB = maxSize / (1024 * 1024);
+          this._snackBar.open(`${file.name} exceeds maximum ${category} size of ${sizeInMB}MB`, '', { duration: 3000 });
+          return;
+        }
         // Add to selectedFilesFinal
         const previewUrl = URL.createObjectURL(file as Blob);
 
@@ -230,6 +250,11 @@ export class NewPostComponent implements OnInit, OnDestroy {
         this.isMultiLine = true
       }
     }
+  }
+
+  get getTotalFilesCount(): number {
+    return (Object.values(this.selectedFilesFinal) as any[][])
+      .reduce((sum: number, files: any[]) => sum + files.length, 0);
   }
 
   updateCategory(type: string) {

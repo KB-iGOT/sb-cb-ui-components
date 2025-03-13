@@ -47,7 +47,6 @@ export class SingleLineTooltipDirective implements AfterViewInit, OnDestroy {
       // this.tooltip.show();
 
     } else {
-      console.log('no')
       this.tooltip.disabled = true;
     }
   }

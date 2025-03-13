@@ -54,7 +54,8 @@
                                 <!-- <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="addMedia(); fileInput.click()"> -->
                                     <mat-icon class="icon image-icon cursor-pointer mr-2" (click)="fileInput.click()">image</mat-icon>
                                 <!-- </button> -->
-                                    <input type="file" hidden #fileInput (change)="onFileInputChange($event, 'image')" multiple accept="image/*">
+                                    <input type="file" hidden #fileInput (change)="onFileInputChange($event, 'image')" multiple 
+                                    accept=".jpg,.jpeg,.png" [attr.max]="MAX_TOTAL_FILES" >
                             </div>
                             <!-- Image preview section -->
                              <div class="grid gap-2 grid-cols-12" *ngIf="categoryType && categoryType.length">
@@ -129,7 +130,7 @@
                                     ></emoji-mart>
                                 </ng-container>
                                 <ng-container *ngIf="!showEmojiPicker">
-                                    <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="fileInput.click()">
+                                    <button mat-icon-button color="primary" class="postIcon image-icon mr-2" (click)="fileInput.click()" [disabled]="getTotalFilesCount >= MAX_TOTAL_FILES">
                                         <mat-icon>image</mat-icon>
                                     </button>
                                 </ng-container>
