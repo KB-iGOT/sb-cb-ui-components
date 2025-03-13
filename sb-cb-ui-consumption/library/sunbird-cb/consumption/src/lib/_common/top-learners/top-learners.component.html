@@ -53,7 +53,7 @@
                             <div class="rank-sec">{{getRank(+obj?.row_num)}}</div>
                         </div>                        
                     </div>
-                    <div class="flex gap-2 kp-section">
+                    <div class="flex gap-2 kp-section" *ngIf="!objectData?.hideEle?.includes('karma-points')">
                         <div class="kp-icon"><img [src]="objectData?.kpIcon" class="kp-image"/></div>
                         <div class="points">{{obj?.total_points || 0}}</div>
                     </div>

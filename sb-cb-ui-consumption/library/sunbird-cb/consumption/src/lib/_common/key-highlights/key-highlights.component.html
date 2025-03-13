@@ -10,7 +10,7 @@
             [widgetData]="contentdata" [styleData]="styleData">
             <div sliderbody>
                 <div *ngFor="let content of contentdata; let i = index" [hidden]="i !== currentIndex">
-                    <div class="flex flex-row key-wrapper items-center justify-center">
+                    <div class="flex flex-row key-wrapper items-center justify-center" [style.background]="formData?.backgroundColor">
                         <div class="kh-description">
                             {{content?.title | slice:0:titleMaxLength}}
                             <span *ngIf="content?.title?.length > titleMaxLength">...</span>
@@ -21,7 +21,6 @@
         </sb-uic-sliders-ng-content>
     </div>
 </ng-container>
-
 <ng-container *ngIf="contentdata?.length && mode === 'mobile'">
     <div class="p-5">
         <div class="mob-key-highlighs-container">
@@ -35,7 +34,7 @@
                 [widgetData]="contentdata" [styleData]="styleData">
                 <div sliderbody>
                     <div *ngFor="let content of contentdata; let i = index" [hidden]="i !== currentIndex">
-                        <div class="flex flex-row mkey-wrapper items-center justify-center">
+                        <div class="flex flex-row mkey-wrapper items-center justify-center"  [style.background]="formData?.backgroundColor">
                             <div class="mkh-description">
                                 {{content?.title | slice:0:titleMaxLength }}
                                 <span *ngIf="content?.title?.length > titleMaxLength">...</span>

@@ -24,13 +24,12 @@ export class MdoLeaderboardComponent implements OnInit {
   constructor(private insiteDataService: InsiteDataService) { }
 
   ngOnInit() {
-     
+    this.currentTab = this.object.currentTab || this.currentTab
     if(this.slwConfig && this.slwConfig.enabled) {
       this.getSlwData()
     } else {
       this.getData()
     }
-   
   }
 
   getSlwData() {
@@ -40,9 +39,9 @@ export class MdoLeaderboardComponent implements OnInit {
     }
     }
     this.insiteDataService.fetchSlwLeaderboard(request).subscribe((res: any) => {
-      if (res && res.result) {
+      if (res && res.result ) {
           this.result = res.result
-          this.filteredData = this.result.mdoLeaderBoard
+          this.filteredData = this.result.mdoLeaderBoard || []
               .filter((user:any) => user.size === this.currentTab) 
               .map((user:any) => ({ ...user, children: [], selected: false })).slice(0, 5)
       }
@@ -56,7 +55,7 @@ export class MdoLeaderboardComponent implements OnInit {
     this.insiteDataService.fetchLeaderboard().subscribe((res: any) => {
         if (res && res.result) {
             this.result = res.result
-            this.filteredData = this.result.mdoLeaderBoard
+            this.filteredData = this.result.mdoLeaderBoard || []
                 .filter(user => user.size === this.currentTab) 
                 .map(user => ({ ...user, children: [], selected: false })).slice(0, 5)
         }

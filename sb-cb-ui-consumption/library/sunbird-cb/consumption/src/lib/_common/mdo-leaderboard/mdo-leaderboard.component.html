@@ -18,12 +18,21 @@
         <div class="horizontal-scroll-container">
             <div class="flex gap-1">
                 <mat-icon class="material-icons left-icon cursor-pointer {{disableLeft ? 'disableArrow': ''}}" (click)="scrollToLeft()" >chevron_left</mat-icon>
+              
                 <div #scrollableContent class="scroll-content">
-                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XL' }" (click)="getTabData('XL')">> 50K</span>
-                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'L' }" (click)="getTabData('L')">10K-50K</span>
-                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'M' }" (click)="getTabData('M')">1K-10K</span>
-                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'S' }" (click)="getTabData('S')">500-1K</span>
-                    <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XS' }" (click)="getTabData('XS')">< 500</span>
+                    <ng-container *ngIf="object?.options?.length; else defultOptions">
+                        <ng-container *ngFor="let option of object?.options">
+                            <span class="tab-title"  [ngClass]="{'active' : currentTab === option?.value }" (click)="getTabData(option?.value)">{{option?.label}}</span>
+                        </ng-container>
+                    </ng-container>
+                    <ng-template #defultOptions>
+                        <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XL' }" (click)="getTabData('XL')">> 50K</span>
+                        <span class="tab-title"  [ngClass]="{'active' : currentTab === 'L' }" (click)="getTabData('L')">10K-50K</span>
+                        <span class="tab-title"  [ngClass]="{'active' : currentTab === 'M' }" (click)="getTabData('M')">1K-10K</span>
+                        <span class="tab-title"  [ngClass]="{'active' : currentTab === 'S' }" (click)="getTabData('S')">500-1K</span>
+                        <span class="tab-title"  [ngClass]="{'active' : currentTab === 'XS' }" (click)="getTabData('XS')">< 500</span>
+                    </ng-template>
+                    
                 </div>
                 <mat-icon class="material-icons icon-right cursor-pointer {{disableRight ? 'disableArrow': ''}}" (click)="scrollToRight()">chevron_right</mat-icon>
             </div>
@@ -56,7 +65,7 @@
                     </div>
                 </div>
             </div>
-            <div class="no-data px-1" *ngIf="filteredData?.length === 0">
+            <div class="no-data px-1 flex justify-center" *ngIf="filteredData?.length === 0">
                 No data found!
             </div>
         </div>
