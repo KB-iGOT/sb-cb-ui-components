@@ -26,10 +26,10 @@
                       ">
               <div class="flex flex-1 items-center">
                 <p class="mat-subheading-1 margin-remove inline-block " *ngIf="stripsResultDataMap[key]?.stripTitle">
-                  <span class="capitalize" *ngIf="stripsResultDataMap[key]?.disableTranslate">
+                  <span class="capitalize {{stripsResultDataMap[key]?.titleClass}}" *ngIf="stripsResultDataMap[key]?.disableTranslate">
                     {{stripsResultDataMap[key]?.stripTitle}}
                   </span>
-                  <span *ngIf="!stripsResultDataMap[key]?.disableTranslate">
+                  <span class="capitalize {{stripsResultDataMap[key]?.titleClass}}"  *ngIf="!stripsResultDataMap[key]?.disableTranslate">
                     {{ translateLabels(stripsResultDataMap[key]?.stripTitle, 'home') }}
                   </span>
                 </p>

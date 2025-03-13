@@ -97,11 +97,16 @@
         <div class="container px-4 flex flex-col mob-container">
             <div class="mr-4 logo-box-container">
                 <div class="flex logo-box-square top mr-4">
-                    <img alt="Application Logo" class="logo-img" [src]="data?.logo">
+                    <img alt="Application Logo" class="logo-img" [src]="data?.logoMobile || data?.logo">
                 </div>
             </div>
             <div class="w-full md:w-9/12 flex-1 flex flex-col">
                 <h1 class=" txt-ellipsis-2 break-words">{{data?.title || channnelName}}</h1>
+                <h4 *ngIf="data?.subTitle" class=" sub-title txt-ellipsis-2 break-words " [style.color]="data?.subTitleColorMobile">
+                    {{data?.subTitle}}</h4>
+
+                <h4 *ngIf="data?.subTitleTwo" class=" sub-title-two txt-ellipsis-2 break-words pt-4 mb-8" [style.color]="data?.subTitleColorTwoMobile">
+                    {{data?.subTitleTwo}}</h4>
                 <p class="mat-body-2">
                     {{data?.description | slice:0:descriptionMaxLength}}
                     <span *ngIf="data?.description?.length > descriptionMaxLength">...</span>
