@@ -11,9 +11,9 @@ const API_END_POINTS = {
   UPDATE_ANSWER_POST: `/apis/proxies/v8/feedDiscussion/updateAnswerPost`,
   SEARCH_POSTS: `/apis/proxies/v8/feedDiscussion/search`,
   FEED_POSTS: `/apis/proxies/v8/feedDiscussion/communityFeed`,
-  UP_VOTE: (id: string) => `/apis/proxies/v8/feedDiscussion/upVote/${id}`,
-  DOWN_VOTE: (id: string) => `/apis/proxies/v8/feedDiscussion/downVote/${id}`,
-  DELETE_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/delete/${id}`,
+  UP_VOTE: (type: string, id: string) => `/apis/proxies/v8/feedDiscussion/${type}/like/${id}`,
+  DOWN_VOTE: (type: string, id: string) => `/apis/proxies/v8/feedDiscussion/${type}/dislike/${id}`,
+  DELETE_POST: (type: string, id: string) => `/apis/proxies/v8/feedDiscussion/${type}/delete/${id}`,
   REPORT_POST: `/apis/proxies/v8/feedDiscussion/report`,
   BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/bookmark/${communityId}/${discussionId}`,
   UN_BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/unbookmark/${communityId}/${discussionId}`,
@@ -77,16 +77,16 @@ export class DiscussionV2Service {
     return this.http.post<any>(`${API_END_POINTS.FEED_POSTS}`, req) 
   }
 
-  upVotePost(id: string) {
-    return this.http.post<any>(`${API_END_POINTS.UP_VOTE(id)}`, {})
+  upVotePost(type: string, id: string) {
+    return this.http.post<any>(`${API_END_POINTS.UP_VOTE(type, id)}`, {})
   }
 
-  downVotePost(id: string) {
-    return this.http.post<any>(`${API_END_POINTS.DOWN_VOTE(id)}`, {})
+  downVotePost(type: string, id: string) {
+    return this.http.post<any>(`${API_END_POINTS.DOWN_VOTE(type, id)}`, {})
   }
 
-  deletePost(id: string) {
-    return this.http.delete<any>(`${API_END_POINTS.DELETE_POST(id)}`)
+  deletePost(type: string, id: string) {
+    return this.http.delete<any>(`${API_END_POINTS.DELETE_POST(type, id)}`)
   }
 
   fetchAllFlags(): Observable<any> {

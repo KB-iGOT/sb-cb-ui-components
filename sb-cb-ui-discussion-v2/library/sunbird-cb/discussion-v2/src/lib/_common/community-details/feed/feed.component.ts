@@ -127,12 +127,12 @@ export class FeedComponent implements OnInit, OnChanges{
     // if(this.userLikedComments.includes(event.commentId)) {
     //   this.likeUnlikeCommentApi('dislike', event.commentId)
     // } else {
-      this.upVotePost('like', event.discussionId)
+      this.upVotePost('like', event.type, event.discussionId)
     // }
   }
 
-  upVotePost(flag: string, discussionId: string) {
-    this.discussV2Svc.upVotePost(discussionId).subscribe(res => {
+  upVotePost(flag: string, type: string,  discussionId: string) {
+    this.discussV2Svc.upVotePost(type, discussionId).subscribe(res => {
       if (res.responseCode === 'OK') {
         this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
         const post = this.posts.find((comm: any) => comm.discussionId === discussionId)

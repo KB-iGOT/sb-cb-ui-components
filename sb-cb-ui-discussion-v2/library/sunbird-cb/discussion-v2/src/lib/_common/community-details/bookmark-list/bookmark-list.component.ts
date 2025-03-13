@@ -13,7 +13,7 @@ export class BookmarkListComponent implements OnInit{
   @Input() communityId: any
   @Input() userJoinedCommunity: boolean = false
   page: any = 0
-  pageSize: any = 1
+  pageSize: any = 10
   totalNumberOfBookmarksCount: any = 0
 
   bookmarkPosts: any = []
@@ -64,6 +64,37 @@ export class BookmarkListComponent implements OnInit{
         this.totalNumberOfBookmarksCount =  this.totalNumberOfBookmarksCount-1
       }
     })
+  }
+
+  likeUnlikeEvent(event: any) {
+    // if(this.userLikedComments.includes(event.commentId)) {
+    //   this.likeUnlikeCommentApi('dislike', event.commentId)
+    // } else {
+      this.upVotePost('like', event.type, event.discussionId)
+    // }
+  }
+
+  upVotePost(flag: string, type: string,  discussionId: string) {
+    this.discussV2Svc.upVotePost(type, discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
+        const post = this.bookmarkPosts.find((comm: any) => comm.discussionId === discussionId)
+        if (flag === 'like') {
+          post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
+          // this.userLikedComments.push(commentId)
+        } else {
+          post.downVoteCount = post.downVoteCount? post.downVoteCount + 1 : 1
+          // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
+          // this.userLikedComments.splice(index, 1)
+        }
+      }
+    })
+  }
+
+  newCommentEvent(event: any){
+    if(event && event.type === 'question'){
+      this.getBookmarkData()
+    }
   }
 
 }
