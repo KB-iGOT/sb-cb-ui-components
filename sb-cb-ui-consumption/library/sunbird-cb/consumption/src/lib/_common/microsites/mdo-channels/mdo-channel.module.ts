@@ -31,6 +31,7 @@ import { MdoLeaderboardModule } from '../../mdo-leaderboard/mdo-leaderboard.modu
 import { KeyHighlightsModule } from '../../key-highlights/key-highlights.module';
 import { OrderByPipeModule } from '../../../_pipes/order-by/order-by.pipe.module';
 import { SafeUrlPipeModule } from '../../../_pipes/safe-url/safe-url.module';
+import { VideoConferenceModule } from '../../video-conference/video-conference.module';
 
 
 
@@ -60,6 +61,7 @@ import { SafeUrlPipeModule } from '../../../_pipes/safe-url/safe-url.module';
     MatTabsModule,
     OrderByPipeModule,
     SafeUrlPipeModule,
+    VideoConferenceModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
