@@ -41,9 +41,7 @@ export class MdoLeaderboardComponent implements OnInit {
     this.insiteDataService.fetchSlwLeaderboard(request).subscribe((res: any) => {
       if (res && res.result ) {
           this.result = res.result
-          this.filteredData = this.result.mdoLeaderBoard || []
-              .filter((user:any) => user.size === this.currentTab) 
-              .map((user:any) => ({ ...user, children: [], selected: false })).slice(0, 5)
+          this.filteredData = this.getFilteredData(this.result.mdoLeaderBoard || [])
       }
       
   }, error => {
@@ -55,9 +53,7 @@ export class MdoLeaderboardComponent implements OnInit {
     this.insiteDataService.fetchLeaderboard().subscribe((res: any) => {
         if (res && res.result) {
             this.result = res.result
-            this.filteredData = this.result.mdoLeaderBoard || []
-                .filter(user => user.size === this.currentTab) 
-                .map(user => ({ ...user, children: [], selected: false })).slice(0, 5)
+            this.filteredData = this.getFilteredData(this.result.mdoLeaderBoard || [])
         }
         
     }, error => {
@@ -65,13 +61,21 @@ export class MdoLeaderboardComponent implements OnInit {
     })
   }
 
+  getFilteredData(response: any) {
+    if(response && response.length > 0) {
+     return  response.filter((user: any) => user.size === this.currentTab) 
+            .map(user => ({ ...user, children: [], selected: false })).slice(0, 5)
+    }
+    return []
+  }
   getTabData(name: any) {
     this.currentTab = name
     this.searchTerm = ''
-    this.filteredData = this.result.mdoLeaderBoard || []
-        .filter(user => user.size === this.currentTab) 
-            .map(user => ({ ...user, children: [], selected: false })).slice(0, 5)
+    this.filteredData = this.getFilteredData(this.result.mdoLeaderBoard || [])
     let nameStr: any = ''
+    if(this.object&& this.object.options && this.object.options.length > 0) {
+      nameStr = this.object.options.find((option: any) => option.value === name).label
+    } else {
     switch (name) {
       case 'XL':
         nameStr = 'greater-than-50K'
@@ -89,6 +93,7 @@ export class MdoLeaderboardComponent implements OnInit {
         nameStr = 'less-than-500'
         break
     }
+  }
     this.tabClicked.emit(nameStr)
   }
 
