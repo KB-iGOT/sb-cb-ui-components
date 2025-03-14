@@ -68,7 +68,7 @@ export class MdoLeaderboardComponent implements OnInit {
   getTabData(name: any) {
     this.currentTab = name
     this.searchTerm = ''
-    this.filteredData = this.result.mdoLeaderBoard
+    this.filteredData = this.result.mdoLeaderBoard || []
         .filter(user => user.size === this.currentTab) 
             .map(user => ({ ...user, children: [], selected: false })).slice(0, 5)
     let nameStr: any = ''
