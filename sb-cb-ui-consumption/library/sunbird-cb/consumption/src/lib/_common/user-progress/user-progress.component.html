@@ -45,7 +45,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2 items-center justify-center pt-3">
+                <div class="flex gap-2 items-center justify-center pt-3" *ngIf="!objectData?.hideEle?.includes('karma-points')">
                     <div class="k-points">
                         <div class="flex items-center gap-3">
                             <img class="kp-point-icon"

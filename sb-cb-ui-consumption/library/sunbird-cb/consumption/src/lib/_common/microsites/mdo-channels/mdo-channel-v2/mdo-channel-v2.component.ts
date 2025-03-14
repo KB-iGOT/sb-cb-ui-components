@@ -1,11 +1,12 @@
 import { Component, HostListener, Input, OnInit } from '@angular/core'
 import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs';
 import { ActivatedRoute, Router } from '@angular/router'
-import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
 /* tslint:disable */
 import * as _ from 'lodash'
 import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'sb-uic-mdo-channel-v2',
@@ -15,7 +16,6 @@ import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 export class MdoChannelV2Component  implements OnInit {
   @Input() sectionList:any = []
   // @Input() configDetails: any
-  @Input() nwlConfiguration: any
   @Input() slwConfiguration: any
   providerId: string = '123456789'
   channnelName = ''
@@ -36,15 +36,19 @@ export class MdoChannelV2Component  implements OnInit {
   isTelemetryRaised: boolean = false
   stripWidth: any
   iframeHeight: any = '240px'
-
+  lookerProUrl: SafeResourceUrl = ''
+  isMobile = false
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private eventSvc: EventService,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    public configSvc: ConfigurationsService
+    public configSvc: ConfigurationsService,
+    private sanitizer: DomSanitizer,
+    private utillsSvc: UtilityService,
   ) { 
+    this.isMobile = this.utillsSvc.isMobile
     if (this.route.snapshot.data && this.route.snapshot.data.formData
       && this.route.snapshot.data.formData.data
       && this.route.snapshot.data.formData.data.result
@@ -99,12 +103,28 @@ export class MdoChannelV2Component  implements OnInit {
       })
     })
     this.setWidth()
+    // this.lookerProDesktopUrl = this.sanitizer.bypassSecurityTrustResourceUrl(data?.lookerProDesktopUrl);
+    this.getLookerProUrl()
   }
 
   hideKeyHightlight(event: any, learnerReview: any) {
     if (event) {
       learnerReview['hideSection'] = true
     }
+  }
+
+  getLookerProUrl(){
+    this.sectionList.forEach((section: any) => {
+      if(section.key === 'sectionLookerpro'){
+        section.column.forEach((col: any) => {  
+          if(col && col.key === 'lookerSection'){
+            let desktopUrl = col.data.lookerProDesktopUrl
+            let mobileUrl = col.data.lookerProMobileUrl
+            this.lookerProUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.isMobile ? mobileUrl : desktopUrl)
+          }
+        })
+      }
+    })
   }
 
 

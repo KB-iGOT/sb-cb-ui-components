@@ -47,7 +47,7 @@ export class InsiteDataService {
   }
 
   fetchSlwLearner(stateOrgId: any): Observable<any> {
-    return this.http.get(`${API_END_POINTS.SLW_TOP_LEARNERS}/${stateOrgId}`)
+    return this.http.get(`${API_END_POINTS.SLW_TOP_LEARNERS(stateOrgId)}`)
   }
 
   fetchLearner(channelId: any): Observable<any> {

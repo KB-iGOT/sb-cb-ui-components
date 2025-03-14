@@ -27,14 +27,13 @@ export class DataPointsComponent implements OnInit {
     if (this.fetchDataFromApi) {
       this.isDataLoading = true
       if (this.pageLayout === 'nlw') {
+          this.getStats()
+      } else {
         if (this.slwConfig && this.slwConfig.enabled) {
           this.getSwlStats()
         } else {
-          this.getStats()
+          this.getInsiteData()
         }
-
-      } else {
-        this.getInsiteData()
       }
     }
   }

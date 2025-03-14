@@ -34,6 +34,7 @@ interface IStripUnitContentData {
   disableTranslate: boolean;
   widgets?: NsWidgetResolver.IRenderConfigWithAnyData[];
   stripTitle: string;
+  titleClass?:  string;
   stripTitleLink?: {
     link: {
       queryParams: string
@@ -996,6 +997,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       errorWidget: strip.errorWidget,
       stripInfo: strip.info,
       stripTitle: strip.title,
+      titleClass: strip.titleClass || '',
       stripTitleLink: strip.stripTitleLink,
       disableTranslate: strip.disableTranslate,
       sliderConfig: strip.sliderConfig,
