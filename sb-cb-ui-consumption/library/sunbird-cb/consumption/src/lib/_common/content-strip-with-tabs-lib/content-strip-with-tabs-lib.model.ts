@@ -15,6 +15,7 @@ export namespace NsContentStripWithTabs {
     disableTranslate?: any;
     key: string;
     title: string;
+    titleClass?: string;
     customeClass?: string;
     nodataMsg?: string;
     stripTitleLink?: {

@@ -1,0 +1,16 @@
+<div class="video-conference container " *ngIf="videoConf" id="contact_us">
+    <div class="content ">
+        <img [src]="videoConf?.thumbnail" alt="image" class="image">
+        <div class="text-center mb-3">
+            <img src="../../../../../assets/icons/call-iicon.svg" alt="">
+        </div>
+        <h1 class="title">{{videoConf?.title }}</h1>
+        <div class="d-flex gap-2 align-items-center justify-content-center">
+            <p class="date">{{videoConf?.date }}</p>
+            <p class="time">{{videoConf?.time }}</p>
+        </div>
+        <button (click)="joinVideoConference(videoConf.joinLink)">{{videoConf?.button }}</button>
+        <p class="text-support">{{videoConf?.technicalSupport }} 
+            <span class="contachEmail">mission[dot]karmayogi[at]gov[dot]in</span> {{videoConf?.plsContact }}</p>
+    </div>
+</div>
