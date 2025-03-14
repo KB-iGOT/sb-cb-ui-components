@@ -2115,7 +2115,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           }
           if (response && response.results) {
             if (response.results.result.Event) {
-              console.log(this.transformEventsV2ToWidgets(response.results.result.Event, strip))
               this.processStrip(
                 strip,
                 this.transformEventsV2ToWidgets(response.results.result.Event, strip),

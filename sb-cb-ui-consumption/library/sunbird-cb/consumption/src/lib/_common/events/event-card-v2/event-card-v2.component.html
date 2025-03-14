@@ -27,7 +27,7 @@
                 <div class="duration-box right-corner" *ngIf="eventDetails?.duration > 0">
                   <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
                   <span class=" ws-mat-white-text duration">
-                    {{ getTime(eventDetails?.duration)}} duration
+                    {{ getTime(eventDetails?.duration)}}
                   </span>
                 </div>
                 <div *ngIf="eventDetails?.showLive" class="fixed-live">{{eventDetails?.status}}</div>
@@ -37,7 +37,7 @@
               <div class="pb-1 flex justify-between">
                 <div class="flex gap-1 resource-type">
                   <img src="assets/icons/handshake.svg" />
-                  <span class="resource-text">{{eventDetails?.resourceType}} rType
+                  <span class="resource-text">{{eventDetails?.resourceType}}
                   </span>
                 </div>
                 <div *ngIf="eventDetails?.showLive" class="live blink">(( . )) {{eventDetails?.status}}
