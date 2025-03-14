@@ -63,13 +63,23 @@ export class EventsComponent implements OnInit {
     this.currentDay = slectedDate.target.value
     let nextDay = moment(slectedDate.target.value, 'YYYY-MM-DD')
     nextDay.add(1, 'days')
-    this.requestBody.request.filters.startDate[">="] = this.currentDay
-    this.requestBody.request.filters.startDate["<"] = nextDay.format('YYYY-MM-DD')
+    let requestData: any = {}
+    if(this.object && this.object.request && Object.keys(this.object.request).length > 0) {
+      requestData = this.object.request
+      let startDate= {
+        ">=": this.currentDay,
+        "<": nextDay.format('YYYY-MM-DD')
+      }
+      requestData.request.filters.startDate = startDate
+    } else {
+      this.requestBody.request.filters.startDate[">="] = this.currentDay
+      this.requestBody.request.filters.startDate["<"] = nextDay.format('YYYY-MM-DD')
+      requestData = this.requestBody
+    }
     this.loader = true
-    this.insightSvc.fetchTrainingDetails(this.requestBody).subscribe((res: any)=> {
+    this.insightSvc.fetchTrainingDetails(requestData).subscribe((res: any)=> {
       this.events = []
       if (res && res.result && res.result.count > 0) {
-
         res.result.Event.forEach((eveEle) => {
           eveEle['eventDate'] = this.customDateFormat(eveEle.startDate, eveEle.startTime)
           eveEle['eventendDate'] = this.customDateFormat(eveEle.endDate, eveEle.endTime)
@@ -88,10 +98,21 @@ export class EventsComponent implements OnInit {
     this.getDaysBetweenDates()
     let nextDay = moment(this.currentDay, 'YYYY-MM-DD')
     nextDay.add(1, 'days')
-    this.requestBody.request.filters.startDate[">="] = this.currentDay
-    this.requestBody.request.filters.startDate["<"] = nextDay.format('YYYY-MM-DD')
     this.loader = true
-    this.insightSvc.fetchTrainingDetails(this.requestBody).subscribe((res: any)=> {
+    let requestData: any = {}
+    if(this.object && this.object.request && Object.keys(this.object.request).length > 0) {
+      requestData = this.object.request
+      let startDate= {
+        ">=": this.currentDay,
+        "<": nextDay.format('YYYY-MM-DD')
+      }
+      requestData.request.filters.startDate = startDate
+    } else {
+      this.requestBody.request.filters.startDate[">="] = this.currentDay
+      this.requestBody.request.filters.startDate["<"] = nextDay.format('YYYY-MM-DD')
+      requestData = this.requestBody
+    }
+    this.insightSvc.fetchTrainingDetails(requestData).subscribe((res: any)=> {
       this.events = []
       if (res && res.result && res.result.count > 0) {
         res.result.Event.forEach((eveEle) => {

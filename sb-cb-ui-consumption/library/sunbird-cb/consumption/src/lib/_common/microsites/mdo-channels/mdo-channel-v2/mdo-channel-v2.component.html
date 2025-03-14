@@ -97,7 +97,7 @@
         <div class="container px-4 flex flex-col mob-container">
             <div class="mr-4 logo-box-container">
                 <div class="flex logo-box-square top mr-4">
-                    <img alt="Application Logo" class="logo-img" [src]="data?.logoMobile || data?.logo">
+                    <img alt="Application Logo" class="logo-img logo-img-mb" [src]="data?.logoMobile || data?.logo">
                 </div>
             </div>
             <div class="w-full md:w-9/12 flex-1 flex flex-col">
@@ -138,61 +138,63 @@
 <ng-template #mainContent let-data="data">
     <div class="flex items-center justify-center" [ngStyle]="{'background': data.background}">
         <div class="container">
-            
-            <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
-                <sb-uic-key-highlights
-                    (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
-                    [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId"
-                    [mode]="'mobile'"></sb-uic-key-highlights>
-            </div>
-            <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
-                <sb-uic-highlights-of-week [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data">
-                </sb-uic-highlights-of-week>
-            </div>
+            <ng-container *ngIf="isMobile">
+                <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
+                    <sb-uic-key-highlights
+                        (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
+                        [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId"
+                        [mode]="'mobile'"></sb-uic-key-highlights>
+                </div>
+                <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
+                    <sb-uic-highlights-of-week [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data">
+                    </sb-uic-highlights-of-week>
+                </div>
 
-            <div class="block md:hidden ">
-                <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
-                    <sb-uic-user-progress [layoutType]="'web'" [mobileHeight]="false"
-                        [objectData]="data?.stateLearningWeekSection?.myprogress?.data"
-                        [rootOrgId]="configSvc?.unMappedUser?.rootOrgId">
-                    </sb-uic-user-progress>
-                </div>
-            </div>
-            <div class="block md:hidden ">
-                <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
-                    <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
-                        [objectData]="data?.stateLearningWeekSection?.speakerOftheDay?.data">
-                    </sb-uic-speakers>
-                </div>
-            </div>
-            <div class="block md:hidden ">
-                <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled">
-                    <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data" [slwConfig]="slwConfiguration"
-                        (tabClicked)="raiseTabClick($event)" [orgId]="orgId"></sb-uic-mdo-leaderboard>
-                </div>
-            </div>
-
-            <div class="block md:hidden col-span-12 padding-left-m padding-right-m padding-top-m padding-bottom-m">
-                <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
-                    [channelId]="orgId" [objectData]="data?.cbpPlanSection?.data">
-                </sb-uic-cbp-plan>
-            </div>
-            <div class="block md:hidden col-span-12 mt-6">
-                <sb-uic-announcements [layoutType]="'mobile'" (openDialog)="triggerOpenDialog($event)"
-                    [objectData]="data?.announcementSection?.data" [fetchDataFromApi]="false" [channelId]="orgId">
-                </sb-uic-announcements>
-                <div class="announcements-container" *ngIf="showModal">
-                    <div class="cursor-pointer close-share-dialog">
-                        <mat-icon (click)="onClose()" class="close-icon">close</mat-icon>
-                    </div>
-                    <div class="share-modal px-3 pt-8">
-                        <sb-uic-announcements [layoutType]="'web'" (openDialog)="triggerOpenDialog($event)"
-                            [objectData]="data?.announcementSection?.data" [mobileHeight]="true"
-                            [fetchDataFromApi]="true" [channelId]="orgId">
-                        </sb-uic-announcements>
+                <div class="block md:hidden ">
+                    <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
+                        <sb-uic-user-progress [layoutType]="'web'" [mobileHeight]="false"
+                            [objectData]="data?.stateLearningWeekSection?.myprogress?.data"
+                            [rootOrgId]="configSvc?.unMappedUser?.rootOrgId">
+                        </sb-uic-user-progress>
                     </div>
                 </div>
-            </div>
+                <div class="block md:hidden ">
+                    <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
+                        <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
+                            [objectData]="data?.stateLearningWeekSection?.speakerOftheDay?.data">
+                        </sb-uic-speakers>
+                    </div>
+                </div>
+                <div class="block md:hidden ">
+                    <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled">
+                        <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data" [slwConfig]="slwConfiguration"
+                            (tabClicked)="raiseTabClick($event)" [orgId]="orgId"></sb-uic-mdo-leaderboard>
+                    </div>
+                </div>
+
+                <div class="block md:hidden col-span-12 padding-left-m padding-right-m padding-top-m padding-bottom-m">
+                    <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
+                        [channelId]="orgId" [objectData]="data?.cbpPlanSection?.data">
+                    </sb-uic-cbp-plan>
+                </div>
+                <div class="block md:hidden col-span-12 mt-6" *ngIf="!data?.announcementSection?.disable">
+                    <sb-uic-announcements [layoutType]="'mobile'" (openDialog)="triggerOpenDialog($event)"
+                        [objectData]="data?.announcementSection?.data" [fetchDataFromApi]="false" [channelId]="orgId">
+                    </sb-uic-announcements>
+                    <div class="announcements-container" *ngIf="showModal">
+                        <div class="cursor-pointer close-share-dialog">
+                            <mat-icon (click)="onClose()" class="close-icon">close</mat-icon>
+                        </div>
+                        <div class="share-modal px-3 pt-8">
+                            <sb-uic-announcements [layoutType]="'web'" (openDialog)="triggerOpenDialog($event)"
+                                [objectData]="data?.announcementSection?.data" [mobileHeight]="true"
+                                [fetchDataFromApi]="true" [channelId]="orgId">
+                            </sb-uic-announcements>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
             <div class="col-span-12">
                 <div class="flex items-center justify-center">
                     <div class="container margin-top-xl">
@@ -292,42 +294,44 @@
                     </div>
                 </div> -->
                 <div class="col-span-12 md:col-span-4">
-                    <div class="hidden md:block padding-top-xl padding-bottom-m">
-                        <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
-                            <sb-uic-user-progress [layoutType]="'web'" [mobileHeight]="false"
-                                [objectData]="data?.stateLearningWeekSection?.myprogress?.data"
-                                [rootOrgId]="configSvc?.unMappedUser?.rootOrgId">
-                            </sb-uic-user-progress>
+                    <ng-container *ngIf="!isMobile">
+                        <div class="hidden md:block padding-top-xl padding-bottom-m">
+                            <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
+                                <sb-uic-user-progress [layoutType]="'web'" [mobileHeight]="false"
+                                    [objectData]="data?.stateLearningWeekSection?.myprogress?.data"
+                                    [rootOrgId]="configSvc?.unMappedUser?.rootOrgId">
+                                </sb-uic-user-progress>
+                            </div>
                         </div>
-                    </div>
-                    <div class="hidden md:block padding-top-xl padding-bottom-m">
-                        <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
-                            <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
-                                [objectData]="data?.stateLearningWeekSection?.speakerOftheDay?.data">
-                            </sb-uic-speakers>
+                        <div class="hidden md:block padding-top-xl padding-bottom-m">
+                            <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
+                                <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
+                                    [objectData]="data?.stateLearningWeekSection?.speakerOftheDay?.data">
+                                </sb-uic-speakers>
+                            </div>
                         </div>
-                    </div>
-                    <div class="hidden md:block padding-top-xl padding-bottom-m">
-                        <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled">
-                            <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data" [slwConfig]="slwConfiguration"
-                                (tabClicked)="raiseTabClick($event)" [orgId]="orgId"></sb-uic-mdo-leaderboard>
+                        <div class="hidden md:block padding-top-xl padding-bottom-m">
+                            <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled">
+                                <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data" [slwConfig]="slwConfiguration"
+                                    (tabClicked)="raiseTabClick($event)" [orgId]="orgId"></sb-uic-mdo-leaderboard>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.cbpPlanSection?.data">
-                        <div class="pt-4">
-                            <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
-                                [channelId]="orgId" [objectData]="data?.cbpPlanSection?.data">
-                            </sb-uic-cbp-plan>
+    
+                        <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.cbpPlanSection?.data">
+                            <div class="pt-4">
+                                <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
+                                    [channelId]="orgId" [objectData]="data?.cbpPlanSection?.data">
+                                </sb-uic-cbp-plan>
+                            </div>
                         </div>
-                    </div>
-                    <div class="hidden md:block" *ngIf="data?.announcementSection?.data">
-                        <div class="pt-4">
-                            <sb-uic-announcements [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
-                                [channelId]="orgId" [objectData]="data?.announcementSection?.data">
-                            </sb-uic-announcements>
+                        <div class="hidden md:block" *ngIf="!data?.announcementSection?.disable">
+                            <div class="pt-4">
+                                <sb-uic-announcements [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
+                                    [channelId]="orgId" [objectData]="data?.announcementSection?.data">
+                                </sb-uic-announcements>
+                            </div>
                         </div>
-                    </div>
+                    </ng-container>
                 </div>
 
 
