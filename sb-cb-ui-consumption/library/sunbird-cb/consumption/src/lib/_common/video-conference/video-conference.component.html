@@ -11,6 +11,7 @@
         </div>
         <button (click)="joinVideoConference(videoConf.joinLink)">{{videoConf?.button }}</button>
         <p class="text-support">{{videoConf?.technicalSupport }} 
-            <span class="contachEmail">mission[dot]karmayogi[at]gov[dot]in</span> {{videoConf?.plsContact }}</p>
+            <a href="mailto:{{videoConf?.plsContactEmailSend}}"><span class="contachEmail">{{videoConf?.plsContact }}</span></a>
+        </p>
     </div>
 </div>
