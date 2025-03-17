@@ -27,7 +27,7 @@
             </div>
          </div>
          <div class="px-4 md:px-0 info-text flex items-center mb-6">
-           <mat-icon class=" cursor-pointer" (click)="goBackMethod()">arrow_back_ios</mat-icon>
+           <mat-icon class=" cursor-pointer arrow-back-btn " (click)="goBackMethod()">arrow_back_ios</mat-icon>
           <h2 class="margin-remove">All Topics <span class="ml-2">({{topicDataList?.length}})</span></h2>
           
          </div>
@@ -35,7 +35,7 @@
            <ng-container *ngIf="(topicDataList | filterSearch: localSearchTextValue).length;else noData">
               <div class=" px-2 md:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                  <ng-container *ngFor="let topic of topicDataList  | filterSearch: localSearchTextValue" >
-                    <d-v2-topic-card [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
+                    <d-v2-topic-card class="flex justify-center md:block" [topicCommunityCount]="topic?.count" [isLoading]="false" (click)="topicCardMethod(topic)"
                        [topicTitle]="topic?.value">
                     </d-v2-topic-card>
                  </ng-container>
