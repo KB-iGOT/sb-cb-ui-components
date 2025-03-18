@@ -42,7 +42,7 @@
             </mat-icon>
             <input type="search" name="searchKey" class="search-field" i18-aria-label
                 aria-label="Search" i18n-placeholder="search"  [(ngModel)]="searchTerm"
-                placeholder="Search your MDO" (keyup)="handleSearchQuery($event)" />
+                placeholder="{{ object?.searchHint }}" (keyup)="handleSearchQuery($event)" />
         </div>
         <div class="l-tab-data {{object?.customClass}}" [style.height]="object?.cardHeight" [style.minHeight]="object?.cardMinHeight">
             <div *ngFor="let user of filteredData; let i = index">
