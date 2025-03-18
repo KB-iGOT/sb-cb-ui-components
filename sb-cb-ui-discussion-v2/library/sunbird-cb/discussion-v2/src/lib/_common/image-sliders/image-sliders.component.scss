@@ -380,3 +380,6 @@ $banner-min-height: 243px;
     margin: 0;
   }
 }
+.object-cover {
+  object-fit: cover !important;
+}

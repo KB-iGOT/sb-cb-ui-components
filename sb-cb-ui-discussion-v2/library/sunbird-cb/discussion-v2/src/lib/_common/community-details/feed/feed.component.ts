@@ -66,9 +66,14 @@ export class FeedComponent implements OnInit, OnChanges{
         this.scrollToDiscussion()
       }
     },(err: any) => {
+      
       this.loadingPosts = false
-      this._snackBar.open('Something went wrong! please try reporting again later.')
-      console.error(err)
+      if(err && err.error.params && err.error.params.errMsg){
+        this._snackBar.open(err.error.params.errMsg)
+      } else {
+        this._snackBar.open('Something went wrong! please try reporting again later.')
+      }
+      // console.error(err)
     })
   }
 
@@ -83,9 +88,13 @@ export class FeedComponent implements OnInit, OnChanges{
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = [...this.posts, ...(_.get(res, 'result.search_results.data') || [])]
     },(err: any) => {
+      
       this.loadingPosts = false
-      this._snackBar.open('Something went wrong! please try reporting again later.')
-      console.error(err)
+      if(err && err.error.params && err.error.params.errMsg){
+        this._snackBar.open(err.error.params.errMsg)
+      } else {
+        this._snackBar.open('Something went wrong! please try reporting again later.')
+      }
     })
   }
 

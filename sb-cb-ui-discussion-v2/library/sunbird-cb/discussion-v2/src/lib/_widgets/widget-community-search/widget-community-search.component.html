@@ -40,10 +40,10 @@
             </div>
             </div>
             </div>
-            <div class="info-text">
+            <div class="px-2 md:px-0 info-text">
                <h2  *ngIf="searchTextValue">Showing results for <span class="higlight-text" >"{{searchTextValue}}"</span></h2>
-               <h2 class="flex" *ngIf="topicName">
-                  <mat-icon class="mr-2 cursor-pointer" (click)="goBackMethod()">arrow_back_ios</mat-icon>
+               <h2 class="flex items-center" *ngIf="topicName">
+                  <mat-icon class="mr-2 cursor-pointer arrow-back-btn" (click)="goBackMethod()">arrow_back_ios</mat-icon>
                   <span>Communities under <span class="higlight-text">"{{topicName}}"</span> ({{totalCount}})</span>
                </h2>
             </div>
