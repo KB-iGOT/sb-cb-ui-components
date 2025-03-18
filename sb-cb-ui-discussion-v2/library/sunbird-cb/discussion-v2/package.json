@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/discussion-v2",
-  "version": "0.0.45-cbrelease-4.8.22",
+  "version": "0.0.46-cbrelease-4.8.22",
   "main": "src/public-api.ts",
   "dependencies": {
     "tslib": "^2.0.0"
