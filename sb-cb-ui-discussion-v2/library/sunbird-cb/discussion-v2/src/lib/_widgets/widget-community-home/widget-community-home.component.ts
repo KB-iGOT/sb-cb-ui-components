@@ -366,13 +366,13 @@ export class WidgetCommunityHomeComponent implements OnInit {
         })
         confirmDialog.afterClosed().subscribe((result: any) => {
           if (result) {
-            this.reportPost(result)
+            this.reportCommunity(result)
           }
         })
       }
     })
   }
-  reportPost(flagDetails: any) {
+  reportCommunity(flagDetails: any) {
     let requestData: any = {
       "communityId": this.communityId
     }
