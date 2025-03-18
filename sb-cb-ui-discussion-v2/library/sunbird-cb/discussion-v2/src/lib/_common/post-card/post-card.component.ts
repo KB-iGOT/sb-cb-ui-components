@@ -214,6 +214,7 @@ export class PostCardComponent {
     let requestData: any = {
       "discussionId": this.post.discussionId,
       "type": this.post.type,
+      "discussionText": this.post.description,
     }
     requestData = { ...requestData, ...flagDetails }
 

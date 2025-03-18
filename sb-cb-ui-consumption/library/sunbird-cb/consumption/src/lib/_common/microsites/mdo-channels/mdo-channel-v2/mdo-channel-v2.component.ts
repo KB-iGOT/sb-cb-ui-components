@@ -118,6 +118,11 @@ export class MdoChannelV2Component  implements OnInit {
       if(section.key === 'sectionLookerpro'){
         section.column.forEach((col: any) => {  
           if(col && col.key === 'lookerSection'){
+            if(this.isMobile){
+              this.iframeHeight =  col.data.mobileHeight || '400px'
+            } else {
+              this.iframeHeight =  col.data.disableDynamicHeight ? col.data.desktopHeight : `${window.innerWidth *0.667}px`;
+            }
             let desktopUrl = col.data.lookerProDesktopUrl
             let mobileUrl = col.data.lookerProMobileUrl
             this.lookerProUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.isMobile ? mobileUrl : desktopUrl)

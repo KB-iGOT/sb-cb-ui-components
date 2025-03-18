@@ -1,8 +1,8 @@
 <div class="flex flex-center">
-    <div>
-        <div class="title-border"></div>
-        <div class="title" [style.color]="objectData?.titleFontColor">{{objectData?.title}} ({{month}})</div>
-        <div class="title-border"></div>
+    <div class="flex items-center flex-wrap justify-center">
+        <div class="title-border w-full"></div>
+        <div class="title w-full" [style.color]="objectData?.titleFontColor">{{objectData?.title}} ({{month}})</div>
+        <div class="title-border w-full"></div>
     </div>    
 </div>
 <div class="top-learners-container" *ngIf="!loading && results.length">

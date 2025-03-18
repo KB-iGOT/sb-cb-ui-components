@@ -19,7 +19,7 @@
        
       <img i18n-alt alt="Image{{i}}"
       [style.height]="isMobile? styleData?.responsive?.customImgHeight : styleData?.customImgHeight"
-      [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"  [src]="slide?.posterImageUrl" class=" banner-image " (error)="changeToDefaultImg($event)"  />
+      [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"  [src]="slide?.posterImageUrl" class=" banner-image object-cover" (error)="changeToDefaultImg($event)"  />
       <div class="image-info">
         <p>{{slide?.name}}</p>
       </div>
