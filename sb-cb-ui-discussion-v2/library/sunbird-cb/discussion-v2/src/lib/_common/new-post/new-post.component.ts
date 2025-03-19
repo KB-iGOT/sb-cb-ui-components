@@ -290,17 +290,15 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.uploadForm.valid) {
-      // const formData = {
-      //   ...this.uploadForm.value,
-      //   // tags: this.selectedTags
-      // };
-      this.showEmojiPicker = false
+    if (this.uploadForm.valid || Object.keys(this.selectedFilesFinal).length > 0) {
+      this.showEmojiPicker = false;
       if (this.editMode) {
-        this.handleEditFlow();
+      this.handleEditFlow();
       } else {
-        this.handlePostCreation();
+      this.handlePostCreation();
       }
+    } else {
+      this._snackBar.open('Please provide a description or select a file to proceed.', '', { duration: 3000 });
     }
   }
   onCancel() {
@@ -491,7 +489,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       ...(parentDiscussionId ? { parentDiscussionId: parentDiscussionId } : null),
       communityId: this.community.communityId || '',
       // title: formData.value.title,
-      description: formData.value.description,
+      description: formData.value.description || '',
       // categoryType: [...this.categoryType],
       // mediaCategory: this.mediaCategory,
       // targetTopic: 'testing',
