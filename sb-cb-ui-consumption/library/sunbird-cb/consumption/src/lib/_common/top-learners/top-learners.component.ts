@@ -45,7 +45,7 @@ export class TopLearnersComponent implements OnInit {
     this.insightSvc.fetchLearner(this.channelId).subscribe((res: any)=> {
       if (res && res.result && res.result.result && res.result.result.length) {
         this.results =  res.result.result
-        this.month = moment().month(Number(res.result.result[0].month) - 1).format('MMMM')
+        this.getMonth(res.result.result)
       }
       this.loading = false
     }, (_error: any) => {
@@ -59,13 +59,21 @@ export class TopLearnersComponent implements OnInit {
     this.insightSvc.fetchSlwLearner(this.channelId).subscribe((res: any)=> {
       if (res && res.result && res.result.result && res.result.result.length) {
         this.results =  res.result.result
-        this.month = moment().month(Number(res.result.result[0].month) - 1).format('MMMM')
+        this.getMonth(res.result.result)
       }
       this.loading = false
     }, (_error: any) => {
       // tslint:disable-next-line: align
       this.loading = false
     })
+  }
+  getMonth(response: any) {
+    if (response && response.length && response[0].month) {
+      this.month = moment().month(Number(response[0].month) - 1).format('MMMM')
+    } else {
+      this.month = new Date().toLocaleString('default', { month: 'long' })
+    }
+
   }
   getRank(rank: number) {
     if (rank === 1) {

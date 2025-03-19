@@ -1,15 +1,15 @@
 <div class="flex flex-center">
-    <div>
-        <div class="title-border"></div>
-        <div class="title" [style.color]="objectData?.titleFontColor">{{objectData?.title}} ({{month}})</div>
-        <div class="title-border"></div>
+    <div class="flex items-center flex-wrap justify-center">
+        <div class="title-border w-full"></div>
+        <div class="title w-full" [style.color]="objectData?.titleFontColor">{{objectData?.title}} ({{month}})</div>
+        <div class="title-border w-full"></div>
     </div>    
 </div>
 <div class="top-learners-container" *ngIf="!loading && results.length">
     <div class="w-full margin-bottom-l margin-top-l">
         <div class="flex gap-3">
             <div *ngFor="let obj of results; let i=index" class="flex-container">
-                <div class="flex-item user-box">
+                <div class="flex-item user-box {{objectData?.customClass}}" [style.height]="objectData?.cardHeight" [style.minHeight]="objectData?.cardMinHeight">
                     <div class="flex gap-3 img-name-sec">
                         <div class="flex gap-3">
                             <div class="profile-pic" *ngIf="obj?.profile_image">
@@ -53,7 +53,7 @@
                             <div class="rank-sec">{{getRank(+obj?.row_num)}}</div>
                         </div>                        
                     </div>
-                    <div class="flex gap-2 kp-section">
+                    <div class="flex gap-2 kp-section" *ngIf="!objectData?.hideEle?.includes('karma-points')">
                         <div class="kp-icon"><img [src]="objectData?.kpIcon" class="kp-image"/></div>
                         <div class="points">{{obj?.total_points || 0}}</div>
                     </div>
@@ -74,7 +74,7 @@
         <div class="w-full margin-bottom-l margin-top-l">
             <div class="flex gap-3">
                 <div *ngFor="let obj of [1,2,3]" class="flex-container">
-                    <div class="flex-item user-box">
+                    <div class="flex-item user-box" >
                         <div class="flex gap-3 img-name-sec">
                             <div class="flex gap-3">
                                 <div class="profile-pic">

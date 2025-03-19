@@ -79,6 +79,16 @@
     }
 }
 
+::ng-deep .filters-checkbox .mat-checkbox-layout{
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    .mat-checkbox-inner-container {
+        margin: 0px;
+        margin-top: 2px;
+    }
+}
 
 ::ng-deep .filters-checkbox .mat-checkbox-label {
 

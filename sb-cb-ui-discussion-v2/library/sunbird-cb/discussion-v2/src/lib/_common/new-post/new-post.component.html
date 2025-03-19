@@ -58,7 +58,7 @@
                                     accept=".jpg,.jpeg,.png" [attr.max]="MAX_TOTAL_FILES" >
                             </div>
                             <!-- Image preview section -->
-                             <div class="grid gap-2 grid-cols-12" *ngIf="categoryType && categoryType.length">
+                             <div class="grid gap-2 grid-cols-12 w-full" *ngIf="categoryType && categoryType.length">
                                  <ng-container *ngFor="let cat of categoryType">
                                      <ng-container *ngFor="let file of selectedFilesFinal[cat]; let i = index">
                                          <div class="md:col-span-4 max-h-32 relative flex items-center image-preview-container justify-center">
@@ -137,7 +137,7 @@
                             </div>
                             <div *ngIf="!editMode">
                                 <button mat-flat-button color="secondary" class="primary-button custom-rounded"
-                                (click)="onSubmit()" [disabled]="(!description.value || description.value.length < 1 )">
+                                (click)="onSubmit()" [disabled]="(!description.value || description.value.length < 1) && getTotalFilesCount === 0">
                                 <mat-icon *ngIf="config?.postBtn?.icon" class="icon cursor-pointer" aria-hidden="false"
                                     i18n-aria-label aria-label="Report">{{config?.postBtn?.icon || 'send'}}</mat-icon>
                                 <!-- <span *ngIf="config?.postBtn?.text" class="ml-1">{{config?.postBtn?.text}}</span> -->
@@ -152,7 +152,7 @@
                             aria-label="more">close</mat-icon>
                         </button>
                         <button mat-button color="secondary" class=""
-                        (click)="onSubmit()" [disabled]="(!description.value || description.value.length < 1 )">
+                        (click)="onSubmit()" [disabled]="(!description.value || description.value.length < 1) && getTotalFilesCount === 0">
                             <mat-icon class="icon success" aria-hidden="false" i18n-aria-label
                             aria-label="more">check_small</mat-icon>
                         </button>

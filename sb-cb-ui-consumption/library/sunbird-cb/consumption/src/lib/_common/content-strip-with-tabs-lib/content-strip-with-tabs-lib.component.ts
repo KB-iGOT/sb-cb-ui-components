@@ -34,6 +34,7 @@ interface IStripUnitContentData {
   disableTranslate: boolean;
   widgets?: NsWidgetResolver.IRenderConfigWithAnyData[];
   stripTitle: string;
+  titleClass?:  string;
   stripTitleLink?: {
     link: {
       queryParams: string
@@ -996,6 +997,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       errorWidget: strip.errorWidget,
       stripInfo: strip.info,
       stripTitle: strip.title,
+      titleClass: strip.titleClass || '',
       stripTitleLink: strip.stripTitleLink,
       disableTranslate: strip.disableTranslate,
       sliderConfig: strip.sliderConfig,
@@ -2115,7 +2117,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           }
           if (response && response.results) {
             if (response.results.result.Event) {
-              console.log(this.transformEventsV2ToWidgets(response.results.result.Event, strip))
               this.processStrip(
                 strip,
                 this.transformEventsV2ToWidgets(response.results.result.Event, strip),
