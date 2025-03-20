@@ -1659,6 +1659,12 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     ) {
       filters.organisation = filters.organisation.replace('<orgID>', this.providerId)
     }
+    if(_.get(filters, 'request.eventEndDate', '').indexOf('<today>') >= 0) {
+      filters.request.eventEndDate = this.todayDate
+    }
+    if(_.get(filters, 'request.eventStartDate', '').indexOf('<today>') >= 0) {
+      filters.request.eventStartDate = this.todayDate
+    }
     return filters
   }
   getFullUrl(apiUrl: any, id: string) {
