@@ -138,6 +138,8 @@ export class WidgetCommunityHomeComponent implements OnInit {
 
   }
   fetchCommunityData(id: string) {
+    this.communityData = {}
+    this.competenciesObject = []
     this.discussV2Svc.communityDetailRead(id).subscribe((resData: any) => {
       if(resData.result && resData.result.communityDetails){
         this.communityData = {...resData.result.communityDetails , ...resData.result.communityDetails.data}
