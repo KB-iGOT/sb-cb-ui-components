@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Inject, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Inject, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { ConfigurationsService, UtilityService } from '@sunbird-cb/utils-v2';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
@@ -14,7 +14,7 @@ import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm
   templateUrl: './widget-community-home.component.html',
   styleUrls: ['./widget-community-home.component.scss']
 })
-export class WidgetCommunityHomeComponent implements OnInit {
+export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
   @Input() communityId!: string
   @Input() discussionId!: string
   @Input() feedWidgetData: any | undefined
@@ -129,19 +129,18 @@ export class WidgetCommunityHomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    
-    if(this.discussionId) {
-
-    }
-    this.fetchCommunityData(this.communityId)
-    this.checkUserJoinedCommunity()
+    // this.fetchCommunityData(this.communityId)
 
   }
+  
   fetchCommunityData(id: string) {
+    this.communityData = {}
+    this.competenciesObject = []
     this.discussV2Svc.communityDetailRead(id).subscribe((resData: any) => {
       if(resData.result && resData.result.communityDetails){
         this.communityData = {...resData.result.communityDetails , ...resData.result.communityDetails.data}
         this.loadCompetencies()
+        this.checkUserJoinedCommunity()
       }
     })
     // Fetch community data using id
@@ -149,6 +148,7 @@ export class WidgetCommunityHomeComponent implements OnInit {
 
   async checkUserJoinedCommunity() {
     this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    this.userJoinedCommunity = false
     this.manageUserCommunityStatus()
     // this.discussV2Svc.usersJoinedCommunityList().subscribe((resData: any) => {
     //   if(resData.result && resData.result.communityDetails && resData.result.communityDetails.length){
@@ -158,6 +158,17 @@ export class WidgetCommunityHomeComponent implements OnInit {
     // })
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    
+    if (changes.communityId) {
+      if(this.communityId) {  
+        this.fetchCommunityData(this.communityId)
+      }
+    }
+    
+  }
+
+  
   async manageUserCommunityStatus(){
     this.userJoinedCommunityList.forEach((community: any) => {
       if(community.communityid === this.communityId){
