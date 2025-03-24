@@ -9,6 +9,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 @Component({
   selector: 'd-v2-post-card',
@@ -48,6 +49,7 @@ export class PostCardComponent {
   reportPending = false
   viewMoreLength = 246
   editMode: boolean =  false
+  userJoinedCommunityObject: any = {}
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -55,14 +57,19 @@ export class PostCardComponent {
     private discussV2Svc: DiscussionV2Service,
     private _snackBar: MatSnackBar,
     private ref: ChangeDetectorRef,
+    private userEnrollCommunitySvc: UserEnrollCommunityService
   ) {
 
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData || [] ]
+    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollData()
+    if(userEnrolledCommunityList.length) {
+      this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
+    }
   }
 
   expandReplyComment() {

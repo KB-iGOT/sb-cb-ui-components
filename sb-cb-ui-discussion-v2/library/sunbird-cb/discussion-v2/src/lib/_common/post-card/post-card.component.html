@@ -3,6 +3,9 @@
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
     <div class="flex user-info">
         <div>
+            <ng-container *ngIf="post?.communityId">
+                <p>Posting in - {{userJoinedCommunityObject[post.communityId]}}</p>
+            </ng-container>
             <div class="mr-4">
                 <d-v2-avatar-photo [size]="'ml'" [name]="post?.createdBy?.first_name"
                     [photoUrl]="post?.createdBy?.user_profile_img_url" [color]="
@@ -167,7 +170,7 @@
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
-                <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community"
+                <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community" [post]="post"
                     [type]="cardConfig?.repliesSection?.newPostReply?.type" (newComment)="newCommentEvent($event)"
                      [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]">
                 </d-v2-new-post>
@@ -201,7 +204,7 @@
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.newPostReply"  [community]="community"
-                (newReply)="updateRepliesData($event)" [type]="cardConfig?.type"
+                (newReply)="updateRepliesData($event)" [type]="cardConfig?.type" [post]="post"
                  (newComment)="newCommentEvent($event, 'level2')" [userJoinedCommunity]="userJoinedCommunity" [post]="post"
                     [taggedUsers]="[post?.createdBy]" [hierarchyPath]="hierarchyPath">
                 </d-v2-new-post>

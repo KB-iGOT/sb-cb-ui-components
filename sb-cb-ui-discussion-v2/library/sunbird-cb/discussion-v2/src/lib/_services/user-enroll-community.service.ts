@@ -14,6 +14,7 @@ export class UserEnrollCommunityService {
   userEnrolledCommunityList : any = [];
   userEnrolledCommunityDetailList : any = [];
   allCommunitiesList: any = []
+  userEnrolledCommunityObjectData: any = {}
   constructor(private http: HttpClient) { }
 
 
@@ -30,6 +31,7 @@ export class UserEnrollCommunityService {
       return this.userEnrolledCommunityList
     }
   }
+
   clearEnrollData() {
     this.userEnrolledCommunityList = [];
   }
@@ -41,6 +43,18 @@ export class UserEnrollCommunityService {
     } 
     return this.http.get<any>(`${API_END_POINTS.USERS_COMMUNITY_LIST}`).toPromise().then((res: any) => {
       if(res && res.result && res.result.communityId && res.result.communityId.length) {
+        // Create a mapping of IDs to names for quick lookup
+        const idToNameMap = res.result.communityDetails.reduce((acc: any, item:any) => {
+          acc[item.communityId] = item.communityName;
+          return acc;
+        }, {});
+        this.userEnrolledCommunityObjectData = idToNameMap;
+        // Add the name to the second array by matching the ID
+        const updatedSecondArray = res.result.communityId.map((item:any) => ({
+          ...item,
+          communityName: idToNameMap[item.communityid] || "Unknown" // Default if no match found
+        }));
+        res.result.communityId = updatedSecondArray;
         return res.result;
       } 
       return emptyData;  

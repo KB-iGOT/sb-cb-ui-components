@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
@@ -8,7 +8,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
   styleUrls: ['./widget-discussionv2-landing-page.component.scss']
 })
 export class WidgetDiscussionv2LandingPageComponent implements OnInit {
-
+  @Input() feedWidgetData: any | undefined
   @Output() searchText = new EventEmitter<any>();
   @Output() showAllByTopic = new EventEmitter<any>();
   @Output() cardClick = new EventEmitter<any>();
