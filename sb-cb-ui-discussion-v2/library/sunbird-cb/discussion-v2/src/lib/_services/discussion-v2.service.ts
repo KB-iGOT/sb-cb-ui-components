@@ -30,7 +30,8 @@ const API_END_POINTS = {
   BOOKMART_LIST: `/apis/proxies/v8/feedDiscussion/bookmarkedDiscussions`,
   COMMUNITY_REPORT: `/apis/proxies/v8/community/v1/report`,
   USER_SEARCH:`/apis/proxies/v8/user/v1/search`,
-  POPULAR_COMMUNITY:`/apis/proxies/v8/community/v1/popular`
+  POPULAR_COMMUNITY:`/apis/proxies/v8/community/v1/popular`,
+  GLOBAL_FEED: `/apis/proxies/v8/feedDiscussion/globalFeed`,
 }
 
 
@@ -142,6 +143,10 @@ export class DiscussionV2Service {
 
   getBookmarkDataList(req: any) {
     return this.http.post<any>(`${API_END_POINTS.BOOKMART_LIST}`, req)
+  }
+
+  getGlobalFeed(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.GLOBAL_FEED}`, req)
   }
 
   convertOrgArrayToObject(data: any) {

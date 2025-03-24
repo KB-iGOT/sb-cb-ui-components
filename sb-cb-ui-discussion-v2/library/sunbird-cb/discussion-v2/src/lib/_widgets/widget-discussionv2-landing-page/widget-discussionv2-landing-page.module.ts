@@ -12,6 +12,7 @@ import { CommunityDetailsModule } from '../../_common/community-details/communit
 import { DiscoverModule } from '../../_common/discover/discover.module';
 import { TopicCardModule } from '../../_common/topic-card/topic-card.module';
 import { CommunityCardModule } from '../../_common/community-card/community-card.module';
+import { GlobalFeedModule } from '../../_common/global-feed/global-feed.module';
 @NgModule({
   declarations: [
     WidgetDiscussionv2LandingPageComponent
@@ -28,7 +29,8 @@ import { CommunityCardModule } from '../../_common/community-card/community-card
     CommunityDetailsModule,
     DiscoverModule,
     TopicCardModule,
-    CommunityCardModule
+    CommunityCardModule,
+    GlobalFeedModule
   ],
   exports:[
     WidgetDiscussionv2LandingPageComponent
