@@ -31,18 +31,30 @@
   <div class="form-section md:col-span-7">
     <form [formGroup]="uploadForm" class="p-4">
       <!-- Community Dropdown -->
-      <!-- <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-medium mb-2">
-              Community <span class="text-red-500">*</span>
-            </label>
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-select formControlName="community" placeholder="Select">
-                <mat-option value="community1">Community 1</mat-option>
-                <mat-option value="community2">Community 2</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div> -->
-      <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
+       {{isGlobal}} - isGlobal
+      <div class="mb-4 flex items-center gap-4" *ngIf="isGlobal">
+        <label class="text-gray-700 text-sm font-medium whitespace-nowrap">
+          Posting in <span class="text-red-500">*</span>
+        </label>
+        <mat-form-field appearance="outline" class="flex-1 custom-mat-form-field">
+          <input type="text"
+           matInput
+           [formControl]="communityCtrl"
+           [matAutocomplete]="auto"
+           placeholder="Search and select community">
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" class="community-autocomplete">
+            <ng-container *ngFor="let community of filteredCommunities">
+              <mat-option *ngIf="community?.status" [value]="community">
+                {{community?.communityName}}
+              </mat-option>
+            </ng-container>
+          </mat-autocomplete>
+          <mat-error *ngIf="communityCtrl.invalid" class="custom-mat-error">Please select a valid community</mat-error>
+        </mat-form-field>
+      </div>
+      <ng-container *ngIf="!isGlobal">
+        <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
+      </ng-container>
 
       <!-- Title -->
       <!-- <div class="mb-4">
