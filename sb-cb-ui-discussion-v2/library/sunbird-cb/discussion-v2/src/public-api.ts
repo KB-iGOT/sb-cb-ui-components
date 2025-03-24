@@ -29,6 +29,9 @@ export * from './lib/_widgets/widget-community-home/widget-community-home.module
 export * from './lib/_widgets/widget-community-search/widget-community-search.component'
 export * from './lib/_widgets/widget-community-search/widget-community-search.module'
 
+export * from './lib/_shared/share-discussion/share-discussion.component'
+export * from './lib/_shared/share-discussion/share-toc.module'
+
 
 export * from './lib/_widgets/widget-topics-all/widget-topics-all.component'
 export * from './lib/_widgets/widget-topics-all/widget-topics-all.module'
