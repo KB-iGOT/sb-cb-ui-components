@@ -2114,10 +2114,12 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
               'path': identifierStrip.request.identifiersApiUrl
             }
             const identifiersResponse = await this.searchV6Request(identifierStrip, identifierStrip.request, calculateParentStatus)
-            if(_.get(identifiersResponse, 'results.result') && _.get(strip, 'request.searchV6.request.filters')) {
-              strip.request.searchV6.request.filters['identifier'] = _.get(identifiersResponse, 'results.result.events')
+            if(_.get(identifiersResponse, 'results.result.events') && _.get(strip, 'request.searchV6.request.filters')) {
+              strip.request.searchV6.request.filters['identifier'] = _.get(identifiersResponse, 'results.result.events', [])
+              response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
+            } else {
+              response = identifiersResponse
             }
-            response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
           } else {
             response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
           }
