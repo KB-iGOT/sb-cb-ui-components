@@ -16,6 +16,7 @@ import { FlagDialogueComponent } from './flag-dialogue/flag-dialogue.component';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogueComponent } from './confirm-dialogue/confirm-dialogue.component';
 import { ShareDiscussionModule } from './share-discussion/share-toc.module';
+import { CommunityGuideLinesComponent } from './community-guide-lines/community-guide-lines.component';
 
 
 
@@ -24,6 +25,7 @@ import { ShareDiscussionModule } from './share-discussion/share-toc.module';
     AvatarPhotoComponent,
     FlagDialogueComponent,
     ConfirmDialogueComponent,
+    CommunityGuideLinesComponent,
   ],
   imports: [
     CommonModule,
@@ -45,7 +47,8 @@ import { ShareDiscussionModule } from './share-discussion/share-toc.module';
     AvatarPhotoComponent,
     FlagDialogueComponent,
     ConfirmDialogueComponent,
-    ShareDiscussionModule
+    ShareDiscussionModule,
+    CommunityGuideLinesComponent
   ],
 })
 export class SharedModule { }

@@ -1,19 +1,26 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
+import { MatDialog } from '@angular/material/dialog';
+import { CommunityGuideLinesComponent } from '../../_shared/community-guide-lines/community-guide-lines.component';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
+import { DiscussionV2Service } from '../../_services/discussion-v2.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 
 @Component({
   selector: 'd-v2-community-card',
   templateUrl: './community-card.component.html',
   styleUrls: ['./community-card.component.scss']
 })
-export class CommunityCardComponent {
+export class CommunityCardComponent implements OnInit {
   @Input() community: any;
   @Input() orgDetails: any = {};
   @Input() isLoading: boolean = false;
+  @Input() userJoinedCommunityList: any[] = []
   defaultThumbnail
   sourceLogos
   defaultSLogo
-  constructor(private configSvc: ConfigurationsService) { 
+  constructor(private snackbar: MatSnackBar, private discussV2Svc: DiscussionV2Service, private userEnrollSvc: UserEnrollCommunityService, private configSvc: ConfigurationsService, private dialog: MatDialog) { 
 
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
@@ -26,6 +33,8 @@ export class CommunityCardComponent {
     }
   }
 
+  ngOnInit(){
+  }
   changeToDefaultImg($event: any) {
     $event.target.src = '/assets/instances/eagle/app_logos/Karmayogi_logo_icon.svg'
   }
@@ -33,6 +42,99 @@ export class CommunityCardComponent {
   changeToDefaultThumbnailImg($event: any) {
     $event.target.src = this.defaultThumbnail
   }
+
+  joinCommunity(community: any) {
+    console.log(community)
+    let dialogRef = this.dialog.open(CommunityGuideLinesComponent, {
+      data: {
+        community: community,
+      },
+      width: window.innerWidth <= 768 ? '100%' : '600px',
+      minWidth: window.innerWidth <= 768 ? '100%' : '400px',
+      maxWidth: window.innerWidth <= 768 ? '100vw' : '40vw'
+    })
+    dialogRef.afterClosed().subscribe((result: any) => {
+      console.log(result)
+      if(result) {
+        this.callJoinCommunity(community)
+      }
+    })
+  }
+
+
+  callJoinCommunity(communityData: any){
+    let request = {
+      "communityId":communityData.communityId
+    }
+    this.discussV2Svc.communityJoin(request).subscribe((resData: any) => {
+      
+      if(resData.params && resData.params.status === 'success'){
+        let resultData = [
+          {
+            "communityid": communityData.communityId,
+            "status": true
+          }
+        ]
+        const community = this.userJoinedCommunityList.find((community: any) => community.communityid === communityData.communityId);
+        if (community) {
+          community.status = true;
+        } else {
+          this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData];
+          this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
+          
+        }
+        this.manageUserCommunityStatus()
+
+        this.snackbar.open('You\’ve successfully joined the community.')
+      }
+    })
+  }
+
+  async manageUserCommunityStatus(){
+    
+    this.userEnrollSvc.clearEnrollData()
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    
+  }
+
+  checkCommunityPresence(communityId: string)  {
+    return this.userJoinedCommunityList.some((community: any) => community.communityid === communityId ? community.status : false);
+  }
+  unJoinCommunity(communityData: any){
+      const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
+        width: '600px',
+        panelClass: 'flag-dialog',
+        backdropClass: 'flag-dialog-backdrop',
+        data: {
+          question: 'Are you sure you want to leave the community?',
+          button: {
+            confirm: 'Leave',
+            cancel: 'Cancel'
+          },
+          infoMsg:'This is a closed community, if you leave the community you wont be able to join again without the permission of SPV'
+        },
+      })
+      confirmDialog.afterClosed().subscribe((result: any) => {
+        if (result) {
+          // this.deleteCommentMethod(post)
+          let request = { "communityId":communityData.communityId }
+          this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
+            if(resData.params && resData.params.status === 'success'){
+              const community = this.userJoinedCommunityList.find((community: any) => community.communityid === communityData.communityId);
+              if (community) {
+                community.status = false;
+              }
+              this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
+              this.manageUserCommunityStatus()
+              this.snackbar.open('You\'ve successfully left the community.')
+            }
+
+          })
+        }
+      })
   
+    
+    
+  }
 
 }
