@@ -4,9 +4,13 @@
            <div class="headding">Trending Discussions</div>
         </div>
         <div contentBodyBlock>
-            <div class="space-y-4 pt-4" *ngIf="posts?.length ;else noData">
-                <div *ngFor="let discussion of posts;let isFirst = first" class="flex flex-wrap items-start space-x-3">
-                    <hr class="divider w-full" *ngIf="!isFirst" >
+            <div class="space-y-3 pt-4" *ngIf="posts?.length ;else noData">
+                <div *ngFor="let discussion of posts;let isFirst = first" class="flex flex-wrap items-start">
+                    <hr class="divider my-3 w-full" *ngIf="!isFirst" >
+                    <div class="community-name-wrapper inline-flex items-center max-w-full mb-3">
+                        <span class="whitespace-nowrap pl-3">Posting in</span> 
+                        <span class="community-name ml-1 pr-2">@{{userJoinedCommunityObject[discussion?.communityId]}}</span>
+                    </div>
                     <div class="trending-data margin-remove cursor-pointer" (click)="navigateToPost(discussion)">
                         <div class="flex items-center justify-between mb-4 user-info w-full">
                                 <div class="flex items-center w-3/4">

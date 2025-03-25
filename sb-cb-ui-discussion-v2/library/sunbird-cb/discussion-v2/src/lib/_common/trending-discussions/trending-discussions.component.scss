@@ -79,6 +79,26 @@
             }
         }
     }
+    .community-name-wrapper {
+        background-color: rgba(217, 217, 217, 1);
+        color: rgba(0, 0, 0, 0.6);
+        // padding: 4px 8px;
+        height: 20px;
+        font-size: 10px;
+        font-weight: 400;
+        line-height: 14px;
+        font-family: Lato;
+        border-radius: 24px;
+        letter-spacing: normal;
+        // width: 100%;
+        & .community-name {
+            color: rgba(27, 76, 161, 1);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+            overflow: hidden;
+        }
+    }
     
 }
 
