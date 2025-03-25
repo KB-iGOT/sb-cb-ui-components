@@ -1,11 +1,14 @@
 <div class="topLevel-card" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
 'reply-card mb-3' : cardType=== 'reply',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
+    <ng-container *ngIf="post?.communityId">
+        <div class="community-name-wrapper inline-flex items-center max-w-full mb-3">
+            <span class="whitespace-nowrap pl-3 flex-1">Posting in</span> 
+            <span class="community-name ml-1 pr-2">@{{userJoinedCommunityObject[post?.communityId]}}</span>
+        </div>
+    </ng-container>
     <div class="flex user-info">
         <div>
-            <ng-container *ngIf="post?.communityId">
-                <p>Posting in - {{userJoinedCommunityObject[post.communityId]}}</p>
-            </ng-container>
             <div class="mr-4">
                 <d-v2-avatar-photo [size]="'ml'" [name]="post?.createdBy?.first_name"
                     [photoUrl]="post?.createdBy?.user_profile_img_url" [color]="

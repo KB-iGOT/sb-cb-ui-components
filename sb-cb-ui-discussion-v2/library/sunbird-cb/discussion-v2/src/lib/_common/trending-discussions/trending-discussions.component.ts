@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 // tslint:disable-next-line
 import _ from 'lodash'
@@ -15,14 +16,24 @@ export class TrendingDiscussionsComponent implements OnInit {
  @Input() communityId!: string
  @Input() emitId!: boolean
  @Output() discussionIdEmit = new EventEmitter<any>()
+ 
 
  hideCardBody:boolean | undefined
  searchResults: any
  loadingPosts: boolean = true
  posts: any
-  constructor(private discussV2Svc: DiscussionV2Service, private router: Router) { }
-  ngOnInit(): void {
+ userJoinedCommunityObject: any = {}
+  constructor(
+    private discussV2Svc: DiscussionV2Service,
+    private router: Router,
+    private userEnrollCommunitySvc: UserEnrollCommunityService
+  ) { }
+  async ngOnInit() {
     this.fetchPosts()
+    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollData()
+    if(userEnrolledCommunityList.length) {
+      this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
+    }
   }
   fetchPosts() {
     this.loadingPosts = true
