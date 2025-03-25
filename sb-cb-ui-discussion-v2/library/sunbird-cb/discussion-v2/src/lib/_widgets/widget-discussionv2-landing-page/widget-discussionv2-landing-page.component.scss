@@ -44,6 +44,9 @@
 
         border: 1px solid #00000029;
     }
+  input:focus-visible{
+    border: 1px solid #00000029;
+  }
 }
 
 .community-groups {
@@ -86,4 +89,9 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+
+  .greyscale-img {
+    fill: #666666;
+    filter: grayscale(100%);
   }

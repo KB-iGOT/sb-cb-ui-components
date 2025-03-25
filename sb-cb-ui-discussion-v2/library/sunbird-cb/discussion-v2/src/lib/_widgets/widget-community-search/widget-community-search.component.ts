@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { combineLatest } from 'rxjs';
@@ -6,12 +6,13 @@ import { communityConstants } from '../../_model/filter-constants.model'
 import { MatBottomSheet } from '@angular/material/bottom-sheet'
 import { FilterComponent } from '../../_common/filter/filter.component';
 import { UtilityService } from '@sunbird-cb/utils-v2';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 @Component({
   selector: 'd-v2-widget-community-search',
   templateUrl: './widget-community-search.component.html',
   styleUrls: ['./widget-community-search.component.scss']
 })
-export class WidgetCommunitySearchComponent {
+export class WidgetCommunitySearchComponent  implements OnInit{
 
   searchTextValue: any = '';
   localSearchTextValue: any = '';
@@ -35,8 +36,10 @@ export class WidgetCommunitySearchComponent {
   filterApply: any = {}
   sortData: any
   isMobile: boolean = false
+
+  userJoinedCommunityList: any = []
   constructor(private bottomSheet: MatBottomSheet,private activatedRoute: ActivatedRoute,
-    private utilitySvc: UtilityService, private discussV2Svc: DiscussionV2Service) {
+    private utilitySvc: UtilityService, private discussV2Svc: DiscussionV2Service, private userEnrollSvc: UserEnrollCommunityService) {
     this.isMobile = this.utilitySvc.isMobile
     this.sortData = [
       {
@@ -94,6 +97,10 @@ export class WidgetCommunitySearchComponent {
       }
       this.onSearch(this.searchTextValue,'t')
     });
+   }
+
+   async ngOnInit(){
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
    }
 
    fetchCommunityList(facetsRender: boolean,searchText?: any, topicName?:any, sortData?: any,loadMoreClick?: boolean, filterApply?:any,factesRequest?:any) {

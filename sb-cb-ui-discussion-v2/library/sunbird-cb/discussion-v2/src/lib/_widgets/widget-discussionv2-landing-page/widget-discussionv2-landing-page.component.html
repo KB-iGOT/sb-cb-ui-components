@@ -5,8 +5,8 @@
                 <mat-tab [id]="tab?.id">
                     <ng-template mat-tab-label>
                         <div class="flex items-center gap-2 mat-label-block">
-
-                        <mat-icon>{{tab?.icon}}</mat-icon>
+                        <img [src]="tab?.iconSvg" alt="tab?.label" class="w-5 h-5" [ngClass]="{'greyscale-img': selectedTabId !== tab?.id}">
+                        <!-- <mat-icon>{{tab?.icon}}</mat-icon> -->
                         <span class=" margin-remove" [ngClass]="{'mat-subheading-2': selectedTabId === tab?.id,'mat-body-2': selectedTabId !== tab?.id}">{{tab?.label}}</span>
                         </div>
                     </ng-template>
@@ -19,7 +19,7 @@
             <!-- Column 1 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
                  <div class="hidden  md:block">
-                    <d-v2-similar-community-card ></d-v2-similar-community-card> 
+                    <d-v2-similar-community-card (communityClick)="onCardClick($event)"></d-v2-similar-community-card> 
                  </div>
             </div>
         <!-- 282,372 -->
@@ -73,14 +73,16 @@
                                 <d-v2-topic-card  [isLoading]="true"></d-v2-topic-card>
                             </div>
                          </div>
-                        <d-v2-discover (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
+                        <d-v2-discover [userCommunityList]="userCommunityList" (popularCommunityClick)="popularCommunity($event)" [topicDataList]="topicDataList" (showAllByTopic)="showAllCommunitiesByTopic($event)" (cardClick)="onCardClick($event)"></d-v2-discover>
                     </ng-container>
 
                     <ng-container *ngIf="selectedTabId === 'my_communities'">
-                        
+                        <div class="flex justify-between items-center mb-4 community-groups">
+                            <h2 class="text-xl font-medium mat-title margin-remove">All Your Communities <span *ngIf="userEnrollDetailsData?.length">({{userEnrollDetailsData?.length}})</span></h2>
+                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"  *ngIf="userEnrollDetailsData?.length; else noEnrolledCommunity">
                             <div  class="flex justify-center md:block" *ngFor="let item of userEnrollDetailsData">
-                               <d-v2-community-card [community]="item"   (click)="onCardClick(item)"></d-v2-community-card>
+                               <d-v2-community-card [userJoinedCommunityList]="userCommunityList" [community]="item"   (click)="onCardClick(item)"></d-v2-community-card>
                             </div>
                         </div>
     
