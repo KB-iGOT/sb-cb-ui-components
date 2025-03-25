@@ -1,8 +1,8 @@
 <div class="topLevel-card" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
 'reply-card mb-3' : cardType=== 'reply',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
-    <ng-container *ngIf="post?.communityId">
-        <div class="community-name-wrapper inline-flex items-center max-w-full mb-3">
+    <ng-container *ngIf="post?.communityId && showCommunity">
+        <div class="community-name-wrapper inline-flex items-center max-w-full mb-3 cursor-pointer" (click)="communityClick(post.communityId)">
             <span class="whitespace-nowrap pl-3 flex-1">Posting in</span> 
             <span class="community-name ml-1 pr-2">@{{userJoinedCommunityObject[post?.communityId]}}</span>
         </div>
@@ -184,7 +184,7 @@
                         <d-v2-post-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"  [community]="community" [hierarchyPath]="hierarchyPath"
                         [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [type]="cardConfig?.repliesSection?.replyCardConfig?.type" [parentPost]="post"
                         [post]="reply" [replyData]="post?.answerPosts" [userJoinedCommunity]="userJoinedCommunity" (likeUnlikeData)="likeUnlikeEvent($event)"
-                        (newComment)="newCommentEvent($event, 'level2')" (newReply)="updateRepliesData($event)" >
+                        (newComment)="newCommentEvent($event, 'level2')" (newReply)="updateRepliesData($event)" [showCommunity]="false">
                         </d-v2-post-card>
                     </ng-container>
                 </ng-container>

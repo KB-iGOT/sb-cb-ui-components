@@ -27,10 +27,12 @@ export class PostCardComponent {
   @Input() userJoinedCommunity!: boolean 
   @Input() community!: string
   @Input() parentPost!: any
+  @Input() showCommunity: boolean= false
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
   @Output() newReply = new EventEmitter<any>()
   @Output() newComment = new EventEmitter<any>()
+  @Output() communityClickEvent = new EventEmitter<any>()
 
   data = {
     replyToggle: false,
@@ -283,6 +285,14 @@ export class PostCardComponent {
       this.post = event.post
       this.editMode = false
     }
+  }
+
+  communityClick(communityId: string) {
+    console.log('communityId', communityId)
+    const community = {
+      communityId: communityId
+    }
+    this.communityClickEvent.emit(community)
   }
 
   openEditDialogue(post: any) {

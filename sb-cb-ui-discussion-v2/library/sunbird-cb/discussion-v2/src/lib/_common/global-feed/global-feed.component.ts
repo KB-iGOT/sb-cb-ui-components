@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 // import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -18,6 +18,7 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
   @Input() showNewPost: boolean = true 
   @Input() selectedTab: string = 'Feeds' 
   @Input() discussionId: string = ''
+  @Output() communityClickEvent = new EventEmitter<any>()
   loadingPosts: boolean = false
   loogedInUserProfile: any = {}
   pageNumber = 0
@@ -158,6 +159,10 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
         post.bookmark = true
       }
     })
+  }
+
+  communityClick(event: any) {
+    this.communityClickEvent.emit(event)
   }
   unbookmarkPost(post: any) {
     const communityId = post.communityId
