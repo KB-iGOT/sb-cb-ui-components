@@ -33,8 +33,11 @@
       <!-- Community Dropdown -->
        {{isGlobal}} - isGlobal
       <div class="mb-4 flex items-center gap-4" *ngIf="isGlobal">
-        <label class="text-gray-700 text-sm font-medium whitespace-nowrap">
-          Posting in <span class="text-red-500">*</span>
+        <label class="text-gray-700 text-sm font-medium whitespace-nowrap flex items-center gap-1">
+          Posting in 
+          <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color custom-info"
+          [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()" [matTooltip]="communityInfoText">info_outline</mat-icon>
+          <span class="text-red-500">*</span>
         </label>
         <mat-form-field appearance="outline" class="flex-1 custom-mat-form-field">
           <input type="text"

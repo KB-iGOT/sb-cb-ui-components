@@ -27,7 +27,7 @@
             <div class=" rounded-lg col-span-1 md:col-span-6">
                 <div class="">
                     <ng-container *ngIf="selectedTabId === 'feeds'">
-                        <d-v2-global-feed [widgetData]="feedWidgetData"></d-v2-global-feed>
+                        <d-v2-global-feed [widgetData]="feedWidgetData" (communityClickEvent)="onCardClick($event)"></d-v2-global-feed>
                     </ng-container>
 
                     <ng-container *ngIf="selectedTabId === 'communities'">
@@ -94,7 +94,7 @@
             <!-- Column 3 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
                 <div class="hidden  md:block">
-                    <d-v2-trending-discussions [expandCard]="true"></d-v2-trending-discussions>
+                    <d-v2-trending-discussions [expandCard]="true" [showCommunity]="true"></d-v2-trending-discussions>
                 </div>
             </div>
         </div>

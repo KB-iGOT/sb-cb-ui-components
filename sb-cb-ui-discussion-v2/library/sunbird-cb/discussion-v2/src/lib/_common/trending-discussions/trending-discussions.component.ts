@@ -15,6 +15,7 @@ export class TrendingDiscussionsComponent implements OnInit {
  @Input() expandCard: boolean= false
  @Input() communityId!: string
  @Input() emitId!: boolean
+ @Input() showCommunity: boolean= false
  @Output() discussionIdEmit = new EventEmitter<any>()
  
 
