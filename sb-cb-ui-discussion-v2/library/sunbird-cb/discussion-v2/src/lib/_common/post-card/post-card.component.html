@@ -1,6 +1,12 @@
 <div class="topLevel-card" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
 'reply-card mb-3' : cardType=== 'reply',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
+    <ng-container *ngIf="post?.communityId && showCommunity">
+        <div class="community-name-wrapper inline-flex items-center max-w-full mb-3 cursor-pointer" (click)="communityClick(post.communityId)">
+            <span class="whitespace-nowrap pl-3 flex-1">Posting in</span> 
+            <span class="community-name ml-1 pr-2">@{{userJoinedCommunityObject[post?.communityId]}}</span>
+        </div>
+    </ng-container>
     <div class="flex user-info">
         <div>
             <div class="mr-4">
@@ -167,7 +173,7 @@
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
-                <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community"
+                <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community" [post]="post"
                     [type]="cardConfig?.repliesSection?.newPostReply?.type" (newComment)="newCommentEvent($event)"
                      [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]">
                 </d-v2-new-post>
@@ -178,7 +184,7 @@
                         <d-v2-post-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"  [community]="community" [hierarchyPath]="hierarchyPath"
                         [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [type]="cardConfig?.repliesSection?.replyCardConfig?.type" [parentPost]="post"
                         [post]="reply" [replyData]="post?.answerPosts" [userJoinedCommunity]="userJoinedCommunity" (likeUnlikeData)="likeUnlikeEvent($event)"
-                        (newComment)="newCommentEvent($event, 'level2')" (newReply)="updateRepliesData($event)" >
+                        (newComment)="newCommentEvent($event, 'level2')" (newReply)="updateRepliesData($event)" [showCommunity]="false">
                         </d-v2-post-card>
                     </ng-container>
                 </ng-container>
@@ -201,7 +207,7 @@
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.newPostReply"  [community]="community"
-                (newReply)="updateRepliesData($event)" [type]="cardConfig?.type"
+                (newReply)="updateRepliesData($event)" [type]="cardConfig?.type" [post]="post"
                  (newComment)="newCommentEvent($event, 'level2')" [userJoinedCommunity]="userJoinedCommunity" [post]="post"
                     [taggedUsers]="[post?.createdBy]" [hierarchyPath]="hierarchyPath">
                 </d-v2-new-post>

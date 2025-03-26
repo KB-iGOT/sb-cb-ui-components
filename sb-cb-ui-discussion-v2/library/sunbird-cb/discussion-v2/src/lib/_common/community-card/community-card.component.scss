@@ -1,6 +1,7 @@
+$text-primary: #1B4CA1;
 .community-card {
     width: 170px;
-    height: 222px;
+    // height: 222px;
     cursor: pointer;
     border: 1px solid #999999;
     border-radius: 12px;
@@ -121,4 +122,18 @@
         }
     }
 
+}
+
+.community-action {
+    button {
+        background: $text-primary;
+        border-color: $text-primary;
+        border: none;
+    }
+    .un-join-btn{
+        color: $text-primary;
+        background-color: white !important;
+        border: 1px solid $text-primary !important;
+    
+    }
 }

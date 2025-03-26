@@ -24,6 +24,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   @Input() userJoinedCommunity: boolean = false
   @Input() community: any
   @Input() editMode: boolean = false
+  @Input() isGlobal: boolean = false
   @Input() post: any
   @Output() editEvents = new EventEmitter<any>()
   @ViewChild('fileInput') fileInput!: ElementRef;
@@ -136,7 +137,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
         community: this.community,
         config: {postsList: this.postsListconfig},
-        currentUser: {...this.loggedInUserData, ...this.loogedInUserProfile}
+        currentUser: {...this.loggedInUserData, ...this.loogedInUserProfile},
+        isGlobal: this.isGlobal
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
@@ -385,7 +387,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
                   if (fileObj.file) {
                     const formData = new FormData();
                     formData.append('file', fileObj.file);
-                    const communityId = this.community.communityId || ''
+                    const communityId = (this.community && this.community.communityId) || 
+                    (this.post && this.post.communityId) || ''
                     this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
                       next: (res: any) => {
                         if (res && res.result && res.result.url) {
@@ -487,7 +490,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
     const req = {
       type,
       ...(parentDiscussionId ? { parentDiscussionId: parentDiscussionId } : null),
-      communityId: this.community.communityId || '',
+      communityId: (this.community && this.community.communityId) || 
+      (this.post && this.post.communityId) || '',
       // title: formData.value.title,
       description: formData.value.description || '',
       // categoryType: [...this.categoryType],
@@ -525,7 +529,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
                 if (fileObj.file) {
                   const formData = new FormData();
                   formData.append('file', fileObj.file);
-                  const communityId = this.community.communityId || ''
+                  const communityId = (this.community && this.community.communityId) || 
+                    (this.post && this.post.communityId) || ''
                   this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
                     next: (res: any) => {
                       if (res && res.result && res.result.url) {
