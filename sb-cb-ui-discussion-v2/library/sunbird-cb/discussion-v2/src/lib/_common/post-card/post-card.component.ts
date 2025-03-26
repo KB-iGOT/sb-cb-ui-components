@@ -9,6 +9,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 @Component({
   selector: 'd-v2-post-card',
@@ -26,10 +27,12 @@ export class PostCardComponent {
   @Input() userJoinedCommunity!: boolean 
   @Input() community!: string
   @Input() parentPost!: any
+  @Input() showCommunity: boolean= false
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
   @Output() newReply = new EventEmitter<any>()
   @Output() newComment = new EventEmitter<any>()
+  @Output() communityClickEvent = new EventEmitter<any>()
 
   data = {
     replyToggle: false,
@@ -48,6 +51,7 @@ export class PostCardComponent {
   reportPending = false
   viewMoreLength = 246
   editMode: boolean =  false
+  userJoinedCommunityObject: any = {}
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -55,14 +59,19 @@ export class PostCardComponent {
     private discussV2Svc: DiscussionV2Service,
     private _snackBar: MatSnackBar,
     private ref: ChangeDetectorRef,
+    private userEnrollCommunitySvc: UserEnrollCommunityService
   ) {
 
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData || [] ]
+    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollData()
+    if(userEnrolledCommunityList.length) {
+      this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
+    }
   }
 
   expandReplyComment() {
@@ -276,6 +285,14 @@ export class PostCardComponent {
       this.post = event.post
       this.editMode = false
     }
+  }
+
+  communityClick(communityId: string) {
+    console.log('communityId', communityId)
+    const community = {
+      communityId: communityId
+    }
+    this.communityClickEvent.emit(community)
   }
 
   openEditDialogue(post: any) {

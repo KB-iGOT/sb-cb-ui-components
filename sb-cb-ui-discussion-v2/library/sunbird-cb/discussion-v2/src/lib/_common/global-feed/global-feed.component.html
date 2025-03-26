@@ -1,5 +1,5 @@
 <div class="w-full widget-container">
-    <div class="mb-6" >
+    <!-- <div class="mb-6" >
         <div class="relative flex community-search">
            <input
               type="text"
@@ -10,9 +10,8 @@
            <mat-icon class="absolute left-3 top-1.5 h-5 w-5 text-gray-400">
               search
            </mat-icon>
-           <!-- <Search class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" /> -->
         </div>
-    </div>
+    </div> -->
     <div class="flex gap-2">
         <!-- <div class="side-menu-container otherCard">
             <h1>Side menu...</h1>
@@ -20,16 +19,17 @@
 
         <div class="flex-1 post-container">
             <div class="mb-4" *ngIf="widgetData?.newPostSection?.show && showNewPost">
-                <d-v2-new-post [community]="community" [userJoinedCommunity]="userJoinedCommunity" [config]="widgetData?.newPostSection" [postsListconfig]="widgetData?.postsList" (newComment)="newCommentEvent($event)"
-                [type]="widgetData?.newPostSection?.type"></d-v2-new-post>
+                <d-v2-new-post [community]="community" [userJoinedCommunity]="true" [config]="widgetData?.newPostSection" [postsListconfig]="widgetData?.postsList" (newComment)="newCommentEvent($event)"
+                [type]="widgetData?.newPostSection?.type" [isGlobal]="true"></d-v2-new-post>
             </div>
 
             <ng-container *ngIf="posts && posts.length && !loadingPosts;else noPostsSection;">
                 <div class="flex flex-col gap-4">
                     <ng-container *ngFor="let post of posts" >
-                        <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]" [id]="'post-' + post?.discussionId"
+                        <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="true" [hierarchyPath]="[post?.discussionId]" [id]="'post-' + post?.discussionId"
                         [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts" [community]="community" (newComment)="newCommentEvent($event)" [parentPost]="post"
-                        (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)" [type]="widgetData?.newPostSection?.type" [showCommunity]="false"></d-v2-post-card>
+                        (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)" [type]="widgetData?.newPostSection?.type" [showCommunity]="true"
+                        (communityClickEvent)="communityClick($event)"></d-v2-post-card>
                     </ng-container>
                     <ng-container *ngIf="searchResults?.totalCount > posts.length">
                         <div class="load-more-posts my-4">

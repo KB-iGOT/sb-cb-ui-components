@@ -36,6 +36,9 @@ export * from './lib/_shared/share-discussion/share-toc.module'
 export * from './lib/_widgets/widget-topics-all/widget-topics-all.component'
 export * from './lib/_widgets/widget-topics-all/widget-topics-all.module'
 
+export * from './lib/_widgets/widget-discussionv2-landing-page/widget-discussionv2-landing-page.component'
+export * from './lib/_widgets/widget-discussionv2-landing-page/widget-discussionv2-landing-page.module'
+
 export * from './lib/_common/shortcuts/shortcuts.module'
 export * from './lib/_common/shortcuts/shortcuts.component'
 export * from './lib/_common/trending-discussions/trending-discussions.module'

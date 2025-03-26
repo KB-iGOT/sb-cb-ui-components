@@ -191,7 +191,7 @@
                         <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
                     </div>
                 </ng-container>
-                <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [emitId]="true" (discussionId)="getDiscussionId($event)" [communityId]="communityId" [expandCard]="true"></d-v2-trending-discussions>
+                <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [emitId]="true" (discussionId)="getDiscussionId($event)" [communityId]="communityId" [expandCard]="true" [showCommunity]="false"></d-v2-trending-discussions>
                 </div>
             </div>
         </div>
@@ -257,7 +257,7 @@
                         <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
                     </div>
                 </ng-container>
-                <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [communityId]="communityId" [expandCard]="true"></d-v2-trending-discussions>
+                <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [communityId]="communityId" [expandCard]="true" [showCommunity]="false"></d-v2-trending-discussions>
             </div>
         </div>
     </div>
