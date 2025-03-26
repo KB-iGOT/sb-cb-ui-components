@@ -738,10 +738,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   createReq(formData: any, type: string) {
+    const communityId = this.isGlobal ? formData.value.community && formData.value.community.communityid : this.data.community.communityId || ''
     const req = {
       type,
       ...(this.data.parentDiscussionId ? { parentDiscussionId: this.data.parentDiscussionId } : null),
-      communityId: this.data.community.communityId || '',
+      communityId: communityId,
       // title: formData.value.title,
       description: formData.value.description,
       // categoryType: [...this.categoryType],

@@ -82,8 +82,7 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
     this.loadingPosts = true
     
     const req = this.fetchPostRequest(false, searchString)
-    const tabType = searchString ? '' : this.selectedTab
-    this.discussV2Svc.getPosts(req, tabType).subscribe(res => {
+    this.discussV2Svc.getGlobalFeed(req).subscribe(res => {
       console.log('res = > ', res)
       this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
