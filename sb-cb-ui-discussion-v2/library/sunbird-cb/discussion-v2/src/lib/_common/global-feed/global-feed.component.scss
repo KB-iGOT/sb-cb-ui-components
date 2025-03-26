@@ -15,3 +15,11 @@
 .post-container {
     max-width: -webkit-fill-available; 
 }
+.community-search{
+    input {
+        border: 1px solid #00000029;
+    }
+    input:focus-visible{
+        border: 1px solid #00000029;
+    }
+}

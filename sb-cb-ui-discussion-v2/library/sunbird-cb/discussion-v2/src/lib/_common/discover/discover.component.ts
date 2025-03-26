@@ -13,6 +13,7 @@ export class DiscoverComponent implements OnInit, OnChanges {
   @Output() cardClick = new EventEmitter<any>();
   @Output() popularCommunityClick = new EventEmitter<any>();
   @Input() topicDataList: any = [];
+  @Input() userCommunityList: any = []
   orgDetails: any;
   toppicWiseCommunities: any;
   loadTopicsCount: number = 3;
@@ -55,11 +56,6 @@ export class DiscoverComponent implements OnInit, OnChanges {
 
   constructor(private discussV2Svc:DiscussionV2Service, private utilitySvc: UtilityService) { 
     this.defaultPosterThumbnail = this.utilitySvc.isMobile ? 'assets/instances/eagle/banners/discussion/community-default-mb-banner.svg' : 'assets/instances/eagle/banners/discussion/community-default-pc-banner.svg'
-    
-    // this.topicDataList
-    // this.topicWiseData();
-    // setTimeout(() => {
-    // }, 1000);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

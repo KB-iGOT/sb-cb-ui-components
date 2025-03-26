@@ -6,6 +6,8 @@ import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.modu
 import { PipesModule } from '../../_pipes/pipes.module';
 import { MultiLineEllipsisModule } from '../../_directives/multi-line-ellipsis/multi-line-ellipsis.module';
 import { SingleLineTooltipModule } from '../../_directives/single-line-tooltip/single-line-tooltip.module';
+import { SharedModule } from '../../_shared/shared.module';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 
@@ -19,7 +21,9 @@ import { SingleLineTooltipModule } from '../../_directives/single-line-tooltip/s
     SkeletonLoaderModule,
     PipesModule,
     MultiLineEllipsisModule,
-    SingleLineTooltipModule
+    SingleLineTooltipModule,
+    MatDialogModule,
+    SharedModule
   ],
   exports: [CommunityCardComponent]
 })

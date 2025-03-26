@@ -19,6 +19,7 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
   topicDataList: any = []
   topicDataLoading: boolean = false
   totalCommunitiesCount: any = 0
+  userCommunityList: any = []
 
   selectedTab = 0;
   selectedTabId: any = 'feeds'
@@ -26,19 +27,22 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
   mainTabs = [
     {
       label: 'Feeds',
-      icon: 'dashboard_2',
+      matIcon: '',
+      iconSvg: 'assets/icons/discuss/feeds.svg',
       id: 'feeds',
       value: 0
     },
     {
       label: 'Communities',
-      icon: 'dashboard_2',
+      matIcon: '',
+      iconSvg: 'assets/icons/discuss/community.svg',
       id: 'communities',
       value: 1
     },
     {
       label: 'My Communities',
-      icon: 'dashboard_2',
+      matIcon: '',
+      iconSvg: 'assets/icons/discuss/community.svg',
       id: 'my_communities',
       value: 2
     }
@@ -54,6 +58,8 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
     this.selectedTab = 0;
     this.selectedTabId = 'feeds'
     let data = await this.userEnrollSvc.getEnrollData()
+    debugger
+    this.userCommunityList = this.userEnrollSvc.userEnrolledCommunityList
     this.userEnrollDetailsData = this.userEnrollSvc.userEnrolledCommunityDetailList
     console.log(data)
   }
