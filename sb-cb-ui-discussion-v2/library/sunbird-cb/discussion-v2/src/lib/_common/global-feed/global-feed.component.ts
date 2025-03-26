@@ -101,12 +101,13 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
   fetchPostRequest(pageReset: boolean, searchString?: string) {
       const req: any = {
         "filterCriteriaMap": {
+          type: "question"
         },
         "requestedFields": [],
         "pageNumber": pageReset? 0 : this.commentListOffSet,
         "pageSize": this.commentListLimit,
         "orderBy": "updatedOn",
-        "orderDirection": "DESC",
+        "orderDirection": "ASC",
         "facets": []
       }
       if(searchString?.length) {
