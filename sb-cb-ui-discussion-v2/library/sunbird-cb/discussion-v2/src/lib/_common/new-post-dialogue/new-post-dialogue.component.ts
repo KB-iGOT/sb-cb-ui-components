@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, ValidationErrors, FormControl } from '@angular/forms';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 // import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -44,6 +44,8 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 // tslint:disable-next-line
 import _ from 'lodash'
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { map, startWith } from 'rxjs/operators';
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 @Component({
   selector: 'd-v2-new-post-dialogue',
@@ -89,6 +91,19 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   private readonly MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
   private readonly MAX_DOC_SIZE = 50 * 1024 * 1024;   // 50MB in bytes
   public readonly MAX_TOTAL_FILES = 10;
+  communityInfoText = "Select a community where your post will be visible. Only communities you have joined will appear in the dropdown."
+  isGlobal = false
+
+  communityCtrl = new FormControl('', [Validators.required, this.validCommunityValidator()]);
+  filteredCommunities: any = [];
+  originalCommunities: any = [
+    // {value: 'community1', label: 'Community 1'},
+    // {value: 'community2', label: 'Community 2'},
+    // {value: 'community2', label: 'christy'},
+    // {value: 'community2', label: 'david'},
+    // {value: 'community2', label: 'Nathan'}
+
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -96,67 +111,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private discussV2Svc: DiscussionV2Service,
     @Inject('environment') environment: any,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    private enrollSvc: UserEnrollCommunityService,
   ) {
-
-    this.widgetData = this.data.config
-    this.uploadForm = this.fb.group({
-      community: [''],
-      // title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, this.textLengthValidator()]],
-      tags: [[]],
-      files: [[]]
-    });
-    this.environment = environment
-
-    if (this.data && this.data.editMode && this.data.post) {
-      this.uploadForm.patchValue({
-        // title: this.data.post.title,
-        description: this.data.post.description,
-        files: this.data.post.mediaUrls
-      })
-
-      // this.selectedFiles = this.data.post.mediaUrls.map((url: string) => ({
-      //   name: url.split('/').slice(-1)[0],
-      //   uploaded: true
-      // }))
-      if (this.data.post.mediaCategory && this.data.post.categoryType) {
-        this.previewCategory = JSON.parse(JSON.stringify(this.data.post.mediaCategory))
-        // this.mediaCategory = {...this.data.post.mediaCategory}
-        this.categoryType = [...this.data.post.categoryType]
-        this.categoryType.map((cat) => {
-          if (this.data.post.mediaCategory[cat]) {
-            this.selectedFilesFinal[cat] = this.selectedFilesFinal[cat] || []
-            this.selectedFilesFinal[cat] = _.map(this.data.post.mediaCategory[cat] || [], function (url) {
-              return {
-                name: url.split('/').slice(-1)[0],
-                uploaded: true,
-                category: cat,
-                previewUrl: url,
-              }
-            })
-          }
-        })
-      }
-      this.updatePostPreview(this.uploadForm.value)
-    }
-
-    // Subscribe to form value changes
-    this.uploadForm.valueChanges.subscribe(formValue => {
-      this.updatePostPreview(formValue);
-    });
-
-
-  }
-
-  ngOnInit(): void {
-    // Set initial user data
-    this.postPreview.user = {
-      name: this.data.community?.currentUser?.name || '',
-      photoUrl: this.data.community?.currentUser?.photoUrl || '',
-      // Add other user properties you need
-    };
-
     this.editorConfig = {
 			toolbar: {
 				items: [
@@ -291,7 +248,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 					// }
 				}
 			},
-			placeholder: 'What you want to say...!',
+			placeholder: 'What do you want to say?',
 			table: {
 				contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
 			},
@@ -301,6 +258,80 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 				}
 			}
 		}
+    this.widgetData = this.data.config
+    this.isGlobal = this.data && this.data.isGlobal || false
+    this.uploadForm = this.fb.group({
+      community:  this.isGlobal ? this.communityCtrl : [''],
+      // title: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.required, this.textLengthValidator()]],
+      tags: [[]],
+      files: [[]]
+    });
+    this.environment = environment
+
+    if (this.data && this.data.editMode && this.data.post) {
+      this.uploadForm.patchValue({
+        // title: this.data.post.title,
+        // community: this.isGlobal ? this.communityCtrl : [''],
+        description: this.data.post.description,
+        files: this.data.post.mediaUrls
+      })
+
+      // this.selectedFiles = this.data.post.mediaUrls.map((url: string) => ({
+      //   name: url.split('/').slice(-1)[0],
+      //   uploaded: true
+      // }))
+      if (this.data.post.mediaCategory && this.data.post.categoryType) {
+        this.previewCategory = JSON.parse(JSON.stringify(this.data.post.mediaCategory))
+        // this.mediaCategory = {...this.data.post.mediaCategory}
+        this.categoryType = [...this.data.post.categoryType]
+        this.categoryType.map((cat) => {
+          if (this.data.post.mediaCategory[cat]) {
+            this.selectedFilesFinal[cat] = this.selectedFilesFinal[cat] || []
+            this.selectedFilesFinal[cat] = _.map(this.data.post.mediaCategory[cat] || [], function (url) {
+              return {
+                name: url.split('/').slice(-1)[0],
+                uploaded: true,
+                category: cat,
+                previewUrl: url,
+              }
+            })
+          }
+        })
+      }
+      this.updatePostPreview(this.uploadForm.value)
+    }
+    // Set up the filter
+    this.communityCtrl.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        const searchText = typeof value === 'string' ? value.toLowerCase() : '';
+        return this.originalCommunities && 
+        this.originalCommunities.length && 
+        this.originalCommunities.filter((community: any) =>
+          community.communityName.toLowerCase().includes(searchText)
+        );
+      })
+    ).subscribe(filtered => this.filteredCommunities = filtered);
+
+    // Subscribe to form value changes
+    this.uploadForm.valueChanges.subscribe(formValue => {
+      this.updatePostPreview(formValue);
+    });
+    
+  }
+
+  async ngOnInit() {
+    this.originalCommunities = await this.enrollSvc.getEnrollData()
+    this.filteredCommunities = [...this.originalCommunities]
+    // Set initial user data
+    this.postPreview.user = {
+      name: this.data.community?.currentUser?.name || '',
+      photoUrl: this.data.community?.currentUser?.photoUrl || '',
+      // Add other user properties you need
+    };
+
+    
   }
 
   private updatePostPreview(formValue: any): void {
@@ -707,10 +738,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   createReq(formData: any, type: string) {
+    const communityId = this.isGlobal ? formData.value.community && formData.value.community.communityid : this.data.community.communityId || ''
     const req = {
       type,
       ...(this.data.parentDiscussionId ? { parentDiscussionId: this.data.parentDiscussionId } : null),
-      communityId: this.data.community.communityId || '',
+      communityId: communityId,
       // title: formData.value.title,
       description: formData.value.description,
       // categoryType: [...this.categoryType],
@@ -973,5 +1005,23 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
   onFocus() {
     this.showEmojiPicker = false
+  }
+
+  displayFn(community: any): string {
+    return community ? community.communityName : '';
+  }
+
+  validCommunityValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return { required: true };
+      
+      // Check if the value is a valid community object
+      const isValid = typeof value === 'object' && 
+                     value.communityName && 
+                     this.originalCommunities.some((c: any) => c.communityName === value.communityName);
+      
+      return isValid ? null : { invalidCommunity: true };
+    };
   }
 }

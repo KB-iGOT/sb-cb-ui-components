@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
-import { MatLegacyAutocompleteModule as MatAutocompleteModule } from '@angular/material/legacy-autocomplete'
 import { PipesModule } from '../../_pipes/pipes.module'
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
@@ -15,19 +14,18 @@ import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { SharedModule } from '../../_shared/shared.module';
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
-import { NewPostComponent } from './new-post.component';
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
-import { PostPreviewComponent } from '../new-post-dialogue/post-preview/post-preview.component';
-import { PickerModule } from '@ctrl/ngx-emoji-mart';
- 
+import { NewPostModule } from '../new-post/new-post.module';
+import { PostCardModule } from '../post-card/post-card.module';
+import { GlobalFeedComponent } from './global-feed.component';
+
+
+
 @NgModule({
   declarations: [
-    NewPostComponent,
-    NewPostDialogueComponent,
-    PostPreviewComponent
+    GlobalFeedComponent
   ],
   imports: [
     CommonModule,
@@ -37,8 +35,8 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     MatTooltipModule,
-    MatAutocompleteModule,
     PipesModule,
     SkeletonLoaderModule,
     MatMenuModule,
@@ -46,16 +44,14 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart';
     MatDialogModule,
     MatCardModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule,
     CKEditorModule,
     SharedModule,
     ImageSlidersModule,
-    PickerModule
+    PostCardModule,
+    NewPostModule,
+
   ],
-  exports: [
-    NewPostComponent,
-    NewPostDialogueComponent,
-    PostPreviewComponent
-  ]
+  exports: [GlobalFeedComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class NewPostModule { }
+export class GlobalFeedModule { }
