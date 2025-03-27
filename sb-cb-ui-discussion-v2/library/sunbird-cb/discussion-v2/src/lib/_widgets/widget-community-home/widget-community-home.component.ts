@@ -79,6 +79,11 @@ export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
     tabs: [],
     filters: [],
   }
+  isExpandedView = false;
+
+toggleExpandedView() {
+  this.isExpandedView = !this.isExpandedView;
+}
   
   constructor(
     @Inject('environment') environment: any,

@@ -196,6 +196,7 @@ input {
 .scrollable-content {
     max-height: 300px;
     overflow-y: auto;
+    width: 100%;
 }
 
 // Hide icons by default when they have the hidden class

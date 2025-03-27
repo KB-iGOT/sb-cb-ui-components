@@ -48,7 +48,7 @@
                     <span *ngFor="let user of post?.taggedUser">{{user?.first_name}}</span>
                 </span>
             </ng-container>
-            <div class="comment-txt mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+            <div class="comment-txt mb-2 mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
                  [innerHTML]="post?.description">
             </div>
             <div class="more-or-less text-right" *ngIf="getEditorTextLength(post?.description) > viewMoreLength">
@@ -61,7 +61,7 @@
        
             <!-- IF image  -->
             <ng-container *ngIf="post?.categoryType?.includes('image')">
-                <div class="media" *ngIf="post?.mediaCategory && post?.mediaCategory?.image">
+                <div class="media media-full-width " *ngIf="post?.mediaCategory && post?.mediaCategory?.image">
                     <d-v2-image-sliders [title]="'Images'" [imageUrls]="post?.mediaCategory?.image" [styleData]="cardConfig?.sliderData?.styleData"></d-v2-image-sliders>
                 </div>
             </ng-container>
@@ -134,11 +134,10 @@
                     <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
                         aria-label="Dropdown-close">arrow_drop_up</mat-icon>
                     <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
-                        *ngIf="cardConfig?.actions?.comments?.iconDisplay"
+                        *ngIf="cardConfig?.actions?.comments?.show"
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.comments?.showCount">
-                        {{replyDataCopy?.length > 1 ? 'Comments' :
-                        'Comment'}} ({{(replyDataCopy?.length) || 0}}) 
+                        ({{(replyDataCopy?.length) || 0}}) 
                     </span>
                 </div>
             </ng-container>
@@ -169,9 +168,10 @@
             </ng-container>
         </div>
     </div>
+    <!-- [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}" -->
     <ng-container *ngIf="cardConfig?.repliesSection?.show && cardType !== 'reply'">
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
-            [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
+            >
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.repliesSection?.newPostReply" [community]="community" [post]="post"
                     [type]="cardConfig?.repliesSection?.newPostReply?.type" (newComment)="newCommentEvent($event)"
@@ -202,9 +202,10 @@
             </ng-container>
         </div>
     </ng-container>
+    <!-- [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}" -->
     <ng-container *ngIf="cardType === 'reply'">
         <div *ngIf="data.replyToggle" class="mt-4 repliesSection"
-            [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
+            >
             <div class="mb-4">
                 <d-v2-new-post [config]="cardConfig?.newPostReply"  [community]="community"
                 (newReply)="updateRepliesData($event)" [type]="cardConfig?.type" [post]="post"
