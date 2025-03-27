@@ -1,104 +1,171 @@
 
 <div class="container mx-auto ">
-    <div class="banner-container px-4 md:px-0">
-        <img src="{{communityData.posterImageUrl}}" alt="" (error)="changeToDefaultThumbnailImg($event)">
-    </div>
-    <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-start mt-2">
-        <div class="community-info flex-1">
-            <div class="flex justify-between">
-                <h2 class="">{{communityData?.communityName}}</h2>
-                <div class="community-action flex  gap-2 items-start ">
-                    <div class="block md:hidden">
-                        <div class="flex items-center ">
-                            <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
-                            <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+    <div  class="default-view" [ngClass]="{'hidden-view': isExpandedView}"   >
+        <div class="flex items-center gap-8 joined-community-container mb-8 cursor-pointer flex-col md:flex-row" (click)="toggleExpandedView()">
+            <div class="joined-community-image">
+                <img src="{{communityData.posterImageUrl}}" alt="" (error)="changeToDefaultThumbnailImg($event)">
+            </div>
+            <div class="community-basic-info  flex flex-wrap justify-between items-start ">
+                <div class="community-info flex-1" >
+                    <div class="flex justify-between">
+                        <h2 class=""  >{{communityData?.communityName}}</h2>
+                        <div class="community-action flex  gap-2 items-start ">
+                            <div class="block md:hidden">
+                                <div class="flex items-center " (click)="$event.stopPropagation()">
+                                    <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true; $event.stopPropagation()">share</mat-icon>
+                                    <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="community-metrix mt-2 gap-y-4 flex-wrap">
+                        <span class="flex items-end mr-2">
+                            <mat-icon class="mr-1">group</mat-icon>
+                            <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
+                            <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
+                        </span>
+                        <span class="mx-2 self-end">•</span>
+                        <span class="flex items-end mr-2">
+                            <mat-icon class="mr-1">list_alt</mat-icon>
+                            <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
+                            <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
+                        </span>
+                        <span class="mx-2 self-end">•</span>
+                        <span class="flex items-end mr-2">
+                            <mat-icon class="mr-1">thumb_up</mat-icon>
+                            <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
+                            <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
+                        </span>
+                        <span class="mx-2 self-end">•</span>
+                        <span class="flex items-end mr-2">
+                            <mat-icon class="mr-1">chat_bubble</mat-icon>
+                            <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
+                            <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
+                        </span>
+
+                        <span class="mx-2 self-end">•</span>
+                        <span class="flex items-end mr-2">
+                            <mat-icon class="mr-1">menu_book</mat-icon>
+                            <span class="mr-1">{{communityData?.competencies_v6?.length }}</span> 
+                            <span>{{ 'Competencies' }}</span>
+                        </span>
+                        
+                    </div>
+                </div>
+                <div class="community-action flex gap-2 items-center ">
+                    <div class="hidden md:block">
+                        <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
+                        <div class="flex items-center" (click)="$event.stopPropagation()">
+                            <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 " (click)="joinCommunity();$event.stopPropagation()">Join</button>
+                            <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true; $event.stopPropagation()">share</mat-icon>
+                            <mat-icon  *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="community-metrix mt-2 gap-y-4 flex-wrap">
-                <span class="flex items-end mr-2">
-                    <mat-icon class="mr-1">group</mat-icon>
-                    <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
-                    <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
-                </span>
-                <span class="mx-2 self-end">•</span>
-                <span class="flex items-end mr-2">
-                    <mat-icon class="mr-1">list_alt</mat-icon>
-                    <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
-                    <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
-                </span>
-                <span class="mx-2 self-end">•</span>
-                <span class="flex items-end mr-2">
-                    <mat-icon class="mr-1">thumb_up</mat-icon>
-                    <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
-                    <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
-                </span>
-                <span class="mx-2 self-end">•</span>
-                <span class="flex items-end mr-2">
-                    <mat-icon class="mr-1">chat_bubble</mat-icon>
-                    <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
-                    <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
-                </span>
-            </div>
         </div>
-        <div class="community-action flex gap-2 items-center ">
-            <div class="hidden md:block">
-                <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
-                <div class="flex items-center">
-                    <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 " (click)="joinCommunity()">Join</button>
-                    <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true">share</mat-icon>
-                    <mat-icon  *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+    </div>
+    <div class="expanded-view" [ngClass]="{'active': isExpandedView, 'hidden-view': !isExpandedView}">
+        <div class="banner-container px-4 md:px-0">
+            <img src="{{communityData.posterImageUrl}}" alt="" (error)="changeToDefaultThumbnailImg($event)">
+        </div>
+        <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-start mt-2">
+            <div class="community-info flex-1">
+                <div class="flex justify-between">
+                    <h2 class="cursor-pointer" (click)="toggleExpandedView()">{{communityData?.communityName}}</h2>
+                    <div class="community-action flex  gap-2 items-start ">
+                        <div class="block md:hidden">
+                            <div class="flex items-center ">
+                                <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
+                                <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="community-metrix mt-2 gap-y-4 flex-wrap">
+                    <span class="flex items-end mr-2">
+                        <mat-icon class="mr-1">group</mat-icon>
+                        <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
+                        <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
+                    </span>
+                    <span class="mx-2 self-end">•</span>
+                    <span class="flex items-end mr-2">
+                        <mat-icon class="mr-1">list_alt</mat-icon>
+                        <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
+                        <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
+                    </span>
+                    <span class="mx-2 self-end">•</span>
+                    <span class="flex items-end mr-2">
+                        <mat-icon class="mr-1">thumb_up</mat-icon>
+                        <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
+                        <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
+                    </span>
+                    <span class="mx-2 self-end">•</span>
+                    <span class="flex items-end mr-2">
+                        <mat-icon class="mr-1">chat_bubble</mat-icon>
+                        <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
+                        <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
+                    </span>
+                </div>
+            </div>
+            <div class="community-action flex gap-2 items-center ">
+                <div class="hidden md:block">
+                    <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
+                    <div class="flex items-center">
+                        <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 " (click)="joinCommunity()">Join</button>
+                        <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true">share</mat-icon>
+                        <mat-icon  *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="block  md:hidden">
-        <div class="community-action flex gap-2 items-center ">
-            <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer " (click)="joinCommunity()">Join</button>
-        </div>
-    </div>
-    <div class="about-community p-4 md:p-0">
-        <h2>About the community</h2>
-        <p class="margin-top-xs">{{communityData?.description}}</p>
-    </div>
-
-    <div class="mt-8 p-4 md:p-0">
-        <ng-container *ngIf="!strip?.loaderWidgets?.length || !competenciesObject">
-            <div class="flex flex-col">
-                <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
-                    {{ 'apptocsinglepage.competencies' | translate }}
-                    <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
-                        [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()" matTooltip="{{ 'apptocsinglepage.competenciesTooltip' | translate }}">info_outline</mat-icon>
-                </div>
-                {{ 'apptocsinglepage.noCompetencyFound' | translate }}
+        <div class="block  md:hidden">
+            <div class="community-action flex gap-2 items-center ">
+                <button *ngIf="!userJoinedCommunity" class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer " (click)="joinCommunity()">Join</button>
             </div>
-        </ng-container>
-        <ng-container *ngIf="strip?.loaderWidgets?.length > 0">
-            <div class="flex flex-col gap-3">
-                <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
-                    {{ 'apptocsinglepage.competencies' | translate }}
-                    <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
-                        [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()" matTooltip="{{ 'apptocsinglepage.competenciesTooltip' | translate }}">info_outline</mat-icon>
+        </div>
+        <div class="about-community p-4 md:p-0">
+            <h2>About the community</h2>
+            <p class="margin-top-xs">{{communityData?.description}}</p>
+        </div>
+    
+        <div class="mt-8 p-4 md:p-0">
+            <ng-container *ngIf="!strip?.loaderWidgets?.length || !competenciesObject">
+                <div class="flex flex-col">
+                    <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
+                        {{ 'apptocsinglepage.competencies' | translate }}
+                        <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
+                            [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()" matTooltip="{{ 'apptocsinglepage.competenciesTooltip' | translate }}">info_outline</mat-icon>
+                    </div>
+                    {{ 'apptocsinglepage.noCompetencyFound' | translate }}
                 </div>
-                <div class="flex flex-row gap-3 sm:gap-4 mb-3">
-                    <ng-container *ngFor="let item of competenciesObject" >
-                        <div class="themes-button" [ngClass]="{'theme-activated': competencySelected === item.key}" (click)="handleShowCompetencies(item, 'selected')">{{ item.key }}</div>
+            </ng-container>
+            <ng-container *ngIf="strip?.loaderWidgets?.length > 0">
+                <div class="flex flex-col gap-3">
+                    <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
+                        {{ 'apptocsinglepage.competencies' | translate }}
+                        <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
+                            [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()" matTooltip="{{ 'apptocsinglepage.competenciesTooltip' | translate }}">info_outline</mat-icon>
+                    </div>
+                    <div class="flex flex-row gap-3 sm:gap-4 mb-3">
+                        <ng-container *ngFor="let item of competenciesObject" >
+                            <div class="themes-button" [ngClass]="{'theme-activated': competencySelected === item.key}" (click)="handleShowCompetencies(item, 'selected')">{{ item.key }}</div>
+                        </ng-container>
+                    </div>
+                    <ng-container *ngFor="let item of competenciesObject">
+                        <div *ngIf="item?.key === competencySelected">
+                            
+                            <ws-utils-horizontal-scroller-v2 [loadStatus]="'done'" [stripConfig]="strip?.stripConfig">
+                                <ng-container *ngFor="let widget of strip?.loaderWidgets;">
+                                    <d-v2-competency-card class="mr-2" [widgetData]="widget?.widgetData"></d-v2-competency-card>
+                                </ng-container>
+                               
+                            </ws-utils-horizontal-scroller-v2>
+                        </div>
                     </ng-container>
                 </div>
-                <ng-container *ngFor="let item of competenciesObject">
-                    <div *ngIf="item?.key === competencySelected">
-                        
-                        <ws-utils-horizontal-scroller-v2 [loadStatus]="'done'" [stripConfig]="strip?.stripConfig">
-                            <ng-container *ngFor="let widget of strip?.loaderWidgets;">
-                                <d-v2-competency-card class="mr-2" [widgetData]="widget?.widgetData"></d-v2-competency-card>
-                            </ng-container>
-                           
-                        </ws-utils-horizontal-scroller-v2>
-                    </div>
-                </ng-container>
-            </div>
-        </ng-container>
+            </ng-container>
+        </div>
     </div>
     <mat-tab-group class="custom-discuss-tab-container " (selectedTabChange)="onTabChange($event)"  [mat-stretch-tabs]="false"  mat-align-tabs="center">
         <ng-container *ngFor="let tab of communityWidgetData?.tabs">
