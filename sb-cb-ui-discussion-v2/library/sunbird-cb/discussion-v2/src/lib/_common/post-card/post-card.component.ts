@@ -65,6 +65,7 @@ export class PostCardComponent {
   }
 
   async ngOnInit() {
+    this.post.isReported = true
     this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData || [] ]
@@ -155,6 +156,7 @@ export class PostCardComponent {
   }
 
   likeUnlikeComment(post: any) {
+    post.isLiked = !post.isLiked
     this.likeUnlikeData.emit(post)
   }
 
@@ -166,11 +168,11 @@ export class PostCardComponent {
   }
 
   likeUnlikeEvent(event: any) {
-    // if(this.userLikedComments.includes(event.commentId)) {
-    //   this.likeUnlikeCommentApi('dislike', event.commentId)
-    // } else {
+    if(event && event.isLiked) {
+      this.downVotePost('dislike', event.type, event.discussionId)
+    } else {
       this.upVotePost('like', event.type, event.discussionId)
-    // }
+    }
   }
 
   upVotePost(flag: string, type: string, discussionId: string) {
@@ -182,7 +184,24 @@ export class PostCardComponent {
           post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
           // this.userLikedComments.push(commentId)
         } else {
-          post.downVoteCount = post.downVoteCount? post.downVoteCount + 1 : 1
+          post.upVoteCount = post.upVoteCount? post.upVoteCount - 1 : 0
+          // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
+          // this.userLikedComments.splice(index, 1)
+        }
+      }
+    })
+  }
+
+  downVotePost(flag: string, type: string, discussionId: string) {
+    this.discussV2Svc.downVotePost(type, discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
+        const post = this.fetchedReplyData.find((comm: any) => comm.discussionId === discussionId)
+        if (flag === 'like') {
+          post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
+          // this.userLikedComments.push(commentId)
+        } else {
+          post.upVoteCount = post.upVoteCount? post.upVoteCount - 1 : 0
           // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
           // this.userLikedComments.splice(index, 1)
         }
@@ -232,6 +251,7 @@ export class PostCardComponent {
         this.loading = false
       }
       this.reportPending = false
+      this.post.isReported = true
       // this.post = res.result
       this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
     },

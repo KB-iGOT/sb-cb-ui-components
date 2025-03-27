@@ -32,6 +32,7 @@ const API_END_POINTS = {
   USER_SEARCH:`/apis/proxies/v8/user/v1/search`,
   POPULAR_COMMUNITY:`/apis/proxies/v8/community/v1/popular`,
   GLOBAL_FEED: `/apis/proxies/v8/feedDiscussion/globalFeed`,
+  ENRICH_DATA: `/apis/proxies/v8/feedDiscussion/v1/enrichData`,
 }
 
 
@@ -147,6 +148,10 @@ export class DiscussionV2Service {
 
   getGlobalFeed(req: any) {
     return this.http.post<any>(`${API_END_POINTS.GLOBAL_FEED}`, req)
+  }
+
+  enrichData(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.ENRICH_DATA}`, req)
   }
 
   convertOrgArrayToObject(data: any) {

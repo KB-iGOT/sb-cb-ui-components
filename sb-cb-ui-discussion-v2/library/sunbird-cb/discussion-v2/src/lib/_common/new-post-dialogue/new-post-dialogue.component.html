@@ -54,7 +54,7 @@
           <mat-error *ngIf="communityCtrl.invalid" class="custom-mat-error">Please select a valid community</mat-error>
         </mat-form-field>
       </div>
-      <ng-container *ngIf="!isGlobal">
+      <ng-container *ngIf="!isGlobal && !data?.editMode">
         <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
       </ng-container>
 

@@ -4,6 +4,7 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 // tslint:disable-next-line
 import _ from 'lodash'
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'd-v2-global-feed',
@@ -59,12 +60,30 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
     const req = this.fetchPostRequest(true, searchString)
     // const tabType = searchString ? '' : this.selectedTab
     this.discussV2Svc.getGlobalFeed(req).subscribe(res => {
-      this.loadingPosts = false
       this.searchResults = _.get(res, 'result.search_results') || {}
-      this.posts = _.get(res, 'result.search_results.data') || []
-
-      if(this.discussionId){
-        this.scrollToDiscussion()
+      const postsData = _.get(res, 'result.search_results.data') || []
+      
+      if (postsData.length) {
+        this.enrichData(postsData).subscribe(
+          () => {
+            this.posts = postsData
+            this.loadingPosts = false
+            if(this.discussionId){
+              this.scrollToDiscussion()
+            }
+          },
+          () => {
+            // On enrichData failure, fallback to original posts
+            this.posts = postsData
+            this.loadingPosts = false
+            if(this.discussionId){
+              this.scrollToDiscussion()
+            }
+          }
+        )
+      } else {
+        this.posts = []
+        this.loadingPosts = false
       }
     },(err: any) => {
       
@@ -83,10 +102,24 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
     
     const req = this.fetchPostRequest(false, searchString)
     this.discussV2Svc.getGlobalFeed(req).subscribe(res => {
-      console.log('res = > ', res)
-      this.loadingPosts = false
+      const newPosts = _.get(res, 'result.search_results.data') || []
       this.searchResults = _.get(res, 'result.search_results') || {}
-      this.posts = [...this.posts, ...(_.get(res, 'result.search_results.data') || [])]
+      
+      if (newPosts.length) {
+        this.enrichData(newPosts).subscribe(
+          () => {
+            this.posts = [...this.posts, ...newPosts]
+            this.loadingPosts = false
+          },
+          () => {
+            // On enrichData failure, fallback to original posts
+            this.posts = [...this.posts, ...newPosts]
+            this.loadingPosts = false
+          }
+        )
+      } else {
+        this.loadingPosts = false
+      }
     },(err: any) => {
       
       this.loadingPosts = false
@@ -97,17 +130,55 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
       }
     })
   }
+  
+  enrichData(posts: any) {
+    const groupedDataRequest = this.groupByCommunityId(this.searchResults.data);
+    console.log(groupedDataRequest);
+    return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
+      map((res: any) => {
+        const enrichedData = _.get(res, 'result.search_results')
+        if (enrichedData) {
+          posts.forEach((post: any) => {
+            post.isLiked = enrichedData.likes[post.discussionId] || false
+            post.isBookmarked = enrichedData.bookmarks[post.discussionId] || false
+            post.isReported = enrichedData.reported[post.discussionId] || false
+          })
+        }
+        return posts
+      })
+    )
+  }
+
+  groupByCommunityId(posts: any) {
+    const communityFilters: { [key: string]: { communityId: string; identifier: string[] } } = {};
+  
+    posts.forEach((post: any) => {
+      const { communityId, discussionId } = post;
+      if (!communityFilters[communityId]) {
+        communityFilters[communityId] = { communityId, identifier: [] };
+      }
+      communityFilters[communityId].identifier.push(discussionId);
+    });
+  
+    return {
+      request: {
+        communityFilters: Object.values(communityFilters),
+        requestType: "question",
+        filters: ["likes", "bookmarks", "reported"]
+      }
+    };
+  }
 
   fetchPostRequest(pageReset: boolean, searchString?: string) {
       const req: any = {
-        "filterCriteriaMap": {
+        filterCriteriaMap: {
           type: "question"
         },
         "requestedFields": [],
         "pageNumber": pageReset? 0 : this.commentListOffSet,
         "pageSize": this.commentListLimit,
         "orderBy": "updatedOn",
-        "orderDirection": "ASC",
+        "orderDirection": "DESC",
         "facets": []
       }
       if(searchString?.length) {
@@ -117,11 +188,11 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
   }
 
   likeUnlikeEvent(event: any) {
-    // if(this.userLikedComments.includes(event.commentId)) {
-    //   this.likeUnlikeCommentApi('dislike', event.commentId)
-    // } else {
+    if(event && event.isLiked) {
+      this.downVotePost('dislike', event.type, event.discussionId)
+    } else {
       this.upVotePost('like', event.type, event.discussionId)
-    // }
+    }
   }
 
   upVotePost(flag: string, type: string,  discussionId: string) {
@@ -134,6 +205,23 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
           // this.userLikedComments.push(commentId)
         } else {
           post.downVoteCount = post.downVoteCount? post.downVoteCount + 1 : 1
+          // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
+          // this.userLikedComments.splice(index, 1)
+        }
+      }
+    })
+  }
+
+  downVotePost(flag: string, type: string, discussionId: string) {
+    this.discussV2Svc.downVotePost(type, discussionId).subscribe(res => {
+      if (res.responseCode === 'OK') {
+        this._snackBar.open(flag === 'like' ? 'Liked' : 'Unliked')
+        const post = this.posts.find((comm: any) => comm.discussionId === discussionId)
+        if (flag === 'like') {
+          post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
+          // this.userLikedComments.push(commentId)
+        } else {
+          post.upVoteCount = post.upVoteCount? post.upVoteCount - 1 : 0
           // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
           // this.userLikedComments.splice(index, 1)
         }
@@ -156,7 +244,7 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
       if (res.responseCode === 'OK') {
         this._snackBar.open('Post bookmarked successffuly!')
         const post = this.posts.find((comm: any) => comm.discussionId === discussionId)
-        post.bookmark = true
+        post.isBookmarked = true
       }
     })
   }
@@ -171,7 +259,7 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
       if (res.responseCode === 'OK') {
         this._snackBar.open('Post un-bookmarked successffuly!')
         const post = this.posts.find((comm: any) => comm.discussionId === discussionId)
-        post.bookmark = false
+        post.isBookmarked = false
       }
     })
   }
