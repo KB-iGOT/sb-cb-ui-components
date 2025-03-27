@@ -132,7 +132,7 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
   }
   
   enrichData(posts: any) {
-    const groupedDataRequest = this.groupByCommunityId(this.searchResults.data);
+    const groupedDataRequest = this.groupByCommunityId(posts);
     console.log(groupedDataRequest);
     return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
       map((res: any) => {

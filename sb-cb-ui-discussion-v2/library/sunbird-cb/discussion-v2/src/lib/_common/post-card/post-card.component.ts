@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'd-v2-post-card',
@@ -110,10 +111,25 @@ export class PostCardComponent {
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
       this.fetchedSearchData = _.get(res, 'result.search_results') || {}
-      this.fetchedReplyData = (_.get(res, 'result.search_results.data') || [])
-      this.replyDataCopy = [...this.fetchedReplyData.map((x: any) => x.discussionId)]
-      this.loading = false
-      this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
+      const postsData = _.get(res, 'result.search_results.data') || []
+      if (postsData.length) {
+        this.enrichData(postsData).subscribe(
+          () => {
+            this.fetchedReplyData = postsData
+            this.replyDataCopy = [...this.fetchedReplyData.map((x: any) => x.discussionId)]
+            this.loading = false
+            this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
+          },
+          () => {
+            // On enrichData failure, fallback to original posts
+            this.fetchedReplyData = postsData
+            this.loading = false
+          }
+        )
+      } else {
+        this.fetchedReplyData = []
+        this.loading = false
+      }
       }, () => {
         this.loading = false
       })
@@ -141,8 +157,23 @@ export class PostCardComponent {
       "facets": []
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
-      this.fetchedReplyData = [...this.fetchedReplyData , ...(_.get(res, 'result.search_results.data') || [])]
-      this.loadingMore = false
+      const newPosts = _.get(res, 'result.search_results.data') || []
+      
+      if (newPosts.length) {
+        this.enrichData(newPosts).subscribe(
+          () => {
+            this.fetchedReplyData = [...this.fetchedReplyData, ...newPosts]
+            this.loadingMore = false
+          },
+          () => {
+            // On enrichData failure, fallback to original posts
+            this.fetchedReplyData = [...this.fetchedReplyData, ...newPosts]
+            this.loadingMore = false
+          }
+        )
+      } else {
+        this.loadingMore = false
+      }
       }, () => {
         this.loadingMore = false
       })
@@ -155,9 +186,49 @@ export class PostCardComponent {
     }
   }
 
+  enrichData(posts: any) {
+    const groupedDataRequest = this.groupByCommunityId(posts);
+    console.log(groupedDataRequest);
+    return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
+      map((res: any) => {
+        const enrichedData = _.get(res, 'result.search_results')
+        if (enrichedData) {
+          posts.forEach((post: any) => {
+            post.isLiked = enrichedData.likes[post.discussionId] || false
+            post.isBookmarked = enrichedData.bookmarks[post.discussionId] || false
+            post.isReported = enrichedData.reported[post.discussionId] || false
+          })
+        }
+        return posts
+      })
+    )
+  }
+
+  groupByCommunityId(posts: any) {
+    const communityFilters: { [key: string]: { communityId: string; identifier: string[] } } = {};
+  
+    posts.forEach((post: any) => {
+      const { communityId, discussionId } = post;
+      if (!communityFilters[communityId]) {
+        communityFilters[communityId] = { communityId, identifier: [] };
+      }
+      communityFilters[communityId].identifier.push(discussionId);
+    });
+  
+    return {
+      request: {
+        communityFilters: Object.values(communityFilters),
+        requestType: "question",
+        filters: ["likes", "bookmarks", "reported"]
+      }
+    };
+  }
+
   likeUnlikeComment(post: any) {
-    post.isLiked = !post.isLiked
     this.likeUnlikeData.emit(post)
+    // after emit change the status to locally update the color. otherwise emitted data will behave reverse
+    // So its necessary to first emit the event and then change
+    post.isLiked = post.isLiked? false: true
   }
 
   bookmark(bookmark:boolean, post: any) {
