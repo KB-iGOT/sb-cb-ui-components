@@ -257,10 +257,13 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   getContineuLearningLenth(data: IStripUnitContentData) {
     return data.widgets ? data.widgets.length : 0;
   }
-  getLength(data: IStripUnitContentData) {
+  getLength(data: IStripUnitContentData, key: string = '') {
     if (!data.tabs || !data.tabs.length) {
       return data.widgets ? data.widgets.length : 0;
     } {
+      if (key === 'myEvents') {
+        return true
+      }
       // if tabs are there check if each tab has widgets and get the tab with max widgets
       const tabWithMaxWidgets = data.tabs.reduce(
         (prev, current) => {
@@ -1140,7 +1143,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         } else if (currentTabFromMap.request.ciosContent) {
           this.getTabDataByCiosSearch(currentStrip, tabEvent, currentTabFromMap, true)
         } else if(currentTabFromMap.request.myEvents) {
-          this.getMyEventsByTabs(currentStrip, tabEvent, currentTabFromMap, true)
+          this.getMyEventsByTabs(currentStrip, tabEvent, currentTabFromMap, false)
         }
         if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
           stripMap.tabs[tabEvent].tabLoading = false;
@@ -2234,8 +2237,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     } 
   try {
           const response = await this.postRequestMethod(strip, postReqestData, apiUrl, calculateParentStatus);
-          if (response && response.results) {
-            if (response.results.result.events && response.results.result.events.length) {
+          if (_.get(response, 'results.result.events')) {
+            if (response.results.result.events.length) {
               const widgets = this.transformEventsV2ToWidgets(response.results.result.events, strip);
               let tabResults: any[] = [];
               if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
@@ -2259,7 +2262,11 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                 tabResults // tabResults as widgets
               );
             } else {
-              this.processStrip(strip, [], 'error', calculateParentStatus, null);
+              const allTabs = this.stripsResultDataMap[strip.key].tabs;
+              if (allTabs && allTabs.length && allTabs[tabIndex]) {
+                allTabs[tabIndex]['fetchTabStatus'] = 'done'
+              }
+              this.processStrip(strip, [], 'done', calculateParentStatus, null);
               this.emptyResponse.emit(true)
             }
 

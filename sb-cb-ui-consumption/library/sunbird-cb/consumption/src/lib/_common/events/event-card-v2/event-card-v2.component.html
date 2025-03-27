@@ -1,4 +1,4 @@
-<div class="widget-card-content-new">
+<div class="widget-card-content-new" [ngClass]="widgetData?.cardSubType">
   <ng-container *ngIf="widgetData" [ngSwitch]="(widgetData?.cardSubType)">
     <ng-container *ngSwitchCase="'card-event-v2'" [ngTemplateOutlet]="cardEventV2"></ng-container>
     <ng-container *ngSwitchCase="'card-event-v2-skeleton'" [ngTemplateOutlet]="cardEventV2Skeleton"></ng-container>
