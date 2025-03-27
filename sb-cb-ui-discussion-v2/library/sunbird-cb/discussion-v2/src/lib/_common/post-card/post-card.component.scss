@@ -1,3 +1,5 @@
+$green : #1D8923;
+
 .topLevel-card {
     padding: 16px;
     background-color: #fff;
@@ -37,7 +39,7 @@
     .like-icon {
         color: #666666;
         &.user-liked {
-            color: #1D8923;
+            color: $green;
         }
     }
 }
@@ -56,7 +58,7 @@
 }
 
 .verified {
-    color: #1D8923;
+    color: $green;
     height: 14px;
     width: 14px;
     font-size: 14px;
@@ -232,4 +234,28 @@
 .media-full-width {
     margin-left: -16px;
     margin-right: -16px;
+}
+
+.reported-mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid $green;
+}
+
+.mask-icon {
+    font-size: 40px;
+    height: 40px;
+    width: 40px;
+}
+
+.green-color {
+    color: $green;
 }

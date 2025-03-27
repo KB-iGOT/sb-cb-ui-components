@@ -181,7 +181,7 @@
             <div class="flex flex-1 items-center">
                 <form class="flex flex-1 items-center gap-2">
                     <div class="flex relative flex-1 input-container cursor-pointer" (click)="userJoinedCommunity && openNewPostDialog()" [class.disabled]="!userJoinedCommunity">
-                        <input #description name="description" class="w-full rounded-full px-4 py-2 focus:outline-none" [disabled]="!userJoinedCommunity"
+                        <input #description name="description" class="w-full rounded-full px-4 py-2 focus:outline-none" [readonly]="true" [disabled]="!userJoinedCommunity"
                             [placeholder]="userJoinedCommunity ? config?.commentBox?.placeholder : 'Join the community to start posting'">
                         <button mat-icon-button color="primary" class="postIcon emoji-icon">
                             <mat-icon>sentiment_satisfied</mat-icon>

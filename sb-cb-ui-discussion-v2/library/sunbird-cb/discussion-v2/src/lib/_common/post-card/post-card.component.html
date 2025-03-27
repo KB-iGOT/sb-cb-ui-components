@@ -1,6 +1,9 @@
-<div class="topLevel-card" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
+<div class="topLevel-card relative" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
 'reply-card mb-3' : cardType=== 'reply',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
+    <ng-container *ngIf="post?.isReported && false">
+        <ng-container [ngTemplateOutlet]="reportedMask" [ngTemplateOutletContext]="post"></ng-container>
+    </ng-container>
     <ng-container *ngIf="post?.communityId && showCommunity">
         <div class="community-name-wrapper inline-flex items-center max-w-full mb-3 cursor-pointer" (click)="communityClick(post.communityId)">
             <span class="whitespace-nowrap pl-3 flex-1">Posting in</span> 
@@ -120,7 +123,7 @@
                 <div class="mr-4 cursor-pointer circleBtn"
                     (click)="likeUnlikeComment(post)">
                     <mat-icon class="icon like-icon mr-2" aria-hidden="false" i18n-aria-label
-                        [ngClass]="{'user-liked': userLikedPosts?.includes(post?.commentId)}"
+                        [ngClass]="{'user-liked': post.isLiked}"
                         aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
                     <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
                         {{(post?.upVoteCount && post?.upVoteCount) || 0}}
@@ -153,13 +156,13 @@
                 </div>
             </ng-container>
             <ng-container *ngIf="cardConfig?.actions?.bookmark?.show && cardType !== 'reply'">
-                <div class=" flex bookmarkDiv cursor-pointer" *ngIf="!post.bookmark" (click)="bookmark(true, post)">
+                <div class=" flex bookmarkDiv cursor-pointer" *ngIf="!post.isBookmarked" (click)="bookmark(true, post)">
                     <mat-icon role="button" aria-hidden="false" aria-label="bookmark" 
                     class="mat-icon notranslate icon material-icons mat-ligature-font mat-icon-no-color">
                     bookmark_outline
                     </mat-icon>
                 </div>
-                <div class=" flex bookmarkDiv cursor-pointer" *ngIf="post.bookmark" (click)="bookmark(false, post)">
+                <div class=" flex bookmarkDiv cursor-pointer" *ngIf="post.isBookmarked" (click)="bookmark(false, post)">
                     <mat-icon role="button" aria-hidden="false" aria-label="bookmark" 
                     class="mat-icon notranslate icon material-icons mat-ligature-font mat-icon-no-color bookmarked-icon">
                     bookmark
@@ -255,6 +258,19 @@
                 <d-v2-widget-skeleton-loader class=" mr-4" [width]="'64px'" [height]="'48px'"
                 [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
             </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #reportedMask let post="post" >
+    <div class="reported-mask reported-mask flex items-center justify-center">
+        <div class="flex flex-col px-6 text-center items-center justify-center">
+            <mat-icon class="icon mask-icon green-color" aria-hidden="false" >error</mat-icon>
+            <h2 class="green-color">Thanks for Reporting</h2>
+            <p class="mat-body-1">You have reported this post, and you will be updated on any further actions taken</p>
+            <button mat-stroked-button type="button" (click)="post.isReported = false">
+                Show post
+            </button>
         </div>
     </div>
 </ng-template>
