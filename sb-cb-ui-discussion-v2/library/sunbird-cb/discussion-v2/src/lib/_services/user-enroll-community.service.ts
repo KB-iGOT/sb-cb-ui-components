@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 const API_END_POINTS = {
   USERS_COMMUNITY_LIST: `/apis/proxies/v8/community/v1/user/communities`,
   COMMUNITY_SEARCH: `/apis/proxies/v8/community/v1/search`,
+  USER_ENROLLED_COMMUNITY_ID_LIST: `/apis/proxies/v8/community/v1/user/communities/all`
 }
 
 @Injectable({
@@ -18,22 +19,22 @@ export class UserEnrollCommunityService {
   constructor(private http: HttpClient) { }
 
 
-  setEnrollData(data: any) {
-    this.userEnrolledCommunityList = data;
+  setEnrollDetailsData(data: any) {
+    this.userEnrolledCommunityDetailList = data;
   }
-  async getEnrollData() {
-    if(this.userEnrolledCommunityList.length) {
-      return this.userEnrolledCommunityList;
+
+  async getEnrollDetailsData() {
+    if(this.userEnrolledCommunityDetailList.length) {
+      return this.userEnrolledCommunityDetailList;
     } else {
       let userCommunityData = await this.getUserEnrolledCommunityList();
-      this.userEnrolledCommunityList = userCommunityData.communityId
       this.userEnrolledCommunityDetailList = userCommunityData.communityDetails
-      return this.userEnrolledCommunityList
+      return this.userEnrolledCommunityDetailList
     }
   }
 
-  clearEnrollData() {
-    this.userEnrolledCommunityList = [];
+  clearEnrollDetailsData() {
+    this.userEnrolledCommunityDetailList = [];
   }
 
   async getUserEnrolledCommunityList() {
@@ -43,18 +44,6 @@ export class UserEnrollCommunityService {
     } 
     return this.http.get<any>(`${API_END_POINTS.USERS_COMMUNITY_LIST}`).toPromise().then((res: any) => {
       if(res && res.result && res.result.communityId && res.result.communityId.length) {
-        // Create a mapping of IDs to names for quick lookup
-        const idToNameMap = res.result.communityDetails.reduce((acc: any, item:any) => {
-          acc[item.communityId] = item.communityName;
-          return acc;
-        }, {});
-        this.userEnrolledCommunityObjectData = idToNameMap;
-        // Add the name to the second array by matching the ID
-        const updatedSecondArray = res.result.communityId.map((item:any) => ({
-          ...item,
-          communityName: idToNameMap[item.communityid] || "Unknown" // Default if no match found
-        }));
-        res.result.communityId = updatedSecondArray;
         return res.result;
       } 
       return emptyData;  
@@ -63,6 +52,53 @@ export class UserEnrollCommunityService {
       return emptyData;
     });
   }
+
+
+
+
+
+
+  setEnrollDataId(data: any) {
+    this.userEnrolledCommunityList = data;
+  }
+
+  async getEnrollDataId() {
+    if(this.userEnrolledCommunityList.length) {
+      return this.userEnrolledCommunityList;
+    } else {
+      let userCommunityData = await this.getUserEnrolledCommunityIdData();
+      this.userEnrolledCommunityList = userCommunityData.communityId
+      return this.userEnrolledCommunityList
+    }
+  }
+
+  clearEnrollDataId() {
+    this.userEnrolledCommunityList = [];
+  }
+
+  async getUserEnrolledCommunityIdData() {
+    let emptyData = {
+      communityId: [],
+      communityDetails:[]
+    } 
+    return this.http.get<any>(`${API_END_POINTS.USER_ENROLLED_COMMUNITY_ID_LIST}`).toPromise().then((res: any) => {
+      debugger
+      if(res && res.result && res.result.communityId && res.result.communityId.length) {
+        // Create a mapping of IDs to names for quick lookup
+        const idToNameMap = res.result.communityId.reduce((acc: any, item:any) => {
+          acc[item.communityid] = item.communityName;
+          return acc;
+        }, {});
+        this.userEnrolledCommunityObjectData = idToNameMap;
+        return res.result;
+      } 
+      return emptyData;  
+    }).catch((err: any) => {
+      console.error(err);
+      return emptyData;
+    });
+  }
+
 
 
   async similarCommuninties(){

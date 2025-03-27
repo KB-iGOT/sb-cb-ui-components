@@ -68,7 +68,8 @@ export class PostCardComponent {
     this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData || [] ]
-    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollData()
+    debugger
+    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollDataId()
     if(userEnrolledCommunityList.length) {
       this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
     }

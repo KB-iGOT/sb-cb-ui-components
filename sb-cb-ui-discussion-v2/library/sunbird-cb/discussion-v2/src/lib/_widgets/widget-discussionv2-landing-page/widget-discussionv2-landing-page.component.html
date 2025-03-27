@@ -18,7 +18,7 @@
         <div class="grid grid-cols-1 px-4 md:px-0 md:grid-cols-12 gap-0 md:gap-4">
             <!-- Column 1 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
-                 <div class="hidden  md:block">
+                 <div class="hidden  md:block" *ngIf="loadedData">
                     <d-v2-similar-community-card (communityClick)="onCardClick($event)"></d-v2-similar-community-card> 
                  </div>
             </div>
@@ -95,7 +95,7 @@
         
             <!-- Column 3 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
-                <div class="hidden  md:block">
+                <div class="hidden  md:block" *ngIf="loadedData">
                     <d-v2-trending-discussions [expandCard]="true" [showCommunity]="true"></d-v2-trending-discussions>
                 </div>
             </div>

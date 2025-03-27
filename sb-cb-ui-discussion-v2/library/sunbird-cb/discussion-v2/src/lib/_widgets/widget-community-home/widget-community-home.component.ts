@@ -80,7 +80,7 @@ export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
     filters: [],
   }
   isExpandedView = false;
-
+  loadedCommunitiesData: boolean = false
 toggleExpandedView() {
   this.isExpandedView = !this.isExpandedView;
 }
@@ -146,21 +146,20 @@ toggleExpandedView() {
         this.communityData = {...resData.result.communityDetails , ...resData.result.communityDetails.data}
         this.loadCompetencies()
         this.checkUserJoinedCommunity()
+
+      } else {
+        this.loadedCommunitiesData = true
       }
     })
     // Fetch community data using id
   }
 
   async checkUserJoinedCommunity() {
-    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollDataId()
     this.userJoinedCommunity = false
-    this.manageUserCommunityStatus()
-    // this.discussV2Svc.usersJoinedCommunityList().subscribe((resData: any) => {
-    //   if(resData.result && resData.result.communityDetails && resData.result.communityDetails.length){
-    //     this.userJoinedCommunityList = resData.result.communityDetails
-    //     this.manageUserCommunityStatus()
-    //   }
-    // })
+    this.manageUserCommunityStatus(true)
+    this.loadedCommunitiesData = true
+    this.isExpandedView = !this.userJoinedCommunity
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -174,14 +173,17 @@ toggleExpandedView() {
   }
 
   
-  async manageUserCommunityStatus(){
+  async manageUserCommunityStatus(onLoad?: boolean){
+    debugger
     this.userJoinedCommunityList.forEach((community: any) => {
       if(community.communityid === this.communityId){
-        this.userJoinedCommunity = community.status
+        this.userJoinedCommunity = true
       }
     })
-    this.userEnrollSvc.clearEnrollData()
-    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    if(!onLoad){
+      this.userEnrollSvc.clearEnrollDataId()
+      this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollDataId()
+    }
   }
   joinCommunity(){
     let request = {
@@ -193,17 +195,11 @@ toggleExpandedView() {
         let resultData = [
           {
             "communityid": this.communityId,
-            "status": true
+            "communityName": this.communityData.communityName
           }
         ]
-        const community = this.userJoinedCommunityList.find((community: any) => community.communityid === this.communityId);
-        if (community) {
-          community.status = true;
-        } else {
-          this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData];
-          this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
-          
-        }
+        this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData];
+        this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
         this.manageUserCommunityStatus()
 
         this.snackbar.open('You\’ve successfully joined the community.')
@@ -234,11 +230,12 @@ toggleExpandedView() {
           let request = { "communityId":this.communityId }
     this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
       if(resData.params && resData.params.status === 'success'){
-        const community = this.userJoinedCommunityList.find((community: any) => community.communityid === this.communityId);
-        if (community) {
-          community.status = false;
+        const communityIndex = this.userJoinedCommunityList.findIndex((community: any) => community.communityid === this.communityId);
+        if (communityIndex !== -1) {
+          this.userJoinedCommunityList.splice(communityIndex, 1);
+          this.userJoinedCommunity = false
         }
-        this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
+        this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
         this.manageUserCommunityStatus()
         this.snackbar.open('You\'ve successfully left the community.')
       }
