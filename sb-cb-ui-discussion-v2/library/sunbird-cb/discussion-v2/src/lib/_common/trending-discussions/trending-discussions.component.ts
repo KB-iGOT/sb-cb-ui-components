@@ -31,7 +31,7 @@ export class TrendingDiscussionsComponent implements OnInit {
   ) { }
   async ngOnInit() {
     this.fetchPosts()
-    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollData()
+    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollDataId()
     if(userEnrolledCommunityList.length) {
       this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
     }
