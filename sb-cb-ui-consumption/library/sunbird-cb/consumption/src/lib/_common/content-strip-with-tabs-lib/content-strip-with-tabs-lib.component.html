@@ -8,7 +8,7 @@
   <ng-container *ngFor="let key of stripsKeyOrder; let i = index; trackBy: identify">
     <ng-container *ngIf="isStripShowing(stripsResultDataMap[key])">
       <a name="{{stripsResultDataMap[key]?.stripTitle}}" [class]="key">
-        <div *ngIf="stripsResultDataMap && (getLength(stripsResultDataMap[key]) ||
+        <div *ngIf="stripsResultDataMap && (getLength(stripsResultDataMap[key], key) ||
                     stripsResultDataMap[key]?.showOnNoData ||
                     stripsResultDataMap[key]?.showOnLoader ||
                     stripsResultDataMap[key]?.showOnError)

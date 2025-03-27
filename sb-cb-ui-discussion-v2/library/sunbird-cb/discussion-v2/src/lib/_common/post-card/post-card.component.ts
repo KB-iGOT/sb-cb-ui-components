@@ -225,6 +225,7 @@ export class PostCardComponent {
   }
 
   likeUnlikeComment(post: any) {
+    post.isLiked = !post.isLiked
     this.likeUnlikeData.emit(post)
     // after emit change the status to locally update the color. otherwise emitted data will behave reverse
     // So its necessary to first emit the event and then change
