@@ -168,3 +168,47 @@ $text-primary: #1B4CA1;
 .report-icons {
     color: #D13924 !important;
 }
+
+.joined-community-container{
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    .joined-community-image{
+        width: 188px;
+        height: 47px;
+        img{
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+    }
+    .community-basic-info{
+        width: -webkit-fill-available;
+        width: -moz-available;
+        width: fill-available;
+        width: 100%;
+    }
+}
+
+
+.default-view, .expanded-view {
+    transition: all 0.9s ease-in-out 0.9s;
+    overflow: hidden;
+  }
+  
+  .expanded-view {
+    max-height: 0;
+    opacity: 0;
+  }
+  
+  .expanded-view.active {
+    max-height: 2000px; /* arbitrary large value */
+    opacity: 1;
+  }
+  
+  .hidden-view {
+    display: none;
+  }
+  
