@@ -35,7 +35,7 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
       value: 0
     },
     {
-      label: 'Communities',
+      label: 'All Communities',
       matIcon: '',
       iconSvg: 'assets/icons/discuss/community.svg',
       id: 'communities',
