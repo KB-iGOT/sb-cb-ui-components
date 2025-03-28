@@ -72,17 +72,13 @@ export class CommunityCardComponent implements OnInit {
         let resultData = [
           {
             "communityid": communityData.communityId,
+            "communityName": communityData.communityName,
             "status": true
           }
         ]
-        const community = this.userJoinedCommunityList.find((community: any) => community.communityid === communityData.communityId);
-        if (community) {
-          community.status = true;
-        } else {
+        
           this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData];
-          this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
-          
-        }
+          this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
         this.manageUserCommunityStatus()
 
         this.snackbar.open('You\’ve successfully joined the community.')
@@ -91,14 +87,12 @@ export class CommunityCardComponent implements OnInit {
   }
 
   async manageUserCommunityStatus(){
-    
-    this.userEnrollSvc.clearEnrollData()
-    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
-    
+    this.userEnrollSvc.clearEnrollDataId()
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollDataId()
   }
 
   checkCommunityPresence(communityId: string)  {
-    return this.userJoinedCommunityList.some((community: any) => community.communityid === communityId ? community.status : false);
+    return this.userJoinedCommunityList.some((community: any) => community.communityid === communityId);
   }
   unJoinCommunity(communityData: any){
       const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
@@ -120,11 +114,11 @@ export class CommunityCardComponent implements OnInit {
           let request = { "communityId":communityData.communityId }
           this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
             if(resData.params && resData.params.status === 'success'){
-              const community = this.userJoinedCommunityList.find((community: any) => community.communityid === communityData.communityId);
-              if (community) {
-                community.status = false;
+              const communityIndex = this.userJoinedCommunityList.findIndex((community: any) => community.communityid === communityData.communityId);
+              if (communityIndex !== -1) {
+                this.userJoinedCommunityList.splice(communityIndex, 1);
               }
-              this.userEnrollSvc.setEnrollData(this.userJoinedCommunityList)
+              this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
               this.manageUserCommunityStatus()
               this.snackbar.open('You\'ve successfully left the community.')
             }

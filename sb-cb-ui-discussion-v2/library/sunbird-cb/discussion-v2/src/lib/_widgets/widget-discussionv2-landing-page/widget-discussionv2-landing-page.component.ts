@@ -16,6 +16,8 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
   @Output() showAllTopics = new EventEmitter<any>();
   @Output() popularCommunityData = new EventEmitter<any>();
   userEnrollDetailsData: any;
+  loadingUserEnrollDetailsData: boolean = false
+  loadedData: boolean = false
   topicDataList: any = []
   topicDataLoading: boolean = false
   totalCommunitiesCount: any = 0
@@ -57,11 +59,10 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
     this.getAllTopics()
     this.selectedTab = 0;
     this.selectedTabId = 'feeds'
-    let data = await this.userEnrollSvc.getEnrollData()
-    debugger
+    let data = await this.userEnrollSvc.getEnrollDataId()
     this.userCommunityList = this.userEnrollSvc.userEnrolledCommunityList
-    this.userEnrollDetailsData = this.userEnrollSvc.userEnrolledCommunityDetailList
     console.log(data)
+    this.loadedData = true
   }
 
   getAllTopics(){ 
@@ -86,9 +87,20 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
     })
   }
 
-  onTabChange(event: any) {
+  async onTabChange(event: any) {
     this.selectedTab = event.index;
     this.selectedTabId = this.mainTabs[event.index].id || 'feeds'
+    if(this.selectedTabId === 'my_communities'){
+      await this.callUserEnrollDetailsData()
+    }
+  }
+
+  async callUserEnrollDetailsData(){
+    this.loadingUserEnrollDetailsData = true
+    this.userEnrollSvc.clearEnrollDetailsData()
+    this.userEnrollDetailsData = await this.userEnrollSvc.getEnrollDetailsData()
+    this.userCommunityList = await this.userEnrollSvc.getEnrollDataId()
+    this.loadingUserEnrollDetailsData = false
   }
 
   showAllCommunitiesByTopic(topic: any) {

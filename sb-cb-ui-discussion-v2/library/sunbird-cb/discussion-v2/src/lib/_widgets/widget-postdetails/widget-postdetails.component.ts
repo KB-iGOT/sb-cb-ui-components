@@ -114,7 +114,7 @@ export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges 
   }
 
   async getUserJoinedCommunityList() {
-    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollDataId()
     this.manageUserCommunityStatus()
   }
 
