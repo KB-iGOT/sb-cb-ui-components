@@ -16,6 +16,7 @@ export class UserEnrollCommunityService {
   userEnrolledCommunityDetailList : any = [];
   allCommunitiesList: any = []
   userEnrolledCommunityObjectData: any = {}
+  userCommunityIdApiCall: boolean = false;
   constructor(private http: HttpClient) { }
 
 
@@ -66,14 +67,19 @@ export class UserEnrollCommunityService {
     if(this.userEnrolledCommunityList.length) {
       return this.userEnrolledCommunityList;
     } else {
-      let userCommunityData = await this.getUserEnrolledCommunityIdData();
-      this.userEnrolledCommunityList = userCommunityData.communityId
-      return this.userEnrolledCommunityList
+      if(!this.userCommunityIdApiCall) {
+        let userCommunityData = await this.getUserEnrolledCommunityIdData();
+        this.userEnrolledCommunityList = userCommunityData.communityId
+        return this.userEnrolledCommunityList
+      } else {
+        return this.userEnrolledCommunityList
+      }
     }
   }
 
   clearEnrollDataId() {
     this.userEnrolledCommunityList = [];
+    this.userCommunityIdApiCall = false;
   }
 
   async getUserEnrolledCommunityIdData() {
@@ -82,7 +88,7 @@ export class UserEnrollCommunityService {
       communityDetails:[]
     } 
     return this.http.get<any>(`${API_END_POINTS.USER_ENROLLED_COMMUNITY_ID_LIST}`).toPromise().then((res: any) => {
-      debugger
+      this.userCommunityIdApiCall = true;
       if(res && res.result && res.result.communityId && res.result.communityId.length) {
         // Create a mapping of IDs to names for quick lookup
         const idToNameMap = res.result.communityId.reduce((acc: any, item:any) => {

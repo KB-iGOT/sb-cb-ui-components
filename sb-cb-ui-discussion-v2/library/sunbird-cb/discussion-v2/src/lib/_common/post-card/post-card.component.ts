@@ -297,6 +297,11 @@ export class PostCardComponent {
   }
 
   openEditDialogue(post: any) {
+    
+    let data = {
+      communityId: this.post.communityId,
+      communityName: this.userJoinedCommunityObject[this.post.communityId]
+    } 
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
       width: '996px',
       maxHeight: '90vh',// Add maximum height (90% of viewport height)
@@ -306,7 +311,7 @@ export class PostCardComponent {
         panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
         backdropClass: 'post-dialog-backdrop',
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
-        community: this.community,
+        community: this.community || data,
         config: this.cardConfig,
         currentUser: {...this.loogedInUserProfile, ...this.loggedInUserData},
         post: post,
