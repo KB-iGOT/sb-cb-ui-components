@@ -322,7 +322,6 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    debugger
     this.originalCommunities = await this.enrollSvc.getEnrollDataId()
     this.filteredCommunities = [...this.originalCommunities]
     // Set initial user data
@@ -633,7 +632,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
                   if (fileObj.file) {
                     const formData = new FormData();
                     formData.append('file', fileObj.file);
-                    const communityId = this.data.community.communityId || ''
+                    const communityId = this.data.community.communityId || this.data.community.communityId || ''
                     this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
                       next: (res: any) => {
                         if (res && res.result && res.result.url) {
@@ -780,7 +779,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
                 if (fileObj.file) {
                   const formData = new FormData();
                   formData.append('file', fileObj.file);
-                  const communityId = this.data.community.communityId || ''
+                  const communityId = this.data.community.communityId || this.data.community.communityid || ''
                   this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
                     next: (res: any) => {
                       if (res && res.result && res.result.url) {
