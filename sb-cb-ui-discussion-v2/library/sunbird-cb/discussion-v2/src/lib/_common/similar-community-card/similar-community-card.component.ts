@@ -19,7 +19,7 @@ export class SimilarCommunityCardComponent implements OnInit {
 
   async getSimiliarCommunities() {
     let similarCommuninties : any = await this.userEnrollSvc.similarCommuninties()
-    let userEnrolledCommunityList: any = await this.userEnrollSvc.getEnrollData()
+    let userEnrolledCommunityList: any = await this.userEnrollSvc.getEnrollDataId()
     similarCommuninties.forEach((ele: any)  =>{
       userEnrolledCommunityList.some((e: any)=> ele.communityId === e.communityid)
     })

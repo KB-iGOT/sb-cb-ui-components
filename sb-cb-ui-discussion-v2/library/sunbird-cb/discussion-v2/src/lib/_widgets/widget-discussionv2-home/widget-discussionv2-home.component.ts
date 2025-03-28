@@ -34,9 +34,9 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   ) { }
   async ngOnInit() {
     this.getAllTopics()
-      let data = await this.userEnrollSvc.getEnrollData()
+      // let data = await this.userEnrollSvc.getEnrollDataId()
       this.userEnrollDetailsData = this.userEnrollSvc.userEnrolledCommunityDetailList
-      console.log(data)
+      // console.log(data)
   }
 
   onSearch(event: any): void {

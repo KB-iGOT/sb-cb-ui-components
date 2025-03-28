@@ -7,50 +7,7 @@
             </div>
             <div class="community-basic-info  flex flex-wrap justify-between items-start ">
                 <div class="community-info flex-1" >
-                    <div class="flex justify-between">
-                        <h2 class=""  >{{communityData?.communityName}}</h2>
-                        <div class="community-action flex  gap-2 items-start ">
-                            <div class="block md:hidden">
-                                <div class="flex items-center " (click)="$event.stopPropagation()">
-                                    <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true; $event.stopPropagation()">share</mat-icon>
-                                    <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="community-metrix mt-2 gap-y-4 flex-wrap">
-                        <span class="flex items-end mr-2">
-                            <mat-icon class="mr-1">group</mat-icon>
-                            <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
-                            <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
-                        </span>
-                        <span class="mx-2 self-end">•</span>
-                        <span class="flex items-end mr-2">
-                            <mat-icon class="mr-1">list_alt</mat-icon>
-                            <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
-                            <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
-                        </span>
-                        <span class="mx-2 self-end">•</span>
-                        <span class="flex items-end mr-2">
-                            <mat-icon class="mr-1">thumb_up</mat-icon>
-                            <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
-                            <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
-                        </span>
-                        <span class="mx-2 self-end">•</span>
-                        <span class="flex items-end mr-2">
-                            <mat-icon class="mr-1">chat_bubble</mat-icon>
-                            <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
-                            <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
-                        </span>
-
-                        <span class="mx-2 self-end">•</span>
-                        <span class="flex items-end mr-2">
-                            <mat-icon class="mr-1">menu_book</mat-icon>
-                            <span class="mr-1">{{communityData?.competencies_v6?.length }}</span> 
-                            <span>{{ 'Competencies' }}</span>
-                        </span>
-                        
-                    </div>
+                   <ng-container [ngTemplateOutlet]="communityName"  [ngTemplateOutletContext]="{'data':{'showCompetency':true}}"></ng-container>
                 </div>
                 <div class="community-action flex gap-2 items-center ">
                     <div class="hidden md:block">
@@ -71,42 +28,7 @@
         </div>
         <div class="community-basic-info p-4 md:p-0 mb-4 md:mb-8 flex flex-wrap justify-between items-start mt-2">
             <div class="community-info flex-1">
-                <div class="flex justify-between">
-                    <h2 class="cursor-pointer" (click)="toggleExpandedView()">{{communityData?.communityName}}</h2>
-                    <div class="community-action flex  gap-2 items-start ">
-                        <div class="block md:hidden">
-                            <div class="flex items-center ">
-                                <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true">share</mat-icon>
-                                <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="community-metrix mt-2 gap-y-4 flex-wrap">
-                    <span class="flex items-end mr-2">
-                        <mat-icon class="mr-1">group</mat-icon>
-                        <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
-                        <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
-                    </span>
-                    <span class="mx-2 self-end">•</span>
-                    <span class="flex items-end mr-2">
-                        <mat-icon class="mr-1">list_alt</mat-icon>
-                        <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
-                        <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
-                    </span>
-                    <span class="mx-2 self-end">•</span>
-                    <span class="flex items-end mr-2">
-                        <mat-icon class="mr-1">thumb_up</mat-icon>
-                        <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
-                        <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
-                    </span>
-                    <span class="mx-2 self-end">•</span>
-                    <span class="flex items-end mr-2">
-                        <mat-icon class="mr-1">chat_bubble</mat-icon>
-                        <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
-                        <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
-                    </span>
-                </div>
+                <ng-container [ngTemplateOutlet]="communityName"  [ngTemplateOutletContext]="{'data':{'showCompetency':false}}"></ng-container>
             </div>
             <div class="community-action flex gap-2 items-center ">
                 <div class="hidden md:block">
@@ -182,8 +104,7 @@
         <div class="grid grid-cols-1 px-4 md:px-0 md:grid-cols-12 gap-0 md:gap-4">
             <!-- Column 1 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
-                <!-- <d-v2-shortcuts [data]="shortCutData"></d-v2-shortcuts> -->
-                 <div class="hidden  md:block">
+                 <div class="hidden  md:block" *ngIf="loadedCommunitiesData">
                     <d-v2-similar-community-card (communityClick)="similarCommunity($event)"></d-v2-similar-community-card> 
                  </div>
             </div>
@@ -253,14 +174,16 @@
             <!-- Column 3 -->
             <div class=" rounded-lg col-span-1 md:col-span-3">
                 <div class="hidden  md:block">
-                <ng-container *ngIf="communityData?.communityGuideLines">
-                    <div class="mb-4">
-                        <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
-                    </div>
-                </ng-container>
-                <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [emitId]="true" (discussionId)="getDiscussionId($event)" [communityId]="communityId" [expandCard]="true" [showCommunity]="false"></d-v2-trending-discussions>
+                    <ng-container *ngIf="communityData?.communityGuideLines">
+                        <div class="mb-4">
+                            <d-v2-community-guidelines [communityGuidelines]="communityData?.communityGuideLines"></d-v2-community-guidelines>
+                        </div>
+                    </ng-container>
+                    <ng-container  *ngIf="loadedCommunitiesData">
+                        <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [emitId]="true" (discussionId)="getDiscussionId($event)" [communityId]="communityId" [expandCard]="true" [showCommunity]="false"></d-v2-trending-discussions>
+                    </ng-container>
                 </div>
-            </div>
+            </div>  
         </div>
     </div>
       
@@ -327,5 +250,53 @@
                 <d-v2-trending-discussions (discussionIdEmit)="trendingDiscussionIdEmit($event)" [communityId]="communityId" [expandCard]="true" [showCommunity]="false"></d-v2-trending-discussions>
             </div>
         </div>
+    </div>
+</ng-template>
+
+<ng-template #communityName let-data="data">
+    <div class="flex justify-between">
+        <h2 class="" (click)="toggleExpandedView()" >{{communityData?.communityName}}</h2>
+        <div class="community-action flex  gap-2 items-start ">
+            <div class="block md:hidden">
+                <div class="flex items-center " (click)="$event.stopPropagation()">
+                    <mat-icon class="cursor-pointer share-icon" (click)="enableShare = true; $event.stopPropagation()">share</mat-icon>
+                    <mat-icon   *ngIf="userJoinedCommunity" class=" cursor-pointer" [matMenuTriggerFor]="menu">more_vert</mat-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="community-metrix mt-2 gap-y-4 flex-wrap">
+        <span class="flex items-center mr-2">
+            <mat-icon class="mr-1">group</mat-icon>
+            <span class="mr-1">{{communityData?.countOfPeopleJoined | numberShortener}}</span> 
+            <span>{{ communityData?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
+        </span>
+        <span class="mx-2 self-end">•</span>
+        <span class="flex items-center mr-2">
+            <mat-icon class="mr-1">list_alt</mat-icon>
+            <span class="mr-1">{{ communityData?.countOfPostCreated | numberShortener}}</span> 
+            <span>{{ communityData?.countOfPostCreated | plural:'Post':'Posts' }}</span>
+        </span>
+        <span class="mx-2 self-end">•</span>
+        <span class="flex items-center mr-2">
+            <mat-icon class="mr-1">thumb_up</mat-icon>
+            <span class="mr-1">{{communityData?.countOfPeopleLiked| numberShortener}}</span> 
+            <span>{{ communityData?.countOfPeopleLiked | plural:'Like':'Likes' }}</span>
+        </span>
+        <span class="mx-2 self-end">•</span>
+        <span class="flex items-center mr-2">
+            <mat-icon class="mr-1">chat_bubble</mat-icon>
+            <span class="mr-1">{{communityData?.countOfAnswerPost | numberShortener}}</span> 
+            <span>{{ communityData?.countOfAnswerPost | plural:'Comment':'Comments' }}</span>
+        </span>
+        <ng-container *ngIf="data?.showCompetency">
+            <span class="mx-2 self-end">•</span>
+            <span class="flex items-center mr-2">
+                <mat-icon class="mr-1">menu_book</mat-icon>
+                <span class="mr-1">{{communityData?.competencies_v6?.length  || 0}}</span> 
+                <span>{{ 'Competencies' }}</span>
+            </span>
+        </ng-container>
+        
     </div>
 </ng-template>

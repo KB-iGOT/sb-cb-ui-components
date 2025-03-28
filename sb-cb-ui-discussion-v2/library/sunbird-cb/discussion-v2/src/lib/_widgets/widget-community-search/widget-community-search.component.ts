@@ -100,7 +100,7 @@ export class WidgetCommunitySearchComponent  implements OnInit{
    }
 
    async ngOnInit(){
-    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollData()
+    this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollDataId()
    }
 
    fetchCommunityList(facetsRender: boolean,searchText?: any, topicName?:any, sortData?: any,loadMoreClick?: boolean, filterApply?:any,factesRequest?:any) {

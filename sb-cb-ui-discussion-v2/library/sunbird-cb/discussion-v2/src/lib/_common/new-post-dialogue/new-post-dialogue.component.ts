@@ -322,7 +322,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.originalCommunities = await this.enrollSvc.getEnrollData()
+    debugger
+    this.originalCommunities = await this.enrollSvc.getEnrollDataId()
     this.filteredCommunities = [...this.originalCommunities]
     // Set initial user data
     this.postPreview.user = {
