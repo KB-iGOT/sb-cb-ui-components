@@ -82,7 +82,6 @@ export class UserEnrollCommunityService {
       communityDetails:[]
     } 
     return this.http.get<any>(`${API_END_POINTS.USER_ENROLLED_COMMUNITY_ID_LIST}`).toPromise().then((res: any) => {
-      debugger
       if(res && res.result && res.result.communityId && res.result.communityId.length) {
         // Create a mapping of IDs to names for quick lookup
         const idToNameMap = res.result.communityId.reduce((acc: any, item:any) => {

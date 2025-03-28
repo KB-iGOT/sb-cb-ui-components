@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
-import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 // tslint:disable-next-line
 import _ from 'lodash'
@@ -23,31 +22,24 @@ export class TrendingDiscussionsComponent implements OnInit {
  searchResults: any
  loadingPosts: boolean = true
  posts: any
- userJoinedCommunityObject: any = {}
   constructor(
     private discussV2Svc: DiscussionV2Service,
     private router: Router,
-    private userEnrollCommunitySvc: UserEnrollCommunityService
   ) { }
   async ngOnInit() {
     this.fetchPosts()
-    let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollDataId()
-    if(userEnrolledCommunityList.length) {
-      this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
-    }
   }
   fetchPosts() {
     this.loadingPosts = true
     const req = {
         "filterCriteriaMap": {
-          "type": "question",
-          isActive: true // this is to get only active posts, deleted posts won't be returned
+          "type": "question"
         },
         "requestedFields": [],
         "pageNumber": 0,
         "pageSize": 3,
         "orderBy": "answerPostCount",
-        "orderDirection": "desc",
+        "orderDirection": "DESC",
         "facets": []
     }
     if(this.communityId) {

@@ -66,11 +66,9 @@ export class PostCardComponent {
   }
 
   async ngOnInit() {
-    this.post.isReported = true
     this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
     this.replyDataCopy = [...this.replyData || [] ]
-    debugger
     let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollDataId()
     if(userEnrolledCommunityList.length) {
       this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
@@ -154,7 +152,7 @@ export class PostCardComponent {
       "pageNumber": this.answerPostPage,
       "pageSize": this.answerPostLimit,
       "orderBy": "createdOn",
-      "orderDirection": "ASC",
+      "orderDirection": "DESC",
       "facets": []
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
@@ -226,7 +224,6 @@ export class PostCardComponent {
   }
 
   likeUnlikeComment(post: any) {
-    post.isLiked = !post.isLiked
     this.likeUnlikeData.emit(post)
     // after emit change the status to locally update the color. otherwise emitted data will behave reverse
     // So its necessary to first emit the event and then change

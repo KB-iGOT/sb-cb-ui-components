@@ -46,7 +46,7 @@
            placeholder="Search and select community">
           <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" class="community-autocomplete">
             <ng-container *ngFor="let community of filteredCommunities">
-              <mat-option *ngIf="community?.status" [value]="community">
+              <mat-option  [value]="community">
                 {{community?.communityName}}
               </mat-option>
             </ng-container>
@@ -54,7 +54,7 @@
           <mat-error *ngIf="communityCtrl.invalid" class="custom-mat-error">Please select a valid community</mat-error>
         </mat-form-field>
       </div>
-      <ng-container *ngIf="!isGlobal && !data?.editMode">
+      <ng-container *ngIf="!isGlobal">
         <p class="mat-body-1"> Posting in community - <span class="mat-h3">{{data?.community?.communityName}}</span> </p>
       </ng-container>
 
