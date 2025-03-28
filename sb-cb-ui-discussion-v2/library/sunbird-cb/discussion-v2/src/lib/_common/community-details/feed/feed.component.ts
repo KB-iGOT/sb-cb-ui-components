@@ -144,7 +144,7 @@ export class FeedComponent implements OnInit, OnChanges{
         "pageNumber": pageReset? 0 : this.commentListOffSet,
         "pageSize": this.commentListLimit,
         "orderBy": "createdOn",
-        "orderDirection": "ASC",
+        "orderDirection": "DESC",
         "facets": []
       }
       if(searchString?.length) {

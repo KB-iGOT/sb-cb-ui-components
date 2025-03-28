@@ -9,8 +9,8 @@
                     <hr class="divider my-3 w-full" *ngIf="!isFirst" >
                     <div class="w-full" (click)="navigateToPost(discussion)">
                         <div class="community-name-wrapper inline-flex items-center max-w-full mb-3 cursor-pointer" *ngIf="showCommunity">
-                            <span class="whitespace-nowrap pl-3">Posting in</span> 
-                            <span class="community-name ml-1 pr-2">@{{userJoinedCommunityObject[discussion?.communityId]}}</span>
+                            <span class="whitespace-nowrap pl-3">Posted in</span> 
+                            <span class="community-name ml-1 pr-2">@{{discussion?.communityName}}</span>
                         </div>
                         <div class="trending-data margin-remove cursor-pointer" >
                             <div class="flex items-center justify-between mb-4 user-info w-full">
