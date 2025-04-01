@@ -19,28 +19,34 @@
 
         <div class="flex-1 post-container">
             <div class="mb-4" *ngIf="widgetData?.newPostSection?.show && showNewPost">
-                <d-v2-new-post [community]="community" [userJoinedCommunity]="true" [config]="widgetData?.newPostSection" [postsListconfig]="widgetData?.postsList" (newComment)="newCommentEvent($event)"
-                [type]="widgetData?.newPostSection?.type" [isGlobal]="true"></d-v2-new-post>
+                <d-v2-new-post [community]="community" [userJoinedCommunity]="true"
+                    [config]="widgetData?.newPostSection" [postsListconfig]="widgetData?.postsList"
+                    (newComment)="newCommentEvent($event)" [type]="widgetData?.newPostSection?.type"
+                    [isGlobal]="true"></d-v2-new-post>
             </div>
 
             <ng-container *ngIf="posts && posts.length && !loadingPosts;else noPostsSection;">
                 <div class="flex flex-col gap-4">
-                    <ng-container *ngFor="let post of posts" >
-                        <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="true" [hierarchyPath]="[post?.discussionId]" [id]="'post-' + post?.discussionId"
-                        [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts" [community]="community" (newComment)="newCommentEvent($event)" [parentPost]="post"
-                        (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)" [type]="widgetData?.newPostSection?.type" [showCommunity]="true"
-                        (communityClickEvent)="communityClick($event)"></d-v2-post-card>
+                    <ng-container *ngFor="let post of posts">
+                        <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="true"
+                            [hierarchyPath]="[post?.discussionId]" [id]="'post-' + post?.discussionId"
+                            [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts"
+                            [community]="community" (newComment)="newCommentEvent($event)" [parentPost]="post"
+                            (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)"
+                            [type]="widgetData?.newPostSection?.type" [showCommunity]="true"
+                            (communityClickEvent)="communityClick($event)"></d-v2-post-card>
                     </ng-container>
                     <ng-container *ngIf="searchResults?.totalCount > posts.length">
                         <div class="load-more-posts my-4">
-                            <button mat-flat-button color="primary" class="w-full " (click)="loadMoreComments()">Load
+                            <button mat-flat-button color="primary" class="w-full nodtranslate"
+                                (click)="loadMoreComments()">Load
                                 More</button>
                         </div>
                     </ng-container>
                 </div>
             </ng-container>
             <ng-container *ngIf="loadingPosts || loadingMore">
-                <ng-container *ngFor="let post of [1,2,3,4]" >
+                <ng-container *ngFor="let post of [1,2,3,4]">
                     <ng-container [ngTemplateOutlet]="postsSkeletonLoader"></ng-container>
                 </ng-container>
             </ng-container>
@@ -58,9 +64,9 @@
                     [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
                 <div class="flex flex-1 flex-col gap-2">
                     <d-v2-widget-skeleton-loader [width]="'50%'" [height]="'20px'"
-                    [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+                        [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
                     <d-v2-widget-skeleton-loader [width]="'40%'" [height]="'18px'"
-                    [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
+                        [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
                 </div>
                 <d-v2-widget-skeleton-loader [width]="'64px'" [height]="'20px'"
                     [bindingClass]="'flex rounded'"></d-v2-widget-skeleton-loader>
@@ -77,7 +83,7 @@
                 <d-v2-widget-skeleton-loader class=" mr-4" [width]="'64px'" [height]="'48px'"
                     [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
                 <d-v2-widget-skeleton-loader class=" mr-4" [width]="'64px'" [height]="'48px'"
-                [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
+                    [bindingClass]="'flex rounded-full'"></d-v2-widget-skeleton-loader>
             </div>
         </div>
     </div>
@@ -85,7 +91,7 @@
 
 <ng-template #noPostsSection>
     <ng-container *ngIf="!loadingPosts && !loadingMore">
-        <div class="flex flex-1 items-center justify-center ">
+        <div class="flex flex-1 items-center justify-center nodtranslate">
             {{widgetData?.postsList?.noPostsSection?.text}}
         </div>
     </ng-container>

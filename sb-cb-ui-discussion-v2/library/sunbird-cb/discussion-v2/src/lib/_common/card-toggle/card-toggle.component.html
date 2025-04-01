@@ -7,10 +7,10 @@
             <ng-content select="[contentBodyBlock]"></ng-content>
         </ng-container>
         <div class="flex items-center justify-end" [ngClass]="{'pt-2': toggleViewBoolean}">
-            <a (click)="toggleViewMethod()" class="toggle-btn">
+            <a (click)="toggleViewMethod()" class="toggle-btn nodtranslate">
                 {{toggleViewBoolean ? 'Collapse' : 'View'}}
             </a>
         </div>
     </mat-card-content>
-      
+
 </mat-card>
