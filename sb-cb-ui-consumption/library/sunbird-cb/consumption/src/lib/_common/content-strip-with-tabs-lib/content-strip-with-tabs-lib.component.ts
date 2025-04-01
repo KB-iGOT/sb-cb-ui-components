@@ -103,6 +103,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   changeEventSubscription: Subscription | null = null;
   defaultMaxWidgets = 12;
   todaysEvents: any = [];
+  userEventsAll: any = undefined;
+  currentTab: any
+  moveToNextTab = false
+  currentTabIndex = 0
 
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
@@ -1100,6 +1104,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   public tabClicked(tabEvent: any, stripMap: IStripUnitContentData, stripKey: string) {
+    this.currentTabIndex = tabEvent
     if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
       stripMap.tabs[tabEvent].fetchTabStatus = 'inprogress';
       stripMap.tabs[tabEvent].tabLoading = true;
@@ -1121,6 +1126,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     //   }
     // );
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEvent];
+    this.currentTab = JSON.parse(JSON.stringify(currentTabFromMap));
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
@@ -1384,7 +1390,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         returnValue = data[0].widgets && data[0].widgets.length > 0 ? 1 : 0;
       }
     }
-    return returnValue;
+    return key === 'myEvents' ? this.currentTabIndex : returnValue;
   }
 
   translateLabels(label: string, type: any) {
@@ -2220,6 +2226,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         if (firstTab.requestRequired) {
             const allTabs = strip.tabs;
             const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
+            this.currentTab = currentTabFromMap
+            this.moveToNextTab = true
             this.getMyEventsByTabs(strip, 0, currentTabFromMap, calculateParentStatus);
         } 
         
@@ -2229,55 +2237,102 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   async getMyEventsByTabs(strip, tabIndex, currentTabData, calculateParentStatus) {
     let apiUrl = ''
     let postReqestData: any = {}
-    if(currentTabData && currentTabData.request &&  currentTabData.request.apiUrl ) {
-      apiUrl = this.getFullUrl(currentTabData.request.apiUrl, this.getUserId )
-    } 
-    if(currentTabData && currentTabData.request &&  currentTabData.request.myEvents ) {
-      postReqestData = this.postMethodFilters(currentTabData.request.myEvents )
-    } 
-  try {
-          const response = await this.postRequestMethod(strip, postReqestData, apiUrl, calculateParentStatus);
-          if (_.get(response, 'results.result.events')) {
-            if (response.results.result.events.length) {
-              const widgets = this.transformEventsV2ToWidgets(response.results.result.events, strip);
-              let tabResults: any[] = [];
-              if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-                const allTabs = this.stripsResultDataMap[strip.key].tabs;
-                if (allTabs && allTabs.length && allTabs[tabIndex]) {
-                  allTabs[tabIndex] = {
-                    ...allTabs[tabIndex],
-                    widgets,
-                    fetchTabStatus: 'done',
-                  };
-                  tabResults = allTabs;
-                }
-              }
-              strip.loader = false
-              this.processStrip(
-                strip,
-                widgets,
-                'done',
-                calculateParentStatus,
-                response.viewMoreUrl,
-                tabResults // tabResults as widgets
-              );
-            } else {
+    if (currentTabData && currentTabData.request && currentTabData.request.apiUrl) {
+      apiUrl = this.getFullUrl(currentTabData.request.apiUrl, this.getUserId)
+    }
+    if (currentTabData && currentTabData.request && currentTabData.request.myEvents) {
+      postReqestData = this.postMethodFilters(currentTabData.request.myEvents)
+    }
+    try {
+      let apiError = false
+      if (this.userEventsAll === undefined) {
+        const response = await this.postRequestMethod(strip, postReqestData, apiUrl, calculateParentStatus);
+        this.userEventsAll = _.get(response, 'results.result.events', [])
+        apiError = _.get(response, 'results.result.events') ? false : true
+      }
+
+      if (apiError === false) {
+        if (this.userEventsAll.length || this.moveToNextTab) {
+          const currentEvents = this.getCurrentEvents()
+          const key: string = this.stripsKeyOrder[0]
+            const stripMap: IStripUnitContentData = this.stripsResultDataMap[key]
+          if (this.moveToNextTab && (!currentEvents || currentEvents.length === 0) && this.currentTabIndex + 1 < stripMap.tabs.length) {
+            this.tabClicked(this.currentTabIndex + 1, stripMap, key)
+          } else {
+            this.moveToNextTab = false
+            const widgets = this.transformEventsV2ToWidgets(currentEvents, strip);
+            let tabResults: any[] = [];
+            if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
               const allTabs = this.stripsResultDataMap[strip.key].tabs;
               if (allTabs && allTabs.length && allTabs[tabIndex]) {
-                allTabs[tabIndex]['fetchTabStatus'] = 'done'
+                allTabs[tabIndex] = {
+                  ...allTabs[tabIndex],
+                  widgets,
+                  fetchTabStatus: 'done',
+                };
+                tabResults = allTabs;
               }
-              this.processStrip(strip, [], 'done', calculateParentStatus, null);
-              this.emptyResponse.emit(true)
             }
-
-          } else {
-            this.processStrip(strip, [], 'error', calculateParentStatus, null);
-            this.emptyResponse.emit(true)
+            strip.loader = false
+            this.processStrip(
+              strip,
+              widgets,
+              'done',
+              calculateParentStatus,
+              null,
+              tabResults // tabResults as widgets
+            );
           }
-        } catch (error) {
-          // Handle errors
-          // console.error('Error:', error);
+        } else {
+          const allTabs = this.stripsResultDataMap[strip.key].tabs;
+          if (allTabs && allTabs.length && allTabs[tabIndex]) {
+            allTabs[tabIndex]['fetchTabStatus'] = 'done'
+          }
+          this.processStrip(strip, [], 'done', calculateParentStatus, null);
+          this.emptyResponse.emit(true)
         }
+
+      } else {
+        this.processStrip(strip, [], 'error', calculateParentStatus, null);
+        this.emptyResponse.emit(true)
+      }
+    } catch (error) {
+      // Handle errors
+      // console.error('Error:', error);
+    }
+  }
+
+  getCurrentEvents() {
+    const events = []
+    if(this.userEventsAll && this.userEventsAll.length && this.currentTab && this.currentTab.label) {
+      this.userEventsAll.forEach((event: any) => {
+        const eventDetails = event.event
+        if(_.get(eventDetails, 'startDate')) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const eventDate = new Date(_.get(eventDetails, 'startDate'));
+          eventDate.setHours(0, 0, 0, 0);
+          switch (this.currentTab.label.toLowerCase()) {
+            case 'today':
+              if(today.getTime() === eventDate.getTime()) {
+                events.push(event)
+              }
+              break
+            case 'upcoming':
+              if(today.getTime() < eventDate.getTime()) {
+                events.push(event)
+              }
+              break
+            case 'past':
+              if(today.getTime() > eventDate.getTime()) {
+                events.push(event)
+              }
+              break
+          }
+        }
+      })
+    }
+    return events
   }
 
   get getUserId(){

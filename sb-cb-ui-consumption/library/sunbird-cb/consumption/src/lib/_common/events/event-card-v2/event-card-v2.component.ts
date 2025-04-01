@@ -52,12 +52,26 @@ export class EventCardV2Component extends WidgetBaseComponent
   ngOnInit() {
     // this.widgetInstanceId=his.id
     this.eventDetails = _.get(this.widgetData, 'content.event', _.get(this.widgetData, 'content', {}))
+    this.eventDetails['showLive'] = this.isLiveEvent(this.eventDetails)
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || ''
       this.sourceLogos = instanceConfig.sources
       this.defaultSLogo = instanceConfig.logos.defaultSourceLogo || ''
     }
+  }
+
+  isLiveEvent(event: any) {
+    if (event.startDate && event.endDate && event.startTime && event.endTime) {
+      // Conver current time into milliseconds
+      let currentTime = new Date().getTime() / 1000
+      // Combining date and time for start event
+      let evenStarttDate = new Date(`${event.startDate} ${event.startTime}`).getTime() / 1000
+      // Combining date and time for end event
+      let eventEndDate = new Date(`${event.endDate} ${event.endTime}`).getTime() / 1000
+      return (currentTime <= eventEndDate && currentTime >= evenStarttDate)
+    }
+    return false
   }
 
   getTime(minutes: number): string {
