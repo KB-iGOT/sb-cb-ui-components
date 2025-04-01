@@ -60,7 +60,7 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
     this.selectedTab = 0;
     this.selectedTabId = 'feeds'
     let data = await this.userEnrollSvc.getEnrollDataId()
-    this.userCommunityList = this.userEnrollSvc.userEnrolledCommunityList
+    this.userCommunityList = data
     console.log(data)
     this.loadedData = true
   }
