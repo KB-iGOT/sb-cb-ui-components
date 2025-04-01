@@ -20,7 +20,7 @@
           [style.minHeight]="isMobile? styleData?.responsive?.customMinHeight : styleData?.customMinHeight"
           [src]="slide?.posterImageUrl" class=" banner-image object-cover" (error)="changeToDefaultImg($event)" />
         <div class="image-info">
-          <p>{{slide?.name}}</p>
+          <p class="nodtranslate">{{slide?.name}}</p>
         </div>
       </div>
     </a>
