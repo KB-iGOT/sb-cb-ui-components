@@ -9,10 +9,10 @@
 'circle-xl-s' : size=== 'xl-s',
 'circle-discussion-s' : size=== 'discussion-s',
 'circle-xxl-s': size=== 'xxl-s'}" [ngStyle]="{'background-color':  color ? color : circleColor }">
-  <img *ngIf="!showInitials" src="{{photoUrl}}" [alt]="photoUrl? '' :(name || initials || size || random)" (error)="changeToDefaultImg($event)" 
-  [ngClass]="customeClass">
+  <img *ngIf="!showInitials" src="{{photoUrl}}" [alt]="photoUrl? '' :(name || initials || size || random)"
+    (error)="changeToDefaultImg($event)" [ngClass]="customeClass">
 
-  <div *ngIf="showInitials" class="initials" i18n-aria-label>
+  <div *ngIf="showInitials" class="initials nodtranslate" i18n-aria-label>
     {{ initials }}
   </div>
 
