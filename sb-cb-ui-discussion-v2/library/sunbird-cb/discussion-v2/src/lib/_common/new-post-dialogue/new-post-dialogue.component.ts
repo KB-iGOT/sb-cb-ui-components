@@ -91,7 +91,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   private readonly MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
   private readonly MAX_DOC_SIZE = 50 * 1024 * 1024;   // 50MB in bytes
   public readonly MAX_TOTAL_FILES = 10;
-  communityInfoText = "Select a community where your post will be visible. Only communities you have joined will appear in the dropdown."
+  communityInfoText = "Select a community you’ve joined to start posting. You can only post in communities where you're a member."
   isGlobal = false
 
   communityCtrl = new FormControl('', [Validators.required, this.validCommunityValidator()]);

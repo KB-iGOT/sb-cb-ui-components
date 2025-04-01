@@ -27,14 +27,16 @@
             <p class="owner-name margin-remove" dV2SingleLineTooltip>By {{community?.orgName || orgDetails[community?.orgId]?.orgname}}</p>
         </div>
         <div class="flex items-center justify-start community-action mt-4" >
-            <ng-container *ngIf="!checkCommunityPresence(community?.communityId)">
+            <button class="btn mat-subheading-2  rounded-full cursor-pointer margin-remove w-full h-8 un-join-btn"
+            >View Community</button>
+            <!-- <ng-container *ngIf="!checkCommunityPresence(community?.communityId)">
                 <button class="btn mat-subheading-2 btn rounded-full text-white cursor-pointer margin-remove w-full h-8"
                 (click)="joinCommunity(community); $event.stopPropagation()">Join</button>
             </ng-container>
             <ng-container *ngIf="checkCommunityPresence(community?.communityId)">
                 <button class="btn mat-subheading-2  rounded-full cursor-pointer margin-remove w-full h-8 un-join-btn"
                 (click)="unJoinCommunity(community); $event.stopPropagation()">Leave</button>
-            </ng-container>
+            </ng-container> -->
         </div>
     </div>
 </div>

@@ -8,6 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 // tslint:disable-next-line
 import _ from 'lodash'
 import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
+import { CommunityGuideLinesComponent } from '../../_shared/community-guide-lines/community-guide-lines.component';
 
 @Component({
   selector: 'd-v2-widget-community-home',
@@ -424,5 +425,22 @@ toggleExpandedView() {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 1000);
+  }
+
+  joinCommunityPopUp() {
+    let dialogRef = this.dialog.open(CommunityGuideLinesComponent, {
+      data: {
+        community: this.communityData,
+      },
+      width: window.innerWidth <= 768 ? '100%' : '600px',
+      minWidth: window.innerWidth <= 768 ? '100%' : '400px',
+      maxWidth: window.innerWidth <= 768 ? '100vw' : '40vw'
+    })
+    dialogRef.afterClosed().subscribe((result: any) => {
+      console.log(result)
+      if(result) {
+        this.joinCommunity()
+      }
+    })
   }
 }
