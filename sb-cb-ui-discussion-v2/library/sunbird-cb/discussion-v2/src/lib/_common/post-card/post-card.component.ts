@@ -137,7 +137,6 @@ export class PostCardComponent {
 
   getListOfRepliesMore() {
     this.loadingMore = true
-    debugger
     // let start: number = this.answerPostCount - this.answerPostLimit
     // let reveseReplayDataCopy = [...this.replyDataCopy]
     // reveseReplayDataCopy.reverse()
