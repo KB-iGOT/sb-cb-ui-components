@@ -6,7 +6,7 @@
     </ng-container>
     <ng-container *ngIf="post?.communityId && showCommunity">
         <div class="community-name-wrapper inline-flex items-center max-w-full mb-3 cursor-pointer" (click)="communityClick(post.communityId)">
-            <span class="whitespace-nowrap pl-3 flex-1">Posting in</span> 
+            <span class="whitespace-nowrap pl-3 flex-1">Posted in</span> 
             <span class="community-name ml-1 pr-2">@{{userJoinedCommunityObject[post?.communityId]}}</span>
         </div>
     </ng-container>
