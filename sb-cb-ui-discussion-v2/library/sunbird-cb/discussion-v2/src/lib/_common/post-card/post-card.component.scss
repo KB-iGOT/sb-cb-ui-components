@@ -7,6 +7,7 @@ $green : #1D8923;
     border: 1px solid #00000033;
 }
 
+
 .reply-card {
     background-color: #0000FF0A;
     border-radius: 0;
@@ -36,6 +37,7 @@ $green : #1D8923;
     height: 40px;
     border: 1px solid #00000014;
     padding: 0 16px;
+    color: #666;
     .like-icon {
         color: #666666;
         &.user-liked {
@@ -76,6 +78,11 @@ $green : #1D8923;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     word-break: break-word;
+}
+
+
+::ng-deep .comment-txt.description p{
+    margin: 0 0 4px !important;
 }
 
 .expand {

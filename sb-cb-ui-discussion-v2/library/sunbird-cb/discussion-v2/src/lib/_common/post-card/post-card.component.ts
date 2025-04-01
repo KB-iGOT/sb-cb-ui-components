@@ -79,6 +79,7 @@ export class PostCardComponent {
     this.data.replyToggle = !this.data.replyToggle
     if (this.data.replyToggle && this.replyData && this.replyData.length) {
       this.loading = true
+      this.answerPostPage = 0
       this.getListOfReplies()
     }
   }
@@ -136,6 +137,7 @@ export class PostCardComponent {
 
   getListOfRepliesMore() {
     this.loadingMore = true
+    debugger
     // let start: number = this.answerPostCount - this.answerPostLimit
     // let reveseReplayDataCopy = [...this.replyDataCopy]
     // reveseReplayDataCopy.reverse()
@@ -428,6 +430,7 @@ export class PostCardComponent {
       this.replyDataCopy.push(event.result.discussionId)
       this.replyDataCopy = this.replyDataCopy.slice()
       this.ref.markForCheck()
+      this.answerPostPage = 0
       this.getListOfReplies()
       if(level) {
         this.newComment.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
