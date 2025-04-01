@@ -43,7 +43,7 @@
         </label>
         <mat-form-field appearance="outline" class="flex-1 custom-mat-form-field">
           <input type="text" matInput [formControl]="communityCtrl" [matAutocomplete]="auto"
-            placeholder="Search and select community">
+            placeholder="Search and select community" class="nodtranslate">
           <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" class="community-autocomplete">
             <ng-container *ngFor="let community of filteredCommunities">
               <mat-option [value]="community">
