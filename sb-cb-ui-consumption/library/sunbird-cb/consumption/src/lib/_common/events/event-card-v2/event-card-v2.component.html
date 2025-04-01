@@ -40,8 +40,10 @@
                   <span class="resource-text">{{eventDetails?.resourceType}}
                   </span>
                 </div>
-                <div *ngIf="eventDetails?.showLive" class="live blink">(( . )) {{eventDetails?.status}}
-                </div>
+                <div *ngIf="eventDetails?.showLive" class="flex gap-1 live blink">
+                  <img class='img' src="/assets/icons/live.svg" alt="">
+                  <span>Live</span>
+              </div>
               </div>
               <div class="event-title capitalize">{{eventDetails?.name}}</div>
               <div class="event-description">{{eventDetails?.description}}</div>
