@@ -75,9 +75,9 @@
             </div>
         </div>
         <div class="more-or-less" *ngIf="comment?.commentData?.comment.length > 152">
-            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)"
+            <div class="cursor-pointer nodtranslate" (click)="viewMoreOrLess(comment?.commentData)"
                 *ngIf="!comment?.commentData?.expanded">View more</div>
-            <div class="cursor-pointer" (click)="viewMoreOrLess(comment?.commentData)"
+            <div class="cursor-pointer nodtranslate" (click)="viewMoreOrLess(comment?.commentData)"
                 *ngIf="comment?.commentData?.expanded">View less</div>
         </div>
     </div>
@@ -107,7 +107,7 @@
                     <mat-icon class="icon like-icon mr-2 nodtranslate" aria-hidden="false" i18n-aria-label
                         [ngClass]="{'user-liked': userLikedComments?.includes(comment?.commentId)}"
                         aria-label="Fail">{{cardConfig?.actions?.like?.icon}}</mat-icon>
-                    <span class="" *ngIf="cardConfig?.actions?.like?.showCount">
+                    <span class="nodtranslate" *ngIf="cardConfig?.actions?.like?.showCount">
                         {{(comment?.commentData?.like && comment?.commentData?.like) || 0}}
                     </span>
                 </div>
@@ -133,7 +133,7 @@
                     <mat-icon class="icon mr-2 reply-icon nodtranslate" aria-hidden="false" color="#1B4CA1"
                         i18n-aria-label *ngIf="cardConfig?.actions?.comments?.iconDisplay"
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
-                    <span class="">
+                    <span class="nodtranslate">
                         Reply
                     </span>
                 </div>
@@ -162,7 +162,7 @@
 
                 <ng-container *ngIf="replayCommentsCount < replyDataCopy?.length && !loading">
                     <div class="load-more-comments  my-4">
-                        <button mat-flat-button class="w-full underline" (click)="loadMoreComments()">Load
+                        <button mat-flat-button class="w-full underline nodtranslate" (click)="loadMoreComments()">Load
                             More</button>
                     </div>
                 </ng-container>
@@ -187,7 +187,7 @@
 
 <ng-template #noReplies>
     <ng-container *ngIf="!loading">
-        <div class="flex flex-1 items-center justify-center  justify-center">
+        <div class="flex flex-1 items-center justify-center  justify-center nodtranslate">
             No comments found!
         </div>
     </ng-container>
@@ -210,16 +210,16 @@
     <button mat-menu-item (click)="openFlagDialogue(comment)"
         *ngIf="comment?.commentData?.commentSource?.userId !== loogedInUserProfile?.userId">
         <mat-icon [ngStyle]="{'color': '#D13924'}">flag</mat-icon>
-        <span>Flag</span>
+        <span class="nodtranslate">Flag</span>
     </button>
     <button mat-menu-item (click)="toggelEdit(comment?.commentData)"
         *ngIf="comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId">
         <mat-icon [ngStyle]="{'color': '#1B4CA1'}">edit</mat-icon>
-        <span>Edit</span>
+        <span class="nodtranslate">Edit</span>
     </button>
     <button mat-menu-item (click)="openDeleteDialogue(comment)"
         *ngIf="comment?.commentData?.commentSource?.userId === loogedInUserProfile?.userId">
         <mat-icon class="nodtranslate" [ngStyle]="{'color': '#FF8268'}">delete</mat-icon>
-        <span>Delete</span>
+        <span class="nodtranslate">Delete</span>
     </button>
 </mat-menu>

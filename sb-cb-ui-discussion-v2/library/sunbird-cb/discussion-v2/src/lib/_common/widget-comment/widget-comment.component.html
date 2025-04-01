@@ -1,7 +1,7 @@
 <div class="w-full mb-4">
     <div class="flex flex-col ratings-div" id="ratingsDiv">
         <div class="mb-1" *ngIf="widgetData?.newCommentSection?.show">
-            <d-v2-new-comment [config]="widgetData?.newCommentSection"  [hierarchyPath]="getHierarchyPath"
+            <d-v2-new-comment [config]="widgetData?.newCommentSection" [hierarchyPath]="getHierarchyPath"
                 (newComment)="refreshComments($event)"></d-v2-new-comment>
         </div>
         <ng-container
@@ -9,10 +9,11 @@
             <ng-container *ngFor="let item of commentData?.commentTree?.commentTreeData?.comments">
                 <ng-container *ngIf="isCommentPresent(item.commentId)">
                     <div class="w-full mt-4">
-                        <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType" [commentUsersData]="commentUsersData"
-                            [cardConfig]="widgetData?.commentsList" [comment]="getComment(item)"
-                            [replyData]="getReplies(item)" [hierarchyPath]="getHierarchyPath"
-                            (newReply)="updateRepliesData($event)" [userLikedComments]="userLikedComments"
+                        <d-v2-comment-card [cardType]="widgetData?.commentsList?.cardType"
+                            [commentUsersData]="commentUsersData" [cardConfig]="widgetData?.commentsList"
+                            [comment]="getComment(item)" [replyData]="getReplies(item)"
+                            [hierarchyPath]="getHierarchyPath" (newReply)="updateRepliesData($event)"
+                            [userLikedComments]="userLikedComments"
                             (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </div>
 
@@ -43,7 +44,7 @@
 
 <ng-template #noCommentsSection>
     <ng-container *ngIf="!loading && !loadingMore">
-        <div class="flex flex-1 items-center justify-center ">
+        <div class="flex flex-1 items-center justify-center nodtranslate">
             {{widgetData?.commentsList?.noCommentsSection?.text}}
         </div>
     </ng-container>
