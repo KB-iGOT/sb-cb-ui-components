@@ -212,3 +212,8 @@ $text-primary: #1B4CA1;
     display: none;
   }
   
+
+.hoverColor:hover {
+    color: #1b4ca1;
+    transform: all .25 ease-in;
+}
