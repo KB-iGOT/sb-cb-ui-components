@@ -12,6 +12,8 @@ $banner-min-height: 243px;
   margin: auto;
   // border-radius: 12px;
   padding-bottom: 40px;
+  overflow: hidden;
+  contain: content;
   &.inline-meta{
     padding-bottom: 0 !important;
   }

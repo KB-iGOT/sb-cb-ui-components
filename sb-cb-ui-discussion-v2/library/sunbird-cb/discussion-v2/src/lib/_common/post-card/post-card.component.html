@@ -134,14 +134,14 @@
             </ng-container>
             <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType !== 'reply'">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="expandReplyComment()">
-                    <mat-icon *ngIf="!data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
+                    <mat-icon *ngIf="!data.replyToggle" class="icon mr-1" aria-hidden="false" i18n-aria-label
                         aria-label="Dropdown-open">arrow_drop_down</mat-icon>
-                    <mat-icon *ngIf="data.replyToggle" class="icon mr-2" aria-hidden="false" i18n-aria-label
+                    <mat-icon *ngIf="data.replyToggle" class="icon mr-1" aria-hidden="false" i18n-aria-label
                         aria-label="Dropdown-close">arrow_drop_up</mat-icon>
                     <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
                         *ngIf="cardConfig?.actions?.comments?.show"
                         aria-label="Fail">{{cardConfig?.actions?.comments?.icon}}</mat-icon>
-                    <span class="nodtranslate" *ngIf="cardConfig?.actions?.comments?.showCount">
+                    <span class="nodtranslate mr-1 mat-body-1 commentCount" *ngIf="cardConfig?.actions?.comments?.showCount">
                         ({{fetchedSearchData?.totalCount ||  (replyDataCopy?.length) || 0}})
                     </span>
                 </div>
