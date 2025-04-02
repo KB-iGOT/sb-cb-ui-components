@@ -34,7 +34,7 @@ interface IStripUnitContentData {
   disableTranslate: boolean;
   widgets?: NsWidgetResolver.IRenderConfigWithAnyData[];
   stripTitle: string;
-  titleClass?:  string;
+  titleClass?: string;
   stripTitleLink?: {
     link: {
       queryParams: string
@@ -138,18 +138,18 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     // const url = window.location.href
     this.initData();
     this.contentSvc.telemetryData$.subscribe((data: any) => {
-      if(
+      if (
         this.widgetData.strips && this.widgetData.strips[0] &&
         this.widgetData.strips[0]?.key !== 'cbpPlan' &&
         this.widgetData.strips[0]?.key !== 'forYou' &&
         this.widgetData.strips[0]?.key !== 'continueLearning'
-         && this.widgetData.strips[0]?.key === data.typeOfTelemetry 
+        && this.widgetData.strips[0]?.key === data.typeOfTelemetry
       ) {
         this.telemtryResponse.emit(data)
       }
     })
     this.contentSvc.telemetryEventData$.subscribe((data: any) => {
-      if(_.get(this.widgetData, 'strips[0].key') === _.get(data, 'context.pageSection')) {
+      if (_.get(this.widgetData, 'strips[0].key') === _.get(data, 'context.pageSection')) {
         this.telemtryResponse.emit(data)
       }
     })
@@ -345,16 +345,16 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
 
     }
-    if(filters.endDate && filters.endDate['<='].indexOf('<today>') >= 0) {
+    if (filters.endDate && filters.endDate['<='].indexOf('<today>') >= 0) {
       filters.endDate['<='] = this.todayDate
     }
-    if(filters.endDate && filters.endDate['<'].indexOf('<today>') >= 0) {
+    if (filters.endDate && filters.endDate['<'].indexOf('<today>') >= 0) {
       filters.endDate['<'] = this.todayDate
     }
-    if(filters.startDate && filters.startDate['>='].indexOf('<today>') >= 0) {
+    if (filters.startDate && filters.startDate['>='].indexOf('<today>') >= 0) {
       filters.startDate['>='] = this.todayDate
     }
-    if(filters.startDate && filters.startDate['>'].indexOf('<today>') >= 0) {
+    if (filters.startDate && filters.startDate['>'].indexOf('<today>') >= 0) {
       filters.startDate['>'] = this.todayDate
     }
     return filters;
@@ -376,23 +376,23 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     // setting initial values
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
-    if(strip.request.myEvents) {
+    if (strip.request.myEvents) {
       this.fetchMyEventsData(strip, calculateParentStatus)
     }
-    if(_.get(strip, 'request.fetchData', '') === 'events') {
+    if (_.get(strip, 'request.fetchData', '') === 'events') {
       this.fetchFromSearchV6Events(strip, calculateParentStatus)
     } else {
       this.processStrip(strip, [], 'fetching', false, null);
-    this.fetchFromEnrollmentList(strip, calculateParentStatus);
-    this.fetchFromSearchV6(strip, calculateParentStatus);
-    this.fetchFromTrendingContent(strip, calculateParentStatus);
-    this.fetchAllCbpPlans(strip, calculateParentStatus);
-    this.fetchAllTopContent(strip, calculateParentStatus);
-    this.fetchAllFeaturedContent(strip, calculateParentStatus);
-    this.fetchAllBookMarkData(strip, calculateParentStatus);
-    this.fetchAllPlaylistSearch(strip, calculateParentStatus);
-    this.fetchPlaylistReadData(strip, calculateParentStatus);
-    this.fetchCiosContentData(strip, calculateParentStatus);
+      this.fetchFromEnrollmentList(strip, calculateParentStatus);
+      this.fetchFromSearchV6(strip, calculateParentStatus);
+      this.fetchFromTrendingContent(strip, calculateParentStatus);
+      this.fetchAllCbpPlans(strip, calculateParentStatus);
+      this.fetchAllTopContent(strip, calculateParentStatus);
+      this.fetchAllFeaturedContent(strip, calculateParentStatus);
+      this.fetchAllBookMarkData(strip, calculateParentStatus);
+      this.fetchAllPlaylistSearch(strip, calculateParentStatus);
+      this.fetchPlaylistReadData(strip, calculateParentStatus);
+      this.fetchCiosContentData(strip, calculateParentStatus);
 
     }
 
@@ -417,32 +417,32 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       // tslint:disable-next-line: deprecation
       this.userSvc.fetchUserBatchList(userId, queryParams).subscribe(
         (result: any) => {
-          this.userSvc.fetchExtEnrollData().subscribe((res: any)=> {
-            if(res && res.result && res.result.courses && res.result.courses.length){
-                let enrolledCourses = result && result.courses;
-                let enrolledExtCourses = res.result && res.result.courses;
-                const courses = [...enrolledExtCourses,...enrolledCourses]
-                this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
-          } else {
+          this.userSvc.fetchExtEnrollData().subscribe((res: any) => {
+            if (res && res.result && res.result.courses && res.result.courses.length) {
+              let enrolledCourses = result && result.courses;
+              let enrolledExtCourses = res.result && res.result.courses;
+              const courses = [...enrolledExtCourses, ...enrolledCourses]
+              this.formatEnrollmentData(strip, courses, content, contentNew, tabResults, calculateParentStatus)
+            } else {
+              let enrolledCourses = result && result.courses;
+              const courses = [...enrolledCourses]
+              this.formatEnrollmentData(strip, courses, content, contentNew, tabResults, calculateParentStatus)
+            }
+          }, (_err: any) => {
             let enrolledCourses = result && result.courses;
             const courses = [...enrolledCourses]
-            this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
-          }
-        },(_err: any)=>{
-          let enrolledCourses = result && result.courses;
-          const courses = [...enrolledCourses]
-          this.formatEnrollmentData(strip, courses,content, contentNew ,tabResults,calculateParentStatus)
-        })
+            this.formatEnrollmentData(strip, courses, content, contentNew, tabResults, calculateParentStatus)
+          })
         },
-        (_err:any) => {
+        (_err: any) => {
           this.processStrip(strip, [], 'error', calculateParentStatus, null);
         }
-        
+
       );
     }
   }
 
-  formatEnrollmentData(strip: any, courses: any,content: any, contentNew: any ,tabResults: any, calculateParentStatus: any){
+  formatEnrollmentData(strip: any, courses: any, content: any, contentNew: any, tabResults: any, calculateParentStatus: any) {
     const showViewMore = Boolean(
       courses.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
     );
@@ -547,21 +547,21 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   getInprogressAndCompleted(array: NsContent.IContent[],
-                            customFilter: any,
-                            strip: NsContentStripWithTabs.IContentStripUnit) {
-                              const inprogress: any[] = []
+    customFilter: any,
+    strip: NsContentStripWithTabs.IContentStripUnit) {
+    const inprogress: any[] = []
     const completed: any[] = []
     // array.forEach((e: any, idx: number, arr: any[]) => (customFilter(e, idx, arr) ? inprogress : completed).push(e))
     array.forEach((e, idx, arr) => {
-    const status = e.status ? (e.status as string).toLowerCase() : ''
-    const statusRetired = status === 'retired'
-    if (customFilter(e, idx, arr)) {
-    if (!statusRetired) {
-      inprogress.push(e)
-    }
-   } else {
-    completed.push(e)
-   }
+      const status = e.status ? (e.status as string).toLowerCase() : ''
+      const statusRetired = status === 'retired'
+      if (customFilter(e, idx, arr)) {
+        if (!statusRetired) {
+          inprogress.push(e)
+        }
+      } else {
+        completed.push(e)
+      }
     })
     // Sort the completed array with 'Live' status first and 'Retired' status second
     completed.sort((a: any, b: any) => {
@@ -628,15 +628,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             // console.log('calling  after-- ')
             if (response.results.result.content) {
               if (strip.key === 'scheduledAssessment') {
-              
+
                 let result = response.results.result.content.map(a => a.identifier);
-                
+
                 let request = {
                   "request": {
-                      "courseId": result
+                    "courseId": result
                   }
                 }
-                const responseData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+                const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
                   const enrollData: any = {}
                   if (res && res.result && res.result.courses && res.result.courses.length) {
                     res.result.courses.forEach((data: any) => {
@@ -685,25 +685,25 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     }
   }
 
-  checkInvitOnlyAssessments(content: any, strip: any, calculateParentStatus: any, viewMoreUrl: any, enrollmentData:any) {
+  checkInvitOnlyAssessments(content: any, strip: any, calculateParentStatus: any, viewMoreUrl: any, enrollmentData: any) {
     if (Object.keys(enrollmentData).length) {
       enrollmentData = enrollmentData
       let filteredArray: any = []
       let now = new Date().getTime()
       content.forEach((data: any) => {
         if (enrollmentData[data.identifier]) {
-          if(enrollmentData[data.identifier].status !== 2 && enrollmentData[data.identifier].batch) {
+          if (enrollmentData[data.identifier].status !== 2 && enrollmentData[data.identifier].batch) {
             const enrollData = enrollmentData[data.identifier].batch
-            let endDate:any = new Date(enrollData.endDate).getTime()
+            let endDate: any = new Date(enrollData.endDate).getTime()
             // let endDate:any = '2024-07-7T00:00:00.000Z'
             let timeDuration = endDate - now
-            if(timeDuration > 0 ) {
+            if (timeDuration > 0) {
               data['batch'] = enrollmentData[data.identifier].batch
               data['completionPercentage'] = enrollmentData[data.identifier].completionPercentage
               filteredArray.push(data)
             }
           }
-          
+
         }
       })
       filteredArray = filteredArray.sort((a: any, b: any) => {
@@ -721,7 +721,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     } else {
       this.processStrip(
         strip,
-       [],
+        [],
         'done',
         calculateParentStatus,
         viewMoreUrl,
@@ -1148,7 +1148,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEvent, currentTabFromMap, true);
         } else if (currentTabFromMap.request.ciosContent) {
           this.getTabDataByCiosSearch(currentStrip, tabEvent, currentTabFromMap, true)
-        } else if(currentTabFromMap.request.myEvents) {
+        } else if (currentTabFromMap.request.myEvents) {
           this.getMyEventsByTabs(currentStrip, tabEvent, currentTabFromMap, false)
         }
         if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
@@ -1510,7 +1510,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       currentTab.request.topContent &&
       currentTab.request.topContent.request &&
       currentTab.request.topContent.request.filters) {
-        currentTab.request.topContent.request.filters = this.postMethodFilters(currentTab.request.topContent.request.filters);
+      currentTab.request.topContent.request.filters = this.postMethodFilters(currentTab.request.topContent.request.filters);
     }
     try {
       // const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus);
@@ -1636,26 +1636,26 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     return new Promise<any>((resolve, reject) => {
       if (request && request) {
         this.contentSvc.getApiMethod(apiUrl).subscribe(results => {
-        let showViewMore: any
-        if(results.result.data){
+          let showViewMore: any
+          if (results.result.data) {
             showViewMore = Boolean(
               results.result.data && results.result.data.orgList.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
-              );
-        } else if(results.result.content){
-          let featuredProvider = JSON.parse(results.result.content.featuredProviders || '[]')
-          showViewMore = Boolean(
-            featuredProvider && featuredProvider.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
             );
-        }
-        const viewMoreUrl = showViewMore
-        ? {
-        path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
-        }
-        : null;
-        resolve({ results, viewMoreUrl });
-        },                                                   (error: any) => {
-        this.processStrip(strip, [], 'error', calculateParentStatus, null);
-        reject(error);
+          } else if (results.result.content) {
+            let featuredProvider = JSON.parse(results.result.content.featuredProviders || '[]')
+            showViewMore = Boolean(
+              featuredProvider && featuredProvider.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+            );
+          }
+          const viewMoreUrl = showViewMore
+            ? {
+              path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
+            }
+            : null;
+          resolve({ results, viewMoreUrl });
+        }, (error: any) => {
+          this.processStrip(strip, [], 'error', calculateParentStatus, null);
+          reject(error);
         },
         );
       }
@@ -1668,10 +1668,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     ) {
       filters.organisation = filters.organisation.replace('<orgID>', this.providerId)
     }
-    if(_.get(filters, 'request.eventEndDate', '').indexOf('<today>') >= 0) {
+    if (_.get(filters, 'request.eventEndDate', '').indexOf('<today>') >= 0) {
       filters.request.eventEndDate = this.todayDate
     }
-    if(_.get(filters, 'request.eventStartDate', '').indexOf('<today>') >= 0) {
+    if (_.get(filters, 'request.eventStartDate', '').indexOf('<today>') >= 0) {
       filters.request.eventStartDate = this.todayDate
     }
     return filters
@@ -1681,12 +1681,12 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     if (apiUrl.indexOf('<bookmarkId>') >= 0) {
       formedUrl = apiUrl.replace('<bookmarkId>', this.environment.mdoChannelsBookmarkId)
     } else if (apiUrl.indexOf('<playlistKey>') >= 0 && apiUrl.indexOf('<orgID>') >= 0) {
-      formedUrl = apiUrl.replace('<playlistKey>', this.providerId + id) 
-      formedUrl = formedUrl.replace('<orgID>', this.providerId) 
-    } else if(apiUrl.indexOf('<doId>') >= 0) {
-      formedUrl = apiUrl.replace('<doId>', this.environment.providerDataKey) 
-    } else if(apiUrl.indexOf('<userId>') >= 0) {
-      formedUrl = apiUrl.replace('<userId>', id) 
+      formedUrl = apiUrl.replace('<playlistKey>', this.providerId + id)
+      formedUrl = formedUrl.replace('<orgID>', this.providerId)
+    } else if (apiUrl.indexOf('<doId>') >= 0) {
+      formedUrl = apiUrl.replace('<doId>', this.environment.providerDataKey)
+    } else if (apiUrl.indexOf('<userId>') >= 0) {
+      formedUrl = apiUrl.replace('<userId>', id)
     }
     return formedUrl
   }
@@ -1861,11 +1861,11 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.getRequestMethod(strip, strip.request.playlistRead, strip.request.apiUrl, calculateParentStatus);
-        
-          if (response && response.results.result.content) {  
-            let content  = response.results.result.content
-            if(strip.key === 'providers'){
-              let featuredProviders : any = JSON.parse(content.featuredProviders|| '[]')
+
+          if (response && response.results.result.content) {
+            let content = response.results.result.content
+            if (strip.key === 'providers') {
+              let featuredProviders: any = JSON.parse(content.featuredProviders || '[]')
               this.processStrip(
                 strip,
                 this.transformAllContentsToWidgets(featuredProviders, strip),
@@ -1903,20 +1903,20 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     if (currentTab.request &&
       currentTab.request.playlistRead &&
       currentTab.request.playlistRead.type) {
-        currentTab.request.apiUrl = this.getFullUrl(currentTab.request.apiUrl, currentTab.request.playlistRead.type);
+      currentTab.request.apiUrl = this.getFullUrl(currentTab.request.apiUrl, currentTab.request.playlistRead.type);
     }
     try {
       const response = await this.getRequestMethod(strip, currentTab.request.playlistRead, currentTab.request.apiUrl, calculateParentStatus);
-      
+
       if (response.results && response.results.result) {
-        let content  = response.results.result.content
+        let content = response.results.result.content
         let widgets = []
-        if(currentTab.value === 'providers'){
-          let featuredProviders : any = JSON.parse(content.featuredProviders|| '[]')
+        if (currentTab.value === 'providers') {
+          let featuredProviders: any = JSON.parse(content.featuredProviders || '[]')
           widgets = this.transformAllTabContentsToWidgets(featuredProviders, currentTab)
         } else {
-          if(currentTab && currentTab.contentShuffel){
-            content  = content.sort( () => Math.random() - 0.5);
+          if (currentTab && currentTab.contentShuffel) {
+            content = content.sort(() => Math.random() - 0.5);
           }
           widgets = this.transformAllTabContentsToWidgets(content, currentTab)
         }
@@ -1958,20 +1958,20 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     } catch (error) {
       console.error('Error:', error)
       let tabResults: any[] = [];
-        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              widgets: [],
-              fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
-          }
-          this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
-        } else {
-          this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
+        const allTabs = this.stripsResultDataMap[strip.key].tabs;
+        if (allTabs && allTabs.length && allTabs[tabIndex]) {
+          allTabs[tabIndex] = {
+            ...allTabs[tabIndex],
+            widgets: [],
+            fetchTabStatus: 'done',
+          };
+          tabResults = allTabs;
         }
+        this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
+      } else {
+        this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      }
     }
   }
 
@@ -2017,7 +2017,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
               this.processStrip(strip, [], 'error', calculateParentStatus, null);
               this.emptyResponse.emit(true)
             }
-  
+
           } else {
             this.processStrip(strip, [], 'error', calculateParentStatus, null);
             this.emptyResponse.emit(true)
@@ -2038,7 +2038,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl,strip.request.ciosContent).toPromise();;
+      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise();;
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip);
         let tabResults: any[] = [];
@@ -2078,19 +2078,19 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     } catch (error) {
       console.error('Error:', error)
       let tabResults: any[] = [];
-        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
-          }
-          this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
-        } else {
-          this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
+        const allTabs = this.stripsResultDataMap[strip.key].tabs;
+        if (allTabs && allTabs.length && allTabs[tabIndex]) {
+          allTabs[tabIndex] = {
+            ...allTabs[tabIndex],
+            fetchTabStatus: 'done',
+          };
+          tabResults = allTabs;
         }
+        this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
+      } else {
+        this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      }
     }
   }
 
@@ -2117,13 +2117,14 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           let response: any
-          if(strip && strip.request && strip.request.hasIdentifiersApi) {
+          let identifiersResponse: any
+          if (strip && strip.request && strip.request.hasIdentifiersApi) {
             const identifierStrip: any = JSON.parse(JSON.stringify(strip))
             identifierStrip.request.searchV6['api'] = {
               'path': identifierStrip.request.identifiersApiUrl
             }
-            const identifiersResponse = await this.searchV6Request(identifierStrip, identifierStrip.request, calculateParentStatus)
-            if(_.get(identifiersResponse, 'results.result.events') && _.get(strip, 'request.searchV6.request.filters')) {
+            identifiersResponse = await this.searchV6Request(identifierStrip, identifierStrip.request, calculateParentStatus)
+            if (_.get(identifiersResponse, 'results.result.events') && _.get(strip, 'request.searchV6.request.filters')) {
               strip.request.searchV6.request.filters['identifier'] = _.get(identifiersResponse, 'results.result.events', [])
               response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
             } else {
@@ -2134,9 +2135,17 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           }
           if (response && response.results) {
             if (response.results.result.Event) {
+              let proccessResult: any = []
+              const ids = _.get(identifiersResponse, 'results.result.events') || []
+              ids.forEach((id: any) => {
+                const event = response.results.result.Event.find((event: any) => event.identifier === id)
+                if (event) {
+                  proccessResult.push(event)
+                }
+              })
               this.processStrip(
                 strip,
-                this.transformEventsV2ToWidgets(response.results.result.Event, strip),
+                this.transformEventsV2ToWidgets(proccessResult, strip),
                 'done',
                 calculateParentStatus,
                 response.viewMoreUrl,
@@ -2193,15 +2202,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       if (response && response.results) {
         const widgets = this.transformEventsV2ToWidgets(response.results.result.events, strip);
         let tabResults: any[] = [];
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              widgets,
-              fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
-          }
+        const allTabs = this.stripsResultDataMap[strip.key].tabs;
+        if (allTabs && allTabs.length && allTabs[tabIndex]) {
+          allTabs[tabIndex] = {
+            ...allTabs[tabIndex],
+            widgets,
+            fetchTabStatus: 'done',
+          };
+          tabResults = allTabs;
+        }
         this.processStrip(
           strip,
           widgets,
@@ -2221,16 +2230,16 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
 
 
   fetchMyEventsData(strip, calculateParentStatus) {
-    if(strip && strip.tabs && strip.tabs.length) {
-        const firstTab = strip.tabs[0];
-        if (firstTab.requestRequired) {
-            const allTabs = strip.tabs;
-            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
-            this.currentTab = currentTabFromMap
-            this.moveToNextTab = true
-            this.getMyEventsByTabs(strip, 0, currentTabFromMap, calculateParentStatus);
-        } 
-        
+    if (strip && strip.tabs && strip.tabs.length) {
+      const firstTab = strip.tabs[0];
+      if (firstTab.requestRequired) {
+        const allTabs = strip.tabs;
+        const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab;
+        this.currentTab = currentTabFromMap
+        this.moveToNextTab = true
+        this.getMyEventsByTabs(strip, 0, currentTabFromMap, calculateParentStatus);
+      }
+
     }
   }
 
@@ -2247,7 +2256,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       let apiError = false
       if (this.userEventsAll === undefined) {
         const response = await this.postRequestMethod(strip, postReqestData, apiUrl, calculateParentStatus);
-        this.userEventsAll = _.get(response, 'results.result.events', [])
+        this.userEventsAll = this.sortData(_.get(response, 'results.result.events', []))
         apiError = _.get(response, 'results.result.events') ? false : true
       }
 
@@ -2255,7 +2264,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         if (this.userEventsAll.length || this.moveToNextTab) {
           const currentEvents = this.getCurrentEvents()
           const key: string = this.stripsKeyOrder[0]
-            const stripMap: IStripUnitContentData = this.stripsResultDataMap[key]
+          const stripMap: IStripUnitContentData = this.stripsResultDataMap[key]
           if (this.moveToNextTab && (!currentEvents || currentEvents.length === 0) && this.currentTabIndex + 1 < stripMap.tabs.length) {
             this.tabClicked(this.currentTabIndex + 1, stripMap, key)
           } else {
@@ -2304,27 +2313,31 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
 
   getCurrentEvents() {
     const events = []
-    if(this.userEventsAll && this.userEventsAll.length && this.currentTab && this.currentTab.label) {
-      this.userEventsAll.forEach((event: any) => {
+    if (this.userEventsAll && this.userEventsAll.length && this.currentTab && this.currentTab.label) {
+      let userEvents = JSON.parse(JSON.stringify(this.userEventsAll))
+      if (this.currentTab.label.toLowerCase() === 'past') {
+        userEvents = userEvents.reverse()
+      }
+      userEvents.forEach((event: any) => {
         const eventDetails = event.event
-        if(_.get(eventDetails, 'startDate')) {
+        if (_.get(eventDetails, 'startDate')) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const eventDate = new Date(_.get(eventDetails, 'startDate'));
           eventDate.setHours(0, 0, 0, 0);
           switch (this.currentTab.label.toLowerCase()) {
             case 'today':
-              if(today.getTime() === eventDate.getTime()) {
+              if (today.getTime() === eventDate.getTime()) {
                 events.push(event)
               }
               break
             case 'upcoming':
-              if(today.getTime() < eventDate.getTime()) {
+              if (today.getTime() < eventDate.getTime()) {
                 events.push(event)
               }
               break
             case 'past':
-              if(today.getTime() > eventDate.getTime()) {
+              if (today.getTime() > eventDate.getTime()) {
                 events.push(event)
               }
               break
@@ -2335,8 +2348,17 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     return events
   }
 
-  get getUserId(){
-    let userId: string= ''
+  sortData(data: any) {
+    data = data.filter((event: any) => event.event && event.event.startDate)
+    return data.sort((a: any, b: any) => {
+      const dateA = new Date(`${a.event.startDate}T${a.event.startTime}`);
+      const dateB = new Date(`${b.event.startDate}T${b.event.startTime}`);
+      return dateA.getTime() - dateB.getTime()
+    })
+  }
+
+  get getUserId() {
+    let userId: string = ''
     if (this.configSvc.userProfile) {
       userId = this.configSvc.userProfile.userId;
     }
