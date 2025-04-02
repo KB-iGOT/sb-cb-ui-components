@@ -632,7 +632,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
                   if (fileObj.file) {
                     const formData = new FormData();
                     formData.append('file', fileObj.file);
-                    const communityId = this.data.community.communityId || this.data.community.communityId || ''
+                    const communityId = (postResult && postResult.communityId) || 
+                    (this.data.community && (this.data.community.communityId || this.data.community.communityid)) 
+                    || ''
                     this.discussV2Svc.uploadFile(formData, communityId, discussionId).subscribe({
                       next: (res: any) => {
                         if (res && res.result && res.result.url) {
