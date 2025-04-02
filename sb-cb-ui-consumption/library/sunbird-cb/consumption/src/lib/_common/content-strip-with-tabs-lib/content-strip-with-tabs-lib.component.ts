@@ -265,7 +265,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     if (!data.tabs || !data.tabs.length) {
       return data.widgets ? data.widgets.length : 0;
     } {
-      if (key === 'myEvents') {
+      if (key === 'myEvents' && this.userEventsAll && this.userEventsAll.length) {
         return true
       }
       // if tabs are there check if each tab has widgets and get the tab with max widgets
