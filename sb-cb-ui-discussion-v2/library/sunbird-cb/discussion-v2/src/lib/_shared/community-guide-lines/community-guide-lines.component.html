@@ -9,8 +9,7 @@
         <p class="mat-body-1 nodtranslate">Agree to the following:</p>
     </div>
     <div class="community-guide-lines-content">
-        <p class="mat-body-1 nodtranslate">
-            {{data?.community?.communityGuideLines}}
+        <p class="mat-body-1 nodtranslate" [innerHTML]="data?.community?.communityGuideLines">
         </p>
     </div>
     <div class="community-guide-lines-footer w-full flex items-center justify-center mt-8">
