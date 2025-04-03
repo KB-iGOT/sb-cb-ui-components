@@ -318,13 +318,17 @@ export class PostCardComponent {
     requestData = { ...requestData, ...flagDetails }
 
     this.discussV2Svc.reportPost(requestData).subscribe(res => {
-      if (res && res.responseCode === 'OK') {
+      if (res && res.responseCode && res.responseCode.toLowerCase() === 'ok') {
         this.loading = false
+        this.reportPending = false
+        this.post.isReported = true
+        // this.post = res.result
+        this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
+      } else {
+        if(res && res.params && res.params.err) {
+          this._snackBar.open(res.params.err || 'Something went wrong! please try reporting again later.')
+        }
       }
-      this.reportPending = false
-      this.post.isReported = true
-      // this.post = res.result
-      this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
     },
       () => {
         this._snackBar.open(_.get(this.cardConfig, 'reportIcon.errorMsg') || 'Something went wrong! please try reporting again later.')

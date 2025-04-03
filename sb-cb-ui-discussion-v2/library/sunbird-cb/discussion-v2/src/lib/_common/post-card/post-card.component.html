@@ -13,7 +13,7 @@
     </ng-container>
     <div class="flex user-info">
         <div>
-            <div class="mr-4">
+            <div class="mr-1 md:mr-4">
                 <d-v2-avatar-photo [size]="'ml'" [name]="post?.createdBy?.first_name"
                     [photoUrl]="post?.createdBy?.user_profile_img_url" [color]="
                     post?.createdBy?.first_name === loogedInUserProfile?.firstName ?
@@ -35,7 +35,11 @@
                 {{post?.createdBy?.designation}}
             </div>
         </div>
-        <span class="mat-body-2 nodtranslate">{{post?.createdOn | pipeRelativeTime}}</span>
+        <span class="mat-body-2">
+            <span class="mr-1 nodtranslate">{{post?.createdOn === post?.updatedOn?'':'(Edited)'}}</span>
+            <span class="mat-body-2 nodtranslate">{{post?.updatedOn | pipeRelativeTime}}</span>
+        </span>
+
         <div>
             <mat-icon class="icon cursor-pointer" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
                 aria-label="more">more_vertical</mat-icon>
