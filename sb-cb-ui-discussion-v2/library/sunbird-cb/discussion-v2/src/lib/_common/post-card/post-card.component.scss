@@ -64,6 +64,7 @@ $green : #1D8923;
     height: 14px;
     width: 14px;
     font-size: 14px;
+    min-width: 14px;
 }
 
 .bold {
@@ -189,11 +190,12 @@ $green : #1D8923;
     padding: 8px;
     border-radius: 4px;
     background-color: #f5f5f5;
+    & .mat-icon {
+        min-width: 24px;
+        font-size: 24px;
+    }
   }
   
-  .doc-icon {
-    font-size: 24px;
-  }
   
   .pdf-icon {
     color: #ff5252;

@@ -557,17 +557,19 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   private handlePostCreation(): void {
+    // For identifying initial update at BE
+    const isInitialUpload: boolean = true
     switch (this.data.type) {
       case NsDiscussionV2.EPostType.QUESTION:
-        this.createPost();
+        this.createPost(isInitialUpload);
         break;
       case NsDiscussionV2.EPostType.ANSWER_POST:
-        this.createAnswerPost();
+        this.createAnswerPost(isInitialUpload);
         break;
     }
   }
 
-  createPost() {
+  createPost(isInitialUpload: boolean) {
     this.loading = true
     this.loaderMsg = 'Creating the post!'
     const req = this.createReq(this.uploadForm, this.data.type)
@@ -576,7 +578,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         if (res && res.result) {
           const discussionId = res.result.discussionId; // Get the discussion ID
           if (this.categoryType.length) {
-            this.uploadHandler(discussionId, res.result);
+            this.uploadHandler(discussionId, res.result, isInitialUpload);
           } else {
             this.loading = false
             this.loaderMsg = 'Post created successfully!'
@@ -592,14 +594,14 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     });
   }
 
-  createAnswerPost() {
+  createAnswerPost(isInitialUpload: boolean) {
     const req = this.createReq(this.uploadForm, this.data.type)
     this.discussV2Svc.createAnswerPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {
           const discussionId = res.result.discussionId; // Get the discussion ID
           if (this.categoryType.length) {
-            this.uploadHandler(discussionId, res.result);
+            this.uploadHandler(discussionId, res.result, isInitialUpload);
           } else {
             this.dialogRef.close({ result: res.result, type: this.data.type });
             this._snackBar.open('Post created successfully!') 
@@ -613,7 +615,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     });
   }
 
-  async uploadHandler(discussionId: string, postResult: any) {
+  async uploadHandler(discussionId: string, postResult: any, isInitialUpload: boolean) {
     try {
       let temp: any = {}
 
@@ -666,7 +668,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
       // After all categories are processed, update mediaCategory and call update
       this.mediaCategory = temp;
-      this.handlePostUpdation(discussionId, postResult);
+      this.handlePostUpdation(discussionId, postResult, isInitialUpload);
     } catch (error) {
       this.loading = false
       this.loaderMsg = 'Uploading the files failed, Please try again later!'
@@ -675,18 +677,18 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     }
   }
 
-  private handlePostUpdation(discussionId: string, postResult: any): void {
+  private handlePostUpdation(discussionId: string, postResult: any, isInitialUpload: boolean): void {
     switch (this.data.type) {
       case NsDiscussionV2.EPostType.QUESTION:
-        this.updatePostWithMediaUrls(discussionId, postResult);
+        this.updatePostWithMediaUrls(discussionId, postResult, isInitialUpload);
         break;
       case NsDiscussionV2.EPostType.ANSWER_POST:
-        this.updateAnswerPostWithMediaUrls(discussionId, postResult);
+        this.updateAnswerPostWithMediaUrls(discussionId, postResult, isInitialUpload);
         break;
     }
   }
 
-  updatePostWithMediaUrls(discussionId: string, postResult: any) {
+  updatePostWithMediaUrls(discussionId: string, postResult: any, isInitialUpload: boolean) {
     this.loading = true
     this.loaderMsg = 'Updating the post with files!'
     const communityId = postResult.communityId
@@ -694,7 +696,8 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       discussionId,
       communityId,
       categoryType: this.categoryType,
-      mediaCategory: this.mediaCategory
+      mediaCategory: this.mediaCategory,
+      ...(isInitialUpload ? { isInitialUpload: true } : null),
     };
     this.discussV2Svc.updatePost(updateReq).subscribe({
       next: (res) => {
@@ -716,11 +719,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateAnswerPostWithMediaUrls(discussionId: string, postResult: any) {
+  updateAnswerPostWithMediaUrls(discussionId: string, postResult: any, isInitialUpload: boolean) {
     const updateReq = {
       answerPostId: discussionId,
       categoryType: this.categoryType,
-      mediaCategory: this.mediaCategory
+      mediaCategory: this.mediaCategory,
+      ...(isInitialUpload ? { isInitialUpload: true } : null),
     };
 
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
