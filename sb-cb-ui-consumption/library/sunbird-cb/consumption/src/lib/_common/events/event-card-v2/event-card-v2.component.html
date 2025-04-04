@@ -9,8 +9,7 @@
   <mat-card class="card-resource-container mr-5 padding-remove cursor-pointer card-resource-container-small">
     <div class="display-contents">
       <ng-container *ngIf="eventDetails">
-        <a class="w-full"
-          (click)="raiseTelemetry();getRedirectUrlData(eventDetails); $event.stopPropagation()"
+        <a class="w-full" (click)="raiseTelemetry();getRedirectUrlData(eventDetails); $event.stopPropagation()"
           role="link" i18n-aria-label>
           <mat-card-content class="min-top">
             <div class="relative">
@@ -43,9 +42,10 @@
                 <div *ngIf="eventDetails?.showLive" class="flex gap-1 live blink">
                   <img class='img' src="/assets/icons/live.svg" alt="">
                   <span>Live</span>
+                </div>
               </div>
-              </div>
-              <div class="event-title capitalize">{{eventDetails?.name}}</div>
+              <div class="event-title capitalize" matTooltipClass="card-tooltip" matTooltip="{{eventDetails?.name}}">
+                {{eventDetails?.name}}</div>
               <div class="event-description">{{eventDetails?.description}}</div>
               <div class="flex w-full flex-wrap flex-middle pb-1 pt-1">
                 <div class="course_logo_box">
@@ -57,8 +57,9 @@
               </div>
               <div class="flex w-full flex-wrap gap-1 flex-middle pb-1 pt-1 opacity-75">
                 <mat-icon class="resource-type-icon">date_range</mat-icon>
-                <span class="resource-text">{{eventDetails?.startDate ? 
-                  (getStartDate(eventDetails?.startDate, eventDetails?.startTime) | date: 'EEE, MMM d hh:mm a') : 'NA'}}</span>
+                <span class="resource-text">{{eventDetails?.startDate ?
+                  (getStartDate(eventDetails?.startDate, eventDetails?.startTime) | date: 'EEE, MMM d hh:mm a') :
+                  'NA'}}</span>
               </div>
               <div class="flex w-full flex-wrap gap-1 flex-middle pb-1 pt-1 opacity-75">
                 <mat-icon class="resource-type-icon">card_membership</mat-icon>
@@ -75,54 +76,53 @@
 <ng-template #cardEventV2Skeleton>
   <mat-card class="card-resource-container mr-5 padding-remove">
     <div class="display-contents">
-        <mat-card-content class="min-top">
-          <div style="position: relative; z-index: 1;">
-            <ng-container>
-              <sb-uic-skeleton-loader [width]="widgetData?.cardCustomeClass ? '272px':'384px'" [height]="'150px'"
-                [bindingClass]="'flex rounded card-img'"></sb-uic-skeleton-loader>
-            </ng-container>
-          </div>
-          <div class="padding-m">
-            <div class="course_widget flex margin-remove">
-              <div class="flex flex-end mb-2">
-                <sb-uic-skeleton-loader [width]="'150px'" [height]="'16px'"
-                  [bindingClass]="'flex mr-4'"></sb-uic-skeleton-loader>
-              </div>
-            </div>
-            <div class="mat-subheading-1 title-text ws-mat-text-block-fade-gradient  mb-4">
-              <sb-uic-skeleton-loader [width]="'100%'" [height]="'16px'"
-                [bindingClass]="'flex'"></sb-uic-skeleton-loader>
-              <sb-uic-skeleton-loader [width]="'100%'" [height]="'32px'"
-                [bindingClass]="'flex rounded margin-top-s'"></sb-uic-skeleton-loader>
-            </div>
-            <div class="flex w-full flex-wrap flex-middle margin-top-s">
-              <div class="">
-                <sb-uic-skeleton-loader [width]="'15px'" [height]="'15px'"
-                  [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
-              </div>
-              <span class="org-text"> <sb-uic-skeleton-loader [width]="'200px'" [height]="'15px'"
-                  [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader></span>
-            </div>
-            <div class="flex w-full flex-wrap flex-middle margin-top-s">
-              <div class="">
-                <sb-uic-skeleton-loader [width]="'16px'" [height]="'16px'"
-                  [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
-              </div>
-              <span class="org-text"> <sb-uic-skeleton-loader [width]="'200px'" [height]="'16px'"
-                  [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader></span>
-            </div>
-            <div class="flex w-full flex-wrap flex-middle margin-top-s">
-              <div class="">
-                <sb-uic-skeleton-loader [width]="'16px'" [height]="'16px'"
-                  [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
-              </div>
-              <span class="org-text"> 
-                <sb-uic-skeleton-loader [width]="'200px'" [height]="'16px'"
-                  [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
-                </span>
+      <mat-card-content class="min-top">
+        <div style="position: relative; z-index: 1;">
+          <ng-container>
+            <sb-uic-skeleton-loader [width]="widgetData?.cardCustomeClass ? '272px':'384px'" [height]="'150px'"
+              [bindingClass]="'flex rounded card-img'"></sb-uic-skeleton-loader>
+          </ng-container>
+        </div>
+        <div class="padding-m">
+          <div class="course_widget flex margin-remove">
+            <div class="flex flex-end mb-2">
+              <sb-uic-skeleton-loader [width]="'150px'" [height]="'16px'"
+                [bindingClass]="'flex mr-4'"></sb-uic-skeleton-loader>
             </div>
           </div>
-        </mat-card-content>
+          <div class="mat-subheading-1 title-text ws-mat-text-block-fade-gradient  mb-4">
+            <sb-uic-skeleton-loader [width]="'100%'" [height]="'16px'" [bindingClass]="'flex'"></sb-uic-skeleton-loader>
+            <sb-uic-skeleton-loader [width]="'100%'" [height]="'32px'"
+              [bindingClass]="'flex rounded margin-top-s'"></sb-uic-skeleton-loader>
+          </div>
+          <div class="flex w-full flex-wrap flex-middle margin-top-s">
+            <div class="">
+              <sb-uic-skeleton-loader [width]="'15px'" [height]="'15px'"
+                [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
+            </div>
+            <span class="org-text"> <sb-uic-skeleton-loader [width]="'200px'" [height]="'15px'"
+                [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader></span>
+          </div>
+          <div class="flex w-full flex-wrap flex-middle margin-top-s">
+            <div class="">
+              <sb-uic-skeleton-loader [width]="'16px'" [height]="'16px'"
+                [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
+            </div>
+            <span class="org-text"> <sb-uic-skeleton-loader [width]="'200px'" [height]="'16px'"
+                [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader></span>
+          </div>
+          <div class="flex w-full flex-wrap flex-middle margin-top-s">
+            <div class="">
+              <sb-uic-skeleton-loader [width]="'16px'" [height]="'16px'"
+                [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
+            </div>
+            <span class="org-text">
+              <sb-uic-skeleton-loader [width]="'200px'" [height]="'16px'"
+                [bindingClass]="'flex rounded'"></sb-uic-skeleton-loader>
+            </span>
+          </div>
+        </div>
+      </mat-card-content>
     </div>
   </mat-card>
 </ng-template>
