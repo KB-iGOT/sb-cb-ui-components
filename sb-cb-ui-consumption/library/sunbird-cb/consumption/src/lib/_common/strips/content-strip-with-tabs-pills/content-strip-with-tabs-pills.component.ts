@@ -1157,6 +1157,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 )
               }
             }
+            else {
+              strip.tabs[tabIndex].hideTab = true
+            }
           })
         } else {
           this.resetPills(strip.tabs[tabIndex].pillsData)
@@ -1165,7 +1168,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
           strip.showOnLoader = false
           strip.tabs[tabIndex].pillsData[0].tabLoading = false
-          // strip.tabs[tabIndex].hideTab = true
+          strip.tabs[tabIndex].hideTab = true
           let tabs = strip.tabs
           if (strip.tabs[0] && strip.tabs[0].hideTab) {
             tabs = []
@@ -1186,7 +1189,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
         strip.showOnLoader = false
         strip.tabs[tabIndex].pillsData[0].tabLoading = false
-        // strip.tabs[tabIndex].hideTab = true
+        strip.tabs[tabIndex].hideTab = true
         let tabs = strip.tabs
         if (strip.tabs[0] && strip.tabs[0].hideTab) {
           tabs = []
@@ -1419,9 +1422,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
+      this.fetchDesignationBasedCourses(strip, 2, true)
       
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
+
         if (strip.tabs && strip.tabs.length) {
           tabResults = this.splitCbpTabsData(courses, strip);
           let countOfWidget = true
