@@ -1469,7 +1469,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         strip.tabs[0].pillsData[0].tabLoading = false
         strip.tabs[0].hideTab = true
         // this.fetchDesignationBasedCourses(strip, 1, true)
-        this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
+        // this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
         this.processStrip(
           strip,
           this.transformContentsToWidgets(courses, strip),
