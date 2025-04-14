@@ -432,6 +432,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.fetchForYouData(strip, calculateParentStatus)
     await this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
+    await this.fetchDesignationBasedCourses(strip, 2, true)
 
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
@@ -1162,17 +1163,17 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             }
           })
         } else {
-          // this.resetPills(strip.tabs[tabIndex].pillsData)
-          // strip.tabs[tabIndex].pillsData[0].selected = true
-          // strip.tabs[tabIndex].pillsData[0].widgets = []
-          // strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
-          // strip.showOnLoader = false
-          // strip.tabs[tabIndex].pillsData[0].tabLoading = false
+          this.resetPills(strip.tabs[tabIndex].pillsData)
+          strip.tabs[tabIndex].pillsData[0].selected = true
+          strip.tabs[tabIndex].pillsData[0].widgets = []
+          strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+          strip.showOnLoader = false
+          strip.tabs[tabIndex].pillsData[0].tabLoading = false
           strip.tabs[tabIndex].hideTab = true
-          // let tabs = strip.tabs
-          // if (strip.tabs[0] && strip.tabs[0].hideTab) {
-          //   tabs = []
-          // }
+          let tabs = strip.tabs
+          if (strip.tabs[0] && strip.tabs[0].hideTab) {
+            tabs = []
+          }
           // this.processStrip(
           //   strip,
           //   this.transformContentsToWidgets([], strip),
@@ -1422,7 +1423,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      this.fetchDesignationBasedCourses(strip, 2, true)
       
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
