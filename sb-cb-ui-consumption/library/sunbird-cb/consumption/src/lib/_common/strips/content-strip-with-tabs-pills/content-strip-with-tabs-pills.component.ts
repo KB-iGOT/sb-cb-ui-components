@@ -1162,25 +1162,25 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             }
           })
         } else {
-          this.resetPills(strip.tabs[tabIndex].pillsData)
-          strip.tabs[tabIndex].pillsData[0].selected = true
-          strip.tabs[tabIndex].pillsData[0].widgets = []
-          strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
-          strip.showOnLoader = false
-          strip.tabs[tabIndex].pillsData[0].tabLoading = false
+          // this.resetPills(strip.tabs[tabIndex].pillsData)
+          // strip.tabs[tabIndex].pillsData[0].selected = true
+          // strip.tabs[tabIndex].pillsData[0].widgets = []
+          // strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+          // strip.showOnLoader = false
+          // strip.tabs[tabIndex].pillsData[0].tabLoading = false
           strip.tabs[tabIndex].hideTab = true
-          let tabs = strip.tabs
-          if (strip.tabs[0] && strip.tabs[0].hideTab) {
-            tabs = []
-          }
-          this.processStrip(
-            strip,
-            this.transformContentsToWidgets([], strip),
-            'done',
-            calculateParentStatus,
-            '',
-            tabs
-          );
+          // let tabs = strip.tabs
+          // if (strip.tabs[0] && strip.tabs[0].hideTab) {
+          //   tabs = []
+          // }
+          // this.processStrip(
+          //   strip,
+          //   this.transformContentsToWidgets([], strip),
+          //   'done',
+          //   calculateParentStatus,
+          //   '',
+          //   tabs
+          // );
         }
       } catch (error) {
         this.resetPills(strip.tabs[tabIndex].pillsData)
