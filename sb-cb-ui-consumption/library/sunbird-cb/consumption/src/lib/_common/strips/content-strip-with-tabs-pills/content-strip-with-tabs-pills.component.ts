@@ -426,7 +426,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus = true,
   ) {
     // setting initial values
-    debugger
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
     this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromSearchV6(strip, calculateParentStatus);
@@ -1417,7 +1416,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   
 
   // cbp plans
-  async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {debugger
+  async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
       let courses: NsContent.IContent[];
       let tabResults: any[] = [];
