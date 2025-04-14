@@ -432,6 +432,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.fetchForYouData(strip, calculateParentStatus)
     await this.fetchAllCbpPlans(strip, calculateParentStatus);
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
+    await this.fetchDesignationBasedCourses(strip, 2, true)
 
     if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
@@ -1173,14 +1174,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           if (strip.tabs[0] && strip.tabs[0].hideTab) {
             tabs = []
           }
-          this.processStrip(
-            strip,
-            this.transformContentsToWidgets([], strip),
-            'done',
-            calculateParentStatus,
-            '',
-            tabs
-          );
+          // this.processStrip(
+          //   strip,
+          //   this.transformContentsToWidgets([], strip),
+          //   'done',
+          //   calculateParentStatus,
+          //   '',
+          //   tabs
+          // );
         }
       } catch (error) {
         this.resetPills(strip.tabs[tabIndex].pillsData)
@@ -1422,7 +1423,6 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      this.fetchDesignationBasedCourses(strip, 2, true)
       
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
@@ -1855,8 +1855,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 },
               }
           }
-          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          this.contentSvc.searchV6(sRequest).subscribe(results => {
+          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          // this.contentSvc.searchV6(sRequest).subscribe(results => {
             if(results.result.count > 0) {
               if (results && results?.result && results?.result?.content) {
                 // let courses = results.result.content
