@@ -426,6 +426,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus = true,
   ) {
     // setting initial values
+    debugger
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
     this.processStrip(strip, [], 'fetching', false, null);
     this.fetchFromSearchV6(strip, calculateParentStatus);
@@ -1416,7 +1417,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   
 
   // cbp plans
-  async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
+  async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {debugger
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
       let courses: NsContent.IContent[];
       let tabResults: any[] = [];
@@ -1855,8 +1856,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 },
               }
           }
-          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          this.contentSvc.searchV6(sRequest).subscribe(results => {
+          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          // this.contentSvc.searchV6(sRequest).subscribe(results => {
             if(results.result.count > 0) {
               if (results && results?.result && results?.result?.content) {
                 // let courses = results.result.content
