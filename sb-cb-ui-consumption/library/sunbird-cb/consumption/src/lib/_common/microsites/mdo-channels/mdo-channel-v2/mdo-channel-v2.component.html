@@ -247,11 +247,6 @@
                             </div>
                         </div>
 
-                    <div *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column?.length &&
-                         data?.stateLearningWeekSection?.events?.column[0]">
-                        <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]"
-                            [nwlEventsConfig]="slwConfiguration"></sb-uic-events>
-                    </div>
                         <div *ngIf="data?.stateLearningWeekSection?.events?.enabled && data?.stateLearningWeekSection?.events?.column?.length &&
                             data?.stateLearningWeekSection?.events?.column[0]">
                             <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]"

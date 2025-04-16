@@ -59,7 +59,7 @@
                 </div>
             </div>
             <div class="insights-wrapper">
-                <div class="insights-container">
+                <div class="insights-container" *ngIf="!objectData?.insights?.disable">
                     <sb-uic-sliders-ng-content
                         [title]="'p1'"
                         [currentIndex]="currentIndex"
