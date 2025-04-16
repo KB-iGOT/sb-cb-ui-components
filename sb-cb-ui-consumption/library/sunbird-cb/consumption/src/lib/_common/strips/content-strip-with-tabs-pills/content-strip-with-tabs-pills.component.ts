@@ -162,24 +162,24 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   subscribeToTelementry() {
 
-    if(!this.telementrySubscription && !this.contentSvc.isTelementrySubscribed) {
+    if (!this.telementrySubscription && !this.contentSvc.isTelementrySubscribed) {
       this.telementrySubscription = this.contentSvc.telemetryData$.subscribe((data: any) => {
-        if(!data) return 
+        if (!data) return
         this.contentSvc.setTelementrySubscription(true)
-        if (this.widgetData && this.widgetData.strips[0] && 
-          ((this.widgetData.strips[0]?.key === 'cbpPlan') 
-          || this.widgetData.strips[0]?.key === 'forYou'
-          || this.widgetData.strips[0]?.key === 'continueLearning') 
-          && this.widgetData.strips[0].key  === data.typeOfTelemetry) {
+        if (this.widgetData && this.widgetData.strips[0] &&
+          ((this.widgetData.strips[0]?.key === 'cbpPlan')
+            || this.widgetData.strips[0]?.key === 'forYou'
+            || this.widgetData.strips[0]?.key === 'continueLearning')
+          && this.widgetData.strips[0].key === data.typeOfTelemetry) {
           const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
           // const pill = tab.pillsData[this.activePillIndex]
-          const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) =>  pill?.selected );
+          const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill?.selected);
           if (tab && pill) {
             data.selectedTab = this.parametrizedText(tab.label)
             data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
             this.telemtryResponse.emit(data)
           }
-        } else if(
+        } else if (
           this.widgetData.strips && this.widgetData.strips[0] &&
           this.widgetData.strips[0]?.key !== 'cbpPlan' &&
           this.widgetData.strips[0]?.key !== 'forYou' &&
@@ -200,11 +200,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       this.changeEventSubscription.unsubscribe();
     }
 
-    if(this.releventNotReleventSubscription) {
+    if (this.releventNotReleventSubscription) {
       this.releventNotReleventSubscription.unsubscribe()
     }
-    
-    if(this.telementrySubscription) {
+
+    if (this.telementrySubscription) {
       this.telementrySubscription.unsubscribe()
       this.contentSvc.setTelementrySubscription(false)
     }
@@ -434,7 +434,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
     await this.fetchDesignationBasedCourses(strip, 2, true)
 
-    if(strip.tabs[0]?.value === SakshamAI.SakshamAI) {
+    if (strip.tabs[0]?.value === SakshamAI.SakshamAI) {
       this.generateCourseRecommendation(strip, 0, true, this.localRecommended)
     }
     this.canShowSakshamAiTab(strip)
@@ -642,19 +642,19 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     if (!strip?.tabs || !Array.isArray(strip.tabs)) {
       return '';
     }
-  
+
     if (strip.tabs[0]?.hideTab === true) {
       return this.recommendedCoursesId;
     }
-  
+
     else if (
       (strip.tabs[0]?.value === SakshamAI.SakshamAI && this.activeTabIndex === 0) ||
       (strip.tabs[1]?.value === SakshamAI.SakshamAI && this.activeTabIndex === 1)
     ) {
       return this.recommendedCoursesId;
     }
-  
-    return ''; 
+
+    return '';
   }
 
   getTabDataByfilter(
@@ -1046,7 +1046,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
         // call API to get tab data and process
         // this.processStrip(currentStrip, [], 'fetching', true, null)
-        if (currentPillFromMap.request.searchV6) { 
+        if (currentPillFromMap.request.searchV6) {
           this.getTabDataByNewReqSearchV6(currentStrip, tabEventIndex, 0, currentPillFromMap, true);
         } else if (currentPillFromMap.request.trendingSearch) {
           this.getTabDataByNewReqTrending(currentStrip, tabEventIndex, 0, currentPillFromMap, true);
@@ -1065,7 +1065,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           this.fetchDesignationBasedCourses(currentStrip, tabEventIndex, true)
         } else if (currentStrip.tabs[tabEventIndex].request && currentStrip.tabs[tabEventIndex].request.cbpList) {
           this.fetchAllCbpPlans(currentStrip, true)
-        } else if (currentStrip.tabs[tabEventIndex].request && currentStrip.tabs[tabEventIndex].request.courseRecommendation){
+        } else if (currentStrip.tabs[tabEventIndex].request && currentStrip.tabs[tabEventIndex].request.courseRecommendation) {
           this.localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
           this.generateCourseRecommendation(currentStrip, tabEventIndex, true, this.localRecommended)
         }
@@ -1414,7 +1414,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     const isAllHidden = strip.tabs.every(tab => tab.hasOwnProperty('hideTab') && tab.hideTab === true);
     return !isAllHidden;
   }
-  
+
 
   // cbp plans
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
@@ -1423,7 +1423,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = [];
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
-      
+
       if (Array.isArray(response) && response.length > 0) {
         courses = response;
 
@@ -1485,12 +1485,12 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   async canShowSakshamAiTab(strip: any) {
     try {
-      if(strip?.key !== 'cbpPlan') return 
+      if (strip?.key !== 'cbpPlan') return
 
       let userProfile = this.configSvc && this.configSvc.userProfile
-      if(userProfile.rootOrgId) {
+      if (userProfile.rootOrgId) {
         let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
-        if(response?.sakshamAIenabled) {
+        if (response?.sakshamAIenabled) {
           strip.tabs[1].hideTab = false
           this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
 
@@ -1499,8 +1499,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         }
       }
     } catch (error) {
-        if(strip?.key !== 'cbpPlan') return 
-        strip.tabs[1].hideTab = true
+      if (strip?.key !== 'cbpPlan') return
+      strip.tabs[1].hideTab = true
     }
   }
 
@@ -1733,6 +1733,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         contentTemp.batchId = c.batchId || '';
         contentTemp.content = c.content || c.event || {};
         contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || '';
+        contentTemp.cType = c.event ? 'event' : '';
         return contentTemp;
       });
     }
@@ -1776,13 +1777,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     })
   }
 
-  async generateCourseRecommendation( 
+  async generateCourseRecommendation(
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     tabIndex: number,
     calculateParentStatus: boolean,
     courseRecommendationId: string
   ) {
-    if(strip.tabs[tabIndex].request.courseRecommendation) {
+    if (strip.tabs[tabIndex].request.courseRecommendation) {
       this.sakshamLoader = true
       let payload = {
         "user_id": this.configSvc.userProfile.userId,
@@ -1793,7 +1794,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let response: any
       let coursesIds: any
 
-      if(courseRecommendationId) {
+      if (courseRecommendationId) {
         response = await this.userSvc.getRecommendedCoursesSakshamAI(courseRecommendationId).toPromise().catch(async (_err: any) => {
           response = await this.userSvc.generateCoursesSakshamAI(strip.tabs[tabIndex].request.courseRecommendation.path, payload)
             .toPromise()
@@ -1804,7 +1805,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           .toPromise()
       }
 
-      if(response?.recommended_courses && response?.recommended_courses?.length) {
+      if (response?.recommended_courses && response?.recommended_courses?.length) {
         this.sakshamLoader = false
         this.recommendedCoursesId = response?.id || ''
         this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
@@ -1818,10 +1819,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         if (coursesIds.length) {
           let request = {
             "request": {
-                "courseId": coursesIds
+              "courseId": coursesIds
             }
           }
-          let enollData =  await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+          let enollData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
             if (res && res.result && res.result.courses && res.result.courses.length) {
               return res.result.courses
             } else {
@@ -1830,34 +1831,34 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }).catch((_err: any) => {
             return []
           })
-         
+
           const sRequestV1: any = {
-             "request": {
+            "request": {
               "filters": {
-                  "primaryCategory": [
-                      "Course"
-                  ],
-                  "identifier": coursesIds
+                "primaryCategory": [
+                  "Course"
+                ],
+                "identifier": coursesIds
               },
               "sortBy": {
-                  "lastUpdatedOn": "Desc"
+                "lastUpdatedOn": "Desc"
               }
             }
           }
           const sRequest: any = {
-              "request": {
-                "filters": {
-                  "identifier": coursesIds
-                },
-                "offset": 0,
-                "sort_by": {
-                  "lastUpdatedOn": "desc"
-                },
-              }
+            "request": {
+              "filters": {
+                "identifier": coursesIds
+              },
+              "offset": 0,
+              "sort_by": {
+                "lastUpdatedOn": "desc"
+              },
+            }
           }
           this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-          // this.contentSvc.searchV6(sRequest).subscribe(results => {
-            if(results.result.count > 0) {
+            // this.contentSvc.searchV6(sRequest).subscribe(results => {
+            if (results.result.count > 0) {
               if (results && results?.result && results?.result?.content) {
                 // let courses = results.result.content
                 let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
@@ -1865,14 +1866,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 if (strip?.tabs && strip?.tabs?.length) {
                   tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
                   let countOfWidget = true
-                  if(strip && strip?.tabs && strip?.tabs?.length) {
-                    strip.tabs.forEach((tab:any)=> {
-                      if(tab?.value === SakshamAI.SakshamAI && tab?.pillsData && tab?.pillsData.length) {
+                  if (strip && strip?.tabs && strip?.tabs?.length) {
+                    strip.tabs.forEach((tab: any) => {
+                      if (tab?.value === SakshamAI.SakshamAI && tab?.pillsData && tab?.pillsData.length) {
                         tab.pillsData.forEach((pill: any) => {
-                          if(pill && pill.widgets && pill.widgets.length){
-                            if(countOfWidget){
+                          if (pill && pill.widgets && pill.widgets.length) {
+                            if (countOfWidget) {
                               pill.selected = true
-                              countOfWidget= false
+                              countOfWidget = false
                             }
                           }
                         });
@@ -1891,7 +1892,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                     '',
                     tabResults
                   )
-                  if(!this.firstTimeLoaded) {
+                  if (!this.firstTimeLoaded) {
                     this.recommendationPopup = true
                     this.firstTimeLoaded = true
                   }
@@ -1923,7 +1924,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           strip.tabs[tabIndex].pillsData[0].tabLoading = false
           strip.tabs[tabIndex].hideTab = true
           let tabs = strip.tabs
-          if (strip.tabs[0] && strip.tabs[0].hideTab){
+          if (strip.tabs[0] && strip.tabs[0].hideTab) {
             tabs = []
           }
           this.processStrip(
@@ -1950,33 +1951,35 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       "comments": comment,
       "user_id": this.configSvc.userProfile.userId
     }
-    const response = await this.contentSvc.saveFeedbackSakshamAI(payload).toPromise().catch(() => {})
-    if(response && response?.message) {
+    const response = await this.contentSvc.saveFeedbackSakshamAI(payload).toPromise().catch(() => { })
+    if (response && response?.message) {
       this.snackBar.openFromComponent(SnackbarComponent, {
-        data: { message: 'Thank you for your feedback.', type: 'success',
+        data: {
+          message: 'Thank you for your feedback.', type: 'success',
         }, duration: SNACKBAR_DURATION, panelClass: 'course-success-snackbar',
       })
-      if(rating === 0) {
+      if (rating === 0) {
         this.generateCourseRecommendation(this.currentStripG, this.tabEventG, true, this.localRecommended)
       }
     } else if (!response) {
       this.snackBar.openFromComponent(SnackbarComponent, {
-        data: { message: 'Something is wrong. Please try again later', type: 'error',
+        data: {
+          message: 'Something is wrong. Please try again later', type: 'error',
         }, duration: SNACKBAR_DURATION, panelClass: 'course-error-snackbar',
       })
     }
     this.sakshamFeedbackPopup = false;
   }
-  
+
   subscribeToReleventEmmitter() {
     if (!this.releventNotReleventSubscription) {
       this.releventNotReleventSubscription = this.contentSvc.releventNotRelevent$.subscribe(data => {
-        if (data && data.widgetData && data.widgetData?.content?.identifier !== this.feedbackCourseId ) {
+        if (data && data.widgetData && data.widgetData?.content?.identifier !== this.feedbackCourseId) {
           this.feedbackCourseId = data.widgetData?.content?.identifier
-          if(data.isRelevent) {
+          if (data.isRelevent) {
             this.saveFeedback('', 1)
-          } else if(!data.isRelevent) {
-            this.sakshamFeedbackPopup = true    
+          } else if (!data.isRelevent) {
+            this.sakshamFeedbackPopup = true
           }
         }
       });
