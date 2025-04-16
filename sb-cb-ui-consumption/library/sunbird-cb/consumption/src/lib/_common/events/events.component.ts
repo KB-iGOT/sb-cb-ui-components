@@ -96,7 +96,7 @@ export class EventsComponent implements OnInit {
 
   getEventsList() {
     this.getDaysBetweenDates()
-    let nextDay = moment(this.currentDay, 'YYYY-MM-DD')
+    let nextDay = this.currentDay ? moment(this.currentDay, 'YYYY-MM-DD') :  moment(moment(), 'YYYY-MM-DD')
     nextDay.add(1, 'days')
     this.loader = true
     let requestData: any = {}
