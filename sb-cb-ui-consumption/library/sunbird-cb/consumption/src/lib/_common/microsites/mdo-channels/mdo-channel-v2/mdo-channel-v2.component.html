@@ -139,7 +139,7 @@
     <div class="flex items-center justify-center" [ngStyle]="{'background': data.background}">
         <div class="container">
             <ng-container *ngIf="isMobile">
-                <ng-container *ngIf="slwConfiguration?.enabled">
+                <ng-container>
                     <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
                         <sb-uic-key-highlights
                             (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
@@ -199,7 +199,7 @@
 
             <div class="col-span-12">
                 <div class="flex items-center justify-center">
-                    <div class="container margin-top-xl"  *ngIf="slwConfiguration?.enabled">
+                    <div class="container margin-top-xl"  >
                         <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
                             <sb-uic-key-highlights
                                 (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
@@ -212,7 +212,7 @@
             </div>
             <div class="grid grid-cols-12 gap-4 padding-top-m mb-6">
                 <div class="col-span-12 md:col-span-{{data.tabSection.colspan}}">
-                    <ng-container *ngIf="slwConfiguration?.enabled">
+                    <ng-container >
                         <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
                             <sb-uic-highlights-of-week [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data">
                             </sb-uic-highlights-of-week>
@@ -299,7 +299,7 @@
                 </div> -->
                 <div class="col-span-12 md:col-span-4">
                     <ng-container *ngIf="!isMobile">
-                        <ng-container *ngIf="slwConfiguration?.enabled">
+                        <ng-container >
                             <div class="hidden md:block padding-top-xl padding-bottom-m">
                                 <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
                                     <sb-uic-user-progress [layoutType]="'web'" [mobileHeight]="false"
