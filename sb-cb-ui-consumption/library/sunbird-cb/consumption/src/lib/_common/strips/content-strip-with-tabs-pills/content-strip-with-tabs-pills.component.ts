@@ -1856,9 +1856,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               },
             }
           }
-          this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
-            // this.contentSvc.searchV6(sRequest).subscribe(results => {
-            if (results.result.count > 0) {
+          // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
+          this.contentSvc.searchV6(sRequest).subscribe(results => {
+            if(results.result.count > 0) {
               if (results && results?.result && results?.result?.content) {
                 // let courses = results.result.content
                 let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
