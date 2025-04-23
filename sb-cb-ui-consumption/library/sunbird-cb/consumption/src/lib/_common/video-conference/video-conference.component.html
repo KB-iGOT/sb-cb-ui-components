@@ -9,8 +9,10 @@
             <p class="date">{{videoConf?.date }}</p>
             <p class="time">{{videoConf?.time }}</p>
         </div>
-        <button (click)="joinVideoConference(videoConf.joinLink)">{{videoConf?.button }}</button>
+        <button *ngIf="videoConf?.button" (click)="joinVideoConference(videoConf.joinLink)">{{videoConf?.button }}</button>
         <p class="text-support">{{videoConf?.technicalSupport }} 
-            <span class="contachEmail">mission[dot]karmayogi[at]gov[dot]in</span> {{videoConf?.plsContact }}</p>
+            <span *ngIf="!videoConf?.plsContacts" class="contachEmail">{{videoConf?.plsContact }}</span>
+            <a *ngIf="videoConf?.plsContacts" class="contachEmail" href="mailto:{{ videoConf?.plsContacts }}">{{videoConf?.plsContact }}</a>
+         </p>
     </div>
 </div>
