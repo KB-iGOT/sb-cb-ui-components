@@ -32,6 +32,7 @@ const API_END_POINTS = {
   EXT_USER_COURSE_ENROLL: (contentId: any) => `/apis/proxies/v8/cios-enroll/v1/readby/useridcourseid/${contentId}`,
   EXT_CONTENT_EROLL: `/apis/proxies/v8/cios-enroll/v1/create`,
   CERT_DOWNLOAD: (certId: any) => `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/download/${certId}`,
+  CERT_DOWNLOADV2: `/apis/proxies/v8/certificate/dynamic/v1/generate`,
 }
 
 @Injectable({
@@ -248,5 +249,9 @@ export class WidgetContentService {
 
   downloadCert(certId: any) {
     return this.http.get<any>(`${API_END_POINTS.CERT_DOWNLOAD(certId)}`)
+  }
+
+  downloadCertV2(payload: any) {
+    return this.http.post<any>(`${API_END_POINTS.CERT_DOWNLOADV2}`, payload)
   }
 }
