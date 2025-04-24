@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core'
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { CommentsService } from '../../_services/comments.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
@@ -26,6 +26,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   isReversed = false
   userLikedComments: any = []
   commentUsersData: any = {}
+  @Output() commentDataChange = new EventEmitter<any>()
   constructor(
     private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
   ) { }
@@ -143,6 +144,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       if (res && res.code === 'Not Found' || !res.result.commentCount) {
         this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
       }
+      this.commentDataChange.emit({
+        commentData: this.commentData,
+        widgetData: this.widgetData,
+      })
     }, (err: any) => {
       this.loading = false
       // tslint:disable-next-line: no-console
