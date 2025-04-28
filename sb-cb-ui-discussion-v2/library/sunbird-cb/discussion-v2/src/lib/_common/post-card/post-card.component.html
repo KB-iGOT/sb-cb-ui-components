@@ -1,5 +1,5 @@
-<div class="topLevel-card relative" *ngIf="post.status !== 'inactive'" [ngClass]="{'topLevel-card' : cardType=== 'topLevel',
-'reply-card mb-3' : cardType=== 'reply',
+<div class="card-l1 relative" *ngIf="post.status !== 'inactive'" [ngClass]="{'card-l1' : cardType=== 'topLevel',
+'card-l2 mb-3' : cardType=== 'reply',  'card-l3 mb-3' : cardType=== 'reply-l2',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
     <ng-container *ngIf="post?.isReported">
         <ng-container [ngTemplateOutlet]="reportedMask" [ngTemplateOutletContext]="post"></ng-container>

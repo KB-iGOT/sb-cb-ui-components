@@ -6,9 +6,11 @@ import { Observable } from 'rxjs'
 const API_END_POINTS = {
   CREATE_POST: `/apis/proxies/v8/feedDiscussion/create`,
   CREATE_ANSWER_POST: `/apis/proxies/v8/feedDiscussion/answerPosts`,
+  CREATE_ANSWER_POST_REPLY: `/apis/proxies/v8/feedDiscussion/answerPostReply/create`,
   READ_POST: (id: string) =>`/apis/proxies/v8/feedDiscussion/read/${id}`,
   UPDATE_POST: `/apis/proxies/v8/feedDiscussion/update`,
   UPDATE_ANSWER_POST: `/apis/proxies/v8/feedDiscussion/updateAnswerPost`,
+  UPDATE_ANSWER_POST_REPLY: `/apis/proxies/v8/feedDiscussion/answerPostReply/update`,
   SEARCH_POSTS: `/apis/proxies/v8/feedDiscussion/search`,
   FEED_POSTS: `/apis/proxies/v8/feedDiscussion/communityFeed`,
   UP_VOTE: (type: string, id: string) => `/apis/proxies/v8/feedDiscussion/${type}/like/${id}`,
@@ -59,6 +61,10 @@ export class DiscussionV2Service {
     return this.http.post<any>(`${API_END_POINTS.CREATE_ANSWER_POST}`, req)
   }
 
+  createAnswerPostReply(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.CREATE_ANSWER_POST_REPLY}`, req)
+  }
+
   readPost(id: string) {
     return this.http.get<any>(`${API_END_POINTS.READ_POST(id)}`)
   }
@@ -69,6 +75,10 @@ export class DiscussionV2Service {
 
   updateAnswerPost(req: any) {
     return this.http.post<any>(`${API_END_POINTS.UPDATE_ANSWER_POST}`, req)
+  }
+
+  updateAnswerPostReply(req: any) {
+    return this.http.post<any>(`${API_END_POINTS.UPDATE_ANSWER_POST_REPLY}`, req)
   }
 
   searchPosts(req: any) {

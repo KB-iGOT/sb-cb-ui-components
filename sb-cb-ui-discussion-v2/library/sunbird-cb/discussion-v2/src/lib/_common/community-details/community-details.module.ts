@@ -26,6 +26,7 @@ import { CommunityGuidelinesComponent } from './community-guidelines/community-g
 import { CardToggleModule } from '../card-toggle/card-toggle.module';
 import { BookmarkListComponent } from './bookmark-list/bookmark-list.component';
 import { NoDataModule } from '../no-data/no-data.module';
+import { PostCardV2Module } from '../post-card-v2/post-card-v2.module';
 
 
 @NgModule({
@@ -59,7 +60,8 @@ import { NoDataModule } from '../no-data/no-data.module';
     NewPostModule,
     MemberCardModule,
     CardToggleModule,
-    NoDataModule
+    NoDataModule,
+    PostCardV2Module
   ],
   exports: [
     FeedComponent,

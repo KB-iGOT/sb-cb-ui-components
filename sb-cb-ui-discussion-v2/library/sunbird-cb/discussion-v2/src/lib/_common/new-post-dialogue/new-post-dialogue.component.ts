@@ -566,6 +566,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       case NsDiscussionV2.EPostType.ANSWER_POST:
         this.createAnswerPost(isInitialUpload);
         break;
+      case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
+        this.createAnswerPostReply(isInitialUpload);
+        break;
     }
   }
 
@@ -611,6 +614,28 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       error: (err: any) => {
         console.log('Create post failed', err);
         this._snackBar.open('Post creation failed, please try again after sometime...!')  
+      }
+    });
+  }
+
+  createAnswerPostReply(isInitialUpload: boolean) {
+    const req = this.createReq(this.uploadForm, this.data.type)
+    console.log('req: ', req, isInitialUpload)
+    this.discussV2Svc.createAnswerPostReply(req).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          const discussionId = res.result.discussionId; // Get the discussion ID
+          if (this.categoryType.length) {
+            this.uploadHandler(discussionId, res.result, isInitialUpload);
+          } else {
+            this.dialogRef.close({ result: res.result, type: this.data.type });
+            this._snackBar.open('Post created successfully!') 
+          }
+
+        }
+      },
+      error: (err: any) => {
+        console.log('Create post failed', err);
       }
     });
   }
@@ -685,6 +710,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       case NsDiscussionV2.EPostType.ANSWER_POST:
         this.updateAnswerPostWithMediaUrls(discussionId, postResult, isInitialUpload);
         break;
+      case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
+        this.updateAnswerPostReplyWithMediaUrls(discussionId, postResult, isInitialUpload);
+        break;
     }
   }
 
@@ -743,11 +771,37 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     });
   }
 
+  updateAnswerPostReplyWithMediaUrls(discussionId: string, _postResult: any, isInitialUpload: boolean) {
+    const updateReq = {
+      answerPostReplyId: discussionId,
+      categoryType: this.categoryType,
+      mediaCategory: this.mediaCategory,
+      ...(isInitialUpload ? { isInitialUpload: true } : null),
+    };
+
+    this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          this._snackBar.open('Post updated successfully!')
+          this.dialogRef.close({ result: res.result, type: this.data.type });
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post with media URLs:', err);
+        // Even if update fails, the post was created
+        this._snackBar.open('Error updating post with media URLs')
+      }
+    });
+  }
+
   createReq(formData: any, type: string) {
     const communityId = this.isGlobal ? formData.value.community && formData.value.community.communityid : this.data.community.communityId || ''
     const req = {
       type,
-      ...(this.data.parentDiscussionId ? { parentDiscussionId: this.data.parentDiscussionId } : null),
+      ...(this.data.parentDiscussionId && (type !== NsDiscussionV2.EPostType.ANSWER_POST_REPLY) ?
+         { parentDiscussionId: this.data.parentDiscussionId } : null),
+      ...(this.data.parentDiscussionId && (type === NsDiscussionV2.EPostType.ANSWER_POST_REPLY) ?
+          { parentAnswerPostId: this.data.parentDiscussionId,  parentDiscussionId: this.data.parentPost.discussionId || ''  } : null),
       communityId: communityId,
       // title: formData.value.title,
       description: formData.value.description,
@@ -767,6 +821,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         break;
       case NsDiscussionV2.EPostType.ANSWER_POST:
         this.editAnswerPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
+        this.editAnswerPostReply();
         break;
     }
   }
@@ -864,6 +921,33 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       // tags: this.selectedTags
     };
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
+      next: (res) => {
+        if (res?.result) {
+          this._snackBar.open('Post updated successfully!')
+          this.dialogRef.close({ result: res.result, type: this.data.type });
+        }
+      },
+      error: (err) => {
+        this._snackBar.open('Post updation failed, please try agian later!...!') 
+        console.error('Error updating post:', err);
+      }
+    });
+  }
+
+  async editAnswerPostReply() {
+    const newMedia = await this.editUploadHandler(this.data.post.discussionId);
+    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.data.post.mediaCategory)
+    const updateReq = {
+      answerPostReplyId: this.data.post.discussionId,
+      // communityId: this.post.communityId,
+      // title: this.uploadForm.value.title,
+      description: this.uploadForm.value.description,
+      // mediaUrls,
+      categoryType: [...this.categoryType],
+      mediaCategory: mergedMediaCategory,
+      // tags: this.selectedTags
+    };
+    this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
       next: (res) => {
         if (res?.result) {
           this._snackBar.open('Post updated successfully!')

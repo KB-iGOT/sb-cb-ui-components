@@ -16,6 +16,7 @@ export * from './lib/_common/widget-discussionv2/widget-discussionv2.component'
 export * from './lib/_common/new-post/new-post.component'
 export * from './lib/_common/new-post-dialogue/new-post-dialogue.component'
 export * from './lib/_common/post-card/post-card.component'
+export * from './lib/_common/post-card-v2/post-card-v2.component'
 
 export * from './lib/_widgets/widget-postdetails/widget-postdetails.module'
 export * from './lib/_widgets/widget-postdetails/widget-postdetails.component'

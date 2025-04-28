@@ -28,13 +28,21 @@
             <ng-container *ngIf="posts && posts.length;else noPostsSection;">
                 <div class="flex flex-col gap-4">
                     <ng-container *ngFor="let post of posts">
-                        <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="true"
+                        <!-- <d-v2-post-card [cardType]="widgetData?.postsList?.cardType" [userJoinedCommunity]="true"
                             [hierarchyPath]="[post?.discussionId]" [id]="'post-' + post?.discussionId"
                             [cardConfig]="widgetData?.postsList" [post]="post" [replyData]="post?.answerPosts"
                             [community]="community" (newComment)="newCommentEvent($event)" [parentPost]="post"
                             (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)"
                             [type]="widgetData?.newPostSection?.type" [showCommunity]="true"
-                            (communityClickEvent)="communityClick($event)"></d-v2-post-card>
+                            (communityClickEvent)="communityClick($event)"></d-v2-post-card> -->
+                        <d-v2-post-card-v2 [cardType]="widgetData?.levelConfigs?.level0?.cardConfig?.cardType" [userJoinedCommunity]="true"
+                        [hierarchyPath]="[post?.discussionId]" [id]="'post-' + post?.discussionId"
+                        [cardConfig]="widgetData" [post]="post" [replyData]="post?.answerPosts"
+                        [community]="community" (newComment)="newCommentEvent($event)" [parentPost]="post"
+                        (likeUnlikeData)="likeUnlikeEvent($event)" (bookmarkEvent)="bookmarkEvent($event)"
+                        [type]="widgetData?.levelConfigs?.level0?.type" [showCommunity]="true"
+                        (communityClickEvent)="communityClick($event)" [levelKey]="'level0'" [currentLevel]="0">
+                        </d-v2-post-card-v2>
                     </ng-container>
                     <ng-container *ngIf="searchResults?.totalCount > posts.length && !loadingPosts">
                         <div class="load-more-posts my-4">

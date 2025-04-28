@@ -175,7 +175,6 @@ toggleExpandedView() {
 
   
   async manageUserCommunityStatus(onLoad?: boolean){
-    debugger
     this.userJoinedCommunityList.forEach((community: any) => {
       if(community.communityid === this.communityId){
         this.userJoinedCommunity = true

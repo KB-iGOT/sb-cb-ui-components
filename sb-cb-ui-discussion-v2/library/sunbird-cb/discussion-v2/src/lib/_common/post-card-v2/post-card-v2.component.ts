@@ -13,13 +13,13 @@ import { UserEnrollCommunityService } from '../../_services/user-enroll-communit
 import { map } from 'rxjs/operators';
 
 @Component({
-  selector: 'd-v2-post-card',
-  templateUrl: './post-card.component.html',
-  styleUrls: ['./post-card.component.scss']
+  selector: 'd-v2-post-card-v2',
+  templateUrl: './post-card-v2.component.html',
+  styleUrls: ['./post-card-v2.component.scss']
 })
-export class PostCardComponent implements OnInit{
+export class PostCardV2Component implements OnInit{
   @Input() cardType = 'topLevel'
-  @Input() cardConfig!: NsDiscussionV2.IPostCardConfig
+  @Input() cardConfig!: NsDiscussionV2.IDiscussV2WidgetDataV2
   @Input() type!: string
   @Input() post!: any
   @Input() replyData: any[] = []
@@ -29,6 +29,8 @@ export class PostCardComponent implements OnInit{
   @Input() community!: string
   @Input() parentPost!: any
   @Input() showCommunity: boolean= false
+  @Input() levelKey!: string
+  @Input() currentLevel: number = 0
   @Output() likeUnlikeData = new EventEmitter<any>()
   @Output() bookmarkEvent = new EventEmitter<any>()
   @Output() newReply = new EventEmitter<any>()
@@ -54,6 +56,14 @@ export class PostCardComponent implements OnInit{
   editMode: boolean =  false
   userJoinedCommunityObject: any = {}
 
+  levelConfig: any;
+  showReplies: boolean = false;
+  avatarConfig: any;
+  allowReplies: boolean = false;
+  nextLevel: string | null = null;
+  nextNestingLevel: number = 0;
+  nextLevelConfig : any
+
   constructor(
     private configSvc: ConfigurationsService,
     private dialog: MatDialog,
@@ -73,7 +83,22 @@ export class PostCardComponent implements OnInit{
     if(userEnrolledCommunityList.length) {
       this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
     }
+
+    this.levelConfig = this.cardConfig.levelConfigs[this.levelKey as keyof typeof this.cardConfig.levelConfigs];
+    // Check if replies are allowed for this level
+    this.allowReplies = this.levelConfig.allowReplies && 
+                        this.currentLevel < this.cardConfig.maxLevels;
+    
+    // Get the reference to the next level's configuration
+    this.nextLevel = this.levelConfig.replyLevelRef;
+    this.nextNestingLevel = this.currentLevel + 1;
+    this.nextLevelConfig = this.cardConfig.levelConfigs[this.nextLevel as keyof typeof this.cardConfig.levelConfigs];
+    console.log('this.nextLevel', this.nextLevel)
+    console.log('this.nextNestingLevel', this.nextNestingLevel)
+    console.log('this.nextLevelConfig', this.nextLevelConfig)
+    console.log('levelConfig', this.levelConfig)
   }
+
 
   expandReplyComment() {
     this.data.replyToggle = !this.data.replyToggle
@@ -99,8 +124,9 @@ export class PostCardComponent implements OnInit{
       // discussionId : [...this.replyDataCopy],
       // isActive: true, // this is to get only active posts, deleted posts won't be returned
       communityId: this.parentPost?.communityId,
-      "type": "answerPost",
-      parentDiscussionId: this.parentPost?.discussionId,
+      "type": this.nextLevelConfig.type || '',
+      ...(this.nextLevelConfig.type === 'answerPost') ? {parentDiscussionId: this.parentPost?.discussionId} : 
+      {parentAnswerPostId: this.post?.discussionId}
     },
       "requestedFields": [],
       "pageNumber": 0,
@@ -118,7 +144,7 @@ export class PostCardComponent implements OnInit{
             this.fetchedReplyData = postsData
             this.replyDataCopy = [...this.fetchedReplyData.map((x: any) => x.discussionId)]
             this.loading = false
-            this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
+            // this.newReply.emit({ response: [], type: this.levelConfig.cardConfig.cardType, replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
           },
           () => {
             // On enrichData failure, fallback to original posts
@@ -146,8 +172,10 @@ export class PostCardComponent implements OnInit{
         // discussionId : [...this.replyDataCopy],
         // isActive: true, // this is to get only active posts, deleted posts won't be returned
         communityId: this.parentPost?.communityId,
-        "type": "answerPost",
-        parentDiscussionId: this.parentPost?.discussionId,
+        "type": this.nextLevelConfig.type || '',
+        ...(this.nextLevelConfig.type === 'answerPost') ? {parentDiscussionId: this.parentPost?.discussionId} : 
+        {parentAnswerPostId: this.post?.discussionId},
+        // parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
       },
       "requestedFields": [],
       "pageNumber": this.answerPostPage,
@@ -364,7 +392,7 @@ export class PostCardComponent implements OnInit{
   }
 
   editHandler(post: any) {
-    if(this.cardConfig && this.cardConfig.editAsDialogue){
+    if(this.cardConfig && this.levelConfig.cardConfig.showActions){
       this.openEditDialogue(post)
     } else {
       this.editMode = true
@@ -409,7 +437,8 @@ export class PostCardComponent implements OnInit{
         config: this.cardConfig,
         currentUser: {...this.loogedInUserProfile, ...this.loggedInUserData},
         post: post,
-        editMode: true
+        editMode: true,
+        parentPost: this.parentPost
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
@@ -436,7 +465,7 @@ export class PostCardComponent implements OnInit{
       this.answerPostPage = 0
       this.getListOfReplies()
       if(level) {
-        this.newComment.emit({ response: event.response, type: 'reply', replyData: this.replyDataCopy })
+        this.newComment.emit({ response: event.response, type: level, replyData: this.replyDataCopy })
       }
     }
   }
@@ -475,5 +504,4 @@ export class PostCardComponent implements OnInit{
     test = test.trim()
     return test.length
   }
-
 }

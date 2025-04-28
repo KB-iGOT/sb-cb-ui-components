@@ -180,5 +180,137 @@ export namespace NsDiscussionV2 {
     export enum EPostType {
         QUESTION = 'question',
         ANSWER_POST = 'answerPost',
+        ANSWER_POST_REPLY = 'answerPostReply',
+    }
+
+    export type LevelKey = `level${number}`; // Matches level0, level1, etc.
+    export interface IDiscussV2WidgetDataV2 {
+        maxLevels: number;
+        defaultAvatarConfig: IAvatarConfig;
+        levelConfigs: Record<LevelKey, LevelConfig>;
+        noPostsSection: INoPostsSection;
+    }
+
+    export interface IAvatarConfig {
+        show: boolean;
+        size: IAvatarSizeConfig;
+        photoUrl: string;
+        name: string;
+        color: string;
+    }
+
+    export interface LevelConfig {
+        type: 'question' | 'answerPost' | 'answerPostReply';
+        allowReplies: boolean;
+        replyLevelRef: string | null;
+        childrenKey: string | null;
+        newPostSection: INewPostSection;
+        cardConfig: ICardConfigV2;
+    }
+
+    export interface INewPostSection {
+        show: boolean;
+        openAsDialogue: boolean;
+        showTopInfo: boolean;
+        topInfo?: TopInfo;
+        avatarPhoto?: IAvatarConfig;
+        commentBox: ICommentBox;
+        postBtn: IPostButton;
+        styles: { [key: string]: string };
+    }
+
+    export interface TopInfo {
+        icon: string;
+        text: string;
+    }
+    
+    export interface IAvatarSizeConfig {
+        size: 's' | 'm' | 'ml' | 'l'
+    }
+    export interface IListType {
+        listType: 'multiple' | 'single'
+    }
+
+    export interface ICardType {
+        cardType: 'topLevel' | 'reply' | 'reply-l2';
+    }
+    export interface ICommentBox {
+        placeholder: string;
+    }
+    
+    export interface IPostButton {
+        text: string;
+        icon: string;
+        show: boolean;
+    }
+
+    // Card Configurations
+    export interface ICardConfigV2 {
+        listType?: IListType;
+        cardType: ICardType;
+        showActions: boolean;
+        editAsDialogue: boolean;
+        childrenIndented?: boolean;
+        cardClick?: ICardClickConfig;
+        avatarPhoto?: IAvatarConfig;
+        sliderData?: ISliderData;
+        reportIcon: ReportIcon;
+        actions: ICardActions;
+    }
+
+    export interface ICardClickConfig {
+        enabled: boolean;
+        position: 'title' | 'body';
+        redirectUrl: string;
+        id: string;
+    }
+      
+    export interface ISliderData {
+        styleData: ISliderStyleData;
+    }
+      
+    export interface ISliderStyleData {
+        bannerMetaClass: string;
+        bannerMeta: string;
+        bannerMetaAlign: string;
+        navigationArrows: string;
+        borderRadius: string;
+        customHeight: string;
+        arrowsPlacement: string;
+        autoplay: boolean;
+        responsive: {
+          bannerMetaClass: string;
+          customHeight: string;
+          bannerMetaAlign: string;
+          navigationArrows: string;
+          dots: string;
+          arrowsPlacement: string;
+          autoplay: boolean;
+        };
+    }
+    // Report & Actions
+    export interface ReportIcon {
+        show: boolean;
+        icon: string;
+        successMsg: string;
+        errorMsg: string;
+        showToolTip: boolean;
+        toolTipText: string;
+    }
+      
+    export interface ICardActions {
+        like?: IActionItem;
+        comments?: IActionItem;
+        bookmark?: IActionItem;
+    }
+      
+    export interface IActionItem {
+        show: boolean;
+        showCount?: boolean;
+        icon?: string;
+    }
+
+    export interface INoPostsSection {
+        text: string;
     }
 }
