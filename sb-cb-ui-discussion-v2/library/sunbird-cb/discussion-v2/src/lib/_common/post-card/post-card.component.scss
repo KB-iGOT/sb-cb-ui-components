@@ -1,6 +1,6 @@
 $green : #1D8923;
 
-.topLevel-card {
+.card-l1 {
     padding: 16px;
     background-color: #fff;
     border-radius: 12px;
@@ -8,9 +8,18 @@ $green : #1D8923;
 }
 
 
-.reply-card {
+.card-l2 {
     background-color: #0000FF0A;
     border-radius: 0;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #00000033;
+}
+
+.card-l3 {
+    background-color: rgba(243, 150, 47, 0.06);
+    border-radius: 0; 
     border: none;
     padding: 16px;
     border-radius: 12px;
