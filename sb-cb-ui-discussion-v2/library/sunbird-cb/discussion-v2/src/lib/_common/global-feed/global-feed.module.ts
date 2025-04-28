@@ -20,6 +20,7 @@ import { ImageSlidersModule } from '../image-sliders/image-sliders.module';
 import { NewPostModule } from '../new-post/new-post.module';
 import { PostCardModule } from '../post-card/post-card.module';
 import { GlobalFeedComponent } from './global-feed.component';
+import { PostCardV2Module } from '../post-card-v2/post-card-v2.module';
 
 
 
@@ -49,7 +50,7 @@ import { GlobalFeedComponent } from './global-feed.component';
     ImageSlidersModule,
     PostCardModule,
     NewPostModule,
-
+    PostCardV2Module,
   ],
   exports: [GlobalFeedComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
