@@ -26,6 +26,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   @Input() editMode: boolean = false
   @Input() isGlobal: boolean = false
   @Input() post: any
+  @Input() parentPost!: any
   @Output() editEvents = new EventEmitter<any>()
   @ViewChild('fileInput') fileInput!: ElementRef;
   @ViewChild('description') description!: ElementRef;
@@ -138,7 +139,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
         community: this.community,
         config: {postsList: this.postsListconfig},
         currentUser: {...this.loggedInUserData, ...this.loogedInUserProfile},
-        isGlobal: this.isGlobal
+        isGlobal: this.isGlobal,
+        parentPost: this.parentPost
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
@@ -319,6 +321,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
       case NsDiscussionV2.EPostType.ANSWER_POST:
         this.createAnswerPost(isInitialUpload);
         break;
+      case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
+        this.createAnswerPostReply(isInitialUpload);
+        break;
     }
   }
 
@@ -352,6 +357,31 @@ export class NewPostComponent implements OnInit, OnDestroy {
   createAnswerPost(isInitialUpload: boolean) {
     const req = this.createReq(this.uploadForm, this.type)
     this.discussV2Svc.createAnswerPost(req).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          const discussionId = res.result.discussionId; // Get the discussion ID
+          if (this.categoryType.length) {
+            this.uploadHandler(discussionId, res.result, isInitialUpload);
+          } else {
+            this._snackBar.open('Post created successfully!')
+            this.uploadForm.controls.description.setValue('')
+            this.newComment.emit({result: res.result, type: res.result.type})
+            if(this.uploadForm && this.uploadForm.controls && this.uploadForm.controls.description){
+              this.checkMultiline(this.uploadForm.controls.description.value)
+            }
+          }
+
+        }
+      },
+      error: (err: any) => {
+        console.log('Create post failed', err);
+      }
+    });
+  }
+  createAnswerPostReply(isInitialUpload: boolean) {
+    const req = this.createReq(this.uploadForm, this.type)
+    console.log('req: ', req, isInitialUpload)
+    this.discussV2Svc.createAnswerPostReply(req).subscribe({
       next: (res) => {
         if (res && res.result) {
           const discussionId = res.result.discussionId; // Get the discussion ID
@@ -437,6 +467,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
       case NsDiscussionV2.EPostType.ANSWER_POST:
         this.updateAnswerPostWithMediaUrls(discussionId, postResult, isInitialUpload);
         break;
+      case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
+        this.updateAnswerPostReplyWithMediaUrls(discussionId, postResult, isInitialUpload);
+        break;
     }
   }
 
@@ -489,11 +522,38 @@ export class NewPostComponent implements OnInit, OnDestroy {
     });
   }
 
+  updateAnswerPostReplyWithMediaUrls(discussionId: string, _postResult: any, isInitialUpload: boolean) {
+    const updateReq = {
+      answerPostReplyId: discussionId,
+      categoryType: this.categoryType,
+      mediaCategory: this.mediaCategory,
+      ...(isInitialUpload ? { isInitialUpload: true } : null),
+    };
+
+    this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
+      next: (res) => {
+        if (res && res.result) {
+          this._snackBar.open('Post created successfully!')
+          this.resetFormAndImages()
+          this.newComment.emit({result: res.result, type: res.result.type})
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post with media URLs:', err);
+        // Even if update fails, the post was created
+        this._snackBar.open('Error updating post with media URLs')
+      }
+    });
+  }
+
   createReq(formData: any, type: string) {
     const parentDiscussionId = this.hierarchyPath.length ? this.hierarchyPath[0] : ''
     const req = {
       type,
-      ...(parentDiscussionId ? { parentDiscussionId: parentDiscussionId } : null),
+      ...(parentDiscussionId && (type !== NsDiscussionV2.EPostType.ANSWER_POST_REPLY) ?
+         { parentDiscussionId: parentDiscussionId } : null),
+      ...(parentDiscussionId && (type === NsDiscussionV2.EPostType.ANSWER_POST_REPLY) ?
+          { parentAnswerPostId: parentDiscussionId, parentDiscussionId: this.parentPost.discussionId || '' } : null),
       communityId: (this.community && this.community.communityId) || 
       (this.post && this.post.communityId) || '',
       // title: formData.value.title,
@@ -515,6 +575,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
         break;
       case NsDiscussionV2.EPostType.ANSWER_POST:
         this.editAnswerPost();
+        break;
+      case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
+        this.editAnswerPostReply();
         break;
     }
   }
@@ -612,6 +675,36 @@ export class NewPostComponent implements OnInit, OnDestroy {
       // tags: this.selectedTags
     };
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
+      next: (res) => {
+        if (res?.result) {
+          this._snackBar.open('Post updated successfully!')
+          this.editEvents.emit({
+            cancelEdit : false,
+            edit: true,
+            post: res.result
+          })
+        }
+      },
+      error: (err) => {
+        console.error('Error updating post:', err);
+      }
+    });
+  }
+
+  async editAnswerPostReply() {
+    const newMedia = await this.editUploadHandler(this.post.discussionId);
+    const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
+    const updateReq = {
+      answerPostReplyId: this.post.discussionId,
+      // communityId: this.post.communityId,
+      // title: this.uploadForm.value.title,
+      description: this.uploadForm.value.description,
+      // mediaUrls,
+      categoryType: [...this.categoryType],
+      mediaCategory: mergedMediaCategory,
+      // tags: this.selectedTags
+    };
+    this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
       next: (res) => {
         if (res?.result) {
           this._snackBar.open('Post updated successfully!')

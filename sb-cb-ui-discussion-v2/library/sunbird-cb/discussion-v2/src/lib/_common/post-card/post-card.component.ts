@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,7 +17,7 @@ import { map } from 'rxjs/operators';
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.scss']
 })
-export class PostCardComponent {
+export class PostCardComponent implements OnInit{
   @Input() cardType = 'topLevel'
   @Input() cardConfig!: NsDiscussionV2.IPostCardConfig
   @Input() type!: string
