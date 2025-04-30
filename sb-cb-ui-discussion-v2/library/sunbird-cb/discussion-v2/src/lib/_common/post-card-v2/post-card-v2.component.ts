@@ -93,10 +93,6 @@ export class PostCardV2Component implements OnInit{
     this.nextLevel = this.levelConfig.replyLevelRef;
     this.nextNestingLevel = this.currentLevel + 1;
     this.nextLevelConfig = this.cardConfig.levelConfigs[this.nextLevel as keyof typeof this.cardConfig.levelConfigs];
-    console.log('this.nextLevel', this.nextLevel)
-    console.log('this.nextNestingLevel', this.nextNestingLevel)
-    console.log('this.nextLevelConfig', this.nextLevelConfig)
-    console.log('levelConfig', this.levelConfig)
   }
 
 
@@ -216,7 +212,6 @@ export class PostCardV2Component implements OnInit{
 
   enrichData(posts: any) {
     const groupedDataRequest = this.groupByCommunityId(posts);
-    console.log(groupedDataRequest);
     return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
       map((res: any) => {
         const enrichedData = _.get(res, 'result.search_results')
@@ -392,7 +387,7 @@ export class PostCardV2Component implements OnInit{
   }
 
   editHandler(post: any) {
-    if(this.cardConfig && this.levelConfig.cardConfig.showActions){
+    if(this.cardConfig && this.levelConfig.cardConfig.editAsDialogue){
       this.openEditDialogue(post)
     } else {
       this.editMode = true
@@ -411,7 +406,6 @@ export class PostCardV2Component implements OnInit{
   }
 
   communityClick(communityId: string) {
-    console.log('communityId', communityId)
     const community = {
       communityId: communityId
     }
@@ -438,7 +432,9 @@ export class PostCardV2Component implements OnInit{
         currentUser: {...this.loogedInUserProfile, ...this.loggedInUserData},
         post: post,
         editMode: true,
-        parentPost: this.parentPost
+        parentPost: this.parentPost,
+        levelKey: this.levelKey,
+        currentLevel: this.currentLevel
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
@@ -455,7 +451,6 @@ export class PostCardV2Component implements OnInit{
   }
 
   newCommentEvent(event: any, level?: string) {
-    console.log('newCommentEvent::', event)
     if (event.result && event.result.discussionId) {
       this.loading = true
       // this.emptySearch()

@@ -11,12 +11,15 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 })
 export class PostPreviewComponent {
   @Input() cardType = 'topLevel'
-  @Input() cardConfig!: NsDiscussionV2.IPostCardConfig
+  @Input() cardConfig!: NsDiscussionV2.IDiscussV2WidgetDataV2
   @Input() type!: string
   @Input() post!: any
+  @Input() levelKey!: string
+  @Input() currentLevel: number = 0
   viewMoreLength = 160
 
   loogedInUserProfile: any = {}
+  levelConfig: any;
   constructor(
     private configSvc: ConfigurationsService,
   ) {
@@ -25,6 +28,7 @@ export class PostPreviewComponent {
 
   ngOnInit() {
     this.loogedInUserProfile = {...this.configSvc.userProfile, ...this.configSvc.unMappedUser}
+    this.levelConfig = this.cardConfig.levelConfigs[this.levelKey as keyof typeof this.cardConfig.levelConfigs];
   }
 
   viewMoreOrLess(item: any) {
