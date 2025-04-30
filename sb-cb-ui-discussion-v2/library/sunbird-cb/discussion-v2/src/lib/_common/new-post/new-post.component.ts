@@ -16,7 +16,7 @@ import _ from 'lodash'
 })
 export class NewPostComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewPostConfig
-  @Input() postsListconfig!: NsDiscussionV2.IPostCardConfig
+  @Input() postsListconfig!: any
   @Input() hierarchyPath = []
   @Input() taggedUsers = []
   @Input() type = 'question'
@@ -137,10 +137,12 @@ export class NewPostComponent implements OnInit, OnDestroy {
         backdropClass: 'post-dialog-backdrop',
         parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
         community: this.community,
-        config: {postsList: this.postsListconfig},
+        config: this.postsListconfig,
         currentUser: {...this.loggedInUserData, ...this.loogedInUserProfile},
         isGlobal: this.isGlobal,
-        parentPost: this.parentPost
+        parentPost: this.parentPost,
+        levelKey: 'level0',
+        currentLevel: '0'
       } 
     });
     newPostDialog.afterClosed().subscribe((result: any) => {
@@ -342,7 +344,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
       }
     });
   }
@@ -374,13 +376,12 @@ export class NewPostComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
       }
     });
   }
   createAnswerPostReply(isInitialUpload: boolean) {
     const req = this.createReq(this.uploadForm, this.type)
-    console.log('req: ', req, isInitialUpload)
     this.discussV2Svc.createAnswerPostReply(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -399,7 +400,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
       }
     });
   }

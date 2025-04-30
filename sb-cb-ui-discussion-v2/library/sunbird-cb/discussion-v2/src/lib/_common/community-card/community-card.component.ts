@@ -44,7 +44,6 @@ export class CommunityCardComponent implements OnInit {
   }
 
   joinCommunity(community: any) {
-    console.log(community)
     let dialogRef = this.dialog.open(CommunityGuideLinesComponent, {
       data: {
         community: community,
@@ -54,7 +53,6 @@ export class CommunityCardComponent implements OnInit {
       maxWidth: window.innerWidth <= 768 ? '100vw' : '40vw'
     })
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result)
       if(result) {
         this.callJoinCommunity(community)
       }

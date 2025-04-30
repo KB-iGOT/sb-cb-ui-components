@@ -61,7 +61,6 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
     this.selectedTabId = 'feeds'
     let data = await this.userEnrollSvc.getEnrollDataId()
     this.userCommunityList = data
-    console.log(data)
     this.loadedData = true
   }
 
@@ -127,7 +126,6 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
   onSearch(event: any): void {
     const searchValue = event.target.value;
     this.searchText.emit(searchValue);
-    console.log('Search text:', searchValue);
     // Add your search logic here
   }
 

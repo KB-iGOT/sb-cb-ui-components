@@ -15,7 +15,7 @@
         <div class="flex user-info">
             <div>
                 <div class="mr-1 md:mr-4">
-                    <d-v2-avatar-photo [size]="'ml'" [name]="post?.createdBy?.first_name"
+                    <d-v2-avatar-photo [size]="levelConfig?.cardConfig?.avatarPhoto?.size" [name]="post?.createdBy?.first_name"
                         [photoUrl]="post?.createdBy?.user_profile_img_url" [color]="
                         post?.createdBy?.first_name === loogedInUserProfile?.firstName ?
                         levelConfig?.cardConfig?.avatarPhoto?.color || '#006400' : '#000'
@@ -110,7 +110,7 @@
                 </ng-container>
             </ng-container>
             <ng-container *ngIf="editMode">
-                <d-v2-new-post [type]="levelConfig?.type" [config]="levelConfig?.newPostSection"
+                <d-v2-new-post [type]="levelConfig?.type" [config]="levelConfig?.newPostSection" [postsListconfig]="cardConfig"
                     (newReply)="updateRepliesData($event)" (newComment)="newCommentEvent($event)"
                     [userJoinedCommunity]="userJoinedCommunity" (editEvents)="editEventsHandler($event)"
                     [community]="community" [editMode]="true" [post]="post" [parentPost]="parentPost">
@@ -125,7 +125,7 @@
                         <mat-icon class="icon like-icon mr-2" aria-hidden="false" i18n-aria-label
                             [ngClass]="{'user-liked': post.isLiked}"
                             aria-label="Fail">{{levelConfig.cardConfig.actions.like.icon}}</mat-icon>
-                        <span class="nodtranslate" *ngIf="levelConfig?.cardConfig?.action?.like?.showCount">
+                        <span class="nodtranslate" *ngIf="levelConfig?.cardConfig?.actions?.like?.showCount">
                             {{(post?.upVoteCount && post?.upVoteCount) || 0}}
                         </span>
                     </div>
@@ -173,7 +173,8 @@
         <ng-container *ngIf="levelConfig?.cardConfig?.actions?.comments?.show">
             <div *ngIf="data.replyToggle" class="mt-4 repliesSection">
                 <div class="mb-4">
-                    <d-v2-new-post [config]="nextLevelConfig?.newPostSection" [community]="community" [post]="post"
+                    <d-v2-new-post [config]="nextLevelConfig?.newPostSection" [community]="community"
+                         [post]="post" [postsListconfig]="cardConfig"
                         [type]="nextLevelConfig?.type" (newComment)="newCommentEvent($event)"
                         [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]" [parentPost]="parentPost">
                     </d-v2-new-post>

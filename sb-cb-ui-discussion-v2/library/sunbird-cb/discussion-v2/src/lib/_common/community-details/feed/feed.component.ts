@@ -282,7 +282,6 @@ export class FeedComponent implements OnInit, OnChanges{
 
   onSearch(event: any){
     const searchValue = event.target.value;
-    console.log('Search text:', searchValue);
     // Add your search logic here{
     this.fetchPosts(searchValue)
 

@@ -133,7 +133,6 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
   
   enrichData(posts: any) {
     const groupedDataRequest = this.groupByCommunityId(posts);
-    console.log(groupedDataRequest);
     return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
       map((res: any) => {
         const enrichedData = _.get(res, 'result.search_results')
@@ -277,7 +276,6 @@ export class GlobalFeedComponent implements OnInit, OnChanges{
 
   onSearch(event: any){
     const searchValue = event.target.value;
-    console.log('Search text:', searchValue);
     // Add your search logic here{
     this.fetchPosts(searchValue)
 

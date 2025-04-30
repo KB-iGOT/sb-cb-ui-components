@@ -20,7 +20,7 @@
         <div class="flex-1 post-container">
             <div class="mb-4" *ngIf="widgetData?.newPostSection?.show && showNewPost">
                 <d-v2-new-post [community]="community" [userJoinedCommunity]="true"
-                    [config]="widgetData?.newPostSection" [postsListconfig]="widgetData?.postsList"
+                    [config]="widgetData?.newPostSection" [postsListconfig]="widgetData"
                     (newComment)="newCommentEvent($event)" [type]="widgetData?.newPostSection?.type"
                     [isGlobal]="true"></d-v2-new-post>
             </div>

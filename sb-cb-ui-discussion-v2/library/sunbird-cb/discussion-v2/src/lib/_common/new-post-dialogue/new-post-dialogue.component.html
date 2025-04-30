@@ -310,8 +310,8 @@
   <div class="preview-section md:col-span-5">
     <div class="flex flex-col">
       <div class="preview p-2">
-        <d-v2-post-preview [cardType]="widgetData?.postsList?.cardType" [cardConfig]="widgetData?.postsList"
-          [post]="postPreview"></d-v2-post-preview>
+        <d-v2-post-preview [cardType]="widgetData?.levelConfigs[data?.levelKey]?.cardConfig?.cardType" [cardConfig]="widgetData"
+          [post]="postPreview" [levelKey]="data?.levelKey" [currentLevel]="data?.currentLevel"></d-v2-post-preview>
       </div>
       <div class="text-center">
         <p class="mat-body-1 nodtranslate">Post preview</p>

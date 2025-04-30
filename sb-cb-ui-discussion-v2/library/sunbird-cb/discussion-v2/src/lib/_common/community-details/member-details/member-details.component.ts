@@ -38,7 +38,6 @@ export class MemberDetailsComponent implements OnInit{
   }
   onSearch(event: any){
     this.membersLoading = true
-   console.log(event);
    let typeText: any  = event && event.target && event.target.value || ''
   let request = {
     "request": {

@@ -5,9 +5,19 @@
     border: 1px solid #00000033;
 }
 
-.reply-card {
-    background-color: #0000FF0A;
+
+.card-l2 {
+    background-color: rgba(0, 0, 255, 0.08);
     border-radius: 0;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #00000033;
+}
+
+.card-l3 {
+    background-color: rgba(243, 150, 47, 0.06);
+    border-radius: 0; 
     border: none;
     padding: 16px;
     border-radius: 12px;

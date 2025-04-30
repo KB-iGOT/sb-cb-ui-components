@@ -188,7 +188,6 @@ export class PostCardComponent implements OnInit{
 
   enrichData(posts: any) {
     const groupedDataRequest = this.groupByCommunityId(posts);
-    console.log(groupedDataRequest);
     return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
       map((res: any) => {
         const enrichedData = _.get(res, 'result.search_results')
@@ -383,7 +382,6 @@ export class PostCardComponent implements OnInit{
   }
 
   communityClick(communityId: string) {
-    console.log('communityId', communityId)
     const community = {
       communityId: communityId
     }
@@ -426,7 +424,6 @@ export class PostCardComponent implements OnInit{
   }
 
   newCommentEvent(event: any, level?: string) {
-    console.log('newCommentEvent::', event)
     if (event.result && event.result.discussionId) {
       this.loading = true
       // this.emptySearch()
