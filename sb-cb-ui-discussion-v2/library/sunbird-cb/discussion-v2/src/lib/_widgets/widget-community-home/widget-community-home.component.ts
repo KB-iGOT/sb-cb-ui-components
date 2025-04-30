@@ -436,7 +436,6 @@ toggleExpandedView() {
       maxWidth: window.innerWidth <= 768 ? '100vw' : '40vw'
     })
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result)
       if(result) {
         this.joinCommunity()
       }

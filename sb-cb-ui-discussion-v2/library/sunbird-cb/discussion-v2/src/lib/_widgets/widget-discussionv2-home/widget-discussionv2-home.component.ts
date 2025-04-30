@@ -42,7 +42,6 @@ export class WidgetDiscussionv2HomeComponent implements OnInit {
   onSearch(event: any): void {
     const searchValue = event.target.value;
     this.searchText.emit(searchValue);
-    console.log('Search text:', searchValue);
     // Add your search logic here
   }
 

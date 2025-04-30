@@ -260,7 +260,6 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
       this.loadingMore = false
-      console.log('res = > ', res)
       this.searchResults = _.get(res, 'result.search_results') || {}
       this.posts = [...this.posts, ...(_.get(res, 'result.search_results.data') || [])]
     },(err: any) => {
@@ -271,7 +270,6 @@ export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
   }
 
   newCommentEvent(event: any) {
-    console.log('Widget catch event :', event)
     if(event && event.type === 'question'){
       this.fetchPosts()
     }

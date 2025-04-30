@@ -231,7 +231,7 @@ export class ShareDiscussionComponent implements OnInit {
         this.userCtrl.setValue('')
       }, error => {
         // tslint:disable
-        console.log(error)
+        console.error(error)
         this.openSnackbar(this.translateLabels('error','contentSharing',''))
       })
     }

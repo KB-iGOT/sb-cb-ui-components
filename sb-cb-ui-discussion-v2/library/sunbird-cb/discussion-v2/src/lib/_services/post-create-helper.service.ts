@@ -29,7 +29,7 @@ export class PostCreateHelperService {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
       }
     });
   }

@@ -53,7 +53,7 @@ import { UserEnrollCommunityService } from '../../_services/user-enroll-communit
   styleUrls: ['./new-post-dialogue.component.scss']
 })
 export class NewPostDialogueComponent implements OnInit, OnDestroy {
-  widgetData!: NsDiscussionV2.IPostDetailsWidget | null
+  widgetData!: any
   uploadForm: FormGroup;
   selectedFilesFinal: any = {}
   selectedTags: string[] = [];
@@ -591,7 +591,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
         this._snackBar.open('Post creation failed, please try again after sometime...!')
       }
     });
@@ -612,7 +612,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
         this._snackBar.open('Post creation failed, please try again after sometime...!')  
       }
     });
@@ -620,7 +620,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
   createAnswerPostReply(isInitialUpload: boolean) {
     const req = this.createReq(this.uploadForm, this.data.type)
-    console.log('req: ', req, isInitialUpload)
+    console.error('req: ', req, isInitialUpload)
     this.discussV2Svc.createAnswerPostReply(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -635,7 +635,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.log('Create post failed', err);
+        console.error('Create post failed', err);
       }
     });
   }
