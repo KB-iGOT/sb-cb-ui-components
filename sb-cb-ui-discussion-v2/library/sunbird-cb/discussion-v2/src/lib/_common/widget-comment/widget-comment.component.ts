@@ -96,7 +96,13 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       offset: this.commentListOffSet,
       overrideCache: overrideCacheValue || false,
     }
-    this.commentSvc.getCommentTree(payload).subscribe((commentRes: any) => {
+
+    const commentTreePayload = {
+      entityType,
+      workflow,
+      "entityId":  this.entityId,
+    }
+    this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
       let commentTreeDataLocal = commentRes.result
       this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
         // tslint:disable-next-line: no-console
