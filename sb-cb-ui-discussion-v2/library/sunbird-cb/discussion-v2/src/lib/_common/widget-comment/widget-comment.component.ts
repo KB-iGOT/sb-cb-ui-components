@@ -97,62 +97,79 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       overrideCache: overrideCacheValue || false,
     }
 
-    this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
-      // tslint:disable-next-line: no-console
-      this.loading = false
-      if (res && res.result.commentCount) {
-        
-        this.commentData = res.result
-        this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
-        if(res && res.result && res.result.courseDetails){
-          res.result.courseDetails['curators'] = []
-          res.result.courseDetails['authors'] = []
-          if(res.result.courseDetails.creatorDetails) {
-            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
-            let creatorIds: any = []
-            creatorDetails.forEach((ele: any) => {
-              creatorIds.push(ele.id)
-            });
-            res.result.courseDetails['authors'] = creatorIds
+    const commentTreePayload = {
+      entityType,
+      workflow,
+      "entityId":  this.entityId,
+    }
+    this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
+      let commentTreeDataLocal = commentRes.result
+      this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
+        // tslint:disable-next-line: no-console
+        this.loading = false
+        if (res && res.result.commentCount) {
+          
+          this.commentData = res.result
+          this.commentData['commentTree'] = {
+            commentTreeId : res.result.commentTreeId,
+            commentTreeData : commentTreeDataLocal
           }
-          if(res.result.courseDetails.creatorContacts) {
-            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
-            let creatorContactsIds: any = []
-            creatorContacts.forEach((ele: any) => {
-              creatorContactsIds.push(ele.id)
-            });
-            res.result.courseDetails['curators'] = creatorContactsIds
+          this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
+          if(res && res.result && res.result.courseDetails){
+            res.result.courseDetails['curators'] = []
+            res.result.courseDetails['authors'] = []
+            if(res.result.courseDetails.creatorDetails) {
+              let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+              let creatorIds: any = []
+              creatorDetails.forEach((ele: any) => {
+                creatorIds.push(ele.id)
+              });
+              res.result.courseDetails['authors'] = creatorIds
+            }
+            if(res.result.courseDetails.creatorContacts) {
+              let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+              let creatorContactsIds: any = []
+              creatorContacts.forEach((ele: any) => {
+                creatorContactsIds.push(ele.id)
+              });
+              res.result.courseDetails['curators'] = creatorContactsIds
+            }
+            this.commentSvc.courseDetails = res.result.courseDetails
           }
-          this.commentSvc.courseDetails = res.result.courseDetails
-        }
-        this.commentData.commentTree.commentTreeData.comments.reverse()
+          this.commentData.commentTree.commentTreeData.comments.reverse()
 
-        this.commentSvc.commentTreeId =''
-        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
-        this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
-        if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
-          // tslint:disable-next-line:max-line-length
-          this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
-        }
+          this.commentSvc.commentTreeId =''
+          this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
+          this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
+          if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
+            // tslint:disable-next-line:max-line-length
+            this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
+          }
 
-        if(res.result && res.result.users && res.result.users.length) {
-          let commentUsersDataObj = res.result.users
-          this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
-        } 
-        this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
-      }
-      if (res && res.code === 'Not Found' || !res.result.commentCount) {
-        this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
-      }
-      this.commentDataChange.emit({
-        commentData: this.commentData,
-        widgetData: this.widgetData,
+          if(res.result && res.result.users && res.result.users.length) {
+            let commentUsersDataObj = res.result.users
+            this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+          } 
+          this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
+        }
+        if (res && res.code === 'Not Found' || !res.result.commentCount) {
+          this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+        }
+        this.commentDataChange.emit({
+          commentData: this.commentData,
+          widgetData: this.widgetData,
+        })
+      }, (err: any) => {
+        this.loading = false
+        // tslint:disable-next-line: no-console
+        console.error('Error in fetching all comments', err)
       })
-    }, (err: any) => {
-      this.loading = false
+    },(err: any) => {
+      this.loadingMore = false
       // tslint:disable-next-line: no-console
       console.error('Error in fetching all comments', err)
     })
+    
   }
 
   fetchInitialComments_v2Addmore(commentTreeId?: string) {
@@ -172,85 +189,83 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
     }
+      this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
+        if (res && res.result.commentCount) {
+          const newComments = res.result.comments
+          if(res && res.result && res.result.courseDetails){
 
-    this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
-      if (res && res.result.commentCount) {
-        
-        const newComments = res.result.comments
-        if(res && res.result && res.result.courseDetails){
-
-          res.result.courseDetails['curators'] = []
-          res.result.courseDetails['authors'] = []
-          if(res.result.courseDetails.creatorDetails) {
-            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
-            let creatorIds: any = []
-            creatorDetails.forEach((ele: any) => {
-              creatorIds.push(ele.id)
-            });
-            res.result.courseDetails['authors'] = creatorIds
+            res.result.courseDetails['curators'] = []
+            res.result.courseDetails['authors'] = []
+            if(res.result.courseDetails.creatorDetails) {
+              let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+              let creatorIds: any = []
+              creatorDetails.forEach((ele: any) => {
+                creatorIds.push(ele.id)
+              });
+              res.result.courseDetails['authors'] = creatorIds
+            }
+            if(res.result.courseDetails.creatorContacts) {
+              let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+              let creatorContactsIds: any = []
+              creatorContacts.forEach((ele: any) => {
+                creatorContactsIds.push(ele.id)
+              });
+              res.result.courseDetails['curators'] = creatorContactsIds
+            }
+            if(res.result && res.result.users && res.result.users.length) {
+              let commentUsersDataObj = res.result.users
+              this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+            } 
+            this.commentSvc.courseDetails = res.result.courseDetails
           }
-          if(res.result.courseDetails.creatorContacts) {
-            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
-            let creatorContactsIds: any = []
-            creatorContacts.forEach((ele: any) => {
-              creatorContactsIds.push(ele.id)
-            });
-            res.result.courseDetails['curators'] = creatorContactsIds
+
+          if (!this.commentData) {
+            this.commentData = res.result
+          } else {
+            const existingCommentIds = this.commentData.comments.map(
+              (comment: any) => comment.commentId
+            )
+
+            const filteredNewComments = newComments.filter(
+              (comment: any) => !existingCommentIds.includes(comment.commentId)
+            )
+
+            this.commentData.comments.push(...filteredNewComments)
           }
-          if(res.result && res.result.users && res.result.users.length) {
-            let commentUsersDataObj = res.result.users
-            this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
-          } 
-          this.commentSvc.courseDetails = res.result.courseDetails
-        }
 
-        if (!this.commentData) {
-          this.commentData = res.result
-        } else {
-          const existingCommentIds = this.commentData.comments.map(
-            (comment: any) => comment.commentId
-          )
+          if (this.commentListOffSet === 0 && !this.isReversed) {
+            this.commentData.commentTree.commentTreeData.comments.reverse()
+            this.isReversed = true
+          }
 
-          const filteredNewComments = newComments.filter(
-            (comment: any) => !existingCommentIds.includes(comment.commentId)
-          )
-
-          this.commentData.comments.push(...filteredNewComments)
-        }
-
-        if (this.commentListOffSet === 0 && !this.isReversed) {
-          this.commentData.commentTree.commentTreeData.comments.reverse()
-          this.isReversed = true
-        }
-
-        this.commentSvc.commentTreeId =''
-        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
-        this.widgetData.newCommentSection.commentTreeData.commentTreeId =
-          this.commentData.commentTree.commentTreeId
-
-        if (
-          this.widgetData.commentsList.repliesSection &&
-          this.widgetData.commentsList.repliesSection.newCommentReply
-        ) {
-          this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId =
+          this.commentSvc.commentTreeId =''
+          this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
+          this.widgetData.newCommentSection.commentTreeData.commentTreeId =
             this.commentData.commentTree.commentTreeId
+
+          if (
+            this.widgetData.commentsList.repliesSection &&
+            this.widgetData.commentsList.repliesSection.newCommentReply
+          ) {
+            this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId =
+              this.commentData.commentTree.commentTreeId
+          }
+
+          this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
         }
 
-        this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
-      }
+        if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
+          this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+        }
 
-      if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
-        this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
-      }
-
-      this.loadingMore = false
-
-    },
-      () => {
         this.loadingMore = false
 
-      }
-    )
+      },
+        () => {
+          this.loadingMore = false
+
+        }
+      )
   }
 
   getReplies(comment: any) {

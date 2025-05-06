@@ -7,6 +7,8 @@ const API_END_POINTS = {
   FETCH_ALL_COMMENTS: (entityType: string, entityId: string, workflow: string) =>
     `/apis/proxies/v8/comment/v1/getAll?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
   FETCH_ALL_COMMENTS_V2: `/apis/proxies/v8/comment/v2/search`,
+  FETCH_ALL_COMMENTS_V3: `apis/proxies/v8/comment/v3/search`,
+  GET_COMMENT_TREE:`apis/proxies/v8/commentTree/v1/get`,
   ADD_FIRST_COMMENT: `/apis/proxies/v8/comment/v1/addFirst`,
   ADD_NEW_COMMENT: '/apis/proxies/v8/comment/v1/addNew',
   LIST_COMMENT: '/apis/proxies/v8/comment/list',
@@ -41,6 +43,10 @@ export class CommentsService {
     return this.http.get<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS(entityType, entityId, workflow)}`)
   }
 
+  getCommentTree(requestBody: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.GET_COMMENT_TREE}`, requestBody)
+  }
+
   fetchAllFlags(): Observable<any> {
     return this.http.get<any>(`${API_END_POINTS.FLAG_LIST}`)
   }
@@ -48,6 +54,11 @@ export class CommentsService {
   fetchAllComment_V2(payload: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
   }
+  
+  fetchAllComment_V3(payload: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+  }
+
 
   addFirstComment(req: any): Observable<any> {
     return this.http.post<any>(API_END_POINTS.ADD_FIRST_COMMENT, req)
