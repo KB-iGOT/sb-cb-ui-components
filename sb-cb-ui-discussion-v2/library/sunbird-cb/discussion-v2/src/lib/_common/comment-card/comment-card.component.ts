@@ -344,7 +344,8 @@ export class CommentCardComponent implements OnInit, OnChanges {
     let replayData = ``
     if(taggedUsers && taggedUsers.length){
       taggedUsers.forEach((tagUser: any) => {
-        users = users + this.tagUserData[tagUser]?.first_name
+        const firstName = this.tagUserData[tagUser]?.first_name
+        if (firstName)  users = users + firstName
       });
     }
     if(users) {
