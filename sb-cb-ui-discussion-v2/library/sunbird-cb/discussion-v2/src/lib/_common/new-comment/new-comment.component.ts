@@ -140,5 +140,8 @@ export class NewCommentComponent implements OnInit, OnDestroy {
     }
   }
 
-  
+  get canShowSection(): boolean {
+    if (this.config?.show || this.config?.showTopInfo) return true
+    return false
+  }
 }
