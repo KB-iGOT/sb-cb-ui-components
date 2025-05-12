@@ -60,7 +60,7 @@
             <span class="mr-1 nodtranslate">{{comment?.createdDate === comment?.lastUpdatedDate?'':'(Edited)'}}</span>
             <span class="nodtranslate">{{comment?.lastUpdatedDate | pipeRelativeTime}}</span>
         </span>
-        <div *ngIf="commentSvc?.enrolledContent">
+        <div *ngIf="commentSvc?.enrolledContent && checkIfAnyConditionMet()">
             <mat-icon class="icon nodtranslate" aria-hidden="false" i18n-aria-label [matMenuTriggerFor]="cardMenu"
                 aria-label="more">more_vertical</mat-icon>
         </div>

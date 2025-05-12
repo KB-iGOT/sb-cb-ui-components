@@ -84,7 +84,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   }
 
   newComment(event: any) {
-    
+
     if (event.response && event.response.comment && event.response.comment.commentId) {
       this.loading = true
       this.emptySearch()
@@ -114,17 +114,17 @@ export class CommentCardComponent implements OnInit, OnChanges {
   getListOfReplies() {
     let reveseReplayDataCopy = [...this.replyDataCopy]
     reveseReplayDataCopy.reverse()
-    let ids:any = reveseReplayDataCopy.slice(0,10)
+    let ids: any = reveseReplayDataCopy.slice(0, 10)
     this.commentSvc.getListOfCommentsById(ids).subscribe(res => {
       this.loading = false
       if (res.result && res.result.comments.length) {
         let taggedUsersList = res.result.taggedUsers
-        this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
+        this.tagUserData = { ...this.tagUserData, ..._.keyBy(taggedUsersList, 'user_id') }
         const reply = res.result.comments
         // parrent comment id is user for sencond level comments only
-        const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
+        const replayModified = reply.map((replayData: any) => ({ ...replayData, parentCommentId: this.comment.commentId }))
         this.fetchedReplyData = [...replayModified,]
-        this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
+        this.newReply.emit({ response: [], type: 'reply', replyDataCopy: this.replyDataCopy, replyData: this.fetchedReplyData })
       }
     },
       () => {
@@ -167,7 +167,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     //     this.likeUnlikeCommentApi('like', event.commentId)
     //   }
     // })
-    if(this.userLikedComments.includes(event.commentId)) {
+    if (this.userLikedComments.includes(event.commentId)) {
       this.likeUnlikeCommentApi('dislike', event.commentId)
     } else {
       this.likeUnlikeCommentApi('like', event.commentId)
@@ -269,14 +269,14 @@ export class CommentCardComponent implements OnInit, OnChanges {
     this.commentSvc.deleteComment(comment.commentId, this.commentSvc.entityType, this.commentSvc.entityId, this.commentSvc.workflow , comment.parentCommentId || '').subscribe((_res: any) => {
       comment.status = 'inactive'
       this._snackBar.open('Comment deleted successfully')
-    }, (_err: any)=> {
+    }, (_err: any) => {
       this._snackBar.open('Something went wrong! please try again later.')
     })
   }
 
-  toggelEdit(commentData:any) {
+  toggelEdit(commentData: any) {
     this.editCommentData = {}
-    this.editCommentData = {...commentData}
+    this.editCommentData = { ...commentData }
     this.isEditMode = true
     this.replayCommentsCount = this.replayCommentsCount + 10
   }
@@ -369,4 +369,13 @@ export class CommentCardComponent implements OnInit, OnChanges {
   emptySearch() {
     this.commentSvc.emptyCommentSearch().subscribe((_res: any) => { })
   }
+
+  checkIfAnyConditionMet(): boolean {
+    return (
+      (this.comment?.commentData?.commentSource?.userId !== this.loogedInUserProfile?.userId &&
+        this.cardConfig?.actions?.flagComment?.show) ||
+      this.comment?.commentData?.commentSource?.userId === this.loogedInUserProfile?.userId
+    )
+  }
+
 }
