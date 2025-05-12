@@ -87,6 +87,27 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.commentSvc.entityId = this.entityId
     this.commentSvc.entityType = entityType
     this.commentSvc.workflow = workflow
+   
+
+    const commentTreePayload = {
+      entityType,
+      workflow,
+      "entityId":  this.entityId,
+    }
+    this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
+      let commentTreeDataLocal = commentRes.result
+      this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
+    },(err: any) => {
+      this.loadingMore = false
+      let commentTreeDataLocal = {}
+      // tslint:disable-next-line: no-console
+     this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
+      console.error('Error in fetching all comments', err)
+    })
+    
+  }
+
+  fetchComments_V3(commentTreeDataLocal: any, commentTreeId?: string, overrideCacheValue?: boolean,entityType: string = '', workflow: string = '') {
     const payload = {
       entityType,
       workflow,
@@ -96,80 +117,66 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       offset: this.commentListOffSet,
       overrideCache: overrideCacheValue || false,
     }
-
-    const commentTreePayload = {
-      entityType,
-      workflow,
-      "entityId":  this.entityId,
-    }
-    this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
-      let commentTreeDataLocal = commentRes.result
-      this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
-        // tslint:disable-next-line: no-console
-        this.loading = false
-        if (res && res.result.commentCount) {
-          
-          this.commentData = res.result
-          this.commentData['commentTree'] = {
-            commentTreeId : res.result.commentTreeId,
-            commentTreeData : commentTreeDataLocal
-          }
-          this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
-          if(res && res.result && res.result.courseDetails){
-            res.result.courseDetails['curators'] = []
-            res.result.courseDetails['authors'] = []
-            if(res.result.courseDetails.creatorDetails) {
-              let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
-              let creatorIds: any = []
-              creatorDetails.forEach((ele: any) => {
-                creatorIds.push(ele.id)
-              });
-              res.result.courseDetails['authors'] = creatorIds
-            }
-            if(res.result.courseDetails.creatorContacts) {
-              let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
-              let creatorContactsIds: any = []
-              creatorContacts.forEach((ele: any) => {
-                creatorContactsIds.push(ele.id)
-              });
-              res.result.courseDetails['curators'] = creatorContactsIds
-            }
-            this.commentSvc.courseDetails = res.result.courseDetails
-          }
-          this.commentData.commentTree.commentTreeData.comments.reverse()
-
-          this.commentSvc.commentTreeId =''
-          this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
-          this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
-          if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
-            // tslint:disable-next-line:max-line-length
-            this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
-          }
-
-          if(res.result && res.result.users && res.result.users.length) {
-            let commentUsersDataObj = res.result.users
-            this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
-          } 
-          this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
+    this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
+      // tslint:disable-next-line: no-console
+      this.loading = false
+      if (res && res.result.commentCount) {
+        
+        this.commentData = res.result
+        this.commentData['commentTree'] = {
+          commentTreeId : res.result.commentTreeId,
+          commentTreeData : commentTreeDataLocal
         }
-        if (res && res.code === 'Not Found' || !res.result.commentCount) {
-          this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+        this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
+        if(res && res.result && res.result.courseDetails){
+          res.result.courseDetails['curators'] = []
+          res.result.courseDetails['authors'] = []
+          if(res.result.courseDetails.creatorDetails) {
+            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+            let creatorIds: any = []
+            creatorDetails.forEach((ele: any) => {
+              creatorIds.push(ele.id)
+            });
+            res.result.courseDetails['authors'] = creatorIds
+          }
+          if(res.result.courseDetails.creatorContacts) {
+            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+            let creatorContactsIds: any = []
+            creatorContacts.forEach((ele: any) => {
+              creatorContactsIds.push(ele.id)
+            });
+            res.result.courseDetails['curators'] = creatorContactsIds
+          }
+          this.commentSvc.courseDetails = res.result.courseDetails
         }
-        this.commentDataChange.emit({
-          commentData: this.commentData,
-          widgetData: this.widgetData,
-        })
-      }, (err: any) => {
-        this.loading = false
-        // tslint:disable-next-line: no-console
-        console.error('Error in fetching all comments', err)
+        this.commentData.commentTree.commentTreeData.comments.reverse()
+
+        this.commentSvc.commentTreeId =''
+        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
+        this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
+        if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
+          // tslint:disable-next-line:max-line-length
+          this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
+        }
+
+        if(res.result && res.result.users && res.result.users.length) {
+          let commentUsersDataObj = res.result.users
+          this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+        } 
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
+      }
+      if (res && res.code === 'Not Found' || !res.result.commentCount) {
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+      }
+      this.commentDataChange.emit({
+        commentData: this.commentData,
+        widgetData: this.widgetData,
       })
-    },(err: any) => {
-      this.loadingMore = false
+    }, (err: any) => {
+      this.loading = false
       // tslint:disable-next-line: no-console
       console.error('Error in fetching all comments', err)
     })
-    
   }
 
   fetchInitialComments_v2Addmore(commentTreeId?: string) {

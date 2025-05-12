@@ -153,7 +153,7 @@
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
-                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)"
+                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)" [replyParendtData]="fetchedReplyData"
                             [userLikedComments]="userLikedComments" [commentUsersData]="commentUsersData"
                             [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply"
                             [tagUserData]="tagUserData" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
