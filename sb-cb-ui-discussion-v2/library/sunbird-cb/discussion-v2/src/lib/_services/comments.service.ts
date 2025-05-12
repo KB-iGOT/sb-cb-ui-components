@@ -86,8 +86,12 @@ export class CommentsService {
 
   }
 
-  deleteComment(commentId: string, entityType: string, entityId: string, workflow: string): Observable<any> {
-    return this.http.delete<any>(`${API_END_POINTS.DELETE_COMMENT(commentId, entityType, entityId, workflow)}`)
+  deleteComment(commentId: string, entityType: string, entityId: string, workflow: string, parentId?: any): Observable<any> {
+    let url = API_END_POINTS.DELETE_COMMENT(commentId, entityType, entityId, workflow)
+    if(parentId) {
+      url = `${url}&parentId=${parentId}`
+    }
+    return this.http.delete<any>(url)
   }
 
   updateComment(request: any) {

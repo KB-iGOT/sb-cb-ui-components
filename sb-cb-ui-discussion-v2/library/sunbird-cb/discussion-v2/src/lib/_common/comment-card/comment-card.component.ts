@@ -23,6 +23,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedComments: any = []
+  @Input() replyParendtData: any = []
   @Input() commentUsersData: any = {}
   @Output() newReply = new EventEmitter<any>()
   @Output() likeUnlikeData = new EventEmitter<any>()
@@ -253,7 +254,19 @@ export class CommentCardComponent implements OnInit, OnChanges {
 
   }
   deleteCommentMethod(comment: any) {
-    this.commentSvc.deleteComment(comment.commentId, this.commentSvc.entityType, this.commentSvc.entityId, this.commentSvc.workflow).subscribe((_res: any) => {
+    const index = this.replyData.findIndex((commentId: any) => commentId === comment.commentId);
+    const parentInderx = this.replyData.findIndex((ele: any) => ele.commentId === comment.commentId);
+    if (index !== -1) {
+      this.replyData.splice(index, 1);
+      this.replyData = this.replyData.slice();
+      this.replyDataCopy = this.replyData
+    }
+    if(parentInderx !== -1) {
+      this.replyParendtData.splice(parentInderx, 1);
+      this.replyParendtData = this.replyParendtData.slice();
+    }      
+    this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.replyParendtData , onlyDeleteCount: true})
+    this.commentSvc.deleteComment(comment.commentId, this.commentSvc.entityType, this.commentSvc.entityId, this.commentSvc.workflow , comment.parentCommentId || '').subscribe((_res: any) => {
       comment.status = 'inactive'
       this._snackBar.open('Comment deleted successfully')
     }, (_err: any)=> {
