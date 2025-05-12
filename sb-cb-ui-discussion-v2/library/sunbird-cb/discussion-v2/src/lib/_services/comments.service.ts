@@ -8,7 +8,7 @@ const API_END_POINTS = {
     `/apis/proxies/v8/comment/v1/getAll?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
   FETCH_ALL_COMMENTS_V2: `/apis/proxies/v8/comment/v2/search`,
   FETCH_ALL_COMMENTS_V3: `apis/proxies/v8/comment/v3/search`,
-  GET_COMMENT_TREE:`apis/proxies/v8/commentTree/v1/get`,
+  GET_COMMENT_TREE: `apis/proxies/v8/commentTree/v1/get`,
   ADD_FIRST_COMMENT: `/apis/proxies/v8/comment/v1/addFirst`,
   ADD_NEW_COMMENT: '/apis/proxies/v8/comment/v1/addNew',
   LIST_COMMENT: '/apis/proxies/v8/comment/list',
@@ -20,7 +20,7 @@ const API_END_POINTS = {
   UPDATE_COMMENT: `/apis/proxies/v8/comment/v1/update`,
   DELETE_COMMENT: (commentId: string, entityType: string, entityId: string, workflow: string) =>
     `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
-  LIKED_COMMENTS:(entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`
+  LIKED_COMMENTS: (entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`
 }
 
 @Injectable({
@@ -32,7 +32,7 @@ export class CommentsService {
   entityId: string = ''
   entityType: string = ''
   workflow: string = ''
-  commentTreeId: string =''
+  commentTreeId: string = ''
   courseDetails: any = {}
   constructor(
     private http: HttpClient,
@@ -54,7 +54,7 @@ export class CommentsService {
   fetchAllComment_V2(payload: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
   }
-  
+
   fetchAllComment_V3(payload: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
   }
@@ -98,7 +98,7 @@ export class CommentsService {
   }
 
 
-  emptyCommentSearch(){
+  emptyCommentSearch() {
     const payload = {
       entityType: this.entityType,
       workflow: this.workflow,
@@ -106,6 +106,7 @@ export class CommentsService {
       entityId: this.entityId,
       overrideCache: true,
     }
-    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
+    // return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
+    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
   }
 }
