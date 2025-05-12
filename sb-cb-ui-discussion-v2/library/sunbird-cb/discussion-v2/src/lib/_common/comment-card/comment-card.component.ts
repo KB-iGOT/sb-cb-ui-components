@@ -246,8 +246,8 @@ export class CommentCardComponent implements OnInit, OnChanges {
     })
     confirmDialog.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.emptySearch()
         this.deleteCommentMethod(comment)
+        this.emptySearch()
       }
     })
 
@@ -279,24 +279,24 @@ export class CommentCardComponent implements OnInit, OnChanges {
     this.editCommentData['comment'] = text
   }
 
-  updateComment(){
+  updateComment() {
     let requestData = {
       "commentTreeId": this.commentSvc.commentTreeId,
       "commentId": this.comment.commentId,
       "commentData": {
-        "comment":this.editCommentData.comment,
-        "commentResolved":this.editCommentData.commentResolved,
-        "commentSource":this.editCommentData.commentSource,
-        "taggedUsers":this.editCommentData.taggedUsers
-      } 
+        "comment": this.editCommentData.comment,
+        "commentResolved": this.editCommentData.commentResolved,
+        "commentSource": this.editCommentData.commentSource,
+        "taggedUsers": this.editCommentData.taggedUsers
+      }
     }
-    this.commentSvc.updateComment(requestData).subscribe((_res: any)=> {
+    this.commentSvc.updateComment(requestData).subscribe((_res: any) => {
       this.isEditMode = false
       this.emptySearch()
       this.comment['lastUpdatedDate'] = new Date().toISOString()
       this.comment['commentData'] = this.editCommentData
       this._snackBar.open('Comment Updated successfully.')
-    },()=>{
+    }, () => {
       this._snackBar.open('Comment Updated failed.')
     })
   }
@@ -309,7 +309,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   updateRepliesData(eventData: any) {
     this.replyDataCopy = eventData.replyDataCopy
     this.fetchedReplyData = [...eventData.replyData]
-    return this.fetchedReplyData 
+    return this.fetchedReplyData
   }
   loadMoreComments() {
     this.replayCommentsCount = this.replayCommentsCount + 10
@@ -320,18 +320,18 @@ export class CommentCardComponent implements OnInit, OnChanges {
     let start: number = this.replayCommentsCount - 10
     let reveseReplayDataCopy = [...this.replyDataCopy]
     reveseReplayDataCopy.reverse()
-    let ids:any = reveseReplayDataCopy.slice(start,this.replayCommentsCount)
-    
+    let ids: any = reveseReplayDataCopy.slice(start, this.replayCommentsCount)
+
     this.commentSvc.getListOfCommentsById(ids).subscribe(res => {
       if (res.result && res.result.comments.length) {
         let taggedUsersList = res.result.taggedUsers
-        this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
+        this.tagUserData = { ...this.tagUserData, ..._.keyBy(taggedUsersList, 'user_id') }
         const reply = res.result.comments
         // parrent comment id is user for sencond level comments only
-        const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
-        this.fetchedReplyData = [ ...this.fetchedReplyData,...replayModified]
-        this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
-        
+        const replayModified = reply.map((replayData: any) => ({ ...replayData, parentCommentId: this.comment.commentId }))
+        this.fetchedReplyData = [...this.fetchedReplyData, ...replayModified]
+        this.newReply.emit({ response: [], type: 'reply', replyDataCopy: this.replyDataCopy, replyData: this.fetchedReplyData })
+
         this.loading = false
       }
     },
@@ -339,21 +339,21 @@ export class CommentCardComponent implements OnInit, OnChanges {
         this.loading = false
       })
   }
-  getCommentMsg(taggedUsers: any, commentText: any){
+  getCommentMsg(taggedUsers: any, commentText: any) {
     let users: any = ''
     let replayData = ``
-    if(taggedUsers && taggedUsers.length){
+    if (taggedUsers && taggedUsers.length) {
       taggedUsers.forEach((tagUser: any) => {
         const firstName = this.tagUserData[tagUser]?.first_name
-        if (firstName)  users = users + firstName
-      });
+        if (firstName) users = users + firstName
+      })
     }
-    if(users) {
+    if (users) {
       replayData = `<span class="mr-2 font-semibold ws-mat-default-text">Replying to ${users}</span>`
     }
     return replayData + commentText
   }
   emptySearch() {
-    this.commentSvc.emptyCommentSearch().subscribe((_res: any) => {})
+    this.commentSvc.emptyCommentSearch().subscribe((_res: any) => { })
   }
 }
