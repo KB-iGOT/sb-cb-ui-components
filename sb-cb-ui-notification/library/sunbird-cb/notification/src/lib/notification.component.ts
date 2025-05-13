@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'sb-uic-notifications',
+  selector: 'sb-uic-notification',
   template: `
     <p>
-      notifications works!
+      notification works!
     </p>
   `,
   styles: []
 })
-export class NotificationsComponent implements OnInit {
+export class NotificationComponent implements OnInit {
 
   constructor() { }
 

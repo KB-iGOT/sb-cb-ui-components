@@ -21,11 +21,11 @@
       "dom"
     ],
     "paths": {
-      "@sunbird-cb/notifications": [
-        "library/sunbird-cb/notifications"
+      "@sunbird-cb/notification": [
+        "library/sunbird-cb/notification"
       ],
-      "@sunbird-cb/notifications/*": [
-        "library/sunbird-cb/notifications/*"
+      "@sunbird-cb/notification/*": [
+        "library/sunbird-cb/notification/*"
       ]
     },
     "useDefineForClassFields": false
