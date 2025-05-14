@@ -7,7 +7,7 @@
       "projectType": "library",
       "root": "library/sunbird-cb/notification",
       "sourceRoot": "library/sunbird-cb/notification/src",
-      "prefix": "sb-uic",
+      "prefix": "sb-uin",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",

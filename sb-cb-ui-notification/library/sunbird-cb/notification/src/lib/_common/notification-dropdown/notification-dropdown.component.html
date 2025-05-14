@@ -1,0 +1,35 @@
+<div class="">
+  <div class="notification-header">
+    Notifications
+  </div>
+  <div class="notification-body">
+    <div class="flex nTabs my-2 justify-between">
+      <div class="flex">
+        <div class="tabLable {{currentTab === 'all' ? 'active-tab' : 'inActive'}}" (click)="loadNotifications('all')">
+          All</div>
+        <div class="tabLable {{currentTab === 'alerts' ? 'active-tab' : 'inActive'}}"
+          (click)="loadNotifications('alerts')">Alerts(12)</div>
+      </div>
+      <div class="mark-all mt-3">Mark All As Read</div>
+    </div>
+    <div class="notification-list">
+      <div class="notification-item" *ngFor="let notification of allNotifications">
+        <div class="flex gap-3">
+          <div class="flex gap-3 item-center">
+            <div class="image">
+              <img [src]="getIconPath(notification?.type)" alt="notification" />
+            </div>
+            <div class="item-title">{{notification?.title}}</div>
+          </div>
+          <div class="timestamp">27s</div>
+        </div>
+        <div class="item-description pt-1">
+          {{notification?.description}}
+        </div>
+      </div>
+      <div class="show-all">
+        <div class="show-all-text" (click)="redirectToNotifications()">Show All</div>
+      </div>
+    </div>
+  </div>
+</div>
