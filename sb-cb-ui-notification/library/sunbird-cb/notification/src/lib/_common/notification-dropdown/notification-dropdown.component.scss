@@ -43,9 +43,13 @@
 
 .notification-item {
   padding: 16px;
-  background-color: rgba(244, 248, 255, 1);
   border-bottom: 1px solid #E2E0DF;
 }
+
+.unread {
+  background-color: rgba(244, 248, 255, 1);
+}
+
 
 .item-title {
   font-family: Lato;
