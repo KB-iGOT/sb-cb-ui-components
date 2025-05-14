@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'sb-uin-notification-dropdown',
@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./notification-dropdown.component.scss']
 })
 export class NotificationDropdownComponent implements OnInit {
+
+  @Output() viewAllClick = new EventEmitter<string>()
   currentTab = 'all'
   notifications: any[] = []
   allNotifications: any[] = [
@@ -95,7 +97,7 @@ export class NotificationDropdownComponent implements OnInit {
   }
 
   redirectToNotifications() {
-
+    this.viewAllClick.emit(this.currentTab)
   }
 
   getIconPath(type: string) {
