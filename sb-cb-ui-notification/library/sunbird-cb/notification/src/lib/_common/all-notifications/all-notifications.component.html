@@ -1,0 +1,31 @@
+<div class="relative">
+  <mat-tab-group animationDuration="0ms" class="mat-tab-labels w-full strips-tabgroup"
+    (selectedIndexChange)="onTabChange($event)">
+    <mat-tab *ngFor="let tab of tabs">
+      <ng-template mat-tab-label>
+        <span>{{tab?.title}} &nbsp;</span>
+        <span *ngIf="tab?.count > 0">({{tab?.count}})</span>
+      </ng-template>
+      <div class="flex flex-row flex-wrap content-container mt-5">
+        <div class="notification-list w-full">
+          <div class="notification-item cursor-pointer {{notification?.isRead ? 'read' : 'unread'}}"
+            *ngFor="let notification of notifications">
+            <div class="flex gap-3 justify-between">
+              <div class="flex gap-3 item-center">
+                <div class="image">
+                  <img [src]="getIconPath(notification?.type)" alt="notification" />
+                </div>
+                <div class="item-title">{{notification?.title}}</div>
+              </div>
+              <div class="timestamp">{{notification?.timestamp || ''}}</div>
+            </div>
+            <div class="item-description pt-1">
+              {{notification?.description}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+  <div class="mark-all mt-3 cursor-pointer">Mark All As Read</div>
+</div>

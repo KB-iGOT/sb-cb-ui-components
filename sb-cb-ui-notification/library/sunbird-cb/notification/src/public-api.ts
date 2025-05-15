@@ -11,4 +11,5 @@ export * from './lib/notification.config'
 export * from './lib/_common/notification-dropdown/notification-dropdown.module'
 export * from './lib/_common/notification-dropdown/notification-dropdown.component'
 
-
+export * from './lib/_common/all-notifications/all-notifications.module'
+export * from './lib/_common/all-notifications/all-notifications.component'

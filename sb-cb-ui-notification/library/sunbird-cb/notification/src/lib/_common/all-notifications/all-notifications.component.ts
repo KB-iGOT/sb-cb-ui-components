@@ -1,15 +1,23 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'sb-uin-notification-dropdown',
-  templateUrl: './notification-dropdown.component.html',
-  styleUrls: ['./notification-dropdown.component.scss']
+  selector: 'sb-uin-all-notifications',
+  templateUrl: './all-notifications.component.html',
+  styleUrls: ['./all-notifications.component.scss']
 })
-export class NotificationDropdownComponent implements OnInit {
+export class AllNotificationsComponent implements OnInit {
 
-  @Output() viewAllClick = new EventEmitter<string>()
-  currentTab = 'all'
   notifications: any[] = []
+  currentTab: number = 0
+
+  tabs: any[] = [
+    { id: 'all', title: 'All', count: 123 },
+    { id: 'alerts', title: 'Alerts', count: 10 },
+    { id: 'updates', title: 'Updates', count: 23 },
+    { id: 'engagement', title: 'Engagement', count: 5 },
+    { id: 'promotions', title: 'Promotions', count: 19 },
+  ]
+
   allNotifications: any[] = [
     {
       type: 'learn',
@@ -88,31 +96,7 @@ export class NotificationDropdownComponent implements OnInit {
   }
 
   getNotificationsObject() {
-    this.notifications = this.currentTab === 'all' ? this.allNotifications : this.alerts
-  }
-
-  loadNotifications(type: string) {
-    this.currentTab = type
-    this.getNotificationsObject()
-  }
-
-  redirectToNotifications() {
-    this.viewAllClick.emit(this.currentTab)
-  }
-
-  getIconPath(type: string) {
-    switch (type) {
-      case 'learn':
-        return 'assets/icons/notifications-engine/learn.svg';
-      case 'network':
-        return 'assets/icons/notifications-engine/network.svg';
-      case 'event':
-        return 'assets/icons/notifications-engine/event.svg';
-      case 'discuss':
-        return 'assets/icons/notifications-engine/discuss.svg';
-      default:
-        return 'assets/icons/notifications-engine/learn.svg';
-    }
+    this.notifications = this.currentTab === 0 ? this.allNotifications : this.alerts
   }
 
   getTimeAgo(dateString: string): string {
@@ -134,5 +118,26 @@ export class NotificationDropdownComponent implements OnInit {
     if (hours > 0) return `${hours}h`
     if (minutes > 0) return `${minutes}m`
     return `${seconds}s`
+  }
+
+  getIconPath(type: string) {
+    switch (type) {
+      case 'learn':
+        return 'assets/icons/notifications-engine/learn.svg';
+      case 'network':
+        return 'assets/icons/notifications-engine/network.svg';
+      case 'event':
+        return 'assets/icons/notifications-engine/event.svg';
+      case 'discuss':
+        return 'assets/icons/notifications-engine/discuss.svg';
+      default:
+        return 'assets/icons/notifications-engine/learn.svg';
+    }
+  }
+
+  onTabChange(type: any) {
+    this.currentTab = type
+    console.log('currentTab', this.currentTab)
+    this.getNotificationsObject()
   }
 }
