@@ -1,3 +1,17 @@
+.notification-container {
+  padding: 16px;
+  width: 353px;
+  min-height: 400px;
+  position: absolute;
+  top: 56px;
+  right: 434px;
+  background: white;
+  border-radius: 10px;
+  font-weight: normal;
+  border: 1px solid #ebe5e5;
+  cursor: default;
+}
+
 .notification-item {
   padding: 16px;
   border-bottom: 1px solid #E2E0DF;
@@ -44,7 +58,7 @@
   font-size: 14px;
   line-height: 100%;
   letter-spacing: 0%;
-  width: 290px;
+  width: 600px;
   word-break: break-word;
   line-height: 17.07px;
   white-space: initial;

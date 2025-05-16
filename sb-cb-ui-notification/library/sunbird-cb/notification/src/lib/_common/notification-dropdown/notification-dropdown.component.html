@@ -6,12 +6,12 @@
     <div class="flex nTabs my-2 justify-between">
       <div class="flex">
         <div class="tabLable cursor-pointer {{currentTab === 'all' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('all')">
+          (click)="loadNotifications('all', $event)">
           All</div>
         <div class="tabLable cursor-pointer {{currentTab === 'alerts' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('alerts')">Alerts(12)</div>
+          (click)="loadNotifications('alerts', $event)">Alerts(12)</div>
       </div>
-      <div class="mark-all mt-3 cursor-pointer">Mark All As Read</div>
+      <div class="mark-all mt-3 cursor-pointer">Mark all as read</div>
     </div>
     <div class="notification-list">
       <div class="notification-item cursor-pointer {{notification?.isRead ? 'read' : 'unread'}}"

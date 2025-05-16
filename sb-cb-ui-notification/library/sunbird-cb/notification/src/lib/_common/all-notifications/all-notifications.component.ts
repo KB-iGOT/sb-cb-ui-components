@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'sb-uin-all-notifications',
@@ -8,7 +9,9 @@ import { Component, OnInit } from '@angular/core';
 export class AllNotificationsComponent implements OnInit {
 
   notifications: any[] = []
+  dynamicTabIndex: number = 0
   currentTab: number = 0
+  loading: boolean = false
 
   tabs: any[] = [
     { id: 'all', title: 'All', count: 123 },
@@ -87,16 +90,30 @@ export class AllNotificationsComponent implements OnInit {
     },
   ]
 
-  constructor() {
+  constructor(readonly route: ActivatedRoute) {
 
   }
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe(params => {
+      const tabInput = params.get('tab');
+      if (tabInput) {
+        const index = this.tabs.findIndex(tab => tab.id === tabInput);
+        if (index !== -1) {
+          this.dynamicTabIndex = index
+        }
+      }
+
+    })
     this.getNotificationsObject()
   }
 
   getNotificationsObject() {
-    this.notifications = this.currentTab === 0 ? this.allNotifications : this.alerts
+    this.loading = true
+    setTimeout(() => {
+      this.notifications = this.dynamicTabIndex === 0 ? this.allNotifications : this.alerts
+      this.loading = false
+    }, 2000)
   }
 
   getTimeAgo(dateString: string): string {
@@ -135,8 +152,9 @@ export class AllNotificationsComponent implements OnInit {
     }
   }
 
-  onTabChange(type: any) {
+  onTabChange(type: number) {
     this.currentTab = type
+    this.dynamicTabIndex = this.currentTab
     console.log('currentTab', this.currentTab)
     this.getNotificationsObject()
   }

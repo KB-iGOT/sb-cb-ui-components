@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs'
 import { AllNotificationsComponent } from './all-notifications.component';
+import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module';
 
 
 @NgModule({
@@ -11,6 +12,7 @@ import { AllNotificationsComponent } from './all-notifications.component';
     CommonModule,
     MatIconModule,
     MatTabsModule,
+    SkeletonLoaderLibModule
   ],
   exports: [
     AllNotificationsComponent
