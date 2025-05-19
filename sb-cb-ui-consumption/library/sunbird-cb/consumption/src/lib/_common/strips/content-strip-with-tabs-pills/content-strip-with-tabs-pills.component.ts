@@ -1079,7 +1079,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     tabIndex: number,
     calculateParentStatus: boolean
   ) {
-    if (strip.tabs[tabIndex].request.designationsList) {
+    if (strip?.tabs[tabIndex]?.request?.designationsList) {
       try {
         let response = await this.userSvc.fetchDesigantionsData().toPromise()
         if (response) {
