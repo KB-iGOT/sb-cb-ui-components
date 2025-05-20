@@ -32,6 +32,7 @@ export class ConfigurationsService {
   hostPath = (window.location.host).replace(':', '_')
 
   userRoles: Set<string> | null = null
+  eventBufferTimeInMinutes: NsInstanceConfig.IConfig | null = null
   userGroups: Set<string> | null = null
   restrictedFeatures: Set<string> | null = null
   restrictedWidgets: Set<string> | null = null

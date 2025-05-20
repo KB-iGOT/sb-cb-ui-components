@@ -19,6 +19,7 @@ export namespace NsInstanceConfig {
         allowIframe: boolean
       }[]
     }
+    eventBufferTimeInMinutes?: any
     appSetup: boolean
     chatBotUrl: string
     defaultFontsize: string
