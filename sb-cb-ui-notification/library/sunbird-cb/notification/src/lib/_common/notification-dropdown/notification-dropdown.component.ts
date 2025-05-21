@@ -1,104 +1,68 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { LibNotificationsService } from '../../_services/lib-notifications.service';
+import * as _ from 'lodash'
 @Component({
   selector: 'sb-uin-notification-dropdown',
   templateUrl: './notification-dropdown.component.html',
   styleUrls: ['./notification-dropdown.component.scss']
 })
-export class NotificationDropdownComponent implements OnInit {
+export class NotificationDropdownComponent implements OnInit, OnChanges {
   @Input() childData: any;
   @Output() viewAllClick = new EventEmitter<string>()
   currentTab = 'all'
+  response: any
   notifications: any[] = []
-  allNotifications: any[] = [
-    {
-      type: 'learn',
-      title: '3 Courses recommended by Neha Agarwal.',
-      description: 'You have a new message from your mentor.',
-      timestamp: this.getTimeAgo('2025-05-15T04:51:00Z'),
-      isRead: false
-    },
-    {
-      type: 'network',
-      title: 'Anil and 5 others requested to connect.',
-      description: 'View all connection request',
-      timestamp: this.getTimeAgo('2025-05-15T03:00:00Z'),
-      isRead: false
-    },
-    {
-      type: 'event',
-      title: '2 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2025-05-12T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: "discuss",
-      title: "Anil and 7 others liked your post.",
-      description: "View all likes on your post.",
-      timestamp: this.getTimeAgo('2025-02-15T04:00:00Z'),
-      isRead: false
-    }
-  ]
+  alerts: any[] = []
 
-  alerts: any[] = [
-    {
-      type: 'learn',
-      title: '3 Courses recommended by Neha Agarwal.',
-      description: 'You have a new message from your mentor.',
-      timestamp: this.getTimeAgo('2025-05-15T04:51:00Z'),
-      isRead: false
-    },
-    {
-      type: 'network',
-      title: 'Anil and 5 others requested to connect.',
-      description: 'View all connection request',
-      timestamp: this.getTimeAgo('2025-05-15T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: 'event',
-      title: '2 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2025-01-15T04:00:00Z'),
-      isRead: false
-    },
-    {
-      type: "discuss",
-      title: "Anil and 7 others liked your post.",
-      description: "View all likes on your post.",
-      timestamp: this.getTimeAgo('2025-05-13T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: 'event',
-      title: '8 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2024-05-15T04:00:00Z'),
-      isRead: false
-    },
-  ]
 
-  constructor() {
 
+  constructor(private libNotificationService: LibNotificationsService) {
+
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log("change", changes)
   }
 
   ngOnInit() {
-    this.getNotificationsObject()
+    this.libNotificationService.getNotifications().subscribe((res: any) => {
+      this.response = _.get(res, 'result.notifications', [])
+      console.log("response", this.response)
+      this.getNotificationsObject()
+      this.alerts = this.response.filter((notification: any) => notification.category === 'alert')
+    })
+
   }
 
   getNotificationsObject() {
-    this.notifications = this.currentTab === 'all' ? this.allNotifications : this.alerts
+    this.notifications = this.currentTab === 'all' ? this.response : this.response.filter((notification: any) => notification.category === this.currentTab)
   }
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
+    console.log("currentTab", this.currentTab)
     this.getNotificationsObject()
     event.stopPropagation()
   }
 
   redirectToNotifications() {
     this.viewAllClick.emit(this.currentTab)
+  }
+
+  redirectToNotification(notification: any) {
+    this.markAsRead(notification)
+  }
+
+  markAsRead(notification: any) {
+    const request = {
+      request: {
+        ids: [notification.notification_id]
+      }
+    }
+    this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+      }
+    })
   }
 
   getIconPath(type: string) {
@@ -109,7 +73,7 @@ export class NotificationDropdownComponent implements OnInit {
         return 'assets/icons/notifications-engine/network.svg';
       case 'event':
         return 'assets/icons/notifications-engine/event.svg';
-      case 'discuss':
+      case 'comment':
         return 'assets/icons/notifications-engine/discuss.svg';
       default:
         return 'assets/icons/notifications-engine/learn.svg';

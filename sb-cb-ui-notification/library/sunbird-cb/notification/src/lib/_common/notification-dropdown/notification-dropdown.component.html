@@ -8,25 +8,25 @@
         <div class="tabLable cursor-pointer {{currentTab === 'all' ? 'active-tab' : 'inActive'}}"
           (click)="loadNotifications('all', $event)">
           All</div>
-        <div class="tabLable cursor-pointer {{currentTab === 'alerts' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('alerts', $event)">Alerts(12)</div>
+        <div class="tabLable cursor-pointer {{currentTab === 'alert' ? 'active-tab' : 'inActive'}}"
+          (click)="loadNotifications('alert', $event)">Alerts({{alerts.length}})</div>
       </div>
       <div class="mark-all mt-3 cursor-pointer">Mark all as read</div>
     </div>
     <div class="notification-list">
-      <div class="notification-item cursor-pointer {{notification?.isRead ? 'read' : 'unread'}}"
-        *ngFor="let notification of notifications">
+      <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
+        (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
         <div class="flex gap-3">
           <div class="flex gap-3 item-center">
             <div class="image">
               <img [src]="getIconPath(notification?.type)" alt="notification" />
             </div>
-            <div class="item-title">{{notification?.title}}</div>
+            <div class="item-title">{{notification?.message?.notification?.title}}</div>
           </div>
-          <div class="timestamp">{{notification?.timestamp || ''}}</div>
+          <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
         </div>
         <div class="item-description pt-1">
-          {{notification?.description}}
+          {{notification?.message?.notification?.body}}
         </div>
       </div>
       <div class="show-all">
