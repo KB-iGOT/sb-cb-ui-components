@@ -20,11 +20,22 @@
               <div class="timestamp">{{notification?.timestamp || ''}}</div>
             </div>
             <div class="item-description pt-1">
-              {{notification?.description}}
+              <div *ngIf="notification?.courses">
+                <span class="cursor-pointer underline link" *ngIf="notification?.courses && !notification?.isExpanded"
+                  (click)="action(notification)">
+                  {{notification?.description}}
+                </span>
+                <span class="cursor-pointer underline link" *ngIf="notification?.courses && notification?.isExpanded"
+                  (click)="action(notification)">
+                  Click to collapse
+                </span>
+              </div>
+              <div *ngIf="!notification?.courses">{{notification?.description}}</div>
             </div>
           </div>
         </div>
       </div>
+      <!-- skelton loaders -->
       <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="loading">
         <div class="notification-list w-full">
           <div class="notification-item ">
