@@ -1,0 +1,62 @@
+import { NgModule } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { TreeHierarchyComponent } from './tree-hierarchy.component';
+import { MaterialModule } from '../material.module';
+import { ActionBarComponent } from './components/action-bar/action-bar.component';
+import { ApprovalComponent } from './components/approval/approval.component';
+import { ApproveViewComponent } from './components/approve-view/approve-view.component';
+import { CategoriesPreviewComponent } from './components/categories-preview/categories-preview.component';
+import { ConforamtionPopupComponent } from './components/conforamtion-popup/conforamtion-popup.component';
+import { ConnectorComponent } from './components/connector/connector.component';
+import { CreateCategoriesComponent } from './components/create-categories/create-categories.component';
+import { CreateTermFromFrameworkComponent } from './components/create-term-from-framework/create-term-from-framework.component';
+import { CreateTermComponent } from './components/create-term/create-term.component';
+import { PendingApprovalComponent } from './components/pending-approval/pending-approval.component';
+import { TreeColumnViewComponent } from './components/tree-column-view/tree-column-view.component';
+import { TreeViewComponent } from './components/tree-view/tree-view.component';
+import { TermCardComponent } from './components/term-card/term-card.component';
+import { ConfigFrameworkComponent } from './containers/config-framework/config-framework.component';
+import { DashboardComponent } from './containers/dashboard/dashboard.component';
+import { OrderByPipe } from './pipes/order-by.pipe';
+import { TreeEditorRoutingModule } from './tree-hierarchy-routing.module';
+
+@NgModule({
+  declarations: [
+    TreeHierarchyComponent,
+    DashboardComponent,
+    ConfigFrameworkComponent,
+    CreateCategoriesComponent,
+    ConfigFrameworkComponent,
+    TreeViewComponent,
+    TermCardComponent,
+    TreeColumnViewComponent,
+    CategoriesPreviewComponent,
+    CategoriesPreviewComponent,
+    CreateTermComponent,
+    ConnectorComponent,
+    ActionBarComponent,
+    ApprovalComponent,
+    PendingApprovalComponent,
+    ApproveViewComponent,
+    OrderByPipe,
+    ConforamtionPopupComponent,
+    CreateTermFromFrameworkComponent,
+  ],
+  imports: [
+    CommonModule,
+    MaterialModule,
+    TreeEditorRoutingModule,
+  ],
+  providers: [
+    DatePipe,
+  ],
+  exports: [
+    TreeHierarchyComponent,
+    CreateCategoriesComponent,
+    ConfigFrameworkComponent,
+    TreeViewComponent,
+    TermCardComponent,
+    CategoriesPreviewComponent
+  ]
+})
+export class TreeHierarchyModule { }
