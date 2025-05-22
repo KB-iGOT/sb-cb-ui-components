@@ -112,7 +112,7 @@
                                                   formControlName="competencySubTheme" multiple [disabled]="data.openMode ==='view'" panelClass="full-width-panel">
                                                   <!-- [ngClass]="{'disbaledSelect':isHideData}" -->
                                                   <mat-select-trigger >
-                                                    <mat-chip-list>
+                                                    <mat-chip-listbox>
                                                         <!-- -->
                                                        
                                                       <mat-chip *ngFor="let item of competencyForm?.get('compThemeFields')['controls'][i]['controls']?.competencySubTheme?.value" 
@@ -121,7 +121,7 @@
                                                         <span >{{ item.name }}</span>
                                                         <mat-icon matChipRemove>cancel</mat-icon>
                                                       </mat-chip>
-                                                    </mat-chip-list>
+                                                    </mat-chip-listbox>
                                                   </mat-select-trigger>
                                                   <!-- {{competencyForm?.get('compThemeFields') |json}} -->
                                                   <!-- <mat-optgroup>

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TreeHierarchyComponent } from './tree-hierarchy.component';
 import { MaterialModule } from '../material.module';
@@ -19,6 +19,15 @@ import { ConfigFrameworkComponent } from './containers/config-framework/config-f
 import { DashboardComponent } from './containers/dashboard/dashboard.component';
 import { OrderByPipe } from './pipes/order-by.pipe';
 import { TreeEditorRoutingModule } from './tree-hierarchy-routing.module';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MAT_TABS_CONFIG } from '@angular/material/tabs';
+import { FrameworkService } from './services/framework.service';
+import { ConnectorService } from './services/connector.service';
+import { LocalConnectionService } from './services/local-connection.service';
+import { OdcsService } from './services/odcs.service';
+import { IConnectionType } from './models/connection-type.model';
+import { ENVIRONMENT } from './services/connection.service';
 
 @NgModule({
   declarations: [
@@ -49,6 +58,14 @@ import { TreeEditorRoutingModule } from './tree-hierarchy-routing.module';
   ],
   providers: [
     DatePipe,
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+    // { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true },
+    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2000 } },
+    { provide: MAT_TABS_CONFIG, useValue: { animationDuration: '0ms' } },
+    FrameworkService,
+    ConnectorService,
+    LocalConnectionService,
+    OdcsService,
   ],
   exports: [
     TreeHierarchyComponent,
@@ -59,4 +76,17 @@ import { TreeEditorRoutingModule } from './tree-hierarchy-routing.module';
     CategoriesPreviewComponent
   ]
 })
-export class TreeHierarchyModule { }
+export class TreeHierarchyModule { 
+  static forRoot(config: IConnectionType): ModuleWithProviders<TreeHierarchyModule> {
+    return {
+      ngModule: TreeHierarchyModule,
+      providers: [
+        // LocalConnectionService,
+        {
+          provide: ENVIRONMENT,
+          useValue: config
+        }
+      ]
+    };
+  }
+}

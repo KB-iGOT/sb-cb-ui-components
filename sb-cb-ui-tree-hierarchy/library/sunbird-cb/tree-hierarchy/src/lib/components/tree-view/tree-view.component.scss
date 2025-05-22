@@ -50,9 +50,6 @@
         background: rgba(27, 76, 161, 1);
         color: #fff !important;
         .mat-icon-custom {
-            position: absolute;
-            top: 0;
-            right: 0%;
             font-size: 21px;
         }
         
@@ -249,4 +246,14 @@ flex-center {
         line-height: 1.5em;
     }
 
+}
+
+.add-btn {
+    height: 24px;
+    background: rgba(27, 76, 161, 1);
+    color: white !important;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    border-radius: 12px;
 }

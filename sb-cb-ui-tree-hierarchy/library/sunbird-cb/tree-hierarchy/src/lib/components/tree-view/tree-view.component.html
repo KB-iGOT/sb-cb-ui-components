@@ -27,11 +27,12 @@
                                 <span *ngIf="i == 0" id="box{{i+1}}count" class="count">({{column.children.length}})</span>
                             </ng-template>
                             <div class="" *ngIf="column?.config?.createBtnEnabled">
-                                <button [ngClass]="{'button-enabled': configCodeBtn== column?.code, 'button-disabled': configCodeBtn!== column?.code}" class="w-full addCardButtonNew" mat-stroked-button
-                                    color="primary" (click)="openCreateTermDialog(column, i)">
-                                    <!-- {{app_strings.createNew}} {{column.name}} -->
-                                     Add
-                                    <mat-icon class="mat-icon-custom ">{{app_strings.add}}</mat-icon>
+                                <button mat-button class="add-btn" [ngClass]="{'button-enabled': configCodeBtn== column?.code, 'button-disabled': configCodeBtn!== column?.code}"
+                                    (click)="openCreateTermDialog(column, i)" type="button">
+                                    <span>Add</span>
+                                    <mat-icon class="margin-remove">
+                                        {{app_strings.add}}
+                                    </mat-icon>
                                 </button>
                             </div>
                             <div class="arrow" id="box{{i+1}}count"></div>

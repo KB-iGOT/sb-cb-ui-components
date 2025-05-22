@@ -219,11 +219,12 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
      const dataCode: any = this.frameworkService.getNextCategory(item)
     //  console.log('dataCode',dataCode);
-
-      this.dataConfig = this.frameworkService.getConfig(dataCode.code)
+      if (dataCode && dataCode.code){
+        this.dataConfig = this.frameworkService.getConfig(dataCode.code)
+      }
       //  console.log('dataCode',this.dataConfig);
 
-     if(dataCode.code === this.dataConfig.category){
+     if(dataCode && dataCode.code === this.dataConfig.category){
       this.configCodeBtn = dataCode.code
      }
       
