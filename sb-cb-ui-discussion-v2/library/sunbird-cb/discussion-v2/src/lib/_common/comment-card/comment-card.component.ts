@@ -122,7 +122,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         this.tagUserData = {...this.tagUserData,..._.keyBy(taggedUsersList, 'user_id')}
         const reply = res.result.comments
         // parrent comment id is user for sencond level comments only
-        const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.commentId}))
+        const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.parentCommentId || this.comment.commentId}))
         this.fetchedReplyData = [...replayModified,]
         this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
       }
@@ -341,7 +341,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         this.tagUserData = { ...this.tagUserData, ..._.keyBy(taggedUsersList, 'user_id') }
         const reply = res.result.comments
         // parrent comment id is user for sencond level comments only
-        const replayModified = reply.map((replayData: any) => ({ ...replayData, parentCommentId: this.comment.commentId }))
+        const replayModified = reply.map((replayData: any) => ({ ...replayData, parentCommentId: this.comment.parentCommentId || this.comment.commentId }))
         this.fetchedReplyData = [...this.fetchedReplyData, ...replayModified]
         this.newReply.emit({ response: [], type: 'reply', replyDataCopy: this.replyDataCopy, replyData: this.fetchedReplyData })
 
