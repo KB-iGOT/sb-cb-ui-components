@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
+import { LibNotificationsService } from '../../_services/lib-notifications.service';
+import * as _ from 'lodash'
 @Component({
   selector: 'sb-uin-all-notifications',
   templateUrl: './all-notifications.component.html',
@@ -12,6 +13,9 @@ export class AllNotificationsComponent implements OnInit {
   dynamicTabIndex: number = 0
   currentTab: number = 0
   loading: boolean = false
+  response: any
+  pageSize: number = 10
+  pageNumber: number = 0
 
   tabs: any[] = [
     { id: 'all', title: 'All', count: 123 },
@@ -99,31 +103,35 @@ export class AllNotificationsComponent implements OnInit {
     },
   ]
 
-  constructor(readonly route: ActivatedRoute) {
+  constructor(readonly route: ActivatedRoute,
+    private libNotificationService: LibNotificationsService
+  ) {
 
   }
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
-      const tabInput = params.get('tab');
+      const tabInput = params.get('tab')
       if (tabInput) {
-        const index = this.tabs.findIndex(tab => tab.id === tabInput);
+        const index = this.tabs.findIndex(tab => tab.id === tabInput)
         if (index !== -1) {
           this.dynamicTabIndex = index
         }
       }
 
     })
-    this.getNotificationsObject()
+    this.loading = true
+    this.libNotificationService.getNotificationsByType(this.pageNumber, this.pageSize).subscribe((res: any) => {
+      this.response = _.get(res, 'result.notifications', [])
+      console.log("response -----", this.response)
+      this.notifications = this.dynamicTabIndex === 0 ? this.response : this.alerts
+      this.loading = false
+    }, error => {
+      this.loading = false
+    })
   }
 
-  getNotificationsObject() {
-    this.loading = true
-    setTimeout(() => {
-      this.notifications = this.dynamicTabIndex === 0 ? this.allNotifications : this.alerts
-      this.loading = false
-    }, 2000)
-  }
+
 
   getTimeAgo(dateString: string): string {
     const givenDate = new Date(dateString);
@@ -149,15 +157,15 @@ export class AllNotificationsComponent implements OnInit {
   getIconPath(type: string) {
     switch (type) {
       case 'learn':
-        return 'assets/icons/notifications-engine/learn.svg';
+        return 'assets/icons/notifications-engine/learn.svg'
       case 'network':
-        return 'assets/icons/notifications-engine/network.svg';
+        return 'assets/icons/notifications-engine/network.svg'
       case 'event':
-        return 'assets/icons/notifications-engine/event.svg';
-      case 'discuss':
-        return 'assets/icons/notifications-engine/discuss.svg';
+        return 'assets/icons/notifications-engine/event.svg'
+      case 'discussion':
+        return 'assets/icons/notifications-engine/discuss.svg'
       default:
-        return 'assets/icons/notifications-engine/learn.svg';
+        return 'assets/icons/notifications-engine/learn.svg'
     }
   }
 
@@ -165,7 +173,6 @@ export class AllNotificationsComponent implements OnInit {
     this.currentTab = type
     this.dynamicTabIndex = this.currentTab
     console.log('currentTab', this.currentTab)
-    this.getNotificationsObject()
   }
 
   action(notification: any) {

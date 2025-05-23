@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
 import * as _ from 'lodash'
 @Component({
@@ -6,61 +6,83 @@ import * as _ from 'lodash'
   templateUrl: './notification-dropdown.component.html',
   styleUrls: ['./notification-dropdown.component.scss']
 })
-export class NotificationDropdownComponent implements OnInit, OnChanges {
+export class NotificationDropdownComponent implements OnInit {
   @Input() childData: any;
   @Output() viewAllClick = new EventEmitter<string>()
+  @Output() reCountNotifications = new EventEmitter<any>()
+  @Output() countClick = new EventEmitter<any>()
   currentTab = 'all'
   response: any
   notifications: any[] = []
   alerts: any[] = []
+  isLoading = false
 
+  constructor(private libNotificationService: LibNotificationsService,
+    private cdr: ChangeDetectorRef
+  ) {
 
-
-  constructor(private libNotificationService: LibNotificationsService) {
-
-  }
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log("change", changes)
   }
 
   ngOnInit() {
-    this.libNotificationService.getNotifications().subscribe((res: any) => {
-      this.response = _.get(res, 'result.notifications', [])
-      console.log("response", this.response)
-      this.getNotificationsObject()
-      this.alerts = this.response.filter((notification: any) => notification.category === 'alert')
+    this.getUserNotifications()
+  }
+
+  getUserNotifications() {
+    this.isLoading = true
+    this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
+      this.notifications = _.get(res, 'result.notifications', [])
+      this.isLoading = false
+    }, error => {
+      console.error("Error fetching notifications", error)
+      this.isLoading = false
     })
-
   }
 
-  getNotificationsObject() {
-    this.notifications = this.currentTab === 'all' ? this.response : this.response.filter((notification: any) => notification.category === this.currentTab)
+  markAllAsRead(event: MouseEvent) {
+    const request = {
+      request: {
+        type: "all",
+      }
+    }
+    this.libNotificationService.markAllAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        this.getUserNotifications()
+        this.reCountNotifications.emit(true)
+      }
+    })
+    event.stopPropagation()
   }
+
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
     console.log("currentTab", this.currentTab)
-    this.getNotificationsObject()
+    this.getUserNotifications()
     event.stopPropagation()
   }
 
-  redirectToNotifications() {
+  redirectToAll() {
     this.viewAllClick.emit(this.currentTab)
   }
 
   redirectToNotification(notification: any) {
-    this.markAsRead(notification)
+    if (!notification.read) {
+      this.markAsRead(notification)
+    }
   }
 
   markAsRead(notification: any) {
     const request = {
       request: {
+        type: "individual",
         ids: [notification.notification_id]
       }
     }
+
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
       if (res.responseCode === 'OK') {
         notification.read = true
+        this.reCountNotifications.emit(true)
       }
     })
   }
@@ -68,15 +90,15 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   getIconPath(type: string) {
     switch (type) {
       case 'learn':
-        return 'assets/icons/notifications-engine/learn.svg';
+        return 'assets/icons/notifications-engine/learn.svg'
       case 'network':
-        return 'assets/icons/notifications-engine/network.svg';
+        return 'assets/icons/notifications-engine/network.svg'
       case 'event':
-        return 'assets/icons/notifications-engine/event.svg';
-      case 'comment':
-        return 'assets/icons/notifications-engine/discuss.svg';
+        return 'assets/icons/notifications-engine/event.svg'
+      case 'discussion':
+        return 'assets/icons/notifications-engine/discuss.svg'
       default:
-        return 'assets/icons/notifications-engine/learn.svg';
+        return 'assets/icons/notifications-engine/learn.svg'
     }
   }
 

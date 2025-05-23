@@ -9,29 +9,90 @@
           (click)="loadNotifications('all', $event)">
           All</div>
         <div class="tabLable cursor-pointer {{currentTab === 'alert' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('alert', $event)">Alerts({{alerts.length}})</div>
+          (click)="loadNotifications('alert', $event)">Alerts</div>
       </div>
-      <div class="mark-all mt-3 cursor-pointer">Mark all as read</div>
+      <div class="mark-all mt-3 cursor-pointer" (click)="markAllAsRead($event)">Mark all as read</div>
     </div>
-    <div class="notification-list">
-      <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
-        (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
-        <div class="flex gap-3">
-          <div class="flex gap-3 item-center">
-            <div class="image">
-              <img [src]="getIconPath(notification?.type)" alt="notification" />
+    <div class="notification-list" *ngIf="!isLoading">
+      <div *ngIf="notifications?.length > 0">
+        <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
+          (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
+          <div class="flex gap-3">
+            <div class="flex gap-3 item-center">
+              <div class="image">
+                <img [src]="getIconPath(notification?.type)" alt="notification" />
+              </div>
+              <div class="item-title">{{notification?.message?.notification?.title}}</div>
             </div>
-            <div class="item-title">{{notification?.message?.notification?.title}}</div>
+            <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
           </div>
-          <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
+          <div class="item-description pt-1">
+            {{notification?.message?.notification?.body}}
+          </div>
         </div>
-        <div class="item-description pt-1">
-          {{notification?.message?.notification?.body}}
+        <div class="show-all">
+          <div class="show-all-text cursor-pointer" (click)="redirectToAll()">Show All</div>
         </div>
       </div>
-      <div class="show-all">
-        <div class="show-all-text cursor-pointer" (click)="redirectToNotifications()">Show All</div>
-      </div>
+      <div *ngIf="notifications?.length === 0">No data!</div>
     </div>
+    <ng-container *ngIf="isLoading">
+      <div class="notification-item cursor-pointer">
+        <div>
+          <div class="flex">
+            <div class="flex gap-1 item-center">
+              <div class="image">
+                <sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'32px'" [height]="'32px'">
+                </sb-uic-skeleton-loader>
+              </div>
+              <div class="item-title"><sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'230px'"
+                  [height]="'32px'"></sb-uic-skeleton-loader></div>
+            </div>
+            <div class="timestamp"><sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'32px'"
+                [height]="'32px'"></sb-uic-skeleton-loader></div>
+          </div>
+          <div class="item-description pt-1">
+            <sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'350px'" [height]="'32px'">
+            </sb-uic-skeleton-loader>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="flex">
+            <div class="flex gap-1 item-center">
+              <div class="image">
+                <sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'32px'" [height]="'32px'">
+                </sb-uic-skeleton-loader>
+              </div>
+              <div class="item-title"><sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'230px'"
+                  [height]="'32px'"></sb-uic-skeleton-loader></div>
+            </div>
+            <div class="timestamp"><sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'32px'"
+                [height]="'32px'"></sb-uic-skeleton-loader></div>
+          </div>
+          <div class="item-description pt-1">
+            <sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'350px'" [height]="'32px'">
+            </sb-uic-skeleton-loader>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="flex">
+            <div class="flex gap-1 item-center">
+              <div class="image">
+                <sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'32px'" [height]="'32px'">
+                </sb-uic-skeleton-loader>
+              </div>
+              <div class="item-title"><sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'230px'"
+                  [height]="'32px'"></sb-uic-skeleton-loader></div>
+            </div>
+            <div class="timestamp"><sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'32px'"
+                [height]="'32px'"></sb-uic-skeleton-loader></div>
+          </div>
+          <div class="item-description pt-1">
+            <sb-uic-skeleton-loader [bindingClass]="'flex rounded objIcon'" [width]="'350px'" [height]="'32px'">
+            </sb-uic-skeleton-loader>
+          </div>
+        </div>
+      </div>
+    </ng-container>
   </div>
 </div>
