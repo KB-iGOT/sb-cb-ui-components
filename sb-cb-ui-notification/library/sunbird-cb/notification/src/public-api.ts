@@ -7,6 +7,7 @@ export * from './lib/notification.component'
 export * from './lib/notification.module'
 export * from './lib/registration-lib.config'
 export * from './lib/notification.config'
+export * from './lib/_services/lib-notifications.service'
 
 export * from './lib/_common/notification-dropdown/notification-dropdown.module'
 export * from './lib/_common/notification-dropdown/notification-dropdown.component'

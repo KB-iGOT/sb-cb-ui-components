@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 
 const API_END_POINTS = {
@@ -15,6 +15,9 @@ const API_END_POINTS = {
   providedIn: 'root'
 })
 export class LibNotificationsService {
+  _unreadCount = new BehaviorSubject<boolean>(false)
+  unreadCount$ = this._unreadCount.asObservable()
+
   constructor(private http: HttpClient) { }
   getNotifications(pageNumber: number, pageSize: number, category: string): Observable<any> {
     if (category === 'all') {
@@ -35,4 +38,9 @@ export class LibNotificationsService {
   markAllAsRead(request: any): Observable<any> {
     return this.http.patch(API_END_POINTS.MARK_AS_READ, request);
   }
+
+  updateUnreadCount(): void {
+    this._unreadCount.next(true)
+  }
+
 }

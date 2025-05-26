@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
 import * as _ from 'lodash'
 @Component({
@@ -9,16 +9,13 @@ import * as _ from 'lodash'
 export class NotificationDropdownComponent implements OnInit {
   @Input() childData: any;
   @Output() viewAllClick = new EventEmitter<string>()
-  @Output() reCountNotifications = new EventEmitter<any>()
-  @Output() countClick = new EventEmitter<any>()
   currentTab = 'all'
   response: any
   notifications: any[] = []
-  alerts: any[] = []
+  alerts: any
   isLoading = false
 
   constructor(private libNotificationService: LibNotificationsService,
-    private cdr: ChangeDetectorRef
   ) {
 
   }
@@ -31,6 +28,8 @@ export class NotificationDropdownComponent implements OnInit {
     this.isLoading = true
     this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
       this.notifications = _.get(res, 'result.notifications', [])
+      const _alerts = _.get(res, 'result.categoryStats', [])
+      this.alerts = _alerts.find(notification => notification.category === 'alert')
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -47,7 +46,7 @@ export class NotificationDropdownComponent implements OnInit {
     this.libNotificationService.markAllAsRead(request).subscribe((res: any) => {
       if (res.responseCode === 'OK') {
         this.getUserNotifications()
-        this.reCountNotifications.emit(true)
+        this.libNotificationService.updateUnreadCount()
       }
     })
     event.stopPropagation()
@@ -69,6 +68,7 @@ export class NotificationDropdownComponent implements OnInit {
     if (!notification.read) {
       this.markAsRead(notification)
     }
+    this.viewAllClick.emit(notification)
   }
 
   markAsRead(notification: any) {
@@ -82,7 +82,7 @@ export class NotificationDropdownComponent implements OnInit {
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
       if (res.responseCode === 'OK') {
         notification.read = true
-        this.reCountNotifications.emit(true)
+        this.libNotificationService.updateUnreadCount()
       }
     })
   }

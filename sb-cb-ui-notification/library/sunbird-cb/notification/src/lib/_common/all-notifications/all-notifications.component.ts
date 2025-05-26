@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
 import * as _ from 'lodash'
+import { debounceTime } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 @Component({
   selector: 'sb-uin-all-notifications',
   templateUrl: './all-notifications.component.html',
@@ -9,125 +11,99 @@ import * as _ from 'lodash'
 })
 export class AllNotificationsComponent implements OnInit {
 
+  @Output() reCountNotifications = new EventEmitter<any>()
+  @Output() redirectTo = new EventEmitter<any>()
+
+
   notifications: any[] = []
   dynamicTabIndex: number = 0
-  currentTab: number = 0
+  currentTab: any = 'all'
   loading: boolean = false
-  response: any
+  response: any[] = []
   pageSize: number = 10
   pageNumber: number = 0
-
+  hasNextPage: boolean = false
   tabs: any[] = [
-    { id: 'all', title: 'All', count: 123 },
-    { id: 'alerts', title: 'Alerts', count: 10 },
-    { id: 'updates', title: 'Updates', count: 23 },
-    { id: 'engagement', title: 'Engagement', count: 5 },
-    { id: 'promotions', title: 'Promotions', count: 19 },
+    { id: "all", category: 'all' },
   ]
-
-  allNotifications: any[] = [
-    {
-      type: 'learn',
-      title: '12 Courses recommended by Neha Agarwal.',
-      description: 'Click here to view recommended courses.',
-      timestamp: this.getTimeAgo('2025-05-15T04:51:00Z'),
-      isRead: false,
-      courses: ["do_113976864943824896111", "do_114081021046390784159", "do_11402573033635840016", "do_113882971081441280172",
-        "do_114289012599259136112", "do_114308876086607872151", "do_114277667872382976138", "do_114277928509136896171",
-        "do_11389554191936716817", "do_11431661045542092814", "do_1143018621876715521203", "do_1141256670204887041118"
-      ],
-      isExpanded: false
-    },
-    {
-      type: 'network',
-      title: 'Anil and 5 others requested to connect.',
-      description: 'View all connection request',
-      timestamp: this.getTimeAgo('2025-05-15T03:00:00Z'),
-      isRead: false,
-      isExpanded: false
-    },
-    {
-      type: 'event',
-      title: '2 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2025-05-12T04:00:00Z'),
-      isRead: true,
-      isExpanded: false
-    },
-    {
-      type: "discuss",
-      title: "Anil and 7 others liked your post.",
-      description: "View all likes on your post.",
-      timestamp: this.getTimeAgo('2025-02-15T04:00:00Z'),
-      isRead: false,
-      isExpanded: false
-    }
-  ]
-
-  alerts: any[] = [
-    {
-      type: 'learn',
-      title: '3 Courses recommended by Neha Agarwal.',
-      description: 'You have a new message from your mentor.',
-      timestamp: this.getTimeAgo('2025-05-15T04:51:00Z'),
-      isRead: false,
-      courses: ["do_11389554191936716817", "do_11431661045542092814", "do_1143018621876715521203"]
-    },
-    {
-      type: 'network',
-      title: 'Anil and 5 others requested to connect.',
-      description: 'View all connection request',
-      timestamp: this.getTimeAgo('2025-05-15T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: 'event',
-      title: '2 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2025-01-15T04:00:00Z'),
-      isRead: false
-    },
-    {
-      type: "discuss",
-      title: "Anil and 7 others liked your post.",
-      description: "View all likes on your post.",
-      timestamp: this.getTimeAgo('2025-05-13T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: 'event',
-      title: '8 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2024-05-15T04:00:00Z'),
-      isRead: false
-    },
-  ]
+  private scrollSubject = new Subject<Event>()
 
   constructor(readonly route: ActivatedRoute,
     private libNotificationService: LibNotificationsService
   ) {
+    this.scrollSubject.pipe(debounceTime(500)).subscribe((event: any) => {
+      console.log("event ", event)
+      this.onDebouncedScroll()
+    })
 
+  }
+  @HostListener('window:scroll', ['$event'])
+
+  onScroll(event: Event): void {
+    if (
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && this.hasNextPage
+    ) {
+      console.log("onScroll event", event)
+      // Emit the scroll event to the subject
+      this.pageNumber = this.pageNumber + 1
+      this.loadNotifications(true)
+    }
+  }
+
+  onDebouncedScroll() {
+    this.pageNumber = this.pageNumber + 1
+    console.log("pageNumber", this.pageNumber)
+    this.loadNotifications(false)
   }
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
-      const tabInput = params.get('tab')
-      if (tabInput) {
-        const index = this.tabs.findIndex(tab => tab.id === tabInput)
+      this.currentTab = params.get('tab')
+    })
+    this.loading = true
+    this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
+      this.response = _.get(res, 'result.notifications', [])
+      const tabs = _.get(res, 'result.categoryStats', [])
+      tabs.forEach((tab: any) => {
+        this.tabs.push(tab)
+      })
+      console.log("tabs", this.tabs)
+      if (this.currentTab) {
+        const index = this.tabs.findIndex(tab => tab.category === this.currentTab)
         if (index !== -1) {
           this.dynamicTabIndex = index
         }
       }
 
-    })
-    this.loading = true
-    this.libNotificationService.getNotificationsByType(this.pageNumber, this.pageSize).subscribe((res: any) => {
-      this.response = _.get(res, 'result.notifications', [])
-      console.log("response -----", this.response)
-      this.notifications = this.dynamicTabIndex === 0 ? this.response : this.alerts
+      this.notifications = this.response
       this.loading = false
     }, error => {
       this.loading = false
+    })
+  }
+
+  redirectToNotification(notification: any) {
+    if (!notification.read) {
+      this.markAsRead(notification)
+    } else {
+      this.redirectTo.emit(notification)
+    }
+  }
+
+  markAsRead(notification: any) {
+    const request = {
+      request: {
+        type: "individual",
+        ids: [notification.notification_id]
+      }
+    }
+
+    this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+        this.redirectTo.emit(notification)
+      }
     })
   }
 
@@ -170,12 +146,53 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   onTabChange(type: number) {
-    this.currentTab = type
-    this.dynamicTabIndex = this.currentTab
+    console.log('type', type)
+    //this.currentTab = type
+    this.dynamicTabIndex = type
+    this.currentTab = this.tabs[this.dynamicTabIndex].category.toLowerCase()
     console.log('currentTab', this.currentTab)
+    this.loadNotifications(true)
+  }
+
+  loadNotifications(canAppend: boolean = false) {
+    this.loading = true
+    this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
+      this.response = _.get(res, 'result.notifications', [])
+      if (canAppend) {
+        this.notifications = []
+        this.notifications = this.response
+      } else {
+        this.notifications = [...this.notifications, ...this.response]
+      }
+      this.loading = false
+    }, error => {
+      console.error('Error loading notifications:', error)
+      this.loading = false
+    })
   }
 
   action(notification: any) {
     notification.isExpanded = !notification.isExpanded
+  }
+
+  getCount(read: any, unread: any) {
+    return (+read || +unread) ? `(${+read + +unread})` : ''
+  }
+
+  markAllAsRead(event: MouseEvent) {
+    const request = {
+      request: {
+        type: "all",
+      }
+    }
+    this.libNotificationService.markAllAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        this.notifications = this.notifications.map((notification: any) => ({
+          ...notification, read: true
+        }))
+      }
+      this.libNotificationService.updateUnreadCount()
+    })
+    event.stopPropagation()
   }
 }

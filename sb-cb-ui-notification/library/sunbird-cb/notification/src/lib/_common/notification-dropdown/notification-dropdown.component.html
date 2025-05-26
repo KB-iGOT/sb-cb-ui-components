@@ -9,7 +9,7 @@
           (click)="loadNotifications('all', $event)">
           All</div>
         <div class="tabLable cursor-pointer {{currentTab === 'alert' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('alert', $event)">Alerts</div>
+          (click)="loadNotifications('alert', $event)">Alerts({{alerts?.unread}})</div>
       </div>
       <div class="mark-all mt-3 cursor-pointer" (click)="markAllAsRead($event)">Mark all as read</div>
     </div>

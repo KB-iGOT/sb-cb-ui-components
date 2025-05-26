@@ -3,13 +3,13 @@
     (selectedIndexChange)="onTabChange($event)" [selectedIndex]="dynamicTabIndex">
     <mat-tab *ngFor="let tab of tabs">
       <ng-template mat-tab-label>
-        <span>{{tab?.title}} &nbsp;</span>
-        <span *ngIf="tab?.count > 0">({{tab?.count}})</span>
+        <span>{{tab?.category}} &nbsp;</span>
+        <span>{{getCount(tab?.read, tab?.unread)}}</span>
       </ng-template>
       <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length && !loading">
         <div class="notification-list w-full">
           <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
-            *ngFor="let notification of notifications">
+            (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
             <div class="flex gap-3 justify-between">
               <div class="flex gap-3 item-center">
                 <div class="image">
@@ -30,7 +30,8 @@
                   Click to collapse
                 </div>
               </div>
-              <div *ngIf="!notification?.courses">{{notification?.message?.notification?.body}}</div>
+              <div *ngIf="!notification?.courses">{{notification?.message?.notification?.body}} ---
+                {{notification?.category}}</div>
             </div>
           </div>
         </div>
@@ -96,5 +97,5 @@
       </div>
     </mat-tab>
   </mat-tab-group>
-  <div class="mark-all mt-3 cursor-pointer">Mark all as read</div>
+  <div class="mark-all mt-3 cursor-pointer z-1000" (click)="markAllAsRead($event)">Mark all as read</div>
 </div>
