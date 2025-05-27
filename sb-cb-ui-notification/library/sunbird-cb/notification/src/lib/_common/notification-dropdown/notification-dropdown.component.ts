@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-
+import { LibNotificationsService } from '../../_services/lib-notifications.service';
+import * as _ from 'lodash'
 @Component({
   selector: 'sb-uin-notification-dropdown',
   templateUrl: './notification-dropdown.component.html',
@@ -7,112 +8,82 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 })
 export class NotificationDropdownComponent implements OnInit {
   @Input() childData: any;
+  @Input() unRead: number = 0
   @Output() viewAllClick = new EventEmitter<string>()
   currentTab = 'all'
+  response: any
   notifications: any[] = []
-  allNotifications: any[] = [
-    {
-      type: 'learn',
-      title: '3 Courses recommended by Neha Agarwal.',
-      description: 'You have a new message from your mentor.',
-      timestamp: this.getTimeAgo('2025-05-15T04:51:00Z'),
-      isRead: false
-    },
-    {
-      type: 'network',
-      title: 'Anil and 5 others requested to connect.',
-      description: 'View all connection request',
-      timestamp: this.getTimeAgo('2025-05-15T03:00:00Z'),
-      isRead: false
-    },
-    {
-      type: 'event',
-      title: '2 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2025-05-12T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: "discuss",
-      title: "Anil and 7 others liked your post.",
-      description: "View all likes on your post.",
-      timestamp: this.getTimeAgo('2025-02-15T04:00:00Z'),
-      isRead: false
-    }
-  ]
+  alerts: any
+  isLoading = false
 
-  alerts: any[] = [
-    {
-      type: 'learn',
-      title: '3 Courses recommended by Neha Agarwal.',
-      description: 'You have a new message from your mentor.',
-      timestamp: this.getTimeAgo('2025-05-15T04:51:00Z'),
-      isRead: false
-    },
-    {
-      type: 'network',
-      title: 'Anil and 5 others requested to connect.',
-      description: 'View all connection request',
-      timestamp: this.getTimeAgo('2025-05-15T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: 'event',
-      title: '2 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2025-01-15T04:00:00Z'),
-      isRead: false
-    },
-    {
-      type: "discuss",
-      title: "Anil and 7 others liked your post.",
-      description: "View all likes on your post.",
-      timestamp: this.getTimeAgo('2025-05-13T04:00:00Z'),
-      isRead: true
-    },
-    {
-      type: 'event',
-      title: '8 New events are now live on the platform.',
-      description: 'Upcoming event: Digital Learning Week. Save your spot!',
-      timestamp: this.getTimeAgo('2024-05-15T04:00:00Z'),
-      isRead: false
-    },
-  ]
-
-  constructor() {
+  constructor(private libNotificationService: LibNotificationsService,
+  ) {
 
   }
 
   ngOnInit() {
-    this.getNotificationsObject()
+    this.getUserNotifications()
   }
 
-  getNotificationsObject() {
-    this.notifications = this.currentTab === 'all' ? this.allNotifications : this.alerts
+  getUserNotifications() {
+    this.isLoading = true
+    this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
+      this.notifications = _.get(res, 'result.notifications', [])
+      const _alerts = _.get(res, 'result.categoryStats', [])
+      this.alerts = _alerts.find(notification => notification.category === 'alert')
+      this.isLoading = false
+    }, error => {
+      console.error("Error fetching notifications", error)
+      this.isLoading = false
+    })
   }
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
-    this.getNotificationsObject()
+    console.log("currentTab", this.currentTab)
+    this.getUserNotifications()
     event.stopPropagation()
   }
 
-  redirectToNotifications() {
+  redirectToAll() {
     this.viewAllClick.emit(this.currentTab)
+  }
+
+  redirectToNotification(notification: any) {
+    if (!notification.read) {
+      this.markAsRead(notification)
+    }
+    this.viewAllClick.emit(notification)
+  }
+
+  markAsRead(notification: any) {
+    const request = {
+      request: {
+        type: "individual",
+        ids: [notification.notification_id]
+      }
+    }
+
+    this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+      }
+    })
   }
 
   getIconPath(type: string) {
     switch (type) {
       case 'learn':
-        return 'assets/icons/notifications-engine/learn.svg';
+        return 'assets/icons/notifications-engine/learn.svg'
       case 'network':
-        return 'assets/icons/notifications-engine/network.svg';
+        return 'assets/icons/notifications-engine/network.svg'
       case 'event':
-        return 'assets/icons/notifications-engine/event.svg';
-      case 'discuss':
-        return 'assets/icons/notifications-engine/discuss.svg';
+        return 'assets/icons/notifications-engine/event.svg'
+      case 'discussion':
+        return 'assets/icons/notifications-engine/discuss.svg'
       default:
-        return 'assets/icons/notifications-engine/learn.svg';
+        return 'assets/icons/notifications-engine/learn.svg'
     }
   }
 

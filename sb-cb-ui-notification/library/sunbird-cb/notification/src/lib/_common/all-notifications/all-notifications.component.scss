@@ -31,6 +31,7 @@
   position: absolute;
   top: 3px;
   right: 17px;
+  z-index: 100;
 }
 
 
@@ -76,4 +77,8 @@
   line-height: 18px;
   letter-spacing: 0%;
   vertical-align: middle;
+}
+
+.link {
+  color: #1b4ca1;
 }

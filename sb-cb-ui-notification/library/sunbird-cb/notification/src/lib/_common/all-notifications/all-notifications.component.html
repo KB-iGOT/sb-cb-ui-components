@@ -3,28 +3,39 @@
     (selectedIndexChange)="onTabChange($event)" [selectedIndex]="dynamicTabIndex">
     <mat-tab *ngFor="let tab of tabs">
       <ng-template mat-tab-label>
-        <span>{{tab?.title}} &nbsp;</span>
-        <span *ngIf="tab?.count > 0">({{tab?.count}})</span>
+        <span>{{tab?.category}} &nbsp;</span>
+        <span>{{getCount(tab?.read, tab?.unread)}}</span>
       </ng-template>
-      <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length && !loading">
+      <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length">
         <div class="notification-list w-full">
-          <div class="notification-item cursor-pointer {{notification?.isRead ? 'read' : 'unread'}}"
-            *ngFor="let notification of notifications">
+          <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
+            (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
             <div class="flex gap-3 justify-between">
               <div class="flex gap-3 item-center">
                 <div class="image">
                   <img [src]="getIconPath(notification?.type)" alt="notification" />
                 </div>
-                <div class="item-title">{{notification?.title}}</div>
+                <div class="item-title">{{notification?.message?.notification?.title}}</div>
               </div>
-              <div class="timestamp">{{notification?.timestamp || ''}}</div>
+              <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
             </div>
             <div class="item-description pt-1">
-              {{notification?.description}}
+              <div *ngIf="notification?.courses">
+                <div class="cursor-pointer underline link" *ngIf="notification?.courses && !notification?.isExpanded"
+                  (click)="action(notification)">
+                  {{notification?.message?.notification?.body}}
+                </div>
+                <div class="cursor-pointer underline link" *ngIf="notification?.courses && notification?.isExpanded"
+                  (click)="action(notification)">
+                  Click to collapse
+                </div>
+              </div>
+              <div *ngIf="!notification?.courses">{{notification?.message?.notification?.body}}</div>
             </div>
           </div>
         </div>
       </div>
+      <!-- skelton loaders -->
       <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="loading">
         <div class="notification-list w-full">
           <div class="notification-item ">
@@ -85,5 +96,6 @@
       </div>
     </mat-tab>
   </mat-tab-group>
-  <div class="mark-all mt-3 cursor-pointer">Mark all as read</div>
+  <div class="mark-all mt-3 cursor-pointer z-1000" (click)="markAllAsRead($event)" *ngIf="unreadCount > 0">Mark all as
+    read</div>
 </div>
