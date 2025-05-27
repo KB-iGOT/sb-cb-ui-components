@@ -6,7 +6,7 @@
         <span>{{tab?.category}} &nbsp;</span>
         <span>{{getCount(tab?.read, tab?.unread)}}</span>
       </ng-template>
-      <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length && !loading">
+      <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length">
         <div class="notification-list w-full">
           <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
             (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
@@ -30,8 +30,7 @@
                   Click to collapse
                 </div>
               </div>
-              <div *ngIf="!notification?.courses">{{notification?.message?.notification?.body}} ---
-                {{notification?.category}}</div>
+              <div *ngIf="!notification?.courses">{{notification?.message?.notification?.body}}</div>
             </div>
           </div>
         </div>
@@ -97,5 +96,6 @@
       </div>
     </mat-tab>
   </mat-tab-group>
-  <div class="mark-all mt-3 cursor-pointer z-1000" (click)="markAllAsRead($event)">Mark all as read</div>
+  <div class="mark-all mt-3 cursor-pointer z-1000" (click)="markAllAsRead($event)" *ngIf="unreadCount > 0">Mark all as
+    read</div>
 </div>

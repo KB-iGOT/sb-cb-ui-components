@@ -8,6 +8,7 @@ import * as _ from 'lodash'
 })
 export class NotificationDropdownComponent implements OnInit {
   @Input() childData: any;
+  @Input() unRead: number = 0
   @Output() viewAllClick = new EventEmitter<string>()
   currentTab = 'all'
   response: any
@@ -36,22 +37,6 @@ export class NotificationDropdownComponent implements OnInit {
       this.isLoading = false
     })
   }
-
-  markAllAsRead(event: MouseEvent) {
-    const request = {
-      request: {
-        type: "all",
-      }
-    }
-    this.libNotificationService.markAllAsRead(request).subscribe((res: any) => {
-      if (res.responseCode === 'OK') {
-        this.getUserNotifications()
-        this.libNotificationService.updateUnreadCount()
-      }
-    })
-    event.stopPropagation()
-  }
-
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type

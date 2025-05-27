@@ -9,9 +9,9 @@
           (click)="loadNotifications('all', $event)">
           All</div>
         <div class="tabLable cursor-pointer {{currentTab === 'alert' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('alert', $event)">Alerts({{alerts?.unread}})</div>
+          (click)="loadNotifications('alert', $event)">Alerts<span
+            *ngIf="alerts?.unread > 0">({{alerts?.unread}})</span></div>
       </div>
-      <div class="mark-all mt-3 cursor-pointer" (click)="markAllAsRead($event)">Mark all as read</div>
     </div>
     <div class="notification-list" *ngIf="!isLoading">
       <div *ngIf="notifications?.length > 0">
@@ -34,7 +34,7 @@
           <div class="show-all-text cursor-pointer" (click)="redirectToAll()">Show All</div>
         </div>
       </div>
-      <div *ngIf="notifications?.length === 0">No data!</div>
+      <div *ngIf="notifications?.length === 0">No notifications yet.</div>
     </div>
     <ng-container *ngIf="isLoading">
       <div class="notification-item cursor-pointer">

@@ -20,20 +20,22 @@ export class AllNotificationsComponent implements OnInit {
   currentTab: any = 'all'
   loading: boolean = false
   response: any[] = []
-  pageSize: number = 10
+  pageSize: number = 5
   pageNumber: number = 0
   hasNextPage: boolean = false
+  unreadCount: number = 0
   tabs: any[] = [
     { id: "all", category: 'all' },
   ]
-  private scrollSubject = new Subject<Event>()
+  private scrollNotificationsSubject = new Subject<Event>()
 
   constructor(readonly route: ActivatedRoute,
     private libNotificationService: LibNotificationsService
   ) {
-    this.scrollSubject.pipe(debounceTime(500)).subscribe((event: any) => {
+    this.scrollNotificationsSubject.pipe(debounceTime(500)).subscribe((event: any) => {
+      this.pageNumber = this.pageNumber + 1
       console.log("event ", event)
-      this.onDebouncedScroll()
+      this.loadNotifications()
     })
 
   }
@@ -41,46 +43,28 @@ export class AllNotificationsComponent implements OnInit {
 
   onScroll(event: Event): void {
     if (
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && this.hasNextPage
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && this.hasNextPage && !this.loading
     ) {
       console.log("onScroll event", event)
       // Emit the scroll event to the subject
-      this.pageNumber = this.pageNumber + 1
-      this.loadNotifications(true)
+      this.scrollNotificationsSubject.next(event)
     }
   }
 
   onDebouncedScroll() {
     this.pageNumber = this.pageNumber + 1
     console.log("pageNumber", this.pageNumber)
-    this.loadNotifications(false)
+    this.loadNotifications()
   }
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
       this.currentTab = params.get('tab')
     })
-    this.loading = true
-    this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
-      this.response = _.get(res, 'result.notifications', [])
-      const tabs = _.get(res, 'result.categoryStats', [])
-      tabs.forEach((tab: any) => {
-        this.tabs.push(tab)
-      })
-      console.log("tabs", this.tabs)
-      if (this.currentTab) {
-        const index = this.tabs.findIndex(tab => tab.category === this.currentTab)
-        if (index !== -1) {
-          this.dynamicTabIndex = index
-        }
-      }
-
-      this.notifications = this.response
-      this.loading = false
-    }, error => {
-      this.loading = false
-    })
+    this.loadNotifications()
   }
+
+
 
   redirectToNotification(notification: any) {
     if (!notification.read) {
@@ -151,19 +135,32 @@ export class AllNotificationsComponent implements OnInit {
     this.dynamicTabIndex = type
     this.currentTab = this.tabs[this.dynamicTabIndex].category.toLowerCase()
     console.log('currentTab', this.currentTab)
-    this.loadNotifications(true)
+    this.notifications = []
+    this.pageNumber = 0
+    this.hasNextPage = false
+    this.loadNotifications()
   }
 
-  loadNotifications(canAppend: boolean = false) {
+  loadNotifications() {
     this.loading = true
     this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
       this.response = _.get(res, 'result.notifications', [])
-      if (canAppend) {
-        this.notifications = []
-        this.notifications = this.response
-      } else {
-        this.notifications = [...this.notifications, ...this.response]
+      const tabs = _.get(res, 'result.categoryStats', [])
+      this.tabs = [{ id: "all", category: 'all' }]
+      tabs.forEach((tab: any) => {
+        this.tabs.push(tab)
+        if (tab.unread) {
+          this.unreadCount += tab.unread
+        }
+      })
+      if (this.currentTab) {
+        const index = this.tabs.findIndex(tab => tab.category === this.currentTab)
+        if (index !== -1) {
+          this.dynamicTabIndex = index
+        }
       }
+      this.notifications = [...this.notifications, ...this.response]
+      this.hasNextPage = res.result && res.result.hasNextPage ? res.result.hasNextPage : false
       this.loading = false
     }, error => {
       console.error('Error loading notifications:', error)
@@ -190,6 +187,7 @@ export class AllNotificationsComponent implements OnInit {
         this.notifications = this.notifications.map((notification: any) => ({
           ...notification, read: true
         }))
+        this.unreadCount = 0
       }
       this.libNotificationService.updateUnreadCount()
     })
