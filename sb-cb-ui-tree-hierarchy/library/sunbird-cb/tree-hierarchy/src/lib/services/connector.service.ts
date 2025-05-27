@@ -24,14 +24,11 @@ export class ConnectorService {
   elmWrapper: any;
   containerSelector = '#treeViewContainer'; // You might need to adjust this selector
 
-  constructor() {
-    console.log('connectorMap -------', this.connectorMap);
-  }
+  constructor() {}
 
   _drawLine(source: any, target: any, options: any = defaultConfig, sourceContainerId: any = undefined, targetContainerId: any = undefined): any {
     const _options = <any>{...defaultConfig, ...options};
     _options['dashed'] = true
-    debugger
     
     if (Array.isArray(target)) {
       let connectedDots: ConnectedDot[] = [];
@@ -50,7 +47,7 @@ export class ConnectorService {
               try {
                 tempLine && tempLine.position();
               } catch(e) {
-                // console.log('Error');
+                // Error handling
               }
             }, true);
           }
@@ -63,7 +60,7 @@ export class ConnectorService {
               try {
                 tempLine && tempLine.position();
               } catch(e) {
-                // console.log('Error');
+                // Error handling
               }
             }, true);
           }
@@ -80,7 +77,6 @@ export class ConnectorService {
     // Find or create the container element
     const treeViewComponent: any = document.querySelector(this.containerSelector);
     if (!treeViewComponent) {
-      console.error('Tree view container not found');
       return {
         source: null,
         target: null,
@@ -91,9 +87,6 @@ export class ConnectorService {
         remove: () => {}
       };
     }
-    
-    // Log for debugging
-    console.log('Found container:', treeViewComponent);
     
     // Create or get container for the SVG
     let container: any = treeViewComponent.querySelector('#leader-line-container');
@@ -109,9 +102,6 @@ export class ConnectorService {
       container.style.zIndex = '1000';
       container.style.overflow = 'hidden';
       treeViewComponent.appendChild(container);
-      console.log('Created new container');
-    } else {
-      console.log('Using existing container');
     }
     
     // Store container reference for access in other methods
@@ -123,15 +113,12 @@ export class ConnectorService {
     
     if (target.targetType === 'id') {
       targetElement = document.getElementById(target.target);
-      console.log('Target by ID:', target.target, targetElement);
     } else {
       targetElement = target.target;
-      console.log('Target by reference:', targetElement);
     }
     
     // Ensure both elements exist
     if (!sourceElement || !targetElement) {
-      console.error('Source or target element not found', { source, target });
       return {
         source: null,
         target: null,
@@ -164,10 +151,6 @@ export class ConnectorService {
     const targetRect = targetElement.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     
-    console.log('Source rect:', sourceRect);
-    console.log('Target rect:', targetRect);
-    console.log('Container rect:', containerRect);
-    
     // Determine edge connection points - always right to left
     let sourceX, sourceY, targetX, targetY;
 
@@ -178,8 +161,6 @@ export class ConnectorService {
     // Target - always connect to the left edge
     targetX = targetRect.left - containerRect.left;
     targetY = targetRect.top + (targetRect.height / 2) - containerRect.top;
-
-    console.log('Edge coordinates:', { sourceX, sourceY, targetX, targetY });
     
     // Create line with initial opacity 1 (visible immediately)
     // Instead of a straight line, create a grid line with right angles
@@ -211,13 +192,13 @@ export class ConnectorService {
         .attr('viewBox', '0 0 10 10')
         .attr('refX', 5)
         .attr('refY', 5)
-        .attr('markerWidth', 8)  // Increased from 6 to 8
-        .attr('markerHeight', 8) // Increased from 6 to 8
+        .attr('markerWidth', 8)
+        .attr('markerHeight', 8)
         .attr('orient', 'auto')
         .append('circle')
         .attr('cx', 5)
         .attr('cy', 5)
-        .attr('r', 4.5)  // Increased from 4 to 4.5
+        .attr('r', 4.5)
         .style('fill', options.color || '#333');
       
       path.attr('marker-start', `url(#start-circle-${svgId})`);
@@ -230,8 +211,8 @@ export class ConnectorService {
         .attr('viewBox', '0 0 10 10')
         .attr('refX', 8)  
         .attr('refY', 5)
-        .attr('markerWidth', 9)   // Increased from 6 to 9
-        .attr('markerHeight', 9)  // Increased from 6 to 9
+        .attr('markerWidth', 9)
+        .attr('markerHeight', 9)
         .attr('orient', 'auto')
         .append('path')
         .attr('d', 'M 0 0 L 10 5 L 0 10 z')
