@@ -1,0 +1,94 @@
+<div class="flex justify-between dialog-heading items-center">
+  <h2 mat-dialog-title class="mb-0"> Select Organisation</h2>
+  <button mat-icon-button class="close-button" (click)="onClose()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div mat-dialog-content>
+  <!-- Search Box -->
+  <div class="search-container flex items-center gap-4">
+    <div class="mat-full-radius flex-grow">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Type here to search..." [formControl]="searchControl" (keyup.enter)="search()" />
+      </mat-form-field>
+    </div>
+    <button mat-flat-button [disabled]="!searchControl.value"
+      class="flex items-center rounded-full new-bg-color font-bold text-sm text-white search-button"
+      (click)="search()">Search
+    </button>
+  </div>
+
+  <div class="p-4 mt-2">
+    <!-- Filter Options -->
+    <ng-container *ngIf="checkIfOrganization">
+      <div class="filter-options">
+        <mat-radio-group [(ngModel)]="filterValue" aria-label="Filter options" (change)="onFilterChange($event)">
+          <mat-radio-button value="all">All</mat-radio-button>
+          <!-- <mat-radio-button value="selected">Selected</mat-radio-button>
+           <mat-radio-button value="notSelected">Not Selected</mat-radio-button> -->
+        </mat-radio-group>
+      </div>
+    </ng-container>
+
+    <div class="org-container">
+      <!-- A-Z Filter Bar -->
+      <ng-container *ngIf="isLoading">
+        <div class="spinner-loader flex items-center justify-center">
+          <mat-spinner></mat-spinner>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!isLoading">
+        <ng-container *ngIf="checkIfOrganization">
+          <div class="alphabet-filter">
+            <ng-container *ngFor="let letter of alphabet; let i = index; let last = last">
+              <button mat-button class="letter-button" (click)="scrollToSection(letter)">
+                {{ letter }}
+              </button>
+              <div class="divider-apl" *ngIf="!last"></div>
+            </ng-container>
+          </div>
+        </ng-container>
+
+        <!-- Org List -->
+        <ng-container *ngIf="checkIfOrganization; else noData">
+          <div class="organization-scroll">
+            <div class="org-row">
+              <div *ngFor="let group of groupedOrganizations | keyvalue" class="org-column p-2 mr-4"
+                [attr.id]="'section-' + group.key">
+                <div class="org-list">
+                  <div *ngFor="let org of group.value" class="org-card py-2">
+                    <mat-checkbox [checked]="isSelected(org?.identifier)" (change)="toggleSelection(org?.identifier)"
+                      [title]="org?.channel">
+                      {{ org?.channel }}
+                    </mat-checkbox>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noData>
+          <div class="no-data p-4 flex flex-column items-center justify-center">
+            <img src="/assets/icons/no-events.png" alt="no-data">
+            <span class="font-bold">No information to display yet</span>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<mat-dialog-actions>
+  <ng-container *ngIf="checkIfOrganization">
+    <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
+      <div class="text-xs">{{selectedOrganizations.length}} items selected</div>
+      <button mat-flat-button [disabled]="selectedOrganizations.length === 0"
+        class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2]">
+        Apply
+      </button>
+    </div>
+
+  </ng-container>
+</mat-dialog-actions>
