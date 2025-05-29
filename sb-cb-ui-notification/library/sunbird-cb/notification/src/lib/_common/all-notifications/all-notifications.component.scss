@@ -82,3 +82,22 @@
 .link {
   color: #1b4ca1;
 }
+
+@media (max-width: 767px) {
+  .mark-all {
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: rgba(27, 76, 161, 1);
+    position: absolute;
+    top: -69px;
+    right: 0px;
+    z-index: 100;
+  }
+
+  .item-description {
+    width: unset;
+  }
+}
