@@ -29,8 +29,8 @@ export class NotificationDropdownComponent implements OnInit {
     this.isLoading = true
     this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
       this.notifications = _.get(res, 'result.notifications', [])
-      const _alerts = _.get(res, 'result.categoryStats', [])
-      this.alerts = _alerts.find(notification => notification.category === 'alert')
+      const _alerts = _.get(res, 'result.subtypeStats', [])
+      this.alerts = _alerts.find(notification => notification.name === 'ALERT')
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -72,15 +72,15 @@ export class NotificationDropdownComponent implements OnInit {
     })
   }
 
-  getIconPath(type: string) {
-    switch (type) {
-      case 'learn':
+  getIconPath(category: string) {
+    switch (category) {
+      case 'LEARN':
         return 'assets/icons/notifications-engine/learn.svg'
-      case 'network':
+      case 'NETWORK':
         return 'assets/icons/notifications-engine/network.svg'
-      case 'event':
+      case 'EVENT':
         return 'assets/icons/notifications-engine/event.svg'
-      case 'discussion':
+      case 'DISCUSSION':
         return 'assets/icons/notifications-engine/discuss.svg'
       default:
         return 'assets/icons/notifications-engine/learn.svg'

@@ -3,7 +3,7 @@
     (selectedIndexChange)="onTabChange($event)" [selectedIndex]="dynamicTabIndex">
     <mat-tab *ngFor="let tab of tabs">
       <ng-template mat-tab-label>
-        <span>{{tab?.category}} &nbsp;</span>
+        <span>{{capitalize(tab?.name)}} &nbsp;</span>
         <span>{{getCount(tab?.read, tab?.unread)}}</span>
       </ng-template>
       <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length">
@@ -13,7 +13,7 @@
             <div class="flex gap-3 justify-between">
               <div class="flex gap-3 item-center">
                 <div class="image">
-                  <img [src]="getIconPath(notification?.type)" alt="notification" />
+                  <img [src]="getIconPath(notification?.category)" alt="notification" />
                 </div>
                 <div class="item-title">{{notification?.message?.notification?.title}}</div>
               </div>
