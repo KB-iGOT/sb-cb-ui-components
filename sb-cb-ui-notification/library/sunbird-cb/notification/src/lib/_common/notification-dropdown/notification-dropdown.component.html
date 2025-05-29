@@ -8,9 +8,9 @@
         <div class="tabLable cursor-pointer {{currentTab === 'all' ? 'active-tab' : 'inActive'}}"
           (click)="loadNotifications('all', $event)">
           All</div>
-        <div class="tabLable cursor-pointer {{currentTab === 'alert' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('alert', $event)">Alerts<span
-            *ngIf="alerts?.unread > 0">({{alerts?.unread}})</span></div>
+        <div class="tabLable cursor-pointer {{currentTab === 'ALERT' ? 'active-tab' : 'inActive'}}"
+          (click)="loadNotifications('ALERT', $event)">Alert<span *ngIf="alerts?.unread > 0">({{alerts?.unread}})</span>
+        </div>
       </div>
     </div>
     <div class="notification-list" *ngIf="!isLoading">
@@ -20,7 +20,7 @@
           <div class="flex gap-3">
             <div class="flex gap-3 item-center">
               <div class="image">
-                <img [src]="getIconPath(notification?.type)" alt="notification" />
+                <img [src]="getIconPath(notification?.category)" alt="notification" />
               </div>
               <div class="item-title">{{notification?.message?.notification?.title}}</div>
             </div>

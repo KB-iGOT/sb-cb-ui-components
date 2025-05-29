@@ -20,12 +20,12 @@ export class AllNotificationsComponent implements OnInit {
   currentTab: any = 'all'
   loading: boolean = false
   response: any[] = []
-  pageSize: number = 5
+  pageSize: number = 10
   pageNumber: number = 0
   hasNextPage: boolean = false
   unreadCount: number = 0
   tabs: any[] = [
-    { id: "all", category: 'all' },
+    { id: "all", name: 'all' },
   ]
   private scrollNotificationsSubject = new Subject<Event>()
 
@@ -91,7 +91,9 @@ export class AllNotificationsComponent implements OnInit {
     })
   }
 
-
+  capitalize(word: string): string {
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  }
 
   getTimeAgo(dateString: string): string {
     const givenDate = new Date(dateString);
@@ -114,15 +116,15 @@ export class AllNotificationsComponent implements OnInit {
     return `${seconds}s`
   }
 
-  getIconPath(type: string) {
-    switch (type) {
-      case 'learn':
+  getIconPath(category: string) {
+    switch (category) {
+      case 'LEARN':
         return 'assets/icons/notifications-engine/learn.svg'
-      case 'network':
+      case 'NETWORK':
         return 'assets/icons/notifications-engine/network.svg'
-      case 'event':
+      case 'EVENT':
         return 'assets/icons/notifications-engine/event.svg'
-      case 'discussion':
+      case 'DISCUSSION':
         return 'assets/icons/notifications-engine/discuss.svg'
       default:
         return 'assets/icons/notifications-engine/learn.svg'
@@ -133,7 +135,7 @@ export class AllNotificationsComponent implements OnInit {
     console.log('type', type)
     //this.currentTab = type
     this.dynamicTabIndex = type
-    this.currentTab = this.tabs[this.dynamicTabIndex].category.toLowerCase()
+    this.currentTab = this.tabs[this.dynamicTabIndex].name
     console.log('currentTab', this.currentTab)
     this.notifications = []
     this.pageNumber = 0
@@ -145,8 +147,8 @@ export class AllNotificationsComponent implements OnInit {
     this.loading = true
     this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
       this.response = _.get(res, 'result.notifications', [])
-      const tabs = _.get(res, 'result.categoryStats', [])
-      this.tabs = [{ id: "all", category: 'all' }]
+      const tabs = _.get(res, 'result.subtypeStats', [])
+      this.tabs = [{ id: "all", name: 'all' }]
       tabs.forEach((tab: any) => {
         this.tabs.push(tab)
         if (tab.unread) {
@@ -154,7 +156,7 @@ export class AllNotificationsComponent implements OnInit {
         }
       })
       if (this.currentTab) {
-        const index = this.tabs.findIndex(tab => tab.category === this.currentTab)
+        const index = this.tabs.findIndex(tab => tab.name === this.currentTab)
         if (index !== -1) {
           this.dynamicTabIndex = index
         }
