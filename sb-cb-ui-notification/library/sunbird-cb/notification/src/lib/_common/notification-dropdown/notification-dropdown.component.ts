@@ -9,6 +9,7 @@ import * as _ from 'lodash'
 export class NotificationDropdownComponent implements OnInit {
   @Input() childData: any;
   @Input() unRead: number = 0
+  @Input() showIcon: boolean = false
   @Output() viewAllClick = new EventEmitter<string>()
   currentTab = 'all'
   response: any

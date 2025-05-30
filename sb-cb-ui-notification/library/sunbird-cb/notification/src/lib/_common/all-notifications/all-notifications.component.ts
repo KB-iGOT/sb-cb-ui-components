@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
 import * as _ from 'lodash'
@@ -13,7 +13,7 @@ export class AllNotificationsComponent implements OnInit {
 
   @Output() reCountNotifications = new EventEmitter<any>()
   @Output() redirectTo = new EventEmitter<any>()
-
+  @Input() showIcon: boolean = false
 
   notifications: any[] = []
   dynamicTabIndex: number = 0
