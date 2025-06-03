@@ -9,7 +9,8 @@
           (click)="loadNotifications('all', $event)">
           All</div>
         <div class="tabLable cursor-pointer {{currentTab === 'ALERT' ? 'active-tab' : 'inActive'}}"
-          (click)="loadNotifications('ALERT', $event)">Alert<span *ngIf="alerts?.unread > 0">({{alerts?.unread}})</span>
+          (click)="loadNotifications('ALERT', $event)">Alert<span
+            *ngIf="alerts?.unread + alerts?.read > 0">({{alerts?.unread + alerts?.read}})</span>
         </div>
       </div>
     </div>
