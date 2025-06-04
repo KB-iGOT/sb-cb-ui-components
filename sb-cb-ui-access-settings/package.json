@@ -51,8 +51,6 @@
     "@angular/platform-browser": "^16.2.12",
     "@angular/platform-browser-dynamic": "^16.2.12",
     "@angular/router": "^16.2.12",
-    "@ngx-translate/core": "^15.0.0",
-    "@ngx-translate/http-loader": "4.0.0",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@sunbird-cb/utils-v2": "0.0.27-ang-13-16",
