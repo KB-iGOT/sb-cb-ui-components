@@ -36,7 +36,7 @@
 }
 
 .org-container {
-  height: 300px;
+  // height: 410px;
   display: flex;
   flex-direction: column;
 }
@@ -63,6 +63,16 @@
     font-weight: 400;
     font-size: 12px;
     color: rgba(0, 0, 0, 0.6);
+    &.active-range-btn {
+      font-weight: 700;
+      font-size: 14px;
+      color: #000000;
+    }
+  }
+
+  .range-button {
+    @extend .letter-button;
+    padding: 0 16px !important;
   }
 }
 
@@ -78,9 +88,6 @@
 }
 
 .org-column {
-  min-width: 200px;
-  max-width: 200px;
-
   .org-list {
     display: flex;
     flex-direction: column;
@@ -99,13 +106,14 @@
         font-weight: 700;
         font-size: 14px;
         line-height: 14px;
+        color: #000000de;
       }
     }
   }
 }
 
 :host ::ng-deep .mat-mdc-dialog-content {
-  max-height: 75vh !important;
+  max-height: 79vh !important;
 }
 
 .apply-button-container {
@@ -125,4 +133,35 @@
   font-family: Lato;
   font-size: 8.98px;
   color: #000000de;
+}
+
+.batch-range-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.batch-range-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+}
+.batch-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.options-checkbox {
+  .mat-checkbox {
+    ::ng-deep .mat-checkbox-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      font-family: Lato;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 14px;
+      color: #000000de;
+    }
+  }
 }

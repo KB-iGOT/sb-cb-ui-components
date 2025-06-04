@@ -6,7 +6,7 @@
                 <span class="text-sm font-normal">Items Selected</span>
             </div>
             <div class="flex items-center gap-2 actions-selections ml-auto">
-                <button mat-button color="primary" class="text-sm font-normal action-refresh-btn"
+                <button mat-button color="primary" class="text-sm font-normal action-refresh-btn" (click)="refreshSelected()"
                     *ngIf="tableConfig?.canShowRefreshBtn || false">
                     <mat-icon>refresh</mat-icon>
                     Refresh

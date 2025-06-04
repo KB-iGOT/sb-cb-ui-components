@@ -138,3 +138,9 @@
 ::ng-deep .mat-select-panel {
   max-height: 340px !important;
 }
+
+.radio-container mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 0px;
+}

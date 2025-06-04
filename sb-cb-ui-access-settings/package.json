@@ -59,8 +59,8 @@
     "keycloak-angular": "^6.1.0",
     "moment": "^2.29.1",
     "rxjs": "^6.6.6",
-    "rxjs-compat": "^6.6.6",
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.16",

@@ -2,14 +2,15 @@ import { Component, inject, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { AccessControlService } from "../../../_services/access-control.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { PageChangeEmitter } from "../../../_models/pagination.model";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
+import { SnackbarComponent } from "../../../components/snackbar/snackbar.component";
 
 @Component({
   selector: "sb-uic-invite-users",
   templateUrl: "./invite-users.component.html",
-  styleUrls: ["./invite-users.component.scss"],
+  styleUrls: ["./invite-users.component.scss"]
 })
 export class InviteUsersComponent implements OnInit {
   public readonly data = inject<any>(MAT_DIALOG_DATA);
@@ -22,6 +23,7 @@ export class InviteUsersComponent implements OnInit {
 
   holdSelectedUsers: any[] = [];
   finalSelectedUsers: any[] = [];
+  usersFinalList: any[] = [];
 
   usersTableConfig!: NsAccessControlConfig.ITableConfig;
   usersLoading = false;
@@ -33,9 +35,12 @@ export class InviteUsersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.usersTableConfig =
-      this.accessControlService.accessControlConfig().usersTableConfig;
-    console.log(this.data, "InviteUsersComponent data");
+    this.usersTableConfig = this.accessControlService.accessControlConfig().usersTableConfig;
+    if (this.data && this.data.selected) {
+      if (!this.isArrayOfObjects(this.data?.selected)) {
+        this.getUsersList("", 5, 0, this.data?.selected);
+      }
+    }
   }
 
   onClose(): void {
@@ -44,62 +49,32 @@ export class InviteUsersComponent implements OnInit {
 
   search(): void {
     this.holdSelectedUsers = [];
-    switch (this.data?.condition?.entity) {
-      case "users":
-        this.getUsersList(this.searchControl.value);
-        break;
-    }
+    this.getUsersList(this.searchControl.value);
   }
 
   onFilterChange(event: any): void {
     this.filterValue = event.value;
   }
 
-  getUsersList(query: string, limit?: number, offset?: number): void {
+  getUsersList(query: string, limit?: number, offset?: number, userIds?: string[]): void {
     this.usersLoading = true;
-    this.accessControlService
-      .fetchUserList(query, { limit: limit, offset: offset })
-      .subscribe({
-        next: (response) => {
-          if (response?.result && response?.result?.response?.content) {
-            this.usersList = response.result.response.content;
-            this.totalUsers = response.result.response.count;
-          } else {
-            this.usersList = [];
-            this.totalUsers = 0;
+    this.accessControlService.fetchUserList(query, { limit: limit, offset: offset }, userIds).subscribe({
+      next: response => {
+        if (response?.result && response?.result?.response?.content) {
+          this.usersList = response.result.response.content;
+          this.totalUsers = response.result.response.count;
+          if (userIds.length) {
+            this.finalSelectedUsers = response.result.response.content;
           }
-        },
-        error: (error) => {
-          console.error("Error fetching users list", error);
-        },
-        complete: () => {
-          this.usersLoading = false;
-        },
-      });
-  }
-
-  getOrgList(query: string, limit?: number, offset?: number): void {
-    this.usersLoading = true;
-    this.accessControlService
-      .fetchOrgList(query, { limit: limit, offset: offset })
-      .subscribe({
-        next: (response) => {
-          debugger;
-          if (response?.result && response?.result?.response?.content) {
-            this.usersList = response.result.response.content;
-            this.totalUsers = response.result.response.count;
-          } else {
-            this.usersList = [];
-            this.totalUsers = 0;
-          }
-        },
-        error: (error) => {
-          console.error("Error fetching users list", error);
-        },
-        complete: () => {
-          this.usersLoading = false;
-        },
-      });
+        } else {
+          this.usersList = [];
+          this.totalUsers = 0;
+        }
+      },
+      complete: () => {
+        this.usersLoading = false;
+      }
+    });
   }
 
   onSelectingUser(event: any): void {
@@ -109,8 +84,10 @@ export class InviteUsersComponent implements OnInit {
   selectUsers(): void {
     this.finalSelectedUsers = this.holdSelectedUsers;
 
-    this.snackbar.open("Added to selected users", "", {
+    this.snackbar.openFromComponent(SnackbarComponent, {
+      data: { message: `Users added to Selected tab`, type: "success" },
       duration: 3000,
+      panelClass: "course-success-snackbar"
     });
     this.activeTab = 1;
   }
@@ -121,8 +98,24 @@ export class InviteUsersComponent implements OnInit {
     this.getUsersList(this.searchControl.value, limit, offset);
   }
 
-  removedUserData(event: any): void {debugger
+  removedUserData(event: any): void {
     this.finalSelectedUsers = [...event.remainingList];
     this.holdSelectedUsers = this.finalSelectedUsers;
+  }
+
+  onSelectingUserToApply(users: any): void {
+    this.usersFinalList = users;
+  }
+
+  applySelections(): void {
+    this.dialogRef.close({
+      rule: this.data.rule,
+      condition: this.data.condition,
+      selected: this.usersFinalList
+    });
+  }
+
+  isArrayOfObjects(arr: any): boolean {
+    return Array.isArray(arr) && arr.every(item => typeof item === "object" && item !== null && !Array.isArray(item));
   }
 }

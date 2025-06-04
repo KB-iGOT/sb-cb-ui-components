@@ -12,118 +12,7 @@ import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack
 export class BulkUploadKarmayogiComponent {
   bulkUploadConfig: NsAccessControlConfig.IBulkUploadKarmayogi;
   file!: File | null;
-  uploadedData = [
-    {
-      webPages: null,
-      maskedPhone: "******0092",
-      tcStatus: null,
-      loginId: null,
-      rootOrgName: "UI Development Ministry",
-      subject: null,
-      channel: "UI Development Ministry",
-      profileUserTypes: [],
-      language: null,
-      updatedDate: "2023-12-24 10:26:53:771+0000",
-      password: null,
-      managedBy: null,
-      flagsValue: 4,
-      report_access_expiry: null,
-      id: "c3598b84-94ab-4f59-ac38-82f267007191",
-      recoveryEmail: "",
-      identifier: "c3598b84-94ab-4f59-ac38-82f267007191",
-      thumbnail: null,
-      profileVisibility: null,
-      updatedBy: null,
-      accesscode: null,
-      last_login: "2024-01-03T08:46:04.000Z",
-      locationIds: null,
-      registryId: null,
-      nodebbid: 5362598,
-      rootOrgId: "0139543696241049600",
-      prevUsedEmail: "",
-      firstName: "Abhishek KP",
-      profileLocation: [],
-      tncAcceptedOn: null,
-      allTncAccepted: {},
-      profileDetails: {
-        profileGroupStatus: "NOT-VERIFIED",
-        verifiedKarmayogi: false,
-        profileDesignationStatus: "NOT-VERIFIED",
-        employmentDetails: {
-          departmentName: "UI Development Ministry",
-        },
-        profileStatusUpdatedOn: "26-06-2024 17.17.48",
-        profileStatus: "NOT-VERIFIED",
-        personalDetails: {
-          firstname: "Abhishek KP",
-          phoneVerified: false,
-          mobile: 9742090092,
-          primaryEmail: "mdo_admin_kp@yopmail.com",
-        },
-        mandatoryFieldsExists: false,
-        additionalProperties: {
-          isProfileUpdatedMsgViewed: false,
-        },
-      },
-      phone: "******0092",
-      dob: null,
-      grade: null,
-      currentLoginTime: null,
-      userType: null,
-      status: 1,
-      lastName: null,
-      gender: null,
-      roles: [],
-      prevUsedPhone: "",
-      stateValidated: true,
-      isDeleted: false,
-      organisations: [
-        {
-          organisationId: "0139543696241049600",
-          updatedBy: null,
-          orgName: "UI Development Ministry",
-          addedByName: null,
-          addedBy: null,
-          associationType: 1,
-          roles: ["CBP_ADMIN", "MDO_ADMIN", "MDO_REPORT_ACCESSOR"],
-          approvedBy: null,
-          updatedDate: null,
-          userId: "c3598b84-94ab-4f59-ac38-82f267007191",
-          approvaldate: null,
-          isDeleted: false,
-          hashTagId: "0139543696241049600",
-          isRejected: null,
-          id: "0139543708634234882",
-          position: null,
-          isApproved: null,
-          orgjoindate: "2023-12-24 10:26:53:583+0000",
-          orgLeftDate: null,
-        },
-      ],
-      provider: null,
-      countryCode: null,
-      maskedEmail: "md**********@yopmail.com",
-      tempPassword: null,
-      email: "md**********@yopmail.com",
-      phoneVerified: true,
-      profileSummary: null,
-      tcUpdatedDate: null,
-      recoveryPhone: "",
-      avatar: null,
-      userName: "abhishekkp_8ayd",
-      userId: "c3598b84-94ab-4f59-ac38-82f267007191",
-      userSubType: null,
-      first_login: "2024-01-03T08:46:04.000Z",
-      emailVerified: true,
-      lastLoginTime: null,
-      createdDate: "2023-12-24 10:26:39:937+0000",
-      framework: {},
-      createdBy: "b3d4fe5d-8704-4239-8c39-05264fca46d5",
-      profileUserType: {},
-      location: null,
-      tncAcceptedVersion: null,
-    },
-  ];
+
   currrentFilterType = "success";
   csvContent: any;
   contacts: any = [];
@@ -488,7 +377,6 @@ export class BulkUploadKarmayogiComponent {
     this.isSuccessUserlist = this.contacts.filter((ele: any) => ele.userStatus);
     this.isErrorUserlist = this.contacts.filter((ele: any) => !ele.userStatus);
 
-    debugger;
     // this.successUserData.emit(this.isSuccessUserlist);
     this.currrentFilterType = this.isSuccessUserlist.length
       ? "success"

@@ -1,15 +1,5 @@
 import { SelectionModel } from "@angular/cdk/collections";
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-  ViewChild,
-} from "@angular/core";
+import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { PageChangeEmitter } from "../../_models/pagination.model";
 import { MatSort, Sort } from "@angular/material/sort";
@@ -18,7 +8,7 @@ import { LiveAnnouncer } from "@angular/cdk/a11y";
 @Component({
   selector: "sb-uic-list-table",
   templateUrl: "./list-table.component.html",
-  styleUrls: ["./list-table.component.scss"],
+  styleUrls: ["./list-table.component.scss"]
 })
 export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() data: any[] = [];
@@ -47,20 +37,13 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     // Handle data input change
     if (changes["data"]?.currentValue?.length) {
       const mappedUsers = changes["data"].currentValue.map((user: any) => ({
-        firstName:
-          user?.firstName ||
-          user?.profileDetails?.personalDetails?.firstname ||
-          "",
-        mobile:
-          user?.mobile || user?.profileDetails?.personalDetails?.mobile || "",
-        email:
-          user?.email ||
-          user?.profileDetails?.personalDetails?.primaryEmail ||
-          "",
+        firstName: user?.firstName || user?.profileDetails?.personalDetails?.firstname || "",
+        mobile: user?.mobile || user?.profileDetails?.personalDetails?.mobile || "",
+        email: user?.email || user?.profileDetails?.personalDetails?.primaryEmail || "",
         ministry: user?.ministry || user?.organisations[0]?.orgName || "",
         invited_on: user?.invited_on || "",
         status: user?.status || "",
-        userId: user?.userId || "",
+        userId: user?.userId || ""
       }));
       this.data = mappedUsers;
       this.dataSource = new MatTableDataSource<any>(mappedUsers);
@@ -74,12 +57,8 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
       this.selection.clear();
 
       if (changes["selected"].currentValue.length > 0) {
-        this.dataSource.data.forEach((row) => {
-          if (
-            changes["selected"].currentValue.some(
-              (sel: any) => sel.userId === row.userId
-            )
-          ) {
+        this.dataSource.data.forEach(row => {
+          if (changes["selected"].currentValue.some((sel: any) => sel.userId === row.userId)) {
             this.selection.select(row);
           }
         });
@@ -109,21 +88,15 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   masterToggle() {
-    this.isAllSelected()
-      ? this.selection.clear()
-      : this.dataSource.data.forEach((row) => this.selection.select(row));
+    this.isAllSelected() ? this.selection.clear() : this.dataSource.data.forEach(row => this.selection.select(row));
     this.selectedTablerow = this.selection.selected;
-    if (this.tableConfig?.type === "allLearners") {
-      this.selectedDataChange.emit(this.selectedTablerow);
-    }
+    this.selectedDataChange.emit(this.selectedTablerow);
   }
 
   toggleSelection(row: any): void {
     this.selection.toggle(row);
     this.selectedTablerow = this.selection.selected;
-    if (this.tableConfig?.type === "allLearners") {
-      this.selectedDataChange.emit(this.selectedTablerow);
-    }
+    this.selectedDataChange.emit(this.selectedTablerow);
   }
 
   onPageChange(event: PageChangeEmitter) {
@@ -135,12 +108,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
       return;
     }
     const removedList = [...this.selectedTablerow];
-    const remainingList = this.data.filter(
-      (user) =>
-        !this.selectedTablerow.some(
-          (selected) => selected.userId === user.userId
-        )
-    );
+    const remainingList = this.data.filter(user => !this.selectedTablerow.some(selected => selected.userId === user.userId));
     this.data = remainingList;
     this.count = remainingList.length;
     this.selectedTablerow = [];
@@ -149,7 +117,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     if (this.tableConfig?.type === "selectedUsers") {
       this.removeSelectedData.emit({
         remainingList,
-        removedList,
+        removedList
       });
     }
   }
@@ -160,5 +128,9 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     } else {
       this._liveAnnouncer.announce("Sorting cleared");
     }
+  }
+
+  refreshSelected(): void {
+    this.selection.clear();
   }
 }
