@@ -48,30 +48,32 @@ export class CadreMappingService {
     this.batchYearToServicesMap.clear();
 
     // Build lookups
-    data.civilServiceType.civilServiceTypeList.forEach(cst => {
-      cst.serviceList.forEach(service => {
-        const { id: serviceId, commonBatchStartYear, commonBatchEndYear } = service;
-        this.allServices.set(serviceId, service);
-
-        // Add years to service-batch map
-        for (let y = commonBatchStartYear; y <= commonBatchEndYear; y++) {
-          this.addToMapSet(this.batchYearToServicesMap, y, serviceId);
-        }
-
-        service.cadreList?.forEach(cadre => {
-          const { id: cadreId, startBatchYear, endBatchYear } = cadre;
-          this.allCadres.set(cadreId, cadre);
-
-          // Map cadre <-> service
-          this.addToMapSet(this.cadreToServiceMap, cadreId, serviceId);
-          this.addToMapSet(this.serviceToCadresMap, serviceId, cadreId);
-
-          // Add years to cadre-batch map
-          for (let y = startBatchYear; y <= endBatchYear; y++) {
-            this.addToMapSet(this.batchYearToCadresMap, y, cadreId);
+    data?.civilServiceType?.civilServiceTypeList.forEach(cst => {
+      if (cst) {
+        cst.serviceList.forEach(service => {
+          const { id: serviceId, commonBatchStartYear, commonBatchEndYear } = service;
+          this.allServices.set(serviceId, service);
+  
+          // Add years to service-batch map
+          for (let y = commonBatchStartYear; y <= commonBatchEndYear; y++) {
+            this.addToMapSet(this.batchYearToServicesMap, y, serviceId);
           }
+  
+          service.cadreList?.forEach(cadre => {
+            const { id: cadreId, startBatchYear, endBatchYear } = cadre;
+            this.allCadres.set(cadreId, cadre);
+  
+            // Map cadre <-> service
+            this.addToMapSet(this.cadreToServiceMap, cadreId, serviceId);
+            this.addToMapSet(this.serviceToCadresMap, serviceId, cadreId);
+  
+            // Add years to cadre-batch map
+            for (let y = startBatchYear; y <= endBatchYear; y++) {
+              this.addToMapSet(this.batchYearToCadresMap, y, cadreId);
+            }
+          });
         });
-      });
+      }
     });
   }
 

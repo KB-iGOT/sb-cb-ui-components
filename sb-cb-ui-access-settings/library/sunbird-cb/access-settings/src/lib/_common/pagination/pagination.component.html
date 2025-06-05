@@ -12,7 +12,7 @@
     <ul class="pagination">
         <div class="pagination-listing flex items-center">
             <ng-container
-                *ngFor="let count of pagination.paginationLength; let last = last; let first = first; let i = index">
+                *ngFor="let count of pagination?.paginationLength; let last = last; let first = first; let i = index">
                 <li class="page-item" *ngIf="first" (click)="navigateToPrevPage(currentPage)"
                     [ngClass]="{disabled: currentPage === firstPage}">
                     <a class="page-link" aria-label="Previous">

@@ -4,7 +4,7 @@
       <span class="text-xl font-bold primary-text-color">Access Control</span>
       <div class="flex gap-2 items-center">
         <span class="text-sm primary-text-color cursor-pointer" (click)="openInstructonsDialog()">How to use access control?</span>
-        <img src="/assets/icons/support-i.svg" alt="support i" width="24" height="24" />
+        <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24" />
       </div>
     </div>
     <div class="light-grey-border p-4 mt-4">
@@ -13,7 +13,7 @@
           <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
             <mat-radio-button [value]="item.value">
               <div class="flex gap-2 items-center">
-                <span>{{ item.name }}</span>
+                <span>{{ item?.name }}</span>
                 <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
               </div>
             </mat-radio-button>
@@ -64,7 +64,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf="accessControlForm && userGroup.length > 0 && !isLoading">
+        <ng-container *ngIf="accessControlForm && userGroup?.length > 0 && !isLoading">
           <form [formGroup]="accessControlForm">
             <mat-accordion class="example-headers-align access-usergroup-accordion mt-3" multi="true">
               <ng-container formArrayName="userGroup" *ngFor="let rule of userGroup?.controls; let i = index; let ruleLast = last">

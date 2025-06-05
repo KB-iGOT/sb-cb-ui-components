@@ -90,7 +90,7 @@ export class AccessControlComponent implements OnInit {
     this.isLoading = true;
     this.accessControlService.fetchCadreConfig().subscribe({
       next: (response: any) => {
-        if (response.result && response.result.response && Object.keys(response.result.response)?.length) {
+        if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
           this.cadreConfigData = response.result.response?.value;
           this.cadreMappingService.initialize(this.cadreConfigData);
           this.accessControlService.holdServiceCadrebatch.set({
@@ -365,7 +365,7 @@ export class AccessControlComponent implements OnInit {
       const cadreSelections = cadre?.selections || [];
       const batchSelections = batch?.selections || [];
       // Case 1: Only service selected
-      if (serviceSelections.length && !cadreSelections.length && !batchSelections.length) {
+      if (serviceSelections?.length && !cadreSelections?.length && !batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           service: this.cadreMappingService.getAllServices(),
@@ -374,7 +374,7 @@ export class AccessControlComponent implements OnInit {
         }));
       }
       // Case 2: Only cadre selected
-      else if (!serviceSelections.length && cadreSelections.length && !batchSelections.length) {
+      else if (!serviceSelections?.length && cadreSelections?.length && !batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           cadre: this.cadreMappingService.getAllCadres(),
@@ -383,7 +383,7 @@ export class AccessControlComponent implements OnInit {
         }));
       }
       // Case 3: Only batch selected
-      else if (!serviceSelections.length && !cadreSelections.length && batchSelections.length) {
+      else if (!serviceSelections?.length && !cadreSelections?.length && batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           batch: this.cadreMappingService.getAllBatchYears(),
@@ -392,7 +392,7 @@ export class AccessControlComponent implements OnInit {
         }));
       }
       // Case 4: Service and Cadre selected
-      else if (serviceSelections.length && cadreSelections.length && !batchSelections.length) {
+      else if (serviceSelections?.length && cadreSelections?.length && !batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           service: this.cadreMappingService.getServicesByCadres(cadreSelections),
@@ -401,7 +401,7 @@ export class AccessControlComponent implements OnInit {
         }));
       }
       // Case 5: Service and Batch selected
-      else if (serviceSelections.length && !cadreSelections.length && batchSelections.length) {
+      else if (serviceSelections?.length && !cadreSelections?.length && batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           cadre: this.cadreMappingService.getCadresByServicesAndBatch(serviceSelections, batchSelections),
@@ -410,7 +410,7 @@ export class AccessControlComponent implements OnInit {
         }));
       }
       // Case 6: Cadre and Batch selected
-      else if (!serviceSelections.length && cadreSelections.length && batchSelections.length) {
+      else if (!serviceSelections?.length && cadreSelections?.length && batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           service: this.cadreMappingService.getServicesByCadresAndBatch(cadreSelections, batchSelections),
@@ -501,7 +501,7 @@ export class AccessControlComponent implements OnInit {
           userGroupCriteriaList: group.conditions.map((condition: any) => {
             let criteriaValue: string[];
 
-            if (condition.entity === NsAccessControlConfig.SelectionType.Users && condition.selected?.length && condition.selected[0]?.userId) {
+            if (condition?.entity === NsAccessControlConfig.SelectionType.Users && condition?.selected?.length && condition?.selected[0]?.userId) {
               const userIds = condition.selected?.map((user: any) => user?.userId) || [];
               criteriaValue = userIds;
             } else {

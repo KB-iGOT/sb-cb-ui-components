@@ -328,7 +328,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          if (response.result && response.result.response) {
+          if (response?.result && response?.result?.response) {
             this.dataList = response.result.response;
           }
         },
