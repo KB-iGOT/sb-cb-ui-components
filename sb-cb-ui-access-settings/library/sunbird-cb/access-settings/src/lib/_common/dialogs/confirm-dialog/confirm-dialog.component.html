@@ -1,0 +1,34 @@
+<div class="dialog-confirm p-4">
+  <div class="flex items-center justify-center flex-column">
+    <div class="icon mb-6" [ngSwitch]="data.type">
+      <mat-icon *ngSwitchCase="'delete'">delete</mat-icon>
+      <mat-icon *ngSwitchCase="'confirm-access-type'" svgIcon="radio-on"></mat-icon>
+    </div>
+
+    <div [ngSwitch]="data?.type">
+      <ng-container *ngSwitchCase="'delete'">
+        <div class="confirm-title text-center">Are you sure you want to delete {{ data?.additionalData || "" }} ?</div>
+        <div class="confirm-desc text-center">
+          Once deleted, it cannot be restored, and any access permissions associated with it will be removed. This action is irreversible.
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'confirm-access-type'">
+        <div class="confirm-title text-center">Are you sure you want to opt for "Public" access?</div>
+        <div class="confirm-desc text-center">Or else please cancel and select <strong>"Custom"</strong> for the restricted content access.</div>
+      </ng-container>
+    </div>
+
+    <div class="confirm-actions flex items-center gap-4 mt-4" [ngSwitch]="data?.type">
+      <ng-container *ngSwitchCase="'delete'">
+        <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">No</button>
+        <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'confirm-access-type'">
+        <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">Cancel</button>
+        <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
+      </ng-container>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,216 @@
+<div class="py-4 px-10">
+  <div class="p-4 as-container">
+    <div class="flex items-center justify-between">
+      <span class="text-xl font-bold primary-text-color">Access Control</span>
+      <div class="flex gap-2 items-center">
+        <span class="text-sm primary-text-color cursor-pointer" (click)="openInstructonsDialog()">How to use access control?</span>
+        <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24" />
+      </div>
+    </div>
+    <div class="light-grey-border p-4 mt-4">
+      <mat-radio-group [(ngModel)]="accessType" (change)="onAccessTypeChange($event)">
+        <div class="radio-container flex gap-5 mb-4">
+          <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
+            <mat-radio-button [value]="item.value">
+              <div class="flex gap-2 items-center">
+                <span>{{ item?.name }}</span>
+                <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
+              </div>
+            </mat-radio-button>
+          </ng-container>
+        </div>
+      </mat-radio-group>
+      <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Public">
+        <div class="info-container">
+          <label class="text-sm">This event will be visible to all Karmayogis.</label>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Custom">
+        <div class="visibiliy-container light-grey-border p-4">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-bold">Visibility</span>
+            <mat-slide-toggle [(ngModel)]="isVisibilityEnabled"></mat-slide-toggle>
+          </div>
+          <ng-container *ngIf="!isVisibilityEnabled">
+            <label class="text-sm">Karmayogis will NOT be able to search and view the description page of the event.</label>
+          </ng-container>
+          <ng-container *ngIf="isVisibilityEnabled">
+            <label class="text-sm"
+              >Karmayogis will be able to search and view the description page of the event but will not able to enroll if Karmayogi do not satisfy the
+              conditions defined in the access control below.</label
+            >
+          </ng-container>
+        </div>
+        <!-- <div class="flex justify-between items-center mt-4 mb-4">
+          <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="filterCriteria = !filterCriteria">
+            <div class="flex gap-2 flex-middle">
+              <span class="text-m">Filter criteria</span>
+              <mat-icon class="primary-text-color">{{ filterCriteria ? "visibility_on" : "visibility_off" }}</mat-icon>
+            </div>
+          </button>
+        </div> -->
+
+        <ng-container *ngIf="filterCriteria">
+          <div class="filter-criteria-container light-grey-border p-4 mt-4 flex flex-middle justify-between mb-4">
+            <div class="info">
+              <span class="text-sm">Define the conditions that Karmayogis must satisfy to enroll in the event.</span>
+            </div>
+            <button mat-button class="new-secondary-button-no-border button-with-corners" type="button">
+              <div class="flex gap-2 flex-middle">
+                <span class="text-m">Refresh</span>
+                <mat-icon class="primary-text-color">refresh</mat-icon>
+              </div>
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="accessControlForm && userGroup?.length > 0 && !isLoading">
+          <form [formGroup]="accessControlForm">
+            <mat-accordion class="example-headers-align access-usergroup-accordion mt-3" multi="true">
+              <ng-container formArrayName="userGroup" *ngFor="let rule of userGroup?.controls; let i = index; let ruleLast = last">
+                <ng-container [formGroupName]="i">
+                  <mat-expansion-panel class="access-usergroup-panel" expanded>
+                    <mat-expansion-panel-header>
+                      <mat-panel-title class="items-center">
+                        <span class="text-sm">{{ rule.get("name")?.value }}</span>
+                      </mat-panel-title>
+                      <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
+                        <button mat-icon-button aria-label="delete user group" (click)="removeUserGroup(i)" title="Delete">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                        <button mat-icon-button aria-label="refresh user group" (click)="resetUserGroup(i)" title="Refresh">
+                          <mat-icon>refresh</mat-icon>
+                        </button>
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <ng-container *ngIf="rule.get('conditions') as conditionsArray">
+                      <div [formArrayName]="'conditions'">
+                        <ng-container *ngFor="let condition of conditionsArray?.controls; let j = index; let conditionlast = last">
+                          <div class="condition-selection mt-2" [formGroupName]="j">
+                            <div class="select-condition-text mb-3 mt-4">Select Condition {{ i + 1 + "." + (j + 1) }}</div>
+                            <div class="selections-options grid grid-cols-5 gap-4">
+                              <div class="mat-full-radius">
+                                <mat-form-field appearance="outline" class="w-full">
+                                  <mat-select placeholder="Select" formControlName="entity" (selectionChange)="onEntityChange(i, j)">
+                                    <ng-container *ngFor="let item of getAvailableEntities(i, j)">
+                                      <mat-option [value]="item?.value" [disabled]="item?.disabled">{{ item?.label }}</mat-option>
+                                    </ng-container>
+                                  </mat-select>
+                                </mat-form-field>
+                              </div>
+                              <div class="mat-full-radius">
+                                <mat-form-field appearance="outline" class="w-full">
+                                  <mat-select placeholder="Select" formControlName="conditionType">
+                                    <ng-container *ngFor="let item of accessControlCriteriaSelection?.optionsConditions">
+                                      <mat-option [value]="item?.value">{{ item?.label }}</mat-option>
+                                    </ng-container>
+                                  </mat-select>
+                                </mat-form-field>
+                              </div>
+                              <div class="action-manage-selection">
+                                <button
+                                  mat-flat-button
+                                  (click)="manageSelections(condition, rule, i)"
+                                  [disabled]="!condition.get('entity').value || !condition.get('conditionType').value"
+                                  class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
+                                  <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
+                                  <span class="font-bold text-sm">Manage Selections</span>
+                                </button>
+                              </div>
+                              <div class="action-options-selected">
+                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button">
+                                  <div class="flex gap-2 flex-middle mt-2">
+                                    <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
+                                  </div>
+                                </button>
+                              </div>
+                              <div class="action-more-options flex justify-end">
+                                <div class="flex gap-4">
+                                  <button mat-icon-button aria-label="delete condition" class="mt-2 ml-auto" (click)="removeCondition(i, j)" title="Delete">
+                                    <mat-icon>delete</mat-icon>
+                                  </button>
+                                  <button mat-icon-button aria-label="refresh condition" class="mt-2 ml-auto" (click)="resetCondition(i, j)" title="Refresh">
+                                    <mat-icon>refresh</mat-icon>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="and-or mat-full-radius" *ngIf="conditionsArray?.length > 1 && !conditionlast">
+                            <mat-form-field appearance="outline" class="w-max-100">
+                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship">
+                                <mat-option [value]="'AND'">AND</mat-option>
+                                <mat-option [value]="'OR'">OR</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </ng-container>
+                    <div class="action-add-condition">
+                      <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="addCondition(i)">
+                        <div class="flex gap-2 flex-middle">
+                          <mat-icon class="primary-text-color">add</mat-icon>
+                          <span class="text-m">Add Condition</span>
+                        </div>
+                      </button>
+                    </div>
+                  </mat-expansion-panel>
+                  <div class="and-or mat-full-radius" *ngIf="userGroup.length > 1 && !ruleLast">
+                    <mat-form-field appearance="outline" class="w-max-100">
+                      <mat-select placeholder="Select" [(value)]="defaultUserGroupRelationship">
+                        <mat-option [value]="'AND'">AND</mat-option>
+                        <mat-option [value]="'OR'">OR</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </mat-accordion>
+          </form>
+        </ng-container>
+
+        <ng-container *ngIf="isLoading">
+          <div class="spinner-loader flex items-center justify-center">
+            <mat-spinner></mat-spinner>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="!isLoading">
+          <div class="text-center mb-6 mt-4">
+            <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="addUserGroup()">
+              <div class="flex gap-2 flex-middle">
+                <mat-icon class="primary-text-color">add</mat-icon>
+                <span class="text-m">Add User Group</span>
+              </div>
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="userGroup?.length > 0">
+          <div class="action-save flex justify-center items-center gap-4">
+            <!-- Save Filter Button -->
+            <button
+              mat-flat-button
+              class="flex rounded-full px-4 py-2 mat-btn-outline font-bold text-sm items-center gap-2"
+              [disabled]="isSaveFltrBtnDisabled || isSaving"
+              (click)="applyAccessControlValue()">
+              <mat-spinner *ngIf="isSaving" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>
+              <span>Save Filter</span>
+            </button>
+
+            <!-- Apply Button -->
+            <button
+              mat-flat-button
+              [disabled]="isApplyBtnDisabled || isApplying"
+              class="flex items-center rounded-full px-4 py-2 new-bg-color font-bold text-sm text-white gap-2"
+              (click)="applyAccessControlValue()">
+              <mat-spinner *ngIf="isApplying" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>
+              <span>Apply</span>
+            </button>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
+</div>
