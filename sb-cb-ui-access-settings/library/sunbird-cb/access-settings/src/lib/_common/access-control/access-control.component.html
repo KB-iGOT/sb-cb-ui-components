@@ -11,7 +11,7 @@
       <mat-radio-group [(ngModel)]="accessType" (change)="onAccessTypeChange($event)">
         <div class="radio-container flex gap-5 mb-4">
           <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
-            <mat-radio-button [value]="item.value">
+            <mat-radio-button [value]="item.value" [disabled]="item?.disabled">
               <div class="flex gap-2 items-center">
                 <span>{{ item?.name }}</span>
                 <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
@@ -26,19 +26,16 @@
         </div>
       </ng-container>
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Custom">
-        <div class="visibiliy-container light-grey-border p-4">
+        <div class="visibiliy-container light-grey-border p-4 mb-4">
           <div class="flex justify-between items-center">
             <span class="text-lg font-bold">Visibility</span>
             <mat-slide-toggle [(ngModel)]="isVisibilityEnabled"></mat-slide-toggle>
           </div>
           <ng-container *ngIf="!isVisibilityEnabled">
-            <label class="text-sm">Karmayogis will NOT be able to search and view the description page of the event.</label>
+            <label class="text-sm">{{ config?.visibilityOnOffTexts?.off }}</label>
           </ng-container>
           <ng-container *ngIf="isVisibilityEnabled">
-            <label class="text-sm"
-              >Karmayogis will be able to search and view the description page of the event but will not able to enroll if Karmayogi do not satisfy the
-              conditions defined in the access control below.</label
-            >
+            <label class="text-sm">{{ config?.visibilityOnOffTexts?.on }}</label>
           </ng-container>
         </div>
         <!-- <div class="flex justify-between items-center mt-4 mb-4">
@@ -126,10 +123,20 @@
                               </div>
                               <div class="action-more-options flex justify-end">
                                 <div class="flex gap-4">
-                                  <button mat-icon-button aria-label="delete condition" class="mt-2 ml-auto" (click)="removeCondition(i, j)" title="Delete">
+                                  <button
+                                    mat-icon-button
+                                    aria-label="delete condition"
+                                    class="mt-2 ml-auto"
+                                    (click)="removeCondition(i, j)"
+                                    title="Delete">
                                     <mat-icon>delete</mat-icon>
                                   </button>
-                                  <button mat-icon-button aria-label="refresh condition" class="mt-2 ml-auto" (click)="resetCondition(i, j)" title="Refresh">
+                                  <button
+                                    mat-icon-button
+                                    aria-label="refresh condition"
+                                    class="mt-2 ml-auto"
+                                    (click)="resetCondition(i, j)"
+                                    title="Refresh">
                                     <mat-icon>refresh</mat-icon>
                                   </button>
                                 </div>
@@ -148,7 +155,15 @@
                       </div>
                     </ng-container>
                     <div class="action-add-condition">
-                      <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="addCondition(i)">
+                      <button
+                        [disabled]="
+                          this.content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
+                          this.content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER
+                        "
+                        mat-button
+                        class="new-secondary-button-no-border button-with-corners"
+                        type="button"
+                        (click)="addCondition(i)">
                         <div class="flex gap-2 flex-middle">
                           <mat-icon class="primary-text-color">add</mat-icon>
                           <span class="text-m">Add Condition</span>
@@ -193,7 +208,7 @@
             <button
               mat-flat-button
               class="flex rounded-full px-4 py-2 mat-btn-outline font-bold text-sm items-center gap-2"
-              [disabled]="isSaveFltrBtnDisabled || isSaving"
+              [disabled]="isSaveFltrBtnDisabled || isSaving || hasUserGroupBeenAdded"
               (click)="applyAccessControlValue()">
               <mat-spinner *ngIf="isSaving" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>
               <span>Save Filter</span>
@@ -202,7 +217,7 @@
             <!-- Apply Button -->
             <button
               mat-flat-button
-              [disabled]="isApplyBtnDisabled || isApplying"
+              [disabled]="isApplyBtnDisabled || isApplying || hasUserGroupBeenAdded"
               class="flex items-center rounded-full px-4 py-2 new-bg-color font-bold text-sm text-white gap-2"
               (click)="applyAccessControlValue()">
               <mat-spinner *ngIf="isApplying" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>

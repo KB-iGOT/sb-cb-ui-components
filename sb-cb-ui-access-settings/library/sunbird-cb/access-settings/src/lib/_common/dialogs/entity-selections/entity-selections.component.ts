@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from "@angular/core";
+import { Component, inject, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from "@angular/core";
 import { AccessControlService } from "../../../_services/access-control.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
@@ -6,13 +6,16 @@ import { BATCH_RANGES } from "../../../_constants/app.constants";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { MatTabChangeEvent } from "@angular/material/tabs";
+import { MatRadioChange } from "@angular/material/radio";
 
 @Component({
   selector: "sb-uic-entity-selections",
   templateUrl: "./entity-selections.component.html",
   styleUrls: ["./entity-selections.component.scss"]
 })
-export class EntitySelectionsComponent implements OnInit, OnDestroy {
+export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild("tabGroup", { read: ElementRef }) tabGroupRef!: ElementRef;
   private destroy$ = new Subject<void>();
   isLoading = false;
   searchControl = new FormControl("");
@@ -21,15 +24,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   dataList: any[] = [];
 
-  selectedData: number[] = [];
+  selectedData: any[] = [];
   groupedEntityData: { [key: string]: any[] } = {};
-  selectionType = "";
+  selectionType: any;
   selectionTypeEnum = NsAccessControlConfig.SelectionType;
   radioSelections: { value: string; label: string }[] = [];
   batchRanges: any;
   selectedCharacterRange: string;
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
-
+  activeTab = 0;
+  selectedVerificationStatus: string = "";
   public readonly data = inject<{ rule: any; condition: any; selected: any[] }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
@@ -39,8 +43,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
-    if (this.data && this.data.selected) {
-      this.selectedData = this.data.selected;
+    if (this.data && this.data.selected && this.data.selected.length) {
+      this.selectedData = [...this.data.selected];
+      this.activeTab = 1;
+
+      if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
+        this.selectedVerificationStatus = this.data.selected[0];
+      }
     }
 
     // Subscribe to search control changes
@@ -63,16 +72,28 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.initializeDisplay();
   }
 
+  ngAfterViewInit(): void {
+    const tabHeader = this.tabGroupRef?.nativeElement?.querySelector(".mat-mdc-tab-header");
+    if (
+      (tabHeader && this.selectionType === NsAccessControlConfig.SelectionType.Cadre) ||
+      this.selectionType === NsAccessControlConfig.SelectionType.Batch
+    ) {
+      tabHeader.style.display = "none";
+    }
+  }
+
   initializeDisplay(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
+        if (this.selectedData?.length) {
+          this.getOrganisationsList("", this.selectedData);
+        }
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
-        const selectionIds = this.data?.rule?.conditions?.find(
-          (c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations
-        )?.selections;
-        if (selectionIds?.length) {
+        if (this.selectedData?.length) {
+          this.getDesignationsList("", this.selectedData);
+        } else {
           this.getDesignationsList("");
         }
         this.radioSelections = this.accessControlCriteriaSelection.designationRadioSelection;
@@ -110,7 +131,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType === NsAccessControlConfig.SelectionType.Service ||
       this.selectionType === NsAccessControlConfig.SelectionType.Designation
     ) {
-      return item?.name;
+      return item?.name || item?.designation;
     }
 
     return item?.id || item?.identifier || item;
@@ -132,8 +153,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onFilterChange(event: any): void {
-    this.filterValue = event.value;
+  onFilterChange(event: MatTabChangeEvent): void {
+    if ((event?.tab?.textLabel).toLowerCase().includes("selected")) {
+      this.filterValue = "selected";
+    } else {
+      this.filterValue = "all";
+    }
     this.getFilteredEntityGrouped();
   }
 
@@ -236,9 +261,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     );
   }
 
-  getOrganisationsList(query: string): void {
+  getOrganisationsList(query: string, selectedData?: string[]): void {
     this.isLoading = true;
-    this.accessControlService.fetchOrgList(query).subscribe({
+    this.accessControlService.fetchOrgList(query, query ? [] : selectedData).subscribe({
       next: response => {
         if (response?.result && response?.result?.response?.content) {
           this.dataList = response.result.response.content;
@@ -255,13 +280,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getDesignationsList(query: string): void {
+  getDesignationsList(query: string, selectedData?: string[]): void {
     this.isLoading = true;
     const selectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
     if (selectionIds?.length) {
       const categories = selectionIds.map((ele: string) => `${ele}_odcs_designation`);
       this.accessControlService
-        .fetchDesignationsWithOrg(categories, query)
+        .fetchDesignationsWithOrg(categories, query, query ? [] : selectedData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: response => {
@@ -280,7 +305,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         });
     } else {
       this.accessControlService
-        .fetchDesignation(query)
+        .fetchDesignation(query, query ? [] : selectedData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: response => {
@@ -393,5 +418,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  onVerificationChange(event: MatRadioChange) {
+    this.selectedData = [event.value];
   }
 }

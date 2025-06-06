@@ -61,19 +61,20 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.SEARCH_USER, { request: request });
   }
 
-  fetchOrgList(query: string, pagination?: { limit: number; offset: number }): Observable<any> {
-    const request = {
+  fetchOrgList(query: string, selectedData?: string[]): Observable<any> {
+    let request: any = {
       request: {
         filters: {},
         sort_by: {
           channel: "asc"
         },
         fields: ["channel", "identifier"],
-        // limit: pagination.limit || 5,
-        // offset: pagination.offset || 0,
         query: query
       }
     };
+    if (selectedData?.length) {
+      request.request.filters.identifier = selectedData;
+    }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
 
@@ -89,19 +90,24 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.CADRE_CONFIG);
   }
 
-  fetchDesignation(query: string): Observable<any> {
-    const payload = {
+  fetchDesignation(query: string, selectedData?: string[]): Observable<any> {
+    let payload: any = {
       filterCriteriaMap: {
         status: "Active"
       },
-      requestedFields: ["designation", "id"],
-      searchString: query
+      requestedFields: ["designation", "id"]
     };
+    if (selectedData?.length) {
+      payload.filterCriteriaMap.designation = selectedData;
+    }
+    if (query) {
+      payload.searchString = query;
+    }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
 
-  fetchDesignationsWithOrg(categories: string[], query: string): Observable<any> {
-    const payload = {
+  fetchDesignationsWithOrg(categories: string[], query: string, selectedData?: string[]): Observable<any> {
+    let payload: any = {
       request: {
         filters: {
           status: "Live",
@@ -118,6 +124,9 @@ export class AccessControlService {
         facets: []
       }
     };
+    if (selectedData?.length) {
+      payload.request.filters.name = selectedData;
+    }
     return this.http.post<any>(ENDPOINTS.SEARCH_V4, payload);
   }
 

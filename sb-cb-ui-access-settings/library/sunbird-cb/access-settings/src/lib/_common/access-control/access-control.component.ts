@@ -26,6 +26,7 @@ export class AccessControlComponent implements OnInit {
 
   accessType: NsAccessControlConfig.ITypeAccessType = NsAccessControlConfig.IAccessTypes.Public;
   ACCESS_TYPE_ENUM = NsAccessControlConfig.IAccessTypes;
+  ACCESS_SETTING_ENUM = NsAccessControlConfig.IAccessSetting;
 
   isLoading = false;
   isVisibilityEnabled: boolean = false;
@@ -70,18 +71,24 @@ export class AccessControlComponent implements OnInit {
       if (this.content?.status === "Live") {
         this.isSaveFltrBtnDisabled = true;
       }
-
-      if (this.content?.accessSettingsEnabled) {
-        this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
-      } else {
-        if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
-          this.accessType = NsAccessControlConfig.IAccessTypes.Public;
-        } else if (
-          this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
-          this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER
-        ) {
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+        this.accessType = NsAccessControlConfig.IAccessTypes.Public;
+        const accessTypePublic = this.accessControlCriteriaSelection?.accessTypes.find(
+          type => type?.value === NsAccessControlConfig.IAccessTypes.Public
+        );
+        if (accessTypePublic) accessTypePublic.disabled = false;
+        if (this.content?.accessSettingsEnabled) {
           this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
         }
+      } else if (
+        this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
+        this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER
+      ) {
+        this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
+        const accessTypePublic = this.accessControlCriteriaSelection?.accessTypes.find(
+          type => type?.value === NsAccessControlConfig.IAccessTypes.Public
+        );
+        if (accessTypePublic) accessTypePublic.disabled = true;
       }
     }
   }
@@ -121,10 +128,6 @@ export class AccessControlComponent implements OnInit {
   }
 
   onAccessTypeChange(event: any) {
-    if (!this.cadreConfigData) {
-      this.fetchCadreConfigData();
-    }
-
     if (event.value === NsAccessControlConfig.IAccessTypes.Public) {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         width: "470px",
@@ -192,7 +195,6 @@ export class AccessControlComponent implements OnInit {
   createConditionGroup(id: number, userGroupIndex: number): FormGroup {
     let entity = "";
     const accessSetting = this.content?.accessSetting;
-
     if (accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC || accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER) {
       entity =
         accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC
@@ -200,6 +202,10 @@ export class AccessControlComponent implements OnInit {
           : NsAccessControlConfig.SelectionType.Users;
       this.accessControlCriteriaSelection.optionsEntity.forEach((ele: NsAccessControlConfig.IOptionsEntity) => {
         ele.disabled = ele.value !== entity;
+      });
+    } else {
+      this.accessControlCriteriaSelection.optionsEntity.forEach((ele: NsAccessControlConfig.IOptionsEntity) => {
+        ele.disabled = false;
       });
     }
 
@@ -467,7 +473,35 @@ export class AccessControlComponent implements OnInit {
     }
   }
 
+  validateFormData() {
+    // Validate user groups and conditions
+    if (!this.userGroup || this.userGroup.length === 0) {
+      this.callSnackbar("Please add at least one user group.", "error");
+      return false;
+    }
+    for (let i = 0; i < this.userGroup.length; i++) {
+      const group = this.userGroup.at(i);
+      const conditions = group.get("conditions") as FormArray;
+      if (!conditions || conditions.length === 0) {
+        this.callSnackbar(`User group ${i + 1} must have at least one condition.`, "error");
+        return false;
+      }
+      for (let j = 0; j < conditions.length; j++) {
+        const selections = conditions.at(j).get("selections")?.value;
+        if (!selections || selections.length === 0) {
+          this.callSnackbar(`Condition ${j + 1} in user group ${i + 1} must have at least one selection.`, "error");
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   async applyAccessControlValue(): Promise<void> {
+    const validated = this.validateFormData();
+
+    if (!validated) return;
+
     if (this.content?.status === "Draft") this.isSaving = true;
     else if (this.content?.status === "Live") this.isApplying = true;
     const payload = await this.processRequestCreation();
@@ -501,8 +535,12 @@ export class AccessControlComponent implements OnInit {
           userGroupCriteriaList: group.conditions.map((condition: any) => {
             let criteriaValue: string[];
 
-            if (condition?.entity === NsAccessControlConfig.SelectionType.Users && condition?.selected?.length && condition?.selected[0]?.userId) {
-              const userIds = condition.selected?.map((user: any) => user?.userId) || [];
+            if (
+              condition?.entity === NsAccessControlConfig.SelectionType.Users &&
+              condition?.selections?.length &&
+              condition?.selections[0]?.userId
+            ) {
+              const userIds = condition.selections?.map((user: any) => user?.userId) || [];
               criteriaValue = userIds;
             } else {
               criteriaValue = condition.selections?.map(String) || [];
@@ -537,6 +575,9 @@ export class AccessControlComponent implements OnInit {
   }
 
   async getAccessControl(): Promise<void> {
+    if (!this.cadreConfigData) {
+      this.fetchCadreConfigData();
+    }
     const response = await this.accessControlService
       .fetchUserGroupAccessControl(this.contentId)
       .toPromise()
@@ -592,15 +633,22 @@ export class AccessControlComponent implements OnInit {
 
       this.userGroup.push(ruleGroup);
     });
-
-    if (!this.cadreConfigData) {
-      this.fetchCadreConfigData();
-    }
   }
 
   async updateContentAccessSetting(): Promise<void> {
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
     await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+  }
+
+  get hasUserGroupBeenAdded(): boolean {
+    if (!this.userGroup || this.userGroup.length === 0) {
+      return true;
+    }
+    const allHaveCondition = this.userGroup.controls.every((group: any) => {
+      const conditions = group.get("conditions");
+      return conditions && conditions.length > 0;
+    });
+    return !allHaveCondition;
   }
 }
