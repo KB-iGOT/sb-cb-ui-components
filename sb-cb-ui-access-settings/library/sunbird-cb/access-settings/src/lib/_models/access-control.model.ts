@@ -4,6 +4,7 @@ export namespace NsAccessControlConfig {
     usersTableConfig: ITableConfig;
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
+    visibilityOnOffTexts: { on: string; off: string };
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];
@@ -13,7 +14,7 @@ export namespace NsAccessControlConfig {
     servicesRadioSelection: ISelectionOption[];
     groupsOptions: string[];
     verificationStatus: ISelectionOption[];
-    accessTypes: { name: string; value: string; tooltip: string }[];
+    accessTypes: { name: string; value: string; tooltip: string; disabled: boolean }[];
   }
 
   export interface IOptionsEntity {

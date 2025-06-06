@@ -36,9 +36,14 @@ export class InviteUsersComponent implements OnInit {
 
   ngOnInit(): void {
     this.usersTableConfig = this.accessControlService.accessControlConfig().usersTableConfig;
-    if (this.data && this.data.selected) {
+    if (this.data && this.data.selected && this.data.selected.length) {
       if (!this.isArrayOfObjects(this.data?.selected)) {
         this.getUsersList("", 5, 0, this.data?.selected);
+      } else {
+        this.usersFinalList = this.data.selected;
+        this.holdSelectedUsers = this.usersFinalList;
+        this.finalSelectedUsers = this.usersFinalList;
+        this.activeTab = 1;
       }
     }
   }
@@ -63,13 +68,16 @@ export class InviteUsersComponent implements OnInit {
         if (response?.result && response?.result?.response?.content) {
           this.usersList = response.result.response.content;
           this.totalUsers = response.result.response.count;
-          if (userIds.length) {
+          if (userIds?.length) {
             this.finalSelectedUsers = response.result.response.content;
+            this.usersFinalList = this.finalSelectedUsers;
+            this.activeTab = 1;
           }
         } else {
           this.usersList = [];
           this.totalUsers = 0;
         }
+        this.usersLoading = false;
       },
       complete: () => {
         this.usersLoading = false;
