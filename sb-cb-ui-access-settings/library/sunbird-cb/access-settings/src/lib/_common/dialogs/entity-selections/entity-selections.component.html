@@ -53,7 +53,7 @@
                 </ng-container>
                 <ng-container *ngIf="!isLoading">
                   <ng-container *ngIf="checkIfData; else noData">
-                    <div class="alphabet-filter" *ngIf="this.selectionType !== selectionTypeEnum.Batch">
+                    <div class="alphabet-filter" *ngIf="this.selectionType !== selectionTypeEnum.Batch && alphabet?.length">
                       <ng-container *ngFor="let letter of alphabet; let i = index; let last = last">
                         <button
                           mat-button

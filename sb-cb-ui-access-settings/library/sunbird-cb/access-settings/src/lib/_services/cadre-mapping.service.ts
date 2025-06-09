@@ -197,4 +197,20 @@ export class CadreMappingService {
     const commonYears = serviceYears.filter(year => cadreYears.includes(year));
     return commonYears.sort((a, b) => a - b);
   }
+
+  getCadreIdsByName(names: string[]) {
+    if (!Array.isArray(names)) names = [names];
+    const lowerNames = names.map(n => n.toLowerCase());
+    return Array.from(this.allCadres.values())
+      .filter(cadre => lowerNames.includes(cadre.name.toLowerCase()))
+      .map(cadre => cadre.id);
+  }
+
+  getServiceIdsByName(names: string[]) {
+    if (!Array.isArray(names)) names = [names];
+    const lowerNames = names.map(n => n.toLowerCase());
+    return Array.from(this.allServices.values())
+      .filter(service => lowerNames.includes(service.name.toLowerCase()))
+      .map(service => service.id);
+  }
 }

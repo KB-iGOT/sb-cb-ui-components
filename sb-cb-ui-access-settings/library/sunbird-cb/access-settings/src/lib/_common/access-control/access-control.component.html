@@ -32,10 +32,10 @@
             <mat-slide-toggle [(ngModel)]="isVisibilityEnabled"></mat-slide-toggle>
           </div>
           <ng-container *ngIf="!isVisibilityEnabled">
-            <label class="text-sm">{{ config?.visibilityOnOffTexts?.off }}</label>
+            <label class="text-sm">{{ (config?.visibilityOnOffTexts?.off || '').replace('{contentType}', content?.contentType) }}</label>
           </ng-container>
           <ng-container *ngIf="isVisibilityEnabled">
-            <label class="text-sm">{{ config?.visibilityOnOffTexts?.on }}</label>
+            <label class="text-sm">{{ (config?.visibilityOnOffTexts?.on || '').replace('{contentType}', content?.contentType) }}</label>
           </ng-container>
         </div>
         <!-- <div class="flex justify-between items-center mt-4 mb-4">

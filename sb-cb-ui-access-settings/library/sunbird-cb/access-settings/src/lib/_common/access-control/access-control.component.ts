@@ -63,7 +63,6 @@ export class AccessControlComponent implements OnInit {
     if (!this.contentId) {
       this.callSnackbar("Content id is required", "error");
     }
-
     if (this.content) {
       if (this.content?.status === "Draft") {
         this.isApplyBtnDisabled = true;
@@ -367,9 +366,11 @@ export class AccessControlComponent implements OnInit {
       const services = conditionValue.find((ele: any) => ele.entity === "service");
       const cadre = conditionValue.find((ele: any) => ele.entity === "cadre");
       const batch = conditionValue.find((ele: any) => ele.entity === "batch");
-      const serviceSelections = services?.selections || [];
-      const cadreSelections = cadre?.selections || [];
+
+      const serviceSelections = this.cadreMappingService.getServiceIdsByName(services?.selections || []) || [];
+      const cadreSelections = this.cadreMappingService.getCadreIdsByName(cadre?.selections || []) || [];
       const batchSelections = batch?.selections || [];
+
       // Case 1: Only service selected
       if (serviceSelections?.length && !cadreSelections?.length && !batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
@@ -641,14 +642,18 @@ export class AccessControlComponent implements OnInit {
     await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
   }
 
-  get hasUserGroupBeenAdded(): boolean {
-    if (!this.userGroup || this.userGroup.length === 0) {
-      return true;
-    }
-    const allHaveCondition = this.userGroup.controls.every((group: any) => {
-      const conditions = group.get("conditions");
-      return conditions && conditions.length > 0;
-    });
-    return !allHaveCondition;
+ get hasUserGroupBeenAdded(): boolean {
+  if (!this.userGroup?.length) {
+    return true;
   }
+
+  return !this.userGroup.controls.every((group: any) => {
+    const conditions = group.get('conditions')?.controls || [];
+    return conditions.length > 0 && conditions.every((condition: any) => {
+      const selections = condition.get('selections')?.value;
+      return Array.isArray(selections) && selections.length > 0;
+    });
+  });
+}
+
 }

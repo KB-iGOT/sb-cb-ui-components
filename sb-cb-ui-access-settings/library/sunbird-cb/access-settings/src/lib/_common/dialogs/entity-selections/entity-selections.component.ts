@@ -8,6 +8,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatRadioChange } from "@angular/material/radio";
+import _ from "lodash";
 
 @Component({
   selector: "sb-uic-entity-selections",
@@ -23,6 +24,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
 
   dataList: any[] = [];
+  dataListDup: any[] = [];
 
   selectedData: any[] = [];
   groupedEntityData: { [key: string]: any[] } = {};
@@ -159,6 +161,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     } else {
       this.filterValue = "all";
     }
+    this.updateAlphabet();
     this.getFilteredEntityGrouped();
   }
 
@@ -185,11 +188,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   getFilteredEntityGrouped(): void {
     let filtered = this.dataList;
 
-    // Filter by radio selection only
     if (this.filterValue === "selected") {
+      filtered = this.dataListDup;
       filtered = filtered.filter(org => this.isSelected(org));
-    } else if (this.filterValue === "notSelected") {
-      filtered = filtered.filter(org => !this.isSelected(org));
     }
 
     // For batch, group by range and chunk each range
@@ -251,6 +252,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     if (chars.has("#")) sorted.push("#");
 
     this.alphabet = sorted;
+
+    if (this.filterValue === "selected") {
+      this.alphabet = [];
+    }
   }
 
   get checkIfData(): boolean {
@@ -267,6 +272,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
       next: response => {
         if (response?.result && response?.result?.response?.content) {
           this.dataList = response.result.response.content;
+          this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
           this.updateAlphabet();
           this.getFilteredEntityGrouped();
         } else {
@@ -292,6 +298,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
           next: response => {
             if (response?.result && response?.result?.Term) {
               this.dataList = response?.result?.Term;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
               this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
@@ -311,6 +318,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
           next: response => {
             if (response?.result && response?.result?.result?.data) {
               this.dataList = response?.result?.result?.data;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
               this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
@@ -326,8 +335,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   getServicesList(query: string): void {
+    debugger;
     const baseList = this.accessControlService.holdServiceCadrebatch().service;
     this.dataList = query ? baseList.filter(service => service.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
     this.updateAlphabet();
     this.getFilteredEntityGrouped();
   }
@@ -335,6 +347,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   getCadreList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().cadre;
     this.dataList = query ? baseList.filter(cadre => cadre.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
     this.updateAlphabet();
     this.getFilteredEntityGrouped();
   }
@@ -342,6 +356,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   getBatchList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().batch;
     this.dataList = query ? baseList.filter(batch => batch.toString().includes(query)) : baseList;
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
     this.updateBatchRanges();
     this.getFilteredEntityGrouped();
   }
