@@ -43,15 +43,24 @@ export class FrameworkService {
     public localConfig: LocalConnectionService
   ) {}
 
-  getFrameworkInfo(): Observable<any> {
+  getFrameworkInfo(_orgData?:any): Observable<any> {
     localStorage.removeItem('terms');
     if (this.localConfig.connectionType === 'online') {
-      return this.http.get(`/${this.proxiesPath}/framework/v1/read/${this.environment.frameworkName}`, { withCredentials: true }).pipe(
+      //framework/v1/read/01358912293839667241_org_hierarchy
+      //framework/v1/read/${this.environment.frameworkName}
+      let url = `/${this.proxiesPath}/framework/v1/read/`
+      if (_orgData) {
+        url  = url + _orgData.identifier + '_org_hierarchy';
+      } else {
+        url = url + this.environment.frameworkName;
+      }
+      return this.http.get(`${url}`, { withCredentials: true }).pipe(
         tap((response: any) => {
           this.resetAll();
           this.formateData(response);
         }),
         catchError((err) => {
+          this.resetAll();
           this.list.clear();
           this.categoriesHash.next([]);
           throw 'Error in source. Details: ' + err;
@@ -269,6 +278,9 @@ export class FrameworkService {
           categoryConfig = config.config.find((obj: any) => obj.category == code);
         }
       });
+    }
+    if (!categoryConfig) {
+      return this.rootConfig.config[0]
     }
     return categoryConfig;
   }

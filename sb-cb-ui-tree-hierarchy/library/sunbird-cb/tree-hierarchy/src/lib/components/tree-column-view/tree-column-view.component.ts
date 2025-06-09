@@ -98,7 +98,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       this.childSubscription.unsubscribe()
     }
     this.childSubscription = this.frameworkService.currentSelection.subscribe(e => {
-       console.log('currentSelection event', e, this.column.code )
       if (!e) {
         return
       } else if (e.type === this.column.code) {
@@ -138,7 +137,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       this.newTermSubscription.unsubscribe()
     }
     this.newTermSubscription = this.frameworkService.insertUpdateDeleteNotifier.subscribe(e => {
-      console.log('newTermSubscription ::', e)
       if (e && e.action) {
         const next = this.frameworkService.getNextCategory(e.action);
         if(next) {
@@ -169,7 +167,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     })
   }
   insertUpdateHandler(e: any, _next: any, isUpdate?: any) {
-    console.log('insertUpdateHandler')
     const back = this.frameworkService.getPreviousCategory(this.column.code)
     // console.log('current Saved ===========>', this.frameworkService.getLocalTermsByCategory(this.column.code))
     const localTerms:any = []
@@ -181,7 +178,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       }
     })
     if(!isUpdate) {
-      console.log('insertUpdateHandler localTerms', localTerms)
     // get last parent and filter Above
     if(e && e.data) {
     this.columnData = this.transform([...localTerms, ...(e.data.children || [])])
@@ -333,23 +329,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
         '#box' + this.column.index
       )
       this.connectorMapping['box' + (this.column.index - 1)].lines = connectionLines
-      // console.log('this.connectorMapping :: ----------------------', this.connectorMapping)
-      // if (cat.code === 'board') {
-      //   this.connectorService._drawLine('box0card0', this.connectorMapping['board']['box0card0'], {
-      //     startPlug: 'disc', endPlug: 'disc', color: 'black'
-      //   }, 'box0', 'box1')
-      // } else if (cat.code === 'medium') {
-      //   this.connectorService._drawLine('box1card1', this.connectorMapping['medium']['box1card1'], {
-      //     startPlug: 'disc', endPlug: 'disc', color: 'black'
-      //   }, 'box0', 'box1')
-      // } else if (cat.code === 'gradeLevel') {
-      //   this.connectorService._drawLine('box2card7', this.connectorMapping['grade']['box2card7'], {
-      //     startPlug: 'disc', endPlug: 'disc', color: 'black'
-      //   }, 'box0', 'box1')
     } else {
-      // console.log('inside else')
-      // console.log('this.column', this.column)
-      // const item = this.column.children.findIndex(c => c.selected) + 1
       if (this.column.index > 1) {
         this.connectorMapping['box' + (this.column.index - 1)].lines = [{ target: elementClicked, line: '', targetType: 'element' }]
 
@@ -362,7 +342,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
           '#box' + this.column.index
         )
         this.connectorMapping['box' + (this.column.index - 1)].lines = connectionLines
-        // console.log('this.connectorMapping :: ----------------------', this.connectorMapping)
       }
 
     }
@@ -370,7 +349,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
 
   }
   removeConnectors(currentElement: any, prevCol: any, currentIndex: any) {
-    console.log('prevCol ------------', prevCol)
     if (this.connectorMapping) {
       for (const key in this.connectorMapping) {
         // Remove all n-1 lines and keep only current selection, also clear n+1 lines

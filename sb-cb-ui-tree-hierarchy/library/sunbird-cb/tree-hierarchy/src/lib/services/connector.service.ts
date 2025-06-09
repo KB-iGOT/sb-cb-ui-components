@@ -29,7 +29,6 @@ export class ConnectorService {
   _drawLine(source: any, target: any, options: any = defaultConfig, sourceContainerId: any = undefined, targetContainerId: any = undefined): any {
     const _options = <any>{...defaultConfig, ...options};
     _options['dashed'] = true
-    
     if (Array.isArray(target)) {
       let connectedDots: ConnectedDot[] = [];
       
@@ -66,7 +65,6 @@ export class ConnectorService {
           }
         }
       });
-      
       return connectedDots;
     } else {
       return this.renderLine(source, target, _options);
@@ -166,7 +164,7 @@ export class ConnectorService {
     // Instead of a straight line, create a grid line with right angles
     const path: any = svg.append('path')
       .attr('d', createGridPath(sourceX, sourceY, targetX, targetY))
-      .style('stroke', options.color || '#333') // Darker color for better visibility
+      .style('stroke', '#000') // Darker color for better visibility
       .style('stroke-width', options.size || 2)
       .style('fill', 'none')
       .style('opacity', 1) // Start visible

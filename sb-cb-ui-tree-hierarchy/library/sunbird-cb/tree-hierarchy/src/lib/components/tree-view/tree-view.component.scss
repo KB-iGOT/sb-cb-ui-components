@@ -96,6 +96,7 @@ flex-center {
 
 .col-container {
     height: inherit;
+    min-width: 350px;
 }
 
 .category-heading-sticky {
@@ -258,3 +259,10 @@ flex-center {
     justify-content: space-between;
     border-radius: 12px;
 }
+
+.overflow-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}   

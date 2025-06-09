@@ -28,6 +28,7 @@ import { LocalConnectionService } from './services/local-connection.service';
 import { OdcsService } from './services/odcs.service';
 import { IConnectionType } from './models/connection-type.model';
 import { ENVIRONMENT } from './services/connection.service';
+import { OrgHierarchyAddModalComponent } from './components/org-hierarchy-add-modal/org-hierarchy-add-modal.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { ENVIRONMENT } from './services/connection.service';
     OrderByPipe,
     ConforamtionPopupComponent,
     CreateTermFromFrameworkComponent,
+    OrgHierarchyAddModalComponent,
   ],
   imports: [
     CommonModule,

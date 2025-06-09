@@ -13,6 +13,7 @@ import { defaultConfig, headerLineConfig } from '../../constants/app-constant';
 import { labels } from '../../labels/strings';
 import { Card } from '../../models/variable-type.model';
 import { CreateTermFromFrameworkComponent } from '../create-term-from-framework/create-term-from-framework.component';
+import { OrgHierarchyAddModalComponent } from '../org-hierarchy-add-modal/org-hierarchy-add-modal.component';
 
 declare var LeaderLine: any;
 @Component({
@@ -26,6 +27,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   @Input() workFlowStatus: string = '';
   @Input() environment:any;
   @Input() taxonomyConfig: any;
+  @Input() orgSelectedData: any;
   @Output() sentForApprove = new EventEmitter<any>()
   mapping = {};
   heightLighted = []
@@ -53,6 +55,11 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
+    
+  }
+
+  ngOnChanges() {
+    this.draftTerms = this.approvalList;
     this.init()
     this.showActionBar = this.isApprovalView?true:false;
     this.frameworkService.afterAddOrEditSubject.subscribe(responseData => {
@@ -63,24 +70,20 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     this.isEnableds()
   }
 
-  ngOnChanges() {
-    this.draftTerms = this.approvalList;
-  }
-
   ngAfterContentChecked(): void {
     this.cdr.detectChanges();
  } 
 
   init() {
     this.initConfig();
-    this.frameworkService.getFrameworkInfo().subscribe(res => {
+    this.frameworkService.getFrameworkInfo((this.orgSelectedData) ? this.orgSelectedData : '').subscribe(() => {
       this.connectorSvc.removeAllLines()
       this.frameworkService.categoriesHash.value.forEach((cat:any) => {
         this.loaded[cat.code] = true
       })
       this.isLoading = false
         setTimeout(() => {
-             this.drawHeaderLine(res.result.framework.categories.length);  
+            //  this.drawHeaderLine(res.result.framework.categories.length);  
              this.makeFirstTermSelected()
         },500)
     }, (err) => {
@@ -149,14 +152,12 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         this.frameworkService.CurrentCardClk.next(firstTerm.category)
         this.frameworkService.currentSelection.next({ type: firstTerm.category, data: firstTerm, cardRef })
         this.isFraworkLoading = false
-        console.log('firstListItem :: ', firstListItem)
       }
     }
   }
 
   updateTaxonomyTerm(data: { selectedTerm: any, isSelected: boolean, isUpdate?:any}) {
     if(data && data.selectedTerm && data.selectedTerm.category) {
-      console.log('updateTaxonomyTerm inside the output event, ')
       if(!data.isUpdate){
         this.updateFinalList(data)
       } else {
@@ -223,19 +224,21 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         this.dataConfig = this.frameworkService.getConfig(dataCode.code)
       }
       //  console.log('dataCode',this.dataConfig);
-
-     if(dataCode && dataCode.code === this.dataConfig.category){
+     if(dataCode){
       this.configCodeBtn = dataCode.code
      }
-      
      })
   }
   
   
   }
 
-  // getbtnEnableFn(){
-
+  // getbtnEnableFn(_item: any) {
+  //   const allSelectedTerm: any = this.frameworkService.getAllSelectedTerms()
+  //   if (allSelectedTerm && allSelectedTerm.length && allSelectedTerm.filter((t: any) => t.category === _item.code).length > 0) {
+  //     return true
+  //   }
+  //   return false
   // }
 
 
@@ -327,6 +330,39 @@ export class TreeViewComponent implements OnInit, OnDestroy {
           this.updateFinalList({ selectedTerm: res.term[0], isSelected: false, parentData: res.parent, colIndex:colIndex })
         })
       }
+    }
+  }
+
+  openOrganizationDialog(column: any, _index: any) {
+    const treeListData = this.frameworkService.getPreviousSelectedTerms(column.code)
+    if (_index === 0) {
+      treeListData.push(column)
+    } 
+    let flag = false
+    if (treeListData && treeListData.length === _index) {
+      flag = true
+    }
+    if (flag) {      
+      const dialog = this.dialog.open(OrgHierarchyAddModalComponent, {
+        data: {
+          previous: treeListData,
+          currentData: column,
+          selectedOrgData: this.orgSelectedData,
+        },
+        autoFocus: true,
+        restoreFocus: true,
+        position: { right: '0' },
+        height: '100vh',
+        width: '50%',
+        panelClass: 'right-side-modal',
+        maxWidth: '100vw'
+      });
+      
+      dialog.afterClosed().subscribe((_res: any) => {
+       
+      });
+    } else {
+      this._snackBar.open(`Please select level ${_index} organization first`);
     }
   }
 

@@ -9,7 +9,7 @@
         [ngClass]="[data.children.selected?'selected':'', data.children.approvalStatus === 'Draft'? 'inDraft':'',
     data.children.associationProperties?.approvalStatus === 'Draft' && isApprovalRequired && !approvalList.length || data.children.highlight && isApprovalRequired ? 'inAssociationDraft':'']"
         id="{{data.children.name}}"
-        [ngStyle]="{'background-color':getColor(data.index,cardRef,'bgColor',data),'border-left': getColor(data.index,cardRef,'border',data)}">
+        [ngStyle]="{'background-color':getColor(data.index,cardRef,'bgColor',data)}">
         <!-- (click)="data.selected=!data.selected" -->   
         <div class="term-card-parent">
             <!-- <Below element is to show id on top left of the card> -->
@@ -47,7 +47,7 @@
         <!-- *ngIf="!data.isViewOnly && data.children.approvalStatus === 'Draft' && isApprovalRequired" -->
 
         <!-- (click)="$event.stopPropagation();" -->
-         <ng-container *ngIf="data.columnInfo.config.enableThreeDot" >
+         <ng-container *ngIf="data?.columnInfo?.config?.enableThreeDot" >
             <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
             [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn">
             <mat-icon>more_vert</mat-icon>
