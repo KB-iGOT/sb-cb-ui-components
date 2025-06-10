@@ -23,12 +23,9 @@
               <div class="image" *ngIf="showIcon">
                 <img [src]="getIconPath(notification?.category)" alt="notification" />
               </div>
-              <div class="item-title">{{notification?.message?.notification?.title}}</div>
+              <div class="item-title">{{notification?.message?.body}}</div>
             </div>
             <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
-          </div>
-          <div class="item-description pt-1">
-            {{notification?.message?.notification?.body}}
           </div>
         </div>
         <div class="show-all">
