@@ -587,7 +587,7 @@ export class AccessControlComponent implements OnInit {
       });
     if (response?.result?.accessControl) {
       this.processAccessControlResult(response.result.accessControl);
-      this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroup, accessType: this.accessType });
+      this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
     }
   }
 
