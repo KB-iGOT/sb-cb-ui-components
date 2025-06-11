@@ -535,11 +535,11 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           // createdTermsCounter++
           // if(createdTermsCounter === this.frameWorkService.selectionList.size) {
             // if(runningIndex === themFieldsLength - 1) {
-            //     console.log('===========11111113',this.frameWorkService.list)
+            
             //     this.frameWorkService.selectionList.delete('competency')
             //     this.dialogClose({ term: [this.selectedTerm], created: true, multi:true, callUpdate: false })
             //     this.disableMultiCreate = false
-            //     console.log('close dialog',createdTerms)
+            
             //     if(createdTerms[0].category === 'theme'){
             //     this._snackBar.open(`Competency ${createdTerms[0].category} created successfully.`)
             //     }
@@ -645,7 +645,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
           // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
           // so term is set from childdata which is received from params in updateData
           // const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : {}
-          // console.log('value :: ', value)
+          
           // const found = parent.children ? parent.children.find(c=> c.identifier === this.selectedTerm.identifier) : false
           // if(!found) {
 
@@ -838,7 +838,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
       for(let removedTerm of removedExisting) {
         removedTermsCollection.push(removedTerm.code)
       }
-        // console.log(parentCol1, parentCol,'requestBody')
+        
         let subThemeRequest ={
           "request": { 
             "contentIds": removedTermsCollection 
@@ -897,7 +897,7 @@ export class CreateTermFromFrameworkComponent implements OnInit {
      }
  
     // 
-    // console.log(this.seletedCompetencyArea)
+    
     return result >= 0 ? true: false
   }
 

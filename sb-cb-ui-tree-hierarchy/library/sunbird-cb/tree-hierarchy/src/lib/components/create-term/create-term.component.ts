@@ -71,7 +71,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    console.log('this.data.columnInfo.config',this.data.columnInfo.config);
+    
     this.termLists = this.data.columnInfo.children
     this.compLabeltext = this.data.columnInfo.config.labelName
     
@@ -162,7 +162,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     //   },
     // }
     // this.frameWorkService.getFilterEntity(filterObj).subscribe((data)=>{
-    //  console.log(data);
+    
     //  if(data && data.length){
     //   this.allCompetency = data
     //  }
@@ -229,8 +229,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   getCategoryName(categoryName:any, term:any){
-    console.log('Categoryand term',term);
-    console.log('this.this.data', this.data);
     this.previousCategoryCode = categoryName;
     this.previousTermCode = term.code
     
@@ -424,7 +422,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
       });
      }
     //
-    // console.log(this.seletedCompetencyArea)
+    
     return result >= 0 ? true: false
   }
 
@@ -555,7 +553,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
           this.disableUpdate = false
           // this.frameWorkService.publishFramework().subscribe(res => {
           //   // this.dialogRef.close(term)
-          //   console.log('published')
+          
           //   return resolve(true)
           // });
           resolve(true)
@@ -673,7 +671,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   submitDesignation() {
-    // console.log('saved designations: ', this.savedDesignations)
+    
   }
 
   cancel() {
@@ -717,7 +715,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   }
 
   OnThemeSelection(event:any) {
-    console.log(event);
+    
     const selectedTheme = event.source.value
     this.filteredallCompetencyTheme.forEach((val: any) => {
       if (selectedTheme.name === val.name) {
@@ -761,7 +759,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   saveTerm() {
     if (this._filter(this.createTermForm.value.name).length > 0) {
       this.isTermExist = true
-      // console.log('Already exist')
+      
       return
     }
     if (this.createTermForm.valid) {
@@ -802,7 +800,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
     form.value.additionalProperties = additionalProperties
     
     form.value.displayName = form.value.dname
-    // console.log('formValue',form.value);
+    
     this.disableUpdate = true
     const formData = {
       // use this if you need disabled field values : form.getRawValue()
@@ -846,9 +844,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
         // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
         // so term is set from childdata which is received from params in updateData
         const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
-        // console.log('value :: ', value)
+        
         this.disableUpdate = false
-        // console.log('selectedterms',value);
         
         // const selectionData = this.frameWorkService.selectionList.get(this.data.columnInfo.code)
         selectionData['description'] = reguestBody.request.term.description
@@ -883,7 +880,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
       } else {
         // associations.push({ identifier: this.selectedTerm.identifier, approvalStatus: appConstants.DRAFT })
         if(this.selectedTerm && this.selectedTerm.identifier) {
-          // console.log('inside selected Term push')
           associations.push({ identifier: this.selectedTerm.identifier })
         }
         this.isTermExist = false
@@ -895,8 +891,7 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
             }
           }
         }
-        // console.log('this.selectedTerm', this.selectedTerm)
-        // console.log('(this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {}', (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? updateData.updateTermData : {})
+        
         // this.dialogClose({ term: this.selectedTerm, created: true })
         this.frameWorkService.updateTerm(this.data.frameworkId, parent.category, parent.code, reguestBody).subscribe(() => {
           if (counter === this.frameWorkService.selectionList.size) {
@@ -905,9 +900,8 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
             // this value is for selected term in case of create scenario, in case of edit scenario this won't be avaiable 
             // so term is set from childdata which is received from params in updateData
             const value = (this.selectedTerm && this.selectedTerm.identifier) ? this.selectedTerm : (updateData) ? {...updateData.updateTermData, ...updateData.formData} : {}
-            // console.log('value :: ', value)
+            
             this.disableUpdate = false
-            // console.log('selectedterms',value);
             this._snackBar.open(`Competency ${value.category} updated successfully`)
             this.dialogClose({ term: { ...value }, created: true })
           }
@@ -921,7 +915,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
   saveThemeTerm() {
     if (this._filter(this.createThemeForm.value.name).length > 0) {
       this.isTermExist = true
-      // console.log('Already exist')
       return
     }
     if (this.createThemeForm.valid) {
@@ -1087,7 +1080,6 @@ export class CreateTermComponent implements OnInit, AfterViewInit {
          this.disableUpdate = false
          // this.frameWorkService.publishFramework().subscribe(res => {
          //   // this.dialogRef.close(term)
-         //   console.log('published')
          //   return resolve(true)
          // });
          resolve(true)

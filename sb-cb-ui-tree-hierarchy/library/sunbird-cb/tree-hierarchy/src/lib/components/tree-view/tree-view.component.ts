@@ -106,10 +106,10 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     if (parentColumn) {
       res.parent = this.frameworkService.selectionList.get(parentColumn.code)
       if(resData.type === 'update'){
-        // console.log('inside new update handler')
+        
         res.parent.children[res.parent.children.findIndex((el: any) => el.identifier === res.term.identifier)] =  res.term
         // this.frameworkService.list.get(res.parent.category).children = [...res.parent.children]
-        // console.log('refreshData calling updateFina list ')
+        
         
 
         // this.frameworkService.currentSelection.next({ type: res.term.category, data: res.term.children, cardRef:resData.cardRef })
@@ -126,7 +126,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
          this.updateFinalList({ selectedTerm: res.term, isSelected: true, parentData: res.parent, colIndex:resData.index }, 'update')
          res.term.selected = true
         // const next = this.frameworkService.getNextCategory(res.term.category)
-        // console.log('next:: ', next)
+        
         //   if (next && next.code) {
         //     this.frameworkService.selectionList.delete(next.code)
         //   }
@@ -178,7 +178,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   //need to refactor at heigh level
   updateFinalList(data: { selectedTerm: any, isSelected: boolean, parentData?: any, colIndex?: any}, type?: any) {
-    // console.log('updateFinalList type', type)
+    
     if (data.isSelected) {
       // data.selectedTerm.selected = data.isSelected
       this.frameworkService.selectionList.set(data.selectedTerm.category, data.selectedTerm);
@@ -196,7 +196,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       },3000)
     }
     setTimeout(() => {
-      // console.log('calling this loaded again ', data.selectedTerm)
       this.loaded[data.selectedTerm.category] = true
       // if(type && type === 'update'){
       //   this.frameworkService.selectionList.delete(data.selectedTerm.category);
@@ -205,25 +204,18 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     }, 100);
 
   }
-  isEnabled(columnCode: string): boolean {
-    // console.log('enable',!!this.frameworkService.selectionList.get(columnCode));
-    
+  isEnabled(columnCode: string): boolean {    
     return !!this.frameworkService.selectionList.get(columnCode)
   }
 
   isEnableds() {
-  //  console.log('frameworkData',this.frameworkService.cardClkData)
   //  return this.frameworkService.cardClkData
   if(this.frameworkService.CurrentCardClk){
     this.frameworkService.CurrentCardClk.subscribe((item)=>{
-      // console.log('itemmmmm',item);
-
      const dataCode: any = this.frameworkService.getNextCategory(item)
-    //  console.log('dataCode',dataCode);
       if (dataCode && dataCode.code){
         this.dataConfig = this.frameworkService.getConfig(dataCode.code)
       }
-      //  console.log('dataCode',this.dataConfig);
      if(dataCode){
       this.configCodeBtn = dataCode.code
      }
@@ -303,9 +295,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
           if (res && res.created) {
             this.showPublish = true
           }
-      //  console.log('create',column);
          const data  = this.frameworkService.cardClkData
-        //  console.log('cData',data);
          
           const responseData = {
             res,
@@ -326,7 +316,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
             res.parent = this.frameworkService.selectionList.get(parentColumn.code)
             res.parent.children? res.parent.children.push(res.term[0]) :res.parent['children'] = [res.term[0]]
           }
-          // console.log('calling  updateFinalList from create dialogue close event')
           this.updateFinalList({ selectedTerm: res.term[0], isSelected: false, parentData: res.parent, colIndex:colIndex })
         })
       }
@@ -334,36 +323,25 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   openOrganizationDialog(column: any, _index: any) {
-    const treeListData = this.frameworkService.getPreviousSelectedTerms(column.code)
-    if (_index === 0) {
-      treeListData.push(column)
-    } 
-    let flag = false
-    if (treeListData && treeListData.length === _index) {
-      flag = true
-    }
-    if (flag) {      
-      const dialog = this.dialog.open(OrgHierarchyAddModalComponent, {
-        data: {
-          previous: treeListData,
-          currentData: column,
-          selectedOrgData: this.orgSelectedData,
-        },
-        autoFocus: true,
-        restoreFocus: true,
-        position: { right: '0' },
-        height: '100vh',
-        width: '50%',
-        panelClass: 'right-side-modal',
-        maxWidth: '100vw'
-      });
+    const treeListData = this.frameworkService.getPreviousSelectedTerms(column.code)     
+    const dialog = this.dialog.open(OrgHierarchyAddModalComponent, {
+      data: {
+        previous: treeListData,
+        currentData: column,
+        selectedOrgData: this.orgSelectedData,
+      },
+      autoFocus: true,
+      restoreFocus: true,
+      position: { right: '0' },
+      height: '100vh',
+      width: '50%',
+      panelClass: 'right-side-modal',
+      maxWidth: '100vw'
+    });
+    
+    dialog.afterClosed().subscribe((_res: any) => {
       
-      dialog.afterClosed().subscribe((_res: any) => {
-       
-      });
-    } else {
-      this._snackBar.open(`Please select level ${_index} organization first`);
-    }
+    });
   }
 
   get list(): any[] {
@@ -403,7 +381,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   updateDraftStatusTerms(event: any){
-    debugger
     if(event.checked) {
       this.draftTerms.push(event.term)
       } else {
@@ -452,7 +429,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         })
     } else {
       this.sentForApprove.emit(this.draftTerms)
-      console.log(this.draftTerms)
     }
    
   }
@@ -512,5 +488,12 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     
     // Enable the current column and the next one
     return index === currentIndex || index === currentIndex + 1;
+  }
+
+    shouldShowSvgBorderWrapper(column: any, index: number): boolean {
+      if (this.isCurrentOrNextTerm(column, index) && this.getCount(column.code) === 0) {
+        return true;
+      } 
+      return false
   }
 }

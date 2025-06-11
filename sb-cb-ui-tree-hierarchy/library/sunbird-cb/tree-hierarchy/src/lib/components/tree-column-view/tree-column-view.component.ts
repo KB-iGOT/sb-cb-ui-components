@@ -146,15 +146,15 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
           if(e.type === 'update') {
             if(this.column.code === next.code && e.type === 'update') {
               // this.column = this.frameworkService.list.get(e.action)
-              console.log('update event section')
+              
               
               const selectedParent: any = this.frameworkService.getPreviousCategory(e.action);
               const selectedParentData = this.frameworkService.list.get(selectedParent.code)
               const selectedParentCardRef = this.frameworkService.selectionList.get(selectedParent.code) && 
               this.frameworkService.selectionList.get(selectedParent.code).cardRef
-              console.log('selectedParentCardRef', selectedParentCardRef)
+              
               if(selectedParent && selectedParentData && selectedParentData.children && selectedParentData.children.length > 0) {
-                console.log('selectedParent', selectedParent)
+                
                 // this.insertUpdateHandler(e, next, 'update')
                 // this.column = this.frameworkService.list.get(e.action)
                 // this.column = this.frameworkService.list.get()
@@ -168,11 +168,11 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
   }
   insertUpdateHandler(e: any, _next: any, isUpdate?: any) {
     const back = this.frameworkService.getPreviousCategory(this.column.code)
-    // console.log('current Saved ===========>', this.frameworkService.getLocalTermsByCategory(this.column.code))
+    
     const localTerms:any = []
     this.frameworkService.getLocalTermsByCategory(this.column.code).forEach(f => {
       const selectedParent = back ? this.frameworkService.selectionList.get(back.code) : null; //can use current
-      console.log('insertUpdateHandler selectedParent', selectedParent)
+      
       if (selectedParent && ((f.parent.code === selectedParent.code) || (f.parent.identifier && (f.parent.identifier === selectedParent.identifier)))) {
         localTerms.push(f.term)
       }
@@ -186,7 +186,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       }).map((mer:any) => {
         //**read local children for next */
         // const nextChildren = this.frameworkService.getLocalTermsByParent(this.column.code)
-        // console.log("Saved ======================+>", nextChildren)
+        
         /**reset Next level children */
         this.column.children = this.column.children.map((col:any) => { col.selected = false; return col })
         mer.selected = false
@@ -203,16 +203,12 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     }
     // this.updateTerms()
 
-    // console.log(this.columnData)
     }
   }
   updateSelection1(_data: any) { 
-    debugger
   }
-  updateSelection(selection: any) {
-    // console.log(selection.element.code, selection.isSelected)
+  updateSelection(_selection: any) {
     // if(this.column.code==='medium'){
-    // console.log( this.column.children)
     // }
     // if (selection.element.category === this.column.code) {
     //   this.updateTaxonomyTerm.emit({ isSelected: selection.isSelected, selectedTerm: selection.element })
@@ -225,7 +221,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     //   }
     //   return col
     // })
-    console.log(selection)
   }
 
   setColumnItems() {
@@ -306,10 +301,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
 
   setConnectors(elementClicked: any, columnItem: any, mode: any) {
     this.removeConnectors(elementClicked, 'box' + (this.column.index - 1), this.column.index - 1)
-    // console.log('mode', mode)
-    // console.log('child ', columnItem)
-    // console.log('elementClicked', elementClicked)
-    // console.log('connectorMapping', this.connectorMapping)
+    
     if (mode === 'ALL') {
       // let tempconnectorMapping = {}
       // this.connectorService.updateConnectorsMap(tempconnectorMapping)
@@ -322,7 +314,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       })
       this.connectorMapping['box' + (this.column.index - 1)] = { source: elementClicked, lines: (ids || []).map((id: any) => { return { target: id, line: '', targetType: 'id' } }) }
       this.connectorService.updateConnectorsMap(this.connectorMapping)
-      // console.log('next', next)
+      
       const connectionLines = this.connectorService._drawLine(
         this.connectorMapping['box' + (this.column.index - 1)].source,
         this.connectorMapping['box' + (this.column.index - 1)].lines,
@@ -381,7 +373,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
   selectedCard(event: any){
-    debugger
     this.updateTermList.emit(event);
   }
 

@@ -83,7 +83,6 @@ export class ConfigFrameworkComponent implements OnInit {
           }
     )
     this.categoriesRepresentations = [...this.tempCategoryRepresentaions]    
-    // console.log(this.categoriesRepresentations)
 }
 
   updateTermArry(current: string, parent: any, index: number){

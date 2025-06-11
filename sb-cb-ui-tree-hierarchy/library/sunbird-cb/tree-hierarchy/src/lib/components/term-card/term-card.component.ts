@@ -51,7 +51,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isApprovalRequired = this.localConnectionService.getConfigInfo().isApprovalRequired
-    // console.log(this._data)
+    
     this.updateApprovalStatus()
     this.subscription = this.frameworkService.insertUpdateDeleteNotifier.subscribe((e)=>{
       if(e){
@@ -65,14 +65,12 @@ export class TermCardComponent implements OnInit, OnDestroy {
   }
 
   cardClicked(data: any, cardRef: any) {
-    debugger
     if(data.category!='subtheme'){
       this.frameworkService.cardClkData = data;
       this.frameworkService.CurrentCardClk.next(data.category)
-      console.log('this.frameworkService.cardClkData',this.frameworkService.cardClkData);
+      
     }
     // this.data.selected = true
-    console.log('card clikc method')
     if(this.frameworkService.isLastColumn(this.data.category)){
       return 
     }
@@ -311,7 +309,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
     if(data && data.columnInfo && data.columnInfo.code){
       const nextCat = this.frameworkService.getNextCategory(data.columnInfo.code)
       if(nextCat && nextCat.code){
-        console.log(nextCat.code)
+        
         return nextCat.code
       }
     }

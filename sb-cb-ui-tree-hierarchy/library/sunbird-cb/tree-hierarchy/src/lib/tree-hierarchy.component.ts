@@ -11,7 +11,6 @@ export class TreeHierarchyComponent implements OnInit {
   @Input() taxonomyConfig: any;
   
   constructor(private frameworkService: FrameworkService) { 
-    console.log('loaded lib');
   }
 
   ngOnInit(): void {
