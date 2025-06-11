@@ -183,7 +183,7 @@ export class AccessControlComponent implements OnInit {
     }
 
     // Check if the last condition's selections are empty
-    if (conditions.length > 0) {
+    if (conditions?.length > 0) {
       const lastCondition = conditions.at(conditions.length - 1);
       const selections = lastCondition.get("selections")?.value || [];
       if (selections.length === 0) {
@@ -193,7 +193,7 @@ export class AccessControlComponent implements OnInit {
     }
 
     // Check if user is added in the condition then no more conditions can be added
-    if (conditions.length > 0) {
+    if (conditions?.length > 0) {
       const lastCondition = conditions.at(conditions.length - 1);
       const lastEntity = lastCondition.get("entity")?.value;
       if (lastEntity === NsAccessControlConfig.SelectionType.Users) {
