@@ -1,0 +1,211 @@
+<div class="flex justify-between dialog-heading items-center">
+  <h2 mat-dialog-title class="mb-0">{{ getModalTitle() }}</h2>
+  <button mat-icon-button class="close-button" (click)="onClose()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div mat-dialog-content>
+  <ng-container
+    *ngIf="
+      selectionType === selectionTypeEnum.Designation ||
+      selectionType === selectionTypeEnum.Service ||
+      selectionType === selectionTypeEnum.Cadre ||
+      selectionType === selectionTypeEnum.Batch ||
+      selectionType === selectionTypeEnum.Organizations
+    ">
+    <!-- Search Box -->
+    <div class="search-container flex items-center gap-4">
+      <div class="mat-full-radius flex-grow">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Type here to search..." [formControl]="searchControl" (keyup.enter)="search()" />
+        </mat-form-field>
+      </div>
+      <button
+        mat-flat-button
+        [disabled]="!searchControl.value"
+        class="flex items-center rounded-full new-bg-color font-bold text-sm text-white search-button"
+        (click)="search()">
+        Search
+      </button>
+    </div>
+
+    <div class="p-4 mt-2">
+      <!-- Filter Options -->
+      <ng-container *ngIf="this.selectionType !== selectionTypeEnum.Group && this.selectionType !== selectionTypeEnum.VerificationStatus">
+        <div class="filter-options">
+          <mat-tab-group
+            #tabGroup
+            dynamicHeight
+            mat-stretch-tabs="false"
+            mat-align-tabs="start"
+            (selectedTabChange)="onFilterChange($event)"
+            [(selectedIndex)]="activeTab"
+            [animationDuration]="100">
+            <mat-tab *ngFor="let item of radioSelections" [label]="item.label">
+              <div class="org-container">
+                <!-- A-Z Filter Bar -->
+                <ng-container *ngIf="isLoading">
+                  <div class="spinner-loader flex items-center justify-center">
+                    <mat-spinner></mat-spinner>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="!isLoading">
+                  <ng-container *ngIf="checkIfData; else noData">
+                    <div class="alphabet-filter" *ngIf="this.selectionType !== selectionTypeEnum.Batch && alphabet?.length">
+                      <ng-container *ngFor="let letter of alphabet; let i = index; let last = last">
+                        <button
+                          mat-button
+                          class="letter-button"
+                          (click)="scrollToSection(letter)"
+                          [ngClass]="{
+                            'active-range-btn': selectedCharacterRange === letter
+                          }">
+                          {{ letter }}
+                        </button>
+                        <div class="divider-apl" *ngIf="!last"></div>
+                      </ng-container>
+                    </div>
+                    <div class="alphabet-filter" *ngIf="this.selectionType === selectionTypeEnum.Batch">
+                      <ng-container *ngFor="let letter of batchRanges; let i = index; let last = last">
+                        <button
+                          mat-button
+                          class="range-button px-4"
+                          (click)="scrollToSection(letter)"
+                          [ngClass]="{
+                            'active-range-btn': selectedCharacterRange === letter
+                          }">
+                          {{ letter }}
+                        </button>
+                        <div class="divider-apl" *ngIf="!last"></div>
+                      </ng-container>
+                    </div>
+                    <div class="flex overflow-x-auto">
+                      <ng-container *ngFor="let group of groupedEntityData | keyvalue">
+                        <div class="org-column p-2 mr-4" [attr.id]="'section-' + group.key">
+                          <div class="org-list">
+                            <div class="batch-range-columns">
+                              <ng-container *ngIf="group.value && group.value.length">
+                                <ng-container *ngFor="let column of group.value">
+                                  <div class="batch-column">
+                                    <div *ngFor="let entity of column" class="org-card py-2">
+                                      <ng-container
+                                        *ngIf="
+                                          selectionType === selectionTypeEnum.Designation ||
+                                          selectionType === selectionTypeEnum.Organizations ||
+                                          selectionType === selectionTypeEnum.Service ||
+                                          selectionType === selectionTypeEnum.Cadre
+                                        ">
+                                        <mat-checkbox
+                                          [checked]="isSelected(entity)"
+                                          (change)="toggleSelection(entity)"
+                                          [title]="entity?.name || entity?.designation || entity?.channel">
+                                          {{ entity?.name || entity?.designation || entity?.channel }}
+                                        </mat-checkbox>
+                                      </ng-container>
+                                      <ng-container *ngIf="selectionType === selectionTypeEnum.Batch">
+                                        <mat-checkbox [checked]="isSelected(entity)" (change)="toggleSelection(entity)" [title]="entity">
+                                          {{ entity }}
+                                        </mat-checkbox>
+                                      </ng-container>
+                                    </div>
+                                  </div>
+                                </ng-container>
+                              </ng-container>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
+                    </div>
+                  </ng-container>
+                  <ng-template #noData>
+                    <div class="no-data p-4 flex flex-column items-center justify-center">
+                      <img src="/assets/icons/no-events.png" alt="no-data" />
+                      <span class="font-bold">No information to display yet</span>
+                    </div>
+                  </ng-template>
+                </ng-container>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="selectionType === selectionTypeEnum.Group">
+    <ng-container *ngIf="isLoading">
+      <div class="spinner-loader flex items-center justify-center">
+        <mat-spinner></mat-spinner>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoading">
+      <div class="flex gap-16 items-center p-4 options-checkbox">
+        <ng-container *ngFor="let group of dataList">
+          <mat-checkbox [checked]="isSelected(group)" (change)="toggleSelection(group)" [title]="group">
+            {{ group }}
+          </mat-checkbox>
+        </ng-container>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="selectionType === selectionTypeEnum.VerificationStatus">
+    <div class="flex gap-16 items-center p-4 options-checkbox">
+      <!-- <ng-container *ngFor="let group of dataList">
+        <mat-checkbox [checked]="isSelected(group)" (change)="toggleSelection(group)" [title]="group">
+          {{ group }}
+        </mat-checkbox>
+      </ng-container> -->
+      <mat-radio-group [(ngModel)]="selectedVerificationStatus" (change)="onVerificationChange($event)">
+        <ng-container *ngFor="let group of dataList">
+          <mat-radio-button [value]="group" [title]="group" class="mr-3">
+            {{ group }}
+          </mat-radio-button>
+        </ng-container>
+      </mat-radio-group>
+    </div>
+  </ng-container>
+</div>
+
+<mat-dialog-actions>
+  <ng-container *ngIf="checkIfData">
+    <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
+      <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus">
+        <div class="text-xs">{{ selectedData.length }} items selected</div>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          selectionType === selectionTypeEnum.VerificationStatus ||
+          selectionType === selectionTypeEnum.Group ||
+          selectionType === selectionTypeEnum.Cadre ||
+          activeTab === 1
+        ">
+        <button
+          mat-flat-button
+          [disabled]="selectedData.length === 0"
+          (click)="applySelections()"
+          class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
+          Apply
+        </button>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          selectionType !== selectionTypeEnum.VerificationStatus &&
+          selectionType !== selectionTypeEnum.Group &&
+          selectionType !== selectionTypeEnum.Cadre &&
+          activeTab === 0
+        ">
+        <button
+          mat-flat-button
+          [disabled]="selectedData.length === 0"
+          (click)="activeTab = 1"
+          class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
+          Selected
+        </button>
+      </ng-container>
+    </div>
+  </ng-container>
+</mat-dialog-actions>
