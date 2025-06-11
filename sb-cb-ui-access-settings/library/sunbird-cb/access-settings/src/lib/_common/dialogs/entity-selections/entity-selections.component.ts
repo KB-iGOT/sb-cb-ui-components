@@ -8,6 +8,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatRadioChange } from "@angular/material/radio";
+import * as _ from "lodash";
 
 @Component({
   selector: "sb-uic-entity-selections",
@@ -23,6 +24,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
 
   dataList: any[] = [];
+  dataListDup: any[] = [];
 
   selectedData: any[] = [];
   groupedEntityData: { [key: string]: any[] } = {};
@@ -34,7 +36,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
   selectedVerificationStatus: string = "";
-  public readonly data = inject<{ rule: any; condition: any; selected: any[] }>(MAT_DIALOG_DATA);
+  public readonly data = inject<{ rule: any; condition: any; selected: any[], activeTabSelected: number }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
@@ -45,7 +47,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     }
     if (this.data && this.data.selected && this.data.selected.length) {
       this.selectedData = [...this.data.selected];
-      this.activeTab = 1;
+      this.activeTab = this.data?.activeTabSelected || 0;
+      this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
 
       if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
         this.selectedVerificationStatus = this.data.selected[0];
@@ -85,9 +88,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   initializeDisplay(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
-        if (this.selectedData?.length) {
-          this.getOrganisationsList("", this.selectedData);
-        }
+        this.getOrganisationsList("", []);
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
@@ -159,6 +160,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     } else {
       this.filterValue = "all";
     }
+    this.updateAlphabet();
     this.getFilteredEntityGrouped();
   }
 
@@ -183,13 +185,18 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   getFilteredEntityGrouped(): void {
+    this.isLoading = true;
     let filtered = this.dataList;
 
-    // Filter by radio selection only
     if (this.filterValue === "selected") {
+      filtered = this.dataListDup;
       filtered = filtered.filter(org => this.isSelected(org));
-    } else if (this.filterValue === "notSelected") {
-      filtered = filtered.filter(org => !this.isSelected(org));
+    }
+
+    if (filtered.length === 0) {
+      this.groupedEntityData = {};
+      this.isLoading = false;
+      return;
     }
 
     // For batch, group by range and chunk each range
@@ -200,6 +207,24 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
         chunked[key] = this.chunkArray(batchGrouped[key], 8);
       }
       this.groupedEntityData = chunked;
+      this.isLoading = false;
+      return;
+    }
+
+    // For cadre and service, group 8 items irerespective of letter
+    if (this.selectionType === this.selectionTypeEnum.Cadre || this.selectionType === this.selectionTypeEnum.Service) {
+      // sort the filtered list by name
+      filtered = filtered.sort((a, b) => {
+        const nameA = a?.name?.toLowerCase() || "";
+        const nameB = b?.name?.toLowerCase() || "";
+        return nameA.localeCompare(nameB);
+      });
+
+      // chunk the filtered list into groups of 8
+      const grouped: { [key: string]: any[][] } = {};
+      grouped["All"] = this.chunkArray(filtered, 8);
+      this.groupedEntityData = grouped;
+      this.isLoading = false;
       return;
     }
 
@@ -219,6 +244,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
       grouped[letter] = this.chunkArray(temp[letter], 7);
     }
     this.groupedEntityData = grouped;
+    this.isLoading = false;
   }
 
   scrollToSection(letter: string) {
@@ -230,6 +256,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   private updateAlphabet(): void {
+    this.selectedCharacterRange = 'A';
     const chars = new Set<string>();
 
     for (const data of this.dataList) {
@@ -251,6 +278,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     if (chars.has("#")) sorted.push("#");
 
     this.alphabet = sorted;
+
+    if (this.filterValue === "selected") {
+      this.alphabet = [];
+    }
   }
 
   get checkIfData(): boolean {
@@ -267,6 +298,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
       next: response => {
         if (response?.result && response?.result?.response?.content) {
           this.dataList = response.result.response.content;
+          this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
           this.updateAlphabet();
           this.getFilteredEntityGrouped();
         } else {
@@ -292,6 +324,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
           next: response => {
             if (response?.result && response?.result?.Term) {
               this.dataList = response?.result?.Term;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
               this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
@@ -311,6 +344,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
           next: response => {
             if (response?.result && response?.result?.result?.data) {
               this.dataList = response?.result?.result?.data;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
               this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
@@ -328,20 +363,26 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   getServicesList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().service;
     this.dataList = query ? baseList.filter(service => service.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
-    this.updateAlphabet();
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
+    this.alphabet = [];
     this.getFilteredEntityGrouped();
   }
 
   getCadreList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().cadre;
     this.dataList = query ? baseList.filter(cadre => cadre.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
-    this.updateAlphabet();
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
+    this.alphabet = [];
     this.getFilteredEntityGrouped();
   }
 
   getBatchList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().batch;
     this.dataList = query ? baseList.filter(batch => batch.toString().includes(query)) : baseList;
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+
     this.updateBatchRanges();
     this.getFilteredEntityGrouped();
   }
