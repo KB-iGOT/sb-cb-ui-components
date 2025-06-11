@@ -65,6 +65,7 @@ export class TermCardComponent implements OnInit, OnDestroy {
   }
 
   cardClicked(data: any, cardRef: any) {
+    debugger
     if(data.category!='subtheme'){
       this.frameworkService.cardClkData = data;
       this.frameworkService.CurrentCardClk.next(data.category)

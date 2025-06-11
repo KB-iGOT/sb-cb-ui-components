@@ -29,6 +29,7 @@ import { OdcsService } from './services/odcs.service';
 import { IConnectionType } from './models/connection-type.model';
 import { ENVIRONMENT } from './services/connection.service';
 import { OrgHierarchyAddModalComponent } from './components/org-hierarchy-add-modal/org-hierarchy-add-modal.component';
+import { TreeHierarchyService } from './tree-hierarchy.service';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import { OrgHierarchyAddModalComponent } from './components/org-hierarchy-add-mo
     ConnectorService,
     LocalConnectionService,
     OdcsService,
+    TreeHierarchyService
   ],
   exports: [
     TreeHierarchyComponent,

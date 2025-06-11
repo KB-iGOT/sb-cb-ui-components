@@ -403,6 +403,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   updateDraftStatusTerms(event: any){
+    debugger
     if(event.checked) {
       this.draftTerms.push(event.term)
       } else {
@@ -481,5 +482,35 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       return nextCat
     }
     return null
+  }
+
+  isCurrentOrNextTerm(_column: any, index: number): boolean {
+    // If there's no current selection, only enable the first column
+    if (!this.frameworkService.currentSelection.value) {
+      return index === 0;
+    }
+    
+    // Get the current selected category from the currentSelection
+    const currentCategory = this.frameworkService.currentSelection.value.type;
+    if (!currentCategory) {
+      return index === 0;
+    }
+    
+    // Find the index of the current active column
+    let currentIndex = -1;
+    for (let i = 0; i < this.list.length; i++) {
+      if (this.list[i].code === currentCategory) {
+        currentIndex = i;
+        break;
+      }
+    }
+    
+    // If we couldn't find the current index, only enable the first column
+    if (currentIndex === -1) {
+      return index === 0;
+    }
+    
+    // Enable the current column and the next one
+    return index === currentIndex || index === currentIndex + 1;
   }
 }

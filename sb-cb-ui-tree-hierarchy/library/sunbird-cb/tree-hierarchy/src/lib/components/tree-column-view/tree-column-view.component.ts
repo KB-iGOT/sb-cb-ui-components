@@ -206,7 +206,9 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     // console.log(this.columnData)
     }
   }
-  updateSelection1(_data: any) { }
+  updateSelection1(_data: any) { 
+    debugger
+  }
   updateSelection(selection: any) {
     // console.log(selection.element.code, selection.isSelected)
     // if(this.column.code==='medium'){
@@ -379,6 +381,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
   selectedCard(event: any){
+    debugger
     this.updateTermList.emit(event);
   }
 
