@@ -8,7 +8,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatRadioChange } from "@angular/material/radio";
-import _ from "lodash";
+import * as _ from "lodash";
 
 @Component({
   selector: "sb-uic-entity-selections",
