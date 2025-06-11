@@ -36,7 +36,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
   selectedVerificationStatus: string = "";
-  public readonly data = inject<{ rule: any; condition: any; selected: any[] }>(MAT_DIALOG_DATA);
+  public readonly data = inject<{ rule: any; condition: any; selected: any[], activeTabSelected: number }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
@@ -47,7 +47,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     }
     if (this.data && this.data.selected && this.data.selected.length) {
       this.selectedData = [...this.data.selected];
-      this.activeTab = 0;
+      this.activeTab = this.data?.activeTabSelected || 0;
+      this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
 
       if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
         this.selectedVerificationStatus = this.data.selected[0];

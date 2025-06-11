@@ -192,6 +192,16 @@ export class AccessControlComponent implements OnInit {
       }
     }
 
+    // Check if user is added in the condition then no more conditions can be added
+    if (conditions.length > 0) {
+      const lastCondition = conditions.at(conditions.length - 1);
+      const lastEntity = lastCondition.get("entity")?.value;
+      if (lastEntity === NsAccessControlConfig.SelectionType.Users) {
+        this.callSnackbar("User condition already exists, cannot add more conditions.", "error");
+        return;
+      }
+    }
+
     conditions.push(this.createConditionGroup(uuidv4(), userGroupIndex));
   }
 
@@ -297,10 +307,10 @@ export class AccessControlComponent implements OnInit {
     }
   }
 
-  manageSelections(condition: any, rule: any, userGroupIndex: number): void {
+  manageSelections(condition: any, rule: any, userGroupIndex: number, activeTabSelected = 0): void {
     switch (condition.value.entity) {
       case NsAccessControlConfig.SelectionType.Users:
-        this.openInviteUserDialog(condition?.value, rule?.value);
+        this.openInviteUserDialog(condition?.value, rule?.value, activeTabSelected);
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
       case NsAccessControlConfig.SelectionType.Designation:
@@ -310,19 +320,19 @@ export class AccessControlComponent implements OnInit {
       case NsAccessControlConfig.SelectionType.Group:
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         this.processCadreConfigMapping(userGroupIndex);
-        this.openSelectionDialog(rule?.value, condition?.value);
+        this.openSelectionDialog(rule?.value, condition?.value, activeTabSelected);
         break;
       default:
         console.warn("Unsupported entity type:", condition.value.entity);
     }
   }
 
-  openSelectionDialog(rule: any, condition: any): void {
+  openSelectionDialog(rule: any, condition: any, activeTabSelected: number): void {
     const originalSelections = [...(condition.selections || [])];
 
     const dialogRef = this.dialog.open(EntitySelectionsComponent, {
       width: "1032px",
-      data: { rule: rule, condition: condition, selected: condition.selections }
+      data: { rule: rule, condition: condition, selected: condition.selections, activeTabSelected: activeTabSelected }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -374,7 +384,7 @@ export class AccessControlComponent implements OnInit {
       const serviceSelections = this.cadreMappingService.getServiceIdsByName(services?.selections || []) || [];
       const cadreSelections = this.cadreMappingService.getCadreIdsByName(cadre?.selections || []) || [];
       const batchSelections = batch?.selections || [];
-      
+
       // Case 1: Only service selected
       if (serviceSelections?.length && !cadreSelections?.length && !batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
@@ -438,10 +448,10 @@ export class AccessControlComponent implements OnInit {
     }
   }
 
-  openInviteUserDialog(condition: any, rule: any): void {
+  openInviteUserDialog(condition: any, rule: any, activeTabSelected: number): void {
     const dialogRef = this.dialog.open(InviteUsersComponent, {
       width: "1090px",
-      data: { condition: condition, rule: rule, selected: condition.selections }
+      data: { condition: condition, rule: rule, selected: condition.selections, activeTab: activeTabSelected }
     });
 
     dialogRef.afterClosed().subscribe(result => {

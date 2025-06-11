@@ -115,7 +115,7 @@
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button">
+                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button" (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
                                   </div>
