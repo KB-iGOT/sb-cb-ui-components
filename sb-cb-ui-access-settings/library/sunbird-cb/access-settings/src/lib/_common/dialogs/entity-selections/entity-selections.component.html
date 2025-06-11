@@ -176,13 +176,36 @@
       <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus">
         <div class="text-xs">{{ selectedData.length }} items selected</div>
       </ng-container>
-      <button
-        mat-flat-button
-        [disabled]="selectedData.length === 0"
-        (click)="applySelections()"
-        class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
-        Apply
-      </button>
+      <ng-container
+        *ngIf="
+          selectionType === selectionTypeEnum.VerificationStatus ||
+          selectionType === selectionTypeEnum.Group ||
+          selectionType === selectionTypeEnum.Cadre ||
+          activeTab === 1
+        ">
+        <button
+          mat-flat-button
+          [disabled]="selectedData.length === 0"
+          (click)="applySelections()"
+          class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
+          Apply
+        </button>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          selectionType !== selectionTypeEnum.VerificationStatus &&
+          selectionType !== selectionTypeEnum.Group &&
+          selectionType !== selectionTypeEnum.Cadre &&
+          activeTab === 0
+        ">
+        <button
+          mat-flat-button
+          [disabled]="selectedData.length === 0"
+          (click)="activeTab = 1"
+          class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
+          Set Selected
+        </button>
+      </ng-container>
     </div>
   </ng-container>
 </mat-dialog-actions>

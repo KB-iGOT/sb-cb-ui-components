@@ -47,7 +47,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     }
     if (this.data && this.data.selected && this.data.selected.length) {
       this.selectedData = [...this.data.selected];
-      this.activeTab = 1;
+      this.activeTab = 0;
 
       if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
         this.selectedVerificationStatus = this.data.selected[0];
@@ -87,9 +87,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   initializeDisplay(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
-        if (this.selectedData?.length) {
-          this.getOrganisationsList("", this.selectedData);
-        }
+        this.getOrganisationsList("", []);
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
@@ -186,11 +184,18 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   getFilteredEntityGrouped(): void {
+    this.isLoading = true;
     let filtered = this.dataList;
 
     if (this.filterValue === "selected") {
       filtered = this.dataListDup;
       filtered = filtered.filter(org => this.isSelected(org));
+    }
+
+    if (filtered.length === 0) {
+      this.groupedEntityData = {};
+      this.isLoading = false;
+      return;
     }
 
     // For batch, group by range and chunk each range
@@ -201,6 +206,24 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
         chunked[key] = this.chunkArray(batchGrouped[key], 8);
       }
       this.groupedEntityData = chunked;
+      this.isLoading = false;
+      return;
+    }
+
+    // For cadre and service, group 8 items irerespective of letter
+    if (this.selectionType === this.selectionTypeEnum.Cadre || this.selectionType === this.selectionTypeEnum.Service) {
+      // sort the filtered list by name
+      filtered = filtered.sort((a, b) => {
+        const nameA = a?.name?.toLowerCase() || "";
+        const nameB = b?.name?.toLowerCase() || "";
+        return nameA.localeCompare(nameB);
+      });
+
+      // chunk the filtered list into groups of 8
+      const grouped: { [key: string]: any[][] } = {};
+      grouped["All"] = this.chunkArray(filtered, 8);
+      this.groupedEntityData = grouped;
+      this.isLoading = false;
       return;
     }
 
@@ -220,6 +243,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
       grouped[letter] = this.chunkArray(temp[letter], 7);
     }
     this.groupedEntityData = grouped;
+    this.isLoading = false;
   }
 
   scrollToSection(letter: string) {
@@ -231,6 +255,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   private updateAlphabet(): void {
+    this.selectedCharacterRange = 'A';
     const chars = new Set<string>();
 
     for (const data of this.dataList) {
@@ -335,12 +360,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   getServicesList(query: string): void {
-    debugger;
     const baseList = this.accessControlService.holdServiceCadrebatch().service;
     this.dataList = query ? baseList.filter(service => service.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
     this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
 
-    this.updateAlphabet();
+    this.alphabet = [];
     this.getFilteredEntityGrouped();
   }
 
@@ -349,7 +373,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy, AfterViewIn
     this.dataList = query ? baseList.filter(cadre => cadre.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
     this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
 
-    this.updateAlphabet();
+    this.alphabet = [];
     this.getFilteredEntityGrouped();
   }
 

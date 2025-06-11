@@ -60,6 +60,10 @@ export class AccessControlComponent implements OnInit {
 
     this.usersTableConfig = this.config?.usersTableConfig;
 
+    if (this.config?.visiblilityOnOff?.default === "on") {
+      this.isVisibilityEnabled = true;
+    }
+
     if (!this.contentId) {
       this.callSnackbar("Content id is required", "error");
     }
@@ -370,7 +374,7 @@ export class AccessControlComponent implements OnInit {
       const serviceSelections = this.cadreMappingService.getServiceIdsByName(services?.selections || []) || [];
       const cadreSelections = this.cadreMappingService.getCadreIdsByName(cadre?.selections || []) || [];
       const batchSelections = batch?.selections || [];
-
+      
       // Case 1: Only service selected
       if (serviceSelections?.length && !cadreSelections?.length && !batchSelections?.length) {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
@@ -642,18 +646,20 @@ export class AccessControlComponent implements OnInit {
     await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
   }
 
- get hasUserGroupBeenAdded(): boolean {
-  if (!this.userGroup?.length) {
-    return true;
-  }
+  get hasUserGroupBeenAdded(): boolean {
+    if (!this.userGroup?.length) {
+      return true;
+    }
 
-  return !this.userGroup.controls.every((group: any) => {
-    const conditions = group.get('conditions')?.controls || [];
-    return conditions.length > 0 && conditions.every((condition: any) => {
-      const selections = condition.get('selections')?.value;
-      return Array.isArray(selections) && selections.length > 0;
+    return !this.userGroup.controls.every((group: any) => {
+      const conditions = group.get("conditions")?.controls || [];
+      return (
+        conditions?.length > 0 &&
+        conditions.every((condition: any) => {
+          const selections = condition.get("selections")?.value;
+          return Array.isArray(selections) && selections.length > 0;
+        })
+      );
     });
-  });
-}
-
+  }
 }
