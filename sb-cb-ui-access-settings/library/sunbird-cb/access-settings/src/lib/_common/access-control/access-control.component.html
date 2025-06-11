@@ -28,14 +28,14 @@
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Custom">
         <div class="visibiliy-container light-grey-border p-4 mb-4">
           <div class="flex justify-between items-center">
-            <span class="text-lg font-bold">Visibility</span>
-            <mat-slide-toggle [(ngModel)]="isVisibilityEnabled"></mat-slide-toggle>
+            <span class="text-lg font-bold">{{ config?.visiblilityOnOff?.label }}</span>
+            <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle>
           </div>
           <ng-container *ngIf="!isVisibilityEnabled">
-            <label class="text-sm">{{ config?.visibilityOnOffTexts?.off }}</label>
+            <label class="text-sm">{{ (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.contentType) }}</label>
           </ng-container>
           <ng-container *ngIf="isVisibilityEnabled">
-            <label class="text-sm">{{ config?.visibilityOnOffTexts?.on }}</label>
+            <label class="text-sm">{{ (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.contentType) }}</label>
           </ng-container>
         </div>
         <!-- <div class="flex justify-between items-center mt-4 mb-4">
@@ -115,7 +115,7 @@
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button">
+                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button" (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
                                   </div>
@@ -145,9 +145,9 @@
                           </div>
                           <div class="and-or mat-full-radius" *ngIf="conditionsArray?.length > 1 && !conditionlast">
                             <mat-form-field appearance="outline" class="w-max-100">
-                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship">
+                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship" >
                                 <mat-option [value]="'AND'">AND</mat-option>
-                                <mat-option [value]="'OR'">OR</mat-option>
+                                <mat-option [value]="'OR'" [disabled]="true">OR</mat-option>
                               </mat-select>
                             </mat-form-field>
                           </div>
@@ -174,7 +174,7 @@
                   <div class="and-or mat-full-radius" *ngIf="userGroup.length > 1 && !ruleLast">
                     <mat-form-field appearance="outline" class="w-max-100">
                       <mat-select placeholder="Select" [(value)]="defaultUserGroupRelationship">
-                        <mat-option [value]="'AND'">AND</mat-option>
+                        <mat-option [value]="'AND'" [disabled]="true">AND</mat-option>
                         <mat-option [value]="'OR'">OR</mat-option>
                       </mat-select>
                     </mat-form-field>

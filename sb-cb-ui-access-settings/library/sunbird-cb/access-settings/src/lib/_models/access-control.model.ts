@@ -4,7 +4,7 @@ export namespace NsAccessControlConfig {
     usersTableConfig: ITableConfig;
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
-    visibilityOnOffTexts: { on: string; off: string };
+    visiblilityOnOff: IVisiblilityOnOff;
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];
@@ -112,4 +112,12 @@ export interface IUserGroupRequest {
       }[];
     }[];
   };
+}
+
+export interface IVisiblilityOnOff {
+  label: string;
+  disabled: boolean;
+  on: string;
+  off: string;
+  default: string;
 }

@@ -64,12 +64,15 @@ export class AccessControlService {
   fetchOrgList(query: string, selectedData?: string[]): Observable<any> {
     let request: any = {
       request: {
-        filters: {},
+        filters: {
+          status: 1,
+        },
         sort_by: {
           channel: "asc"
         },
         fields: ["channel", "identifier"],
-        query: query
+        query: query,
+        limit: 1500
       }
     };
     if (selectedData?.length) {
@@ -95,7 +98,9 @@ export class AccessControlService {
       filterCriteriaMap: {
         status: "Active"
       },
-      requestedFields: ["designation", "id"]
+      requestedFields: ["designation", "id"],
+      pageSize: 1000,
+      pageNumber: 0
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
