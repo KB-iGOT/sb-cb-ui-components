@@ -39,7 +39,10 @@
                 </ng-container> -->
                 <!-- <span>++{{data.children.selected}}+++</span>
                 <span>=={{data.children.status}}==</span>  -->
-                <div class="card-description">{{data.children.description}} </div>
+                <div class="card-description flex flex-middle gap-1">
+                    <mat-icon svgIcon="frac"></mat-icon> 
+                    <span>{{(data.children.children) ? data.children.children?.length : 0}} Child Org</span>
+                </div>
             </div>
         </div>
 
@@ -66,10 +69,10 @@
 
 <ng-template #cardStandard>
     <div>
-        {{data.children.name}}
+        {{data.children.name}} 
     </div>
     <div>
-        {{data.children.description}}
+        {{data.children.description}} s
     </div>
 </ng-template>
 
