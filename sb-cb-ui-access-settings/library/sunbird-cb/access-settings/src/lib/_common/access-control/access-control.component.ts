@@ -58,6 +58,13 @@ export class AccessControlComponent implements OnInit {
     this.accessControlService.accessControlConfig.set(this.config);
     this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
 
+    // Disable form for reviewer if readonly is true
+    if (this.accessControlCriteriaSelection?.readOnly) {
+      this.accessControlForm.disable();
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
+    }
+
     this.usersTableConfig = this.config?.usersTableConfig;
 
     if (this.config?.visiblilityOnOff?.default === "on") {
@@ -68,11 +75,10 @@ export class AccessControlComponent implements OnInit {
       this.callSnackbar("Content id is required", "error");
     }
     if (this.content) {
-      if (this.content?.status === "Draft") {
-        this.isApplyBtnDisabled = true;
-      }
       if (this.content?.status === "Live") {
         this.isSaveFltrBtnDisabled = true;
+      } else {
+        this.isApplyBtnDisabled = true;
       }
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         this.accessType = NsAccessControlConfig.IAccessTypes.Public;
@@ -222,9 +228,11 @@ export class AccessControlComponent implements OnInit {
       });
     }
 
+    // Disable entity control if readOnly is true
+    const isEntityDisabled = !!this.accessControlCriteriaSelection?.readOnly;
     return this.fb.group({
       id: [id],
-      entity: [entity, Validators.required],
+      entity: [{ value: entity, disabled: isEntityDisabled }, Validators.required],
       conditionType: [{ value: "is", disabled: true }, Validators.required],
       selections: [[]]
     });
@@ -517,25 +525,25 @@ export class AccessControlComponent implements OnInit {
 
     if (!validated) return;
 
-    if (this.content?.status === "Draft") this.isSaving = true;
-    else if (this.content?.status === "Live") this.isApplying = true;
+    if (this.content?.status === "Live") this.isApplying = true;
+    else this.isSaving = true;
+
     const payload = await this.processRequestCreation();
     this.accessControlService.applyUserGroupAccessControl(payload).subscribe({
       next: response => {
         if (response?.result && response?.result?.accessControl) {
-          this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroup, accessType: this.accessType });
+          this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
           this.callSnackbar("Access Control saved successfully", "success");
         } else {
           this.callSnackbar("Could not save access control, Please try again.", "error");
         }
-
-        if (this.content?.status === "Draft") this.isSaving = false;
-        else if (this.content?.status === "Live") this.isApplying = false;
+        if (this.content?.status === "Live") this.isApplying = false;
+        else this.isSaving = false;
       },
       error: () => {
         this.callSnackbar("Could not save access control, Please try again.", "error");
-        if (this.content?.status === "Draft") this.isSaving = false;
-        else if (this.content?.status === "Live") this.isApplying = false;
+        if (this.content?.status === "Live") this.isApplying = false;
+        else this.isSaving = false;
       }
     });
   }
