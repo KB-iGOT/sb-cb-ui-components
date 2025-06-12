@@ -514,12 +514,13 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     return false
   }
 
-  createTerms(selectedList:any, column:any) {
+  async createTerms(selectedList:any, column:any) {
     const frameworkData = {
       id: this.orgSelectedData.orgHierarchyFrameworkId || '',
       category: column.code || '',
     }
-    selectedList.forEach(async (ele:any) => {
+    let createdNodeId:any = []
+    for await (const ele of selectedList) { 
       const requestBody = {
         request: {
             term: {
@@ -533,34 +534,65 @@ export class TreeViewComponent implements OnInit, OnDestroy {
             }
           }
         }
-        const createTremsRes:any = await this.treeHierarchySvc.createTerm(requestBody, frameworkData).toPromise().catch(err => {
-          console.error('Error in creating term', err);
-        })
-        if (createTremsRes && createTremsRes.result && createTremsRes.result.node_id) {
-          this.updateAssociation(createTremsRes.result.node_id[0], frameworkData);
-        }
-    });
+      const createTremsRes:any = await this.treeHierarchySvc.createTerm(requestBody, frameworkData).toPromise().catch(err => {
+        console.error('Error in creating term', err);
+      })
+      if (createTremsRes && createTremsRes.result && createTremsRes.result.node_id) {
+        createdNodeId.push(createTremsRes.result.node_id[0]);
+      } else {
+        this._snackBar.open('Error in creating term', 'cancel');
+        this.treeHierarchySvc.setLoaderState(false);
+        return;
+      }
+    }
+    if (createdNodeId.length === selectedList.length) {
+      if (column.index >1) {
+        await this.updateAssociation(createdNodeId, frameworkData, column);
+      } 
+      this.publishFramework(frameworkData);
+    }
   }
 
-  async updateAssociation(nodeId: string, frameworkData: any) {
-    const requestBody = {
+  async updateAssociation(nodeId: any, frameworkData: any, column: any) {
+    const prev:any = this.frameworkService.getPreviousCategory(column.code);
+    let prevTrem:any = this.frameworkService.getPreviousSelectedTerms(column)
+    let currentTermSelected:any
+    
+    this.frameworkService.currentSelection.subscribe((ele:any) => {
+      currentTermSelected = ele.data
+    })
+    const requestBody:any = {
       request: {
         term: {
-          associations: [
-            {
-              identifier: nodeId
-            },
-          ]
+          associations: []
         }
       }
     } 
-    const nodeIdParts = nodeId.split('_');
+    if (prevTrem && prevTrem) {
+      prevTrem = prevTrem.filter((ele:any) => ele.category === prev.code)[0]
+      if (prevTrem && prevTrem.associations && prevTrem.associations.length > 0) {
+        prevTrem.associations.forEach((ele:any) => {
+            requestBody.request.term.associations.push({
+            identifier: ele.identifier
+          })
+        }) 
+      }
+    }
+    if (nodeId && nodeId.length > 0) {
+      nodeId.forEach((ele:any) => {
+        requestBody.request.term.associations.push({
+          identifier: ele
+        })
+      })
+    }
+    frameworkData.category = prev.code || '';
+    const nodeIdParts = currentTermSelected.identifier.split('_');
     const codeId = nodeIdParts[nodeIdParts.length - 1];
     const updateAssociationRes:any = await this.treeHierarchySvc.updateFrameworkAssociation(requestBody, frameworkData, codeId).toPromise().catch(err => {
       console.error('Error in updating association', err);
     })
     if (updateAssociationRes && updateAssociationRes.result && updateAssociationRes.result.node_id) {
-      this.publishFramework(frameworkData);
+      // this.publishFramework(frameworkData);
     }
   }
 

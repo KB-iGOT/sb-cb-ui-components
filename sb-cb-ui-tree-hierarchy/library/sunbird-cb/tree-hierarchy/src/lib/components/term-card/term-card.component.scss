@@ -32,13 +32,19 @@
                 font-weight: 400;
             }
             .card-description {
-                color: rgba(0, 0, 0, 0.4);
+                color: rgba(0, 0, 0);
                 font-size: 12px !important;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
+
+                mat-icon {
+                    width: 16px;
+                    height: 16px;
+                    color: #1B4CA1;
+                }
             }
         }
     }
@@ -50,6 +56,10 @@
         border-style: none;
         .card-description {
             color: black !important;
+
+            mat-icon {
+                color: black !important;
+            }
         }
     }
     &.clickable {
