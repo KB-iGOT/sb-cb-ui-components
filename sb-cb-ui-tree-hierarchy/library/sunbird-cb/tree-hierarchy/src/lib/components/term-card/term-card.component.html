@@ -49,7 +49,7 @@
         <!-- (click)="$event.stopPropagation();" -->
          <ng-container *ngIf="data?.columnInfo?.config?.enableThreeDot" >
             <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
-            [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn">
+            [matMenuTriggerFor]="orgMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn">
             <mat-icon>more_vert</mat-icon>
             </button>
          </ng-container>
@@ -103,6 +103,27 @@
             aria-label="Analytics">
             <mat-icon>delete</mat-icon>
             <span>Delete</span>
+        </button>
+    </ng-template>
+</mat-menu>
+
+<mat-menu #orgMenu="matMenu" class="menu-sec">
+    <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
+        <button *ngIf="data.columnInfo.config.enableUpdateHierarchy"  (click)="updateHierarchy(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
+            class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
+            <mat-icon>visibility</mat-icon> <span>Update Hierarchy</span>
+        </button>
+        <button *ngIf="data.columnInfo.config.enabaleRemoveConnection" (click)="removeConnection(data,  data.children,data.index, cardRef)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>edit</mat-icon>
+            <span>Remove Connection</span>
+        </button>
+        <button *ngIf="data.columnInfo.config.enableManageOrganization" (click)="manageOrganization(data)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>add</mat-icon>
+            <span>Manage Organisation</span>
         </button>
     </ng-template>
 </mat-menu>

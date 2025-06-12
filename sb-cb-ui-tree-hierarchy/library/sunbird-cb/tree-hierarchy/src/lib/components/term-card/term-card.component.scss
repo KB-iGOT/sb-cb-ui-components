@@ -64,9 +64,24 @@
 }
 
 
-   ::ng-deep .menu-sec {
-        min-height: 0px !important;
-    
+::ng-deep {
+  .menu-sec {
+    min-height: 0px !important;
+    background: #fff !important;
+  }
+  
+  .mat-mdc-menu-panel {
+    background-color: #fff !important;
+  }
+  
+  .mat-mdc-menu-content,
+  .mat-mdc-menu-item {
+    background-color: #fff !important;
+  }
+}
+
+.menu-sec {
+  background: #fff !important;
 }
 
 .refIdCard {

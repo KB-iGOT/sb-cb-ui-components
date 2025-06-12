@@ -70,14 +70,14 @@
                             <div class="icon-container">
                                 <mat-icon svgIcon="frac-no-connection"></mat-icon>
                             </div>
-                            <label>Select an organization to add or see further connections</label>
-                                <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i)" type="button" 
-                                [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
-                                    <span>Add</span>
-                                    <mat-icon class="margin-remove">
-                                        {{app_strings.add}}
-                                    </mat-icon>
-                                </button>
+                            <label>{{isLoading}} Select an organization to add or see further connections</label>
+                            <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i)" type="button" 
+                            [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
+                                <span>Add</span>
+                                <mat-icon class="margin-remove">
+                                    {{app_strings.add}}
+                                </mat-icon>
+                            </button>
                         </div>
                     </div>
                 </ng-container>
@@ -89,7 +89,4 @@
 </div>
 <div *ngIf="!(list && list.length > 0 ) && isFraworkLoading" class="flex heightFix ">
     <h1 i18n>{{app_strings.loading}}</h1>
-</div>
-<div *ngIf="isLoading" class="spinner">
-    <mat-spinner></mat-spinner>
 </div>

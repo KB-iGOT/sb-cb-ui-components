@@ -96,6 +96,11 @@
 	  max-width: 90vw !important; // Optional: adjust width if needed
 	}
   }
+
+  .mat-pseudo-checkbox-checked {
+	background-color: $primary-color !important;
+	border-color: $primary-color !important;
+  }
 }
 
 .org-hierarchy-modal {

@@ -34,40 +34,24 @@
                 <div class="select-search-container">
                     <mat-form-field appearance="outline" class="w-full custom-height-select">
                         <mat-select [formControl]="selectedOrgsControl" placeholder="Select" #singleSelect
-                        [panelClass]="'mat-select-panel-below'" disableOptionCentering [disableOptionCentering]="true">
-                                                <!-- Replace your existing search container div with this one -->
-                        <div class="search-container">
-                            <input type="text" [formControl]="searchControl" placeholder="Search..."
-                            (keydown)="$event.key === ' ' ? $event.stopPropagation() : null" (click)="$event.stopPropagation()"
-                            class="search-input" #searchInput>
-                        </div>
-                        <mat-option *ngFor="let organization of filteredOptions" [value]="organization.identifier">
-                            {{organization.orgName}}
-                        </mat-option>
-                        <mat-option *ngIf="filteredOptions.length === 0" disabled>
-                            No matching found
-                        </mat-option>
+                        [panelClass]="'mat-select-panel-below'" disableOptionCentering [disableOptionCentering]="true"
+                        multiple> <!-- Added the multiple attribute here -->
+                            <!-- Search container -->
+                            <div class="search-container">
+                                <input type="text" [formControl]="searchControl" placeholder="Search..."
+                                (keydown)="$event.key === ' ' ? $event.stopPropagation() : null" (click)="$event.stopPropagation()"
+                                class="search-input" #searchInput>
+                            </div>
+                            <mat-option *ngFor="let organization of filteredOptions" [value]="organization.identifier">
+                                {{organization.orgName}}
+                            </mat-option>
+                            <mat-option *ngIf="filteredOptions.length === 0" disabled>
+                                No data found
+                            </mat-option>
                         </mat-select>
                     </mat-form-field>
                 </div>
                 
-                <!-- Selected items chips display -->
-                <div class="selected-items-container" *ngIf="selectedOrgsControl?.value?.length">
-                  <div class="selected-chips">
-                    <mat-chip-listbox>
-                      <mat-chip-option 
-                        *ngFor="let item of getSelectedOptions()" 
-                        [removable]="true" 
-                        (removed)="removeSelected(item.id)"
-                        disabled="true"> <!-- disabled to make it behave like a regular chip -->
-                        {{item.name}}
-                        <button matChipRemove>
-                          <mat-icon>cancel</mat-icon>
-                        </button>
-                      </mat-chip-option>
-                    </mat-chip-listbox>
-                  </div>
-                </div>
             </div>
         </ng-container>
     </div>

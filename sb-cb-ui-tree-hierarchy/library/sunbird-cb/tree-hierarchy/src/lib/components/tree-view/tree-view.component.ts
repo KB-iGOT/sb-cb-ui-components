@@ -14,6 +14,8 @@ import { labels } from '../../labels/strings';
 import { Card } from '../../models/variable-type.model';
 import { CreateTermFromFrameworkComponent } from '../create-term-from-framework/create-term-from-framework.component';
 import { OrgHierarchyAddModalComponent } from '../org-hierarchy-add-modal/org-hierarchy-add-modal.component';
+import { TreeHierarchyService } from '../../tree-hierarchy.service';
+import { v4 as uuidv4 } from 'uuid'
 
 declare var LeaderLine: any;
 @Component({
@@ -29,6 +31,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   @Input() taxonomyConfig: any;
   @Input() orgSelectedData: any;
   @Output() sentForApprove = new EventEmitter<any>()
+  @Output() loaderEnable = new EventEmitter<any>()
   mapping = {};
   heightLighted = []
   localList = []
@@ -46,13 +49,17 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   configCodeBtn:any;
   dataConfig:any
   isFraworkLoading = true
+  loaderSubscription!: Subscription
   constructor(private frameworkService: FrameworkService, 
     private localSvc: LocalConnectionService, 
     public dialog: MatDialog, 
     private approvalService: ApprovalService,
     private _snackBar: MatSnackBar,
     private connectorSvc: ConnectorService,
-    private cdr: ChangeDetectorRef) { }
+    private cdr: ChangeDetectorRef,
+    private treeHierarchySvc: TreeHierarchyService,
+    private changeDetector: ChangeDetectorRef,
+  ) { }
 
   ngOnInit() {
     
@@ -89,6 +96,13 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     }, (err) => {
       console.error('error in fetching framework', err)
     })
+
+    this.loaderSubscription = this.treeHierarchySvc.loaderState$.subscribe(
+      data => {
+        this.loaderEnable.emit(data)
+        this.changeDetector.detectChanges()
+      },
+    )
   
   }
   refreshData(resData: any) {
@@ -146,7 +160,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       if(firstListItem[1] && firstListItem[1].children && firstListItem[1].children.length) {
         const firstTerm = firstListItem[1].children[0] as any
         const cardRef = document.getElementById(firstTerm.name)
-        this.categoryList = []
+        // this.categoryList = []
         firstTerm.selected = true
         this.frameworkService.cardClkData = firstTerm;
         this.frameworkService.CurrentCardClk.next(firstTerm.category)
@@ -340,7 +354,10 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     });
     
     dialog.afterClosed().subscribe((_res: any) => {
-      
+        if (_res && _res.length > 0) {
+          this.treeHierarchySvc.setLoaderState(true);
+          this.createTerms(_res, column)
+        }
     });
   }
 
@@ -490,10 +507,76 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     return index === currentIndex || index === currentIndex + 1;
   }
 
-    shouldShowSvgBorderWrapper(column: any, index: number): boolean {
-      if (this.isCurrentOrNextTerm(column, index) && this.getCount(column.code) === 0) {
-        return true;
-      } 
-      return false
+  shouldShowSvgBorderWrapper(column: any, index: number): boolean {
+    if (this.isCurrentOrNextTerm(column, index) && this.getCount(column.code) === 0) {
+      return true;
+    } 
+    return false
+  }
+
+  createTerms(selectedList:any, column:any) {
+    const frameworkData = {
+      id: this.orgSelectedData.orgHierarchyFrameworkId || '',
+      category: column.code || '',
+    }
+    selectedList.forEach(async (ele:any) => {
+      const requestBody = {
+        request: {
+            term: {
+              name: ele.orgName || '',
+              description: ele.description || '',
+              code: uuidv4(),
+              additionalProperties: {
+                identifier: ele.ministryOrStateId || '',
+                parentOrgName: ele.ministryOrStateName || '',
+              }
+            }
+          }
+        }
+        const createTremsRes:any = await this.treeHierarchySvc.createTerm(requestBody, frameworkData).toPromise().catch(err => {
+          console.error('Error in creating term', err);
+        })
+        if (createTremsRes && createTremsRes.result && createTremsRes.result.node_id) {
+          this.updateAssociation(createTremsRes.result.node_id[0], frameworkData);
+        }
+    });
+  }
+
+  async updateAssociation(nodeId: string, frameworkData: any) {
+    const requestBody = {
+      request: {
+        term: {
+          associations: [
+            {
+              identifier: nodeId
+            },
+          ]
+        }
+      }
+    } 
+    const nodeIdParts = nodeId.split('_');
+    const codeId = nodeIdParts[nodeIdParts.length - 1];
+    const updateAssociationRes:any = await this.treeHierarchySvc.updateFrameworkAssociation(requestBody, frameworkData, codeId).toPromise().catch(err => {
+      console.error('Error in updating association', err);
+    })
+    if (updateAssociationRes && updateAssociationRes.result && updateAssociationRes.result.node_id) {
+      this.publishFramework(frameworkData);
+    }
+  }
+
+  publishFramework(frameworkData: any) {
+    this.treeHierarchySvc.publishFreamework(frameworkData).subscribe((res:any) => {
+      if (res && res.result && res.result.publishStatus) {
+        this._snackBar.open(`${res.result.publishStatus}`, 'cancel');
+        this.treeHierarchySvc.setLoaderState(false);
+        this.init();
+      } else {
+        this._snackBar.open('Error in publishing framework', 'cancel');
+        this.treeHierarchySvc.setLoaderState(false);
+      }
+    }, (err) => {
+      console.error('Error in publishing framework', err);
+      this.treeHierarchySvc.setLoaderState(false);
+    });
   }
 }
