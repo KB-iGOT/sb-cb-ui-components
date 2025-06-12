@@ -15,6 +15,7 @@ export namespace NsAccessControlConfig {
     groupsOptions: string[];
     verificationStatus: ISelectionOption[];
     accessTypes: { name: string; value: string; tooltip: string; disabled: boolean }[];
+    readOnly: boolean;
   }
 
   export interface IOptionsEntity {

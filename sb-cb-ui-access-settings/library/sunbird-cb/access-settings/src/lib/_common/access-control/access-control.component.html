@@ -11,7 +11,7 @@
       <mat-radio-group [(ngModel)]="accessType" (change)="onAccessTypeChange($event)">
         <div class="radio-container flex gap-5 mb-4">
           <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
-            <mat-radio-button [value]="item.value" [disabled]="item?.disabled">
+            <mat-radio-button [value]="item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
               <div class="flex gap-2 items-center">
                 <span>{{ item?.name }}</span>
                 <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
@@ -72,10 +72,10 @@
                         <span class="text-sm">{{ rule.get("name")?.value }}</span>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                        <button mat-icon-button aria-label="delete user group" (click)="removeUserGroup(i)" title="Delete">
+                        <button [disabled]="accessControlCriteriaSelection?.readOnly" mat-icon-button aria-label="delete user group" (click)="removeUserGroup(i)" title="Delete">
                           <mat-icon>delete</mat-icon>
                         </button>
-                        <button mat-icon-button aria-label="refresh user group" (click)="resetUserGroup(i)" title="Refresh">
+                        <button [disabled]="accessControlCriteriaSelection?.readOnly" mat-icon-button aria-label="refresh user group" (click)="resetUserGroup(i)" title="Refresh">
                           <mat-icon>refresh</mat-icon>
                         </button>
                       </mat-panel-description>
@@ -108,14 +108,19 @@
                                 <button
                                   mat-flat-button
                                   (click)="manageSelections(condition, rule, i)"
-                                  [disabled]="!condition.get('entity').value || !condition.get('conditionType').value"
+                                  [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly"
                                   class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
                                   <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
                                   <span class="font-bold text-sm">Manage Selections</span>
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button" (click)="manageSelections(condition, rule, i, 1)">
+                                <button
+                                  mat-button
+                                  class="new-secondary-button-no-border button-with-corners mt-2"
+                                  type="button"
+                                  [disabled]="accessControlCriteriaSelection?.readOnly"
+                                  (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
                                   </div>
@@ -127,6 +132,7 @@
                                     mat-icon-button
                                     aria-label="delete condition"
                                     class="mt-2 ml-auto"
+                                    [disabled]="accessControlCriteriaSelection?.readOnly"
                                     (click)="removeCondition(i, j)"
                                     title="Delete">
                                     <mat-icon>delete</mat-icon>
@@ -135,6 +141,7 @@
                                     mat-icon-button
                                     aria-label="refresh condition"
                                     class="mt-2 ml-auto"
+                                    [disabled]="accessControlCriteriaSelection?.readOnly"
                                     (click)="resetCondition(i, j)"
                                     title="Refresh">
                                     <mat-icon>refresh</mat-icon>
@@ -145,7 +152,7 @@
                           </div>
                           <div class="and-or mat-full-radius" *ngIf="conditionsArray?.length > 1 && !conditionlast">
                             <mat-form-field appearance="outline" class="w-max-100">
-                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship" >
+                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship">
                                 <mat-option [value]="'AND'">AND</mat-option>
                                 <mat-option [value]="'OR'" [disabled]="true">OR</mat-option>
                               </mat-select>
@@ -157,8 +164,9 @@
                     <div class="action-add-condition">
                       <button
                         [disabled]="
-                          this.content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
-                          this.content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER
+                          content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
+                          content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
+                          accessControlCriteriaSelection?.readOnly
                         "
                         mat-button
                         class="new-secondary-button-no-border button-with-corners"
@@ -193,7 +201,12 @@
 
         <ng-container *ngIf="!isLoading">
           <div class="text-center mb-6 mt-4">
-            <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="addUserGroup()">
+            <button
+              [disabled]="accessControlCriteriaSelection?.readOnly"
+              mat-button
+              class="new-secondary-button-no-border button-with-corners"
+              type="button"
+              (click)="addUserGroup()">
               <div class="flex gap-2 flex-middle">
                 <mat-icon class="primary-text-color">add</mat-icon>
                 <span class="text-m">Add User Group</span>
