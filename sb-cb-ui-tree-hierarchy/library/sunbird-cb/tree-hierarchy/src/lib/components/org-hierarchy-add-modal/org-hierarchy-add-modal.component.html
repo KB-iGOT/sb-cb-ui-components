@@ -1,0 +1,74 @@
+<div class="org-hierarchy-modal">
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <div class="header-title">
+      <h2 class="m-0">Update Organisation Hierarchy</h2>
+    </div>
+    <button mat-icon-button class="close-button" (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Modal Content -->
+  <div class="modal-content">
+    <div class="content-container">
+        <div class="flex flex-col org-container">
+          <label class="orgTypeName">{{data?.selectedOrgData?.sbOrgType}}</label>
+          <label class="orgTypeSelected">{{data?.selectedOrgData?.orgName?.toLowerCase()}}</label>
+          <div class="dashed-line"></div>
+        </div>
+        <ng-container *ngIf="data?.previous?.length > 0">
+            <div class="flex flex-col org-container" *ngFor="let item of data?.previous;let i = index"
+            [ngStyle]="{'margin-left': 30 * (i+1) + 'px'}">
+                <label class="orgTypeName">{{item?.category?.toLowerCase()}}</label>
+                <label class="orgTypeSelected">{{item?.name?.toLowerCase()}}</label>
+                <div class="dashed-line"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="data?.currentData">
+            <div class="flex flex-col org-container" 
+            [ngStyle]="{'margin-left': 30 * (data?.previous?.length + 1) + 'px'}">
+                <label class="orgTypeName">{{data?.currentData?.code?.toLowerCase()}}</label>
+                
+                <!-- Searchable multi-select -->
+                <div class="select-search-container">
+                    <mat-form-field appearance="outline" class="w-full custom-height-select">
+                        <mat-select [formControl]="selectedOrgsControl" placeholder="Select" #singleSelect
+                        [panelClass]="'mat-select-panel-below'" disableOptionCentering [disableOptionCentering]="true"
+                        multiple> <!-- Added the multiple attribute here -->
+                            <!-- Search container -->
+                            <div class="search-container">
+                                <input type="text" [formControl]="searchControl" placeholder="Search..."
+                                (keydown)="$event.key === ' ' ? $event.stopPropagation() : null" (click)="$event.stopPropagation()"
+                                class="search-input" #searchInput>
+                            </div>
+                            <mat-option *ngFor="let organization of filteredOptions" [value]="organization.identifier">
+                                {{organization.orgName}}
+                            </mat-option>
+                            <mat-option *ngIf="filteredOptions.length === 0" disabled>
+                                No data found
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                
+            </div>
+        </ng-container>
+    </div>
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="modal-footer">
+    <button mat-stroked-button class="btn-common btn-secondary" (click)="onClose()" type="button">
+      Cancel
+    </button>
+    <button 
+      mat-stroked-button 
+      class="btn-common btn-primary" 
+      [disabled]="!selectedOrgsControl.value?.length" 
+      (click)="onSave()" 
+      type="button">
+      Save
+    </button>
+  </div>
+</div>

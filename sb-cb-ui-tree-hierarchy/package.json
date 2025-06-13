@@ -1,44 +1,18 @@
 {
-  "name": "sb-cb-ui-notification",
-  "version": "0.0.05-cbrelease-4.8.26",
+  "name": "sb-cb-ui-tree-hierarchy",
+  "version": "0.0.2-cbrelease-4.8.26",
   "scripts": {
     "ng": "ng",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
+    "prebuild": "npm run lint:fix",
     "build-watch": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
+    "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
     "e2e": "ng e2e",
     "i18n": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng xi18n --output-path locale",
     "tailwind": "./node_modules/.bin/tailwind build ./src/tailwind-build.scss  -o ./src/styles.scss",
     "prestart": "npm run tailwind"
-  },
-  "jest": {
-    "preset": "jest-preset-angular",
-    "setupFilesAfterEnv": [
-      "<rootDir>/library/sunbird-cb/notification/setup.jest.ts"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/dist/"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "<rootDir>/library/sunbird-cb/notification/tsconfig.spec.json",
-        "stringifyContentPathRegex": "\\.html$"
-      }
-    },
-    "transform": {
-      "^.+\\.(ts|js|html)$": [
-        "jest-preset-angular",
-        {
-          "tsconfig": "<rootDir>/library/sunbird-cb/notification/tsconfig.spec.json",
-          "stringifyContentPathRegex": "\\.html$"
-        }
-      ]
-    }
   },
   "dependencies": {
     "@angular/animations": "^16.2.12",
@@ -47,16 +21,28 @@
     "@angular/compiler": "^16.2.12",
     "@angular/core": "^16.2.12",
     "@angular/forms": "^16.2.12",
-    "@angular/material": "16.2.12",
-    "@angular/platform-browser": "16.2.12",
+    "@angular/material": "^16.2.14",
+    "@angular/platform-browser": "^16.2.12",
+    "@angular/platform-browser-dynamic": "^16.2.12",
     "@angular/router": "^16.2.12",
-    "@sunbird-cb/design-system": "0.0.3",
+    "@ckeditor/ckeditor5-angular": "^9.1.0",
+    "ckeditor5": "^43.1.0",
+    "@ctrl/ngx-emoji-mart": "^7.1.0",
+    "@ngx-translate/core": "^15.0.0",
+    "@ngx-translate/http-loader": "4.0.0",
+    "@sunbird-cb/design-system": "0.0.1",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
-    "@sunbird-cb/utils-v2": "0.0.27-ang-13-16",
-    "@sunbird-cb/consumption": "0.0.20-cbrelease-4.8.23",
-    "rxjs": "^6.6.6",
-    "rxjs-compat": "^6.6.6",
-    "tslib": "^2.0.0"
+    "@sunbird-cb/utils-v2": "0.0.22-ang-13-16",
+    "@types/d3": "^7.4.3",
+    "@types/lodash": "4.14.168",
+    "d3": "^7.8.5",
+    "leader-line": "^1.0.8",
+    "moment": "^2.29.1",
+    "ngx-image-cropper": "^6.3.4",
+    "rxjs": "~6.6.7",
+    "tslib": "^2.0.0",
+    "uuid": "^9.0.0",
+    "zone.js": "~0.13.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.16",
@@ -65,16 +51,12 @@
     "@angular/language-service": "^16.2.12",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.6",
-    "@types/jest": "^29.5.14",
-    "@types/lodash": "4.14.161",
     "@types/mustache": "^0.8.32",
     "@types/node": "^12.11.1",
     "angular-cli-alias": "^1.0.9",
     "codelyzer": "^6.0.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
-    "jest": "^29.7.0",
-    "jest-preset-angular": "^14.5.1",
     "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage-istanbul-reporter": "~3.0.2",
@@ -83,6 +65,7 @@
     "ng-packagr": "^16.2.3",
     "protractor": "~7.0.0",
     "ts-node": "~8.3.0",
+    "tsickle": "^0.36.0",
     "tslint": "~6.1.0",
     "tslint-angular": "^3.0.2",
     "tslint-config-airbnb": "^5.11.1",

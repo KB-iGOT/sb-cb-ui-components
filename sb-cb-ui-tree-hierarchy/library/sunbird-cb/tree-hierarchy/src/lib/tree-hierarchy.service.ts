@@ -1,0 +1,41 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+const API_ENDPOINT = {
+  ORG_V1_SEARCH: '/apis/proxies/v8/org/v1/search',
+  CREATE_TERMS: `/apis/proxies/v8/action/framework/v3/term/create`,
+  UPDATE_ASSOCIATION: `/apis/proxies/v8/framework/v1/term/update/`,
+  PUBLISH_FRAMEWORK: `/apis/proxies/v8/framework/v1/publish/`
+}
+@Injectable({
+  providedIn: 'root'
+})
+export class TreeHierarchyService {
+
+  private loaderSubject = new BehaviorSubject<boolean>(false);
+  loaderState$ = this.loaderSubject.asObservable();
+
+  constructor(private http: HttpClient,) { }
+
+  orgSerachApi(requestBody: any): Observable<any> {
+    return this.http.post(`${API_ENDPOINT.ORG_V1_SEARCH}`, requestBody);
+  }
+
+  createTerm(requestBody: any, frameworkObj:any): Observable<any> {
+    return this.http.post(`${API_ENDPOINT.CREATE_TERMS}?framework=${frameworkObj.id}&category=${frameworkObj.category}`, requestBody);
+  }
+
+  updateFrameworkAssociation(requestBody: any, frameworkObj:any, codeId:any): Observable<any> {
+    return this.http.patch(`${API_ENDPOINT.UPDATE_ASSOCIATION}${codeId}?framework=${frameworkObj.id}&category=${frameworkObj.category}`, requestBody);
+  }
+
+  publishFreamework(frameworkObj:any): Observable<any> {
+    return this.http.post(`${API_ENDPOINT.PUBLISH_FRAMEWORK}${frameworkObj.id}`, {});
+  }
+
+  setLoaderState(isLoading: boolean) {
+    this.loaderSubject.next(isLoading)
+  }
+  
+}
