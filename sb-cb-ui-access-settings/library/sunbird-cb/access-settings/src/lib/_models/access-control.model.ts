@@ -12,6 +12,8 @@ export namespace NsAccessControlConfig {
     organizationRadioSelection: ISelectionOption[];
     designationRadioSelection: ISelectionOption[];
     servicesRadioSelection: ISelectionOption[];
+    cadreRadioSelection: ISelectionOption[];
+    batchRadioSelection: ISelectionOption[];
     groupsOptions: string[];
     verificationStatus: ISelectionOption[];
     accessTypes: { name: string; value: string; tooltip: string; disabled: boolean }[];

@@ -23,6 +23,7 @@ export class AccessControlComponent implements OnInit {
   @Input() content: any;
 
   @Output() accessControlData: EventEmitter<{ userGroup: any[]; accessType: string }> = new EventEmitter();
+  @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
 
   accessType: NsAccessControlConfig.ITypeAccessType = NsAccessControlConfig.IAccessTypes.Public;
   ACCESS_TYPE_ENUM = NsAccessControlConfig.IAccessTypes;
@@ -173,6 +174,11 @@ export class AccessControlComponent implements OnInit {
   addCondition(userGroupIndex: number) {
     const conditions = this.ruleConditions(userGroupIndex);
     const accessSetting = this.content?.accessSetting;
+
+    if (conditions?.value?.length === 8) {
+      this.callSnackbar("Every conditions are already added, cannot add more", "error");
+      return;
+    }
 
     // Check if organization/users already exists based on access setting
     if (accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC || accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER) {
@@ -385,9 +391,9 @@ export class AccessControlComponent implements OnInit {
     const ruleGroup = this.userGroup.at(userGroupIndex);
     const conditionValue = ruleGroup.get("conditions").value;
     if (conditionValue && conditionValue.length) {
-      const services = conditionValue.find((ele: any) => ele.entity === "service");
-      const cadre = conditionValue.find((ele: any) => ele.entity === "cadre");
-      const batch = conditionValue.find((ele: any) => ele.entity === "batch");
+      const services = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Service);
+      const cadre = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Cadre);
+      const batch = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Batch);
 
       const serviceSelections = this.cadreMappingService.getServiceIdsByName(services?.selections || []) || [];
       const cadreSelections = this.cadreMappingService.getCadreIdsByName(cadre?.selections || []) || [];
@@ -434,8 +440,8 @@ export class AccessControlComponent implements OnInit {
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           cadre: this.cadreMappingService.getCadresByServicesAndBatch(serviceSelections, batchSelections),
-          service: this.cadreMappingService.getServicesByCadresAndBatch(cadreSelections, batchSelections),
-          batch: this.cadreMappingService.getBatchYearsByServicesAndCadres(serviceSelections, cadreSelections)
+          service: this.cadreMappingService.getServicesByBatchYears(batchSelections),
+          batch: this.cadreMappingService.getBatchYearsByServices(serviceSelections)
         }));
       }
       // Case 6: Cadre and Batch selected
@@ -662,6 +668,7 @@ export class AccessControlComponent implements OnInit {
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
     await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+    this.refreshContentMeta.emit(true);
   }
 
   get hasUserGroupBeenAdded(): boolean {
@@ -670,7 +677,7 @@ export class AccessControlComponent implements OnInit {
     }
 
     return !this.userGroup.controls.every((group: any) => {
-      const conditions = group.get("conditions")?.controls || [];
+      const conditions = (group.get("conditions") as FormArray)?.controls || [];
       return (
         conditions?.length > 0 &&
         conditions.every((condition: any) => {
@@ -679,5 +686,37 @@ export class AccessControlComponent implements OnInit {
         })
       );
     });
+  }
+
+  get getTotalUserCount(): number {
+    return this.userGroup.controls.reduce((total: number, group: any) => {
+      const conditions = (group.get("conditions") as FormArray)?.controls || [];
+      return (
+        total +
+        conditions.reduce((count: number, condition: any) => {
+          const entity = condition.get("entity")?.value;
+          const selections = condition.get("selections")?.value || [];
+          if (entity === NsAccessControlConfig.SelectionType.Users) {
+            return count + selections.length;
+          }
+          return count;
+        }, 0)
+      );
+    }, 0);
+  }
+
+  getUserCountForUserGroup(userGroupIndex: number): number {
+    const group = this.userGroup.at(userGroupIndex);
+    if (!group) return 0;
+
+    const conditions = (group.get("conditions") as FormArray)?.controls || [];
+    return conditions.reduce((count: number, condition: any) => {
+      const entity = condition.get("entity")?.value;
+      const selections = condition.get("selections")?.value || [];
+      if (entity === NsAccessControlConfig.SelectionType.Users) {
+        return count + selections.length;
+      }
+      return count;
+    }, 0);
   }
 }
