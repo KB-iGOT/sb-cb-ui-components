@@ -4,6 +4,7 @@ import { LibNotificationsService } from '../../_services/lib-notifications.servi
 import * as _ from 'lodash'
 import { debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'sb-uin-all-notifications',
   templateUrl: './all-notifications.component.html',
@@ -31,7 +32,8 @@ export class AllNotificationsComponent implements OnInit {
   private scrollNotificationsSubject = new Subject<Event>()
 
   constructor(readonly route: ActivatedRoute,
-    private libNotificationService: LibNotificationsService
+    private libNotificationService: LibNotificationsService,
+    private snackBar: MatSnackBar
   ) {
     this.scrollNotificationsSubject.pipe(debounceTime(500)).subscribe((event: any) => {
       this.pageNumber = this.pageNumber + 1
@@ -191,6 +193,7 @@ export class AllNotificationsComponent implements OnInit {
           ...notification, read: true
         }))
         this.unreadCount = 0
+        this.snackBar.open('Marked as read.')
       }
       this.libNotificationService.updateUnreadCount()
     })
