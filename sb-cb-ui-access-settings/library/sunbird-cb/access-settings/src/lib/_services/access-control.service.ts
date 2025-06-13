@@ -61,22 +61,26 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.SEARCH_USER, { request: request });
   }
 
-  fetchOrgList(query: string, selectedData?: string[]): Observable<any> {
+  fetchOrgList(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
     let request: any = {
       request: {
         filters: {
-          status: 1,
+          status: 1
         },
         sort_by: {
           channel: "asc"
         },
         fields: ["channel", "identifier"],
         query: query,
-        limit: 1500
+        limit: 200
       }
     };
     if (selectedData?.length) {
       request.request.filters.identifier = selectedData;
+    }
+
+    if (characterSearch) {
+      request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
@@ -99,7 +103,7 @@ export class AccessControlService {
         status: "Active"
       },
       requestedFields: ["designation", "id"],
-      pageSize: 1000,
+      pageSize:1000,
       pageNumber: 0
     };
     if (selectedData?.length) {

@@ -21,15 +21,19 @@
         </div>
       </mat-radio-group>
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Public">
-        <div class="info-container">
+        <!-- <div class="info-container">
           <label class="text-sm">This event will be visible to all Karmayogis.</label>
-        </div>
+        </div> -->
       </ng-container>
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Custom">
         <div class="visibiliy-container light-grey-border p-4 mb-4">
           <div class="flex justify-between items-center">
             <span class="text-lg font-bold">{{ config?.visiblilityOnOff?.label }}</span>
-            <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle>
+            <!-- <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle> -->
+            <div class="checkbox-toggle">
+              <input [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false" type="checkbox" id="switch" />
+              <label for="switch" [attr.disabled]="config?.visiblilityOnOff?.disabled || false"></label>
+            </div>
           </div>
           <ng-container *ngIf="!isVisibilityEnabled">
             <label class="text-sm">{{ (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.contentType) }}</label>
@@ -61,6 +65,11 @@
           </div>
         </ng-container>
 
+        <div class="users-total-count flex gap-2 items-center my-3">
+          <mat-icon svgIcon="info-outline" [matTooltip]=""></mat-icon>
+          <div class="text-dark">Total Count : {{ getTotalUserCount }}</div>
+        </div>
+
         <ng-container *ngIf="accessControlForm && userGroup?.length > 0 && !isLoading">
           <form [formGroup]="accessControlForm">
             <mat-accordion class="example-headers-align access-usergroup-accordion mt-3" multi="true">
@@ -69,14 +78,27 @@
                   <mat-expansion-panel class="access-usergroup-panel" expanded>
                     <mat-expansion-panel-header>
                       <mat-panel-title class="items-center">
-                        <span class="text-sm">{{ rule.get("name")?.value }}</span>
+                        <div class="flex gap-4 items-center">
+                          <span class="text-sm">{{ rule.get("name")?.value }}</span>
+                          <div class="text-dark user-group-user-count">Count : {{ getUserCountForUserGroup(i) }}</div>
+                        </div>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                        <button [disabled]="accessControlCriteriaSelection?.readOnly" mat-icon-button aria-label="delete user group" (click)="removeUserGroup(i)" title="Delete">
+                        <button
+                          [disabled]="accessControlCriteriaSelection?.readOnly"
+                          mat-icon-button
+                          aria-label="delete user group"
+                          (click)="removeUserGroup(i)"
+                          title="Delete">
                           <mat-icon>delete</mat-icon>
                         </button>
-                        <button [disabled]="accessControlCriteriaSelection?.readOnly" mat-icon-button aria-label="refresh user group" (click)="resetUserGroup(i)" title="Refresh">
-                          <mat-icon>refresh</mat-icon>
+                        <button
+                          [disabled]="accessControlCriteriaSelection?.readOnly"
+                          mat-icon-button
+                          aria-label="refresh user group"
+                          (click)="resetUserGroup(i)"
+                          title="Refresh">
+                          <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
                         </button>
                       </mat-panel-description>
                     </mat-expansion-panel-header>
@@ -108,10 +130,14 @@
                                 <button
                                   mat-flat-button
                                   (click)="manageSelections(condition, rule, i)"
-                                  [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly"
+                                  [disabled]="
+                                    !condition.get('entity').value ||
+                                    !condition.get('conditionType').value ||
+                                    accessControlCriteriaSelection?.readOnly
+                                  "
                                   class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
                                   <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
-                                  <span class="font-bold text-sm">Manage Selections</span>
+                                  <span class="font-bold text-sm">Manage Selection</span>
                                 </button>
                               </div>
                               <div class="action-options-selected">
@@ -144,7 +170,7 @@
                                     [disabled]="accessControlCriteriaSelection?.readOnly"
                                     (click)="resetCondition(i, j)"
                                     title="Refresh">
-                                    <mat-icon>refresh</mat-icon>
+                                    <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
                                   </button>
                                 </div>
                               </div>
@@ -174,7 +200,7 @@
                         (click)="addCondition(i)">
                         <div class="flex gap-2 flex-middle">
                           <mat-icon class="primary-text-color">add</mat-icon>
-                          <span class="text-m">Add Condition</span>
+                          <span class="text-m">Add New Condition</span>
                         </div>
                       </button>
                     </div>
