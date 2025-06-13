@@ -14,6 +14,7 @@ export class AllNotificationsComponent implements OnInit {
   @Output() reCountNotifications = new EventEmitter<any>()
   @Output() redirectTo = new EventEmitter<any>()
   @Input() showIcon: boolean = false
+  @Input() showMarkAllAsRead: boolean = true
 
   notifications: any[] = []
   dynamicTabIndex: number = 0
