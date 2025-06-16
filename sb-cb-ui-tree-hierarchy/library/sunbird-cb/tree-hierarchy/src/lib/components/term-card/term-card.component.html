@@ -112,16 +112,17 @@
 
 <mat-menu #orgMenu="matMenu" class="menu-sec">
     <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
+        <button *ngIf="data.columnInfo.config.enabaleRemoveConnection" (click)="removeConnection(data)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>close</mat-icon>
+            <span>Remove Connection</span>
+        </button>
         <!-- <button *ngIf="data.columnInfo.config.enableUpdateHierarchy"  (click)="updateHierarchy(data, data.children, data.index)" mat-menu-item name="channel-analytics-button"
             class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
             <mat-icon>visibility</mat-icon> <span>Update Hierarchy</span>
         </button>
-        <button *ngIf="data.columnInfo.config.enabaleRemoveConnection" (click)="removeConnection(data,  data.children,data.index, cardRef)"
-            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
-            aria-label="Analytics">
-            <mat-icon>edit</mat-icon>
-            <span>Remove Connection</span>
-        </button>
+        
         <button *ngIf="data.columnInfo.config.enableManageOrganization" (click)="manageOrganization(data)"
             mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
             aria-label="Analytics">

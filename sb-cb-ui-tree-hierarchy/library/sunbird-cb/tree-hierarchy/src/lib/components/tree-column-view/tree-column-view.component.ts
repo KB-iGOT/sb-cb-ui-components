@@ -21,6 +21,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
   @Output() updateTaxonomyTerm = new EventEmitter<CardSelection>(true);
   @Output() updateTermList = new EventEmitter<CardChecked>();
   @Output() cardsCount = new EventEmitter<CardsCount>();
+  @Output() cardAction = new EventEmitter<CardSelection>();
   columnData: Array<Card> = [];
   childSubscription: Subscription | undefined;
   newTermSubscription: Subscription | undefined;
@@ -398,6 +399,10 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     if(this.newTermSubscription) {
       this.newTermSubscription.unsubscribe()
     }
+  }
+
+  cardActionEmit(event: any) {
+    this.cardAction.emit(event);
   }
   
 }
