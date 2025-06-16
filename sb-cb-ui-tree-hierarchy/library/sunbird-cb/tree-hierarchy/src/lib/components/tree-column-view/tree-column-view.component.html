@@ -21,7 +21,7 @@
         <div #cardEle id="{{column.code}}Card{{j+1}}" >
             <lib-term-card
                 [data]="{'children': child, 'selected' : false, 'category':column.code, cardSubType: 'minimal', isViewOnly:false,'index':column.index, columnInfo: column}"
-                (isSelected)="updateSelection1($event)" (selectedCard)="selectedCard($event)">
+                (isSelected)="updateSelection1($event)" (selectedCard)="selectedCard($event)" (cardAction)="cardActionEmit($event)">
             </lib-term-card>
         </div>
     </ng-container>
@@ -30,7 +30,7 @@
     <!-- <div>No {{column.name}} associated</div> -->
 </ng-template>
 
-<div class="w-full flex justify-center" *ngIf="showLoadMoreBtn">
+<div class="w-full flex justify-center" *ngIf="!disableLoadButton">
     <button (click)="loadMore()" class="mat-raised-button mat-button-base loadMore" [ngClass]="{'disablBtn': disableLoadButton}"
     [disabled]="disableLoadButton">Load more...</button>
 </div>

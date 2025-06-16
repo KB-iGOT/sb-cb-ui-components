@@ -16,6 +16,7 @@ import { CreateTermFromFrameworkComponent } from '../create-term-from-framework/
 import { OrgHierarchyAddModalComponent } from '../org-hierarchy-add-modal/org-hierarchy-add-modal.component';
 import { TreeHierarchyService } from '../../tree-hierarchy.service';
 import { v4 as uuidv4 } from 'uuid'
+import { ConforamtionPopupComponent } from '../conforamtion-popup/conforamtion-popup.component';
 
 declare var LeaderLine: any;
 @Component({
@@ -530,6 +531,8 @@ export class TreeViewComponent implements OnInit, OnDestroy {
               additionalProperties: {
                 identifier: ele.ministryOrStateId || '',
                 parentOrgName: ele.ministryOrStateName || '',
+                orgId: ele.identifier || '',
+                orgName: ele.orgName || '',
               }
             }
           }
@@ -555,12 +558,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   async updateAssociation(nodeId: any, frameworkData: any, column: any) {
     const prev:any = this.frameworkService.getPreviousCategory(column.code);
-    let prevTrem:any = this.frameworkService.getPreviousSelectedTerms(column)
-    let currentTermSelected:any
-    
-    this.frameworkService.currentSelection.subscribe((ele:any) => {
-      currentTermSelected = ele.data
-    })
+    let prevTrem:any = this.frameworkService.getPreviousSelectedTerms(column.code)
     const requestBody:any = {
       request: {
         term: {
@@ -585,8 +583,8 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         })
       })
     }
-    frameworkData.category = prev.code || '';
-    const nodeIdParts = currentTermSelected.identifier.split('_');
+    frameworkData.category = prevTrem.category || '';
+    const nodeIdParts = prevTrem.identifier.split('_');
     const codeId = nodeIdParts[nodeIdParts.length - 1];
     const updateAssociationRes:any = await this.treeHierarchySvc.updateFrameworkAssociation(requestBody, frameworkData, codeId).toPromise().catch(err => {
       console.error('Error in updating association', err);
@@ -599,9 +597,11 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   publishFramework(frameworkData: any) {
     this.treeHierarchySvc.publishFreamework(frameworkData).subscribe((res:any) => {
       if (res && res.result && res.result.publishStatus) {
-        this._snackBar.open(`${res.result.publishStatus}`, 'cancel');
-        this.treeHierarchySvc.setLoaderState(false);
-        this.init();
+        setTimeout(() => {
+          this._snackBar.open(`Organization Hierarchy updated. Will reflect in sometime`, 'cancel');
+          this.treeHierarchySvc.setLoaderState(false);
+          this.init();
+        }, 10000);
       } else {
         this._snackBar.open('Error in publishing framework', 'cancel');
         this.treeHierarchySvc.setLoaderState(false);
@@ -610,5 +610,84 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       console.error('Error in publishing framework', err);
       this.treeHierarchySvc.setLoaderState(false);
     });
+  }
+
+  removeConnection(data: any) {
+    const dialogData = {
+      dialogType: 'warning',
+      descriptions: [
+        {
+          header: `${data?.children?.children?.length || 0} Organisation${data?.children?.children?.length > 1 ? 's' : ''} will be removed from organisation hierarchy.`,
+          headerClass: 'flex items-center justify-center text-blue',
+          messages: [
+            {
+              msgClass: 'text-blue margin-bottom-s',
+              msg: `Do you want to proceed?`,
+            },
+          ],
+        },
+      ],
+      footerClass: 'items-center justify-center',
+      buttons: [
+        {
+          btnText: 'No',
+          btnClass: 'btn-common btn-secondary',
+          response: false,
+        },
+        {
+          btnText: 'Yes',
+          btnClass: 'btn-common btn-primary',
+          response: true,
+        },
+      ],
+    }
+    const dialogRef = this.dialog.open(ConforamtionPopupComponent, {
+      data: dialogData,
+      autoFocus: false,
+      width: '600px',
+      maxWidth: '80vw',
+      maxHeight: '90vh',
+      disableClose: true,
+    })
+    dialogRef.afterClosed().subscribe((res: any) => {
+      if (res) {
+        this.retireTermFunction(data)
+      }
+    })
+  }
+
+  async retireTermFunction(data: any) {
+    const requestBody = {
+      request: {
+        contentIds: [
+          data.children.code
+        ]
+      }
+    }
+    const identifierParts = data.children.identifier.split('_');
+    const frameworkObj = {
+      id: identifierParts.slice(0, 3).join('_'),
+      category: data.category
+    }
+    this.treeHierarchySvc.setLoaderState(true)
+    const retireRes = await this.treeHierarchySvc.retireTerm(requestBody, frameworkObj).toPromise().catch((_err: any) => {
+      this.treeHierarchySvc.setLoaderState(false)
+      this._snackBar.open(`Failed to remove connection.`, 'cancel')
+    }
+    )
+    if (retireRes && retireRes.params && retireRes.params.status?.toLowerCase() === 'successful') {
+      await this.publishFramework(frameworkObj)
+    } else {
+      this.treeHierarchySvc.setLoaderState(false)
+      this._snackBar.open(`Failed to remove connection.`, 'cancel')
+    }
+  }
+
+  cardActionEmit(event:any) {
+    switch(event.action) {
+      case 'remove-term':
+        this.removeConnection(event.data);
+        break;
+    }
   }
 }

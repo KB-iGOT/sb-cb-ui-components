@@ -57,7 +57,8 @@
                 <ng-container *ngIf="column?.children && column?.children.length > 0">
                     <lib-tree-column-view *ngIf="loaded[column.code]" #selectedTaxonomyTerm [column]="column"
                     [containerId]="'box'+(i+1)" (updateTaxonomyTerm)="updateTaxonomyTerm($event)"
-                    (updateTermList)="updateDraftStatusTerms($event)" (cardsCount)="getNoOfCards($event)">
+                    (updateTermList)="updateDraftStatusTerms($event)" (cardsCount)="getNoOfCards($event)" 
+                    (retireTermData)="removeConnection($event)" (cardAction)="cardActionEmit($event)">
                 </lib-tree-column-view>
                 </ng-container>
                 <ng-container *ngIf="shouldShowSvgBorderWrapper(column, i)">

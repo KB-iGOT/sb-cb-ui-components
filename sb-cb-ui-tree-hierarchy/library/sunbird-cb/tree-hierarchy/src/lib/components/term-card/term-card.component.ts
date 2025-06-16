@@ -40,13 +40,13 @@ export class TermCardComponent implements OnInit, OnDestroy {
 
   @Output() isSelected = new EventEmitter<CardSelection>()
   @Output() selectedCard = new EventEmitter<CardChecked>()
+  @Output() cardAction = new EventEmitter<{ action: string, data: any }>()
 
   constructor(
     private frameworkService: FrameworkService,
     private localConnectionService: LocalConnectionService,
     private approvalService: ApprovalService,
     public dialog: MatDialog, 
-    
   ) { }
 
   ngOnInit() {
@@ -376,6 +376,10 @@ export class TermCardComponent implements OnInit, OnDestroy {
         })
       
     
+    }
+
+    removeConnection(item:any) {
+      this.cardAction.emit({ action: 'remove-term', data: item });
     }
   
 }
