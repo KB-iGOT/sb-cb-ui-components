@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { InviteUsersComponent } from "../dialogs/invite-users/invite-users.component";
 import { IUserGroupRequest, NsAccessControlConfig } from "../../_models/access-control.model";
@@ -11,13 +11,15 @@ import { SnackbarComponent } from "../../components/snackbar/snackbar.component"
 import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { ConfirmDialogComponent } from "../dialogs/confirm-dialog/confirm-dialog.component";
 import { AccessControlGuideComponent } from "../dialogs/access-control-guide/access-control-guide.component";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "sb-uic-access-control",
   templateUrl: "./access-control.component.html",
   styleUrls: ["./access-control.component.scss"]
 })
-export class AccessControlComponent implements OnInit {
+export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() config!: NsAccessControlConfig.IAccessControlConfig;
   @Input() contentId: string = "";
   @Input() content: any;
@@ -25,12 +27,14 @@ export class AccessControlComponent implements OnInit {
   @Output() accessControlData: EventEmitter<{ userGroup: any[]; accessType: string }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
 
+  private destroy$ = new Subject<void>();
+
   accessType: NsAccessControlConfig.ITypeAccessType = NsAccessControlConfig.IAccessTypes.Public;
   ACCESS_TYPE_ENUM = NsAccessControlConfig.IAccessTypes;
   ACCESS_SETTING_ENUM = NsAccessControlConfig.IAccessSetting;
 
   isLoading = false;
-  isVisibilityEnabled: boolean = false;
+  isVisibilityEnabled: boolean = true;
   filterCriteria: boolean = false;
 
   defaultConditionRelationship: string = "AND";
@@ -68,10 +72,6 @@ export class AccessControlComponent implements OnInit {
 
     this.usersTableConfig = this.config?.usersTableConfig;
 
-    if (this.config?.visiblilityOnOff?.default === "on") {
-      this.isVisibilityEnabled = true;
-    }
-
     if (!this.contentId) {
       this.callSnackbar("Content id is required", "error");
     }
@@ -103,24 +103,38 @@ export class AccessControlComponent implements OnInit {
     }
   }
 
+  ngAfterViewInit(): void {
+    if (this.config?.visiblilityOnOff?.default !== "on") {
+      this.isVisibilityEnabled = false;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   fetchCadreConfigData(): void {
     this.isLoading = true;
-    this.accessControlService.fetchCadreConfig().subscribe({
-      next: (response: any) => {
-        if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
-          this.cadreConfigData = response.result.response?.value;
-          this.cadreMappingService.initialize(this.cadreConfigData);
-          this.accessControlService.holdServiceCadrebatch.set({
-            service: this.cadreMappingService.getAllServices(),
-            batch: this.cadreMappingService.getAllBatchYears(),
-            cadre: this.cadreMappingService.getAllCadres()
-          });
+    this.accessControlService
+      .fetchCadreConfig()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
+            this.cadreConfigData = response.result.response?.value;
+            this.cadreMappingService.initialize(this.cadreConfigData);
+            this.accessControlService.holdServiceCadrebatch.set({
+              service: this.cadreMappingService.getAllServices(),
+              batch: this.cadreMappingService.getAllBatchYears(),
+              cadre: this.cadreMappingService.getAllCadres()
+            });
+          }
+        },
+        complete: () => {
+          this.isLoading = false;
         }
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
+      });
   }
 
   initForm() {
@@ -155,9 +169,9 @@ export class AccessControlComponent implements OnInit {
       this.updateContentAccessSetting();
     }
 
-    if (event.value === NsAccessControlConfig.IAccessTypes.Custom) {
-      this.isVisibilityEnabled = false;
-    }
+    // if (event.value === NsAccessControlConfig.IAccessTypes.Custom) {
+    //   this.isVisibilityEnabled = false;
+    // }
   }
 
   addUserGroup() {
@@ -176,7 +190,7 @@ export class AccessControlComponent implements OnInit {
     const accessSetting = this.content?.accessSetting;
 
     if (conditions?.value?.length === 8) {
-      this.callSnackbar("Every conditions are already added, cannot add more", "error");
+      this.callSnackbar("You have already added all types of conditions", "error");
       return;
     }
 
@@ -282,6 +296,7 @@ export class AccessControlComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
         this.userGroup.removeAt(index);
+        this.applyAccessControlValue(true);
       }
     });
   }
@@ -526,32 +541,36 @@ export class AccessControlComponent implements OnInit {
     return true;
   }
 
-  async applyAccessControlValue(): Promise<void> {
-    const validated = this.validateFormData();
-
-    if (!validated) return;
+  async applyAccessControlValue(shouldProceedWithoutValidation: boolean = false): Promise<void> {
+    if (!shouldProceedWithoutValidation) {
+      const validated = this.validateFormData();
+      if (!validated) return;
+    }
 
     if (this.content?.status === "Live") this.isApplying = true;
     else this.isSaving = true;
 
     const payload = await this.processRequestCreation();
-    this.accessControlService.applyUserGroupAccessControl(payload).subscribe({
-      next: response => {
-        if (response?.result && response?.result?.accessControl) {
-          this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
-          this.callSnackbar("Access Control saved successfully", "success");
-        } else {
+    this.accessControlService
+      .applyUserGroupAccessControl(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          if (response?.result && response?.result?.accessControl) {
+            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
+            this.callSnackbar("Access Control saved successfully", "success");
+          } else {
+            this.callSnackbar("Could not save access control, Please try again.", "error");
+          }
+          if (this.content?.status === "Live") this.isApplying = false;
+          else this.isSaving = false;
+        },
+        error: () => {
           this.callSnackbar("Could not save access control, Please try again.", "error");
+          if (this.content?.status === "Live") this.isApplying = false;
+          else this.isSaving = false;
         }
-        if (this.content?.status === "Live") this.isApplying = false;
-        else this.isSaving = false;
-      },
-      error: () => {
-        this.callSnackbar("Could not save access control, Please try again.", "error");
-        if (this.content?.status === "Live") this.isApplying = false;
-        else this.isSaving = false;
-      }
-    });
+      });
   }
 
   processRequestCreation(): Promise<IUserGroupRequest> {
@@ -609,6 +628,7 @@ export class AccessControlComponent implements OnInit {
     }
     const response = await this.accessControlService
       .fetchUserGroupAccessControl(this.contentId)
+      .pipe(takeUntil(this.destroy$))
       .toPromise()
       .catch(() => {
         this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });

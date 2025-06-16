@@ -37,7 +37,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     // Handle data input change
     if (changes["data"]?.currentValue?.length) {
       const mappedUsers = changes["data"].currentValue.map((user: any) => ({
-        firstName: user?.firstName || user?.profileDetails?.personalDetails?.firstname || "",
+        firstName: user?.firstName || user?.profileDetails?.personalDetails?.firstname || user?.fullName || "",
         mobile: user?.mobile || user?.profileDetails?.personalDetails?.mobile || "",
         email: user?.email || user?.profileDetails?.personalDetails?.primaryEmail || "",
         ministry: user?.ministry || user?.organisations[0]?.orgName || "",
@@ -64,7 +64,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
         });
       }
 
-      this.selectedTablerow = this.selection.selected;
+      this.selectedTablerow = changes["selected"]?.currentValue || [];
     }
   }
 
@@ -88,15 +88,45 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   masterToggle() {
-    this.isAllSelected() ? this.selection.clear() : this.dataSource.data.forEach(row => this.selection.select(row));
-    this.selectedTablerow = this.selection.selected;
-    this.selectedDataChange.emit(this.selectedTablerow);
+    const isAll = this.isAllSelected();
+    if (isAll) {
+      const previouslySelected = this.dataSource.data.filter(row => this.selectedTablerow.some(sel => sel.userId === row.userId));
+      this.dataSource.data.forEach(row => this.selection.deselect(row));
+      this.selectedTablerow = this.selectedTablerow.filter(sel => !this.dataSource.data.some(row => row.userId === sel.userId));
+      this.selectedDataChange.emit({
+        selectedRows: this.selectedTablerow,
+        toggledRows: previouslySelected,
+        action: "unselectedAll"
+      });
+    } else {
+      const newlySelected = this.dataSource.data.filter(row => !this.selectedTablerow.some(sel => sel.userId === row.userId));
+      this.dataSource.data.forEach(row => this.selection.select(row));
+      this.selectedTablerow = [...this.selectedTablerow, ...newlySelected];
+      this.selectedDataChange.emit({
+        selectedRows: this.selectedTablerow,
+        toggledRows: newlySelected,
+        action: "selectedAll"
+      });
+    }
   }
 
   toggleSelection(row: any): void {
-    this.selection.toggle(row);
-    this.selectedTablerow = this.selection.selected;
-    this.selectedDataChange.emit(this.selectedTablerow);
+    const rowId = row.userId;
+    const isSelected = this.selectedTablerow.some(r => r.userId === rowId);
+
+    if (isSelected) {
+      this.selectedTablerow = this.selectedTablerow.filter(r => r.userId !== rowId);
+      this.selection.deselect(row);
+    } else {
+      this.selectedTablerow.push(row);
+      this.selection.select(row);
+    }
+
+    this.selectedDataChange.emit({
+      selectedRows: this.selectedTablerow,
+      toggledRow: row,
+      action: isSelected ? "unselected" : "selected"
+    });
   }
 
   onPageChange(event: PageChangeEmitter) {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { AccessControlService } from "../../../_services/access-control.service";
@@ -6,14 +6,17 @@ import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack
 import { PageChangeEmitter } from "../../../_models/pagination.model";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 import { SnackbarComponent } from "../../../components/snackbar/snackbar.component";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "sb-uic-invite-users",
   templateUrl: "./invite-users.component.html",
   styleUrls: ["./invite-users.component.scss"]
 })
-export class InviteUsersComponent implements OnInit {
+export class InviteUsersComponent implements OnInit, OnDestroy {
   public readonly data = inject<any>(MAT_DIALOG_DATA);
+  private destroy$ = new Subject<void>();
 
   searchControl = new FormControl("");
   filterValue: NsAccessControlConfig.IManageSelectionType = "add_karmayogis";
@@ -48,6 +51,11 @@ export class InviteUsersComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   onClose(): void {
     this.dialogRef.close();
   }
@@ -63,35 +71,41 @@ export class InviteUsersComponent implements OnInit {
 
   getUsersList(query: string, limit?: number, offset?: number, userIds?: string[]): void {
     this.usersLoading = true;
-    this.accessControlService.fetchUserList(query, { limit: limit, offset: offset }, userIds).subscribe({
-      next: response => {
-        if (response?.result && response?.result?.response?.content) {
-          this.usersList = response.result.response.content;
-          this.totalUsers = response.result.response.count;
-          if (userIds?.length) {
-            this.finalSelectedUsers = response.result.response.content;
-            this.usersFinalList = this.finalSelectedUsers;
-            this.activeTab = 1;
+    this.accessControlService
+      .fetchUserList(query, { limit: limit, offset: offset }, userIds)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          if (response?.result && response?.result?.response?.content) {
+            this.usersList = response.result.response.content;
+            this.totalUsers = response.result.response.count;
+            if (userIds?.length) {
+              this.finalSelectedUsers = response.result.response.content;
+              this.holdSelectedUsers = this.finalSelectedUsers;
+              this.activeTab = 1;
+            }
+            if (this.holdSelectedUsers?.length) {
+              this.usersFinalList = [...this.holdSelectedUsers];
+            }
+          } else {
+            this.usersList = [];
+            this.totalUsers = 0;
           }
-        } else {
-          this.usersList = [];
-          this.totalUsers = 0;
+          this.usersLoading = false;
+        },
+        complete: () => {
+          this.usersLoading = false;
         }
-        this.usersLoading = false;
-      },
-      complete: () => {
-        this.usersLoading = false;
-      }
-    });
+      });
   }
 
   onSelectingUser(event: any): void {
-    this.holdSelectedUsers = event;
+    this.holdSelectedUsers = event.selectedRows;
   }
 
   selectUsers(): void {
     this.finalSelectedUsers = this.holdSelectedUsers;
-
+    this.usersFinalList = this.finalSelectedUsers;
     this.snackbar.openFromComponent(SnackbarComponent, {
       data: { message: `Users added to Selected tab`, type: "success" },
       duration: 3000,

@@ -46,7 +46,7 @@
                   [tableConfig]="usersTableConfig['allLearners']"
                   (selectedDataChange)="onSelectingUser($event)"
                   (pageChange)="onPageChange($event)"
-                  [selected]="finalSelectedUsers"></sb-uic-list-table>
+                  [selected]="usersFinalList"></sb-uic-list-table>
               </ng-container>
             </div>
           </mat-tab>
@@ -56,7 +56,7 @@
                 <mat-spinner></mat-spinner>
               </div>
             </ng-container>
-            <ng-container *ngIf="!usersLoading">
+            <div [ngClass]="{ hidden: usersLoading }">
               <ng-container *ngIf="finalSelectedUsers && finalSelectedUsers.length > 0; else noData">
                 <sb-uic-list-table
                   [data]="finalSelectedUsers"
@@ -67,7 +67,7 @@
                   (removeSelectedData)="removedUserData($event)"
                   [selected]="usersFinalList"></sb-uic-list-table>
               </ng-container>
-            </ng-container>
+            </div>
           </mat-tab>
         </mat-tab-group>
       </ng-container>

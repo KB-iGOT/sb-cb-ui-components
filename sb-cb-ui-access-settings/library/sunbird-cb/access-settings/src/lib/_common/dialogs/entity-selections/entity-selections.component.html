@@ -174,14 +174,9 @@
   <ng-container *ngIf="checkIfData">
     <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
       <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus">
-        <div class="text-xs">{{ selectedDataTemp.length }} items selected</div>
+        <div class="text-xs">{{ filterValue === "all" ? selectedDataTemp?.length : selectedData?.length }} items selected</div>
       </ng-container>
-      <ng-container
-        *ngIf="
-          selectionType === selectionTypeEnum.VerificationStatus ||
-          selectionType === selectionTypeEnum.Group ||
-          activeTab === 1
-        ">
+      <ng-container *ngIf="selectionType === selectionTypeEnum.VerificationStatus || selectionType === selectionTypeEnum.Group || activeTab === 1">
         <button
           mat-flat-button
           [disabled]="selectedData.length === 0 && selectedDataTemp.length === 0"
@@ -190,18 +185,13 @@
           Apply
         </button>
       </ng-container>
-      <ng-container
-        *ngIf="
-          selectionType !== selectionTypeEnum.VerificationStatus &&
-          selectionType !== selectionTypeEnum.Group &&
-          activeTab === 0
-        ">
+      <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus && selectionType !== selectionTypeEnum.Group && activeTab === 0">
         <button
           mat-flat-button
           [disabled]="selectedDataTemp.length === 0"
           (click)="setSelected()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
-          {{getModalTitle()}}
+          {{ getModalTitle() }}
         </button>
       </ng-container>
     </div>
