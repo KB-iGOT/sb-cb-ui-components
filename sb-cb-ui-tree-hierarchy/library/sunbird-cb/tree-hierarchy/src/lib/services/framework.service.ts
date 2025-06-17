@@ -37,6 +37,7 @@ export class FrameworkService {
   proxiesPath = 'apis/proxies/v8';
   cardClkData: any;
   CurrentCardClk = new BehaviorSubject<any>(null);
+  completeResponse: any;
   
   constructor(
     private http: HttpClient,
@@ -58,6 +59,7 @@ export class FrameworkService {
         tap((response: any) => {
           this.resetAll();
           this.formateData(response);
+          this.completeResponse = response.result.framework;
         }),
         catchError((err) => {
           this.resetAll();

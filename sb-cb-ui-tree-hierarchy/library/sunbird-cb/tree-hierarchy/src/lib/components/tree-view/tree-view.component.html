@@ -10,11 +10,11 @@
             <div class="category-heading-sticky">
                 <div class="category-heading-container">
                     <div class='category-header'>
-                        <div class="category-header-items w-full" id="box{{i}}Header">
-                            <ng-container *ngIf="column?.config?.iconEnabled">
-                                <mat-icon [ngStyle]="{'color':column.config.color}">{{column.config.icon}}</mat-icon>
-                            </ng-container>
-                            <span class="flex-1 mat-body-1">
+                        <div class="category-header-items w-full flex padding-remove" id="box{{i}}Header">
+                            <span class="flex gap-1 mat-body-1">
+                                <ng-container *ngIf="column?.config?.iconEnabled">
+                                    <mat-icon [ngStyle]="{'color':column.config.color}">{{column.config.icon}}</mat-icon>
+                                </ng-container>
                                 <!-- {{column.name}} -->
                                 {{column?.config?.categoryDisplayName || column.name }}
                                 <ng-container *ngIf="i != 0 && categoryList?.length > 0; else firstColumn">
@@ -22,12 +22,17 @@
                                         <span class="count">({{getCount(column.code)}})</span>
                                     </ng-container>
                                 </ng-container>
+                                <ng-container *ngIf="column?.config?.levelNameEdit">
+                                    <button mat-icon-button type="button" class="edit-btn flex" (click)="editCategoryName(column, i)">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                            </ng-container>
                             </span>
                             <ng-template #firstColumn>
                                 <span *ngIf="i == 0" id="box{{i+1}}count" class="count">({{column.children.length}})</span>
                             </ng-template>
                             <ng-container class="" *ngIf="column?.config?.createBtnEnabled && !column?.config?.addOrgEnabled">
-                                <button mat-button class="add-btn" [ngClass]="{'button-enabled': configCodeBtn== column?.code, 'button-disabled': configCodeBtn!== column?.code}"
+                                <button mat-button class="add-btn margin-left-auto" [ngClass]="{'button-enabled': configCodeBtn== column?.code, 'button-disabled': configCodeBtn!== column?.code}"
                                     (click)="openCreateTermDialog(column, i)" type="button">
                                     <span>Add</span>
                                     <mat-icon class="margin-remove">
@@ -36,7 +41,7 @@
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="column?.config?.addOrgEnabled && !column?.config?.createBtnEnabled">
-                                <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i)" type="button" 
+                                <button mat-button class="add-btn margin-left-auto" (click)="openOrganizationDialog(column, i)" type="button" 
                                 [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                     <span>Add</span>
                                     <mat-icon class="margin-remove">
@@ -71,7 +76,7 @@
                             <div class="icon-container">
                                 <mat-icon svgIcon="frac-no-connection"></mat-icon>
                             </div>
-                            <label>{{isLoading}} Select an organization to add or see further connections</label>
+                            <label>Select an organization to add or see further connections</label>
                             <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i)" type="button" 
                             [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                 <span>Add</span>
