@@ -122,7 +122,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: (response: any) => {
           if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
-            this.cadreConfigData = response.result.response?.value;
+            this.cadreConfigData = response?.result?.response?.value;
             this.cadreMappingService.initialize(this.cadreConfigData);
             this.accessControlService.holdServiceCadrebatch.set({
               service: this.cadreMappingService.getAllServices(),

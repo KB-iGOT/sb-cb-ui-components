@@ -77,8 +77,8 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: response => {
           if (response?.result && response?.result?.response?.content) {
-            this.usersList = response.result.response.content;
-            this.totalUsers = response.result.response.count;
+            this.usersList = response?.result?.response?.content;
+            this.totalUsers = response?.result?.response?.count;
             if (userIds?.length) {
               this.finalSelectedUsers = response.result.response.content;
               this.holdSelectedUsers = this.finalSelectedUsers;
