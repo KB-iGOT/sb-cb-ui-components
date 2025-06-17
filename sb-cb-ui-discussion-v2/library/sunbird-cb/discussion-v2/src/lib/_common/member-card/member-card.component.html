@@ -1,12 +1,12 @@
-<mat-card class="member-card-wrapper relative" *ngIf="!isLoading">
+<mat-card class="member-card-wrapper relative" *ngIf="!isLoading && memeberData">
     <div class="absolute photo-block">
-        <d-v2-avatar-photo [size]="'l'" [name]="memeberData?.first_name ||  memeberData.firstName"
+        <d-v2-avatar-photo [size]="'l'" [name]="memeberData?.first_name ||  memeberData?.firstName"
             [photoUrl]="memeberData?.user_profile_img_url || memeberData?.profileDetails?.profileImageUrl || ''">
         </d-v2-avatar-photo>
     </div>
     <div class="member-info">
         <div class="member-name">
-            <span class="nodtranslate" dV2MultiLineElipsis>{{memeberData?.first_name || memeberData.firstName}}</span>
+            <span class="nodtranslate" dV2MultiLineElipsis *ngIf="memeberData?.first_name || memeberData?.firstName">{{memeberData?.first_name || memeberData?.firstName}}</span>
         </div>
         <div class="member-role">
             <span class="nodtranslate" dV2MultiLineElipsis>{{memeberData?.designation ||
@@ -19,7 +19,6 @@
             </button> -->
         </div>
     </div>
-
 </mat-card>
 
 <mat-card class="member-card-wrapper relative" *ngIf="isLoading">
