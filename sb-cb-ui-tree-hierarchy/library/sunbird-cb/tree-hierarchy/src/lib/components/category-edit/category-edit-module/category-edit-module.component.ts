@@ -42,17 +42,16 @@ export class CategoryEditModuleComponent implements OnInit {
   saveCategoryName() {
     if (this.categoryForm.valid) {
       const updatedCategory = {
-        ...this.data.column,
-        config: {
-          ...this.data.column.config,
-          categoryDisplayName: this.categoryForm.get('categoryName')?.value || ''
-        }
+        formData: {
+          categoryName: this.categoryForm.get('categoryName')?.value || '',
+          categotyDescription: this.categoryForm.get('categoryDescription')?.value || ''
+        },
+        columnData: this.data.columnInfo
       };
       
       this.dialogRef.close({
         updated: true,
-        column: updatedCategory,
-        index: this.data.index
+        column: updatedCategory
       });
     }
   }
