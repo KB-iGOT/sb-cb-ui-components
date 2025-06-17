@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 const API_ENDPOINT = {
   ORG_V1_SEARCH: '/apis/proxies/v8/org/v1/search',
   CREATE_TERMS: `/apis/proxies/v8/action/framework/v3/term/create`,
+  UPDATE_TERMS: `/apis/proxies/v8/framework/v1/term/update/`,
   UPDATE_ASSOCIATION: `/apis/proxies/v8/framework/v1/term/update/`,
   PUBLISH_FRAMEWORK: `/apis/proxies/v8/framework/v1/publish/`,
   RETIRE_TREM: `apis/proxies/v8/framework/v1/term/retire`
@@ -25,6 +26,10 @@ export class TreeHierarchyService {
 
   createTerm(requestBody: any, frameworkObj:any): Observable<any> {
     return this.http.post(`${API_ENDPOINT.CREATE_TERMS}?framework=${frameworkObj.id}&category=${frameworkObj.category}`, requestBody);
+  }
+
+  updateTerm(requestBody: any, frameworkObj:any, codeId:any): Observable<any> {
+    return this.http.patch(`${API_ENDPOINT.UPDATE_TERMS}/${codeId}?framework=${frameworkObj.id}&category=${frameworkObj.category}`, requestBody);
   }
 
   updateFrameworkAssociation(requestBody: any, frameworkObj:any, codeId:any): Observable<any> {

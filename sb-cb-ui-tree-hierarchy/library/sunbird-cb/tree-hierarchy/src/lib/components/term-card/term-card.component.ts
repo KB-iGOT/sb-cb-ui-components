@@ -74,8 +74,8 @@ export class TermCardComponent implements OnInit, OnDestroy {
     if(this.frameworkService.isLastColumn(this.data.category)){
       return 
     }
-    this.isSelected.emit({ element: this.data.children, isSelected: !data.selected })
     this.frameworkService.currentSelection.next({ type: this.data.category, data: data.children, cardRef })
+    this.isSelected.emit({ element: this.data.children, isSelected: !data.selected })
   }
 
   handleProductClick(term: any, event: any){
@@ -361,25 +361,25 @@ export class TermCardComponent implements OnInit, OnDestroy {
       cardInfo: data
     }
     let dialog = this.dialog.open(ConforamtionPopupComponent, {
-          data: dialogData,
-          autoFocus: false,
-          width: '500px',
-          maxWidth: '80vw',
-          maxHeight: '90vh',
-          disableClose: true
-        })
-        dialog.afterClosed().subscribe(_res => {
-         
-        setTimeout(() => {
-          window.dispatchEvent(new Event('resize'))
-        }, 100)
-        })
-      
+        data: dialogData,
+        autoFocus: false,
+        width: '500px',
+        maxWidth: '80vw',
+        maxHeight: '90vh',
+        disableClose: true
+      })
+      dialog.afterClosed().subscribe(_res => {
+        
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'))
+      }, 100)
+    })
     
-    }
+  }
 
-    removeConnection(item:any) {
-      this.cardAction.emit({ action: 'remove-term', data: item });
-    }
-  
+  menuAction(type:string, _item: any) {
+    this.cardAction.emit({ action: type, data: _item });
+  } 
 }
+  
+

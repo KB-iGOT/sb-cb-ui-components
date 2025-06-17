@@ -30,6 +30,7 @@ import { IConnectionType } from './models/connection-type.model';
 import { ENVIRONMENT } from './services/connection.service';
 import { OrgHierarchyAddModalComponent } from './components/org-hierarchy-add-modal/org-hierarchy-add-modal.component';
 import { TreeHierarchyService } from './tree-hierarchy.service';
+import { CategoryEditModuleComponent } from './components/category-edit/category-edit-module/category-edit-module.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { TreeHierarchyService } from './tree-hierarchy.service';
     ConforamtionPopupComponent,
     CreateTermFromFrameworkComponent,
     OrgHierarchyAddModalComponent,
+    CategoryEditModuleComponent,
   ],
   imports: [
     CommonModule,
