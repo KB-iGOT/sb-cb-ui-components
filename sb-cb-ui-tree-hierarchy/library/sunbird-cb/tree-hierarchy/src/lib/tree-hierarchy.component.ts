@@ -4,7 +4,7 @@ import { FrameworkService } from './services/framework.service';
 @Component({
   selector: 'd-v2-tree-hierarchy',
   templateUrl: './tree-hierarchy.component.html',
-  styleUrls: ['./tree-hierarchy.component.scss']
+  styleUrls: ['./tree-hierarchy.component.scss'],
 })
 export class TreeHierarchyComponent implements OnInit {
   @Input() environment: any;

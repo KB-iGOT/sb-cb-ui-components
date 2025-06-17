@@ -776,7 +776,15 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       position: { top: '50px' }
     })
     dialog.afterClosed().subscribe((res: any) => {
-      console.log('Category edit dialog closed', res);
+      if (res) {
+        const requestBody = {
+          frameworkId: this.frameworkService.getFrameworkId(),
+          categoryCode: res.column.columnData.code,
+          categoryName: res.column.formData.categoryName,
+          categoryDescription: res.column.formData.categotyDescription || ''
+        }
+        this.updateCategory(requestBody);
+      }
     })
   }
 
@@ -826,5 +834,30 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       });
     }
     return tempData;
+  }
+
+  async updateCategory(event: any) {
+    const requestBody = {
+      request: {
+        category: {
+          name: event.categoryName || '',
+          description: event.categoryDescription || '',
+        }
+      }
+    }
+    const frameworkObj = {
+      id: event.frameworkId,
+      category: event.categoryCode
+    }
+    this.treeHierarchySvc.setLoaderState(true);    
+    const updateCatRes = await this.treeHierarchySvc.updateCategory(requestBody, frameworkObj).toPromise().catch((_err: any) => {
+      this.treeHierarchySvc.setLoaderState(false);
+      if (_err && _err.error && _err.error.params && _err.error.params.errMsg) {
+        this._snackBar.open(`${_err.error.params.errMsg}`)
+      }
+    })
+    if (updateCatRes && updateCatRes.params && updateCatRes.params.status.toLowerCase() === 'successful') {
+      await this.publishFramework(frameworkObj)
+    }
   }
 }
