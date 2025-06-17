@@ -42,15 +42,7 @@
             <label class="text-sm">{{ (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.contentType) }}</label>
           </ng-container>
         </div>
-        <!-- <div class="flex justify-between items-center mt-4 mb-4">
-          <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="filterCriteria = !filterCriteria">
-            <div class="flex gap-2 flex-middle">
-              <span class="text-m">Filter criteria</span>
-              <mat-icon class="primary-text-color">{{ filterCriteria ? "visibility_on" : "visibility_off" }}</mat-icon>
-            </div>
-          </button>
-        </div> -->
-
+     
         <ng-container *ngIf="filterCriteria">
           <div class="filter-criteria-container light-grey-border p-4 mt-4 flex flex-middle justify-between mb-4">
             <div class="info">
@@ -65,7 +57,7 @@
           </div>
         </ng-container>
 
-        <div class="users-total-count flex gap-2 items-center my-3">
+        <div class="users-total-count flex gap-2 items-center my-3" *ngIf="getTotalUserCount">
           <mat-icon svgIcon="info-outline" [matTooltip]=""></mat-icon>
           <div class="text-dark">Total Count : {{ getTotalUserCount }}</div>
         </div>
@@ -80,7 +72,9 @@
                       <mat-panel-title class="items-center">
                         <div class="flex gap-4 items-center">
                           <span class="text-sm">{{ rule.get("name")?.value }}</span>
-                          <div class="text-dark user-group-user-count">Count : {{ getUserCountForUserGroup(i) }}</div>
+                          <ng-container *ngIf="getUserCountForUserGroup(i)">
+                            <div class="text-dark user-group-user-count">Count : {{ getUserCountForUserGroup(i) }}</div>
+                          </ng-container>
                         </div>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">

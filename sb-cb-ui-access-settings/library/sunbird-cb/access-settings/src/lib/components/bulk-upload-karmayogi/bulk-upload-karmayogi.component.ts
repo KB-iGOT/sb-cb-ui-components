@@ -50,11 +50,8 @@ export class BulkUploadKarmayogiComponent {
     if (files && files.length) {
       const extension = files[0].name.split(".").pop().toLowerCase(); // file extension from input file
       const isSuccess = fileTypes.indexOf(extension) > -1; // is extension in acceptable types
-      // console.log(isSuccess)
-      console.log("Filename: " + files[0].name);
       this.fileName = files[0].name;
-      // console.log('Type: ' + files[0].type)
-      // console.log('Size: ' + files[0].size + ' bytes')
+     
       if (isSuccess) {
         const fileToRead = files[0];
         const fileReader = new FileReader();

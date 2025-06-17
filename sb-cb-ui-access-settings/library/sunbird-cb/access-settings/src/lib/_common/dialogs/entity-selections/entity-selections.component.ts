@@ -77,9 +77,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
             this.getBatchList(query);
             break;
           case this.selectionTypeEnum.Designation:
-            if (!query) {
-              this.getDesignationsList(query);
-            }
+            // if (!query) {
+            //   this.getDesignationsList(query);
+            // }
             break;
           case this.selectionTypeEnum.Organizations:
             // if (!query) {
@@ -92,7 +92,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
     this.initializeDisplay();
   }
-
 
   initializeDisplay(): void {
     switch (this.selectionType) {
@@ -180,12 +179,17 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.getFilteredEntityGrouped();
     if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
       this.updateBatchRanges();
     } else {
       this.updateAlphabet();
     }
-    this.getFilteredEntityGrouped();
+
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Cadre || this.selectionType === NsAccessControlConfig.SelectionType.Service) {
+      this.selectedVerificationStatus = "";
+      this.alphabet = [];
+    }
   }
 
   search(): void {
@@ -297,10 +301,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.selectedCharacterRange = "A";
     const chars = new Set<string>();
 
-    for (const data of this.dataList) {
-      let letter = "#";
-      const value = data?.channel || data?.name || data?.designation;
-      letter = value.charAt(0)?.toUpperCase() || "#";
+    const sourceList =
+      this.filterValue === "selected" && this.selectionType !== NsAccessControlConfig.SelectionType.Organizations
+        ? this.dataListDup.filter(
+            item => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item)
+          )
+        : this.dataList;
+
+    for (const data of sourceList) {
+      const value = data?.channel || data?.name || data?.designation || "";
+      let letter = value.charAt(0)?.toUpperCase() || "#";
       if (!/^[A-Z]$/.test(letter)) {
         letter = "#";
       }
@@ -318,7 +328,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     } else {
       this.alphabet = sorted;
     }
-  
   }
 
   get checkIfData(): boolean {
@@ -449,7 +458,20 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   updateBatchRanges(): void {
-    this.batchRanges = BATCH_RANGES.map(range => range.label);
+    const isSelectedFilter = this.filterValue === "selected";
+
+    const sourceList = isSelectedFilter ? this.dataListDup.filter(item => this.isSelected(item) && this.selectedData.includes(item)) : this.dataList;
+
+    const validLabels: string[] = [];
+
+    for (const { label, start, end } of BATCH_RANGES) {
+      const hasItemInRange = sourceList.some(item => item >= start && item <= end);
+      if (hasItemInRange) {
+        validLabels.push(label);
+      }
+    }
+
+    this.batchRanges = validLabels;
   }
 
   groupBatchByRange(batchList: number[]) {
@@ -481,7 +503,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   applySelections(): void {
-    this.selectedData = [...this.selectedDataTemp];
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Group) {
+      this.selectedData = this.selectedDataTemp;
+    }
     this.dialogRef.close({
       rule: this.data.rule,
       condition: this.data.condition,
@@ -508,7 +532,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   setSelected(): void {
-    this.selectedData = this.selectedDataTemp;
+    this.selectedData = [...this.selectedDataTemp];
     this.activeTab = 1;
   }
 }
