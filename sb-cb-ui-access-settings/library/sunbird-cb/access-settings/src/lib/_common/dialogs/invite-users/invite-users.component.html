@@ -42,11 +42,14 @@
                 <sb-uic-list-table
                   [data]="usersList"
                   [count]="totalUsers"
-                  [initialPaginationSize]="usersTableConfig['allLearners']?.initialPaginationSize"
+                  [initialPaginationSize]="pagination.limit"
                   [tableConfig]="usersTableConfig['allLearners']"
                   (selectedDataChange)="onSelectingUser($event)"
                   (pageChange)="onPageChange($event)"
-                  [selected]="usersFinalList"></sb-uic-list-table>
+                  (sortChange)="onSortChange($event)"
+                  [selected]="usersFinalList"
+                  [currentPage]="currentPage"
+                  ></sb-uic-list-table>
               </ng-container>
             </div>
           </mat-tab>
@@ -61,7 +64,7 @@
                 <sb-uic-list-table
                   [data]="finalSelectedUsers"
                   [count]="finalSelectedUsers.length || 0"
-                  [initialPaginationSize]="usersTableConfig['selectedUsers']?.initialPaginationSize"
+                  [initialPaginationSize]="pagination.limit"
                   [tableConfig]="usersTableConfig['selectedUsers']"
                   (selectedDataChange)="onSelectingUserToApply($event)"
                   (removeSelectedData)="removedUserData($event)"
@@ -97,7 +100,7 @@
         Select Users
       </button>
     </ng-container>
-    <ng-container *ngIf="activeTab === 1 && usersFinalList.length">
+    <ng-container *ngIf="activeTab === 1 && usersFinalList.length && finalSelectedUsers.length">
       <button
         mat-flat-button
         (click)="applySelections()"

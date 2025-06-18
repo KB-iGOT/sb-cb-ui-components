@@ -13,6 +13,7 @@ import { ConfirmDialogComponent } from "../dialogs/confirm-dialog/confirm-dialog
 import { AccessControlGuideComponent } from "../dialogs/access-control-guide/access-control-guide.component";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { MatRadioChange } from "@angular/material/radio";
 
 @Component({
   selector: "sb-uic-access-control",
@@ -26,10 +27,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   @Output() accessControlData: EventEmitter<{ userGroup: any[]; accessType: string }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
+  @Output() sendForCQF: EventEmitter<boolean> = new EventEmitter();
 
   private destroy$ = new Subject<void>();
 
   accessType: NsAccessControlConfig.ITypeAccessType = NsAccessControlConfig.IAccessTypes.Public;
+  accessTypeDup: NsAccessControlConfig.ITypeAccessType = NsAccessControlConfig.IAccessTypes.Public;
   ACCESS_TYPE_ENUM = NsAccessControlConfig.IAccessTypes;
   ACCESS_SETTING_ENUM = NsAccessControlConfig.IAccessSetting;
 
@@ -47,6 +50,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   cadreConfigData: any;
   isSaveFltrBtnDisabled = false;
   isApplyBtnDisabled = false;
+  isAddUserGroupBtnDisabled = false;
   isApplying = false;
   isSaving = false;
   constructor(
@@ -77,10 +81,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
     if (this.content) {
       if (this.content?.status === "Live") {
+        this.accessControlCriteriaSelection.readOnly = true;
         this.isSaveFltrBtnDisabled = true;
       } else {
         this.isApplyBtnDisabled = true;
+        this.accessControlCriteriaSelection.readOnly = false;
       }
+
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         this.accessType = NsAccessControlConfig.IAccessTypes.Public;
         const accessTypePublic = this.accessControlCriteriaSelection?.accessTypes.find(
@@ -100,7 +107,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         );
         if (accessTypePublic) accessTypePublic.disabled = true;
       }
+
+      this.processConditionsForContentType();
     }
+    this.accessTypeDup = this.accessType;
   }
 
   ngAfterViewInit(): void {
@@ -151,27 +161,27 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.userGroup.at(ruleIndex).get("conditions") as FormArray;
   }
 
-  onAccessTypeChange(event: any) {
-    if (event.value === NsAccessControlConfig.IAccessTypes.Public) {
+  onAccessTypeChange(event: MatRadioChange): void {
+    const selectedType = event.value;
+    (event?.source?._inputElement?.nativeElement as HTMLElement)?.blur();
+    if (selectedType === NsAccessControlConfig.IAccessTypes.Public) {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         width: "470px",
         data: { type: "confirm-access-type" }
       });
+
       dialogRef.afterClosed().subscribe(result => {
         if (result?.action === NsAccessControlConfig.IActions.Confirm) {
-          this.accessType = NsAccessControlConfig.IAccessTypes.Public;
+          this.accessType = selectedType;
           this.updateContentAccessSetting();
         } else {
-          this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
+          this.accessTypeDup = this.accessType;
         }
       });
     } else {
+      this.accessType = selectedType;
       this.updateContentAccessSetting();
     }
-
-    // if (event.value === NsAccessControlConfig.IAccessTypes.Custom) {
-    //   this.isVisibilityEnabled = false;
-    // }
   }
 
   addUserGroup() {
@@ -223,7 +233,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const lastCondition = conditions.at(conditions.length - 1);
       const lastEntity = lastCondition.get("entity")?.value;
       if (lastEntity === NsAccessControlConfig.SelectionType.Users) {
-        this.callSnackbar("User condition already exists, cannot add more conditions.", "error");
+        this.callSnackbar("Adding further condition is not possible , as you have already added User as condition", "error");
         return;
       }
     }
@@ -295,8 +305,20 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
-        this.userGroup.removeAt(index);
-        this.applyAccessControlValue(true);
+        if (group?.value?.conditions?.length && group?.value?.conditions[0]?.selections.length) {
+          this.userGroup.removeAt(index);
+          // Rename remaining groups
+          for (let i = 0; i < this.userGroup.length; i++) {
+            this.resetUserGroup(i);
+          }
+          this.applyAccessControlValue(true);
+        } else {
+          this.userGroup.removeAt(index);
+          // Rename remaining groups
+          for (let i = 0; i < this.userGroup.length; i++) {
+            this.resetUserGroup(i);
+          }
+        }
       }
     });
   }
@@ -305,12 +327,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const group = this.userGroup.at(index);
     if (group) {
       group.get("name")?.setValue(`User Group ${index + 1}`);
-      group.get("description")?.setValue(`Description for UserGroup ${index + 1}`);
-      const conditions = group.get("conditions") as FormArray;
-      for (let i = 0; i < conditions.length; i++) {
-        const id = conditions.at(i).get("id")?.value;
-        conditions.setControl(i, this.createConditionGroup(id, index));
-      }
     }
   }
 
@@ -336,10 +352,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  manageSelections(condition: any, rule: any, userGroupIndex: number, activeTabSelected = 0): void {
-    switch (condition.value.entity) {
+  manageSelections(conditionForm: any, ruleForm: any, userGroupIndex: number, activeTabSelected = 0): void {
+    const condition = conditionForm.getRawValue();
+    const rule = ruleForm.getRawValue();
+    switch (condition.entity) {
       case NsAccessControlConfig.SelectionType.Users:
-        this.openInviteUserDialog(condition?.value, rule?.value, activeTabSelected);
+        this.openInviteUserDialog(condition, rule, activeTabSelected);
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
       case NsAccessControlConfig.SelectionType.Designation:
@@ -349,10 +367,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       case NsAccessControlConfig.SelectionType.Group:
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         this.processCadreConfigMapping(userGroupIndex);
-        this.openSelectionDialog(rule?.value, condition?.value, activeTabSelected);
+        this.openSelectionDialog(rule, condition, activeTabSelected);
         break;
       default:
-        console.warn("Unsupported entity type:", condition.value.entity);
+        console.warn("Unsupported entity type:", condition.entity);
     }
   }
 
@@ -738,5 +756,46 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
       return count;
     }, 0);
+  }
+
+  processConditionsForContentType(): void {
+    // For Moderated Content Condition
+    if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+      // Create Organization condition
+      const orgCondition = this.createConditionGroup(uuidv4(), 0);
+      orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
+
+      // Create Verification Status condition with default 'Verified'
+      const verificationCondition = this.createConditionGroup(uuidv4(), 0);
+      verificationCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.VerificationStatus);
+      verificationCondition.get("selections")?.setValue(["VERIFIED"]);
+
+      // Create user group with these two conditions
+      const group = this.fb.group({
+        id: [uuidv4()],
+        name: ["User Group 1"],
+        description: ["Description for UserGroup 1"],
+        conditions: this.fb.array([orgCondition, verificationCondition])
+      });
+      this.userGroup.push(group);
+
+      // Disable add user group btn
+      this.isAddUserGroupBtnDisabled = true;
+    }
+
+    // For Access Control Content Type
+    if (this.accessType === NsAccessControlConfig.IAccessTypes.Public) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "470px",
+        data: { type: "confirm-access-type" }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+          this.sendForCQF.emit(true);
+          this.updateContentAccessSetting();
+        }
+      });
+    }
   }
 }

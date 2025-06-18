@@ -18,10 +18,12 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() tableConfig: any;
   @Input() selected: any;
   @Input() bulkUploadEntriesCount: any;
+  @Input() currentPage: number = 1;
 
   @Output() selectedDataChange: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<PageChangeEmitter> = new EventEmitter();
   @Output() removeSelectedData: EventEmitter<any> = new EventEmitter();
+  @Output() sortChange: EventEmitter<any> = new EventEmitter();
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -29,7 +31,6 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   selection = new SelectionModel<any>(true, []);
   selectedTablerow: any[] = [];
 
-  currentPage: number = 1;
   constructor(private _liveAnnouncer: LiveAnnouncer) {}
   ngOnInit() {}
 
@@ -47,6 +48,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
       }));
       this.data = mappedUsers;
       this.dataSource = new MatTableDataSource<any>(mappedUsers);
+      this.dataSource.sort = this.sort;
     }
 
     if (changes["count"]?.currentValue !== undefined) {
@@ -66,6 +68,10 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
 
       this.selectedTablerow = changes["selected"]?.currentValue || [];
     }
+
+    if (changes["currentPage"]?.currentValue) {
+      this.currentPage = changes["currentPage"]?.currentValue;
+    }
   }
 
   ngAfterViewInit() {
@@ -79,6 +85,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     const endIndex = startIndex + this.initialPaginationSize;
     const paginatedUsers = this.data.slice(startIndex, endIndex);
     this.dataSource = new MatTableDataSource<any>(paginatedUsers);
+    this.dataSource.sort = this.sort;
   }
 
   isAllSelected() {
@@ -130,6 +137,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   onPageChange(event: PageChangeEmitter) {
+    this.currentPage = event?.currentPage;
     this.pageChange.emit(event);
   }
 
@@ -144,6 +152,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     this.selectedTablerow = [];
     this.selection.clear();
     this.dataSource = new MatTableDataSource<any>(remainingList);
+    this.dataSource.sort = this.sort;
     if (this.tableConfig?.type === "selectedUsers") {
       this.removeSelectedData.emit({
         remainingList,
@@ -154,9 +163,19 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
 
   onSortChange(sortState: Sort): void {
     if (sortState.direction) {
-      this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+      if (sortState.active === "ministry") sortState.active = "channel";
+      if (sortState.active === "mobile") sortState.active = "phone";
+      if (this.tableConfig?.type === "selectedUsers") {
+        this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+      } else {
+        this.sortChange.emit({ [sortState.active]: sortState.direction });
+      }
     } else {
-      this._liveAnnouncer.announce("Sorting cleared");
+      if (this.tableConfig?.type === "selectedUsers") {
+        this._liveAnnouncer.announce("Sorting cleared");
+      } else {
+        this.sortChange.emit({});
+      }
     }
   }
 
