@@ -262,7 +262,7 @@ flex-center {
 
 .overflow-container {
   width: 100%;
-  max-width: 100%;
+  max-width: calc(100vw - 340px);
   overflow-x: auto;
   white-space: nowrap;
 }
