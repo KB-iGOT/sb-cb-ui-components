@@ -4,6 +4,8 @@ import { FormControl } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TreeHierarchyService } from '../../tree-hierarchy.service';
+import { FrameworkService } from '../../services/framework.service';
+import _ from 'lodash';
 
 @Component({
   selector: 'sb-cb-tree-org-hierarchy-add-modal',
@@ -24,6 +26,7 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<OrgHierarchyAddModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private treeHierarchySvc: TreeHierarchyService, 
+    private frameworkService: FrameworkService
   ) {}
 
   ngOnInit() {
@@ -134,34 +137,54 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
     const requestBody = {
       request: {
         filters: {
-            status: 1,
-            ministryOrStateType: (this.data && this.data.selectedOrgData) ?
-             this.data.selectedOrgData.sbOrgType : '',
-            ministryOrStateId: (this.data && this.data.selectedOrgData) ? 
+          status: 1,
+          ministryOrStateType: (this.data && this.data.selectedOrgData) ?
+            this.data.selectedOrgData.sbOrgType : '',
+          ministryOrStateId: (this.data && this.data.selectedOrgData) ? 
             this.data.selectedOrgData.identifier : ''
         },
         sort_by: {
-            createdDate: "desc"
+          createdDate: "desc"
         },
         limit: 100,
         offset: 0,
         fields: [
-            'identifier',
-            'orgName',
-            'description',
-            'parentOrgName',
-            'ministryOrStateId',
-            'ministryOrStateType',
-            'ministryOrStateName'
+          'identifier',
+          'orgName',
+          'description',
+          'parentOrgName',
+          'ministryOrStateId',
+          'ministryOrStateType',
+          'ministryOrStateName'
         ]
       }
     }
+    
     const orgListData = await this.treeHierarchySvc.orgSerachApi(requestBody).toPromise().catch(err => {
       console.error('Error fetching organization data:', err);
     });
+    
     if (orgListData && orgListData.result && 
       orgListData.result.response && orgListData.result.response.content) {
-        this.orgOptions = orgListData.result.response.content || [];
+        const framworkData = _.cloneDeep(this.frameworkService.completeResponse)
+        let orgIdsAdded: string[] = [];
+        if (framworkData && framworkData.categories && framworkData.categories.length > 0) {
+          framworkData.categories.forEach((category: any) => {
+            if (category.terms && category.terms.length > 0) {
+              category.terms.forEach((term: any) => {
+                if (term.additionalProperties && term.additionalProperties.orgId) {
+                  if (!orgIdsAdded.includes(term.additionalProperties.orgId)) {
+                    orgIdsAdded.push(term.additionalProperties.orgId);
+                  }
+                }
+              });
+            }
+          });
+        }
+        const filteredOrgList = orgListData.result.response.content.filter((org: any) => 
+          !orgIdsAdded.includes(org.identifier)
+        )
+        this.orgOptions = filteredOrgList || [];
         this.filteredOptions = [...this.orgOptions];
     }
   }

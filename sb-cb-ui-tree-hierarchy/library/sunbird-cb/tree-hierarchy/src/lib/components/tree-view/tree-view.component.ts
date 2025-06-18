@@ -17,6 +17,8 @@ import { OrgHierarchyAddModalComponent } from '../org-hierarchy-add-modal/org-hi
 import { TreeHierarchyService } from '../../tree-hierarchy.service';
 import { v4 as uuidv4 } from 'uuid'
 import { ConforamtionPopupComponent } from '../conforamtion-popup/conforamtion-popup.component';
+import { CategoryEditModuleComponent } from '../category-edit/category-edit-module/category-edit-module.component';
+import _ from 'lodash';
 
 declare var LeaderLine: any;
 @Component({
@@ -33,6 +35,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   @Input() orgSelectedData: any;
   @Output() sentForApprove = new EventEmitter<any>()
   @Output() loaderEnable = new EventEmitter<any>()
+  @Output() manageOrg = new EventEmitter<any>()
   mapping = {};
   heightLighted = []
   localList = []
@@ -421,12 +424,54 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
   
   getCount(code: string): number {
-    let count = 0
-    if (this.categoryList) {
-      const category = this.categoryList.find((category: any) => category.category === code)
-      count = category && category.count ? category.count : 0
+    // Get all previous categories to determine if they have selections
+    const allCategories = Array.from(this.frameworkService.list.values());
+    const currentCategoryIndex = allCategories.findIndex(cat => cat.code === code);
+    
+    // Check if all previous categories have selected terms
+    for (let i = 0; i < currentCategoryIndex; i++) {
+      const prevCategoryCode = allCategories[i].code;
+      const hasPrevSelection = this.frameworkService.selectionList.has(prevCategoryCode);
+      
+      // If any previous category doesn't have a selection, return 0
+      if (!hasPrevSelection) {
+        return 0;
+      }
     }
-    return count
+    
+    // Now we can calculate the actual count since all previous levels are selected
+    let count = 0;
+    
+    // Check if there's a selected term for parent category that has children for this category
+    const prevCategory = this.frameworkService.getPreviousCategory(code);
+    if (prevCategory) {
+      const prevSelectedTerm = this.frameworkService.selectionList.get(prevCategory.code);
+      if (prevSelectedTerm) {
+        // If we have a selected parent term, count its children for this category
+        if (prevSelectedTerm.children && prevSelectedTerm.children.length > 0) {
+          count = prevSelectedTerm.children.filter((child: any) => 
+            !child.isDeleted && child.status !== 'Retired' && 
+            (child.category === code || (child.associations && 
+             child.associations.some((assoc: any) => assoc.category === code)))
+          ).length;
+          
+          return count;
+        }
+      }
+      
+      // If no selection exists for the parent, don't show counts
+      return 0;
+    }
+    
+    // If this is the first level, we can show all terms
+    const categoryData = this.frameworkService.list.get(code);
+    if (categoryData && categoryData.children) {
+      count = categoryData.children.filter((child: any) => 
+        !child.isDeleted && child.status !== 'Retired'
+      ).length;
+    }
+    
+    return count;
   }
 
   sendForApproval(){
@@ -533,6 +578,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
                 parentOrgName: ele.ministryOrStateName || '',
                 orgId: ele.identifier || '',
                 orgName: ele.orgName || '',
+                ministryOrStateType: ele.ministryOrStateType || '',
               }
             }
           }
@@ -613,70 +659,90 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   removeConnection(data: any) {
-    const dialogData = {
-      dialogType: 'warning',
-      descriptions: [
-        {
-          header: `${data?.children?.children?.length || 0} Organisation${data?.children?.children?.length > 1 ? 's' : ''} will be removed from organisation hierarchy.`,
-          headerClass: 'flex items-center justify-center text-blue',
-          messages: [
-            {
-              msgClass: 'text-blue margin-bottom-s',
-              msg: `Do you want to proceed?`,
-            },
-          ],
-        },
-      ],
-      footerClass: 'items-center justify-center',
-      buttons: [
-        {
-          btnText: 'No',
-          btnClass: 'btn-common btn-secondary',
-          response: false,
-        },
-        {
-          btnText: 'Yes',
-          btnClass: 'btn-common btn-primary',
-          response: true,
-        },
-      ],
+    const association = this.getSelectedTermsAssociation(data.children.code);
+    let count = 0
+    if (association && association.length > 0) {
+      association.forEach((assoc: any) => {
+        if (assoc.ids && assoc.ids.length > 0) {
+          count += assoc.ids.length
+        }
+      })
     }
-    const dialogRef = this.dialog.open(ConforamtionPopupComponent, {
-      data: dialogData,
-      autoFocus: false,
-      width: '600px',
-      maxWidth: '80vw',
-      maxHeight: '90vh',
-      disableClose: true,
-    })
-    dialogRef.afterClosed().subscribe((res: any) => {
-      if (res) {
-        this.retireTermFunction(data)
+    if (count > 0) {
+      const dialogData = {
+        dialogType: 'warning',
+        descriptions: [
+          {
+            header: `${count || 0} Organisation${count > 1 ? 's' : ''} will be removed from organisation hierarchy.`,
+            headerClass: 'flex items-center justify-center text-blue',
+            messages: [
+              {
+                msgClass: 'text-blue margin-bottom-s',
+                msg: `Do you want to proceed?`,
+              },
+            ],
+          },
+        ],
+        footerClass: 'items-center justify-center',
+        buttons: [
+          {
+            btnText: 'No',
+            btnClass: 'btn-common btn-secondary',
+            response: false,
+          },
+          {
+            btnText: 'Yes',
+            btnClass: 'btn-common btn-primary',
+            response: true,
+          },
+        ],
       }
-    })
+      const dialogRef = this.dialog.open(ConforamtionPopupComponent, {
+        data: dialogData,
+        autoFocus: false,
+        width: '600px',
+        maxWidth: '80vw',
+        maxHeight: '90vh',
+        disableClose: true,
+      })
+      dialogRef.afterClosed().subscribe((res: any) => {
+        if (res) {
+          this.retireTermFunction(association)
+        }
+      })
+    } else {
+      this._snackBar.open(`Error in removing the organisation`, 'cancel')
+    }
   }
 
-  async retireTermFunction(data: any) {
-    const requestBody = {
-      request: {
-        contentIds: [
-          data.children.code
-        ]
+  async retireTermFunction(association: any) {  
+    let count = 0  
+    this.treeHierarchySvc.setLoaderState(true)
+    for await (const ele of association) {
+      const requestBody = {
+        request: {
+          contentIds: ele.ids
+        }
+      }
+      const frameworkObj = {
+        id: this.frameworkService.completeResponse.code,
+        category: ele.category || '',
+      }
+      const retireRes = await this.treeHierarchySvc.retireTerm(requestBody, frameworkObj).toPromise().catch((_err: any) => {
+        this.treeHierarchySvc.setLoaderState(false)
+        this._snackBar.open(`Failed to remove connection.`, 'cancel')
+      })
+      if (retireRes && retireRes.params && retireRes.params.status?.toLowerCase() === 'successful') {
+        count += 1
+      } else {
+        this.treeHierarchySvc.setLoaderState(false)
+        this._snackBar.open(`Failed to remove connection.`, 'cancel')
       }
     }
-    const identifierParts = data.children.identifier.split('_');
-    const frameworkObj = {
-      id: identifierParts.slice(0, 3).join('_'),
-      category: data.category
-    }
-    this.treeHierarchySvc.setLoaderState(true)
-    const retireRes = await this.treeHierarchySvc.retireTerm(requestBody, frameworkObj).toPromise().catch((_err: any) => {
-      this.treeHierarchySvc.setLoaderState(false)
-      this._snackBar.open(`Failed to remove connection.`, 'cancel')
-    }
-    )
-    if (retireRes && retireRes.params && retireRes.params.status?.toLowerCase() === 'successful') {
-      await this.publishFramework(frameworkObj)
+    if (count === association.length) {
+      await this.publishFramework({
+        id: this.frameworkService.completeResponse.code,
+      })
     } else {
       this.treeHierarchySvc.setLoaderState(false)
       this._snackBar.open(`Failed to remove connection.`, 'cancel')
@@ -686,8 +752,112 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   cardActionEmit(event:any) {
     switch(event.action) {
       case 'remove-term':
-        this.removeConnection(event.data);
-        break;
+          this.removeConnection(event.data);
+          break;
+        case 'update-hierarchy':
+          this.openOrganizationDialog(this.list[this.list.findIndex((item:any) => item.code === event.data.category) +1], '');
+          break;
+          case 'manage-org':
+            this.manageOrg.emit(event.data.children);
+          break;
+    }
+  }
+
+  editCategoryName(column:any, index:any) {
+    console.log('editCategoryName', column, index);
+    const dialog = this.dialog.open(CategoryEditModuleComponent, {
+      data: {
+        columnInfo: column,
+        frameworkId: this.frameworkService.getFrameworkId(),
+        colIndex: index
+      },
+      width: '800px',
+      panelClass: 'category-edit-container',
+      position: { top: '50px' }
+    })
+    dialog.afterClosed().subscribe((res: any) => {
+      if (res) {
+        const requestBody = {
+          frameworkId: this.frameworkService.getFrameworkId(),
+          categoryCode: res.column.columnData.code,
+          categoryName: res.column.formData.categoryName,
+          categoryDescription: res.column.formData.categotyDescription || ''
+        }
+        this.updateCategory(requestBody);
+      }
+    })
+  }
+
+  getSelectedTermsAssociation(categoryCode: string) {
+    let tempData: any = [];
+    const completeData = _.cloneDeep(this.frameworkService.completeResponse);
+    if (completeData && completeData.categories && completeData.categories.length > 0) {
+      completeData.categories.forEach((category: any, catIndex: any) => {
+        if (category.terms && category.terms.length > 0) {
+          category.terms.forEach((term: any) => {
+            if (term.code === categoryCode) {
+              tempData.push({
+                name: term.name,
+                category: term.category,
+                ids: [term.code],
+                nextCategory: term.children ? term.children[0].category : '',
+                assocIds: []
+              });
+              if (term.associations && term.associations.length > 0) {
+                term.associations.forEach((assoc: any) => {
+                  tempData[catIndex]['assocIds'].push(assoc.code)
+                })
+              }
+            }
+          });
+        } if (catIndex > 0 && category.terms && category.terms.length > 0) {
+          category.terms.forEach((term: any) => {
+            tempData.forEach((item: any) => {
+              if (item.nextCategory === term.category && item.assocIds.includes(term.code)) {
+                const pushData:any = {
+                  name: term.name,
+                  category: term.category,
+                  ids: [term.code],
+                  nextCategory: term.children ? term.children[0].category : '',
+                  assocIds: []
+                }
+                if (term.associations && term.associations.length > 0) {
+                  term.associations.forEach((assoc: any) => {
+                    pushData['assocIds'].push(assoc.code)
+                  })
+                }
+                tempData.push(pushData);
+              }
+            });
+          });
+        }
+      });
+    }
+    return tempData;
+  }
+
+  async updateCategory(event: any) {
+    const requestBody = {
+      request: {
+        category: {
+          name: event.categoryName || '',
+          description: event.categoryDescription || '',
+        }
+      }
+    }
+    const frameworkObj = {
+      id: event.frameworkId,
+      category: event.categoryCode
+    }
+    this.treeHierarchySvc.setLoaderState(true);    
+    const updateCatRes = await this.treeHierarchySvc.updateCategory(requestBody, frameworkObj).toPromise().catch((_err: any) => {
+      this.treeHierarchySvc.setLoaderState(false);
+      if (_err && _err.error && _err.error.params && _err.error.params.errMsg) {
+        this._snackBar.open(`${_err.error.params.errMsg}`)
+      }
+    })
+    if (updateCatRes && updateCatRes.params && updateCatRes.params.status.toLowerCase() === 'successful') {
+      await this.publishFramework(frameworkObj)
     }
   }
 }
