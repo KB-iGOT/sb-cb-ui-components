@@ -33,7 +33,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   }
 
   submitComment() {
-    
+
     const req = this.createReq(this.searchControl.value, [])
     if(!this.addNewCommentBool){
       this.addNewCommentBool = true
@@ -102,7 +102,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
       }
     } else {
       commentTreeId = this.config.commentTreeData.commentTreeId || this.commentSvc.commentTreeId
-      hierarchyPath = this.hierarchyPath
+      hierarchyPath = this.hierarchyPath && this.hierarchyPath.filter(item => item !== undefined && item !== null) || []
     }
     return {
       ...(commentTreeId ? { commentTreeId } : null),

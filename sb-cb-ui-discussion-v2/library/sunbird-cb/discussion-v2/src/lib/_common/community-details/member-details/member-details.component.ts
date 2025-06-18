@@ -38,7 +38,7 @@ export class MemberDetailsComponent implements OnInit{
   }
   onSearch(event: any){
     this.membersLoading = true
-   let typeText: any  = event && event.target && event.target.value || ''
+   let typeText: any  = event && event?.target && event?.target?.value || ''
   let request = {
     "request": {
         "filters": {
@@ -56,18 +56,19 @@ export class MemberDetailsComponent implements OnInit{
     }
   }
   this.discussV2Svc.userSearch(request).subscribe((res: any)=> {
-    
     this.membersLoading = false
-    if(res && res.result && res.result.response && res.result.response.content) {
-      this.communityMembersList = res.result.response.content
-      this.totalNumberOfMembers =  res.result.response.count
+    if(res && res.result && res.result.response && res.result.response.content && res.result.response.content.length
+      && res.result.response.content.length > 0
+    ) {
+      this.communityMembersList = res?.result?.response?.content
+      this.totalNumberOfMembers =  res?.result?.response?.count
     } else {
       this.communityMembersList = []
     }
   })
   }
   loadMoreMembers(){
-    if( !(this.communityMembersList.length >= this.totalNumberOfMembers)) {
+    if( !(this.communityMembersList?.length >= this.totalNumberOfMembers)) {
       this.offset = this.offset + 1
       this.getAllMembersOfCommunity()
     }
