@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="light-grey-border p-4 mt-4">
-      <mat-radio-group [(ngModel)]="accessType" (change)="onAccessTypeChange($event)">
+      <mat-radio-group [(ngModel)]="accessTypeDup" (change)="onAccessTypeChange($event)">
         <div class="radio-container flex gap-5 mb-4">
           <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
             <mat-radio-button [value]="item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
@@ -36,10 +36,10 @@
             </div>
           </div>
           <ng-container *ngIf="!isVisibilityEnabled">
-            <label class="text-sm">{{ (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.contentType) }}</label>
+            <label class="text-sm">{{ (config?.visiblilityOnOff?.off || "").replace("{contentType}", (content?.courseCategory || content?.contentType)) }}</label>
           </ng-container>
           <ng-container *ngIf="isVisibilityEnabled">
-            <label class="text-sm">{{ (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.contentType) }}</label>
+            <label class="text-sm">{{ (config?.visiblilityOnOff?.on || "").replace("{contentType}", (content?.courseCategory || content?.contentType)) }}</label>
           </ng-container>
         </div>
      
@@ -126,8 +126,7 @@
                                   (click)="manageSelections(condition, rule, i)"
                                   [disabled]="
                                     !condition.get('entity').value ||
-                                    !condition.get('conditionType').value ||
-                                    accessControlCriteriaSelection?.readOnly
+                                    !condition.get('conditionType').value 
                                   "
                                   class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
                                   <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
@@ -139,7 +138,6 @@
                                   mat-button
                                   class="new-secondary-button-no-border button-with-corners mt-2"
                                   type="button"
-                                  [disabled]="accessControlCriteriaSelection?.readOnly"
                                   (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
@@ -222,7 +220,7 @@
         <ng-container *ngIf="!isLoading">
           <div class="text-center mb-6 mt-4">
             <button
-              [disabled]="accessControlCriteriaSelection?.readOnly"
+              [disabled]="accessControlCriteriaSelection?.readOnly || isAddUserGroupBtnDisabled"
               mat-button
               class="new-secondary-button-no-border button-with-corners"
               type="button"

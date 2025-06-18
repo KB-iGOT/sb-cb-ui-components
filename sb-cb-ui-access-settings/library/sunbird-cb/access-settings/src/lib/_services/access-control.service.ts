@@ -42,21 +42,24 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.SEARCH_USER_WITH_ADMIN(queryString));
   }
 
-  fetchUserList(query: string, pagination: { limit: number; offset: number }, userIds?: string[]): Observable<any> {
+  fetchUserList(query: string, pagination: { limit: number; offset: number }, userIds?: string[], filters?: any, sorting?: any): Observable<any> {
     let request: any = {
       filters: {
-        "profileDetails.profileStatus": ["VERIFIED", "NOT-VERIFIED"],
         status: 1
       },
       limit: pagination.limit || 5,
       offset: pagination.offset || 0,
       query: query,
-      sort_by: {
-        firstName: "asc"
-      }
+      sort_by: {}
     };
     if (userIds?.length) {
       request.filters = { ...request.filters, userId: userIds };
+    }
+    if (filters) {
+      request.filters = { ...request.filters, ...filters };
+    }
+    if (sorting) {
+      request.sort_by = sorting;
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_USER, { request: request });
   }
@@ -103,7 +106,7 @@ export class AccessControlService {
         status: "Active"
       },
       requestedFields: ["designation", "id"],
-      pageSize:1000,
+      pageSize: 1000,
       pageNumber: 0
     };
     if (selectedData?.length) {

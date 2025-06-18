@@ -99,7 +99,7 @@
         <div class="pagination-users">
             <sb-uic-pagination [defaultPaginationSize]="initialPaginationSize"
                 [defaultPaginationSizeOptions]="initialPaginationSizeOptions" [totalItemsCount]="count"
-                [currentPage]="1" (pageChange)="onPageChange($event)">
+                [currentPage]="currentPage" (pageChange)="onPageChange($event)">
             </sb-uic-pagination>
         </div>
     </ng-container>

@@ -155,10 +155,18 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   toggleSelection(item: any): void {
     const value = this.getSelectionValue(item);
-    if (this.selectedDataTemp.includes(value)) {
-      this.selectedDataTemp = this.selectedDataTemp.filter(v => v !== value);
-    } else {
-      this.selectedDataTemp = [...this.selectedDataTemp, value];
+    if (this.filterValue === "all") {
+      if (this.selectedDataTemp.includes(value)) {
+        this.selectedDataTemp = this.selectedDataTemp.filter(v => v !== value);
+      } else {
+        this.selectedDataTemp = [...this.selectedDataTemp, value];
+      }
+    } else if (this.filterValue === "selected") {
+      if (this.selectedData.includes(value)) {
+        this.selectedData = this.selectedData.filter(v => v !== value);
+      } else {
+        this.selectedData = [...this.selectedData, value];
+      }
     }
   }
 
@@ -302,7 +310,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     const chars = new Set<string>();
 
     const sourceList =
-      this.filterValue === "selected" && this.selectionType !== NsAccessControlConfig.SelectionType.Organizations
+      this.filterValue === "selected"
         ? this.dataListDup.filter(
             item => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item)
           )
