@@ -574,11 +574,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
               description: ele.description || '',
               code: uuidv4(),
               additionalProperties: {
-                identifier: ele.ministryOrStateId || '',
-                parentOrgName: ele.ministryOrStateName || '',
-                orgId: ele.identifier || '',
-                orgName: ele.orgName || '',
-                ministryOrStateType: ele.ministryOrStateType || '',
+                orgId: ele.identifier || ''
               }
             }
           }
@@ -647,7 +643,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
           this._snackBar.open(`Organization Hierarchy updated. Will reflect in sometime`, 'cancel');
           this.treeHierarchySvc.setLoaderState(false);
           this.init();
-        }, 10000);
+        }, 3000);
       } else {
         this._snackBar.open('Error in publishing framework', 'cancel');
         this.treeHierarchySvc.setLoaderState(false);
