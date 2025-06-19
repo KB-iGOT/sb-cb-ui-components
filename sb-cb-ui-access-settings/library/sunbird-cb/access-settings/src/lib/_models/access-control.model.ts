@@ -5,6 +5,8 @@ export namespace NsAccessControlConfig {
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
     visiblilityOnOff: IVisiblilityOnOff;
+    userConfig: { [key: string]: any; userRoles: any };
+    content: any;
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];

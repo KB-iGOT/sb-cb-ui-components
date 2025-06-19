@@ -98,7 +98,7 @@
                                           selectionType === selectionTypeEnum.Cadre
                                         ">
                                         <mat-checkbox
-                                          [disabled]="accessControlCriteriaSelection?.readOnly"
+                                          [disabled]="accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled"
                                           [checked]="isSelected(entity)"
                                           (change)="toggleSelection(entity)"
                                           [title]="entity?.name || entity?.designation || entity?.channel">
@@ -107,7 +107,7 @@
                                       </ng-container>
                                       <ng-container *ngIf="selectionType === selectionTypeEnum.Batch">
                                         <mat-checkbox
-                                          [disabled]="accessControlCriteriaSelection?.readOnly"
+                                          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
                                           [checked]="isSelected(entity)"
                                           (change)="toggleSelection(entity)"
                                           [title]="entity">
@@ -150,7 +150,7 @@
       <div class="flex gap-16 items-center p-4 options-checkbox">
         <ng-container *ngFor="let group of dataList">
           <mat-checkbox
-            [disabled]="accessControlCriteriaSelection?.readOnly"
+            [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
             [checked]="isSelected(group)"
             (change)="toggleSelection(group)"
             [title]="group">
@@ -163,16 +163,15 @@
 
   <ng-container *ngIf="selectionType === selectionTypeEnum.VerificationStatus">
     <div class="flex gap-16 items-center p-4 options-checkbox">
-      <mat-radio-group
-        [(ngModel)]="selectedVerificationStatus"
-        (change)="onVerificationChange($event)"
-        [disabled]="accessControlCriteriaSelection?.readOnly">
-        <ng-container *ngFor="let group of dataList">
-          <mat-radio-button [value]="group?.value" [title]="group?.label" class="mr-3">
-            {{ group?.label }}
-          </mat-radio-button>
-        </ng-container>
-      </mat-radio-group>
+      <ng-container *ngFor="let group of dataList">
+        <mat-checkbox
+          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+          [checked]="isSelectedVerification(group)"
+          (change)="onVerificationChange(group)"
+          [title]="group?.label">
+          {{ group?.label }}
+        </mat-checkbox>
+      </ng-container>
     </div>
   </ng-container>
 </div>
@@ -186,7 +185,7 @@
       <ng-container *ngIf="selectionType === selectionTypeEnum?.VerificationStatus || selectionType === selectionTypeEnum?.Group || activeTab === 1">
         <button
           mat-flat-button
-          [disabled]="(selectedData.length === 0 && selectedDataTemp.length === 0) || accessControlCriteriaSelection?.readOnly"
+          [disabled]="(selectedData.length === 0 && selectedDataTemp.length === 0) || accessControlCriteriaSelection?.readOnly || data?.disabled"
           (click)="applySelections()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
           Apply
@@ -195,7 +194,7 @@
       <ng-container *ngIf="selectionType !== selectionTypeEnum?.VerificationStatus && selectionType !== selectionTypeEnum?.Group && activeTab === 0">
         <button
           mat-flat-button
-          [disabled]="selectedDataTemp.length === 0 || accessControlCriteriaSelection?.readOnly"
+          [disabled]="selectedDataTemp.length === 0 || accessControlCriteriaSelection?.readOnly || data?.disabled"
           (click)="setSelected()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
           {{ getModalTitle() }}
