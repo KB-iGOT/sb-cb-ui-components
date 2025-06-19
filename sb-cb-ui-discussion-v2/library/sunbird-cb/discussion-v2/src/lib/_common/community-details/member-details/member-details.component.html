@@ -18,14 +18,16 @@
             <ng-container *ngIf="!membersLoading">
                 <div class="flex gap-4 flex-wrap justify-start" *ngIf="communityMembersList?.length;else noData ">
                     <ng-container *ngFor="let member of communityMembersList">
-                        <d-v2-member-card [memeberData]="member"></d-v2-member-card>
+                        <d-v2-member-card [memeberData]="member"
+                            *ngIf="member && (member.first_name || member.firstName)"></d-v2-member-card>
                     </ng-container>
                 </div>
             </ng-container>
             <div class="flex gap-4 flex-wrap justify-start">
                 <ng-container *ngIf="membersLoading">
                     <ng-container *ngFor="let member of [1,2,3]">
-                        <d-v2-member-card [isLoading]="true" [memeberData]="member"></d-v2-member-card>
+                        <d-v2-member-card [isLoading]="true" [memeberData]="member"
+                            *ngIf="member && (member.first_name || member.firstName)"></d-v2-member-card>
                     </ng-container>
                 </ng-container>
             </div>
