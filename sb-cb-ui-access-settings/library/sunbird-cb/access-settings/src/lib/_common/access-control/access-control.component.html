@@ -184,7 +184,8 @@
                         [disabled]="
                           content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
                           content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
-                          accessControlCriteriaSelection?.readOnly
+                          accessControlCriteriaSelection?.readOnly || 
+                          rule.get('isUserGroupDisabled')?.value
                         "
                         mat-button
                         class="new-secondary-button-no-border button-with-corners"

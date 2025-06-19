@@ -64,15 +64,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   ngOnInit(): void {
     this.initForm();
     this.getAccessControl();
+    this.config.content = this.content;
     this.accessControlService.accessControlConfig.set(this.config);
     this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
-
-    // Disable form for reviewer if readonly is true
-    if (this.accessControlCriteriaSelection?.readOnly) {
-      this.accessControlForm.disable();
-      this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
-    }
 
     this.usersTableConfig = this.config?.usersTableConfig;
 
@@ -80,14 +74,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.callSnackbar("Content id is required", "error");
     }
     if (this.content) {
-      if (this.content?.status === "Live") {
-        this.accessControlCriteriaSelection.readOnly = true;
-        this.isSaveFltrBtnDisabled = true;
-      } else {
-        this.isApplyBtnDisabled = true;
-        this.accessControlCriteriaSelection.readOnly = false;
-      }
-
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         this.accessType = NsAccessControlConfig.IAccessTypes.Public;
         const accessTypePublic = this.accessControlCriteriaSelection?.accessTypes.find(
@@ -117,6 +103,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.config?.visiblilityOnOff?.default !== "on") {
       this.isVisibilityEnabled = false;
     }
+    localStorage.removeItem("goToSetting");
   }
 
   ngOnDestroy(): void {
@@ -189,7 +176,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       id: [uuidv4()],
       name: [`User Group ${this.userGroup.length + 1}`],
       description: [`Description for UserGroup ${this.userGroup.length + 1}`],
-      conditions: this.fb.array([this.createConditionGroup(uuidv4(), this.userGroup.length - 1)])
+      conditions: this.fb.array([this.createConditionGroup(uuidv4(), this.userGroup.length - 1)]),
+      isUserGroupDisabled: [false]
     });
 
     this.userGroup.push(ruleGroup);
@@ -357,7 +345,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const rule = ruleForm.getRawValue();
     switch (condition.entity) {
       case NsAccessControlConfig.SelectionType.Users:
-        this.openInviteUserDialog(condition, rule, activeTabSelected);
+        this.openInviteUserDialog(condition, rule, activeTabSelected, rule?.isUserGroupDisabled
+);
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
       case NsAccessControlConfig.SelectionType.Designation:
@@ -367,19 +356,20 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       case NsAccessControlConfig.SelectionType.Group:
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         this.processCadreConfigMapping(userGroupIndex);
-        this.openSelectionDialog(rule, condition, activeTabSelected);
+        this.openSelectionDialog(rule, condition, activeTabSelected, rule?.isUserGroupDisabled
+);
         break;
       default:
         console.warn("Unsupported entity type:", condition.entity);
     }
   }
 
-  openSelectionDialog(rule: any, condition: any, activeTabSelected: number): void {
+  openSelectionDialog(rule: any, condition: any, activeTabSelected: number, isDisabled: boolean): void {
     const originalSelections = [...(condition.selections || [])];
 
     const dialogRef = this.dialog.open(EntitySelectionsComponent, {
       width: "1032px",
-      data: { rule: rule, condition: condition, selected: condition.selections, activeTabSelected: activeTabSelected }
+      data: { rule: rule, condition: condition, selected: condition.selections, activeTabSelected: activeTabSelected, disabled: isDisabled }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -495,10 +485,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  openInviteUserDialog(condition: any, rule: any, activeTabSelected: number): void {
+  openInviteUserDialog(condition: any, rule: any, activeTabSelected: number, isDisabled: boolean): void {
     const dialogRef = this.dialog.open(InviteUsersComponent, {
       width: "1090px",
-      data: { condition: condition, rule: rule, selected: condition.selections, activeTab: activeTabSelected }
+      data: { condition: condition, rule: rule, selected: condition.selections, activeTab: activeTabSelected, disabled: isDisabled }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -594,7 +584,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   processRequestCreation(): Promise<IUserGroupRequest> {
     return new Promise((resolve, reject) => {
       try {
-        const data = this.accessControlForm.value;
+        const data = this.accessControlForm.getRawValue();
 
         const userGroups = data.userGroup.map((group: any) => ({
           userGroupName: group.name,
@@ -695,11 +685,34 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         id: [group.userGroupId || uuidv4()],
         name: [group.userGroupName],
         description: [`Description for ${group.userGroupName}`],
-        conditions: conditions
+        conditions: conditions,
+        isUserGroupDisabled: [false]
       });
 
       this.userGroup.push(ruleGroup);
     });
+
+    if (this.content?.status === "Review" && this.content?.reviewStatus === "InReview") {
+      // reviewer(readonly)
+      this.accessControlCriteriaSelection.readOnly = true;
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
+    } else if (
+      this.content?.status === "Live" &&
+      (this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("content_creator"))
+    ) {
+      // publisher (cannot edit already added)
+      for (let i = 0; i < this.userGroup.length; i++) {
+        const group = this.userGroup.at(i);
+        group.get("id")?.disable();
+        group.get("name")?.disable();
+        group.get("description")?.disable();
+        group.get("conditions")?.disable();
+        group.get("isUserGroupDisabled")?.setValue(true);
+      }
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = false;
+    }
   }
 
   async updateContentAccessSetting(): Promise<void> {
@@ -764,6 +777,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // Create Organization condition
       const orgCondition = this.createConditionGroup(uuidv4(), 0);
       orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
+      orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
 
       // Create Verification Status condition with default 'Verified'
       const verificationCondition = this.createConditionGroup(uuidv4(), 0);
