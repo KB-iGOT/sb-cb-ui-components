@@ -38,12 +38,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
   selectedVerificationStatus: string = "";
-  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number }>(MAT_DIALOG_DATA);
+  userProfile: any;
+  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number, disabled: boolean }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
     this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig().accessControlCriteriaSelection;
+    this.userProfile = this.accessControlService.accessControlConfig().userConfig;
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
@@ -59,7 +61,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
 
       if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
-        this.selectedVerificationStatus = this.data.selected[0];
+        // this.selectedVerificationStatus = this.data.selected[0];
       }
     }
 
@@ -511,7 +513,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   applySelections(): void {
-    if (this.selectionType === NsAccessControlConfig.SelectionType.Group) {
+    if (
+      this.selectionType === NsAccessControlConfig.SelectionType.Group ||
+      this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus
+    ) {
       this.selectedData = this.selectedDataTemp;
     }
     this.dialogRef.close({
@@ -535,12 +540,27 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   onVerificationChange(event: MatRadioChange) {
-    this.selectedData = [event.value];
-    this.selectedDataTemp = [event.value];
+    const value = event.value;
+    const index = this.selectedDataTemp.indexOf(value);
+    if (index > -1) {
+      this.selectedDataTemp.splice(index, 1);
+    } else {
+      this.selectedDataTemp.push(value);
+    }
+  }
+
+  isSelectedVerification(event: any): boolean {
+    return this.selectedDataTemp.includes(event?.value);
   }
 
   setSelected(): void {
     this.selectedData = [...this.selectedDataTemp];
     this.activeTab = 1;
+  }
+
+  disableOrganisationIfModerated(item: any): boolean {
+    const value = this.getSelectionValue(item);
+    if (value === this.userProfile?.rootOrgId) return true;
+    return false;
   }
 }

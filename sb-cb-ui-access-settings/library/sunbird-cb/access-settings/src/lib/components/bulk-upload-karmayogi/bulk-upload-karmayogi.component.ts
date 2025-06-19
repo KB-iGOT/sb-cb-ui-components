@@ -52,7 +52,7 @@ export class BulkUploadKarmayogiComponent {
         this.fileUploading = false;
         this.snackBar.openFromComponent(SnackbarComponent, {
           data: {
-            message: "File size exceeds the maximum limit of 100 MB.",
+            message: "The file has exceeded the 100 MB upload size limit.",
             type: "error"
           },
           duration: 3000,
