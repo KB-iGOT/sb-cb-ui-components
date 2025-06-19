@@ -37,9 +37,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   selectedCharacterRange: string;
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
-  selectedVerificationStatus: string = "";
   userProfile: any;
-  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number, disabled: boolean }>(MAT_DIALOG_DATA);
+  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
@@ -59,10 +58,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
       this.activeTab = this.data?.activeTabSelected || 0;
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
-
-      if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
-        // this.selectedVerificationStatus = this.data.selected[0];
-      }
     }
 
     // Subscribe to search control changes
@@ -145,6 +140,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType === NsAccessControlConfig.SelectionType.Designation
     ) {
       return item?.name || item?.designation;
+    } else if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
+      return Number(item);
     }
 
     return item?.id || item?.identifier || item;
@@ -152,7 +149,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   isSelected(item: any): boolean {
     const value = this.getSelectionValue(item);
-    return this.selectedDataTemp.includes(value);
+    return this.filterValue === "selected" ? this.selectedData.includes(value) : this.selectedDataTemp.includes(value);
   }
 
   toggleSelection(item: any): void {
@@ -170,6 +167,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.selectedData = [...this.selectedData, value];
       }
     }
+  }
+
+  setSelected(): void {
+    this.selectedData = [...this.selectedDataTemp];
+    this.activeTab = 1;
   }
 
   onFilterChange(event: MatTabChangeEvent): void {
@@ -197,7 +199,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
 
     if (this.selectionType === NsAccessControlConfig.SelectionType.Cadre || this.selectionType === NsAccessControlConfig.SelectionType.Service) {
-      this.selectedVerificationStatus = "";
       this.alphabet = [];
     }
   }
@@ -551,11 +552,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   isSelectedVerification(event: any): boolean {
     return this.selectedDataTemp.includes(event?.value);
-  }
-
-  setSelected(): void {
-    this.selectedData = [...this.selectedDataTemp];
-    this.activeTab = 1;
   }
 
   disableOrganisationIfModerated(item: any): boolean {
