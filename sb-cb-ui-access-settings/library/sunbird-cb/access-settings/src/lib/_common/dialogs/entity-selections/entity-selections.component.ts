@@ -38,13 +38,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
   userProfile: any;
+  content: any;
   public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
-    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig().accessControlCriteriaSelection;
-    this.userProfile = this.accessControlService.accessControlConfig().userConfig;
+    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig()?.accessControlCriteriaSelection;
+    this.userProfile = this.accessControlService.accessControlConfig()?.userConfig;
+    this.content = this.accessControlService.accessControlConfig()?.content;
+
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
@@ -166,6 +169,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       } else {
         this.selectedData = [...this.selectedData, value];
       }
+      this.selectedDataTemp = [...this.selectedData];
     }
   }
 
@@ -376,7 +380,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     const selectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
     if (selectionIds?.length) {
-      const categories = selectionIds.map((ele: string) => `${ele}_odcs_designation`);
+      const categories = selectionIds.map((ele: string) => `${ele}_odcs_master_fw_designation`);
       this.accessControlService
         .fetchDesignationsWithOrg(categories, query, query ? [] : selectedData)
         .pipe(takeUntil(this.destroy$))
@@ -556,7 +560,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   disableOrganisationIfModerated(item: any): boolean {
     const value = this.getSelectionValue(item);
-    if (value === this.userProfile?.rootOrgId) return true;
+    if (value === this.userProfile?.rootOrgId && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
     return false;
   }
 }
