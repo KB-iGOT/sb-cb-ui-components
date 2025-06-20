@@ -4,6 +4,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { PageChangeEmitter } from "../../_models/pagination.model";
 import { MatSort, Sort } from "@angular/material/sort";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
+import * as _ from "lodash";
 
 @Component({
   selector: "sb-uic-list-table",
@@ -130,7 +131,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     this.selectedDataChange.emit({
-      selectedRows: this.selectedTablerow,
+      selectedRows: _.cloneDeep(this.selectedTablerow),
       toggledRow: row,
       action: isSelected ? "unselected" : "selected"
     });
