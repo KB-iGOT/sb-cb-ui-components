@@ -24,14 +24,14 @@ export class ConnectorService {
   elmWrapper: any;
   containerSelector = '#treeViewContainer'; // You might need to adjust this selector
 
-  constructor() {}
+  constructor() {
+  }
 
   _drawLine(source: any, target: any, options: any = defaultConfig, sourceContainerId: any = undefined, targetContainerId: any = undefined): any {
     const _options = <any>{...defaultConfig, ...options};
     _options['dashed'] = true
     if (Array.isArray(target)) {
       let connectedDots: ConnectedDot[] = [];
-      
       target.forEach((_target) => {
         const tempLine = this.renderLine(source, _target, _options);
         connectedDots.push({
@@ -89,17 +89,30 @@ export class ConnectorService {
     // Create or get container for the SVG
     let container: any = treeViewComponent.querySelector('#leader-line-container');
     if (!container) {
+      // Create a wrapper container to control the overflow at the top
+      let overflowWrapper = document.createElement('div');
+      overflowWrapper.id = 'leader-line-overflow-wrapper';
+      overflowWrapper.style.position = 'absolute';
+      overflowWrapper.style.top = '80px'; // Same top position
+      overflowWrapper.style.bottom = '0';
+      overflowWrapper.style.left = '0';
+      overflowWrapper.style.right = '0';
+      overflowWrapper.style.overflow = 'hidden'; // Hide anything above this container
+      overflowWrapper.style.pointerEvents = 'none'; // Allow clicks to pass through
+      
+      // Original container remains the same but positioned at top:0 within the wrapper
       container = document.createElement('div');
       container.id = 'leader-line-container';
       container.style.position = 'absolute';
-      container.style.top = '0';
+      container.style.top = '0'; // Changed to 0 as it's now relative to wrapper
+      container.style.bottom = '0';
       container.style.left = '0';
+      container.style.right = '0';
       container.style.width = '100%';
       container.style.height = '100%';
-      container.style.pointerEvents = 'none';
-      container.style.zIndex = '1000';
-      container.style.overflow = 'hidden';
-      treeViewComponent.appendChild(container);
+      container.style.pointerEvents = 'none'; // Allow clicks to pass through
+      overflowWrapper.appendChild(container);
+      treeViewComponent.appendChild(overflowWrapper);
     }
     
     // Store container reference for access in other methods
@@ -316,5 +329,19 @@ export class ConnectorService {
     }
     // to reset connector map after clearing all the lines
     this.updateConnectorsMap({});
+  }
+
+  repositionAllLines(): void {
+    if (this.connectorMap) {
+      Object.values(this.connectorMap).forEach((connector: any) => {
+        if (connector && connector.lines) {
+          connector.lines.forEach((item: any) => {
+            if (item.line && typeof item.line.position === 'function') {
+              item.line.position();
+            }
+          });
+        }
+      });
+    }
   }
 }

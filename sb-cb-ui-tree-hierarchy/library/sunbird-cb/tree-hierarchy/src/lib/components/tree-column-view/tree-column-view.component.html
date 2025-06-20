@@ -1,17 +1,14 @@
 <ng-container *ngIf="column?.config?.showSearch">
     <div class="w-full sticky">
         <div class="search mb-2">
-            <div class=rsearch>
-                <!-- <ng-container *ngIf="column?.config?.showSearch"> -->
-                    <div class="sinput mat-field-rounded">
-                    <mat-icon class=" search-icon">search</mat-icon>
-                    <input type="search" [formControl]="searchValue"  placeholder="Search" #search>
+            <div class="rsearch">
+                <div class="sinput mat-field-rounded flex flex-middle">
+                    <mat-icon class="search-icon">search</mat-icon>
+                    <input type="search" [formControl]="searchValue" placeholder="Search" #search>
                     <button *ngIf="search.value" class="clear-btn flex" (click)="clearSearch()">
-                    <mat-icon class="">clear</mat-icon>
+                        <mat-icon>clear</mat-icon>
                     </button>
-                    </div>
-                    
-                <!-- </ng-container> -->
+                </div>
             </div>
         </div>
     </div>

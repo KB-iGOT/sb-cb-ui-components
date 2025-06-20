@@ -34,12 +34,15 @@
                 <div class="select-search-container">
                     <mat-form-field appearance="outline" class="w-full custom-height-select">
                         <mat-select [formControl]="selectedOrgsControl" placeholder="Select" #singleSelect
-                        [panelClass]="'mat-select-panel-below'" disableOptionCentering [disableOptionCentering]="true"
-                        multiple> <!-- Added the multiple attribute here -->
+                          [panelClass]="'mat-select-panel-below'" 
+                          disableOptionCentering 
+                          [disableOptionCentering]="true"
+                          (keydown)="handleKeydown($event)"
+                          multiple>
                             <!-- Search container -->
-                            <div class="search-container">
+                            <div class="search-container" (click)="$event.stopPropagation()">
                                 <input type="text" [formControl]="searchControl" placeholder="Search..."
-                                (keydown)="$event.key === ' ' ? $event.stopPropagation() : null" (click)="$event.stopPropagation()"
+                                (keydown)="handleSearchKeydown($event)"
                                 class="search-input" #searchInput>
                             </div>
                             <mat-option *ngFor="let organization of filteredOptions" [value]="organization.identifier">
