@@ -608,7 +608,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         }
       }
     } 
-    if (prevTrem && prevTrem) {
+    if (prev && prevTrem) {
       prevTrem = prevTrem.filter((ele:any) => ele.category === prev.code)[0]
       if (prevTrem && prevTrem.associations && prevTrem.associations.length > 0) {
         prevTrem.associations.forEach((ele:any) => {
@@ -801,7 +801,8 @@ export class TreeViewComponent implements OnInit, OnDestroy {
               });
               if (term.associations && term.associations.length > 0) {
                 term.associations.forEach((assoc: any) => {
-                  tempData[catIndex]['assocIds'].push(assoc.code)
+                  const getIndex = tempData.findIndex((item:any) => item.ids && item.ids.includes(term.code))
+                  tempData[getIndex]['assocIds'].push(assoc.code)
                 })
               }
             }
