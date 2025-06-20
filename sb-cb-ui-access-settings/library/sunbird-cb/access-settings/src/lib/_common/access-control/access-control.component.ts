@@ -694,12 +694,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   private setupFormChangeDetection(): void {
     this.accessControlForm.valueChanges.subscribe(() => {
       const currentValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
-      this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;      
+      this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
     });
   }
 
   processAccessControlResult(accessControl: any): void {
-    if (!accessControl?.userGroups?.length) return;
+    if (!accessControl?.userGroups?.length) {
+      setTimeout(() => {
+        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+        this.setupFormChangeDetection();
+      }, 0);
+
+      return;
+    }
 
     while (this.userGroup.length) {
       this.userGroup.removeAt(0);
@@ -808,19 +815,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   processConditionsForContentType(): void {
-    // For Access Control Content Type
-    if (this.accessType === NsAccessControlConfig.IAccessTypes.Public) {
-      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-        width: "470px",
-        data: { type: "confirm-access-type" }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
-          this.sendForCQF.emit(true);
-          this.updateContentAccessSetting();
-        }
-      });
+    if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+      // Disable add user group btn
+      this.isAddUserGroupBtnDisabled = true;
     }
   }
 
@@ -838,7 +835,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     };
 
     const group = this.userGroup.at(userGroupIndex);
-    if (!group) return;
+    if (!group) {
+      this.userCount[userGroupIndex] = 0;
+      return;
+    }
 
     const conditions = group.get("conditions") as FormArray;
     const request: { [key: string]: any[] } = {};

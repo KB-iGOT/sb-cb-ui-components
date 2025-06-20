@@ -75,7 +75,7 @@ export class AccessControlService {
         },
         fields: ["channel", "identifier"],
         query: query,
-        limit: 200
+        // limit: 200
       }
     };
     if (selectedData?.length) {
