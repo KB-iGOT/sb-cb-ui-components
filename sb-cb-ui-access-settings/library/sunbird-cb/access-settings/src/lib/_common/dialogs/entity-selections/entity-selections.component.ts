@@ -37,15 +37,17 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   selectedCharacterRange: string;
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
-  selectedVerificationStatus: string = "";
   userProfile: any;
-  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number, disabled: boolean }>(MAT_DIALOG_DATA);
+  content: any;
+  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
-    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig().accessControlCriteriaSelection;
-    this.userProfile = this.accessControlService.accessControlConfig().userConfig;
+    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig()?.accessControlCriteriaSelection;
+    this.userProfile = this.accessControlService.accessControlConfig()?.userConfig;
+    this.content = this.accessControlService.accessControlConfig()?.content;
+
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
@@ -59,10 +61,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
       this.activeTab = this.data?.activeTabSelected || 0;
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
-
-      if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
-        // this.selectedVerificationStatus = this.data.selected[0];
-      }
     }
 
     // Subscribe to search control changes
@@ -145,6 +143,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType === NsAccessControlConfig.SelectionType.Designation
     ) {
       return item?.name || item?.designation;
+    } else if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
+      return Number(item);
     }
 
     return item?.id || item?.identifier || item;
@@ -152,7 +152,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   isSelected(item: any): boolean {
     const value = this.getSelectionValue(item);
-    return this.selectedDataTemp.includes(value);
+    return this.filterValue === "selected" ? this.selectedData.includes(value) : this.selectedDataTemp.includes(value);
   }
 
   toggleSelection(item: any): void {
@@ -169,7 +169,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       } else {
         this.selectedData = [...this.selectedData, value];
       }
+      this.selectedDataTemp = [...this.selectedData];
     }
+  }
+
+  setSelected(): void {
+    this.selectedData = [...this.selectedDataTemp];
+    this.activeTab = 1;
   }
 
   onFilterChange(event: MatTabChangeEvent): void {
@@ -197,7 +203,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
 
     if (this.selectionType === NsAccessControlConfig.SelectionType.Cadre || this.selectionType === NsAccessControlConfig.SelectionType.Service) {
-      this.selectedVerificationStatus = "";
       this.alphabet = [];
     }
   }
@@ -375,7 +380,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     const selectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
     if (selectionIds?.length) {
-      const categories = selectionIds.map((ele: string) => `${ele}_odcs_designation`);
+      const categories = selectionIds.map((ele: string) => `${ele}_odcs_master_fw_designation`);
       this.accessControlService
         .fetchDesignationsWithOrg(categories, query, query ? [] : selectedData)
         .pipe(takeUntil(this.destroy$))
@@ -553,14 +558,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     return this.selectedDataTemp.includes(event?.value);
   }
 
-  setSelected(): void {
-    this.selectedData = [...this.selectedDataTemp];
-    this.activeTab = 1;
-  }
-
   disableOrganisationIfModerated(item: any): boolean {
     const value = this.getSelectionValue(item);
-    if (value === this.userProfile?.rootOrgId) return true;
+    if (value === this.userProfile?.rootOrgId && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
     return false;
   }
 }

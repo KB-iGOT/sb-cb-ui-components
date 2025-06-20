@@ -51,9 +51,9 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       if (!this.isArrayOfObjects(this.data?.selected)) {
         this.getUsersList("", this.pagination.limit, this.pagination.offset, this.data?.selected);
       } else {
-        this.usersFinalList = this.data.selected;
-        this.holdSelectedUsers = this.usersFinalList;
-        this.finalSelectedUsers = this.usersFinalList;
+        this.usersFinalList = [...this.data.selected];
+        this.holdSelectedUsers = [...this.usersFinalList];
+        this.finalSelectedUsers = [...this.usersFinalList];
         this.activeTab = 1;
       }
     }
@@ -156,8 +156,8 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.holdSelectedUsers = this.finalSelectedUsers;
   }
 
-  onSelectingUserToApply(users: any): void {
-    this.usersFinalList = users;
+  onSelectingUserToApply(event: any): void {
+    this.usersFinalList = [...event.selectedRows];
   }
 
   applySelections(): void {
