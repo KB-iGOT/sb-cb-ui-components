@@ -85,7 +85,7 @@
   </ng-container>
 
   <ng-container *ngIf="filterValue === 'bulk_upload_karmayogis'">
-    <sb-uic-bulk-upload-karmayogi></sb-uic-bulk-upload-karmayogi>
+    <sb-uic-bulk-upload-karmayogi (appliedUser)="onApplyingUserBulkUpload($event)"></sb-uic-bulk-upload-karmayogi>
   </ng-container>
 </div>
 
