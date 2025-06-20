@@ -78,8 +78,20 @@
           [count]="1"
           [initialPaginationSize]="bulkUploadConfig['bulkUploadTable']?.initialPaginationSize"
           [tableConfig]="bulkUploadConfig['bulkUploadTable']"
+          (selectedDataChange)="onSelectingUser($event)"
           [bulkUploadEntriesCount]="{ totalCount: isSuccessUserlist?.length + isErrorUserlist?.length, success: isSuccessUserlist?.length }">
         </sb-uic-list-table>
+
+        <ng-container *ngIf="isSuccessUserlist?.length && holdSelectedUsers?.length">
+          <div class="w-full mt-4">
+            <button
+              mat-flat-button
+              (click)="applySelections()"
+              class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2 w-full">
+              Apply
+            </button>
+          </div>
+        </ng-container>
       </ng-container>
 
       <ng-container *ngIf="currrentFilterType === 'error'">

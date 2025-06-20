@@ -82,8 +82,8 @@ export class AccessControlService {
       request.request.filters.identifier = selectedData;
     }
 
-    if (characterSearch) {
-      request.request.filters.channel = { startsWith: characterSearch };
+    if (characterSearch || !query) {
+      request.request.filters.channel = { startsWith: characterSearch ||  'A'};
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }

@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Output } from "@angular/core";
 import { AccessControlService } from "../../_services/access-control.service";
 import { NsAccessControlConfig } from "../../_models/access-control.model";
 import { SnackbarComponent } from "../snackbar/snackbar.component";
@@ -11,6 +11,8 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
   styleUrls: ["./bulk-upload-karmayogi.component.scss"]
 })
 export class BulkUploadKarmayogiComponent {
+  @Output() appliedUser: EventEmitter<any> = new EventEmitter();
+
   bulkUploadConfig: NsAccessControlConfig.IBulkUploadKarmayogi;
   file!: File | null;
 
@@ -24,6 +26,9 @@ export class BulkUploadKarmayogiComponent {
   isErrorUserlist: any = [];
   fileName: string = "";
   currentDate = new Date();
+
+  holdSelectedUsers: any[] = [];
+  finalSelectedUsers: any[] = [];
   constructor(private accessControlService: AccessControlService, private snackBar: MatSnackBar) {
     this.bulkUploadConfig = this.accessControlService.accessControlConfig().bulkUploadKarmayogi;
   }
@@ -371,5 +376,13 @@ export class BulkUploadKarmayogiComponent {
 
   downloadErrorFile() {
     this.accessControlService.downloadFile(this.isErrorUserlist, "userErrordata");
+  }
+
+  onSelectingUser(event: any): void {
+    this.holdSelectedUsers = [...event.selectedRows];
+  }
+
+  applySelections() {
+    this.appliedUser.emit(this.holdSelectedUsers);
   }
 }

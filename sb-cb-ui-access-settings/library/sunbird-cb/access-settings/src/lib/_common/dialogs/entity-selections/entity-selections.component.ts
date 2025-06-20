@@ -39,6 +39,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   activeTab = 0;
   userProfile: any;
   content: any;
+  searchedOrganisationFlagWithQuery: boolean = false;
+
   public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
@@ -299,9 +301,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   scrollToSection(letter: string) {
-    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && this.filterValue === "all" && !this.searchControl.value) {
+    if (
+      this.selectionType === NsAccessControlConfig.SelectionType.Organizations &&
+      this.filterValue === "all" &&
+      !this.searchedOrganisationFlagWithQuery
+    ) {
       this.selectedCharacterRange = letter;
-      this.getOrganisationsList(this.searchControl.value, [], letter);
+      this.getOrganisationsList("", [], letter);
       return;
     }
 
@@ -360,6 +366,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         if (response?.result && response?.result?.response?.content) {
           this.dataList = response.result.response.content;
           this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+          if (query) this.searchedOrganisationFlagWithQuery = true;
+          else this.searchedOrganisationFlagWithQuery = false;
 
           if (this.filterValue === "selected" || query) {
             this.updateAlphabet();

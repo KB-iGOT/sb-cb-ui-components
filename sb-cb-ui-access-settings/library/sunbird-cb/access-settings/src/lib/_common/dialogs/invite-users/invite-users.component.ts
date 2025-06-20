@@ -72,9 +72,16 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     let reducedData: any = {};
     this.resetPagination();
     this.sortState = {};
-    this.holdSelectedUsers = [];
 
-    const pickEntity = [NsAccessControlConfig.SelectionType.Organizations, NsAccessControlConfig.SelectionType.VerificationStatus];
+    const pickEntity = [
+      NsAccessControlConfig.SelectionType.Organizations,
+      NsAccessControlConfig.SelectionType.VerificationStatus,
+      NsAccessControlConfig.SelectionType.Designation,
+      NsAccessControlConfig.SelectionType.Group,
+      NsAccessControlConfig.SelectionType.Cadre,
+      NsAccessControlConfig.SelectionType.Service,
+      NsAccessControlConfig.SelectionType.Batch
+    ];
 
     if (this.data?.rule?.conditions.length) {
       reducedData = this.data?.rule?.conditions.reduce((acc: any, curr: any) => {
@@ -88,6 +95,11 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       this.filters = {
         rootOrgId: reducedData?.rootOrgId,
         "profileDetails.profileStatus": reducedData.profilestatus,
+        "profileDetails.professionalDetails.designation": reducedData.designation,
+        "profileDetails.professionalDetails.group": reducedData.group,
+        "profileDetails.cadreDetails.cadreName": reducedData.Cadre,
+        "profileDetails.cadreDetails.civilServiceName": reducedData.service,
+        "profileDetails.cadreDetails.cadreBatch": reducedData.batch,
         status: 1
       };
     }
@@ -177,5 +189,10 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.currentPage = 1;
     this.pagination.limit = 5;
     this.pagination.offset = 0;
+  }
+
+  onApplyingUserBulkUpload(event: any) {
+    this.usersFinalList = [...event];
+    this.dialogRef.close({ rule: this.data.rule, condition: this.data.condition, selected: this.usersFinalList });
   }
 }
