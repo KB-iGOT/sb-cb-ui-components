@@ -188,4 +188,29 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
         this.filteredOptions = [...this.orgOptions];
     }
   }
+
+  handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    return true;
+  }
+
+  handleSearchKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    
+    // For space, we only want to prevent default behavior when in the search input
+    // but allow the event to propagate for selection functionality
+    if (event.key === ' ' && event.target instanceof HTMLInputElement) {
+      // Don't prevent propagation, just prevent default to allow typing spaces in search
+      event.stopPropagation(); 
+    }
+    return true;
+  }
 }
