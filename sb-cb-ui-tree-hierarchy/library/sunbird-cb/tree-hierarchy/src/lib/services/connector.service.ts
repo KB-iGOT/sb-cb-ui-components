@@ -24,14 +24,14 @@ export class ConnectorService {
   elmWrapper: any;
   containerSelector = '#treeViewContainer'; // You might need to adjust this selector
 
-  constructor() {}
+  constructor() {
+  }
 
   _drawLine(source: any, target: any, options: any = defaultConfig, sourceContainerId: any = undefined, targetContainerId: any = undefined): any {
     const _options = <any>{...defaultConfig, ...options};
     _options['dashed'] = true
     if (Array.isArray(target)) {
       let connectedDots: ConnectedDot[] = [];
-      
       target.forEach((_target) => {
         const tempLine = this.renderLine(source, _target, _options);
         connectedDots.push({
@@ -92,13 +92,48 @@ export class ConnectorService {
       container = document.createElement('div');
       container.id = 'leader-line-container';
       container.style.position = 'absolute';
-      container.style.top = '0';
+      container.style.top = '100px';
+      container.style.bottom = '0';
       container.style.left = '0';
+      container.style.right = '0';
       container.style.width = '100%';
       container.style.height = '100%';
-      container.style.pointerEvents = 'none';
-      container.style.zIndex = '1000';
-      container.style.overflow = 'hidden';
+      
+      // Add resize observer to dynamically adjust container width
+      const resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          if (entry.target === treeViewComponent) {
+            container.style.width = `${entry.contentRect.width}px`;
+            
+            // Reposition all lines when container resizes
+            if (this.connectorMap) {
+              Object.values(this.connectorMap).forEach((connector: any) => {
+                if (connector && connector.lines) {
+                  connector.lines.forEach((item: any) => {
+                    if (item.line && typeof item.line.position === 'function') {
+                      item.line.position();
+                    }
+                  });
+                }
+              });
+            }
+          }
+        }
+      });
+
+      // Start observing the treeViewComponent
+      resizeObserver.observe(treeViewComponent);
+
+      // Also listen for scroll events to reposition lines
+      treeViewComponent.addEventListener('scroll', () => {
+        // Update container dimensions based on visible area
+        container.style.width = `${treeViewComponent.scrollWidth}px`;
+        container.style.height = `${treeViewComponent.scrollHeight}px`;
+        
+        // Reposition all active lines
+        this.repositionAllLines();
+      });
+      
       treeViewComponent.appendChild(container);
     }
     
@@ -316,5 +351,19 @@ export class ConnectorService {
     }
     // to reset connector map after clearing all the lines
     this.updateConnectorsMap({});
+  }
+
+  repositionAllLines(): void {
+    if (this.connectorMap) {
+      Object.values(this.connectorMap).forEach((connector: any) => {
+        if (connector && connector.lines) {
+          connector.lines.forEach((item: any) => {
+            if (item.line && typeof item.line.position === 'function') {
+              item.line.position();
+            }
+          });
+        }
+      });
+    }
   }
 }

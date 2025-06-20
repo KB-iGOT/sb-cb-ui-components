@@ -95,17 +95,21 @@ flex-center {
 }
 
 .col-container {
+    display: flex;
+    flex-direction: column;
     height: inherit;
     min-width: 350px;
+    /* Adjust based on your needs */
+    max-width: 300px; /* Adjust based on your needs */
 }
 
 .category-heading-sticky {
-    top: 0;
     position: sticky;
-    width: 100%;
-    background: #fff;
-    margin-bottom: 16px;
+    top: 0;
     z-index: 10;
+    width: 100%;
+    background-color: #fff; /* Match your background color */
+    margin-bottom: 16px;
 }
 
 .category-heading-container {
@@ -264,6 +268,7 @@ flex-center {
   width: 100%;
   max-width: calc(100vw - 340px);
   overflow-x: auto;
+  overflow-y: hidden;
   white-space: nowrap;
 }
 
