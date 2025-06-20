@@ -51,7 +51,7 @@ export class FrameworkService {
       //framework/v1/read/${this.environment.frameworkName}
       let url = `/${this.proxiesPath}/framework/v1/read/`
       if (_orgData) {
-        url  = url + _orgData.identifier + '_org_hierarchy';
+        url  = url + _orgData.orgHierarchyFrameworkId;
       } else {
         url = url + this.environment.frameworkName;
       }
