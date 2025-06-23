@@ -42,6 +42,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   searchedOrganisationFlagWithQuery: boolean = false;
 
   public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
+  searchedDesignationFlagWithQuery: any;
+  orgSelectionIds = [];
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
@@ -108,7 +110,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
-        this.getDesignationsList("");
+        this.getDesignationsList("", [], "A");
         this.radioSelections = this.accessControlCriteriaSelection?.designationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Service:
@@ -310,11 +312,21 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.getOrganisationsList("", [], letter);
       return;
     }
+    if (
+      this.selectionType === NsAccessControlConfig.SelectionType.Designation &&
+      this.filterValue === "all" &&
+      !this.searchedDesignationFlagWithQuery &&
+      !this.orgSelectionIds?.length
+    ) {
+      this.selectedCharacterRange = letter;
+      this.getDesignationsList("", [], letter);
+      return;
+    }
 
     const section = document.getElementById(`section-${letter}`);
     if (section) {
       this.selectedCharacterRange = letter;
-      section.scrollIntoView({ behavior: "smooth", inline: "start" });
+      section.scrollIntoView({ behavior: "auto", inline: "start" });
     }
   }
 
@@ -344,7 +356,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (chars.has("#")) sorted.push("#");
 
     // Show all characters for Organizations
-    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && this.filterValue === "all" && !this.searchControl.value) {
+    if (
+      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations ||
+        this.selectionType === NsAccessControlConfig.SelectionType.Designation) &&
+      this.filterValue === "all" &&
+      !this.searchControl.value &&
+      !this.orgSelectionIds?.length
+    ) {
       this.alphabet = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "#"];
     } else {
       this.alphabet = sorted;
@@ -384,11 +402,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getDesignationsList(query: string, selectedData?: string[]): void {
+  getDesignationsList(query: string, selectedData?: string[], character?: string): void {
     this.isLoading = true;
-    const selectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
-    if (selectionIds?.length) {
-      const categories = selectionIds.map((ele: string) => `${ele}_odcs_master_fw_designation`);
+    this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
+    if (this.orgSelectionIds?.length) {
+      const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_master_fw_designation`);
       this.accessControlService
         .fetchDesignationsWithOrg(categories, query, query ? [] : selectedData)
         .pipe(takeUntil(this.destroy$))
@@ -410,15 +428,20 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         });
     } else {
       this.accessControlService
-        .fetchDesignation(query, query ? [] : selectedData)
+        .fetchDesignation(query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: response => {
             if (response?.result && response?.result?.result?.data) {
               this.dataList = response?.result?.result?.data;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+              if (query) this.searchedDesignationFlagWithQuery = true;
+              else this.searchedDesignationFlagWithQuery = false;
 
-              this.updateAlphabet();
+              if (this.filterValue === "selected" || query) {
+                this.updateAlphabet();
+              }
+
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
@@ -569,6 +592,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   disableOrganisationIfModerated(item: any): boolean {
     const value = this.getSelectionValue(item);
     if (value === this.userProfile?.rootOrgId && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
+    return false;
+  }
+
+  disabledVerifiedIfModerated(item: any): boolean {
+    if (item?.value === "VERIFIED" && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
     return false;
   }
 }

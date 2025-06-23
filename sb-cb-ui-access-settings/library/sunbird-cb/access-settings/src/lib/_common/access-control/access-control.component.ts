@@ -188,6 +188,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   addCondition(userGroupIndex: number) {
+    this.processCadreConfigMapping(userGroupIndex);
     const conditions = this.ruleConditions(userGroupIndex);
     const accessSetting = this.content?.accessSetting;
 
@@ -281,7 +282,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  getAvailableEntities(userGroupIndex: number, currentConditionIndex: number): { value: string; label: string }[] {
+  getAvailableEntities(userGroupIndex: number, currentConditionIndex: number): any[] {
     const conditions = this.ruleConditions(userGroupIndex);
     const selectedEntities = conditions.controls
       .map((ctrl, idx) => (idx !== currentConditionIndex ? ctrl.get("entity")?.value : null))
@@ -753,37 +754,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       });
 
       this.userGroup.push(ruleGroup);
+
       // Calculate count for each user group
       this.calculateUserCountForUserGroup(index);
     });
-
-    if (this.content?.status === "Review" && this.content?.reviewStatus === "InReview") {
-      // reviewer(readonly)
-      this.accessControlCriteriaSelection.readOnly = true;
-      this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
-    } else if (
-      this.content?.status === "Live" &&
-      (this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("content_creator"))
-    ) {
-      // publisher (cannot edit already added)
-      for (let i = 0; i < this.userGroup.length; i++) {
-        const group = this.userGroup.at(i);
-        group.get("id")?.disable();
-        group.get("name")?.disable();
-        group.get("description")?.disable();
-        group.get("conditions")?.disable();
-        group.get("isUserGroupDisabled")?.setValue(true);
-      }
-      this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = false;
-    } else {
-      // Initialize formchange detection to enable/disable filterbutton
-      setTimeout(() => {
-        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
-        this.setupFormChangeDetection();
-      }, 0);
-    }
   }
 
   async updateContentAccessSetting(): Promise<void> {
@@ -818,6 +792,35 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
       // Disable add user group btn
       this.isAddUserGroupBtnDisabled = true;
+    }
+
+    if (this.content?.status === "Review" && this.content?.reviewStatus === "InReview") {
+      // reviewer(readonly)
+      this.accessControlCriteriaSelection.readOnly = true;
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
+    } else if (this.content?.status === "Live" && this.config.userConfig.userRoles.has("content_publisher")) {
+      //   // publisher (cannot edit already added)
+      //   for (let i = 0; i < this.userGroup.length; i++) {
+      //     const group = this.userGroup.at(i);
+      //     group.get("id")?.disable();
+      //     group.get("name")?.disable();
+      //     group.get("description")?.disable();
+      //     group.get("conditions")?.disable();
+      //     group.get("isUserGroupDisabled")?.setValue(true);
+      //   }
+      //   this.isSaveFltrBtnDisabled = true;
+      //   this.isApplyBtnDisabled = false;
+      // } else {
+      // // Initialize formchange detection to enable/disable filterbutton
+      // setTimeout(() => {
+      //   this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+      //   this.setupFormChangeDetection();
+      // }, 0);
+
+      this.accessControlCriteriaSelection.readOnly = true;
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
     }
   }
 

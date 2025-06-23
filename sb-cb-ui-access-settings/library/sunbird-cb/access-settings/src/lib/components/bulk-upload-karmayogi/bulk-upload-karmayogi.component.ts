@@ -362,6 +362,8 @@ export class BulkUploadKarmayogiComponent {
       // this.dataSource = new MatTableDataSource<IUserElement>(
       //   this.isSuccessUserlist
       // );
+      this.holdSelectedUsers = this.isSuccessUserlist;
+      document.getElementById("user-table-select")?.scrollIntoView({ behavior: "smooth" });
     } else if (this.currrentFilterType === "error") {
       // this.displayedColumns = ["email", "status", "mobile", "message"];
       // this.dataSource = new MatTableDataSource<IUserElement>(

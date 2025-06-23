@@ -165,7 +165,7 @@
     <div class="flex gap-16 items-center p-4 options-checkbox">
       <ng-container *ngFor="let group of dataList">
         <mat-checkbox
-          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled || disabledVerifiedIfModerated(group)"
           [checked]="isSelectedVerification(group)"
           (change)="onVerificationChange(group)"
           [title]="group?.label">
