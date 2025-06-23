@@ -110,7 +110,42 @@ export class ConnectorService {
       container.style.right = '0';
       container.style.width = '100%';
       container.style.height = '100%';
-      container.style.pointerEvents = 'none'; // Allow clicks to pass through
+      
+      // Add resize observer to dynamically adjust container width
+      const resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          if (entry.target === treeViewComponent) {
+            container.style.width = `${entry.contentRect.width}px`;
+            
+            // Reposition all lines when container resizes
+            if (this.connectorMap) {
+              Object.values(this.connectorMap).forEach((connector: any) => {
+                if (connector && connector.lines) {
+                  connector.lines.forEach((item: any) => {
+                    if (item.line && typeof item.line.position === 'function') {
+                      item.line.position();
+                    }
+                  });
+                }
+              });
+            }
+          }
+        }
+      });
+      
+      // Start observing the treeViewComponent
+      resizeObserver.observe(treeViewComponent);
+      
+      // Also listen for scroll events to reposition lines
+      treeViewComponent.addEventListener('scroll', () => {
+        // Update container dimensions based on visible area
+        overflowWrapper.style.width = `${treeViewComponent.scrollWidth}px`;
+        overflowWrapper.style.height = `${treeViewComponent.scrollHeight}px`;
+        
+        // Reposition all active lines
+        this.repositionAllLines();
+      });
+      
       overflowWrapper.appendChild(container);
       treeViewComponent.appendChild(overflowWrapper);
     }
