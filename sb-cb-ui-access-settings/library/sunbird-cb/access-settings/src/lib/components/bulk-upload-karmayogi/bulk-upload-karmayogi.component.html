@@ -79,6 +79,7 @@
           [initialPaginationSize]="bulkUploadConfig['bulkUploadTable']?.initialPaginationSize"
           [tableConfig]="bulkUploadConfig['bulkUploadTable']"
           (selectedDataChange)="onSelectingUser($event)"
+          [selected]="holdSelectedUsers"
           [bulkUploadEntriesCount]="{ totalCount: isSuccessUserlist?.length + isErrorUserlist?.length, success: isSuccessUserlist?.length }">
         </sb-uic-list-table>
 

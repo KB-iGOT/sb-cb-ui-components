@@ -170,6 +170,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
 
   onSelectingUserToApply(event: any): void {
     this.usersFinalList = [...event.selectedRows];
+    this.holdSelectedUsers = [...event.selectedRows];
   }
 
   applySelections(): void {

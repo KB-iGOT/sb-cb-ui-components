@@ -68,13 +68,14 @@ export class AccessControlService {
     let request: any = {
       request: {
         filters: {
-          status: 1
+          status: 1,
+          isMdo: true
         },
         sort_by: {
           channel: "asc"
         },
         fields: ["channel", "identifier"],
-        query: query,
+        query: query
         // limit: 200
       }
     };
@@ -83,7 +84,7 @@ export class AccessControlService {
     }
 
     if (characterSearch || !query) {
-      request.request.filters.channel = { startsWith: characterSearch ||  'A'};
+      request.request.filters.channel = { startsWith: characterSearch || "A" };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
@@ -100,20 +101,23 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.CADRE_CONFIG);
   }
 
-  fetchDesignation(query: string, selectedData?: string[]): Observable<any> {
+  fetchDesignation(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
     let payload: any = {
       filterCriteriaMap: {
         status: "Active"
       },
       requestedFields: ["designation", "id"],
-      pageSize: 1000,
-      pageNumber: 0
+      pageSize: 1000
+      // pageNumber: 0
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
     }
     if (query) {
       payload.searchString = query;
+    }
+    if (characterSearch || !query) {
+      payload.startsWith = characterSearch || "A";
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
