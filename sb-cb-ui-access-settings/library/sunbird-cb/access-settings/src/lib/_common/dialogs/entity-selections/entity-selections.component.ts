@@ -216,9 +216,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       case NsAccessControlConfig.SelectionType.Designation:
         this.selectedCharacterRange = "A";
         this.getDesignationsList(this.searchControl.value);
+
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
         this.selectedCharacterRange = "A";
+        if (this.filterValue === "all" && !this.searchControl.value) this.updateAlphabet();
         this.getOrganisationsList(this.searchControl.value, []);
         break;
       case NsAccessControlConfig.SelectionType.Service:
@@ -387,9 +389,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           if (query) this.searchedOrganisationFlagWithQuery = true;
           else this.searchedOrganisationFlagWithQuery = false;
 
-          if (this.filterValue === "selected" || query) {
-            this.updateAlphabet();
-          }
+          if (this.filterValue === "selected" || query) this.updateAlphabet();
+
           this.getFilteredEntityGrouped();
         } else {
           this.dataList = [];
