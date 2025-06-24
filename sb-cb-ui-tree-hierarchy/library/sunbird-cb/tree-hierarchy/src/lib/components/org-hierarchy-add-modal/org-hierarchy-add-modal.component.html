@@ -29,7 +29,7 @@
             <div class="flex flex-col org-container" 
             [ngStyle]="{'margin-left': 30 * (data?.previous?.length + 1) + 'px'}">
                 <label class="orgTypeName">{{data?.currentData?.code?.toLowerCase()}}</label>
-                
+                <label class="sub-label">Organisations which are already in the hierarchy will not listed to add or in searchable dropdown</label>
                 <!-- Searchable multi-select -->
                 <div class="select-search-container">
                     <mat-form-field appearance="outline" class="w-full custom-height-select">
