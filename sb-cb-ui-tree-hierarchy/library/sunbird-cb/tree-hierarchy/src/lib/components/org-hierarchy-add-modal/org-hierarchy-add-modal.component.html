@@ -40,10 +40,14 @@
                           (keydown)="handleKeydown($event)"
                           multiple>
                             <!-- Search container -->
-                            <div class="search-container" (click)="$event.stopPropagation()">
+                            <div class="search-container flex gap-5 flex-middle" (click)="$event.stopPropagation()">
                                 <input type="text" [formControl]="searchControl" placeholder="Search..."
                                 (keydown)="handleSearchKeydown($event)"
                                 class="search-input" #searchInput>
+                                <button mat-button class="add-btn" (click)="checkAndClose(singleSelect); $event.stopPropagation()" type="button">
+                                    <span>Add</span>
+                                    <mat-icon class="margin-remove">add</mat-icon>
+                                </button>
                             </div>
                             <mat-option *ngFor="let organization of filteredOptions" [value]="organization.identifier">
                                 {{organization.orgName}}
@@ -53,6 +57,14 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
+                    <ng-container *ngIf="selectedOrgsControl?.value?.length > 0">
+                      <mat-chip-list class="org-clip" aria-label="orgSelection">
+                        <mat-chip class="clip-option flex flex-middle" *ngFor="let item of selectedOrgsControl.value" [removable]="true" (removed)="removeOrg(item)">
+                          {{getNameOfOrg(item)}}
+                          <mat-icon matChipRemove class="margin-remove">close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-list>
+                    </ng-container>
                 </div>
                 
             </div>
