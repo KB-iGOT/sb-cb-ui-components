@@ -6,6 +6,8 @@ import { takeUntil } from 'rxjs/operators';
 import { TreeHierarchyService } from '../../tree-hierarchy.service';
 import { FrameworkService } from '../../services/framework.service';
 import _ from 'lodash';
+import { MatSelect } from '@angular/material/select';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 
 @Component({
   selector: 'sb-cb-tree-org-hierarchy-add-modal',
@@ -26,7 +28,8 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<OrgHierarchyAddModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private treeHierarchySvc: TreeHierarchyService, 
-    private frameworkService: FrameworkService
+    private frameworkService: FrameworkService,
+    private snackbar: MatSnackBar,
   ) {}
 
   ngOnInit() {
@@ -212,5 +215,23 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
       event.stopPropagation(); 
     }
     return true;
+  }
+
+  checkAndClose(selectElement: MatSelect): void {
+    if (!this.selectedOrgsControl.value || this.selectedOrgsControl.value.length === 0) {
+      this.snackbar.open('Please select at least one organization')
+    } else {
+      selectElement.close();
+    }
+  }
+
+  getNameOfOrg(id:any) {
+    return this.filteredOptions.find((option: any) => option.identifier === id)?.orgName || '';
+  }
+
+  removeOrg(itemToRemove: string): void {
+    const currentValues = this.selectedOrgsControl.value || [];
+    const updatedValues = currentValues.filter(item => item !== itemToRemove);
+    this.selectedOrgsControl.setValue(updatedValues);
   }
 }

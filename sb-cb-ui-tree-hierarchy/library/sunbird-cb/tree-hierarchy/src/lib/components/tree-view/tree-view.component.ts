@@ -760,7 +760,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   editCategoryName(column:any, index:any) {
-    console.log('editCategoryName', column, index);
     const dialog = this.dialog.open(CategoryEditModuleComponent, {
       data: {
         columnInfo: column,

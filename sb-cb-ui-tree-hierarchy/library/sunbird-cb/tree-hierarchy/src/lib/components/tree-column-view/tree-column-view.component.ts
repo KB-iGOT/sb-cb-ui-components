@@ -43,7 +43,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
 
 
   ngOnInit(): void {
-    console.log('column', this.column)
     this.subscribeEvents()
     this.setColumnItems()
     this.searchValue.valueChanges.pipe(
@@ -277,6 +276,8 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   searchFilterData(_ele: any){
+
+    this.setColumnItems()
     const back = this.frameworkService.getPreviousCategory(this.column.code)
     if(back && back.code) {
       let backColumData = this.frameworkService.selectionList.get(back.code)
@@ -287,9 +288,15 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
           this.frameworkService.currentSelection.next({ type: backColumData.category, data: backColumData, cardRef: backColumData.cardRef })
         }, 200)
       }
-    }    
-    this.frameworkService.removeOldLine()
-    this.setColumnItems()
+    } else {
+      if(this.columnItems?.length === 0) {
+        this.frameworkService.removeOldLine()
+      } else {
+        setTimeout(() => {
+          this.makeFirstTermSelected()
+        },500)
+      }
+    }
    }
 
   clearSearch() {
@@ -404,6 +411,21 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
 
   cardActionEmit(event: any) {
     this.cardAction.emit(event);
+  }
+
+  makeFirstTermSelected() {
+    const firstListItem = this.frameworkService.list.entries().next().value as any
+    if(firstListItem && firstListItem.length >= 2){
+      if(firstListItem[1] && firstListItem[1].children && firstListItem[1].children.length) {
+        const firstTerm = firstListItem[1].children[0] as any
+        const cardRef = document.getElementById(firstTerm.name)
+        // this.categoryList = []
+        firstTerm.selected = true
+        this.frameworkService.cardClkData = firstTerm;
+        this.frameworkService.CurrentCardClk.next(firstTerm.category)
+        this.frameworkService.currentSelection.next({ type: firstTerm.category, data: firstTerm, cardRef })
+      }
+    }
   }
   
 }
