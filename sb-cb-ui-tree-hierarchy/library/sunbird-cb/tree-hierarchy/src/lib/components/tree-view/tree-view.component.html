@@ -57,7 +57,6 @@
                     </div> -->
                 </div>
             </div>
-            <!-- {{column.code}} -->
             <div class="padding-x2 cat-columns container-box" id="box{{i+1}}">
                 <ng-container *ngIf="column?.children && column?.children.length > 0">
                     <lib-tree-column-view *ngIf="loaded[column.code]" #selectedTaxonomyTerm [column]="column"

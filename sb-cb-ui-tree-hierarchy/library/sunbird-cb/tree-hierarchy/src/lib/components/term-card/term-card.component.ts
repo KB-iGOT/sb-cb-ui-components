@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core'
 import { NSFramework } from '../../models/framework.model'
 import { ApprovalService } from '../../services/approval.service';
 import { FrameworkService } from '../../services/framework.service'
@@ -17,6 +17,8 @@ import { ConforamtionPopupComponent } from '../conforamtion-popup/conforamtion-p
 })
 export class TermCardComponent implements OnInit, OnDestroy {
   // @Input() data!: NSFramework.ITermCard
+  @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
+
 
   private _data!: NSFramework.ITermCard;
   isApprovalRequired: boolean = false
@@ -380,6 +382,27 @@ export class TermCardComponent implements OnInit, OnDestroy {
   menuAction(type:string, _item: any) {
     this.cardAction.emit({ action: type, data: _item });
   } 
+
+  getuserCount(item: any) {
+    if(item.children.code) {
+      const tempData = item.columnInfo.children.find((i: any) => i.code === item.children.code)
+      return tempData?.userCount || 0
+    }
+    return 0
+  }
+
+  openDialog() {
+    this.dialog.open(this.dialogTemplate, {
+      width: '500px',
+      // Optional configuration
+      disableClose: true,
+      data: { /* Any data you want to pass to the dialog */ }
+    });
+  }
+  
+  closeModal() {
+    this.dialog.closeAll();
+  }
 }
   
 

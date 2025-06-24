@@ -43,6 +43,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
 
 
   ngOnInit(): void {
+    console.log('column', this.column)
     this.subscribeEvents()
     this.setColumnItems()
     this.searchValue.valueChanges.pipe(
@@ -249,7 +250,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       filteredColumnData = this.columnData
     }
     this.filteredColumnItems = filteredColumnData
-    
     this.columnItems = filteredColumnData ? filteredColumnData.slice(this.startIndex, this.currentLastIndex) : []
     // }
   }
@@ -287,7 +287,8 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
           this.frameworkService.currentSelection.next({ type: backColumData.category, data: backColumData, cardRef: backColumData.cardRef })
         }, 200)
       }
-    }
+    }    
+    this.frameworkService.removeOldLine()
     this.setColumnItems()
    }
 
