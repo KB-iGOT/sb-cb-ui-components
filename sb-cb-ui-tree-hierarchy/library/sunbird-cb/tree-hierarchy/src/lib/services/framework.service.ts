@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { FRAMEWORK } from '../constants/data';
 import { NSFramework } from '../models/framework.model';
 import { HttpClient } from '@angular/common/http';
@@ -9,7 +9,19 @@ import { IConnection } from '../models/connection.model';
 import { LocalConnectionService } from './local-connection.service';
 /* tslint:disable */
 import _ from 'lodash';
+// import { TreeHierarchyService } from '../tree-hierarchy.service';
 /* tslint:enable */
+
+const API_ENDPOINT = {
+  ORG_V1_SEARCH: '/apis/proxies/v8/org/v1/search',
+  CREATE_TERMS: `/apis/proxies/v8/action/framework/v3/term/create`,
+  UPDATE_TERMS: `/apis/proxies/v8/framework/v1/term/update/`,
+  UPDATE_ASSOCIATION: `/apis/proxies/v8/framework/v1/term/update/`,
+  PUBLISH_FRAMEWORK: `/apis/proxies/v8/framework/v1/publish/`,
+  RETIRE_TREM: `/apis/proxies/v8/framework/v1/term/retire`,
+  UPDATE_CATEGORY: `/apis/proxies/v8/framework/v1/category/update/`,
+  USERS_SEARCH: `apis/proxies/v8/user/v1/search`
+}
 
 interface NotifierType {
   type: 'select' | 'insert' | 'update' | 'delete';
@@ -38,25 +50,39 @@ export class FrameworkService {
   cardClkData: any;
   CurrentCardClk = new BehaviorSubject<any>(null);
   completeResponse: any;
+  additionalData: any; // Add a property to store additional data
+  userCountData: any; // Add a property to store user count data
   
   constructor(
     private http: HttpClient,
-    public localConfig: LocalConnectionService
+    public localConfig: LocalConnectionService,
+    // private treeHierarchySvc: TreeHierarchyService
   ) {}
 
   getFrameworkInfo(_orgData?:any): Observable<any> {
     localStorage.removeItem('terms');
     if (this.localConfig.connectionType === 'online') {
-      //framework/v1/read/01358912293839667241_org_hierarchy
-      //framework/v1/read/${this.environment.frameworkName}
       let url = `/${this.proxiesPath}/framework/v1/read/`
       if (_orgData) {
-        url  = url + _orgData.orgHierarchyFrameworkId;
+        url = url + _orgData.orgHierarchyFrameworkId;
       } else {
         url = url + this.environment.frameworkName;
       }
       return this.http.get(`${url}`, { withCredentials: true }).pipe(
-        tap((response: any) => {
+        switchMap((frameworkResponse: any) => {
+          const originalFrameworkResponse = frameworkResponse;
+          return this.getSelectedStateOrg(_orgData).pipe(
+            switchMap((orgListData: any) => {
+              this.additionalData = orgListData?.result?.response?.content || [];
+              return this.getUserPerOrg().pipe(
+                map(() => {
+                  return originalFrameworkResponse
+                })
+              );
+            })
+          );
+        }),
+        tap(async (response: any) => {
           this.resetAll();
           this.formateData(response);
           this.completeResponse = response.result.framework;
@@ -66,7 +92,8 @@ export class FrameworkService {
           this.list.clear();
           this.categoriesHash.next([]);
           throw 'Error in source. Details: ' + err;
-        }));
+        })
+      );
     } else {
       this.resetAll();
       this.formateData(FRAMEWORK);
@@ -238,6 +265,8 @@ export class FrameworkService {
         config: this.getConfig(a.code),
         children: (a.terms || []).map((c: any) => {
           const associations = c.associations || [];
+          const tempCount = this.getUserCount(c)
+          Object.assign(c, { userCount: tempCount })
           if (associations.length > 0) {
             Object.assign(c, { children: associations });
           }
@@ -445,5 +474,107 @@ export class FrameworkService {
         }
       });
     }
+  }
+
+  private getSelectedStateOrg(_orgData?: any): Observable<any> {
+    const requestBody = {
+        request: {
+          filters: {
+            status: 1,
+            ministryOrStateType: (_orgData) ?
+              _orgData.sbOrgType : '',
+            ministryOrStateId: (_orgData) ? 
+              _orgData.identifier : ''
+          },
+          sort_by: {
+            createdDate: "desc"
+          },
+          limit: 100,
+          offset: 0,
+          fields: [
+            'identifier',
+            'orgName',
+            'description',
+            'parentOrgName',
+            'ministryOrStateId',
+            'ministryOrStateType',
+            'ministryOrStateName', 
+            'sbOrgSubType'
+          ]
+        }
+      }    
+    return this.http.post(`${API_ENDPOINT.ORG_V1_SEARCH}`, requestBody).pipe(
+      catchError(error => {
+        console.error('Error fetching Org data:', error);
+        // Return empty data to continue the chain even if this API fails
+        return of({});
+      })
+    );
+  }
+
+  private getUserPerOrg(_orgData?: any): Observable<any> {
+    const orgIds = this.additionalData.map((org: any) => org.identifier);
+    const requestBody = {
+      request: {
+        filters: {
+            rootOrgId: orgIds
+        },
+        fields: [
+            'identifier',
+            'rootOrgId'
+          ],
+        limit: 1,
+        facets: [
+            "rootOrgId"
+        ],
+        sort_by: {
+            "createdDate": "desc"
+        }
+      }
+    }
+    const orgIdCounts: { id: string, count: number }[] = [];
+    if (this.additionalData && this.additionalData.length > 0) {
+      this.additionalData.forEach((org: any) => {
+        if (org.identifier) {
+          orgIdCounts.push({
+            id: org.identifier,
+            count: 0 
+          });
+        }
+      })
+    }
+    return this.http.post(`${API_ENDPOINT.USERS_SEARCH}`, requestBody).pipe(
+      map((res: any) => {
+        if (res && res.result && res.result.response && res.result.response.count){
+        const facetsValue = res.result.response.facets || [];  
+          if (facetsValue && facetsValue.length > 0) {
+            const orgFacet = facetsValue.find((facet: any) => facet.name === 'rootOrgId');
+            if (orgFacet && orgFacet.values) {
+              orgFacet.values.forEach((value: any) => {
+                const orgIndex = orgIdCounts.findIndex(org => org.id === value.name);
+                if (orgIndex !== -1) {
+                  orgIdCounts[orgIndex].count = value.count || 0;
+                }
+              });
+            }
+          }
+        }
+        this.userCountData = orgIdCounts;
+      }),
+      catchError(error => {
+        console.error('Error fetching user count data:', error);
+        return of({});
+      })
+    );
+  }
+
+  getUserCount(term: any): number {
+    if (term && term.additionalProperties && term.additionalProperties.orgId) {
+      if (this.userCountData && this.userCountData.length > 0) {
+        const userCount = this.userCountData.filter((user:any) => user.id === term.additionalProperties.orgId)[0]?.count;
+        return userCount || 0;
+      }
+    } 
+    return 0
   }
 }

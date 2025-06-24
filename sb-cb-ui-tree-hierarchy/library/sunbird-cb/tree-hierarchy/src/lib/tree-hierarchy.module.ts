@@ -31,6 +31,7 @@ import { ENVIRONMENT } from './services/connection.service';
 import { OrgHierarchyAddModalComponent } from './components/org-hierarchy-add-modal/org-hierarchy-add-modal.component';
 import { TreeHierarchyService } from './tree-hierarchy.service';
 import { CategoryEditModuleComponent } from './components/category-edit/category-edit-module/category-edit-module.component';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { CategoryEditModuleComponent } from './components/category-edit/category
     CommonModule,
     MaterialModule,
     TreeEditorRoutingModule,
+    MatChipsModule
   ],
   providers: [
     DatePipe,
