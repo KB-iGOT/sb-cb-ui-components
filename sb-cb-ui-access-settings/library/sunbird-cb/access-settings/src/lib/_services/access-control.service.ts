@@ -15,7 +15,8 @@ const ENDPOINTS = {
   SEARCH_V4: "/apis/proxies/v8/sunbirdigot/v4/search",
   CREATE_USERGROUPS_CONTROL: "/apis/proxies/v8/accessSetttings/v1/upsert",
   GET_ACCESS_CONTROL: (id: string) => `/apis/proxies/v8/accessSetttings/read/${id}`,
-  ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`
+  ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`,
+  PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`
 };
 
 @Injectable({
@@ -81,10 +82,11 @@ export class AccessControlService {
     };
     if (selectedData?.length) {
       request.request.filters.identifier = selectedData;
+      characterSearch = "";
     }
 
     if (characterSearch || !query) {
-      request.request.filters.channel = { startsWith: characterSearch || "A" };
+      request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
@@ -112,12 +114,13 @@ export class AccessControlService {
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
+      characterSearch = "";
     }
     if (query) {
       payload.searchString = query;
     }
     if (characterSearch || !query) {
-      payload.startsWith = characterSearch || "A";
+      payload.startsWith = characterSearch;
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
@@ -156,6 +159,10 @@ export class AccessControlService {
 
   updateContentV3(meta: any, id: string): Observable<any> {
     return this.http.patch<any>(`${ENDPOINTS.ACTION_CONTENT_V3}update/${id}`, meta);
+  }
+
+  updateContentV4(meta: any, id: string): Observable<any> {
+    return this.http.patch<any>(`${ENDPOINTS.PRIVATE_CONTENT_V4}update/${id}`, meta);
   }
 
   downloadFile(data: any, filename = "data") {
