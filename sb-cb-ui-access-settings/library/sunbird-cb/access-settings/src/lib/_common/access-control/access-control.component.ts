@@ -582,6 +582,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
             this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
             this.isSaveFltrBtnDisabled = true;
+
+            // Update secure setting for moderated content
+            if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+              this.updateContentAccessSetting();
+            }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
@@ -679,6 +684,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.isAddUserGroupBtnDisabled = true;
           this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
           this.applyAccessControlValue(false, false);
+          this.updateContentAccessSetting();
         }
 
         setTimeout(() => {
@@ -689,6 +695,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (response?.result?.accessControl) {
       this.processAccessControlResult(response.result.accessControl);
       this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
+
+      // Temporary fix to updated the failed content for moderated
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+        if (!this.content?.accessSettingsEnabled) {
+          this.updateContentAccessSetting();
+        }
+      }
+      this.updateContentAccessSetting();
     }
   }
 
@@ -757,10 +771,47 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Calculate count for each user group
       this.calculateUserCountForUserGroup(index);
+      setTimeout(() => {
+        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+        this.setupFormChangeDetection();
+      }, 0);
     });
   }
 
   async updateContentAccessSetting(): Promise<void> {
+    if (typeof this.content.language === "string") {
+      this.content.language = [this.content.language];
+    }
+    if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+      const userGroup0 = this.userGroup.at(0);
+      let organisation: string[] = [];
+      let isVerifiedKarmayogi = "";
+
+      if (userGroup0) {
+        const conditions = userGroup0.get("conditions") as FormArray;
+        if (conditions && conditions.length) {
+          const orgCondition = conditions.controls.find(ctrl => ctrl.get("entity")?.value === NsAccessControlConfig.SelectionType.Organizations);
+          if (orgCondition) {
+            organisation = orgCondition.get("selections")?.value || [];
+          }
+
+          const verificationCondition = conditions.controls.find(
+            ctrl => ctrl.get("entity")?.value === NsAccessControlConfig.SelectionType.VerificationStatus
+          );
+          if (verificationCondition) {
+            const verSelections = verificationCondition.get("selections")?.value || [];
+            isVerifiedKarmayogi = Array.isArray(verSelections) && verSelections?.length > 1 ? "No" : "Yes";
+          }
+        }
+      }
+
+      this.content.secureSettings = {
+        version: 1,
+        organisation,
+        isVerifiedKarmayogi
+      };
+    }
+
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
     await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
@@ -799,7 +850,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.accessControlCriteriaSelection.readOnly = true;
       this.isSaveFltrBtnDisabled = true;
       this.isApplyBtnDisabled = true;
-    } else if (this.content?.status === "Live" && this.config.userConfig.userRoles.has("content_publisher")) {
+    } else if (this.content?.status === "Live" && this.config.userConfig.userRoles.has("content_publisher, spv_publisher")) {
       //   // publisher (cannot edit already added)
       //   for (let i = 0; i < this.userGroup.length; i++) {
       //     const group = this.userGroup.at(i);
