@@ -95,7 +95,7 @@
                             [disabled]="accessControlCriteriaSelection?.readOnly"
                             mat-icon-button
                             aria-label="refresh user group"
-                            (click)="resetUserGroup(i)"
+                            (click)="resetUserGroupWithSelections(i)"
                             title="Refresh">
                             <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
                           </button>
@@ -110,7 +110,7 @@
                             <div class="selections-options grid grid-cols-5 gap-4">
                               <div class="mat-full-radius">
                                 <mat-form-field appearance="outline" class="w-full">
-                                  <mat-select placeholder="Select" formControlName="entity" (selectionChange)="onEntityChange(i, j)">
+                                  <mat-select placeholder="Select" formControlName="entity" (selectionChange)="onEntityChange(i, j)" (openedChange)="onOpeningEntityChange($event, i, j)">
                                     <ng-container *ngFor="let item of getAvailableEntities(i, j)">
                                       <mat-option [value]="item?.value" [disabled]="item?.disabled">{{ item?.label }}</mat-option>
                                     </ng-container>

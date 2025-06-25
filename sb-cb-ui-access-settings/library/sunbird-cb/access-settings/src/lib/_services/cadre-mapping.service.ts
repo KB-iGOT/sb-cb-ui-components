@@ -53,20 +53,20 @@ export class CadreMappingService {
         cst.serviceList.forEach(service => {
           const { id: serviceId, commonBatchStartYear, commonBatchEndYear } = service;
           this.allServices.set(serviceId, service);
-  
+
           // Add years to service-batch map
           for (let y = commonBatchStartYear; y <= commonBatchEndYear; y++) {
             this.addToMapSet(this.batchYearToServicesMap, y, serviceId);
           }
-  
+
           service.cadreList?.forEach(cadre => {
             const { id: cadreId, startBatchYear, endBatchYear } = cadre;
             this.allCadres.set(cadreId, cadre);
-  
+
             // Map cadre <-> service
             this.addToMapSet(this.cadreToServiceMap, cadreId, serviceId);
             this.addToMapSet(this.serviceToCadresMap, serviceId, cadreId);
-  
+
             // Add years to cadre-batch map
             for (let y = startBatchYear; y <= endBatchYear; y++) {
               this.addToMapSet(this.batchYearToCadresMap, y, cadreId);
@@ -155,11 +155,15 @@ export class CadreMappingService {
     });
   }
 
-  getCadresByServicesAndBatch(serviceIds: string[], year: number): Array<{ id: string; name: string }> {
+  getCadresByServicesAndBatch(serviceIds: string[], years: number[]): Array<{ id: string; name: string }> {
     const cadres = this.getCadresByServices(serviceIds);
+    if (!Array.isArray(years)) {
+      years = [years];
+    }
     return cadres.filter(cadre => {
       const fullCadre = this.allCadres.get(cadre.id);
-      return year >= fullCadre.startBatchYear && year <= fullCadre.endBatchYear;
+      // Return true if any year is within the cadre's batch year range
+      return years.some(year => year >= fullCadre.startBatchYear && year <= fullCadre.endBatchYear);
     });
   }
 

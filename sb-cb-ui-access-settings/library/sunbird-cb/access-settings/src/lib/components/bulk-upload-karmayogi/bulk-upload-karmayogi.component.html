@@ -83,7 +83,7 @@
           [bulkUploadEntriesCount]="{ totalCount: isSuccessUserlist?.length + isErrorUserlist?.length, success: isSuccessUserlist?.length }">
         </sb-uic-list-table>
 
-        <ng-container *ngIf="isSuccessUserlist?.length && holdSelectedUsers?.length">
+        <!-- <ng-container *ngIf="isSuccessUserlist?.length && holdSelectedUsers?.length">
           <div class="w-full mt-4">
             <button
               mat-flat-button
@@ -92,7 +92,7 @@
               Apply
             </button>
           </div>
-        </ng-container>
+        </ng-container> -->
       </ng-container>
 
       <ng-container *ngIf="currrentFilterType === 'error'">

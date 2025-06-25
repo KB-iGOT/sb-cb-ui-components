@@ -25,7 +25,9 @@
           <input matInput placeholder="Search by Name, Email and Phone Number" [formControl]="searchControl" (keyup.enter)="search()" />
         </mat-form-field>
       </div>
-      <button mat-flat-button class="flex items-center rounded-full new-bg-color font-bold text-sm text-white search-button" (click)="search()">Search</button>
+      <button mat-flat-button class="flex items-center rounded-full new-bg-color font-bold text-sm text-white search-button" (click)="search()">
+        Search
+      </button>
     </div>
 
     <div class="contents-wrapper">
@@ -48,8 +50,7 @@
                   (pageChange)="onPageChange($event)"
                   (sortChange)="onSortChange($event)"
                   [selected]="usersFinalList"
-                  [currentPage]="currentPage"
-                  ></sb-uic-list-table>
+                  [currentPage]="currentPage"></sb-uic-list-table>
               </ng-container>
             </div>
           </mat-tab>
@@ -104,6 +105,16 @@
       <button
         mat-flat-button
         (click)="applySelections()"
+        class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white w-full mt-2">
+        Apply
+      </button>
+    </ng-container>
+  </ng-container>
+  <ng-container *ngIf="filterValue === 'bulk_upload_karmayogis'">
+    <ng-container *ngIf="bulkUploadUserList?.length">
+      <button
+        mat-flat-button
+        (click)="applySelectionsBulk()"
         class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white w-full mt-2">
         Apply
       </button>

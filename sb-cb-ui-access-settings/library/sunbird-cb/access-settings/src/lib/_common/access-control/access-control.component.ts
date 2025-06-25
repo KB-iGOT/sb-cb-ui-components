@@ -282,6 +282,46 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  onOpeningEntityChange(event: boolean, userGroupIndex: number, conditionIndex: number): void {
+    if (event) {
+      // Disable cadre from selection if services/batch has not cadre
+      const conditions = this.ruleConditions(userGroupIndex);
+      let selectedService: string[] = [];
+      let selectedBatch: number[] = [];
+      for (let i = 0; i < conditions.length; i++) {
+        const entity = conditions.at(i).get("entity")?.value;
+        const selections = conditions.at(i).get("selections")?.value || [];
+        if (entity === NsAccessControlConfig.SelectionType.Service) {
+          selectedService = selections;
+        }
+        if (entity === NsAccessControlConfig.SelectionType.Batch) {
+          selectedBatch = selections;
+        }
+      }
+
+      let availableCadres: any[] = [];
+      let disableCadre = false;
+
+      // 1. Only service is added
+      if (selectedService.length && !selectedBatch.length) {
+        const serviceSelections = this.cadreMappingService.getServiceIdsByName(selectedService || []) || [];
+        availableCadres = this.cadreMappingService.getCadresByServices(serviceSelections);
+        disableCadre = availableCadres.length === 0;
+      } else {
+        // If neither is selected, do not disable Cadre
+        disableCadre = false;
+      }
+
+      const updatedOptions = this.accessControlCriteriaSelection.optionsEntity.map(option => {
+        if (option.value === NsAccessControlConfig.SelectionType.Cadre) {
+          return { ...option, disabled: disableCadre };
+        }
+        return option;
+      });
+      this.accessControlCriteriaSelection.optionsEntity = [...updatedOptions];
+    }
+  }
+
   getAvailableEntities(userGroupIndex: number, currentConditionIndex: number): any[] {
     const conditions = this.ruleConditions(userGroupIndex);
     const selectedEntities = conditions.controls
@@ -324,6 +364,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  resetUserGroupWithSelections(userGroupIndex: number) {
+    const group = this.userGroup.at(userGroupIndex);
+    if (group) {
+      group.get("name")?.setValue(`User Group ${userGroupIndex + 1}`);
+      const conditions = group.get("conditions") as FormArray;
+      if (conditions && conditions.length) {
+        for (let i = 0; i < conditions.length; i++) {
+          const condition = conditions.at(i);
+          condition.get("entity")?.setValue("");
+          condition.get("selections")?.setValue([]);
+        }
+      }
+      this.calculateUserCountForUserGroup(userGroupIndex);
+    }
+  }
+
   removeCondition(userGroupIndex: number, conditionIndex: number) {
     const conditions = this.ruleConditions(userGroupIndex);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -344,6 +400,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (condition) {
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
+      this.calculateUserCountForUserGroup(userGroupIndex);
     }
   }
 
@@ -814,7 +871,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
-    await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+    await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
     this.refreshContentMeta.emit(true);
   }
 
@@ -916,16 +973,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }
 
+    const filters: any = { ...request };
+    if (Object.keys(filters).length > 0) {
+      filters.status = 1;
+    } else delete filters.status;
+
     const payload = {
       request: {
-        filters: {
-          ...request,
-          status: 1
-        },
+        ...(Object.keys(filters).length > 0 ? { filters } : {}),
         fields: ["identifier", "rootOrgId", "firstName"]
       }
     };
-    const response = await this.accessControlService.validateUser(payload).toPromise().catch();
+    const response = await this.accessControlService
+      .validateUser(payload)
+      .toPromise()
+      .catch(() => {
+        this.userCount[userGroupIndex] = 0;
+      });
     if (response?.result?.response) {
       const count = response?.result?.response?.count;
       this.userCount[userGroupIndex] = count;
