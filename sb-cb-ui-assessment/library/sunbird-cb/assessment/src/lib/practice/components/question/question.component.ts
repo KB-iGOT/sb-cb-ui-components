@@ -20,7 +20,7 @@ import { MatLegacySnackBar as MatSnackBar, MatLegacySnackBarConfig as MatSnackBa
 export class QuestionComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() artifactUrl = ''
   @Input() questionNumber = 0
-  @Input() total = 0
+  @Input() total = 1
   @Input() viewState = 'initial'
   @Input() primaryCategory = NsContent.EPrimaryCategory.PRACTICE_RESOURCE
   @Input() ePrimaryCategory: any
@@ -28,7 +28,7 @@ export class QuestionComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() showAnswer: any
   @Input() currentQuestion: any
   @Input() selectedAssessmentCompatibilityLevel = 2
-  @Input() questionParagraph ? = ''
+  @Input() questionParagraph? = ''
   @Input() question: NSPractice.IQuestion = {
     multiSelection: false,
     section: '',
