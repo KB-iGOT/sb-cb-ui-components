@@ -18,12 +18,41 @@
           <div class="dashed-line"></div>
         </div>
         <ng-container *ngIf="data?.previous?.length > 0">
-            <div class="flex flex-col org-container" *ngFor="let item of data?.previous;let i = index"
+          <div class="flex flex-col org-container" *ngFor="let item of data?.previous;let i = index"
             [ngStyle]="{'margin-left': 30 * (i+1) + 'px'}">
-                <label class="orgTypeName">{{item?.category?.toLowerCase()}}</label>
-                <label class="orgTypeSelected">{{item?.name?.toLowerCase()}}</label>
-                <div class="dashed-line"></div>
-            </div>
+            <ng-container *ngIf="data?.type === 'update' && i === (data?.previous?.length - 2)">
+              <label class="orgTypeName">{{item?.category?.toLowerCase()}}</label>
+              <label class="sub-label">Only the imported organisation will be listed.</label>
+              <div class="select-search-container">
+                  <mat-form-field appearance="outline" class="w-full custom-height-select">
+                      <mat-select [formControl]="parentSelectedOrgControl" placeholder="Select" #parentSelect
+                        [panelClass]="'mat-select-panel-below'" 
+                        disableOptionCentering 
+                        [disableOptionCentering]="true"
+                        (keydown)="handleKeydown($event)">
+                          <!-- Search container -->
+                          <div class="search-container flex gap-5 flex-middle" (click)="$event.stopPropagation()">
+                              <input type="text" [formControl]="parentSearchControl" placeholder="Search..."
+                              (keydown)="handleSearchKeydown($event)"
+                              class="search-input" #searchInput>
+                          </div>
+                          <mat-option class="no-checkbox" *ngFor="let organization of parentFilteredOptions" [value]="organization.code">
+                              {{organization.name}}
+                          </mat-option>
+                          <mat-option *ngIf="parentFilteredOptions.length === 0" disabled>
+                              No data found
+                          </mat-option>
+                      </mat-select>
+                  </mat-form-field>
+                  <div class="dashed-line"></div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="!(data?.type === 'update' && i === (data?.previous?.length - 2))">
+              <label class="orgTypeName">{{item?.category?.toLowerCase()}}</label>
+              <label class="orgTypeSelected">{{item?.name?.toLowerCase()}}</label>
+              <div class="dashed-line"></div>
+            </ng-container>
+          </div>
         </ng-container>
         <ng-container *ngIf="data?.currentData">
             <div class="flex flex-col org-container" 
@@ -66,7 +95,6 @@
                       </mat-chip-list>
                     </ng-container>
                 </div>
-                
             </div>
         </ng-container>
     </div>
@@ -80,7 +108,6 @@
     <button 
       mat-stroked-button 
       class="btn-common btn-primary" 
-      [disabled]="!selectedOrgsControl.value?.length" 
       (click)="onSave()" 
       type="button">
       Save
