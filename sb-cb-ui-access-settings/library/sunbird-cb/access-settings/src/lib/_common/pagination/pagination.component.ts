@@ -51,6 +51,12 @@ export class PaginationComponent implements OnInit, OnChanges {
     ) {
       this.paginationInListing();
     }
+
+    if (changes?.currentPage) {
+      this.currentPage = changes.currentPage.currentValue;
+      this.previousPage = changes.currentPage.previousValue || 0;
+      this.paginationInListing();
+    }
   }
 
   paginationInListing() {

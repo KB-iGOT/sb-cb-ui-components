@@ -1,17 +1,17 @@
 <div class="py-4 px-10">
   <div class="p-4 as-container">
     <div class="flex items-center justify-between">
-      <span class="text-xl font-bold primary-text-color">Access Control</span>
+      <span class="text-xl font-bold primary-text-color">Access Settings</span>
       <div class="flex gap-2 items-center">
         <span class="text-sm primary-text-color cursor-pointer" (click)="openInstructonsDialog()">How to use access control?</span>
         <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24" />
       </div>
     </div>
     <div class="light-grey-border p-4 mt-4">
-      <mat-radio-group [(ngModel)]="accessType" (change)="onAccessTypeChange($event)">
+      <mat-radio-group [(ngModel)]="accessTypeDup" (change)="onAccessTypeChange($event)">
         <div class="radio-container flex gap-5 mb-4">
           <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
-            <mat-radio-button [value]="item.value" [disabled]="item?.disabled">
+            <mat-radio-button [value]="item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
               <div class="flex gap-2 items-center">
                 <span>{{ item?.name }}</span>
                 <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
@@ -21,31 +21,31 @@
         </div>
       </mat-radio-group>
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Public">
-        <div class="info-container">
+        <!-- <div class="info-container">
           <label class="text-sm">This event will be visible to all Karmayogis.</label>
-        </div>
+        </div> -->
       </ng-container>
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Custom">
         <div class="visibiliy-container light-grey-border p-4 mb-4">
           <div class="flex justify-between items-center">
             <span class="text-lg font-bold">{{ config?.visiblilityOnOff?.label }}</span>
-            <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle>
+            <!-- <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle> -->
+            <div class="checkbox-toggle">
+              <input [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false" type="checkbox" id="switch" />
+              <label for="switch" [attr.disabled]="config?.visiblilityOnOff?.disabled || false"></label>
+            </div>
           </div>
           <ng-container *ngIf="!isVisibilityEnabled">
-            <label class="text-sm">{{ (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.contentType) }}</label>
+            <label class="text-sm">{{
+              (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.courseCategory || content?.contentType)
+            }}</label>
           </ng-container>
           <ng-container *ngIf="isVisibilityEnabled">
-            <label class="text-sm">{{ (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.contentType) }}</label>
+            <label class="text-sm">{{
+              (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.courseCategory || content?.contentType)
+            }}</label>
           </ng-container>
         </div>
-        <!-- <div class="flex justify-between items-center mt-4 mb-4">
-          <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="filterCriteria = !filterCriteria">
-            <div class="flex gap-2 flex-middle">
-              <span class="text-m">Filter criteria</span>
-              <mat-icon class="primary-text-color">{{ filterCriteria ? "visibility_on" : "visibility_off" }}</mat-icon>
-            </div>
-          </button>
-        </div> -->
 
         <ng-container *ngIf="filterCriteria">
           <div class="filter-criteria-container light-grey-border p-4 mt-4 flex flex-middle justify-between mb-4">
@@ -61,6 +61,11 @@
           </div>
         </ng-container>
 
+        <div class="users-total-count flex gap-2 items-center my-3" *ngIf="getTotalUserCount">
+          <mat-icon svgIcon="info-outline" [matTooltip]=""></mat-icon>
+          <div class="text-dark">Total Count : {{ getTotalUserCount }}</div>
+        </div>
+
         <ng-container *ngIf="accessControlForm && userGroup?.length > 0 && !isLoading">
           <form [formGroup]="accessControlForm">
             <mat-accordion class="example-headers-align access-usergroup-accordion mt-3" multi="true">
@@ -69,15 +74,32 @@
                   <mat-expansion-panel class="access-usergroup-panel" expanded>
                     <mat-expansion-panel-header>
                       <mat-panel-title class="items-center">
-                        <span class="text-sm">{{ rule.get("name")?.value }}</span>
+                        <div class="flex gap-4 items-center">
+                          <span class="text-sm">{{ rule.get("name")?.value }}</span>
+                          <ng-container *ngIf="userCount[i]">
+                            <div class="text-dark user-group-user-count">Count : {{ userCount[i] }}</div>
+                          </ng-container>
+                        </div>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                        <button mat-icon-button aria-label="delete user group" (click)="removeUserGroup(i)" title="Delete">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                        <button mat-icon-button aria-label="refresh user group" (click)="resetUserGroup(i)" title="Refresh">
-                          <mat-icon>refresh</mat-icon>
-                        </button>
+                        <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC">
+                          <button
+                            [disabled]="accessControlCriteriaSelection?.readOnly"
+                            mat-icon-button
+                            aria-label="delete user group"
+                            (click)="removeUserGroup(i)"
+                            title="Delete">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                          <button
+                            [disabled]="accessControlCriteriaSelection?.readOnly"
+                            mat-icon-button
+                            aria-label="refresh user group"
+                            (click)="resetUserGroup(i)"
+                            title="Refresh">
+                            <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
+                          </button>
+                        </ng-container>
                       </mat-panel-description>
                     </mat-expansion-panel-header>
                     <ng-container *ngIf="rule.get('conditions') as conditionsArray">
@@ -111,11 +133,15 @@
                                   [disabled]="!condition.get('entity').value || !condition.get('conditionType').value"
                                   class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
                                   <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
-                                  <span class="font-bold text-sm">Manage Selections</span>
+                                  <span class="font-bold text-sm">Manage Selection</span>
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button" (click)="manageSelections(condition, rule, i, 1)">
+                                <button
+                                  mat-button
+                                  class="new-secondary-button-no-border button-with-corners mt-2"
+                                  type="button"
+                                  (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
                                   </div>
@@ -123,29 +149,33 @@
                               </div>
                               <div class="action-more-options flex justify-end">
                                 <div class="flex gap-4">
-                                  <button
-                                    mat-icon-button
-                                    aria-label="delete condition"
-                                    class="mt-2 ml-auto"
-                                    (click)="removeCondition(i, j)"
-                                    title="Delete">
-                                    <mat-icon>delete</mat-icon>
-                                  </button>
-                                  <button
-                                    mat-icon-button
-                                    aria-label="refresh condition"
-                                    class="mt-2 ml-auto"
-                                    (click)="resetCondition(i, j)"
-                                    title="Refresh">
-                                    <mat-icon>refresh</mat-icon>
-                                  </button>
+                                  <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC">
+                                    <button
+                                      mat-icon-button
+                                      aria-label="delete condition"
+                                      class="mt-2 ml-auto"
+                                      [disabled]="accessControlCriteriaSelection?.readOnly"
+                                      (click)="removeCondition(i, j)"
+                                      title="Delete">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                    <button
+                                      mat-icon-button
+                                      aria-label="refresh condition"
+                                      class="mt-2 ml-auto"
+                                      [disabled]="accessControlCriteriaSelection?.readOnly"
+                                      (click)="resetCondition(i, j)"
+                                      title="Refresh">
+                                      <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
+                                    </button>
+                                  </ng-container>
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div class="and-or mat-full-radius" *ngIf="conditionsArray?.length > 1 && !conditionlast">
                             <mat-form-field appearance="outline" class="w-max-100">
-                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship" >
+                              <mat-select placeholder="Select" [(value)]="defaultConditionRelationship">
                                 <mat-option [value]="'AND'">AND</mat-option>
                                 <mat-option [value]="'OR'" [disabled]="true">OR</mat-option>
                               </mat-select>
@@ -157,8 +187,10 @@
                     <div class="action-add-condition">
                       <button
                         [disabled]="
-                          this.content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
-                          this.content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER
+                          content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
+                          content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
+                          accessControlCriteriaSelection?.readOnly ||
+                          rule.get('isUserGroupDisabled')?.value
                         "
                         mat-button
                         class="new-secondary-button-no-border button-with-corners"
@@ -166,7 +198,7 @@
                         (click)="addCondition(i)">
                         <div class="flex gap-2 flex-middle">
                           <mat-icon class="primary-text-color">add</mat-icon>
-                          <span class="text-m">Add Condition</span>
+                          <span class="text-m">Add New Condition</span>
                         </div>
                       </button>
                     </div>
@@ -193,7 +225,12 @@
 
         <ng-container *ngIf="!isLoading">
           <div class="text-center mb-6 mt-4">
-            <button mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="addUserGroup()">
+            <button
+              [disabled]="accessControlCriteriaSelection?.readOnly || isAddUserGroupBtnDisabled"
+              mat-button
+              class="new-secondary-button-no-border button-with-corners"
+              type="button"
+              (click)="addUserGroup()">
               <div class="flex gap-2 flex-middle">
                 <mat-icon class="primary-text-color">add</mat-icon>
                 <span class="text-m">Add User Group</span>

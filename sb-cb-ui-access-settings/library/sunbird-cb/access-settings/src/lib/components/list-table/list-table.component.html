@@ -1,4 +1,4 @@
-<div class="wrapper-user-table">
+<div class="wrapper-user-table" id="user-table-select">
     <div class="selections-meta">
         <div class="flex items-center justify-between p-2">
             <div class="flex items-center gap-2 selection-count" *ngIf="tableConfig?.canShowSelectedItems || false">
@@ -41,7 +41,7 @@
 
         <!-- first_name Column -->
         <ng-container matColumnDef="firstName">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> First Name </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Full Name </th>
             <td mat-cell *matCellDef="let element"> {{element?.firstName}} </td>
         </ng-container>
 
@@ -99,7 +99,7 @@
         <div class="pagination-users">
             <sb-uic-pagination [defaultPaginationSize]="initialPaginationSize"
                 [defaultPaginationSizeOptions]="initialPaginationSizeOptions" [totalItemsCount]="count"
-                [currentPage]="1" (pageChange)="onPageChange($event)">
+                [currentPage]="currentPage" (pageChange)="onPageChange($event)">
             </sb-uic-pagination>
         </div>
     </ng-container>

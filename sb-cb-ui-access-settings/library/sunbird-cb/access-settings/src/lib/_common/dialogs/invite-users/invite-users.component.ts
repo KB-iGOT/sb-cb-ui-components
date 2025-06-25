@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { AccessControlService } from "../../../_services/access-control.service";
@@ -6,14 +6,17 @@ import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack
 import { PageChangeEmitter } from "../../../_models/pagination.model";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 import { SnackbarComponent } from "../../../components/snackbar/snackbar.component";
+import { Subject } from "rxjs";
+import { first, takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "sb-uic-invite-users",
   templateUrl: "./invite-users.component.html",
   styleUrls: ["./invite-users.component.scss"]
 })
-export class InviteUsersComponent implements OnInit {
+export class InviteUsersComponent implements OnInit, OnDestroy {
   public readonly data = inject<any>(MAT_DIALOG_DATA);
+  private destroy$ = new Subject<void>();
 
   searchControl = new FormControl("");
   filterValue: NsAccessControlConfig.IManageSelectionType = "add_karmayogis";
@@ -28,6 +31,14 @@ export class InviteUsersComponent implements OnInit {
   usersTableConfig!: NsAccessControlConfig.ITableConfig;
   usersLoading = false;
   activeTab = 0;
+  sortState: any = {};
+  pagination: { limit: number; offset: number } = {
+    limit: 5,
+    offset: 0
+  };
+
+  filters: any = {};
+  currentPage = 1;
   constructor(
     public dialogRef: MatDialogRef<InviteUsersComponent>,
     private accessControlService: AccessControlService,
@@ -38,14 +49,19 @@ export class InviteUsersComponent implements OnInit {
     this.usersTableConfig = this.accessControlService.accessControlConfig().usersTableConfig;
     if (this.data && this.data.selected && this.data.selected.length) {
       if (!this.isArrayOfObjects(this.data?.selected)) {
-        this.getUsersList("", 5, 0, this.data?.selected);
+        this.getUsersList("", this.pagination.limit, this.pagination.offset, this.data?.selected);
       } else {
-        this.usersFinalList = this.data.selected;
-        this.holdSelectedUsers = this.usersFinalList;
-        this.finalSelectedUsers = this.usersFinalList;
+        this.usersFinalList = [...this.data.selected];
+        this.holdSelectedUsers = [...this.usersFinalList];
+        this.finalSelectedUsers = [...this.usersFinalList];
         this.activeTab = 1;
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onClose(): void {
@@ -53,45 +69,85 @@ export class InviteUsersComponent implements OnInit {
   }
 
   search(): void {
-    this.holdSelectedUsers = [];
-    this.getUsersList(this.searchControl.value);
+    let reducedData: any = {};
+    this.resetPagination();
+    this.sortState = {};
+
+    const pickEntity = [
+      NsAccessControlConfig.SelectionType.Organizations,
+      NsAccessControlConfig.SelectionType.VerificationStatus,
+      NsAccessControlConfig.SelectionType.Designation,
+      NsAccessControlConfig.SelectionType.Group,
+      NsAccessControlConfig.SelectionType.Cadre,
+      NsAccessControlConfig.SelectionType.Service,
+      NsAccessControlConfig.SelectionType.Batch
+    ];
+
+    if (this.data?.rule?.conditions.length) {
+      reducedData = this.data?.rule?.conditions.reduce((acc: any, curr: any) => {
+        if (pickEntity.includes(curr.entity)) {
+          acc[curr.entity] = curr.selections;
+        }
+        return acc;
+      }, {});
+    }
+    if (Object.keys(reducedData)?.length) {
+      this.filters = {
+        rootOrgId: reducedData?.rootOrgId,
+        "profileDetails.profileStatus": reducedData.profilestatus,
+        "profileDetails.professionalDetails.designation": reducedData.designation,
+        "profileDetails.professionalDetails.group": reducedData.group,
+        "profileDetails.cadreDetails.cadreName": reducedData.Cadre,
+        "profileDetails.cadreDetails.civilServiceName": reducedData.service,
+        "profileDetails.cadreDetails.cadreBatch": reducedData.batch,
+        status: 1
+      };
+    }
+
+    this.getUsersList(this.searchControl.value, this.pagination.limit, this.pagination.offset, [], this.filters, this.sortState);
   }
 
   onFilterChange(event: any): void {
     this.filterValue = event.value;
   }
 
-  getUsersList(query: string, limit?: number, offset?: number, userIds?: string[]): void {
+  getUsersList(query: string, limit?: number, offset?: number, userIds?: string[], filters?: any, sorting?: any): void {
     this.usersLoading = true;
-    this.accessControlService.fetchUserList(query, { limit: limit, offset: offset }, userIds).subscribe({
-      next: response => {
-        if (response?.result && response?.result?.response?.content) {
-          this.usersList = response.result.response.content;
-          this.totalUsers = response.result.response.count;
-          if (userIds?.length) {
-            this.finalSelectedUsers = response.result.response.content;
-            this.usersFinalList = this.finalSelectedUsers;
-            this.activeTab = 1;
+    this.accessControlService
+      .fetchUserList(query, { limit: limit, offset: offset }, userIds, filters, sorting)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          if (response?.result && response?.result?.response?.content) {
+            this.usersList = response?.result?.response?.content;
+            this.totalUsers = response?.result?.response?.count;
+            if (userIds?.length) {
+              this.finalSelectedUsers = response.result.response.content;
+              this.holdSelectedUsers = this.finalSelectedUsers;
+              this.activeTab = 1;
+            }
+            if (this.holdSelectedUsers?.length) {
+              this.usersFinalList = [...this.holdSelectedUsers];
+            }
+          } else {
+            this.usersList = [];
+            this.totalUsers = 0;
           }
-        } else {
-          this.usersList = [];
-          this.totalUsers = 0;
+          this.usersLoading = false;
+        },
+        complete: () => {
+          this.usersLoading = false;
         }
-        this.usersLoading = false;
-      },
-      complete: () => {
-        this.usersLoading = false;
-      }
-    });
+      });
   }
 
   onSelectingUser(event: any): void {
-    this.holdSelectedUsers = event;
+    this.holdSelectedUsers = [...event.selectedRows];
   }
 
   selectUsers(): void {
     this.finalSelectedUsers = this.holdSelectedUsers;
-
+    this.usersFinalList = [...this.finalSelectedUsers];
     this.snackbar.openFromComponent(SnackbarComponent, {
       data: { message: `Users added to Selected tab`, type: "success" },
       duration: 3000,
@@ -101,9 +157,10 @@ export class InviteUsersComponent implements OnInit {
   }
 
   onPageChange(event: PageChangeEmitter): void {
-    const limit = event.limit;
-    const offset = (event.currentPage - 1) * limit;
-    this.getUsersList(this.searchControl.value, limit, offset);
+    this.currentPage = event.currentPage;
+    this.pagination.limit = event.limit;
+    this.pagination.offset = (event.currentPage - 1) * this.pagination.limit;
+    this.getUsersList(this.searchControl.value, this.pagination.limit, this.pagination.offset, [], this.filters, this.sortState);
   }
 
   removedUserData(event: any): void {
@@ -111,19 +168,32 @@ export class InviteUsersComponent implements OnInit {
     this.holdSelectedUsers = this.finalSelectedUsers;
   }
 
-  onSelectingUserToApply(users: any): void {
-    this.usersFinalList = users;
+  onSelectingUserToApply(event: any): void {
+    this.usersFinalList = [...event.selectedRows];
+    this.holdSelectedUsers = [...event.selectedRows];
   }
 
   applySelections(): void {
-    this.dialogRef.close({
-      rule: this.data.rule,
-      condition: this.data.condition,
-      selected: this.usersFinalList
-    });
+    this.dialogRef.close({ rule: this.data.rule, condition: this.data.condition, selected: this.usersFinalList });
   }
 
   isArrayOfObjects(arr: any): boolean {
     return Array.isArray(arr) && arr.every(item => typeof item === "object" && item !== null && !Array.isArray(item));
+  }
+
+  onSortChange(sortState: any): void {
+    this.sortState = sortState;
+    this.getUsersList(this.searchControl.value, this.pagination.limit, this.pagination.offset, [], this.filters, sortState);
+  }
+
+  resetPagination(): void {
+    this.currentPage = 1;
+    this.pagination.limit = 5;
+    this.pagination.offset = 0;
+  }
+
+  onApplyingUserBulkUpload(event: any) {
+    this.usersFinalList = [...event];
+    this.dialogRef.close({ rule: this.data.rule, condition: this.data.condition, selected: this.usersFinalList });
   }
 }

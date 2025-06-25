@@ -17,18 +17,25 @@
         <div class="confirm-title text-center">Are you sure you want to opt for "Public" access?</div>
         <div class="confirm-desc text-center">Or else please cancel and select <strong>"Custom"</strong> for the restricted content access.</div>
       </ng-container>
+
+      <ng-container *ngSwitchCase="'confirm-save-without-user-group'">
+        <div class="confirm-title text-center">Are you sure you want to save without adding user group/s?</div>
+        <div class="confirm-desc text-center">Or please cancel and <strong>“Add User Group”</strong> for the restricted content access,</div>
+      </ng-container>
     </div>
 
-    <div class="confirm-actions flex items-center gap-4 mt-4" [ngSwitch]="data?.type">
-      <ng-container *ngSwitchCase="'delete'">
+    <ng-container *ngIf="data?.type === 'delete'">
+      <div class="confirm-actions flex items-center gap-4 mt-4">
         <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">No</button>
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
-      </ng-container>
+      </div>
+    </ng-container>
 
-      <ng-container *ngSwitchCase="'confirm-access-type'">
+    <ng-container *ngIf="data?.type === 'confirm-access-type' || data?.type === 'confirm-save-without-user-group'">
+      <div class="confirm-actions flex items-center gap-4 mt-4">
         <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">Cancel</button>
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
-      </ng-container>
-    </div>
+      </div>
+    </ng-container>
   </div>
 </div>

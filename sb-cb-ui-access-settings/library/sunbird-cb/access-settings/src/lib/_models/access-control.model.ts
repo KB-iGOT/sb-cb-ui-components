@@ -5,6 +5,8 @@ export namespace NsAccessControlConfig {
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
     visiblilityOnOff: IVisiblilityOnOff;
+    userConfig: { [key: string]: any; userRoles: any };
+    content: any;
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];
@@ -12,9 +14,12 @@ export namespace NsAccessControlConfig {
     organizationRadioSelection: ISelectionOption[];
     designationRadioSelection: ISelectionOption[];
     servicesRadioSelection: ISelectionOption[];
+    cadreRadioSelection: ISelectionOption[];
+    batchRadioSelection: ISelectionOption[];
     groupsOptions: string[];
     verificationStatus: ISelectionOption[];
     accessTypes: { name: string; value: string; tooltip: string; disabled: boolean }[];
+    readOnly: boolean;
   }
 
   export interface IOptionsEntity {

@@ -1,15 +1,18 @@
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Output } from "@angular/core";
 import { AccessControlService } from "../../_services/access-control.service";
 import { NsAccessControlConfig } from "../../_models/access-control.model";
 import { SnackbarComponent } from "../snackbar/snackbar.component";
 import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 @Component({
   selector: "sb-uic-bulk-upload-karmayogi",
   templateUrl: "./bulk-upload-karmayogi.component.html",
-  styleUrls: ["./bulk-upload-karmayogi.component.scss"],
+  styleUrls: ["./bulk-upload-karmayogi.component.scss"]
 })
 export class BulkUploadKarmayogiComponent {
+  @Output() appliedUser: EventEmitter<any> = new EventEmitter();
+
   bulkUploadConfig: NsAccessControlConfig.IBulkUploadKarmayogi;
   file!: File | null;
 
@@ -23,12 +26,11 @@ export class BulkUploadKarmayogiComponent {
   isErrorUserlist: any = [];
   fileName: string = "";
   currentDate = new Date();
-  constructor(
-    private accessControlService: AccessControlService,
-    private snackBar: MatSnackBar
-  ) {
-    this.bulkUploadConfig =
-      this.accessControlService.accessControlConfig().bulkUploadKarmayogi;
+
+  holdSelectedUsers: any[] = [];
+  finalSelectedUsers: any[] = [];
+  constructor(private accessControlService: AccessControlService, private snackBar: MatSnackBar) {
+    this.bulkUploadConfig = this.accessControlService.accessControlConfig().bulkUploadKarmayogi;
   }
 
   downloadSample() {
@@ -47,15 +49,25 @@ export class BulkUploadKarmayogiComponent {
     this.fileUploading = true;
     const files: any = [input];
     const fileTypes = ["csv"]; // acceptable file types
+
     if (files && files.length) {
       const extension = files[0].name.split(".").pop().toLowerCase(); // file extension from input file
       const isSuccess = fileTypes.indexOf(extension) > -1; // is extension in acceptable types
-      // console.log(isSuccess)
-      console.log("Filename: " + files[0].name);
-      this.fileName = files[0].name;
-      // console.log('Type: ' + files[0].type)
-      // console.log('Size: ' + files[0].size + ' bytes')
+      if (files[0].size > MAX_FILE_SIZE) {
+        this.fileUploading = false;
+        this.snackBar.openFromComponent(SnackbarComponent, {
+          data: {
+            message: "The file has exceeded the 100 MB upload size limit.",
+            type: "error"
+          },
+          duration: 3000,
+          panelClass: "course-error-snackbar"
+        });
+        return;
+      }
+
       if (isSuccess) {
+        this.fileName = files[0].name;
         const fileToRead = files[0];
         const fileReader = new FileReader();
         fileReader.onload = (event: any) => {
@@ -67,22 +79,24 @@ export class BulkUploadKarmayogiComponent {
         this.snackBar.openFromComponent(SnackbarComponent, {
           data: {
             message: "Unsupported File Format. Please upload a CSV file.",
-            type: "error",
+            type: "error"
           },
           duration: 3000,
-          panelClass: "course-error-snackbar",
+          panelClass: "course-error-snackbar"
         });
+        return;
       }
     } else {
       this.fileUploading = false;
       this.snackBar.openFromComponent(SnackbarComponent, {
         data: {
           message: "Unsupported File Format. Please upload a CSV file.",
-          type: "error",
+          type: "error"
         },
         duration: 3000,
-        panelClass: "course-error-snackbar",
+        panelClass: "course-error-snackbar"
       });
+      return;
     }
   }
 
@@ -127,28 +141,23 @@ export class BulkUploadKarmayogiComponent {
         this.fileUploading = false;
         this.snackBar.openFromComponent(SnackbarComponent, {
           data: {
-            message:
-              "Field Mismatch. Please ensure your uploaded file matches the sample template provided.",
-            type: "error",
+            message: "Field Mismatch. Please ensure your uploaded file matches the sample template provided.",
+            type: "error"
           },
           duration: 3000,
-          panelClass: "course-error-snackbar",
+          panelClass: "course-error-snackbar"
         });
         return;
       }
-      if (
-        !headerValues.includes("Emailid") ||
-        !headerValues.includes("Mobilenumber")
-      ) {
+      if (!headerValues.includes("Emailid") || !headerValues.includes("Mobilenumber")) {
         this.fileUploading = false;
         this.snackBar.openFromComponent(SnackbarComponent, {
           data: {
-            message:
-              "Field Mismatch. Please ensure your uploaded file matches the sample template provided.",
-            type: "error",
+            message: "Field Mismatch. Please ensure your uploaded file matches the sample template provided.",
+            type: "error"
           },
           duration: 3000,
-          panelClass: "course-error-snackbar",
+          panelClass: "course-error-snackbar"
         });
         return;
       }
@@ -160,28 +169,20 @@ export class BulkUploadKarmayogiComponent {
     const emailIds: any = [];
     const mobileNumbers: any = [];
     const bothEmailAndMobile: any = {};
-    this.contacts = this.contacts.filter(
-      (ele: any) => ele.Emailid || ele.Mobilenumber
-    );
+    this.contacts = this.contacts.filter((ele: any) => ele.Emailid || ele.Mobilenumber);
     if (this.contacts.length > 30) {
       this.snackBar.openFromComponent(SnackbarComponent, {
         data: { message: "More than 30 users are not allowed", type: "error" },
         duration: 3000,
-        panelClass: "course-error-snackbar",
+        panelClass: "course-error-snackbar"
       });
       this.fileUploading = false;
     } else {
       await this.contacts.forEach((element: any) => {
-        const emailPattern = new RegExp(
-          `^[\\w\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`
-        );
+        const emailPattern = new RegExp(`^[\\w\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`);
         const mobilePattern = new RegExp(/^(6|7|8|9)\d{9}$/);
-        const emailTest = element.Emailid
-          ? emailPattern.test(element.Emailid)
-          : true;
-        const mobileTest = element.Mobilenumber
-          ? mobilePattern.test(element.Mobilenumber)
-          : true;
+        const emailTest = element.Emailid ? emailPattern.test(element.Emailid) : true;
+        const mobileTest = element.Mobilenumber ? mobilePattern.test(element.Mobilenumber) : true;
         element["email"] = element.Emailid;
         element["mobile"] = element.Mobilenumber;
         if (mobileTest && element.Mobilenumber) {
@@ -198,25 +199,15 @@ export class BulkUploadKarmayogiComponent {
           if (emailTest || mobileTest) {
             element["status"] = "Success";
             element["userStatus"] = true;
-            if (
-              (!emailTest && element.Mobilenumber !== "") ||
-              (!emailTest && element.Mobilenumber === "")
-            ) {
+            if ((!emailTest && element.Mobilenumber !== "") || (!emailTest && element.Mobilenumber === "")) {
               element["status"] = "Error";
               element["userStatus"] = false;
-              element["message"] = emailPattern.test(element.Emailid)
-                ? ""
-                : "Invalid Email id";
+              element["message"] = emailPattern.test(element.Emailid) ? "" : "Invalid Email id";
             }
-            if (
-              (!mobileTest && element.Emailid !== "") ||
-              (!mobileTest && element.Emailid === "")
-            ) {
+            if ((!mobileTest && element.Emailid !== "") || (!mobileTest && element.Emailid === "")) {
               element["status"] = "Error";
               element["userStatus"] = false;
-              element["message"] = mobilePattern.test(element.Mobilenumber)
-                ? ""
-                : "Invalid Mobile number";
+              element["message"] = mobilePattern.test(element.Mobilenumber) ? "" : "Invalid Mobile number";
             }
           } else {
             if (!emailTest && !mobileTest) {
@@ -226,25 +217,15 @@ export class BulkUploadKarmayogiComponent {
             } else {
               element["status"] = "Error";
               element["userStatus"] = false;
-              element["message"] = emailPattern.test(element.Emailid)
-                ? ""
-                : "Invalid Email id";
-              element["message"] = mobilePattern.test(element.Mobilenumber)
-                ? ""
-                : "Invalid Mobile number";
+              element["message"] = emailPattern.test(element.Emailid) ? "" : "Invalid Email id";
+              element["message"] = mobilePattern.test(element.Mobilenumber) ? "" : "Invalid Mobile number";
             }
           }
         }
       });
       this.flag = true;
-      const emailResponseData = await this.callUserCheckApi(
-        emailIds,
-        "primaryEmail"
-      );
-      const mobileResponseData = await this.callUserCheckApi(
-        mobileNumbers,
-        "mobile"
-      );
+      const emailResponseData = await this.callUserCheckApi(emailIds, "primaryEmail");
+      const mobileResponseData = await this.callUserCheckApi(mobileNumbers, "mobile");
       if (emailResponseData && mobileResponseData) {
         this.manageData(emailResponseData, mobileResponseData);
       } else {
@@ -252,10 +233,10 @@ export class BulkUploadKarmayogiComponent {
         this.snackBar.openFromComponent(SnackbarComponent, {
           data: {
             message: "Something went wrong! Please try again",
-            type: "error",
+            type: "error"
           },
           duration: 3000,
-          panelClass: "course-error-snackbar",
+          panelClass: "course-error-snackbar"
         });
       }
     }
@@ -277,19 +258,19 @@ export class BulkUploadKarmayogiComponent {
           "createdDate",
           "rootOrgName",
           "organisations",
-          "username",
-        ],
-      },
+          "username"
+        ]
+      }
     };
     if (key === "primaryEmail") {
       request.request.filters = {
         ...request.request.filters,
-        email: userData,
+        email: userData
       };
     } else {
       request.request.filters = {
         ...request.request.filters,
-        phone: userData,
+        phone: userData
       };
     }
     return this.accessControlService
@@ -313,9 +294,7 @@ export class BulkUploadKarmayogiComponent {
     if (userEmailData.count) {
       userEmailData.content.forEach(async (e: any) => {
         if (e.profileDetails) {
-          userEmailMap[
-            e.profileDetails.personalDetails.primaryEmail.toLowerCase()
-          ] = e;
+          userEmailMap[e.profileDetails.personalDetails.primaryEmail.toLowerCase()] = e;
           userEmailMapUserId[e.userId] = e;
         }
       });
@@ -331,15 +310,8 @@ export class BulkUploadKarmayogiComponent {
       if (e.userStatus) {
         if (e.email && e.mobile) {
           const userData = userEmailMap[e.email.toLowerCase()];
-          if (
-            userData &&
-            userData.profileDetails.personalDetails &&
-            userData.profileDetails.personalDetails.mobile
-          ) {
-            if (
-              String(userData.profileDetails.personalDetails.mobile) ===
-              String(e.mobile)
-            ) {
+          if (userData && userData.profileDetails.personalDetails && userData.profileDetails.personalDetails.mobile) {
+            if (String(userData.profileDetails.personalDetails.mobile) === String(e.mobile)) {
               e["userId"] = userData.userId;
               e["ministry"] = userData.rootOrgName;
               e["fullName"] = userData.firstName || userData.firstname;
@@ -378,9 +350,7 @@ export class BulkUploadKarmayogiComponent {
     this.isErrorUserlist = this.contacts.filter((ele: any) => !ele.userStatus);
 
     // this.successUserData.emit(this.isSuccessUserlist);
-    this.currrentFilterType = this.isSuccessUserlist.length
-      ? "success"
-      : "error";
+    this.currrentFilterType = this.isSuccessUserlist.length ? "success" : "error";
     if (this.currrentFilterType === "success") {
       // this.displayedColumns = [
       //   "fullName",
@@ -392,6 +362,8 @@ export class BulkUploadKarmayogiComponent {
       // this.dataSource = new MatTableDataSource<IUserElement>(
       //   this.isSuccessUserlist
       // );
+      this.holdSelectedUsers = this.isSuccessUserlist;
+      document.getElementById("user-table-select")?.scrollIntoView({ behavior: "smooth" });
     } else if (this.currrentFilterType === "error") {
       // this.displayedColumns = ["email", "status", "mobile", "message"];
       // this.dataSource = new MatTableDataSource<IUserElement>(
@@ -405,9 +377,14 @@ export class BulkUploadKarmayogiComponent {
   }
 
   downloadErrorFile() {
-    this.accessControlService.downloadFile(
-      this.isErrorUserlist,
-      "userErrordata"
-    );
+    this.accessControlService.downloadFile(this.isErrorUserlist, "userErrordata");
+  }
+
+  onSelectingUser(event: any): void {
+    this.holdSelectedUsers = [...event.selectedRows];
+  }
+
+  applySelections() {
+    this.appliedUser.emit(this.holdSelectedUsers);
   }
 }

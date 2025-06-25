@@ -31,7 +31,7 @@
       </button>
     </div>
 
-    <div class="p-4 mt-2">
+    <div class="p-4 pl-0 mt-2">
       <!-- Filter Options -->
       <ng-container *ngIf="this.selectionType !== selectionTypeEnum.Group && this.selectionType !== selectionTypeEnum.VerificationStatus">
         <div class="filter-options">
@@ -52,35 +52,35 @@
                   </div>
                 </ng-container>
                 <ng-container *ngIf="!isLoading">
+                  <div class="alphabet-filter" *ngIf="this.selectionType !== selectionTypeEnum.Batch && alphabet?.length">
+                    <ng-container *ngFor="let letter of alphabet; let i = index; let last = last">
+                      <button
+                        mat-button
+                        class="letter-button"
+                        (click)="scrollToSection(letter)"
+                        [ngClass]="{
+                          'active-range-btn': selectedCharacterRange === letter
+                        }">
+                        {{ letter }}
+                      </button>
+                      <div class="divider-apl" *ngIf="!last"></div>
+                    </ng-container>
+                  </div>
+                  <div class="alphabet-filter" *ngIf="this.selectionType === selectionTypeEnum.Batch">
+                    <ng-container *ngFor="let letter of batchRanges; let i = index; let last = last">
+                      <button
+                        mat-button
+                        class="range-button px-4"
+                        (click)="scrollToSection(letter)"
+                        [ngClass]="{
+                          'active-range-btn': selectedCharacterRange === letter
+                        }">
+                        {{ letter }}
+                      </button>
+                      <div class="divider-apl" *ngIf="!last"></div>
+                    </ng-container>
+                  </div>
                   <ng-container *ngIf="checkIfData; else noData">
-                    <div class="alphabet-filter" *ngIf="this.selectionType !== selectionTypeEnum.Batch && alphabet?.length">
-                      <ng-container *ngFor="let letter of alphabet; let i = index; let last = last">
-                        <button
-                          mat-button
-                          class="letter-button"
-                          (click)="scrollToSection(letter)"
-                          [ngClass]="{
-                            'active-range-btn': selectedCharacterRange === letter
-                          }">
-                          {{ letter }}
-                        </button>
-                        <div class="divider-apl" *ngIf="!last"></div>
-                      </ng-container>
-                    </div>
-                    <div class="alphabet-filter" *ngIf="this.selectionType === selectionTypeEnum.Batch">
-                      <ng-container *ngFor="let letter of batchRanges; let i = index; let last = last">
-                        <button
-                          mat-button
-                          class="range-button px-4"
-                          (click)="scrollToSection(letter)"
-                          [ngClass]="{
-                            'active-range-btn': selectedCharacterRange === letter
-                          }">
-                          {{ letter }}
-                        </button>
-                        <div class="divider-apl" *ngIf="!last"></div>
-                      </ng-container>
-                    </div>
                     <div class="flex overflow-x-auto">
                       <ng-container *ngFor="let group of groupedEntityData | keyvalue">
                         <div class="org-column p-2 mr-4" [attr.id]="'section-' + group.key">
@@ -98,6 +98,7 @@
                                           selectionType === selectionTypeEnum.Cadre
                                         ">
                                         <mat-checkbox
+                                          [disabled]="accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled"
                                           [checked]="isSelected(entity)"
                                           (change)="toggleSelection(entity)"
                                           [title]="entity?.name || entity?.designation || entity?.channel">
@@ -105,7 +106,11 @@
                                         </mat-checkbox>
                                       </ng-container>
                                       <ng-container *ngIf="selectionType === selectionTypeEnum.Batch">
-                                        <mat-checkbox [checked]="isSelected(entity)" (change)="toggleSelection(entity)" [title]="entity">
+                                        <mat-checkbox
+                                          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+                                          [checked]="isSelected(entity)"
+                                          (change)="toggleSelection(entity)"
+                                          [title]="entity">
                                           {{ entity }}
                                         </mat-checkbox>
                                       </ng-container>
@@ -144,7 +149,11 @@
     <ng-container *ngIf="!isLoading">
       <div class="flex gap-16 items-center p-4 options-checkbox">
         <ng-container *ngFor="let group of dataList">
-          <mat-checkbox [checked]="isSelected(group)" (change)="toggleSelection(group)" [title]="group">
+          <mat-checkbox
+            [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+            [checked]="isSelected(group)"
+            (change)="toggleSelection(group)"
+            [title]="group">
             {{ group }}
           </mat-checkbox>
         </ng-container>
@@ -154,18 +163,15 @@
 
   <ng-container *ngIf="selectionType === selectionTypeEnum.VerificationStatus">
     <div class="flex gap-16 items-center p-4 options-checkbox">
-      <!-- <ng-container *ngFor="let group of dataList">
-        <mat-checkbox [checked]="isSelected(group)" (change)="toggleSelection(group)" [title]="group">
-          {{ group }}
+      <ng-container *ngFor="let group of dataList">
+        <mat-checkbox
+          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled || disabledVerifiedIfModerated(group)"
+          [checked]="isSelectedVerification(group)"
+          (change)="onVerificationChange(group)"
+          [title]="group?.label">
+          {{ group?.label }}
         </mat-checkbox>
-      </ng-container> -->
-      <mat-radio-group [(ngModel)]="selectedVerificationStatus" (change)="onVerificationChange($event)">
-        <ng-container *ngFor="let group of dataList">
-          <mat-radio-button [value]="group" [title]="group" class="mr-3">
-            {{ group }}
-          </mat-radio-button>
-        </ng-container>
-      </mat-radio-group>
+      </ng-container>
     </div>
   </ng-container>
 </div>
@@ -174,36 +180,24 @@
   <ng-container *ngIf="checkIfData">
     <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
       <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus">
-        <div class="text-xs">{{ selectedData.length }} items selected</div>
+        <div class="text-xs">{{ filterValue === "all" ? selectedDataTemp?.length : selectedData?.length }} items selected</div>
       </ng-container>
-      <ng-container
-        *ngIf="
-          selectionType === selectionTypeEnum.VerificationStatus ||
-          selectionType === selectionTypeEnum.Group ||
-          selectionType === selectionTypeEnum.Cadre ||
-          activeTab === 1
-        ">
+      <ng-container *ngIf="selectionType === selectionTypeEnum?.VerificationStatus || selectionType === selectionTypeEnum?.Group || activeTab === 1">
         <button
           mat-flat-button
-          [disabled]="selectedData.length === 0"
+          [disabled]="(selectedData.length === 0 && selectedDataTemp.length === 0) || accessControlCriteriaSelection?.readOnly || data?.disabled"
           (click)="applySelections()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
           Apply
         </button>
       </ng-container>
-      <ng-container
-        *ngIf="
-          selectionType !== selectionTypeEnum.VerificationStatus &&
-          selectionType !== selectionTypeEnum.Group &&
-          selectionType !== selectionTypeEnum.Cadre &&
-          activeTab === 0
-        ">
+      <ng-container *ngIf="selectionType !== selectionTypeEnum?.VerificationStatus && selectionType !== selectionTypeEnum?.Group && activeTab === 0">
         <button
           mat-flat-button
-          [disabled]="selectedData.length === 0"
-          (click)="activeTab = 1"
+          [disabled]="selectedDataTemp.length === 0 || accessControlCriteriaSelection?.readOnly || data?.disabled"
+          (click)="setSelected()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
-          Selected
+          {{ getModalTitle() }}
         </button>
       </ng-container>
     </div>

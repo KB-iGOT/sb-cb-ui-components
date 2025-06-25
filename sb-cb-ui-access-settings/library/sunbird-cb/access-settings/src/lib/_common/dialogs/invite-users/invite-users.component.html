@@ -42,11 +42,14 @@
                 <sb-uic-list-table
                   [data]="usersList"
                   [count]="totalUsers"
-                  [initialPaginationSize]="usersTableConfig['allLearners']?.initialPaginationSize"
+                  [initialPaginationSize]="pagination.limit"
                   [tableConfig]="usersTableConfig['allLearners']"
                   (selectedDataChange)="onSelectingUser($event)"
                   (pageChange)="onPageChange($event)"
-                  [selected]="finalSelectedUsers"></sb-uic-list-table>
+                  (sortChange)="onSortChange($event)"
+                  [selected]="usersFinalList"
+                  [currentPage]="currentPage"
+                  ></sb-uic-list-table>
               </ng-container>
             </div>
           </mat-tab>
@@ -56,18 +59,18 @@
                 <mat-spinner></mat-spinner>
               </div>
             </ng-container>
-            <ng-container *ngIf="!usersLoading">
+            <div [ngClass]="{ hidden: usersLoading }">
               <ng-container *ngIf="finalSelectedUsers && finalSelectedUsers.length > 0; else noData">
                 <sb-uic-list-table
                   [data]="finalSelectedUsers"
                   [count]="finalSelectedUsers.length || 0"
-                  [initialPaginationSize]="usersTableConfig['selectedUsers']?.initialPaginationSize"
+                  [initialPaginationSize]="pagination.limit"
                   [tableConfig]="usersTableConfig['selectedUsers']"
                   (selectedDataChange)="onSelectingUserToApply($event)"
                   (removeSelectedData)="removedUserData($event)"
                   [selected]="usersFinalList"></sb-uic-list-table>
               </ng-container>
-            </ng-container>
+            </div>
           </mat-tab>
         </mat-tab-group>
       </ng-container>
@@ -82,7 +85,7 @@
   </ng-container>
 
   <ng-container *ngIf="filterValue === 'bulk_upload_karmayogis'">
-    <sb-uic-bulk-upload-karmayogi></sb-uic-bulk-upload-karmayogi>
+    <sb-uic-bulk-upload-karmayogi (appliedUser)="onApplyingUserBulkUpload($event)"></sb-uic-bulk-upload-karmayogi>
   </ng-container>
 </div>
 
@@ -97,7 +100,7 @@
         Select Users
       </button>
     </ng-container>
-    <ng-container *ngIf="activeTab === 1 && usersFinalList.length">
+    <ng-container *ngIf="activeTab === 1 && usersFinalList.length && finalSelectedUsers.length">
       <button
         mat-flat-button
         (click)="applySelections()"

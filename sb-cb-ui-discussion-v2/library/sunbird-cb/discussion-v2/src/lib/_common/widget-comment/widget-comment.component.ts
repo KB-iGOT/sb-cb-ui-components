@@ -196,7 +196,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
     }
-      this.commentSvc.fetchAllComment_V2(payload).subscribe(res => {
+      this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
         if (res && res.result.commentCount) {
           const newComments = res.result.comments
           if(res && res.result && res.result.courseDetails){

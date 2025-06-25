@@ -42,41 +42,49 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.SEARCH_USER_WITH_ADMIN(queryString));
   }
 
-  fetchUserList(query: string, pagination: { limit: number; offset: number }, userIds?: string[]): Observable<any> {
+  fetchUserList(query: string, pagination: { limit: number; offset: number }, userIds?: string[], filters?: any, sorting?: any): Observable<any> {
     let request: any = {
       filters: {
-        "profileDetails.profileStatus": ["VERIFIED", "NOT-VERIFIED"],
         status: 1
       },
       limit: pagination.limit || 5,
       offset: pagination.offset || 0,
       query: query,
-      sort_by: {
-        firstName: "asc"
-      }
+      sort_by: {}
     };
     if (userIds?.length) {
       request.filters = { ...request.filters, userId: userIds };
     }
+    if (filters) {
+      request.filters = { ...request.filters, ...filters };
+    }
+    if (sorting) {
+      request.sort_by = sorting;
+    }
     return this.http.post<any>(ENDPOINTS.SEARCH_USER, { request: request });
   }
 
-  fetchOrgList(query: string, selectedData?: string[]): Observable<any> {
+  fetchOrgList(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
     let request: any = {
       request: {
         filters: {
           status: 1,
+          isMdo: true
         },
         sort_by: {
           channel: "asc"
         },
         fields: ["channel", "identifier"],
-        query: query,
-        limit: 1500
+        query: query
+        // limit: 200
       }
     };
     if (selectedData?.length) {
       request.request.filters.identifier = selectedData;
+    }
+
+    if (characterSearch || !query) {
+      request.request.filters.channel = { startsWith: characterSearch || "A" };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
@@ -93,20 +101,23 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.CADRE_CONFIG);
   }
 
-  fetchDesignation(query: string, selectedData?: string[]): Observable<any> {
+  fetchDesignation(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
     let payload: any = {
       filterCriteriaMap: {
         status: "Active"
       },
       requestedFields: ["designation", "id"],
-      pageSize: 1000,
-      pageNumber: 0
+      pageSize: 1000
+      // pageNumber: 0
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
     }
     if (query) {
       payload.searchString = query;
+    }
+    if (characterSearch || !query) {
+      payload.startsWith = characterSearch || "A";
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
