@@ -1,4 +1,4 @@
-<div class="dialog-confirm p-4">
+<div class="dialog-confirm p-4" *ngIf="data && data?.type !== 'confirm-reset-fields'">
   <div class="flex items-center justify-center flex-column">
     <div class="icon mb-6" [ngSwitch]="data.type">
       <mat-icon *ngSwitchCase="'delete'">delete</mat-icon>
@@ -37,5 +37,28 @@
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
       </div>
     </ng-container>
+  </div>
+</div>
+
+<div class="dialog-confirm p-4" *ngIf="data && data?.type === 'confirm-reset-fields'">
+  <div class="flex items-center justify-center flex-column">
+    <div class="icon mb-6" [ngSwitch]="data.type">
+      <mat-icon *ngSwitchCase="'confirm-reset-fields'" svgIcon="radio-on"></mat-icon>
+    </div>
+    <div [ngSwitch]="data?.type">
+      <ng-container *ngSwitchCase="'confirm-reset-fields'">
+        <div class="confirm-title text-center">Are you sure you want to reset  ?</div>
+        <div class="confirm-desc text-center">
+          Once reset, subsequent categories will get reset.
+        </div>
+      </ng-container>
+
+    <ng-container *ngIf="data?.type === 'confirm-reset-fields'">
+      <div class="confirm-actions flex items-center justify-center gap-4 mt-4">
+        <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">Cancel</button>
+        <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
+      </div>
+    </ng-container>
+  </div>
   </div>
 </div>

@@ -348,11 +348,33 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   manageSelections(conditionForm: any, ruleForm: any, userGroupIndex: number, activeTabSelected = 0): void {
+    
+    
+
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
+    let resetFilterFlag = false 
+    if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+      resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex)  
+    }
+    if(resetFilterFlag) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "470px",
+        data: { type: "confirm-reset-fields" }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+          this.resetActiveUserGroupFields(condition, rule, userGroupIndex)
+        } 
+      });
+    }
+    
     switch (condition.entity) {
       case NsAccessControlConfig.SelectionType.Users:
-        this.openInviteUserDialog(condition, rule, activeTabSelected, rule?.isUserGroupDisabled);
+        if(!resetFilterFlag) {
+          this.openInviteUserDialog(condition, rule, activeTabSelected, rule?.isUserGroupDisabled);
+        }        
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
       case NsAccessControlConfig.SelectionType.Designation:
@@ -362,7 +384,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       case NsAccessControlConfig.SelectionType.Group:
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         this.processCadreConfigMapping(userGroupIndex);
-        this.openSelectionDialog(rule, condition, activeTabSelected, rule?.isUserGroupDisabled);
+        if(!resetFilterFlag) {
+          this.openSelectionDialog(rule, condition, activeTabSelected, rule?.isUserGroupDisabled);
+        }
         break;
       default:
         console.warn("Unsupported entity type:", condition.entity);
@@ -935,5 +959,36 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   isUserGroupFormChanged(initialValue: any): boolean {
     const currentValue = this.accessControlForm.getRawValue().userGroup;
     return JSON.stringify(currentValue) !== JSON.stringify(initialValue);
+  }
+
+  checkForResetFilter(condition:any, rule:any, userGroupIndex:any) {
+    let flag = false
+    let accessControlFormData  = this.accessControlForm.getRawValue()
+    let activeManageSelection =  accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex]
+    if(activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1)  {
+      //Show Popup
+      activeManageSelection?.conditions?.map((item)=>{
+        if((item?.entity === condition?.entity) && item?.selections?.length > 0) {
+          flag = true
+        }
+      })      
+    }
+    return flag
+  }
+
+  resetActiveUserGroupFields(condition:any, rule:any, userGroupIndex:any) {
+    let accessControlFormData  = this.accessControlForm.getRawValue()
+    let activeManageSelection =  accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex]
+    let activeConditionIndex = activeManageSelection?.conditions?.findIndex((item) => {
+      return (item?.entity === condition?.entity) && item?.selections?.length > 0;
+    });
+    let activeManageSelectionArrLength =  activeManageSelection?.conditions.length
+    for(let i = activeConditionIndex +1 ; i < activeManageSelectionArrLength; i++) {
+      const userGroupArray = this.accessControlForm.get('userGroup') as FormArray;
+      const userGroup = userGroupArray.at(userGroupIndex) as FormGroup;
+      const conditionsArray = userGroup.get('conditions') as FormArray;
+      const conditionGroup = conditionsArray.at(i) as FormGroup;
+      conditionGroup.reset();
+    }
   }
 }

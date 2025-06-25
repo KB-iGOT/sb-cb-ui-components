@@ -143,7 +143,7 @@
                                   type="button"
                                   (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
-                                    <span class="text-m color-gr underline">{{ condition.get("selections").value.length }} items selected</span>
+                                    <span class="text-m color-gr underline">{{ condition?.get("selections").value?.length }} items selected</span>
                                   </div>
                                 </button>
                               </div>
@@ -203,7 +203,7 @@
                       </button>
                     </div>
                   </mat-expansion-panel>
-                  <div class="and-or mat-full-radius" *ngIf="userGroup.length > 1 && !ruleLast">
+                  <div class="and-or mat-full-radius" *ngIf="userGroup?.length > 1 && !ruleLast">
                     <mat-form-field appearance="outline" class="w-max-100">
                       <mat-select placeholder="Select" [(value)]="defaultUserGroupRelationship">
                         <mat-option [value]="'AND'" [disabled]="true">AND</mat-option>
