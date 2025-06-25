@@ -3,7 +3,7 @@
     class="flex flex-1 respo margin-bottom-m no-shadow">
     <div class="flex flex-column width-100"
       [ngClass]="mobileQuestionSetExpand ? 'mobile-responsive-question-container-expand' : 'mobile-responsive-question-container'">
-      <div class="flex flex-row width-100 justify-between">
+      <div class="flex flex-row width-100 justify-between" *ngIf="showOnlyQuestion">
         <div>
           <p class="margin-bottom-m">
             <ng-container i18n="question number label"><span class="subheading-1">Question</span></ng-container><span
@@ -13,7 +13,7 @@
             <span class="question-number">&nbsp;{{ total }}</span>
           </p>
         </div>
-        <div class="flex flex-row align-center justify-around" *ngIf="!showQuestionOnly">
+        <!-- <div class="flex flex-row align-center justify-around" *ngIf="!showQuestionOnly">
           <ng-container
             *ngIf="ePrimaryCategory.PRACTICE_RESOURCE === primaryCategory && ((questionNumber) <= totalQCount)">
             <div *ngIf="!isMobile" class="cursor-pointer"
@@ -55,9 +55,9 @@
             </div>
           </div>
 
-        </div>
+        </div> -->
       </div>
-      <div class="respo flex flex-column padding-top-m">
+      <div class="respo flex flex-column padding-top-m" *ngIf="!showOnlyQuestion">
         <div class="flex flex-column respo_inner">
           <div class="flex flex-1">
             <h2 *ngIf="question.questionType !== 'ftb'" class="mat-h2"
@@ -127,7 +127,7 @@
         <mat-icon *ngIf="isQuestionMarked()" matTooltip="'You can use this Flag icon to postpone attempting a particular question. The flagged question will be highlighted in orange, as a reminder, when you attempt it later.'">flag</mat-icon>
       </button>
     </div> -->
-      <div class="flex flex-row width-100 justify-between">
+      <div class="flex flex-row width-100 justify-between" *ngIf="showOnlyQuestion">
         <div>
           <p class="margin-bottom-m">
             <ng-container i18n="question number label"><span class="subheading-1">Question</span></ng-container><span
@@ -137,7 +137,7 @@
             <span class="question-number">&nbsp;{{ total }}</span>
           </p>
         </div>
-        <div class="flex flex-row align-center justify-around">
+        <!-- <div class="flex flex-row align-center justify-around">
           <ng-container
             *ngIf="ePrimaryCategory.PRACTICE_RESOURCE === primaryCategory && ((questionNumber) <= totalQCount)">
             <div *ngIf="!isMobile" class="cursor-pointer"
@@ -179,9 +179,9 @@
             </div>
           </div>
 
-        </div>
+        </div> -->
       </div>
-      <div class="respo flex flex-column padding-top-m">
+      <div class="respo flex flex-column padding-top-m" *ngIf="!showOnlyQuestion">
         <div class="flex flex-1- flex-column respo_inner">
           <div class="flex flex-1 flex-center flex-column">
             <ng-container *ngIf="question.questionType !== 'ftb'">
