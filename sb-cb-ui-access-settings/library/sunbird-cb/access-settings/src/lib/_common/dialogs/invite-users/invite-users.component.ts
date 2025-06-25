@@ -27,6 +27,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   holdSelectedUsers: any[] = [];
   finalSelectedUsers: any[] = [];
   usersFinalList: any[] = [];
+  bulkUploadUserList: any[] = [];
 
   usersTableConfig!: NsAccessControlConfig.ITableConfig;
   usersLoading = false;
@@ -108,6 +109,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(event: any): void {
+    if(event?.value === 'bulk_upload_karmayogis') this.bulkUploadUserList = []
     this.filterValue = event.value;
   }
 
@@ -193,7 +195,10 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   }
 
   onApplyingUserBulkUpload(event: any) {
-    this.usersFinalList = [...event];
-    this.dialogRef.close({ rule: this.data.rule, condition: this.data.condition, selected: this.usersFinalList });
+    this.bulkUploadUserList = event;
+  }
+
+  applySelectionsBulk(): void {
+    this.dialogRef.close({ rule: this.data.rule, condition: this.data.condition, selected: this.bulkUploadUserList });
   }
 }

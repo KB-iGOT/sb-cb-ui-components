@@ -110,7 +110,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
-        this.getDesignationsList("", [], "A");
+        if (this.activeTab === 0) {
+          this.getDesignationsList("", [], "A");
+          this.selectedCharacterRange = "A";
+        } else {
+          this.getDesignationsList("", this.selectedData, undefined);
+          this.alphabet = [];
+        }
         this.radioSelections = this.accessControlCriteriaSelection?.designationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Service:
@@ -195,9 +201,18 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.selectedCharacterRange = "A";
       } else {
         this.getOrganisationsList("", this.selectedData, undefined);
-        // this.alphabet = [];
       }
     }
+
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Designation) {
+      if (this.activeTab === 0) {
+        this.getDesignationsList("", [], "A");
+        this.selectedCharacterRange = "A";
+      } else {
+        this.getDesignationsList("", this.selectedData, undefined);
+      }
+    }
+
 
     this.getFilteredEntityGrouped();
     if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {

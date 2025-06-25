@@ -363,7 +363,9 @@ export class BulkUploadKarmayogiComponent {
       //   this.isSuccessUserlist
       // );
       this.holdSelectedUsers = this.isSuccessUserlist;
-      document.getElementById("user-table-select")?.scrollIntoView({ behavior: "smooth" });
+      this.appliedUser.emit(this.holdSelectedUsers);
+
+      // document.getElementById("user-table-select")?.scrollIntoView({ behavior: "smooth" });
     } else if (this.currrentFilterType === "error") {
       // this.displayedColumns = ["email", "status", "mobile", "message"];
       // this.dataSource = new MatTableDataSource<IUserElement>(
@@ -382,9 +384,10 @@ export class BulkUploadKarmayogiComponent {
 
   onSelectingUser(event: any): void {
     this.holdSelectedUsers = [...event.selectedRows];
-  }
-
-  applySelections() {
     this.appliedUser.emit(this.holdSelectedUsers);
   }
+
+  // applySelections() {
+  //   this.appliedUser.emit(this.holdSelectedUsers);
+  // }
 }
