@@ -1029,15 +1029,32 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     let flag = false
     let accessControlFormData  = this.accessControlForm.getRawValue()
     let activeManageSelection =  accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex]
+    let activeSelectionCount = 0
     if(activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1)  {
       //Show Popup
-      activeManageSelection?.conditions?.map((item)=>{
-        if((item?.entity === condition?.entity) && item?.selections?.length > 0) {
-          flag = true
-        }
-      })      
+      let onlyOneCondition = this.hasOnlyOneArrayWithLength(activeManageSelection?.conditions, 'selections')
+      if(onlyOneCondition) {
+        flag = false
+      } else {
+        activeManageSelection?.conditions?.map((item)=>{  
+          if((item?.entity == condition?.entity) && item?.selections.length > 0) {
+            flag = true         
+          }
+        })  
+      }
     }
     return flag
+  }
+
+  hasOnlyOneArrayWithLength(data, key) {
+    let count = 0;  
+    for (const obj of data) {
+        if (Array.isArray(obj[key]) && obj[key].length > 0) {
+          count++;
+        }
+      
+    }  
+    return count > 1 ? false : true;
   }
 
   resetActiveUserGroupFields(condition:any, rule:any, userGroupIndex:any) {
@@ -1051,8 +1068,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const userGroupArray = this.accessControlForm.get('userGroup') as FormArray;
       const userGroup = userGroupArray.at(userGroupIndex) as FormGroup;
       const conditionsArray = userGroup.get('conditions') as FormArray;
-      const conditionGroup = conditionsArray.at(i) as FormGroup;
-      conditionGroup.reset();
+      const conditionGroup = conditionsArray.at(i) as FormGroup;      
+      // conditionGroup.reset();      
+      const condition = conditionGroup;
+      condition.get("entity")?.setValue("");
+      condition.get("selections")?.setValue([]);
     }
+
+    this.calculateUserCountForUserGroup(userGroupIndex);
+    
   }
 }

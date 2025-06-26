@@ -42,16 +42,19 @@
 
 <div class="dialog-confirm p-4" *ngIf="data && data?.type === 'confirm-reset-fields'">
   <div class="flex items-center justify-center flex-column">
+
     <div class="icon mb-6" [ngSwitch]="data.type">
       <mat-icon *ngSwitchCase="'confirm-reset-fields'" svgIcon="radio-on"></mat-icon>
     </div>
+
     <div [ngSwitch]="data?.type">
       <ng-container *ngSwitchCase="'confirm-reset-fields'">
-        <div class="confirm-title text-center">Any changes in this condition would reset the below AND conditions,do you still wish to continue?</div>
-        <!-- <div class="confirm-desc text-center"> -->
-          
+        <div class="confirm-title text-center">
+          Any changes in this condition would reset the below AND conditions, do you still wish to continue?
         </div>
+        <!-- Optional description div can go here -->
       </ng-container>
+    </div>
 
     <ng-container *ngIf="data?.type === 'confirm-reset-fields'">
       <div class="confirm-actions flex items-center justify-center gap-4 mt-4">
@@ -59,6 +62,8 @@
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Confirm</button>
       </div>
     </ng-container>
-  </div>
+
   </div>
 </div>
+
+
