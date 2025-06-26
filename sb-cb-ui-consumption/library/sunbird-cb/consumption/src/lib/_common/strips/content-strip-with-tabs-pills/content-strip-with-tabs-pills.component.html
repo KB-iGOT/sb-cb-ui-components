@@ -105,9 +105,9 @@
                       <div class="wfull wrapper-saksham"
                         *ngIf="tab?.pillsData && tab?.pillsData?.length && !tab?.hideTab"
                         [ngClass]="{'overlay-max-height': recommendationPopup || sakshamFeedbackPopup}">
-                        <div class="flex justify-between item-center">
+                        <div class="pt-3 flex justify-between item-center">
                           <ng-container *ngIf="tab?.value !== sakshamAIEnum.SakshamAI">
-                            <div class="pt-4">
+                            <div class=" flex items-center">
                               <mat-chip-list class="content-pill" aria-label="Fish selection">
                                 <ng-container *ngFor="let pill of tab?.pillsData;let p = index">
                                   <mat-chip [selected]="pill?.selected"

@@ -125,6 +125,10 @@ export class CommentCardComponent implements OnInit, OnChanges {
         const replayModified = reply.map((replayData: any) => ({...replayData, parentCommentId: this.comment.parentCommentId || this.comment.commentId}))
         this.fetchedReplyData = [...replayModified,]
         this.newReply.emit({ response: [], type: 'reply', replyDataCopy:this.replyDataCopy, replyData: this.fetchedReplyData })
+        if(res.result && res.result.users && res.result.users.length) {
+                  let commentUsersDataObj = res.result.users
+                  this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+        } 
       }
     },
       () => {
@@ -344,7 +348,10 @@ export class CommentCardComponent implements OnInit, OnChanges {
         const replayModified = reply.map((replayData: any) => ({ ...replayData, parentCommentId: this.comment.parentCommentId || this.comment.commentId }))
         this.fetchedReplyData = [...this.fetchedReplyData, ...replayModified]
         this.newReply.emit({ response: [], type: 'reply', replyDataCopy: this.replyDataCopy, replyData: this.fetchedReplyData })
-
+        if(res.result && res.result.users && res.result.users.length) {
+          let commentUsersDataObj = res.result.users
+          this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
+} 
         this.loading = false
       }
     },
