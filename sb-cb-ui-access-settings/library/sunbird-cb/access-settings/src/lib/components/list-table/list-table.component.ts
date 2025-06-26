@@ -20,6 +20,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() selected: any;
   @Input() bulkUploadEntriesCount: any;
   @Input() currentPage: number = 1;
+  @Input() isDisabled: boolean = false;
 
   @Output() selectedDataChange: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<PageChangeEmitter> = new EventEmitter();

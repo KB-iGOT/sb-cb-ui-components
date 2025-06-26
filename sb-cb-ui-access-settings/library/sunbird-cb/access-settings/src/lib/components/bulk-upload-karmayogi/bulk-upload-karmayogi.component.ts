@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { AccessControlService } from "../../_services/access-control.service";
 import { NsAccessControlConfig } from "../../_models/access-control.model";
 import { SnackbarComponent } from "../snackbar/snackbar.component";
@@ -12,6 +12,7 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 })
 export class BulkUploadKarmayogiComponent {
   @Output() appliedUser: EventEmitter<any> = new EventEmitter();
+  @Input() isDisabled: boolean = false;
 
   bulkUploadConfig: NsAccessControlConfig.IBulkUploadKarmayogi;
   file!: File | null;
