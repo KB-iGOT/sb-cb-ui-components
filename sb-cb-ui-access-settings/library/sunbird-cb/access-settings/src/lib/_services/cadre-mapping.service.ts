@@ -147,13 +147,17 @@ export class CadreMappingService {
     });
   }
 
-  getServicesByCadresAndBatch(cadreIds: string[], year: number): Array<{ id: string; name: string }> {
-    const services = this.getServicesByCadres(cadreIds);
-    return services.filter(service => {
-      const fullService = this.allServices.get(service.id);
-      return year >= fullService.commonBatchStartYear && year <= fullService.commonBatchEndYear;
-    });
+  getServicesByCadresAndBatch(cadreIds: string[], years: number[]): Array<{ id: string; name: string }> {
+  const services = this.getServicesByCadres(cadreIds);
+  if (!Array.isArray(years)) {
+    years = [years];
   }
+  return services.filter(service => {
+    const fullService = this.allServices.get(service.id);
+    // Return true if any year is within the service's batch year range
+    return years.some(year => year >= fullService.commonBatchStartYear && year <= fullService.commonBatchEndYear);
+  });
+}
 
   getCadresByServicesAndBatch(serviceIds: string[], years: number[]): Array<{ id: string; name: string }> {
     const cadres = this.getCadresByServices(serviceIds);
