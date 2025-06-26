@@ -340,13 +340,14 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  openOrganizationDialog(column: any, _index: any) {
+  openOrganizationDialog(column: any, _index: any, typeSelected: string) {
     const treeListData = this.frameworkService.getPreviousSelectedTerms(column.code)     
     const dialog = this.dialog.open(OrgHierarchyAddModalComponent, {
       data: {
         previous: treeListData,
         currentData: column,
         selectedOrgData: this.orgSelectedData,
+        type: typeSelected
       },
       autoFocus: true,
       restoreFocus: true,
@@ -357,10 +358,22 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       maxWidth: '100vw'
     });
     
-    dialog.afterClosed().subscribe((_res: any) => {
-        if (_res && _res.length > 0) {
+    dialog.afterClosed().subscribe(async (_res: any) => {
+        if (_res && _res.type === 'add') {
           this.treeHierarchySvc.setLoaderState(true);
-          this.createTerms(_res, column)
+          this.createTerms(_res.selectedOrg, column)
+        } else if (_res && _res.type === 'update') {
+          if (_res.paparentSelectedOrg) {
+            await this.updateParentAssociation(_res.paparentSelectedOrg, _res.currentTerm);
+          }
+          if (_res.selectedOrg && _res.selectedOrg.length > 0) {
+            this.treeHierarchySvc.setLoaderState(true);
+            this.createTerms(_res.selectedOrg, column)
+          } else {
+            this.publishFramework({
+              id: this.orgSelectedData.orgHierarchyFrameworkId || '',
+            category: ''})
+          }
         }
     });
   }
@@ -601,6 +614,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   async updateAssociation(nodeId: any, frameworkData: any, column: any) {
     const prev:any = this.frameworkService.getPreviousCategory(column.code);
     let prevTrem:any = this.frameworkService.getPreviousSelectedTerms(column.code)
+    const tempFrameData = _.cloneDeep(this.frameworkService.completeResponse)
     const requestBody:any = {
       request: {
         term: {
@@ -609,7 +623,8 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       }
     } 
     if (prev && prevTrem) {
-      prevTrem = prevTrem.filter((ele:any) => ele.category === prev.code)[0]
+      prevTrem = prevTrem.find((ele:any) => ele.category === prev.code)
+      prevTrem = tempFrameData.categories.find((ele:any) => ele.code === prev.code).terms.find((ele:any) => ele.code === prevTrem.code)
       if (prevTrem && prevTrem.associations && prevTrem.associations.length > 0) {
         prevTrem.associations.forEach((ele:any) => {
             requestBody.request.term.associations.push({
@@ -643,7 +658,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
           this._snackBar.open(`Organization Hierarchy updated. Will reflect in sometime`, 'cancel');
           this.treeHierarchySvc.setLoaderState(false);
           this.init();
-        }, 3000);
+        }, 5000);
       } else {
         this._snackBar.open('Error in publishing framework', 'cancel');
         this.treeHierarchySvc.setLoaderState(false);
@@ -751,7 +766,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
           this.removeConnection(event.data);
           break;
         case 'update-hierarchy':
-          this.openOrganizationDialog(this.list[this.list.findIndex((item:any) => item.code === event.data.category) +1], '');
+          this.openOrganizationDialog(this.list[this.list.findIndex((item:any) => item.code === event.data.category) +1], '', 'update');
           break;
           case 'manage-org':
             this.manageOrg.emit(event.data.children);
@@ -855,5 +870,56 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     if (updateCatRes && updateCatRes.params && updateCatRes.params.status.toLowerCase() === 'successful') {
       await this.publishFramework(frameworkObj)
     }
+  }
+
+  async updateParentAssociation(selectedParent: any, currentTerm: any) {
+    const framworkData = _.cloneDeep(this.frameworkService.completeResponse);
+    const parentCategoryData = framworkData.categories.find((cat: any) => cat.code === selectedParent.category);
+    if (parentCategoryData && parentCategoryData.terms && parentCategoryData.terms.length > 0) {
+      const currentParentTerm = parentCategoryData.terms.find((term: any) => {
+        if (term.associations && term.associations.length > 0) {
+          return term.associations.some((assoc: any) => assoc.code === currentTerm.code);
+        }
+      });
+      if (currentParentTerm) {
+        const updateOldParentAssociation:any = {
+          request: {
+            term: {
+              associations: []
+            }
+          }
+        }
+        currentParentTerm.associations.forEach((assoc: any) => {
+          if (assoc.code !== currentTerm.code) {
+            updateOldParentAssociation.request.term.associations.push({identifier: assoc.identifier})
+          }
+        })
+        await this.updateHierarchyAssocication(updateOldParentAssociation, framworkData.identifier, currentParentTerm)
+      }
+      selectedParent = parentCategoryData.terms.find((term: any) => term.code === selectedParent.code);
+      const updateNewParentAssociation:any = {
+        request: {
+          term: {
+            associations: []
+          }
+        }
+      }
+      if (selectedParent && selectedParent.associations && selectedParent.associations.length > 0) {
+        selectedParent.associations.forEach((assoc: any) => {
+          updateNewParentAssociation.request.term.associations.push({identifier: assoc.identifier})
+        })
+      }
+      updateNewParentAssociation.request.term.associations.push({identifier: currentTerm.identifier});
+      await this.updateHierarchyAssocication(updateNewParentAssociation, framworkData.identifier, selectedParent);
+    }
+  }
+
+  async updateHierarchyAssocication(requestBody: any, frameworkId: any, termData: any) {
+    this.treeHierarchySvc.setLoaderState(true);
+    await this.treeHierarchySvc.updateFrameworkAssociation(requestBody, { id: frameworkId, category: termData.category }, termData.code).toPromise().catch((err: any) => {
+      console.error('Error in updating association', err);
+      this.treeHierarchySvc.setLoaderState(false);
+      this._snackBar.open(`Error in updating association`, 'cancel');
+    });
   }
 }

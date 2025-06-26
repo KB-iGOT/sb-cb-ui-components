@@ -123,7 +123,7 @@
 
 <mat-menu #orgMenu="matMenu" class="menu-sec">
     <ng-template matMenuContent let-rowData="data" let-cardRef="cardRef">
-        <button *ngIf="data.columnInfo.config.enableUpdateHierarchy"  (click)="menuAction('update-hierarchy', data)" mat-menu-item name="channel-analytics-button"
+        <button *ngIf="data.columnInfo.config.enableUpdateHierarchy && data.index > 1"  (click)="menuAction('update-hierarchy', data)" mat-menu-item name="channel-analytics-button"
             class="action-btn" i18n-aria-label aria-label="Analytics">
             <mat-icon>edit</mat-icon> <span>Update Hierarchy</span>
         </button>

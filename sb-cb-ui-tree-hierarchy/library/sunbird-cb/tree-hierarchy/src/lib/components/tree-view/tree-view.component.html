@@ -41,7 +41,7 @@
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="column?.config?.addOrgEnabled && !column?.config?.createBtnEnabled">
-                                <button mat-button class="add-btn margin-left-auto" (click)="openOrganizationDialog(column, i)" type="button" 
+                                <button mat-button class="add-btn margin-left-auto" (click)="openOrganizationDialog(column, i, 'add')" type="button" 
                                 [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                     <span>Add</span>
                                     <mat-icon class="margin-remove">
@@ -76,7 +76,7 @@
                                 <mat-icon svgIcon="frac-no-connection"></mat-icon>
                             </div>
                             <label>Select an organization to add or see further connections</label>
-                            <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i)" type="button" 
+                            <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i, 'add')" type="button" 
                             [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                 <span>Add</span>
                                 <mat-icon class="margin-remove">

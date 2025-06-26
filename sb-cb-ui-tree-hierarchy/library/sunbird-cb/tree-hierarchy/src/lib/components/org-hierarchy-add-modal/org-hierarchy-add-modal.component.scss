@@ -10,6 +10,10 @@
 
 }
 
+::ng-deep .no-checkbox .mat-pseudo-checkbox {
+  	display: none !important;
+}
+
 .custom-height-select {
   width: 100%;
   margin-top: 5px;
