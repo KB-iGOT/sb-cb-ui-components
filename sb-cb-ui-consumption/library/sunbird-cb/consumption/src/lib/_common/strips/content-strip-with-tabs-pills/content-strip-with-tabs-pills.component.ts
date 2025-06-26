@@ -1083,7 +1083,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ) {
     if (strip.tabs[tabIndex]?.request && strip.tabs[tabIndex].request.designationsList) {
       try {
-        let response = await this.userSvc.fetchDesigantionsData().toPromise()
+        let response = await this.userSvc.fetchDesignationsData().toPromise()
         if (response) {
           let request = {
             "request": {
