@@ -655,7 +655,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     this.treeHierarchySvc.publishFreamework(frameworkData).subscribe((res:any) => {
       if (res && res.result && res.result.publishStatus) {
         setTimeout(() => {
-          this._snackBar.open(`Organization Hierarchy updated. Will reflect in sometime`, 'cancel');
+          this._snackBar.open(`Organization hierarchy updated successfully`);
           this.treeHierarchySvc.setLoaderState(false);
           this.init();
         }, 5000);

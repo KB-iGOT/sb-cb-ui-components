@@ -41,12 +41,18 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
       this.frameworkData = _.cloneDeep(this.frameworkService.completeResponse);
       this.getParentTerms(this.data.previous[this.data.previous.length - 2]);
     }
-    // Listen for search changes
+
     this.searchControl.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((value: any) => {
         this.filterOptions(value);
       });
+
+    this.parentSearchControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value: any) => {
+        this.filterParentOptions(value);
+    });
   }
 
   ngOnDestroy() {
@@ -103,6 +109,23 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
   clearSearch(event: Event) {
     event.stopPropagation();
     this.searchControl.setValue('');
+  }
+
+  filterParentOptions(searchValue: string) {
+    const originalOptions = this.frameworkData?.categories?.find((v:any) => 
+      v.code === this.data?.previous[this.data.previous.length - 2]?.category
+    )?.terms || [];
+    
+    if (!searchValue) {
+      // Reset to all original options when search is empty
+      this.parentFilteredOptions = [...originalOptions];
+      return;
+    }
+    
+    const filterValue = searchValue.toLowerCase();
+    this.parentFilteredOptions = originalOptions.filter((option:any) => 
+      option.name.toLowerCase().includes(filterValue)
+    );
   }
 
   toggleSelectAll(event: Event) {
