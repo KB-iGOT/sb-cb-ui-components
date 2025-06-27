@@ -831,8 +831,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               allPills[pillIndex] = {
                 ...allPills[pillIndex],
                 widgets,
-                fetchTabStatus: 'done',
-                selected: true
+                // fetchTabStatus: 'done',
+                // selected: true
               };
             }
             allTabs[tabIndex] = {
@@ -851,6 +851,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           response.viewMoreUrl,
           tabResults // tabResults as widgets
         );
+        this.statusChangetoDone(strip, tabIndex, pillIndex);
       } else {
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs;
@@ -902,8 +903,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               allPills[pillIndex] = {
                 ...allPills[pillIndex],
                 widgets,
-                fetchTabStatus: 'done',
-                selected: true
+                // fetchTabStatus: 'done',
+                // selected: true
               };
             }
             allTabs[tabIndex] = {
@@ -922,6 +923,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           response.viewMoreUrl,
           tabResults // tabResults as widgets
         );
+        this.statusChangetoDone(strip, tabIndex, pillIndex);
       } else {
         this.processStrip(strip, [], 'error', calculateParentStatus, null);
       }
@@ -1079,9 +1081,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     tabIndex: number,
     calculateParentStatus: boolean
   ) {
-    if (strip.tabs[tabIndex].request.designationsList) {
+    if (strip.tabs[tabIndex]?.request && strip.tabs[tabIndex].request.designationsList) {
       try {
-        let response = await this.userSvc.fetchDesigantionsData().toPromise()
+        let response = await this.userSvc.fetchDesignationsData().toPromise()
         if (response) {
           let request = {
             "request": {
@@ -1125,17 +1127,21 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                         if (pill && pill.widgets && pill.widgets.length) {
                           if (countOfWidget) {
                             pill.selected = true
+                            pill.fetchTabStatus = 'done'
+                            pill.tabLoading = false
                             countOfWidget = false
+                          }else {
+                            pill.selected = false
                           }
                         }
                       });
                     }
                   })
                 }
-                strip.tabs[tabIndex].pillsData[0].selected = true
-                strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
+                // strip.tabs[tabIndex].pillsData[0].selected = true
+                // strip.tabs[tabIndex].pillsData[0].fetchTabStatus = 'done'
                 strip.showOnLoader = false
-                strip.tabs[tabIndex].pillsData[0].tabLoading = false
+                // strip.tabs[tabIndex].pillsData[0].tabLoading = false
                 this.processStrip(
                   strip,
                   this.transformContentsToWidgets(courses, strip),
@@ -1295,8 +1301,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   }
 
   pillClicked(event: any, stripMap: IStripUnitContentData, stripKey: any, pillIndex: any, tabIndex: any) {
+    this.resetSelectedPill(stripMap.tabs[tabIndex].pillsData)
     this.activePillIndex = pillIndex
     if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
+      stripMap.tabs[tabIndex].pillsData[pillIndex].selected = true;
       stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
       stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true;
       stripMap.showOnLoader = true;
@@ -1328,17 +1336,17 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
         //   stripMap.tabs[tabEvent.index].tabLoading = false;
         // }
-        setTimeout(() => {
-          stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
-          stripMap.showOnLoader = false;
-        }, 200);
+        // setTimeout(() => {
+        //   stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
+        //   stripMap.showOnLoader = false;
+        // }, 200);
       } else {
         this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
-        if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
-          stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-          stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
-          stripMap.showOnLoader = true;
-        }
+        // if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
+        //   stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
+        //   stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
+        //   stripMap.showOnLoader = true;
+        // }
         setTimeout(() => {
           if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
             stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'done';
@@ -1666,6 +1674,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               {},
               strip.tabs
             );
+            this.statusChangetoDone(strip, tabIndex, pillIndex);
           }
         })
       }, (_err: any) => {
@@ -1685,6 +1694,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             {},
             strip.tabs
           );
+
+          this.statusChangetoDone(strip, tabIndex, pillIndex);
         })
       })
     }
@@ -1713,6 +1724,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           {},
           strip.tabs
         );
+        this.statusChangetoDone(strip, tabIndex, pillIndex);
       })
     }
   }
@@ -1759,6 +1771,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           {},
           strip.tabs
         );
+        this.statusChangetoDone(strip, tabIndex, pillIndex);
       }
     }
   }
@@ -1989,6 +2002,19 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   cancelFeedbackPopup() {
     this.sakshamFeedbackPopup = false;
     this.feedbackCourseId = ''
+  }
+
+  statusChangetoDone(strip: any,tabIndex:number,pillIndex:number) {
+    const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
+    if (allPills && allPills.length && allPills[pillIndex]) {
+      allPills[pillIndex] = {
+        ...allPills[pillIndex],
+        fetchTabStatus: 'done',
+        tabLoading: false,
+        selected: true
+      };
+      this.stripsResultDataMap[strip.key].showOnLoader = false;
+    }
   }
 
 }

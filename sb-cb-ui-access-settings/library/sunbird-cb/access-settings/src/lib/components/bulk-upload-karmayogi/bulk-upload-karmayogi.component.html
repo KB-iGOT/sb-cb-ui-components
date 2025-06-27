@@ -80,6 +80,7 @@
           [tableConfig]="bulkUploadConfig['bulkUploadTable']"
           (selectedDataChange)="onSelectingUser($event)"
           [selected]="holdSelectedUsers"
+          [isDisabled]="isDisabled"
           [bulkUploadEntriesCount]="{ totalCount: isSuccessUserlist?.length + isErrorUserlist?.length, success: isSuccessUserlist?.length }">
         </sb-uic-list-table>
 

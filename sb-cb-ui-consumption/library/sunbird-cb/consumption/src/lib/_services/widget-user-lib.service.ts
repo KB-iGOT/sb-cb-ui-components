@@ -386,7 +386,7 @@ export class WidgetUserServiceLib {
       return eventRes
     }))
   }
-  fetchDesigantionsData() {
+  fetchDesignationsData() {
     const result: any = this.http.get(API_END_POINTS.FETCH_DESIGNATION_COURSES).pipe(catchError(this.handleError1), map(
       async (data: any) => {
         if (data.result && data.result.courseList) {
