@@ -66,10 +66,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    
-  }
-
-  ngOnChanges() {
     this.draftTerms = this.approvalList;
     this.init()
     this.showActionBar = this.isApprovalView?true:false;
@@ -79,6 +75,10 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       }
     })
     this.isEnableds()
+  }
+
+  ngOnChanges() {
+    
   }
 
   ngAfterContentChecked(): void {
