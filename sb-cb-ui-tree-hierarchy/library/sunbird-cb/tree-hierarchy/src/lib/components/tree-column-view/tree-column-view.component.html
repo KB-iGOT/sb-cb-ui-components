@@ -1,6 +1,6 @@
 <ng-container *ngIf="column?.config?.showSearch">
     <div class="w-full sticky">
-        <div class="search mb-2">
+        <div class="search mb-5">
             <div class="rsearch">
                 <div class="sinput mat-field-rounded flex flex-middle">
                     <mat-icon class="search-icon">search</mat-icon>
@@ -24,7 +24,7 @@
     </ng-container>
 </ng-container>
 <ng-template #noDataTemplate>
-    <!-- <div>No Data found</div> -->
+    <div>No Data found</div>
 </ng-template>
 
 <div class="w-full flex justify-center" *ngIf="!disableLoadButton">
