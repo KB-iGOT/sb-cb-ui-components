@@ -25,7 +25,7 @@
                         <span class="comp-area {{data?.children?.additionalProperties?.competencyArea?.name?.toLowerCase()}}">{{data?.children?.additionalProperties?.competencyArea?.name}}</span>
                      </div>
                  </ng-container>
-                <div class="flex flex-between">
+                <div class="flex flex-between flex-middle">
                     <div class="card-title">{{data.children.name}}
                         <ng-container *ngIf="data?.children?.refId">
                             <div class="refIdCard mt-2">
@@ -34,8 +34,8 @@
                         </ng-container> 
                     </div>
                     <ng-container *ngIf="data?.columnInfo?.config?.enableInfoIcon" >
-                        <button type="button" mat-icon-button i18n-aria-label aria-label="info items" class="action-btn" (click)="openDialog()">
-                        <mat-icon>info</mat-icon>
+                        <button type="button" mat-icon-button i18n-aria-label aria-label="info items" class="action-btn small-btn" (click)="openDialog()">
+                            <mat-icon class="small-icon">info</mat-icon>
                         </button>
                     </ng-container>
                 </div>
@@ -46,7 +46,7 @@
                 </ng-container> -->
                 <!-- <span>++{{data.children.selected}}+++</span>
                 <span>=={{data.children.status}}==</span>  -->
-                <div class="flex flex-between">
+                <div class="flex flex-between flex-middle mt-4">
                     <div class="card-description flex flex-middle gap-1">
                         <mat-icon svgIcon="frac"></mat-icon> 
                     <span>{{(data.children.children) ? data.children.children?.length : 0}} Child Org</span>
@@ -57,8 +57,8 @@
                     </div>
                     <ng-container *ngIf="data?.columnInfo?.config?.enableThreeDot" >
                         <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
-                        [matMenuTriggerFor]="orgMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn">
-                        <mat-icon>more_vert</mat-icon>
+                        [matMenuTriggerFor]="orgMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn small-btn">
+                        <mat-icon class="small-icon">more_vert</mat-icon>
                         </button>
                     </ng-container>
                 </div>
