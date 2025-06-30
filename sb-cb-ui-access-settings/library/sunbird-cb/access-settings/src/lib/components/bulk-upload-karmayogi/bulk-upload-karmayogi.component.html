@@ -70,7 +70,7 @@
     <div class="list-table-bulk-upload">
       <ng-container *ngIf="currrentFilterType === 'success'">
         <div class="flex items-center gap-2 selection-count mb-4 p-2">
-          <span class="">{{ isSuccessUserlist.length }}</span>
+          <span class="">{{ holdSelectedUsers?.length }}</span>
           <span class="text-sm font-normal">Items Selected</span>
         </div>
         <sb-uic-list-table
@@ -119,7 +119,7 @@
                   <span class="text-title text-dark">{{ fileName }}</span>
                   <img src="/assets/icons/error-icon.svg" alt="error-icon" />
                 </div>
-                <div class="text-style text-dark">Theress an error occurred while uploading this file.</div>
+                <div class="text-style text-dark">There's an error occurred while uploading this file.</div>
               </div>
               <div class="flex gap-x-6 gap-y-4 falied-records-info">
                 <div class="flex flex-column gap-4 flex-grow-1">
