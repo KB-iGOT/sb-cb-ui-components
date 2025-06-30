@@ -23,8 +23,10 @@
         </div>
     </ng-container>
 </ng-container>
-<ng-template #noDataTemplate>
+<ng-template #noDataTemplate >
+    <ng-container *ngIf="searchValue?.value">
     <div>No Data found</div>
+    </ng-container>
 </ng-template>
 
 <div class="w-full flex justify-center" *ngIf="!disableLoadButton">
