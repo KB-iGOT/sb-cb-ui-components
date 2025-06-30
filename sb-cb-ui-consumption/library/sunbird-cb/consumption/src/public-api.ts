@@ -85,3 +85,5 @@ export * from './lib/_common/horizontal-scroller-v2/horizontal-scroller-v2.modul
 export * from './lib/_common/horizontal-scroller-v2/horizontal-scroller-v2.component'
 export * from './lib/_common/dialog-components/add-competency-popup/add-competency-popup.component'
 export * from './lib/_common/dialog-components/snackbar/snackbar.component'
+export * from  './lib/_pipes/nbsp/nbsp.module'
+export * from './lib/_pipes/nbsp/nbsp.pipe'

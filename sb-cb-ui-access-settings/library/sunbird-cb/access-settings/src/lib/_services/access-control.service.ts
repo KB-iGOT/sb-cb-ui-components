@@ -51,7 +51,8 @@ export class AccessControlService {
       limit: pagination.limit || 5,
       offset: pagination.offset || 0,
       query: query,
-      sort_by: {}
+      sort_by: {},
+      fields: ["userId", "firstName", "maskedEmail", "rootOrgName", "phone"]
     };
     if (userIds?.length) {
       request.filters = { ...request.filters, userId: userIds };
