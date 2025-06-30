@@ -239,7 +239,40 @@ export class AccessControlService {
           language: apiResponse.language || [],
           accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
-          accessSettingsEnabled: accessSettingsEnabled || false
+          accessSettingsEnabled: accessSettingsEnabled || false,
+        }
+      }
+    };
+  }
+
+  createRequesForMDOContent(apiResponse: any, accessSettingsEnabled: boolean, secureSettings: any) {
+    return {
+      request: {
+        content: {
+          appIcon: apiResponse.appIcon || "",
+          posterImage: apiResponse.posterImage || "",
+          code: apiResponse.code || "",
+          contentType: apiResponse.contentType || "",
+          createdBy: apiResponse.createdBy || "",
+          creatorContacts: apiResponse.creatorContacts || [],
+          creatorIDs: apiResponse.creatorIDs || [],
+          createdFor: apiResponse.createdFor || [],
+          creator: apiResponse.creator || "",
+          framework: apiResponse.framework || "",
+          mimeType: apiResponse.mimeType || "",
+          name: apiResponse.name || "",
+          organisation: apiResponse.organisation || [],
+          isExternal: apiResponse.isExternal || false,
+          primaryCategory: apiResponse.primaryCategory || "",
+          courseCategory: apiResponse.courseCategory || "",
+          license: apiResponse.license || "",
+          ownershipType: apiResponse.ownershipType || [],
+          cumulativeTracking: apiResponse.cumulativeTracking || false,
+          language: apiResponse.language || [],
+          accessSetting: apiResponse.accessSetting || "",
+          versionKey: apiResponse.versionKey || "",
+          accessSettingsEnabled: accessSettingsEnabled || false,
+          secureSettings: secureSettings || null
         }
       }
     };

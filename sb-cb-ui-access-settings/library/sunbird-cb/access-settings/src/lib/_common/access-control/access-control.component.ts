@@ -693,9 +693,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.isSaveFltrBtnDisabled = true;
 
             // Update secure setting for moderated content
-            if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+            // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
               this.updateContentAccessSetting();
-            }
+            // }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
@@ -912,6 +912,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   async updateContentAccessSetting(): Promise<void> {
+    let secureSettings = {}
     if (typeof this.content.language === "string") {
       this.content.language = [this.content.language];
     }
@@ -942,19 +943,31 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         version: 1,
         organisation,
         isVerifiedKarmayogi
-      };
+      };    
+      secureSettings = {
+        version: 1,
+        organisation,
+        isVerifiedKarmayogi
+      }  
     }
 
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
-    if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+    const requestForMDO = this.accessControlService.createRequesForMDOContent(this.content, accessTypeBoolean, secureSettings);
+    if((this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("spv_publisher")) && this.content.status !== 'Draft') {
+      if(this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+        await this.accessControlService.updateContentV4(requestForMDO, this.contentId).toPromise();
+      } else {
+        await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
+      }
+      
     } else {
       if (this.content.reviewStatus) {
         (request.request.content as any).reviewStatus = this.content.reviewStatus;
       }
       await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
     }
+    
     this.refreshContentMeta.emit(true);
   }
 
@@ -1096,6 +1109,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
         });
       }
+      if(activeManageSelection?.conditions?.length > 1) {
+        let checkLastIndexHaveSelections = -1
+        activeManageSelection?.conditions?.forEach((item, index) => {
+          if (item?.selections.length > 0 ) {
+            checkLastIndexHaveSelections = index
+          }
+        });
+        // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
+        // console.log('checkLastIndexHaveSelections--', checkLastIndexHaveSelections)
+        if(activeManageSelection?.conditions[checkLastIndexHaveSelections]?.entity === condition?.entity && condition?.selections?.length > 0) {
+          flag = false;
+        }
+      }
+      
+      // let index = activeManageSelection?.conditions?.findLastIndex((item) =>
+      //   item?.entity === condition?.entity && item?.selections.length > 0
+      // );
+      // if((index + 1) === activeManageSelection?.conditions.length) {        
+      //   flag = false
+      // }
+      // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
+      // console.log('index', index)
     }
     return flag;
   }
