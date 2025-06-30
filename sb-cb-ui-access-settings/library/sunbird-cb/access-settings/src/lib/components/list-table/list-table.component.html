@@ -2,7 +2,7 @@
     <div class="selections-meta">
         <div class="flex items-center justify-between p-2">
             <div class="flex items-center gap-2 selection-count" *ngIf="tableConfig?.canShowSelectedItems || false">
-                <span class="">{{selectedTablerow.length}}</span>
+                <span class="">{{selectedTablerow?.length}}</span>
                 <span class="text-sm font-normal">Items Selected</span>
             </div>
             <div class="flex items-center gap-2 actions-selections ml-auto">

@@ -390,6 +390,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       }
       this.calculateUserCountForUserGroup(userGroupIndex);
+      this.processDisableAddConditionOnClose(userGroupIndex);
     }
   }
 
@@ -403,6 +404,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
         conditions.removeAt(conditionIndex);
         this.calculateUserCountForUserGroup(userGroupIndex);
+        this.processDisableAddConditionOnClose(userGroupIndex);
       }
     });
   }
@@ -414,6 +416,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
       this.calculateUserCountForUserGroup(userGroupIndex);
+      this.processDisableAddConditionOnClose(userGroupIndex);
     }
   }
 
