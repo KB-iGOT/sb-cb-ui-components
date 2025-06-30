@@ -84,7 +84,7 @@
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
                         <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC">
                           <button
-                            [disabled]="accessControlCriteriaSelection?.readOnly"
+                            [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                             mat-icon-button
                             aria-label="delete user group"
                             (click)="removeUserGroup(i)"
@@ -92,7 +92,7 @@
                             <mat-icon>delete</mat-icon>
                           </button>
                           <button
-                            [disabled]="accessControlCriteriaSelection?.readOnly"
+                            [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                             mat-icon-button
                             aria-label="refresh user group"
                             (click)="resetUserGroupWithSelections(i)"
@@ -130,14 +130,14 @@
                                 <button
                                   mat-flat-button
                                   (click)="manageSelections(condition, rule, i)"
-                                  [disabled]="!condition.get('entity').value || !condition.get('conditionType').value"
+                                  [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly"
                                   class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
                                   <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
                                   <span class="font-bold text-sm">Manage Selection</span>
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button
+                                <button [disabled]="accessControlCriteriaSelection?.readOnly"
                                   mat-button
                                   class="new-secondary-button-no-border button-with-corners mt-2"
                                   type="button"
@@ -154,7 +154,7 @@
                                       mat-icon-button
                                       aria-label="delete condition"
                                       class="mt-2 ml-auto"
-                                      [disabled]="accessControlCriteriaSelection?.readOnly"
+                                      [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                                       (click)="removeCondition(i, j)"
                                       title="Delete">
                                       <mat-icon>delete</mat-icon>
@@ -163,7 +163,7 @@
                                       mat-icon-button
                                       aria-label="refresh condition"
                                       class="mt-2 ml-auto"
-                                      [disabled]="accessControlCriteriaSelection?.readOnly"
+                                      [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                                       (click)="resetCondition(i, j)"
                                       title="Refresh">
                                       <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
@@ -190,7 +190,8 @@
                           content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
                           content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
                           accessControlCriteriaSelection?.readOnly ||
-                          rule.get('isUserGroupDisabled')?.value
+                          rule.get('isUserGroupDisabled')?.value ||
+                          rule.get('isAddConditionDisabled')?.value 
                         "
                         mat-button
                         class="new-secondary-button-no-border button-with-corners"

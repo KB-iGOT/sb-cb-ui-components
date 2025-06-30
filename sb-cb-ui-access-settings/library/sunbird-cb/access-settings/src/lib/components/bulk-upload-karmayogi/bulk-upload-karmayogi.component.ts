@@ -246,21 +246,7 @@ export class BulkUploadKarmayogiComponent {
     const request: any = {
       request: {
         filters: {},
-        fields: [
-          "userId",
-          "email",
-          "firstName",
-          "lastName",
-          "phone",
-          "rootOrgId",
-          "channel",
-          "roles",
-          "profileDetails",
-          "createdDate",
-          "rootOrgName",
-          "organisations",
-          "username"
-        ]
+        fields: ["userId", "email", "firstName", "lastName", "phone", "rootOrgId", "channel", "roles", "profileDetails", "rootOrgName"]
       }
     };
     if (key === "primaryEmail") {
@@ -316,6 +302,8 @@ export class BulkUploadKarmayogiComponent {
               e["userId"] = userData.userId;
               e["ministry"] = userData.rootOrgName;
               e["fullName"] = userData.firstName || userData.firstname;
+              e["mobile"] = userData?.phone;
+              e["email"] = userData?.email;
             } else {
               e["status"] = "Error";
               e["userStatus"] = false;
@@ -328,14 +316,14 @@ export class BulkUploadKarmayogiComponent {
           }
         } else if (e.email && userEmailMap[e.email.toLowerCase()]) {
           const userData = userEmailMap[e.email.toLowerCase()];
-          e["mobile"] = userData.profileDetails.personalDetails.mobile;
+          e["mobile"] = userData?.phone;
 
           e["userId"] = userData.userId;
           e["ministry"] = userData.rootOrgName;
           e["fullName"] = userData.firstName || userData.firstname;
         } else if (e.mobile && userMobileMap[e.mobile]) {
           const userData = userMobileMap[e.mobile];
-          e["email"] = userData.profileDetails.personalDetails.primaryEmail;
+          e["email"] = userData?.email;
           e["userId"] = userData.userId;
           e["ministry"] = userData.rootOrgName;
           e["fullName"] = userData.firstName || userData.firstname;
