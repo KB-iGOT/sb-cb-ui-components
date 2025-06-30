@@ -181,7 +181,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       name: [`User Group ${this.userGroup.length + 1}`],
       description: [`Description for UserGroup ${this.userGroup.length + 1}`],
       conditions: this.fb.array([this.createConditionGroup(uuidv4(), this.userGroup.length - 1)]),
-      isUserGroupDisabled: [false]
+      isUserGroupDisabled: [false],
+      isAddConditionDisabled: [false]
     });
 
     this.userGroup.push(ruleGroup);
@@ -279,6 +280,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
+      this.processDisableAddConditionOnClose(userGroupIndex);
     }
   }
 
@@ -419,7 +421,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
-    if(!(this.content?.status === "Live" || this.content?.prevStatus === "Live")) {
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live")) {
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
       }
@@ -428,11 +430,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           width: "470px",
           data: { type: "confirm-reset-fields" }
         });
-  
+
         dialogRef.afterClosed().subscribe(result => {
           if (result?.action === NsAccessControlConfig.IActions.Confirm) {
             this.resetActiveUserGroupFields(condition, rule, userGroupIndex);
-        
           }
         });
       }
@@ -496,6 +497,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             }
 
             this.processCadreConfigMapping(ruleIndex);
+            this.processDisableAddConditionOnClose(ruleIndex);
+
             if (!this.areSelectionsEqual(originalSelections, result.selected)) {
               this.calculateUserCountForUserGroup(ruleIndex);
             }
@@ -585,6 +588,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  processDisableAddConditionOnClose(userGroupIndex: number): void {
+    // If any condition is Users and at least one user is added, disable add condition
+    const ruleGroup = this.userGroup.at(userGroupIndex);
+    const conditions = ruleGroup.get("conditions") as FormArray;
+    const hasUsersConditionWithSelection = conditions.controls.some(
+      ctrl =>
+        ctrl.get("entity")?.value === NsAccessControlConfig.SelectionType.Users &&
+        Array.isArray(ctrl.get("selections")?.value) &&
+        ctrl.get("selections")?.value.length > 0
+    );
+    ruleGroup.get("isAddConditionDisabled")?.setValue(hasUsersConditionWithSelection);
+  }
+
   openInviteUserDialog(condition: any, rule: any, activeTabSelected: number, isDisabled: boolean): void {
     const originalSelections = [...(condition.selections || [])];
 
@@ -605,6 +621,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             const conditionGroup = conditions.at(conditionIndex);
             // const userIds = result.selected && result.selected.map((user: any) => user?.userId);
             conditionGroup.get("selections")?.setValue(result.selected);
+            this.processDisableAddConditionOnClose(ruleIndex);
           }
           if (!this.areSelectionsEqual(originalSelections, result.selected)) {
             this.calculateUserCountForUserGroup(ruleIndex);
@@ -860,10 +877,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         name: [group.userGroupName],
         description: [`Description for ${group.userGroupName}`],
         conditions: conditions,
-        isUserGroupDisabled: [false]
+        isUserGroupDisabled: [false],
+        isAddConditionDisabled: [false]
       });
 
       this.userGroup.push(ruleGroup);
+
+      // Check if add condition should be disabled for this user group
+      this.processDisableAddConditionOnClose(index);
 
       // Calculate count for each user group
       this.calculateUserCountForUserGroup(index);
@@ -929,6 +950,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
       await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
     } else {
+      if (this.content.reviewStatus) {
+        (request.request.content as any).reviewStatus = this.content.reviewStatus;
+      }
       await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
     }
     this.refreshContentMeta.emit(true);
@@ -968,29 +992,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isApplyBtnDisabled = true;
     } else if (
       this.content?.status === "Live" &&
-      (this.config.userConfig.userRoles.has("content_creator") || this.config.userConfig.userRoles.has("spv_publisher"))
+      (this.config.userConfig.userRoles.has("spv_publisher") || this.config.userConfig.userRoles.has("content_publisher"))
     ) {
-      //   // publisher (cannot edit already added)
-      //   for (let i = 0; i < this.userGroup.length; i++) {
-      //     const group = this.userGroup.at(i);
-      //     group.get("id")?.disable();
-      //     group.get("name")?.disable();
-      //     group.get("description")?.disable();
-      //     group.get("conditions")?.disable();
-      //     group.get("isUserGroupDisabled")?.setValue(true);
-      //   }
-      //   this.isSaveFltrBtnDisabled = true;
-      //   this.isApplyBtnDisabled = false;
-      // } else {
-      // // Initialize formchange detection to enable/disable filterbutton
-      // setTimeout(() => {
-      //   this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
-      //   this.setupFormChangeDetection();
-      // }, 0);
-
-      // this.accessControlCriteriaSelection.readOnly = true;
-      // this.isSaveFltrBtnDisabled = true;
-      // this.isApplyBtnDisabled = true;
+      // publisher (disabled all)
+      this.accessControlCriteriaSelection.readOnly = true;
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
     }
   }
 
@@ -1072,57 +1079,55 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return JSON.stringify(currentValue) !== JSON.stringify(initialValue);
   }
 
-  checkForResetFilter(condition:any, rule:any, userGroupIndex:any) {
-    let flag = false
-    let accessControlFormData  = this.accessControlForm.getRawValue()
-    let activeManageSelection =  accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex]
-    let activeSelectionCount = 0
-    if(activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1)  {
+  checkForResetFilter(condition: any, rule: any, userGroupIndex: any) {
+    let flag = false;
+    let accessControlFormData = this.accessControlForm.getRawValue();
+    let activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
+    let activeSelectionCount = 0;
+    if (activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1) {
       //Show Popup
-      let onlyOneCondition = this.hasOnlyOneArrayWithLength(activeManageSelection?.conditions, 'selections')
-      if(onlyOneCondition) {
-        flag = false
+      let onlyOneCondition = this.hasOnlyOneArrayWithLength(activeManageSelection?.conditions, "selections");
+      if (onlyOneCondition) {
+        flag = false;
       } else {
-        activeManageSelection?.conditions?.map((item)=>{  
-          if((item?.entity == condition?.entity) && item?.selections.length > 0) {
-            flag = true         
+        activeManageSelection?.conditions?.map(item => {
+          if (item?.entity == condition?.entity && item?.selections.length > 0) {
+            flag = true;
           }
-        })  
+        });
       }
     }
-    return flag
+    return flag;
   }
 
   hasOnlyOneArrayWithLength(data, key) {
-    let count = 0;  
+    let count = 0;
     for (const obj of data) {
-        if (Array.isArray(obj[key]) && obj[key].length > 0) {
-          count++;
-        }
-      
-    }  
+      if (Array.isArray(obj[key]) && obj[key].length > 0) {
+        count++;
+      }
+    }
     return count > 1 ? false : true;
   }
 
-  resetActiveUserGroupFields(condition:any, rule:any, userGroupIndex:any) {
-    let accessControlFormData  = this.accessControlForm.getRawValue()
-    let activeManageSelection =  accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex]
-    let activeConditionIndex = activeManageSelection?.conditions?.findIndex((item) => {
-      return (item?.entity === condition?.entity) && item?.selections?.length > 0;
+  resetActiveUserGroupFields(condition: any, rule: any, userGroupIndex: any) {
+    let accessControlFormData = this.accessControlForm.getRawValue();
+    let activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
+    let activeConditionIndex = activeManageSelection?.conditions?.findIndex(item => {
+      return item?.entity === condition?.entity && item?.selections?.length > 0;
     });
-    let activeManageSelectionArrLength =  activeManageSelection?.conditions.length
-    for(let i = activeConditionIndex +1 ; i < activeManageSelectionArrLength; i++) {
-      const userGroupArray = this.accessControlForm.get('userGroup') as FormArray;
+    let activeManageSelectionArrLength = activeManageSelection?.conditions.length;
+    for (let i = activeConditionIndex + 1; i < activeManageSelectionArrLength; i++) {
+      const userGroupArray = this.accessControlForm.get("userGroup") as FormArray;
       const userGroup = userGroupArray.at(userGroupIndex) as FormGroup;
-      const conditionsArray = userGroup.get('conditions') as FormArray;
-      const conditionGroup = conditionsArray.at(i) as FormGroup;      
-      // conditionGroup.reset();      
+      const conditionsArray = userGroup.get("conditions") as FormArray;
+      const conditionGroup = conditionsArray.at(i) as FormGroup;
+      // conditionGroup.reset();
       const condition = conditionGroup;
       condition.get("entity")?.setValue("");
       condition.get("selections")?.setValue([]);
     }
 
     this.calculateUserCountForUserGroup(userGroupIndex);
-    
   }
 }
