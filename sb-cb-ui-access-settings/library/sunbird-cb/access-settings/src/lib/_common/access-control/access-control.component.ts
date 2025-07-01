@@ -959,16 +959,20 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const requestForMDO = this.accessControlService.createRequesForMDOContent(this.content, accessTypeBoolean, secureSettings);
     if((this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("spv_publisher")) && this.content.status !== 'Draft') {
       if(this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+         if (this.content.reviewStatus) {
+        (request.request.content as any).reviewStatus = this.content.reviewStatus;
+         }
         await this.accessControlService.updateContentV4(requestForMDO, this.contentId).toPromise();
       } else {
+        if (this.content.reviewStatus) {
+        (request.request.content as any).reviewStatus = this.content.reviewStatus;
+      }
         await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
+
       }
       
     } else {
-      if (this.content.reviewStatus) {
-        (request.request.content as any).reviewStatus = this.content.reviewStatus;
-      }
-      await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
+      await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
     }
     
     this.refreshContentMeta.emit(true);
