@@ -13,7 +13,6 @@ const API_END_POINTS = {
   ENROLL_CONTENT_DATA: `${PROXIES_V8}/learner/course/v4/user/enrollment/details`
 };
 
-console.log('fghjk')
 @Injectable({
   providedIn: 'root'
 })
