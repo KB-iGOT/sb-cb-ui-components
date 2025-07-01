@@ -424,7 +424,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
-    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live")) {
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === 'Review')) {
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
       }
