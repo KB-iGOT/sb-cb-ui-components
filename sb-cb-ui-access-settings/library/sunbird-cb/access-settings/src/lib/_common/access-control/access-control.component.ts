@@ -71,6 +71,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.config.content = this.content;
     this.accessControlService.accessControlConfig.set(this.config);
     this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
+    if (this.accessControlCriteriaSelection.readOnly) {
+      this.accessControlCriteriaSelection.readOnly = false;
+    }
 
     this.usersTableConfig = this.config?.usersTableConfig;
 
@@ -697,7 +700,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // Update secure setting for moderated content
             // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-              this.updateContentAccessSetting();
+            this.updateContentAccessSetting();
             // }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
@@ -809,12 +812,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
 
       // Temporary fix to updated the failed content for moderated
-      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-        if (!this.content?.accessSettingsEnabled) {
-          this.updateContentAccessSetting();
-        }
-      }
-      this.updateContentAccessSetting();
+      // if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+      //   if (!this.content?.accessSettingsEnabled) {
+      //     this.updateContentAccessSetting();
+      //   }
+      // }
+      // this.updateContentAccessSetting();
     }
   }
 
@@ -915,7 +918,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   async updateContentAccessSetting(): Promise<void> {
-    let secureSettings = {}
+    let secureSettings = {};
     if (typeof this.content.language === "string") {
       this.content.language = [this.content.language];
     }
@@ -946,35 +949,39 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         version: 1,
         organisation,
         isVerifiedKarmayogi
-      };    
+      };
       secureSettings = {
         version: 1,
         organisation,
         isVerifiedKarmayogi
-      }  
+      }
     }
 
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
     const requestForMDO = this.accessControlService.createRequesForMDOContent(this.content, accessTypeBoolean, secureSettings);
-    if((this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("spv_publisher")) && this.content.status !== 'Draft') {
-      if(this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-         if (this.content.reviewStatus) {
-        (request.request.content as any).reviewStatus = this.content.reviewStatus;
-         }
-        await this.accessControlService.updateContentV4(requestForMDO, this.contentId).toPromise();
+    if (this.content.status !== "Live" || this.content.prevStatus != "Live") {
+      if (
+        (this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("spv_publisher")) &&
+        this.content.status !== "Draft"
+      ) {
+        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          if (this.content.reviewStatus) {
+            ;
+            (request.request.content as any).reviewStatus = this.content.reviewStatus;
+          }
+          await this.accessControlService.updateContentV4(requestForMDO, this.contentId).toPromise();
+        } else {
+          if (this.content.reviewStatus) {
+            (request.request.content as any).reviewStatus = this.content.reviewStatus;
+          }
+          await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
+        }
       } else {
-        if (this.content.reviewStatus) {
-        (request.request.content as any).reviewStatus = this.content.reviewStatus;
+        await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
       }
-        await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
-
-      }
-      
-    } else {
-      await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
     }
-    
+
     this.refreshContentMeta.emit(true);
   }
 
@@ -1011,8 +1018,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isSaveFltrBtnDisabled = true;
       this.isApplyBtnDisabled = true;
     } else if (
-      this.content?.status === "Live" &&
-      (this.config.userConfig.userRoles.has("spv_publisher") || this.config.userConfig.userRoles.has("content_publisher"))
+      (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
+      (this.config.userConfig.userRoles.has("spv_publisher") ||
+        this.config.userConfig.userRoles.has("content_publisher") ||
+        this.config.userConfig.userRoles.has("content_creator"))
     ) {
       // publisher (disabled all)
       this.accessControlCriteriaSelection.readOnly = true;
@@ -1116,24 +1125,24 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
         });
       }
-      if(activeManageSelection?.conditions?.length > 1) {
-        let checkLastIndexHaveSelections = -1
+      if (activeManageSelection?.conditions?.length > 1) {
+        let checkLastIndexHaveSelections = -1;
         activeManageSelection?.conditions?.forEach((item, index) => {
-          if (item?.selections.length > 0 ) {
-            checkLastIndexHaveSelections = index
+          if (item?.selections.length > 0) {
+            checkLastIndexHaveSelections = index;
           }
         });
         // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
         // console.log('checkLastIndexHaveSelections--', checkLastIndexHaveSelections)
-        if(activeManageSelection?.conditions[checkLastIndexHaveSelections]?.entity === condition?.entity && condition?.selections?.length > 0) {
+        if (activeManageSelection?.conditions[checkLastIndexHaveSelections]?.entity === condition?.entity && condition?.selections?.length > 0) {
           flag = false;
         }
       }
-      
+
       // let index = activeManageSelection?.conditions?.findLastIndex((item) =>
       //   item?.entity === condition?.entity && item?.selections.length > 0
       // );
-      // if((index + 1) === activeManageSelection?.conditions.length) {        
+      // if((index + 1) === activeManageSelection?.conditions.length) {
       //   flag = false
       // }
       // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
