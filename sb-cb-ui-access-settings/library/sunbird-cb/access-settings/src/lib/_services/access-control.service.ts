@@ -141,7 +141,8 @@ export class AccessControlService {
           lastUpdatedOn: "desc",
           objectType: "Term"
         },
-        facets: []
+        facets: [],
+        limit: 1000
       }
     };
     if (selectedData?.length) {
@@ -239,7 +240,7 @@ export class AccessControlService {
           language: apiResponse.language || [],
           accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
-          accessSettingsEnabled: accessSettingsEnabled || false,
+          accessSettingsEnabled: accessSettingsEnabled || false
         }
       }
     };
