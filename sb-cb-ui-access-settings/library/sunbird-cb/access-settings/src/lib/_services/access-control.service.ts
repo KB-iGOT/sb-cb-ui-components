@@ -126,7 +126,13 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
 
-  fetchDesignationsWithOrg(categories: string[], query: string, selectedData?: string[]): Observable<any> {
+  fetchDesignationsWithOrg(
+    paginationOffset: number,
+    categories: string[],
+    query: string,
+    selectedData?: string[],
+    characterSearch?: string
+  ): Observable<any> {
     let payload: any = {
       request: {
         filters: {
@@ -138,15 +144,21 @@ export class AccessControlService {
         fields: ["identifier", "name"],
         query: query,
         sort_by: {
-          lastUpdatedOn: "desc",
-          objectType: "Term"
+          name: "asc"
         },
         facets: [],
-        limit: 1000
+        limit: 100,
+        offset: paginationOffset
       }
     };
     if (selectedData?.length) {
       payload.request.filters.name = selectedData;
+    }
+    if (characterSearch || !query) {
+      if (!payload.request.filters.name || typeof payload.request.filters.name !== "object") {
+        payload.request.filters.name = {};
+      }
+      payload.request.filters.name.startsWith = characterSearch;
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_V4, payload);
   }
