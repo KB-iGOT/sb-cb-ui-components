@@ -978,7 +978,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
         }
       } else {
-        await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          await this.accessControlService.updateContentV3(requestForMDO, this.contentId).toPromise();
+        } else {
+          await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+        }
       }
     }
 
