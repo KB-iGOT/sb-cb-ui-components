@@ -954,7 +954,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         version: 1,
         organisation,
         isVerifiedKarmayogi
-      }
+      };
     }
 
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
@@ -967,8 +967,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       ) {
         if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
           if (this.content.reviewStatus) {
-            ;
-            (request.request.content as any).reviewStatus = this.content.reviewStatus;
+            (requestForMDO.request.content as any).reviewStatus = this.content.reviewStatus;
           }
           await this.accessControlService.updateContentV4(requestForMDO, this.contentId).toPromise();
         } else {

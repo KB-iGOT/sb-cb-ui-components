@@ -453,7 +453,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
     if (this.orgSelectionIds?.length) {
-      const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_master_fw_designation`);
+      const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_designation`);
       this.accessControlService
         .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
