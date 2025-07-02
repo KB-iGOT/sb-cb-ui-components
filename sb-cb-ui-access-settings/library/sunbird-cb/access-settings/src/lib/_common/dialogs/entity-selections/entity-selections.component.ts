@@ -44,6 +44,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
   searchedDesignationFlagWithQuery: any;
   orgSelectionIds = [];
+
+  paginationOffset = 0;
+  totalItemsCount = 0;
+  isFetchingMore = false;
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
@@ -111,10 +115,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         break;
       case NsAccessControlConfig.SelectionType.Designation:
         if (this.activeTab === 0) {
-          this.getDesignationsList("", [], "A");
+          this.getDesignationsList(this.paginationOffset, "", [], "A");
           this.selectedCharacterRange = "A";
         } else {
-          this.getDesignationsList("", this.selectedData, undefined);
+          this.getDesignationsList(this.paginationOffset, "", this.selectedData, undefined);
           this.alphabet = [];
         }
         this.radioSelections = this.accessControlCriteriaSelection?.designationRadioSelection;
@@ -206,13 +210,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
     if (this.selectionType === NsAccessControlConfig.SelectionType.Designation) {
       if (this.activeTab === 0) {
-        this.getDesignationsList("", [], "A");
+        this.getDesignationsList(this.paginationOffset, "", [], "A");
         this.selectedCharacterRange = "A";
       } else {
-        this.getDesignationsList("", this.selectedData, undefined);
+        this.getDesignationsList(this.paginationOffset, "", this.selectedData, undefined);
       }
     }
-
 
     this.getFilteredEntityGrouped();
     if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
@@ -229,9 +232,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   search(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Designation:
-        this.selectedCharacterRange = "A";
-        this.getDesignationsList(this.searchControl.value);
-
+        this.paginationOffset = 0;
+        if (this.filterValue === "all" && !this.searchControl.value) {
+          this.selectedCharacterRange = "A";
+          this.updateAlphabet();
+          this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange);
+        } else {
+          this.getDesignationsList(this.paginationOffset, this.searchControl.value);
+        }
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
         this.selectedCharacterRange = "A";
@@ -320,6 +328,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   scrollToSection(letter: string) {
+    this.paginationOffset = 0;
     if (
       this.selectionType === NsAccessControlConfig.SelectionType.Organizations &&
       this.filterValue === "all" &&
@@ -332,11 +341,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (
       this.selectionType === NsAccessControlConfig.SelectionType.Designation &&
       this.filterValue === "all" &&
-      !this.searchedDesignationFlagWithQuery &&
-      !this.orgSelectionIds?.length
+      !this.searchedDesignationFlagWithQuery
     ) {
+      // !this.orgSelectionIds?.length
       this.selectedCharacterRange = letter;
-      this.getDesignationsList("", [], letter);
+      this.getDesignationsList(this.paginationOffset, "", [], letter);
       return;
     }
 
@@ -377,8 +386,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       (this.selectionType === NsAccessControlConfig.SelectionType.Organizations ||
         this.selectionType === NsAccessControlConfig.SelectionType.Designation) &&
       this.filterValue === "all" &&
-      !this.searchControl.value &&
-      !this.orgSelectionIds?.length
+      !this.searchControl.value
     ) {
       this.alphabet = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "#"];
     } else {
@@ -392,6 +400,27 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       (this.selectionType === NsAccessControlConfig.SelectionType.Group && this.dataList.length > 0) ||
       (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus && this.dataList.length > 0)
     );
+  }
+
+  onScrollPaginate(event: any): void {
+    const threshold = 150;
+    const position = event.target.scrollLeft + event.target.offsetWidth;
+    const width = event.target.scrollWidth;
+    if (width - position < threshold && !this.isLoading && !this.isFetchingMore && this.dataList.length < this.totalItemsCount) {
+      this.loadMore();
+    }
+  }
+
+  loadMore(): void {
+    if (this.dataList.length >= this.totalItemsCount || this.isFetchingMore) return;
+    this.isFetchingMore = true;
+    this.paginationOffset += 100;
+    switch (this.selectionType) {
+      case this.selectionTypeEnum.Designation:
+        if (this.searchControl.value) this.selectedCharacterRange = "";
+        this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange, true);
+        break;
+    }
   }
 
   getOrganisationsList(query: string, selectedData?: string[], character?: string): void {
@@ -418,28 +447,35 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getDesignationsList(query: string, selectedData?: string[], character?: string): void {
-    this.isLoading = true;
+  getDesignationsList(paginationOffset: number, query: string, selectedData?: string[], character?: string, append: boolean = false): void {
+    if (!append) {
+      this.isLoading = true;
+    }
     this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
     if (this.orgSelectionIds?.length) {
       const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_master_fw_designation`);
       this.accessControlService
-        .fetchDesignationsWithOrg(categories, query, query ? [] : selectedData)
+        .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: response => {
             if (response?.result && response?.result?.Term) {
-              this.dataList = response?.result?.Term;
-              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
-              this.updateAlphabet();
+              const newData = response?.result?.Term;
+              this.dataList = append ? [...this.dataList, ...newData] : newData;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
+              this.totalItemsCount = response?.result?.count;
+
+              if (query) this.searchedDesignationFlagWithQuery = true;
+              if (this.filterValue === "selected" || query) this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
-              this.alphabet = [];
+              if (query) this.alphabet = [];
             }
           },
           complete: () => {
             this.isLoading = false;
+            this.isFetchingMore = false;
           }
         });
     } else {
@@ -449,15 +485,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: response => {
             if (response?.result && response?.result?.result?.data) {
-              this.dataList = response?.result?.result?.data;
-              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+              const newData = response?.result?.result?.data;
+              this.dataList = append ? [...this.dataList, ...newData] : newData;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
+              this.totalItemsCount = response?.result?.result?.count;
               if (query) this.searchedDesignationFlagWithQuery = true;
               else this.searchedDesignationFlagWithQuery = false;
-
-              if (this.filterValue === "selected" || query) {
-                this.updateAlphabet();
-              }
-
+              if (this.filterValue === "selected" || query) this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
