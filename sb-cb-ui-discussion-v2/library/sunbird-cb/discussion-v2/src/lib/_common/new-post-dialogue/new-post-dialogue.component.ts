@@ -116,7 +116,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
   ];
 
-  mentionedUsers: Array<{ id: string, name: string }> = []
+  mentionedUsers: Array<{ userId: string, userName: string }> = []
   apiResponse: any
   rootOrgId = ''
   allUsers: any[] = []
@@ -376,12 +376,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   handleMentionClick(eventInfo: MentionFeedItem) {
     debugger
     const mentionedUser = {
-      id: eventInfo.id,
-      name: eventInfo.name
+      userId: eventInfo.id,
+      userName: eventInfo.name
     }
 
     // Add to mentioned users array if not already present
-    const existingIndex = this.mentionedUsers.findIndex(user => user.id === mentionedUser.id)
+    const existingIndex = this.mentionedUsers.findIndex(user => user.userId === mentionedUser.userId)
     if (existingIndex === -1) {
       this.mentionedUsers.push(mentionedUser)
     }
@@ -407,7 +407,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
                 this.allUsers.push(`@${apiData.userName}`)
                 this.allProccessedUsers.push({
                   id: apiData.userId,
-                  name: apiData.userName,
+                  name: `${apiData.userName}`,
                 })
               }
             })
@@ -900,6 +900,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       // targetTopic: 'testing',
       // tags: this.selectedTags,
       // mediaUrls: this.mediaUrls || []
+      ...(this.mentionedUsers.length > 0 ? { mentionedUsers: this.mentionedUsers } : {})
     }
     return req
   }
@@ -981,6 +982,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       categoryType: [...this.categoryType],
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
+      ...(this.mentionedUsers.length > 0 ? { mentionedUsers: this.mentionedUsers } : {})
     }
 
     this.discussV2Svc.updatePost(updateReq).subscribe({
@@ -1062,7 +1064,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     })
     editor.model.document.on('change:data', () => {
       const content = editor.getData()
-
+      this.mentionedUsers = []
       // Parse mentions from content using regex
       const mentionRegex = /<span[^>]*data-mention[^>]*>@([^<]+)<\/span>/g
       let match
@@ -1070,11 +1072,10 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       while ((match = mentionRegex.exec(content)) !== null) {
         const mentionName = match[1]
         const foundUser = this.allProccessedUsers.find(user => user.name === mentionName)
-
-        if (foundUser && !this.mentionedUsers.find(user => user.id === foundUser.id)) {
+        if (foundUser && !this.mentionedUsers.find(user => user.userId === foundUser.id)) {
           this.mentionedUsers.push({
-            id: foundUser.id,
-            name: foundUser.name
+            userId: foundUser.id,
+            userName: foundUser.name
           })
         }
         console.log("--- ", this.mentionedUsers)

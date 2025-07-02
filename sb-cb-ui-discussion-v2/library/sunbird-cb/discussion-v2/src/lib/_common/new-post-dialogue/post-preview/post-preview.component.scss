@@ -17,7 +17,7 @@
 
 .card-l3 {
     background-color: rgba(243, 150, 47, 0.06);
-    border-radius: 0; 
+    border-radius: 0;
     border: none;
     padding: 16px;
     border-radius: 12px;
@@ -58,7 +58,7 @@
     height: 16px;
     min-width: 70px;
     border-radius: 16px;
-    border: 1px solid #1B4CA1; 
+    border: 1px solid #1B4CA1;
     background-color: #1B4CA11A;
     color: #1B4CA1;
     font-size: 12px;
@@ -85,6 +85,12 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     word-break: break-word;
+
+}
+
+::ng-deep  .comment-txt .mention {
+    color: #1B4CA1;
+    background: none;
 }
 
 .expand {
@@ -176,19 +182,19 @@
     border-radius: 4px;
     background-color: #f5f5f5;
   }
-  
+
   .doc-icon {
     font-size: 24px;
   }
-  
+
   .pdf-icon {
     color: #ff5252;
   }
-  
+
   .doc-icon, .docx-icon {
     color: #2196f3;
   }
-  
+
   .doc-name {
     font-size: 14px;
     color: #333;
@@ -199,7 +205,7 @@
   text-decoration: none;
   color: #1B4CA1;  // Using your app's primary blue color
   cursor: pointer;
-  
+
   &:hover {
     text-decoration: underline;
   }
