@@ -379,7 +379,6 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   handleMentionClick(eventInfo: MentionFeedItem) {
-    debugger
     const mentionedUser = {
       userId: eventInfo.id,
       userName: eventInfo.userName
