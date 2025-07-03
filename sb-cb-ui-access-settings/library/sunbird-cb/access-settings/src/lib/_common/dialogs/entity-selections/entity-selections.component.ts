@@ -439,6 +439,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         } else {
           this.dataList = [];
           this.alphabet = [];
+          this.dataListDup = [];
+          this.groupedEntityData = {};
         }
       },
       complete: () => {
@@ -460,7 +462,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: response => {
             if (response?.result && response?.result?.Term) {
-              const newData = response?.result?.Term;
+              // const newData = response?.result?.Term;
+              const newData = _.uniqBy(response.result.Term, (item: any) => item?.name.trim().toLowerCase());
+
               this.dataList = append ? [...this.dataList, ...newData] : newData;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
               this.totalItemsCount = response?.result?.count;
@@ -470,6 +474,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
+              this.dataListDup = [];
+              this.groupedEntityData = {};
               if (query) this.alphabet = [];
             }
           },
@@ -495,6 +501,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
+              this.dataListDup = [];
+              this.groupedEntityData = {};
               this.alphabet = [];
             }
           },
