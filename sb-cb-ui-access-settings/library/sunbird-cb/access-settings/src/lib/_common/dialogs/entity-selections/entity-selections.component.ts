@@ -458,9 +458,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: response => {
+          next: (response) => {
             if (response?.result && response?.result?.Term) {
-              const newData = response?.result?.Term;
+              // const newData = response?.result?.Term;
+              const newData = _.uniqBy(response.result.Term, (item: any) => item?.name.trim().toLowerCase());
+
               this.dataList = append ? [...this.dataList, ...newData] : newData;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
               this.totalItemsCount = response?.result?.count;
