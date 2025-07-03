@@ -51,11 +51,11 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 interface MentionFeedItem {
   id: string
-  name: string
+  userName: string
   userId: string
 }
 interface ExtendedMentionFeed extends MentionFeed {
-  onItemClick?: (item: MentionFeedItem) => { id: string, userId?: string, name: string }
+  onItemClick?: (item: MentionFeedItem) => { id: string, userId?: string, userName: string }
 }
 
 @Component({
@@ -312,6 +312,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         files: this.data.post.mediaUrls
       })
 
+      if (this.data.mentionedUsers && this.data.mentionedUsers.length) {
+        this.allProccessedUsers = this.data.mentionedUsers
+        this.allUsers = this.data.mentionedUsers
+      }
+
       // this.selectedFiles = this.data.post.mediaUrls.map((url: string) => ({
       //   name: url.split('/').slice(-1)[0],
       //   uploaded: true
@@ -377,7 +382,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     debugger
     const mentionedUser = {
       userId: eventInfo.id,
-      userName: eventInfo.name
+      userName: eventInfo.userName
     }
 
     // Add to mentioned users array if not already present
@@ -389,7 +394,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     // Return the text to be inserted into the editor
     return {
       id: eventInfo.id,
-      name: eventInfo.name
+      userName: eventInfo.userName
     }
   }
 
@@ -400,14 +405,14 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         (data: any) => {
           if (data.result && data.result.response) {
             this.apiResponse = data.result.response.content
-            this.allUsers = []
-            this.allProccessedUsers = []
+            // this.allUsers = []
+            // this.allProccessedUsers = []
             this.apiResponse.forEach((apiData: any) => {
               if (apiData.profileDetails && apiData.profileDetails.personalDetails) {
                 this.allUsers.push(`@${apiData.userName}`)
                 this.allProccessedUsers.push({
-                  id: apiData.userId,
-                  name: `${apiData.userName}`,
+                  userId: apiData.userId,
+                  userName: `${apiData.userName}`,
                 })
               }
             })
@@ -1071,11 +1076,11 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
       while ((match = mentionRegex.exec(content)) !== null) {
         const mentionName = match[1]
-        const foundUser = this.allProccessedUsers.find(user => user.name === mentionName)
-        if (foundUser && !this.mentionedUsers.find(user => user.userId === foundUser.id)) {
+        const foundUser = this.allProccessedUsers.find(user => user.userName === mentionName)
+        if (foundUser && !this.mentionedUsers.find(user => user.userId === foundUser.userId)) {
           this.mentionedUsers.push({
-            userId: foundUser.id,
-            userName: foundUser.name
+            userId: foundUser.userId,
+            userName: foundUser.userName
           })
         }
         console.log("--- ", this.mentionedUsers)
