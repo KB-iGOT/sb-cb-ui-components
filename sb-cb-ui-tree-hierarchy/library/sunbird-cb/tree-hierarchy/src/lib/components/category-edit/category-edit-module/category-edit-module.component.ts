@@ -18,7 +18,6 @@ export class CategoryEditModuleComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('Category Edit Module Data:', this.data);
     this.initForm()
   }
 

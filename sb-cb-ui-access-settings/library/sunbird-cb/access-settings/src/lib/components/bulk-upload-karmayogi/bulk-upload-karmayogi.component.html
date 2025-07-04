@@ -70,7 +70,7 @@
     <div class="list-table-bulk-upload">
       <ng-container *ngIf="currrentFilterType === 'success'">
         <div class="flex items-center gap-2 selection-count mb-4 p-2">
-          <span class="">{{ isSuccessUserlist.length }}</span>
+          <span class="">{{ holdSelectedUsers?.length }}</span>
           <span class="text-sm font-normal">Items Selected</span>
         </div>
         <sb-uic-list-table
@@ -78,8 +78,22 @@
           [count]="1"
           [initialPaginationSize]="bulkUploadConfig['bulkUploadTable']?.initialPaginationSize"
           [tableConfig]="bulkUploadConfig['bulkUploadTable']"
+          (selectedDataChange)="onSelectingUser($event)"
+          [selected]="holdSelectedUsers"
+          [isDisabled]="isDisabled"
           [bulkUploadEntriesCount]="{ totalCount: isSuccessUserlist?.length + isErrorUserlist?.length, success: isSuccessUserlist?.length }">
         </sb-uic-list-table>
+
+        <!-- <ng-container *ngIf="isSuccessUserlist?.length && holdSelectedUsers?.length">
+          <div class="w-full mt-4">
+            <button
+              mat-flat-button
+              (click)="applySelections()"
+              class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2 w-full">
+              Apply
+            </button>
+          </div>
+        </ng-container> -->
       </ng-container>
 
       <ng-container *ngIf="currrentFilterType === 'error'">
@@ -105,7 +119,7 @@
                   <span class="text-title text-dark">{{ fileName }}</span>
                   <img src="/assets/icons/error-icon.svg" alt="error-icon" />
                 </div>
-                <div class="text-style text-dark">Theress an error occurred while uploading this file.</div>
+                <div class="text-style text-dark">There's an error occurred while uploading this file.</div>
               </div>
               <div class="flex gap-x-6 gap-y-4 falied-records-info">
                 <div class="flex flex-column gap-4 flex-grow-1">

@@ -15,7 +15,8 @@ const ENDPOINTS = {
   SEARCH_V4: "/apis/proxies/v8/sunbirdigot/v4/search",
   CREATE_USERGROUPS_CONTROL: "/apis/proxies/v8/accessSetttings/v1/upsert",
   GET_ACCESS_CONTROL: (id: string) => `/apis/proxies/v8/accessSetttings/read/${id}`,
-  ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`
+  ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`,
+  PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`
 };
 
 @Injectable({
@@ -50,7 +51,8 @@ export class AccessControlService {
       limit: pagination.limit || 5,
       offset: pagination.offset || 0,
       query: query,
-      sort_by: {}
+      sort_by: {},
+      fields: ["userId", "firstName", "maskedEmail", "rootOrgName", "phone"]
     };
     if (userIds?.length) {
       request.filters = { ...request.filters, userId: userIds };
@@ -68,21 +70,23 @@ export class AccessControlService {
     let request: any = {
       request: {
         filters: {
-          status: 1
+          status: 1,
+          isMdo: true
         },
         sort_by: {
           channel: "asc"
         },
         fields: ["channel", "identifier"],
-        query: query,
-        limit: 200
+        query: query
+        // limit: 200
       }
     };
     if (selectedData?.length) {
       request.request.filters.identifier = selectedData;
+      characterSearch = "";
     }
 
-    if (characterSearch) {
+    if (characterSearch || !query) {
       request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
@@ -100,25 +104,35 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.CADRE_CONFIG);
   }
 
-  fetchDesignation(query: string, selectedData?: string[]): Observable<any> {
+  fetchDesignation(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
     let payload: any = {
       filterCriteriaMap: {
         status: "Active"
       },
       requestedFields: ["designation", "id"],
-      pageSize: 1000,
-      pageNumber: 0
+      pageSize: 1000
+      // pageNumber: 0
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
+      characterSearch = "";
     }
     if (query) {
       payload.searchString = query;
     }
+    if (characterSearch || !query) {
+      payload.startsWith = characterSearch;
+    }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
 
-  fetchDesignationsWithOrg(categories: string[], query: string, selectedData?: string[]): Observable<any> {
+  fetchDesignationsWithOrg(
+    paginationOffset: number,
+    categories: string[],
+    query: string,
+    selectedData?: string[],
+    characterSearch?: string
+  ): Observable<any> {
     let payload: any = {
       request: {
         filters: {
@@ -130,14 +144,21 @@ export class AccessControlService {
         fields: ["identifier", "name"],
         query: query,
         sort_by: {
-          lastUpdatedOn: "desc",
-          objectType: "Term"
+          name: "asc"
         },
-        facets: []
+        facets: [],
+        limit: 100,
+        offset: paginationOffset
       }
     };
     if (selectedData?.length) {
       payload.request.filters.name = selectedData;
+    }
+    if (characterSearch || !query) {
+      if (!payload.request.filters.name || typeof payload.request.filters.name !== "object") {
+        payload.request.filters.name = {};
+      }
+      payload.request.filters.name.startsWith = characterSearch;
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_V4, payload);
   }
@@ -152,6 +173,10 @@ export class AccessControlService {
 
   updateContentV3(meta: any, id: string): Observable<any> {
     return this.http.patch<any>(`${ENDPOINTS.ACTION_CONTENT_V3}update/${id}`, meta);
+  }
+
+  updateContentV4(meta: any, id: string): Observable<any> {
+    return this.http.patch<any>(`${ENDPOINTS.PRIVATE_CONTENT_V4}update/${id}`, meta);
   }
 
   downloadFile(data: any, filename = "data") {
@@ -228,6 +253,39 @@ export class AccessControlService {
           accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
           accessSettingsEnabled: accessSettingsEnabled || false
+        }
+      }
+    };
+  }
+
+  createRequesForMDOContent(apiResponse: any, accessSettingsEnabled: boolean, secureSettings: any) {
+    return {
+      request: {
+        content: {
+          appIcon: apiResponse.appIcon || "",
+          posterImage: apiResponse.posterImage || "",
+          code: apiResponse.code || "",
+          contentType: apiResponse.contentType || "",
+          createdBy: apiResponse.createdBy || "",
+          creatorContacts: apiResponse.creatorContacts || [],
+          creatorIDs: apiResponse.creatorIDs || [],
+          createdFor: apiResponse.createdFor || [],
+          creator: apiResponse.creator || "",
+          framework: apiResponse.framework || "",
+          mimeType: apiResponse.mimeType || "",
+          name: apiResponse.name || "",
+          organisation: apiResponse.organisation || [],
+          isExternal: apiResponse.isExternal || false,
+          primaryCategory: apiResponse.primaryCategory || "",
+          courseCategory: apiResponse.courseCategory || "",
+          license: apiResponse.license || "",
+          ownershipType: apiResponse.ownershipType || [],
+          cumulativeTracking: apiResponse.cumulativeTracking || false,
+          language: apiResponse.language || [],
+          accessSetting: apiResponse.accessSetting || "",
+          versionKey: apiResponse.versionKey || "",
+          accessSettingsEnabled: accessSettingsEnabled || false,
+          secureSettings: secureSettings || null
         }
       }
     };

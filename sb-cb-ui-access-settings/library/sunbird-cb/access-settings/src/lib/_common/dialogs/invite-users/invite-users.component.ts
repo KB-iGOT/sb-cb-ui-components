@@ -27,6 +27,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   holdSelectedUsers: any[] = [];
   finalSelectedUsers: any[] = [];
   usersFinalList: any[] = [];
+  bulkUploadUserList: any[] = [];
 
   usersTableConfig!: NsAccessControlConfig.ITableConfig;
   usersLoading = false;
@@ -51,9 +52,9 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       if (!this.isArrayOfObjects(this.data?.selected)) {
         this.getUsersList("", this.pagination.limit, this.pagination.offset, this.data?.selected);
       } else {
-        this.usersFinalList = this.data.selected;
-        this.holdSelectedUsers = this.usersFinalList;
-        this.finalSelectedUsers = this.usersFinalList;
+        this.usersFinalList = [...this.data.selected];
+        this.holdSelectedUsers = [...this.usersFinalList];
+        this.finalSelectedUsers = [...this.usersFinalList];
         this.activeTab = 1;
       }
     }
@@ -72,9 +73,16 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     let reducedData: any = {};
     this.resetPagination();
     this.sortState = {};
-    this.holdSelectedUsers = [];
 
-    const pickEntity = [NsAccessControlConfig.SelectionType.Organizations, NsAccessControlConfig.SelectionType.VerificationStatus];
+    const pickEntity = [
+      NsAccessControlConfig.SelectionType.Organizations,
+      NsAccessControlConfig.SelectionType.VerificationStatus,
+      NsAccessControlConfig.SelectionType.Designation,
+      NsAccessControlConfig.SelectionType.Group,
+      NsAccessControlConfig.SelectionType.Cadre,
+      NsAccessControlConfig.SelectionType.Service,
+      NsAccessControlConfig.SelectionType.Batch
+    ];
 
     if (this.data?.rule?.conditions.length) {
       reducedData = this.data?.rule?.conditions.reduce((acc: any, curr: any) => {
@@ -88,6 +96,11 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       this.filters = {
         rootOrgId: reducedData?.rootOrgId,
         "profileDetails.profileStatus": reducedData.profilestatus,
+        "profileDetails.professionalDetails.designation": reducedData.designation,
+        "profileDetails.professionalDetails.group": reducedData.group,
+        "profileDetails.cadreDetails.cadreName": reducedData.Cadre,
+        "profileDetails.cadreDetails.civilServiceName": reducedData.service,
+        "profileDetails.cadreDetails.cadreBatch": reducedData.batch,
         status: 1
       };
     }
@@ -96,6 +109,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(event: any): void {
+    if(event?.value === 'bulk_upload_karmayogis') this.bulkUploadUserList = []
     this.filterValue = event.value;
   }
 
@@ -156,8 +170,9 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.holdSelectedUsers = this.finalSelectedUsers;
   }
 
-  onSelectingUserToApply(users: any): void {
-    this.usersFinalList = users;
+  onSelectingUserToApply(event: any): void {
+    this.usersFinalList = [...event.selectedRows];
+    this.holdSelectedUsers = [...event.selectedRows];
   }
 
   applySelections(): void {
@@ -177,5 +192,13 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.currentPage = 1;
     this.pagination.limit = 5;
     this.pagination.offset = 0;
+  }
+
+  onApplyingUserBulkUpload(event: any) {
+    this.bulkUploadUserList = event;
+  }
+
+  applySelectionsBulk(): void {
+    this.dialogRef.close({ rule: this.data.rule, condition: this.data.condition, selected: this.bulkUploadUserList });
   }
 }

@@ -396,5 +396,6 @@ export namespace NsContent {
     STANDALONE_ASSESSMENT = 'Standalone Assessment',
     MODERATED_ASSESSEMENT = 'Moderated Assessment',
     CASE_STUDY = 'Case Study',
+    COMPREHENSIVE_ASSESSMENT_PROGRAM='Comprehensive Assessment Program'
   }
 }

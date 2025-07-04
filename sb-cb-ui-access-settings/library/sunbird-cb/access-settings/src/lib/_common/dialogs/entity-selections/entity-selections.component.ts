@@ -37,15 +37,25 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   selectedCharacterRange: string;
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
-  selectedVerificationStatus: string = "";
   userProfile: any;
-  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number, disabled: boolean }>(MAT_DIALOG_DATA);
+  content: any;
+  searchedOrganisationFlagWithQuery: boolean = false;
+
+  public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
+  searchedDesignationFlagWithQuery: any;
+  orgSelectionIds = [];
+
+  paginationOffset = 0;
+  totalItemsCount = 0;
+  isFetchingMore = false;
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
-    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig().accessControlCriteriaSelection;
-    this.userProfile = this.accessControlService.accessControlConfig().userConfig;
+    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig()?.accessControlCriteriaSelection;
+    this.userProfile = this.accessControlService.accessControlConfig()?.userConfig;
+    this.content = this.accessControlService.accessControlConfig()?.content;
+
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
@@ -59,10 +69,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
       this.activeTab = this.data?.activeTabSelected || 0;
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
-
-      if (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus) {
-        // this.selectedVerificationStatus = this.data.selected[0];
-      }
     }
 
     // Subscribe to search control changes
@@ -108,7 +114,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
-        this.getDesignationsList("");
+        if (this.activeTab === 0) {
+          this.getDesignationsList(this.paginationOffset, "", [], "A");
+          this.selectedCharacterRange = "A";
+        } else {
+          this.getDesignationsList(this.paginationOffset, "", this.selectedData, undefined);
+          this.alphabet = [];
+        }
         this.radioSelections = this.accessControlCriteriaSelection?.designationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Service:
@@ -145,6 +157,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType === NsAccessControlConfig.SelectionType.Designation
     ) {
       return item?.name || item?.designation;
+    } else if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
+      return Number(item);
     }
 
     return item?.id || item?.identifier || item;
@@ -152,7 +166,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   isSelected(item: any): boolean {
     const value = this.getSelectionValue(item);
-    return this.selectedDataTemp.includes(value);
+    return this.filterValue === "selected" ? this.selectedData.includes(value) : this.selectedDataTemp.includes(value);
   }
 
   toggleSelection(item: any): void {
@@ -169,7 +183,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       } else {
         this.selectedData = [...this.selectedData, value];
       }
+      this.selectedDataTemp = [...this.selectedData];
     }
+  }
+
+  setSelected(): void {
+    this.selectedData = [...this.selectedDataTemp];
+    this.activeTab = 1;
   }
 
   onFilterChange(event: MatTabChangeEvent): void {
@@ -185,7 +205,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.selectedCharacterRange = "A";
       } else {
         this.getOrganisationsList("", this.selectedData, undefined);
-        // this.alphabet = [];
+      }
+    }
+
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Designation) {
+      if (this.activeTab === 0) {
+        this.getDesignationsList(this.paginationOffset, "", [], "A");
+        this.selectedCharacterRange = "A";
+      } else {
+        this.getDesignationsList(this.paginationOffset, "", this.selectedData, undefined);
       }
     }
 
@@ -197,7 +225,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
 
     if (this.selectionType === NsAccessControlConfig.SelectionType.Cadre || this.selectionType === NsAccessControlConfig.SelectionType.Service) {
-      this.selectedVerificationStatus = "";
       this.alphabet = [];
     }
   }
@@ -205,11 +232,18 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   search(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Designation:
-        this.selectedCharacterRange = "A";
-        this.getDesignationsList(this.searchControl.value);
+        this.paginationOffset = 0;
+        if (this.filterValue === "all" && !this.searchControl.value) {
+          this.selectedCharacterRange = "A";
+          this.updateAlphabet();
+          this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange);
+        } else {
+          this.getDesignationsList(this.paginationOffset, this.searchControl.value);
+        }
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
         this.selectedCharacterRange = "A";
+        if (this.filterValue === "all" && !this.searchControl.value) this.updateAlphabet();
         this.getOrganisationsList(this.searchControl.value, []);
         break;
       case NsAccessControlConfig.SelectionType.Service:
@@ -294,16 +328,31 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   scrollToSection(letter: string) {
-    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && this.filterValue === "all" && !this.searchControl.value) {
+    this.paginationOffset = 0;
+    if (
+      this.selectionType === NsAccessControlConfig.SelectionType.Organizations &&
+      this.filterValue === "all" &&
+      !this.searchedOrganisationFlagWithQuery
+    ) {
       this.selectedCharacterRange = letter;
-      this.getOrganisationsList(this.searchControl.value, [], letter);
+      this.getOrganisationsList("", [], letter);
+      return;
+    }
+    if (
+      this.selectionType === NsAccessControlConfig.SelectionType.Designation &&
+      this.filterValue === "all" &&
+      !this.searchedDesignationFlagWithQuery
+    ) {
+      // !this.orgSelectionIds?.length
+      this.selectedCharacterRange = letter;
+      this.getDesignationsList(this.paginationOffset, "", [], letter);
       return;
     }
 
     const section = document.getElementById(`section-${letter}`);
     if (section) {
       this.selectedCharacterRange = letter;
-      section.scrollIntoView({ behavior: "smooth", inline: "start" });
+      section.scrollIntoView({ behavior: "auto", inline: "start" });
     }
   }
 
@@ -333,7 +382,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (chars.has("#")) sorted.push("#");
 
     // Show all characters for Organizations
-    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && this.filterValue === "all" && !this.searchControl.value) {
+    if (
+      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations ||
+        this.selectionType === NsAccessControlConfig.SelectionType.Designation) &&
+      this.filterValue === "all" &&
+      !this.searchControl.value
+    ) {
       this.alphabet = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "#"];
     } else {
       this.alphabet = sorted;
@@ -348,6 +402,27 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     );
   }
 
+  onScrollPaginate(event: any): void {
+    const threshold = 150;
+    const position = event.target.scrollLeft + event.target.offsetWidth;
+    const width = event.target.scrollWidth;
+    if (width - position < threshold && !this.isLoading && !this.isFetchingMore && this.dataList.length < this.totalItemsCount) {
+      this.loadMore();
+    }
+  }
+
+  loadMore(): void {
+    if (this.dataList.length >= this.totalItemsCount || this.isFetchingMore) return;
+    this.isFetchingMore = true;
+    this.paginationOffset += 100;
+    switch (this.selectionType) {
+      case this.selectionTypeEnum.Designation:
+        if (this.searchControl.value) this.selectedCharacterRange = "";
+        this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange, true);
+        break;
+    }
+  }
+
   getOrganisationsList(query: string, selectedData?: string[], character?: string): void {
     this.isLoading = true;
     this.accessControlService.fetchOrgList(query, query ? [] : selectedData, character).subscribe({
@@ -355,14 +430,17 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         if (response?.result && response?.result?.response?.content) {
           this.dataList = response.result.response.content;
           this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+          if (query) this.searchedOrganisationFlagWithQuery = true;
+          else this.searchedOrganisationFlagWithQuery = false;
 
-          if (this.filterValue === "selected" || query) {
-            this.updateAlphabet();
-          }
+          if (this.filterValue === "selected" || query) this.updateAlphabet();
+
           this.getFilteredEntityGrouped();
         } else {
           this.dataList = [];
           this.alphabet = [];
+          this.dataListDup = [];
+          this.groupedEntityData = {};
         }
       },
       complete: () => {
@@ -371,44 +449,60 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getDesignationsList(query: string, selectedData?: string[]): void {
-    this.isLoading = true;
-    const selectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
-    if (selectionIds?.length) {
-      const categories = selectionIds.map((ele: string) => `${ele}_odcs_designation`);
+  getDesignationsList(paginationOffset: number, query: string, selectedData?: string[], character?: string, append: boolean = false): void {
+    if (!append) {
+      this.isLoading = true;
+    }
+    this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
+    if (this.orgSelectionIds?.length) {
+      const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_designation`);
       this.accessControlService
-        .fetchDesignationsWithOrg(categories, query, query ? [] : selectedData)
+        .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: response => {
             if (response?.result && response?.result?.Term) {
-              this.dataList = response?.result?.Term;
-              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
-              this.updateAlphabet();
+              // const newData = response?.result?.Term;
+              const newData = _.uniqBy(response.result.Term, (item: any) => item?.name.trim().toLowerCase());
+
+              this.dataList = append ? [...this.dataList, ...newData] : newData;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
+              this.totalItemsCount = response?.result?.count;
+
+              if (query) this.searchedDesignationFlagWithQuery = true;
+              if (this.filterValue === "selected" || query) this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
-              this.alphabet = [];
+              this.dataListDup = [];
+              this.groupedEntityData = {};
+              if (query) this.alphabet = [];
             }
           },
           complete: () => {
             this.isLoading = false;
+            this.isFetchingMore = false;
           }
         });
     } else {
       this.accessControlService
-        .fetchDesignation(query, query ? [] : selectedData)
+        .fetchDesignation(query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: response => {
             if (response?.result && response?.result?.result?.data) {
-              this.dataList = response?.result?.result?.data;
-              this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
-
-              this.updateAlphabet();
+              const newData = response?.result?.result?.data;
+              this.dataList = append ? [...this.dataList, ...newData] : newData;
+              this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
+              this.totalItemsCount = response?.result?.result?.count;
+              if (query) this.searchedDesignationFlagWithQuery = true;
+              else this.searchedDesignationFlagWithQuery = false;
+              if (this.filterValue === "selected" || query) this.updateAlphabet();
               this.getFilteredEntityGrouped();
             } else {
               this.dataList = [];
+              this.dataListDup = [];
+              this.groupedEntityData = {};
               this.alphabet = [];
             }
           },
@@ -553,14 +647,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     return this.selectedDataTemp.includes(event?.value);
   }
 
-  setSelected(): void {
-    this.selectedData = [...this.selectedDataTemp];
-    this.activeTab = 1;
-  }
-
   disableOrganisationIfModerated(item: any): boolean {
     const value = this.getSelectionValue(item);
-    if (value === this.userProfile?.rootOrgId) return true;
+    if (value === this.userProfile?.rootOrgId && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
+    return false;
+  }
+
+  disabledVerifiedIfModerated(item: any): boolean {
+    if (item?.value === "VERIFIED" && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
     return false;
   }
 }

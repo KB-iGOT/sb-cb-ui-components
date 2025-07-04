@@ -3,7 +3,7 @@
 .term-card {
     border: 1px solid $light-gray;
     padding: 0.9rem;
-    margin: 0 0 1em 0;
+    margin: 0 5px 1em 5px;
     background-color: $white;
     border-radius: 8px;
     overflow: hidden;
@@ -26,10 +26,10 @@
             white-space: initial;
             // margin-left: 0.5em;
             .card-title {
-                margin-bottom: 0.5em;
                 font-family: 'Lato';
                 font-size: 14px;
                 font-weight: 400;
+                line-height: 16px;
             }
             .card-description {
                 color: rgba(0, 0, 0);
@@ -155,5 +155,51 @@
 
 .refId-card {
     font-size: 10px;
+}
+
+.action-btn {
+    color: #00000099;
+}
+
+.modal-text {
+    font-size: 16px;
+}
+
+.large-icon {
+    font-size: 46px;
+    width: 46px;
+    height: 46px;
+}
+
+.color-secondary {
+    color: #F3962F;
+}
+
+.color-primary {
+    color: #1B4CA1;
+}
+
+.modal-btn {
+    width: 87px;
+}
+
+.small-btn {
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  padding: 0 !important;
+  
+  // Override Material's touch target size
+  ::ng-deep .mat-mdc-button-touch-target {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+
+.small-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
 }
 

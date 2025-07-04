@@ -3,9 +3,10 @@ import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALO
 import { FormControl } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { TreeHierarchyService } from '../../tree-hierarchy.service';
 import { FrameworkService } from '../../services/framework.service';
 import _ from 'lodash';
+import { MatSelect } from '@angular/material/select';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 
 @Component({
   selector: 'sb-cb-tree-org-hierarchy-add-modal',
@@ -14,30 +15,44 @@ import _ from 'lodash';
 })
 export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
   searchControl = new FormControl('');
+  parentSearchControl = new FormControl('');
   selectedOrgsControl = new FormControl<(string | number)[]>([]);
+  parentSelectedOrgControl = new FormControl('');
   
   // Example options - replace with your actual data
   orgOptions: any[] = [];
   filteredOptions: any[] = [];
+
+  parentFilteredOptions: any[] = [];
   
   private destroy$ = new Subject<void>();
+  frameworkData: any;
 
   constructor(
     public dialogRef: MatDialogRef<OrgHierarchyAddModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    private treeHierarchySvc: TreeHierarchyService, 
-    private frameworkService: FrameworkService
+    @Inject(MAT_DIALOG_DATA) public data: any, 
+    private frameworkService: FrameworkService,
+    private snackbar: MatSnackBar,
   ) {}
 
   ngOnInit() {
     this.getSelectedStateOrg()
-    
-    // Listen for search changes
+    if(this.data && this.data.type === 'update') {
+      this.frameworkData = _.cloneDeep(this.frameworkService.completeResponse);
+      this.getParentTerms(this.data.previous[this.data.previous.length - 2]);
+    }
+
     this.searchControl.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((value: any) => {
         this.filterOptions(value);
       });
+
+    this.parentSearchControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value: any) => {
+        this.filterParentOptions(value);
+    });
   }
 
   ngOnDestroy() {
@@ -96,6 +111,23 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
     this.searchControl.setValue('');
   }
 
+  filterParentOptions(searchValue: string) {
+    const originalOptions = this.frameworkData?.categories?.find((v:any) => 
+      v.code === this.data?.previous[this.data.previous.length - 2]?.category
+    )?.terms || [];
+    
+    if (!searchValue) {
+      // Reset to all original options when search is empty
+      this.parentFilteredOptions = [...originalOptions];
+      return;
+    }
+    
+    const filterValue = searchValue.toLowerCase();
+    this.parentFilteredOptions = originalOptions.filter((option:any) => 
+      option.name.toLowerCase().includes(filterValue)
+    );
+  }
+
   toggleSelectAll(event: Event) {
     event.stopPropagation();
     if (this.isAllSelected()) {
@@ -117,6 +149,11 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
     return this.orgOptions.filter((option: any) => selectedIds.includes(option.identifier));
   }
 
+  getParentSelectedOptions() {
+    const selectedId = this.parentSelectedOrgControl.value;
+    return this.parentFilteredOptions.find((option: any) => option.code === selectedId);
+  }
+
   removeSelected(id: string | number) {
     const currentSelection = this.selectedOrgsControl.value || [];
     this.selectedOrgsControl.setValue(
@@ -129,43 +166,31 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
   }
 
   onSave() {
+    if (this.data && this.data.type === 'update' && this.selectedOrgsControl?.value?.find((v: any) => v === this.parentSelectedOrgControl.value)) {
+      this.snackbar.open('You cannot select the parent organization as a child organization')
+      return
+    }
+    if (this.data && this.data.type === 'update' && this.selectedOrgsControl?.value?.length === 0 && !this.parentSelectedOrgControl.value) {
+      this.snackbar.open('Please select at least one organization or parent organization');
+      return;
+    }
+    if (this.data && this.data.type === 'add' && this.selectedOrgsControl?.value?.length === 0) {
+      this.snackbar.open('Please select at least one organization');
+      return;
+    }
     const selectedOrgs = this.getSelectedOptions();
-    this.dialogRef.close(selectedOrgs);
+    const parentSelectedOrg = this.getParentSelectedOptions();
+    this.dialogRef.close({
+      selectedOrg: selectedOrgs,
+      paparentSelectedOrg: parentSelectedOrg,
+      currentTerm: this.data?.previous[this.data.previous.length - 1],
+      type: this.data.type,
+    });
   }
 
   async getSelectedStateOrg() {
-    const requestBody = {
-      request: {
-        filters: {
-          status: 1,
-          ministryOrStateType: (this.data && this.data.selectedOrgData) ?
-            this.data.selectedOrgData.sbOrgType : '',
-          ministryOrStateId: (this.data && this.data.selectedOrgData) ? 
-            this.data.selectedOrgData.identifier : ''
-        },
-        sort_by: {
-          createdDate: "desc"
-        },
-        limit: 100,
-        offset: 0,
-        fields: [
-          'identifier',
-          'orgName',
-          'description',
-          'parentOrgName',
-          'ministryOrStateId',
-          'ministryOrStateType',
-          'ministryOrStateName'
-        ]
-      }
-    }
-    
-    const orgListData = await this.treeHierarchySvc.orgSerachApi(requestBody).toPromise().catch(err => {
-      console.error('Error fetching organization data:', err);
-    });
-    
-    if (orgListData && orgListData.result && 
-      orgListData.result.response && orgListData.result.response.content) {
+    const orgListData = this.frameworkService.additionalData || []
+    if (orgListData && orgListData.length > 0) {
         const framworkData = _.cloneDeep(this.frameworkService.completeResponse)
         let orgIdsAdded: string[] = [];
         if (framworkData && framworkData.categories && framworkData.categories.length > 0) {
@@ -181,11 +206,58 @@ export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
             }
           });
         }
-        const filteredOrgList = orgListData.result.response.content.filter((org: any) => 
+        const filteredOrgList = orgListData.filter((org: any) => 
           !orgIdsAdded.includes(org.identifier)
         )
         this.orgOptions = filteredOrgList || [];
         this.filteredOptions = [...this.orgOptions];
     }
+  }
+
+  handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    return true;
+  }
+
+  handleSearchKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    
+    // For space, we only want to prevent default behavior when in the search input
+    // but allow the event to propagate for selection functionality
+    if (event.key === ' ' && event.target instanceof HTMLInputElement) {
+      // Don't prevent propagation, just prevent default to allow typing spaces in search
+      event.stopPropagation(); 
+    }
+    return true;
+  }
+
+  checkAndClose(selectElement: MatSelect): void {
+    if (!this.selectedOrgsControl.value || this.selectedOrgsControl.value.length === 0) {
+      this.snackbar.open('Please select at least one organization')
+    } else {
+      selectElement.close();
+    }
+  }
+
+  getNameOfOrg(id:any) {
+    return this.filteredOptions.find((option: any) => option.identifier === id)?.orgName || '';
+  }
+
+  removeOrg(itemToRemove: string): void {
+    const currentValues = this.selectedOrgsControl.value || [];
+    const updatedValues = currentValues.filter(item => item !== itemToRemove);
+    this.selectedOrgsControl.setValue(updatedValues);
+  }
+
+  getParentTerms(item:any) {
+    this.parentFilteredOptions = this.frameworkData.categories.find((v:any) => v.code === item.category).terms
   }
 }

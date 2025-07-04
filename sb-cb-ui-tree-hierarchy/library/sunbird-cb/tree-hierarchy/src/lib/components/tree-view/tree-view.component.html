@@ -6,7 +6,7 @@
 
 <div *ngIf="list && list.length > 0" class="flex heightFix overflow-container" id="treeViewContainer">
     <ng-container *ngFor="let column of list; let i = index;">
-        <div class="flex-1 felx-col  col-container containers{{list.length}}" id="box{{i+1}}Container">
+        <div class="flex-1 flex-col col-container containers{{list.length}}" id="box{{i+1}}Container">
             <div class="category-heading-sticky">
                 <div class="category-heading-container">
                     <div class='category-header'>
@@ -41,7 +41,7 @@
                                 </button>
                             </ng-container>
                             <ng-container *ngIf="column?.config?.addOrgEnabled && !column?.config?.createBtnEnabled">
-                                <button mat-button class="add-btn margin-left-auto" (click)="openOrganizationDialog(column, i)" type="button" 
+                                <button mat-button class="add-btn margin-left-auto" (click)="openOrganizationDialog(column, i, 'add')" type="button" 
                                 [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                     <span>Add</span>
                                     <mat-icon class="margin-remove">
@@ -57,7 +57,6 @@
                     </div> -->
                 </div>
             </div>
-            <!-- {{column.code}} -->
             <div class="padding-x2 cat-columns container-box" id="box{{i+1}}">
                 <ng-container *ngIf="column?.children && column?.children.length > 0">
                     <lib-tree-column-view *ngIf="loaded[column.code]" #selectedTaxonomyTerm [column]="column"
@@ -77,7 +76,7 @@
                                 <mat-icon svgIcon="frac-no-connection"></mat-icon>
                             </div>
                             <label>Select an organization to add or see further connections</label>
-                            <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i)" type="button" 
+                            <button mat-button class="add-btn" (click)="openOrganizationDialog(column, i, 'add')" type="button" 
                             [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                 <span>Add</span>
                                 <mat-icon class="margin-remove">

@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { AccessControlService } from "../../_services/access-control.service";
 import { NsAccessControlConfig } from "../../_models/access-control.model";
 import { SnackbarComponent } from "../snackbar/snackbar.component";
@@ -11,6 +11,9 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
   styleUrls: ["./bulk-upload-karmayogi.component.scss"]
 })
 export class BulkUploadKarmayogiComponent {
+  @Output() appliedUser: EventEmitter<any> = new EventEmitter();
+  @Input() isDisabled: boolean = false;
+
   bulkUploadConfig: NsAccessControlConfig.IBulkUploadKarmayogi;
   file!: File | null;
 
@@ -24,6 +27,9 @@ export class BulkUploadKarmayogiComponent {
   isErrorUserlist: any = [];
   fileName: string = "";
   currentDate = new Date();
+
+  holdSelectedUsers: any[] = [];
+  finalSelectedUsers: any[] = [];
   constructor(private accessControlService: AccessControlService, private snackBar: MatSnackBar) {
     this.bulkUploadConfig = this.accessControlService.accessControlConfig().bulkUploadKarmayogi;
   }
@@ -240,21 +246,7 @@ export class BulkUploadKarmayogiComponent {
     const request: any = {
       request: {
         filters: {},
-        fields: [
-          "userId",
-          "email",
-          "firstName",
-          "lastName",
-          "phone",
-          "rootOrgId",
-          "channel",
-          "roles",
-          "profileDetails",
-          "createdDate",
-          "rootOrgName",
-          "organisations",
-          "username"
-        ]
+        fields: ["userId", "email", "firstName", "lastName", "phone", "rootOrgId", "channel", "roles", "profileDetails", "rootOrgName"]
       }
     };
     if (key === "primaryEmail") {
@@ -310,6 +302,8 @@ export class BulkUploadKarmayogiComponent {
               e["userId"] = userData.userId;
               e["ministry"] = userData.rootOrgName;
               e["fullName"] = userData.firstName || userData.firstname;
+              e["mobile"] = userData?.phone;
+              e["email"] = userData?.email;
             } else {
               e["status"] = "Error";
               e["userStatus"] = false;
@@ -322,14 +316,14 @@ export class BulkUploadKarmayogiComponent {
           }
         } else if (e.email && userEmailMap[e.email.toLowerCase()]) {
           const userData = userEmailMap[e.email.toLowerCase()];
-          e["mobile"] = userData.profileDetails.personalDetails.mobile;
+          e["mobile"] = userData?.phone;
 
           e["userId"] = userData.userId;
           e["ministry"] = userData.rootOrgName;
           e["fullName"] = userData.firstName || userData.firstname;
         } else if (e.mobile && userMobileMap[e.mobile]) {
           const userData = userMobileMap[e.mobile];
-          e["email"] = userData.profileDetails.personalDetails.primaryEmail;
+          e["email"] = userData?.email;
           e["userId"] = userData.userId;
           e["ministry"] = userData.rootOrgName;
           e["fullName"] = userData.firstName || userData.firstname;
@@ -357,6 +351,10 @@ export class BulkUploadKarmayogiComponent {
       // this.dataSource = new MatTableDataSource<IUserElement>(
       //   this.isSuccessUserlist
       // );
+      this.holdSelectedUsers = this.isSuccessUserlist;
+      this.appliedUser.emit(this.holdSelectedUsers);
+
+      // document.getElementById("user-table-select")?.scrollIntoView({ behavior: "smooth" });
     } else if (this.currrentFilterType === "error") {
       // this.displayedColumns = ["email", "status", "mobile", "message"];
       // this.dataSource = new MatTableDataSource<IUserElement>(
@@ -372,4 +370,13 @@ export class BulkUploadKarmayogiComponent {
   downloadErrorFile() {
     this.accessControlService.downloadFile(this.isErrorUserlist, "userErrordata");
   }
+
+  onSelectingUser(event: any): void {
+    this.holdSelectedUsers = [...event.selectedRows];
+    this.appliedUser.emit(this.holdSelectedUsers);
+  }
+
+  // applySelections() {
+  //   this.appliedUser.emit(this.holdSelectedUsers);
+  // }
 }

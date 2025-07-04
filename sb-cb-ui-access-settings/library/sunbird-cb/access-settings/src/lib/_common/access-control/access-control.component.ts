@@ -46,13 +46,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   usersTableConfig: NsAccessControlConfig.ITableConfig;
   accessControlForm!: FormGroup;
+  MDO_SPECIFIC = NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
 
   cadreConfigData: any;
-  isSaveFltrBtnDisabled = false;
-  isApplyBtnDisabled = false;
+  isSaveFltrBtnDisabled = true;
+  isApplyBtnDisabled = true;
   isAddUserGroupBtnDisabled = false;
   isApplying = false;
   isSaving = false;
+  userCount: any = {};
+
+  initialUserGroupValue: any;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -67,6 +71,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.config.content = this.content;
     this.accessControlService.accessControlConfig.set(this.config);
     this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
+    if (this.accessControlCriteriaSelection.readOnly) {
+      this.accessControlCriteriaSelection.readOnly = false;
+    }
 
     this.usersTableConfig = this.config?.usersTableConfig;
 
@@ -177,13 +184,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       name: [`User Group ${this.userGroup.length + 1}`],
       description: [`Description for UserGroup ${this.userGroup.length + 1}`],
       conditions: this.fb.array([this.createConditionGroup(uuidv4(), this.userGroup.length - 1)]),
-      isUserGroupDisabled: [false]
+      isUserGroupDisabled: [false],
+      isAddConditionDisabled: [false]
     });
 
     this.userGroup.push(ruleGroup);
   }
 
   addCondition(userGroupIndex: number) {
+    this.processCadreConfigMapping(userGroupIndex);
     const conditions = this.ruleConditions(userGroupIndex);
     const accessSetting = this.content?.accessSetting;
 
@@ -274,10 +283,52 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
+      this.processDisableAddConditionOnClose(userGroupIndex);
     }
   }
 
-  getAvailableEntities(userGroupIndex: number, currentConditionIndex: number): { value: string; label: string }[] {
+  onOpeningEntityChange(event: boolean, userGroupIndex: number, conditionIndex: number): void {
+    if (event) {
+      // Disable cadre from selection if services/batch has not cadre
+      const conditions = this.ruleConditions(userGroupIndex);
+      let selectedService: string[] = [];
+      let selectedBatch: number[] = [];
+      for (let i = 0; i < conditions.length; i++) {
+        const entity = conditions.at(i).get("entity")?.value;
+        const selections = conditions.at(i).get("selections")?.value || [];
+        if (entity === NsAccessControlConfig.SelectionType.Service) {
+          selectedService = selections;
+        }
+        if (entity === NsAccessControlConfig.SelectionType.Batch) {
+          selectedBatch = selections;
+        }
+      }
+
+      let availableCadres: any[] = [];
+      let disableCadre = false;
+
+      // 1. Only service is added
+      if (selectedService.length) {
+        const serviceSelections = this.cadreMappingService.getServiceIdsByName(selectedService || []) || [];
+        availableCadres = this.cadreMappingService.getCadresByServices(serviceSelections);
+        disableCadre = availableCadres.length === 0;
+      } else {
+        // If neither is selected, do not disable Cadre
+        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) disableCadre = true;
+        else disableCadre = false;
+      }
+
+      const updatedOptions = this.accessControlCriteriaSelection.optionsEntity.map(option => {
+        if (option.value === NsAccessControlConfig.SelectionType.Cadre) {
+          return { ...option, disabled: disableCadre };
+        }
+        return option;
+      });
+      this.accessControlCriteriaSelection.optionsEntity = [...updatedOptions];
+    }
+  }
+
+  getAvailableEntities(userGroupIndex: number, currentConditionIndex: number): any[] {
     const conditions = this.ruleConditions(userGroupIndex);
     const selectedEntities = conditions.controls
       .map((ctrl, idx) => (idx !== currentConditionIndex ? ctrl.get("entity")?.value : null))
@@ -299,22 +350,50 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           for (let i = 0; i < this.userGroup.length; i++) {
             this.resetUserGroup(i);
           }
+          this.reindexUserCount();
           this.applyAccessControlValue(true);
+          this.calculateUserCountForUserGroup(index);
         } else {
           this.userGroup.removeAt(index);
           // Rename remaining groups
           for (let i = 0; i < this.userGroup.length; i++) {
             this.resetUserGroup(i);
           }
+          this.reindexUserCount();
         }
       }
     });
+  }
+
+  private reindexUserCount() {
+    const newUserCount: { [key: number]: number } = {};
+    for (let i = 0; i < this.userGroup.length; i++) {
+      newUserCount[i] = this.userCount[i] || 0;
+    }
+    this.userCount = newUserCount;
   }
 
   resetUserGroup(index: number) {
     const group = this.userGroup.at(index);
     if (group) {
       group.get("name")?.setValue(`User Group ${index + 1}`);
+    }
+  }
+
+  resetUserGroupWithSelections(userGroupIndex: number) {
+    const group = this.userGroup.at(userGroupIndex);
+    if (group) {
+      group.get("name")?.setValue(`User Group ${userGroupIndex + 1}`);
+      const conditions = group.get("conditions") as FormArray;
+      if (conditions && conditions.length) {
+        for (let i = 0; i < conditions.length; i++) {
+          const condition = conditions.at(i);
+          condition.get("entity")?.setValue("");
+          condition.get("selections")?.setValue([]);
+        }
+      }
+      this.calculateUserCountForUserGroup(userGroupIndex);
+      this.processDisableAddConditionOnClose(userGroupIndex);
     }
   }
 
@@ -327,6 +406,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
         conditions.removeAt(conditionIndex);
+        this.calculateUserCountForUserGroup(userGroupIndex);
+        this.processDisableAddConditionOnClose(userGroupIndex);
       }
     });
   }
@@ -337,16 +418,38 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (condition) {
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
+      this.calculateUserCountForUserGroup(userGroupIndex);
+      this.processDisableAddConditionOnClose(userGroupIndex);
     }
   }
 
   manageSelections(conditionForm: any, ruleForm: any, userGroupIndex: number, activeTabSelected = 0): void {
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
+    let resetFilterFlag = false;
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === 'Review')) {
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+        resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+      }
+      if (resetFilterFlag) {
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+          width: "470px",
+          data: { type: "confirm-reset-fields" }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+            this.resetActiveUserGroupFields(condition, rule, userGroupIndex);
+          }
+        });
+      }
+    }
+
     switch (condition.entity) {
       case NsAccessControlConfig.SelectionType.Users:
-        this.openInviteUserDialog(condition, rule, activeTabSelected, rule?.isUserGroupDisabled
-);
+        if (!resetFilterFlag) {
+          this.openInviteUserDialog(condition, rule, activeTabSelected, rule?.isUserGroupDisabled);
+        }
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
       case NsAccessControlConfig.SelectionType.Designation:
@@ -356,8 +459,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       case NsAccessControlConfig.SelectionType.Group:
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         this.processCadreConfigMapping(userGroupIndex);
-        this.openSelectionDialog(rule, condition, activeTabSelected, rule?.isUserGroupDisabled
-);
+        if (!resetFilterFlag) {
+          this.openSelectionDialog(rule, condition, activeTabSelected, rule?.isUserGroupDisabled);
+        }
         break;
       default:
         console.warn("Unsupported entity type:", condition.entity);
@@ -399,6 +503,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             }
 
             this.processCadreConfigMapping(ruleIndex);
+            this.processDisableAddConditionOnClose(ruleIndex);
+
+            if (!this.areSelectionsEqual(originalSelections, result.selected)) {
+              this.calculateUserCountForUserGroup(ruleIndex);
+            }
           }
         }
       }
@@ -437,7 +546,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           ...prev,
           cadre: this.cadreMappingService.getAllCadres(),
           service: this.cadreMappingService.getServicesByCadres(cadreSelections),
-          batch: this.cadreMappingService.getBatchYearsByServices(cadreSelections)
+          batch: this.cadreMappingService.getBatchYearsByCadres(cadreSelections)
         }));
       }
       // Case 3: Only batch selected
@@ -472,8 +581,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.accessControlService.holdServiceCadrebatch.update(prev => ({
           ...prev,
           service: this.cadreMappingService.getServicesByCadresAndBatch(cadreSelections, batchSelections),
-          cadre: this.cadreMappingService.getCadresByServicesAndBatch(serviceSelections, batchSelections),
-          batch: this.cadreMappingService.getBatchYearsByServicesAndCadres(serviceSelections, cadreSelections)
+          cadre: this.cadreMappingService.getCadresByBatchYears(batchSelections),
+          batch: this.cadreMappingService.getBatchYearsByCadres(cadreSelections)
         }));
       } else {
         this.accessControlService.holdServiceCadrebatch.set({
@@ -485,7 +594,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  processDisableAddConditionOnClose(userGroupIndex: number): void {
+    // If any condition is Users and at least one user is added, disable add condition
+    const ruleGroup = this.userGroup.at(userGroupIndex);
+    const conditions = ruleGroup.get("conditions") as FormArray;
+    const hasUsersConditionWithSelection = conditions.controls.some(
+      ctrl =>
+        ctrl.get("entity")?.value === NsAccessControlConfig.SelectionType.Users &&
+        Array.isArray(ctrl.get("selections")?.value) &&
+        ctrl.get("selections")?.value.length > 0
+    );
+    ruleGroup.get("isAddConditionDisabled")?.setValue(hasUsersConditionWithSelection);
+  }
+
   openInviteUserDialog(condition: any, rule: any, activeTabSelected: number, isDisabled: boolean): void {
+    const originalSelections = [...(condition.selections || [])];
+
     const dialogRef = this.dialog.open(InviteUsersComponent, {
       width: "1090px",
       data: { condition: condition, rule: rule, selected: condition.selections, activeTab: activeTabSelected, disabled: isDisabled }
@@ -503,6 +627,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             const conditionGroup = conditions.at(conditionIndex);
             // const userIds = result.selected && result.selected.map((user: any) => user?.userId);
             conditionGroup.get("selections")?.setValue(result.selected);
+            this.processDisableAddConditionOnClose(ruleIndex);
+          }
+          if (!this.areSelectionsEqual(originalSelections, result.selected)) {
+            this.calculateUserCountForUserGroup(ruleIndex);
           }
         }
       }
@@ -549,7 +677,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return true;
   }
 
-  async applyAccessControlValue(shouldProceedWithoutValidation: boolean = false): Promise<void> {
+  async applyAccessControlValue(shouldProceedWithoutValidation: boolean = false, displaySuccessMessage: boolean = true): Promise<void> {
     if (!shouldProceedWithoutValidation) {
       const validated = this.validateFormData();
       if (!validated) return;
@@ -566,7 +694,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         next: response => {
           if (response?.result && response?.result?.accessControl) {
             this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
-            this.callSnackbar("Access Control saved successfully", "success");
+            if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
+            this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+            this.isSaveFltrBtnDisabled = true;
+
+            // Update secure setting for moderated content
+            // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+            this.updateContentAccessSetting();
+            // }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
@@ -639,22 +774,79 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .pipe(takeUntil(this.destroy$))
       .toPromise()
       .catch(() => {
-        this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
+        // For Moderated Content Condition if not already added the usergroup autocreate a usergroup with added conditions and save it
+        if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          // Create Organization condition
+          const orgCondition = this.createConditionGroup(uuidv4(), 0);
+          orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
+          orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
+
+          // Create Verification Status condition with default 'Verified'
+          const verificationCondition = this.createConditionGroup(uuidv4(), 0);
+          verificationCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.VerificationStatus);
+          verificationCondition.get("selections")?.setValue(["VERIFIED"]);
+
+          // Create user group with these two conditions
+          const group = this.fb.group({
+            id: [uuidv4()],
+            name: ["User Group 1"],
+            description: ["Description for UserGroup 1"],
+            conditions: this.fb.array([orgCondition, verificationCondition])
+          });
+          this.userGroup.push(group);
+
+          // Disable add user group btn
+          this.isAddUserGroupBtnDisabled = true;
+          this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
+          this.applyAccessControlValue(false, false);
+          this.updateContentAccessSetting();
+        }
+
+        setTimeout(() => {
+          this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+          this.setupFormChangeDetection();
+        }, 0);
       });
     if (response?.result?.accessControl) {
       this.processAccessControlResult(response.result.accessControl);
       this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
+
+      // Temporary fix to updated the failed content for moderated
+      // if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+      //   if (!this.content?.accessSettingsEnabled) {
+      //     this.updateContentAccessSetting();
+      //   }
+      // }
+      // this.updateContentAccessSetting();
     }
   }
 
+  private setupFormChangeDetection(): void {
+    this.accessControlForm.valueChanges.subscribe(() => {
+      const currentValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+      if (this.content?.status === "Live" || this.content?.prevStatus === "Live") {
+        this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
+      } else {
+        this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
+      }
+    });
+  }
+
   processAccessControlResult(accessControl: any): void {
-    if (!accessControl?.userGroups?.length) return;
+    if (!accessControl?.userGroups?.length) {
+      setTimeout(() => {
+        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+        this.setupFormChangeDetection();
+      }, 0);
+
+      return;
+    }
 
     while (this.userGroup.length) {
       this.userGroup.removeAt(0);
     }
 
-    accessControl.userGroups.forEach((group: any) => {
+    accessControl.userGroups.forEach((group: any, index: number) => {
       const conditions = this.fb.array([]) as any;
 
       group.userGroupCriteriaList.forEach((criteria: any) => {
@@ -675,7 +867,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         // Set the form values
         condition.patchValue({
           entity: entityMap[criteria.criteriaKey] || criteria.criteriaKey,
-          selections: criteria.criteriaValue
+          selections:
+            criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
+              ? Array.isArray(criteria.criteriaValue)
+                ? criteria.criteriaValue.map((b: any) => Number(b))
+                : []
+              : criteria.criteriaValue
         });
 
         conditions.push(condition);
@@ -686,39 +883,108 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         name: [group.userGroupName],
         description: [`Description for ${group.userGroupName}`],
         conditions: conditions,
-        isUserGroupDisabled: [false]
+        isUserGroupDisabled: [false],
+        isAddConditionDisabled: [false]
       });
 
       this.userGroup.push(ruleGroup);
-    });
 
-    if (this.content?.status === "Review" && this.content?.reviewStatus === "InReview") {
-      // reviewer(readonly)
-      this.accessControlCriteriaSelection.readOnly = true;
-      this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
-    } else if (
-      this.content?.status === "Live" &&
-      (this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("content_creator"))
-    ) {
-      // publisher (cannot edit already added)
-      for (let i = 0; i < this.userGroup.length; i++) {
-        const group = this.userGroup.at(i);
-        group.get("id")?.disable();
-        group.get("name")?.disable();
-        group.get("description")?.disable();
-        group.get("conditions")?.disable();
-        group.get("isUserGroupDisabled")?.setValue(true);
+      // Check if add condition should be disabled for this user group
+      this.processDisableAddConditionOnClose(index);
+
+      // Calculate count for each user group
+      this.calculateUserCountForUserGroup(index);
+      if (
+        (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
+        (this.config.userConfig.userRoles.has("content_creator") || this.config.userConfig.userRoles.has("spv_publisher"))
+      ) {
+        // publisher (cannot edit already added)
+        for (let i = 0; i < this.userGroup.length; i++) {
+          const group = this.userGroup.at(i);
+          group.get("id")?.disable();
+          group.get("name")?.disable();
+          group.get("description")?.disable();
+          group.get("conditions")?.disable();
+          group.get("isUserGroupDisabled")?.setValue(true);
+        }
+        this.isSaveFltrBtnDisabled = true;
+        this.isApplyBtnDisabled = false;
       }
-      this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = false;
-    }
+      setTimeout(() => {
+        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+        this.setupFormChangeDetection();
+      }, 0);
+    });
   }
 
   async updateContentAccessSetting(): Promise<void> {
+    let secureSettings = {};
+    if (typeof this.content.language === "string") {
+      this.content.language = [this.content.language];
+    }
+    if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+      const userGroup0 = this.userGroup.at(0);
+      let organisation: string[] = [];
+      let isVerifiedKarmayogi = "";
+
+      if (userGroup0) {
+        const conditions = userGroup0.get("conditions") as FormArray;
+        if (conditions && conditions.length) {
+          const orgCondition = conditions.controls.find(ctrl => ctrl.get("entity")?.value === NsAccessControlConfig.SelectionType.Organizations);
+          if (orgCondition) {
+            organisation = orgCondition.get("selections")?.value || [];
+          }
+
+          const verificationCondition = conditions.controls.find(
+            ctrl => ctrl.get("entity")?.value === NsAccessControlConfig.SelectionType.VerificationStatus
+          );
+          if (verificationCondition) {
+            const verSelections = verificationCondition.get("selections")?.value || [];
+            isVerifiedKarmayogi = Array.isArray(verSelections) && verSelections?.length > 1 ? "No" : "Yes";
+          }
+        }
+      }
+
+      this.content.secureSettings = {
+        version: 1,
+        organisation,
+        isVerifiedKarmayogi
+      };
+      secureSettings = {
+        version: 1,
+        organisation,
+        isVerifiedKarmayogi
+      };
+    }
+
     const accessTypeBoolean = this.accessType === NsAccessControlConfig.IAccessTypes.Public ? false : true;
     const request = this.accessControlService.createRequestContent(this.content, accessTypeBoolean);
-    await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+    const requestForMDO = this.accessControlService.createRequesForMDOContent(this.content, accessTypeBoolean, secureSettings);
+    if (this.content.status !== "Live" || this.content.prevStatus != "Live") {
+      if (
+        (this.config.userConfig.userRoles.has("content_publisher") || this.config.userConfig.userRoles.has("spv_publisher")) &&
+        this.content.status !== "Draft"
+      ) {
+        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          if (this.content.reviewStatus) {
+            (requestForMDO.request.content as any).reviewStatus = this.content.reviewStatus;
+          }
+          await this.accessControlService.updateContentV4(requestForMDO, this.contentId).toPromise();
+        } else {
+          if (this.content.reviewStatus) {
+            (request.request.content as any).reviewStatus = this.content.reviewStatus;
+          }
+          await this.accessControlService.updateContentV4(request, this.contentId).toPromise();
+        }
+      } else {
+        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          await this.accessControlService.updateContentV3(requestForMDO, this.contentId).toPromise();
+        } else {
+          await this.accessControlService.updateContentV3(request, this.contentId).toPromise();
+        }
+      }
+    }
+
     this.refreshContentMeta.emit(true);
   }
 
@@ -740,76 +1006,182 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   get getTotalUserCount(): number {
-    return this.userGroup.controls.reduce((total: number, group: any) => {
-      const conditions = (group.get("conditions") as FormArray)?.controls || [];
-      return (
-        total +
-        conditions.reduce((count: number, condition: any) => {
-          const entity = condition.get("entity")?.value;
-          const selections = condition.get("selections")?.value || [];
-          if (entity === NsAccessControlConfig.SelectionType.Users) {
-            return count + selections.length;
-          }
-          return count;
-        }, 0)
-      );
-    }, 0);
-  }
-
-  getUserCountForUserGroup(userGroupIndex: number): number {
-    const group = this.userGroup.at(userGroupIndex);
-    if (!group) return 0;
-
-    const conditions = (group.get("conditions") as FormArray)?.controls || [];
-    return conditions.reduce((count: number, condition: any) => {
-      const entity = condition.get("entity")?.value;
-      const selections = condition.get("selections")?.value || [];
-      if (entity === NsAccessControlConfig.SelectionType.Users) {
-        return count + selections.length;
-      }
-      return count;
-    }, 0);
+    return (Object.values(this.userCount) as number[]).reduce((total, count) => total + count, 0);
   }
 
   processConditionsForContentType(): void {
-    // For Moderated Content Condition
     if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      // Create Organization condition
-      const orgCondition = this.createConditionGroup(uuidv4(), 0);
-      orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
-      orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
-
-      // Create Verification Status condition with default 'Verified'
-      const verificationCondition = this.createConditionGroup(uuidv4(), 0);
-      verificationCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.VerificationStatus);
-      verificationCondition.get("selections")?.setValue(["VERIFIED"]);
-
-      // Create user group with these two conditions
-      const group = this.fb.group({
-        id: [uuidv4()],
-        name: ["User Group 1"],
-        description: ["Description for UserGroup 1"],
-        conditions: this.fb.array([orgCondition, verificationCondition])
-      });
-      this.userGroup.push(group);
-
       // Disable add user group btn
       this.isAddUserGroupBtnDisabled = true;
     }
 
-    // For Access Control Content Type
-    if (this.accessType === NsAccessControlConfig.IAccessTypes.Public) {
-      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-        width: "470px",
-        data: { type: "confirm-access-type" }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
-          this.sendForCQF.emit(true);
-          this.updateContentAccessSetting();
-        }
-      });
+    if (this.content?.status === "Review" && this.content?.reviewStatus === "InReview") {
+      // reviewer(readonly)
+      this.accessControlCriteriaSelection.readOnly = true;
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
+    } else if (
+      (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
+      (this.config.userConfig.userRoles.has("spv_publisher") ||
+        this.config.userConfig.userRoles.has("content_publisher") ||
+        this.config.userConfig.userRoles.has("content_creator"))
+    ) {
+      // publisher (disabled all)
+      this.accessControlCriteriaSelection.readOnly = true;
+      this.isSaveFltrBtnDisabled = true;
+      this.isApplyBtnDisabled = true;
     }
+  }
+
+  async calculateUserCountForUserGroup(userGroupIndex: number): Promise<void> {
+    // Mapping of entity to request key
+    const entityKeyMap: { [key: string]: string } = {
+      [NsAccessControlConfig.SelectionType.Organizations]: "rootOrgId",
+      [NsAccessControlConfig.SelectionType.Designation]: "profileDetails.professionalDetails.designation",
+      [NsAccessControlConfig.SelectionType.Group]: "profileDetails.professionalDetails.group",
+      [NsAccessControlConfig.SelectionType.VerificationStatus]: "profileDetails.profileStatus",
+      [NsAccessControlConfig.SelectionType.Cadre]: "profileDetails.cadreDetails.cadreName",
+      [NsAccessControlConfig.SelectionType.Service]: "profileDetails.cadreDetails.civilServiceName",
+      [NsAccessControlConfig.SelectionType.Batch]: "profileDetails.cadreDetails.cadreBatch",
+      [NsAccessControlConfig.SelectionType.Users]: "identifier"
+    };
+
+    const group = this.userGroup.at(userGroupIndex);
+    if (!group) {
+      this.userCount[userGroupIndex] = 0;
+      return;
+    }
+
+    const conditions = group.get("conditions") as FormArray;
+    const request: { [key: string]: any[] } = {};
+
+    for (let j = 0; j < conditions.length; j++) {
+      const condition = conditions.at(j);
+      const entity = condition.get("entity")?.value;
+      const selections = condition.get("selections")?.value || [];
+      const key = entityKeyMap[entity];
+      if (key) {
+        if (
+          entity === NsAccessControlConfig.SelectionType.Users &&
+          Array.isArray(selections) &&
+          selections.every(sel => typeof sel === "object" && sel !== null)
+        ) {
+          const userIds = selections && selections.map((user: any) => user?.userId);
+          request[key] = userIds;
+        } else {
+          request[key] = selections;
+        }
+      }
+    }
+
+    // Remove keys with empty array values
+    Object.keys(request).forEach(key => {
+      if (Array.isArray(request[key]) && request[key].length === 0) {
+        delete request[key];
+      }
+    });
+
+    const filters: any = { ...request };
+    if (Object.keys(filters).length > 0) {
+      filters.status = 1;
+    } else {
+      delete filters.status;
+    }
+
+    const payload = {
+      request: {
+        ...(Object.keys(filters).length > 0 ? { filters } : {}),
+        fields: ["identifier", "rootOrgId", "firstName"]
+      }
+    };
+    const response = await this.accessControlService
+      .validateUser(payload)
+      .toPromise()
+      .catch(() => {
+        this.userCount[userGroupIndex] = 0;
+      });
+    if (response?.result?.response) {
+      const count = response?.result?.response?.count;
+      this.userCount[userGroupIndex] = count;
+    }
+  }
+
+  isUserGroupFormChanged(initialValue: any): boolean {
+    const currentValue = this.accessControlForm.getRawValue().userGroup;
+    return JSON.stringify(currentValue) !== JSON.stringify(initialValue);
+  }
+
+  checkForResetFilter(condition: any, rule: any, userGroupIndex: any) {
+    let flag = false;
+    let accessControlFormData = this.accessControlForm.getRawValue();
+    let activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
+    let activeSelectionCount = 0;
+    if (activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1) {
+      //Show Popup
+      let onlyOneCondition = this.hasOnlyOneArrayWithLength(activeManageSelection?.conditions, "selections");
+      if (onlyOneCondition) {
+        flag = false;
+      } else {
+        activeManageSelection?.conditions?.map(item => {
+          if (item?.entity == condition?.entity && item?.selections.length > 0) {
+            flag = true;
+          }
+        });
+      }
+      if (activeManageSelection?.conditions?.length > 1) {
+        let checkLastIndexHaveSelections = -1;
+        activeManageSelection?.conditions?.forEach((item, index) => {
+          if (item?.selections.length > 0) {
+            checkLastIndexHaveSelections = index;
+          }
+        });
+        // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
+        // console.log('checkLastIndexHaveSelections--', checkLastIndexHaveSelections)
+        if (activeManageSelection?.conditions[checkLastIndexHaveSelections]?.entity === condition?.entity && condition?.selections?.length > 0) {
+          flag = false;
+        }
+      }
+
+      // let index = activeManageSelection?.conditions?.findLastIndex((item) =>
+      //   item?.entity === condition?.entity && item?.selections.length > 0
+      // );
+      // if((index + 1) === activeManageSelection?.conditions.length) {
+      //   flag = false
+      // }
+      // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
+      // console.log('index', index)
+    }
+    return flag;
+  }
+
+  hasOnlyOneArrayWithLength(data, key) {
+    let count = 0;
+    for (const obj of data) {
+      if (Array.isArray(obj[key]) && obj[key].length > 0) {
+        count++;
+      }
+    }
+    return count > 1 ? false : true;
+  }
+
+  resetActiveUserGroupFields(condition: any, rule: any, userGroupIndex: any) {
+    let accessControlFormData = this.accessControlForm.getRawValue();
+    let activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
+    let activeConditionIndex = activeManageSelection?.conditions?.findIndex(item => {
+      return item?.entity === condition?.entity && item?.selections?.length > 0;
+    });
+    let activeManageSelectionArrLength = activeManageSelection?.conditions.length;
+    for (let i = activeConditionIndex + 1; i < activeManageSelectionArrLength; i++) {
+      const userGroupArray = this.accessControlForm.get("userGroup") as FormArray;
+      const userGroup = userGroupArray.at(userGroupIndex) as FormGroup;
+      const conditionsArray = userGroup.get("conditions") as FormArray;
+      const conditionGroup = conditionsArray.at(i) as FormGroup;
+      // conditionGroup.reset();
+      const condition = conditionGroup;
+      condition.get("entity")?.setValue("");
+      condition.get("selections")?.setValue([]);
+    }
+
+    this.calculateUserCountForUserGroup(userGroupIndex);
   }
 }

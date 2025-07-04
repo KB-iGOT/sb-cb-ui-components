@@ -25,7 +25,9 @@
           <input matInput placeholder="Search by Name, Email and Phone Number" [formControl]="searchControl" (keyup.enter)="search()" />
         </mat-form-field>
       </div>
-      <button mat-flat-button class="flex items-center rounded-full new-bg-color font-bold text-sm text-white search-button" (click)="search()">Search</button>
+      <button mat-flat-button class="flex items-center rounded-full new-bg-color font-bold text-sm text-white search-button" (click)="search()">
+        Search
+      </button>
     </div>
 
     <div class="contents-wrapper">
@@ -48,8 +50,8 @@
                   (pageChange)="onPageChange($event)"
                   (sortChange)="onSortChange($event)"
                   [selected]="usersFinalList"
-                  [currentPage]="currentPage"
-                  ></sb-uic-list-table>
+                  [isDisabled]="data?.disabled"
+                  [currentPage]="currentPage"></sb-uic-list-table>
               </ng-container>
             </div>
           </mat-tab>
@@ -68,6 +70,7 @@
                   [tableConfig]="usersTableConfig['selectedUsers']"
                   (selectedDataChange)="onSelectingUserToApply($event)"
                   (removeSelectedData)="removedUserData($event)"
+                  [isDisabled]="data?.disabled"
                   [selected]="usersFinalList"></sb-uic-list-table>
               </ng-container>
             </div>
@@ -85,7 +88,7 @@
   </ng-container>
 
   <ng-container *ngIf="filterValue === 'bulk_upload_karmayogis'">
-    <sb-uic-bulk-upload-karmayogi></sb-uic-bulk-upload-karmayogi>
+    <sb-uic-bulk-upload-karmayogi (appliedUser)="onApplyingUserBulkUpload($event)" [isDisabled]="data?.disabled"></sb-uic-bulk-upload-karmayogi>
   </ng-container>
 </div>
 
@@ -96,14 +99,26 @@
         mat-flat-button
         (click)="selectUsers()"
         class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white w-full mt-2"
-        [disabled]="holdSelectedUsers?.length === 0">
+        [disabled]="holdSelectedUsers?.length === 0 || data?.disabled">
         Select Users
       </button>
     </ng-container>
     <ng-container *ngIf="activeTab === 1 && usersFinalList.length && finalSelectedUsers.length">
       <button
+        [disabled]="data?.disabled"
         mat-flat-button
         (click)="applySelections()"
+        class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white w-full mt-2">
+        Apply
+      </button>
+    </ng-container>
+  </ng-container>
+  <ng-container *ngIf="filterValue === 'bulk_upload_karmayogis'">
+    <ng-container *ngIf="bulkUploadUserList?.length">
+      <button
+        [disabled]="data?.disabled"
+        mat-flat-button
+        (click)="applySelectionsBulk()"
         class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white w-full mt-2">
         Apply
       </button>

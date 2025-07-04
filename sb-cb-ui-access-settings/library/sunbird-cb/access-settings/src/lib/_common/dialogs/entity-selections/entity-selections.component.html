@@ -81,7 +81,7 @@
                     </ng-container>
                   </div>
                   <ng-container *ngIf="checkIfData; else noData">
-                    <div class="flex overflow-x-auto">
+                    <div class="flex overflow-x-auto" (scroll)="onScrollPaginate($event)">
                       <ng-container *ngFor="let group of groupedEntityData | keyvalue">
                         <div class="org-column p-2 mr-4" [attr.id]="'section-' + group.key">
                           <div class="org-list">
@@ -98,7 +98,9 @@
                                           selectionType === selectionTypeEnum.Cadre
                                         ">
                                         <mat-checkbox
-                                          [disabled]="accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled"
+                                          [disabled]="
+                                            accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled
+                                          "
                                           [checked]="isSelected(entity)"
                                           (change)="toggleSelection(entity)"
                                           [title]="entity?.name || entity?.designation || entity?.channel">
@@ -165,7 +167,7 @@
     <div class="flex gap-16 items-center p-4 options-checkbox">
       <ng-container *ngFor="let group of dataList">
         <mat-checkbox
-          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled || disabledVerifiedIfModerated(group)"
           [checked]="isSelectedVerification(group)"
           (change)="onVerificationChange(group)"
           [title]="group?.label">

@@ -4,6 +4,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { PageChangeEmitter } from "../../_models/pagination.model";
 import { MatSort, Sort } from "@angular/material/sort";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
+import * as _ from "lodash";
 
 @Component({
   selector: "sb-uic-list-table",
@@ -19,6 +20,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() selected: any;
   @Input() bulkUploadEntriesCount: any;
   @Input() currentPage: number = 1;
+  @Input() isDisabled: boolean = false;
 
   @Output() selectedDataChange: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<PageChangeEmitter> = new EventEmitter();
@@ -38,13 +40,13 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     // Handle data input change
     if (changes["data"]?.currentValue?.length) {
       const mappedUsers = changes["data"].currentValue.map((user: any) => ({
-        firstName: user?.firstName || user?.profileDetails?.personalDetails?.firstname || user?.fullName || "",
-        mobile: user?.mobile || user?.profileDetails?.personalDetails?.mobile || "",
-        email: user?.email || user?.profileDetails?.personalDetails?.primaryEmail || "",
-        ministry: user?.ministry || user?.organisations[0]?.orgName || "",
+        firstName: user?.firstName || user?.firstname || user?.fullName || "",
+        mobile: user?.mobile || user?.phone || "",
+        email: user?.email || user?.maskedEmail || "",
+        ministry: user?.ministry || user?.rootOrgName || "",
         invited_on: user?.invited_on || "",
         status: user?.status || "",
-        userId: user?.userId || ""
+        userId: user?.userId || user?.id || ""
       }));
       this.data = mappedUsers;
       this.dataSource = new MatTableDataSource<any>(mappedUsers);
@@ -130,7 +132,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     this.selectedDataChange.emit({
-      selectedRows: this.selectedTablerow,
+      selectedRows: _.cloneDeep(this.selectedTablerow),
       toggledRow: row,
       action: isSelected ? "unselected" : "selected"
     });
