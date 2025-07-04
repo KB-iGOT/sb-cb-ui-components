@@ -743,7 +743,34 @@ export class NewPostComponent implements OnInit, OnDestroy {
     })
   }
 
+  getMentionedUsers(text: string) {
+    const mentions = this.extractMentions(text)
+    const users: any = []
+    mentions.forEach(mention => {
+      const username = mention.substring(1)
+      const user = this.mentionedUsers.find(u => u.userName === username)
+      if (user && user.userId) {
+        users.push({
+          userId: user.userId,
+          userName: user.userName
+        })
+      }
+    })
+    return users
+  }
+
+  extractMentions(text: string): string[] {
+    if (!text) {
+      return []
+    }
+    const mentionRegex = /@\w+/g
+    return text.match(mentionRegex) || []
+  }
+
   createReq(formData: any, type: string) {
+    const _description = formData.value.description || ''
+    const mentions = this.getMentionedUsers(_description)
+
     const parentDiscussionId = this.hierarchyPath.length ? this.hierarchyPath[0] : ''
     const req = {
       type,
@@ -760,7 +787,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       // targetTopic: 'testing',
       // tags: this.selectedTags,
       // mediaUrls: this.mediaUrls || []
-      ...(this.mentionedUsers.length > 0 ? { mentionedUsers: this.mentionedUsers } : {}),
+      ...(mentions.length > 0 ? { mentionedUsers: mentions } : {}),
       ...((this.taggedUsers && this.taggedUsers.length) ? { taggedUser: this.taggedUsers.map((x: any) => x.user_id) } : null),
     }
     return req
@@ -873,8 +900,11 @@ export class NewPostComponent implements OnInit, OnDestroy {
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
     }
-    if (this.mentionedUsers && this.mentionedUsers.length) {
-      updateReq['mentionedUsers'] = this.mentionedUsers
+    const _description = this.uploadForm.value.description
+    const mentions = this.getMentionedUsers(_description)
+    console.log("this.mentionedUsers.length ", this.mentionedUsers)
+    if (mentions && mentions.length) {
+      updateReq['mentionedUsers'] = mentions
     }
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
@@ -897,7 +927,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   async editAnswerPostReply() {
     const newMedia = await this.editUploadHandler(this.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
-    const updateReq = {
+    const updateReq: any = {
       answerPostReplyId: this.post.discussionId,
       // communityId: this.post.communityId,
       // title: this.uploadForm.value.title,
@@ -906,6 +936,12 @@ export class NewPostComponent implements OnInit, OnDestroy {
       categoryType: [...this.categoryType],
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
+    }
+    const _description = this.uploadForm.value.description
+    const mentions = this.getMentionedUsers(_description)
+    console.log("this.mentionedUsers.length ", this.mentionedUsers)
+    if (mentions && mentions.length) {
+      updateReq['mentionedUsers'] = mentions
     }
     this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
       next: (res) => {

@@ -41,9 +41,6 @@
                                     <mat-spinner diameter="20"></mat-spinner>
                                     <span>Loading users...</span>
                                 </div>
-                                <div *ngIf="!isLoadingUsers && mentionUsers.length === 0" class="mention-no-results">
-                                    No users found
-                                </div>
                                 <div *ngIf="!isLoadingUsers && mentionUsers.length > 0" class="mention-list">
                                     <div *ngFor="let user of mentionUsers; let i = index" class="mention-list-item"
                                         [class.active]="i === activeMentionIndex" (click)="selectMention(user)">
