@@ -6,7 +6,7 @@ import { WidgetContentLibService } from '../../../../_services/widget-content-li
 @Component({
   selector: 'sb-uic-card-assessment',
   templateUrl: './card-assessment.component.html',
-  styleUrls: ['./card-assessment.component.css']
+  styleUrls: ['./card-assessment.component.scss']
 })
 
 // @Directive({
@@ -19,6 +19,7 @@ export class CardAssessmentComponent implements OnInit {
   stripData: any = []
   enrollList: any = []
   activeResource: any = []
+  eCourseCategory: any = NsContent.ECourseCategory
   defaultThumbnail: any
   defaultSLogo: any
   daysRemaining: number = 0;
