@@ -24,7 +24,7 @@
 ::ng-deep .mat-mdc-tab.mdc-tab--active:hover .mdc-tab-indicator__content--underline {
   border-color: #1b4ca1;
   --mat-tab-header-active-label-text-color: #1b4ca1 !important;
-//   border-top-width: 2.5px !important;
+  //   border-top-width: 2.5px !important;
 }
 
 :host ::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
@@ -36,4 +36,9 @@
 
 .mat-mdc-tab-header {
   --mdc-tab-indicator-active-indicator-height: 2.5px !important;
+}
+
+.about-guide {
+  font-family: Lato;
+  font-weight: 400;
 }
