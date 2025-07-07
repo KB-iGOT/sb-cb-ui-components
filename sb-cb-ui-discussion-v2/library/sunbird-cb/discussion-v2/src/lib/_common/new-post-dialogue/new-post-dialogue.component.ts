@@ -406,18 +406,18 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
             this.apiResponse = data.result.response.content
             // this.allUsers = []
             // this.allProccessedUsers = []
+            const mentionUsers: any[] = []
             this.apiResponse.forEach((apiData: any) => {
               if (apiData.profileDetails && apiData.profileDetails.personalDetails) {
                 this.allUsers.push(`@${apiData.userName}`)
+                mentionUsers.push(`@${apiData.userName}`)
                 this.allProccessedUsers.push({
                   userId: apiData.userId,
                   userName: `${apiData.userName}`,
                 })
               }
             })
-            console.log("allProccessedUsers ", this.allProccessedUsers)
-            console.log('Fetched users:', this.allUsers)
-            resolve(this.allUsers)
+            resolve(mentionUsers)
           }
         },
         (error: any) => {
@@ -1082,7 +1082,6 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
             userName: foundUser.userName
           })
         }
-        console.log("--- ", this.mentionedUsers)
       }
     })
   }

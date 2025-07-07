@@ -902,7 +902,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
     }
     const _description = this.uploadForm.value.description
     const mentions = this.getMentionedUsers(_description)
-    console.log("this.mentionedUsers.length ", this.mentionedUsers)
     if (mentions && mentions.length) {
       updateReq['mentionedUsers'] = mentions
     }
@@ -939,7 +938,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
     }
     const _description = this.uploadForm.value.description
     const mentions = this.getMentionedUsers(_description)
-    console.log("this.mentionedUsers.length ", this.mentionedUsers)
     if (mentions && mentions.length) {
       updateReq['mentionedUsers'] = mentions
     }
