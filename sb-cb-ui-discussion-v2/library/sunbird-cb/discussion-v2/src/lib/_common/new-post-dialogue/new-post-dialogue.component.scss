@@ -1,3 +1,7 @@
+::ng-deep .ck-content .mention {
+  color: #1B4CA1;
+  background: none;
+}
 .custom-textarea {
     font-size: 14px;
     border: 1px solid #00000014;
@@ -66,7 +70,7 @@
   .ck.ck-editor__main {
     order: 1;
   }
-  
+
   .ck.ck-editor__top {
     order: 2;
   }
@@ -82,7 +86,7 @@
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
   }
-} 
+}
 
 .doc-item {
   padding: 8px;
@@ -112,7 +116,7 @@
   text-decoration: none;
   color: #1B4CA1;  // Using your app's primary blue color
   cursor: pointer;
-  
+
   &:hover {
     text-decoration: underline;
   }

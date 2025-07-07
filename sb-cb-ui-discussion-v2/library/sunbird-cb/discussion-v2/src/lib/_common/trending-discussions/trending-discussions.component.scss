@@ -43,7 +43,7 @@
                 text-decoration-skip-ink: none;
                 color: #666666;
             }
-            
+
         }
         .post-data {
             //styleName: Body 2;
@@ -54,13 +54,13 @@
             text-align: left;
             text-underline-position: from-font;
             text-decoration-skip-ink: none;
-            color: #212121;     
+            color: #212121;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1.2em;     
+            line-height: 1.2em;
         }
         .post-details {
             color: #00000099;
@@ -77,6 +77,10 @@
                 height: 16px;
                 font-size: 16px;
             }
+        }
+        ::ng-deep .post-data .mention{
+           color: #1B4CA1;
+           background: none;
         }
     }
     .community-name-wrapper {
@@ -99,7 +103,7 @@
             overflow: hidden;
         }
     }
-    
+
 }
 
 

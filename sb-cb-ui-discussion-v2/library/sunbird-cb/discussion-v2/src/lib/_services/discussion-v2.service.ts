@@ -7,7 +7,7 @@ const API_END_POINTS = {
   CREATE_POST: `/apis/proxies/v8/feedDiscussion/create`,
   CREATE_ANSWER_POST: `/apis/proxies/v8/feedDiscussion/answerPosts`,
   CREATE_ANSWER_POST_REPLY: `/apis/proxies/v8/feedDiscussion/answerPostReply/create`,
-  READ_POST: (id: string) =>`/apis/proxies/v8/feedDiscussion/read/${id}`,
+  READ_POST: (id: string) => `/apis/proxies/v8/feedDiscussion/read/${id}`,
   UPDATE_POST: `/apis/proxies/v8/feedDiscussion/update`,
   UPDATE_ANSWER_POST: `/apis/proxies/v8/feedDiscussion/updateAnswerPost`,
   UPDATE_ANSWER_POST_REPLY: `/apis/proxies/v8/feedDiscussion/answerPostReply/update`,
@@ -17,13 +17,13 @@ const API_END_POINTS = {
   DOWN_VOTE: (type: string, id: string) => `/apis/proxies/v8/feedDiscussion/${type}/dislike/${id}`,
   DELETE_POST: (type: string, id: string) => `/apis/proxies/v8/feedDiscussion/${type}/delete/${id}`,
   REPORT_POST: `/apis/proxies/v8/feedDiscussion/report`,
-  BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/bookmark/${communityId}/${discussionId}`,
-  UN_BOOKMARK_POST:(communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/unbookmark/${communityId}/${discussionId}`,
+  BOOKMARK_POST: (communityId: string, discussionId: string) => `/apis/proxies/v8/feedDiscussion/bookmark/${communityId}/${discussionId}`,
+  UN_BOOKMARK_POST: (communityId: string, discussionId: string) => `/apis/proxies/v8/feedDiscussion/unbookmark/${communityId}/${discussionId}`,
   FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/commentReportReasonConfig`,
   DISCUSS_FLAG_LIST: `/apis/proxies/v8/data/v2/system/settings/get/discussionReportReasonConfig`,
-  UPLOAD_FILE: (communityId: string, discussionId: string)  =>`/apis/proxies/v8/feedDiscussion/uploadFile/${communityId}/${discussionId}`,
+  UPLOAD_FILE: (communityId: string, discussionId: string) => `/apis/proxies/v8/feedDiscussion/uploadFile/${communityId}/${discussionId}`,
   COMMUNITY_JOIN: `/apis/proxies/v8/community/v1/join`,
-  COMMUNITY_UNJOIN:`apis/proxies/v8/community/v1/unjoin`,
+  COMMUNITY_UNJOIN: `apis/proxies/v8/community/v1/unjoin`,
   COMMUNITY_READ: (id: string) => `/apis/proxies/v8/community/v1/read/${id}`,
   COMMUNITY_SEARCH: `/apis/proxies/v8/community/v1/search`,
   COMMUNITY_USER_LIST: `/apis/proxies/v8/community/v1/community/listuser`,
@@ -31,10 +31,11 @@ const API_END_POINTS = {
   TOPIC_WISE_COMMUNITIES: `/apis/proxies/v8/community/v1/category/listAll`,
   BOOKMART_LIST: `/apis/proxies/v8/feedDiscussion/bookmarkedDiscussions`,
   COMMUNITY_REPORT: `/apis/proxies/v8/community/v1/report`,
-  USER_SEARCH:`/apis/proxies/v8/user/v1/search`,
-  POPULAR_COMMUNITY:`/apis/proxies/v8/community/v1/popular`,
+  USER_SEARCH: `/apis/proxies/v8/user/v1/search`,
+  POPULAR_COMMUNITY: `/apis/proxies/v8/community/v1/popular`,
   GLOBAL_FEED: `/apis/proxies/v8/feedDiscussion/globalFeed`,
   ENRICH_DATA: `/apis/proxies/v8/feedDiscussion/v1/enrichData`,
+  SEARCH_USERS: '/apis/proxies/v8/user/v1/search',
 }
 
 
@@ -47,7 +48,7 @@ export class DiscussionV2Service {
   entityId: string = ''
   entityType: string = ''
   workflow: string = ''
-  commentTreeId: string =''
+  commentTreeId: string = ''
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService
@@ -82,11 +83,11 @@ export class DiscussionV2Service {
   }
 
   searchPosts(req: any) {
-    return this.http.post<any>(`${API_END_POINTS.SEARCH_POSTS}`, req) 
+    return this.http.post<any>(`${API_END_POINTS.SEARCH_POSTS}`, req)
   }
 
   feedPosts(req: any) {
-    return this.http.post<any>(`${API_END_POINTS.FEED_POSTS}`, req) 
+    return this.http.post<any>(`${API_END_POINTS.FEED_POSTS}`, req)
   }
 
   upVotePost(type: string, id: string) {
@@ -107,20 +108,20 @@ export class DiscussionV2Service {
   communityFlag(request: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.COMMUNITY_REPORT}`, request)
   }
-  
+
   reportPost(requestData: any) {
     return this.http.post<any>(`${API_END_POINTS.REPORT_POST}`, requestData)
   }
 
-  bookmarkPost(communityId: string, discussionId:string) {
+  bookmarkPost(communityId: string, discussionId: string) {
     return this.http.get<any>(`${API_END_POINTS.BOOKMARK_POST(communityId, discussionId)}`)
   }
 
-  UnBookmarkPost(communityId: string, discussionId:string) {
+  UnBookmarkPost(communityId: string, discussionId: string) {
     return this.http.post<any>(`${API_END_POINTS.UN_BOOKMARK_POST(communityId, discussionId)}`, {})
   }
 
-  uploadFile(req: any, communityId: string, discussionId:string): Observable<any> {
+  uploadFile(req: any, communityId: string, discussionId: string): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.UPLOAD_FILE(communityId, discussionId)}`, req)
   }
 
@@ -166,9 +167,9 @@ export class DiscussionV2Service {
 
   convertOrgArrayToObject(data: any) {
     return data.reduce((acc: any, item: any) => {
-      acc[item.id] = item;
-      return acc;
-    }, {});
+      acc[item.id] = item
+      return acc
+    }, {})
   }
 
   /**
@@ -182,8 +183,8 @@ export class DiscussionV2Service {
   }
 
   getPosts(req: any, type: any) {
-    let requestUrl = type === 'Feeds'? API_END_POINTS.FEED_POSTS: API_END_POINTS.SEARCH_POSTS
-    return this.http.post<any>(`${requestUrl}`, req) 
+    let requestUrl = type === 'Feeds' ? API_END_POINTS.FEED_POSTS : API_END_POINTS.SEARCH_POSTS
+    return this.http.post<any>(`${requestUrl}`, req)
   }
 
   /**
@@ -195,6 +196,21 @@ export class DiscussionV2Service {
     // Make a POST request to the POPULAR_COMMUNITY endpoint with the request data
     return this.http.post<any>(`${API_END_POINTS.POPULAR_COMMUNITY}`, req)
   }
+
+
+  searchUsers(value: string, rootOrgId: string): Observable<any> {
+    const reqBody = {
+      request: {
+        query: value,
+        filters: {
+          rootOrgId,
+        },
+      },
+    }
+    return this.http.post<any>(`${API_END_POINTS.SEARCH_USERS}`, reqBody)
+  }
+
+
 }
 
 

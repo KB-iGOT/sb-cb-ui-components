@@ -1,4 +1,4 @@
-<div  class="relative" *ngIf="post.status !== 'inactive'" [ngClass]="{ 'card-l1' : cardType=== 'topLevel',
+<div class="relative" *ngIf="post.status !== 'inactive'" [ngClass]="{ 'card-l1' : cardType=== 'topLevel',
 'suspended': post && post.status === 'suspended', 'disabled': !userJoinedCommunity}">
     <div class="" [ngClass]="{
     'card-l2 mb-3' : cardType=== 'reply',  'card-l3 mb-3' : cardType=== 'reply-l2'}">
@@ -9,14 +9,15 @@
             <div class="community-name-wrapper inline-flex items-center max-w-full mb-3 cursor-pointer"
                 (click)="communityClick(post.communityId)">
                 <span class="whitespace-nowrap pl-3 flex-1 nodtranslate">Posted in</span>
-                <span class="community-name ml-1 pr-2 nodtranslate">@{{userJoinedCommunityObject[post?.communityId]}}</span>
+                <span
+                    class="community-name ml-1 pr-2 nodtranslate">@{{userJoinedCommunityObject[post?.communityId]}}</span>
             </div>
         </ng-container>
         <div class="flex user-info">
             <div>
                 <div class="mr-1 md:mr-4">
-                    <d-v2-avatar-photo [size]="levelConfig?.cardConfig?.avatarPhoto?.size" [name]="post?.createdBy?.first_name"
-                        [photoUrl]="post?.createdBy?.user_profile_img_url" [color]="
+                    <d-v2-avatar-photo [size]="levelConfig?.cardConfig?.avatarPhoto?.size"
+                        [name]="post?.createdBy?.first_name" [photoUrl]="post?.createdBy?.user_profile_img_url" [color]="
                         post?.createdBy?.first_name === loogedInUserProfile?.firstName ?
                         levelConfig?.cardConfig?.avatarPhoto?.color || '#006400' : '#000'
                     ">
@@ -58,13 +59,22 @@
                         <span class="nodtranslate" *ngFor="let user of post?.taggedUser">{{user?.first_name}}</span>
                     </span>
                 </ng-container>
-                <div class="comment-txt mb-1 mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
-                    [innerHTML]="post?.description">
-                </div>
+                <ng-container *ngIf="post?.parentDiscussionId">
+                    <div class="comment-txt mb-1 mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+                        [innerHTML]="post?.description | mentionHighlight">
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="!post?.parentDiscussionId">
+                    <div class="comment-txt mb-1 mat-body-1 ws-mat-black-text description {{getEditorTextLength(post?.description) > viewMoreLength && !post?.expanded ? 'expand' : 'un-expand'}}"
+                        [innerHTML]="post?.description">
+                    </div>
+                </ng-container>
+
                 <div class="more-or-less text-right" *ngIf="getEditorTextLength(post?.description) > viewMoreLength">
                     <div class="cursor-pointer nodtranslate" (click)="viewMoreOrLess(post)" *ngIf="!post?.expanded">View
                         more</div>
-                    <div class="cursor-pointer nodtranslate" (click)="viewMoreOrLess(post)" *ngIf="post?.expanded">View less
+                    <div class="cursor-pointer nodtranslate" (click)="viewMoreOrLess(post)" *ngIf="post?.expanded">View
+                        less
                     </div>
                 </div>
 
@@ -89,8 +99,8 @@
                             }">
                                 {{getFileIcon(doc)}}
                             </mat-icon>
-                            <a [href]="doc" target="_blank" rel="noopener noreferrer" class="doc-name doc-link nodtranslate"
-                                (click)="openDocument($event, doc)">
+                            <a [href]="doc" target="_blank" rel="noopener noreferrer"
+                                class="doc-name doc-link nodtranslate" (click)="openDocument($event, doc)">
                                 {{getFileName(doc)}}
                             </a>
                         </div>
@@ -110,10 +120,11 @@
                 </ng-container>
             </ng-container>
             <ng-container *ngIf="editMode">
-                <d-v2-new-post [type]="levelConfig?.type" [config]="levelConfig?.newPostSection" [postsListconfig]="cardConfig"
-                    (newReply)="updateRepliesData($event)" (newComment)="newCommentEvent($event)"
-                    [userJoinedCommunity]="userJoinedCommunity" (editEvents)="editEventsHandler($event)"
-                    [community]="community" [editMode]="true" [post]="post" [parentPost]="parentPost">
+                <d-v2-new-post [type]="levelConfig?.type" [config]="levelConfig?.newPostSection"
+                    [postsListconfig]="cardConfig" (newReply)="updateRepliesData($event)"
+                    (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity"
+                    (editEvents)="editEventsHandler($event)" [community]="community" [editMode]="true" [post]="post"
+                    [parentPost]="parentPost">
                 </d-v2-new-post>
             </ng-container>
         </div>
@@ -139,8 +150,9 @@
                         <mat-icon class="icon mr-2" aria-hidden="false" i18n-aria-label
                             *ngIf="levelConfig?.cardConfig?.actions?.comments?.show"
                             aria-label="Fail">{{levelConfig?.cardConfig?.actions?.comments?.icon}}</mat-icon>
-                        <span class="nodtranslate mr-1 mat-body-1 commentCount" *ngIf="levelConfig?.cardConfig?.actions?.comments?.showCount">
-                            ({{fetchedSearchData?.totalCount ||  (replyDataCopy?.length) || 0}})
+                        <span class="nodtranslate mr-1 mat-body-1 commentCount"
+                            *ngIf="levelConfig?.cardConfig?.actions?.comments?.showCount">
+                            ({{fetchedSearchData?.totalCount || (replyDataCopy?.length) || 0}})
                         </span>
                     </div>
                 </ng-container>
@@ -155,13 +167,15 @@
                     </div>
                 </ng-container>
                 <ng-container *ngIf="levelConfig?.cardConfig?.actions?.bookmark?.show">
-                    <div class=" flex bookmarkDiv cursor-pointer" *ngIf="!post.isBookmarked" (click)="bookmark(true, post)">
+                    <div class=" flex bookmarkDiv cursor-pointer" *ngIf="!post.isBookmarked"
+                        (click)="bookmark(true, post)">
                         <mat-icon role="button" aria-hidden="false" aria-label="bookmark"
                             class="mat-icon notranslate icon material-icons mat-ligature-font mat-icon-no-color">
                             bookmark_outline
                         </mat-icon>
                     </div>
-                    <div class=" flex bookmarkDiv cursor-pointer" *ngIf="post.isBookmarked" (click)="bookmark(false, post)">
+                    <div class=" flex bookmarkDiv cursor-pointer" *ngIf="post.isBookmarked"
+                        (click)="bookmark(false, post)">
                         <mat-icon role="button" aria-hidden="false" aria-label="bookmark"
                             class="mat-icon notranslate icon material-icons mat-ligature-font mat-icon-no-color bookmarked-icon">
                             bookmark
@@ -173,28 +187,30 @@
         <ng-container *ngIf="levelConfig?.cardConfig?.actions?.comments?.show">
             <div *ngIf="data.replyToggle" class="mt-4 repliesSection">
                 <div class="mb-4">
-                    <d-v2-new-post [config]="nextLevelConfig?.newPostSection" [community]="community"
-                         [post]="post" [postsListconfig]="cardConfig"
-                        [type]="nextLevelConfig?.type" (newComment)="newCommentEvent($event)"
-                        [userJoinedCommunity]="userJoinedCommunity" [hierarchyPath]="[post?.discussionId]" [parentPost]="parentPost">
+                    <d-v2-new-post [config]="nextLevelConfig?.newPostSection" [community]="community" [post]="post"
+                        [postsListconfig]="cardConfig" [type]="nextLevelConfig?.type"
+                        (newComment)="newCommentEvent($event)" [userJoinedCommunity]="userJoinedCommunity"
+                        [hierarchyPath]="[post?.discussionId]" [parentPost]="parentPost">
                     </d-v2-new-post>
                 </div>
             </div>
         </ng-container>
-            
+
     </div>
     <ng-container *ngIf="levelConfig?.cardConfig?.actions?.comments?.show">
-        <div class="repliesSection mt-4 flex flex-col gap-4" *ngIf="data.replyToggle" [ngClass]="{'pl-6': levelConfig?.cardConfig?.childrenIndented}">
+        <div class="repliesSection mt-4 flex flex-col gap-4" *ngIf="data.replyToggle"
+            [ngClass]="{'pl-6': levelConfig?.cardConfig?.childrenIndented}">
             <ng-container *ngIf="replyDataCopy && replyDataCopy?.length > 0 && !loading; else noReplies">
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
-                        <d-v2-post-card-v2 [cardType]="nextLevelConfig?.cardConfig?.cardType"
-                            [community]="community" [hierarchyPath]="hierarchyPath"
-                            [cardConfig]="cardConfig" [id]="'post-' + post?.discussionId"
-                            [type]="nextLevelConfig?.type" [parentPost]="post"
-                            [post]="reply" [replyData]="reply[nextLevelConfig?.childrenKey]" [userJoinedCommunity]="userJoinedCommunity"
-                            (likeUnlikeData)="likeUnlikeEvent($event)" (newComment)="newCommentEvent($event, nextLevelConfig?.cardConfig?.cardType)"
-                            (newReply)="updateRepliesData($event)" [showCommunity]="false"  [levelKey]="nextLevel" [currentLevel]="nextNestingLevel">
+                        <d-v2-post-card-v2 [cardType]="nextLevelConfig?.cardConfig?.cardType" [community]="community"
+                            [hierarchyPath]="hierarchyPath" [cardConfig]="cardConfig"
+                            [id]="'post-' + post?.discussionId" [type]="nextLevelConfig?.type" [parentPost]="post"
+                            [post]="reply" [replyData]="reply[nextLevelConfig?.childrenKey]"
+                            [userJoinedCommunity]="userJoinedCommunity" (likeUnlikeData)="likeUnlikeEvent($event)"
+                            (newComment)="newCommentEvent($event, nextLevelConfig?.cardConfig?.cardType)"
+                            (newReply)="updateRepliesData($event)" [showCommunity]="false" [levelKey]="nextLevel"
+                            [currentLevel]="nextNestingLevel">
                         </d-v2-post-card-v2>
                     </ng-container>
                 </ng-container>
@@ -205,14 +221,14 @@
                     </div>
                 </ng-container>
             </ng-container>
-        
+
             <ng-container *ngIf="loading || loadingMore">
                 <ng-container [ngTemplateOutlet]="skeletonLoader"></ng-container>
             </ng-container>
         </div>
     </ng-container>
-    
-    
+
+
 
 </div>
 
