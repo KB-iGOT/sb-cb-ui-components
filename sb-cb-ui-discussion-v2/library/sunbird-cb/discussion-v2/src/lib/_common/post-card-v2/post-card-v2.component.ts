@@ -1,23 +1,23 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NsDiscussionV2 } from '../../_model/discussion-v2.model';
-import { ConfigurationsService } from '@sunbird-cb/utils-v2';
-import { MatDialog } from '@angular/material/dialog';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { MatDialog } from '@angular/material/dialog'
 // tslint:disable-next-line
 import _ from 'lodash'
-import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component';
-import { DiscussionV2Service } from '../../_services/discussion-v2.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
-import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component';
-import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
-import { map } from 'rxjs/operators';
+import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component'
+import { DiscussionV2Service } from '../../_services/discussion-v2.service'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component'
+import { NewPostDialogueComponent } from '../new-post-dialogue/new-post-dialogue.component'
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service'
+import { map } from 'rxjs/operators'
 
 @Component({
   selector: 'd-v2-post-card-v2',
   templateUrl: './post-card-v2.component.html',
   styleUrls: ['./post-card-v2.component.scss']
 })
-export class PostCardV2Component implements OnInit{
+export class PostCardV2Component implements OnInit {
   @Input() cardType = 'topLevel'
   @Input() cardConfig!: NsDiscussionV2.IDiscussV2WidgetDataV2
   @Input() type!: string
@@ -25,10 +25,10 @@ export class PostCardV2Component implements OnInit{
   @Input() replyData: any[] = []
   @Input() hierarchyPath = []
   @Input() userLikedPosts: any = []
-  @Input() userJoinedCommunity!: boolean 
+  @Input() userJoinedCommunity!: boolean
   @Input() community!: string
   @Input() parentPost!: any
-  @Input() showCommunity: boolean= false
+  @Input() showCommunity: boolean = false
   @Input() levelKey!: string
   @Input() currentLevel: number = 0
   @Output() likeUnlikeData = new EventEmitter<any>()
@@ -53,16 +53,16 @@ export class PostCardV2Component implements OnInit{
   flagSelectionList: any
   reportPending = false
   viewMoreLength = 246
-  editMode: boolean =  false
+  editMode: boolean = false
   userJoinedCommunityObject: any = {}
 
-  levelConfig: any;
+  levelConfig: any
   showReplies: boolean = false;
-  avatarConfig: any;
+  avatarConfig: any
   allowReplies: boolean = false;
   nextLevel: string | null = null;
   nextNestingLevel: number = 0;
-  nextLevelConfig : any
+  nextLevelConfig: any
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -78,21 +78,21 @@ export class PostCardV2Component implements OnInit{
   async ngOnInit() {
     this.loggedInUserData = this.configSvc.unMappedUser
     this.loogedInUserProfile = this.configSvc.userProfile
-    this.replyDataCopy = [...this.replyData || [] ]
+    this.replyDataCopy = [...this.replyData || []]
     let userEnrolledCommunityList = await this.userEnrollCommunitySvc.getEnrollDataId()
-    if(userEnrolledCommunityList.length) {
+    if (userEnrolledCommunityList.length) {
       this.userJoinedCommunityObject = this.userEnrollCommunitySvc.userEnrolledCommunityObjectData
     }
 
-    this.levelConfig = this.cardConfig.levelConfigs[this.levelKey as keyof typeof this.cardConfig.levelConfigs];
+    this.levelConfig = this.cardConfig.levelConfigs[this.levelKey as keyof typeof this.cardConfig.levelConfigs]
     // Check if replies are allowed for this level
-    this.allowReplies = this.levelConfig.allowReplies && 
-                        this.currentLevel < this.cardConfig.maxLevels;
-    
+    this.allowReplies = this.levelConfig.allowReplies &&
+      this.currentLevel < this.cardConfig.maxLevels
+
     // Get the reference to the next level's configuration
-    this.nextLevel = this.levelConfig.replyLevelRef;
-    this.nextNestingLevel = this.currentLevel + 1;
-    this.nextLevelConfig = this.cardConfig.levelConfigs[this.nextLevel as keyof typeof this.cardConfig.levelConfigs];
+    this.nextLevel = this.levelConfig.replyLevelRef
+    this.nextNestingLevel = this.currentLevel + 1
+    this.nextLevelConfig = this.cardConfig.levelConfigs[this.nextLevel as keyof typeof this.cardConfig.levelConfigs]
   }
 
 
@@ -111,19 +111,19 @@ export class PostCardV2Component implements OnInit{
     this.getListOfRepliesMore()
   }
 
-    getListOfReplies() {
+  getListOfReplies() {
     // let reveseReplayDataCopy = [...this.replyDataCopy]
     // reveseReplayDataCopy.reverse()
     // let ids:any = reveseReplayDataCopy.slice(0,this.answerPostLimit)
     const req = {
-    "filterCriteriaMap": {
-      // discussionId : [...this.replyDataCopy],
-      // isActive: true, // this is to get only active posts, deleted posts won't be returned
-      communityId: this.parentPost?.communityId,
-      "type": this.nextLevelConfig.type || '',
-      ...(this.nextLevelConfig.type === 'answerPost') ? {parentDiscussionId: this.parentPost?.discussionId} : 
-      {parentAnswerPostId: this.post?.discussionId}
-    },
+      "filterCriteriaMap": {
+        // discussionId : [...this.replyDataCopy],
+        // isActive: true, // this is to get only active posts, deleted posts won't be returned
+        communityId: this.parentPost?.communityId,
+        "type": this.nextLevelConfig.type || '',
+        ...(this.nextLevelConfig.type === 'answerPost') ? { parentDiscussionId: this.parentPost?.discussionId } :
+          { parentAnswerPostId: this.post?.discussionId }
+      },
       "requestedFields": [],
       "pageNumber": 0,
       "pageSize": this.answerPostLimit,
@@ -152,9 +152,9 @@ export class PostCardV2Component implements OnInit{
         this.fetchedReplyData = []
         this.loading = false
       }
-      }, () => {
-        this.loading = false
-      })
+    }, () => {
+      this.loading = false
+    })
   }
 
   getListOfRepliesMore() {
@@ -169,8 +169,8 @@ export class PostCardV2Component implements OnInit{
         // isActive: true, // this is to get only active posts, deleted posts won't be returned
         communityId: this.parentPost?.communityId,
         "type": this.nextLevelConfig.type || '',
-        ...(this.nextLevelConfig.type === 'answerPost') ? {parentDiscussionId: this.parentPost?.discussionId} : 
-        {parentAnswerPostId: this.post?.discussionId},
+        ...(this.nextLevelConfig.type === 'answerPost') ? { parentDiscussionId: this.parentPost?.discussionId } :
+          { parentAnswerPostId: this.post?.discussionId },
         // parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
       },
       "requestedFields": [],
@@ -182,7 +182,7 @@ export class PostCardV2Component implements OnInit{
     }
     this.discussV2Svc.searchPosts(req).subscribe(res => {
       const newPosts = _.get(res, 'result.search_results.data') || []
-      
+
       if (newPosts.length) {
         this.enrichData(newPosts).subscribe(
           () => {
@@ -198,11 +198,11 @@ export class PostCardV2Component implements OnInit{
       } else {
         this.loadingMore = false
       }
-      }, () => {
-        this.loadingMore = false
-      })
+    }, () => {
+      this.loadingMore = false
+    })
   }
-  
+
 
   viewMoreOrLess(item: any) {
     if (this.getEditorTextLength(item.description) > this.viewMoreLength) {
@@ -211,7 +211,7 @@ export class PostCardV2Component implements OnInit{
   }
 
   enrichData(posts: any) {
-    const groupedDataRequest = this.groupByCommunityId(posts);
+    const groupedDataRequest = this.groupByCommunityId(posts)
     return this.discussV2Svc.enrichData(groupedDataRequest).pipe(
       map((res: any) => {
         const enrichedData = _.get(res, 'result.search_results')
@@ -228,33 +228,33 @@ export class PostCardV2Component implements OnInit{
   }
 
   groupByCommunityId(posts: any) {
-    const communityFilters: { [key: string]: { communityId: string; identifier: string[] } } = {};
-  
+    const communityFilters: { [key: string]: { communityId: string; identifier: string[] } } = {}
+
     posts.forEach((post: any) => {
-      const { communityId, discussionId } = post;
+      const { communityId, discussionId } = post
       if (!communityFilters[communityId]) {
-        communityFilters[communityId] = { communityId, identifier: [] };
+        communityFilters[communityId] = { communityId, identifier: [] }
       }
-      communityFilters[communityId].identifier.push(discussionId);
-    });
-  
+      communityFilters[communityId].identifier.push(discussionId)
+    })
+
     return {
       request: {
         communityFilters: Object.values(communityFilters),
         requestType: "question",
         filters: ["likes", "bookmarks", "reported"]
       }
-    };
+    }
   }
 
   likeUnlikeComment(post: any) {
     this.likeUnlikeData.emit(post)
     // after emit change the status to locally update the color. otherwise emitted data will behave reverse
     // So its necessary to first emit the event and then change
-    post.isLiked = post.isLiked? false: true
+    post.isLiked = post.isLiked ? false : true
   }
 
-  bookmark(bookmark:boolean, post: any) {
+  bookmark(bookmark: boolean, post: any) {
     this.bookmarkEvent.emit({
       bookmark,
       post
@@ -262,7 +262,7 @@ export class PostCardV2Component implements OnInit{
   }
 
   likeUnlikeEvent(event: any) {
-    if(event && event.isLiked) {
+    if (event && event.isLiked) {
       this.downVotePost('dislike', event.type, event.discussionId)
     } else {
       this.upVotePost('like', event.type, event.discussionId)
@@ -278,7 +278,7 @@ export class PostCardV2Component implements OnInit{
           post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
           // this.userLikedComments.push(commentId)
         } else {
-          post.upVoteCount = post.upVoteCount? post.upVoteCount - 1 : 0
+          post.upVoteCount = post.upVoteCount ? post.upVoteCount - 1 : 0
           // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
           // this.userLikedComments.splice(index, 1)
         }
@@ -295,7 +295,7 @@ export class PostCardV2Component implements OnInit{
           post.upVoteCount = post.upVoteCount ? post.upVoteCount + 1 : 1
           // this.userLikedComments.push(commentId)
         } else {
-          post.upVoteCount = post.upVoteCount? post.upVoteCount - 1 : 0
+          post.upVoteCount = post.upVoteCount ? post.upVoteCount - 1 : 0
           // const index = this.userLikedComments.findIndex((x: any) => x === commentId)
           // this.userLikedComments.splice(index, 1)
         }
@@ -322,7 +322,7 @@ export class PostCardV2Component implements OnInit{
           data: { comment, flagSelectionList: this.flagSelectionList },
         })
         confirmDialog.afterClosed().subscribe((result: any) => {
-          
+
           if (result) {
             this.reportPost(result)
           }
@@ -348,7 +348,7 @@ export class PostCardV2Component implements OnInit{
         // this.post = res.result
         this._snackBar.open(_.get(this.cardConfig, 'reportIcon.successMsg') || 'Reported successfully! Thank you for reporting.')
       } else {
-        if(res && res.params && res.params.err) {
+        if (res && res.params && res.params.err) {
           this._snackBar.open(res.params.err || 'Something went wrong! please try reporting again later.')
         }
       }
@@ -381,13 +381,13 @@ export class PostCardV2Component implements OnInit{
     this.discussV2Svc.deletePost(post.type, post.discussionId).subscribe((_res: any) => {
       post.status = 'inactive'
       this._snackBar.open('Comment deleted successfully')
-    }, (_err: any)=> {
+    }, (_err: any) => {
       this._snackBar.open('Something went wrong! please try again later.')
     })
   }
 
   editHandler(post: any) {
-    if(this.cardConfig && this.levelConfig.cardConfig.editAsDialogue){
+    if (this.cardConfig && this.levelConfig.cardConfig.editAsDialogue) {
       this.openEditDialogue(post)
     } else {
       this.editMode = true
@@ -395,10 +395,10 @@ export class PostCardV2Component implements OnInit{
   }
 
   editEventsHandler(event: any) {
-    if(event && event.cancelEdit) {
+    if (event && event.cancelEdit) {
       this.editMode = false
     }
-    if(event && event.edit){
+    if (event && event.edit) {
       event.post.createdBy = this.post.createdBy
       this.post = event.post
       this.editMode = false
@@ -413,33 +413,37 @@ export class PostCardV2Component implements OnInit{
   }
 
   openEditDialogue(post: any) {
-    
+
     let data = {
       communityId: this.post.communityId,
       communityName: this.userJoinedCommunityObject[this.post.communityId]
-    } 
+    }
+    let postData: any = {
+      type: this.type,
+      panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
+      backdropClass: 'post-dialog-backdrop',
+      parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
+      community: this.community || data,
+      config: this.cardConfig,
+      currentUser: { ...this.loogedInUserProfile, ...this.loggedInUserData },
+      post: post,
+      editMode: true,
+      parentPost: this.parentPost,
+      levelKey: this.levelKey,
+      currentLevel: this.currentLevel
+    }
+    if (post.mentionedUsers && post.mentionedUsers.length) {
+      postData['mentionedUsers'] = post.mentionedUsers
+    }
     const newPostDialog = this.dialog.open(NewPostDialogueComponent, {
       width: '996px',
       maxHeight: '90vh',// Add maximum height (90% of viewport height)
       disableClose: true,
-      data: {
-        type: this.type,
-        panelClass: ['post-dialog', 'scrollable-dialog'], // Add scrollable class
-        backdropClass: 'post-dialog-backdrop',
-        parentDiscussionId: this.hierarchyPath.length ? this.hierarchyPath[0] : '',
-        community: this.community || data,
-        config: this.cardConfig,
-        currentUser: {...this.loogedInUserProfile, ...this.loggedInUserData},
-        post: post,
-        editMode: true,
-        parentPost: this.parentPost,
-        levelKey: this.levelKey,
-        currentLevel: this.currentLevel
-      } 
-    });
+      data: postData
+    })
     newPostDialog.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.newComment.emit({result: result.result, type: result.type})
+        this.newComment.emit({ result: result.result, type: result.type })
       }
     })
   }
@@ -447,7 +451,7 @@ export class PostCardV2Component implements OnInit{
   updateRepliesData(eventData: any) {
     this.replyDataCopy = [...eventData.replyDataCopy]
     this.fetchedReplyData = [...eventData.replyData]
-    return this.fetchedReplyData 
+    return this.fetchedReplyData
   }
 
   newCommentEvent(event: any, level?: string) {
@@ -459,38 +463,38 @@ export class PostCardV2Component implements OnInit{
       this.ref.markForCheck()
       this.answerPostPage = 0
       this.getListOfReplies()
-      if(level) {
+      if (level) {
         this.newComment.emit({ response: event.response, type: level, replyData: this.replyDataCopy })
       }
     }
   }
 
   getFileExtension(file: string): string {
-    return file.split('.').pop() || '';
+    return file.split('.').pop() || ''
   }
 
   getFileName(url: string): string {
-    const filename = url.split('/').pop() || '';
+    const filename = url.split('/').pop() || ''
     // Decode the URL-encoded filename
-    return decodeURIComponent(filename);
+    return decodeURIComponent(filename)
   }
 
   getFileIcon(url: string): string {
-    const extension = this.getFileExtension(url);
-    switch(extension) {
+    const extension = this.getFileExtension(url)
+    switch (extension) {
       case 'pdf':
-        return 'picture_as_pdf';
+        return 'picture_as_pdf'
       case 'doc':
       case 'docx':
-        return 'description';
+        return 'description'
       default:
-        return 'insert_drive_file';
+        return 'insert_drive_file'
     }
   }
 
   openDocument(event: MouseEvent, url: string) {
-    event.preventDefault();
-    window.open(url, '_blank');
+    event.preventDefault()
+    window.open(url, '_blank')
   }
 
   getEditorTextLength(content: any) {
