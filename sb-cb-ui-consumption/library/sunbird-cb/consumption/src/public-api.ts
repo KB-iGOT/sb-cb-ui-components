@@ -94,3 +94,4 @@ export * from './lib/_common/connection-name/connection-name.component';
 export * from './lib/_common/connection-hover-card/connection-hover-card.component';
 export * from './lib/_directives/tooltip/tooltip.directive';
 export * from './lib/_directives/tooltip/tooltip.module';
+export * from './lib/_common/dialog-components/confirmation-dialog/confirmation-dialog.component';
