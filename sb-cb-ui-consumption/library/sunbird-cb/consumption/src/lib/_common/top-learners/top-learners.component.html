@@ -18,18 +18,18 @@
                             <div class="initial" *ngIf="!obj?.profile_image"
                                 [style.backgroundColor]="colors[i]"
                                 >
-                                {{createInititals(obj?.fullname)}}
+                                {{createInititals(obj?.fullName)}}
                             </div>
                             <div class="flex flex-col gap-1">
-                                <div class="name-sec" *ngIf="obj?.fullname?.length >= 24"
+                                <div class="name-sec" *ngIf="obj?.fullName?.length >= 24"
                                     #tooltip="matTooltip"
                                     [matTooltipClass]="'below'"
-                                    matTooltip="{{obj?.fullname}}"
+                                    matTooltip="{{obj?.fullName}}"
                                     [matTooltipPosition]="'below'">
-                                        {{obj?.fullname}}
+                                        {{obj?.fullName}}
                                 </div>
-                                <div class="name-sec" *ngIf="obj?.fullname?.length < 24">
-                                    {{obj?.fullname}}
+                                <div class="name-sec" *ngIf="obj?.fullName?.length < 24">
+                                    {{obj?.fullName}}
                                 </div>
                                 <div class="designation-sec" *ngIf="obj?.designation?.length >= 32"
                                     #tooltip="matTooltip"
@@ -39,14 +39,14 @@
                                         {{obj?.designation}}
                                 </div>
                                 <div class="designation-sec"  *ngIf="obj?.designation?.length < 32">{{obj?.designation}}</div>
-                                <div class="designation-sec" *ngIf="obj?.org_name?.length >= 32"
+                                <div class="designation-sec" *ngIf="obj?.orgName?.length >= 32"
                                     #tooltip="matTooltip"
                                     [matTooltipClass]="'below'"
-                                    matTooltip="{{obj?.org_name}}"
+                                    matTooltip="{{obj?.orgName}}"
                                     [matTooltipPosition]="'below'">
-                                        {{obj?.org_name}}
+                                        {{obj?.orgName}}
                                 </div>
-                                <div class="designation-sec" *ngIf="obj?.org_name?.length < 32">{{obj?.org_name}}</div>
+                                <div class="designation-sec" *ngIf="obj?.orgName?.length < 32">{{obj?.orgName}}</div>
                             </div>
                         </div>
                         <div class="flex gap-3">                                                       
