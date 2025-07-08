@@ -87,3 +87,10 @@ export * from './lib/_common/dialog-components/add-competency-popup/add-competen
 export * from './lib/_common/dialog-components/snackbar/snackbar.component'
 export * from  './lib/_pipes/nbsp/nbsp.module'
 export * from './lib/_pipes/nbsp/nbsp.pipe'
+export * from './lib/_common/community-suggestions/community-suggestions.component';
+export * from './lib/_common/community-suggestions/community-suggestions.module';
+export * from './lib/_common/connection-name/connection-name.module';
+export * from './lib/_common/connection-name/connection-name.component';
+export * from './lib/_common/connection-hover-card/connection-hover-card.component';
+export * from './lib/_directives/tooltip/tooltip.directive';
+export * from './lib/_directives/tooltip/tooltip.module';

@@ -628,14 +628,37 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             // console.log('calling  after-- ')
             if (response.results.result.content) {
               if (strip.key === 'scheduledAssessment') {
-
-                let result = response.results.result.content.map(a => a.identifier);
-
+                let searchRequest: any = { searchV6:{
+                  "request": {
+                      "filters": {
+                          "courseCategory": NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM,
+                          "contentType": [
+                              "Course"
+                          ]
+                      },
+                      "query": "",
+                      "sort_by": {
+                          "lastUpdatedOn": "desc"
+                      }
+                  },
+                  "query": ""
+                }
+              }
+                const comprehensiveResponse = await this.searchV6Request(strip, searchRequest, calculateParentStatus);
+                let comprehensiveContent: any = []
+                let comprehensiveResult: any = []
+                let result: any = []
+                if(comprehensiveResponse?.results?.result?.content && comprehensiveResponse?.results?.result?.content?.length) {
+                  comprehensiveContent = comprehensiveResponse.results.result.content
+                  comprehensiveResult = comprehensiveResponse.results.result.content.map((ele: any)=> ele?.identifier);
+                  result = response.results.result.content.map((a: any) => a?.identifier);
+                }
                 let request = {
                   "request": {
-                    "courseId": result
+                    "courseId": [...result,...comprehensiveResult]
                   }
                 }
+
                 const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
                   const enrollData: any = {}
                   if (res && res.result && res.result.courses && res.result.courses.length) {
@@ -649,9 +672,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                 }).catch((_err: any) => {
                   return {}
                 });
-                this.checkInvitOnlyAssessments(response.results.result.content, strip, calculateParentStatus, response.viewMoreUrl, responseData)
-
-
+                let contentData = [...response.results.result.content, ...comprehensiveContent]  
+                this.checkInvitOnlyAssessments(contentData, strip, calculateParentStatus, response.viewMoreUrl, responseData)
               } else {
                 this.processStrip(
                   strip,
@@ -661,7 +683,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                   response.viewMoreUrl,
                 );
               }
-
             } else if (response.results.result.Event) {
               this.processStrip(
                 strip,
@@ -686,24 +707,40 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   checkInvitOnlyAssessments(content: any, strip: any, calculateParentStatus: any, viewMoreUrl: any, enrollmentData: any) {
-    if (Object.keys(enrollmentData).length) {
-      enrollmentData = enrollmentData
+    if (Object.keys(enrollmentData)) {
+      enrollmentData = Object.keys(enrollmentData).length ? enrollmentData : {}
       let filteredArray: any = []
       let now = new Date().getTime()
       content.forEach((data: any) => {
         if (enrollmentData[data.identifier]) {
-          if (enrollmentData[data.identifier].status !== 2 && enrollmentData[data.identifier].batch) {
-            const enrollData = enrollmentData[data.identifier].batch
+          const batchData = enrollmentData[data.identifier]?.content?.batches.find((batch: any) => batch.batchId === enrollmentData[data.identifier]?.batchId) || {}
+          batchData['endDate'] = data.endDate ? data.endDate : batchData.endDate
+          if (enrollmentData[data.identifier].status !== 2 &&batchData) {
+            const enrollData = batchData
             let endDate: any = new Date(enrollData.endDate).getTime()
             // let endDate:any = '2024-07-7T00:00:00.000Z'
             let timeDuration = endDate - now
             if (timeDuration > 0) {
-              data['batch'] = enrollmentData[data.identifier].batch
+              data['batch'] = batchData
               data['completionPercentage'] = enrollmentData[data.identifier].completionPercentage
               filteredArray.push(data)
             }
           }
 
+        }else if (data.courseCategory === NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM) {
+          // Non-enrolled comprehensive assessment
+          // Check if it has a valid end date that's in the future
+          if (data.endDate) {
+            const endDate = new Date(data.endDate).getTime()
+            const batchData = data.batches && data.batches.length ? data.batches[0] : {};
+            if (endDate >= now) {
+              // Mark as not enrolled but valid for display
+              data['isEnrolled'] = false
+              data['batch'] = batchData
+              data['batch']['endDate'] = data.endDate
+              filteredArray.push(data)
+            }
+          }
         }
       })
       filteredArray = filteredArray.sort((a: any, b: any) => {
