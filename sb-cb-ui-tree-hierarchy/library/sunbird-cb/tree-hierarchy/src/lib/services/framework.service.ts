@@ -489,7 +489,7 @@ export class FrameworkService {
           sort_by: {
             createdDate: "desc"
           },
-          limit: 100,
+          limit: 9999,
           offset: 0,
           fields: [
             'identifier',
