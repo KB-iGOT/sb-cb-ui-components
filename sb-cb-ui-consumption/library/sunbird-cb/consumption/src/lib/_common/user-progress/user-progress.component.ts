@@ -100,4 +100,24 @@ export class UserProgressComponent implements OnInit {
     this.expand = !this.expand
   }
 
+  formatNumber(value: any): string {
+    if (!value) {
+      return '0';
+    }
+    
+    const num = Number(value);
+    if (isNaN(num)) {
+      return '0';
+    }
+    
+    // Check if number is decimal (has fractional part)
+    if (num % 1 !== 0) {
+      // Round to 2 decimal places
+      return num.toFixed(2);
+    }
+    
+    // Return as integer if no decimal part
+    return num.toString();
+  }
+
 }
