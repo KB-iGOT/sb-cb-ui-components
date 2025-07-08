@@ -46,20 +46,20 @@
         </div>
         <div class="l-tab-data {{object?.customClass}}" [style.height]="object?.cardHeight" [style.minHeight]="object?.cardMinHeight">
             <div *ngFor="let user of filteredData; let i = index">
-                <div class="flex flex-row item mb-{{filteredData.length - 1 === i ? 0 : 5}} gap-3 {{user.row_num === 1 ? 'relative' : ''}}" >
-                    <div><img class="crown absolute" src="assets/images/national-learning/rank-crown.svg" *ngIf="user.row_num === 1"/></div>
-                    <div class="{{getRank(user.row_num)}}">{{user.row_num}}</div>
+                <div class="flex flex-row item mb-{{filteredData.length - 1 === i ? 0 : 5}} gap-3 {{user?.row_num === 1 ? 'relative' : ''}}" >
+                    <div><img class="crown absolute" src="assets/images/national-learning/rank-crown.svg" *ngIf="user?.row_num === 1"/></div>
+                    <div class="{{getRank(user?.row_num)}}">{{user?.row_num}}</div>
                     <div class="w-full">
                         <div class="flex flex-between gap-2">
                             <div>
-                                <div class="rank-name">{{user.org_name}}</div>
+                                <div class="rank-name">{{user?.orgName}}</div>
                                 <div class="rank-points flex mt-1 gap-1" *ngIf="!object?.hideEle?.includes('karma-points')">
                                     <img class="nlw-kb" src="assets/icons/home/karma-badge.svg"/>
-                                    <div class="points">{{user.total_points || 0 }} points</div>
+                                    <div class="points">{{user?.total_points || 0 }} points</div>
                                 </div>
                             </div>
-                            <div class="rank-crown" *ngIf="[1,2,3].includes(user.row_num)">
-                                <img class="nlw-animation" [src]="getMedal(user.row_num)"/>
+                            <div class="rank-crown" *ngIf="[1,2,3].includes(user?.row_num)">
+                                <img class="nlw-animation" [src]="getMedal(user?.row_num)"/>
                             </div>
                         </div>
                     </div>
