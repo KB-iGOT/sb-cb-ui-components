@@ -299,7 +299,8 @@ export namespace NsUser {
     profileImageUrl?: string
     professionalDetails?: any
     webPortalLang?: any,
-    departmentImg?: any
+    departmentImg?: any,
+    profileBannerUrl?: string
   }
 
   export interface INodebbUserProfile {
