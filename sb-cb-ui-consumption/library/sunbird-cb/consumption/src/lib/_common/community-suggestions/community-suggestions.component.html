@@ -10,18 +10,18 @@
             <img src="/assets/instances/eagle/app_logos/default.png" alt="default logo" class="community-image">
           </ng-template>
         </div>
-        <div class="flex-grow">
+        <div class="flex-grow flex flex-col gap-1">
           <div class="communityName">{{community?.communityName}}</div>
           <div class="community-details flex gap-4 items-center mt-1">
             <span>{{community?.countOfPeopleJoined | numberShortener}} {{ community?.countOfPeopleJoined | plural:'Member':'Members' }}</span>
             <span>-</span>
             <span>{{community?.countOfPostCreated | numberShortener}} {{ community?.countOfPeopleJoined | plural:'Post':'Posts' }}</span>
           </div>
-          <div class="flex gap-1">
+          <div class="flex gap-1 mt-2 items-center">
             <div class="logo flex items-center justify-center">
               <img src="/assets/instances/eagle/app_logos/Karmayogi_logo_icon.svg" alt="Karmayogi Logo" class="karmayogi-logo">
             </div>
-            <div class="community-details mt-2">{{community?.orgName}}</div>
+            <div class="community-details">{{community?.orgName}}</div>
           </div>
         </div>
       </div>
