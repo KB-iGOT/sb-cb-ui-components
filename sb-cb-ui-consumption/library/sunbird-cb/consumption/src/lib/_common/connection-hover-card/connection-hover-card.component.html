@@ -1,5 +1,5 @@
 <mat-card class="flex flex-col card-container">
-    <div class="photo-container flex items-center justify-center">
+    <div class="photo-container flex items-center justify-center mb-4">
         <ng-container *ngIf="hoverUser?.profileBannerUrl; else defaultBanner">
             <img class="banner-image" [src]="hoverUser?.profileBannerUrl" alt="banner pic" />
         </ng-container>
