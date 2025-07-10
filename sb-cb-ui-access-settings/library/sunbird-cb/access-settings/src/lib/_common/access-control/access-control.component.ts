@@ -14,6 +14,7 @@ import { AccessControlGuideComponent } from "../dialogs/access-control-guide/acc
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatRadioChange } from "@angular/material/radio";
+import * as _ from "lodash";
 
 @Component({
   selector: "sb-uic-access-control",
@@ -80,29 +81,35 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!this.contentId) {
       this.callSnackbar("Content id is required", "error");
     }
+
     if (this.content) {
-      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+      const isAllUsers = this.content.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS;
+      const isCustomAccess =
+        this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
+        this.content.accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER;
+      const isComprehensiveCategory = this.content.courseCategory === "Comprehensive Assessment Program";
+
+      const accessTypePublic = _.find(this.accessControlCriteriaSelection?.accessTypes, {
+        value: NsAccessControlConfig.IAccessTypes.Public
+      });
+
+      if (isAllUsers) {
         this.accessType = NsAccessControlConfig.IAccessTypes.Public;
-        const accessTypePublic = this.accessControlCriteriaSelection?.accessTypes.find(
-          type => type?.value === NsAccessControlConfig.IAccessTypes.Public
-        );
         if (accessTypePublic) accessTypePublic.disabled = false;
-        if (this.content?.accessSettingsEnabled) {
+
+        if (this.content.accessSettingsEnabled) {
           this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
         }
-      } else if (
-        this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
-        this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER
-      ) {
+      }
+
+      if (isCustomAccess || isComprehensiveCategory) {
         this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
-        const accessTypePublic = this.accessControlCriteriaSelection?.accessTypes.find(
-          type => type?.value === NsAccessControlConfig.IAccessTypes.Public
-        );
         if (accessTypePublic) accessTypePublic.disabled = true;
       }
 
       this.processConditionsForContentType();
     }
+
     this.accessTypeDup = this.accessType;
   }
 
@@ -427,7 +434,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
-    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === 'Review')) {
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review")) {
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
       }
@@ -825,7 +832,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.accessControlForm.valueChanges.subscribe(() => {
       const currentValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
       if (this.content?.status === "Live" || this.content?.prevStatus === "Live") {
-        this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
+        // this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
+        this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
       } else {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
       }
@@ -1024,7 +1032,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
       (this.config.userConfig.userRoles.has("spv_publisher") ||
         this.config.userConfig.userRoles.has("content_publisher") ||
-        this.config.userConfig.userRoles.has("content_creator"))
+        this.config.userConfig.userRoles.has("content_creator")) && this.content?.courseCategory !== "Comprehensive Assessment Program"
     ) {
       // publisher (disabled all)
       this.accessControlCriteriaSelection.readOnly = true;
