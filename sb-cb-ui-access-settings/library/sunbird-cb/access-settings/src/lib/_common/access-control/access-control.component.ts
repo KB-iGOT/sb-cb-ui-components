@@ -707,7 +707,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // Update secure setting for moderated content
             // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-            this.updateContentAccessSetting();
+             if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live") {
+               this.updateContentAccessSetting();
+             }
             // }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
