@@ -101,7 +101,7 @@
 <ng-template #cardMini let-actionBtn="actionBtn" let-config="config">
   <!-- Case 1: Default behavior for all routes except '/app/my-dashboard' -->
   <a *ngIf="!(actionBtn?.dashboardVisibility)" role="link" matRipple
-    [routerLink]="actionBtn?.url"
+    [routerLink]="actionBtn?.url" active
     [wsWidgetUrlResolver]="actionBtn.isExternal"
     [attr.aria-label]="actionBtn?.name"
     routerLinkActive="ws-mat-selected-home-menu"
