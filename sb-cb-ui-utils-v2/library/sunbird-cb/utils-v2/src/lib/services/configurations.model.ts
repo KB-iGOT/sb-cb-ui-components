@@ -301,6 +301,7 @@ export namespace NsUser {
     webPortalLang?: any,
     departmentImg?: any,
     profileBannerUrl?: string
+    mobile?: string
   }
 
   export interface INodebbUserProfile {
