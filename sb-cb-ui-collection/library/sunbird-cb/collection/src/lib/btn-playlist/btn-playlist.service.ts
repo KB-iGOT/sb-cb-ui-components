@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Observable, ReplaySubject, throwError } from 'rxjs'
 import { first, tap } from 'rxjs/operators'
-import { ConfigurationsService } from '@sunbird-cb/utils'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 // map, mergeMap,
 import { NsContent } from '../_services/widget-content.model'
 import { NsPlaylist } from './btn-playlist.model'

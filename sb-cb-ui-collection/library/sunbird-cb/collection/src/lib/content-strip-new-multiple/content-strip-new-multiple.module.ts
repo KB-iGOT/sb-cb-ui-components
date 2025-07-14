@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { ContentStripNewMultipleComponent } from './content-strip-new-multiple.component'
-import { HorizontalScrollerModule } from '@sunbird-cb/utils'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
+import { HorizontalScrollerModule } from '@sunbird-cb/utils-v2'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
@@ -17,7 +17,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
         CommonModule,
         RouterModule,
         HorizontalScrollerModule,
-        WidgetResolverModule,
+        SbUiResolverModule,
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,

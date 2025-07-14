@@ -5,13 +5,13 @@ import { RouterModule } from '@angular/router'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatIconModule } from '@angular/material/icon'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
-import { PipeDurationTransformModule } from '@sunbird-cb/utils'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
+import { PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
 
 @NgModule({
     declarations: [AtGlanceComponent],
     imports: [
-        CommonModule, WidgetResolverModule, RouterModule,
+        CommonModule, SbUiResolverModule, RouterModule,
         MatCardModule, MatDividerModule, MatIconModule, PipeDurationTransformModule,
     ],
     exports: [AtGlanceComponent]

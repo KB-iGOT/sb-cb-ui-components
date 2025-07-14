@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
-import { ConfigurationsService, getStringifiedQueryParams } from '@sunbird-cb/utils'
+import { ConfigurationsService, getStringifiedQueryParams } from '@sunbird-cb/utils-v2'
 import { NsAutoComplete } from './user-autocomplete.model'
 
 // TODO: move this in some common place

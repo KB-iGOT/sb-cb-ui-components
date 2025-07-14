@@ -3,7 +3,7 @@ import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALO
 import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs'
 import { HttpErrorResponse } from '@angular/common/http'
 
-import { TFetchStatus, ConfigurationsService } from '@sunbird-cb/utils'
+import { TFetchStatus, ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { WsDiscussionForumService } from '../../ws-discussion-forum.services'
 import { WsDiscussionForumUserService } from '../../ws-discussion-forum-user.service'
 import { NsDiscussionForum } from '../../ws-discussion-forum.model'

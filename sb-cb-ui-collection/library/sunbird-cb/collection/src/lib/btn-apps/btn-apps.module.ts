@@ -6,7 +6,7 @@ import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/lega
 import { MatRippleModule } from '@angular/material/core'
 import { MatIconModule } from '@angular/material/icon'
 import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 
 @NgModule({
     declarations: [BtnAppsComponent],
@@ -17,7 +17,7 @@ import { WidgetResolverModule } from '@sunbird-cb/resolver'
         MatIconModule,
         MatMenuModule,
         MatRippleModule,
-        WidgetResolverModule,
+        SbUiResolverModule,
     ],
     exports: [BtnAppsComponent]
 })

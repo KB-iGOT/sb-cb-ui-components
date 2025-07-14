@@ -5,7 +5,7 @@ import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/lega
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatIconModule } from '@angular/material/icon'
 import { MatLegacyProgressBarModule as MatProgressBarModule } from '@angular/material/legacy-progress-bar'
-import { InViewPortModule } from '@sunbird-cb/utils'
+import { InViewPortModule } from '@sunbird-cb/utils-v2'
 
 @NgModule({
   declarations: [UserContentDetailedRatingComponent],
