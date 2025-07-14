@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { NsContent } from '../_services/widget-content.model'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { BtnMailUserDialogComponent } from './btn-mail-user-dialog/btn-mail-user-dialog.component'
-import { ConfigurationsService } from '@sunbird-cb/utils'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 export interface IBtnMailUser {
   content: NsContent.IContent

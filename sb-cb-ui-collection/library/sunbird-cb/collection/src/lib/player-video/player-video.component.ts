@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, OnDestroy, OnInit, ViewChild } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
-import { EventService } from '@sunbird-cb/utils'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
+import { EventService } from '@sunbird-cb/utils-v2'
 import videoJs from 'video.js'
 // /Viewar?
 // import { ViewerUtilService } from '../../../../../../project/ws/viewer/src/lib/viewer-util.service'

@@ -9,7 +9,7 @@ import {
   ViewChild,
 } from '@angular/core'
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { Chart, ChartOptions } from 'chart.js'
 import { IWidgetGraphData, TChartJsGraphType, TChartJsColorPalette } from './graph-general.model'
 import { COLOR_PALETTE, GRAPH_TYPES, colorPalettes } from './graph-general-color-palette'

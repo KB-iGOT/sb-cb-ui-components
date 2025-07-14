@@ -16,7 +16,7 @@ import {
 import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator'
 import { MatSort } from '@angular/material/sort'
 import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { IColums, ITable } from './card-table.model'
 /* tslint:disable */
 import _ from 'lodash'

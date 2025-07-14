@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { IChannel } from './card-channel.model'
 @Component({
   selector: 'ws-widget-card-channel',

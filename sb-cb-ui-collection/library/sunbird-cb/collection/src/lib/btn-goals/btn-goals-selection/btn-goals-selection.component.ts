@@ -7,7 +7,7 @@ import {
   Output,
   EventEmitter,
 } from '@angular/core'
-import { TFetchStatus } from '@sunbird-cb/utils'
+import { TFetchStatus } from '@sunbird-cb/utils-v2'
 import { NsGoal } from '../btn-goals.model'
 import { BtnGoalsService } from '../btn-goals.service'
 import { MatLegacyListOption as MatListOption } from '@angular/material/legacy-list'

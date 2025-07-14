@@ -6,7 +6,7 @@ import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-m
 import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { RouterModule } from '@angular/router'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 import { BtnPageBackModule } from '../btn-page-back/btn-page-back.module'
 import { TourModule } from '../_common/tour-guide/tour-guide.module'
 import { PageComponent } from './page.component'
@@ -17,7 +17,7 @@ import { PageComponent } from './page.component'
     imports: [
         CommonModule,
         RouterModule,
-        WidgetResolverModule,
+        SbUiResolverModule,
         BtnPageBackModule,
         MatButtonModule,
         MatToolbarModule,

@@ -1,5 +1,5 @@
 import { Component, HostBinding, Input, OnInit } from '@angular/core'
-import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver'
+import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import { IProCert } from './profile-cretifications.model'
 
 @Component({

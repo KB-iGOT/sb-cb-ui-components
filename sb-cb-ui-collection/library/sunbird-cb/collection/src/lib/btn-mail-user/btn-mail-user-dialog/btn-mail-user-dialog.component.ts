@@ -3,7 +3,7 @@ import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALO
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { WidgetContentShareService } from '../../_services/widget-content-share.service'
 import { IBtnMailUser } from '../btn-mail-user.component'
-// import { EventService } from '@sunbird-cb/utils'
+// import { EventService } from '@sunbird-cb/utils-v2'
 
 @Component({
   selector: 'ws-widget-btn-mail-user-dialog',

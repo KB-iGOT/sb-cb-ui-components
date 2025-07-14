@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { interval, Subscription } from 'rxjs'
 import { ICarousel } from '../sliders/sliders.model'
 

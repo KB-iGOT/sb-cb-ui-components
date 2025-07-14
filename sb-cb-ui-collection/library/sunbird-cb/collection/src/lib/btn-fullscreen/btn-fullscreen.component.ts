@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, Output, EventEmitter, HostBinding } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { Subscription, fromEvent } from 'rxjs'
 import {
   getFullScreenElement,

@@ -10,7 +10,7 @@ import { CardLearningStatusComponent } from './card-learning-status/card-learnin
 import { StarRatingComponent } from './star-rating/star-rating.component'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { MatGridListModule } from '@angular/material/grid-list'
-import { HorizontalScrollerModule, PipeNameTransformModule } from '@sunbird-cb/utils'
+import { HorizontalScrollerModule, PipeNameTransformModule } from '@sunbird-cb/utils-v2'
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'

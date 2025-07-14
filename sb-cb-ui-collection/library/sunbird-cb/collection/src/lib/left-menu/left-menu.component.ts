@@ -1,7 +1,7 @@
 import { LeftMenuService } from './left-menu.service'
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { ILeftMenu, IMenu } from './left-menu.model'
 import { defaultImg } from './base64.json'
 @Component({

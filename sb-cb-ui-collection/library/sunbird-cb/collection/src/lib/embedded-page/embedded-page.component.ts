@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, OnChanges, Input } from '@angular/core'
 import { SafeResourceUrl, DomSanitizer } from '@angular/platform-browser'
 
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { NsEmbeddedPage } from './embedded-page.model'
 
 @Component({

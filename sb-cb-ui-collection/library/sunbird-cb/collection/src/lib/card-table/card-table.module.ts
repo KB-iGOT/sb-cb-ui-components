@@ -5,7 +5,7 @@ import {
   HorizontalScrollerModule,
   PipeCountTransformModule,
   PipeDurationTransformModule,
-} from '@sunbird-cb/utils'
+} from '@sunbird-cb/utils-v2'
 import { PipeTableListModule } from './pipe-table-list/pipe-table-list.module'
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
@@ -18,13 +18,13 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
 import { RouterModule } from '@angular/router'
 import { PipeTableMetaModule } from './pipe-table-meta/pipe-table-meta.module'
 import { PipeRelativePathTableModule } from './relative-url/relative-url.module'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 @NgModule({
   declarations: [CardTableComponent],
   imports: [
     CommonModule,
     HorizontalScrollerModule,
-    WidgetResolverModule,
+    SbUiResolverModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
