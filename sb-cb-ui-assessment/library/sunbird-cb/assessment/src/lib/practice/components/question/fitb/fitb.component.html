@@ -5,7 +5,7 @@
       question?.instructions || 'Fill in the blank with the best
       word'}}</span>
   </ng-container>
-  <h2 *ngIf="question.questionType === 'ftb'" class="mat-h2" [innerHTML]="safeQuestion" class="quiz-question">
+  <h2 *ngIf="question.questionType === 'ftb'" class="mat-h2" [innerHTML]="safeQuestion" class="quiz-question ques-padding-top">
   </h2>
 
   <div *ngIf="question.questionType === 'ftb' && !questionPreview">
