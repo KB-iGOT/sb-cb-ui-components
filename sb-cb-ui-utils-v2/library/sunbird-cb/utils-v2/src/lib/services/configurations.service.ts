@@ -114,6 +114,8 @@ export class ConfigurationsService {
 
   changeNavBarFullView = new Subject()
   openExploreMenuForMWeb = new Subject()
+
+  orgReadData: any
   updateGlobalProfile(state: boolean) {
     this.updateProfile.next(state)
   }
@@ -124,6 +126,12 @@ export class ConfigurationsService {
 
   updatePlatformRatingMethod(state: any) {
     this.updatePlatformRating.next(state)
+  }
+
+ private updateOrgReadData: BehaviorSubject<string> = new BehaviorSubject('')
+  updateOrgReadDataObservable = this.updateOrgReadData.asObservable()
+  updateOrgData(id: string) {
+      this.updateOrgReadData.next(id)
   }
 
 }
