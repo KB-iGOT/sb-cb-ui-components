@@ -413,6 +413,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
         conditions.removeAt(conditionIndex);
+         this.applyAccessControlValue(true);
         this.calculateUserCountForUserGroup(userGroupIndex);
         this.processDisableAddConditionOnClose(userGroupIndex);
       }
@@ -730,28 +731,31 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       try {
         const data = this.accessControlForm.getRawValue();
 
-        const userGroups = data.userGroup.map((group: any) => ({
-          userGroupName: group.name,
-          userGroupCriteriaList: group.conditions.map((condition: any) => {
-            let criteriaValue: string[];
+        // Filter out user groups with empty userGroupCriteriaList
+        const userGroups = data.userGroup
+          .map((group: any) => ({
+            userGroupName: group.name,
+            userGroupCriteriaList: group.conditions.map((condition: any) => {
+              let criteriaValue: string[];
 
-            if (
-              condition?.entity === NsAccessControlConfig.SelectionType.Users &&
-              condition?.selections?.length &&
-              condition?.selections[0]?.userId
-            ) {
-              const userIds = condition.selections?.map((user: any) => user?.userId) || [];
-              criteriaValue = userIds;
-            } else {
-              criteriaValue = condition.selections?.map(String) || [];
-            }
+              if (
+                condition?.entity === NsAccessControlConfig.SelectionType.Users &&
+                condition?.selections?.length &&
+                condition?.selections[0]?.userId
+              ) {
+                const userIds = condition.selections?.map((user: any) => user?.userId) || [];
+                criteriaValue = userIds;
+              } else {
+                criteriaValue = condition.selections?.map(String) || [];
+              }
 
-            return {
-              criteriaKey: condition.entity,
-              criteriaValue
-            };
-          })
-        }));
+              return {
+                criteriaKey: condition.entity,
+                criteriaValue
+              };
+            })
+          }))
+          .filter((group: any) => Array.isArray(group.userGroupCriteriaList) && group.userGroupCriteriaList.length > 0);
 
         const requestPayload: IUserGroupRequest = {
           contentId: this.contentId,
