@@ -116,7 +116,7 @@
     (clickOutside)="onClickOutside()"
   >
     <!-- Dashboard Icon Button -->
-    <button class="dashboard-icon-btn" (click)="toggleDashboardDropdown($event)">
+    <button class="dashboard-icon-btn" (click)="toggleDashboardDropdown($event)" title="Dashboard">
       <mat-icon>bar_chart</mat-icon>
     </button>
 
@@ -125,9 +125,11 @@
       <button
         *ngIf="actionBtn?.dashboardVisibility?.mdo"
         type="button"
+        title="This dashboard is for the reports related to user learning on iGOT Platform within my MDO."
         (click)="onDashboardSelect('mdo')">MDO Dashboard</button>
       <button
         *ngIf="actionBtn?.dashboardVisibility?.myIgot"
+        title="This dashboard is for the reports related to Training Plan, which reflects to learners under their My iGOT section."
         type="button"
         (click)="onDashboardSelect('igot')">My iGOT Dashboard</button>
     </div>
