@@ -204,6 +204,7 @@ export class DiscussionV2Service {
         query: value,
         filters: {
           rootOrgId,
+          status: 1,
         },
       },
     }
