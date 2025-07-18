@@ -722,6 +722,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             let timeDuration = endDate - now
             if (timeDuration > 0) {
               data['batch'] = batchData
+              data['isEnrolled'] = true
               data['completionPercentage'] = enrollmentData[data.identifier].completionPercentage
               filteredArray.push(data)
             }

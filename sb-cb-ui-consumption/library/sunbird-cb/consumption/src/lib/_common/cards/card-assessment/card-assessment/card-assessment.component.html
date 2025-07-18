@@ -69,7 +69,8 @@
 											</div>
 											<div class="flex">
 												<span
-													class="time-span flex items-center justify-center">{{widgetData?.content?.batch?.startDate
+													class="time-span flex items-center justify-center"
+													[ngClass]=" (eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory) && !widgetData?.content?.isEnrolled ? 'not-started': ''">{{widgetData?.content?.batch?.startDate
 													| date: 'dd MMM yyy HH:mm' }}</span>
 											</div>
 										</div>
@@ -80,7 +81,8 @@
 											</div>
 											<div class="flex">
 												<span
-													class="time-span flex items-center justify-center">{{widgetData?.content?.batch?.endDate
+													class="time-span flex items-center justify-center"
+													[ngClass]=" (eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory) && !widgetData?.content?.isEnrolled ? 'not-started': ''">{{widgetData?.content?.batch?.endDate
 													| date: 'dd MMM yyy' }}</span>
 											</div>
 										</div>
