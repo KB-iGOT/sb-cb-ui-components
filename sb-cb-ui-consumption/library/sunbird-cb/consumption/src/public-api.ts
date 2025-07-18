@@ -95,3 +95,5 @@ export * from './lib/_common/connection-hover-card/connection-hover-card.compone
 export * from './lib/_directives/tooltip/tooltip.directive';
 export * from './lib/_directives/tooltip/tooltip.module';
 export * from './lib/_common/dialog-components/confirmation-dialog/confirmation-dialog.component';
+export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.component';
+export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.module';
