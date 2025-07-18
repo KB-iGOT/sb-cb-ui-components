@@ -68,8 +68,19 @@ export namespace NsInstanceConfig {
     websitelanguages: any[]
     profileTimelyNudges: any,
     npsCategory?: string
-    compentency?: any
+    compentency?: any  // This is a temporary fix, need to remove this after the competency is implemented in the app
+    competency?: ICompetencyKeys
   }
+
+  export interface ICompetencyKeys {
+    vKey: string
+    vCompetencyArea: string
+    vCompetencyAreaDescription: string
+    vCompetencyTheme: string
+    vCompetencySubTheme: string
+  }
+
+  
   export interface IPortalUrls {
     igot: string,
     spv: string,

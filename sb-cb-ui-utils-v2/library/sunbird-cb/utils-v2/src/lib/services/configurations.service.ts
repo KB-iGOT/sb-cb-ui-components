@@ -107,6 +107,7 @@ export class ConfigurationsService {
   // setHostPath = (sitePath: string) => (sitePath).replace(':', '_')
   welcomeTabs: NSProfileDataV3.IProfileTab | null = null
   compentency: any = null
+  competency: any
   iGOTAIConfig: any
   // variable setting for csJwtToken
   cstoken = ''
