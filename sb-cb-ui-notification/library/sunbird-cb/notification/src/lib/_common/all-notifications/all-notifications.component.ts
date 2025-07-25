@@ -149,7 +149,53 @@ export class AllNotificationsComponent implements OnInit {
   loadNotifications() {
     this.loading = true
     this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
-      this.response = _.get(res, 'result.notifications', [])
+      let dummy = {
+        "read": true,
+        "role": null,
+        "sub_category": "CONTENT_LIVE",
+        "sub_type": "ALERT",
+        "created_at": "2025-07-09T07:12:30.596Z",
+        "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75d",
+        "source": "USER_CREATED",
+        "type": "IN_APP",
+        "message": {
+          "data": {
+            "id": ["do_11435804917797683211954", "do_11436326013757030413662", "do_11435843728247193612089",
+              "do_11435804892338585611949", "do_113965740548784128178", "do_113959889204092928120"
+            ],
+            "count": 6
+          },
+          "body": "Your content 'ADV ASMT - Principal Mining Architect - QW9671' has been published successfully."
+        },
+        "category": "LEARN_CONTENT"
+      }
+      let dummy1 = {
+        "read": true,
+        "role": null,
+        "sub_category": "CONTENT_LIVE",
+        "sub_type": "ALERT",
+        "created_at": "2025-07-09T07:12:30.596Z",
+        "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75d ----",
+        "source": "USER_CREATED",
+        "type": "IN_APP",
+        "message": {
+          "data": {
+            "id": ["do_11435804917797683211954", "do_11436326013757030413662", "do_11435843728247193612089",
+              "do_11435804892338585611949",
+            ],
+            "count": 6
+          },
+          "body": "Your content 'ADV ASMT - QW9671' has been published successfully."
+        },
+        "category": "LEARN_CONTENT"
+      }
+      this.response = [dummy, dummy1]
+      // this.response = _.get(res, 'result.notifications', [])
+      this.response = this.response.map(notification => ({
+        ...notification,
+        isExpanded: false,
+        content: []
+      }))
       const tabs = _.get(res, 'result.subtypeStats', [])
       this.tabs = [{ id: "all", name: 'all' }]
       tabs.forEach((tab: any) => {
@@ -174,7 +220,11 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   action(notification: any) {
-    notification.isExpanded = !notification.isExpanded
+    if (notification.isExpanded) {
+      notification.isExpanded = false
+    } else {
+      notification.isExpanded = true
+    }
   }
 
   getCount(read: any, unread: any) {

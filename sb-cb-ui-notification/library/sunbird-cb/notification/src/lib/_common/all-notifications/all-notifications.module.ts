@@ -5,9 +5,10 @@ import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-t
 import { AllNotificationsComponent } from './all-notifications.component';
 import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module';
 import { MatSnackBarModule } from '@angular/material/snack-bar'
+import { ViewContentComponent } from '../view-content/view-content.component';
 
 @NgModule({
-  declarations: [AllNotificationsComponent],
+  declarations: [AllNotificationsComponent, ViewContentComponent],
   imports: [
     CommonModule,
     MatIconModule,
