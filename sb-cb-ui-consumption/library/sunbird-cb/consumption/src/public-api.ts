@@ -11,6 +11,9 @@ export * from './lib/consumption.config'
 export * from './lib/_services/widget-content-lib.service'
 export * from './lib/_services/widget-user-lib.service'
 
+
+export * from './lib/_services/content-language.service'
+
 export * from './lib/_common/strips/content-strip-facet-filter/content-strip-facet-filter.module'
 export * from './lib/_common/strips/content-strip-with-tabs-pills/content-strip-with-tabs-pills.module'
 export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'

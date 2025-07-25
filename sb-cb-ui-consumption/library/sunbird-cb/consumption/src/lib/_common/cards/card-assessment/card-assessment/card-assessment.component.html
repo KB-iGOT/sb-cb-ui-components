@@ -77,7 +77,8 @@
 										<div *ngIf="!daysPending" class="flex flex-row"> 
 											<span class="start-span">{{eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory ? 'Program':'Assessment'}} ends on </span>
 											<div class="flex margin-right-s">
-												<span class="start-btn">Start {{eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory ? 'Program':'Assessment'}}</span> 
+												<span class="start-btn">
+													{{widgetData?.content?.isEnrolled ? 'Resume':'Start'}} {{eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory ? 'Program':'Assessment'}}</span> 
 											</div>
 											<div class="flex">
 												<span
