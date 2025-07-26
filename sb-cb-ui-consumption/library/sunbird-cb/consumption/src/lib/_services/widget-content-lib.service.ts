@@ -641,7 +641,7 @@ export class WidgetContentLibService {
     
     const urlData = {
       url: `/app/toc/${content.identifier || content.collectionId}/overview`,
-      queryParams: content.batchId ? { batchId: content.batchId } : {},
+      queryParams: content.batchId ? { batchId: content.batchId } : {} as { [key: string]: any },
     };
     
     if (content.endDate) {
