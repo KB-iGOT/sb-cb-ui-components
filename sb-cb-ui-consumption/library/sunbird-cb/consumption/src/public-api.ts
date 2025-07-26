@@ -100,3 +100,5 @@ export * from './lib/_directives/tooltip/tooltip.module';
 export * from './lib/_common/dialog-components/confirmation-dialog/confirmation-dialog.component';
 export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.component';
 export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.module';
+export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.component';
+export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.module';
