@@ -395,7 +395,8 @@ export namespace NsContent {
     MODERATED_COURSE = 'Moderated Course',
     STANDALONE_ASSESSMENT = 'Standalone Assessment',
     MODERATED_ASSESSEMENT = 'Moderated Assessment',
-    COMPREHENSIVE_ASSESSMENT_PROGRAM='Comprehensive Assessment Program'
+    COMPREHENSIVE_ASSESSMENT_PROGRAM='Comprehensive Assessment Program',
+    MULTILINGUAL_COURSE='Multilingual Course'
   }
 
   export enum WFBlendedProgramStatus {

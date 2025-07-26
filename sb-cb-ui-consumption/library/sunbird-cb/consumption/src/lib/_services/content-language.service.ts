@@ -63,7 +63,7 @@ export class ContentLanguageService {
             localValue: masterLang.localValue,
             langId: langKey.toLowerCase(),
             isBaseLanguage: langData.isBaseLanguage,
-            id: langData.id,
+            identifier: langData.id,
             status: langData.status
           });
         }
@@ -81,12 +81,30 @@ export class ContentLanguageService {
             localValue: masterLang.localValue,
             langId: lang.toLowerCase(),
             isBaseLanguage: true, // Assuming the first language is base language
-            id: content.identifier, // Use the content identifier
+            identifier: content.identifier, // Use the content identifier
             status: content.status || 'Live'
           });
         }
       }
     }
     return output;
+  }
+
+  getBaseLanguage(content: any) {
+    let langList = this.getAllContentLanguages(content);
+    if (langList && langList.length > 0) {
+      // Find the first language that is marked as base language
+      const selectedLanguage = langList.find(lang => lang.isBaseLanguage);
+      return selectedLanguage 
+    }
+  }
+  
+  getSelectedLanguage(content: any) {
+    let langList = this.getAllContentLanguages(content);
+    if (langList && langList.length > 0) {
+      // Find the first language that is marked as base language
+      const selectedLanguage = langList.find(lang => lang.identifier === content?.identifier);
+      return selectedLanguage 
+    }
   }
 }
