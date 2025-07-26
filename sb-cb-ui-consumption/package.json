@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.1.9-cbrelease-4.8.27",
+  "version": "0.1.10-cbrelease-4.8.27",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -19,7 +19,7 @@
     "preset": "jest-preset-angular",
     "setupFilesAfterEnv": [
       "<rootDir>/library/sunbird-cb/consumption/setup.jest.ts"
-    ],
+    ]10
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
       "<rootDir>/dist/"
