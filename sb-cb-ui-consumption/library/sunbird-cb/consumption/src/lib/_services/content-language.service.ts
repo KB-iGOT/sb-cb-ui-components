@@ -54,6 +54,7 @@ export class ContentLanguageService {
       for (const langKey of Object.keys(content.languageMapV1)) {
         const langData = content.languageMapV1[langKey];
         // Find matching master language
+       if(langData && langData.status && langData.status.toLowerCase() === 'live') {
         const masterLang = masterLanguages.get(langKey.toLowerCase());
         
         if (masterLang) {
@@ -67,6 +68,7 @@ export class ContentLanguageService {
             status: langData.status
           });
         }
+       }
       }
     } 
     // Case 2: When languageMapV1 is not available, use language array
