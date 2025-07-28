@@ -662,8 +662,7 @@ export class WidgetContentLibService {
       url: `/app/toc/${content.identifier || content.collectionId}/overview`,
       queryParams: content.batchId ? { batchId: content.batchId } : {} as { [key: string]: any },
     };
-    
-    if (content.endDate) {
+    if (content.endDate && content?.courseCategory !== NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM) {
       urlData.queryParams = { ...urlData.queryParams, planType: 'cbPlan', endDate: content.endDate };
     }
     
