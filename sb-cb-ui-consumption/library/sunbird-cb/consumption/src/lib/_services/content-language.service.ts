@@ -109,4 +109,13 @@ export class ContentLanguageService {
       return selectedLanguage 
     }
   }
+
+  getRequiredLanguageDetails(content: any, langId: string) {
+    let langList = this.getAllContentLanguages(content);
+    if (langList && langList.length > 0) {
+      // Find the first language that is marked as base language
+      const selectedLanguage = langList.find(lang => lang.langId === langId || content?.identifier);
+      return selectedLanguage 
+    }
+  }
 }
