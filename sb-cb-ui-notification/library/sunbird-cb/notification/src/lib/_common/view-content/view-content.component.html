@@ -1,1 +1,10 @@
-<p>view-content works! {{notification?.notification_id}}</p>
+<div class="flex flex-row flex-wrap gap-3" *ngIf="skeletonLoader">
+  <ng-container *ngFor="let item of skeletonLoaderArray">
+    <sb-uin-content-card [skeletonLoader]="true"></sb-uin-content-card>
+  </ng-container>
+</div>
+<div class="flex flex-row flex-wrap gap-3" *ngIf="!skeletonLoader">
+  <ng-container *ngFor="let content of contents">
+    <sb-uin-content-card [content]="content"></sb-uin-content-card>
+  </ng-container>
+</div>

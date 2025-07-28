@@ -8,7 +8,7 @@ const API_END_POINTS = {
   LIST_WITH_CATEGORY: (pageNumber: number, pageSize: number, subType: string) => `apis/proxies/v8/v1/notifications/list?page=${pageNumber}&size=${pageSize}&sub_type=${subType}`,
   MARK_AS_READ: `apis/proxies/v8/v1/notifications/read`,
   NOTIFICATIONS: (pageNumber: number, pageSize: number) => `apis/proxies/v8/v1/notifications/list?page=${pageNumber}&size=${pageSize}`,
-
+  SEARCH: `apis/proxies/v8/sunbirdigot/search`
 }
 
 @Injectable({
@@ -41,6 +41,10 @@ export class LibNotificationsService {
 
   updateUnreadCount(): void {
     this._unreadCount.next(true)
+  }
+
+  searchContent(query: string): Observable<any> {
+    return this.http.post(API_END_POINTS.SEARCH, query);
   }
 
 }
