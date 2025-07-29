@@ -7,7 +7,7 @@ import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { ViewContentComponent } from '../view-content/view-content.component';
 import { ContentCardComponent } from '../content-card/content-card.component';
-import { PipeDurationTransformModule, PipePublicURLModule } from '@sunbird-cb/utils-v2';
+import { DefaultThumbnailModule, PipeDurationTransformModule, PipePublicURLModule } from '@sunbird-cb/utils-v2';
 
 @NgModule({
   declarations: [AllNotificationsComponent, ViewContentComponent, ContentCardComponent],
@@ -18,7 +18,8 @@ import { PipeDurationTransformModule, PipePublicURLModule } from '@sunbird-cb/ut
     SkeletonLoaderLibModule,
     MatSnackBarModule,
     PipePublicURLModule,
-    PipeDurationTransformModule
+    PipeDurationTransformModule,
+    DefaultThumbnailModule,
   ],
   exports: [
     AllNotificationsComponent

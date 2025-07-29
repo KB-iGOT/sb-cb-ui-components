@@ -18,6 +18,9 @@ export class LibNotificationsService {
   _unreadCount = new BehaviorSubject<boolean>(false)
   unreadCount$ = this._unreadCount.asObservable()
 
+  _handleClick = new BehaviorSubject<any>('')
+  handleClick$ = this._handleClick.asObservable()
+
   constructor(private http: HttpClient) { }
   getNotifications(pageNumber: number, pageSize: number, subType: string): Observable<any> {
     if (subType === 'all') {
@@ -45,6 +48,10 @@ export class LibNotificationsService {
 
   searchContent(query: string): Observable<any> {
     return this.http.post(API_END_POINTS.SEARCH, query);
+  }
+
+  emitClick(content: any): void {
+    this._handleClick.next(content)
   }
 
 }

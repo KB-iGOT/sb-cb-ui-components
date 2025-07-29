@@ -180,17 +180,20 @@ export class AllNotificationsComponent implements OnInit {
         "type": "IN_APP",
         "message": {
           "data": {
-            "id": ["do_1143662801561272321416", "do_1143662844448686081458", "do_11415533689699532812",
-              "do_1143662830669250561449",
-            ],
+            "id": ['do_1143662801561272321416'],
+            // "id": ["do_1143662801561272321416", "do_1143662844448686081458", "do_11415533689699532812",
+            //   "do_1143662830669250561449",
+            // ],
             "count": 6
           },
           "body": "Your content 'ADV ASMT - QW9671' has been published successfully."
         },
         "category": "LEARN_CONTENT"
       }
-      this.response = [dummy, dummy1]
-      // this.response = _.get(res, 'result.notifications', [])
+      // this.response = [dummy, dummy1]
+      this.response = _.get(res, 'result.notifications', [])
+      this.response.push(dummy)
+      this.response.push(dummy1)
       this.response = this.response.map(notification => ({
         ...notification,
         isExpanded: false,
