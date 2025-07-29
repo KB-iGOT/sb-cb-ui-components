@@ -615,7 +615,9 @@ export class WidgetContentLibService {
       } 
       if(enrollmentData) {
         const BASE_LANG = this.contentLanguageSvc.getBaseLanguage(baseContentRead);
-        return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, BASE_LANG.langId, BASE_LANG.id ) 
+        if(BASE_LANG && Object.keys(BASE_LANG).length ) {
+          return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, BASE_LANG.langId, BASE_LANG.id ) 
+        }
       }
     
     return this.gotoTocPage(enrollmentData);
