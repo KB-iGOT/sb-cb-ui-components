@@ -63,7 +63,7 @@ export class ContentLanguageService {
             value: masterLang.value,
             localValue: masterLang.localValue,
             langId: langKey.toLowerCase(),
-            isBaseLanguage: langData.isBaseLanguage,
+            isBaseLanguage: langData?.isBaseLang || langData?.isBaseLanguage,
             identifier: langData.id,
             status: langData.status
           });
@@ -96,7 +96,7 @@ export class ContentLanguageService {
     let langList = this.getAllContentLanguages(content);
     if (langList && langList.length > 0) {
       // Find the first language that is marked as base language
-      const selectedLanguage = langList.find(lang => lang.isBaseLanguage);
+      const selectedLanguage = langList.find(lang => lang?.isBaseLang || lang?.isBaseLanguage);
       return selectedLanguage 
     }
   }
