@@ -118,4 +118,10 @@ export class ContentLanguageService {
       return selectedLanguage 
     }
   }
+
+  getContentLanguage(content: any){
+    if(content && content?.language && content?.language.length > 0){ 
+      return content.language[0].toLowerCase()
+    }
+  }
 }
