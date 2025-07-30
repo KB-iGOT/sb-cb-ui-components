@@ -16,6 +16,7 @@ export class AllNotificationsComponent implements OnInit {
   @Output() redirectTo = new EventEmitter<any>()
   @Input() showIcon: boolean = false
   @Input() showMarkAllAsRead: boolean = true
+  @Input() fragment: string = ''
 
   notifications: any[] = []
   dynamicTabIndex: number = 0
@@ -175,7 +176,7 @@ export class AllNotificationsComponent implements OnInit {
         "sub_category": "CONTENT_LIVE",
         "sub_type": "ALERT",
         "created_at": "2025-07-09T07:12:30.596Z",
-        "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75d",
+        "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75ds",
         "source": "USER_CREATED",
         "type": "IN_APP",
         "message": {
@@ -196,7 +197,7 @@ export class AllNotificationsComponent implements OnInit {
       this.response.push(dummy1)
       this.response = this.response.map(notification => ({
         ...notification,
-        isExpanded: false,
+        isExpanded: this.fragment && this.fragment === notification.notification_id,
         content: []
       }))
       const tabs = _.get(res, 'result.subtypeStats', [])
