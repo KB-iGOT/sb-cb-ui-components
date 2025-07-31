@@ -193,8 +193,7 @@ export class AllNotificationsComponent implements OnInit {
       }
       // this.response = [dummy, dummy1]
       this.response = _.get(res, 'result.notifications', [])
-      this.response.push(dummy)
-      this.response.push(dummy1)
+      this.response = [dummy, dummy1, ...this.response]
       this.response = this.response.map(notification => ({
         ...notification,
         isExpanded: this.fragment && this.fragment === notification.notification_id,

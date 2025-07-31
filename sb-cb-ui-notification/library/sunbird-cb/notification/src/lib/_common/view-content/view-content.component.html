@@ -1,9 +1,12 @@
-<div class="flex flex-row flex-wrap gap-3" *ngIf="skeletonLoader">
+<!-- Skeleton loader with vertical scroll on mobile -->
+<div class="content-container mobile-scroll" *ngIf="skeletonLoader">
   <ng-container *ngFor="let item of skeletonLoaderArray">
     <sb-uin-content-card [skeletonLoader]="true"></sb-uin-content-card>
   </ng-container>
 </div>
-<div class="flex flex-row flex-wrap gap-3" *ngIf="!skeletonLoader">
+
+<!-- Content with vertical scroll on mobile -->
+<div class="content-container mobile-scroll" *ngIf="!skeletonLoader">
   <ng-container *ngFor="let content of contents">
     <sb-uin-content-card [content]="content"></sb-uin-content-card>
   </ng-container>
