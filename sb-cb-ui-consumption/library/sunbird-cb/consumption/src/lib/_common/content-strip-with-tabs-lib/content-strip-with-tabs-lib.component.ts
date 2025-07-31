@@ -717,7 +717,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           batchData['endDate'] = data.endDate ? data.endDate : batchData.endDate
           if (enrollmentData[data.identifier].status !== 2 &&batchData) {
             const enrollData = batchData
-            let endDate: any = new Date(enrollData.endDate).getTime()
+            const endDate = this.getEndDateTime(enrollData.endDate);
             // let endDate:any = '2024-07-7T00:00:00.000Z'
             let timeDuration = endDate - now
             if (timeDuration > 0) {
@@ -732,8 +732,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           // Non-enrolled comprehensive assessment
           // Check if it has a valid end date that's in the future
           if (data.endDate) {
-            const endDate = new Date(data.endDate).getTime()
             const batchData = data.batches && data.batches.length ? data.batches[0] : {};
+            const endDate = this.getEndDateTime(data.endDate);
             if (endDate >= now) {
               // Mark as not enrolled but valid for display
               data['isEnrolled'] = false
@@ -765,6 +765,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         viewMoreUrl,
       );
     }
+  }
+  getEndDateTime(endDate: any) {
+    if (endDate) {
+      const date = new Date(endDate);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      return endOfDay.getTime();
+    }
+    return new Date().getTime(); 
   }
 
   async searchV6Request(strip: NsContentStripWithTabs.IContentStripUnit,
