@@ -263,6 +263,7 @@ export class WidgetUserServiceLib {
         childData['parentId'] = c.id
         childData['planType'] = 'cbPlan'
         childData['contentStatus'] = 0
+        childData['isApar'] = c.isApar
         contentIds.push(childData.identifier)
         if (childData.status !== NsCardContent.IGOTConst.RETIRED) {
           cbpContentData.push(childData)
