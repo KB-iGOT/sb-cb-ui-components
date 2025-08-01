@@ -102,3 +102,4 @@ export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.component';
 export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.module';
 export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.component';
 export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.module';
+export * from './lib/_common/cards/available-languages/available-languages.component';
