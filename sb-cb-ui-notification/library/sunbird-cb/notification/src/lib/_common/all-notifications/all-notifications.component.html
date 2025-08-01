@@ -6,7 +6,7 @@
         <span>{{capitalize(tab?.name)}} &nbsp;</span>
         <span>{{getCount(tab?.read, tab?.unread)}}</span>
       </ng-template>
-      <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length">
+      <div class="flex flex-row flex-wrap content-container mt-5: md:mt-0" *ngIf="notifications?.length">
         <div class="notification-list w-full">
           <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
             id="notification-{{notification?.notification_id}}" *ngFor="let notification of notifications">
