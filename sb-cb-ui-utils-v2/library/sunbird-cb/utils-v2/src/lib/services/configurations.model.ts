@@ -68,7 +68,8 @@ export namespace NsInstanceConfig {
     websitelanguages: any[]
     profileTimelyNudges: any,
     npsCategory?: string
-    compentency?: any
+    compentency?: any,
+    devnagiriMultiLangEnabled?: any
   }
   export interface IPortalUrls {
     igot: string,

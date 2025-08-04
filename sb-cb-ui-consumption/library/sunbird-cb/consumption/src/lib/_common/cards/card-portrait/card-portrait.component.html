@@ -69,6 +69,11 @@
               cbpData: cbPlanMapData[widgetData?.content?.identifier]
             }}"></ng-container>
           </ng-container>
+          <ng-container *ngIf="widgetData?.content?.isApar">
+            <div class="cbp-mark right-0 rounded-bottom">
+              <p class="cbp-success apar-flag">APAR</p>
+            </div>
+          </ng-container>
           <div class="duration-box right-corner" *ngIf="widgetData?.content?.duration > 0 && !(widgetData?.content?.programDuration > 0)">
             <mat-icon class="mat-icon main_icon mr-1 nodtranslate">access_time</mat-icon>
             <span class=" ws-mat-white-text duration nodtranslate">
