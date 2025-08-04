@@ -651,29 +651,35 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                 if(comprehensiveResponse?.results?.result?.content && comprehensiveResponse?.results?.result?.content?.length) {
                   comprehensiveContent = comprehensiveResponse.results.result.content
                   comprehensiveResult = comprehensiveResponse.results.result.content.map((ele: any)=> ele?.identifier);
+                  
+                }
+                if(response?.results?.result?.content && response?.results?.result?.content?.length) {
                   result = response.results.result.content.map((a: any) => a?.identifier);
                 }
+                let combinedArray = [...result,...comprehensiveResult]
                 let request = {
                   "request": {
                     "courseId": [...result,...comprehensiveResult]
                   }
                 }
-
-                const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
-                  const enrollData: any = {}
-                  if (res && res.result && res.result.courses && res.result.courses.length) {
-                    res.result.courses.forEach((data: any) => {
-                      enrollData[data.collectionId] = data
-                    })
-                    return enrollData
-                  } else {
+                let enrollResponseData = []
+                if(combinedArray && combinedArray.length) {
+                  enrollResponseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+                    const enrollData: any = {}
+                    if (res && res.result && res.result.courses && res.result.courses.length) {
+                      res.result.courses.forEach((data: any) => {
+                        enrollData[data.collectionId] = data
+                      })
+                      return enrollData
+                    } else {
+                      return {}
+                    }
+                  }).catch((_err: any) => {
                     return {}
-                  }
-                }).catch((_err: any) => {
-                  return {}
-                });
+                  })
+                }
                 let contentData = [...response.results.result.content, ...comprehensiveContent]  
-                this.checkInvitOnlyAssessments(contentData, strip, calculateParentStatus, response.viewMoreUrl, responseData)
+                this.checkInvitOnlyAssessments(contentData, strip, calculateParentStatus, response.viewMoreUrl, enrollResponseData)
               } else {
                 this.processStrip(
                   strip,
@@ -707,6 +713,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   checkInvitOnlyAssessments(content: any, strip: any, calculateParentStatus: any, viewMoreUrl: any, enrollmentData: any) {
+    debugger
     if (Object.keys(enrollmentData)) {
       enrollmentData = Object.keys(enrollmentData).length ? enrollmentData : {}
       let filteredArray: any = []
