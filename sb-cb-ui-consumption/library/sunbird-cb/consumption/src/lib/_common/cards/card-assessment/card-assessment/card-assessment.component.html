@@ -69,18 +69,21 @@
 											</div>
 											<div class="flex">
 												<span
-													class="time-span flex items-center justify-center">{{widgetData?.content?.batch?.startDate
+													class="time-span flex items-center justify-center"
+													[ngClass]=" (eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory) && !widgetData?.content?.isEnrolled ? 'not-started': ''">{{widgetData?.content?.batch?.startDate
 													| date: 'dd MMM yyy HH:mm' }}</span>
 											</div>
 										</div>
 										<div *ngIf="!daysPending" class="flex flex-row"> 
 											<span class="start-span">{{eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory ? 'Program':'Assessment'}} ends on </span>
 											<div class="flex margin-right-s">
-												<span class="start-btn">Start {{eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory ? 'Program':'Assessment'}}</span> 
+												<span class="start-btn">
+													{{widgetData?.content?.isEnrolled ? 'Resume':'Start'}} {{eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory ? 'Program':'Assessment'}}</span> 
 											</div>
 											<div class="flex">
 												<span
-													class="time-span flex items-center justify-center">{{widgetData?.content?.batch?.endDate
+													class="time-span flex items-center justify-center"
+													[ngClass]=" (eCourseCategory?.COMPREHENSIVE_ASSESSMENT_PROGRAM === widgetData?.content?.courseCategory) && !widgetData?.content?.isEnrolled ? 'not-started': ''">{{widgetData?.content?.batch?.endDate
 													| date: 'dd MMM yyy' }}</span>
 											</div>
 										</div>

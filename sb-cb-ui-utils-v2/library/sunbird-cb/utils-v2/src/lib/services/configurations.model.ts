@@ -69,7 +69,8 @@ export namespace NsInstanceConfig {
     profileTimelyNudges: any,
     npsCategory?: string
     compentency?: any  // This is a temporary fix, need to remove this after the competency is implemented in the app
-    competency?: ICompetencyKeys
+    competency?: ICompetencyKeys,
+    devnagiriMultiLangEnabled?: any
   }
 
   export interface ICompetencyKeys {

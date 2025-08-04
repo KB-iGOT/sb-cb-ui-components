@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-utils-v2",
-  "version": "0.0.42-spv-mdo-upgrade",
+  "version": "0.0.43-spv-mdo-upgrade",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",

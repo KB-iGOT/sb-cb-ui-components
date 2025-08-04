@@ -52,7 +52,7 @@
                     <div class="w-full">
                         <div class="flex flex-between gap-2">
                             <div>
-                                <div class="rank-name">{{user?.orgName}}</div>
+                                <div class="rank-name">{{user?.orgName || user?.org_name}}</div>
                                 <div class="rank-points flex mt-1 gap-1" *ngIf="!object?.hideEle?.includes('karma-points')">
                                     <img class="nlw-kb" src="assets/icons/home/karma-badge.svg"/>
                                     <div class="points">{{user?.total_points || 0 }} points</div>

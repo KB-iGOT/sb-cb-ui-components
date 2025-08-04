@@ -651,29 +651,35 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                 if(comprehensiveResponse?.results?.result?.content && comprehensiveResponse?.results?.result?.content?.length) {
                   comprehensiveContent = comprehensiveResponse.results.result.content
                   comprehensiveResult = comprehensiveResponse.results.result.content.map((ele: any)=> ele?.identifier);
+                  
+                }
+                if(response?.results?.result?.content && response?.results?.result?.content?.length) {
                   result = response.results.result.content.map((a: any) => a?.identifier);
                 }
+                let combinedArray = [...result,...comprehensiveResult]
                 let request = {
                   "request": {
                     "courseId": [...result,...comprehensiveResult]
                   }
                 }
-
-                const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
-                  const enrollData: any = {}
-                  if (res && res.result && res.result.courses && res.result.courses.length) {
-                    res.result.courses.forEach((data: any) => {
-                      enrollData[data.collectionId] = data
-                    })
-                    return enrollData
-                  } else {
+                let enrollResponseData = []
+                if(combinedArray && combinedArray.length) {
+                  enrollResponseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+                    const enrollData: any = {}
+                    if (res && res.result && res.result.courses && res.result.courses.length) {
+                      res.result.courses.forEach((data: any) => {
+                        enrollData[data.collectionId] = data
+                      })
+                      return enrollData
+                    } else {
+                      return {}
+                    }
+                  }).catch((_err: any) => {
                     return {}
-                  }
-                }).catch((_err: any) => {
-                  return {}
-                });
+                  })
+                }
                 let contentData = [...response.results.result.content, ...comprehensiveContent]  
-                this.checkInvitOnlyAssessments(contentData, strip, calculateParentStatus, response.viewMoreUrl, responseData)
+                this.checkInvitOnlyAssessments(contentData, strip, calculateParentStatus, response.viewMoreUrl, enrollResponseData)
               } else {
                 this.processStrip(
                   strip,
@@ -707,6 +713,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   checkInvitOnlyAssessments(content: any, strip: any, calculateParentStatus: any, viewMoreUrl: any, enrollmentData: any) {
+    debugger
     if (Object.keys(enrollmentData)) {
       enrollmentData = Object.keys(enrollmentData).length ? enrollmentData : {}
       let filteredArray: any = []
@@ -717,11 +724,12 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           batchData['endDate'] = data.endDate ? data.endDate : batchData.endDate
           if (enrollmentData[data.identifier].status !== 2 &&batchData) {
             const enrollData = batchData
-            let endDate: any = new Date(enrollData.endDate).getTime()
+            const endDate = this.getEndDateTime(enrollData.endDate);
             // let endDate:any = '2024-07-7T00:00:00.000Z'
             let timeDuration = endDate - now
             if (timeDuration > 0) {
               data['batch'] = batchData
+              data['isEnrolled'] = true
               data['completionPercentage'] = enrollmentData[data.identifier].completionPercentage
               filteredArray.push(data)
             }
@@ -731,8 +739,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           // Non-enrolled comprehensive assessment
           // Check if it has a valid end date that's in the future
           if (data.endDate) {
-            const endDate = new Date(data.endDate).getTime()
             const batchData = data.batches && data.batches.length ? data.batches[0] : {};
+            const endDate = this.getEndDateTime(data.endDate);
             if (endDate >= now) {
               // Mark as not enrolled but valid for display
               data['isEnrolled'] = false
@@ -764,6 +772,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         viewMoreUrl,
       );
     }
+  }
+  getEndDateTime(endDate: any) {
+    if (endDate) {
+      const date = new Date(endDate);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      return endOfDay.getTime();
+    }
+    return new Date().getTime(); 
   }
 
   async searchV6Request(strip: NsContentStripWithTabs.IContentStripUnit,
