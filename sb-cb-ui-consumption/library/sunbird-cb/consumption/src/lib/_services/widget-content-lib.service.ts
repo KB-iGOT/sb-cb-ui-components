@@ -525,7 +525,7 @@ export class WidgetContentLibService {
       };
       return urlData
     }
-    if (content.externalId) {
+    if (content && content.externalId) {
       const urlData: any = {
         url: `app/toc/ext/${content.contentId}`,
         queryParams: { batchId: content.batchId },
@@ -560,10 +560,10 @@ export class WidgetContentLibService {
   }
   async checkForDataToFormUrl(content: any, enrollData: any, baseContentRead?: any,multilingualId?:string) {
     let urlData: any;
-    if (enrollData.completionPercentage === 100) {
+    if (enrollData?.completionPercentage === 100) {
       return this.gotoTocPage(enrollData);
     }
-    if (enrollData.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
+    if (enrollData?.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
       const modifyEnrollData = {
         ...enrollData,
         identifier: enrollData.collectionId,
@@ -604,8 +604,7 @@ export class WidgetContentLibService {
   }
 
   getResourseDataWithData(enrollmentData: any, resourceId: any, mimeType: any,content:any, baseContentRead?: any,multilingualId?:string) {
-
-      if(enrollmentData && enrollmentData.recent_language) {
+        if(enrollmentData && enrollmentData.recent_language) {
         if(baseContentRead.languageMapV1 && Object.keys(baseContentRead.languageMapV1).length) { 
           const recent_LANG_DATA = baseContentRead.languageMapV1[enrollmentData.recent_language];
           if(recent_LANG_DATA && recent_LANG_DATA.id && (recent_LANG_DATA.id !== content.identifier)) {
