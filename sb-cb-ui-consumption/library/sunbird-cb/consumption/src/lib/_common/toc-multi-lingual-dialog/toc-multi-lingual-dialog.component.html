@@ -20,7 +20,7 @@
             <mat-icon class="header-icon">{{data.icon}}</mat-icon>
         </div>
         <div class="mat-subheading-2 margin-bottom-xs whitespace-pre-wrap"> {{ data?.header}} </div>
-        <p class="mat-body-2 whitespace-pre-wrap"> {{ data?.message}} </p>
+        <p class="mat-body-2 whitespace-pre-wrap" [innerHTML]="data?.message"> </p>
 
         <mat-dialog-actions align="end">
             <button mat-dialog-close class="close-btn submit-btn">{{ data.cancelButton}}</button>
