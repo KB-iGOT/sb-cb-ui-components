@@ -19,9 +19,25 @@
             <form class="flex flex-1 items-center">
                 <!-- <mat-form-field appearance="outline" class="w-full pl-1"> -->
                 <div class="relative w-full flex ">
-                    <input #comment name="comment" class="flex-1 discuss-input mr-2" [formControl]="searchControl"
-                        [attr.disabled]="toggleDisable()" i18n-placeholder
-                        [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()">
+                    <input #comment #description name="comment" class="flex-1 discuss-input mr-2"
+                        [formControl]="searchControl" [attr.disabled]="toggleDisable()" i18n-placeholder
+                        [placeholder]="config?.commentBox?.placeholder || 'Add a comment'" (focus)="onFocus()"
+                        (input)="handleInput($event)" (keyup)="onTextareaKeyUp($event)">
+                    <!-- Add the mention dropdown container -->
+                    <div class="mention-dropdown" *ngIf="showMentionDropdown">
+                        <div *ngIf="isLoadingUsers" class="mention-loading">
+                            <mat-spinner diameter="20"></mat-spinner>
+                            <span>Loading users...</span>
+                        </div>
+                        <div *ngIf="!isLoadingUsers && mentionUsers.length > 0" class="mention-list">
+                            <div *ngFor="let user of mentionUsers; let i = index" class="mention-list-item"
+                                [class.active]="i === activeMentionIndex" (click)="selectMention(user)">
+                                <div class="mention-user-info">
+                                    <div class="mention-user-name">{{ user.userName }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <mat-icon class="icon emoji-picker nodtranslate" aria-hidden="false" i18n-aria-label
                         aria-label="Fail"
                         (click)="commentSvc?.enrolledContent && toggleEmojiPicker()">sentiment_satisfied</mat-icon>
