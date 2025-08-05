@@ -28,8 +28,28 @@ export class NotificationDropdownComponent implements OnInit {
 
   getUserNotifications() {
     this.isLoading = true
+    let dummy = {
+      "read": true,
+      "role": null,
+      "sub_category": "CONTENT_LIVE",
+      "sub_type": "ALERT",
+      "created_at": "2025-07-09T07:12:30.596Z",
+      "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75d",
+      "source": "USER_CREATED",
+      "type": "IN_APP",
+      "message": {
+        "data": {
+          "id": ["do_113540184895873024146" //, "do_113540184895873024146"
+          ],
+          "count": 6
+        },
+        "body": "Your content 'ADV ' has been published successfully."
+      },
+      "category": "LEARN_CONTENT"
+    }
     this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
       this.notifications = _.get(res, 'result.notifications', [])
+      this.notifications.push(dummy)
       const _alerts = _.get(res, 'result.subtypeStats', [])
       this.alerts = _alerts.find(notification => notification.name === 'ALERT')
       this.isLoading = false
