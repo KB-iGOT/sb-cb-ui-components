@@ -18,6 +18,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   loadingMore = false
   entityId = ''
   @Input() widgetData!: NsDiscussionV2.ICommentWidgetData | any
+  @Input() commentId!: any
   commentTreeId = ''
   loogedInUserProfile: any = {}
   commentListLimit = 20
@@ -39,8 +40,8 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   }
 
   getLikedComments() {
-    this.commentSvc.getAllLikedCommentIds(this.commentSvc.entityId).subscribe((res: any)=> {
-      if(res && res.result && res.result.commentId && res.result.commentId.length) {
+    this.commentSvc.getAllLikedCommentIds(this.commentSvc.entityId).subscribe((res: any) => {
+      if (res && res.result && res.result.commentId && res.result.commentId.length) {
         this.userLikedComments = res.result.commentId
       }
     })
@@ -59,7 +60,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       this.loading = false
       if (res && res.commentCount) {
         this.commentData = res
-        this.commentSvc.commentTreeId =''
+        this.commentSvc.commentTreeId = ''
         this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
         this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
@@ -87,27 +88,94 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.commentSvc.entityId = this.entityId
     this.commentSvc.entityType = entityType
     this.commentSvc.workflow = workflow
-   
+
 
     const commentTreePayload = {
       entityType,
       workflow,
-      "entityId":  this.entityId,
+      "entityId": this.entityId,
     }
     this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
       let commentTreeDataLocal = commentRes.result
-      this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
-    },(err: any) => {
+      if (this.commentId) {
+        this.getCommentById(commentTreeDataLocal)
+      } else {
+        this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
+      }
+
+    }, (err: any) => {
       this.loadingMore = false
       let commentTreeDataLocal = {}
       // tslint:disable-next-line: no-console
-     this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
+      this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
       console.error('Error in fetching all comments', err)
     })
-    
+
   }
 
-  fetchComments_V3(commentTreeDataLocal: any, commentTreeId?: string, overrideCacheValue?: boolean,entityType: string = '', workflow: string = '') {
+  getCommentById(commentTreeDataLocal: any) {
+    this.commentSvc.getListOfCommentsById([this.commentId]).subscribe(res => {
+      this.loading = false
+      if (res && res.result.commentCount) {
+
+        this.commentData = res.result
+        this.commentData['commentTree'] = {
+          commentTreeId: res.result.commentTreeId,
+          commentTreeData: commentTreeDataLocal
+        }
+        this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
+        if (res && res.result && res.result.courseDetails) {
+          res.result.courseDetails['curators'] = []
+          res.result.courseDetails['authors'] = []
+          if (res.result.courseDetails.creatorDetails) {
+            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+            let creatorIds: any = []
+            creatorDetails.forEach((ele: any) => {
+              creatorIds.push(ele.id)
+            })
+            res.result.courseDetails['authors'] = creatorIds
+          }
+          if (res.result.courseDetails.creatorContacts) {
+            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+            let creatorContactsIds: any = []
+            creatorContacts.forEach((ele: any) => {
+              creatorContactsIds.push(ele.id)
+            })
+            res.result.courseDetails['curators'] = creatorContactsIds
+          }
+          this.commentSvc.courseDetails = res.result.courseDetails
+        }
+        this.commentData.commentTree.commentTreeData.comments.reverse()
+
+        this.commentSvc.commentTreeId = ''
+        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
+        this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
+        if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
+          // tslint:disable-next-line:max-line-length
+          this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
+        }
+
+        if (res.result && res.result.users && res.result.users.length) {
+          let commentUsersDataObj = res.result.users
+          this.commentUsersData = { ...this.commentUsersData, ..._.keyBy(commentUsersDataObj, 'user_id') }
+        }
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
+      }
+      if (res && res.code === 'Not Found' || !res.result.commentCount) {
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+      }
+      this.commentDataChange.emit({
+        commentData: this.commentData,
+        widgetData: this.widgetData,
+      })
+    }, (err: any) => {
+      this.loading = false
+      // tslint:disable-next-line: no-console
+      console.error('Error in fetching all comments', err)
+    })
+  }
+
+  fetchComments_V3(commentTreeDataLocal: any, commentTreeId?: string, overrideCacheValue?: boolean, entityType: string = '', workflow: string = '') {
     const payload = {
       entityType,
       workflow,
@@ -116,42 +184,43 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
       overrideCache: overrideCacheValue || false,
+      commentId: "ed3f1e12-710f-11f0-8e17-9bfc7d3cd85d",
     }
     this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
       // tslint:disable-next-line: no-console
       this.loading = false
       if (res && res.result.commentCount) {
-        
+
         this.commentData = res.result
         this.commentData['commentTree'] = {
-          commentTreeId : res.result.commentTreeId,
-          commentTreeData : commentTreeDataLocal
+          commentTreeId: res.result.commentTreeId,
+          commentTreeData: commentTreeDataLocal
         }
         this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
-        if(res && res.result && res.result.courseDetails){
+        if (res && res.result && res.result.courseDetails) {
           res.result.courseDetails['curators'] = []
           res.result.courseDetails['authors'] = []
-          if(res.result.courseDetails.creatorDetails) {
+          if (res.result.courseDetails.creatorDetails) {
             let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
             let creatorIds: any = []
             creatorDetails.forEach((ele: any) => {
               creatorIds.push(ele.id)
-            });
+            })
             res.result.courseDetails['authors'] = creatorIds
           }
-          if(res.result.courseDetails.creatorContacts) {
+          if (res.result.courseDetails.creatorContacts) {
             let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
             let creatorContactsIds: any = []
             creatorContacts.forEach((ele: any) => {
               creatorContactsIds.push(ele.id)
-            });
+            })
             res.result.courseDetails['curators'] = creatorContactsIds
           }
           this.commentSvc.courseDetails = res.result.courseDetails
         }
         this.commentData.commentTree.commentTreeData.comments.reverse()
 
-        this.commentSvc.commentTreeId =''
+        this.commentSvc.commentTreeId = ''
         this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
         this.widgetData.newCommentSection.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         if (this.widgetData.commentsList.repliesSection && this.widgetData.commentsList.repliesSection.newCommentReply) {
@@ -159,10 +228,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
           this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId = this.commentData.commentTree.commentTreeId
         }
 
-        if(res.result && res.result.users && res.result.users.length) {
+        if (res.result && res.result.users && res.result.users.length) {
           let commentUsersDataObj = res.result.users
-          this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
-        } 
+          this.commentUsersData = { ...this.commentUsersData, ..._.keyBy(commentUsersDataObj, 'user_id') }
+        }
         this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
       }
       if (res && res.code === 'Not Found' || !res.result.commentCount) {
@@ -196,83 +265,83 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
     }
-      this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
-        if (res && res.result.commentCount) {
-          const newComments = res.result.comments
-          if(res && res.result && res.result.courseDetails){
+    this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
+      if (res && res.result.commentCount) {
+        const newComments = res.result.comments
+        if (res && res.result && res.result.courseDetails) {
 
-            res.result.courseDetails['curators'] = []
-            res.result.courseDetails['authors'] = []
-            if(res.result.courseDetails.creatorDetails) {
-              let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
-              let creatorIds: any = []
-              creatorDetails.forEach((ele: any) => {
-                creatorIds.push(ele.id)
-              });
-              res.result.courseDetails['authors'] = creatorIds
-            }
-            if(res.result.courseDetails.creatorContacts) {
-              let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
-              let creatorContactsIds: any = []
-              creatorContacts.forEach((ele: any) => {
-                creatorContactsIds.push(ele.id)
-              });
-              res.result.courseDetails['curators'] = creatorContactsIds
-            }
-            if(res.result && res.result.users && res.result.users.length) {
-              let commentUsersDataObj = res.result.users
-              this.commentUsersData = {...this.commentUsersData,..._.keyBy(commentUsersDataObj, 'user_id')}
-            } 
-            this.commentSvc.courseDetails = res.result.courseDetails
+          res.result.courseDetails['curators'] = []
+          res.result.courseDetails['authors'] = []
+          if (res.result.courseDetails.creatorDetails) {
+            let creatorDetails = JSON.parse(res.result.courseDetails.creatorDetails)
+            let creatorIds: any = []
+            creatorDetails.forEach((ele: any) => {
+              creatorIds.push(ele.id)
+            })
+            res.result.courseDetails['authors'] = creatorIds
           }
-
-          if (!this.commentData) {
-            this.commentData = res.result
-          } else {
-            const existingCommentIds = this.commentData.comments.map(
-              (comment: any) => comment.commentId
-            )
-
-            const filteredNewComments = newComments.filter(
-              (comment: any) => !existingCommentIds.includes(comment.commentId)
-            )
-
-            this.commentData.comments.push(...filteredNewComments)
+          if (res.result.courseDetails.creatorContacts) {
+            let creatorContacts = JSON.parse(res.result.courseDetails.creatorContacts)
+            let creatorContactsIds: any = []
+            creatorContacts.forEach((ele: any) => {
+              creatorContactsIds.push(ele.id)
+            })
+            res.result.courseDetails['curators'] = creatorContactsIds
           }
-
-          if (this.commentListOffSet === 0 && !this.isReversed) {
-            this.commentData.commentTree.commentTreeData.comments.reverse()
-            this.isReversed = true
+          if (res.result && res.result.users && res.result.users.length) {
+            let commentUsersDataObj = res.result.users
+            this.commentUsersData = { ...this.commentUsersData, ..._.keyBy(commentUsersDataObj, 'user_id') }
           }
+          this.commentSvc.courseDetails = res.result.courseDetails
+        }
 
-          this.commentSvc.commentTreeId =''
-          this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
-          this.widgetData.newCommentSection.commentTreeData.commentTreeId =
+        if (!this.commentData) {
+          this.commentData = res.result
+        } else {
+          const existingCommentIds = this.commentData.comments.map(
+            (comment: any) => comment.commentId
+          )
+
+          const filteredNewComments = newComments.filter(
+            (comment: any) => !existingCommentIds.includes(comment.commentId)
+          )
+
+          this.commentData.comments.push(...filteredNewComments)
+        }
+
+        if (this.commentListOffSet === 0 && !this.isReversed) {
+          this.commentData.commentTree.commentTreeData.comments.reverse()
+          this.isReversed = true
+        }
+
+        this.commentSvc.commentTreeId = ''
+        this.commentSvc.commentTreeId = this.commentData.commentTree.commentTreeId
+        this.widgetData.newCommentSection.commentTreeData.commentTreeId =
+          this.commentData.commentTree.commentTreeId
+
+        if (
+          this.widgetData.commentsList.repliesSection &&
+          this.widgetData.commentsList.repliesSection.newCommentReply
+        ) {
+          this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId =
             this.commentData.commentTree.commentTreeId
-
-          if (
-            this.widgetData.commentsList.repliesSection &&
-            this.widgetData.commentsList.repliesSection.newCommentReply
-          ) {
-            this.widgetData.commentsList.repliesSection.newCommentReply.commentTreeData.commentTreeId =
-              this.commentData.commentTree.commentTreeId
-          }
-
-          this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
         }
 
-        if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
-          this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
-        }
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = false
+      }
 
+      if (res && (res.code === 'NOT_FOUND' || !res.result.commentCount)) {
+        this.widgetData.newCommentSection.commentTreeData.isFirstComment = true
+      }
+
+      this.loadingMore = false
+
+    },
+      () => {
         this.loadingMore = false
 
-      },
-        () => {
-          this.loadingMore = false
-
-        }
-      )
+      }
+    )
   }
 
   getReplies(comment: any) {
@@ -305,8 +374,8 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
 
   refreshComments(_event: any) {
     this.commentListOffSet = 0
-    if(_event.response 
-      && _event.response.commentTree 
+    if (_event.response
+      && _event.response.commentTree
       && _event.response.commentTree.commentTreeId) {
       this.fetchInitialComments_v2(_event.response.commentTree.commentTreeId, true)
     }
@@ -325,7 +394,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     //     this.likeUnlikeCommentApi('like', event.commentId)
     //   }
     // })
-    if(this.userLikedComments.includes(event.commentId)) {
+    if (this.userLikedComments.includes(event.commentId)) {
       this.likeUnlikeCommentApi('dislike', event.commentId)
     } else {
       this.likeUnlikeCommentApi('like', event.commentId)
@@ -366,7 +435,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   }
 
   emptySearch() {
-    this.commentSvc.emptyCommentSearch().subscribe((_res: any) => {})
+    this.commentSvc.emptyCommentSearch().subscribe((_res: any) => { })
   }
 
 }
