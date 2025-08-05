@@ -13,8 +13,8 @@ const ENDPOINTS = {
   CADRE_CONFIG: "/apis/proxies/v8/data/v2/system/settings/get/cadreConfig",
   DESIGNATION_LIST: "/apis/proxies/v8/designation/search",
   SEARCH_V4: "/apis/proxies/v8/sunbirdigot/v4/search",
-  CREATE_USERGROUPS_CONTROL: "/apis/proxies/v8/accessSetttings/v1/upsert",
-  GET_ACCESS_CONTROL: (id: string) => `/apis/proxies/v8/accessSetttings/read/${id}`,
+  CREATE_USERGROUPS_CONTROL: "/apis/proxies/v8/accessSettings/v1/upsert",
+  GET_ACCESS_CONTROL: (id: string) => `/apis/proxies/v8/accessSettings/read/${id}`,
   ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`,
   PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`
 };
