@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-notification",
-  "version": "0.0.05-cbrelease-4.8.26",
+  "version": "0.0.1-cbrelease-4.8.28",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
@@ -15,7 +15,7 @@
     "prestart": "npm run tailwind"
   },
   "dependencies": {
-   "@angular/animations": "^16.2.12",
+    "@angular/animations": "^16.2.12",
     "@angular/cdk": "^16.2.14",
     "@angular/common": "^16.2.12",
     "@angular/compiler": "^16.2.12",
@@ -26,12 +26,14 @@
     "@angular/router": "^16.2.12",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
-    "@sunbird-cb/utils-v2": "0.0.27-ang-13-16",
+    "@sunbird-cb/utils-v2": "0.0.42-ang-13-16",
     "@sunbird-cb/consumption": "0.0.20-cbrelease-4.8.23",
     "rxjs": "~6.6.6",
     "rxjs-compat": "^6.6.6",
     "tslib": "^2.0.0",
-    "tryer":"^1.0.1"
+    "tryer": "^1.0.1",
+    "ngx-image-cropper": "^6.3.4",
+    "@ngx-translate/core": "^15.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.16",

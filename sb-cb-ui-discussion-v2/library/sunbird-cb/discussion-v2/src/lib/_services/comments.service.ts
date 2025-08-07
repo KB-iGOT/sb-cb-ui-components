@@ -20,7 +20,9 @@ const API_END_POINTS = {
   UPDATE_COMMENT: `/apis/proxies/v8/comment/v1/update`,
   DELETE_COMMENT: (commentId: string, entityType: string, entityId: string, workflow: string) =>
     `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
-  LIKED_COMMENTS: (entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`
+  LIKED_COMMENTS: (entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`,
+  SEARCH_USERS: '/apis/proxies/v8/user/v1/search',
+  GET_COMMENT_BY_ID:  `/apis/proxies/v8/comment/list`,
 }
 
 @Injectable({
@@ -59,6 +61,10 @@ export class CommentsService {
     return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
   }
 
+  commentList(payload: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+  }
+
 
   addFirstComment(req: any): Observable<any> {
     return this.http.post<any>(API_END_POINTS.ADD_FIRST_COMMENT, req)
@@ -88,7 +94,7 @@ export class CommentsService {
 
   deleteComment(commentId: string, entityType: string, entityId: string, workflow: string, parentId?: any): Observable<any> {
     let url = API_END_POINTS.DELETE_COMMENT(commentId, entityType, entityId, workflow)
-    if(parentId) {
+    if (parentId) {
       url = `${url}&parentId=${parentId}`
     }
     return this.http.delete<any>(url)
@@ -112,5 +118,19 @@ export class CommentsService {
     }
     // return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
     return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+  }
+
+
+  searchUsers(value: string, rootOrgId: string): Observable<any> {
+    const reqBody = {
+      request: {
+        query: value,
+        filters: {
+          rootOrgId,
+          status: 1,
+        },
+      },
+    }
+    return this.http.post<any>(`${API_END_POINTS.SEARCH_USERS}`, reqBody)
   }
 }

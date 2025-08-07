@@ -71,7 +71,7 @@
                 <span class="mr-2 font-semibold ws-mat-default-text">Replying to {{tagUserData[tagUser]?.first_name}}</span>
             </ng-container> -->
             <div class="comment-txt nodtranslate {{comment?.commentData?.comment.length > 152 && !comment?.commentData?.expanded ? 'expand' : 'un-expand'}}"
-                [innerHTML]="getCommentMsg(comment?.commentData?.taggedUsers, comment?.commentData?.comment)">
+                [innerHTML]="getCommentMsg(comment?.commentData?.taggedUsers, comment?.commentData?.comment) | mentionHighlight">
             </div>
         </div>
         <div class="more-or-less" *ngIf="comment?.commentData?.comment.length > 152">
@@ -83,8 +83,24 @@
     </div>
     <div class="mt-4 mb-4" *ngIf="isEditMode">
         <div class="relative w-full flex ">
-            <input #comment name="comment" class="flex-1 discuss-input " [(ngModel)]="editCommentData.comment"
-                i18n-placeholder [placeholder]="'Add a comment'" (focus)="onFocus()">
+            <input #comment #description name="comment" class="flex-1 discuss-input "
+                [(ngModel)]="editCommentData.comment" i18n-placeholder [placeholder]="'Add a comment'"
+                (focus)="onFocus()" (input)="handleInput($event)" (keyup)="onTextareaKeyUp($event)">
+            <!-- Add the mention dropdown container -->
+            <div class="mention-dropdown" *ngIf="showMentionDropdown">
+                <div *ngIf="isLoadingUsers" class="mention-loading">
+                    <mat-spinner diameter="20"></mat-spinner>
+                    <span>Loading users...</span>
+                </div>
+                <div *ngIf="!isLoadingUsers && mentionUsers.length > 0" class="mention-list">
+                    <div *ngFor="let user of mentionUsers; let i = index" class="mention-list-item"
+                        [class.active]="i === activeMentionIndex" (click)="selectMention(user)">
+                        <div class="mention-user-info">
+                            <div class="mention-user-name">{{ user.userName }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <mat-icon class="icon emoji-picker" aria-hidden="false" i18n-aria-label aria-label="Fail"
                 (click)="toggleEmojiPicker()">sentiment_satisfied</mat-icon>
             <br />
@@ -153,8 +169,9 @@
                 <ng-container *ngIf="!loading">
                     <ng-container *ngFor="let reply of fetchedReplyData">
                         <d-v2-comment-card [cardType]="cardConfig?.repliesSection?.replyCardConfig?.cardType"
-                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)" [replyParendtData]="fetchedReplyData"
-                            [userLikedComments]="userLikedComments" [commentUsersData]="commentUsersData"
+                            [replyData]="replyDataCopy" (newReply)="updateRepliesData($event)"
+                            [replyParendtData]="fetchedReplyData" [userLikedComments]="userLikedComments"
+                            [commentUsersData]="commentUsersData"
                             [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply"
                             [tagUserData]="tagUserData" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </ng-container>

@@ -14,3 +14,6 @@ export * from './lib/_common/notification-dropdown/notification-dropdown.compone
 
 export * from './lib/_common/all-notifications/all-notifications.module'
 export * from './lib/_common/all-notifications/all-notifications.component'
+
+export * from './lib/_common/view-content/view-content.component'
+export * from './lib/_common/content-card/content-card.component'

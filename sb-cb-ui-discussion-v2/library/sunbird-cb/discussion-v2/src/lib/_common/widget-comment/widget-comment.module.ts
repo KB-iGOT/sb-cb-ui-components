@@ -14,13 +14,14 @@ import { CommentsService } from '../../_services/comments.service'
 import { PipesModule } from '../../_pipes/pipes.module'
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
-import { MatLegacyMenuModule  as MatMenuModule } from '@angular/material/legacy-menu'
+import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
 import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PickerModule } from '@ctrl/ngx-emoji-mart'
 import { SharedModule } from '../../_shared/shared.module'
+import { MentionHighlightPipe } from '../../_pipes/mention-highlight.pipe'
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { SharedModule } from '../../_shared/shared.module'
     NewCommentComponent,
     CommentCardComponent,
     WidgetCommentComponent,
+    MentionHighlightPipe,
   ],
   imports: [
     CommonModule,
