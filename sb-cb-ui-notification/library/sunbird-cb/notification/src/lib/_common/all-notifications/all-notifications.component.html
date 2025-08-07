@@ -10,46 +10,15 @@
         <div class="notification-list w-full">
           <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
             id="notification-{{notification?.notification_id}}" *ngFor="let notification of notifications">
-            <ng-container *ngIf="notification?.category === 'LEARN_CONTENT'">
-              <div class="flex gap-3 justify-between"
-                (click)="notification?.message?.data?.id?.length  === 1 ? redirectToNotification(notification) : ''">
-                <div class="flex gap-3 item-center">
-                  <div class="image" *ngIf="showIcon">
-                    <img [src]="getIconPath(notification?.category)" alt="notification" />
-                  </div>
-                  <div class="item-title">{{notification?.message?.body}}</div>
+            <div class="flex gap-3 justify-between" (click)="redirectToNotification(notification)">
+              <div class="flex gap-3 item-center">
+                <div class="image" *ngIf="showIcon">
+                  <img [src]="getIconPath(notification?.category)" alt="notification" />
                 </div>
-                <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
+                <div class="item-title">{{notification?.message?.body}}</div>
               </div>
-              <div class="item-description pt-1">
-                <div *ngIf="notification?.message?.data?.id?.length > 1">
-                  <div class="cursor-pointer underline link"
-                    *ngIf="notification?.message?.data?.id?.length > 1 && notification?.isExpanded"
-                    (click)="action(notification)">
-                    Click to collapse
-                  </div>
-                  <div class="cursor-pointer underline link"
-                    *ngIf="notification?.message?.data?.id?.length > 1 && !notification?.isExpanded"
-                    (click)="action(notification)">
-                    Click to expand
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="notification?.isExpanded">
-                <sb-uin-view-content [notification]="notification"></sb-uin-view-content>
-              </div>
-            </ng-container>
-            <ng-container *ngIf="notification?.category !== 'LEARN_CONTENT'">
-              <div class="flex gap-3 justify-between" (click)="redirectToNotification(notification)">
-                <div class="flex gap-3 item-center">
-                  <div class="image" *ngIf="showIcon">
-                    <img [src]="getIconPath(notification?.category)" alt="notification" />
-                  </div>
-                  <div class="item-title">{{notification?.message?.body}}</div>
-                </div>
-                <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
-              </div>
-            </ng-container>
+              <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
+            </div>
           </div>
         </div>
       </div>

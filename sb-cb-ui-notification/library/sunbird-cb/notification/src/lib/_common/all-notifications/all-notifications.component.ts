@@ -150,49 +150,7 @@ export class AllNotificationsComponent implements OnInit {
   loadNotifications() {
     this.loading = true
     this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
-      let dummy = {
-        "read": true,
-        "role": null,
-        "sub_category": "CONTENT_LIVE",
-        "sub_type": "ALERT",
-        "created_at": "2025-07-09T07:12:30.596Z",
-        "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75d",
-        "source": "USER_CREATED",
-        "type": "IN_APP",
-        "message": {
-          "data": {
-            "id": ["do_113540184895873024146", "do_113976905939918848122"
-            ],
-            "count": 6
-          },
-          "body": "Your content 'ADV ASMT - Principal Mining Architect - QW9671' has been published successfully."
-        },
-        "category": "LEARN_CONTENT"
-      }
-      let dummy1 = {
-        "read": true,
-        "role": null,
-        "sub_category": "CONTENT_LIVE",
-        "sub_type": "ALERT",
-        "created_at": "2025-07-09T07:12:30.596Z",
-        "notification_id": "9c270d13-6e10-4205-b8b6-5c4844a6e75ds",
-        "source": "USER_CREATED",
-        "type": "IN_APP",
-        "message": {
-          "data": {
-            "id": ['do_113540184895873024146'],
-            // "id": ["do_1143662801561272321416", "do_1143662844448686081458", "do_11415533689699532812",
-            //   "do_1143662830669250561449",
-            // ],
-            "count": 6
-          },
-          "body": "Your content 'ADV ASMT - QW9671' has been published successfully."
-        },
-        "category": "LEARN_CONTENT"
-      }
-      // this.response = [dummy, dummy1]
       this.response = _.get(res, 'result.notifications', [])
-      this.response = [dummy, dummy1, ...this.response]
       this.response = this.response.map(notification => ({
         ...notification,
         isExpanded: this.fragment && this.fragment === notification.notification_id,
