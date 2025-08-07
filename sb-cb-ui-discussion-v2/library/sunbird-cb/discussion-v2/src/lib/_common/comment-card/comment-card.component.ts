@@ -344,7 +344,6 @@ export class CommentCardComponent implements OnInit, OnChanges {
 
   updateComment() {
     const mentions = this.getMentionedUsers(this.editCommentData.comment)
-    debugger
     let requestData: any = {
       "commentTreeId": this.commentSvc.commentTreeId,
       "commentId": this.comment.commentId,
@@ -572,6 +571,32 @@ export class CommentCardComponent implements OnInit, OnChanges {
       this.closeMentionDropdown()
     } else {
       //this._snackBar.open(`You have already tagged ${user.userName}`)
+    }
+  }
+
+  onTextareaKeyUp(event: KeyboardEvent): void {
+    // Handle navigation in mention dropdown
+    if (this.showMentionDropdown) {
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault()
+          this.activeMentionIndex = Math.min(this.activeMentionIndex + 1, this.mentionUsers.length - 1)
+          return
+        case 'ArrowUp':
+          event.preventDefault()
+          this.activeMentionIndex = Math.max(this.activeMentionIndex - 1, 0)
+          return
+        case 'Enter':
+          event.preventDefault()
+          if (this.mentionUsers.length > 0) {
+            this.selectMention(this.mentionUsers[this.activeMentionIndex])
+          }
+          return
+        case 'Escape':
+          event.preventDefault()
+          this.closeMentionDropdown()
+          return
+      }
     }
   }
 }
