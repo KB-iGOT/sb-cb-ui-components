@@ -22,6 +22,7 @@ const API_END_POINTS = {
     `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
   LIKED_COMMENTS: (entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`,
   SEARCH_USERS: '/apis/proxies/v8/user/v1/search',
+  GET_COMMENT_BY_ID:  `/apis/proxies/v8/comment/list`,
 }
 
 @Injectable({
@@ -57,6 +58,10 @@ export class CommentsService {
   }
 
   fetchAllComment_V3(payload: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+  }
+
+  commentList(payload: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
   }
 
