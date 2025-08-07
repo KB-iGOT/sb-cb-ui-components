@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/notification",
-  "version": "0.0.05-cbrelease-4.8.26",
+  "version": "0.0.1-cbrelease-4.8.28",
   "dependencies": {
     "tslib": "^2.0.0"
   },
