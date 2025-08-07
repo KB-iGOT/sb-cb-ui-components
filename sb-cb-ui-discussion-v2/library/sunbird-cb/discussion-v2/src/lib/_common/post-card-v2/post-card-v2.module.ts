@@ -18,14 +18,12 @@ import { SharedModule } from '../../_shared/shared.module'
 import { ImageSlidersModule } from '../image-sliders/image-sliders.module'
 import { NewPostModule } from '../new-post/new-post.module'
 import { PostCardV2Component } from './post-card-v2.component'
-import { MentionHighlightPipe } from '../../_pipes/mention-highlight.pipe'
 
 
 
 @NgModule({
   declarations: [
     PostCardV2Component,
-    MentionHighlightPipe
   ],
   imports: [
     CommonModule,
@@ -45,7 +43,7 @@ import { MentionHighlightPipe } from '../../_pipes/mention-highlight.pipe'
     MatCheckboxModule,
     SharedModule,
     ImageSlidersModule,
-    NewPostModule
+    NewPostModule,
   ],
   exports: [PostCardV2Component],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
