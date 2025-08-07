@@ -7,6 +7,7 @@ export namespace NsAccessControlConfig {
     visiblilityOnOff: IVisiblilityOnOff;
     userConfig: { [key: string]: any; userRoles: any };
     content: any;
+    application: string;
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];
@@ -20,6 +21,8 @@ export namespace NsAccessControlConfig {
     verificationStatus: ISelectionOption[];
     accessTypes: { name: string; value: string; tooltip: string; disabled: boolean }[];
     readOnly: boolean;
+    canShowAccessTypeRadio: boolean;
+    shouldShowVisibilityToggle: boolean;
   }
 
   export interface IOptionsEntity {
@@ -102,6 +105,11 @@ export namespace NsAccessControlConfig {
     ALL_USERS = "allUsers",
     MDO_SPECIFIC = "mdoSpecific",
     CUSTOME_USER = "customeUser"
+  }
+
+  export enum Application {
+    MDO = "mdo_portal",
+    Creation_Portal = "creation_portal",
   }
 }
 

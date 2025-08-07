@@ -80,52 +80,113 @@
                       <div class="divider-apl" *ngIf="!last"></div>
                     </ng-container>
                   </div>
-                  <ng-container *ngIf="checkIfData; else noData">
-                    <div class="flex overflow-x-auto" (scroll)="onScrollPaginate($event)">
-                      <ng-container *ngFor="let group of groupedEntityData | keyvalue">
-                        <div class="org-column p-2 mr-4" [attr.id]="'section-' + group.key">
-                          <div class="org-list">
-                            <div class="batch-range-columns">
-                              <ng-container *ngIf="group.value && group.value.length">
-                                <ng-container *ngFor="let column of group.value">
-                                  <div class="batch-column">
-                                    <div *ngFor="let entity of column" class="org-card py-2">
-                                      <ng-container
-                                        *ngIf="
-                                          selectionType === selectionTypeEnum.Designation ||
-                                          selectionType === selectionTypeEnum.Organizations ||
-                                          selectionType === selectionTypeEnum.Service ||
-                                          selectionType === selectionTypeEnum.Cadre
-                                        ">
-                                        <mat-checkbox
-                                          [disabled]="
-                                            accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled
-                                          "
-                                          [checked]="isSelected(entity)"
-                                          (change)="toggleSelection(entity)"
-                                          [title]="entity?.name || entity?.designation || entity?.channel">
-                                          {{ entity?.name || entity?.designation || entity?.channel }}
-                                        </mat-checkbox>
-                                      </ng-container>
-                                      <ng-container *ngIf="selectionType === selectionTypeEnum.Batch">
-                                        <mat-checkbox
-                                          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
-                                          [checked]="isSelected(entity)"
-                                          (change)="toggleSelection(entity)"
-                                          [title]="entity">
-                                          {{ entity }}
-                                        </mat-checkbox>
-                                      </ng-container>
-                                    </div>
-                                  </div>
-                                </ng-container>
-                              </ng-container>
-                            </div>
-                          </div>
-                        </div>
+
+                  <ng-container *ngIf="selectionType === selectionTypeEnum.Service && application === APPLICATION_ENUM.MDO">
+                    <div class="flex gap-4 items-center px-2 my-3 options-checkbox">
+                      <ng-container *ngFor="let selectionType of serviceSelectionTypes">
+                        <mat-checkbox
+                          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+                          [checked]="selectionType === 'All India Services'"
+                          (change)="onChangeServiceSelectionType($event, selectionType)"
+                          [title]="selectionType">
+                          {{ selectionType }}
+                        </mat-checkbox>
                       </ng-container>
                     </div>
+                    <div class="alphabet-filter">
+                      <ng-container *ngFor="let letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split(''); let i = index; let last = last">
+                        <button
+                          mat-button
+                          class="letter-button"
+                          (click)="scrollToSection(letter)"
+                          [ngClass]="{
+                            'active-range-btn': selectedCharacterRange === letter
+                          }">
+                          {{ letter }}
+                        </button>
+                        <div class="divider-apl" *ngIf="!last"></div>
+                      </ng-container>
+                    </div>
+                    <ng-container *ngIf="checkIfData; else noData">
+                      <div class="flex overflow-x-auto">
+                        <ng-container *ngFor="let group of groupedEntityData | keyvalue">
+                          <div class="org-column p-2 mr-4" [attr.id]="'section-' + group.key">
+                            <div class="org-list">
+                              <div class="batch-range-columns">
+                                <ng-container *ngIf="group.value && group.value.length">
+                                  <ng-container *ngFor="let column of group.value">
+                                    <div class="batch-column">
+                                      <div *ngFor="let entity of column" class="org-card py-2">
+                                        <ng-container>
+                                          <mat-checkbox
+                                            [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+                                            [checked]="isSelected(entity)"
+                                            (change)="toggleSelection(entity)"
+                                            [title]="entity?.name || entity?.designation || entity?.channel">
+                                            {{ entity?.name || entity?.designation || entity?.channel }}
+                                          </mat-checkbox>
+                                        </ng-container>
+                                      </div>
+                                    </div>
+                                  </ng-container>
+                                </ng-container>
+                              </div>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </ng-container>
                   </ng-container>
+
+                  <ng-container *ngIf="application !== APPLICATION_ENUM.MDO || selectionType !== selectionTypeEnum.Service">
+                    <ng-container *ngIf="checkIfData; else noData">
+                      <div class="flex overflow-x-auto" (scroll)="onScrollPaginate($event)">
+                        <ng-container *ngFor="let group of groupedEntityData | keyvalue">
+                          <div class="org-column p-2 mr-4" [attr.id]="'section-' + group.key">
+                            <div class="org-list">
+                              <div class="batch-range-columns">
+                                <ng-container *ngIf="group.value && group.value.length">
+                                  <ng-container *ngFor="let column of group.value">
+                                    <div class="batch-column">
+                                      <div *ngFor="let entity of column" class="org-card py-2">
+                                        <ng-container
+                                          *ngIf="
+                                            selectionType === selectionTypeEnum.Designation ||
+                                            selectionType === selectionTypeEnum.Organizations ||
+                                            (selectionType === selectionTypeEnum.Service && application !== APPLICATION_ENUM.MDO) ||
+                                            selectionType === selectionTypeEnum.Cadre
+                                          ">
+                                          <mat-checkbox
+                                            [disabled]="
+                                              accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled
+                                            "
+                                            [checked]="isSelected(entity)"
+                                            (change)="toggleSelection(entity)"
+                                            [title]="entity?.name || entity?.designation || entity?.channel">
+                                            {{ entity?.name || entity?.designation || entity?.channel }}
+                                          </mat-checkbox>
+                                        </ng-container>
+                                        <ng-container *ngIf="selectionType === selectionTypeEnum.Batch">
+                                          <mat-checkbox
+                                            [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+                                            [checked]="isSelected(entity)"
+                                            (change)="toggleSelection(entity)"
+                                            [title]="entity">
+                                            {{ entity }}
+                                          </mat-checkbox>
+                                        </ng-container>
+                                      </div>
+                                    </div>
+                                  </ng-container>
+                                </ng-container>
+                              </div>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </ng-container>
+                  </ng-container>
+                  
                   <ng-template #noData>
                     <div class="no-data p-4 flex flex-column items-center justify-center">
                       <img src="/assets/icons/no-events.png" alt="no-data" />
