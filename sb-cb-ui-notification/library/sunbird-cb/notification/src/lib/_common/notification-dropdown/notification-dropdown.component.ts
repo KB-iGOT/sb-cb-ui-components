@@ -58,7 +58,7 @@ export class NotificationDropdownComponent implements OnInit {
   }
 
   markAsRead(notification: any) {
-    const request: any = {
+    let request: any = {
       request: {
         type: 'individual',
         ids: [notification.notification_id]
