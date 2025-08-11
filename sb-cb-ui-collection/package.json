@@ -1,9 +1,9 @@
 {
   "name": "sb-cb-ui-collection",
-  "version": "1.0.56-ang-13-16",
+  "version": "1.0.56-utils-upgrade",
   "scripts": {
     "ng": "ng",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
     "test": "ng test",
     "e2e": "ng e2e",
     "i18n": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng xi18n --output-path locale",
@@ -25,7 +25,7 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "@sunbird-cb/design-system": "0.0.1",
     "@sunbird-cb/resolver-v2": "^0.0.7-ang-13-16",
-    "@sunbird-cb/utils-v2": "0.0.42-spv-mdo-upgrade",
+    "@sunbird-cb/utils-v2": "0.0.43-spv-mdo-upgrade",
     "@types/lodash": "4.14.168",
     "chart.js": "^2.9.4",
     "moment": "^2.29.1",

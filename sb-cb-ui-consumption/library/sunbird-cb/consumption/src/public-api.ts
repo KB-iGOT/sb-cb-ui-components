@@ -68,6 +68,7 @@ export * from './lib/_common/competency-passbook-mdo/competency-passbook-mdo.com
 export * from './lib/_common/user-content-rating/user-content-rating-lib.component'
 export * from './lib/_common/microsites/mdo-channels/mdo-channel-v1/mdo-channel-v1.component'
 export * from './lib/_common/microsites/mdo-channels/mdo-channel-v2/mdo-channel-v2.component'
+export * from './lib/_common/microsites/mdo-channels/mdo-channel-v3/mdo-channel-v3.component'
 export * from './lib/_common/microsites/providers/providers-v2/providers-v2.component'
 export * from './lib/_common/key-highlights/key-highlights.module'
 export * from './lib/_common/events/events.module'
