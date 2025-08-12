@@ -49,7 +49,7 @@ export class ContentLanguageService {
     let output = [];
     
     // Case 1: When languageMapV1 is available
-    if (content.languageMapV1 && Object.keys(content.languageMapV1).length > 0) {
+    if (content && content.languageMapV1 && Object.keys(content.languageMapV1).length > 0) {
       // Iterate over each language in languageMapV1
       for (const langKey of Object.keys(content.languageMapV1)) {
         const langData = content.languageMapV1[langKey];
@@ -72,7 +72,7 @@ export class ContentLanguageService {
       }
     } 
     // Case 2: When languageMapV1 is not available, use language array
-    else if (content.language && content.language.length > 0) {
+    else if (content && content.language && content.language.length > 0) {
       for (const lang of content.language) {
         const masterLang = masterLanguages.get(lang.toLowerCase());
         
