@@ -121,6 +121,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   rootOrgId = ''
   allUsers: any[] = []
   allProccessedUsers: any[] = []
+  detectedLanguage = ''
 
   constructor(
     private fb: FormBuilder,
@@ -636,18 +637,28 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.uploadForm.valid) {
-      // const formData = {
-      //   ...this.uploadForm.value,
-      //   // tags: this.selectedTags
-      // };
+      await this.getDetectedLanguage()
       if (this.data.editMode) {
         this.handleEditFlow()
       } else {
         this.handlePostCreation()
       }
     }
+  }
+
+  getDetectedLanguage(): Promise<void> {
+    const description = this.uploadForm.value.description || ''
+    return new Promise((resolve) => {
+      this.discussV2Svc.detectLanguage({ text: description }).subscribe({
+        next: (res) => {
+          this.detectedLanguage = _.get(res, 'detected_language', '')
+          resolve()
+        },
+        error: () => resolve()
+      })
+    })
   }
 
   private handlePostCreation(): void {
@@ -890,7 +901,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
 
   createReq(formData: any, type: string) {
     const communityId = this.isGlobal ? formData.value.community && formData.value.community.communityid : this.data.community.communityId || ''
-    const req = {
+    const req: any = {
       type,
       ...(this.data.parentDiscussionId && (type !== NsDiscussionV2.EPostType.ANSWER_POST_REPLY) ?
         { parentDiscussionId: this.data.parentDiscussionId } : null),
@@ -905,6 +916,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       // tags: this.selectedTags,
       // mediaUrls: this.mediaUrls || []
       ...(this.mentionedUsers.length > 0 ? { mentionedUsers: this.mentionedUsers } : {})
+    }
+    if (this.detectedLanguage) {
+      req['language'] = this.detectedLanguage
     }
     return req
   }
@@ -977,7 +991,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   async editPost() {
     const newMedia = await this.editUploadHandler(this.data.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.data.post.mediaCategory)
-    const updateReq = {
+    const updateReq: any = {
       discussionId: this.data.post.discussionId,
       communityId: this.data.post.communityId,
       // title: this.uploadForm.value.title,
@@ -987,6 +1001,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
       ...(this.mentionedUsers.length > 0 ? { mentionedUsers: this.mentionedUsers } : {})
+    }
+    if (this.detectedLanguage) {
+      updateReq['language'] = this.detectedLanguage
     }
 
     this.discussV2Svc.updatePost(updateReq).subscribe({
@@ -1006,7 +1023,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   async editAnswerPost() {
     const newMedia = await this.editUploadHandler(this.data.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.data.post.mediaCategory)
-    const updateReq = {
+    const updateReq: any = {
       answerPostId: this.data.post.discussionId,
       // communityId: this.data.post.communityId,
       // title: this.uploadForm.value.title,
@@ -1015,6 +1032,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       categoryType: [...this.categoryType],
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
+    }
+    if (this.detectedLanguage) {
+      updateReq['language'] = this.detectedLanguage
     }
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
@@ -1033,7 +1053,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   async editAnswerPostReply() {
     const newMedia = await this.editUploadHandler(this.data.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.data.post.mediaCategory)
-    const updateReq = {
+    const updateReq: any = {
       answerPostReplyId: this.data.post.discussionId,
       // communityId: this.post.communityId,
       // title: this.uploadForm.value.title,
@@ -1042,6 +1062,9 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
       categoryType: [...this.categoryType],
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
+    }
+    if (this.detectedLanguage) {
+      updateReq['language'] = this.detectedLanguage
     }
     this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
       next: (res) => {
