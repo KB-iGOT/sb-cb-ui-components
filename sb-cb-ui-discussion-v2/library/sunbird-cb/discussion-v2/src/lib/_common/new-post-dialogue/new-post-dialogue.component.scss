@@ -291,3 +291,18 @@
   height: 18px;
   width: 18px;
 }
+
+.note-card {
+  background-color: #f699531f;
+  border-radius: 8px;
+
+  .note-icon {
+    min-width: 24px;
+  }
+
+  .note-text {
+    /* stylelint-disable */
+    font: 400 14px 'Lato';
+    /* stylelint-enable */
+  }
+}

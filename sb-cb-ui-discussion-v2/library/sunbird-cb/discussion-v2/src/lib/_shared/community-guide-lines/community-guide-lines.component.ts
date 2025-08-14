@@ -1,6 +1,6 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core'
+import { MatDialogRef } from '@angular/material/dialog'
+import { MAT_DIALOG_DATA } from '@angular/material/dialog'
 
 @Component({
   selector: 'd-v2-community-guide-lines',
@@ -10,11 +10,12 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class CommunityGuideLinesComponent {
   selectedFlags: any = []
   othersTextData: any = ''
+  isProfanity: boolean = false;
   constructor(
     public dialogRef: MatDialogRef<CommunityGuideLinesComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-
+    this.isProfanity = data?.isProfanity || false
   }
   cancel() {
     this.dialogRef.close(false)
@@ -23,4 +24,4 @@ export class CommunityGuideLinesComponent {
   submit(): void {
     this.dialogRef.close(true)
   }
-} 
+}
