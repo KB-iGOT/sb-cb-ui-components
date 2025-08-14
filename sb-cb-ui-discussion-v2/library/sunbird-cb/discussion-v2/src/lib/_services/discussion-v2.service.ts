@@ -36,7 +36,7 @@ const API_END_POINTS = {
   GLOBAL_FEED: `/apis/proxies/v8/feedDiscussion/globalFeed`,
   ENRICH_DATA: `/apis/proxies/v8/feedDiscussion/v1/enrichData`,
   SEARCH_USERS: '/apis/proxies/v8/user/v1/search',
-  DETECT_LANGUAGE: '/apis/proxies/v8/content/v1/language/detect',
+  DETECT_LANGUAGE: '/apis/proxies/v8/moderation/v1/language/detect',
 }
 
 

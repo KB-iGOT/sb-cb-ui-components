@@ -1,14 +1,15 @@
-import { Component, Input, OnInit, Inject, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
-import { DiscussionV2Service } from '../../_services/discussion-v2.service';
-import { ConfigurationsService, UtilityService } from '@sunbird-cb/utils-v2';
-import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
-import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, Input, OnInit, Inject, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core'
+import { DiscussionV2Service } from '../../_services/discussion-v2.service'
+import { ConfigurationsService, UtilityService } from '@sunbird-cb/utils-v2'
+import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service'
+import { FlagDialogueComponent } from '../../_shared/flag-dialogue/flag-dialogue.component'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 // tslint:disable-next-line
 import _ from 'lodash'
-import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
-import { CommunityGuideLinesComponent } from '../../_shared/community-guide-lines/community-guide-lines.component';
+import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component'
+import { CommunityGuideLinesComponent } from '../../_shared/community-guide-lines/community-guide-lines.component'
+import { ActivatedRoute } from '@angular/router'
 
 @Component({
   selector: 'd-v2-widget-community-home',
@@ -25,32 +26,32 @@ export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
   communityData: any = {}
   userJoinedCommunityList: any = []
   userJoinedCommunity: boolean = false
-  hideCardBody:boolean | undefined
+  hideCardBody: boolean | undefined
   enableShare: boolean = false
-  rootOrgId: String= ''
+  rootOrgId: String = ''
   compentencyKey: any
   environment: any
   competenciesObject: any = []
   competencySelected = ''
   userId: any
   flagSelectionList: any
-  selectedTab = 0; 
+  selectedTab = 0;
   selectedTabName: any = 'Feeds'
-  shortCutData: any[]= [
+  shortCutData: any[] = [
     {
-      name:"Saved Posts",
-      icon:"bookmark_border",
-      link:"/page/learn"
+      name: "Saved Posts",
+      icon: "bookmark_border",
+      link: "/page/learn"
     },
     {
-      name:"Posts By You",
-      icon:"list_alt",
-      link:""
+      name: "Posts By You",
+      icon: "list_alt",
+      link: ""
     },
     {
-      name:"Pending Request",
-      icon:"update",
-      link:""
+      name: "Pending Request",
+      icon: "update",
+      link: ""
     }
   ]
 
@@ -63,7 +64,7 @@ export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
       icon: '',
     },
     sliderConfig: {
-      showNavs : true,
+      showNavs: true,
       showDots: false,
     },
     loader: true,
@@ -82,28 +83,31 @@ export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
   }
   isExpandedView = false;
   loadedCommunitiesData: boolean = false
-toggleExpandedView() {
-  this.isExpandedView = !this.isExpandedView;
-}
-  
+  isProfanity = false;
+  guidelienesChecked = false
+  toggleExpandedView() {
+    this.isExpandedView = !this.isExpandedView
+  }
+
   constructor(
     @Inject('environment') environment: any,
-    private dialog:MatDialog,
+    private dialog: MatDialog,
     private discussV2Svc: DiscussionV2Service,
     private configSvc: ConfigurationsService,
     private userEnrollSvc: UserEnrollCommunityService,
     private snackbar: MatSnackBar,
-    private utilitySvc: UtilityService
-  ) { 
+    private utilitySvc: UtilityService,
+    private route: ActivatedRoute
+  ) {
     this.defaultPosterThumbnail = this.utilitySvc.isMobile ? 'assets/instances/eagle/banners/discussion/community-default-mb-banner.svg' : 'assets/instances/eagle/banners/discussion/community-default-pc-banner.svg'
 
     this.environment = environment
-    if(this.configSvc 
+    if (this.configSvc
       && this.configSvc.userProfile
-      && this.configSvc.userProfile.rootOrgId){
+      && this.configSvc.userProfile.rootOrgId) {
       this.rootOrgId = this.configSvc.userProfile.rootOrgId
     }
-    if(this.configSvc && this.configSvc.userProfile && this.configSvc.userProfile?.userId){
+    if (this.configSvc && this.configSvc.userProfile && this.configSvc.userProfile?.userId) {
       this.userId = this.configSvc.userProfile.userId
     }
     this.compentencyKey = this.configSvc.compentency[environment.compentencyVersionKey]
@@ -136,15 +140,29 @@ toggleExpandedView() {
 
   ngOnInit() {
     // this.fetchCommunityData(this.communityId)
+    this.checkIsProfanity()
 
   }
-  
+
+  checkIsProfanity() {
+    this.route.queryParams.subscribe(params => {
+      if (params['profanity'] && params['profanity'] === 'PROFANITY_CHECK') {
+        this.isProfanity = true
+      } else {
+        this.isProfanity = false
+      }
+    })
+  }
+
   fetchCommunityData(id: string) {
     this.communityData = {}
     this.competenciesObject = []
     this.discussV2Svc.communityDetailRead(id).subscribe((resData: any) => {
-      if(resData.result && resData.result.communityDetails){
-        this.communityData = {...resData.result.communityDetails , ...resData.result.communityDetails.data}
+      if (resData.result && resData.result.communityDetails) {
+        this.communityData = { ...resData.result.communityDetails, ...resData.result.communityDetails.data }
+        if (this.isProfanity && !this.guidelienesChecked) {
+          this.joinCommunityPopUp()
+        }
         this.loadCompetencies()
         this.checkUserJoinedCommunity()
 
@@ -164,41 +182,41 @@ toggleExpandedView() {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    
+
     if (changes.communityId) {
-      if(this.communityId) {  
+      if (this.communityId) {
         this.fetchCommunityData(this.communityId)
       }
     }
-    
+
   }
 
-  
-  async manageUserCommunityStatus(onLoad?: boolean){
+
+  async manageUserCommunityStatus(onLoad?: boolean) {
     this.userJoinedCommunityList.forEach((community: any) => {
-      if(community.communityid === this.communityId){
+      if (community.communityid === this.communityId) {
         this.userJoinedCommunity = true
       }
     })
-    if(!onLoad){
+    if (!onLoad) {
       this.userEnrollSvc.clearEnrollDataId()
       this.userJoinedCommunityList = await this.userEnrollSvc.getEnrollDataId()
     }
   }
-  joinCommunity(){
+  joinCommunity() {
     let request = {
-      "communityId":this.communityId
+      "communityId": this.communityId
     }
     this.discussV2Svc.communityJoin(request).subscribe((resData: any) => {
-      
-      if(resData.params && resData.params.status === 'success'){
+
+      if (resData.params && resData.params.status === 'success') {
         let resultData = [
           {
             "communityid": this.communityId,
             "communityName": this.communityData.communityName
           }
         ]
-        this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData];
+        this.userJoinedCommunityList = [...this.userJoinedCommunityList, ...resultData]
         this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
         this.manageUserCommunityStatus()
 
@@ -207,50 +225,50 @@ toggleExpandedView() {
     })
   }
   checkCommunityPresence(): boolean {
-    return this.userJoinedCommunityList.some((community: any) => community.communityid === this.communityId);
+    return this.userJoinedCommunityList.some((community: any) => community.communityid === this.communityId)
   }
-  unJoinCommunity(){
-      const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
-        width: '600px',
-        panelClass: 'flag-dialog',
-        backdropClass: 'flag-dialog-backdrop',
-        data: {
-          question: 'Are you sure you want to leave the community?',
-          button: {
-            confirm: 'Leave',
-            cancel: 'Cancel'
-          },
-          infoMsg:'This is a closed community, if you leave the community you wont be able to join again without the permission of SPV',
-          flagSelectionList: this.flagSelectionList
+  unJoinCommunity() {
+    const confirmDialog = this.dialog.open(ConfirmDialogueComponent, {
+      width: '600px',
+      panelClass: 'flag-dialog',
+      backdropClass: 'flag-dialog-backdrop',
+      data: {
+        question: 'Are you sure you want to leave the community?',
+        button: {
+          confirm: 'Leave',
+          cancel: 'Cancel'
         },
-      })
-      confirmDialog.afterClosed().subscribe((result: any) => {
-        if (result) {
-          // this.deleteCommentMethod(post)
-          let request = { "communityId":this.communityId }
-    this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
-      if(resData.params && resData.params.status === 'success'){
-        const communityIndex = this.userJoinedCommunityList.findIndex((community: any) => community.communityid === this.communityId);
-        if (communityIndex !== -1) {
-          this.userJoinedCommunityList.splice(communityIndex, 1);
-          this.userJoinedCommunity = false
-        }
-        this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
-        this.manageUserCommunityStatus()
-        this.snackbar.open('You\'ve successfully left the community.')
-      }
-
+        infoMsg: 'This is a closed community, if you leave the community you wont be able to join again without the permission of SPV',
+        flagSelectionList: this.flagSelectionList
+      },
     })
-        }
-      })
-  
-    
-    
+    confirmDialog.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // this.deleteCommentMethod(post)
+        let request = { "communityId": this.communityId }
+        this.discussV2Svc.communityUnjoin(request).subscribe((resData: any) => {
+          if (resData.params && resData.params.status === 'success') {
+            const communityIndex = this.userJoinedCommunityList.findIndex((community: any) => community.communityid === this.communityId)
+            if (communityIndex !== -1) {
+              this.userJoinedCommunityList.splice(communityIndex, 1)
+              this.userJoinedCommunity = false
+            }
+            this.userEnrollSvc.setEnrollDataId(this.userJoinedCommunityList)
+            this.manageUserCommunityStatus()
+            this.snackbar.open('You\'ve successfully left the community.')
+          }
+
+        })
+      }
+    })
+
+
+
   }
 
-  getUserId(){
+  getUserId() {
     let userId = ''
-    if(this.configSvc && this.configSvc.userProfile && this.configSvc.userProfile?.userId){
+    if (this.configSvc && this.configSvc.userProfile && this.configSvc.userProfile?.userId) {
       userId = this.configSvc.userProfile.userId
     }
     return userId
@@ -263,7 +281,7 @@ toggleExpandedView() {
 
 
   loadCompetencies(): void {
-    
+
     if (this.communityData && this.communityData[this.compentencyKey.vKey] && this.communityData[this.compentencyKey.vKey].length) {
       const competenciesObject: any = {}
       if (typeof this.communityData[this.compentencyKey.vKey] === 'string'
@@ -273,24 +291,24 @@ toggleExpandedView() {
       this.communityData[this.compentencyKey.vKey].forEach((_obj: any) => {
         if (competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]) {
           if (competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]
-            [_obj[this.compentencyKey.vCompetencyTheme]]) {
+          [_obj[this.compentencyKey.vCompetencyTheme]]) {
             const competencyTheme = competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]
-              [_obj[this.compentencyKey.vCompetencyTheme]]
+            [_obj[this.compentencyKey.vCompetencyTheme]]
             if (competencyTheme.indexOf(_obj[this.compentencyKey.vCompetencySubTheme]) === -1) {
               competencyTheme.push(_obj[this.compentencyKey.vCompetencySubTheme])
             }
           } else {
             competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]
-              [_obj[this.compentencyKey.vCompetencyTheme]] = []
+            [_obj[this.compentencyKey.vCompetencyTheme]] = []
             competenciesObject[_obj[this.compentencyKey.vCompetencyArea]]
-              [_obj[this.compentencyKey.vCompetencyTheme]]
+            [_obj[this.compentencyKey.vCompetencyTheme]]
               .push(_obj[this.compentencyKey.vCompetencySubTheme])
           }
         } else {
           competenciesObject[_obj[this.compentencyKey.vCompetencyArea]] = {}
           competenciesObject[_obj[this.compentencyKey.vCompetencyArea]][_obj[this.compentencyKey.vCompetencyTheme]] = []
           competenciesObject[_obj[this.compentencyKey.vCompetencyArea]][_obj[this.compentencyKey.vCompetencyTheme]]
-          .push(_obj[this.compentencyKey.vCompetencySubTheme])
+            .push(_obj[this.compentencyKey.vCompetencySubTheme])
         }
       })
 
@@ -353,14 +371,14 @@ toggleExpandedView() {
     ))
   }
   onTabChange(event: any) {
-    this.selectedTab = event.index;
+    this.selectedTab = event.index
     this.selectedTabName = event.tab && event.tab.textLabel || 'Feeds'
 
   }
 
   similarCommunity(communityData: any) {
     this.similarCommunityClick.emit(communityData)
-    this.communityId =communityData.communityId
+    this.communityId = communityData.communityId
     this.ngOnInit()
   }
 
@@ -390,7 +408,7 @@ toggleExpandedView() {
       "communityId": this.communityId
     }
     requestData = { ...requestData, ...flagDetails }
-  
+
     this.discussV2Svc.communityFlag(requestData).subscribe((_res: any) => {
       if (_res && _res.responseCode === 'OK') {
         // this.loading = false
@@ -405,38 +423,40 @@ toggleExpandedView() {
   changeToDefaultThumbnailImg($event: any) {
     $event.target.src = this.defaultPosterThumbnail
   }
-  getDiscussionId(discussId: string){
+  getDiscussionId(discussId: string) {
     this.discussionId = discussId
   }
 
   trendingDiscussionIdEmit(event: any) {
-    if(this.discussionId === event) {
+    if (this.discussionId === event) {
       this.scrollToElement(event)
     }
     this.discussionId = event
     this.selectedTab = 0
-    this.selectedTabName =  'Feeds'
+    this.selectedTabName = 'Feeds'
   }
-  private scrollToElement(discussionId:string) {
+  private scrollToElement(discussionId: string) {
     setTimeout(() => {
-      const element = document.getElementById('post-' + discussionId);
+      const element = document.getElementById('post-' + discussionId)
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-    }, 1000);
+    }, 1000)
   }
 
   joinCommunityPopUp() {
     let dialogRef = this.dialog.open(CommunityGuideLinesComponent, {
       data: {
         community: this.communityData,
+        isProfanity: this.isProfanity
       },
       width: window.innerWidth <= 768 ? '100%' : '600px',
       minWidth: window.innerWidth <= 768 ? '100%' : '400px',
       maxWidth: window.innerWidth <= 768 ? '100vw' : '40vw'
     })
     dialogRef.afterClosed().subscribe((result: any) => {
-      if(result) {
+      this.guidelienesChecked = true
+      if (result) {
         this.joinCommunity()
       }
     })
