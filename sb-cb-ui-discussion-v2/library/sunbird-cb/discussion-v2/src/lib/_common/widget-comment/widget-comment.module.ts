@@ -21,7 +21,6 @@ import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/lega
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { PickerModule } from '@ctrl/ngx-emoji-mart'
 import { SharedModule } from '../../_shared/shared.module'
-import { MentionHighlightPipe } from '../../_pipes/mention-highlight.pipe'
 
 @NgModule({
   declarations: [
@@ -29,7 +28,6 @@ import { MentionHighlightPipe } from '../../_pipes/mention-highlight.pipe'
     NewCommentComponent,
     CommentCardComponent,
     WidgetCommentComponent,
-    MentionHighlightPipe,
   ],
   imports: [
     CommonModule,
@@ -48,7 +46,7 @@ import { MentionHighlightPipe } from '../../_pipes/mention-highlight.pipe'
     MatCardModule,
     MatCheckboxModule,
     PickerModule,
-    SharedModule
+    SharedModule,
   ],
   providers: [
     CommentsService,

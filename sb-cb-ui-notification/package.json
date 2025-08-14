@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-notification",
-  "version": "0.0.1-cbrelease-4.8.28",
+  "version": "0.0.3-cbrelease-4.8.28",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
@@ -26,7 +26,6 @@
     "@angular/router": "^16.2.12",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
-    "@sunbird-cb/utils-v2": "0.0.42-ang-13-16",
     "@sunbird-cb/consumption": "0.0.20-cbrelease-4.8.23",
     "rxjs": "~6.6.6",
     "rxjs-compat": "^6.6.6",
