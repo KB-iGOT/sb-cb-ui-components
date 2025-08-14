@@ -649,7 +649,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   }
 
   getDetectedLanguage(): Promise<void> {
-    const description = this.uploadForm.value.description || ''
+    const description = this.getPlainTextFromHtml(this.uploadForm.value.description || '')
     return new Promise((resolve) => {
       this.discussV2Svc.detectLanguage({ text: description }).subscribe({
         next: (res) => {
@@ -659,6 +659,12 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         error: () => resolve()
       })
     })
+  }
+
+  getPlainTextFromHtml(html: string): string {
+    const div = document.createElement('div')
+    div.innerHTML = html || ''
+    return div.textContent || div.innerText || ''
   }
 
   private handlePostCreation(): void {

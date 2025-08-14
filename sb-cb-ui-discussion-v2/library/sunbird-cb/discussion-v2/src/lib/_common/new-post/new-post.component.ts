@@ -494,7 +494,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.uploadForm.valid || Object.keys(this.selectedFilesFinal).length > 0) {
       this.showEmojiPicker = false
-      const description = this.uploadForm.value.description || ''
+      const description = this.getPlainTextFromHtml(this.uploadForm.value.description || '')
       this.getDetectedLanguage(description).subscribe((language: string | undefined) => {
         if (this.editMode) {
           this.handleEditFlow(language)
@@ -505,6 +505,12 @@ export class NewPostComponent implements OnInit, OnDestroy {
     } else {
       this._snackBar.open('Please provide a description or select a file to proceed.', '', { duration: 3000 })
     }
+  }
+
+  getPlainTextFromHtml(html: string): string {
+    const div = document.createElement('div')
+    div.innerHTML = html || ''
+    return div.textContent || div.innerText || ''
   }
 
   getDetectedLanguage(description: string) {

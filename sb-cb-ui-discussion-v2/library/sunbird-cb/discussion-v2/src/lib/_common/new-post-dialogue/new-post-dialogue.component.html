@@ -72,7 +72,7 @@
       </div> -->
 
       <!-- Question Description -->
-      <div class="mb-4 flex flex-col w-full">
+      <div class="flex flex-col w-full">
         <!-- <label class="block text-gray-700 text-sm font-medium mb-2">
           Description <span class="text-red-500">*</span>
         </label> -->
@@ -113,6 +113,12 @@
             </ng-container>
           </div>
         </div>
+      </div>
+
+      <div class="note-card p-3 flex items-center mb-4 gap-2">
+        <mat-icon class="note-icon" i18n-aria-label aria-label="Note">info</mat-icon>
+        <span class="note-text">This content is being moderated and may be removed if it violates community
+          guidelines.</span>
       </div>
 
       <!-- Action Buttons -->
@@ -310,8 +316,9 @@
   <div class="preview-section md:col-span-5">
     <div class="flex flex-col">
       <div class="preview p-2">
-        <d-v2-post-preview [cardType]="widgetData?.levelConfigs[data?.levelKey]?.cardConfig?.cardType" [cardConfig]="widgetData"
-          [post]="postPreview" [levelKey]="data?.levelKey" [currentLevel]="data?.currentLevel"></d-v2-post-preview>
+        <d-v2-post-preview [cardType]="widgetData?.levelConfigs[data?.levelKey]?.cardConfig?.cardType"
+          [cardConfig]="widgetData" [post]="postPreview" [levelKey]="data?.levelKey"
+          [currentLevel]="data?.currentLevel"></d-v2-post-preview>
       </div>
       <div class="text-center">
         <p class="mat-body-1 nodtranslate">Post preview</p>

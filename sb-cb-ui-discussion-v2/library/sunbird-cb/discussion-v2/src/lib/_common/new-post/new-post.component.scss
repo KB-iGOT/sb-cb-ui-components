@@ -311,3 +311,17 @@ input {
   font-size: 12px;
   color: #666;
 }
+
+.note-card {
+  .note-icon {
+    min-width: 24px;
+    color: #1a4ca1;
+  }
+
+  .note-text {
+    /* stylelint-disable */
+    font: 400 14px 'Lato';
+    /* stylelint-enable */
+    color: #1a4ca1;
+  }
+}
