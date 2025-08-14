@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, Valid
 import { COMMA, ENTER } from '@angular/cdk/keycodes'
 import { MatChipInputEvent } from '@angular/material/chips'
 // import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import StripHtmlOnPastePlugin from './restrict-tags'
 import {
   type EditorConfig,
   ClassicEditor,
@@ -291,14 +292,27 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
             onItemClick: this.handleMentionClick.bind(this)
           } as ExtendedMentionFeed,
         ]
-      }
+      },
+      htmlSupport: {
+        allow: [],
+        disallow: [
+          {
+            name: /.*/,
+            attributes: [
+              /^on.*$/,
+              'src', 'href'
+            ]
+          }
+        ]
+      },
+      //extraPlugins: [StripHtmlOnPastePlugin]
     }
     this.widgetData = this.data.config
     this.isGlobal = this.data && this.data.isGlobal || false
     this.uploadForm = this.fb.group({
       community: this.isGlobal ? this.communityCtrl : [''],
       // title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, this.textLengthValidator()]],
+      description: ['', [Validators.required, this.textLengthValidator(), this.removeJsDangerousContent()]],
       tags: [[]],
       files: [[]]
     })
@@ -670,6 +684,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
     this.loading = true
     this.loaderMsg = 'Creating the post!'
     const req = this.createReq(this.uploadForm, this.data.type)
+    console.log('req--', req)
     this.discussV2Svc.createPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -1220,6 +1235,36 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
         this.originalCommunities.some((c: any) => c.communityName === value.communityName)
 
       return isValid ? null : { invalidCommunity: true }
+    }
+  }
+
+  // removeJsDangerousContent(html: string): string {
+  //   console.log('html', html)
+  //   return html
+  //     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+  //     .replace(/&lt;script[\s\S]*?&gt;[\s\S]*?&lt;\/script&gt;/gi, '')
+  //     .replace(/ on\w+="[^"]*"/gi, '')
+  //     .replace(/ on\w+='[^']*'/gi, '')
+  //     .replace(/ on\w+=\w+/gi, '')
+  //     .replace(/href=["']javascript:[^"']*["']/gi, 'href="#"')
+  //     .replace(/src=["']javascript:[^"']*["']/gi, '')
+  // }
+
+  private removeJsDangerousContent(): ValidatorFn {
+    const jsRegex = /&lt;script&gt;|&lt;\s*img[^&gt;]*>|<\s*img[^>]*>|src*=*>|<\s*script[^>]*>|javascript\s*:|on\w+\s*=\s*|(?:src|href)\s*=\s*["']\s*["']/gi
+    //const plainTextAndLinksRegex = /^(?:https?:\/\/[^\s<>"]+|www\.[^\s<>"]+|[\w\s.,!?@#$%^&*()\-=_+\[\]{}:'"\\/|]*)*$/gi
+
+
+
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value
+
+      let val = jsRegex.test(value)
+      console.log('val', val)
+      if (val) {
+        return { jsInjectionDetected: true }
+      }
+      return null
     }
   }
 }

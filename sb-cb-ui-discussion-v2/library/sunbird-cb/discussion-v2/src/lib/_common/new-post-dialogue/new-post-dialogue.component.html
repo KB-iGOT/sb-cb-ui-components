@@ -98,6 +98,9 @@
             <span class="nodtranslate" *ngIf="getEditorTextLength(uploadForm.get('description')?.value) < 3">(Minimum 3
               characters
               required)</span>
+            <span class="nodtranslate error" *ngIf="uploadForm.get('description')?.errors?.jsInjectionDetected">JS
+              Injection
+              not allowed</span>
           </p>
           <div class="relative">
 
@@ -295,7 +298,7 @@
       <!-- Submit Button -->
       <div class="mt-4">
         <button mat-raised-button color="" class="w-full primary-button"
-          [disabled]="!uploadForm.valid || uploadForm.get('description')?.errors?.['maxLength'] || uploadForm.get('description')?.errors?.['minLength']"
+          [disabled]="!uploadForm.valid || uploadForm.get('description')?.errors?.['maxLength'] || uploadForm.get('description')?.errors?.['minLength'] || uploadForm.get('description')?.errors?.jsInjectionDetected"
           (click)="onSubmit()">
           <ng-container *ngIf="!data.editMode">
             <span class="nodtranslate"> {{data?.config?.postBtn?.text || 'Post'}} </span>
@@ -310,8 +313,9 @@
   <div class="preview-section md:col-span-5">
     <div class="flex flex-col">
       <div class="preview p-2">
-        <d-v2-post-preview [cardType]="widgetData?.levelConfigs[data?.levelKey]?.cardConfig?.cardType" [cardConfig]="widgetData"
-          [post]="postPreview" [levelKey]="data?.levelKey" [currentLevel]="data?.currentLevel"></d-v2-post-preview>
+        <d-v2-post-preview [cardType]="widgetData?.levelConfigs[data?.levelKey]?.cardConfig?.cardType"
+          [cardConfig]="widgetData" [post]="postPreview" [levelKey]="data?.levelKey"
+          [currentLevel]="data?.currentLevel"></d-v2-post-preview>
       </div>
       <div class="text-center">
         <p class="mat-body-1 nodtranslate">Post preview</p>
