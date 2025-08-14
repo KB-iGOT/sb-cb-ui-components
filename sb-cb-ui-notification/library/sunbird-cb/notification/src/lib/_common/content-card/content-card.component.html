@@ -6,15 +6,15 @@
         <div class="min-top">
           <div style="position: relative; z-index: 1;">
             <ng-container>
-              <img mat-card-image [src]="content.posterImage | pipePublicURL" loading="lazy"
+              <!-- <img mat-card-image [src]="content.posterImage | pipePublicURL" loading="lazy"
                 class="card-img ws-mat-primary-lite-background margin-remove"
-                [wsUtilsDefaultThumbnail]="defaultThumbnail" [alt]="content.name" />
+                [wsUtilsDefaultThumbnail]="defaultThumbnail" [alt]="content.name" /> -->
             </ng-container>
             <div class="duration-box right-corner" *ngIf="content?.duration > 0 && !(content?.programDuration > 0)">
               <mat-icon class="mat-icon main_icon mr-1 nodtranslate">access_time</mat-icon>
-              <span class=" ws-mat-white-text duration nodtranslate">
+              <!-- <span class=" ws-mat-white-text duration nodtranslate">
                 {{ (content?.duration || 120)| pipeDurationTransform: 'hms' }}
-              </span>
+              </span> -->
             </div>
           </div>
           <div class="padding-m">
@@ -34,10 +34,10 @@
               {{ content.name }}
             </div>
             <div class="flex w-full flex-wrap flex-middle">
-              <div class="course_logo_box" *ngIf="content?.creatorLogo">
+              <!-- <div class="course_logo_box" *ngIf="content?.creatorLogo">
                 <img [src]="content?.creatorLogo | pipePublicURL" loading="lazy" class="source-icon"
                   [alt]="content?.sourceName + '_' + content?.identifier" />
-              </div>
+              </div> -->
               <div class="course_logo_box" *ngIf="!content?.creatorLogo">
                 <img [src]="defaultSLogo" loading="lazy" class="source-icon"
                   [alt]="content?.sourceName + '_' + content?.identifier" />
