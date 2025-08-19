@@ -132,6 +132,12 @@
                                 <div class="w-full nodtranslate">
                                     {{ description?.value?.length}}/{{commentMaxLength}}
                                 </div>
+                                <div class="note-card flex items-center mt-2 mb-4 gap-2">
+                                    <mat-icon class="note-icon" i18n-aria-label aria-label="Note">info</mat-icon>
+                                    <span class="note-text">This content is being moderated and may be removed if it
+                                        violates community
+                                        guidelines.</span>
+                                </div>
                                 <div class="flex-1">
                                     <button mat-icon-button color="primary" class="postIcon image-icon mr-2"
                                         (click)="toggleEmojiPicker()">

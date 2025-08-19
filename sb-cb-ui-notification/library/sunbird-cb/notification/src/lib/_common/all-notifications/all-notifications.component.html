@@ -6,11 +6,11 @@
         <span>{{capitalize(tab?.name)}} &nbsp;</span>
         <span>{{getCount(tab?.read, tab?.unread)}}</span>
       </ng-template>
-      <div class="flex flex-row flex-wrap content-container mt-5" *ngIf="notifications?.length">
+      <div class="flex flex-row flex-wrap content-container mt-5: md:mt-0" *ngIf="notifications?.length">
         <div class="notification-list w-full">
           <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
-            (click)="redirectToNotification(notification)" *ngFor="let notification of notifications">
-            <div class="flex gap-3 justify-between">
+            id="notification-{{notification?.notification_id}}" *ngFor="let notification of notifications">
+            <div class="flex gap-3 justify-between" (click)="redirectToNotification(notification)">
               <div class="flex gap-3 item-center">
                 <div class="image" *ngIf="showIcon">
                   <img [src]="getIconPath(notification?.category)" alt="notification" />
@@ -19,19 +19,6 @@
               </div>
               <div class="timestamp">{{getTimeAgo(notification?.created_at) || ''}}</div>
             </div>
-            <!-- <div class="item-description pt-1">
-              <div *ngIf="notification?.courses">
-                <div class="cursor-pointer underline link" *ngIf="notification?.courses && !notification?.isExpanded"
-                  (click)="action(notification)">
-                  {{notification?.message?.notification?.body}}
-                </div>
-                <div class="cursor-pointer underline link" *ngIf="notification?.courses && notification?.isExpanded"
-                  (click)="action(notification)">
-                  Click to collapse
-                </div>
-              </div>
-              <div *ngIf="!notification?.courses">{{notification?.message?.notification?.body}}</div>
-            </div> -->
           </div>
         </div>
       </div>

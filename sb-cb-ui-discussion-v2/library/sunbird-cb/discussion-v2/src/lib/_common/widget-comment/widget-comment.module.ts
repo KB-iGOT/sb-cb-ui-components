@@ -14,7 +14,7 @@ import { CommentsService } from '../../_services/comments.service'
 import { PipesModule } from '../../_pipes/pipes.module'
 import { SkeletonLoaderModule } from '../../skeleton-loader/skeleton-loader.module'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
-import { MatLegacyMenuModule  as MatMenuModule } from '@angular/material/legacy-menu'
+import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatCardModule } from '@angular/material/card'
 import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
@@ -46,7 +46,7 @@ import { SharedModule } from '../../_shared/shared.module'
     MatCardModule,
     MatCheckboxModule,
     PickerModule,
-    SharedModule
+    SharedModule,
   ],
   providers: [
     CommentsService,

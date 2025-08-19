@@ -16,6 +16,7 @@ export class AllNotificationsComponent implements OnInit {
   @Output() redirectTo = new EventEmitter<any>()
   @Input() showIcon: boolean = false
   @Input() showMarkAllAsRead: boolean = true
+  @Input() fragment: string = ''
 
   notifications: any[] = []
   dynamicTabIndex: number = 0
@@ -78,13 +79,15 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   markAsRead(notification: any) {
-    const request = {
+    let request: any = {
       request: {
         type: "individual",
         ids: [notification.notification_id]
       }
     }
-
+    if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
+      request.request.action = 'global'
+    }
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
       if (res.responseCode === 'OK') {
         notification.read = true
@@ -150,6 +153,11 @@ export class AllNotificationsComponent implements OnInit {
     this.loading = true
     this.libNotificationService.getNotifications(this.pageNumber, this.pageSize, this.currentTab).subscribe((res: any) => {
       this.response = _.get(res, 'result.notifications', [])
+      this.response = this.response.map(notification => ({
+        ...notification,
+        isExpanded: this.fragment && this.fragment === notification.notification_id,
+        content: []
+      }))
       const tabs = _.get(res, 'result.subtypeStats', [])
       this.tabs = [{ id: "all", name: 'all' }]
       tabs.forEach((tab: any) => {
@@ -174,7 +182,11 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   action(notification: any) {
-    notification.isExpanded = !notification.isExpanded
+    if (notification.isExpanded) {
+      notification.isExpanded = false
+    } else {
+      notification.isExpanded = true
+    }
   }
 
   getCount(read: any, unread: any) {
