@@ -9,6 +9,7 @@ import { takeUntil } from "rxjs/operators";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
+import { MatCheckboxChange } from "@angular/material/checkbox";
 
 @Component({
   selector: "sb-uic-entity-selections",
@@ -48,6 +49,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   paginationOffset = 0;
   totalItemsCount = 0;
   isFetchingMore = false;
+
+  application = '';
+  APPLICATION_ENUM = NsAccessControlConfig.Application;
+
+  serviceSelectionTypes = ["Select All", "All India Services", "Central Services", "State Services", "Other"];
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
 
   ngOnInit(): void {
@@ -55,6 +61,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig()?.accessControlCriteriaSelection;
     this.userProfile = this.accessControlService.accessControlConfig()?.userConfig;
     this.content = this.accessControlService.accessControlConfig()?.content;
+    this.application = this.accessControlService.accessControlConfig()?.application || '';
 
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
@@ -656,5 +663,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   disabledVerifiedIfModerated(item: any): boolean {
     if (item?.value === "VERIFIED" && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
     return false;
+  }
+
+  onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
+    const value = event.checked;
+    // if (value === "Select All") {
+    //   this.selectedDataTemp = this.accessControlService.holdServiceCadrebatch().service.map(service => service.name);
+    // } else {
+    //   this.selectedDataTemp = this.accessControlService.holdServiceCadrebatch().service
+    //     .filter(service => service.type === value)
+    //     .map(service => service.name);
+    // }
   }
 }

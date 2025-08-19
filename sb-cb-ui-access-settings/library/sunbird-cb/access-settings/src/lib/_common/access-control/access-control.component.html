@@ -8,44 +8,49 @@
       </div>
     </div>
     <div class="light-grey-border p-4 mt-4">
-      <mat-radio-group [(ngModel)]="accessTypeDup" (change)="onAccessTypeChange($event)">
-        <div class="radio-container flex gap-5 mb-4">
-          <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
-            <mat-radio-button [value]="item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
-              <div class="flex gap-2 items-center">
-                <span>{{ item?.name }}</span>
-                <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
-              </div>
-            </mat-radio-button>
-          </ng-container>
-        </div>
-      </mat-radio-group>
+      <ng-container *ngIf="canShowAccessControlTypeRadio">
+        <mat-radio-group [(ngModel)]="accessTypeDup" (change)="onAccessTypeChange($event)">
+          <div class="radio-container flex gap-5 mb-4">
+            <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
+              <mat-radio-button [value]="item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
+                <div class="flex gap-2 items-center">
+                  <span>{{ item?.name }}</span>
+                  <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
+                </div>
+              </mat-radio-button>
+            </ng-container>
+          </div>
+        </mat-radio-group>
+      </ng-container>
+
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Public">
         <!-- <div class="info-container">
           <label class="text-sm">This event will be visible to all Karmayogis.</label>
         </div> -->
       </ng-container>
       <ng-container *ngIf="accessType === ACCESS_TYPE_ENUM.Custom">
-        <div class="visibiliy-container light-grey-border p-4 mb-4">
-          <div class="flex justify-between items-center">
-            <span class="text-lg font-bold">{{ config?.visiblilityOnOff?.label }}</span>
-            <!-- <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle> -->
-            <div class="checkbox-toggle">
-              <input [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false" type="checkbox" id="switch" />
-              <label for="switch" [attr.disabled]="config?.visiblilityOnOff?.disabled || false"></label>
+        <ng-container *ngIf="shouldShowVisibilityToggle">
+          <div class="visibiliy-container light-grey-border p-4 mb-4">
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-bold">{{ config?.visiblilityOnOff?.label }}</span>
+              <!-- <mat-slide-toggle [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false"></mat-slide-toggle> -->
+              <div class="checkbox-toggle">
+                <input [(ngModel)]="isVisibilityEnabled" [disabled]="config?.visiblilityOnOff?.disabled || false" type="checkbox" id="switch" />
+                <label for="switch" [attr.disabled]="config?.visiblilityOnOff?.disabled || false"></label>
+              </div>
             </div>
+            <ng-container *ngIf="!isVisibilityEnabled">
+              <label class="text-sm">{{
+                (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.courseCategory || content?.contentType)
+              }}</label>
+            </ng-container>
+            <ng-container *ngIf="isVisibilityEnabled">
+              <label class="text-sm">{{
+                (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.courseCategory || content?.contentType)
+              }}</label>
+            </ng-container>
           </div>
-          <ng-container *ngIf="!isVisibilityEnabled">
-            <label class="text-sm">{{
-              (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.courseCategory || content?.contentType)
-            }}</label>
-          </ng-container>
-          <ng-container *ngIf="isVisibilityEnabled">
-            <label class="text-sm">{{
-              (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.courseCategory || content?.contentType)
-            }}</label>
-          </ng-container>
-        </div>
+        </ng-container>
 
         <ng-container *ngIf="filterCriteria">
           <div class="filter-criteria-container light-grey-border p-4 mt-4 flex flex-middle justify-between mb-4">
@@ -143,7 +148,7 @@
                                   type="button"
                                   (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
-                                    <span class="text-m color-gr underline">{{ condition?.get("selections").value?.length }} items selected</span>
+                                    <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
                                   </div>
                                 </button>
                               </div>
