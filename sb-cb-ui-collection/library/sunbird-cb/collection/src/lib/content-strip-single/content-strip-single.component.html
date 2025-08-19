@@ -6,8 +6,8 @@
   <div *ngIf="loader" class="text-center my-2">
     <mat-spinner class="inline-block"></mat-spinner>
   </div>
-  <ng-container *ngIf="error" [wsResolverWidget]="widgetData.errorWidget"></ng-container>
-  <ng-container *ngIf="showNoData" [wsResolverWidget]="widgetData.noDataWidget"></ng-container>
+  <ng-container *ngIf="error" [sbUiResolverWidget]="widgetData.errorWidget"></ng-container>
+  <ng-container *ngIf="showNoData" [sbUiResolverWidget]="widgetData.noDataWidget"></ng-container>
   <ng-container *ngIf="stripsResultDataMap && stripsResultDataMap.length">
     <div class="h-full flex flex-col">
       <div

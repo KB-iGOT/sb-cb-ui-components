@@ -5,7 +5,7 @@ import { BrowserModule } from '@angular/platform-browser'
 
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { MatGridListModule } from '@angular/material/grid-list'
-import { HorizontalScrollerModule } from '@sunbird-cb/utils'
+import { HorizontalScrollerModule } from '@sunbird-cb/utils-v2'
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'

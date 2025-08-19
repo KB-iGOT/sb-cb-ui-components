@@ -1,8 +1,8 @@
 import { trigger, transition, style, animate } from '@angular/animations'
 import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
-import { ConfigurationsService, NsInstanceConfig, ValueService } from '@sunbird-cb/utils'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
+import { ConfigurationsService, NsInstanceConfig, ValueService } from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 @Component({
   selector: 'ws-widget-card-hubs-list',

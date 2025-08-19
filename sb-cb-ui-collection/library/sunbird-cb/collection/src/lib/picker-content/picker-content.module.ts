@@ -14,7 +14,7 @@ import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@ang
 import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select'
 import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs'
 import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
-import { DefaultThumbnailModule, PipeDurationTransformModule } from '@sunbird-cb/utils'
+import { DefaultThumbnailModule, PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
 import { DisplayContentTypeModule } from '../_common/display-content-type/display-content-type.module'
 import { PickerContentComponent } from './picker-content.component'
 

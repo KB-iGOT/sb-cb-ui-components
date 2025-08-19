@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core'
-import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver'
+import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import { IWidgetWrapperMedia } from './video-wrapper.model'
 import { Platform } from '@angular/cdk/platform'
 

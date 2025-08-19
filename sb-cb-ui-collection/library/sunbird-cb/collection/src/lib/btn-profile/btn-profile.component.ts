@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, HostBinding } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
-import { ConfigurationsService, LogoutComponent, NsAppsConfig, NsPage } from '@sunbird-cb/utils'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
+import { ConfigurationsService, LogoutComponent, NsAppsConfig, NsPage } from '@sunbird-cb/utils-v2'
 import { IBtnAppsConfig } from '../btn-apps/btn-apps.model'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { Subscription } from 'rxjs'

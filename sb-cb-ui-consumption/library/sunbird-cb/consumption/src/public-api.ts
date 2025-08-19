@@ -11,6 +11,9 @@ export * from './lib/consumption.config'
 export * from './lib/_services/widget-content-lib.service'
 export * from './lib/_services/widget-user-lib.service'
 
+
+export * from './lib/_services/content-language.service'
+
 export * from './lib/_common/strips/content-strip-facet-filter/content-strip-facet-filter.module'
 export * from './lib/_common/strips/content-strip-with-tabs-pills/content-strip-with-tabs-pills.module'
 export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
@@ -68,6 +71,7 @@ export * from './lib/_common/competency-passbook-mdo/competency-passbook-mdo.com
 export * from './lib/_common/user-content-rating/user-content-rating-lib.component'
 export * from './lib/_common/microsites/mdo-channels/mdo-channel-v1/mdo-channel-v1.component'
 export * from './lib/_common/microsites/mdo-channels/mdo-channel-v2/mdo-channel-v2.component'
+export * from './lib/_common/microsites/mdo-channels/mdo-channel-v3/mdo-channel-v3.component'
 export * from './lib/_common/microsites/providers/providers-v2/providers-v2.component'
 export * from './lib/_common/key-highlights/key-highlights.module'
 export * from './lib/_common/events/events.module'
@@ -97,3 +101,6 @@ export * from './lib/_directives/tooltip/tooltip.module';
 export * from './lib/_common/dialog-components/confirmation-dialog/confirmation-dialog.component';
 export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.component';
 export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.module';
+export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.component';
+export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.module';
+export * from './lib/_common/cards/available-languages/available-languages.component';

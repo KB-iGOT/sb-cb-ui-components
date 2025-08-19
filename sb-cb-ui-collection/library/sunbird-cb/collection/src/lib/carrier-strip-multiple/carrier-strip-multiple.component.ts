@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy, HostBinding } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { NsCarrierStripNewMultiple } from './carrier-strip-multiple.model'
 import { ContentStripNewMultipleService } from './carrier-strip-multiple.service'
 import { WidgetContentService } from '../_services/widget-content.service'
@@ -10,7 +10,7 @@ import {
   TFetchStatus,
   LoggerService,
   UtilityService,
-} from '@sunbird-cb/utils'
+} from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 
 interface IStripUnitContentData {

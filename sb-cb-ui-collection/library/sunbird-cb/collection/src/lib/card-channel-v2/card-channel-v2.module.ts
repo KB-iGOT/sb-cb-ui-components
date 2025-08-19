@@ -4,7 +4,7 @@ import { CardChannelV2Component } from './card-channel-v2.component'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatIconModule } from '@angular/material/icon'
 import { RouterModule } from '@angular/router'
-import { PipeDurationTransformModule, DefaultThumbnailModule } from '@sunbird-cb/utils'
+import { PipeDurationTransformModule, DefaultThumbnailModule } from '@sunbird-cb/utils-v2'
 
 @NgModule({
     declarations: [CardChannelV2Component],

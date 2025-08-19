@@ -1,0 +1,74 @@
+import { Component, OnInit, Inject } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+
+@Component({
+  selector: 'app-top-section',
+  templateUrl: './top-section.component.html',
+  styleUrls: ['./top-section.component.scss']
+})
+export class TopSectionComponent implements OnInit {
+  descriptionMaxLength = 500;
+  stripWidth: string;
+
+  constructor(
+    @Inject('sectionData') public data: any,
+    @Inject('channelName') public channelName: string,
+    @Inject('orgId') public orgId: string,
+    @Inject('isMobile') public isMobile: boolean,
+    @Inject('slwConfiguration') public slwConfig: any,
+    @Inject('isEdit') public isEdit: boolean,
+    @Inject('eventCallback') public eventCallback: (event: any) => void,
+    public sanitizer: DomSanitizer
+  ) {
+    if (this.isEdit) {
+      console.log('Edit mode active for top section');
+    }
+  }
+
+  ngOnInit() {
+    this.stripWidth = `${(window.innerWidth - 1200 + 135)/2}px`;
+  }
+  
+  emitEvent(action: string, id: string, data?: any) {
+    this.eventCallback({
+      action,
+      source: 'topSection',
+      id,
+      data: data || this.data
+    });
+  }
+
+  openEditor(fieldName: string, displayName: string, currentValue: any) {
+    this.eventCallback({
+      action: 'edit',
+      source: 'topSection',
+      id: fieldName,
+      data: {
+        fieldName,
+        displayName,
+        currentValue,
+        path: fieldName,
+        fieldType: this.getFieldType(fieldName, currentValue),
+        parentData: this.data
+      }
+    });
+  }
+
+  getFieldType(fieldName: string, value: any): string {
+    if (fieldName === 'logo' || fieldName === 'logoMobile' || fieldName.includes('banner')) {
+      return 'image';
+    } else if (fieldName === 'sliderData') {
+      return 'slider';
+    } else if (fieldName === 'metrics') {
+      return 'metrics';
+    } else if (typeof value === 'string' && value.startsWith('#')) {
+      return 'color';
+    } else if (typeof value === 'boolean') {
+      return 'boolean';
+    } else if (fieldName.includes('description')) {
+      return 'textarea';
+    } else {
+      return 'text';
+    }
+  }
+}

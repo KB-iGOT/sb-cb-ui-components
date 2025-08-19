@@ -1,0 +1,187 @@
+<h2 mat-dialog-title>Edit {{data.displayName}}</h2>
+<mat-dialog-content>
+  <form [formGroup]="editorForm" class="editor-form">
+    <div [ngSwitch]="formType">
+      <!-- Text input -->
+      <mat-form-field *ngSwitchCase="'text'" appearance="outline" class="full-width">
+        <input matInput formControlName="value" placeholder="Enter {{data.displayName}}">
+        <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
+      </mat-form-field>
+      
+      <!-- Textarea -->
+      <mat-form-field *ngSwitchCase="'textarea'" appearance="outline" class="full-width">
+        <textarea matInput formControlName="value" placeholder="Enter {{data.displayName}}" rows="5"></textarea>
+        <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
+      </mat-form-field>
+      
+      <!-- Color picker -->
+      <div *ngSwitchCase="'color'" class="color-picker-container">
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="value" placeholder="Enter color code (e.g., #FF5733)">
+          <mat-error *ngIf="editorForm.get('value')?.hasError('required')">Color is required</mat-error>
+          <mat-error *ngIf="editorForm.get('value')?.hasError('pattern')">Invalid color format</mat-error>
+        </mat-form-field>
+        <div class="color-preview" [style.background-color]="editorForm.get('value')?.value"></div>
+      </div>
+      
+      <!-- Image URL with upload option -->
+      <div *ngSwitchCase="'image'" class="image-container">
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="value" placeholder="Enter image URL">
+          <mat-error *ngIf="editorForm.get('value')?.invalid">Valid image URL is required</mat-error>
+        </mat-form-field>
+        
+        <div class="upload-section">
+          <button type="button" mat-raised-button color="primary" (click)="fileInput.click()">
+            <mat-icon>cloud_upload</mat-icon> Upload Image
+          </button>
+          <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept="image/*">
+          <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+        </div>
+        
+        <div class="image-preview">
+          <img [src]="editorForm.get('value')?.value" alt="Image Preview" *ngIf="editorForm.get('value')?.value">
+        </div>
+      </div>
+      
+      <!-- Boolean toggle -->
+      <mat-slide-toggle *ngSwitchCase="'boolean'" formControlName="value" color="primary">
+        {{editorForm.get('value')?.value ? 'Enabled' : 'Disabled'}}
+      </mat-slide-toggle>
+      
+      <!-- For complex types like metrics -->
+      <div *ngSwitchCase="'metrics'" class="complex-editor">
+        <p>Metrics editor not yet implemented</p>
+        <!-- Implement metrics editor UI here -->
+      </div>
+      
+      <!-- Slider implementation -->
+      <div *ngSwitchCase="'slider'" class="slider-editor">
+        <!-- Slider Preview -->
+        <div class="slider-preview-container">
+          <h3>Preview</h3>
+          <div class="slider-preview">
+            <sb-uic-sliders 
+              [widgetData]="sliderData.sliders" 
+              [styleData]="sliderData.styleData"
+              (clickEvent)="onSliderClick($event)">
+            </sb-uic-sliders>
+          </div>
+        </div>
+        
+        <!-- Slider Items Management -->
+        <div class="slider-items-container">
+          <h3>Slider Items</h3>
+          
+          <div class="slider-items" *ngIf="sliderData.sliders.length" cdkDropList (cdkDropListDropped)="dropSliderItem($event)">
+            <div *ngFor="let item of sliderData.sliders; let i = index" class="slider-item" cdkDrag>
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+              <div class="item-preview">
+                <img [src]="item?.banners?.l" alt="Slider image" class="item-image">
+                <div class="item-details">
+                  <div class="item-title">{{item.title || 'No title'}}</div>
+                  <div class="item-status" [class.active]="item.active">
+                    {{item.active ? 'Active' : 'Inactive'}}
+                  </div>
+                </div>
+              </div>
+              <div class="item-actions">
+                <button mat-icon-button color="primary" (click)="editSliderItem(i)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="removeSliderItem(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="!sliderData.sliders.length" class="no-items">
+            No slider items available. Add some items to see them here.
+          </div>
+          <button mat-raised-button color="primary" class="add-item-btn" (click)="addSliderItem()">
+            <mat-icon>add</mat-icon> Add Slider Item
+          </button>
+        </div>
+        
+        <!-- Item Editor (when editing) -->
+        <div *ngIf="isEditingSlider" class="slider-item-editor">
+          <h3>{{editingIndex === -1 ? 'Add' : 'Edit'}} Slider Item</h3>
+          <form [formGroup]="sliderItemForm" class="slider-item-form">
+            <div class="form-section">
+              <h4>Basic Information</h4>
+              
+              <div class="toggle-container">
+                <label class="toggle-label">Item Status:</label>
+                <mat-slide-toggle formControlName="active" color="primary" class="active-toggle">
+                  <span class="toggle-text">{{sliderItemForm.get('active')?.value ? 'Active' : 'Inactive'}}</span>
+                </mat-slide-toggle>
+              </div>
+              
+              <mat-form-field appearance="outline" class="full-width">
+                <input matInput formControlName="title" placeholder="Enter title">
+              </mat-form-field>
+            </div>
+            
+            <div class="form-section" formGroupName="banners">
+              <h4>Banner Image</h4>
+              
+              <div class="image-container">
+                <mat-form-field appearance="outline" class="full-width">
+                  <input matInput formControlName="l" placeholder="Enter image URL">
+                  <mat-error *ngIf="sliderItemForm.get('banners.l')?.invalid">Valid image URL is required</mat-error>
+                </mat-form-field>
+                
+                <div class="upload-section">
+                  <button type="button" mat-raised-button color="primary" (click)="sliderFileInput.click()">
+                    <mat-icon>cloud_upload</mat-icon> Upload Image
+                  </button>
+                  <input hidden (change)="onSliderImageSelected($event)" #sliderFileInput type="file" accept="image/*">
+                  <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+                </div>
+                
+                <div class="image-preview">
+                  <img [src]="sliderItemForm.get('banners.l')?.value" alt="Image Preview" *ngIf="sliderItemForm.get('banners.l')?.value">
+                </div>
+                
+                <div class="note">
+                  <small>
+                    <mat-icon class="small-icon">info</mat-icon>
+                    The same image will be used for all banner sizes (L, M, S, XL, XS, XXL)
+                  </small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h4>Navigation</h4>
+              
+              <mat-form-field appearance="outline" class="full-width">
+                <input matInput formControlName="redirectUrl" placeholder="Enter redirect URL (optional)">
+              </mat-form-field>
+            </div>
+            
+            <div class="item-form-actions">
+              <button mat-button (click)="cancelSliderItemEdit()">Cancel</button>
+              <button mat-raised-button color="primary" [disabled]="sliderItemForm.invalid" (click)="saveSliderItem()">
+                Save Item
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Default case -->
+      <mat-form-field *ngSwitchDefault appearance="outline" class="full-width">
+        <input matInput formControlName="value" placeholder="Enter {{data.displayName}}">
+        <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="editorForm.invalid" (click)="onSubmit()">Save</button>
+</mat-dialog-actions>

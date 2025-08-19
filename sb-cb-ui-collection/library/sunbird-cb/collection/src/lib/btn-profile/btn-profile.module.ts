@@ -7,9 +7,9 @@ import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-m
 import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { BtnProfileComponent } from './btn-profile.component'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 import { RouterModule } from '@angular/router'
-import { LogoutModule } from '@sunbird-cb/utils'
+import { LogoutModule } from '@sunbird-cb/utils-v2'
 import { AvatarPhotoModule } from '../_common/avatar-photo/avatar-photo.module'
 // import { TreeCatalogModule } from '../tree-catalog/tree-catalog.module'
 
@@ -26,7 +26,7 @@ import { AvatarPhotoModule } from '../_common/avatar-photo/avatar-photo.module'
         MatTooltipModule,
         MatSlideToggleModule,
         RouterModule,
-        WidgetResolverModule,
+        SbUiResolverModule,
     ]
 })
 export class BtnProfileModule { }

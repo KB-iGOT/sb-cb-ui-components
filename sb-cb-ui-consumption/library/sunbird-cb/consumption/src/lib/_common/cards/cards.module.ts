@@ -34,6 +34,7 @@ import { DialogComponentsModule } from '../dialog-components/dialog-components.m
 import { CardMdoChannelV1Component } from './card-mdo-channel-v1/card-mdo-channel-v1.component';
 import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.module';
 import { PipePublicURLModule } from '@sunbird-cb/utils-v2';
+import { AvailableLanguagesComponent } from './available-languages/available-languages.component';
 
 
 @NgModule({
@@ -51,7 +52,8 @@ import { PipePublicURLModule } from '@sunbird-cb/utils-v2';
         CardPortraitExtComponent,
         CardAssessmentComponent,
         CardProgressPortraitLibComponent,
-        CardMdoChannelV1Component
+        CardMdoChannelV1Component,
+        AvailableLanguagesComponent
     ],
     imports: [
         CommonModule,
@@ -91,6 +93,7 @@ import { PipePublicURLModule } from '@sunbird-cb/utils-v2';
         CardKarmaProgramsComponent,
         CardKarmaProgramsV2Component,
         CardPortraitExtComponent,
+        AvailableLanguagesComponent
     ]
 })
 export class CardsModule { }

@@ -126,7 +126,7 @@ export class ViewerTocComponent implements OnInit, OnDestroy {
         this.processCurrentResourceChange()
       }
     })
-    this.viewerDataServiceSubscription = this.viewerDataSvc.changedSubject.subscribe(_data => {
+    this.viewerDataServiceSubscription = this.viewerDataSvc.changedSubject.subscribe((_data: any) => {
       if (this.resourceId !== this.viewerDataSvc.resourceId) {
         this.resourceId = this.viewerDataSvc.resourceId
         this.processCurrentResourceChange()
@@ -135,7 +135,8 @@ export class ViewerTocComponent implements OnInit, OnDestroy {
   }
 
   private getContentProgressHash() {
-    this.contentProgressSvc.getProgressHash().subscribe(progressHash => {
+    
+    this.contentProgressSvc.getProgressHash().subscribe((progressHash: any) => {
       this.contentProgressHash = progressHash
     })
   }

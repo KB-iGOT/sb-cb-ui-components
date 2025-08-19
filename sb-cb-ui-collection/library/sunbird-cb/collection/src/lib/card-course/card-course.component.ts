@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core'
 // import { StarRatingColor } from './star-rating/star-rating.component'
-import { WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 
 @Component({
   selector: 'ws-widget-card-course',

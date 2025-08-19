@@ -2,7 +2,7 @@ import { NgModule, Injectable } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { SlidersComponent } from './sliders.component'
 import { RouterModule } from '@angular/router'
-import { NavigationModule, ImageResponsiveModule } from '@sunbird-cb/utils'
+import { NavigationModule, ImageResponsiveModule } from '@sunbird-cb/utils-v2'
 import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser'
 import * as Hammer from 'hammerjs'
 @Injectable()

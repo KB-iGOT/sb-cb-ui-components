@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, HostBinding } from '@angular/core'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { IAuthorData } from './author-card.model'
 @Component({
   selector: 'ws-widget-author-card',

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { LeftMenuWithoutLogoComponent } from './left-menu-without-logo.component'
-import { WidgetResolverModule } from '@sunbird-cb/resolver'
+import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
@@ -17,7 +17,7 @@ import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/le
     imports: [
         CommonModule,
         RouterModule,
-        WidgetResolverModule,
+        SbUiResolverModule,
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,

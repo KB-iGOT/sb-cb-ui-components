@@ -107,6 +107,7 @@ export class ConfigurationsService {
   // setHostPath = (sitePath: string) => (sitePath).replace(':', '_')
   welcomeTabs: NSProfileDataV3.IProfileTab | null = null
   compentency: any = null
+  competency: any
   iGOTAIConfig: any
   // variable setting for csJwtToken
   cstoken = ''
@@ -114,6 +115,8 @@ export class ConfigurationsService {
 
   changeNavBarFullView = new Subject()
   openExploreMenuForMWeb = new Subject()
+
+  orgReadData: any
   updateGlobalProfile(state: boolean) {
     this.updateProfile.next(state)
   }
@@ -124,6 +127,12 @@ export class ConfigurationsService {
 
   updatePlatformRatingMethod(state: any) {
     this.updatePlatformRating.next(state)
+  }
+
+ private updateOrgReadData: BehaviorSubject<string> = new BehaviorSubject('')
+  updateOrgReadDataObservable = this.updateOrgReadData.asObservable()
+  updateOrgData(id: string) {
+      this.updateOrgReadData.next(id)
   }
 
 }

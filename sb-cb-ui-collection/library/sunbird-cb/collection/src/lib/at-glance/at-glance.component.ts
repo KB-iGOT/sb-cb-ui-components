@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core'
 import { IAtGlanceComponentData } from './at-glance.model'
-import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver'
+import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 @Component({
   selector: 'ws-widget-at-glance',
   templateUrl: './at-glance.component.html',

@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core'
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
 import { ActivatedRoute } from '@angular/router'
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import {
   ConfigurationsService,
   EventService, LoggerService,
   NsPage, ValueService, WsEvents,
   SubapplicationRespondService,
-} from '@sunbird-cb/utils'
+} from '@sunbird-cb/utils-v2'
 import { fromEvent, Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
 import { CustomTourService } from '../_common/tour-guide/tour-guide.service'
