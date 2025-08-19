@@ -1,15 +1,16 @@
 <div class="community-suggestions-container">
   <ng-container *ngIf="!isLoading; else skeletonLoader">
     <mat-card *ngFor="let community of communitySuggestionsList" class="community-card mb-4 flex flex-col items-center">
-      <div class="flex items-center">
-        <div class="mr-4">
-          <ng-container *ngIf="community.imageUrl; else defaultImage">
-            <img [src]="community.imageUrl" alt="logo" class="community-image">
+      <div class="flex items-center justify-center mb-4">
+          <ng-container *ngIf="community?.imageUrl; else defaultImage">
+            <img [src]="community?.imageUrl" alt="logo" class="community-image">
           </ng-container>
           <ng-template #defaultImage>
             <img src="/assets/instances/eagle/app_logos/default.png" alt="default logo" class="community-image">
           </ng-template>
         </div>
+      <div class="flex items-center">
+        
         <div class="flex-grow flex flex-col gap-1">
           <div class="communityName">{{community?.communityName}}</div>
           <div class="community-details flex gap-4 items-center mt-1">
