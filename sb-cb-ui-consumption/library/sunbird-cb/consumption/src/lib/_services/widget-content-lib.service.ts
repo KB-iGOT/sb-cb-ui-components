@@ -11,6 +11,7 @@ import * as _ from 'lodash'
 import { viewerRouteGenerator } from './viewer-route-util'
 import { WidgetUserServiceLib } from './widget-user-lib.service'
 import moment from 'moment';
+import { ContentLanguageService } from './content-language.service';
 // tslint:enable
 
 // TODO: move this in some common place
@@ -69,7 +70,8 @@ export class WidgetContentLibService {
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
-    private userSvc: WidgetUserServiceLib
+    private userSvc: WidgetUserServiceLib,
+    private contentLanguageSvc: ContentLanguageService,
   ) {
   }
 
@@ -515,7 +517,7 @@ export class WidgetContentLibService {
     return []
   }
 
-  async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean) {
+  async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean,  baseContentRead?: any,multilingualId?:string) {
     if (content && content.content && content.content.category === 'Event') {
       const urlData: any = {
         url: `app/event-hub/home/${content.content.identifier}`,
@@ -523,7 +525,7 @@ export class WidgetContentLibService {
       };
       return urlData
     }
-    if (content.externalId) {
+    if (content && content.externalId) {
       const urlData: any = {
         url: `app/toc/ext/${content.contentId}`,
         queryParams: { batchId: content.batchId },
@@ -534,7 +536,7 @@ export class WidgetContentLibService {
         // const enrolledCourse: any = await this.getEnrolledData(content.identifier);
         const enrolledCourse: any = enrollmentList;
         if (enrolledCourse && enrolledCourse.length) {
-          const enrolledCourseData = enrolledCourse[0]
+          const enrolledCourseData = enrolledCourse && enrolledCourse?.length && enrolledCourse.find((el: any) => el?.collectionId === baseContentRead ||  content?.identifier)
           if (enrolledCourseData && enrolledCourseData.content && (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
@@ -546,7 +548,7 @@ export class WidgetContentLibService {
             const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
             return data;
           } {
-            const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData,  baseContentRead, multilingualId);
             return data;
           }
         }
@@ -556,12 +558,12 @@ export class WidgetContentLibService {
       }
     }
   }
-  async checkForDataToFormUrl(content: any, enrollData: any) {
+  async checkForDataToFormUrl(content: any, enrollData: any, baseContentRead?: any,multilingualId?:string) {
     let urlData: any;
-    if (enrollData.completionPercentage === 100) {
+    if (enrollData?.completionPercentage === 100) {
       return this.gotoTocPage(enrollData);
     }
-    if (enrollData.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
+    if (enrollData?.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
       const modifyEnrollData = {
         ...enrollData,
         identifier: enrollData.collectionId,
@@ -570,12 +572,12 @@ export class WidgetContentLibService {
       };
       if (modifyEnrollData.lastReadContentId) {
         return this.getResourseDataWithData(modifyEnrollData,
-          enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType);
+          enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType,content,  baseContentRead,multilingualId);
       }
       if (modifyEnrollData.firstChildId) {
         return this.getResourseDataWithData(modifyEnrollData,
           enrollData.firstChildId,
-          enrollData.lrcProgressDetails.mimeType);
+          enrollData.lrcProgressDetails.mimeType, content,  baseContentRead,multilingualId);
       }
     }
     if (enrollData.firstChildId || enrollData.lastReadContentId) {
@@ -589,7 +591,7 @@ export class WidgetContentLibService {
             primaryCategory: enrollData.content.primaryCategory,
             name: enrollData.content.name,
           };
-          urlData = this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType);
+          urlData = this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType,content,  baseContentRead,multilingualId);
           if (urlData) {
             return urlData;
           }
@@ -601,32 +603,73 @@ export class WidgetContentLibService {
 
   }
 
-  getResourseDataWithData(content: any, resourseId: any, mimeType: any) {
-    if (content) {
+  getResourseDataWithData(enrollmentData: any, resourceId: any, mimeType: any,content:any, baseContentRead?: any,multilingualId?:string) {
+        if(enrollmentData && enrollmentData.recent_language) {
+        if(baseContentRead.languageMapV1 && Object.keys(baseContentRead.languageMapV1).length) { 
+          const recent_LANG_DATA = baseContentRead.languageMapV1[enrollmentData.recent_language];
+          if(recent_LANG_DATA && recent_LANG_DATA.id && (recent_LANG_DATA.id !== content.identifier)) {
+            return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, enrollmentData.recent_language, recent_LANG_DATA.id ) 
+          }
+        }
+      } 
+      if(enrollmentData) {
+        const BASE_LANG = this.contentLanguageSvc.getBaseLanguage(baseContentRead);
+        if(BASE_LANG && Object.keys(BASE_LANG).length ) {
+          return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, BASE_LANG.langId, BASE_LANG.id ) 
+        }
+      }
+    
+    return this.gotoTocPage(enrollmentData);
+  }
+
+
+  gotoPlayerPage(navigationData: any, content:any, baseContentId:string, resourceId:string, mimeType:any, ml?:string, mlId?:string)  {
+    if (navigationData) {
       const url = viewerRouteGenerator(
-        resourseId,
+        resourceId,
         mimeType,
-        content.identifier,
+        baseContentId,
         'Course',
         false,
         'Learning Resource',
-        content.batchId,
+        navigationData.batchId,
         content.name,
+        ml,
+        mlId,
       );
       return url;
     }
-    return this.gotoTocPage(content);
   }
+
   gotoTocPage(content: any) {
-    const urlData: any = {
-      url: `/app/toc/${content.identifier ? content.identifier : content.collectionId}/overview`,
-      queryParams: { batchId: content.batchId },
+    if (content && content.courseCategory && content.courseCategory === NsContent.ECourseCategory.MULTILINGUAL_COURSE) {
+      const baseContentData = this.contentLanguageSvc.getBaseLanguage(content);
+      const selectedLanguage = content && content.language && content.language.length ? 
+        content.language[0].toLowerCase() : '';
+      
+      if (baseContentData && Object.keys(baseContentData).length) {
+        return {
+          url: `/app/toc/${baseContentData.identifier}/overview`,
+          queryParams: { 
+            MLId: content.identifier,
+            ML: selectedLanguage,
+            ...(content.batchId ? { batchId: content.batchId } : {})
+          },
+        };
+      }
+    }
+    
+    const urlData = {
+      url: `/app/toc/${content.identifier || content.collectionId}/overview`,
+      queryParams: content.batchId ? { batchId: content.batchId } : {} as { [key: string]: any },
     };
     if (content.endDate && content?.courseCategory !== NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM) {
       urlData.queryParams = { ...urlData.queryParams, planType: 'cbPlan', endDate: content.endDate };
     }
+    
     return urlData;
   }
+
   isBatchInProgress(batchData: any) {
     // if (this.content && this.content['batches']) {
     // const batches = this.content['batches'] as NsContent.IBatch
