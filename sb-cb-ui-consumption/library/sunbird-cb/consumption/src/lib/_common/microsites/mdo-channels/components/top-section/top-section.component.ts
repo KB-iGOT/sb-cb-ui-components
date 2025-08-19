@@ -9,31 +9,17 @@ import { DomSanitizer } from '@angular/platform-browser';
 export class TopSectionComponent implements OnInit {
   descriptionMaxLength = 500;
   stripWidth: string;
-  // data
-  // channelName
-  // orgId
-  // isMobile
-  // slwConfig
-  // isEdit
-  // eventCallback
+
   constructor(
-    @Inject('sectionData') 
-    private data: any,
-    @Inject('channelName') 
-    private channelName: string,
-    @Inject('orgId') 
-    private orgId: string,
-    @Inject('isMobile') 
-    private isMobile: boolean,
-    @Inject('slwConfiguration') 
-    private slwConfig: any,
-    @Inject('isEdit') 
-    private isEdit: boolean,
-    @Inject('eventCallback') 
-    private eventCallback: (event: any) => void,
-    private sanitizer: DomSanitizer
+    @Inject('sectionData') public data: any,
+    @Inject('channelName') public channelName: string,
+    @Inject('orgId') public orgId: string,
+    @Inject('isMobile') public isMobile: boolean,
+    @Inject('slwConfiguration') public slwConfig: any,
+    @Inject('isEdit') public isEdit: boolean,
+    @Inject('eventCallback') public eventCallback: (event: any) => void,
+    public sanitizer: DomSanitizer
   ) {
-    // Remove console logs in production
     if (this.isEdit) {
       console.log('Edit mode active for top section');
     }
@@ -52,12 +38,6 @@ export class TopSectionComponent implements OnInit {
     });
   }
 
-  /**
-   * Open editor for a specific field
-   * @param fieldName Name of the field to edit
-   * @param displayName Display name for the field
-   * @param currentValue Current value of the field
-   */
   openEditor(fieldName: string, displayName: string, currentValue: any) {
     this.eventCallback({
       action: 'edit',
@@ -67,17 +47,14 @@ export class TopSectionComponent implements OnInit {
         fieldName,
         displayName,
         currentValue,
-        path: fieldName, // Path in the data object
+        path: fieldName,
         fieldType: this.getFieldType(fieldName, currentValue),
         parentData: this.data
       }
     });
   }
 
-  /**
-   * Determine the field type based on field name and value
-   */
-  private getFieldType(fieldName: string, value: any): string {
+  getFieldType(fieldName: string, value: any): string {
     if (fieldName === 'logo' || fieldName === 'logoMobile' || fieldName.includes('banner')) {
       return 'image';
     } else if (fieldName === 'sliderData') {
