@@ -607,7 +607,7 @@ export class WidgetContentLibService {
         if(enrollmentData && enrollmentData.recent_language) {
         if(baseContentRead.languageMapV1 && Object.keys(baseContentRead.languageMapV1).length) { 
           const recent_LANG_DATA = baseContentRead.languageMapV1[enrollmentData.recent_language];
-          if(recent_LANG_DATA && recent_LANG_DATA.id && (recent_LANG_DATA.id !== content.identifier)) {
+          if(recent_LANG_DATA && recent_LANG_DATA.id) {
             return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, enrollmentData.recent_language, recent_LANG_DATA.id ) 
           }
         }
