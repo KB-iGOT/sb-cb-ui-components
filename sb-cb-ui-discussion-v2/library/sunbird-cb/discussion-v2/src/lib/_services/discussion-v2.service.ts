@@ -36,7 +36,6 @@ const API_END_POINTS = {
   GLOBAL_FEED: `/apis/proxies/v8/feedDiscussion/globalFeed`,
   ENRICH_DATA: `/apis/proxies/v8/feedDiscussion/v1/enrichData`,
   SEARCH_USERS: '/apis/proxies/v8/user/v1/search',
-  DETECT_LANGUAGE: '/apis/proxies/v8/moderation/v1/language/detect',
 }
 
 
@@ -211,11 +210,6 @@ export class DiscussionV2Service {
     }
     return this.http.post<any>(`${API_END_POINTS.SEARCH_USERS}`, reqBody)
   }
-
-  detectLanguage(req: any): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.DETECT_LANGUAGE}`, req)
-  }
-
 
 }
 
