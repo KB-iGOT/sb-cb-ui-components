@@ -7,15 +7,17 @@ import { TranslateService } from '@ngx-translate/core';
 import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2';
 import * as _ from 'lodash';
 import { MatDialog } from '@angular/material/dialog';
-import { EditorDialogComponent } from '../components/editor-dialog/editor-dialog.component';
+import { EditorDialogComponent } from '../../micro-sites-components/components/editor-dialog/editor-dialog.component';
+import { SlwConfigDialogComponent } from '../../micro-sites-components/components/slw-config-dialog/slw-config-dialog.component';
 import { cloneDeep } from 'lodash';
+import { HttpClient } from '@angular/common/http'; // Add this import
 
 // Import component types
-import { TopSectionComponent } from '../components/top-section/top-section.component';
-import { LookerSectionComponent } from '../components/looker-section/looker-section.component';
-import { TopLearnersComponent } from '../components/top-learners/top-learners.component';
-import { MainContentComponent } from '../components/main-content/main-content.component';
-import { SupportSectionComponent } from '../components/support-section/support-section.component';
+import { TopSectionComponent } from '../../micro-sites-components/components/top-section/top-section.component';
+import { LookerSectionComponent } from '../../micro-sites-components/components/looker-section/looker-section.component';
+import { TopLearnersComponent } from '../../micro-sites-components/components/top-learners/top-learners.component';
+import { MainContentComponent } from '../../micro-sites-components/components/main-content/main-content.component';
+import { SupportSectionComponent } from '../../micro-sites-components/components/support-section/support-section.component';
 
 @Component({
   selector: 'sb-uic-mdo-channel-v3',
@@ -33,6 +35,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   @Input() orgId: string;
   
   isMobile: boolean = false;
+  isStateLearningWeekEnabled: boolean = false;
+  hasUnsavedChanges: boolean = false;
   
   navigationTitles = [
     { title: 'Learn', url: '/page/learn', icon: 'school', disableTranslate: false },
@@ -61,7 +65,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     private utilsSvc: UtilityService,
     private injector: Injector,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog // Add this
+    private dialog: MatDialog,
+    private http: HttpClient // Add HttpClient to constructor
   ) {
     this.isMobile = this.utilsSvc.isMobile;
   }
@@ -84,9 +89,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   }
   
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.sectionList || changes.slwConfiguration) {
-      // Clear injector cache when inputs change
+    if ((changes.sectionList && !changes.sectionList.firstChange) ||
+        (changes.slwConfiguration && !changes.slwConfiguration.firstChange)) {
       this.injectorCache.clear();
+      this.hasUnsavedChanges = true; // Enable Save button only after first change
     }
   }
   
@@ -168,11 +174,11 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   // Add new method to handle edit dialog
   openEditorDialog(event: any) {
     const dialogRef = this.dialog.open(EditorDialogComponent, {
-      width: this.getDialogWidth(event.data.fieldType),
+      width: '600px',
       data: {
         fieldName: event.data.fieldName,
         displayName: event.data.displayName,
-        value: event.data.currentValue,
+        value: event.data.value, // <-- This should be the actual value
         fieldType: event.data.fieldType,
         section: event.source
       }
@@ -180,8 +186,26 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Update the section data
-        this.updateSectionData(event.source, event.data.fieldName, result);
+        if (event.data.fieldType === 'keyHighlights') {
+          // Update keyHighlights in sectionList
+          const updatedSections = cloneDeep(this.sectionList);
+          updatedSections.forEach(section => {
+            if (section.enabled) {
+              section.column.forEach(column => {
+                if (column.key === event.source && column.data?.stateLearningWeekSection?.keyHighlights) {
+                  column.data.stateLearningWeekSection.keyHighlights = result;
+                }
+              });
+            }
+          });
+          this.sectionList = updatedSections;
+          this.activeSections = this.sectionList.filter(section => section.enabled)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+          this.hasUnsavedChanges = true;
+          this.cdr.detectChanges();
+        } else {
+          this.updateSectionData(event.source, event.data.fieldName, result);
+        }
       }
     });
   }
@@ -250,4 +274,128 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     // Update the final property
     current[parts[parts.length - 1]] = value;
   }
+
+  // Action handlers
+  toggleStateLearningWeek() {
+    this.isStateLearningWeekEnabled = !this.isStateLearningWeekEnabled;
+    this.hasUnsavedChanges = true;
+    this.cdr.markForCheck();
+    
+    // Raise telemetry
+    this.raiseTelemetry('toggle-state-learning-week');
+  }
+
+  saveChanges() {
+    // Prepare payload
+    const payload = {
+      type: 'mdo-channel',
+      subtype: 'microsite-v2',
+      action: 'page-configuration',
+      component: 'portal',
+      framework: '*',
+      data: {
+        stateLearningWeekConfig: this.slwConfiguration || {},
+        sectionList: this.sectionList || []
+      },
+      created_on: new Date().toISOString(),
+      last_modified_on: new Date().toISOString(),
+      rootOrgId: this.orgId || ''
+    };
+
+    console.log('Payload:', payload);
+    // Call the API
+    // this.http.post('http://localhost:3000/apis/v1/form/update', payload, {
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Accept': 'application/json, text/plain, */*',
+    //     'hostPath': 'localhost_3000',
+    //     'locale': 'en',
+    //     'org': 'dopt',
+    //     'rootOrg': 'igot'
+    //   }
+    // }).subscribe({
+    //   next: (res) => {
+    //     console.log('Form update success:', res);
+    //     this.hasUnsavedChanges = false;
+    //     this.cdr.markForCheck();
+    //   },
+    //   error: (err) => {
+    //     console.error('Form update failed:', err);
+    //   }
+    // });
+
+    // Raise telemetry
+    this.raiseTelemetry('save-changes');
+  }
+
+  publishChanges() {
+    if (this.hasUnsavedChanges) {
+      this.saveChanges();
+    }
+    
+    // Implement publish logic here
+    console.log('Publishing changes...');
+    
+    // Raise telemetry
+    this.raiseTelemetry('publish-changes');
+    
+    // You can emit an event or call a service to publish the data
+  }
+
+  // Add method to open SLW configuration dialog
+  openSLWConfigDialog(currentConfig: any) {
+    console.log('Opening SLW config dialog');
+    const dialogRef = this.dialog.open(SlwConfigDialogComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: currentConfig || {
+        enabled: true,
+        startDate: '',
+        endDate: '',
+        title: 'State Learning Week',
+        description: '',
+        titleHi: '',
+        descriptionHi: '',
+        buttonText: 'View More',
+        width: '30px',
+        orgId: this.orgId,
+        orgName: ''
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog closed with result:', result);
+      if (result) {
+        // Update SLW configuration
+        this.slwConfiguration = result;
+        this.isStateLearningWeekEnabled = true;
+        this.hasUnsavedChanges = true;
+        this.cdr.detectChanges();
+      } else {
+        // If dialog was cancelled, disable SLW
+        this.isStateLearningWeekEnabled = false;
+        if (this.slwConfiguration) {
+          this.slwConfiguration.enabled = false;
+        }
+        this.hasUnsavedChanges = true;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  handleToggleSLW() {
+    if (this.slwConfiguration) {
+      this.slwConfiguration.enabled = !this.slwConfiguration.enabled;
+      this.hasUnsavedChanges = true;
+      this.cdr.markForCheck();
+    }
+  }
+
+  handleConfigureSLW(currentConfig: any) {
+    console.log('Configure SLW called with:', currentConfig);
+    this.openSLWConfigDialog(currentConfig);
+  }
+
+  
 }
