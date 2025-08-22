@@ -15,8 +15,9 @@ const API_END_POINTS = {
   providedIn: 'root'
 })
 export class LibNotificationsService {
-  _unreadCount = new BehaviorSubject<boolean>(false)
+  _unreadCount = new BehaviorSubject<number>(0)
   unreadCount$ = this._unreadCount.asObservable()
+  notificationsCallCount = 0
 
   _handleClick = new BehaviorSubject<any>('')
   handleClick$ = this._handleClick.asObservable()
@@ -43,7 +44,8 @@ export class LibNotificationsService {
   }
 
   updateUnreadCount(): void {
-    this._unreadCount.next(true)
+    this.notificationsCallCount = this.notificationsCallCount + 1
+    this._unreadCount.next(this.notificationsCallCount)
   }
 
   searchContent(query: string): Observable<any> {
