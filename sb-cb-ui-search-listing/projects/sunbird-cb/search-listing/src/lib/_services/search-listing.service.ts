@@ -7,6 +7,7 @@ import {
   IGOTConst,
   SearchCommunitiesRequest,
   SearchExternalRequest,
+  SearchListingConfig,
   SearchNLP,
   SearchPeoplesRequest,
   SearchV4Request
@@ -33,7 +34,8 @@ const API_END_POINTS = {
     return `/apis/proxies/v8/learner/course/v4/user/enrollment/list/${userId}`;
   },
   FETCH_CPB_PLANS: `/apis/proxies/v8/user/v1/cbplan`,
-  DOWNLOAD_CERTIFICATE_v2: (id: string) => `apis/protected/v8/cohorts/course/batch/cert/download/${id}`
+  DOWNLOAD_CERTIFICATE_v2: (id: string) => `apis/protected/v8/cohorts/course/batch/cert/download/${id}`,
+  SEARCH_USERS: `/apis/proxies/v8/user/v1/search`
 };
 
 @Injectable({
@@ -41,7 +43,7 @@ const API_END_POINTS = {
 })
 export class SearchListingService {
   private removeFilter = new Subject<any>();
-  searchConfig: any = null;
+  searchConfig: SearchListingConfig.Config | null = null;
   /**
    * Observable string streams
    */
@@ -58,13 +60,16 @@ export class SearchListingService {
     return throwError(errorMessage);
   }
 
-  fetchSearchData(request: any): Observable<any> { //       This method is used to fetch search data based on the request parameters.
+  fetchSearchData(request: any): Observable<any> {
+    //       This method is used to fetch search data based on the request parameters.
     return this.http.post<any>(API_END_POINTS.SEARCH_V6, request);
   }
-  fetchSearchDataByCategory(request: any): Observable<any> { // This method is used to fetch search data by category.
+  fetchSearchDataByCategory(request: any): Observable<any> {
+    // This method is used to fetch search data by category.
     return this.http.post<any>(API_END_POINTS.SEARCH_V4, request);
   }
-  fetchSearchDataforCios(request: any): Observable<any> { // This method is used to fetch search data for CIOs.
+  fetchSearchDataforCios(request: any): Observable<any> {
+    // This method is used to fetch search data for CIOs.
     return this.http.post<any>(API_END_POINTS.SEARCH_EXT_CONTENT, request);
   }
   public notifyOther(data: any) {
@@ -73,62 +78,79 @@ export class SearchListingService {
     }
   }
 
-  async getSearchConfig(): Promise<any> {  // This method fetches the search configuration from the server.
+  async getSearchConfig(): Promise<any> {
+    // This method fetches the search configuration from the server.
     if (!this.searchConfig) {
-      this.searchConfig = {};
       const baseUrl = this.configSrv.sitePath;
-      this.searchConfig = await this.http.get<any>(`${baseUrl}/feature/search.json`).toPromise();
+      this.searchConfig = await this.http.get<any>(`${baseUrl}/feature/search-listing.json`).toPromise();
     }
     return of(this.searchConfig).toPromise();
   }
 
-  searchCoursesv4(params: SearchV4Request): Promise<any> { // This method is used to search courses using the v4 API.
+  searchCoursesv4(params: SearchV4Request): Promise<any> {
+    // This method is used to search courses using the v4 API.
     return this.http.post(API_END_POINTS.SEARCH_V4, params).toPromise();
   }
 
-  searchConnections(params: SearchPeoplesRequest): Promise<any> { // This method is used to search for people connections.
+  searchConnections(params: SearchPeoplesRequest): Promise<any> {
+    // This method is used to search for people connections.
     return this.http.post(API_END_POINTS.SEARCH_PEOPLE, { request: params }).toPromise();
   }
 
-  searchCommunity(params: SearchCommunitiesRequest): Promise<any> { // This method is used to search for communities.
+  searchCommunity(params: SearchCommunitiesRequest): Promise<any> {
+    // This method is used to search for communities.
     return this.http.post(API_END_POINTS.SEARCH_COMMUNITY, params).toPromise();
   }
 
-  searchResource(params: SearchV4Request): Promise<any> { // This method is used to search resources.
+  searchResource(params: SearchV4Request): Promise<any> {
+    // This method is used to search resources.
     return this.http.post(API_END_POINTS.SEARCH_V6, params).toPromise();
   }
 
-  nlpSearch(params: SearchNLP): Promise<any> { // This method is used to perform NLP-based search.
+  nlpSearch(params: SearchNLP): Promise<any> {
+    // This method is used to perform NLP-based search.
     return this.http.post(API_END_POINTS.SEARCH_NLP, params).toPromise();
   }
 
-  recentCreate(req: any): Promise<any> {// This method is used to create a recent search entry.
+  recentCreate(req: any): Promise<any> {
+    // This method is used to create a recent search entry.
     return this.http.post(API_END_POINTS.RECENT_CREATE, req).toPromise();
   }
-  recentRead() { // This method is used to read recent search entries.
+  recentRead() {
+    // This method is used to read recent search entries.
     return this.http.get(API_END_POINTS.RECENT_READ);
   }
 
-  recentDeleteByUser() {  // This method is used to delete recent search entries by user ID.
+  recentDeleteByUser() {
+    // This method is used to delete recent search entries by user ID.
     return this.http.delete(API_END_POINTS.RECENT_DELETE_BY_USERID);
   }
-  recentDeleteByTime(id: any) { // This method is used to delete recent search entries by timestamp.
+  recentDeleteByTime(id: any) {
+    // This method is used to delete recent search entries by timestamp.
     return this.http.delete(API_END_POINTS.RECENT_DELETE_BY_TIMESTAMP(id));
   }
 
-  enrollment(request: any, userId: string): any {  // This method is used to fetch enrollment data for a user.
+  enrollment(request: any, userId: string): any {
+    // This method is used to fetch enrollment data for a user.
     return this.http.post(API_END_POINTS.ENROLLMENT_API(userId), request);
   }
 
-  searchExternalContent(params: SearchExternalRequest): Promise<any> { // This method is used to search for external content.
+  searchExternalContent(params: SearchExternalRequest): Promise<any> {
+    // This method is used to search for external content.
     return this.http.post(API_END_POINTS.SEARCH_EXT_CONTENT, params).toPromise();
   }
- 
-  downloadCertificate_v2(id: string): Observable<any> { // This method is used to download a certificate by its ID.
+  searchUsersMDO(params: any): Promise<any> {
+    // This method is used to search for users in the MDO.
+    return this.http.post(API_END_POINTS.SEARCH_USERS, params).toPromise();
+  }
+  
+  downloadCertificate_v2(id: string): Observable<any> {
+    // This method is used to download a certificate by its ID.
     return this.http.get(`${API_END_POINTS.DOWNLOAD_CERTIFICATE_v2(id)}`);
   }
 
-  fetchCbpPlanList() {  // This method is used to fetch the list of CBP plans.
+  fetchCbpPlanList() {
+    // This method is used to fetch the list of CBP plans.
     if (this.checkStorageData("cbpService", "cbpData")) {
       const result: any = this.http.get(API_END_POINTS.FETCH_CPB_PLANS).pipe(
         catchError(this.handleError),

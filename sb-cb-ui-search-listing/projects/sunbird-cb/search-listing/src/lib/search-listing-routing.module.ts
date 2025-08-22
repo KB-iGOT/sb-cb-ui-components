@@ -10,12 +10,7 @@ const routes: Routes = [
     component: GlobalSearchComponent,
     data: {
       pageType: "feature",
-      pageKey: "search",
-      pageId: "",
-    },
-    resolve: {
-      // searchPageData: PageResolve,
-      // recommendedPeople: MyMdoResolveService
+      pageKey: "search-listing"
     },
   },
 ];

@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core";
+import { importProvidersFrom, NgModule } from "@angular/core";
 import { SearchListingComponent } from "./search-listing.component";
 import { GlobalSearchComponent } from "./routes/global-search/global-search.component";
 import { LearnSearchComponent } from "./routes/learn-search/learn-search.component";
@@ -30,7 +30,7 @@ import { MatLegacySlideToggleModule as MatSlideToggleModule } from "@angular/mat
 import { MatLegacyTabsModule as MatTabsModule } from "@angular/material/legacy-tabs";
 import { MatLegacyTooltipModule as MatTooltipModule } from "@angular/material/legacy-tooltip";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { MatRippleModule } from "@angular/material/core";
+import { MatNativeDateModule, MatRippleModule } from "@angular/material/core";
 import { MatLegacyOptionModule as MatOptionModule } from "@angular/material/legacy-core";
 import { MatDividerModule } from "@angular/material/divider";
 import { MatExpansionModule } from "@angular/material/expansion";
@@ -42,6 +42,10 @@ import { SkeletonLoaderComponent } from "./_components/skeleton-loader/skeleton-
 import { TranslateModule } from "@ngx-translate/core";
 import { SkeletonLoaderPeoplesComponent } from "./_components/skeleton-loader-peoples/skeleton-loader-peoples.component";
 import { AvatarPhotoModule } from "./_components/avatar-photo/avatar-photo.module";
+import { DesignationCardComponent } from "./_components/designation-card/designation-card.component";
+import { TrainingPlansCardComponent } from "./_components/training-plans-card/training-plans-card.component";
+import { UsersCardComponent } from "./_components/users-card/users-card.component";
+import { DefaultMatCalendarRangeStrategy, MatDatepickerModule, MatRangeDateSelectionModel } from "@angular/material/datepicker";
 
 @NgModule({
   declarations: [
@@ -60,7 +64,10 @@ import { AvatarPhotoModule } from "./_components/avatar-photo/avatar-photo.modul
     SearchSortInputComponent,
     SkeletonLoaderContentComponent,
     SkeletonLoaderPeoplesComponent,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    DesignationCardComponent,
+    TrainingPlansCardComponent,
+    UsersCardComponent
   ],
   imports: [
     CommonModule,
@@ -92,9 +99,11 @@ import { AvatarPhotoModule } from "./_components/avatar-photo/avatar-photo.modul
     MatDividerModule,
     AvatarPhotoModule,
     MatRadioModule,
-    TranslateModule
+    TranslateModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   exports: [SearchListingComponent, SearchInputHomeComponent],
-  providers: []
+  providers: [importProvidersFrom(MatNativeDateModule), MatRangeDateSelectionModel, DefaultMatCalendarRangeStrategy]
 })
 export class SearchListingModule {}

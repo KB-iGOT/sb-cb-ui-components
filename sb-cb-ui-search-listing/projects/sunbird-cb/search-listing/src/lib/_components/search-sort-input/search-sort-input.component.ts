@@ -1,27 +1,11 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  ViewChild,
-} from "@angular/core";
-import {
-  SEARCH_SORT_DROPDOWN,
-  SEARCH_SORT_PEOPLES,
-} from "../../_constants/search-listing.constant";
-import {
-  SearchCategory,
-  SearchConstantLocalStorage,
-  SortType,
-} from "../../_models/search-listing.model";
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild } from "@angular/core";
+import { SEARCH_SORT_DROPDOWN, SEARCH_SORT_PEOPLES } from "../../_constants/search-listing.constant";
+import { SearchCategory, SearchConstantLocalStorage, SortType } from "../../_models/search-listing.model";
 
 @Component({
   selector: "ws-app-search-sort-input",
   templateUrl: "./search-sort-input.component.html",
-  styleUrls: ["./search-sort-input.component.scss"],
+  styleUrls: ["./search-sort-input.component.scss"]
 })
 export class SearchSortInputComponent implements AfterViewInit, OnChanges {
   @Output() searchSorter = new EventEmitter();
@@ -39,30 +23,19 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
       this.options = SEARCH_SORT_PEOPLES;
       this.selectedOption = SortType.MostRelevent;
       // this.searchSorter.emit(this.selectedOption);
-    } else if (
-      this.category === SearchCategory.Communities ||
-      this.category === SearchCategory.Events
-    ) {
-      this.options = SEARCH_SORT_DROPDOWN.filter(
-        (option) => option.value !== SortType.HighestRated
-      );
+    } else if (this.category === SearchCategory.Communities || this.category === SearchCategory.Events || this.category === SearchCategory.Users) {
+      this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.HighestRated);
       this.selectedOption = SortType.MostRelevent;
       // this.searchSorter.emit(this.selectedOption);
     } else if (this.category === SearchCategory.ExternalContents) {
-      this.options = SEARCH_SORT_DROPDOWN.filter(
-        (option) =>
-          option.value !== SortType.HighestRated &&
-          option.value !== SortType.MostRelevent
-      );
+      this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.HighestRated && option.value !== SortType.MostRelevent);
       this.selectedOption = SortType.RecentlyAdded;
     } else {
       this.options = SEARCH_SORT_DROPDOWN;
       this.selectedOption = SortType.MostRelevent;
       // this.searchSorter.emit(this.selectedOption);
       if (this.isExploreContentTab) {
-        this.options = SEARCH_SORT_DROPDOWN.filter(
-          (option) => option.value !== SortType.MostRelevent
-        );
+        this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.MostRelevent);
         this.selectedOption = SortType.RecentlyAdded;
       } else {
         this.options = SEARCH_SORT_DROPDOWN;
@@ -71,7 +44,7 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
     }
 
     const sortType = localStorage.getItem(SearchConstantLocalStorage.SortType);
-    if (sortType && this.options.some((option) => option.value === sortType)) {
+    if (sortType && this.options.some(option => option.value === sortType)) {
       this.selectedOption = sortType;
       // this.searchSorter.emit(this.selectedOption);
     }

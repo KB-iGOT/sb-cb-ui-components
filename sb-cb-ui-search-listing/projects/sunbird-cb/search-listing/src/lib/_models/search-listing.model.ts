@@ -67,6 +67,7 @@ export class Filters {
 
 export class SortBy {
   createdOn?: string;
+  createdDate?: string;
   startDate?: string;
   avgRating?: string;
   firstName?: string;
@@ -85,7 +86,10 @@ export enum SearchCategory {
   CaseStudy = "case-study",
   Communities = "communities",
   Resources = "resources",
-  ExternalContents = "external-contents"
+  ExternalContents = "external-contents",
+  TrainingPlans = "training-plans",
+  Designation = "designation",
+  Users = "users"
 }
 
 export const SearchOthersFacet = [
@@ -176,6 +180,56 @@ export class SearchCommunitiesRequest {
   }
 }
 
+export class SearchUsersRequest {
+  request: UsersRequestParams;
+  constructor() {
+    this.request = new UsersRequestParams();
+  }
+}
+
+export class UsersRequestParams {
+  filters: UsersFilters;
+  fields: string[];
+  facets: string[];
+  query?: string;
+  sort_by: SortBy;
+  orderBy: string;
+  limit: number;
+  offset: number;
+
+  constructor() {
+    this.filters = {};
+    this.fields = [
+      "userId",
+      "firstName",
+      "userName",
+      "email",
+      "profileDetails.professionalDetails.designation",
+      "maskedPhone",
+      "profileDetails.personalDetails.primaryEmail",
+      "profileDetails.profileStatus",
+      "onboardingDate",
+      "rootOrgName"
+    ];
+    this.facets = [
+      "profileDetails.professionalDetails.designation",
+      "profileDetails.profileStatus",
+      "profileDetails.professionalDetails.group",
+      "profileDetails.employmentDetails.departmentName",
+      "organisations.roles"
+    ];
+    this.limit = 10;
+    this.offset = 0;
+    this.sort_by = {};
+    this.orderBy = 'createdDate'
+  }
+}
+
+export interface UsersFilters {
+  rootOrgId?: string;
+  [key: string]: any;
+}
+
 export class SearchNLP {
   query: string;
   synonyms: boolean;
@@ -217,7 +271,14 @@ export enum FacetType {
   sectorNameResource = "sectorName",
   contentPartners = "contentPartner.contentPartnerName",
   topic = "topic",
-  topicName = "topicName"
+  topicName = "topicName",
+
+  // Users
+  profileDesignation = "profileDetails.professionalDetails.designation",
+  profileStatus = "profileDetails.profileStatus",
+  profileGroup = "profileDetails.professionalDetails.group",
+  employmentDepartment = "profileDetails.employmentDetails.departmentName",
+  organizationsRoles = "organisations.roles"
 }
 
 export enum SortType {
@@ -295,4 +356,55 @@ export enum ACBPConst {
 export enum IGOTConst {
   COMPETENCIES = "competencies_v6",
   RETIRED = "Retired"
+}
+
+export namespace SearchListingConfig {
+  export interface Config {
+    searchCategories: SearchCategory[];
+    searchListing: boolean;
+    allSearchCategoriesTypes: SearchCategoryType[];
+    searchInputConfig: SearchInputConfig;
+    applicationName: string;
+    noDataFoundFlags: SearchNoDataFoundFlags;
+  }
+  export interface SearchCategory {
+    label: string;
+    value: string;
+    icon: string;
+  }
+
+  export interface FilterType {
+    name: string;
+    count: number;
+    isChecked: boolean;
+    displayName: string;
+    filters?: FilterType[];
+  }
+
+  export interface SearchCategoryType {
+    displayName: string;
+    name: string;
+    count: number;
+    isChecked: boolean;
+    filters: FilterType[];
+    disabled: boolean;
+  }
+  export interface SearchInputConfig {
+    enableRecentSearches: boolean;
+    defaultSearchCategory: string;
+  }
+  export interface SearchNoDataFoundFlags {
+    navigationsButtons: NavigationsButton[];
+  }
+
+  export interface NavigationsButton {
+    label: string;
+    routeTo: string;
+    matFlatButton: boolean;
+  }
+
+  export enum ApplicationNames {
+    LearnerPortal = "Learner Portal",
+    MDOPortal = "MDO Portal"
+  }
 }

@@ -4,11 +4,13 @@ import { Subscription } from "rxjs";
 import * as _ from "lodash";
 import { TranslateService } from "@ngx-translate/core";
 import { ConfigurationsService, MultilingualTranslationsService, NsContent } from "@sunbird-cb/utils-v2";
-import { Facet, FacetType, FormattedFacets, ICompentencyKeys, SearchCategory } from "../../_models/search-listing.model";
+import { Facet, FacetType, FormattedFacets, ICompentencyKeys, SearchCategory, SearchListingConfig } from "../../_models/search-listing.model";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from "@angular/router";
 import { MatRadioChange } from "@angular/material/radio";
-import { CATEGORY_TYPE } from "../../_constants/search-listing.constant";
+// import { CATEGORY_TYPE } from "../../_constants/search-listing.constant";
+import { SearchListingService } from "../../_services/search-listing.service";
+import { DateRange, DefaultMatCalendarRangeStrategy, MatRangeDateSelectionModel } from "@angular/material/datepicker";
 @Component({
   selector: "ws-app-search-filters",
   templateUrl: "./search-filters.component.html",
@@ -27,8 +29,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   private subscription: Subscription = new Subscription();
   queryParams: any;
 
-  categoryType = CATEGORY_TYPE;
-  categoryTypeDup = CATEGORY_TYPE;
+  categoryType: SearchListingConfig.SearchCategoryType[] = [];
+  categoryTypeDup: SearchListingConfig.SearchCategoryType[] = [];
   categoryTypeEnum = SearchCategory;
   showAllLanguage = false;
   showAllContents = false;
@@ -70,12 +72,17 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   isExploreContentTab = false;
   isAllContentSelected = true;
   environment!: any;
+  searchConfig: SearchListingConfig.Config | null = null;
+  selectedDateRange!: DateRange<Date> | null;
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService, // private router: Router
-    private configSvc: ConfigurationsService
+    private configSvc: ConfigurationsService,
+    private searchService: SearchListingService,
+    private selectionModel: MatRangeDateSelectionModel<Date>,
+    private selectionStrategy: DefaultMatCalendarRangeStrategy<Date>
   ) {
     this.environment = environment;
     if (localStorage.getItem("websiteLanguage")) {
@@ -85,7 +92,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
     this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
     this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
@@ -100,6 +107,17 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
         }
       })
     );
+
+    this.searchConfig = await this.searchService.getSearchConfig();
+
+    if (this.searchConfig) {
+      const categories = this.searchConfig.searchCategories || [];
+      const categorieTypes = this.searchConfig.allSearchCategoriesTypes || [];
+      this.categoryType = categorieTypes.filter(cat => {
+        return categories.some(category => category.value === cat.name);
+      });
+      this.categoryTypeDup = this.categoryType;
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -760,5 +778,15 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     } else {
       return obj === target;
     }
+  }
+
+  rangeChanged(selectedDate: Date) {
+    const selection = this.selectionModel.selection,
+      newSelection = this.selectionStrategy.selectionFinished(selectedDate, selection);
+
+    this.selectionModel.updateSelection(newSelection, this);
+    this.selectedDateRange = new DateRange<Date>(newSelection.start, newSelection.end);
+
+    console.log(this.selectedDateRange, "Selected Date Range");
   }
 }

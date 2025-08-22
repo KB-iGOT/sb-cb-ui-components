@@ -10,6 +10,7 @@ import {
   SearchEventfacet,
   SearchEventFields,
   SearchExternalRequest,
+  SearchListingConfig,
   SearchNLP,
   SearchPeoplesRequest,
   SearchResourceFacets,
@@ -21,7 +22,7 @@ import { WidgetContentLibService } from "@sunbird-cb/consumption";
 import { SearchListingService } from "../../_services/search-listing.service";
 
 @Component({
-  selector: "ws-app-search-input-home",
+  selector: "ws-app-search-input-lib-home",
   templateUrl: "./search-input-home.component.html",
   styleUrls: ["./search-input-home.component.scss"],
   // tslint:disable-next-line
@@ -43,33 +44,14 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   nlpSearchValue: any;
   private hasReadRecentBeenCalled = false;
   searchCat: any;
-  categories = [
-    { label: "Content", value: SearchCategory.Courses, icon: "video-library" },
-    { label: "Events", value: SearchCategory.Events, icon: "calender-event" },
-    { label: "People", value: SearchCategory.People, icon: "people-search" },
-    {
-      label: "External Contents",
-      value: SearchCategory.ExternalContents,
-      icon: "video-library"
-    },
-    {
-      label: "Communities",
-      value: SearchCategory.Communities,
-      icon: "menu_book"
-    },
-    {
-      label: "Resources",
-      value: SearchCategory.Resources,
-      icon: "diversity_3"
-    },
-    { label: "All", value: SearchCategory.All, icon: "" }
-  ];
+  categories: any[] = [];
 
-  selectedSearchCategory: string = SearchCategory.Courses;
+  selectedSearchCategory: string = "";
   openSearchTemplate = false;
   loaderSearching = false;
   responseNlpQuery = "";
   searchSubscription: any;
+  searchConfig: SearchListingConfig.Config | null = null;
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
   @HostListener("document:click", ["$event"])
   onClickOutside(event: Event) {
@@ -112,36 +94,21 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    if (!this.activated.snapshot.data["searchPageData"]) {
-      this.searchListingService
-        .getSearchConfig()
-        .then((data: any) => {
-          this.activated.snapshot.data = {
-            searchPageData: { data }
-          };
-        })
-        .then(() => {
-          this.initialize();
-        });
-    } else {
+    this.searchConfig = this.activated.snapshot.data["searchPageData"];
+    if (this.searchConfig) {
       this.initialize();
+    } else {
+      this.searchListingService.getSearchConfig().then((data: any) => {
+        this.searchConfig = data;
+        this.initialize();
+      });
     }
   }
+
   ngOnChanges() {
     for (const change in SimpleChange) {
       if (change === "placeHolder") {
         this.placeHolder = this.placeHolder;
-      }
-    }
-  }
-
-  autoFilter() {
-    if (this.route.snapshot.data["searchPageData"]) {
-      const isAutoCompleteAllowed = this.route.snapshot.data["searchPageData"].data.search.isAutoCompleteAllowed;
-      if (typeof isAutoCompleteAllowed === "boolean" && isAutoCompleteAllowed) {
-        this.queryControl.valueChanges.pipe(debounceTime(200), distinctUntilChanged()).subscribe(q => {
-          this.searchFromQuery(q);
-        });
       }
     }
   }
@@ -179,16 +146,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       if (queryParam.has("category")) {
         this.selectedSearchCategory = queryParam.get("category") || "";
       } else {
-        // this.selectedSearchCategory = SearchCategory.All;
-        this.selectedSearchCategory = SearchCategory.Courses;
-      }
-
-      const isAutoCompleteAllowed = this.route.snapshot.data["searchPageData"]
-        ? this.route.snapshot.data["searchPageData"].data.search.isAutoCompleteAllowed
-        : false;
-      if (typeof isAutoCompleteAllowed === "undefined" || (typeof isAutoCompleteAllowed === "boolean" && isAutoCompleteAllowed)) {
+        this.selectedSearchCategory = this.searchConfig?.searchInputConfig?.defaultSearchCategory || "";
       }
     });
+    this.categories = this.searchConfig?.searchCategories || [];
   }
 
   async updateQuery(query: string) {

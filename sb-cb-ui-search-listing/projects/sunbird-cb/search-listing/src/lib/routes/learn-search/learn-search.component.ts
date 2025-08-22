@@ -19,7 +19,9 @@ import {
   SearchResourceFacets,
   SearchResourceMimeType,
   SearchExternalRequest,
-  ICompentencyKeys
+  ICompentencyKeys,
+  SearchListingConfig,
+  SearchUsersRequest
 } from "../../_models/search-listing.model";
 import { forkJoin, Subject } from "rxjs";
 import moment from "moment";
@@ -67,6 +69,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   communitiesSearchTotalCount = 0;
   resourcesSearchTotalCount = 0;
   externalSearchTotalCount = 0;
+  designationSearchTotalCount = 0;
+  trainingPlansSearchTotalCount = 0;
+  usersSearchTotalCount = 0;
 
   courseSearchResults: any[] = [];
   eventsSearchResults: any[] = [];
@@ -74,6 +79,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   resourcesSearchResults: any[] = [];
   communitiesSearchResults: any[] = [];
   externalSearchResults: any[] = [];
+  designationSearchResults: any[] = [];
+  trainingPlansSearchResults: any[] = [];
+  usersSearchResults: any[] = [];
 
   searchRequestCourse = new SearchV4Request([]);
   searchRequestEvents = new SearchV4Request([]);
@@ -81,6 +89,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   searchRequestResources = new SearchV4Request([]);
   searchRequestCommunities = new SearchCommunitiesRequest([]);
   searchRequestExternal = new SearchExternalRequest([]);
+  searchRequestUsers = new SearchUsersRequest();
+
   searchContentLoader = true;
 
   initialPaginationSize = 10;
@@ -94,6 +104,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   peoplesFacets = [];
   resourcesFacets = [];
   externalFacets = [];
+  designationFacets = [];
+  trainingPlansFacets = [];
+  usersFacets = [];
 
   combinedFacets: any[] = [];
   compentencyKey!: ICompentencyKeys;
@@ -117,6 +130,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   applySelectedFilters: any = [];
   compentencyKeyExist = false;
   environment!: any;
+  searchConfig: SearchListingConfig.Config | null = null;
   constructor(
     @Inject("environment") environment: any,
     private searchListingService: SearchListingService,
@@ -129,20 +143,21 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     private langtranslations: MultilingualTranslationsService,
     private networkService: NetworkService
   ) {
-    if (localStorage.getItem("websiteLanguage")) {
-      this.translate.setDefaultLang("en");
-      const lang = localStorage.getItem("websiteLanguage")!;
-      this.translate.use(lang);
-    }
+    this.langtranslations.languageSelectedObservable.subscribe(() => {
+      if (localStorage.getItem("websiteLanguage")) {
+        this.translate.setDefaultLang("en");
+        const lang = localStorage.getItem("websiteLanguage")!;
+        this.translate.use(lang);
+      }
+    });
     this.environment = environment;
-
     this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
     this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
     this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
     this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     if (this.configSvc.userProfile && this.configSvc.userProfile.departmentName) {
       this.currentUserDept = this.configSvc.userProfile.departmentName;
     }
@@ -169,6 +184,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async ngOnChanges(changes: SimpleChanges) {
+    this.searchConfig = await this.searchListingService.getSearchConfig();
+
     if (this.configSvc.unMappedUser && this.configSvc.unMappedUser.profileDetails) {
       this.veifiedKarmayogi =
         this.configSvc.unMappedUser.profileDetails.profileStatus && this.configSvc.unMappedUser.profileDetails.profileStatus === "VERIFIED" ? true : false;
@@ -205,13 +222,37 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
         this.seeAllResults(category);
       } else {
-        await this.searchCourses();
-        await this.searchEvents();
+        const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
+        if (categories.length) {
+          if (categories.includes(SearchCategory.Courses)) {
+            await this.searchCourses();
+          }
+          if (categories.includes(SearchCategory.Events)) {
+            await this.searchEvents();
+          }
 
-        await this.searchPeople();
-        await this.searchcommunities();
-        await this.searchResources();
-        await this.searchExternalContents();
+          if (categories.includes(SearchCategory.People)) {
+            await this.searchPeople();
+          }
+          if (categories.includes(SearchCategory.Communities)) {
+            await this.searchcommunities();
+          }
+          if (categories.includes(SearchCategory.Resources)) {
+            await this.searchResources();
+          }
+          if (categories.includes(SearchCategory.ExternalContents)) {
+            await this.searchExternalContents();
+          }
+          if (categories.includes(SearchCategory.Designation)) {
+            await this.searchDesignations();
+          }
+          if (categories.includes(SearchCategory.TrainingPlans)) {
+            await this.searchTrainingPlans();
+          }
+          if (categories.includes(SearchCategory.Users)) {
+            await this.searchUsersMDO();
+          }
+        }
 
         this.searchContentLoader = false;
       }
@@ -267,7 +308,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   translateLabels(label: string, type: any) {
-    return this.langtranslations.translateLabel(label, type, "");
+    return this.langtranslations.translateLabelWithoutspace(label, type, "");
   }
 
   updateNoResultMessage(searchTerm: string) {
@@ -418,91 +459,183 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  async getCompetencyHierichy(filterFlag?: any) {
-    const competency = ["Behavioural", "Functional", "Domain"];
-    let competencyFactet: any = [];
-    let competencyThemeFacet: any = [];
-    let competencySubThemeFacet: any = [];
-    let result: any;
-    for (const element of competency) {
-      if (this.seeAllResult === SearchCategory.Courses) {
-        if (filterFlag) {
-          // const searchRequestCourse = new SearchV4Request([
-          //   this.competencyAreaNameKey,
-          //   this.competencyThemeKey,
-          //   this.competencySubThemeKey,
-          // ]);
-          this.searchRequestCourse.request.query = this.statedata?.param;
-          this.searchRequestCourse.request.filters[this.competencyAreaNameKey] = element;
-          result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
-        } else {
-          const searchRequestCourse = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
-          searchRequestCourse.request.query = this.statedata?.param;
-          searchRequestCourse.request.filters[this.competencyAreaNameKey] = element;
-          result = await this.searchListingService.searchCoursesv4(searchRequestCourse);
-        }
-        competencyThemeFacet = result.result?.facets.find((facet: any) => facet.name === this.competencyThemeKey);
-        competencySubThemeFacet = result.result?.facets.find((facet: any) => facet.name === this.competencySubThemeKey);
-      } else if (this.seeAllResult === SearchCategory.Events) {
-        const searchRequestEvents = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
-        searchRequestEvents.request.query = this.statedata?.param;
-        searchRequestEvents.request.filters[this.competencyAreaNameKey] = element;
-        result = await this.searchListingService.searchCoursesv4(searchRequestEvents);
-        competencyThemeFacet = result.result?.facets.find((facet: any) => facet.name === this.competencyThemeKey);
-        competencySubThemeFacet = result.result?.facets.find((facet: any) => facet.name === this.competencySubThemeKey);
-      } else if (this.seeAllResult === SearchCategory.Communities) {
-        const searchRequestCommunity = new SearchCommunitiesRequest([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
-        searchRequestCommunity.searchString = this.statedata?.param;
-        searchRequestCommunity.filterCriteriaMap[this.competencyAreaNameKey] = element;
-        result = await this.searchListingService.searchCommunity(searchRequestCommunity);
-        competencyThemeFacet = result.result?.search_results?.facets[this.competencyThemeKey].length
-          ? {
-              values: result.result?.search_results?.facets[this.competencyThemeKey]
-            }
-          : { values: [] };
-        competencySubThemeFacet = result.result?.search_results?.facets[this.competencySubThemeKey].length
-          ? {
-              values: result.result?.search_results?.facets[this.competencySubThemeKey]
-            }
-          : { values: [] };
-      } else if (this.seeAllResult === SearchCategory.CaseStudy) {
-        const searchRequestCourse = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
-        searchRequestCourse.request.query = this.statedata?.param;
-        searchRequestCourse.request.filters[this.competencyAreaNameKey] = [element];
-        searchRequestCourse.request.filters.courseCategory = ["Case Study"];
-        result = await this.searchListingService.searchCoursesv4(searchRequestCourse);
-        competencyThemeFacet = result.result?.facets.find((facet: any) => facet.name === this.competencyThemeKey);
-        competencySubThemeFacet = result.result?.facets.find((facet: any) => facet.name === this.competencySubThemeKey);
+  async searchDesignations() {
+    this.searchPeopleLoader = true;
+    this.designationSearchTotalCount = 6;
+    this.designationSearchResults = [
+      {
+        identifier: "0140908831042437120_odcs_master_fw_designation_2954d550-e2dd-11ef-b10d-cf016b313ac2",
+        code: "2954d550-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Consulate General",
+        refType: "designation",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662498085,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "DESG-000966",
+        category: "designation",
+        status: "Live"
+      },
+      {
+        identifier: "0140908831042437120_odcs_master_fw_designation_28f1a6b0-e2dd-11ef-b10d-cf016b313ac2",
+        code: "28f1a6b0-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Controller of Administration",
+        refType: "designation",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662497435,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "DESG-000977",
+        category: "designation",
+        status: "Live"
+      },
+      {
+        identifier: "0140908831042437120_odcs_master_fw_designation_2a406dd0-e2dd-11ef-b10d-cf016b313ac2",
+        code: "2a406dd0-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Deputy Chief Security Officer",
+        refType: "designation",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662499629,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "DESG-001102",
+        category: "designation",
+        status: "Live"
+      },
+      {
+        identifier: "0140908831042437120_odcs_master_fw_designation_29d3a240-e2dd-11ef-b10d-cf016b313ac2",
+        code: "29d3a240-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Controller",
+        refType: "designation",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662498916,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "DESG-000970",
+        category: "designation",
+        status: "Live"
+      },
+      {
+        identifier: "0140908831042437120_odcs_master_fw_designation_24bde810-e2dd-11ef-b10d-cf016b313ac2",
+        code: "24bde810-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Assistant Official Liquidator",
+        refType: "designation",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662490385,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "DESG-000489",
+        category: "designation",
+        status: "Live"
+      },
+      {
+        identifier: "0140908831042437120_odcs_master_fw_designation_2aab8bb0-e2dd-11ef-b10d-cf016b313ac2",
+        code: "2aab8bb0-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Deputy Chief Executive",
+        refType: "designation",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662500331,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "DESG-001081",
+        category: "designation",
+        status: "Live"
       }
+    ];
 
-      const competencyThemeName = competencyThemeFacet
-        ? competencyThemeFacet.values.map((value: any) => ({
-            name: value?.name || value?.value,
-            count: value.count,
-            isChecked: false
-          }))
-        : [];
-      const competencySubThemeName = competencySubThemeFacet
-        ? competencySubThemeFacet.values.map((value: any) => ({
-            name: value?.name || value?.value,
-            count: value.count,
-            isChecked: false
-          }))
-        : [];
+    this.searchPeopleLoader = false;
+  }
 
-      if (competencyThemeName.length || competencySubThemeName.length) {
-        competencyFactet.push({
-          [this.competencyAreaNameKey]: {
-            name: element,
-            count: this.seeAllResult === SearchCategory.Communities ? _.get(result, "result.search_results.totalCount", 0) : _.get(result, "result.count", 0),
-            isChecked: false
-          },
-          [this.competencyThemeKey]: competencyThemeName,
-          [this.competencySubThemeKey]: competencySubThemeName
-        });
+  async searchTrainingPlans() {
+    this.trainingPlansSearchTotalCount = 6;
+    this.trainingPlansSearchResults = [
+      {
+        identifier: "0140908831042437120_odcs_master_fw_trainingplan_2954d550-e2dd-11ef-b10d-cf016b313ac2",
+        code: "2954d550-e2dd-11ef-b10d-cf016b313ac2",
+        translations: null,
+        name: "Consulate General Training Plan",
+        refType: "trainingPlan",
+        description: null,
+        index: 0,
+        additionalProperties: {
+          timeStamp: 1738662498085,
+          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
+          previousCategoryCode: "org",
+          importedOn: "04 Feb, 2025",
+          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
+          importedByName: "Qa Fnb Mdoadmin "
+        },
+        refId: "TP-000966",
+        category: "trainingPlan",
+        status: "Live"
       }
+    ];
+  }
+
+  async searchUsersMDO() {
+    console.log(this.configSvc);
+    this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
+    this.searchRequestUsers.request.query = this.statedata?.param || "";
+    const result = await this.searchListingService.searchUsersMDO(this.searchRequestUsers).catch(() => {
+      return {
+        result: { response: { content: [], count: 0, facets: {} } }
+      };
+    });
+
+    if (result?.result?.response?.content && result?.result?.response?.content?.length) {
+      this.usersSearchResults = result?.result?.response?.content || [];
+      this.usersSearchTotalCount = result?.result?.response?.count;
+      this.usersFacets = result.result?.response.facets || [];
+
+      this.combinedFacets = [];
+      this.combinedFacets = [...this.combinedFacets, result.result?.response.facets || []];
+    } else {
+      this.usersSearchResults = [];
+      this.usersSearchTotalCount = 0;
+      this.usersFacets = [];
     }
-    this.competencyFactet = competencyFactet;
   }
 
   processCommunityFacets(facets: Record<string, any[]>): any {
@@ -569,6 +702,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestResources.request.sort_by.createdOn = "desc";
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderBy = "createdOn";
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        this.searchRequestUsers.request.orderBy = "createdDate";
       }
     } else if (this.searchSortFilter === SortType.HighestRated) {
       if (this.seeAllResult === "") {
@@ -589,6 +724,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (this.seeAllResult === "") {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
         this.searchRequestEvents.request.sort_by.name = SortType.Ascending;
+        this.searchRequestUsers.request.sort_by.firstName = SortType.Ascending;
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
       } else if (this.seeAllResult === SearchCategory.Events) {
@@ -597,6 +733,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestResources.request.sort_by.name = SortType.Ascending;
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderDirection = SortType.Ascending;
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        this.searchRequestUsers.request.sort_by.firstName = SortType.Ascending;
       }
     } else if (this.searchSortFilter === SortType.ZtoA) {
       if (this.seeAllResult === "") {
@@ -610,6 +748,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestResources.request.sort_by.name = SortType.Descending;
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderDirection = SortType.Descending;
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        this.searchRequestUsers.request.sort_by.firstName = SortType.Descending;
       }
     }
 
@@ -669,6 +809,18 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           this.constructQueryParam("communities");
           this.seeAllResult = SearchCategory.Communities;
           this.applyFilterToCaategoryType();
+        } else if (key === SearchCategory.Designation) {
+          this.constructQueryParam("designation");
+          this.seeAllResult = SearchCategory.Designation;
+          this.applyFilterToCaategoryType();
+        } else if (key === SearchCategory.TrainingPlans) {
+          this.constructQueryParam("training-plans");
+          this.seeAllResult = SearchCategory.TrainingPlans;
+          this.applyFilterToCaategoryType();
+        } else if (key === SearchCategory.Users) {
+          this.constructQueryParam("users");
+          this.seeAllResult = SearchCategory.Users;
+          this.applyFilterToCaategoryType();
         } else if (key === "typeOfEvents") {
           const currentEpochTime = moment().valueOf();
           const tomorrowEpochTime = moment().add(1, "day").startOf("day").valueOf();
@@ -695,8 +847,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           this.searchRequestCommunities.filterCriteriaMap.orgName = [...selectedFilters[key]];
         } else if (key === "topicName") {
           this.searchRequestCommunities.filterCriteriaMap.topicName = [...selectedFilters[key]];
-        } else if (key === "profileDetails.professionalDetails.designation") {
+        } else if (key === FacetType.profileDesignation) {
           this.searchRequestPeoples.filters[key] = [...selectedFilters[key]];
+          this.searchRequestUsers.request.filters[FacetType.profileDesignation] = [...selectedFilters[key]];
         } else if (key === "rootOrgName") {
           this.searchRequestPeoples.filters[key] = [...selectedFilters[key]];
         } else if (key === "sourceName") {
@@ -727,6 +880,14 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           this.searchRequestExternal.filterCriteriaMap[FacetType.contentPartners] = [...selectedFilters[key]];
         } else if (key === FacetType.topic) {
           this.searchRequestExternal.filterCriteriaMap[FacetType.topic] = [...selectedFilters[key]];
+        }
+        // Users
+        else if (key === FacetType.profileGroup) {
+          this.searchRequestUsers.request.filters[FacetType.profileGroup] = [...selectedFilters[key]];
+        } else if (key === FacetType.profileStatus) {
+          this.searchRequestUsers.request.filters[FacetType.profileStatus] = [...selectedFilters[key]];
+        } else if (key === FacetType.organizationsRoles) {
+          this.searchRequestUsers.request.filters[FacetType.organizationsRoles] = [...selectedFilters[key]];
         } else {
           this.searchRequestCourse.request.filters.courseCategory!.push(...selectedFilters[key]);
         }
@@ -765,11 +926,44 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchcommunities();
     } else if (this.seeAllResult === SearchCategory.ExternalContents) {
       this.searchExternalContents();
+    } else if (this.seeAllResult === SearchCategory.Designation) {
+      this.searchDesignations();
+    } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
+      this.searchTrainingPlans();
+    } else if (this.seeAllResult === SearchCategory.Users) {
+      this.searchUsersMDO();
     } else {
-      await this.searchCourses();
-      await this.searchEvents();
-      this.searchPeople();
-      this.searchcommunities();
+      const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
+      if (categories.length) {
+        if (categories.includes(SearchCategory.Courses)) {
+          await this.searchCourses();
+        }
+        if (categories.includes(SearchCategory.Events)) {
+          await this.searchEvents();
+        }
+
+        if (categories.includes(SearchCategory.People)) {
+          this.searchPeople();
+        }
+        if (categories.includes(SearchCategory.Communities)) {
+          this.searchcommunities();
+        }
+        if (categories.includes(SearchCategory.Resources)) {
+          this.searchResources();
+        }
+        if (categories.includes(SearchCategory.ExternalContents)) {
+          this.searchExternalContents();
+        }
+        if (categories.includes(SearchCategory.Designation)) {
+          this.searchDesignations();
+        }
+        if (categories.includes(SearchCategory.TrainingPlans)) {
+          this.searchTrainingPlans();
+        }
+        if (categories.includes(SearchCategory.Users)) {
+          this.searchUsersMDO();
+        }
+      }
     }
 
     this.searchContentLoader = false;
@@ -837,34 +1031,40 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.communitiesSearchTotalCount = 0;
       this.resourcesSearchTotalCount = 0;
       this.externalSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
 
       this.searchRequestCourse.request.limit = this.initialPaginationSize;
       await this.searchCourses();
       this.combinedFacets = [this.coursesFacets];
-      // this.getCompetencyHierichy();
     } else if (category === SearchCategory.CaseStudy) {
       this.eventSearchTotalCount = 0;
       this.peopleSearchTotalCount = 0;
       this.communitiesSearchTotalCount = 0;
       this.resourcesSearchTotalCount = 0;
       this.externalSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
 
       this.searchRequestCourse.request.limit = this.initialPaginationSize;
       this.searchRequestCourse.request.filters.courseCategory = ["Case Study"];
       await this.searchCourses();
       this.combinedFacets = [this.coursesFacets];
-      // this.getCompetencyHierichy();
     } else if (category === SearchCategory.Events) {
       this.courseSearchTotalCount = 0;
       this.peopleSearchTotalCount = 0;
       this.communitiesSearchTotalCount = 0;
       this.resourcesSearchTotalCount = 0;
       this.externalSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
 
       this.searchRequestEvents.request.limit = this.initialPaginationSize;
       await this.searchEvents();
       this.combinedFacets = [this.eventsFacets];
-      // this.getCompetencyHierichy();
       this.processTypeOfEventsFilter();
     } else if (category === SearchCategory.People) {
       this.courseSearchTotalCount = 0;
@@ -872,6 +1072,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.communitiesSearchTotalCount = 0;
       this.resourcesSearchTotalCount = 0;
       this.externalSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
 
       this.searchRequestPeoples.limit = this.initialPaginationSize;
       await this.searchPeople();
@@ -882,17 +1085,23 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.peopleSearchTotalCount = 0;
       this.resourcesSearchTotalCount = 0;
       this.externalSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
 
       this.searchRequestCommunities.pageSize = this.initialPaginationSize;
       await this.searchcommunities();
       this.combinedFacets = [this.communitiesFacets];
-      // this.getCompetencyHierichy();
     } else if (category === SearchCategory.Resources) {
       this.courseSearchTotalCount = 0;
       this.eventSearchTotalCount = 0;
       this.communitiesSearchTotalCount = 0;
       this.peopleSearchTotalCount = 0;
       this.externalSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
+
       this.searchRequestResources.request.limit = this.initialPaginationSize;
       await this.searchResources();
       this.combinedFacets = [this.resourcesFacets];
@@ -902,10 +1111,48 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.communitiesSearchTotalCount = 0;
       this.peopleSearchTotalCount = 0;
       this.resourcesSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
+
       this.searchRequestExternal.pageSize = this.initialPaginationSize;
 
       await this.searchExternalContents();
       this.combinedFacets = [this.externalFacets];
+    } else if (category === SearchCategory.Designation) {
+      this.courseSearchTotalCount = 0;
+      this.eventSearchTotalCount = 0;
+      this.communitiesSearchTotalCount = 0;
+      this.peopleSearchTotalCount = 0;
+      this.resourcesSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
+
+      // this.searchRequestExternal.pageSize = this.initialPaginationSize;
+      await this.searchDesignations();
+      // this.combinedFacets = [this.externalFacets];
+    } else if (category === SearchCategory.TrainingPlans) {
+      this.courseSearchTotalCount = 0;
+      this.eventSearchTotalCount = 0;
+      this.communitiesSearchTotalCount = 0;
+      this.peopleSearchTotalCount = 0;
+      this.resourcesSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.usersSearchTotalCount = 0;
+      // this.searchRequestExternal.pageSize = this.initialPaginationSize;
+      await this.searchTrainingPlans();
+      // this.combinedFacets = [this.externalFacets];
+    } else if (category === SearchCategory.Users) {
+      this.courseSearchTotalCount = 0;
+      this.eventSearchTotalCount = 0;
+      this.communitiesSearchTotalCount = 0;
+      this.peopleSearchTotalCount = 0;
+      this.resourcesSearchTotalCount = 0;
+      this.designationSearchTotalCount = 0;
+      this.trainingPlansSearchTotalCount = 0;
+      // this.searchRequestExternal.pageSize = this.initialPaginationSize;
+      await this.searchUsersMDO();
+      // this.combinedFacets = [this.externalFacets];
     }
     // this.scrollToTop();
     this.searchContentLoader = false;
@@ -926,6 +1173,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.communitiesSearchResults = [];
     this.resourcesSearchResults = [];
     this.externalSearchResults = [];
+    this.designationSearchResults = [];
+    this.trainingPlansSearchResults = [];
+    this.usersSearchResults = [];
 
     this.combinedFacets = [];
 
@@ -935,6 +1185,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.communitiesSearchTotalCount = 0;
     this.resourcesSearchTotalCount = 0;
     this.externalSearchTotalCount = 0;
+    this.designationSearchTotalCount = 0;
+    this.trainingPlansSearchTotalCount = 0;
+    this.usersSearchTotalCount = 0;
 
     this.seeAllResult = "";
     this.allResultsDepartmentName = new Set<string>();
@@ -970,6 +1223,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchRequestCommunities.pageSize = event.limit;
       this.searchRequestCommunities.pageNumber = event.currentPage - 1;
       await this.searchcommunities();
+    } else if (this.seeAllResult === SearchCategory.Users) {
+      this.searchRequestUsers.request.limit = event.limit;
+      this.searchRequestUsers.request.offset = (event.currentPage - 1) * event.limit;
+      await this.searchUsersMDO();
     }
 
     this.searchContentLoader = false;
@@ -1015,6 +1272,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         await this.searchCourses();
         await this.searchEvents();
         await this.searchcommunities();
+        await this.searchUsersMDO();
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by = {};
         await this.searchCourses();
@@ -1029,9 +1287,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (this.seeAllResult === "") {
         this.searchRequestCourse.request.sort_by.createdOn = "desc";
         this.searchRequestEvents.request.sort_by.startDate = "desc";
+        this.searchRequestUsers.request.orderBy = "createdDate";
+
         await this.searchCourses();
         await this.searchEvents();
         await this.searchcommunities();
+        await this.searchUsersMDO();
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.createdOn = "desc";
         await this.searchCourses();
@@ -1051,6 +1312,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderBy = "createdOn";
         await this.searchExternalContents();
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        this.searchRequestUsers.request.orderBy = "createdDate";
+        await this.searchUsersMDO();
       }
     } else if (event === SortType.HighestRated) {
       if (this.seeAllResult === "") {
@@ -1079,9 +1343,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (this.seeAllResult === "") {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
         this.searchRequestEvents.request.sort_by.name = SortType.Ascending;
+        this.searchRequestUsers.request.sort_by.firstName = "asc";
+
         await this.searchCourses();
         await this.searchEvents();
         await this.searchcommunities();
+        await this.searchUsersMDO();
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
         await this.searchCourses();
@@ -1094,14 +1361,19 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderDirection = SortType.Ascending;
         await this.searchExternalContents();
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        this.searchRequestUsers.request.sort_by.firstName = SortType.Ascending;
+        await this.searchUsersMDO();
       }
     } else if (event === SortType.ZtoA) {
       if (this.seeAllResult === "") {
         this.searchRequestCourse.request.sort_by.name = SortType.Descending;
         this.searchRequestEvents.request.sort_by.name = SortType.Descending;
+        this.searchRequestUsers.request.sort_by.firstName = SortType.Descending;
         await this.searchCourses();
         await this.searchEvents();
         await this.searchcommunities();
+        await this.searchUsersMDO();
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.name = SortType.Descending;
         await this.searchCourses();
@@ -1114,6 +1386,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderDirection = SortType.Descending;
         await this.searchExternalContents();
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        this.searchRequestUsers.request.sort_by.firstName = SortType.Descending;
+        await this.searchUsersMDO();
       }
     }
 
@@ -1318,6 +1593,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         await this.searchcommunities();
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         await this.searchExternalContents();
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        await this.searchDesignations();
+      } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
+        await this.searchTrainingPlans();
+      } else if (this.seeAllResult === SearchCategory.Users) {
+        await this.searchUsersMDO();
       }
 
       this.searchContentLoader = false;

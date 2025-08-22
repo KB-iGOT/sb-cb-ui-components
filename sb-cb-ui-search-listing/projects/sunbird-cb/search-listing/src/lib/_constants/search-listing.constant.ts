@@ -170,5 +170,21 @@ export const CATEGORY_TYPE = [
     displayName: "External Contents",
     filters: [],
     disabled: false
-  }
+  },
+  {
+    name: "designation",
+    count: 0,
+    isChecked: false,
+    displayName: "Designation",
+    filters: [],
+    disabled: false
+  },
+  {
+    name: "training-plans",
+    count: 0,
+    isChecked: false,
+    displayName: "Training Plans",
+    filters: [],
+    disabled: false
+  },
 ];

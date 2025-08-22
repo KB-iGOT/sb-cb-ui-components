@@ -12,6 +12,9 @@
           peopleSearchTotalCount +
           communitiesSearchTotalCount +
           resourcesSearchTotalCount +
+          designationSearchTotalCount +
+          trainingPlansSearchTotalCount +
+          usersSearchTotalCount +
           externalSearchTotalCount >
           0 &&
           !searchContentLoader &&
@@ -41,6 +44,9 @@
               peopleSearchTotalCount +
               communitiesSearchTotalCount +
               resourcesSearchTotalCount +
+              designationSearchTotalCount +
+              trainingPlansSearchTotalCount +
+              usersSearchTotalCount +
               externalSearchTotalCount >
             0
           ">
@@ -79,6 +85,12 @@
                 <span *ngIf="externalSearchTotalCount > 0">{{ "searchfilters.externalContent" | translate : { count: externalSearchTotalCount } }}</span>
               </p>
             </ng-container>
+            <ng-container *ngIf="seeAllResult === 'training-plans'">
+              <p class="contents-title-top text-dark mb-0">{{ "learnsearch.trainingPlans" | translate : { count: trainingPlansSearchTotalCount } }}</p>
+            </ng-container>
+            <ng-container *ngIf="seeAllResult === 'designation'">
+              <p class="contents-title-top text-dark mb-0">{{ "learnsearch.designations" | translate : { count: designationSearchTotalCount } }}</p>
+            </ng-container>
           </div>
 
           <ng-container *ngIf="isExploreContentTab">
@@ -115,7 +127,9 @@
               seeAllResult === 'courses' ||
               seeAllResult === 'communities' ||
               seeAllResult === 'resources' ||
-              seeAllResult === 'external-contents') &&
+              seeAllResult === 'external-contents' ||
+              seeAllResult === 'training-plans' ||
+              seeAllResult === 'users') &&
             searchContentLoader
           ">
           <ng-container *ngFor="let item of [1, 2, 3, 4]">
@@ -166,6 +180,54 @@
                     [defaultPaginationSize]="initialPaginationSize"
                     [defaultPaginationSizeOptions]="initialPaginationSizeOptions"
                     [totalItemsCount]="this.courseSearchTotalCount"
+                    [currentPage]="initialPaginationPage"
+                    (pageChange)="onPageChange($event)"></ws-app-pagination>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <!-- Users Card -->
+          <ng-container *ngIf="seeAllResult === 'users' && searchPeopleLoader">
+            <div class="flex flex-wrap gap-x-3 gap-y-6 items-center justify-start">
+              <div class="card-container" *ngFor="let user of [1, 2, 3, 4, 5, 6]">
+                <ws-app-skeleton-loader-peoples></ws-app-skeleton-loader-peoples>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="usersSearchTotalCount > 0 && (seeAllResult === '' || seeAllResult === 'users')">
+            <div class="search-people-card overflow-x-hidden">
+              <p *ngIf="seeAllResult === ''" class="mat-subheading-1 mt-4 font-bold-imp text-dark">
+                {{ "learnsearch.users" | translate : { count: usersSearchTotalCount } }}
+              </p>
+              <ng-container *ngIf="usersSearchTotalCount > 0 && !seeAllResult">
+                <ws-utils-horizontal-scroller [loadStatus]="'done'">
+                  <div class="card-container mr-6" *ngFor="let user of usersSearchResults; let index = index">
+                    <sb-cb-search-users-card [user]="user" (telemetry)="applyTelemetry($event, index)" [category]="seeAllResult"></sb-cb-search-users-card>
+                  </div>
+                </ws-utils-horizontal-scroller>
+              </ng-container>
+
+              <ng-container *ngIf="seeAllResult === 'users'">
+                <div class="flex flex-wrap gap-x-3 gap-y-3 items-center justify-start mt-4">
+                  <div class="card-container" *ngFor="let user of usersSearchResults; let i = index">
+                    <sb-cb-search-users-card [user]="user" (telemetry)="applyTelemetry($event, index)" [category]="seeAllResult"></sb-cb-search-users-card>
+                  </div>
+                </div>
+              </ng-container>
+              <p
+                class="see-all-results text-center font-normal brand-color cursor-pointer mt-4"
+                *ngIf="!seeAllResult && usersSearchTotalCount > 5"
+                (click)="constructQueryParam('users')">
+                {{ "learnsearch.seeAllResults" | translate }}
+              </p>
+              <ng-container *ngIf="seeAllResult && usersSearchTotalCount > initialPaginationSize">
+                <div class="mt-4">
+                  <ws-app-pagination
+                    [defaultPaginationSize]="initialPaginationSize"
+                    [defaultPaginationSizeOptions]="initialPaginationSizeOptions"
+                    [totalItemsCount]="this.usersSearchTotalCount"
                     [currentPage]="initialPaginationPage"
                     (pageChange)="onPageChange($event)"></ws-app-pagination>
                 </div>
@@ -303,6 +365,88 @@
             </div>
           </ng-container>
 
+          <!-- Designation Card -->
+          <ng-container *ngIf="seeAllResult === 'designation' && searchPeopleLoader">
+            <div class="flex flex-wrap gap-x-3 gap-y-6 items-center justify-start">
+              <div class="card-container" *ngFor="let user of [1, 2, 3, 4, 5, 6]">
+                <ws-app-skeleton-loader-peoples></ws-app-skeleton-loader-peoples>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="designationSearchTotalCount > 0 && (seeAllResult === '' || seeAllResult === 'designation')">
+            <div class="search-people-card overflow-x-hidden">
+              <p *ngIf="seeAllResult === ''" class="mat-subheading-1 mt-4 font-bold-imp text-dark">
+                {{ "learnsearch.designations" | translate : { count: designationSearchTotalCount } }}
+              </p>
+              <ng-container *ngIf="designationSearchTotalCount > 0 && !seeAllResult">
+                <ws-utils-horizontal-scroller [loadStatus]="'done'">
+                  <div class="card-container mr-6" *ngFor="let designation of designationSearchResults; let index = index">
+                    <sb-cb-search-designation-card
+                      [designation]="designation"
+                      (telemetry)="applyTelemetry($event, index)"
+                      [category]="seeAllResult"></sb-cb-search-designation-card>
+                  </div>
+                </ws-utils-horizontal-scroller>
+              </ng-container>
+
+              <ng-container *ngIf="seeAllResult === 'designation'">
+                <div class="flex flex-wrap gap-x-3 gap-y-3 items-center justify-start mt-4">
+                  <div class="card-container" *ngFor="let designation of designationSearchResults; let i = index">
+                    <sb-cb-search-designation-card
+                      [designation]="designation"
+                      (telemetry)="applyTelemetry($event, index)"
+                      [category]="seeAllResult"></sb-cb-search-designation-card>
+                  </div>
+                </div>
+              </ng-container>
+              <p
+                class="see-all-results text-center font-normal brand-color cursor-pointer mt-4"
+                *ngIf="!seeAllResult && designationSearchTotalCount > 5"
+                (click)="constructQueryParam('designation')">
+                {{ "learnsearch.seeAllResults" | translate }}
+              </p>
+              <ng-container *ngIf="seeAllResult && designationSearchTotalCount > initialPaginationSize">
+                <div class="mt-4">
+                  <ws-app-pagination
+                    [defaultPaginationSize]="initialPaginationSize"
+                    [defaultPaginationSizeOptions]="initialPaginationSizeOptions"
+                    [totalItemsCount]="this.designationSearchTotalCount"
+                    [currentPage]="initialPaginationPage"
+                    (pageChange)="onPageChange($event)"></ws-app-pagination>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <!-- Training Plans  -->
+          <ng-container *ngIf="trainingPlansSearchTotalCount > 0 && (seeAllResult === '' || seeAllResult === 'training-plans')">
+            <div class="search-content-card">
+              <p *ngIf="seeAllResult === ''" class="mat-subheading-1 mt-4 font-bold-imp text-dark">
+                <span>{{ "learnsearch.trainingPlans" | translate : { count: trainingPlansSearchTotalCount } }}</span>
+              </p>
+              <ng-container *ngFor="let plan of trainingPlansSearchResults; let index = index">
+                <sb-cb-search-training-plans-card [content]="plan" (telemetry)="applyTelemetry($event, index)"></sb-cb-search-training-plans-card>
+              </ng-container>
+              <p
+                class="see-all-results text-center font-normal brand-color cursor-pointer mt-4"
+                *ngIf="!seeAllResult && trainingPlansSearchTotalCount > 3"
+                (click)="constructQueryParam('training-plans')">
+                {{ "learnsearch.seeAllResults" | translate }}
+              </p>
+              <ng-container *ngIf="seeAllResult && trainingPlansSearchTotalCount > initialPaginationSize">
+                <div [ngClass]="{ 'md:mt-72': trainingPlansSearchResults.length < 3 }">
+                  <ws-app-pagination
+                    [defaultPaginationSize]="initialPaginationSize"
+                    [defaultPaginationSizeOptions]="initialPaginationSizeOptions"
+                    [totalItemsCount]="this.trainingPlansSearchTotalCount"
+                    [currentPage]="initialPaginationPage"
+                    (pageChange)="onPageChange($event)"></ws-app-pagination>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+
           <!-- Resource  -->
           <ng-container *ngIf="resourcesSearchTotalCount > 0 && (seeAllResult === '' || seeAllResult === 'resources')">
             <div class="search-content-card">
@@ -377,6 +521,9 @@
             peopleSearchTotalCount +
             communitiesSearchTotalCount +
             resourcesSearchTotalCount +
+            designationSearchTotalCount +
+            trainingPlansSearchTotalCount +
+            usersSearchTotalCount +
             externalSearchTotalCount ===
             0 && !searchContentLoader
         ">
@@ -385,12 +532,26 @@
           {{ noResultMessage }}
         </div>
         <div class="action-search-btn flex gap-4 items-center mt-6 justify-center">
-          <button mat-raised-button class="mat-btn-outline cursor-pointer py-1" (click)="navigateTo('page/home')">
-            {{ "learnsearch.btnBackToHomepage" | translate }}
-          </button>
-          <button mat-flat-button class="mat-btn-flat cursor-pointer py-1" (click)="navigateTo('page/home')">
-            {{ "learnsearch.btnExploreMore" | translate }}
-          </button>
+          <ng-container *ngIf="searchConfig?.noDataFoundFlags?.navigationsButtons && searchConfig?.noDataFoundFlags?.navigationsButtons.length">
+            <ng-container *ngFor="let button of searchConfig?.noDataFoundFlags?.navigationsButtons">
+              <button
+                mat-raised-button
+                class="mat-btn-flat cursor-pointer py-1"
+                *ngIf="button?.matFlatButton"
+                (click)="navigateTo(button?.routeTo)"
+                [matFlatButton]="button.matFlatButton">
+                {{ translateLabels(button.label, "learnsearch") }}
+              </button>
+              <button
+                mat-raised-button
+                class="mat-btn-outline cursor-pointer py-1"
+                *ngIf="!button?.matFlatButton"
+                (click)="navigateTo(button?.routeTo)"
+                [matFlatButton]="button.matFlatButton">
+                {{ translateLabels(button.label, "learnsearch") }}
+              </button>
+            </ng-container>
+          </ng-container>
         </div>
       </div>
     </mat-sidenav-content>

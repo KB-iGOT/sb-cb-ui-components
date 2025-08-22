@@ -1,4 +1,4 @@
-@import '../../_scss/ws-vars';
+@import "../../_scss/ws-vars";
 .filter-section {
   .mat-expansion-panel-spacing {
     margin-bottom: 10px !important;
@@ -29,7 +29,7 @@
   }
 
   .mat-checkbox-checked.mat-accent .mat-checkbox-background {
-    background: $brandAccentColor 0% 0% no-repeat padding-box !important;
+    background: #{$brandAccentColor} 0% 0% no-repeat padding-box !important;
     border-radius: 4px;
   }
 
@@ -37,7 +37,7 @@
     @extend .mat-checkbox-label;
     font-weight: 700;
     line-height: 100%;
-    color: $brandAccentColor;
+    color: #{$brandAccentColor};
   }
 }
 
@@ -141,7 +141,7 @@
   color: $colorRed !important;
 }
 
-.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled="true"]):hover {
   background-color: transparent !important;
 }
 
@@ -174,8 +174,8 @@
   max-width: 10em;
 }
 
-.adjust{
-  width: max-content
+.adjust {
+  width: max-content;
 }
 .sub-header {
   /* stylelint-disable */
@@ -196,7 +196,7 @@
 
 ::ng-deep .search-input-themes {
   .mat-form-field-appearance-outline .mat-form-field-infix {
-    padding : 5px 0px;
+    padding: 5px 0px;
     border-top: 1px;
   }
 
@@ -206,11 +206,29 @@
 }
 
 .search-input-block {
-  width:100%
+  width: 100%;
 }
 
 @media (max-width: 768px) {
   .filter-sidebar {
     padding: 1rem 1rem 4rem 1rem !important;
+  }
+}
+
+::ng-deep .mat-calendar-body-in-range::before {
+  // background: #3f51b533;
+  --mat-datepicker-calendar-date-in-range-state-background-color: #3f51b533;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$brandAccentColor};
+  --mat-datepicker-calendar-date-selected-state-text-color: #{$white};
+}
+
+@media (hover: hover) {
+  ::ng-deep
+    .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
+    > .mat-calendar-body-cell-content:not(.mat-calendar-body-selected):not(.mat-calendar-body-comparison-identical) {
+    --mat-datepicker-calendar-date-hover-state-background-color: #3f51b533;
   }
 }
