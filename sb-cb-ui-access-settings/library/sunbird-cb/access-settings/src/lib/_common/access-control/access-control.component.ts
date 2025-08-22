@@ -58,6 +58,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   userCount: any = {};
 
   initialUserGroupValue: any;
+
+  canShowAccessControlTypeRadio = true;
+  shouldShowVisibilityToggle = true;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -77,10 +80,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     this.usersTableConfig = this.config?.usersTableConfig;
-
-    if (!this.contentId) {
-      this.callSnackbar("Content id is required", "error");
-    }
 
     if (this.content) {
       const isAllUsers = this.content.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS;
@@ -108,8 +107,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
 
       this.processConditionsForContentType();
+    } else {
+      // Condition for MDO
+      this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
     }
 
+    this.canShowAccessControlTypeRadio = this.config?.accessControlCriteriaSelection.canShowAccessTypeRadio ?? true;
+    this.shouldShowVisibilityToggle = this.config?.accessControlCriteriaSelection?.shouldShowVisibilityToggle ?? true;
     this.accessTypeDup = this.accessType;
   }
 
@@ -413,7 +417,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
         conditions.removeAt(conditionIndex);
-         this.applyAccessControlValue(true);
+        this.applyAccessControlValue(true);
         this.calculateUserCountForUserGroup(userGroupIndex);
         this.processDisableAddConditionOnClose(userGroupIndex);
       }
@@ -708,9 +712,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // Update secure setting for moderated content
             // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-             if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live") {
-               this.updateContentAccessSetting();
-             }
+            if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live") {
+              this.updateContentAccessSetting();
+            }
             // }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
@@ -813,8 +817,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
           this.applyAccessControlValue(false, false);
           this.updateContentAccessSetting();
+        } else {
+          this.addUserGroup();
         }
-
         setTimeout(() => {
           this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
           this.setupFormChangeDetection();
@@ -1038,7 +1043,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
       (this.config.userConfig.userRoles.has("spv_publisher") ||
         this.config.userConfig.userRoles.has("content_publisher") ||
-        this.config.userConfig.userRoles.has("content_creator")) && this.content?.courseCategory !== "Comprehensive Assessment Program"
+        this.config.userConfig.userRoles.has("content_creator")) &&
+      this.content?.courseCategory !== "Comprehensive Assessment Program"
     ) {
       // publisher (disabled all)
       this.accessControlCriteriaSelection.readOnly = true;
