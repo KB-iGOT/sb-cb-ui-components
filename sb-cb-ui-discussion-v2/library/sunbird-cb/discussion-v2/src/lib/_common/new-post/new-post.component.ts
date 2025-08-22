@@ -8,8 +8,6 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 import { MatDialog } from '@angular/material/dialog'
 // tslint:disable-next-line
 import _ from 'lodash'
-import { of } from 'rxjs'
-import { catchError, mergeMap } from 'rxjs/operators'
 
 @Component({
   selector: 'd-v2-new-post',
@@ -494,31 +492,14 @@ export class NewPostComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.uploadForm.valid || Object.keys(this.selectedFilesFinal).length > 0) {
       this.showEmojiPicker = false
-      const description = this.getPlainTextFromHtml(this.uploadForm.value.description || '')
-      this.getDetectedLanguage(description).subscribe((language: string | undefined) => {
-        if (this.editMode) {
-          this.handleEditFlow(language)
-        } else {
-          this.handlePostCreation(language)
-        }
-      })
+      if (this.editMode) {
+        this.handleEditFlow()
+      } else {
+        this.handlePostCreation()
+      }
     } else {
       this._snackBar.open('Please provide a description or select a file to proceed.', '', { duration: 3000 })
     }
-  }
-
-  getPlainTextFromHtml(html: string): string {
-    const div = document.createElement('div')
-    div.innerHTML = html || ''
-    return div.textContent || div.innerText || ''
-  }
-
-  getDetectedLanguage(description: string) {
-    if (!description) return of(undefined)
-    return this.discussV2Svc.detectLanguage({ text: description }).pipe(
-      mergeMap((res: any) => of(res.detected_language || undefined)),
-      catchError(() => of(undefined))
-    )
   }
 
   onCancel() {
@@ -527,23 +508,23 @@ export class NewPostComponent implements OnInit, OnDestroy {
     })
   }
 
-  private handlePostCreation(language?: string): void {
+  private handlePostCreation(): void {
     const isInitialUpload: boolean = true
     switch (this.type) {
       case NsDiscussionV2.EPostType.QUESTION:
-        this.createPost(isInitialUpload, language)
+        this.createPost(isInitialUpload)
         break
       case NsDiscussionV2.EPostType.ANSWER_POST:
-        this.createAnswerPost(isInitialUpload, language)
+        this.createAnswerPost(isInitialUpload)
         break
       case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
-        this.createAnswerPostReply(isInitialUpload, language)
+        this.createAnswerPostReply(isInitialUpload)
         break
     }
   }
 
-  createPost(isInitialUpload: boolean, language?: string) {
-    const req = this.createReq(this.uploadForm, this.type, language)
+  createPost(isInitialUpload: boolean) {
+    const req = this.createReq(this.uploadForm, this.type)
     this.discussV2Svc.createPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -569,8 +550,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
     this.isMultiLine = false
   }
 
-  createAnswerPost(isInitialUpload: boolean, language?: string) {
-    const req = this.createReq(this.uploadForm, this.type, language)
+  createAnswerPost(isInitialUpload: boolean) {
+    const req = this.createReq(this.uploadForm, this.type)
     this.discussV2Svc.createAnswerPost(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -593,8 +574,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
       }
     })
   }
-  createAnswerPostReply(isInitialUpload: boolean, language?: string) {
-    const req = this.createReq(this.uploadForm, this.type, language)
+  createAnswerPostReply(isInitialUpload: boolean) {
+    const req = this.createReq(this.uploadForm, this.type)
     this.discussV2Svc.createAnswerPostReply(req).subscribe({
       next: (res) => {
         if (res && res.result) {
@@ -784,11 +765,11 @@ export class NewPostComponent implements OnInit, OnDestroy {
     return text.match(mentionRegex) || []
   }
 
-  createReq(formData: any, type: string, language?: string) {
+  createReq(formData: any, type: string) {
     const _description = formData.value.description || ''
     const mentions = this.getMentionedUsers(_description)
     const parentDiscussionId = this.hierarchyPath.length ? this.hierarchyPath[0] : ''
-    const req: any = {
+    const req = {
       type,
       ...(parentDiscussionId && (type !== NsDiscussionV2.EPostType.ANSWER_POST_REPLY) ?
         { parentDiscussionId: parentDiscussionId } : null),
@@ -806,22 +787,19 @@ export class NewPostComponent implements OnInit, OnDestroy {
       ...(mentions.length > 0 ? { mentionedUsers: mentions } : {}),
       ...((this.taggedUsers && this.taggedUsers.length) ? { taggedUser: this.taggedUsers.map((x: any) => x.user_id) } : null),
     }
-    if (language) {
-      req.language = language
-    }
     return req
   }
 
-  handleEditFlow(language?: string) {
+  handleEditFlow() {
     switch (this.type) {
       case NsDiscussionV2.EPostType.QUESTION:
-        this.editPost(language)
+        this.editPost()
         break
       case NsDiscussionV2.EPostType.ANSWER_POST:
-        this.editAnswerPost(language)
+        this.editAnswerPost()
         break
       case NsDiscussionV2.EPostType.ANSWER_POST_REPLY:
-        this.editAnswerPostReply(language)
+        this.editAnswerPostReply()
         break
     }
   }
@@ -878,10 +856,10 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
 
-  async editPost(language?: string) {
+  async editPost() {
     const newMedia = await this.editUploadHandler(this.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
-    const updateReq: any = {
+    const updateReq = {
       discussionId: this.post.discussionId,
       communityId: this.post.communityId,
       // title: this.uploadForm.value.title,
@@ -890,9 +868,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
       categoryType: [...this.categoryType],
       mediaCategory: mergedMediaCategory,
       // tags: this.selectedTags
-    }
-    if (language) {
-      updateReq.language = language
     }
     this.discussV2Svc.updatePost(updateReq).subscribe({
       next: (res) => {
@@ -908,7 +883,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     })
   }
 
-  async editAnswerPost(language?: string) {
+  async editAnswerPost() {
     const newMedia = await this.editUploadHandler(this.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
     const updateReq: any = {
@@ -925,9 +900,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
     const mentions = this.getMentionedUsers(_description)
     if (mentions && mentions.length) {
       updateReq['mentionedUsers'] = mentions
-    }
-    if (language) {
-      updateReq.language = language
     }
     this.discussV2Svc.updateAnswerPost(updateReq).subscribe({
       next: (res) => {
@@ -947,7 +919,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     })
   }
 
-  async editAnswerPostReply(language?: string) {
+  async editAnswerPostReply() {
     const newMedia = await this.editUploadHandler(this.post.discussionId)
     const mergedMediaCategory = this.getNewAndOldMerged(newMedia, this.post.mediaCategory)
     const updateReq: any = {
@@ -964,9 +936,6 @@ export class NewPostComponent implements OnInit, OnDestroy {
     const mentions = this.getMentionedUsers(_description)
     if (mentions && mentions.length) {
       updateReq['mentionedUsers'] = mentions
-    }
-    if (language) {
-      updateReq.language = language
     }
     this.discussV2Svc.updateAnswerPostReply(updateReq).subscribe({
       next: (res) => {
