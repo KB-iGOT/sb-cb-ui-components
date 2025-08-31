@@ -40,14 +40,10 @@
               </div>
             </div>
             <ng-container *ngIf="!isVisibilityEnabled">
-              <label class="text-sm">{{
-                (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.courseCategory || content?.contentType)
-              }}</label>
+              <label class="text-sm">{{ (config?.visiblilityOnOff?.off || "").replace("{contentType}", content?.courseCategory || content?.contentType) }}</label>
             </ng-container>
             <ng-container *ngIf="isVisibilityEnabled">
-              <label class="text-sm">{{
-                (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.courseCategory || content?.contentType)
-              }}</label>
+              <label class="text-sm">{{ (config?.visiblilityOnOff?.on || "").replace("{contentType}", content?.courseCategory || content?.contentType) }}</label>
             </ng-container>
           </div>
         </ng-container>
@@ -93,7 +89,8 @@
                             mat-icon-button
                             aria-label="delete user group"
                             (click)="removeUserGroup(i)"
-                            title="Delete">
+                            title="Delete"
+                          >
                             <mat-icon>delete</mat-icon>
                           </button>
                           <button
@@ -101,7 +98,8 @@
                             mat-icon-button
                             aria-label="refresh user group"
                             (click)="resetUserGroupWithSelections(i)"
-                            title="Refresh">
+                            title="Refresh"
+                          >
                             <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
                           </button>
                         </ng-container>
@@ -136,17 +134,14 @@
                                   mat-flat-button
                                   (click)="manageSelections(condition, rule, i)"
                                   [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly"
-                                  class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2">
+                                  class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2"
+                                >
                                   <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
                                   <span class="font-bold text-sm">Manage Selection</span>
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button
-                                  mat-button
-                                  class="new-secondary-button-no-border button-with-corners mt-2"
-                                  type="button"
-                                  (click)="manageSelections(condition, rule, i, 1)">
+                                <button mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button" (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
                                   </div>
@@ -161,7 +156,8 @@
                                       class="mt-2 ml-auto"
                                       [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                                       (click)="removeCondition(i, j)"
-                                      title="Delete">
+                                      title="Delete"
+                                    >
                                       <mat-icon>delete</mat-icon>
                                     </button>
                                     <button
@@ -170,7 +166,8 @@
                                       class="mt-2 ml-auto"
                                       [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                                       (click)="resetCondition(i, j)"
-                                      title="Refresh">
+                                      title="Refresh"
+                                    >
                                       <img src="/assets/icons/restart.svg" alt="refresh" class="img-icon-24" />
                                     </button>
                                   </ng-container>
@@ -196,12 +193,13 @@
                           content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
                           accessControlCriteriaSelection?.readOnly ||
                           rule.get('isUserGroupDisabled')?.value ||
-                          rule.get('isAddConditionDisabled')?.value 
+                          rule.get('isAddConditionDisabled')?.value
                         "
                         mat-button
                         class="new-secondary-button-no-border button-with-corners"
                         type="button"
-                        (click)="addCondition(i)">
+                        (click)="addCondition(i)"
+                      >
                         <div class="flex gap-2 flex-middle">
                           <mat-icon class="primary-text-color">add</mat-icon>
                           <span class="text-m">Add New Condition</span>
@@ -229,14 +227,15 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf="!isLoading">
+        <ng-container *ngIf="!isLoading && (userGroup?.length === 0 || (userGroup?.length === 1 && config?.application !== MDO_APPLICATION))">
           <div class="text-center mb-6 mt-4">
             <button
               [disabled]="accessControlCriteriaSelection?.readOnly || isAddUserGroupBtnDisabled"
               mat-button
               class="new-secondary-button-no-border button-with-corners"
               type="button"
-              (click)="addUserGroup()">
+              (click)="addUserGroup()"
+            >
               <div class="flex gap-2 flex-middle">
                 <mat-icon class="primary-text-color">add</mat-icon>
                 <span class="text-m">Add User Group</span>
@@ -246,13 +245,14 @@
         </ng-container>
 
         <ng-container *ngIf="userGroup?.length > 0">
-          <div class="action-save flex justify-center items-center gap-4">
+          <div class="action-save flex justify-center items-center gap-4" [ngClass]="{ 'mt-4': userGroup?.length === 1 && config?.application === MDO_APPLICATION }">
             <!-- Save Filter Button -->
             <button
               mat-flat-button
               class="flex rounded-full px-4 py-2 mat-btn-outline font-bold text-sm items-center gap-2"
               [disabled]="isSaveFltrBtnDisabled || isSaving || hasUserGroupBeenAdded"
-              (click)="applyAccessControlValue()">
+              (click)="applyAccessControlValue()"
+            >
               <mat-spinner *ngIf="isSaving" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>
               <span>Save Filter</span>
             </button>
