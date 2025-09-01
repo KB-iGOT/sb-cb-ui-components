@@ -2,18 +2,20 @@ import { Component, inject, OnInit, OnDestroy, ElementRef, ViewChild } from "@an
 import { AccessControlService } from "../../../_services/access-control.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
-import { BATCH_RANGES } from "../../../_constants/app.constants";
+import { BATCH_RANGES, CHECKBOX_OPTIONS } from "../../../_constants/app.constants";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
+import { MatCheckboxChange } from "@angular/material/checkbox";
+import { CadreMappingService } from "../../../_services/cadre-mapping.service";
 
 @Component({
   selector: "sb-uic-entity-selections",
   templateUrl: "./entity-selections.component.html",
-  styleUrls: ["./entity-selections.component.scss"]
+  styleUrls: ["./entity-selections.component.scss"],
 })
 export class EntitySelectionsComponent implements OnInit, OnDestroy {
   @ViewChild("tabGroup", { read: ElementRef }) tabGroupRef!: ElementRef;
@@ -25,6 +27,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   dataList: any[] = [];
   dataListDup: any[] = [];
+
+  selectedCentralDeputation: boolean = false;
 
   selectedData: any[] = [];
   selectedDataTemp: any[] = [];
@@ -48,25 +52,58 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   paginationOffset = 0;
   totalItemsCount = 0;
   isFetchingMore = false;
-  constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService) {}
+
+  application = "";
+  APPLICATION_ENUM = NsAccessControlConfig.Application;
+  rawCadreconfigData: any;
+  accessControlConfig: NsAccessControlConfig.IAccessControlConfig | null = null;
+
+  serviceSelectionTypes = ["Select All"];
+  selectedServiceType = ["All India Services"];
+  customeFieldValues: any;
+  isEntityCustomField: boolean;
+
+  entityFilterOptions = CHECKBOX_OPTIONS;
+  constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService, private cadreMappingService: CadreMappingService) {}
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
-    this.accessControlCriteriaSelection = this.accessControlService.accessControlConfig()?.accessControlCriteriaSelection;
-    this.userProfile = this.accessControlService.accessControlConfig()?.userConfig;
-    this.content = this.accessControlService.accessControlConfig()?.content;
+    this.accessControlConfig = this.accessControlService.accessControlConfig();
+
+    this.accessControlCriteriaSelection = this.accessControlConfig?.accessControlCriteriaSelection;
+    this.userProfile = this.accessControlConfig?.userConfig;
+    this.content = this.accessControlConfig?.content;
+    this.application = this.accessControlConfig?.application || "";
 
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
+
+    this.isEntityCustomField = this.checkIfCustomeField(this.data.condition);
+    if (this.isEntityCustomField) {
+      this.customeFieldValues = this.accessControlService.customesFieldData().find((ele: any) => ele?.attributeName === this.data.condition.entity);
+      this.selectionType = NsAccessControlConfig.SelectionType.CustomField;
+    }
+
+    if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+      this.selectedDataTemp = [this.selectedCentralDeputation];
+    }
+
     if (this.data && this.data.selected && this.data.selected.length) {
       if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
         this.selectedData = [...this.data.selected.map((ele: any) => _.toNumber(ele))];
         this.selectedDataTemp = [...this.selectedData];
+      } else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+        this.selectedCentralDeputation = this.data.selected[0];
       } else {
         this.selectedData = [...this.data.selected];
         this.selectedDataTemp = [...this.selectedData];
       }
+
+      if (this.application === NsAccessControlConfig.Application.MDO) {
+        this.selectedServiceType = ["Select All"];
+      }
+
       this.activeTab = this.data?.activeTabSelected || 0;
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
     }
@@ -83,16 +120,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
             break;
           case this.selectionTypeEnum.Batch:
             this.getBatchList(query);
-            break;
-          case this.selectionTypeEnum.Designation:
-            // if (!query) {
-            //   this.getDesignationsList(query);
-            // }
-            break;
-          case this.selectionTypeEnum.Organizations:
-            // if (!query) {
-            //   this.getOrganisationsList(query, [], "A");
-            // }
             break;
         }
       }
@@ -141,6 +168,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         this.getVerificationStatus();
         break;
+      case NsAccessControlConfig.SelectionType.CustomField:
+        this.radioSelections = this.accessControlCriteriaSelection[this.customeFieldValues?.attributeName];
+        this.getCustomsFieldList();
+        break;
     }
   }
 
@@ -173,13 +204,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     const value = this.getSelectionValue(item);
     if (this.filterValue === "all") {
       if (this.selectedDataTemp.includes(value)) {
-        this.selectedDataTemp = this.selectedDataTemp.filter(v => v !== value);
+        this.selectedDataTemp = this.selectedDataTemp.filter((v) => v !== value);
       } else {
         this.selectedDataTemp = [...this.selectedDataTemp, value];
       }
     } else if (this.filterValue === "selected") {
       if (this.selectedData.includes(value)) {
-        this.selectedData = this.selectedData.filter(v => v !== value);
+        this.selectedData = this.selectedData.filter((v) => v !== value);
       } else {
         this.selectedData = [...this.selectedData, value];
       }
@@ -263,9 +294,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     let filtered = this.dataList;
 
     if (this.filterValue === "selected") {
-      filtered = this.dataListDup.filter(
-        item => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item)
-      );
+      if (this.selectionType === NsAccessControlConfig.SelectionType.CustomField) {
+        const selectedData = this.selectedData.map((ele) => ele.name);
+        filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.name));
+      } else {
+        filtered = this.dataListDup.filter((item) => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item));
+      }
     }
 
     if (filtered.length === 0) {
@@ -317,7 +351,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     // Ensure # group is assigned at the end
     const sortedLetters = Object.keys(temp)
-      .filter(l => l !== "#")
+      .filter((l) => l !== "#")
       .sort();
     if (temp["#"]) sortedLetters.push("#");
     for (const letter of sortedLetters) {
@@ -329,20 +363,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   scrollToSection(letter: string) {
     this.paginationOffset = 0;
-    if (
-      this.selectionType === NsAccessControlConfig.SelectionType.Organizations &&
-      this.filterValue === "all" &&
-      !this.searchedOrganisationFlagWithQuery
-    ) {
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && this.filterValue === "all" && !this.searchedOrganisationFlagWithQuery) {
       this.selectedCharacterRange = letter;
       this.getOrganisationsList("", [], letter);
       return;
     }
-    if (
-      this.selectionType === NsAccessControlConfig.SelectionType.Designation &&
-      this.filterValue === "all" &&
-      !this.searchedDesignationFlagWithQuery
-    ) {
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Designation && this.filterValue === "all" && !this.searchedDesignationFlagWithQuery) {
       // !this.orgSelectionIds?.length
       this.selectedCharacterRange = letter;
       this.getDesignationsList(this.paginationOffset, "", [], letter);
@@ -362,9 +388,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
     const sourceList =
       this.filterValue === "selected"
-        ? this.dataListDup.filter(
-            item => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item)
-          )
+        ? this.dataListDup.filter((item) => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item))
         : this.dataList;
 
     for (const data of sourceList) {
@@ -377,14 +401,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
 
     const sorted = Array.from(chars)
-      .filter(c => c !== "#")
+      .filter((c) => c !== "#")
       .sort();
     if (chars.has("#")) sorted.push("#");
 
     // Show all characters for Organizations
     if (
-      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations ||
-        this.selectionType === NsAccessControlConfig.SelectionType.Designation) &&
+      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations || this.selectionType === NsAccessControlConfig.SelectionType.Designation) &&
       this.filterValue === "all" &&
       !this.searchControl.value
     ) {
@@ -426,7 +449,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   getOrganisationsList(query: string, selectedData?: string[], character?: string): void {
     this.isLoading = true;
     this.accessControlService.fetchOrgList(query, query ? [] : selectedData, character).subscribe({
-      next: response => {
+      next: (response) => {
         if (response?.result && response?.result?.response?.content) {
           this.dataList = response.result.response.content;
           this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
@@ -445,7 +468,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       },
       complete: () => {
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -460,7 +483,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: response => {
+          next: (response) => {
             if (response?.result && response?.result?.Term) {
               // const newData = response?.result?.Term;
               const newData = _.uniqBy(response.result.Term, (item: any) => item?.name.trim().toLowerCase());
@@ -482,14 +505,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           complete: () => {
             this.isLoading = false;
             this.isFetchingMore = false;
-          }
+          },
         });
     } else {
       this.accessControlService
         .fetchDesignation(query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: response => {
+          next: (response) => {
             if (response?.result && response?.result?.result?.data) {
               const newData = response?.result?.result?.data;
               this.dataList = append ? [...this.dataList, ...newData] : newData;
@@ -508,23 +531,51 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           },
           complete: () => {
             this.isLoading = false;
-          }
+          },
         });
     }
   }
 
   getServicesList(query: string): void {
-    const baseList = this.accessControlService.holdServiceCadrebatch().service;
-    this.dataList = query ? baseList.filter(service => service.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
-    this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+    if (this.application === NsAccessControlConfig.Application.MDO) {
+      const cadreDataRaw = this.cadreMappingService.getCadreConfigData()?.civilServiceType?.civilServiceTypeList || [];
+      if (this.serviceSelectionTypes.length === 1) {
+        this.serviceSelectionTypes = ["Select All", ...cadreDataRaw.map((element: any) => element.name)];
+      }
 
-    this.alphabet = [];
-    this.getFilteredEntityGrouped();
+      // If only 'Select All' is selected, treat as all types selected
+      let selectedTypes = this.selectedServiceType.filter((type) => type !== "Select All");
+      if (this.selectedServiceType.length === 1 && this.selectedServiceType[0] === "Select All") {
+        selectedTypes = cadreDataRaw.map((element: any) => element.name);
+      }
+
+      if (this.selectedServiceType.length === 0) {
+        selectedTypes = [...cadreDataRaw.map((element: any) => element.name)];
+      }
+
+      let allServices: any[] = [];
+      cadreDataRaw.forEach((item: any) => {
+        if (selectedTypes.includes(item.name) && Array.isArray(item.serviceList)) {
+          allServices = allServices.concat(item.serviceList);
+        }
+      });
+      allServices = _.uniqBy(allServices, (service: any) => service.name?.trim().toLowerCase());
+      this.dataList = query ? allServices.filter((service) => service.name?.toLowerCase().includes(query.toLowerCase())) : allServices;
+      this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+      this.alphabet = [];
+      this.getFilteredEntityGrouped();
+    } else {
+      const baseList = this.accessControlService.holdServiceCadrebatch().service;
+      this.dataList = query ? baseList.filter((service) => service.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
+      this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+      this.alphabet = [];
+      this.getFilteredEntityGrouped();
+    }
   }
 
   getCadreList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().cadre;
-    this.dataList = query ? baseList.filter(cadre => cadre.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
+    this.dataList = query ? baseList.filter((cadre) => cadre.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
     this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
 
     this.alphabet = [];
@@ -533,7 +584,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   getBatchList(query: string): void {
     const baseList = this.accessControlService.holdServiceCadrebatch().batch;
-    this.dataList = query ? baseList.filter(batch => batch.toString().includes(query)) : baseList;
+    this.dataList = query ? baseList.filter((batch) => batch.toString().includes(query)) : baseList;
     this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
 
     this.updateBatchRanges();
@@ -553,7 +604,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.isLoading = false;
-        }
+        },
       });
   }
 
@@ -561,15 +612,22 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.dataList = this.accessControlCriteriaSelection.verificationStatus;
   }
 
+  getCustomsFieldList(): void {
+    this.dataList = this.customeFieldValues?.originalCustomFieldData || [];
+    this.dataListDup = _.uniqWith([...this.dataList], _.isEqual);
+    this.alphabet = [];
+    this.getFilteredEntityGrouped();
+  }
+
   updateBatchRanges(): void {
     const isSelectedFilter = this.filterValue === "selected";
 
-    const sourceList = isSelectedFilter ? this.dataListDup.filter(item => this.isSelected(item) && this.selectedData.includes(item)) : this.dataList;
+    const sourceList = isSelectedFilter ? this.dataListDup.filter((item) => this.isSelected(item) && this.selectedData.includes(item)) : this.dataList;
 
     const validLabels: string[] = [];
 
     for (const { label, start, end } of BATCH_RANGES) {
-      const hasItemInRange = sourceList.some(item => item >= start && item <= end);
+      const hasItemInRange = sourceList.some((item) => item >= start && item <= end);
       if (hasItemInRange) {
         validLabels.push(label);
       }
@@ -581,7 +639,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   groupBatchByRange(batchList: number[]) {
     const grouped: { [key: string]: number[] } = {};
     for (const range of BATCH_RANGES) {
-      grouped[range.label] = batchList.filter(year => year >= range.start && year <= range.end);
+      grouped[range.label] = batchList.filter((year) => year >= range.start && year <= range.end);
     }
     return grouped;
   }
@@ -602,6 +660,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         return "Select Group";
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         return "Verification Status";
+      case NsAccessControlConfig.SelectionType.CustomField:
+        return `Select ${this.capitalizeFirstLetter(this.customeFieldValues?.name)}` || "Select Value";
+      case NsAccessControlConfig.SelectionType.CentralDeputation:
+        return "Central Deputation";
     }
     return "";
   }
@@ -609,14 +671,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   applySelections(): void {
     if (
       this.selectionType === NsAccessControlConfig.SelectionType.Group ||
-      this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus
+      this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus ||
+      this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation
     ) {
       this.selectedData = this.selectedDataTemp;
     }
     this.dialogRef.close({
       rule: this.data.rule,
       condition: this.data.condition,
-      selected: this.selectedData
+      selected: this.selectedData,
     });
   }
 
@@ -656,5 +719,104 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   disabledVerifiedIfModerated(item: any): boolean {
     if (item?.value === "VERIFIED" && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
     return false;
+  }
+
+  // On Mdo Portal, Service Selection Type Change
+  // onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
+  //   const checked = event.checked;
+  //   if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
+  //     this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
+  //     return;
+  //   }
+
+  //   // Handle individual service type selection
+  //   const value = selectionType;
+  //   if (checked) {
+  //     if (!this.selectedServiceType.includes(value)) {
+  //       this.selectedServiceType.push(value);
+  //     }
+  //   } else {
+  //     this.selectedServiceType = this.selectedServiceType.filter((v) => v !== value);
+  //   }
+
+  //   this.getServicesList(this.searchControl.value);
+
+  //   setTimeout(() => {
+  //     const allOptions = this.dataList.map((item) => this.getSelectionValue(item));
+  //     if (checked) {
+  //       // Add all options from the newly selected type that are not already selected
+  //       const newOptions = this.dataList.filter((item) => this.getSelectionValue(item) && !this.selectedDataTemp.includes(this.getSelectionValue(item))).map((item) => this.getSelectionValue(item));
+  //       this.selectedDataTemp = [...this.selectedDataTemp, ...newOptions];
+  //     } else {
+  //       // Remove all options from the deselected type
+  //       const removedOptions = this.dataList.map((item) => this.getSelectionValue(item));
+  //       this.selectedDataTemp = this.selectedDataTemp.filter((v) => !removedOptions.includes(v));
+  //     }
+  //   }, 0);
+  // }
+
+  onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
+    const checked = event.checked;
+    if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
+      this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
+      return;
+    }
+
+    // Handle individual service type selection
+    const value = selectionType;
+    if (checked) {
+      if (!this.selectedServiceType.includes(value)) {
+        this.selectedServiceType.push(value);
+      }
+    } else {
+      this.selectedServiceType = this.selectedServiceType.filter((v) => v !== value);
+    }
+
+    // If no service type is selected, show all options
+    if (this.selectedServiceType.length === 0) {
+      this.getServicesList(this.searchControl.value);
+      return;
+    }
+
+    this.getServicesList(this.searchControl.value);
+  }
+
+  checkIfCustomeField(condition: any): boolean {
+    const optionsEntity = this.accessControlConfig.accessControlCriteriaSelection.optionsEntity;
+    if (optionsEntity && optionsEntity.length) {
+      const matched = optionsEntity.find((ele: any) => ele?.value === condition?.entity);
+      return matched?.isCustomField || false;
+    }
+    return false;
+  }
+
+  isCentralDeputationSelected(isDeputation: string): boolean {
+    return this.selectedDataTemp.includes(isDeputation);
+  }
+
+  onCentralDeputationChange(event: any): void {
+    const isChecked = event?.target?.checked;
+    this.selectedDataTemp = [isChecked];
+  }
+
+  selectAvailableOptions(event: MatCheckboxChange): void {
+    const checked = event.checked;
+    if (event.source.value === "selectAll") {
+      this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
+    } else if (event.source.value === "isCCA") {
+      this.selectedDataTemp = checked
+        ? _.map(
+            _.filter(this.dataList, (item) => item?.iscca === true),
+            (item) => this.getSelectionValue(item)
+          )
+        : [];
+    }
+  }
+
+  capitalizeFirstLetter(str: string) {
+    if (typeof str !== "string" || str.length === 0) {
+      return str;
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }
