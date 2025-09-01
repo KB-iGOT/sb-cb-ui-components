@@ -83,7 +83,7 @@
                         </div>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC">
+                        <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC && config?.application !== MDO_APPLICATION">
                           <button
                             [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                             mat-icon-button
@@ -244,7 +244,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf="userGroup?.length > 0">
+        <ng-container *ngIf="userGroup?.length > 0 && config?.application !== MDO_APPLICATION">
           <div class="action-save flex justify-center items-center gap-4" [ngClass]="{ 'mt-4': userGroup?.length === 1 && config?.application === MDO_APPLICATION }">
             <!-- Save Filter Button -->
             <button

@@ -365,8 +365,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         disableCadre = availableCadres.length === 0;
       } else {
         // If neither is selected, do not disable Cadre
-        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) disableCadre = true;
-        else disableCadre = false;
+        if(this.content) {
+          if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) disableCadre = true;
+          else disableCadre = false;
+        }
       }
 
       const updatedOptions = this.accessControlCriteriaSelection.optionsEntity.map(option => {
@@ -472,6 +474,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
       this.calculateUserCountForUserGroup(userGroupIndex);
       this.processDisableAddConditionOnClose(userGroupIndex);
+
+      if (this.config.application === this.MDO_APPLICATION) {
+        this.applyAccessControlValue(true, false)
+      }
     }
   }
 
@@ -807,7 +813,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             userGroupName: group.name,
             userGroupCriteriaList: group.conditions.map((condition: any) => {
               let criteriaValue: string[];
-
               if (
                 condition?.entity === NsAccessControlConfig.SelectionType.Users &&
                 condition?.selections?.length &&
@@ -815,32 +820,43 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
               ) {
                 const userIds = condition.selections?.map((user: any) => user?.userId) || [];
                 criteriaValue = userIds;
+              } else if (condition?.entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
+                criteriaValue = condition.selections[0];
               } else {
-                criteriaValue = condition.selections?.map(String) || [];
+                if (condition.selections.length && typeof condition.selections[0] === "object") {
+                  criteriaValue = condition.selections?.map((sel: any) => sel?.attributeName) || [];
+                } else {
+                  criteriaValue = condition.selections?.map(String) || [];
+                }
               }
 
-              return {
-                criteriaKey: condition.entity,
-                criteriaValue
-              };
+              if (condition.entity && criteriaValue && criteriaValue.length > 0) {
+                return {
+                  criteriaKey: condition.entity,
+                  criteriaValue,
+                };
+              }
+              return null;
             })
-          }))
-          .filter((group: any) => Array.isArray(group.userGroupCriteriaList) && group.userGroupCriteriaList.length > 0);
+            .filter((criteria: any) => !!criteria), // Remove nulls
+        }))
+        .filter((group: any) => Array.isArray(group.userGroupCriteriaList) && group.userGroupCriteriaList.length > 0);
 
-        const requestPayload: IUserGroupRequest = {
-          contentId: this.contentId,
-          accessControl: {
-            version: 1,
-            userGroups
-          }
-        };
+      const requestPayload: IUserGroupRequest = {
+        contentId: this.contentId,
+        accessControl: {
+          version: 1,
+          userGroups,
+        },
+      };
 
-        resolve(requestPayload);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+      resolve(requestPayload);
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
+
 
   openInstructonsDialog(): void {
     this.dialog.open(AccessControlGuideComponent, {
@@ -1311,6 +1327,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                 ...prevConfig,
                 accessControlCriteriaSelection: this.accessControlCriteriaSelection,
               }));
+
             }
           }
         },
@@ -1342,12 +1359,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         };
 
         // Set the form values
-        condition.patchValue({
+        
+       condition.patchValue({
           entity: entityMap[criteria.criteriaKey] || criteria.criteriaKey,
           selections:
             criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
               ? Array.isArray(criteria.criteriaValue)
                 ? criteria.criteriaValue.map((b: any) => Number(b))
+                : []
+              : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
+              ? Array.isArray(criteria.criteriaValue)
+                ? criteria.criteriaValue
                 : []
               : criteria.criteriaValue,
         });

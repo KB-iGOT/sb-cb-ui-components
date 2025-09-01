@@ -28,7 +28,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   dataList: any[] = [];
   dataListDup: any[] = [];
 
-  selectedCentralDeputation: string = "";
+  selectedCentralDeputation: boolean = false;
 
   selectedData: any[] = [];
   selectedDataTemp: any[] = [];
@@ -83,6 +83,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (this.isEntityCustomField) {
       this.customeFieldValues = this.accessControlService.customesFieldData().find((ele: any) => ele?.attributeName === this.data.condition.entity);
       this.selectionType = NsAccessControlConfig.SelectionType.CustomField;
+    }
+
+    if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+      this.selectedDataTemp = [this.selectedCentralDeputation];
     }
 
     if (this.data && this.data.selected && this.data.selected.length) {
@@ -167,9 +171,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       case NsAccessControlConfig.SelectionType.CustomField:
         this.radioSelections = this.accessControlCriteriaSelection[this.customeFieldValues?.attributeName];
         this.getCustomsFieldList();
-        break;
-      case NsAccessControlConfig.SelectionType.CentralDeputation:
-        this.getCentralDeputation();
         break;
     }
   }
@@ -420,8 +421,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     return (
       (this.groupedEntityData && Object.keys(this.groupedEntityData).length > 0) ||
       (this.selectionType === NsAccessControlConfig.SelectionType.Group && this.dataList.length > 0) ||
-      (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus && this.dataList.length > 0) ||
-      (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation && this.dataList.length > 0)
+      (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus && this.dataList.length > 0)
     );
   }
 
@@ -549,6 +549,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         selectedTypes = cadreDataRaw.map((element: any) => element.name);
       }
 
+      if (this.selectedServiceType.length === 0) {
+        selectedTypes = [...cadreDataRaw.map((element: any) => element.name)];
+      }
+
       let allServices: any[] = [];
       cadreDataRaw.forEach((item: any) => {
         if (selectedTypes.includes(item.name) && Array.isArray(item.serviceList)) {
@@ -606,10 +610,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   getVerificationStatus(): void {
     this.dataList = this.accessControlCriteriaSelection.verificationStatus;
-  }
-
-  getCentralDeputation(): void {
-    this.dataList = this.accessControlCriteriaSelection?.centralDeputation;
   }
 
   getCustomsFieldList(): void {
@@ -722,6 +722,39 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   // On Mdo Portal, Service Selection Type Change
+  // onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
+  //   const checked = event.checked;
+  //   if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
+  //     this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
+  //     return;
+  //   }
+
+  //   // Handle individual service type selection
+  //   const value = selectionType;
+  //   if (checked) {
+  //     if (!this.selectedServiceType.includes(value)) {
+  //       this.selectedServiceType.push(value);
+  //     }
+  //   } else {
+  //     this.selectedServiceType = this.selectedServiceType.filter((v) => v !== value);
+  //   }
+
+  //   this.getServicesList(this.searchControl.value);
+
+  //   setTimeout(() => {
+  //     const allOptions = this.dataList.map((item) => this.getSelectionValue(item));
+  //     if (checked) {
+  //       // Add all options from the newly selected type that are not already selected
+  //       const newOptions = this.dataList.filter((item) => this.getSelectionValue(item) && !this.selectedDataTemp.includes(this.getSelectionValue(item))).map((item) => this.getSelectionValue(item));
+  //       this.selectedDataTemp = [...this.selectedDataTemp, ...newOptions];
+  //     } else {
+  //       // Remove all options from the deselected type
+  //       const removedOptions = this.dataList.map((item) => this.getSelectionValue(item));
+  //       this.selectedDataTemp = this.selectedDataTemp.filter((v) => !removedOptions.includes(v));
+  //     }
+  //   }, 0);
+  // }
+
   onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
     const checked = event.checked;
     if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
@@ -739,20 +772,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectedServiceType = this.selectedServiceType.filter((v) => v !== value);
     }
 
-    this.getServicesList(this.searchControl.value);
+    // If no service type is selected, show all options
+    if (this.selectedServiceType.length === 0) {
+      this.getServicesList(this.searchControl.value);
+      return;
+    }
 
-    setTimeout(() => {
-      const allOptions = this.dataList.map((item) => this.getSelectionValue(item));
-      if (checked) {
-        // Add all options from the newly selected type that are not already selected
-        const newOptions = this.dataList.filter((item) => this.getSelectionValue(item) && !this.selectedDataTemp.includes(this.getSelectionValue(item))).map((item) => this.getSelectionValue(item));
-        this.selectedDataTemp = [...this.selectedDataTemp, ...newOptions];
-      } else {
-        // Remove all options from the deselected type
-        const removedOptions = this.dataList.map((item) => this.getSelectionValue(item));
-        this.selectedDataTemp = this.selectedDataTemp.filter((v) => !removedOptions.includes(v));
-      }
-    }, 0);
+    this.getServicesList(this.searchControl.value);
   }
 
   checkIfCustomeField(condition: any): boolean {
@@ -768,9 +794,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     return this.selectedDataTemp.includes(isDeputation);
   }
 
-  onCentralDeputationChange(event: any, isDeputation: string): void {
-    this.selectedDataTemp = [isDeputation];
-    this.selectedCentralDeputation = isDeputation;
+  onCentralDeputationChange(event: any): void {
+    const isChecked = event?.target?.checked;
+    this.selectedDataTemp = [isChecked];
   }
 
   selectAvailableOptions(event: MatCheckboxChange): void {

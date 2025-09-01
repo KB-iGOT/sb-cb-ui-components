@@ -6,5 +6,5 @@ export const BATCH_RANGES = [
 
 export const CHECKBOX_OPTIONS = [
   { label: "Select All", value: "selectAll" },
-  { label: "Cadre Controlling Authority", value: "isCCA" },
+  // { label: "Cadre Controlling Authority", value: "isCCA" },
 ];

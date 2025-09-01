@@ -90,10 +90,6 @@
                       </div>
                     </ng-container>
 
-                    <div class="alphabet-filter">
-                      <ng-container *ngTemplateOutlet="alphabetFilterTemplate; context: { alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('') }"></ng-container>
-                    </div>
-
                     <ng-container *ngIf="checkIfData; else noData">
                       <ng-container *ngTemplateOutlet="entityListTemplate"></ng-container>
                     </ng-container>
@@ -154,27 +150,29 @@
   </ng-container>
 
   <ng-container *ngIf="selectionType === selectionTypeEnum.CentralDeputation">
-    <div class="flex gap-16 items-center p-4 options-radio">
-      <ng-container *ngFor="let choice of dataList">
-        <mat-radio-group
-          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
-          [(ngModel)]="selectedCentralDeputation"
-          (change)="onCentralDeputationChange($event, choice?.value)"
-          class="mr-4"
-        >
-          <mat-radio-button [value]="choice?.value" [title]="choice?.label">
-            {{ choice?.label }}
-          </mat-radio-button>
-        </mat-radio-group>
-      </ng-container>
+    <div class="flex items-start p-4 flex-column">
+      <div class="lato-normal-text-line">When ON, this training plan will be allocated to all AIS officials marked as on Central Deputation in their profiles.</div>
+      <div class="toggle-central-deputation flex gap-4 items-end">
+        <div class="toggle-central-deputation lato-normal-text-line">Central Deputation</div>
+        <div class="checkbox-toggle">
+          <input
+            [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+            [(ngModel)]="selectedCentralDeputation"
+            (change)="onCentralDeputationChange($event)"
+            id="switch"
+            type="checkbox"
+          />
+          <label for="switch" [attr.data-disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"></label>
+        </div>
+      </div>
     </div>
   </ng-container>
 </div>
 
 <mat-dialog-actions>
-  <ng-container *ngIf="checkIfData">
+  <ng-container *ngIf="checkIfData || selectionType === selectionTypeEnum.CentralDeputation">
     <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
-      <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus || selectionType !== selectionTypeEnum.CentralDeputation">
+      <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus && selectionType !== selectionTypeEnum.CentralDeputation">
         <div class="text-xs">{{ filterValue === "all" ? selectedDataTemp?.length : selectedData?.length }} items selected</div>
       </ng-container>
       <ng-container
