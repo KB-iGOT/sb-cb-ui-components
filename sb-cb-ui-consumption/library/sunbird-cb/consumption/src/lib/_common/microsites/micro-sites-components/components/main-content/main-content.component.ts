@@ -20,6 +20,7 @@ export class MainContentComponent implements OnInit {
     @Inject('isMobile') public isMobile: boolean,
     @Inject('providerId') public providerId: string,
     @Inject('slwConfiguration') public slwConfig: any,
+    @Inject('isEdit') public isEdit: boolean,
     @Inject('eventCallback') private eventCallback: (event: any) => void,
     public configSvc: ConfigurationsService
   ) {}
@@ -113,5 +114,26 @@ export class MainContentComponent implements OnInit {
       source: 'mainContent',
       id: `${name}-core-expertise`
     });
+  }
+
+ openEditor(fieldName: string, displayName: string, value: any) {
+  this.eventCallback({
+    action: 'edit',
+    source: 'mainContent',
+    id: fieldName,
+    data: {
+      fieldName,
+      displayName,
+      value,
+      fieldType: this.getFieldType(fieldName, value),
+      parentData: this.data
+    }
+  });
+}
+
+  getFieldType(fieldName: string, value: any): string {
+    if (fieldName === 'keyHighlights') return 'keyHighlights';
+    // Add other field type logic as needed
+    return typeof value;
   }
 }

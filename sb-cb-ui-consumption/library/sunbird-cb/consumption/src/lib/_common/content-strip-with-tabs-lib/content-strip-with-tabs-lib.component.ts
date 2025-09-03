@@ -85,6 +85,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   @Input() providerId: any = ''
   @Input() emitViewAll: boolean = false
   @Input() channnelName: any = ''
+  @Input() isEdit: boolean = false
   @HostBinding('id')
   public id = `ws-strip-miltiple_${Math.random()}`;
   stripsResultDataMap: { [key: string]: IStripUnitContentData } = {};
@@ -288,7 +289,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           // tslint:disable-next-line: align
         }, data.tabs[0]);
       // if tabs has atleast 1 widgets then strip will show or else not
-      return tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0;
+      return this.isEdit ? true :tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0;
     }
   }
 
@@ -2024,7 +2025,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         }
         this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
       } else {
-        this.processStrip(strip, [], 'error', calculateParentStatus, null);
+        this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults);
       }
     }
   }

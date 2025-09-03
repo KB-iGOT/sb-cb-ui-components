@@ -2,7 +2,7 @@
   <div class="container">
     <!-- Mobile view components -->
     <ng-container *ngIf="isMobile">
-      <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
+      <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
         <sb-uic-key-highlights
           (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
           [formData]="data?.stateLearningWeekSection?.keyHighlights" 
@@ -69,11 +69,18 @@
       </div>
     </ng-container>
     
-    <!-- Desktop Key Highlights -->
+    <!-- Desktop Key Highlights - Always show when editing -->
     <div class="col-span-12">
       <div class="flex items-center justify-center">
         <div class="container margin-top-xl">
-          <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled">
+          <div class="feature-header" *ngIf="isEdit">
+            <button mat-icon-button aria-label="Edit Key Highlights" class="edit-icon"
+              (click)="openEditor('keyHighlights', 'Key Highlights', data?.stateLearningWeekSection?.keyHighlights)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <!-- Show if enabled OR if in edit mode -->
+          <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
             <sb-uic-key-highlights
               (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
               [formData]="data?.stateLearningWeekSection?.keyHighlights" 
@@ -90,42 +97,44 @@
       <!-- Main tab section -->
       <div class="col-span-12 md:col-span-{{data.tabSection.colspan}}">
         <!-- Week highlights (desktop) -->
-        <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled">
+        <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.weekHighlights?.enabled || isEdit">
           <sb-uic-highlights-of-week [objectData]="data?.stateLearningWeekSection?.weekHighlights?.data"></sb-uic-highlights-of-week>
         </div>
         
         <!-- Mandatory courses -->
         <ng-container *ngIf="data?.stateLearningWeekSection?.mandatoryCourse?.enabled && 
-                            data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data">
+                            data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data  || isEdit">
           <div class="margin-top-l nlw-mandatoryCourse">
-            <sb-uic-content-strip-with-tabs 
+            hiiiiii
+            <!-- <sb-uic-content-strip-with-tabs 
               [emitViewAll]="false" 
               (telemtryResponse)="raiseTelemetryInteratEvent($event)" 
               [providerId]="orgId"
               [widgetData]="data?.stateLearningWeekSection?.mandatoryCourse?.column[0]?.data"
               [channnelName]="channelName">
-            </sb-uic-content-strip-with-tabs>
+            </sb-uic-content-strip-with-tabs> -->
           </div>
         </ng-container>
         
         <!-- Learning content -->
         <ng-container *ngIf="data?.stateLearningWeekSection?.exploreLearningContent?.enabled && 
-                           data?.stateLearningWeekSection?.exploreLearningContent?.strips[0]">
+                           data?.stateLearningWeekSection?.exploreLearningContent?.strips[0]  || isEdit">
           <div class="margin-top-l nlw-mandatoryCourse">
-            <sb-uic-content-strip-with-tabs 
+            bye
+            <!-- <sb-uic-content-strip-with-tabs 
               [emitViewAll]="false" 
               (telemtryResponse)="raiseTelemetryInteratEvent($event)" 
               [providerId]="orgId"
               [widgetData]="data?.stateLearningWeekSection?.exploreLearningContent"
               [channnelName]="channelName">
-            </sb-uic-content-strip-with-tabs>
+            </sb-uic-content-strip-with-tabs> -->
           </div>
         </ng-container>
         
         <!-- Events -->
-        <div *ngIf="data?.stateLearningWeekSection?.events?.enabled && 
+        <div *ngIf="slwConfig?.enabled && (data?.stateLearningWeekSection?.events?.enabled && 
                   data?.stateLearningWeekSection?.events?.column?.length &&
-                  data?.stateLearningWeekSection?.events?.column[0]">
+                  data?.stateLearningWeekSection?.events?.column[0] || isEdit)">
           <sb-uic-events 
             [object]="data?.stateLearningWeekSection?.events?.column[0]"
             [nwlEventsConfig]="slwConfig">
@@ -133,7 +142,7 @@
         </div>
         
         <!-- Tabs -->
-        <ng-container *ngIf="!data?.tabSection?.disable">
+        <ng-container *ngIf="!data?.tabSection?.disable  || isEdit">
           <mat-tab-group 
             animationDuration="0ms" 
             class="mat-tab-labels mytabs w-full"
@@ -152,12 +161,13 @@
                   </div>
                 </div>
               </ng-container>
-              
+              hi
               <!-- Content tab content -->
               <div class="padding-top-l">
                 <app-column-section-display 
                   [data]="data.tabSection.contentTab"
                   [orgId]="orgId"
+                  [isEdit]="isEdit"
                   [channelName]="channelName"
                   (competencyEvent)="hideCompetency($event)"
                   (competencyTelemetry)="raiseCompetencyTelemetry($event)"
@@ -175,6 +185,8 @@
                   [data]="data.tabSection.coreAreasTab"
                   [orgId]="orgId"
                   [channelName]="channelName"
+
+                [isEdit]="isEdit"
                   (competencyEvent)="hideCompetency($event)"
                   (competencyTelemetry)="raiseCompetencyTelemetry($event)"
                   (contentTelemetry)="raiseTelemetryInteratEvent($event)"
@@ -190,7 +202,7 @@
       <div class="col-span-12 md:col-span-4">
         <ng-container *ngIf="!isMobile">
           <!-- Progress -->
-          <div class="hidden md:block padding-top-xl padding-bottom-m">
+          <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled || isEdit">
             <div *ngIf="data?.stateLearningWeekSection?.myprogress?.enabled">
               <sb-uic-user-progress 
                 [layoutType]="'web'" 
@@ -202,7 +214,7 @@
           </div>
           
           <!-- Speakers -->
-          <div class="hidden md:block padding-top-xl padding-bottom-m">
+          <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled || isEdit">
             <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
               <sb-uic-speakers 
                 [layoutType]="'web'" 
@@ -213,7 +225,7 @@
           </div>
           
           <!-- Leaderboard -->
-          <div class="hidden md:block padding-top-xl padding-bottom-m">
+          <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled || isEdit">
             <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled">
               <sb-uic-mdo-leaderboard 
                 [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data" 
@@ -237,8 +249,8 @@
             </div>
           </div>
           
-          <!-- Announcements -->
-          <div class="hidden md:block" *ngIf="!data?.announcementSection?.disable">
+          <!-- Announcements - Always show when editing -->
+          <div class="hidden md:block" *ngIf="!data?.announcementSection?.disable || isEdit">
             <div class="pt-4">
               <sb-uic-announcements 
                 [layoutType]="'web'" 
@@ -254,3 +266,4 @@
     </div>
   </div>
 </div>
+

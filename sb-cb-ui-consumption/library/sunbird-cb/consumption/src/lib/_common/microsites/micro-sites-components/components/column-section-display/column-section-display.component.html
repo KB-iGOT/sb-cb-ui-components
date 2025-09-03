@@ -19,6 +19,7 @@
                 *ngIf="column?.key.includes('content')"
                 [data]="{contentStrip: column?.data, sectionKey: section.key}"
                 (viewAllResponse)="onViewAllEvent($event.event, $event.data)"
+                [isEdit]="isEdit"
                 (telemetryResponse)="onContentTelemetry($event)">
               </app-content-strip>
             </ng-container>

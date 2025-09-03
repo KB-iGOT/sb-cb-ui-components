@@ -7,6 +7,7 @@ import { Component, Inject, Input, Output, EventEmitter } from '@angular/core';
 })
 export class ContentStripComponent {
   @Input() data: any;
+  @Input() isEdit: boolean;
   @Output() viewAllResponse = new EventEmitter<any>();
   @Output() telemetryResponse = new EventEmitter<any>();
   
@@ -36,6 +37,16 @@ export class ContentStripComponent {
       source: 'contentStrip',
       id: event.id || 'content-interaction',
       data: event
+    });
+  }
+  hideContentStrip(event: any, contentStrip: any) {
+    console.log(event)
+    debugger
+    this.eventCallback({
+      action: 'hide-content-strip',
+      source: 'contentStrip',
+      id: 'content-strip',
+      data: contentStrip
     });
   }
 }

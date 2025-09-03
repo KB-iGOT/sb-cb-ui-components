@@ -37,7 +37,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   isMobile: boolean = false;
   isStateLearningWeekEnabled: boolean = false;
   hasUnsavedChanges: boolean = false;
-  
+  isLoading: boolean = false;
+
   navigationTitles = [
     { title: 'Learn', url: '/page/learn', icon: 'school', disableTranslate: false },
     { title: 'MDO Channels', url: '/app/learn/mdo-channels/all-channels', icon: '', disableTranslate: true }
@@ -156,7 +157,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   }
   
   trackByFn(index: number, item: any): any {
-    return item.key || index;
+    return item.version || item.key || index;
   }
   
   raiseTelemetry(name: string) {
@@ -178,34 +179,21 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       data: {
         fieldName: event.data.fieldName,
         displayName: event.data.displayName,
-        value: event.data.value, // <-- This should be the actual value
+        value: event.data.value,
         fieldType: event.data.fieldType,
         section: event.source
       }
     });
 
+    // After dialog close
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        if (event.data.fieldType === 'keyHighlights') {
-          // Update keyHighlights in sectionList
-          const updatedSections = cloneDeep(this.sectionList);
-          updatedSections.forEach(section => {
-            if (section.enabled) {
-              section.column.forEach(column => {
-                if (column.key === event.source && column.data?.stateLearningWeekSection?.keyHighlights) {
-                  column.data.stateLearningWeekSection.keyHighlights = result;
-                }
-              });
-            }
-          });
-          this.sectionList = updatedSections;
-          this.activeSections = this.sectionList.filter(section => section.enabled)
-            .sort((a, b) => (a.order || 0) - (b.order || 0));
-          this.hasUnsavedChanges = true;
-          this.cdr.detectChanges();
-        } else {
-          this.updateSectionData(event.source, event.data.fieldName, result);
-        }
+        this.isLoading = true;
+        
+        // Use updateSectionData method to update keyHighlights
+        this.updateSectionData(event.source, event.data.fieldName, result);
+        
+        this.isLoading = false;
       }
     });
   }
@@ -235,8 +223,13 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       
       for (const column of section.column) {
         if (column.key === sectionType && column.data) {
-          // Update the specific field
-          this.updateNestedField(column.data, fieldName, newValue);
+          // Special handling for keyHighlights which is nested under stateLearningWeekSection
+          if (fieldName === 'keyHighlights' && column.data.stateLearningWeekSection) {
+            column.data.stateLearningWeekSection.keyHighlights = newValue;
+          } else {
+            // Update other fields using the nested field helper
+            this.updateNestedField(column.data, fieldName, newValue);
+          }
           break;
         }
       }
@@ -245,16 +238,19 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     // Clear the injector cache to force component recreation
     this.injectorCache.clear();
     
-    // Update the sectionList (this will trigger change detection)
+    // Update the sectionList with new reference (this will trigger change detection)
     this.sectionList = updatedSections;
     console.log('Updated sectionList:', this.sectionList);
     
-    // Update active sections
+    // Update active sections with new reference
     this.activeSections = this.sectionList.filter(section => section.enabled)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
     
+    // Mark for change detection
+    this.hasUnsavedChanges = true;
+    
     // Force change detection to ensure UI updates
-    this.cdr.detectChanges(); // Use detectChanges instead of markForCheck
+    this.cdr.detectChanges();
   }
 
   // Helper method to update nested fields

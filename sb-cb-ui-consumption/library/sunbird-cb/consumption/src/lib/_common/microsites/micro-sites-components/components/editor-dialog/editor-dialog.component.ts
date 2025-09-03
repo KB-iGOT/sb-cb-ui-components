@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -59,11 +59,19 @@ export class EditorDialogComponent implements OnInit {
     this.formType = data.fieldType || 'text';
   }
   
-  ngOnInit() {
-    this.initForm();
-    this.initSliderItemForm();
+  get keyHighlightsArray(): FormArray {
+    return this.editorForm.get('keyHighlights') as FormArray;
   }
-  
+
+  ngOnInit() {
+    if (this.formType === 'keyHighlights') {
+      this.initKeyHighlightsForm();
+    } else {
+      this.initForm();
+      this.initSliderItemForm();
+    }
+  }
+
   initForm() {
     // Create form based on field type
     switch (this.formType) {
@@ -109,6 +117,39 @@ export class EditorDialogComponent implements OnInit {
           value: [this.data.value, [Validators.required]]
         });
     }
+  }
+  
+  initKeyHighlightsForm() {
+    const config = this.data.value || {};
+    this.editorForm = this.fb.group({
+      enabled: [config.enabled ?? true],
+      backgroundColor: [config.backgroundColor ?? '#FFFFFF', [Validators.required]],
+      titleMaxLength: [config.titleMaxLength ?? 200, [Validators.required, Validators.min(1)]],
+      keyHighlights: this.fb.array(
+        (config.content || []).map((item: any) =>
+          this.fb.control(item.title, [
+            Validators.required,
+            Validators.maxLength(config.titleMaxLength ?? 200)
+          ])
+        )
+      ),
+      sliderData: this.fb.group({
+        styleData: this.fb.group({
+          borderRadius: [config.sliderData?.styleData?.borderRadius ?? '0'],
+          customHeight: [config.sliderData?.styleData?.customHeight ?? '100px'],
+          bannerMeta: [config.sliderData?.styleData?.bannerMeta ?? 'visible'],
+          dots: [config.sliderData?.styleData?.dots ?? 'hidden'],
+          arrowsPlacement: [config.sliderData?.styleData?.arrowsPlacement ?? 'middle-inline'],
+          responsive: this.fb.group({
+            customHeight: [config.sliderData?.styleData?.responsive?.customHeight ?? '80px'],
+            bannerMetaAlign: [config.sliderData?.styleData?.responsive?.bannerMetaAlign ?? 'left'],
+            navigationArrows: [config.sliderData?.styleData?.responsive?.navigationArrows ?? 'visible'],
+            dots: [config.sliderData?.styleData?.responsive?.dots ?? 'hidden'],
+            arrowsPlacement: [config.sliderData?.styleData?.responsive?.arrowsPlacement ?? 'middle-inline']
+          })
+        })
+      })
+    });
   }
   
   initSliderItemForm(item?: SliderItem) {
@@ -310,8 +351,38 @@ export class EditorDialogComponent implements OnInit {
     return originalUrl.replace('https://storage.googleapis.com/igotqa/', 'https://portal.qa.karmayogibharat.net/content-store/');
   }
   
+  addKeyHighlight() {
+    this.keyHighlightsArray.push(
+      this.fb.control('', [
+        Validators.required,
+        Validators.maxLength(this.editorForm.get('titleMaxLength')?.value || 200)
+      ])
+    );
+  }
+
+  removeKeyHighlight(index: number) {
+    this.keyHighlightsArray.removeAt(index);
+  }
+
+  dropKeyHighlight(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.keyHighlightsArray.controls, event.previousIndex, event.currentIndex);
+    this.keyHighlightsArray.updateValueAndValidity();
+  }
+
   onSubmit() {
-    if (this.editorForm.valid) {
+    if (this.formType === 'keyHighlights') {
+      const formValue = this.editorForm.value;
+      const updatedConfig = {
+        enabled: formValue.enabled,
+        backgroundColor: formValue.backgroundColor,
+        titleMaxLength: formValue.titleMaxLength,
+        content: formValue.keyHighlights.map((title: string) => ({ title })),
+        sliderData: {
+          styleData: formValue.sliderData.styleData
+        }
+      };
+      this.dialogRef.close(updatedConfig);
+    } else if (this.editorForm.valid) {
       this.dialogRef.close(this.editorForm.value.value);
     }
   }

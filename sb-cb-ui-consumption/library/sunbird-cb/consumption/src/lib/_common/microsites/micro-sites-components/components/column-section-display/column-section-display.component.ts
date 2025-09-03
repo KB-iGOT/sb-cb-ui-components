@@ -9,7 +9,7 @@ export class ColumnSectionDisplayComponent implements OnInit {
   @Input() data: any[] = [];
   @Input() orgId: string;
   @Input() channelName: string;
-  
+  @Input() isEdit: boolean;
   @Output() competencyEvent = new EventEmitter<boolean>();
   @Output() competencyTelemetry = new EventEmitter<string>();
   @Output() contentTelemetry = new EventEmitter<any>();

@@ -11,8 +11,7 @@
   (saveChanges)="saveChanges()"
   (publishChanges)="publishChanges()"
 ></app-action-items>
-
-<div class="container-fluid" id="section-micro-sites">
+<div class="container-fluid" id="section-micro-sites"  >
   <ng-container *ngFor="let section of activeSections; trackBy: trackByFn">
     <section [id]="section.key" class="w-full grid grid-cols-12 gap-4 {{section.customClass}}" 
              [ngClass]="{'container': section.wrapperClass}">
@@ -27,3 +26,6 @@
     </section>
   </ng-container>
 </div>
+<!-- <div *ngIf="isLoading" class="loader-overlay">
+  <mat-spinner></mat-spinner>
+</div> -->
