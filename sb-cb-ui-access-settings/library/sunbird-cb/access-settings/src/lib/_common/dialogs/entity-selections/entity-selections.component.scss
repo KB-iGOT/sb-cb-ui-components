@@ -19,8 +19,10 @@
   margin-right: -8px;
 }
 
-::ng-deep .mat-form-field-wrapper {
-  padding-bottom: 0 !important;
+.dialog-body-wrapper {
+  ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0 !important;
+  }
 }
 
 .search-button {
