@@ -53,17 +53,10 @@ ul {
     height: 40px !important;
     max-width: 80px !important;
   }
-  
-  ::ng-deep
-    .pagination-size-select.mat-full-radius-select
-    .mat-form-field-appearance-outline
-    .mat-form-field-infix {
+  ::ng-deep .pagination-size-select.mat-full-radius-select .mat-form-field-appearance-outline .mat-form-field-infix {
     padding: 0px 0 8px 0 !important;
   }
-  
-  ::ng-deep
-    .pagination-size-select.mat-full-radius-select
-    .mat-form-field-wrapper {
+  ::ng-deep .pagination-size-select.mat-full-radius-select .mat-form-field-wrapper {
     padding-bottom: 0 !important;
   }
 }

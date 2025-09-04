@@ -93,9 +93,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
         this.selectedData = [...this.data.selected.map((ele: any) => _.toNumber(ele))];
         this.selectedDataTemp = [...this.selectedData];
-      } else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+      } 
+      else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
         this.selectedCentralDeputation = this.data.selected[0];
-      } else {
+      }
+       else {
         this.selectedData = [...this.data.selected];
         this.selectedDataTemp = [...this.selectedData];
       }
@@ -616,7 +618,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.dataList = this.customeFieldValues?.originalCustomFieldData || [];
     this.dataListDup = _.uniqWith([...this.dataList], _.isEqual);
     this.alphabet = [];
+    
+    if (this.data && this.data.selected && this.data.selected.length) {
+      const dataFields = this.dataList.filter(ele => this.data.selected.includes(ele?.attributeName))
+      this.selectedData = [...dataFields];
+      this.selectedDataTemp = [...this.selectedData];
+    }
     this.getFilteredEntityGrouped();
+
   }
 
   updateBatchRanges(): void {
