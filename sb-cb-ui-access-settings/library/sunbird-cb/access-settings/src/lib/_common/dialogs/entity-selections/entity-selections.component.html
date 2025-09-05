@@ -44,10 +44,25 @@
                 </ng-container>
                 <ng-container *ngIf="!isLoading">
                   <!-- Select all option  -->
-                  <ng-container *ngIf="selectionType === selectionTypeEnum.Organizations && filterValue === 'all'">
+                  <ng-container
+                    *ngIf="
+                      (selectionType === selectionTypeEnum.Organizations ||
+                        selectionType === selectionTypeEnum.Designation ||
+                        selectionType === selectionTypeEnum.Cadre ||
+                        selectionType === selectionTypeEnum.CustomField ||
+                        selectionType === selectionTypeEnum.Batch) &&
+                      filterValue === 'all'
+                    "
+                  >
                     <div class="px-2 py-4 options-checkbox">
                       <ng-container *ngFor="let item of entityFilterOptions">
-                        <mat-checkbox class="mr-4" [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled" (change)="selectAvailableOptions($event)" [value]="item?.value">
+                        <mat-checkbox
+                          class="mr-4"
+                          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+                          (change)="selectAvailableOptions($event)"
+                          [value]="item?.value"
+                          [checked]="item?.value === 'selectAll' ? areAllSelected() : isOptionSelected(item?.value)"
+                        >
                           {{ item?.label }}
                         </mat-checkbox>
                       </ng-container>

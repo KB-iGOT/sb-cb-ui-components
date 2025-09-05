@@ -93,11 +93,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
         this.selectedData = [...this.data.selected.map((ele: any) => _.toNumber(ele))];
         this.selectedDataTemp = [...this.selectedData];
-      } 
-      else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+      } else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
         this.selectedCentralDeputation = this.data.selected[0];
-      }
-       else {
+      } else {
         this.selectedData = [...this.data.selected];
         this.selectedDataTemp = [...this.selectedData];
       }
@@ -618,14 +616,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.dataList = this.customeFieldValues?.originalCustomFieldData || [];
     this.dataListDup = _.uniqWith([...this.dataList], _.isEqual);
     this.alphabet = [];
-    
-    if (this.data && this.data.selected && this.data.selected.length) {
-      const dataFields = this.dataList.filter(ele => this.data.selected.includes(ele?.attributeName))
-      this.selectedData = [...dataFields];
-      this.selectedDataTemp = [...this.selectedData];
+
+    if (this.data && this.data.selected && Array.isArray(this.data.selected) && this.data.selected.length) {
+      if (this.data.selected.every((item) => typeof item === "string")) {
+        const dataFields = this.dataList.filter((ele) => this.data.selected.includes(ele?.attributeName));
+        this.selectedData = [...dataFields];
+        this.selectedDataTemp = [...this.selectedData];
+      }
     }
     this.getFilteredEntityGrouped();
-
   }
 
   updateBatchRanges(): void {
@@ -810,15 +809,45 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   selectAvailableOptions(event: MatCheckboxChange): void {
     const checked = event.checked;
-    if (event.source.value === "selectAll") {
-      this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
-    } else if (event.source.value === "isCCA") {
-      this.selectedDataTemp = checked
-        ? _.map(
-            _.filter(this.dataList, (item) => item?.iscca === true),
-            (item) => this.getSelectionValue(item)
-          )
-        : [];
+    const value = event.source.value;
+
+    if (!checked) {
+      this.selectedDataTemp = [];
+      return;
+    }
+
+    switch (value) {
+      case "selectAll":
+        this.selectedDataTemp = this.dataList.map((item) => this.getSelectionValue(item));
+        break;
+      case "isCCA":
+        this.selectedDataTemp = this.dataList.filter((item) => item?.iscca === true).map((item) => this.getSelectionValue(item));
+        break;
+    }
+
+    switch (this.selectionType) {
+      case this.selectionTypeEnum.Organizations:
+      case this.selectionTypeEnum.Designation:
+      case this.selectionTypeEnum.Group:
+      case this.selectionTypeEnum.CustomField:
+      case this.selectionTypeEnum.Cadre:
+      case this.selectionTypeEnum.Batch:
+        this.getFilteredEntityGrouped();
+        break;
+    }
+  }
+
+  areAllSelected(): boolean {
+    if (!this.dataList.length) return false;
+    return this.dataList.every((item) => this.selectedDataTemp.includes(this.getSelectionValue(item)));
+  }
+
+  isOptionSelected(value: string): boolean {
+    switch (value) {
+      case "selectAll":
+        return this.areAllSelected();
+      default:
+        return false;
     }
   }
 
