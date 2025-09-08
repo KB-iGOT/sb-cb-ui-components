@@ -450,6 +450,29 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+
+  checkServicesAndResetReleated(userGroupIndex: number): void {
+    const userGroups = this.userGroup.at(userGroupIndex);
+    const conditions = this.ruleConditions(userGroupIndex);
+
+    if (userGroups) {
+      const conditionsUserGroup = userGroups?.value?.conditions || [];
+
+      // Find service index
+      const serviceIndex = _.findIndex(conditionsUserGroup, (c: any) => c.entity === NsAccessControlConfig.SelectionType.Service);
+
+      if (serviceIndex !== -1) {
+        conditionsUserGroup.forEach((c: any, index: number) => {
+          if (_.includes([NsAccessControlConfig.SelectionType.Batch, NsAccessControlConfig.SelectionType.Cadre], c.entity) && index > serviceIndex) {
+            console.log(`Entity '${c.entity}' found at index:`, index);
+            // conditions.removeAt(index);
+             conditions.setControl(index, this.createConditionGroup(uuidv4(), userGroupIndex));
+          }
+        });
+      }
+    }
+  }
+
   removeCondition(userGroupIndex: number, conditionIndex: number) {
     const conditions = this.ruleConditions(userGroupIndex);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -458,6 +481,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+        this.checkServicesAndResetReleated(userGroupIndex);
         conditions.removeAt(conditionIndex);
         this.applyAccessControlValue(true);
         this.calculateUserCountForUserGroup(userGroupIndex);
@@ -470,8 +494,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const conditions = this.ruleConditions(userGroupIndex);
     const condition = conditions.at(conditionIndex);
     if (condition) {
+      this.checkServicesAndResetReleated(userGroupIndex);
+
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
+
       this.calculateUserCountForUserGroup(userGroupIndex);
       this.processDisableAddConditionOnClose(userGroupIndex);
 
@@ -485,7 +512,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
-    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review")) {
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION) {
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
       }
@@ -1193,15 +1220,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         fields: ["identifier", "rootOrgId", "firstName"]
       }
     };
-    const response = await this.accessControlService
-      .validateUser(payload)
-      .toPromise()
-      .catch(() => {
-        this.userCount[userGroupIndex] = 0;
-      });
-    if (response?.result?.response) {
-      const count = response?.result?.response?.count;
-      this.userCount[userGroupIndex] = count;
+    if(payload?.request?.filters) {
+      const response = await this.accessControlService
+        .validateUser(payload)
+        .toPromise()
+        .catch(() => {
+          this.userCount[userGroupIndex] = 0;
+        });
+      if (response?.result?.response) {
+        const count = response?.result?.response?.count;
+        this.userCount[userGroupIndex] = count;
+      }
     }
   }
 
