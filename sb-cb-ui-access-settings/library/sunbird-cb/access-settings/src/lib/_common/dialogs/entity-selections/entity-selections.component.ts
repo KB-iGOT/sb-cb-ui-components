@@ -486,7 +486,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           next: (response) => {
             if (response?.result && response?.result?.Term) {
               // const newData = response?.result?.Term;
-              const newData = _.uniqBy(response.result.Term, (item: any) => item?.name.trim().toLowerCase());
+              const newData = _.uniqBy(response.result.Term, (item: any) => item?.identifier);
 
               this.dataList = append ? [...this.dataList, ...newData] : newData;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
@@ -730,39 +730,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   // On Mdo Portal, Service Selection Type Change
-  // onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
-  //   const checked = event.checked;
-  //   if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
-  //     this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
-  //     return;
-  //   }
-
-  //   // Handle individual service type selection
-  //   const value = selectionType;
-  //   if (checked) {
-  //     if (!this.selectedServiceType.includes(value)) {
-  //       this.selectedServiceType.push(value);
-  //     }
-  //   } else {
-  //     this.selectedServiceType = this.selectedServiceType.filter((v) => v !== value);
-  //   }
-
-  //   this.getServicesList(this.searchControl.value);
-
-  //   setTimeout(() => {
-  //     const allOptions = this.dataList.map((item) => this.getSelectionValue(item));
-  //     if (checked) {
-  //       // Add all options from the newly selected type that are not already selected
-  //       const newOptions = this.dataList.filter((item) => this.getSelectionValue(item) && !this.selectedDataTemp.includes(this.getSelectionValue(item))).map((item) => this.getSelectionValue(item));
-  //       this.selectedDataTemp = [...this.selectedDataTemp, ...newOptions];
-  //     } else {
-  //       // Remove all options from the deselected type
-  //       const removedOptions = this.dataList.map((item) => this.getSelectionValue(item));
-  //       this.selectedDataTemp = this.selectedDataTemp.filter((v) => !removedOptions.includes(v));
-  //     }
-  //   }, 0);
-  // }
-
   onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
     const checked = event.checked;
     if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
