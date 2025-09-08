@@ -102,8 +102,8 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.GROUPS);
   }
 
-  fetchCadreConfig(): Observable<any> {
-    return this.http.get<any>(ENDPOINTS.CADRE_CONFIG);
+  fetchCadreConfig(): Promise<any> {
+    return this.http.get<any>(ENDPOINTS.CADRE_CONFIG).toPromise();
   }
 
   fetchDesignation(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {

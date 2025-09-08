@@ -71,7 +71,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     private snackbar: MatSnackBar
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.initForm();
 
     // Dont call read api for MDO its only for CBP for now
@@ -80,7 +80,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     if (!this.cadreConfigData) {
-      this.fetchCadreConfigData();
+      await this.fetchCadreConfigData();
     }
 
     this.config.content = this.content;
@@ -143,6 +143,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }
 
+    // Add config to signal 
+    this.accessControlService.accessControlConfig.set(this.config);
+
     if (this.tempAccessControl) {
       this.processTempAccessControl(this.tempAccessControl);
     } else {
@@ -153,7 +156,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }, 0);
     }
 
-    this.accessControlService.accessControlConfig.set(this.config);
   }
 
   ngAfterViewInit(): void {
@@ -168,28 +170,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.destroy$.complete();
   }
 
-  fetchCadreConfigData(): void {
+  async fetchCadreConfigData(): Promise<void> {
     this.isLoading = true;
-    this.accessControlService
-      .fetchCadreConfig()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
-            this.cadreConfigData = response?.result?.response?.value;
-            this.cadreMappingService.initialize(this.cadreConfigData);
-            this.accessControlService.holdServiceCadrebatch.set({
-              service: this.cadreMappingService.getAllServices(),
-              batch: this.cadreMappingService.getAllBatchYears(),
-              cadre: this.cadreMappingService.getAllCadres()
-            });
-            this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
-          }
-        },
-        complete: () => {
-          this.isLoading = false;
-        },
+
+    const response: any = await this.accessControlService.fetchCadreConfig().catch(() => (this.isLoading = false));
+    if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
+      this.cadreConfigData = response?.result?.response?.value;
+      this.cadreMappingService.initialize(this.cadreConfigData);
+
+      this.accessControlService.holdServiceCadrebatch.set({
+        service: this.cadreMappingService.getAllServices(),
+        batch: this.cadreMappingService.getAllBatchYears(),
+        cadre: this.cadreMappingService.getAllCadres(),
       });
+
+      this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
+      this.isLoading = false;
+    }
   }
 
   initForm() {
@@ -849,6 +846,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                 criteriaValue = userIds;
               } else if (condition?.entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
                 criteriaValue = condition.selections[0];
+                return { criteriaKey: condition.entity, criteriaValue };
+
               } else {
                 if (condition.selections.length && typeof condition.selections[0] === "object") {
                   criteriaValue = condition.selections?.map((sel: any) => sel?.attributeName) || [];
@@ -1370,58 +1369,58 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     tempAccessControl.userGroups.forEach((group: any, index: number) => {
+      //Check and Enable Deputation if Service is selected 'All India Services'
+      const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service)
+      if (this.config?.application === NsAccessControlConfig.Application.MDO && isContainsService?.criteriaKey === NsAccessControlConfig.SelectionType.Service) {
+        const serviceNames = this.cadreMappingService.getServicesByNames(isContainsService.criteriaValue || []);
+        const selections = serviceNames.map((service) => service.name);
+        if (selections.includes("All India Services")) {
+          this.accessControlService.enableDeputation(true);
+        } else {
+          this.accessControlService.enableDeputation(false);
+        }
+      }
+
+      // Process patching.
       const conditions = this.fb.array([]) as any;
 
       group.userGroupCriteriaList.forEach((criteria: any) => {
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
-        // Map API keys to form entity values
-        const entityMap: { [key: string]: string } = {
-          rootOrgId: NsAccessControlConfig.SelectionType.Organizations,
-          user: NsAccessControlConfig.SelectionType.Users,
-          group: NsAccessControlConfig.SelectionType.Group,
-          designation: NsAccessControlConfig.SelectionType.Designation,
-          profilestatus: NsAccessControlConfig.SelectionType.VerificationStatus,
-          Cadre: NsAccessControlConfig.SelectionType.Cadre,
-          service: NsAccessControlConfig.SelectionType.Service,
-          batch: NsAccessControlConfig.SelectionType.Batch,
-        };
-
         // Set the form values
-        
-       condition.patchValue({
-          entity: entityMap[criteria.criteriaKey] || criteria.criteriaKey,
-          selections:
-            criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
-              ? Array.isArray(criteria.criteriaValue)
-                ? criteria.criteriaValue.map((b: any) => Number(b))
-                : []
-              : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
-              ? Array.isArray(criteria.criteriaValue)
-                ? criteria.criteriaValue
-                : []
-              : criteria.criteriaValue,
+        condition.patchValue({
+            entity: criteria.criteriaKey,
+            selections:
+              criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue.map((b: any) => Number(b))
+                  : []
+                : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue
+                  : [criteria.criteriaValue]
+                : criteria.criteriaValue,
+          });
+
+          conditions.push(condition);
         });
 
-        conditions.push(condition);
-      });
+        const ruleGroup = this.fb.group({
+          id: [group.userGroupId || uuidv4()],
+          name: [group.userGroupName],
+          description: [`Description for ${group.userGroupName}`],
+          conditions: conditions,
+          isUserGroupDisabled: [false],
+          isAddConditionDisabled: [false],
+        });
 
-      const ruleGroup = this.fb.group({
-        id: [group.userGroupId || uuidv4()],
-        name: [group.userGroupName],
-        description: [`Description for ${group.userGroupName}`],
-        conditions: conditions,
-        isUserGroupDisabled: [false],
-        isAddConditionDisabled: [false],
-      });
+        this.userGroup.push(ruleGroup);
 
-      this.userGroup.push(ruleGroup);
+        // Check if add condition should be disabled for this user group
+        this.processDisableAddConditionOnClose(index);
 
-      // Check if add condition should be disabled for this user group
-      this.processDisableAddConditionOnClose(index);
-
-      // Calculate count for each user group
-      this.calculateUserCountForUserGroup(index);
+        // Calculate count for each user group
+        this.calculateUserCountForUserGroup(index);
     });
 
     setTimeout(() => {
