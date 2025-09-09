@@ -400,7 +400,7 @@ export class NewPostDialogueComponent implements OnInit, OnDestroy {
   getUsers(queryText: string) {
     return new Promise<Array<MentionFeedItem>>((resolve) => {
       // Replace this with your actual API call
-      this.discussV2Svc.searchUsers(queryText, this.rootOrgId).subscribe(
+      this.discussV2Svc.searchUsers(queryText).subscribe(
         (data: any) => {
           if (data.result && data.result.response) {
             this.apiResponse = data.result.response.content

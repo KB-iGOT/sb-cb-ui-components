@@ -59,6 +59,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
         this.commentSvc.addFirstComment(req).subscribe(res => {
           this.addNewCommentBool = false
           this.performSuccessEvents(res)
+          this.mentionedUsers = []
         }, (err: any) => {
           // tslint:disable-next-line: no-console
           console.error('Error in posting, please try again later!', err)
@@ -68,6 +69,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
         this.commentSvc.addNewComment(req).subscribe(res => {
           this.addNewCommentBool = false
           this.performSuccessEvents(res)
+          this.mentionedUsers = []
         }, (err: any) => {
           // tslint:disable-next-line: no-console
           console.error('Error in posting, please try again later!', err)
@@ -312,7 +314,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
     this.isLoadingUsers = true
 
     // Call your API to search users
-    this.commentSvc.searchUsers(query, this.rootOrgId).subscribe(
+    this.commentSvc.searchUsers(query).subscribe(
       (data: any) => {
         this.isLoadingUsers = false
         if (data.result && data.result.response) {
