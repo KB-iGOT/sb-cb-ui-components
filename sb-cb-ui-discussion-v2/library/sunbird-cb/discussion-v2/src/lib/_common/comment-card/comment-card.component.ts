@@ -520,7 +520,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     this.isLoadingUsers = true
 
     // Call your API to search users
-    this.commentSvc.searchUsers(query, this.rootOrgId).subscribe(
+    this.commentSvc.searchUsers(query).subscribe(
       (data: any) => {
         this.isLoadingUsers = false
         if (data.result && data.result.response) {
