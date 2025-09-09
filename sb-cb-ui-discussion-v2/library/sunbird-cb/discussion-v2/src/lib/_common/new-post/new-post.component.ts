@@ -283,7 +283,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     this.isLoadingUsers = true
 
     // Call your API to search users
-    this.discussV2Svc.searchUsers(query, this.rootOrgId).subscribe(
+    this.discussV2Svc.searchUsers(query).subscribe(
       (data: any) => {
         this.isLoadingUsers = false
         if (data.result && data.result.response) {

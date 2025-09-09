@@ -198,12 +198,11 @@ export class DiscussionV2Service {
   }
 
 
-  searchUsers(value: string, rootOrgId: string): Observable<any> {
+  searchUsers(value: string): Observable<any> {
     const reqBody = {
       request: {
         query: value,
         filters: {
-          rootOrgId,
           status: 1,
         },
       },
