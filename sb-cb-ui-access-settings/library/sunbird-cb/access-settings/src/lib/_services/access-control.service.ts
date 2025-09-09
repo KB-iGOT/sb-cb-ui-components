@@ -4,6 +4,7 @@ import { Observable } from "rxjs";
 import { IUserGroupRequest, NsAccessControlConfig } from "../_models/access-control.model";
 import { toNumber } from "lodash";
 
+const PAGINATION_LIMIT = 100;
 const ENDPOINTS = {
   SEARCH_USER_WITH_ADMIN: (query: string) => `/apis/proxies/v8/user/v1/autocomplete/${query}`,
   SEARCH_USER: `/apis/proxies/v8/user/v1/admin/search`,
@@ -68,7 +69,7 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.SEARCH_USER, { request: request });
   }
 
-  fetchOrgList(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
+  fetchOrgList(query: string, pagination: { limit: number; offset: number }, selectedData?: string[], characterSearch?: string): Observable<any> {
     let request: any = {
       request: {
         filters: {
@@ -80,7 +81,8 @@ export class AccessControlService {
         },
         fields: ["channel", "identifier", "iscca"],
         query: query,
-        // limit: 200
+        limit: pagination.limit,
+        offset: pagination.offset,
       },
     };
     if (selectedData?.length) {
@@ -106,14 +108,16 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.CADRE_CONFIG).toPromise();
   }
 
-  fetchDesignation(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
+  fetchDesignation(query: string, pagination: { pageSize: number; pageNumber: number }, selectedData?: string[], characterSearch?: string): Observable<any> {
     let payload: any = {
       filterCriteriaMap: {
         status: "Active",
       },
       requestedFields: ["designation", "id"],
-      pageSize: 1000,
-      // pageNumber: 0
+      pageSize: pagination.pageSize || this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
+      pageNumber: pagination.pageNumber || 0,
+      orderDirection: "ASC",
+      orderBy: "designation",
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
@@ -143,7 +147,7 @@ export class AccessControlService {
           name: "asc",
         },
         facets: [],
-        limit: 100,
+        limit: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
         offset: paginationOffset,
       },
     };
@@ -292,7 +296,7 @@ export class AccessControlService {
       filterCriteriaMap: filterCriteria,
       requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName"],
       pageNumber: 0,
-      pageSize: 100,
+      pageSize: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       orderDirection: "DESC",
       orderBy: "createdOn",
       facets: [],
@@ -329,5 +333,43 @@ export class AccessControlService {
       // Update Signal Value
       this.accessControlConfig.set({ ...config });
     }
+  }
+
+  public mapCustomFields(data: any[], originalCustomFieldData: any[]): any[] {
+    if (!data || !originalCustomFieldData || !Array.isArray(data) || !Array.isArray(originalCustomFieldData) || originalCustomFieldData.length === 0) {
+      return [];
+    }
+
+    const result: any[] = [];
+
+    // Recursive helper to collect all fields and their values
+    function traverseNode(node: any, parentValue: string | null = null): void {
+      if (!node) return;
+
+      const entry = {
+        name: node.fieldName,
+        attributeName: node.fieldAttribute,
+        fieldValue: node.fieldValue,
+        parentFieldValue: node.parentFieldValue || parentValue,
+      };
+
+      if (node.fieldName && node.fieldAttribute) {
+        result.push(entry);
+      }
+
+      // Process child nodes if they exist
+      if (Array.isArray(node.fieldValues)) {
+        node.fieldValues.forEach((childNode: any) => {
+          traverseNode(childNode, node.fieldValue);
+        });
+      }
+    }
+
+    // Process each top-level node
+    data.forEach((node) => {
+      traverseNode(node);
+    });
+
+    return result;
   }
 }

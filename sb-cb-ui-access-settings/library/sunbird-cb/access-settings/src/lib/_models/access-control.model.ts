@@ -5,7 +5,7 @@ export namespace NsAccessControlConfig {
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
     visiblilityOnOff: IVisiblilityOnOff;
-    userConfig: { [key: string]: any; userRoles: any, org: any };
+    userConfig: { [key: string]: any; userRoles: any; org: any };
     content: any;
     application: string;
   }
@@ -25,6 +25,7 @@ export namespace NsAccessControlConfig {
     shouldShowVisibilityToggle: boolean;
     allowCustomsField: boolean;
     centralDeputation?: ISelectionOption[];
+    paginationLimit: number
   }
 
   export interface IOptionsEntity {

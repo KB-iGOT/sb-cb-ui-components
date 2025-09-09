@@ -46,9 +46,7 @@
                   <!-- Select all option  -->
                   <ng-container
                     *ngIf="
-                      (selectionType === selectionTypeEnum.Organizations ||
-                        selectionType === selectionTypeEnum.Designation ||
-                        selectionType === selectionTypeEnum.Cadre ||
+                      ( selectionType === selectionTypeEnum.Cadre ||
                         selectionType === selectionTypeEnum.CustomField ||
                         selectionType === selectionTypeEnum.Batch) &&
                       filterValue === 'all'
@@ -241,9 +239,9 @@
                         [disabled]="accessControlCriteriaSelection?.readOnly || disableOrganisationIfModerated(entity) || data?.disabled"
                         [checked]="isSelected(entity)"
                         (change)="toggleSelection(entity)"
-                        [title]="entity?.name || entity?.designation || entity?.channel"
+                        [title]="entity?.fieldValue || entity?.name || entity?.designation || entity?.channel"
                       >
-                        {{ entity?.name || entity?.designation || entity?.channel }}
+                        {{ entity?.fieldValue || entity?.name || entity?.designation || entity?.channel }}
                       </mat-checkbox>
                     </ng-container>
                     <ng-container *ngIf="selectionType === selectionTypeEnum.Batch">
