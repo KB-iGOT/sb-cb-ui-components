@@ -51,6 +51,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   paginationOffset = 0;
   totalItemsCount = 0;
+  paginationLImit = 100
   isFetchingMore = false;
 
   application = "";
@@ -261,9 +262,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   search(): void {
+    this.paginationOffset = 0;
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Designation:
-        this.paginationOffset = 0;
         if (this.filterValue === "all" && !this.searchControl.value) {
           this.selectedCharacterRange = "A";
           this.updateAlphabet();
@@ -295,8 +296,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
     if (this.filterValue === "selected") {
       if (this.selectionType === NsAccessControlConfig.SelectionType.CustomField) {
-        const selectedData = this.selectedData.map((ele) => ele.name);
-        filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.name));
+        const selectedData = this.selectedData.map((ele) => ele.fieldValue);
+        filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.fieldValue));
       } else {
         filtered = this.dataListDup.filter((item) => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item));
       }
@@ -326,6 +327,21 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       filtered = filtered.sort((a, b) => {
         const nameA = a?.name?.toLowerCase() || "";
         const nameB = b?.name?.toLowerCase() || "";
+        return nameA.localeCompare(nameB);
+      });
+
+      // chunk the filtered list into groups of 8
+      const grouped: { [key: string]: any[][] } = {};
+      grouped["All"] = this.chunkArray(filtered, 8);
+      this.groupedEntityData = grouped;
+      this.isLoading = false;
+      return;
+    }
+
+    if(this.selectionType === this.selectionTypeEnum.CustomField) {
+      filtered = filtered.sort((a, b) => {
+        const nameA = a?.fieldValue?.toLowerCase() || "";
+        const nameB = b?.fieldValue?.toLowerCase() || "";
         return nameA.localeCompare(nameB);
       });
 
@@ -437,39 +453,58 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   loadMore(): void {
     if (this.dataList.length >= this.totalItemsCount || this.isFetchingMore) return;
     this.isFetchingMore = true;
-    this.paginationOffset += 100;
+    this.paginationOffset += this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
+    
     switch (this.selectionType) {
       case this.selectionTypeEnum.Designation:
         if (this.searchControl.value) this.selectedCharacterRange = "";
         this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange, true);
         break;
+      case this.selectionTypeEnum.Organizations:
+        if (this.searchControl.value) this.selectedCharacterRange = "";
+        this.getOrganisationsList(this.searchControl.value, [], this.selectedCharacterRange, true);
+        break;
     }
   }
 
-  getOrganisationsList(query: string, selectedData?: string[], character?: string): void {
-    this.isLoading = true;
-    this.accessControlService.fetchOrgList(query, query ? [] : selectedData, character).subscribe({
-      next: (response) => {
-        if (response?.result && response?.result?.response?.content) {
-          this.dataList = response.result.response.content;
-          this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
-          if (query) this.searchedOrganisationFlagWithQuery = true;
-          else this.searchedOrganisationFlagWithQuery = false;
+  getOrganisationsList(query: string, selectedData?: string[], character?: string, append: boolean = false): void {
+    if (!append) {
+      this.isLoading = true;
+    }
+    
+    const pagination = {
+      limit: this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit,
+      offset: this.paginationOffset
+    };
 
-          if (this.filterValue === "selected" || query) this.updateAlphabet();
+    this.accessControlService.fetchOrgList(query, pagination, query ? [] : selectedData, character)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response?.result && response?.result?.response?.content) {
+            const newData = response.result.response.content;
+            this.dataList = append ? [...this.dataList, ...newData] : newData;
+            this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
+            this.totalItemsCount = response.result.response.count;
 
-          this.getFilteredEntityGrouped();
-        } else {
-          this.dataList = [];
-          this.alphabet = [];
-          this.dataListDup = [];
-          this.groupedEntityData = {};
-        }
-      },
-      complete: () => {
-        this.isLoading = false;
-      },
-    });
+            if (query) this.searchedOrganisationFlagWithQuery = true;
+            else this.searchedOrganisationFlagWithQuery = false;
+
+            if (this.filterValue === "selected" || query) this.updateAlphabet();
+
+            this.getFilteredEntityGrouped();
+          } else {
+            this.dataList = [];
+            this.alphabet = [];
+            this.dataListDup = [];
+            this.groupedEntityData = {};
+          }
+        },
+        complete: () => {
+          this.isLoading = false;
+          this.isFetchingMore = false;
+        },
+      });
   }
 
   getDesignationsList(paginationOffset: number, query: string, selectedData?: string[], character?: string, append: boolean = false): void {
@@ -508,8 +543,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           },
         });
     } else {
+      const pageSize = this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
+      const pagination = {
+        pageSize: pageSize,
+        pageNumber: Math.floor(paginationOffset / pageSize)
+      };
+      
       this.accessControlService
-        .fetchDesignation(query, query ? [] : selectedData, character)
+        .fetchDesignation(query, pagination, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
@@ -517,7 +558,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
               const newData = response?.result?.result?.data;
               this.dataList = append ? [...this.dataList, ...newData] : newData;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
-              this.totalItemsCount = response?.result?.result?.count;
+              this.totalItemsCount = response?.result?.result?.totalCount;
               if (query) this.searchedDesignationFlagWithQuery = true;
               else this.searchedDesignationFlagWithQuery = false;
               if (this.filterValue === "selected" || query) this.updateAlphabet();
@@ -531,6 +572,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           },
           complete: () => {
             this.isLoading = false;
+            this.isFetchingMore = false;
           },
         });
     }
@@ -613,18 +655,29 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   getCustomsFieldList(): void {
-    this.dataList = this.customeFieldValues?.originalCustomFieldData || [];
-    this.dataListDup = _.uniqWith([...this.dataList], _.isEqual);
-    this.alphabet = [];
+    if(this.customeFieldValues?.customFieldData?.length && this.customeFieldValues?.originalCustomFieldData?.length) {
+      const mappedValues = this.accessControlService.mapCustomFields(this.customeFieldValues?.customFieldData, this.customeFieldValues?.originalCustomFieldData)
 
-    if (this.data && this.data.selected && Array.isArray(this.data.selected) && this.data.selected.length) {
-      if (this.data.selected.every((item) => typeof item === "string")) {
-        const dataFields = this.dataList.filter((ele) => this.data.selected.includes(ele?.attributeName));
-        this.selectedData = [...dataFields];
-        this.selectedDataTemp = [...this.selectedData];
+      this.dataList = mappedValues || [];
+      this.dataListDup = _.uniqWith([...mappedValues], _.isEqual);
+      this.alphabet = [];
+  
+      if (this.data && this.data.selected && Array.isArray(this.data.selected) && this.data.selected.length) {
+        if (this.data.selected.every((item) => typeof item === "string")) {
+          const dataFields = this.dataList.filter((ele) => this.data.selected.includes(ele?.fieldValue));
+          this.selectedData = [...dataFields];
+          this.selectedDataTemp = [...this.selectedData];
+        }
       }
+      this.getFilteredEntityGrouped();
+      
+      
+    } else {
+      this.dataList = []
+      this.dataListDup = []
+      this.getFilteredEntityGrouped();
     }
-    this.getFilteredEntityGrouped();
+    
   }
 
   updateBatchRanges(): void {
@@ -824,4 +877,5 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
+  
 }

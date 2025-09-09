@@ -127,12 +127,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.shouldShowVisibilityToggle = this.config?.accessControlCriteriaSelection?.shouldShowVisibilityToggle ?? true;
     this.accessTypeDup = this.accessType;
 
-    if (this.config.accessControlCriteriaSelection.allowCustomsField) {
-      if (!this.accessControlService.customesFieldData()?.length) {
-        this.getCustomsField();
-      }
-    }
-
     if (this.config?.application === NsAccessControlConfig.Application.MDO) {
       const isCCA = this.config?.userConfig?.org?.iscca ?? false;
       if (!isCCA) {
@@ -185,6 +179,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       });
 
       this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
+
+      if (this.config.accessControlCriteriaSelection.allowCustomsField) {
+        if (!this.accessControlService.customesFieldData()?.length) {
+          this.getCustomsField();
+        }
+    }
       this.isLoading = false;
     }
   }
@@ -460,7 +460,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       if (serviceIndex !== -1) {
         conditionsUserGroup.forEach((c: any, index: number) => {
-          if (_.includes([NsAccessControlConfig.SelectionType.Batch, NsAccessControlConfig.SelectionType.Cadre], c.entity) && index > serviceIndex) {
+          if (_.includes([NsAccessControlConfig.SelectionType.Batch, NsAccessControlConfig.SelectionType.Cadre, NsAccessControlConfig.SelectionType.CentralDeputation], c.entity) && index > serviceIndex) {
             console.log(`Entity '${c.entity}' found at index:`, index);
             // conditions.removeAt(index);
              conditions.setControl(index, this.createConditionGroup(uuidv4(), userGroupIndex));
@@ -588,6 +588,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // Enable Deputation if Service is selected 'All India Services'
             if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO && condition.entity === NsAccessControlConfig.SelectionType.Service) {
+              this.checkServicesAndResetReleated(ruleIndex)
               const serviceNames = this.cadreMappingService.getServicesByNames(result.selected || []);
               const selections = serviceNames.map((service) => service.name);
               if (selections.includes("All India Services")) {
@@ -850,7 +851,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
               } else {
                 if (condition.selections.length && typeof condition.selections[0] === "object") {
-                  criteriaValue = condition.selections?.map((sel: any) => sel?.attributeName) || [];
+                  criteriaValue = condition.selections?.map((sel: any) => sel?.fieldValue) || [];
                 } else {
                   criteriaValue = condition.selections?.map(String) || [];
                 }
@@ -1230,6 +1231,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         const count = response?.result?.response?.count;
         this.userCount[userGroupIndex] = count;
       }
+    } else {
+       this.userCount[userGroupIndex] = 0;
     }
   }
 
