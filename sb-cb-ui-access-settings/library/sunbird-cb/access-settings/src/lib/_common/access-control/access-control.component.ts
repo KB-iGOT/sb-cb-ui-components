@@ -460,10 +460,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       if (serviceIndex !== -1) {
         conditionsUserGroup.forEach((c: any, index: number) => {
-          if (_.includes([NsAccessControlConfig.SelectionType.Batch, NsAccessControlConfig.SelectionType.Cadre, NsAccessControlConfig.SelectionType.CentralDeputation], c.entity) && index > serviceIndex) {
+          if (_.includes([NsAccessControlConfig.SelectionType.CentralDeputation], c.entity) && index > serviceIndex) {
             console.log(`Entity '${c.entity}' found at index:`, index);
             // conditions.removeAt(index);
              conditions.setControl(index, this.createConditionGroup(uuidv4(), userGroupIndex));
+             this.accessControlService.enableDeputation(false)
           }
         });
       }
@@ -510,7 +511,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
     if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION) {
-      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS || this.config.application === this.MDO_APPLICATION) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
       }
       if (resetFilterFlag) {
@@ -1321,6 +1322,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .fetchCustomsField({
         organisationId: this.config.userConfig.rootOrgId,
         isEnabled: true,
+        type: "masterList"
         // isMandatory: true,
       })
       .subscribe({

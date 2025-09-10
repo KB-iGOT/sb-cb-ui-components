@@ -294,7 +294,7 @@ export class AccessControlService {
   fetchCustomsField(filterCriteria: any): Observable<any> {
     const requestPayload = {
       filterCriteriaMap: filterCriteria,
-      requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName"],
+      requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName", "type"],
       pageNumber: 0,
       pageSize: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       orderDirection: "DESC",
