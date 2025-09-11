@@ -8,6 +8,7 @@ export namespace NsAccessControlConfig {
     userConfig: { [key: string]: any; userRoles: any; org: any };
     content: any;
     application: string;
+    mdoContent: any
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];

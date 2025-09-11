@@ -63,6 +63,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   canShowAccessControlTypeRadio = true;
   shouldShowVisibilityToggle = true;
+  isCCA = false;
+  mdoContent: any;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -73,6 +75,18 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   async ngOnInit(): Promise<void> {
     this.initForm();
+
+    if (this.config?.application === NsAccessControlConfig.Application.MDO) {
+      this.isCCA = this.config?.userConfig?.org?.isCCA ?? false;
+      if (!this.isCCA) {
+        this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
+          this.config.accessControlCriteriaSelection.optionsEntity,
+          (entity) => entity.value !== NsAccessControlConfig.SelectionType.Organizations
+        );
+      }
+
+      this.mdoContent = this.config?.mdoContent
+    }
 
     // Dont call read api for MDO its only for CBP for now
     if (this.config.application !== NsAccessControlConfig.Application.MDO) {
@@ -127,16 +141,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.shouldShowVisibilityToggle = this.config?.accessControlCriteriaSelection?.shouldShowVisibilityToggle ?? true;
     this.accessTypeDup = this.accessType;
 
-    if (this.config?.application === NsAccessControlConfig.Application.MDO) {
-      const isCCA = this.config?.userConfig?.org?.iscca ?? false;
-      if (!isCCA) {
-        this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
-          this.config.accessControlCriteriaSelection.optionsEntity,
-          (entity) => entity.value !== NsAccessControlConfig.SelectionType.Organizations
-        );
-      }
-    }
-
     // Add config to signal 
     this.accessControlService.accessControlConfig.set(this.config);
 
@@ -181,11 +185,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
 
       if (this.config.accessControlCriteriaSelection.allowCustomsField) {
-        if (!this.accessControlService.customesFieldData()?.length) {
+        if (!this.accessControlService.customesFieldData()?.length && !this.isCCA) {
           this.getCustomsField();
         }
     }
-      this.isLoading = false;
+    // if isCCA is false then no need to wait for customs field
+      if(this.isCCA) {
+        this.isLoading = false;
+      }
     }
   }
 
@@ -318,20 +325,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditions.at(conditionIndex);
     const selectedEntity = condition?.get("entity")?.value;
 
-    // Check if the same entity is already selected in another condition of this user group
-    const isDuplicate = conditions.controls.some((ctrl, index) => {
-      return index !== conditionIndex && ctrl.get("entity")?.value === selectedEntity;
-    });
-
-    if (isDuplicate) {
-      this.callSnackbar(`${selectedEntity?.toUpperCase()} is already selected in this user group`, "error");
-      condition.get("entity")?.setValue("");
-      return;
-    }
-
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
       this.processDisableAddConditionOnClose(userGroupIndex);
+      this.calculateUserCountForUserGroup(userGroupIndex);
     }
   }
 
@@ -448,21 +445,18 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
 
-  checkServicesAndResetReleated(userGroupIndex: number): void {
+  checkServicesAndResetReleated(userGroupIndex: number, conditionIndex: number): void {
     const userGroups = this.userGroup.at(userGroupIndex);
     const conditions = this.ruleConditions(userGroupIndex);
-
     if (userGroups) {
       const conditionsUserGroup = userGroups?.value?.conditions || [];
 
       // Find service index
       const serviceIndex = _.findIndex(conditionsUserGroup, (c: any) => c.entity === NsAccessControlConfig.SelectionType.Service);
-
-      if (serviceIndex !== -1) {
+      const condition = conditions.at(conditionIndex);
+      if (serviceIndex !== -1 && condition?.get("entity")?.value === NsAccessControlConfig.SelectionType.Service) {
         conditionsUserGroup.forEach((c: any, index: number) => {
           if (_.includes([NsAccessControlConfig.SelectionType.CentralDeputation], c.entity) && index > serviceIndex) {
-            console.log(`Entity '${c.entity}' found at index:`, index);
-            // conditions.removeAt(index);
              conditions.setControl(index, this.createConditionGroup(uuidv4(), userGroupIndex));
              this.accessControlService.enableDeputation(false)
           }
@@ -479,7 +473,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
-        this.checkServicesAndResetReleated(userGroupIndex);
+        this.checkServicesAndResetReleated(userGroupIndex, conditionIndex);
         conditions.removeAt(conditionIndex);
         this.applyAccessControlValue(true);
         this.calculateUserCountForUserGroup(userGroupIndex);
@@ -492,7 +486,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const conditions = this.ruleConditions(userGroupIndex);
     const condition = conditions.at(conditionIndex);
     if (condition) {
-      this.checkServicesAndResetReleated(userGroupIndex);
+      this.checkServicesAndResetReleated(userGroupIndex, conditionIndex);
 
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
@@ -589,7 +583,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // Enable Deputation if Service is selected 'All India Services'
             if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO && condition.entity === NsAccessControlConfig.SelectionType.Service) {
-              this.checkServicesAndResetReleated(ruleIndex)
+              this.checkServicesAndResetReleated(ruleIndex, conditionIndex);
               const serviceNames = this.cadreMappingService.getServicesByNames(result.selected || []);
               const selections = serviceNames.map((service) => service.name);
               if (selections.includes("All India Services")) {
@@ -607,7 +601,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // send event after every selection for MDO
             if (this.config.application === this.MDO_APPLICATION) {
-              this.applyAccessControlValue(false, false);
+              this.applyAccessControlValue(true, false);
             }
           }
         }
@@ -1170,7 +1164,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       [NsAccessControlConfig.SelectionType.Cadre]: "profileDetails.cadreDetails.cadreName",
       [NsAccessControlConfig.SelectionType.Service]: "profileDetails.cadreDetails.civilServiceName",
       [NsAccessControlConfig.SelectionType.Batch]: "profileDetails.cadreDetails.cadreBatch",
-      [NsAccessControlConfig.SelectionType.Users]: "identifier"
+      [NsAccessControlConfig.SelectionType.Users]: "identifier",
+      [NsAccessControlConfig.SelectionType.CentralDeputation]: "profileDetails.cadreDetails.isOnCentralDeputation"
     };
 
     const group = this.userGroup.at(userGroupIndex);
@@ -1180,7 +1175,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const conditions = group.get("conditions") as FormArray;
-    const request: { [key: string]: any[] } = {};
+    const request: { [key: string]: any } = {};
 
     for (let j = 0; j < conditions.length; j++) {
       const condition = conditions.at(j);
@@ -1195,10 +1190,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         ) {
           const userIds = selections && selections.map((user: any) => user?.userId);
           request[key] = userIds;
-        } else {
+        } else if (entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
+          if (selections.length && typeof selections[0] === "boolean") {
+            request[key] = selections[0];
+          }
+        }
+        else {
           request[key] = selections;
         }
-      }
+      } 
+      else {
+          const customFieldSelections = selections.map((sel: any) => sel?.fieldValue || sel);
+          request[`${entity}`] = customFieldSelections;
+        }
     }
 
     // Remove keys with empty array values
@@ -1231,9 +1235,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (response?.result?.response) {
         const count = response?.result?.response?.count;
         this.userCount[userGroupIndex] = count;
+
+        if (!this.userCount[userGroupIndex]) {
+          this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
+        }
       }
     } else {
-       this.userCount[userGroupIndex] = 0;
+        this.userCount[userGroupIndex] = 0;
+        this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
     }
   }
 
@@ -1360,8 +1369,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                 ...prevConfig,
                 accessControlCriteriaSelection: this.accessControlCriteriaSelection,
               }));
-
+              this.isLoading = false
             }
+          } else {
+              this.isLoading = false
           }
         },
       });
