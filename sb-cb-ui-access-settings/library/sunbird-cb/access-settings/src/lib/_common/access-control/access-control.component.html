@@ -1,10 +1,10 @@
 <div class="py-4 px-10">
   <div class="p-4 as-container">
     <div class="flex items-center justify-between">
-      <span class="text-xl font-bold primary-text-color">Access Settings</span>
+      <span class="text-xl font-bold primary-text-color">{{config?.application === MDO_APPLICATION ? 'Access Control' : 'Access Settings'}}</span>
       <div class="flex gap-2 items-center">
         <span class="text-sm primary-text-color cursor-pointer" (click)="openInstructonsDialog()">How to use access control?</span>
-        <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24" />
+        <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24 cursor-pointer" (click)="openInstructonsDialog()"/>
       </div>
     </div>
     <div class="light-grey-border p-4 mt-4">
@@ -83,7 +83,7 @@
                         </div>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC && config?.application !== MDO_APPLICATION">
+                        <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC && (config?.application !== MDO_APPLICATION || (config?.application === MDO_APPLICATION && config?.mdoContent?.status === 'Live' && userGroup?.length > 1))">
                           <button
                             [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                             mat-icon-button
@@ -226,8 +226,11 @@
             <mat-spinner></mat-spinner>
           </div>
         </ng-container>
-
-        <ng-container *ngIf="!isLoading && (userGroup?.length === 0 || (userGroup?.length === 1 && config?.application !== MDO_APPLICATION))">
+        <ng-container *ngIf="
+          !isLoading && 
+          (userGroup?.length === 0 || 
+          (userGroup?.length === 1 && config?.application !== MDO_APPLICATION) || 
+          (config?.application === MDO_APPLICATION && config?.mdoContent?.status === 'Live' && userGroup?.length < 2))">
           <div class="text-center mb-6 mt-4">
             <button
               [disabled]="accessControlCriteriaSelection?.readOnly || isAddUserGroupBtnDisabled"

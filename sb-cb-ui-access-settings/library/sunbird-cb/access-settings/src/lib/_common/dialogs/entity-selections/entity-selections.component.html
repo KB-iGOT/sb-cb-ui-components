@@ -29,6 +29,13 @@
       </div>
     </ng-container>
 
+    <ng-container *ngIf="selectionType === selectionTypeEnum.Organizations">
+      <div class="lato-normal-text-line mt-2 ml-4">Select the Organizations only if this plan needs to be made visible to only selective organizations users.</div>
+    </ng-container>
+    <ng-container *ngIf="selectionType === selectionTypeEnum.Designation">
+      <div class="lato-normal-text-line mt-2 ml-4">Select the Designations only if this plan needs to be made visible to only selective designation users.</div>
+    </ng-container>
+
     <div class="p-4 pl-0 mt-2">
       <!-- Filter Options -->
       <ng-container *ngIf="selectionType !== selectionTypeEnum.Group && selectionType !== selectionTypeEnum.VerificationStatus">

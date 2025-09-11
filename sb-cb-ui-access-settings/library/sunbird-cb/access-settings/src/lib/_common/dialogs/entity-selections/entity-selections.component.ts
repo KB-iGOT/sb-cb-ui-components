@@ -75,7 +75,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.userProfile = this.accessControlConfig?.userConfig;
     this.content = this.accessControlConfig?.content;
     this.application = this.accessControlConfig?.application || "";
-
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
@@ -580,6 +579,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   getServicesList(query: string): void {
     if (this.application === NsAccessControlConfig.Application.MDO) {
+      const baseList = this.accessControlService.holdServiceCadrebatch().service;
+      const baseServiceNames = new Set(baseList.map(service => service.name?.trim().toLowerCase()));
+      
       const cadreDataRaw = this.cadreMappingService.getCadreConfigData()?.civilServiceType?.civilServiceTypeList || [];
       if (this.serviceSelectionTypes.length === 1) {
         this.serviceSelectionTypes = ["Select All", ...cadreDataRaw.map((element: any) => element.name)];
@@ -598,9 +600,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       let allServices: any[] = [];
       cadreDataRaw.forEach((item: any) => {
         if (selectedTypes.includes(item.name) && Array.isArray(item.serviceList)) {
-          allServices = allServices.concat(item.serviceList);
+          // Filter services that exist in baseList
+          const filteredServices = item.serviceList.filter((service: any) => 
+            baseServiceNames.has(service.name?.trim().toLowerCase())
+          );
+          allServices = allServices.concat(filteredServices);
         }
       });
+      
       allServices = _.uniqBy(allServices, (service: any) => service.name?.trim().toLowerCase());
       this.dataList = query ? allServices.filter((service) => service.name?.toLowerCase().includes(query.toLowerCase())) : allServices;
       this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
