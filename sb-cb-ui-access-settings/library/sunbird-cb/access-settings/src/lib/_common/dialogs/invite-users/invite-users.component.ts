@@ -12,7 +12,7 @@ import { first, takeUntil } from "rxjs/operators";
 @Component({
   selector: "sb-uic-invite-users",
   templateUrl: "./invite-users.component.html",
-  styleUrls: ["./invite-users.component.scss"]
+  styleUrls: ["./invite-users.component.scss"],
 })
 export class InviteUsersComponent implements OnInit, OnDestroy {
   public readonly data = inject<any>(MAT_DIALOG_DATA);
@@ -35,19 +35,17 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   sortState: any = {};
   pagination: { limit: number; offset: number } = {
     limit: 5,
-    offset: 0
+    offset: 0,
   };
 
   filters: any = {};
   currentPage = 1;
-  constructor(
-    public dialogRef: MatDialogRef<InviteUsersComponent>,
-    private accessControlService: AccessControlService,
-    private snackbar: MatSnackBar
-  ) {}
+  isCCA = false;
+  constructor(public dialogRef: MatDialogRef<InviteUsersComponent>, private accessControlService: AccessControlService, private snackbar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.usersTableConfig = this.accessControlService.accessControlConfig().usersTableConfig;
+    this.isCCA = this.accessControlService.accessControlConfig()?.userConfig?.org?.isCCA ?? false;
     if (this.data && this.data.selected && this.data.selected.length) {
       if (!this.isArrayOfObjects(this.data?.selected)) {
         this.getUsersList("", this.pagination.limit, this.pagination.offset, this.data?.selected);
@@ -81,8 +79,14 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       NsAccessControlConfig.SelectionType.Group,
       NsAccessControlConfig.SelectionType.Cadre,
       NsAccessControlConfig.SelectionType.Service,
-      NsAccessControlConfig.SelectionType.Batch
+      NsAccessControlConfig.SelectionType.Batch,
     ];
+
+    if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
+      if (!this.isCCA) {
+        reducedData.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+      }
+    }
 
     if (this.data?.rule?.conditions.length) {
       reducedData = this.data?.rule?.conditions.reduce((acc: any, curr: any) => {
@@ -90,8 +94,9 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
           acc[curr.entity] = curr.selections;
         }
         return acc;
-      }, {});
+      }, { ...reducedData });
     }
+
     if (Object.keys(reducedData)?.length) {
       this.filters = {
         rootOrgId: reducedData?.rootOrgId,
@@ -101,7 +106,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
         "profileDetails.cadreDetails.cadreName": reducedData.Cadre,
         "profileDetails.cadreDetails.civilServiceName": reducedData.service,
         "profileDetails.cadreDetails.cadreBatch": reducedData.batch,
-        status: 1
+        status: 1,
       };
     }
 
@@ -109,7 +114,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(event: any): void {
-    if(event?.value === 'bulk_upload_karmayogis') this.bulkUploadUserList = []
+    if (event?.value === "bulk_upload_karmayogis") this.bulkUploadUserList = [];
     this.filterValue = event.value;
   }
 
@@ -119,7 +124,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       .fetchUserList(query, { limit: limit, offset: offset }, userIds, filters, sorting)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: response => {
+        next: (response) => {
           if (response?.result && response?.result?.response?.content) {
             this.usersList = response?.result?.response?.content;
             this.totalUsers = response?.result?.response?.count;
@@ -139,7 +144,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.usersLoading = false;
-        }
+        },
       });
   }
 
@@ -153,7 +158,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.snackbar.openFromComponent(SnackbarComponent, {
       data: { message: `Users added to Selected tab`, type: "success" },
       duration: 3000,
-      panelClass: "course-success-snackbar"
+      panelClass: "course-success-snackbar",
     });
     this.activeTab = 1;
   }
@@ -180,7 +185,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
   }
 
   isArrayOfObjects(arr: any): boolean {
-    return Array.isArray(arr) && arr.every(item => typeof item === "object" && item !== null && !Array.isArray(item));
+    return Array.isArray(arr) && arr.every((item) => typeof item === "object" && item !== null && !Array.isArray(item));
   }
 
   onSortChange(sortState: any): void {

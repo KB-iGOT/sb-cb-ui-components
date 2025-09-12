@@ -59,12 +59,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   rawCadreconfigData: any;
   accessControlConfig: NsAccessControlConfig.IAccessControlConfig | null = null;
 
-  serviceSelectionTypes = ["Select All"];
-  selectedServiceType = ["All India Services"];
+  serviceSelectionTypes = ["All Services"];
+  selectedServiceType = "All Services";
   customeFieldValues: any;
   isEntityCustomField: boolean;
 
   entityFilterOptions = CHECKBOX_OPTIONS;
+  isCCA = false;
   constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService, private cadreMappingService: CadreMappingService) {}
 
   ngOnInit(): void {
@@ -75,6 +76,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.userProfile = this.accessControlConfig?.userConfig;
     this.content = this.accessControlConfig?.content;
     this.application = this.accessControlConfig?.application || "";
+    this.isCCA = this.accessControlConfig?.userConfig?.org?.isCCA ?? false;
+    
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
     }
@@ -101,7 +104,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
 
       if (this.application === NsAccessControlConfig.Application.MDO) {
-        this.selectedServiceType = ["Select All"];
+        this.selectedServiceType = "All";
       }
 
       this.activeTab = this.data?.activeTabSelected || 0;
@@ -510,7 +513,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (!append) {
       this.isLoading = true;
     }
-    this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
+
+    // For isCCA = false , fetch designations within their orgs only
+    if(!this.isCCA) {
+      this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
+    } else {
+      this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
+    }
     if (this.orgSelectionIds?.length) {
       const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_designation`);
       this.accessControlService
@@ -583,18 +592,17 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       const baseServiceNames = new Set(baseList.map(service => service.name?.trim().toLowerCase()));
       
       const cadreDataRaw = this.cadreMappingService.getCadreConfigData()?.civilServiceType?.civilServiceTypeList || [];
+      
+      // Update service types only once when first loading
       if (this.serviceSelectionTypes.length === 1) {
-        this.serviceSelectionTypes = ["Select All", ...cadreDataRaw.map((element: any) => element.name)];
+        this.serviceSelectionTypes = ["All Services", ...cadreDataRaw.map((element: any) => element.name)];
       }
 
-      // If only 'Select All' is selected, treat as all types selected
-      let selectedTypes = this.selectedServiceType.filter((type) => type !== "Select All");
-      if (this.selectedServiceType.length === 1 && this.selectedServiceType[0] === "Select All") {
+      let selectedTypes: string[];
+      if (this.selectedServiceType === "All Services") {
         selectedTypes = cadreDataRaw.map((element: any) => element.name);
-      }
-
-      if (this.selectedServiceType.length === 0) {
-        selectedTypes = [...cadreDataRaw.map((element: any) => element.name)];
+      } else {
+        selectedTypes = [this.selectedServiceType];
       }
 
       let allServices: any[] = [];
@@ -790,29 +798,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   // On Mdo Portal, Service Selection Type Change
-  onChangeServiceSelectionType(event: MatCheckboxChange, selectionType: string): void {
-    const checked = event.checked;
-    if (this.selectionType === this.selectionTypeEnum.Service && selectionType === "Select All") {
-      this.selectedDataTemp = checked ? this.dataList.map((item) => this.getSelectionValue(item)) : [];
-      return;
-    }
-
-    // Handle individual service type selection
-    const value = selectionType;
-    if (checked) {
-      if (!this.selectedServiceType.includes(value)) {
-        this.selectedServiceType.push(value);
-      }
-    } else {
-      this.selectedServiceType = this.selectedServiceType.filter((v) => v !== value);
-    }
-
-    // If no service type is selected, show all options
-    if (this.selectedServiceType.length === 0) {
-      this.getServicesList(this.searchControl.value);
-      return;
-    }
-
+  onChangeServiceSelectionType(event: MatRadioChange): void {
+    this.selectedServiceType = event.value;
     this.getServicesList(this.searchControl.value);
   }
 
