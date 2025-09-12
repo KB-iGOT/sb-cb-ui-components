@@ -55,6 +55,7 @@
                     *ngIf="
                       ( selectionType === selectionTypeEnum.Cadre ||
                         selectionType === selectionTypeEnum.CustomField ||
+                        selectionType === selectionTypeEnum.Service ||
                         selectionType === selectionTypeEnum.Batch) &&
                       filterValue === 'all'
                     "
@@ -96,17 +97,22 @@
                   <!-- Selections for Service -->
                   <ng-container *ngIf="selectionType === selectionTypeEnum.Service && application === APPLICATION_ENUM.MDO">
                     <ng-container *ngIf="filterValue === 'all'">
-                      <div class="flex gap-4 items-center px-2 my-3 options-checkbox">
-                        <ng-container *ngFor="let selectionType of serviceSelectionTypes">
-                          <mat-checkbox
-                            [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
-                            [checked]="selectedServiceType.includes(selectionType)"
-                            (change)="onChangeServiceSelectionType($event, selectionType)"
-                            [title]="selectionType"
-                          >
-                            {{ selectionType }}
-                          </mat-checkbox>
-                        </ng-container>
+                      <div class="flex gap-4 items-center px-2 my-3 options-radio">
+                        <mat-radio-group [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled" 
+                                       [(ngModel)]="selectedServiceType" 
+                                       (change)="onChangeServiceSelectionType($event)"
+                                       class="flex flex-wrap gap-4">
+                          <ng-container *ngFor="let type of serviceSelectionTypes">
+                            <mat-radio-button
+                              [value]="type"
+                              [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+                              [checked]="selectedServiceType === type"
+                              class="service-radio-btn"
+                            >
+                              {{ type }}
+                            </mat-radio-button>
+                          </ng-container>
+                        </mat-radio-group>
                       </div>
                     </ng-container>
 

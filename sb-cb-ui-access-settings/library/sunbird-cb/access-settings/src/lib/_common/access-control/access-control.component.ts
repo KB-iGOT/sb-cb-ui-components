@@ -328,7 +328,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
       this.processDisableAddConditionOnClose(userGroupIndex);
-      this.calculateUserCountForUserGroup(userGroupIndex);
+      this.calculateUserCountForUserGroup(userGroupIndex, conditionIndex);
     }
   }
 
@@ -491,7 +491,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
 
-      this.calculateUserCountForUserGroup(userGroupIndex);
+      this.calculateUserCountForUserGroup(userGroupIndex, conditionIndex);
       this.processDisableAddConditionOnClose(userGroupIndex);
 
       if (this.config.application === this.MDO_APPLICATION) {
@@ -1154,7 +1154,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  async calculateUserCountForUserGroup(userGroupIndex: number): Promise<void> {
+  async calculateUserCountForUserGroup(userGroupIndex: number, conditionIndex?: number): Promise<void> {
     // Mapping of entity to request key
     const entityKeyMap: { [key: string]: string } = {
       [NsAccessControlConfig.SelectionType.Organizations]: "rootOrgId",
@@ -1235,14 +1235,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (response?.result?.response) {
         const count = response?.result?.response?.count;
         this.userCount[userGroupIndex] = count;
-
         if (!this.userCount[userGroupIndex]) {
           this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
         }
       }
-    } else {
-        this.userCount[userGroupIndex] = 0;
-        this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
     }
   }
 
@@ -1431,6 +1427,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         });
 
         this.userGroup.push(ruleGroup);
+
+        if (
+        (this.mdoContent?.status === "Live") &&
+        (this.config.userConfig.userRoles.has("mdo_admin") || this.config.userConfig.userRoles.has("mdo_leader"))
+      ) {
+        // Mdo admin and mdo leader (cannot edit already added)
+        for (let i = 0; i < this.userGroup.length; i++) {
+          const group = this.userGroup.at(i);
+          group.get("id")?.disable();
+          group.get("name")?.disable();
+          group.get("description")?.disable();
+          group.get("conditions")?.disable();
+          group.get("isUserGroupDisabled")?.setValue(true);
+        }
+        this.isSaveFltrBtnDisabled = true;
+        this.isApplyBtnDisabled = false;
+      }
 
         // Check if add condition should be disabled for this user group
         this.processDisableAddConditionOnClose(index);
