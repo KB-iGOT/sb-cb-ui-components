@@ -3,6 +3,7 @@
   "version": "0.0.6-cbrelease-4.8.28",
   "scripts": {
     "ng": "ng",
+    "prebuild": "npm run lint:fix",
     "build-watch": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
     "test": "ng test",
