@@ -104,7 +104,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
 
       if (this.application === NsAccessControlConfig.Application.MDO) {
-        this.selectedServiceType = "All";
+        this.selectedServiceType = "All Services";
       }
 
       this.activeTab = this.data?.activeTabSelected || 0;
