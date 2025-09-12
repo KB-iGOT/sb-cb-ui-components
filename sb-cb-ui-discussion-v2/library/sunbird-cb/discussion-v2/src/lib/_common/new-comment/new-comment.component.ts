@@ -33,6 +33,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   activeMentionIndex = 0;
   isLoadingUsers = false;
   mentionedUsers: any[] = []; // Track mentioned users for API
+  previousText: string = ''
 
   constructor(
     private configSvc: ConfigurationsService,
@@ -197,8 +198,37 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   handleInput(event: Event): void {
     console.log('Input event:', event)
     if (this.descriptionTextarea?.nativeElement) {
+      const currentText = this.descriptionTextarea.nativeElement.value
+      // Check for deleted mentions before processing new ones
+      this.checkForDeletedMentions(currentText)
       this.checkForMention()
     }
+
+  }
+
+  checkForDeletedMentions(currentText: string): void {
+    const currentMentions = this.extractMentions(currentText)
+    const previousMentions = this.extractMentions(this.previousText)
+    const deletedMentions = previousMentions.filter(mention => !currentMentions.includes(mention))
+    deletedMentions.forEach(deletedMention => {
+      const username = deletedMention.substring(1) // Remove @ symbol
+      const userIndex = this.mentionedUsers.findIndex(user => user.userName === username)
+      if (userIndex !== -1) {
+        this.mentionedUsers.splice(userIndex, 1)
+      }
+    })
+    this.checkForPartiallyDeletedMentions(currentMentions)
+  }
+
+  checkForPartiallyDeletedMentions(currentMentions: string[]): void {
+    this.mentionedUsers = this.mentionedUsers.filter(user => {
+      const userMention = `@${user.userName}`
+      const stillExists = currentMentions.includes(userMention)
+      if (!stillExists) {
+        return false
+      }
+      return true
+    })
   }
 
   checkForMention(): void {
@@ -325,12 +355,14 @@ export class NewCommentComponent implements OnInit, OnDestroy {
           }))
         } else {
           this.mentionUsers = []
+          this.previousText = ''
         }
       },
       (error) => {
         console.error('Error fetching users for mention:', error)
         this.isLoadingUsers = false
         this.mentionUsers = []
+        this.previousText = ''
       }
     )
   }
