@@ -799,9 +799,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   // On Mdo Portal, Service Selection Type Change
   onChangeServiceSelectionType(event: MatRadioChange): void {
-    this.selectedServiceType = event.value;
-    this.getServicesList(this.searchControl.value);
-  }
+  const wasSelectAllChecked = this.areAllSelected();
+  this.selectedServiceType = event.value;
+  this.getServicesList(this.searchControl.value);
+  
+  // If selectAll was checked before, auto-select all items in the new filtered list
+  if (wasSelectAllChecked) {
+    this.selectedDataTemp = this.dataList.map((item) => this.getSelectionValue(item));
+    this.getFilteredEntityGrouped();
+  } 
+}
 
   checkIfCustomeField(condition: any): boolean {
     const optionsEntity = this.accessControlConfig.accessControlCriteriaSelection.optionsEntity;
