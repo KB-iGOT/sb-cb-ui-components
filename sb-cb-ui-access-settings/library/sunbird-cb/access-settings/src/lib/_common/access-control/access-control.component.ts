@@ -185,7 +185,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
 
       if (this.config.accessControlCriteriaSelection.allowCustomsField) {
-        if (!this.accessControlService.customesFieldData()?.length && !this.isCCA) {
+        if (!this.isCCA) {
           this.getCustomsField();
         }
     }
@@ -1335,18 +1335,52 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           if (data && data?.result && data.result.searchResults?.data) {
             const results = data.result.searchResults.data;
             if (Array.isArray(results) && results.length) {
-              this.accessControlService.customesFieldData.set(results);
-              const mappedResults = results.map((field: any) => ({
-                disabled: false,
-                value: field?.attributeName || "",
-                label: field?.name || "",
-                isCustomField: true,
-              }));
+              // Map the results using lodash only for field mapping
+              const mappedFields = _.chain(results)
+                .map(field => {
+                  if (field?.originalCustomFieldData?.length === 1) {
+                    return {
+                      disabled: false,
+                      value: field?.attributeName || "",
+                      label: field?.name || "",
+                      isCustomField: true,
+                      reversedOrderCustomFieldData: field?.reversedOrderCustomFieldData?.filter(
+                        (item: any) => item?.fieldAttribute === field?.attributeName
+                      )
+                    };
+                  } else if (field?.originalCustomFieldData?.length > 1) {
+                    const lastField = _.last(field.originalCustomFieldData) as { 
+                      attributeName?: string; 
+                      name?: string; 
+                    };
+                    if (lastField) {
+                      return {
+                        disabled: false,
+                        value: lastField?.attributeName || "",
+                        label: lastField?.name || "",
+                        isCustomField: true,
+                        reversedOrderCustomFieldData: field?.reversedOrderCustomFieldData?.filter(
+                          (item: any) => item?.fieldAttribute === lastField?.attributeName
+                        )
+                      };
+                    }
+                  }
+                  return null;
+                })
+                .compact()
+                .value();
 
-              // Update optionsEntity
-              this.accessControlCriteriaSelection.optionsEntity = [...this.accessControlCriteriaSelection.optionsEntity, ...mappedResults];
+              // Update the service with mapped fields
+              this.accessControlService.customesFieldData.set(mappedFields);
 
-              const dynamicFields = mappedResults.reduce((acc, field) => {
+              // Update optionsEntity without duplicates
+              this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
+                [...this.accessControlCriteriaSelection.optionsEntity, ...mappedFields],
+                'value'
+              );
+
+              // Create dynamic fields
+              const dynamicFields = mappedFields.reduce((acc, field) => {
                 acc[field.value] = [
                   { value: "all", label: `All ${field.label}` },
                   { value: "selected", label: `Selected ${field.label}` },
@@ -1354,7 +1388,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                 return acc;
               }, {} as Record<string, Array<{ value: string; label: string }>>);
 
-              // Merge dynamic keys into accessControlCriteriaSelection
+              // Merge configurations
               this.accessControlCriteriaSelection = {
                 ...this.accessControlCriteriaSelection,
                 ...dynamicFields,
@@ -1365,10 +1399,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                 ...prevConfig,
                 accessControlCriteriaSelection: this.accessControlCriteriaSelection,
               }));
-              this.isLoading = false
+              this.isLoading = false;
+
             }
           } else {
-              this.isLoading = false
+            this.isLoading = false;
           }
         },
       });

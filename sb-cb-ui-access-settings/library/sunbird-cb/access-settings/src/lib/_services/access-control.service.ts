@@ -294,7 +294,7 @@ export class AccessControlService {
   fetchCustomsField(filterCriteria: any): Observable<any> {
     const requestPayload = {
       filterCriteriaMap: filterCriteria,
-      requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName", "type"],
+      requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName", "type", "reversedOrderCustomFieldData"],
       pageNumber: 0,
       pageSize: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       orderDirection: "DESC",
@@ -333,43 +333,5 @@ export class AccessControlService {
       // Update Signal Value
       this.accessControlConfig.set({ ...config });
     }
-  }
-
-  public mapCustomFields(data: any[], originalCustomFieldData: any[]): any[] {
-    if (!data || !originalCustomFieldData || !Array.isArray(data) || !Array.isArray(originalCustomFieldData) || originalCustomFieldData.length === 0) {
-      return [];
-    }
-
-    const result: any[] = [];
-
-    // Recursive helper to collect all fields and their values
-    function traverseNode(node: any, parentValue: string | null = null): void {
-      if (!node) return;
-
-      const entry = {
-        name: node.fieldName,
-        attributeName: node.fieldAttribute,
-        fieldValue: node.fieldValue,
-        parentFieldValue: node.parentFieldValue || parentValue,
-      };
-
-      if (node.fieldName && node.fieldAttribute) {
-        result.push(entry);
-      }
-
-      // Process child nodes if they exist
-      if (Array.isArray(node.fieldValues)) {
-        node.fieldValues.forEach((childNode: any) => {
-          traverseNode(childNode, node.fieldValue);
-        });
-      }
-    }
-
-    // Process each top-level node
-    data.forEach((node) => {
-      traverseNode(node);
-    });
-
-    return result;
   }
 }
