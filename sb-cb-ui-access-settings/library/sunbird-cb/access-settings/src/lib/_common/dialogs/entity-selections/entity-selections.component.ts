@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ElementRef, ViewChild } from "@angular/core";
+import { Component, Inject, OnInit, OnDestroy, ElementRef, ViewChild, inject } from "@angular/core";
 import { AccessControlService } from "../../../_services/access-control.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
@@ -66,10 +66,22 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   entityFilterOptions = CHECKBOX_OPTIONS;
   isCCA = false;
-  constructor(public dialogRef: MatDialogRef<EntitySelectionsComponent>, private accessControlService: AccessControlService, private cadreMappingService: CadreMappingService) {}
+  environment: any
+  ODCSMasterFramework: any
+ constructor(
+    public dialogRef: MatDialogRef<EntitySelectionsComponent>,
+    private accessControlService: AccessControlService,
+    private cadreMappingService: CadreMappingService,
+    @Inject("environment") environment: any
+  ) {
+    this.environment = environment;
+  }
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
+    if (this.environment.ODCSMasterFramework) {
+      this.ODCSMasterFramework = this.environment.ODCSMasterFramework
+    }
     this.accessControlConfig = this.accessControlService.accessControlConfig();
 
     this.accessControlCriteriaSelection = this.accessControlConfig?.accessControlCriteriaSelection;
@@ -84,7 +96,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
     this.isEntityCustomField = this.checkIfCustomeField(this.data.condition);
     if (this.isEntityCustomField) {
-      this.customeFieldValues = this.accessControlService.customesFieldData().find((ele: any) => ele?.attributeName === this.data.condition.entity);
+      this.customeFieldValues = this.accessControlService.customesFieldData().find((ele: any) => ele?.value === this.data.condition.entity);
       this.selectionType = NsAccessControlConfig.SelectionType.CustomField;
     }
 
@@ -172,7 +184,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.getVerificationStatus();
         break;
       case NsAccessControlConfig.SelectionType.CustomField:
-        this.radioSelections = this.accessControlCriteriaSelection[this.customeFieldValues?.attributeName];
+        this.radioSelections = this.accessControlCriteriaSelection[this.customeFieldValues?.value];
         this.getCustomsFieldList();
         break;
     }
@@ -521,7 +533,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
     }
     if (this.orgSelectionIds?.length) {
-      const categories = this.orgSelectionIds.map((ele: string) => `${ele}_odcs_designation`);
+      const categories = this.orgSelectionIds.map((ele: string) => `${ele}_${this.ODCSMasterFramework ? this.ODCSMasterFramework : 'odcs'}_designation`);
       this.accessControlService
         .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
         .pipe(takeUntil(this.destroy$))
@@ -604,7 +616,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       } else {
         selectedTypes = [this.selectedServiceType];
       }
-
       let allServices: any[] = [];
       cadreDataRaw.forEach((item: any) => {
         if (selectedTypes.includes(item.name) && Array.isArray(item.serviceList)) {
@@ -670,9 +681,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   getCustomsFieldList(): void {
-    if(this.customeFieldValues?.customFieldData?.length && this.customeFieldValues?.originalCustomFieldData?.length) {
-      const mappedValues = this.accessControlService.mapCustomFields(this.customeFieldValues?.customFieldData, this.customeFieldValues?.originalCustomFieldData)
-
+    if(this.customeFieldValues?.reversedOrderCustomFieldData?.length) {
+      const mappedValues = this.customeFieldValues?.reversedOrderCustomFieldData;
+      
       this.dataList = mappedValues || [];
       this.dataListDup = _.uniqWith([...mappedValues], _.isEqual);
       this.alphabet = [];
@@ -685,7 +696,6 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         }
       }
       this.getFilteredEntityGrouped();
-      
       
     } else {
       this.dataList = []
@@ -737,7 +747,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       case NsAccessControlConfig.SelectionType.VerificationStatus:
         return "Verification Status";
       case NsAccessControlConfig.SelectionType.CustomField:
-        return `Select ${this.capitalizeFirstLetter(this.customeFieldValues?.name)}` || "Select Value";
+        return `Select ${this.capitalizeFirstLetter(this.customeFieldValues?.label)}` || "Select Value";
       case NsAccessControlConfig.SelectionType.CentralDeputation:
         return "Central Deputation";
     }
