@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-tree-hierarchy",
-  "version": "0.0.16-cbrelease-4.8.26",
+  "version": "0.0.1-cbrelease-4.8.29",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
