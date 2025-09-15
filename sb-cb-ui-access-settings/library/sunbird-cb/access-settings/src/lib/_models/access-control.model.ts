@@ -5,8 +5,10 @@ export namespace NsAccessControlConfig {
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
     visiblilityOnOff: IVisiblilityOnOff;
-    userConfig: { [key: string]: any; userRoles: any };
+    userConfig: { [key: string]: any; userRoles: any; org: any };
     content: any;
+    application: string;
+    mdoContent: any
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];
@@ -20,12 +22,18 @@ export namespace NsAccessControlConfig {
     verificationStatus: ISelectionOption[];
     accessTypes: { name: string; value: string; tooltip: string; disabled: boolean }[];
     readOnly: boolean;
+    canShowAccessTypeRadio: boolean;
+    shouldShowVisibilityToggle: boolean;
+    allowCustomsField: boolean;
+    centralDeputation?: ISelectionOption[];
+    paginationLimit: number
   }
 
   export interface IOptionsEntity {
     value: string;
     label: string;
     disabled: boolean;
+    isCustomField?: boolean;
   }
 
   export interface IOptionsCondition {
@@ -72,7 +80,9 @@ export namespace NsAccessControlConfig {
     VerificationStatus = "profilestatus",
     Cadre = "Cadre",
     Service = "service",
-    Batch = "batch"
+    Batch = "batch",
+    CustomField = "customeField",
+    CentralDeputation = "isOnCentralDeputation",
   }
 
   export interface ISelectionOption {
@@ -82,12 +92,12 @@ export namespace NsAccessControlConfig {
 
   export enum IActions {
     Confirm = "confirm",
-    Reject = "reject"
+    Reject = "reject",
   }
 
   export enum IAccessTypes {
     Public = "public",
-    Custom = "custom"
+    Custom = "custom",
   }
 
   export type ITypeAccessType = "public" | "custom";
@@ -101,7 +111,12 @@ export namespace NsAccessControlConfig {
   export enum IAccessSetting {
     ALL_USERS = "allUsers",
     MDO_SPECIFIC = "mdoSpecific",
-    CUSTOME_USER = "customeUser"
+    CUSTOME_USER = "customeUser",
+  }
+
+  export enum Application {
+    MDO = "mdo_portal",
+    Creation_Portal = "cbp_portal",
   }
 }
 

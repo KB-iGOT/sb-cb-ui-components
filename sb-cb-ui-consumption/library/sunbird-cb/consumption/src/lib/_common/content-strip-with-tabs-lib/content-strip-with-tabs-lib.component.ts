@@ -714,7 +714,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   checkInvitOnlyAssessments(content: any, strip: any, calculateParentStatus: any, viewMoreUrl: any, enrollmentData: any) {
-    debugger
     if (Object.keys(enrollmentData)) {
       enrollmentData = Object.keys(enrollmentData).length ? enrollmentData : {}
       let filteredArray: any = []

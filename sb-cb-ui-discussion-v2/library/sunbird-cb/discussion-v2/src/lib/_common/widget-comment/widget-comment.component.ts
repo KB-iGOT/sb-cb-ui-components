@@ -27,6 +27,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   isReversed = false
   userLikedComments: any = []
   commentUsersData: any = {}
+  commentTree: any
   @Output() commentDataChange = new EventEmitter<any>()
   constructor(
     private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
@@ -98,11 +99,10 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
       let commentTreeDataLocal = commentRes.result
       if (this.commentId) {
-        this.getCommentById(commentTreeDataLocal)
+        this.fetchCommentTreeAndComment_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
       } else {
         this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
       }
-
     }, (err: any) => {
       this.loadingMore = false
       let commentTreeDataLocal = {}
@@ -117,10 +117,9 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     this.commentSvc.getListOfCommentsById([this.commentId]).subscribe(res => {
       this.loading = false
       if (res && res.result.commentCount) {
-
         this.commentData = res.result
         this.commentData['commentTree'] = {
-          commentTreeId: res.result.commentTreeId,
+          commentTreeId: res.result.commentTreeId || this.commentTree,
           commentTreeData: commentTreeDataLocal
         }
         this.commentsLength = this.commentData.commentTree.commentTreeData.comments.length || 0
@@ -175,8 +174,8 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
     })
   }
 
-  fetchComments_V3(commentTreeDataLocal: any, commentTreeId?: string, overrideCacheValue?: boolean, entityType: string = '', workflow: string = '') {
-    const payload = {
+  fetchCommentTreeAndComment_V3(commentTreeDataLocal: any, commentTreeId?: string, overrideCacheValue?: boolean, entityType: string = '', workflow: string = '') {
+    let payload: any = {
       entityType,
       workflow,
       commentTreeId: commentTreeId || '',
@@ -184,13 +183,39 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       limit: this.commentListLimit,
       offset: this.commentListOffSet,
       overrideCache: overrideCacheValue || false,
-      commentId: "ed3f1e12-710f-11f0-8e17-9bfc7d3cd85d",
+
     }
     this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
       // tslint:disable-next-line: no-console
       this.loading = false
       if (res && res.result.commentCount) {
+        this.commentTree = res.result.commentTreeId
+        this.getCommentById(commentTreeDataLocal)
+      }
+    }, error => {
+      this.loadingMore = false
+      // tslint:disable-next-line: no-console
+      console.log(error)
+      this.getCommentById(commentTreeDataLocal)
+    })
+  }
 
+  fetchComments_V3(commentTreeDataLocal: any, commentTreeId?: string, overrideCacheValue?: boolean, entityType: string = '', workflow: string = '') {
+    let payload: any = {
+      entityType,
+      workflow,
+      commentTreeId: commentTreeId || '',
+      entityId: this.entityId,
+      limit: this.commentListLimit,
+      offset: this.commentListOffSet,
+      overrideCache: overrideCacheValue || false,
+
+    }
+    this.commentSvc.fetchAllComment_V3(payload).subscribe(res => {
+      // tslint:disable-next-line: no-console
+      this.loading = false
+      if (res && res.result.commentCount) {
+        this.commentTree = res.result.commentTreeId
         this.commentData = res.result
         this.commentData['commentTree'] = {
           commentTreeId: res.result.commentTreeId,

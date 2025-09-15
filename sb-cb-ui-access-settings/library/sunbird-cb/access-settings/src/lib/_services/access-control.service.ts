@@ -4,6 +4,7 @@ import { Observable } from "rxjs";
 import { IUserGroupRequest, NsAccessControlConfig } from "../_models/access-control.model";
 import { toNumber } from "lodash";
 
+const PAGINATION_LIMIT = 100;
 const ENDPOINTS = {
   SEARCH_USER_WITH_ADMIN: (query: string) => `/apis/proxies/v8/user/v1/autocomplete/${query}`,
   SEARCH_USER: `/apis/proxies/v8/user/v1/admin/search`,
@@ -16,11 +17,13 @@ const ENDPOINTS = {
   CREATE_USERGROUPS_CONTROL: "/apis/proxies/v8/accessSettings/v1/upsert",
   GET_ACCESS_CONTROL: (id: string) => `/apis/proxies/v8/accessSettings/read/${id}`,
   ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`,
-  PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`
+  PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`,
+
+  CUSTOMES_FIELD_SEARCH: "apis/proxies/v8/customFields/v1/search",
 };
 
 @Injectable({
-  providedIn: "root"
+  providedIn: "root",
 })
 export class AccessControlService {
   accessControlConfig: WritableSignal<NsAccessControlConfig.IAccessControlConfig>;
@@ -29,13 +32,13 @@ export class AccessControlService {
     batch: number[];
     cadre: { id: string; name: string }[];
   }>;
-
+  customesFieldData: WritableSignal<any[]> = signal([]);
   constructor(private readonly http: HttpClient) {
     this.accessControlConfig = signal<NsAccessControlConfig.IAccessControlConfig>(null);
     this.holdServiceCadrebatch = signal({
       service: [],
       batch: [],
-      cadre: []
+      cadre: [],
     });
   }
 
@@ -46,13 +49,13 @@ export class AccessControlService {
   fetchUserList(query: string, pagination: { limit: number; offset: number }, userIds?: string[], filters?: any, sorting?: any): Observable<any> {
     let request: any = {
       filters: {
-        status: 1
+        status: 1,
       },
       limit: pagination.limit || 5,
       offset: pagination.offset || 0,
       query: query,
       sort_by: {},
-      fields: ["userId", "firstName", "maskedEmail", "rootOrgName", "phone"]
+      fields: ["userId", "firstName", "maskedEmail", "rootOrgName", "phone"],
     };
     if (userIds?.length) {
       request.filters = { ...request.filters, userId: userIds };
@@ -66,20 +69,21 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.SEARCH_USER, { request: request });
   }
 
-  fetchOrgList(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
+  fetchOrgList(query: string, pagination: { limit: number; offset: number }, selectedData?: string[], characterSearch?: string): Observable<any> {
     let request: any = {
       request: {
         filters: {
           status: 1,
-          isMdo: true
+          isMdo: true,
         },
         sort_by: {
-          channel: "asc"
+          channel: "asc",
         },
-        fields: ["channel", "identifier"],
-        query: query
-        // limit: 200
-      }
+        fields: ["channel", "identifier", "iscca"],
+        query: query,
+        limit: pagination.limit,
+        offset: pagination.offset,
+      },
     };
     if (selectedData?.length) {
       request.request.filters.identifier = selectedData;
@@ -100,18 +104,20 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.GROUPS);
   }
 
-  fetchCadreConfig(): Observable<any> {
-    return this.http.get<any>(ENDPOINTS.CADRE_CONFIG);
+  fetchCadreConfig(): Promise<any> {
+    return this.http.get<any>(ENDPOINTS.CADRE_CONFIG).toPromise();
   }
 
-  fetchDesignation(query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
+  fetchDesignation(query: string, pagination: { pageSize: number; pageNumber: number }, selectedData?: string[], characterSearch?: string): Observable<any> {
     let payload: any = {
       filterCriteriaMap: {
-        status: "Active"
+        status: "Active",
       },
       requestedFields: ["designation", "id"],
-      pageSize: 1000
-      // pageNumber: 0
+      pageSize: pagination.pageSize || this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
+      pageNumber: pagination.pageNumber || 0,
+      orderDirection: "ASC",
+      orderBy: "designation",
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
@@ -126,30 +132,24 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
 
-  fetchDesignationsWithOrg(
-    paginationOffset: number,
-    categories: string[],
-    query: string,
-    selectedData?: string[],
-    characterSearch?: string
-  ): Observable<any> {
+  fetchDesignationsWithOrg(paginationOffset: number, categories: string[], query: string, selectedData?: string[], characterSearch?: string): Observable<any> {
     let payload: any = {
       request: {
         filters: {
           status: "Live",
           category: "designation",
           categories: categories,
-          objectType: "Term"
+          objectType: "Term",
         },
         fields: ["identifier", "name"],
         query: query,
         sort_by: {
-          name: "asc"
+          name: "asc",
         },
         facets: [],
-        limit: 100,
-        offset: paginationOffset
-      }
+        limit: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
+        offset: paginationOffset,
+      },
     };
     if (selectedData?.length) {
       payload.request.filters.name = selectedData;
@@ -252,9 +252,9 @@ export class AccessControlService {
           language: apiResponse.language || [],
           accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
-          accessSettingsEnabled: accessSettingsEnabled || false
-        }
-      }
+          accessSettingsEnabled: accessSettingsEnabled || false,
+        },
+      },
     };
   }
 
@@ -285,9 +285,53 @@ export class AccessControlService {
           accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
           accessSettingsEnabled: accessSettingsEnabled || false,
-          secureSettings: secureSettings || null
+          secureSettings: secureSettings || null,
+        },
+      },
+    };
+  }
+
+  fetchCustomsField(filterCriteria: any): Observable<any> {
+    const requestPayload = {
+      filterCriteriaMap: filterCriteria,
+      requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName", "type", "reversedOrderCustomFieldData"],
+      pageNumber: 0,
+      pageSize: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
+      orderDirection: "DESC",
+      orderBy: "createdOn",
+      facets: [],
+    };
+    return this.http.post<any>(ENDPOINTS.CUSTOMES_FIELD_SEARCH, requestPayload);
+  }
+
+  enableDeputation(value: boolean) {
+    const config = this.accessControlConfig();
+    if (config) {
+      const centralDeputationOption = { disabled: false, value: NsAccessControlConfig.SelectionType.CentralDeputation, label: "Central Deputation" };
+      const centralDeputationCriteria = [
+        { value: "yes", label: "Yes" },
+        { value: "no", label: "No" },
+      ];
+      // Add if true, remove if false
+      if (value) {
+        // Add to optionsEntity if not present
+        if (!config.accessControlCriteriaSelection.optionsEntity.some((o: any) => o.value === NsAccessControlConfig.SelectionType.CentralDeputation)) {
+          config.accessControlCriteriaSelection.optionsEntity.push(centralDeputationOption);
+        }
+        // Add to accessControlCriteriaSelection if not present
+        if (!config.accessControlCriteriaSelection.centralDeputation) {
+          config.accessControlCriteriaSelection.centralDeputation = centralDeputationCriteria;
+        }
+      } else {
+        // Remove from optionsEntity
+        config.accessControlCriteriaSelection.optionsEntity = config.accessControlCriteriaSelection.optionsEntity.filter((o: any) => o.value !== NsAccessControlConfig.SelectionType.CentralDeputation);
+        // Remove from accessControlCriteriaSelection
+        if (config.accessControlCriteriaSelection.centralDeputation) {
+          delete config.accessControlCriteriaSelection.centralDeputation;
         }
       }
-    };
+      // Update Signal Value
+      this.accessControlConfig.set({ ...config });
+    }
   }
 }

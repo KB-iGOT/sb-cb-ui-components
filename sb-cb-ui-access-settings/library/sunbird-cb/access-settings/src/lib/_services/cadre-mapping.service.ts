@@ -21,7 +21,7 @@ interface CivilServiceData {
 }
 
 @Injectable({
-  providedIn: "root"
+  providedIn: "root",
 })
 export class CadreMappingService {
   private allCadres = new Map<string, any>();
@@ -30,6 +30,8 @@ export class CadreMappingService {
   private serviceToCadresMap = new Map<string, Set<string>>();
   private batchYearToCadresMap = new Map<number, Set<string>>();
   private batchYearToServicesMap = new Map<number, Set<string>>();
+
+  private cadreConfigData: CivilServiceData | null = null;
 
   private addToMapSet(map: Map<any, Set<any>>, key: any, value: any) {
     if (!map.has(key)) {
@@ -216,9 +218,36 @@ export class CadreMappingService {
 
   getServiceIdsByName(names: string[]) {
     if (!Array.isArray(names)) names = [names];
-    const lowerNames = names.map(n => n.toLowerCase());
+    const lowerNames = names.map((n) => n.toLowerCase());
     return Array.from(this.allServices.values())
-      .filter(service => lowerNames.includes(service.name.toLowerCase()))
-      .map(service => service.id);
+      .filter((service) => lowerNames.includes(service.name.toLowerCase()))
+      .map((service) => service.id);
+  }
+
+  setCadreConfigData(data: CivilServiceData) {
+    this.cadreConfigData = data;
+  }
+
+  getCadreConfigData(): CivilServiceData | null {
+    return this.cadreConfigData;
+  }
+
+  getServicesByNames(names: string[]): Array<{ id: string; name: string }> {
+    if (!Array.isArray(names)) names = [names];
+    const lowerNames = names.map((n) => n.toLowerCase());
+    const uniqueMap = new Map<string, { id: string; name: string }>();
+    const cadreConfig = this.getCadreConfigData();
+    if (cadreConfig) {
+      cadreConfig.civilServiceType.civilServiceTypeList.forEach((cst) => {
+        cst.serviceList.forEach((service) => {
+          if (lowerNames.includes(service.name.toLowerCase())) {
+            if (!uniqueMap.has(cst.id)) {
+              uniqueMap.set(cst.id, { id: cst.id, name: cst.name });
+            }
+          }
+        });
+      });
+    }
+    return Array.from(uniqueMap.values());
   }
 }
