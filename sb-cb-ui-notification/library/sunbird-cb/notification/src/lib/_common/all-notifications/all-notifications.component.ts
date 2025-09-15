@@ -194,12 +194,27 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   markAllAsRead(event: MouseEvent) {
-    const request = {
+    const userRequestsPayload = {
       request: {
-        type: "all",
+        type: 'all',
       }
     }
-    this.libNotificationService.markAllAsRead(request).subscribe((res: any) => {
+    const globalRequestPayload = {
+      request: {
+        type: 'all',
+        action: 'global'
+      }
+    }
+    this.libNotificationService.markAllAsRead(userRequestsPayload).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        this.notifications = this.notifications.map((notification: any) => ({
+          ...notification, read: true
+        }))
+        this.unreadCount = 0
+      }
+      this.libNotificationService.updateUnreadCount()
+    })
+    this.libNotificationService.markAllAsRead(globalRequestPayload).subscribe((res: any) => {
       if (res.responseCode === 'OK') {
         this.notifications = this.notifications.map((notification: any) => ({
           ...notification, read: true
