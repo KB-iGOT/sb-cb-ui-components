@@ -1401,6 +1401,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
               }));
               this.isLoading = false;
 
+            } else {
+              this.isLoading = false;
             }
           } else {
             this.isLoading = false;
