@@ -601,7 +601,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             }
 
             // send event after every selection for MDO
-            if (this.config.application === this.MDO_APPLICATION) {
+            if (this.config.application === this.MDO_APPLICATION && this.config?.mdoContent?.status !== "Live") {
               this.applyAccessControlValue(true, false);
             }
           }
@@ -727,9 +727,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
 
           // send event after every selection for MDO
-          if (this.config.application === this.MDO_APPLICATION) {
-            this.applyAccessControlValue(true, false);
-          }
+         if (this.config.application === this.MDO_APPLICATION && this.config?.mdoContent?.status !== "Live") {
+              this.applyAccessControlValue(true, false);
+            }
 
           if (!this.areSelectionsEqual(originalSelections, result.selected)) {
             this.calculateUserCountForUserGroup(ruleIndex);
@@ -1210,6 +1210,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           const customFieldSelections = selections.map((sel: any) => sel?.fieldValue || sel);
           request[`${entity}`] = customFieldSelections;
         }
+    }
+
+    if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
+      if (!this.isCCA) {
+        request.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+      }
     }
 
     // Remove keys with empty array values
