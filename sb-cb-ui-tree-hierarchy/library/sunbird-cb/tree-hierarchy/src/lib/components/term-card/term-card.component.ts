@@ -18,7 +18,7 @@ import { ConforamtionPopupComponent } from '../conforamtion-popup/conforamtion-p
 export class TermCardComponent implements OnInit, OnDestroy {
   // @Input() data!: NSFramework.ITermCard
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
-
+  @Input() enableThreeDots = true
 
   private _data!: NSFramework.ITermCard;
   isApprovalRequired: boolean = false

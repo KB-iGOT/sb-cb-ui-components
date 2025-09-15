@@ -46,7 +46,7 @@
                 </ng-container> -->
                 <!-- <span>++{{data.children.selected}}+++</span>
                 <span>=={{data.children.status}}==</span>  -->
-                <div class="flex flex-between flex-middle mt-4">
+                <div class="flex gap-3 flex-middle mt-4">
                     <div class="card-description flex flex-middle gap-1">
                         <mat-icon svgIcon="frac"></mat-icon> 
                     <span>{{(data.children.children) ? data.children.children?.length : 0}} Child Org</span>
@@ -55,9 +55,9 @@
                         <mat-icon svgIcon="frac"></mat-icon> 
                         <span>{{getuserCount(data)}} Users</span>
                     </div>
-                    <ng-container *ngIf="data?.columnInfo?.config?.enableThreeDot" >
+                    <ng-container *ngIf="data?.columnInfo?.config?.enableThreeDot && enableThreeDots" >
                         <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
-                        [matMenuTriggerFor]="orgMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn small-btn">
+                        [matMenuTriggerFor]="orgMenu" [matMenuTriggerData]="{'data':data, 'cardRef': cardRef}" class="action-btn small-btn ml-auto">
                         <mat-icon class="small-icon">more_vert</mat-icon>
                         </button>
                     </ng-container>
@@ -146,7 +146,7 @@
 <ng-template #dialogTemplate>
   <div class="flex flex-col flex-middle">
     <mat-icon class="large-icon color-secondary">error_outline</mat-icon>
-    <p class="color-primary modal-text margin-top-s">Select a organisation to add or see further connections.</p>
+    <p class="color-primary modal-text margin-top-s">Select a organisation to {{enableThreeDots ? 'add or ' : ''}}see further connections.</p>
     <button mat-button type="button" (click)="closeModal()" class="btn-common btn-primary modal-btn">Close</button>
   </div>
 </ng-template>

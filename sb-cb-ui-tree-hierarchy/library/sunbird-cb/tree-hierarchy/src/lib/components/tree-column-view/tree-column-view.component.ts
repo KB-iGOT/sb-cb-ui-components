@@ -17,6 +17,7 @@ declare var LeaderLine: any;
 export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() column: any;
   @Input() containerId: string | undefined
+  @Input() isChildOrg = false
   connectorMapping: any = {}
   @Output() updateTaxonomyTerm = new EventEmitter<CardSelection>(true);
   @Output() updateTermList = new EventEmitter<CardChecked>();
@@ -51,7 +52,6 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
     ).subscribe((ele: any) => {
       this.searchFilterData(ele)
     })
-
     if (this.column.index === 1) {
       this.approvalService.getUpdateList().subscribe((list:any) => {
         this.approvalTerm = list.filter((item: any) => this.column.code === item.category)
@@ -333,7 +333,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
       )
       this.connectorMapping['box' + (this.column.index - 1)].lines = connectionLines
     } else {
-      if (this.column.index > 1) {
+      if (this.column.index > 1 && this.connectorMapping['box' + (this.column.index - 1)]) {
         this.connectorMapping['box' + (this.column.index - 1)].lines = [{ target: elementClicked, line: '', targetType: 'element' }]
 
         this.connectorService.updateConnectorsMap(this.connectorMapping)
