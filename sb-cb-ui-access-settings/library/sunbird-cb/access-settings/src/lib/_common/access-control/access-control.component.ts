@@ -65,6 +65,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   shouldShowVisibilityToggle = true;
   isCCA = false;
   mdoContent: any;
+
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -724,6 +725,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             conditionGroup.get("selections")?.setValue(result.selected);
             this.processDisableAddConditionOnClose(ruleIndex);
           }
+
+          // send event after every selection for MDO
+          if (this.config.application === this.MDO_APPLICATION) {
+            this.applyAccessControlValue(true, false);
+          }
+
           if (!this.areSelectionsEqual(originalSelections, result.selected)) {
             this.calculateUserCountForUserGroup(ruleIndex);
           }
@@ -1239,6 +1246,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
         }
       }
+    } else {
+      this.userCount[userGroupIndex] = 0;
     }
   }
 
@@ -1335,18 +1344,25 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           if (data && data?.result && data.result.searchResults?.data) {
             const results = data.result.searchResults.data;
             if (Array.isArray(results) && results.length) {
-              // Map the results using lodash only for field mapping
+
               const mappedFields = _.chain(results)
                 .map(field => {
                   if (field?.originalCustomFieldData?.length === 1) {
+                     const firstField = _.first(field.originalCustomFieldData) as { 
+                      attributeName?: string; 
+                      name?: string; 
+                    };
+                    const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                      .filter((item: any) => item?.fieldAttribute === firstField?.attributeName)
+                      .uniqBy('fieldValue')  
+                      .value();
+                      
                     return {
                       disabled: false,
-                      value: field?.attributeName || "",
-                      label: field?.name || "",
+                      value: firstField?.attributeName || "",
+                      label: firstField?.name || "",
                       isCustomField: true,
-                      reversedOrderCustomFieldData: field?.reversedOrderCustomFieldData?.filter(
-                        (item: any) => item?.fieldAttribute === field?.attributeName
-                      )
+                      reversedOrderCustomFieldData: filteredAndUniqueData
                     };
                   } else if (field?.originalCustomFieldData?.length > 1) {
                     const lastField = _.last(field.originalCustomFieldData) as { 
@@ -1354,14 +1370,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                       name?: string; 
                     };
                     if (lastField) {
+                      const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                        .filter((item: any) => item?.fieldAttribute === lastField?.attributeName)
+                        .uniqBy('fieldValue') 
+                        .value();
+
                       return {
                         disabled: false,
                         value: lastField?.attributeName || "",
                         label: lastField?.name || "",
                         isCustomField: true,
-                        reversedOrderCustomFieldData: field?.reversedOrderCustomFieldData?.filter(
-                          (item: any) => item?.fieldAttribute === lastField?.attributeName
-                        )
+                        reversedOrderCustomFieldData: filteredAndUniqueData
                       };
                     }
                   }
@@ -1493,5 +1512,33 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
       this.setupFormChangeDetection();
     }, 0);
+  }
+
+  get canAddUserGroup(): boolean {
+    if (this.isLoading) {
+      return false;
+    }
+
+    if (!this.userGroup?.length) {
+      return true;
+    }
+
+    if (this.config?.application !== this.MDO_APPLICATION) {
+      return true;
+    }
+
+    // for mdo applications add user group enabled everytime edited for live  
+    if (this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") {
+      const currentValue = JSON.stringify(this.accessControlForm?.getRawValue()?.userGroup);
+      const initialValue = this.initialUserGroupValue;
+
+      if (currentValue === initialValue) {
+        return true;
+      }
+
+      return !this.userGroup?.length;
+    }
+
+    return false;
   }
 }
