@@ -59,7 +59,7 @@ export class FrameworkService {
     // private treeHierarchySvc: TreeHierarchyService
   ) {}
 
-  getFrameworkInfo(_orgData?:any): Observable<any> {
+  getFrameworkInfo(_orgData?:any, _childOrgData?:any): Observable<any> {
     localStorage.removeItem('terms');
     if (this.localConfig.connectionType === 'online') {
       let url = `/${this.proxiesPath}/framework/v1/read/`
@@ -84,7 +84,7 @@ export class FrameworkService {
         }),
         tap(async (response: any) => {
           this.resetAll();
-          this.formateData(response);
+          this.formateData(response, _childOrgData);
           this.completeResponse = response.result.framework;
         }),
         catchError((err) => {
@@ -248,13 +248,18 @@ export class FrameworkService {
     return filteredData;
   }
 
-  formateData(response: any): void {
-    this.frameworkId = response.result.framework.code;
-    (response.result.framework.categories).forEach((a: any, _idx: number) => {
+  formateData(response: any, _childOrgData?: any): void {
+    this.frameworkId = response.result.framework.code; 
+    let categories = response.result.framework.categories;
+    if (_childOrgData?.rootOrgId) {
+      categories = this.getOrgFromChildOnwards(categories || [], _childOrgData || '')
+    }
+    response.result.framework.categories = categories;
+    (categories).forEach((a: any, _idx: number) => {
       this.list.set(a.code, {
         code: a.code,
         identifier: a.identifier,
-        index: a.index,
+        index: (_idx + 1),
         name: a.name,
         selected: a.selected,
         status: a.status as NSFramework.TNodeStatus,
@@ -288,6 +293,25 @@ export class FrameworkService {
       } as NSFramework.ICategory);
     });
     this.categoriesHash.next(allCategories);
+  }
+
+  getOrgFromChildOnwards(_categories: any, _childOrgData: any) {
+    const colIndexToBeRemoved: number[] = []
+    let termFoundIndex: any = -1;
+    if (_categories?.length > 0) {
+      _categories.forEach((ele:any) => {
+        if (ele?.terms?.length > 0) {
+          const termFound = ele.terms.find((term: any) => term.name === _childOrgData.channel);
+          if (!termFound && termFoundIndex === -1) {
+            colIndexToBeRemoved.push(ele.index)
+          } else if(termFoundIndex === -1) {
+            termFoundIndex = ele.index;
+            ele.terms = ele.terms.filter((term: any) => term.name === _childOrgData.channel);
+          }
+        }
+      })
+    }
+    return _categories.filter((category: any) => !colIndexToBeRemoved.includes(category.index));
   }
 
   removeOldLine(): void {
