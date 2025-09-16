@@ -22,7 +22,7 @@ const API_END_POINTS = {
     `/apis/proxies/v8/comment/v1/delete/${commentId}?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
   LIKED_COMMENTS: (entityId: any) => `apis/proxies/v8/comment/v1/likedComments?courseId=${entityId}`,
   SEARCH_USERS: '/apis/proxies/v8/user/v1/search',
-  GET_COMMENT_BY_ID:  `/apis/proxies/v8/comment/list`,
+  GET_COMMENT_BY_ID: `/apis/proxies/v8/comment/list`,
 }
 
 @Injectable({
@@ -121,12 +121,11 @@ export class CommentsService {
   }
 
 
-  searchUsers(value: string, rootOrgId: string): Observable<any> {
+  searchUsers(value: string): Observable<any> {
     const reqBody = {
       request: {
         query: value,
         filters: {
-          rootOrgId,
           status: 1,
         },
       },

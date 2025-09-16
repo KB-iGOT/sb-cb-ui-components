@@ -64,6 +64,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   activeMentionIndex = 0;
   isLoadingUsers = false;
   mentionedUsers: any[] = []; // Track mentioned users for API
+  previousText: string = '';
 
 
   constructor(
@@ -177,7 +178,36 @@ export class NewPostComponent implements OnInit, OnDestroy {
   // Add these methods to your component
   handleInput(event: Event): void {
     this.autoGrow(event)
+    const currentText = this.uploadForm.controls.description.value
+    // Check for deleted mentions before processing new ones
+    this.checkForDeletedMentions(currentText)
     this.checkForMention()
+
+  }
+
+  checkForDeletedMentions(currentText: string): void {
+    const currentMentions = this.extractMentions(currentText)
+    const previousMentions = this.extractMentions(this.previousText)
+    const deletedMentions = previousMentions.filter(mention => !currentMentions.includes(mention))
+    deletedMentions.forEach(deletedMention => {
+      const username = deletedMention.substring(1) // Remove @ symbol
+      const userIndex = this.mentionedUsers.findIndex(user => user.userName === username)
+      if (userIndex !== -1) {
+        this.mentionedUsers.splice(userIndex, 1)
+      }
+    })
+    this.checkForPartiallyDeletedMentions(currentMentions)
+  }
+
+  checkForPartiallyDeletedMentions(currentMentions: string[]): void {
+    this.mentionedUsers = this.mentionedUsers.filter(user => {
+      const userMention = `@${user.userName}`
+      const stillExists = currentMentions.includes(userMention)
+      if (!stillExists) {
+        return false
+      }
+      return true
+    })
   }
 
   onTextareaKeyUp(event: KeyboardEvent): void {
@@ -283,7 +313,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     this.isLoadingUsers = true
 
     // Call your API to search users
-    this.discussV2Svc.searchUsers(query, this.rootOrgId).subscribe(
+    this.discussV2Svc.searchUsers(query).subscribe(
       (data: any) => {
         this.isLoadingUsers = false
         if (data.result && data.result.response) {
@@ -293,6 +323,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
             userName: `${user.userName}`,
           }))
         } else {
+          this.previousText = ''
           this.mentionUsers = []
         }
       },
@@ -300,6 +331,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
         console.error('Error fetching users for mention:', error)
         this.isLoadingUsers = false
         this.mentionUsers = []
+        this.previousText = ''
       }
     )
   }

@@ -30,8 +30,11 @@ export class BulkUploadKarmayogiComponent {
 
   holdSelectedUsers: any[] = [];
   finalSelectedUsers: any[] = [];
+  isCCA = false;
+
   constructor(private accessControlService: AccessControlService, private snackBar: MatSnackBar) {
     this.bulkUploadConfig = this.accessControlService.accessControlConfig().bulkUploadKarmayogi;
+    this.isCCA = this.accessControlService.accessControlConfig()?.userConfig?.org?.isCCA ?? false;
   }
 
   downloadSample() {
@@ -259,6 +262,12 @@ export class BulkUploadKarmayogiComponent {
         ...request.request.filters,
         phone: userData
       };
+    }
+
+    if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
+      if (!this.isCCA) {
+        request.request.filters.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+      }
     }
     return this.accessControlService
       .validateUser(request)

@@ -19,14 +19,15 @@ import * as _ from "lodash";
 @Component({
   selector: "sb-uic-access-control",
   templateUrl: "./access-control.component.html",
-  styleUrls: ["./access-control.component.scss"]
+  styleUrls: ["./access-control.component.scss"],
 })
 export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() config!: NsAccessControlConfig.IAccessControlConfig;
   @Input() contentId: string = "";
   @Input() content: any;
+  @Input() tempAccessControl: any;
 
-  @Output() accessControlData: EventEmitter<{ userGroup: any[]; accessType: string }> = new EventEmitter();
+  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
   @Output() sendForCQF: EventEmitter<boolean> = new EventEmitter();
 
@@ -48,6 +49,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   usersTableConfig: NsAccessControlConfig.ITableConfig;
   accessControlForm!: FormGroup;
   MDO_SPECIFIC = NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
+  MDO_APPLICATION = NsAccessControlConfig.Application.MDO;
 
   cadreConfigData: any;
   isSaveFltrBtnDisabled = true;
@@ -61,6 +63,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   canShowAccessControlTypeRadio = true;
   shouldShowVisibilityToggle = true;
+  isCCA = false;
+  mdoContent: any;
+
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -69,12 +74,33 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     private snackbar: MatSnackBar
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.initForm();
-    this.getAccessControl();
+
+    if (this.config?.application === NsAccessControlConfig.Application.MDO) {
+      this.isCCA = this.config?.userConfig?.org?.isCCA ?? false;
+      if (!this.isCCA) {
+        this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
+          this.config.accessControlCriteriaSelection.optionsEntity,
+          (entity) => entity.value !== NsAccessControlConfig.SelectionType.Organizations
+        );
+      }
+
+      this.mdoContent = this.config?.mdoContent
+    }
+
+    // Dont call read api for MDO its only for CBP for now
+    if (this.config.application !== NsAccessControlConfig.Application.MDO) {
+      this.getAccessControl();
+    }
+
+    if (!this.cadreConfigData) {
+      await this.fetchCadreConfigData();
+    }
+
     this.config.content = this.content;
-    this.accessControlService.accessControlConfig.set(this.config);
     this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
+
     if (this.accessControlCriteriaSelection.readOnly) {
       this.accessControlCriteriaSelection.readOnly = false;
     }
@@ -112,9 +138,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
     }
 
-    this.canShowAccessControlTypeRadio = this.config?.accessControlCriteriaSelection.canShowAccessTypeRadio ?? true;
+    this.canShowAccessControlTypeRadio = this.config?.accessControlCriteriaSelection?.canShowAccessTypeRadio ?? true;
     this.shouldShowVisibilityToggle = this.config?.accessControlCriteriaSelection?.shouldShowVisibilityToggle ?? true;
     this.accessTypeDup = this.accessType;
+
+    // Add config to signal 
+    this.accessControlService.accessControlConfig.set(this.config);
+
+    if (this.tempAccessControl) {
+      this.processTempAccessControl(this.tempAccessControl);
+    } else {
+      this.addUserGroup();
+      setTimeout(() => {
+        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+        this.setupFormChangeDetection();
+      }, 0);
+    }
+
   }
 
   ngAfterViewInit(): void {
@@ -129,27 +169,32 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.destroy$.complete();
   }
 
-  fetchCadreConfigData(): void {
+  async fetchCadreConfigData(): Promise<void> {
     this.isLoading = true;
-    this.accessControlService
-      .fetchCadreConfig()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
-            this.cadreConfigData = response?.result?.response?.value;
-            this.cadreMappingService.initialize(this.cadreConfigData);
-            this.accessControlService.holdServiceCadrebatch.set({
-              service: this.cadreMappingService.getAllServices(),
-              batch: this.cadreMappingService.getAllBatchYears(),
-              cadre: this.cadreMappingService.getAllCadres()
-            });
-          }
-        },
-        complete: () => {
-          this.isLoading = false;
-        }
+
+    const response: any = await this.accessControlService.fetchCadreConfig().catch(() => (this.isLoading = false));
+    if (response?.result && response?.result?.response && Object.keys(response?.result?.response)?.length) {
+      this.cadreConfigData = response?.result?.response?.value;
+      this.cadreMappingService.initialize(this.cadreConfigData);
+
+      this.accessControlService.holdServiceCadrebatch.set({
+        service: this.cadreMappingService.getAllServices(),
+        batch: this.cadreMappingService.getAllBatchYears(),
+        cadre: this.cadreMappingService.getAllCadres(),
       });
+
+      this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
+
+      if (this.config.accessControlCriteriaSelection.allowCustomsField) {
+        if (!this.isCCA) {
+          this.getCustomsField();
+        }
+    }
+    // if isCCA is false then no need to wait for customs field
+      if(this.isCCA) {
+        this.isLoading = false;
+      }
+    }
   }
 
   initForm() {
@@ -281,20 +326,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditions.at(conditionIndex);
     const selectedEntity = condition?.get("entity")?.value;
 
-    // Check if the same entity is already selected in another condition of this user group
-    const isDuplicate = conditions.controls.some((ctrl, index) => {
-      return index !== conditionIndex && ctrl.get("entity")?.value === selectedEntity;
-    });
-
-    if (isDuplicate) {
-      this.callSnackbar(`${selectedEntity?.toUpperCase()} is already selected in this user group`, "error");
-      condition.get("entity")?.setValue("");
-      return;
-    }
-
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
       this.processDisableAddConditionOnClose(userGroupIndex);
+      this.calculateUserCountForUserGroup(userGroupIndex, conditionIndex);
     }
   }
 
@@ -325,8 +360,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         disableCadre = availableCadres.length === 0;
       } else {
         // If neither is selected, do not disable Cadre
-        if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) disableCadre = true;
-        else disableCadre = false;
+        if(this.content) {
+          if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) disableCadre = true;
+          else disableCadre = false;
+        }
       }
 
       const updatedOptions = this.accessControlCriteriaSelection.optionsEntity.map(option => {
@@ -408,6 +445,27 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+
+  checkServicesAndResetReleated(userGroupIndex: number, conditionIndex: number): void {
+    const userGroups = this.userGroup.at(userGroupIndex);
+    const conditions = this.ruleConditions(userGroupIndex);
+    if (userGroups) {
+      const conditionsUserGroup = userGroups?.value?.conditions || [];
+
+      // Find service index
+      const serviceIndex = _.findIndex(conditionsUserGroup, (c: any) => c.entity === NsAccessControlConfig.SelectionType.Service);
+      const condition = conditions.at(conditionIndex);
+      if (serviceIndex !== -1 && condition?.get("entity")?.value === NsAccessControlConfig.SelectionType.Service) {
+        conditionsUserGroup.forEach((c: any, index: number) => {
+          if (_.includes([NsAccessControlConfig.SelectionType.CentralDeputation], c.entity) && index > serviceIndex) {
+             conditions.setControl(index, this.createConditionGroup(uuidv4(), userGroupIndex));
+             this.accessControlService.enableDeputation(false)
+          }
+        });
+      }
+    }
+  }
+
   removeCondition(userGroupIndex: number, conditionIndex: number) {
     const conditions = this.ruleConditions(userGroupIndex);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -416,6 +474,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+        this.checkServicesAndResetReleated(userGroupIndex, conditionIndex);
         conditions.removeAt(conditionIndex);
         this.applyAccessControlValue(true);
         this.calculateUserCountForUserGroup(userGroupIndex);
@@ -428,10 +487,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const conditions = this.ruleConditions(userGroupIndex);
     const condition = conditions.at(conditionIndex);
     if (condition) {
+      this.checkServicesAndResetReleated(userGroupIndex, conditionIndex);
+
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
-      this.calculateUserCountForUserGroup(userGroupIndex);
+
+      this.calculateUserCountForUserGroup(userGroupIndex, conditionIndex);
       this.processDisableAddConditionOnClose(userGroupIndex);
+
+      if (this.config.application === this.MDO_APPLICATION) {
+        this.applyAccessControlValue(true, false)
+      }
     }
   }
 
@@ -439,9 +505,26 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
-    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review")) {
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION) {
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+      } else if (this.config.application === this.MDO_APPLICATION) {
+        // For MDO applications, check if the user group is in initial state
+        const currentGroup = this.userGroup.at(userGroupIndex);
+        const isInInitialState = (() => {
+          if (this.config?.mdoContent?.status === 'Live') {
+            const initialUserGroups = this.getInitialState();
+            if (initialUserGroups) {
+              return initialUserGroups.some(group => group.userGroupName === currentGroup.get('name')?.value);
+            }
+          }
+          return false;
+        })();
+
+        // Only show reset filter flag if not in initial state
+        if (!isInInitialState) {
+          resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+        }
       }
       if (resetFilterFlag) {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -476,7 +559,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         break;
       default:
-        console.warn("Unsupported entity type:", condition.entity);
+        if (!resetFilterFlag) {
+          this.openSelectionDialog(rule, condition, activeTabSelected, rule?.isUserGroupDisabled);
+        }
     }
   }
 
@@ -514,11 +599,27 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
               }
             }
 
+            // Enable Deputation if Service is selected 'All India Services'
+            if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO && condition.entity === NsAccessControlConfig.SelectionType.Service) {
+              this.checkServicesAndResetReleated(ruleIndex, conditionIndex);
+              const serviceNames = this.cadreMappingService.getServicesByNames(result.selected || []);
+              const selections = serviceNames.map((service) => service.name);
+              if (selections.includes("All India Services")) {
+                this.accessControlService.enableDeputation(true);
+              } else {
+                this.accessControlService.enableDeputation(false);
+              }
+            }
             this.processCadreConfigMapping(ruleIndex);
             this.processDisableAddConditionOnClose(ruleIndex);
 
             if (!this.areSelectionsEqual(originalSelections, result.selected)) {
               this.calculateUserCountForUserGroup(ruleIndex);
+            }
+
+            // send event after every selection for MDO
+            if (this.config.application === this.MDO_APPLICATION) {
+              this.applyAccessControlValue(true, false);
             }
           }
         }
@@ -641,6 +742,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             conditionGroup.get("selections")?.setValue(result.selected);
             this.processDisableAddConditionOnClose(ruleIndex);
           }
+
+          // send event after every selection for MDO
+         if (this.config.application === this.MDO_APPLICATION) {
+              this.applyAccessControlValue(true, false);
+        }
+
           if (!this.areSelectionsEqual(originalSelections, result.selected)) {
             this.calculateUserCountForUserGroup(ruleIndex);
           }
@@ -699,6 +806,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     else this.isSaving = true;
 
     const payload = await this.processRequestCreation();
+
+    if (this.config.application === this.MDO_APPLICATION) {
+      this.accessControlData.emit({ userGroup: payload, accessType: this.accessType });
+      if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
+      this.isSaveFltrBtnDisabled = true;
+      this.isSaving = false;
+      return;
+    }
+
     this.accessControlService
       .applyUserGroupAccessControl(payload)
       .pipe(takeUntil(this.destroy$))
@@ -741,7 +857,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             userGroupName: group.name,
             userGroupCriteriaList: group.conditions.map((condition: any) => {
               let criteriaValue: string[];
-
               if (
                 condition?.entity === NsAccessControlConfig.SelectionType.Users &&
                 condition?.selections?.length &&
@@ -749,32 +864,45 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
               ) {
                 const userIds = condition.selections?.map((user: any) => user?.userId) || [];
                 criteriaValue = userIds;
+              } else if (condition?.entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
+                criteriaValue = condition.selections[0];
+                return { criteriaKey: condition.entity, criteriaValue };
+
               } else {
-                criteriaValue = condition.selections?.map(String) || [];
+                if (condition.selections.length && typeof condition.selections[0] === "object") {
+                  criteriaValue = condition.selections?.map((sel: any) => sel?.fieldValue) || [];
+                } else {
+                  criteriaValue = condition.selections?.map(String) || [];
+                }
               }
 
-              return {
-                criteriaKey: condition.entity,
-                criteriaValue
-              };
+              if (condition.entity && criteriaValue && criteriaValue.length > 0) {
+                return {
+                  criteriaKey: condition.entity,
+                  criteriaValue,
+                };
+              }
+              return null;
             })
-          }))
-          .filter((group: any) => Array.isArray(group.userGroupCriteriaList) && group.userGroupCriteriaList.length > 0);
+            .filter((criteria: any) => !!criteria), // Remove nulls
+        }))
+        .filter((group: any) => Array.isArray(group.userGroupCriteriaList) && group.userGroupCriteriaList.length > 0);
 
-        const requestPayload: IUserGroupRequest = {
-          contentId: this.contentId,
-          accessControl: {
-            version: 1,
-            userGroups
-          }
-        };
+      const requestPayload: IUserGroupRequest = {
+        contentId: this.contentId,
+        accessControl: {
+          version: 1,
+          userGroups,
+        },
+      };
 
-        resolve(requestPayload);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
+      resolve(requestPayload);
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
+
 
   openInstructonsDialog(): void {
     this.dialog.open(AccessControlGuideComponent, {
@@ -783,9 +911,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   async getAccessControl(): Promise<void> {
-    if (!this.cadreConfigData) {
-      this.fetchCadreConfigData();
-    }
     const response = await this.accessControlService
       .fetchUserGroupAccessControl(this.contentId)
       .pipe(takeUntil(this.destroy$))
@@ -818,7 +943,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.applyAccessControlValue(false, false);
           this.updateContentAccessSetting();
         } else {
-          this.addUserGroup();
+          // this.addUserGroup();
         }
         setTimeout(() => {
           this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
@@ -1053,7 +1178,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  async calculateUserCountForUserGroup(userGroupIndex: number): Promise<void> {
+  async calculateUserCountForUserGroup(userGroupIndex: number, conditionIndex?: number): Promise<void> {
     // Mapping of entity to request key
     const entityKeyMap: { [key: string]: string } = {
       [NsAccessControlConfig.SelectionType.Organizations]: "rootOrgId",
@@ -1063,7 +1188,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       [NsAccessControlConfig.SelectionType.Cadre]: "profileDetails.cadreDetails.cadreName",
       [NsAccessControlConfig.SelectionType.Service]: "profileDetails.cadreDetails.civilServiceName",
       [NsAccessControlConfig.SelectionType.Batch]: "profileDetails.cadreDetails.cadreBatch",
-      [NsAccessControlConfig.SelectionType.Users]: "identifier"
+      [NsAccessControlConfig.SelectionType.Users]: "identifier",
+      [NsAccessControlConfig.SelectionType.CentralDeputation]: "profileDetails.cadreDetails.isOnCentralDeputation"
     };
 
     const group = this.userGroup.at(userGroupIndex);
@@ -1073,7 +1199,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const conditions = group.get("conditions") as FormArray;
-    const request: { [key: string]: any[] } = {};
+    const request: { [key: string]: any } = {};
 
     for (let j = 0; j < conditions.length; j++) {
       const condition = conditions.at(j);
@@ -1088,10 +1214,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         ) {
           const userIds = selections && selections.map((user: any) => user?.userId);
           request[key] = userIds;
-        } else {
+        } else if (entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
+          if (selections.length && typeof selections[0] === "boolean") {
+            request[key] = selections[0];
+          }
+        }
+        else {
           request[key] = selections;
         }
-      }
+      } 
+      else {
+          const customFieldSelections = selections.map((sel: any) => sel?.fieldValue || sel);
+          request[`${entity}`] = customFieldSelections;
+        }
     }
 
     // Remove keys with empty array values
@@ -1100,6 +1235,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         delete request[key];
       }
     });
+    
+    if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
+      if (!this.isCCA && Object.keys(request)?.length > 0) {
+        request.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+      }
+    }
 
     const filters: any = { ...request };
     if (Object.keys(filters).length > 0) {
@@ -1114,15 +1255,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         fields: ["identifier", "rootOrgId", "firstName"]
       }
     };
-    const response = await this.accessControlService
-      .validateUser(payload)
-      .toPromise()
-      .catch(() => {
-        this.userCount[userGroupIndex] = 0;
-      });
-    if (response?.result?.response) {
-      const count = response?.result?.response?.count;
-      this.userCount[userGroupIndex] = count;
+    if(payload?.request?.filters) {
+      const response = await this.accessControlService
+        .validateUser(payload)
+        .toPromise()
+        .catch(() => {
+          this.userCount[userGroupIndex] = 0;
+        });
+      if (response?.result?.response) {
+        const count = response?.result?.response?.count;
+        this.userCount[userGroupIndex] = count;
+        if (!this.userCount[userGroupIndex]) {
+          this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
+        }
+      }
+    } else {
+      this.userCount[userGroupIndex] = 0;
     }
   }
 
@@ -1203,5 +1351,266 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     this.calculateUserCountForUserGroup(userGroupIndex);
+  }
+
+  // Customs Field Logics
+  getCustomsField() {
+    this.accessControlService
+      .fetchCustomsField({
+        organisationId: this.config.userConfig.rootOrgId,
+        isEnabled: true,
+        type: "masterList"
+        // isMandatory: true,
+      })
+      .subscribe({
+        next: (data) => {
+          if (data && data?.result && data.result.searchResults?.data) {
+            const results = data.result.searchResults.data;
+            if (Array.isArray(results) && results.length) {
+
+              const mappedFields = _.chain(results)
+                .map(field => {
+                  if (field?.originalCustomFieldData?.length === 1) {
+                     const firstField = _.first(field.originalCustomFieldData) as { 
+                      attributeName?: string; 
+                      name?: string; 
+                    };
+                    const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                      .filter((item: any) => item?.fieldAttribute === firstField?.attributeName)
+                      .uniqBy('fieldValue')  
+                      .value();
+                      
+                    return {
+                      disabled: false,
+                      value: firstField?.attributeName || "",
+                      label: firstField?.name || "",
+                      isCustomField: true,
+                      reversedOrderCustomFieldData: filteredAndUniqueData
+                    };
+                  } else if (field?.originalCustomFieldData?.length > 1) {
+                    const lastField = _.last(field.originalCustomFieldData) as { 
+                      attributeName?: string; 
+                      name?: string; 
+                    };
+                    if (lastField) {
+                      const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                        .filter((item: any) => item?.fieldAttribute === lastField?.attributeName)
+                        .uniqBy('fieldValue') 
+                        .value();
+
+                      return {
+                        disabled: false,
+                        value: lastField?.attributeName || "",
+                        label: lastField?.name || "",
+                        isCustomField: true,
+                        reversedOrderCustomFieldData: filteredAndUniqueData
+                      };
+                    }
+                  }
+                  return null;
+                })
+                .compact()
+                .value();
+
+              // Update the service with mapped fields
+              this.accessControlService.customesFieldData.set(mappedFields);
+
+              // Update optionsEntity without duplicates
+              this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
+                [...this.accessControlCriteriaSelection.optionsEntity, ...mappedFields],
+                'value'
+              );
+
+              // Create dynamic fields
+              const dynamicFields = mappedFields.reduce((acc, field) => {
+                acc[field.value] = [
+                  { value: "all", label: `All ${field.label}` },
+                  { value: "selected", label: `Selected ${field.label}` },
+                ];
+                return acc;
+              }, {} as Record<string, Array<{ value: string; label: string }>>);
+
+              // Merge configurations
+              this.accessControlCriteriaSelection = {
+                ...this.accessControlCriteriaSelection,
+                ...dynamicFields,
+              };
+
+              // Update the signal with the full updated object
+              this.accessControlService.accessControlConfig.update((prevConfig) => ({
+                ...prevConfig,
+                accessControlCriteriaSelection: this.accessControlCriteriaSelection,
+              }));
+              this.isLoading = false;
+
+            } else {
+              this.isLoading = false;
+            }
+          } else {
+            this.isLoading = false;
+          }
+        },
+      });
+  }
+
+  // Patch raw accesscontrol to form
+  private getStorageKey(): string {
+    return `${this.config.application}_access_control_${this.contentId}`;
+  }
+
+  private saveInitialState(userGroups: any[]): void {
+    if (this.config?.application === this.MDO_APPLICATION && 
+        this.config?.mdoContent?.status === "Live") {
+      const state = {
+        initialUserGroups: userGroups,
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(state));
+    }
+  }
+
+  private getInitialState(): any[] | null {
+    const savedState = localStorage.getItem(this.getStorageKey());
+    if (savedState) {
+      const { initialUserGroups } = JSON.parse(savedState);
+      return initialUserGroups;
+    }
+    return null;
+  }
+
+  processTempAccessControl(tempAccessControl: any): void {
+    while (this.userGroup.length) {
+      this.userGroup.removeAt(0);
+    }
+
+    // Save initial state if not already saved
+    if (!this.getInitialState()) {
+      this.saveInitialState(tempAccessControl.userGroups);
+    }
+
+    tempAccessControl.userGroups.forEach((group: any, index: number) => {
+      //Check and Enable Deputation if Service is selected 'All India Services'
+      const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service)
+      if (this.config?.application === NsAccessControlConfig.Application.MDO && isContainsService?.criteriaKey === NsAccessControlConfig.SelectionType.Service) {
+        const serviceNames = this.cadreMappingService.getServicesByNames(isContainsService.criteriaValue || []);
+        const selections = serviceNames.map((service) => service.name);
+        if (selections.includes("All India Services")) {
+          this.accessControlService.enableDeputation(true);
+        } else {
+          this.accessControlService.enableDeputation(false);
+        }
+      }
+
+      // Process patching.
+      const conditions = this.fb.array([]) as any;
+
+      group.userGroupCriteriaList.forEach((criteria: any) => {
+        const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
+
+        // Set the form values
+        condition.patchValue({
+            entity: criteria.criteriaKey,
+            selections:
+              criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue.map((b: any) => Number(b))
+                  : []
+                : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue
+                  : [criteria.criteriaValue]
+                : criteria.criteriaValue,
+          });
+
+          conditions.push(condition);
+        });
+
+        const ruleGroup = this.fb.group({
+          id: [group.userGroupId || uuidv4()],
+          name: [group.userGroupName],
+          description: [`Description for ${group.userGroupName}`],
+          conditions: conditions,
+          isUserGroupDisabled: [false],
+          isAddConditionDisabled: [false],
+        });
+
+        this.userGroup.push(ruleGroup);
+
+        if (
+        (this.mdoContent?.status === "Live") &&
+        (this.config.userConfig.userRoles.has("mdo_admin") || this.config.userConfig.userRoles.has("mdo_leader"))
+      ) {
+        // Get initial state from localStorage
+        const initialUserGroups = this.getInitialState();
+        
+        if (initialUserGroups) {
+          // Only disable user groups that were in the initial state
+          const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
+          
+          for (let i = 0; i < this.userGroup.length; i++) {
+            const group = this.userGroup.at(i);
+            const groupId = group.get("name")?.value;
+            
+            // If this group was in the initial state, disable it
+            if (initialGroupIds.includes(groupId)) {
+              group.get("id")?.disable();
+              group.get("name")?.disable();
+              group.get("description")?.disable();
+              group.get("conditions")?.disable();
+              group.get("isUserGroupDisabled")?.setValue(true);
+            }
+          }
+        }
+        
+        this.isSaveFltrBtnDisabled = true;
+        this.isApplyBtnDisabled = false;
+      }
+
+        // Check if add condition should be disabled for this user group
+        this.processDisableAddConditionOnClose(index);
+
+        // Calculate count for each user group
+        this.calculateUserCountForUserGroup(index);
+    });
+
+    setTimeout(() => {
+      this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+      this.setupFormChangeDetection();
+    }, 0);
+  }
+
+  get canAddUserGroup(): boolean {
+    if (this.isLoading) {
+      return false;
+    }
+
+    if (!this.userGroup?.length) {
+      return true;
+    }
+
+    if (this.config?.application !== this.MDO_APPLICATION) {
+      return true;
+    }
+
+    // For MDO applications with Live status
+    if (this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") {
+      const initialUserGroups = this.getInitialState();
+      if (!initialUserGroups) {
+        return true;
+      }
+
+      // Get current non-disabled user groups
+      const activeUserGroups = this.userGroup.controls.filter(group => 
+        !group.get('isUserGroupDisabled')?.value
+      );
+
+      if (activeUserGroups.length === 0) {
+        return true;
+      }
+
+      return false;
+    }
+
+    return false;
   }
 }
