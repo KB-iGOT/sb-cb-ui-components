@@ -84,7 +84,7 @@ export class FrameworkService {
         }),
         tap(async (response: any) => {
           this.resetAll();
-          this.formateData(response, _childOrgData);
+          this.formateData(response, _orgData, _childOrgData);
           this.completeResponse = response.result.framework;
         }),
         catchError((err) => {
@@ -248,10 +248,10 @@ export class FrameworkService {
     return filteredData;
   }
 
-  formateData(response: any, _childOrgData?: any): void {
+  formateData(response: any, _orgData?: any, _childOrgData?: any): void {
     this.frameworkId = response.result.framework.code; 
     let categories = response.result.framework.categories;
-    if (_childOrgData?.rootOrgId) {
+    if (_childOrgData?.id !== _orgData?.id) {
       categories = this.getOrgFromChildOnwards(categories || [], _childOrgData || '')
     }
     response.result.framework.categories = categories;
@@ -267,7 +267,7 @@ export class FrameworkService {
         translations: a.translations,
         category: a.category,
         associations: a.associations,
-        config: this.getConfig(a.code),
+        config: this.getConfig(a.code,_childOrgData),
         children: (a.terms || []).map((c: any) => {
           const associations = c.associations || [];
           const tempCount = this.getUserCount(c)
@@ -277,8 +277,8 @@ export class FrameworkService {
           }
           return c;
         })
-      });
-    });
+      })
+    })
     
     const allCategories: NSFramework.ICategory[] = [];
     this.list.forEach(a => {
@@ -325,7 +325,7 @@ export class FrameworkService {
     this.rootConfig = config;
   }
 
-  getConfig(code: string): any {
+  getConfig(code: string,_childOrgData?: any): any {
     let categoryConfig: any;
     if (this.rootConfig && this.rootConfig[0]) {
       this.rootConfig.forEach((config: any) => {
@@ -335,7 +335,8 @@ export class FrameworkService {
       });
     }
     if (!categoryConfig) {
-      return this.rootConfig.config[0]
+      const config = this.rootConfig.config[0]
+      return config
     }
     return categoryConfig;
   }

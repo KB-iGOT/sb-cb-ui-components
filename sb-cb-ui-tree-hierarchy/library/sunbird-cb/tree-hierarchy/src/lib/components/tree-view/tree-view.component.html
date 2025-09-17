@@ -60,7 +60,7 @@
             <div class="padding-x2 cat-columns container-box" id="box{{i+1}}">
                 <ng-container *ngIf="column?.children && column?.children.length > 0">
                     <lib-tree-column-view *ngIf="loaded[column.code]" #selectedTaxonomyTerm [column]="column"
-                    [containerId]="'box'+(i+1)" [isChildOrg]="checkChildOrg()" (updateTaxonomyTerm)="updateTaxonomyTerm($event)"
+                    [containerId]="'box'+(i+1)" [childOrg]="childOrgData" [isChildOrg]="checkChildOrg()" (updateTaxonomyTerm)="updateTaxonomyTerm($event)"
                     (updateTermList)="updateDraftStatusTerms($event)" (cardsCount)="getNoOfCards($event)" 
                     (retireTermData)="removeConnection($event)" (cardAction)="cardActionEmit($event)">
                 </lib-tree-column-view>

@@ -1,0 +1,11 @@
+%page-center {
+  max-width: 1202px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.container-balanced {
+  @extend %page-center;
+  height: auto;
+  min-height: 400px;
+}

@@ -506,8 +506,25 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
     if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION) {
-      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS || this.config.application === this.MDO_APPLICATION) {
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+      } else if (this.config.application === this.MDO_APPLICATION) {
+        // For MDO applications, check if the user group is in initial state
+        const currentGroup = this.userGroup.at(userGroupIndex);
+        const isInInitialState = (() => {
+          if (this.config?.mdoContent?.status === 'Live') {
+            const initialUserGroups = this.getInitialState();
+            if (initialUserGroups) {
+              return initialUserGroups.some(group => group.userGroupName === currentGroup.get('name')?.value);
+            }
+          }
+          return false;
+        })();
+
+        // Only show reset filter flag if not in initial state
+        if (!isInInitialState) {
+          resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+        }
       }
       if (resetFilterFlag) {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -727,9 +744,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
 
           // send event after every selection for MDO
-          if (this.config.application === this.MDO_APPLICATION) {
-            this.applyAccessControlValue(true, false);
-          }
+         if (this.config.application === this.MDO_APPLICATION) {
+              this.applyAccessControlValue(true, false);
+        }
 
           if (!this.areSelectionsEqual(originalSelections, result.selected)) {
             this.calculateUserCountForUserGroup(ruleIndex);
@@ -1218,6 +1235,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         delete request[key];
       }
     });
+    
+    if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
+      if (!this.isCCA && Object.keys(request)?.length > 0) {
+        request.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+      }
+    }
 
     const filters: any = { ...request };
     if (Object.keys(filters).length > 0) {
@@ -1431,9 +1454,38 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   // Patch raw accesscontrol to form
+  private getStorageKey(): string {
+    return `${this.config.application}_access_control_${this.contentId}`;
+  }
+
+  private saveInitialState(userGroups: any[]): void {
+    if (this.config?.application === this.MDO_APPLICATION && 
+        this.config?.mdoContent?.status === "Live") {
+      const state = {
+        initialUserGroups: userGroups,
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(state));
+    }
+  }
+
+  private getInitialState(): any[] | null {
+    const savedState = localStorage.getItem(this.getStorageKey());
+    if (savedState) {
+      const { initialUserGroups } = JSON.parse(savedState);
+      return initialUserGroups;
+    }
+    return null;
+  }
+
   processTempAccessControl(tempAccessControl: any): void {
     while (this.userGroup.length) {
       this.userGroup.removeAt(0);
+    }
+
+    // Save initial state if not already saved
+    if (!this.getInitialState()) {
+      this.saveInitialState(tempAccessControl.userGroups);
     }
 
     tempAccessControl.userGroups.forEach((group: any, index: number) => {
@@ -1488,15 +1540,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         (this.mdoContent?.status === "Live") &&
         (this.config.userConfig.userRoles.has("mdo_admin") || this.config.userConfig.userRoles.has("mdo_leader"))
       ) {
-        // Mdo admin and mdo leader (cannot edit already added)
-        for (let i = 0; i < this.userGroup.length; i++) {
-          const group = this.userGroup.at(i);
-          group.get("id")?.disable();
-          group.get("name")?.disable();
-          group.get("description")?.disable();
-          group.get("conditions")?.disable();
-          group.get("isUserGroupDisabled")?.setValue(true);
+        // Get initial state from localStorage
+        const initialUserGroups = this.getInitialState();
+        
+        if (initialUserGroups) {
+          // Only disable user groups that were in the initial state
+          const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
+          
+          for (let i = 0; i < this.userGroup.length; i++) {
+            const group = this.userGroup.at(i);
+            const groupId = group.get("name")?.value;
+            
+            // If this group was in the initial state, disable it
+            if (initialGroupIds.includes(groupId)) {
+              group.get("id")?.disable();
+              group.get("name")?.disable();
+              group.get("description")?.disable();
+              group.get("conditions")?.disable();
+              group.get("isUserGroupDisabled")?.setValue(true);
+            }
+          }
         }
+        
         this.isSaveFltrBtnDisabled = true;
         this.isApplyBtnDisabled = false;
       }
@@ -1527,16 +1592,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       return true;
     }
 
-    // for mdo applications add user group enabled everytime edited for live  
+    // For MDO applications with Live status
     if (this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") {
-      const currentValue = JSON.stringify(this.accessControlForm?.getRawValue()?.userGroup);
-      const initialValue = this.initialUserGroupValue;
-
-      if (currentValue === initialValue) {
+      const initialUserGroups = this.getInitialState();
+      if (!initialUserGroups) {
         return true;
       }
 
-      return !this.userGroup?.length;
+      // Get current non-disabled user groups
+      const activeUserGroups = this.userGroup.controls.filter(group => 
+        !group.get('isUserGroupDisabled')?.value
+      );
+
+      if (activeUserGroups.length === 0) {
+        return true;
+      }
+
+      return false;
     }
 
     return false;

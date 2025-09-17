@@ -925,6 +925,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   checkChildOrg() {
-    return (this.childOrgData?.rootOrgId) ? true : false
+    return (this.childOrgData?.rootOrgId !== this.orgSelectedData.id) ? true : false
   }
 }

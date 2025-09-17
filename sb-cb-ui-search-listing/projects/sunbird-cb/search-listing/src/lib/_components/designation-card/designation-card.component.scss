@@ -1,0 +1,28 @@
+@import "../../_scss/ws-common";
+@import "../../_scss/ws-vars";
+@import "../../_scss/ws-mixins";
+
+.card-container {
+  height: 192px;
+  width: 158px;
+  border: 1px solid $matCardBorderColor;
+  border-radius: 12px;
+  background: $white;
+}
+
+.mat-btn-outline {
+  height: 32px !important;
+  padding: 8px 28px !important;
+  background: $brandAccentDarkShade2 !important;
+}
+
+.designation {
+  max-width: 12em;
+  overflow: hidden;
+  word-break: break-word;
+  white-space: initial;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}

@@ -18,6 +18,7 @@ export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() column: any;
   @Input() containerId: string | undefined
   @Input() isChildOrg = false
+  @Input() childOrg: any
   connectorMapping: any = {}
   @Output() updateTaxonomyTerm = new EventEmitter<CardSelection>(true);
   @Output() updateTermList = new EventEmitter<CardChecked>();
