@@ -221,7 +221,7 @@ export class UsersRequestParams {
     this.limit = 10;
     this.offset = 0;
     this.sort_by = {};
-    this.orderBy = 'createdDate'
+    this.orderBy = "createdDate";
   }
 }
 
@@ -279,6 +279,8 @@ export enum FacetType {
   profileGroup = "profileDetails.professionalDetails.group",
   employmentDepartment = "profileDetails.employmentDetails.departmentName",
   organizationsRoles = "organisations.roles"
+
+  // Designations
 }
 
 export enum SortType {
@@ -365,7 +367,9 @@ export namespace SearchListingConfig {
     allSearchCategoriesTypes: SearchCategoryType[];
     searchInputConfig: SearchInputConfig;
     applicationName: string;
-    noDataFoundFlags: SearchNoDataFoundFlags;
+    noDataFoundFlags: {
+      [key: string]: SearchNoDataFoundFlags;
+    }
   }
   export interface SearchCategory {
     label: string;
@@ -394,6 +398,7 @@ export namespace SearchListingConfig {
     defaultSearchCategory: string;
   }
   export interface SearchNoDataFoundFlags {
+    showButtons: boolean;
     navigationsButtons: NavigationsButton[];
   }
 

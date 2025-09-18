@@ -532,8 +532,8 @@
           {{ noResultMessage }}
         </div>
         <div class="action-search-btn flex gap-4 items-center mt-6 justify-center">
-          <ng-container *ngIf="searchConfig?.noDataFoundFlags?.navigationsButtons && searchConfig?.noDataFoundFlags?.navigationsButtons.length">
-            <ng-container *ngFor="let button of searchConfig?.noDataFoundFlags?.navigationsButtons">
+          <ng-container *ngIf="searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons && searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons.length">
+            <ng-container *ngFor="let button of searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons">
               <button
                 mat-raised-button
                 class="mat-btn-flat cursor-pointer py-1"
