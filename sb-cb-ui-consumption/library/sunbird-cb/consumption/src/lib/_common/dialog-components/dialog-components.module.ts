@@ -50,7 +50,8 @@ import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-
     exports: [
         CertificateDialogComponent, 
         AddCompetencyPopupComponent, 
-        SnackbarComponent
+        SnackbarComponent,
+        ConfirmationDialogComponent
     ]
 })
 export class DialogComponentsModule { }
