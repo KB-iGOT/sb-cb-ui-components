@@ -12,6 +12,7 @@ export class UsersCardComponent {
   @Input() user!: any;
   @Input() category!: any;
   @Output() telemetry = new EventEmitter<any>();
+  @Output() updateUser = new EventEmitter<string>();
 
   currentUser!: NsUser.IUserProfile;
   howerUser!: any;
@@ -82,7 +83,7 @@ export class UsersCardComponent {
     user.contentType = "People";
     user.identifier = user.userId;
     this.telemetry.emit(user);
-    this.router.navigate(["/app/person-profile", user.userId || user.id || user.wid], { fragment: "profileInfo" });
+    this.updateUser.emit(user.userId || user.id || user.wid);
   }
 
   get usr() {

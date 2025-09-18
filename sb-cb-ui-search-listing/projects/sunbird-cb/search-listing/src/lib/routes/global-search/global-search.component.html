@@ -1,5 +1,10 @@
 <div class="container-balanced margin-top-l margin-bottom-xl">
-    <ws-app-learn-search [userValue]="userValue" [searchQuery]="searchParam" [paramFilters]="searchparamFilters"
-        [filtersPanel]="filtersPanel" (queryParamChange)="filterSelectcategory($event)">
-    </ws-app-learn-search>
+    <ng-contianer *ngIf="!userId; else updateUser">
+        <ws-app-learn-search [userValue]="userValue" [searchQuery]="searchParam" [paramFilters]="searchparamFilters"
+            [filtersPanel]="filtersPanel" (queryParamChange)="filterSelectcategory($event)" (updateUserEvent)="updateUserDetails($event)">
+        </ws-app-learn-search>
+    </ng-contianer>
+    <ng-template #updateUser>
+      <ws-app-user-update [userId]="userId" (updateEvent)="updateUserStatus($event)"></ws-app-user-update>
+    </ng-template>
 </div>
