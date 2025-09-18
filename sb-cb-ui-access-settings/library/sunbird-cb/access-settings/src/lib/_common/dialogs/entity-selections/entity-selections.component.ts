@@ -196,23 +196,25 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   private getSelectionValue(item: any): any {
     if (typeof item !== "object" || item === null) {
-      return item;
+      return item?.toLowerCase();
     } else if (
       this.selectionType === NsAccessControlConfig.SelectionType.Cadre ||
       this.selectionType === NsAccessControlConfig.SelectionType.Service ||
       this.selectionType === NsAccessControlConfig.SelectionType.Designation
     ) {
-      return item?.name || item?.designation;
+      return item?.name?.toLowerCase() || item?.designation?.toLowerCase();
     } else if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
       return Number(item);
     }
 
-    return item?.id || item?.identifier || item;
+    return item?.id?.toLowerCase() || item?.identifier?.toLowerCase() || item;
   }
 
   isSelected(item: any): boolean {
     const value = this.getSelectionValue(item);
-    return this.filterValue === "selected" ? this.selectedData.includes(value) : this.selectedDataTemp.includes(value);
+    const selectedData = this.selectedData.map((ele) => (typeof ele === "string" ? ele.toLowerCase() : ele));
+    const selectedDataTemp = this.selectedDataTemp.map((ele) => (typeof ele === "string" ? ele.toLowerCase() : ele));
+    return this.filterValue === "selected" ? selectedData.includes(value) : selectedDataTemp.includes(value);
   }
 
   toggleSelection(item: any): void {
@@ -313,7 +315,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         const selectedData = this.selectedData.map((ele) => ele.fieldValue);
         filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.fieldValue));
       } else {
-        filtered = this.dataListDup.filter((item) => this.isSelected(item) && this.selectedData.includes(item?.name || item?.designation || item?.id || item?.identifier || item));
+        const selectedData = this.selectedData.map((ele) => (typeof ele === "string" ? ele.toLowerCase() : ele));
+        filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.name?.toLowerCase() || item?.designation?.toLowerCase() || item?.id?.toLowerCase() || item?.identifier?.toLowerCase() || item?.toLowerCase()));
       }
     }
 
@@ -541,7 +544,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           next: (response) => {
             if (response?.result && response?.result?.Term) {
               // const newData = response?.result?.Term;
-              const newData = _.uniqBy(response.result.Term, (item: any) => item?.identifier);
+              const newData = _.uniqBy(response.result.Term, (item: any) => item?.identifier && item?.name);
 
               this.dataList = append ? [...this.dataList, ...newData] : newData;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
