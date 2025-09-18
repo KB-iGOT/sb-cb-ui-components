@@ -445,10 +445,19 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       return [];
     }
     const returnedData = _.flatMap(data, (values, key) =>
-      values.map((value: any) => ({
-        type: key,
-        value: value === "Courses" ? "Contents" : this.formatValue(value)
-      }))
+      values.map((value: any) => {
+        if (key === 'dateRange') {
+          const dates = value.split(' ')[0]; // Get just the date part
+          return {
+            type: key,
+            value: dates
+          };
+        }
+        return {
+          type: key,
+          value: value === "Courses" ? "Contents" : this.formatValue(value)
+        };
+      })
     );
     this.categoriseByFacet(returnedData);
     return returnedData;
@@ -486,6 +495,10 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   clearFilterChip(item: { type: string; value: string }) {
     let facets;
+    if (item.type === 'dateRange') {
+      this.clearDateRange();
+      return;
+    }
     if (item.type === "sectorId" || item.type === "subSectorId") {
       item.value = this.reverseFormatSectorName(item.value);
     }
@@ -786,7 +799,39 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     this.selectionModel.updateSelection(newSelection, this);
     this.selectedDateRange = new DateRange<Date>(newSelection.start, newSelection.end);
+    
+    if (this.selectedDateRange?.start && this.selectedDateRange?.end) {
+      const formattedStartDate = this.formatDateForFilter(this.selectedDateRange.start);
+      const formattedEndDate = this.formatDateForFilter(this.selectedDateRange.end);
+      
+      this.selectedFilters['dateRange'] = [formattedStartDate, formattedEndDate];
+      this.appliedFilter.emit(this.selectedFilters);
+      this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+    }
+  }
 
-    console.log(this.selectedDateRange, "Selected Date Range");
+  private formatDateForFilter(date: Date): string {
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    
+    const year = date.getUTCFullYear();
+    const month = pad(date.getUTCMonth() + 1);
+    const day = pad(date.getUTCDate());
+    const hours = pad(date.getUTCHours());
+    const minutes = pad(date.getUTCMinutes());
+    const seconds = pad(date.getUTCSeconds());
+    const milliseconds = date.getUTCMilliseconds().toString().padStart(3, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}+0000`;
+  }
+
+  clearDateRange() {
+    this.selectedDateRange = null;
+    if (this.selectedFilters['dateRange']) {
+      this.selectedFilters['dateRange'] = []
+      this.appliedFilter.emit(this.selectedFilters);
+      this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+    } else {
+      this.appliedFilter.emit(this.selectedFilters);
+    }
   }
 }
