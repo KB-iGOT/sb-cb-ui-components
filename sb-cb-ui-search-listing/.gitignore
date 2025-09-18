@@ -40,3 +40,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+
+/projects/sunbird-cb/search-listing/node_modules/*
+/.package.json.swp
+/yarn.lock

@@ -57,4 +57,4 @@ package-lock.json
 /sb-cb-ui-components/node_modules
 */*/dist
 /sb-cb-ui-components/*/node_modules
-
+sb-cb-ui-search-listing/.package.json.swp
