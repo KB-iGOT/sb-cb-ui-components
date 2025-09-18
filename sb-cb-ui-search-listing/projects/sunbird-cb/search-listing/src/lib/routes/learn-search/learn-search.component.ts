@@ -90,6 +90,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   searchRequestCommunities = new SearchCommunitiesRequest([]);
   searchRequestExternal = new SearchExternalRequest([]);
   searchRequestUsers = new SearchUsersRequest();
+  searchRequestDesignation = { filters: {} };
+  searchRequestTrainingPlans = { filters: {} };
 
   searchContentLoader = true;
 
@@ -177,7 +179,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     this.updateNoResultMessage(this.statedata.param);
 
-    this.checkCourseEnrollmentAndCbpPlan();
+    if (this.searchConfig?.searchCategories.some(cat => cat.value === SearchCategory.Courses)) {
+      this.checkCourseEnrollmentAndCbpPlan();
+    }
     // this.fetchCbpPlan()
     this.checkIfExploreContentTab();
     localStorage.removeItem(SearchConstantLocalStorage.SortType);
@@ -615,7 +619,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async searchUsersMDO() {
-    console.log(this.configSvc);
+    this.searchPeopleLoader = true;
     this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
     this.searchRequestUsers.request.query = this.statedata?.param || "";
     const result = await this.searchListingService.searchUsersMDO(this.searchRequestUsers).catch(() => {
@@ -636,6 +640,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.usersSearchTotalCount = 0;
       this.usersFacets = [];
     }
+
+    this.searchPeopleLoader = false;
   }
 
   processCommunityFacets(facets: Record<string, any[]>): any {
@@ -675,6 +681,18 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestPeoples = new SearchPeoplesRequest();
     this.searchRequestPeoples.limit = this.initialPaginationSize;
     this.searchRequestPeoples.offset = 0;
+
+    this.searchRequestUsers = new SearchUsersRequest();
+    this.searchRequestUsers.request.limit = this.initialPaginationSize;
+    this.searchRequestUsers.request.filters = { rootOrgId: this.configSvc.userProfile?.rootOrgId || "" };
+
+    this.searchRequestDesignation = {
+      filters: {}
+    };
+
+    this.searchRequestTrainingPlans = {
+      filters: {}
+    };
 
     if (this.searchSortFilter === SortType.MostRelevent) {
       if (this.seeAllResult === "") {
@@ -888,6 +906,18 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           this.searchRequestUsers.request.filters[FacetType.profileStatus] = [...selectedFilters[key]];
         } else if (key === FacetType.organizationsRoles) {
           this.searchRequestUsers.request.filters[FacetType.organizationsRoles] = [...selectedFilters[key]];
+        } else if (key === "dateRange") {
+          if (selectedFilters[key].length === 2) {
+            const [startDate, endDate] = selectedFilters[key];
+            if (startDate && endDate) {
+              this.searchRequestUsers.request.filters["createdDate"] = {
+                ">=": startDate,
+                "<=": endDate
+              };
+            }
+          } else {
+            this.searchRequestUsers.request.filters["createdDate"] = selectedFilters[key];
+          }
         } else {
           this.searchRequestCourse.request.filters.courseCategory!.push(...selectedFilters[key]);
         }
@@ -979,7 +1009,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     console.log("selectedFilters", selectedFilters);
   }
 
-  // Delete the empty request param from resuest body
+  // Delete the empty request param from request body
   deleteFilterKeys() {
     const removeEmpty = (obj: any, keys: string[], isObjectCheck = false) => {
       keys.forEach(key => {
@@ -1014,13 +1044,34 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     const resourceFilters = this.searchRequestResources?.request?.filters || {};
     removeEmpty(resourceFilters, [FacetType.sectorNameResource, FacetType.subSectorNameResource], false);
 
-    // For searchRequestResources
+    // For searchRequestExternal
     const externalFilters = this.searchRequestExternal.filterCriteriaMap || {};
     removeEmpty(
       externalFilters,
       [FacetType.contentPartners, FacetType.topic, this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey],
       false
     );
+
+    // For searchRequestUsers
+    const userFilters = this.searchRequestUsers?.request?.filters || {};
+    removeEmpty(userFilters, [FacetType.profileGroup, FacetType.profileStatus, FacetType.organizationsRoles, FacetType.profileDesignation], false);
+
+    if (userFilters["createdDate"]) {
+      const dateRange = userFilters["createdDate"];
+      if (!Object.keys(dateRange)?.length) {
+        delete this.searchRequestUsers?.request?.filters["createdDate"];
+      }
+    }
+
+    // For searchRequestDesignation
+    if (this.searchRequestDesignation?.filters) {
+      removeEmpty(this.searchRequestDesignation.filters, ["name", "status", "category"], false);
+    }
+
+    // For searchRequestTrainingPlans
+    if (this.searchRequestTrainingPlans?.filters) {
+      removeEmpty(this.searchRequestTrainingPlans.filters, ["planName", "status", "type"], false);
+    }
   }
 
   async seeAllResults(category: string) {
@@ -1163,9 +1214,11 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestEvents = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
     this.searchRequestPeoples = new SearchPeoplesRequest();
     this.searchRequestCommunities = new SearchCommunitiesRequest([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
-
     this.searchRequestResources = new SearchV4Request([]);
     this.searchRequestExternal = new SearchExternalRequest([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
+
+    this.searchRequestDesignation = { filters: {} };
+    this.searchRequestTrainingPlans = { filters: {} };
 
     this.courseSearchResults = [];
     this.eventsSearchResults = [];
@@ -1562,7 +1615,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       });
     }
 
-    console.log("Event counts by type:", eventCounts);
     this.typesOfEventsFilters = eventCounts;
   }
 

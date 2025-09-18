@@ -897,16 +897,6 @@
   <!-- Users Onboarding Date range Filter  -->
   <div class="filter-without-search" *ngIf="searchCategory === 'users'">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.onBoardingDateRange" | translate }}</p>
-    <!-- <mat-selection-list>
-            <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['organisations.roles']">
-                <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)"
-                    (change)="onSelectionFilter($event, options, 'organisations.roles')">
-                    <span class="min-width-adjust" [matTooltip]="options?.name" [matTooltipPosition]="'right'">
-                        {{ options?.name + ' (' + options.count + ')'}}
-                    </span>
-                </mat-checkbox>
-            </section>
-        </mat-selection-list> -->
     <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)"></mat-calendar>
   </div>
 </div>
