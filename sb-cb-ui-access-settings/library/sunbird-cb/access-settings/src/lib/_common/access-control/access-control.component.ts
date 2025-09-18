@@ -168,7 +168,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.destroy$.next();
     this.destroy$.complete();
   }
-
+  
   async fetchCadreConfigData(): Promise<void> {
     this.isLoading = true;
 
@@ -185,15 +185,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
 
-      if (this.config.accessControlCriteriaSelection.allowCustomsField) {
-        if (!this.isCCA) {
-          this.getCustomsField();
-        }
-    }
-    // if isCCA is false then no need to wait for customs field
-      if(this.isCCA) {
+      if (this.config.accessControlCriteriaSelection.allowCustomsField && !this.isCCA) {
+        this.getCustomsField();
+      } else {
         this.isLoading = false;
       }
+    
     }
   }
 
