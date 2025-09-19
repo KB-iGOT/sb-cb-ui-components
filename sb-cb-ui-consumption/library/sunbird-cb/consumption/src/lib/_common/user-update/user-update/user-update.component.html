@@ -45,10 +45,10 @@
             <div class="flex gap-2 items-center">
               <mat-form-field appearance="outline" class="w-full">
                 <mat-select formControlName="designation" placeholder="Choose a designation"
-                  panelClass="profile-control" (openedChange)="setupScrollListener($event)"
+                  panelClass="user-edit" (openedChange)="setupScrollListener($event)"
                   (closed)="onDesignationDropdownClosed()">
                   <div class="sticky-search-container" (click)="$event.stopPropagation()">
-                    <div class="search-input-wrapper profile-control">
+                    <div class="search-input-wrapper user-edit">
                       <input type="text" placeholder="Search designation" formControlName="searchDesignation"
                         class="search-input" (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()"
                         autocomplete="off">
@@ -135,8 +135,11 @@
           <div>
             <mat-selection-list id="roles" formControlName="roles" #roles class="roles-list">
               <ng-container *ngFor="let role of rolesList">
-                <mat-list-option (click)="modifyUserRoles(role.roleName)" [selected]="role.isSelected"
-                  [value]="role?.roleName">
+                <mat-list-option [ngClass]="{'oppDisable': role.roleName === 'PUBLIC'}"
+                  (click)="modifyUserRoles(role.roleName)"
+                  [selected]="role.isSelected"
+                  [value]="role?.roleName"
+                  [disabled]="role.roleName === 'PUBLIC'">
                   {{role.roleName}}
                 </mat-list-option>
               </ng-container>
@@ -301,8 +304,15 @@
               <div class="detail-item">
                 <div class="other-details-label">Mother Tongue</div>
                 <mat-form-field appearance="outline" class="w-full">
-                  <input matInput formControlName="domicileMedium" placeholder="Enter Mother Tongue">
+                  <input id="language" matInput type="text" placeholder="Mother Tongue" formControlName="domicileMedium"
+                    [matAutocomplete]="motherTongueAuto" aria-label="Domicile Medium (Mother Tongue)" #motherTongue
+                    maxlength="30" />
                 </mat-form-field>
+                <mat-autocomplete #motherTongueAuto="matAutocomplete" autoActiveFirstOption="true">
+                  <mat-option *ngFor="let option of masterLanguages | async" [value]="option.name">
+                    {{ option.name }}
+                  </mat-option>
+                </mat-autocomplete>
               </div>
               <div class="detail-item">
                 <div class="other-details-label">Category</div>

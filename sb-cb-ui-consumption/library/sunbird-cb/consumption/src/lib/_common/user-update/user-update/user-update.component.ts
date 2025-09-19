@@ -2,13 +2,14 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import * as _ from 'lodash'
 import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
-import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators'
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators'
 import { UserService } from '../user.service'
 import { MatLegacyDialog } from '@angular/material/legacy-dialog'
 import { ConfirmationDialogComponent } from '../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 import { DatePipe } from '@angular/common'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { COMMA, ENTER } from '@angular/cdk/keycodes'
+import { Observable, of } from 'rxjs'
 
 const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a-zA-Z0-9]*[a-zA-Z0-9]+)?(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/
 
@@ -63,6 +64,8 @@ export class UserUpdateComponent implements OnInit {
   isMdoLeader = false
   today = new Date()
   separatorKeysCodes: number[] = [ENTER, COMMA]
+  masterLanguages: Observable<any[]> | undefined
+  masterLanguagesEntries: any
 
   phoneNumberPattern = '^((\\+91-?)|0)?[0-9]{10}$'
   emailRegix = `^[\\w\-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`
@@ -124,6 +127,8 @@ export class UserUpdateComponent implements OnInit {
   async initialization() {
     await this.loadRoles()
     await this.loadGroups()
+    this.loadLangauages()
+    
     this.valueChanges()
     this.getUserDetails()
   }
@@ -146,6 +151,13 @@ export class UserUpdateComponent implements OnInit {
         this.mapRoles(user)
       }
     })
+  }
+
+  loadLangauages() {
+    this.userService.getMasterLanguages().subscribe(
+      (data: any) => {
+        this.masterLanguagesEntries = data.languages
+      })
   }
 
   valueChanges() {
@@ -173,6 +185,38 @@ export class UserUpdateComponent implements OnInit {
           settingValueChange = false
         })
     }
+
+    const domicileMediumControl = this.otherDetailsForm.get('domicileMedium')
+    if (domicileMediumControl) {
+      domicileMediumControl.valueChanges
+        .pipe(
+          debounceTime(500),
+          distinctUntilChanged(),
+          startWith(''),
+          map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
+          map((name: any) => name ? this.filterLanguage(name) : (this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])),
+        )
+        .subscribe(res => {
+          this.masterLanguages = of(res)
+        })
+    }
+    // this.masterLanguages = this.otherDetailsForm.get('domicileMedium')!.valueChanges
+    //   .pipe(
+    //     debounceTime(500),
+    //     distinctUntilChanged(),
+    //     startWith(''),
+    //     map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
+    //     map((name: any) => name ? this.filterLanguage(name) : this.masterLanguagesEntries.slice()),
+    //   )
+  // }
+  }
+
+  filterLanguage(name: string) {
+    if (name) {
+      const filterValue = name.toLowerCase()
+      return this.masterLanguagesEntries ? this.masterLanguagesEntries.filter((option: any) => option.name.toLowerCase().includes(filterValue)) : []
+    }
+    return this.masterLanguagesEntries
   }
 
   //#region (get user details)
@@ -732,15 +776,6 @@ export class UserUpdateComponent implements OnInit {
     })
   }
   //#endregion (UI interactions)
-
-  onRoleChange(role: string, event: any) {
-    const currentRoles = this.userForm.get('roles')?.value || []
-    if (event.checked) {
-      this.userForm.get('roles')?.setValue([...currentRoles, role])
-    } else {
-      this.userForm.get('roles')?.setValue(currentRoles.filter((r: string) => r !== role))
-    }
-  }
 
   openSnackbar(primaryMsg: string, duration: number = 5000) {
     this.snackBar.open(primaryMsg, 'X', {
