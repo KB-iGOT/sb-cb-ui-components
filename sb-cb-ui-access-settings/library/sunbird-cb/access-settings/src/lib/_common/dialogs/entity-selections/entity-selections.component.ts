@@ -196,7 +196,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   private getSelectionValue(item: any): any {
     if (typeof item !== "object" || item === null) {
-      return item?.toLowerCase();
+      return item
     } else if (
       this.selectionType === NsAccessControlConfig.SelectionType.Cadre ||
       this.selectionType === NsAccessControlConfig.SelectionType.Service ||
@@ -210,12 +210,20 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     return item?.id?.toLowerCase() || item?.identifier?.toLowerCase() || item;
   }
 
-  isSelected(item: any): boolean {
-    const value = this.getSelectionValue(item);
-    const selectedData = this.selectedData.map((ele) => (typeof ele === "string" ? ele.toLowerCase() : ele));
-    const selectedDataTemp = this.selectedDataTemp.map((ele) => (typeof ele === "string" ? ele.toLowerCase() : ele));
-    return this.filterValue === "selected" ? selectedData.includes(value) : selectedDataTemp.includes(value);
-  }
+ isSelected(item: any): boolean {
+  const value = this.getSelectionValue(item);
+  const compareList = this.filterValue === "selected" ? this.selectedData : this.selectedDataTemp;
+
+  return compareList.some(selected => {
+    if (typeof selected === 'string' && typeof value === 'string') {
+      return selected === value ||
+             selected.toLowerCase() === value.toLowerCase() ||
+             selected.toUpperCase() === value.toUpperCase();
+    } else {
+      return selected === value;
+    }
+  });
+}
 
   toggleSelection(item: any): void {
     const value = this.getSelectionValue(item);
@@ -315,8 +323,20 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         const selectedData = this.selectedData.map((ele) => ele.fieldValue);
         filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.fieldValue));
       } else {
-        const selectedData = this.selectedData.map((ele) => (typeof ele === "string" ? ele.toLowerCase() : ele));
-        filtered = this.dataListDup.filter((item) => this.isSelected(item) && selectedData.includes(item?.name?.toLowerCase() || item?.designation?.toLowerCase() || item?.id?.toLowerCase() || item?.identifier?.toLowerCase() || item?.toLowerCase()));
+          filtered = this.dataListDup.filter(item => {
+          const keysToCheck = [item?.name, item?.designation, item?.id, item?.identifier, item];
+          return this.isSelected(item) && keysToCheck.some(key =>
+            key && this.selectedData.some(selected => {
+              if (typeof selected === 'string' && typeof key === 'string') {
+                return selected === key ||
+                      selected.toLowerCase() === key.toLowerCase() ||
+                      selected.toUpperCase() === key.toUpperCase();
+              } else {
+                return selected === key;
+              }
+            })
+          );
+        });
       }
     }
 
