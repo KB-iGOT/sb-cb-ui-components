@@ -518,6 +518,10 @@ export class WidgetContentLibService {
   }
 
   async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean,  baseContentRead?: any,multilingualId?:string) {
+    if(content && content.publicCard && content.publicCard.baseUrl) {
+      window.open(content.publicCard.baseUrl +
+        '/public/toc/' + content?.identifier + '/overview', '_blank') 
+    }
     if (content && content.content && content.content.category === 'Event') {
       const urlData: any = {
         url: `app/event-hub/home/${content.content.identifier}`,

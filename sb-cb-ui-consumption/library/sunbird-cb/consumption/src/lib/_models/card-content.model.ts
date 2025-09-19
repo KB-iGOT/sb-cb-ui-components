@@ -12,6 +12,7 @@ export namespace NsCardContent {
     stateData: any;
     cardCustomeClass?: any;
     sakshamAIGenerated?: string;
+    publicCard?: any;
   }
 
   export interface IContentTags {
