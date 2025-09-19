@@ -40,6 +40,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   @Input() paramFilters: any = [];
   @Input() filtersPanel!: string;
   @Output() queryParamChange = new EventEmitter<any>();
+  @Output() updateUserEvent = new EventEmitter<string>(); 
 
   // searchResults: any = [];
   defaultThumbnail = "";
@@ -276,6 +277,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   applyTelemetry(event: any, index: number) {
     this.raiseTelemetry(event, index);
+  }
+
+  updateUserDetails(event: string) {
+    this.updateUserEvent.emit(event);
   }
 
   raiseTelemetry(content: any, i: number) {

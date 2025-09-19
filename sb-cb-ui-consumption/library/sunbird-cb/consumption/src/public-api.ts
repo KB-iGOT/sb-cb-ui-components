@@ -104,3 +104,5 @@ export * from './lib/_common/avatar-photo-lib/avatar-photo-lib.module';
 export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.component';
 export * from './lib/_common/toc-multi-lingual-dialog/toc-multi-lingual-dialog.module';
 export * from './lib/_common/cards/available-languages/available-languages.component';
+export * from './lib/_common/user-update/user-update.module';
+export * from './lib/_common/user-update/user-update/user-update.component';    

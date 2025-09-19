@@ -18,6 +18,7 @@ export class GlobalSearchComponent implements OnInit {
   compentencyKey!: any;
   searchCategory: string = "";
   environment!: any;
+  userId!: string;
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
@@ -89,5 +90,14 @@ export class GlobalSearchComponent implements OnInit {
       queryParams,
       queryParamsHandling: "merge"
     });
+  }
+
+  updateUserDetails(event: string) {
+    this.userId = event;
+  }
+  updateUserStatus(event: any) {
+    if (event) {
+      this.userId = '';
+    }
   }
 }

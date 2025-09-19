@@ -46,6 +46,7 @@ import { DesignationCardComponent } from "./_components/designation-card/designa
 import { TrainingPlansCardComponent } from "./_components/training-plans-card/training-plans-card.component";
 import { UsersCardComponent } from "./_components/users-card/users-card.component";
 import { DefaultMatCalendarRangeStrategy, MatDatepickerModule, MatRangeDateSelectionModel } from "@angular/material/datepicker";
+import { UserUpdateModule } from '@sunbird-cb/consumption'
 
 @NgModule({
   declarations: [
@@ -101,7 +102,8 @@ import { DefaultMatCalendarRangeStrategy, MatDatepickerModule, MatRangeDateSelec
     MatRadioModule,
     TranslateModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    UserUpdateModule
   ],
   exports: [SearchListingComponent, SearchInputHomeComponent],
   providers: [importProvidersFrom(MatNativeDateModule), MatRangeDateSelectionModel, DefaultMatCalendarRangeStrategy]
