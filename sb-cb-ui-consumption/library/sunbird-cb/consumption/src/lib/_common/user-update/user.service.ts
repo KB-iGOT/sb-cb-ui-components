@@ -12,6 +12,7 @@ const API_END_POINTS = {
   GET_SEARCH_DESIGNATIONS: '/apis/proxies/v8/designation/search',
   UPDATE_USER_DETAILS: '/apis/proxies/v8/user/v1/admin/extPatch',
   ADD_USER_ROLE: '/apis/proxies/v8/user/private/v1/assign/role',
+  GET_MASTER_LANGUAGES: '/apis/protected/v8/user/profileRegistry/getMasterLanguages',
 
 }
 @Injectable({
@@ -47,6 +48,10 @@ export class UserService {
 
   addUserToRole(req: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.ADD_USER_ROLE}`, req)
+  }
+
+  getMasterLanguages(): Observable<any> {
+    return this.http.get<any>(API_END_POINTS.GET_MASTER_LANGUAGES)
   }
 
 

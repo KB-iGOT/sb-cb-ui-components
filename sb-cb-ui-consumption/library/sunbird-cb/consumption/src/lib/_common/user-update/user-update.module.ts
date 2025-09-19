@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatLegacyListModule } from '@angular/material/legacy-list';
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module';
 import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
+import { MatLegacyAutocompleteModule } from '@angular/material/legacy-autocomplete';
 
 
 
@@ -40,6 +41,7 @@ import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
     MatDatepickerModule,
     MatLegacyListModule,
     MatLegacyChipsModule,
+    MatLegacyAutocompleteModule,
     DialogComponentsModule
   ],
   exports: [
