@@ -154,7 +154,42 @@
 .oppDisable {
   opacity: 0.6;
   pointer-events: none;
-  
+
+}
+
+.appr-text-field {
+  width: 80%;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  padding: 9px;
+  /* stylelint-disable */
+  font: 400 14px Lato;
+  /* stylelint-enable */
+}
+
+.editreasonicon {
+  vertical-align: middle;
+  color: #666 !important;
+}
+
+.rejectdialog {
+  margin: -24px;
+  .mat-dialog-title {
+    background: #1b4ca1;
+    color: #fff;
+    padding: 1em 1em;
+    /* stylelint-disable */
+    font: 500 18px/24px Montserrat !important;
+    /* stylelint-enable */
+  }
+  .mat-dialog-content {
+    margin: 0 !important;
+    padding: 0 24px !important;
+  }
+  .mat-dialog-actions {
+    padding: 10px 24px !important;
+    margin-bottom: 0 !important;
+  }
 }
 
 ::ng-deep .user-edit {
@@ -237,6 +272,10 @@
       border-color: #F3962F;
       box-shadow: 0 0 0 1px rgba(243, 150, 47, 0.2);
     }
+  }
+
+  .mat-select-arrow-wrapper {
+    margin-top: 7px;
   }
   
 }

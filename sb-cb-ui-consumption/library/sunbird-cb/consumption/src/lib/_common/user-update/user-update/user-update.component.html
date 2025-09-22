@@ -1,7 +1,7 @@
 <div class="p-6">
   <div class="flex items-center justify-between items-center mb-8">
     <div class="flex items-center gap-4">
-      <mat-icon class="backIcon" (click)="cancel()">arrow_back</mat-icon>
+      <!-- <mat-icon class="backIcon" (click)="cancel()">arrow_back</mat-icon> -->
       <div>
         <sb-uic-avatar-photo i18n-aria-label role="link" tabindex="0" [name]="avatarUserName"
           [photoUrl]="userDetails?.photo" size="m-side-rating">
@@ -10,7 +10,8 @@
       <div class=" flex flex-col">
         <div class="flex gap-2">
           <div class="slot-header">{{userName}} </div>
-          <ng-container *ngIf="designationStatus === 'VERIFIED' && groupStatus === 'VERIFIED'; else verificationPending">
+          <ng-container
+            *ngIf="designationStatus === 'VERIFIED' && groupStatus === 'VERIFIED'; else verificationPending">
             <div class="flex items-center justify-center gap-2 px-2 statusApproved">
               Aproved <mat-icon class="status-info-icon">check_circle</mat-icon>
             </div>
@@ -19,7 +20,7 @@
             <div class="flex items-center justify-center gap-2 px-2 statusPending">
               Pending <mat-icon class="status-info-icon">info_outline</mat-icon>
             </div>
-          </ng-template>  
+          </ng-template>
         </div>
         <div class="userDesignation">{{currentDesignation}}</div>
       </div>
@@ -44,9 +45,8 @@
             <div class="label required">Designation</div>
             <div class="flex gap-2 items-center">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-select formControlName="designation" placeholder="Choose a designation"
-                  panelClass="user-edit" (openedChange)="setupScrollListener($event)"
-                  (closed)="onDesignationDropdownClosed()">
+                <mat-select formControlName="designation" placeholder="Choose a designation" panelClass="user-edit"
+                  (openedChange)="setupScrollListener($event)" (closed)="onDesignationDropdownClosed()">
                   <div class="sticky-search-container" (click)="$event.stopPropagation()">
                     <div class="search-input-wrapper user-edit">
                       <input type="text" placeholder="Search designation" formControlName="searchDesignation"
@@ -121,6 +121,81 @@
               </div>
             </div>
           </div>
+
+          <!-- #region (approval section) -->
+            <ng-container *ngIf="designationApprovalField || groupApprovalField">
+              <hr class="w-full">
+              <div class="flex gap-2 flex-col">
+                <div class="slot-header">Approvals</div>
+                <ng-container *ngIf="designationApprovalField">
+                  <div class="flex flex-col gap-2">
+                    <div class="label required">Designation</div>
+                    <div class="flex gap-2 items-center">
+                      <input type="text" class="appr-text-field" [value]="designationApprovalField?.toValue"
+                        [disabled]="true">
+                      <ng-container *ngIf="userForm?.get('approveDesignation')?.value === true">
+                        <mat-icon class="verified-icon margin-left-xs">
+                          check_circle</mat-icon>
+                      </ng-container>
+                      <ng-container *ngIf="userForm?.get('approveDesignation')?.value === false">
+                        <mat-icon class="nonverified-icon margin-left-xs">
+                          cancel</mat-icon>
+                      </ng-container>
+                    </div>
+                    <mat-radio-group aria-label="Select an option"
+                      formControlName="approveDesignation" class="mat-caption">
+                      <mat-radio-button value="approvedesg" class="margin-right-s"
+                        (change)="onClickHandleWorkflow('APPROVE', 'designation')">
+                        Approve
+                      </mat-radio-button>
+                      <mat-radio-button value="rejectdesg" (change)="onClickHandleWorkflow('REJECT', 'designation')">
+                        Reject
+                      </mat-radio-button>
+                      <mat-icon class="margin-left-m editreasonicon cursor-pointer"
+                          *ngIf="designationApprovalField?.action === 'REJECT' && designationApprovalField?.comment !== '' && !htmlDetected"
+                          (click)="updateRejection(designationApprovalField)">chat_bubble</mat-icon>
+                    </mat-radio-group>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="groupApprovalField">
+                  <div class="flex flex-col gap-2">
+                    <div class="label required">Group</div>
+                    <div class="flex gap-2 items-center">
+                      <input type="text" class="appr-text-field" [value]="groupApprovalField?.toValue"
+                        [disabled]="true">
+                      <ng-container *ngIf="userForm?.get('approveGroup')?.value === true">
+                        <mat-icon class="verified-icon margin-left-xs">
+                          check_circle</mat-icon>
+                      </ng-container>
+                      <ng-container *ngIf="userForm?.get('approveGroup')?.value === false">
+                        <mat-icon class="nonverified-icon margin-left-xs">
+                          cancel</mat-icon>
+                      </ng-container>
+                    </div>
+                    <mat-radio-group aria-label="Select an option"
+                      formControlName="approveGroup" class="mat-caption">
+                      <mat-radio-button value="approvegroup" class="margin-right-s"
+                        (change)="onClickHandleWorkflow('APPROVE', 'group')">
+                        Approve
+                      </mat-radio-button>
+                      <mat-radio-button value="rejectgroup" (change)="onClickHandleWorkflow('REJECT', 'group')">
+                        Reject
+                      </mat-radio-button>
+                      <mat-icon class="margin-left-m editreasonicon cursor-pointer"
+                          *ngIf="groupApprovalField?.action === 'REJECT' && groupApprovalField?.comment !== '' && !htmlDetected"
+                          (click)="updateRejection(groupApprovalField)">chat_bubble</mat-icon>
+                    </mat-radio-group>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="showApprovalButtons">
+                  <div class="flex justify-end">
+                    <button mat-button class="updateProfileBtn"
+                      (click)="updateApprovals()">Update Approvals</button>
+                  </div>
+                </ng-container>
+              </div>
+            </ng-container>
+          <!-- #endregion (approval section) -->
         </mat-card-content>
       </mat-card>
       <!-- #endregion (primary details) -->
@@ -136,9 +211,7 @@
             <mat-selection-list id="roles" formControlName="roles" #roles class="roles-list">
               <ng-container *ngFor="let role of rolesList">
                 <mat-list-option [ngClass]="{'oppDisable': role.roleName === 'PUBLIC'}"
-                  (click)="modifyUserRoles(role.roleName)"
-                  [selected]="role.isSelected"
-                  [value]="role?.roleName"
+                  (click)="modifyUserRoles(role.roleName)" [selected]="role.isSelected" [value]="role?.roleName"
                   [disabled]="role.roleName === 'PUBLIC'">
                   {{role.roleName}}
                 </mat-list-option>
@@ -200,7 +273,7 @@
             </div>
             <div class="detail-item">
               <div class="other-details-label">eHRMS ID/External System ID</div>
-              <div class="detail-value">{{ otherDetails?.externalSystemId }}</div>
+              <div class="detail-value">{{ otherDetails?.ehrmsID }}</div>
             </div>
             <div class="detail-item">
               <div class="other-details-label">Date of Retirement</div>
@@ -248,8 +321,8 @@
                   <input matInput formControlName="employeeId" placeholder="Enter Employee ID">
                   <mat-error [hidden]="false" class="custom-error" *ngIf="otherDetailsForm?.controls['employeeId'].touched &&
                       otherDetailsForm?.controls['employeeId'].errors?.pattern" aria-label="Please enter a valid id">
-                      Please enter a valid employee Id
-                    </mat-error>
+                    Please enter a valid employee Id
+                  </mat-error>
                 </mat-form-field>
               </div>
               <div class="detail-item">
@@ -296,7 +369,7 @@
                 <div class="other-details-label">Date of Birth</div>
                 <mat-form-field appearance="outline" class="w-full">
                   <input matInput formControlName="dob" [matDatepicker]="picker" placeholder="Choose Date of Birth"
-                  [min]="1/1/1900" [max]="today">
+                    [min]="1/1/1900" [max]="today">
                   <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
@@ -332,12 +405,6 @@
                 <div class="other-details-label">eHRMS ID/External System ID</div>
                 <mat-form-field appearance="outline" class="w-full">
                   <input matInput formControlName="ehrmsID" placeholder="Enter eHRMS/External System ID">
-                </mat-form-field>
-              </div>
-              <div class="detail-item">
-                <div class="other-details-label">Date of Retirement</div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <input matInput formControlName="externalSystemDor" placeholder="Enter Date of Retirement">
                 </mat-form-field>
               </div>
               <div class="detail-item">
@@ -387,18 +454,17 @@
               <div class="slot-header">Tags</div>
               <div class="flex gap-4">
                 <mat-form-field appearance="outline" class="w-full">
-                  <input #tags matInput formControlName="tags" placeholder="Type here" [matChipInputFor]="chipListTags" autocomplete="off"
-                    maxlength="100" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  <input #tags matInput formControlName="tags" placeholder="Type here" [matChipInputFor]="chipListTags"
+                    autocomplete="off" maxlength="100" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                     (matChipInputTokenEnd)="addActivity($event)">
                   <mat-error class="hintErr" *ngIf="otherDetailsForm?.controls['tags'].errors?.pattern">
                     Only space and alphabets are supported
                   </mat-error>
                 </mat-form-field>
                 <button mat-raised-button type="button" [disabled]="!tags.value"
-                    (click)="addActivity({input: tags, value: tags.value})"
-                    class="btn-success btn-add-activity">
-                    <span class="text-white"> Add tag</span>
-                  </button>
+                  (click)="addActivity({input: tags, value: tags.value})" class="btn-success btn-add-activity">
+                  <span class="text-white"> Add tag</span>
+                </button>
               </div>
             </div>
             <mat-chip-list #chipListTags>
@@ -417,3 +483,49 @@
   </div>
 
 </div>
+
+
+<ng-template #rejectDialog>
+  <form class="rejectdialog">
+    <p mat-dialog-title class="dialog-title">Reason for rejection</p>
+    <mat-dialog-content>
+      <mat-form-field class="w-full mt-5" appearance="outline">
+        <textarea matInput class="reason-text-area" [(ngModel)]="comment" name="reason"
+          placeholder="Type the description in fewer than 100 characters" resizable="none" maxlength="100"
+          (input)="validateText($event.target.value)"></textarea>
+        <mat-error [hidden]="false" aria-label="Budget year Error|Explains name is required" *ngIf="htmlDetected">
+          Field is mandatory
+        </mat-error>
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions class="flex flex-wrap justify-end">
+      <button mat-raised-button class="btn-success btn-responsive successbtn" [mat-dialog-close]="true"
+        [disabled]="!comment || htmlDetected">
+        <span class="text-white">Submit</span></button>
+      <button mat-raised-button class="btn-success btn-responsive cancelbtn" matDialogClose>Cancel</button>
+    </mat-dialog-actions>
+  </form>
+</ng-template>
+
+<ng-template #updaterejectDialog>
+  <form class="rejectdialog">
+    <p mat-dialog-title class="dialog-title">Reason for rejection
+      <mat-icon (click)="showedit()" *ngIf="!showeditText" class="float-right cursor-pointer">edit_square</mat-icon>
+    </p>
+    <mat-dialog-content>
+      <p class="margin-top-l margin-bottom-l" *ngIf="!showeditText">{{comment}}</p>
+      <mat-form-field class="w-full mt-5" appearance="outline" *ngIf="showeditText">
+        <textarea matInput class="reason-text-area" [(ngModel)]="comment" name="reason"
+          placeholder="Type the description in fewer than 100 characters" resizable="none" maxlength="100"
+          (input)="validateText($event.target.value)"></textarea>
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions class="flex flex-wrap justify-end" *ngIf="showeditText">
+      <button mat-raised-button class="btn-success btn-responsive successbtn" [disabled]="!comment || htmlDetected"
+        [mat-dialog-close]="true">
+        <span class="text-white">Update</span></button>
+      <button mat-raised-button class="btn-success btn-responsive cancelbtn" matDialogClose>Cancel</button>
+    </mat-dialog-actions>
+  </form>
+</ng-template>
+
