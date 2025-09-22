@@ -1797,6 +1797,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           content,
           ...(content.batch && { batch: content.batch }),
           cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
+          ...(strip.stripConfig && strip.stripConfig.publicCard && { publicCard: strip.stripConfig.publicCard }),
           cardCustomeClass: strip.customeClass ? strip.customeClass : '',
           context: { pageSection: strip.key, position: idx },
           intranetMode: strip.stripConfig && strip.stripConfig.intranetMode,

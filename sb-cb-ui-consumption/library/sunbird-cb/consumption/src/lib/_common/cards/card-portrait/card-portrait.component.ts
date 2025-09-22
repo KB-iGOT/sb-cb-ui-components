@@ -77,6 +77,9 @@ export class CardPortraitComponent implements OnInit {
     if (this.widgetData && this.widgetData.context && this.widgetData.context.pageSection) {
       contentData['typeOfTelemetry'] = this.widgetData.context.pageSection
     }
+    if (this.widgetData && this.widgetData.publicCard) {
+      contentData['publicCard'] = this.widgetData.publicCard
+    }
     if (this.widgetData && this.widgetData.sakshamAIGenerated) {
       contentData['sakshamAIGenerated'] = this.widgetData.sakshamAIGenerated
     }
