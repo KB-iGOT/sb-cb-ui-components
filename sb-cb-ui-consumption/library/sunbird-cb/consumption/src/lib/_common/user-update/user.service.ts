@@ -14,7 +14,7 @@ const API_END_POINTS = {
   UPDATE_USER_DETAILS: '/apis/proxies/v8/user/v1/admin/extPatch',
   ADD_USER_ROLE: '/apis/proxies/v8/user/private/v1/assign/role',
   GET_MASTER_LANGUAGES: '/apis/protected/v8/user/profileRegistry/getMasterLanguages',
-
+  WORKFLOW_HANDLER_V2: '/apis/protected/v8/workflowhandler/v2/transition'
 }
 @Injectable({
   providedIn: "root",
@@ -53,6 +53,10 @@ export class UserService {
 
   addUserToRole(req: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.ADD_USER_ROLE}`, req)
+  }
+
+  handleWorkflowV2(request: any): Observable<any> {
+    return this.http.post<any>(API_END_POINTS.WORKFLOW_HANDLER_V2, request)
   }
 
   getMasterLanguages(): Observable<any> {

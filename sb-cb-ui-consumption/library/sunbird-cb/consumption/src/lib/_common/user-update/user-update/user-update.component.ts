@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import * as _ from 'lodash'
 import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
@@ -25,6 +25,11 @@ export class UserUpdateComponent implements OnInit {
   //#region (input output)
   @Input() userId: string | null = null
   @Output() updateEvent = new EventEmitter<string>()
+
+  @ViewChild('rejectDialog')
+  rejectDialog!: TemplateRef<any>
+  @ViewChild('updaterejectDialog')
+  updaterejectDialog!: TemplateRef<any>
   //#endregion (input output)
 
   userForm!: FormGroup
@@ -37,11 +42,12 @@ export class UserUpdateComponent implements OnInit {
   currentDesignation = ''
   designationStatus = ''
   designationApprovalField: any
-  approveDesignation = ''
   groupStatus = ''
   groupApprovalField: any
-  approveGroup = ''
+  actionList: any[] = []
   showCadreDetails = false
+  comment = ''
+  showeditText = false
 
   otherDetailsEditable = false;
   rolesList: {
@@ -77,6 +83,9 @@ export class UserUpdateComponent implements OnInit {
   yearPattern = '(^[0-9]{4}$)'
   empIDPattern = `^[A-Za-z0-9]+$`
   namePatern = '^[a-zA-Z ]*$'
+
+  noHtmlCharacter = new RegExp(/<[^>]*>|(function[^\s]+)|(javascript:[^\s]+)/i)
+  htmlDetected = false
 
   //#endregion (variables)
 
@@ -174,7 +183,7 @@ export class UserUpdateComponent implements OnInit {
   //#region (get user details)
   getApprovalsStatus() {
     const formBody = {
-      serviceName: 'profile update',
+      serviceName: 'profile',
       applicationStatus: 'SEND_FOR_APPROVAL',
       requestType: ['GROUP_CHANGE', 'DESIGNATION_CHANGE'],
       deptName: _.get(this.configSvc, 'unMappedUser.channel'),
@@ -187,29 +196,41 @@ export class UserUpdateComponent implements OnInit {
     }
     this.userService.getApprovalsList(formBody).subscribe((res: any) => {
       const currentUserInfo = _.get(res, 'result.data', []).filter((user: any) => _.get(user, 'userInfo.id') === this.userId)
-      if(currentUserInfo.length > 0) {
-        this.setApprovalsStatus(currentUserInfo[0].wfInfo)
+      if(currentUserInfo && currentUserInfo.length > 0) {
+        this.setApprovalsStatus(currentUserInfo[0].wfInfo, currentUserInfo[0].userInfo)
       }
     })
   }
 
-  setApprovalsStatus(wfInfo: any) {
+  setApprovalsStatus(wfInfo: any, userInfo: any) {
     if(wfInfo && wfInfo.length > 0) {
       wfInfo.forEach((item: any) => {
         if(item.currentStatus === 'SEND_FOR_APPROVAL') {
           item['formatedUpdateFieldValues'] = JSON.parse(item.updateFieldValues)
-          console.log('item', item)
           if(item.requestType === 'DESIGNATION_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.designation', '')
+            item['wid'] = _.get(userInfo, 'wid', '')
+            this.addControl(this.userForm, 'approveDesignation', item['toValue'], [Validators.required])
             this.designationApprovalField = item
           } else if(item.requestType === 'GROUP_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.group', '')
+            this.addControl(this.userForm, 'approveGroup', item['toValue'], [Validators.required])
             this.groupApprovalField = item
           }
         }
       })
     }
   }
+
+  addControl(group: FormGroup, controlName: string, value: any = '', validatorsList: any[] = []) {
+    const controlExists = group ? group.get(controlName) : null;
+  
+    if (!controlExists) {
+      // Add control if condition is true and control doesn't exist
+      group.addControl(controlName, this.fb.control(value, validatorsList));
+    }
+  }
+
   patchUserDetails(user: any) {
     this.isMdoLeader = _.get(this.configSvc, 'unMappedUser.roles', []).includes('MDO_LEADER')
     this.userName = _.get(user, 'firstName', '')
@@ -388,15 +409,6 @@ export class UserUpdateComponent implements OnInit {
           this.masterLanguages = of(res)
         })
     }
-    // this.masterLanguages = this.otherDetailsForm.get('domicileMedium')!.valueChanges
-    //   .pipe(
-    //     debounceTime(500),
-    //     distinctUntilChanged(),
-    //     startWith(''),
-    //     map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
-    //     map((name: any) => name ? this.filterLanguage(name) : this.masterLanguagesEntries.slice()),
-    //   )
-  // }
   }
 
   filterLanguage(name: string) {
@@ -808,48 +820,114 @@ export class UserUpdateComponent implements OnInit {
     })
   }
 
-  onClickHandleWorkflow(action: string) {
-    console.log('action', action);
-    // const req = {
-    //   action,
-    //   comment: '',
-    //   state: 'SEND_FOR_APPROVAL',
-    //   userId: field.wf.userId,
-    //   applicationId: field.wf.applicationId,
-    //   actorUserId: this.userwfData.userInfo.wid,
-    //   wfId: field.wf.wfId,
-    //   deptName: field.wf.deptName || '',
-    //   serviceName: 'profile',
-    //   updateFieldValues: JSON.parse(field.wf.updateFieldValues),
-    // }
-    // if (action === 'APPROVE') {
-    //   const index = this.actionList.findIndex((x: any) => x.wfId === req.wfId)
-    //   if (index > -1) {
-    //     this.actionList[index] = req
-    //   } else {
-    //     this.actionList.push(req)
-    //   }
-    // } else {
-    //   this.comment = ''
-    //   const dialogRef = this.dialog.open(this.rejectDialog, {
-    //     width: '770px',
-    //     minHeight: '260px'
-    //   })
-    //   dialogRef.afterClosed().subscribe(result => {
-    //     if (result) {
-    //       req.comment = this.comment
-    //       field.comment = this.comment
-    //       const index = this.actionList.findIndex((x: any) => x.wfId === req.wfId)
-    //       if (index > -1) {
-    //         this.actionList[index] = req
-    //       } else {
-    //         this.actionList.push(req)
-    //       }
-    //     } else {
-    //       dialogRef.close()
-    //     }
-    //   })
-    // }
+  onClickHandleWorkflow(action: string, field: string) {
+    let fieldDetails: any
+    if (field === 'designation') {
+      fieldDetails = this.designationApprovalField
+    } else if (field === 'group') {
+      fieldDetails = this.groupApprovalField
+    }
+    fieldDetails['action'] = action
+    if (fieldDetails) {
+      const req = {
+        action,
+        comment: '',
+        state: 'SEND_FOR_APPROVAL',
+        userId: fieldDetails.userId,
+        applicationId: fieldDetails.applicationId,
+        actorUserId: fieldDetails.wid,
+        wfId: fieldDetails.wfId,
+        deptName: fieldDetails.deptName || '',
+        serviceName: 'profile',
+        updateFieldValues: JSON.parse(fieldDetails.updateFieldValues),
+      }
+      if (action === 'APPROVE') {
+        const index = this.actionList.findIndex((x: any) => x.wfId === req.wfId)
+        if (index > -1) {
+          this.actionList[index] = req
+        } else {
+          this.actionList.push(req)
+        }
+      } else {
+        this.comment = ''
+        const dialogRef = this.dialog.open(this.rejectDialog, {
+          width: '770px',
+          minHeight: '260px'
+        })
+        dialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            req.comment = this.comment
+            fieldDetails['comment'] = this.comment
+            const index = this.actionList.findIndex((x: any) => x.wfId === req.wfId)
+            if (index > -1) {
+              this.actionList[index] = req
+            } else {
+              this.actionList.push(req)
+            }
+          } else {
+            dialogRef.close()
+          }
+        })
+      }
+    }
+  }
+
+  updateRejection(field: any) {
+    this.comment = field.comment
+    const dialogRef = this.dialog.open(this.updaterejectDialog, {
+      width: '770px',
+    })
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.actionList.forEach((req: any) => {
+          if (req.wfId === field.wfId) {
+            req.comment = this.comment
+            field.comment = this.comment
+            this.showeditText = false
+          }
+        })
+      } else {
+        dialogRef.close()
+      }
+    })
+  }
+
+  validateText(text: any) {
+    const regexMatch = text.match(this.noHtmlCharacter)
+    if (regexMatch) {
+      this.htmlDetected = true
+      this.snackBar.open('HTML or Js is not allowed')
+    } else {
+      this.htmlDetected = false
+    }
+  }
+
+  showedit() {
+    this.showeditText = true
+  }
+
+  get showApprovalButtons() : boolean {
+    if(!(this.designationApprovalField && this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
+      return false
+    } else if(!(this.groupApprovalField && this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
+      return false
+    }
+    return true
+  }
+
+  updateApprovals() {
+    if (this.actionList.length > 0) {
+      const request: any = {
+        request: this.actionList
+      }
+      this.userService.handleWorkflowV2(request).subscribe((res: any) => {
+        if (res.result.data) {
+          if (res.result.data) {
+            this.openSnackbar('Request has been updated')
+          }
+        }
+      })
+    }
   }
   //#endregion (UI interactions)
 

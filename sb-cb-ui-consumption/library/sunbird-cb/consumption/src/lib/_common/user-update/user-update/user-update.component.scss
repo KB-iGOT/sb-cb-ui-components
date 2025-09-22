@@ -157,10 +157,6 @@
 
 }
 
-.approval-section {
-  border-top: 1px solid #000;
-}
-
 .appr-text-field {
   width: 80%;
   border: 1px solid #DDDDDD;
@@ -169,6 +165,31 @@
   /* stylelint-disable */
   font: 400 14px Lato;
   /* stylelint-enable */
+}
+
+.editreasonicon {
+  vertical-align: middle;
+  color: #666 !important;
+}
+
+.rejectdialog {
+  margin: -24px;
+  .mat-dialog-title {
+    background: #1b4ca1;
+    color: #fff;
+    padding: 1em 1em;
+    /* stylelint-disable */
+    font: 500 18px/24px Montserrat !important;
+    /* stylelint-enable */
+  }
+  .mat-dialog-content {
+    margin: 0 !important;
+    padding: 0 24px !important;
+  }
+  .mat-dialog-actions {
+    padding: 10px 24px !important;
+    margin-bottom: 0 !important;
+  }
 }
 
 ::ng-deep .user-edit {
