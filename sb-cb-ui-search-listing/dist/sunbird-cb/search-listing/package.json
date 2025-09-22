@@ -1,0 +1,25 @@
+{
+  "name": "@sunbird-cb/search-listing",
+  "version": "0.0.0-watch+1758570367441",
+  "peerDependencies": {
+    "@angular/common": "^16.2.12",
+    "@angular/core": "^16.2.12"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "module": "fesm2022/sunbird-cb-search-listing.mjs",
+  "typings": "index.d.ts",
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./index.d.ts",
+      "esm2022": "./esm2022/sunbird-cb-search-listing.mjs",
+      "esm": "./esm2022/sunbird-cb-search-listing.mjs",
+      "default": "./fesm2022/sunbird-cb-search-listing.mjs"
+    }
+  }
+}
