@@ -10,6 +10,7 @@ const API_END_POINTS = {
   GET_ALL_ROLES: '/apis/proxies/v8/data/v1/system/settings/get/orgTypeList',
   GET_SUNBIRD_IGOT_SEARCH: '/apis/proxies/v8/sunbirdigot/v4/search',
   GET_SEARCH_DESIGNATIONS: '/apis/proxies/v8/designation/search',
+  PROFILEAPPROVALSLIST: '/apis/protected/v8/workflowhandler/profileApprovalSearch',
   UPDATE_USER_DETAILS: '/apis/proxies/v8/user/v1/admin/extPatch',
   ADD_USER_ROLE: '/apis/proxies/v8/user/private/v1/assign/role',
   GET_MASTER_LANGUAGES: '/apis/protected/v8/user/profileRegistry/getMasterLanguages',
@@ -28,6 +29,10 @@ export class UserService {
 
   getUserById(userid: string): Observable<any> {
     return this.http.get<any>(API_END_POINTS.PROFILE_REGISTRY_V1 + userid).pipe(map(resp => _.get(resp, 'result.response')))
+  }
+
+  getApprovalsList(request: any): Observable<any> {
+    return this.http.post<any>(API_END_POINTS.PROFILEAPPROVALSLIST, request)
   }
 
   getAllRoles(): Observable<any> {

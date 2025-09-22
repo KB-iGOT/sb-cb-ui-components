@@ -9,7 +9,7 @@ import { ConfirmationDialogComponent } from '../../dialog-components/confirmatio
 import { DatePipe } from '@angular/common'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { COMMA, ENTER } from '@angular/cdk/keycodes'
-import { Observable, of } from 'rxjs'
+import { forkJoin, Observable, of } from 'rxjs'
 
 const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a-zA-Z0-9]*[a-zA-Z0-9]+)?(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/
 
@@ -36,7 +36,11 @@ export class UserUpdateComponent implements OnInit {
   rootOrgId = ''
   currentDesignation = ''
   designationStatus = ''
+  designationApprovalField: any
+  approveDesignation = ''
   groupStatus = ''
+  groupApprovalField: any
+  approveGroup = ''
   showCadreDetails = false
 
   otherDetailsEditable = false;
@@ -112,7 +116,6 @@ export class UserUpdateComponent implements OnInit {
       cadreName: [''],
       cadreBatch: [''],
       cadreControllingAuthorityName: [''],
-      externalSystemDor: [''],
       tags: ['', [Validators.pattern(this.namePatern)]],
     })
 
@@ -125,117 +128,89 @@ export class UserUpdateComponent implements OnInit {
   }
 
   async initialization() {
-    await this.loadRoles()
-    await this.loadGroups()
-    this.loadLangauages()
+    this.mergeApiCalls()
     
     this.valueChanges()
-    this.getUserDetails()
   }
 
-  async loadGroups() {
-    await this.userService.getGroups().subscribe(
-      (data: any) => {
-        const res = data.result.response.filter((ele: any) => ele !== 'Others')
+  mergeApiCalls() {
+    if (!this.userId) return
+
+    forkJoin({
+      roles: this.userService.getAllRoles(),
+      groups: this.userService.getGroups(),
+      languages: this.userService.getMasterLanguages(),
+      userDetails: this.userService.getUserById(this.userId)
+    }).subscribe(
+      ({ roles, groups, languages, userDetails }) => {
+        // Handle roles
+        const parseRoledata = JSON.parse(_.get(roles, 'result.response.value', ''))
+        this.orgTypeList = parseRoledata.orgTypeList
+
+        // Handle groups
+        const res = _.get(groups, 'result.response', []).filter((ele: any) => ele !== 'Others')
         this.groupsList = res
+
+        // Handle languages
+        this.masterLanguagesEntries = languages ? languages.languages : []
+
+        // Handle user details
+        if (userDetails) {
+          this.userDetails = userDetails
+          this.getApprovalsStatus()
+          this.rootOrgId = _.get(userDetails, 'rootOrgId', '')
+          this.checkOrgHasDesignations()
+          this.userRoles.clear()
+          this.patchUserDetails(userDetails)
+          this.mapRoles(userDetails)
+        }
       },
-      (_err: any) => {
-      })
+      err => {
+        this.openSnackbar('Failed to load user data. Please try again.')
+      }
+    )
   }
 
-  async loadRoles(user?: any) {
-    this.userService.getAllRoles().subscribe((_data: any) => {
-      const parseRoledata = JSON.parse(_data.result.response.value)
-      this.orgTypeList = parseRoledata.orgTypeList
-      if (user) {
-        this.mapRoles(user)
+  //#region (get user details)
+  getApprovalsStatus() {
+    const formBody = {
+      serviceName: 'profile update',
+      applicationStatus: 'SEND_FOR_APPROVAL',
+      requestType: ['GROUP_CHANGE', 'DESIGNATION_CHANGE'],
+      deptName: _.get(this.configSvc, 'unMappedUser.channel'),
+      offset: 0,
+      limit: 20,
+      query: _.get(this.userDetails, 'firstName', ''),
+      sortBy: {
+        createdOn: 'desc',
+      },
+    }
+    this.userService.getApprovalsList(formBody).subscribe((res: any) => {
+      const currentUserInfo = _.get(res, 'result.data', []).filter((user: any) => _.get(user, 'userInfo.id') === this.userId)
+      if(currentUserInfo.length > 0) {
+        this.setApprovalsStatus(currentUserInfo[0].wfInfo)
       }
     })
   }
 
-  loadLangauages() {
-    this.userService.getMasterLanguages().subscribe(
-      (data: any) => {
-        this.masterLanguagesEntries = data.languages
-      })
-  }
-
-  valueChanges() {
-    const searchDesignationControl = this.userForm.get('searchDesignation')
-    if (searchDesignationControl) {
-      let settingValueChange = true
-      searchDesignationControl.valueChanges
-        .pipe(
-          debounceTime(250),
-          distinctUntilChanged(),
-          startWith(''),
-        )
-        .subscribe(searchText => {
-          this.designationsOffset = 0
-          if (searchText && searchText.length > 1) {
-            this.designationSearchText = searchText // to avoid api call with single character
-            this.getdesignationsMeta()
-          } else if (!searchText) {
-            if (!settingValueChange) {
-              this.designationSearchText = searchText
-              this.getdesignationsMeta()
-            }
-            this.checkCurrentDesignationPresent()
+  setApprovalsStatus(wfInfo: any) {
+    if(wfInfo && wfInfo.length > 0) {
+      wfInfo.forEach((item: any) => {
+        if(item.currentStatus === 'SEND_FOR_APPROVAL') {
+          item['formatedUpdateFieldValues'] = JSON.parse(item.updateFieldValues)
+          console.log('item', item)
+          if(item.requestType === 'DESIGNATION_CHANGE') {
+            item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.designation', '')
+            this.designationApprovalField = item
+          } else if(item.requestType === 'GROUP_CHANGE') {
+            item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.group', '')
+            this.groupApprovalField = item
           }
-          settingValueChange = false
-        })
-    }
-
-    const domicileMediumControl = this.otherDetailsForm.get('domicileMedium')
-    if (domicileMediumControl) {
-      domicileMediumControl.valueChanges
-        .pipe(
-          debounceTime(500),
-          distinctUntilChanged(),
-          startWith(''),
-          map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
-          map((name: any) => name ? this.filterLanguage(name) : (this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])),
-        )
-        .subscribe(res => {
-          this.masterLanguages = of(res)
-        })
-    }
-    // this.masterLanguages = this.otherDetailsForm.get('domicileMedium')!.valueChanges
-    //   .pipe(
-    //     debounceTime(500),
-    //     distinctUntilChanged(),
-    //     startWith(''),
-    //     map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
-    //     map((name: any) => name ? this.filterLanguage(name) : this.masterLanguagesEntries.slice()),
-    //   )
-  // }
-  }
-
-  filterLanguage(name: string) {
-    if (name) {
-      const filterValue = name.toLowerCase()
-      return this.masterLanguagesEntries ? this.masterLanguagesEntries.filter((option: any) => option.name.toLowerCase().includes(filterValue)) : []
-    }
-    return this.masterLanguagesEntries
-  }
-
-  //#region (get user details)
-  getUserDetails() {
-    if (this.userId) {
-      this.userService.getUserById(this.userId).subscribe((res) => {
-        if (res) {
-          this.rootOrgId = _.get(res, 'rootOrgId', '')
-          this.checkOrgHasDesignations()
-          this.userRoles.clear()
-          this.patchUserDetails(res)
-          this.mapRoles(res)
         }
       })
     }
   }
-
   patchUserDetails(user: any) {
-    this.userDetails = user
     this.isMdoLeader = _.get(this.configSvc, 'unMappedUser.roles', []).includes('MDO_LEADER')
     this.userName = _.get(user, 'firstName', '')
     this.avatarUserName = this.getUseravatarName
@@ -254,9 +229,9 @@ export class UserUpdateComponent implements OnInit {
 
     const formatedDob = this.getDateFromText(_.get(user, 'profileDetails.personalDetails.dob', ''))
     const genderMap: { [key: string]: string } = {
-      FEMALE: 'Female',
-      MALE: 'Male',
-      OTHERS: 'Others',
+      female: 'Female',
+      male: 'Male',
+      others: 'Others',
     }
     const civilServiceName = _.get(user, 'profileDetails?.cadreDetails?.civilServiceName', '').trim()
     if (civilServiceName && (
@@ -269,16 +244,16 @@ export class UserUpdateComponent implements OnInit {
 
     const genderValue = _.get(user, 'profileDetails.personalDetails.gender', '')
     this.otherDetails = {
-      employeeID: _.get(user, 'profileDetails.employmentDetails.employeeCode', ''),
-      ehrmsID: _.get(user, 'profileDetails.additionalProperties.externalSystemId', ''),
-      dob: formatedDob,
+      employeeId: _.get(user, 'profileDetails.employmentDetails.employeeCode', ''),
+      ehrmsID: _.get(user, 'profileDetails.additionalProperties.externalSystemId', '-'),
+      dob: _.get(user, 'profileDetails.personalDetails.dob', ''),
       primaryEmail: _.get(user, 'profileDetails.personalDetails.primaryEmail', ''),
       mobile: _.get(user, 'profileDetails.personalDetails.mobile', ''),
-      domicileMedium: _.get(user, 'domicileMedium', ''),
-      gender: genderValue ? genderMap[genderValue] : '',
+      domicileMedium: _.get(user, 'profileDetails.personalDetails.domicileMedium', ''),
+      gender: genderValue ? genderMap[genderValue.toLowerCase()] : '',
       category: _.get(user, 'profileDetails.personalDetails.category', ''),
       pincode: _.get(user, 'profileDetails.employmentDetails.pinCode', ''),
-      externalSystemDor: _.get(user, 'additionalProperties.externalSystemDor', ''),
+      externalSystemDor: _.get(user, 'additionalProperties.externalSystemDor', 'NA'),
       civilServiceType: _.get(user, 'profileDetails?.cadreDetails?.civilServiceType', ''),
       civilServiceName: _.get(user, 'profileDetails?.cadreDetails?.civilServiceName', '-'),
       cadreName: _.get(user, 'profileDetails?.cadreDetails?.cadreName', '-'),
@@ -291,8 +266,8 @@ export class UserUpdateComponent implements OnInit {
       dob: formatedDob,
       primaryEmail: _.get(user, 'profileDetails.personalDetails.primaryEmail', ''),
       mobile: _.get(user, 'profileDetails.personalDetails.mobile', ''),
-      domicileMedium: _.get(user, 'domicileMedium', ''),
-      gender: genderValue ? genderMap[genderValue] : '',
+      domicileMedium: _.get(user, 'profileDetails.personalDetails.domicileMedium', ''),
+      gender: genderValue ? genderMap[genderValue.toLowerCase()] : '',
       category: _.get(user, 'profileDetails.personalDetails.category', ''),
       pincode: _.get(user, 'profileDetails.employmentDetails.pinCode', ''),
       civilServiceType: _.get(user, 'profileDetails?.cadreDetails?.civilServiceType', ''),
@@ -300,7 +275,6 @@ export class UserUpdateComponent implements OnInit {
       cadreName: _.get(user, 'profileDetails?.cadreDetails?.cadreName', '-'),
       cadreBatch: _.get(user, 'profileDetails?.cadreDetails?.cadreBatch', ''),
       cadreControllingAuthorityName: _.get(user, 'profileDetails?.cadreDetails?.cadreControllingAuthorityName', ''),
-      externalSystemDor: _.get(user, 'additionalProperties.externalSystemDor', ''),
     })
   }
 
@@ -370,11 +344,68 @@ export class UserUpdateComponent implements OnInit {
           this.userRoles.add(role)
         })
       }
-    } else {
-      this.loadRoles(user)
     }
   }
   //#endregion (get user details)
+
+  valueChanges() {
+    const searchDesignationControl = this.userForm.get('searchDesignation')
+    if (searchDesignationControl) {
+      let settingValueChange = true
+      searchDesignationControl.valueChanges
+        .pipe(
+          debounceTime(250),
+          distinctUntilChanged(),
+          startWith(''),
+        )
+        .subscribe(searchText => {
+          this.designationsOffset = 0
+          if (searchText && searchText.length > 1) {
+            this.designationSearchText = searchText // to avoid api call with single character
+            this.getdesignationsMeta()
+          } else if (!searchText) {
+            if (!settingValueChange) {
+              this.designationSearchText = searchText
+              this.getdesignationsMeta()
+            }
+            this.checkCurrentDesignationPresent()
+          }
+          settingValueChange = false
+        })
+    }
+
+    const domicileMediumControl = this.otherDetailsForm.get('domicileMedium')
+    if (domicileMediumControl) {
+      domicileMediumControl.valueChanges
+        .pipe(
+          debounceTime(500),
+          distinctUntilChanged(),
+          startWith(''),
+          map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
+          map((name: any) => name ? this.filterLanguage(name) : (this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])),
+        )
+        .subscribe(res => {
+          this.masterLanguages = of(res)
+        })
+    }
+    // this.masterLanguages = this.otherDetailsForm.get('domicileMedium')!.valueChanges
+    //   .pipe(
+    //     debounceTime(500),
+    //     distinctUntilChanged(),
+    //     startWith(''),
+    //     map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
+    //     map((name: any) => name ? this.filterLanguage(name) : this.masterLanguagesEntries.slice()),
+    //   )
+  // }
+  }
+
+  filterLanguage(name: string) {
+    if (name) {
+      const filterValue = name.toLowerCase()
+      return this.masterLanguagesEntries ? this.masterLanguagesEntries.filter((option: any) => option.name.toLowerCase().includes(filterValue)) : []
+    }
+    return this.masterLanguagesEntries
+  }
 
   checkOrgHasDesignations(): void {
     if (!this.rootOrgId) {
@@ -665,7 +696,8 @@ export class UserUpdateComponent implements OnInit {
       const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: dialogData,
         width: '500px',
-        disableClose: true
+        disableClose: true,
+        autoFocus: false
       })
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
@@ -742,7 +774,7 @@ export class UserUpdateComponent implements OnInit {
           },
           employmentDetails: {
             pinCode: _.get(otherDetailsValues, 'pincode', ''),
-            employeeCode: _.get(otherDetailsValues, 'employeeID', ''),
+            employeeCode: _.get(otherDetailsValues, 'employeeId', ''),
           },
         },
       },
@@ -774,6 +806,50 @@ export class UserUpdateComponent implements OnInit {
         }
       }
     })
+  }
+
+  onClickHandleWorkflow(action: string) {
+    console.log('action', action);
+    // const req = {
+    //   action,
+    //   comment: '',
+    //   state: 'SEND_FOR_APPROVAL',
+    //   userId: field.wf.userId,
+    //   applicationId: field.wf.applicationId,
+    //   actorUserId: this.userwfData.userInfo.wid,
+    //   wfId: field.wf.wfId,
+    //   deptName: field.wf.deptName || '',
+    //   serviceName: 'profile',
+    //   updateFieldValues: JSON.parse(field.wf.updateFieldValues),
+    // }
+    // if (action === 'APPROVE') {
+    //   const index = this.actionList.findIndex((x: any) => x.wfId === req.wfId)
+    //   if (index > -1) {
+    //     this.actionList[index] = req
+    //   } else {
+    //     this.actionList.push(req)
+    //   }
+    // } else {
+    //   this.comment = ''
+    //   const dialogRef = this.dialog.open(this.rejectDialog, {
+    //     width: '770px',
+    //     minHeight: '260px'
+    //   })
+    //   dialogRef.afterClosed().subscribe(result => {
+    //     if (result) {
+    //       req.comment = this.comment
+    //       field.comment = this.comment
+    //       const index = this.actionList.findIndex((x: any) => x.wfId === req.wfId)
+    //       if (index > -1) {
+    //         this.actionList[index] = req
+    //       } else {
+    //         this.actionList.push(req)
+    //       }
+    //     } else {
+    //       dialogRef.close()
+    //     }
+    //   })
+    // }
   }
   //#endregion (UI interactions)
 

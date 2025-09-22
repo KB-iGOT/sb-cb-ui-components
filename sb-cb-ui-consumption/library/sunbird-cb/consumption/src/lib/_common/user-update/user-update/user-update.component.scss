@@ -154,7 +154,21 @@
 .oppDisable {
   opacity: 0.6;
   pointer-events: none;
-  
+
+}
+
+.approval-section {
+  border-top: 1px solid #000;
+}
+
+.appr-text-field {
+  width: 80%;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  padding: 9px;
+  /* stylelint-disable */
+  font: 400 14px Lato;
+  /* stylelint-enable */
 }
 
 ::ng-deep .user-edit {
@@ -237,6 +251,10 @@
       border-color: #F3962F;
       box-shadow: 0 0 0 1px rgba(243, 150, 47, 0.2);
     }
+  }
+
+  .mat-select-arrow-wrapper {
+    margin-top: 7px;
   }
   
 }

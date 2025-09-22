@@ -17,6 +17,7 @@ import { MatLegacyListModule } from '@angular/material/legacy-list';
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module';
 import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
 import { MatLegacyAutocompleteModule } from '@angular/material/legacy-autocomplete';
+import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
 
 
 
@@ -42,6 +43,7 @@ import { MatLegacyAutocompleteModule } from '@angular/material/legacy-autocomple
     MatLegacyListModule,
     MatLegacyChipsModule,
     MatLegacyAutocompleteModule,
+    MatLegacyRadioModule,
     DialogComponentsModule
   ],
   exports: [
