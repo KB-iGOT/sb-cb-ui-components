@@ -225,6 +225,29 @@ export class UsersRequestParams {
   }
 }
 
+export class SearchTrainingPlansRequest {
+  filter: {
+     [key: string]: any 
+  };
+  pageNumber: number;
+  pageSize: number;
+  searchString?: string;
+  orderBy?: string;
+  orderDirection?: string;
+  requestedFields?: string[];
+  facets: string[];
+
+  constructor() {
+    this.pageNumber = 0;
+    this.pageSize = 10;
+    this.facets = ["status", "createdAt", "createdByName", "contentType", "endDate", "isApar"];
+    this.orderBy = ''
+    this.orderDirection = 'desc'
+    this.filter = {}
+
+  }
+}
+
 export interface UsersFilters {
   rootOrgId?: string;
   [key: string]: any;
@@ -278,9 +301,17 @@ export enum FacetType {
   profileStatus = "profileDetails.profileStatus",
   profileGroup = "profileDetails.professionalDetails.group",
   employmentDepartment = "profileDetails.employmentDetails.departmentName",
-  organizationsRoles = "organisations.roles"
+  organizationsRoles = "organisations.roles",
 
   // Designations
+
+  // Training Plans
+  status = "status",
+  createdAt = "createdAt",
+  createdByName = "createdByName",
+  contentType = "contentType",
+  endDate = "endDate",
+  isApar = "isApar"
 }
 
 export enum SortType {
@@ -369,7 +400,7 @@ export namespace SearchListingConfig {
     applicationName: string;
     noDataFoundFlags: {
       [key: string]: SearchNoDataFoundFlags;
-    }
+    };
   }
   export interface SearchCategory {
     label: string;

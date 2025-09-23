@@ -5,6 +5,7 @@ import { ConfigurationsService } from "@sunbird-cb/utils-v2";
 import {
   ACBPConst,
   IGOTConst,
+  SearchTrainingPlansRequest,
   SearchCommunitiesRequest,
   SearchExternalRequest,
   SearchListingConfig,
@@ -35,7 +36,8 @@ const API_END_POINTS = {
   },
   FETCH_CPB_PLANS: `/apis/proxies/v8/user/v1/cbplan`,
   DOWNLOAD_CERTIFICATE_v2: (id: string) => `apis/protected/v8/cohorts/course/batch/cert/download/${id}`,
-  SEARCH_USERS: `/apis/proxies/v8/user/v1/search`
+  SEARCH_USERS: `/apis/proxies/v8/user/v1/search`,
+  SEARCH_TRAINING_PLANS: `/apis/proxies/v8/cbplan/v2/search`
 };
 
 @Injectable({
@@ -143,7 +145,12 @@ export class SearchListingService {
     // This method is used to search for users in the MDO.
     return this.http.post(API_END_POINTS.SEARCH_USERS, params).toPromise();
   }
-  
+
+  searchTrainingPlans(params: SearchTrainingPlansRequest): Promise<any> {
+    // This method is used to search for training plans.
+    return this.http.post(API_END_POINTS.SEARCH_TRAINING_PLANS, params).toPromise();
+  }
+
   downloadCertificate_v2(id: string): Observable<any> {
     // This method is used to download a certificate by its ID.
     return this.http.get(`${API_END_POINTS.DOWNLOAD_CERTIFICATE_v2(id)}`);

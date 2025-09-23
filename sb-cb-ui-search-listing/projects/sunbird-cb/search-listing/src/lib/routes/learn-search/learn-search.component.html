@@ -50,14 +50,7 @@
               externalSearchTotalCount >
             0
           ">
-          <!-- <ng-container *ngIf="!isExploreContentTab">
-                        <div class="">
-                            <span class="brand-color">“{{(courseSearchTotalCount + eventSearchTotalCount +
-                                peopleSearchTotalCount + communitiesSearchTotalCount)}}”</span>
-                            <span class="mx-1">{{'learnsearch.searchResultsFor' | translate}}</span>
-                            <span class="brand-color" *ngIf="searchQuery.query">“{{searchQuery.query}}”</span>
-                        </div>
-                    </ng-container> -->
+       
           <div class="" *ngIf="!isExploreContentTab">
             <ng-container *ngIf="seeAllResult === '' || seeAllResult === 'courses'">
               <p class="contents-title-top text-dark mb-0">
@@ -426,7 +419,7 @@
                 <span>{{ "learnsearch.trainingPlans" | translate : { count: trainingPlansSearchTotalCount } }}</span>
               </p>
               <ng-container *ngFor="let plan of trainingPlansSearchResults; let index = index">
-                <sb-cb-search-training-plans-card [content]="plan" (telemetry)="applyTelemetry($event, index)"></sb-cb-search-training-plans-card>
+                <sb-cb-search-training-plans-card [plan]="plan" (telemetry)="applyTelemetry($event, index)"></sb-cb-search-training-plans-card>
               </ng-container>
               <p
                 class="see-all-results text-center font-normal brand-color cursor-pointer mt-4"
