@@ -22,18 +22,20 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
     if (this.category === SearchCategory.People) {
       this.options = SEARCH_SORT_PEOPLES;
       this.selectedOption = SortType.MostRelevent;
-      // this.searchSorter.emit(this.selectedOption);
-    } else if (this.category === SearchCategory.Communities || this.category === SearchCategory.Events || this.category === SearchCategory.Users) {
+    } else if (
+      this.category === SearchCategory.Communities ||
+      this.category === SearchCategory.Events ||
+      this.category === SearchCategory.Users ||
+      this.category === SearchCategory.TrainingPlans
+    ) {
       this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.HighestRated);
       this.selectedOption = SortType.MostRelevent;
-      // this.searchSorter.emit(this.selectedOption);
     } else if (this.category === SearchCategory.ExternalContents) {
       this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.HighestRated && option.value !== SortType.MostRelevent);
       this.selectedOption = SortType.RecentlyAdded;
     } else {
       this.options = SEARCH_SORT_DROPDOWN;
       this.selectedOption = SortType.MostRelevent;
-      // this.searchSorter.emit(this.selectedOption);
       if (this.isExploreContentTab) {
         this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.MostRelevent);
         this.selectedOption = SortType.RecentlyAdded;
