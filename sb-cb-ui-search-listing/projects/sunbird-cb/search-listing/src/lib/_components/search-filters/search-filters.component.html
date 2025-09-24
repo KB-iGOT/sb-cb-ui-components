@@ -894,6 +894,44 @@
     </mat-selection-list>
   </div>
 
+  <!-- Training Plan Content Type Filter  -->
+  <div
+    class="filter-without-search"
+    *ngIf="searchCategory && formattedFacets && formattedFacets['contentType'] && formattedFacets['contentType'].length">
+    <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "widgetCbpFilters.contentType" | translate }}</p>
+    <mat-selection-list>
+      <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['contentType']">
+        <mat-checkbox
+          [checked]="options?.isChecked || getSelectedFilter(options)"
+          (change)="onSelectionFilter($event, options, 'contentType')">
+           <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
+                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
+                >
+                <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
+        </mat-checkbox>
+      </section>
+    </mat-selection-list>
+  </div>
+
+  <!-- Training Plan Status Filter  -->
+  <div
+    class="filter-without-search"
+    *ngIf="searchCategory && formattedFacets && formattedFacets['status'] && formattedFacets['status'].length">
+    <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "widgetCbpFilters.status" | translate }}</p>
+    <mat-selection-list>
+      <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['status']">
+        <mat-checkbox
+          [checked]="options?.isChecked || getSelectedFilter(options)"
+          (change)="onSelectionFilter($event, options, 'status')">
+           <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
+                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
+                >
+                <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
+        </mat-checkbox>
+      </section>
+    </mat-selection-list>
+  </div>
+
   <!-- Users Onboarding Date range Filter  -->
   <div class="filter-without-search" *ngIf="searchCategory === 'users'">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.onBoardingDateRange" | translate }}</p>
