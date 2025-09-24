@@ -192,6 +192,7 @@ export namespace NsInstanceConfig {
     navbarLogo?: string
     playListLogo?: string
     thumpsUp?: string
+    [tenantKey: string]: string | undefined
 
   }
   export interface IMailIds {
