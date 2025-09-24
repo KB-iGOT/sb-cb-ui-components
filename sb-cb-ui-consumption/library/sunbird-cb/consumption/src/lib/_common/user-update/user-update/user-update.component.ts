@@ -346,15 +346,29 @@ export class UserUpdateComponent implements OnInit {
         }
       }
       const usrRoles = _.get(user, 'organisations[0].roles', [])
-      this.uniqueRoles.forEach((role: any) => {
-        if (!this.rolesList.some((item: any) => item.roleName === role.roleName) && role.roleName !== 'MENTOR') {
+      
+      if (this.isMdoLeader) {
+        // For MDO leaders, add all unique roles except MENTOR
+        this.uniqueRoles.forEach((role: any) => {
+          if (!this.rolesList.some((item: any) => item.roleName === role.roleName) && role.roleName !== 'MENTOR') {
+            const roleDetails = {
+              roleName: role.roleName,
+              isSelected: usrRoles.includes(role.roleName),
+            }
+            this.rolesList.push(roleDetails)
+          }
+        })
+      } else {
+        // For non-MDO leaders, only add PUBLIC role if it exists
+        const publicRole = this.uniqueRoles.find((role: any) => role.roleName === 'PUBLIC')
+        if (publicRole && !this.rolesList.some((item: any) => item.roleName === 'PUBLIC')) {
           const roleDetails = {
-            roleName: role.roleName,
-            isSelected: usrRoles.includes(role.roleName),
+            roleName: 'PUBLIC',
+            isSelected: usrRoles.includes('PUBLIC'),
           }
           this.rolesList.push(roleDetails)
         }
-      })
+      }
       if (usrRoles.length > 0) {
         setTimeout(() => {
           this.userForm.controls['roles'].setValue(usrRoles)
@@ -705,6 +719,7 @@ export class UserUpdateComponent implements OnInit {
           dialogData.description = 'You are about to remove this user from your organization. The user will lose all learning access and be moved out of your organization in 48 hours unless you reverse the action from the "Not My Users" tab.'
           break;
       }
+      console.log('roles', this.userRoles);
       const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: dialogData,
         width: '500px',
