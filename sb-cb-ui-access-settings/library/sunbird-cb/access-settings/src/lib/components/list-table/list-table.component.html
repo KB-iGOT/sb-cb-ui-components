@@ -86,7 +86,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="tableConfig?.displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: tableConfig?.displayedColumns;" (click)="selection.toggle(row)">
+        <tr mat-row *matRowDef="let row; columns: tableConfig?.displayedColumns;" (click)="toggleSelection(row);">
         </tr>
     </table>
     <div *ngIf="!dataSource.data.length" class="no-data-center">
