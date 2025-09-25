@@ -5,7 +5,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
 import { TranslateService } from '@ngx-translate/core';
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
-import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2';
+import { ConfigurationsService, EventService, WidgetContentService, WsEvents } from '@sunbird-cb/utils-v2';
 import * as _ from "lodash";
 import { CertificateService } from '../../../_services/certificate.service';
 import { CertificateDialogComponent } from '../../dialog-components/certificate-dialog/certificate-dialog.component';
@@ -43,6 +43,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
     private contSvc: WidgetContentLibService,
     private certificateService: CertificateService,
     private dialog: MatDialog,
+    private contentSvcUtils: WidgetContentService,
+
     ) { 
       this.langtranslations.languageSelectedObservable.subscribe(() => {
         if (localStorage.getItem('websiteLanguage')) {
@@ -110,28 +112,71 @@ export class CardProgressPortraitLibComponent implements OnInit {
     this.events.raiseInteractTelemetry(
       {
         type: WsEvents.EnumInteractTypes.CLICK,
-        id: 'view-certificate',
+        id: "view-certificate",
         subType: WsEvents.EnumInteractSubTypes.CERTIFICATE,
       },
       {
-        id: certificateData.issuedCertificates && certificateData.issuedCertificates.length && certificateData.issuedCertificates[0].identifier,   // id of the certificate
+        id:
+          certificateData.issuedCertificates &&
+          certificateData.issuedCertificates.length &&
+          certificateData.issuedCertificates[0].identifier, // id of the certificate
         type: WsEvents.EnumInteractSubTypes.CERTIFICATE,
-      })
-    if(certificateData.issuedCertificates.length > 0) {
-      this.downloadCertificateLoading = true
-      const certificate: any = certificateData.issuedCertificates.sort((a: any, b: any) =>
-        new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
-      let certData: any = certificate && certificate.length && certificate[0]
-      this.certificateService.downloadCertificate_v2(certData.identifier).subscribe((res: any)=>{
-        this.downloadCertificateLoading = false
-        const cet = res.result.printUri
-        this.dialog.open(CertificateDialogComponent, {
-          width: '1300px',
-          data: { cet, certId: certData.identifier },
-        })
-      })
+      }
+    );
+    if (certificateData.issuedCertificates.length > 0) {
+      this.downloadCertificateLoading = true;
+        const certificate: any = certificateData.issuedCertificates.sort(
+         (a: any, b: any) =>
+           new Date(a.lastIssuedOn).getTime() -
+           new Date(b.lastIssuedOn).getTime()
+       );
+       let certData: any = certificate && certificate.length && certificate[0];
+      if (
+        this.widgetData.content &&
+        this.widgetData.content.primaryCategory &&
+        this.widgetData.content.primaryCategory?.toLowerCase() !== "course"
+      ) {
+        const payload = {
+          request: {
+            courseId: this.widgetData.content.identifier,
+            batchId: this.widgetData.content.batchId || "",
+            userId: this.configSvc.userProfile.userId,
+          },
+        };
+        this.contentSvcUtils.downloadCertV2(payload).subscribe(
+          (response) => {
+            if (this.widgetData.content) {
+              this.downloadCertificateLoading = false;
+              this.dialog.open(CertificateDialogComponent, {
+                width: "1200px",
+                data: {
+                  cet: response.result.printUri,
+                  certId: this.widgetData.content && certData.identifier,
+                },
+              });
+            }
+            this.downloadCertificateLoading = false;
+          },
+          (error: any) => {
+            this.downloadCertificateLoading = false;
+          }
+        );
+      } else {
+ 
+       this.certificateService
+         .downloadCertificate_v2(certData.identifier)
+         .subscribe((res: any) => {
+           this.downloadCertificateLoading = false;
+           const cet = res.result.printUri;
+           this.dialog.open(CertificateDialogComponent, {
+             width: "1300px",
+             data: { cet, certId: certData.identifier },
+           });
+         });
+       this.downloadCertificateLoading = false;
+     }
     } else {
-      this.downloadCertificateLoading = false
+       this.downloadCertificateLoading = false;
     }
   }
 
