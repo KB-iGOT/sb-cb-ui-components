@@ -85,4 +85,27 @@ subdomain = this.currentHostname.split('.')[0];
     const domainData = this.configSvc.instanceConfig.domainList[this.subdomain];
     return domainData?.redirectPath || '/page/home';
   }
+
+  getDomainSitePath(environmentVariable: any): string {
+    // Handle missing configuration
+    if (!this.configSvc?.instanceConfig) {
+      return environmentVariable.sitePath;
+    }
+
+    // Early return for direct hostname match
+    if (environmentVariable.sitePath === this.currentHostname) {
+      return environmentVariable.sitePath;
+    }
+
+    // Handle missing domain list
+    if (!this.configSvc.instanceConfig.domainList) {
+      return environmentVariable.sitePath;
+    }
+
+    // Get domain-specific redirect path
+    const domainData = this.configSvc.instanceConfig.domainList[this.subdomain];
+    return domainData?.sitePath || environmentVariable.sitePath;
+  }
+
+
 }

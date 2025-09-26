@@ -87,6 +87,7 @@ export namespace NsInstanceConfig {
       logo: string
       redirectPath: string
       cdnContentHost: string
+      sitePath: string
     }
   }
 
