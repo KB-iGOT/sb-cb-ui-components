@@ -1,10 +1,24 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChange, ViewChild, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChange,
+  ViewChild,
+  ViewEncapsulation
+} from "@angular/core";
 import { UntypedFormControl } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ConfigurationsService } from "@sunbird-cb/utils-v2";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import {
   FacetType,
+  ICompentencyKeys,
   SearchCategory,
   SearchCommunitiesRequest,
   SearchEventfacet,
@@ -15,6 +29,8 @@ import {
   SearchPeoplesRequest,
   SearchResourceFacets,
   SearchResourceMimeType,
+  SearchTrainingPlansRequest,
+  SearchUsersRequest,
   SearchV4Request
 } from "../../_models/search-listing.model";
 import { WidgetContentLibService } from "@sunbird-cb/consumption";
@@ -52,29 +68,37 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   responseNlpQuery = "";
   searchSubscription: any;
   searchConfig: SearchListingConfig.Config | null = null;
+
+  environment!: any;
+  competencyAreaNameKey!: string;
+  competencyThemeKey!: string;
+  competencySubThemeKey!: string;
+  compentencyKey!: ICompentencyKeys;
+
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
   @HostListener("document:click", ["$event"])
   onClickOutside(event: Event) {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.openSearchTemplate = false;
+      this.hasReadRecentBeenCalled = false;
     }
   }
   constructor(
     private activated: ActivatedRoute,
     private router: Router,
     private configSvc: ConfigurationsService,
-    private route: ActivatedRoute,
     private eRef: ElementRef,
     private searchListingService: SearchListingService,
-    private contSvc: WidgetContentLibService // private mobileAppsService: MobileAppsService
+    private contSvc: WidgetContentLibService, // private mobileAppsService: MobileAppsService
+    @Inject("environment") environment: any
   ) {
-    this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
+    this.environment = environment;
+    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
+    this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
+    this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
+    this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
 
-    // this.searchSubscription = this.mobileAppsService.clearGlobalSearchForHomePage.subscribe((value: any) => {
-    //   if (value) {
-    //     this.clearSearchTextElement();
-    //   }
-    // });
+    this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
     this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
       if (value.length > 100) {
@@ -212,101 +236,27 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   goToSearchItem(query: any) {
     const category = query?.search_category && query?.search_category[0];
     const nlpSearchQuery = query?.nlp_search_query;
-    if (category && category === "courses" && nlpSearchQuery) {
-      const req = {
-        request: {
-          filters: {
-            contentType: ["Course"],
-            courseCategory: [],
-            status: ["Live"]
-          },
-          fields: [
-            "downloadUrl",
-            "organisation",
-            "language",
-            "source",
-            "appIcon",
-            "identifier",
-            "name",
-            "primaryCategory",
-            "contentType",
-            "posterImage",
-            "createdOn",
-            "duration",
-            "avgRating",
-            "additionalTags",
-            "courseCategory",
-            "mimeType",
-            "contentId",
-            "creatorLogo",
-            "sectorDetails_v1"
-          ],
-          facets: [
-            "avgRating",
-            "language",
-            "organisation",
-            "courseCategory",
-            "sectorDetails_v1.sectorName",
-            "sectorDetails_v1.subSectorName",
-            "competencies_v6.competencyAreaName",
-            "competencies_v6.competencyThemeName",
-            "competencies_v6.competencySubThemeName"
-          ],
-          query: nlpSearchQuery,
-          limit: 3,
-          offset: 0,
-          sort_by: {}
-        }
-      };
+    if (category && category === SearchCategory.Courses && nlpSearchQuery) {
+      const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
+      req.request.query = nlpSearchQuery;
+      req.request.filters.contentType = ["Course"];
       this.searchListingService.fetchSearchDataByCategory(req).subscribe((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
     }
-    if (category && category === "events" && nlpSearchQuery) {
-      const req = {
-        request: {
-          filters: {
-            contentType: "Event",
-            status: ["Live"]
-          },
-          fields: [
-            "name",
-            "description",
-            "identifier",
-            "resourceType",
-            "contentType",
-            "sourceName",
-            "duration",
-            "startDate",
-            "endDate",
-            "startTime",
-            "endTime",
-            "createdOn",
-            "eventType",
-            "expiryDate",
-            "appIcon",
-            "startDateTime",
-            "endDateTime"
-          ],
-          facets: [
-            "duration",
-            "language",
-            "sourceName",
-            "startDateTimeInEpoch",
-            "endDateTimeInEpoch",
-            "resourceType",
-            "competencies_v6.competencyAreaName",
-            "competencies_v6.competencyThemeName",
-            "competencies_v6.competencySubThemeName"
-          ],
-          query: nlpSearchQuery,
-          limit: 3,
-          offset: 0,
-          sort_by: {}
-        }
-      };
+    else if (category && category === SearchCategory.Events && nlpSearchQuery) {
+      const req = new SearchV4Request([]);
+      req.request.filters.contentType = "Event";
+      req.request.filters.status = ["Live"];
+      req.request.fields = SearchEventFields;
+      req.request.facets = [...SearchEventfacet, this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey];
+      req.request.query = nlpSearchQuery;
+
+      delete req.request.filters?.courseCategory;
+      delete req.request.sort_by?.createdOn;
+
       this.searchListingService.fetchSearchDataByCategory(req).subscribe((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
@@ -314,16 +264,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       });
     }
 
-    if (category && category === "peoples" && nlpSearchQuery) {
-      const req = {
-        filters: {},
-        facets: ["profileDetails.professionalDetails.designation", "rootOrgName"],
-        fields: [],
-        limit: 5,
-        offset: 0,
-        sort_by: {},
-        query: nlpSearchQuery
-      };
+    else if (category && category === SearchCategory.People && nlpSearchQuery) {
+      const req = new SearchPeoplesRequest();
+      req.query = nlpSearchQuery;
+
       this.searchListingService
         .searchConnections(req)
         .then(() => {
@@ -335,198 +279,109 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
         });
     }
 
-    if (category && category === "resources" && nlpSearchQuery) {
-      const req = {
-        request: {
-          filters: {
-            contentType: "Resource",
-            courseCategory: [],
-            status: ["Live"],
-            mimeType: ["application/pdf", "video/mp4", "text/x-url", "audio/mpeg", "application/vnd.ekstep.content-collection"]
-          },
-          fields: [],
-          facets: ["resourceCategory", "sectorDetails_v1.subSectorName", "sectorDetails_v1.sectorName", "years"],
-          query: nlpSearchQuery,
-          limit: 3,
-          offset: 0,
-          sort_by: {},
-          exists: ["sectorDetails_v1.sectorName", "resourceCategory"]
-        }
-      };
+    else if (category && category === SearchCategory.Resources && nlpSearchQuery) {
+      const req = new SearchV4Request([]);
+      req.request.filters.contentType = "Resource";
+      req.request.facets = SearchResourceFacets;
+      req.request.filters["mimeType"] = SearchResourceMimeType;
+      req.request.exists = [FacetType.sectorNames_v1, FacetType.resourceCategory];
+      req.request.fields = [];
+      req.request.query = nlpSearchQuery;
+
       this.searchListingService.fetchSearchDataByCategory(req).subscribe((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
     }
-    if (category && category === "communities" && nlpSearchQuery) {
-      const req = {
-        filterCriteriaMap: {
-          status: "active"
-        },
-        requestedFields: [],
-        pageNumber: 0,
-        pageSize: 6,
-        facets: ["topicName", "orgName", "competencies_v6.competencyAreaName", "competencies_v6.competencyThemeName", "competencies_v6.competencySubThemeName"],
-        searchString: nlpSearchQuery
-      };
-      this.searchListingService.fetchSearchDataByCategory(req).subscribe((res: any) => {
-        if (res) {
+    else if (category && category === SearchCategory.Communities && nlpSearchQuery) {
+      const req = new SearchCommunitiesRequest([]);
+      req.searchString = nlpSearchQuery;
+
+      this.searchListingService.searchCommunity(req).then((res: any) => {
+        if(res) {
           this.updateRecentSearchQuery(query);
         }
-      });
+      }).catch();
     }
 
-    if (category && category === "all" && nlpSearchQuery) {
-      const catReq = {
-        request: {
-          filters: {
-            contentType: ["Course"],
-            courseCategory: [],
-            status: ["Live"]
-          },
-          fields: [
-            "downloadUrl",
-            "organisation",
-            "language",
-            "source",
-            "appIcon",
-            "identifier",
-            "name",
-            "primaryCategory",
-            "contentType",
-            "posterImage",
-            "createdOn",
-            "duration",
-            "avgRating",
-            "additionalTags",
-            "courseCategory",
-            "mimeType",
-            "contentId",
-            "creatorLogo",
-            "sectorDetails_v1"
-          ],
-          facets: [
-            "avgRating",
-            "language",
-            "organisation",
-            "courseCategory",
-            "sectorDetails_v1.sectorName",
-            "sectorDetails_v1.subSectorName",
-            "competencies_v6.competencyAreaName",
-            "competencies_v6.competencyThemeName",
-            "competencies_v6.competencySubThemeName"
-          ],
-          query: nlpSearchQuery,
-          limit: 3,
-          offset: 0,
-          sort_by: {}
-        }
-      };
+    else if (category && category === "all" && nlpSearchQuery) {
+      const catReq = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
+      catReq.request.query = nlpSearchQuery;
+      catReq.request.filters.contentType = ["Course"];
       this.searchListingService.fetchSearchDataByCategory(catReq).subscribe((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
 
-      const eventReq = {
-        request: {
-          filters: {
-            contentType: "Event",
-            status: ["Live"]
-          },
-          fields: [
-            "name",
-            "description",
-            "identifier",
-            "resourceType",
-            "contentType",
-            "sourceName",
-            "duration",
-            "startDate",
-            "endDate",
-            "startTime",
-            "endTime",
-            "createdOn",
-            "eventType",
-            "expiryDate",
-            "appIcon",
-            "startDateTime",
-            "endDateTime"
-          ],
-          facets: [
-            "duration",
-            "language",
-            "sourceName",
-            "startDateTimeInEpoch",
-            "endDateTimeInEpoch",
-            "resourceType",
-            "competencies_v6.competencyAreaName",
-            "competencies_v6.competencyThemeName",
-            "competencies_v6.competencySubThemeName"
-          ],
-          query: nlpSearchQuery,
-          limit: 3,
-          offset: 0,
-          sort_by: {}
-        }
-      };
+      const eventReq = new SearchV4Request([]);
+      eventReq.request.filters.contentType = "Event";
+      eventReq.request.filters.status = ["Live"];
+      eventReq.request.fields = SearchEventFields;
+      eventReq.request.facets = [...SearchEventfacet, this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey];
+      eventReq.request.query = nlpSearchQuery;
+
+      delete eventReq.request.filters?.courseCategory;
+      delete eventReq.request.sort_by?.createdOn;
       this.searchListingService.fetchSearchDataByCategory(eventReq).subscribe((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
 
-      const peopleReq = {
-        filters: {},
-        facets: ["profileDetails.professionalDetails.designation", "rootOrgName"],
-        fields: [],
-        limit: 5,
-        offset: 0,
-        sort_by: {},
-        query: nlpSearchQuery
-      };
+      const peopleReq = new SearchPeoplesRequest();
+      peopleReq.query = nlpSearchQuery;
       this.searchListingService.searchConnections(peopleReq).catch();
 
-      const resourceReq = {
-        request: {
-          filters: {
-            contentType: "Resource",
-            courseCategory: [],
-            status: ["Live"],
-            mimeType: ["application/pdf", "video/mp4", "text/x-url", "audio/mpeg", "application/vnd.ekstep.content-collection"]
-          },
-          fields: [],
-          facets: ["resourceCategory", "sectorDetails_v1.subSectorName", "sectorDetails_v1.sectorName", "years"],
-          query: query,
-          limit: 3,
-          offset: 0,
-          sort_by: {},
-          exists: ["sectorDetails_v1.sectorName", "resourceCategory"]
-        }
-      };
+      const resourceReq = new SearchV4Request([]);
+      resourceReq.request.filters.contentType = "Resource";
+      resourceReq.request.facets = SearchResourceFacets;
+      resourceReq.request.filters["mimeType"] = SearchResourceMimeType;
+      resourceReq.request.exists = [FacetType.sectorNames_v1, FacetType.resourceCategory];
+      resourceReq.request.fields = [];
+      resourceReq.request.query = nlpSearchQuery;
       this.searchListingService.fetchSearchDataByCategory(resourceReq).subscribe((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
 
-      const communitiesreq = {
-        filterCriteriaMap: {
-          status: "active"
-        },
-        requestedFields: [],
-        pageNumber: 0,
-        pageSize: 6,
-        facets: ["topicName", "orgName", "competencies_v6.competencyAreaName", "competencies_v6.competencyThemeName", "competencies_v6.competencySubThemeName"],
-        searchString: nlpSearchQuery
-      };
-      this.searchListingService.fetchSearchDataByCategory(communitiesreq).subscribe((res: any) => {
+      const communitiesreq = new SearchCommunitiesRequest([]);
+      communitiesreq.searchString = nlpSearchQuery;
+
+
+      this.searchListingService.searchCommunity(communitiesreq).then((res: any) => {
+        if(res) {
+          this.updateRecentSearchQuery(query);
+        }
+      }).catch();
+    }
+
+    else if (category && category === SearchCategory.Users && nlpSearchQuery) {
+      const req = new SearchUsersRequest()
+      req.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
+      req.request.query = nlpSearchQuery
+      this.searchListingService.searchUsersMDO(req).then((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
     }
+
+    else if (category && category === SearchCategory.TrainingPlans && nlpSearchQuery) {
+      const req  = new SearchTrainingPlansRequest();
+      req.pageSize = 3
+      req.searchString = nlpSearchQuery
+
+      this.searchListingService.searchTrainingPlans(req).then((res: any) => {
+        if (res) {
+          this.updateRecentSearchQuery(query);
+        }
+      });
+    }
+
+    else if (category && category === SearchCategory.Designation && nlpSearchQuery) {}
   }
 
   recentDeleteByUserId() {
@@ -602,7 +457,16 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.openSearchTemplate = true;
     }, 0);
     this.queryControl.reset();
-    this.updateQuery("");
+
+    const params = { ...this.activated.snapshot.queryParams };
+    params['q'] = null;
+    params['search'] = null;
+
+    this.router.navigate([], {
+      relativeTo: this.activated.parent,
+      queryParams: params,
+      queryParamsHandling: 'merge',
+    });
   }
 
   async selectSearchCategory(category: string) {
@@ -749,7 +613,6 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           if (response?.data?.keywords.length > 0) {
             this.responseNlpQuery = response?.data?.keywords[0]?.keyword;
             this.createRecent(this.responseNlpQuery);
-            this.readRecent();
           }
         } else {
           this.responseNlpQuery = "";
@@ -766,7 +629,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }
 
     if (this.openSearchTemplate) {
-      this.readRecent();
+      // this.readRecent();
     }
     if (!this.selectedSearchCategory) {
       // this.searchFromQuery(this.responseNlpQuery);

@@ -34,6 +34,7 @@
     </mat-sidenav>
 
     <mat-sidenav-content #mainContainer class="custom-sidecontent" [ngClass]="{ full: filtersPanel && filtersPanel === 'hide' }">
+      
       <div #contentWrapper class="ml-2 md:ml-4 md:mr-0 mr-2 content-wrapper">
         <div
           class="result-meta flex items-center justify-between flex-wrap"
@@ -84,6 +85,9 @@
             <ng-container *ngIf="seeAllResult === 'designation'">
               <p class="contents-title-top text-dark mb-0">{{ "learnsearch.designations" | translate : { count: designationSearchTotalCount } }}</p>
             </ng-container>
+            <ng-container *ngIf="seeAllResult === 'users'">
+              <p class="contents-title-top text-dark mb-0">{{ "learnsearch.users" | translate : { count: usersSearchTotalCount } }}</p>
+            </ng-container>
           </div>
 
           <ng-container *ngIf="isExploreContentTab">
@@ -121,8 +125,7 @@
               seeAllResult === 'communities' ||
               seeAllResult === 'resources' ||
               seeAllResult === 'external-contents' ||
-              seeAllResult === 'training-plans' ||
-              seeAllResult === 'users') &&
+              seeAllResult === 'training-plans') &&
             searchContentLoader
           ">
           <ng-container *ngFor="let item of [1, 2, 3, 4]">

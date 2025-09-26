@@ -153,7 +153,7 @@
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">
         {{ "searchfilters.typeOfEvents" | translate }}
       </p>
-      <mat-radio-group (change)="onTypesOfEventsChange(true, $event.value, 'typeOfEvents')">
+      <mat-radio-group (change)="onRadioTypeChange(true, $event.value, 'typeOfEvents')">
         <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['typeOfEvents']">
           <ng-container *ngIf="options?.count">
             <mat-radio-button [value]="options" [checked]="options?.isChecked || getSelectedFilter(options)">
@@ -932,8 +932,35 @@
     </mat-selection-list>
   </div>
 
+  <!-- Training Plan isAPAR Type Filter -->
+  <ng-container
+    *ngIf="
+      searchCategory &&
+      formattedFacets &&
+      formattedFacets['isApar'] &&
+      formattedFacets['isApar'].length
+    ">
+    <div class="rating-filter">
+      <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">
+        {{ "learnsearch.planType" | translate }}
+      </p>
+      <mat-radio-group (change)="onRadioTypeChange(true, $event.value, 'isApar')">
+        <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['isApar']">
+          <ng-container *ngIf="options?.count">
+            <mat-radio-button [value]="options" [checked]="options?.isChecked || getSelectedFilter(options)">
+              <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
+                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
+                >
+                <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
+            </mat-radio-button>
+          </ng-container>
+        </section>
+      </mat-radio-group>
+    </div>
+  </ng-container>
+
   <!-- Users Onboarding Date range Filter  -->
-  <div class="filter-without-search" *ngIf="searchCategory === 'users'">
+  <div class="filter-without-search" *ngIf="searchCategory &&  isUserFacetsPresent">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.onBoardingDateRange" | translate }}</p>
     <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)"></mat-calendar>
   </div>

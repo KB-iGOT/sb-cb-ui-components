@@ -218,3 +218,11 @@
 .subtheme-detail {
   width: 89%;
 }
+
+.text-ellipse {
+    display: inline-block;
+    max-width: 38em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

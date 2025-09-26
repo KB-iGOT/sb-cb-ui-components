@@ -193,7 +193,7 @@ export class UsersRequestParams {
   facets: string[];
   query?: string;
   sort_by: SortBy;
-  orderBy: string;
+  orderBy?: string;
   limit: number;
   offset: number;
 
@@ -241,8 +241,6 @@ export class SearchTrainingPlansRequest {
     this.pageNumber = 0;
     this.pageSize = 10;
     this.facets = ["status", "createdAt", "createdByName", "contentType", "endDate", "isApar"];
-    this.orderBy = ''
-    this.orderDirection = 'desc'
     this.filter = {}
 
   }
