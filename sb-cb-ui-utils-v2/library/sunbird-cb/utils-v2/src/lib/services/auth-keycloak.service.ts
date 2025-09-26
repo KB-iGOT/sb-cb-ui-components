@@ -5,6 +5,7 @@ import { ReplaySubject } from 'rxjs'
 // import { filter } from 'rxjs/operators'
 import { AuthMicrosoftService } from './auth-microsoft.service'
 import { ConfigurationsService } from './configurations.service'
+import { DomainConfService } from './domain-conf.service'
 
 // interface IParsedToken {
 //   email?: string
@@ -28,6 +29,7 @@ export class AuthKeycloakService {
     private configSvc: ConfigurationsService,
     // private keycloakSvc: KeycloakService,
     private msAuthSvc: AuthMicrosoftService,
+    private domainConf: DomainConfService,
     @Inject('environment') environment: any,
   ) {
     this.loginChangeSubject.subscribe((isLoggedIn: boolean) => {
@@ -187,7 +189,7 @@ export class AuthKeycloakService {
       // window.location.href = `${this.environment.staticHomePageUrl}`
       // await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
       // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
-      window.location.href = `https://${this.environment.sitePath}/apis/reset`
+      window.location.href = `https://${this.domainConf.getDomainSitePath(this.environment)}/apis/reset`
       await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()
 
 

@@ -789,6 +789,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     const originalFilters: any = [];
     return new Promise<any>((resolve, reject) => {
       if (request && request.searchV6) {
+        request.searchV6.request.filters = this.checkForDateFilters(request.searchV6.request.filters);
         this.contentSvc.searchV6(request.searchV6).subscribe(results => {
           const showViewMore = Boolean(
             results.result.content && results.result.content.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
