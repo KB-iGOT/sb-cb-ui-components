@@ -128,3 +128,5 @@ export * from './lib/helpers/horizontal-scroller-v2/horizontal-scroller-v2.compo
 //ENROLL SERVICES
 export * from './lib/services-new/widget-enroll.service'
 export * from './lib/services-new/data-transfer.service'
+
+export * from './lib/services/domain-conf.service'
