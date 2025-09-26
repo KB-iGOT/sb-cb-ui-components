@@ -11,7 +11,8 @@ import {
   SearchListingConfig,
   SearchNLP,
   SearchPeoplesRequest,
-  SearchV4Request
+  SearchV4Request,
+  SearchDesignationRequest
 } from "../_models/search-listing.model";
 import { catchError, map } from "rxjs/operators";
 // import "rxjs/add/observable/of";
@@ -292,5 +293,10 @@ export class SearchListingService {
     }
     localStorage.setItem("cbpData", JSON.stringify([]));
     return [];
+  }
+
+  searchDesignationV4(params: SearchDesignationRequest): Promise<any> {
+    // This method is used to search courses using the v4 API.
+    return this.http.post(API_END_POINTS.SEARCH_V4, params).toPromise();
   }
 }

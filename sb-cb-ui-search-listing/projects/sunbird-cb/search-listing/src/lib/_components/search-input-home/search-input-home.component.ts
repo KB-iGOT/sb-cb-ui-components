@@ -21,6 +21,7 @@ import {
   ICompentencyKeys,
   SearchCategory,
   SearchCommunitiesRequest,
+  SearchDesignationRequest,
   SearchEventfacet,
   SearchEventFields,
   SearchExternalRequest,
@@ -245,8 +246,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           this.updateRecentSearchQuery(query);
         }
       });
-    }
-    else if (category && category === SearchCategory.Events && nlpSearchQuery) {
+    } else if (category && category === SearchCategory.Events && nlpSearchQuery) {
       const req = new SearchV4Request([]);
       req.request.filters.contentType = "Event";
       req.request.filters.status = ["Live"];
@@ -262,9 +262,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           this.updateRecentSearchQuery(query);
         }
       });
-    }
-
-    else if (category && category === SearchCategory.People && nlpSearchQuery) {
+    } else if (category && category === SearchCategory.People && nlpSearchQuery) {
       const req = new SearchPeoplesRequest();
       req.query = nlpSearchQuery;
 
@@ -277,9 +275,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           // tslint:disable-next-line: align
           console.error("something went wrong", error);
         });
-    }
-
-    else if (category && category === SearchCategory.Resources && nlpSearchQuery) {
+    } else if (category && category === SearchCategory.Resources && nlpSearchQuery) {
       const req = new SearchV4Request([]);
       req.request.filters.contentType = "Resource";
       req.request.facets = SearchResourceFacets;
@@ -293,19 +289,19 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           this.updateRecentSearchQuery(query);
         }
       });
-    }
-    else if (category && category === SearchCategory.Communities && nlpSearchQuery) {
+    } else if (category && category === SearchCategory.Communities && nlpSearchQuery) {
       const req = new SearchCommunitiesRequest([]);
       req.searchString = nlpSearchQuery;
 
-      this.searchListingService.searchCommunity(req).then((res: any) => {
-        if(res) {
-          this.updateRecentSearchQuery(query);
-        }
-      }).catch();
-    }
-
-    else if (category && category === "all" && nlpSearchQuery) {
+      this.searchListingService
+        .searchCommunity(req)
+        .then((res: any) => {
+          if (res) {
+            this.updateRecentSearchQuery(query);
+          }
+        })
+        .catch();
+    } else if (category && category === "all" && nlpSearchQuery) {
       const catReq = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
       catReq.request.query = nlpSearchQuery;
       catReq.request.filters.contentType = ["Course"];
@@ -350,38 +346,47 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       const communitiesreq = new SearchCommunitiesRequest([]);
       communitiesreq.searchString = nlpSearchQuery;
 
-
-      this.searchListingService.searchCommunity(communitiesreq).then((res: any) => {
-        if(res) {
-          this.updateRecentSearchQuery(query);
-        }
-      }).catch();
-    }
-
-    else if (category && category === SearchCategory.Users && nlpSearchQuery) {
-      const req = new SearchUsersRequest()
+      this.searchListingService
+        .searchCommunity(communitiesreq)
+        .then((res: any) => {
+          if (res) {
+            this.updateRecentSearchQuery(query);
+          }
+        })
+        .catch();
+    } else if (category && category === SearchCategory.Users && nlpSearchQuery) {
+      const req = new SearchUsersRequest();
       req.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
-      req.request.query = nlpSearchQuery
+      req.request.query = nlpSearchQuery;
       this.searchListingService.searchUsersMDO(req).then((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
-    }
-
-    else if (category && category === SearchCategory.TrainingPlans && nlpSearchQuery) {
-      const req  = new SearchTrainingPlansRequest();
-      req.pageSize = 3
-      req.searchString = nlpSearchQuery
+    } else if (category && category === SearchCategory.TrainingPlans && nlpSearchQuery) {
+      const req = new SearchTrainingPlansRequest();
+      req.pageSize = 3;
+      req.searchString = nlpSearchQuery;
 
       this.searchListingService.searchTrainingPlans(req).then((res: any) => {
         if (res) {
           this.updateRecentSearchQuery(query);
         }
       });
-    }
+    } else if (category && category === SearchCategory.Designation && nlpSearchQuery) {
+      const req = new SearchDesignationRequest();
+      req.request.query = nlpSearchQuery;
+      req.request.filters["categories"] = [`${this.configSvc.userProfile?.rootOrgId}_odcs_designation`];
 
-    else if (category && category === SearchCategory.Designation && nlpSearchQuery) {}
+      this.searchListingService
+        .searchDesignationV4(req)
+        .then((res: any) => {
+          if (res) {
+            this.updateRecentSearchQuery(query);
+          }
+        })
+        .catch(() => {});
+    }
   }
 
   recentDeleteByUserId() {
@@ -459,13 +464,13 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     this.queryControl.reset();
 
     const params = { ...this.activated.snapshot.queryParams };
-    params['q'] = null;
-    params['search'] = null;
+    params["q"] = "";
+    params["search"] = "";
 
     this.router.navigate([], {
       relativeTo: this.activated.parent,
       queryParams: params,
-      queryParamsHandling: 'merge',
+      queryParamsHandling: "merge"
     });
   }
 

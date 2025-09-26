@@ -9,4 +9,12 @@ export class DesignationCardComponent {
   @Input() designation!: any;
   @Input() category!: any;
   @Output() telemetry = new EventEmitter<any>();
+
+  formatAdditionalInfo(info: string): any {
+    if (typeof info === "string") {
+      return JSON.parse(info);
+    } else {
+      return info;
+    }
+  }
 }

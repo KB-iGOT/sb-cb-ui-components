@@ -22,7 +22,8 @@ import {
   ICompentencyKeys,
   SearchListingConfig,
   SearchUsersRequest,
-  SearchTrainingPlansRequest
+  SearchTrainingPlansRequest,
+  SearchDesignationRequest
 } from "../../_models/search-listing.model";
 import { forkJoin, Subject } from "rxjs";
 import moment from "moment";
@@ -92,7 +93,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   searchRequestCommunities = new SearchCommunitiesRequest([]);
   searchRequestExternal = new SearchExternalRequest([]);
   searchRequestUsers = new SearchUsersRequest();
-  searchRequestDesignation = { filters: {} };
+  searchRequestDesignation = new SearchDesignationRequest();
   searchRequestTrainingPlans = new SearchTrainingPlansRequest();
 
   searchContentLoader = true;
@@ -471,130 +472,21 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   async searchDesignations() {
     this.searchPeopleLoader = true;
-    this.designationSearchTotalCount = 6;
-    this.designationSearchResults = [
-      {
-        identifier: "0140908831042437120_odcs_master_fw_designation_2954d550-e2dd-11ef-b10d-cf016b313ac2",
-        code: "2954d550-e2dd-11ef-b10d-cf016b313ac2",
-        translations: null,
-        name: "Consulate General",
-        refType: "designation",
-        description: null,
-        index: 0,
-        additionalProperties: {
-          timeStamp: 1738662498085,
-          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
-          previousCategoryCode: "org",
-          importedOn: "04 Feb, 2025",
-          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
-          importedByName: "Qa Fnb Mdoadmin "
-        },
-        refId: "DESG-000966",
-        category: "designation",
-        status: "Live"
-      },
-      {
-        identifier: "0140908831042437120_odcs_master_fw_designation_28f1a6b0-e2dd-11ef-b10d-cf016b313ac2",
-        code: "28f1a6b0-e2dd-11ef-b10d-cf016b313ac2",
-        translations: null,
-        name: "Controller of Administration",
-        refType: "designation",
-        description: null,
-        index: 0,
-        additionalProperties: {
-          timeStamp: 1738662497435,
-          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
-          previousCategoryCode: "org",
-          importedOn: "04 Feb, 2025",
-          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
-          importedByName: "Qa Fnb Mdoadmin "
-        },
-        refId: "DESG-000977",
-        category: "designation",
-        status: "Live"
-      },
-      {
-        identifier: "0140908831042437120_odcs_master_fw_designation_2a406dd0-e2dd-11ef-b10d-cf016b313ac2",
-        code: "2a406dd0-e2dd-11ef-b10d-cf016b313ac2",
-        translations: null,
-        name: "Deputy Chief Security Officer",
-        refType: "designation",
-        description: null,
-        index: 0,
-        additionalProperties: {
-          timeStamp: 1738662499629,
-          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
-          previousCategoryCode: "org",
-          importedOn: "04 Feb, 2025",
-          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
-          importedByName: "Qa Fnb Mdoadmin "
-        },
-        refId: "DESG-001102",
-        category: "designation",
-        status: "Live"
-      },
-      {
-        identifier: "0140908831042437120_odcs_master_fw_designation_29d3a240-e2dd-11ef-b10d-cf016b313ac2",
-        code: "29d3a240-e2dd-11ef-b10d-cf016b313ac2",
-        translations: null,
-        name: "Controller",
-        refType: "designation",
-        description: null,
-        index: 0,
-        additionalProperties: {
-          timeStamp: 1738662498916,
-          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
-          previousCategoryCode: "org",
-          importedOn: "04 Feb, 2025",
-          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
-          importedByName: "Qa Fnb Mdoadmin "
-        },
-        refId: "DESG-000970",
-        category: "designation",
-        status: "Live"
-      },
-      {
-        identifier: "0140908831042437120_odcs_master_fw_designation_24bde810-e2dd-11ef-b10d-cf016b313ac2",
-        code: "24bde810-e2dd-11ef-b10d-cf016b313ac2",
-        translations: null,
-        name: "Assistant Official Liquidator",
-        refType: "designation",
-        description: null,
-        index: 0,
-        additionalProperties: {
-          timeStamp: 1738662490385,
-          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
-          previousCategoryCode: "org",
-          importedOn: "04 Feb, 2025",
-          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
-          importedByName: "Qa Fnb Mdoadmin "
-        },
-        refId: "DESG-000489",
-        category: "designation",
-        status: "Live"
-      },
-      {
-        identifier: "0140908831042437120_odcs_master_fw_designation_2aab8bb0-e2dd-11ef-b10d-cf016b313ac2",
-        code: "2aab8bb0-e2dd-11ef-b10d-cf016b313ac2",
-        translations: null,
-        name: "Deputy Chief Executive",
-        refType: "designation",
-        description: null,
-        index: 0,
-        additionalProperties: {
-          timeStamp: 1738662500331,
-          previousTermCode: "1b910c75-7e5d-440c-8bc3-bf75f65436f9",
-          previousCategoryCode: "org",
-          importedOn: "04 Feb, 2025",
-          importedById: "25950729-5e2a-48eb-ac39-1ed076325f5c",
-          importedByName: "Qa Fnb Mdoadmin "
-        },
-        refId: "DESG-001081",
-        category: "designation",
-        status: "Live"
-      }
-    ];
 
+    this.searchRequestDesignation.request.query = this.statedata?.param || "";
+    this.searchRequestDesignation.request.filters["categories"] = [`${this.configSvc.userProfile?.rootOrgId}_odcs_designation`];
+
+    const result = await this.searchListingService.searchDesignationV4(this.searchRequestDesignation).catch(() => {});
+    if (result.result && result.result?.Term) {
+      this.designationSearchResults = result.result?.Term || [];
+      this.designationSearchTotalCount = result.result?.count;
+      this.designationFacets = result.result?.facets;
+      this.combinedFacets = [];
+      this.combinedFacets = [...this.combinedFacets, this.designationFacets || []];
+    } else {
+      this.designationSearchResults = [];
+      this.designationSearchTotalCount = 0;
+    }
     this.searchPeopleLoader = false;
   }
 
@@ -607,8 +499,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.trainingPlansSearchResults = result.result.result.data;
       this.trainingPlansSearchTotalCount = result.result.result.totalCount;
       this.trainingPlansFacets = this.processObjectFacetsForTrainingPlan(result.result.result.facets) || [];
-
-      console.log(this.trainingPlansFacets, ">>>");
 
       this.combinedFacets = [];
       this.combinedFacets = [...this.combinedFacets, this.trainingPlansFacets || []];
@@ -711,9 +601,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestUsers.request.limit = this.initialPaginationSize;
     this.searchRequestUsers.request.filters = { rootOrgId: this.configSvc.userProfile?.rootOrgId || "" };
 
-    this.searchRequestDesignation = {
-      filters: {}
-    };
+    this.searchRequestDesignation = new SearchDesignationRequest();
+    this.searchRequestDesignation.request.limit = this.initialPaginationSize;
+    this.searchRequestDesignation.request.offset = 0;
 
     this.searchRequestTrainingPlans = new SearchTrainingPlansRequest();
     this.searchRequestTrainingPlans.pageSize = this.initialPaginationSize;
@@ -725,6 +615,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestEvents.request.sort_by = {};
         this.searchRequestResources.request.sort_by = {};
         this.searchRequestUsers.request.sort_by = {};
+        this.searchRequestDesignation.request.sort_by = {};
 
         delete this.searchRequestTrainingPlans.orderBy;
         delete this.searchRequestTrainingPlans.orderDirection;
@@ -740,6 +631,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
         this.searchRequestTrainingPlans.orderBy = "";
         this.searchRequestTrainingPlans.orderDirection = "desc";
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        this.searchRequestDesignation.request.sort_by = {};
       }
     } else if (this.searchSortFilter === SortType.RecentlyAdded) {
       if (this.seeAllResult === "") {
@@ -748,6 +641,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestUsers.request.orderBy = "createdDate";
         this.searchRequestTrainingPlans.orderBy = "createdAt";
         this.searchRequestTrainingPlans.orderDirection = "desc";
+
+        this.searchRequestDesignation.request.sort_by[FacetType.createdOn] = SortType.Descending;
+        delete this.searchRequestDesignation.request.sort_by["name"];
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.createdOn = "desc";
       } else if (this.seeAllResult === SearchCategory.Events) {
@@ -767,6 +663,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
         this.searchRequestTrainingPlans.orderBy = "createdAt";
         this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
+      } else if (this.seeAllResult == SearchCategory.Designation) {
+        this.searchRequestDesignation.request.sort_by[FacetType.createdOn] = SortType.Descending;
+        delete this.searchRequestDesignation.request.sort_by["name"];
       }
     } else if (this.searchSortFilter === SortType.HighestRated) {
       if (this.seeAllResult === "") {
@@ -788,8 +687,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
         this.searchRequestEvents.request.sort_by.name = SortType.Ascending;
         this.searchRequestUsers.request.sort_by.firstName = SortType.Ascending;
+
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Ascending;
+
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Ascending;
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
       } else if (this.seeAllResult === SearchCategory.Events) {
@@ -803,14 +706,21 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Ascending;
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Ascending;
       }
     } else if (this.searchSortFilter === SortType.ZtoA) {
       if (this.seeAllResult === "") {
         this.searchRequestCourse.request.sort_by.name = SortType.Descending;
         this.searchRequestEvents.request.sort_by.name = SortType.Descending;
         this.searchRequestUsers.request.sort_by.firstName = SortType.Descending;
+
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
+
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Descending;
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.name = SortType.Descending;
       } else if (this.seeAllResult === SearchCategory.Events) {
@@ -824,6 +734,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Descending;
       }
     }
 
@@ -966,13 +879,21 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           if (selectedFilters[key].length === 2) {
             const [startDate, endDate] = selectedFilters[key];
             if (startDate && endDate) {
-              this.searchRequestUsers.request.filters["createdDate"] = {
-                ">=": startDate,
-                "<=": endDate
-              };
+              if (this.seeAllResult === SearchCategory.Users) {
+                this.searchRequestUsers.request.filters["createdDate"] = {
+                  ">=": startDate,
+                  "<=": endDate
+                };
+              } else if (this.seeAllResult === SearchCategory.Designation) {
+                this.searchRequestDesignation.request.filters[FacetType.createdOn] = {
+                  ">=": startDate,
+                  "<=": endDate
+                };
+              }
             }
           } else {
             this.searchRequestUsers.request.filters["createdDate"] = selectedFilters[key];
+            this.searchRequestDesignation.request.filters[FacetType.createdOn] = selectedFilters[key];
           }
         } else if (key === FacetType.status) {
           this.searchRequestTrainingPlans.filter[FacetType.status] = [...selectedFilters[key]];
@@ -1128,8 +1049,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // For searchRequestDesignation
-    if (this.searchRequestDesignation?.filters) {
-      removeEmpty(this.searchRequestDesignation.filters, ["name", "status", "category"], false);
+    if (this.searchRequestDesignation?.request.filters) {
+      removeEmpty(this.searchRequestDesignation.request.filters, [FacetType.createdOn], false);
     }
 
     // For searchRequestTrainingPlans
@@ -1286,8 +1207,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestResources = new SearchV4Request([]);
     this.searchRequestExternal = new SearchExternalRequest([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
 
-    this.searchRequestDesignation = { filters: {} };
+    this.searchRequestDesignation = new SearchDesignationRequest();
     this.searchRequestTrainingPlans = new SearchTrainingPlansRequest();
+    this.searchRequestUsers = new SearchUsersRequest();
 
     this.courseSearchResults = [];
     this.eventsSearchResults = [];
@@ -1353,6 +1275,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchRequestTrainingPlans.pageSize = event.limit;
       this.searchRequestTrainingPlans.pageNumber = event.currentPage - 1;
       await this.searchTrainingPlans();
+    } else if (this.seeAllResult === SearchCategory.Designation) {
+      this.searchRequestDesignation.request.limit = event.limit;
+      this.searchRequestDesignation.request.offset = (event.currentPage - 1) * event.limit;
+      await this.searchDesignations();
     }
 
     this.searchContentLoader = false;
@@ -1384,6 +1310,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestTrainingPlans.pageNumber = 0;
     this.searchRequestTrainingPlans.orderBy = "desc";
 
+    this.searchRequestDesignation.request.offset = 0;
+    this.searchRequestDesignation.request.sort_by = {};
+
     if (this.seeAllResult) {
       this.searchRequestPeoples.limit = this.initialPaginationSize;
       this.searchRequestEvents.request.limit = this.initialPaginationSize;
@@ -1394,6 +1323,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
       this.searchRequestUsers.request.limit = this.initialPaginationSize;
       this.searchRequestTrainingPlans.pageSize = this.initialPaginationSize;
+      this.searchRequestDesignation.request.limit = this.initialPaginationSize;
     } else {
       this.searchRequestPeoples.limit = this.initialPaginationSize;
       this.searchRequestCommunities.pageSize = this.initialPaginationSize;
@@ -1403,6 +1333,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchRequestExternal.pageSize = this.initialPaginationSize;
       this.searchRequestUsers.request.limit = this.initialPaginationPage;
       this.searchRequestTrainingPlans.pageSize = this.commonPageResultSize;
+      this.searchRequestDesignation.request.limit = this.initialPaginationSize;
     }
 
     if (event === SortType.MostRelevent) {
@@ -1412,6 +1343,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         await this.searchcommunities();
         await this.searchUsersMDO();
         await this.searchTrainingPlans();
+        await this.searchDesignations();
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by = {};
         await this.searchCourses();
@@ -1429,35 +1361,42 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         delete this.searchRequestTrainingPlans.orderBy;
         delete this.searchRequestTrainingPlans.orderDirection;
         await this.searchTrainingPlans();
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        this.searchRequestDesignation.request.sort_by = {};
+        await this.searchDesignations();
       }
     } else if (event === SortType.RecentlyAdded) {
       if (this.seeAllResult === "") {
-        this.searchRequestCourse.request.sort_by.createdOn = "desc";
-        this.searchRequestEvents.request.sort_by.startDate = "desc";
+        this.searchRequestCourse.request.sort_by.createdOn = SortType.Descending;
+        this.searchRequestEvents.request.sort_by.startDate = SortType.Descending;
         this.searchRequestUsers.request.orderBy = "createdDate";
 
-        this.searchRequestTrainingPlans.orderBy = "createdAt";
-        this.searchRequestTrainingPlans.orderDirection = "desc";
+        this.searchRequestTrainingPlans.orderBy = FacetType.createdAt;
+        this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
+
+        this.searchRequestDesignation.request.sort_by[FacetType.createdOn] = SortType.Descending;
+        delete this.searchRequestDesignation.request.sort_by["name"];
+
         await this.searchCourses();
         await this.searchEvents();
         await this.searchcommunities();
         await this.searchUsersMDO();
         await this.searchTrainingPlans();
       } else if (this.seeAllResult === SearchCategory.Courses) {
-        this.searchRequestCourse.request.sort_by.createdOn = "desc";
+        this.searchRequestCourse.request.sort_by.createdOn = SortType.Descending;
         await this.searchCourses();
       } else if (this.seeAllResult === SearchCategory.Events) {
-        this.searchRequestEvents.request.sort_by.startDate = "desc";
+        this.searchRequestEvents.request.sort_by.startDate = SortType.Descending;
         await this.searchEvents();
       } else if (this.seeAllResult === SearchCategory.Communities) {
-        this.searchRequestCommunities.orderDirection = "desc";
+        this.searchRequestCommunities.orderDirection = SortType.Descending;
         await this.searchcommunities();
       } else if (this.seeAllResult === SearchCategory.People) {
         delete this.searchRequestPeoples?.sort_by?.firstName;
-        this.searchRequestPeoples.sort_by.createdOn = "desc";
+        this.searchRequestPeoples.sort_by.createdOn = SortType.Descending;
         await this.searchPeople();
       } else if (this.seeAllResult === SearchCategory.Resources) {
-        this.searchRequestResources.request.sort_by.createdOn = "desc";
+        this.searchRequestResources.request.sort_by.createdOn = SortType.Descending;
         await this.searchResources();
       } else if (this.seeAllResult === SearchCategory.ExternalContents) {
         this.searchRequestExternal.orderBy = "createdOn";
@@ -1468,24 +1407,28 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         await this.searchUsersMDO();
       } else if (this.seeAllResult === SearchCategory.TrainingPlans) {
         this.searchRequestTrainingPlans.orderBy = "createdAt";
-        this.searchRequestTrainingPlans.orderDirection = "desc";
+        this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
         await this.searchTrainingPlans();
+      } else if (this.seeAllResult == SearchCategory.Designation) {
+        this.searchRequestDesignation.request.sort_by[FacetType.createdOn] = SortType.Descending;
+        delete this.searchRequestDesignation.request.sort_by["name"];
+        await this.searchDesignations();
       }
     } else if (event === SortType.HighestRated) {
       if (this.seeAllResult === "") {
-        this.searchRequestCourse.request.sort_by.avgRating = "desc";
-        this.searchRequestEvents.request.sort_by.avgRating = "desc";
+        this.searchRequestCourse.request.sort_by.avgRating = SortType.Descending;
+        this.searchRequestEvents.request.sort_by.avgRating = SortType.Descending;
         await this.searchCourses();
         await this.searchEvents();
         await this.searchcommunities();
       } else if (this.seeAllResult === SearchCategory.Courses) {
-        this.searchRequestCourse.request.sort_by.avgRating = "desc";
+        this.searchRequestCourse.request.sort_by.avgRating = SortType.Descending;
         await this.searchCourses();
       } else if (this.seeAllResult === SearchCategory.Events) {
-        this.searchRequestEvents.request.sort_by.avgRating = "desc";
+        this.searchRequestEvents.request.sort_by.avgRating = SortType.Descending;
         await this.searchEvents();
       } else if (this.seeAllResult === SearchCategory.Resources) {
-        this.searchRequestResources.request.sort_by.avgRating = "desc";
+        this.searchRequestResources.request.sort_by.avgRating = SortType.Descending;
         await this.searchResources();
       }
     } else if (event === SortType.Ascending) {
@@ -1497,17 +1440,23 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     } else if (event === SortType.AtoZ) {
       if (this.seeAllResult === "") {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
+        await this.searchCourses();
+
         this.searchRequestEvents.request.sort_by.name = SortType.Ascending;
+        await this.searchEvents();
+
         this.searchRequestUsers.request.sort_by.firstName = SortType.Ascending;
+        await this.searchUsersMDO();
 
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Ascending;
-
-        await this.searchCourses();
-        await this.searchEvents();
-        await this.searchcommunities();
-        await this.searchUsersMDO();
         await this.searchTrainingPlans();
+
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Ascending;
+        await this.searchDesignations();
+
+        await this.searchcommunities();
       } else if (this.seeAllResult === SearchCategory.Courses) {
         this.searchRequestCourse.request.sort_by.name = SortType.Ascending;
         await this.searchCourses();
@@ -1527,6 +1476,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Ascending;
         await this.searchTrainingPlans();
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Ascending;
+        await this.searchDesignations();
       }
     } else if (event === SortType.ZtoA) {
       if (this.seeAllResult === "") {
@@ -1536,6 +1489,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
+
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Descending;
+        await this.searchDesignations();
 
         await this.searchCourses();
         await this.searchEvents();
@@ -1561,6 +1518,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestTrainingPlans.orderBy = "name";
         this.searchRequestTrainingPlans.orderDirection = SortType.Descending;
         await this.searchTrainingPlans();
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Descending;
+        await this.searchDesignations();
       }
     }
 
@@ -1620,7 +1581,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     const params = this.activated.snapshot.queryParams;
 
     this.queryParams = {
-      q: params["q"].trim(),
+      q: params["q"]?.trim(),
       search: params["search"] || null,
       category: category || null,
       tab: null
