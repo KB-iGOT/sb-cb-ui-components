@@ -34,6 +34,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   @Input() taxonomyConfig: any;
   @Input() orgSelectedData: any;
   @Input() childOrgData: any;
+  @Input() userRolesData: any;
   @Output() sentForApprove = new EventEmitter<any>()
   @Output() loaderEnable = new EventEmitter<any>()
   @Output() manageOrg = new EventEmitter<any>()
@@ -925,6 +926,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   checkChildOrg() {
-    return (this.childOrgData?.rootOrgId !== this.orgSelectedData.id) ? true : false
+    return (this.childOrgData?.rootOrgId !== this.orgSelectedData.id || this.userRolesData.has('mdo_admin')) ? true : false
   }
 }
