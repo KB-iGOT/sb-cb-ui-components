@@ -508,8 +508,8 @@ export class FrameworkService {
             status: 1,
             ministryOrStateType: (_orgData) ?
               _orgData.sbOrgType : '',
-            ministryOrStateId: (_orgData) ? 
-              _orgData.identifier : ''
+            ministryOrStateId: (_orgData?.identifier) ? 
+              _orgData?.identifier : (_orgData?.rootOrgId) ? _orgData.rootOrgId : ''
           },
           sort_by: {
             createdDate: "desc"
@@ -524,7 +524,8 @@ export class FrameworkService {
             'ministryOrStateId',
             'ministryOrStateType',
             'ministryOrStateName', 
-            'sbOrgSubType'
+            'sbOrgSubType',
+            'rootOrgId'
           ]
         }
       }    
