@@ -27,7 +27,7 @@
     <div class="grid grid-cols-2 gap-4 text-sm text-gray-500 mb-2">
       <div class="flex flex-col gap-2">
         <ng-container *ngIf="plan?.endDate">
-          <div class="flex items-center gap-1 trp-meta-texts">Due on: {{ plan?.endDate ?? "" | date : "EEE, MMM d, h:mm a" }}</div>
+          <div class="flex items-center gap-1 trp-meta-texts">Due on {{ plan?.endDate ?? "" | date : "EEE, MMM d, h:mm a" }}</div>
         </ng-container>
         <ng-container *ngIf="plan?.contentList">
           <div class="flex items-center gap-1 trp-meta-texts">
@@ -39,7 +39,7 @@
         <div class="flex items-center gap-1 trp-meta-texts" *ngIf="plan?.createdByName">
           By {{ userProfile?.firstName === plan?.createdByName ? "You" : plan?.createdByName }}
         </div>
-        <div class="flex items-center gap-1 trp-meta-texts" *ngIf="plan?.createdAt">Created On: {{ plan?.createdAt ?? "" | date : "EEE, MMM d, y" }}</div>
+        <div class="flex items-center gap-1 trp-meta-texts" *ngIf="plan?.createdAt">Created On {{ plan?.createdAt ?? "" | date : "EEE, MMM d, y" }}</div>
       </div>
     </div>
   </div>

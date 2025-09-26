@@ -417,7 +417,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  onTypesOfEventsChange(_event: MatRadioChange, option: any, radioType: string) {
+  onRadioTypeChange(_event: MatRadioChange, option: any, radioType: string) {
     const type = option?.name;
     this.selectedFilters[radioType] = [type];
 
@@ -833,5 +833,9 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     } else {
       this.appliedFilter.emit(this.selectedFilters);
     }
+  }
+
+  get isUserFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.Users &&  this.formattedFacets && Object.keys(this.formattedFacets).length > 0;
   }
 }

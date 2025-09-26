@@ -50,7 +50,6 @@
               externalSearchTotalCount >
             0
           ">
-       
           <div class="" *ngIf="!isExploreContentTab">
             <ng-container *ngIf="seeAllResult === '' || seeAllResult === 'courses'">
               <p class="contents-title-top text-dark mb-0">
@@ -83,6 +82,9 @@
             </ng-container>
             <ng-container *ngIf="seeAllResult === 'designation'">
               <p class="contents-title-top text-dark mb-0">{{ "learnsearch.designations" | translate : { count: designationSearchTotalCount } }}</p>
+            </ng-container>
+            <ng-container *ngIf="seeAllResult === 'users'">
+              <p class="contents-title-top text-dark mb-0">{{ "learnsearch.users" | translate : { count: usersSearchTotalCount } }}</p>
             </ng-container>
           </div>
 
@@ -121,8 +123,7 @@
               seeAllResult === 'communities' ||
               seeAllResult === 'resources' ||
               seeAllResult === 'external-contents' ||
-              seeAllResult === 'training-plans' ||
-              seeAllResult === 'users') &&
+              seeAllResult === 'training-plans') &&
             searchContentLoader
           ">
           <ng-container *ngFor="let item of [1, 2, 3, 4]">
@@ -197,7 +198,11 @@
               <ng-container *ngIf="usersSearchTotalCount > 0 && !seeAllResult">
                 <ws-utils-horizontal-scroller [loadStatus]="'done'">
                   <div class="card-container mr-6" *ngFor="let user of usersSearchResults; let index = index">
-                    <sb-cb-search-users-card [user]="user" (telemetry)="applyTelemetry($event, index)" [category]="seeAllResult" (updateUser)="updateUserDetails($event)"></sb-cb-search-users-card>
+                    <sb-cb-search-users-card
+                      [user]="user"
+                      (telemetry)="applyTelemetry($event, index)"
+                      [category]="seeAllResult"
+                      (updateUser)="updateUserDetails($event)"></sb-cb-search-users-card>
                   </div>
                 </ws-utils-horizontal-scroller>
               </ng-container>
@@ -205,7 +210,11 @@
               <ng-container *ngIf="seeAllResult === 'users'">
                 <div class="flex flex-wrap gap-x-3 gap-y-3 items-center justify-start mt-4">
                   <div class="card-container" *ngFor="let user of usersSearchResults; let i = index">
-                    <sb-cb-search-users-card [user]="user" (telemetry)="applyTelemetry($event, index)" [category]="seeAllResult" (updateUser)="updateUserDetails($event)"></sb-cb-search-users-card>
+                    <sb-cb-search-users-card
+                      [user]="user"
+                      (telemetry)="applyTelemetry($event, index)"
+                      [category]="seeAllResult"
+                      (updateUser)="updateUserDetails($event)"></sb-cb-search-users-card>
                   </div>
                 </div>
               </ng-container>
@@ -418,9 +427,11 @@
               <p *ngIf="seeAllResult === ''" class="mat-subheading-1 mt-4 font-bold-imp text-dark">
                 <span>{{ "learnsearch.trainingPlans" | translate : { count: trainingPlansSearchTotalCount } }}</span>
               </p>
-              <ng-container *ngFor="let plan of trainingPlansSearchResults; let index = index">
-                <sb-cb-search-training-plans-card [plan]="plan" (telemetry)="applyTelemetry($event, index)"></sb-cb-search-training-plans-card>
-              </ng-container>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                <ng-container *ngFor="let plan of trainingPlansSearchResults; let index = index">
+                  <sb-cb-search-training-plans-card [plan]="plan" (telemetry)="applyTelemetry($event, index)"> </sb-cb-search-training-plans-card>
+                </ng-container>
+              </div>
               <p
                 class="see-all-results text-center font-normal brand-color cursor-pointer mt-4"
                 *ngIf="!seeAllResult && trainingPlansSearchTotalCount > 3"
@@ -525,7 +536,8 @@
           {{ noResultMessage }}
         </div>
         <div class="action-search-btn flex gap-4 items-center mt-6 justify-center">
-          <ng-container *ngIf="searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons && searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons.length">
+          <ng-container
+            *ngIf="searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons && searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons.length">
             <ng-container *ngFor="let button of searchConfig?.noDataFoundFlags[seeAllResult]?.navigationsButtons">
               <button
                 mat-raised-button
