@@ -446,8 +446,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
     const returnedData = _.flatMap(data, (values, key) =>
       values.map((value: any) => {
-        if (key === 'dateRange') {
-          const dates = value.split(' ')[0]; // Get just the date part
+        if (key === "dateRange") {
+          const dates = value.split(" ")[0]; // Get just the date part
           return {
             type: key,
             value: dates
@@ -495,7 +495,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   clearFilterChip(item: { type: string; value: string }) {
     let facets;
-    if (item.type === 'dateRange') {
+    if (item.type === "dateRange") {
       this.clearDateRange();
       return;
     }
@@ -625,7 +625,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
     let filteredList = data?.filter((item: any) => item.name.toLowerCase().includes(this.filterQueryOrganisation.toLowerCase()));
 
-    return this.showAllOrganisation ? filteredList : filteredList.slice(0, 4);
+    return this.showAllOrganisation ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredContents() {
@@ -633,13 +633,13 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQueryContents.toLowerCase())
     );
 
-    return this.showAllContents ? filteredList : filteredList.slice(0, 4);
+    return this.showAllContents ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredLanguages() {
     let filteredList = this.formattedFacets[FacetType.Language].filter((item: any) => item.name.toLowerCase().includes(this.filterQueryLanguage.toLowerCase()));
 
-    return this.showAllLanguage ? filteredList : filteredList.slice(0, 4);
+    return this.showAllLanguage ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredSectorNames() {
@@ -652,7 +652,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     let filteredList = data.filter((item: any) => item.name.toLowerCase().includes(this.filterQuerySectorNames.toLowerCase()));
 
-    return this.showAllSectors ? filteredList : filteredList.slice(0, 4);
+    return this.showAllSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredSubSectorNames() {
@@ -665,7 +665,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     let filteredList = data.filter((item: any) => item.name.toLowerCase().includes(this.filterQuerySubSectorNames.toLowerCase()));
 
-    return this.showAllSubSectors ? filteredList : filteredList.slice(0, 4);
+    return this.showAllSubSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredSectorId() {
@@ -673,7 +673,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQuerySectorNames.toLowerCase())
     );
 
-    return this.showAllSectors ? filteredList : filteredList.slice(0, 4);
+    return this.showAllSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredSubSectorId() {
@@ -681,7 +681,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQuerySubSectorNames.toLowerCase())
     );
 
-    return this.showAllSubSectors ? filteredList : filteredList.slice(0, 4);
+    return this.showAllSubSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredDesignations() {
@@ -689,13 +689,13 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item?.name.toLowerCase().includes(this.filterQueryDesignation.toLowerCase())
     );
 
-    return this.showAllDesignation ? filteredList : filteredList.slice(0, 4);
+    return this.showAllDesignation ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredRootOrgNames() {
     let filteredList = this.formattedFacets["rootOrgName"]?.filter((item: any) => item?.name.toLowerCase().includes(this.filterQueryRootOrgName.toLowerCase()));
 
-    return this.showAllOrganisation ? filteredList : filteredList.slice(0, 4);
+    return this.showAllOrganisation ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredCompetencyTheme() {
@@ -703,7 +703,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item?.name.toLowerCase().includes(this.filterQueryThemes.toLowerCase())
     );
 
-    return this.showAllCompetencyTheme ? filteredList : filteredList.slice(0, 4);
+    return this.showAllCompetencyTheme ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredSubCompetencyTheme() {
@@ -711,7 +711,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item?.name.toLowerCase().includes(this.filterQuerySubThemes.toLowerCase())
     );
 
-    return this.showAllCompetencySubTheme ? filteredList : filteredList.slice(0, 4);
+    return this.showAllCompetencySubTheme ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredResourceCategory() {
@@ -719,7 +719,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQueryResourceCategory.toLowerCase())
     );
 
-    return this.showResourceCategory ? filteredList : filteredList.slice(0, 4);
+    return this.showResourceCategory ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredContentPartners() {
@@ -727,7 +727,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQueryContentPartners.toLowerCase())
     );
 
-    return this.showAllContentPartners ? filteredList : filteredList.slice(0, 4);
+    return this.showAllContentPartners ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredTopic() {
@@ -739,7 +739,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
     let filteredList = filterData.filter((item: any) => item.name.toLowerCase().includes(this.filterQueryTopic.toLowerCase()));
 
-    return this.showAllTopic ? filteredList : filteredList.slice(0, 4);
+    return this.showAllTopic ? filteredList : filteredList?.slice(0, 4);
   }
 
   private recursivelySetIsCheckedFalse(filters: any[], name: string): any {
@@ -799,35 +799,52 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     this.selectionModel.updateSelection(newSelection, this);
     this.selectedDateRange = new DateRange<Date>(newSelection.start, newSelection.end);
-    
+
     if (this.selectedDateRange?.start && this.selectedDateRange?.end) {
-      const formattedStartDate = this.formatDateForFilter(this.selectedDateRange.start);
-      const formattedEndDate = this.formatDateForFilter(this.selectedDateRange.end);
-      
-      this.selectedFilters['dateRange'] = [formattedStartDate, formattedEndDate];
+      const formattedStartDate = this.formatDateForFilter(this.selectedDateRange.start, this.searchCategory);
+      const formattedEndDate = this.formatDateForFilter(this.selectedDateRange.end, this.searchCategory);
+
+      this.selectedFilters["dateRange"] = [formattedStartDate, formattedEndDate];
       this.appliedFilter.emit(this.selectedFilters);
       this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
     }
   }
 
-  private formatDateForFilter(date: Date): string {
-    const pad = (num: number) => num.toString().padStart(2, '0');
-    
-    const year = date.getUTCFullYear();
-    const month = pad(date.getUTCMonth() + 1);
-    const day = pad(date.getUTCDate());
-    const hours = pad(date.getUTCHours());
-    const minutes = pad(date.getUTCMinutes());
-    const seconds = pad(date.getUTCSeconds());
-    const milliseconds = date.getUTCMilliseconds().toString().padStart(3, '0');
+  private formatDateForFilter(date: Date, category: string): string {
+    const pad = (num: number, size = 2) => num.toString().padStart(size, "0");
 
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}+0000`;
+    if (category === SearchCategory.Users) {
+      const year = date.getUTCFullYear();
+      const month = pad(date.getUTCMonth() + 1);
+      const day = pad(date.getUTCDate());
+      const hours = pad(date.getUTCHours());
+      const minutes = pad(date.getUTCMinutes());
+      const seconds = pad(date.getUTCSeconds());
+      const milliseconds = date.getUTCMilliseconds().toString().padStart(3, "0");
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}+0000`;
+    } else {
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+      const seconds = pad(date.getSeconds());
+      const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
+
+      const offset = -date.getTimezoneOffset();
+      const offsetSign = offset >= 0 ? "+" : "-";
+      const offsetHours = pad(Math.floor(Math.abs(offset) / 60));
+      const offsetMinutes = pad(Math.abs(offset) % 60);
+
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${offsetHours}${offsetMinutes}`;
+    }
   }
 
   clearDateRange() {
     this.selectedDateRange = null;
-    if (this.selectedFilters['dateRange']) {
-      this.selectedFilters['dateRange'] = []
+    if (this.selectedFilters["dateRange"]) {
+      this.selectedFilters["dateRange"] = [];
       this.appliedFilter.emit(this.selectedFilters);
       this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
     } else {
@@ -836,6 +853,10 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   get isUserFacetsPresent(): boolean {
-    return this.searchCategory === SearchCategory.Users &&  this.formattedFacets && Object.keys(this.formattedFacets).length > 0;
+    return this.searchCategory === SearchCategory.Users && this.formattedFacets && Object.keys(this.formattedFacets)?.length > 0;
+  }
+
+  get isDesignationFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.Designation && this.formattedFacets && Object.keys(this.formattedFacets)?.length > 0;
   }
 }

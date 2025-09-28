@@ -26,7 +26,8 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
       this.category === SearchCategory.Communities ||
       this.category === SearchCategory.Events ||
       this.category === SearchCategory.Users ||
-      this.category === SearchCategory.TrainingPlans
+      this.category === SearchCategory.TrainingPlans ||
+      this.category === SearchCategory.Designation
     ) {
       this.options = SEARCH_SORT_DROPDOWN.filter(option => option.value !== SortType.HighestRated);
       this.selectedOption = SortType.MostRelevent;

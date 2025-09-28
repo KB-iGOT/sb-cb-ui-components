@@ -227,7 +227,7 @@ export class UsersRequestParams {
 
 export class SearchTrainingPlansRequest {
   filter: {
-     [key: string]: any 
+    [key: string]: any;
   };
   pageNumber: number;
   pageSize: number;
@@ -241,8 +241,44 @@ export class SearchTrainingPlansRequest {
     this.pageNumber = 0;
     this.pageSize = 10;
     this.facets = ["status", "createdAt", "createdByName", "contentType", "endDate", "isApar"];
-    this.filter = {}
+    this.filter = {};
+  }
+}
 
+export class SearchDesignationRequest {
+  request: DesignationRequestParams;
+  constructor() {
+    this.request = new DesignationRequestParams();
+  }
+}
+
+export class DesignationRequestParams {
+  filters: {
+    category?: string;
+    categories?: string[];
+    status?: string;
+    objectType?: string;
+    [key: string]: any;
+  };
+  fields: string[];
+  facets: string[];
+  query?: string;
+  sort_by: SortBy;
+  orderBy?: string;
+  limit: number;
+  offset: number;
+
+  constructor() {
+    this.fields = ["name", "identifier", "createdOn", "additionalProperties"];
+    this.facets = ["createdOn"];
+    this.limit = 10;
+    this.offset = 0;
+    this.sort_by = {};
+    this.filters = {
+      category: "designation",
+      status: "Live",
+      objectType: "Term"
+    };
   }
 }
 
@@ -302,6 +338,7 @@ export enum FacetType {
   organizationsRoles = "organisations.roles",
 
   // Designations
+  createdOn = "createdOn",
 
   // Training Plans
   status = "status",

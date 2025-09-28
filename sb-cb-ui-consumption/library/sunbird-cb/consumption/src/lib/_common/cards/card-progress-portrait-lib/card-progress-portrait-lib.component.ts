@@ -123,7 +123,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
         type: WsEvents.EnumInteractSubTypes.CERTIFICATE,
       }
     );
-    if (certificateData.issuedCertificates.length > 0) {
+    if (certificateData?.issuedCertificates?.length > 0) {
       this.downloadCertificateLoading = true;
         const certificate: any = certificateData.issuedCertificates.sort(
          (a: any, b: any) =>
