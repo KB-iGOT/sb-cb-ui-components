@@ -13,7 +13,7 @@ import {
   ViewEncapsulation
 } from "@angular/core";
 import { UntypedFormControl } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { ConfigurationsService } from "@sunbird-cb/utils-v2";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import {
@@ -37,6 +37,7 @@ import {
 import { WidgetContentLibService } from "@sunbird-cb/consumption";
 // import { MobileAppsService } from "../../../../../../../../../src/app/services/mobile-apps.service";
 import { SearchListingService } from "../../_services/search-listing.service";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "ws-app-search-input-lib-home",
@@ -67,7 +68,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   openSearchTemplate = false;
   loaderSearching = false;
   responseNlpQuery = "";
-  searchSubscription: any;
+  searchSubscription: Subscription = new Subscription();
   searchConfig: SearchListingConfig.Config | null = null;
 
   environment!: any;
@@ -102,7 +103,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
     this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
-      if (value.length > 100) {
+      if (value && value.length > 100) {
         await this.searchFromQuery(value);
         this.loaderSearching = false;
       } else {
@@ -164,17 +165,41 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     } else {
       this.disableMenu = false;
     }
-    this.activated.queryParamMap.subscribe(queryParam => {
-      if (queryParam.has("q")) {
-        this.queryControl.setValue(queryParam.get("q") || "");
+
+    //Only allow coccunities for mdo_leader and mdo moderator in MDO
+    if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+      const userRoles = this.configSvc?.userRoles as Set<string>;
+      if (!userRoles.has("mdo_leader") && !userRoles.has("mdo_moderator")) {
+        if (this.searchConfig.searchCategories) {
+          this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+        }
       }
-      if (queryParam.has("category")) {
-        this.selectedSearchCategory = queryParam.get("category") || "";
-      } else {
-        this.selectedSearchCategory = this.searchConfig?.searchInputConfig?.defaultSearchCategory || "";
-      }
-    });
+    }
+
+    this.searchSubscription.add(
+      this.activated.queryParamMap.subscribe(queryParam => {
+        if (queryParam.has("q")) {
+          this.queryControl.setValue(queryParam.get("q") || "");
+        }
+        if (queryParam.has("category")) {
+          this.selectedSearchCategory = queryParam.get("category") || "";
+        } else {
+          this.selectedSearchCategory = this.searchConfig?.searchInputConfig?.defaultSearchCategory || "";
+        }
+      })
+    );
     this.categories = this.searchConfig?.searchCategories || [];
+
+    this.searchSubscription.add(
+      this.router.events.subscribe(event => {
+        if (event instanceof NavigationEnd) {
+          const path = event.url.split("?")[0];
+          if (!path.split("/").includes("globalsearch")) {
+            this.queryControl.reset();
+          }
+        }
+      })
+    );
   }
 
   async updateQuery(query: string) {

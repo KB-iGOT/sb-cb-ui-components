@@ -429,6 +429,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchRequestCommunities.searchString = this.statedata?.param || "";
     }
 
+    if (this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+      this.searchRequestCommunities.filterCriteriaMap["orgId"] = this.configSvc.userProfile?.rootOrgId;
+    }
+
     const result = await this.searchListingService.searchCommunity(this.searchRequestCommunities).catch(() => {
       return {
         result: { search_results: { data: [], totalCount: 0, facets: {} } }

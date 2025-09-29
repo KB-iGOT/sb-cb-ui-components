@@ -2,7 +2,7 @@
   <!-- Left Section -->
   <div class="flex-1">
     <!-- Title -->
-    <div class="plan-name mb-2">{{ plan?.name }}</div>
+    <div class="plan-name mb-2 text-ellipse cursor-pointer" [matTooltip]="plan?.name">{{ plan?.name }}</div>
     <!-- Tags -->
     <div class="flex gap-4 mb-8">
       <ng-container *ngIf="plan?.orgScope === 'Single'">
