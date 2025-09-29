@@ -8,6 +8,7 @@ type DialogData = {
   iconUrl?: string;
   type?: string;
   buttonsPositionClass?: string;
+  planeDescription?: string;
   buttons?: {
     classes?: string;
     text?: string;
@@ -25,7 +26,7 @@ export class ConfirmationDialogComponent {
 
   constructor(
     private dialogRef: MatLegacyDialogRef<ConfirmationDialogComponent>,
-    @Inject(MAT_LEGACY_DIALOG_DATA) public data: DialogData
+    @Inject(MAT_LEGACY_DIALOG_DATA) public data: DialogData,
   ) { 
     this.dialgoData = data
   }

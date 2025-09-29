@@ -22,7 +22,7 @@
                                         <span class="count">({{getCount(column.code)}})</span>
                                     </ng-container>
                                 </ng-container>
-                                <ng-container *ngIf="column?.config?.levelNameEdit">
+                                <ng-container *ngIf="column?.config?.levelNameEdit && !checkChildOrg()">
                                     <button mat-icon-button type="button" class="edit-btn flex" (click)="editCategoryName(column, i)">
                                         <mat-icon>edit</mat-icon>
                                     </button>
@@ -31,7 +31,7 @@
                             <ng-template #firstColumn>
                                 <span *ngIf="i == 0" id="box{{i+1}}count" class="count">({{column.children.length}})</span>
                             </ng-template>
-                            <ng-container class="" *ngIf="column?.config?.createBtnEnabled && !column?.config?.addOrgEnabled">
+                            <ng-container class="" *ngIf="column?.config?.createBtnEnabled && !column?.config?.addOrgEnabled && !checkChildOrg()">
                                 <button mat-button class="add-btn margin-left-auto" [ngClass]="{'button-enabled': configCodeBtn== column?.code, 'button-disabled': configCodeBtn!== column?.code}"
                                     (click)="openCreateTermDialog(column, i)" type="button">
                                     <span>Add</span>
@@ -40,7 +40,7 @@
                                     </mat-icon>
                                 </button>
                             </ng-container>
-                            <ng-container *ngIf="column?.config?.addOrgEnabled && !column?.config?.createBtnEnabled">
+                            <ng-container *ngIf="column?.config?.addOrgEnabled && !column?.config?.createBtnEnabled && !checkChildOrg()">
                                 <button mat-button class="add-btn margin-left-auto" (click)="openOrganizationDialog(column, i, 'add')" type="button" 
                                 [ngClass]="{'button-enabled': isCurrentOrNextTerm(column, i), 'button-disabled': !isCurrentOrNextTerm(column, i)}">
                                     <span>Add</span>
@@ -60,12 +60,12 @@
             <div class="padding-x2 cat-columns container-box" id="box{{i+1}}">
                 <ng-container *ngIf="column?.children && column?.children.length > 0">
                     <lib-tree-column-view *ngIf="loaded[column.code]" #selectedTaxonomyTerm [column]="column"
-                    [containerId]="'box'+(i+1)" (updateTaxonomyTerm)="updateTaxonomyTerm($event)"
+                    [containerId]="'box'+(i+1)" [childOrg]="childOrgData" [isChildOrg]="checkChildOrg()" (updateTaxonomyTerm)="updateTaxonomyTerm($event)"
                     (updateTermList)="updateDraftStatusTerms($event)" (cardsCount)="getNoOfCards($event)" 
                     (retireTermData)="removeConnection($event)" (cardAction)="cardActionEmit($event)">
                 </lib-tree-column-view>
                 </ng-container>
-                <ng-container *ngIf="shouldShowSvgBorderWrapper(column, i)">
+                <ng-container *ngIf="shouldShowSvgBorderWrapper(column, i) && !checkChildOrg()">
                     <div class="svg-border-wrapper">
                         <svg width="100%" height="100%">
                             <rect x="0" y="0" width="100%" height="100%" fill="none" stroke="#1B213352" stroke-width="2" 

@@ -26,14 +26,14 @@
 
     <ng-container *ngIf="data?.type === 'delete'">
       <div class="confirm-actions flex items-center gap-4 mt-4">
-        <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">No</button>
+        <button mat-flat-button class="mat-btn-outline mt-2 gap-2 border-radius-4" (click)="confirmNo()">No</button>
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
       </div>
     </ng-container>
 
     <ng-container *ngIf="data?.type === 'confirm-access-type' || data?.type === 'confirm-save-without-user-group'">
       <div class="confirm-actions flex items-center gap-4 mt-4">
-        <button mat-flat-button class="mat-btn-outline mt-2 gap-2" (click)="confirmNo()">Cancel</button>
+        <button mat-flat-button class="mat-btn-outline mt-2 gap-2 border-radius-4" (click)="confirmNo()">Cancel</button>
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
       </div>
     </ng-container>

@@ -308,6 +308,7 @@
   width: 100%;
   padding: 8px;
   box-sizing: border-box; /* Add this to prevent padding from adding to width */
+  top: 0;
 
   &::before {
 	content: "";

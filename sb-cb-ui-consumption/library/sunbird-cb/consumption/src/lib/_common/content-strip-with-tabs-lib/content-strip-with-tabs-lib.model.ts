@@ -126,6 +126,7 @@ export namespace NsContentStripWithTabs {
     deletedMode?: 'greyOut' | 'hide';
     contentTags?: IContentTags;
     hideShowAll?: boolean;
+    publicCard?: any;
   }
 
   export interface IContentTags {

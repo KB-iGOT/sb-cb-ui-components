@@ -33,6 +33,8 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   @Input() environment:any;
   @Input() taxonomyConfig: any;
   @Input() orgSelectedData: any;
+  @Input() childOrgData: any;
+  @Input() userRolesData: any;
   @Output() sentForApprove = new EventEmitter<any>()
   @Output() loaderEnable = new EventEmitter<any>()
   @Output() manageOrg = new EventEmitter<any>()
@@ -87,7 +89,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   init() {
     this.initConfig();
-    this.frameworkService.getFrameworkInfo((this.orgSelectedData) ? this.orgSelectedData : '').subscribe(() => {
+    this.frameworkService.getFrameworkInfo((this.orgSelectedData) ? this.orgSelectedData : '', (this.childOrgData) ? this.childOrgData : '').subscribe(() => {
       this.connectorSvc.removeAllLines()
       this.frameworkService.categoriesHash.value.forEach((cat:any) => {
         this.loaded[cat.code] = true
@@ -921,5 +923,9 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       this.treeHierarchySvc.setLoaderState(false);
       this._snackBar.open(`Error in updating association`, 'cancel');
     });
+  }
+
+  checkChildOrg() {
+    return (this.childOrgData?.rootOrgId !== this.orgSelectedData.id || this.userRolesData.has('mdo_admin')) ? true : false
   }
 }

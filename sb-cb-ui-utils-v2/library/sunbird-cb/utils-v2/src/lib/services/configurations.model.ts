@@ -35,6 +35,7 @@ export namespace NsInstanceConfig {
     telemetryConfig: ITelemetryConfig
     themes: ITheme[]
     logos: ILogos
+    domainList?: IDomainList
     sources?: ISourceLogo[]
     mailIds: IMailIds
     details: IDetails
@@ -79,6 +80,15 @@ export namespace NsInstanceConfig {
     vCompetencyAreaDescription: string
     vCompetencyTheme: string
     vCompetencySubTheme: string
+  }
+
+  export interface IDomainList {
+    [key: string]: {
+      logo: string
+      redirectPath: string
+      cdnContentHost: string
+      sitePath: string
+    }
   }
 
   
@@ -192,7 +202,6 @@ export namespace NsInstanceConfig {
     navbarLogo?: string
     playListLogo?: string
     thumpsUp?: string
-
   }
   export interface IMailIds {
     contactUs: string

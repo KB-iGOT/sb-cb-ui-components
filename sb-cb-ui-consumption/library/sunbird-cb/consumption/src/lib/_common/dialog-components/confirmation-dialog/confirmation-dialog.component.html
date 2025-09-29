@@ -10,6 +10,10 @@
     </div>
   </ng-container>
 
+  <ng-container *ngIf="dialgoData?.planeDescription">
+    <div class="plane-dexcription">{{dialgoData?.planeDescription}}</div>
+  </ng-container>
+
   <ng-container *ngIf="dialgoData?.description">
     <div class="dexcription">{{dialgoData?.description}}</div>
   </ng-container>
