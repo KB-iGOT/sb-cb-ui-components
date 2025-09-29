@@ -58,6 +58,7 @@
   border: 1px solid $borderColor;
   margin-bottom: 24px;
   border-radius: 12px;
+  min-height: 172px;
 }
 
 .trp-meta-texts {
@@ -89,4 +90,12 @@
   background: #1d8923;
   border-radius: 50%;
   display: inline-block;
+}
+
+.text-ellipse {
+  display: inline-block;
+  max-width: 16em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
