@@ -1,0 +1,47 @@
+<div class="container-fluid mb-4" *ngIf="isEdit">
+  <div class="action-items-container">
+    <div class="action-items-header">
+      <h3 class="title">Channel Actions</h3>
+      
+      <div class="action-controls">
+        <!-- State Learning Week Status Badge -->
+        <span 
+          class="slw-status-badge"
+          [ngClass]="isStateLearningWeekEnabled ? 'enabled' : 'disabled'">
+          State Learning Week: {{ isStateLearningWeekEnabled ? 'Enabled' : 'Disabled' }}
+        </span>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons d-flex">
+          <button 
+            class="btn btn-slw-config"
+            (click)="onConfigureSLW()">
+            <i class="material-icons">settings</i>
+            Configure State Learning Week
+          </button>
+          
+          <button 
+            class="btn btn-save"
+            [disabled]="!hasUnsavedChanges"
+            (click)="onSaveChanges()">
+            <i class="material-icons">save</i>
+            Save Changes
+          </button>
+          
+          <button 
+            class="btn btn-publish"
+            (click)="onPublishChanges()">
+            <i class="material-icons">publish</i>
+            Publish Changes
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status Indicator -->
+    <div class="status-indicator" *ngIf="hasUnsavedChanges">
+      <i class="material-icons warning-icon">warning</i>
+      You have unsaved changes
+    </div>
+  </div>
+</div>

@@ -2,6 +2,37 @@
 <mat-dialog-content>
   <form [formGroup]="editorForm" class="editor-form">
     <div [ngSwitch]="formType">
+      <!-- Key Highlights Editor -->
+      <div *ngSwitchCase="'keyHighlights'" class="key-highlights-editor">
+        <mat-slide-toggle formControlName="enabled">Enabled</mat-slide-toggle>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="backgroundColor" placeholder="Background Color (e.g. #FFFFFF)">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput type="number" formControlName="titleMaxLength" placeholder="Title Max Length">
+        </mat-form-field>
+        <label>Highlights</label>
+        <div formArrayName="keyHighlights" cdkDropList (cdkDropListDropped)="dropKeyHighlight($event)" class="highlights-container">
+          <div *ngFor="let control of keyHighlightsArray.controls; let i = index" 
+               cdkDrag class="highlight-item">
+            <div class="drag-handle" cdkDragHandle>
+              <mat-icon>drag_indicator</mat-icon>
+            </div>
+            <mat-form-field appearance="outline" class="highlight-input">
+              <input matInput [formControlName]="i" 
+                     [maxlength]="editorForm.get('titleMaxLength')?.value || 200" 
+                     placeholder="Highlight text">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="removeKeyHighlight(i)" class="delete-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-raised-button color="primary" type="button" (click)="addKeyHighlight()">
+          <mat-icon>add</mat-icon> Add Highlight
+        </button>
+      </div>
+      
       <!-- Text input -->
       <mat-form-field *ngSwitchCase="'text'" appearance="outline" class="full-width">
         <input matInput formControlName="value" placeholder="Enter {{data.displayName}}">

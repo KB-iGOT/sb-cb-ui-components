@@ -38,7 +38,7 @@ export class TopSectionComponent implements OnInit {
     });
   }
 
-  openEditor(fieldName: string, displayName: string, currentValue: any) {
+  openEditor(fieldName: string, displayName: string, value: any) {
     this.eventCallback({
       action: 'edit',
       source: 'topSection',
@@ -46,9 +46,9 @@ export class TopSectionComponent implements OnInit {
       data: {
         fieldName,
         displayName,
-        currentValue,
+        value, // <-- Correct property name
         path: fieldName,
-        fieldType: this.getFieldType(fieldName, currentValue),
+        fieldType: this.getFieldType(fieldName, value),
         parentData: this.data
       }
     });

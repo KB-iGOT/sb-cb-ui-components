@@ -1,5 +1,17 @@
 <ws-widget-btn-page-back [widgetData]="{ url: 'home', titles: navigationTitles }"></ws-widget-btn-page-back>
-<div class="container-fluid" id="section-micro-sites">
+
+<!-- Action Items Section -->
+<app-action-items
+  [isEdit]="isEdit"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [slwConfiguration]="slwConfiguration"
+  [isStateLearningWeekEnabled]="slwConfiguration?.enabled"
+  (toggleSLW)="handleToggleSLW()"
+  (configureSLW)="handleConfigureSLW($event)"
+  (saveChanges)="saveChanges()"
+  (publishChanges)="publishChanges()"
+></app-action-items>
+<div class="container-fluid" id="section-micro-sites"  >
   <ng-container *ngFor="let section of activeSections; trackBy: trackByFn">
     <section [id]="section.key" class="w-full grid grid-cols-12 gap-4 {{section.customClass}}" 
              [ngClass]="{'container': section.wrapperClass}">
@@ -14,3 +26,6 @@
     </section>
   </ng-container>
 </div>
+<!-- <div *ngIf="isLoading" class="loader-overlay">
+  <mat-spinner></mat-spinner>
+</div> -->
