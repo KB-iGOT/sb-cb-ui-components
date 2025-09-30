@@ -189,7 +189,7 @@ export class AuthKeycloakService {
       // window.location.href = `${this.environment.staticHomePageUrl}`
       // await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
       // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
-      window.location.href = `https://${this.domainConf.getDomainSitePath(this.environment)}/apis/reset`
+      window.location.href = `https://${this.domainConf.getDomainSitePath()}/apis/reset`
       await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()
 
 
@@ -203,7 +203,7 @@ export class AuthKeycloakService {
     storage.removeItem(storageKey)
     // window.location.href = `${this.environment.staticHomePageUrl}`
     //await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
-    window.location.href = `https://${this.environment.sitePath}/apis/reset`
+    window.location.href = `https://${this.domainConf.getDomainSitePath()}/apis/reset`
     // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
     // window.location.href = `${this.environment.staticHomePageUrl}`
     await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()

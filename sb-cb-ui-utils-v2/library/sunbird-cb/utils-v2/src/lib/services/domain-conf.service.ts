@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { ConfigurationsService } from './configurations.service'
+
 
 @Injectable({
   providedIn: 'root'
@@ -7,46 +8,46 @@ import { ConfigurationsService } from './configurations.service'
 export class DomainConfService {
 currentHostname = window.location.hostname;
 subdomain = this.currentHostname.split('.')[0];
+environment: any;
   constructor(
-    private configSvc: ConfigurationsService
-  ) {
-
-   }
+    private configSvc: ConfigurationsService,
+  @Inject('environment') environment: any) {
+      this.environment = environment
+    }
 
   /**
    * Gets the appropriate CDN host based on domain configuration
-   * @param environmentVariable - Environment configuration containing sitePath and cdnContentHost
+
    * @returns The CDN host URL for the current domain
    */
-  getDomainCDNHost(environmentVariable: any): string {
+  getDomainCDNHost(): string {
     // Early return for direct hostname match
-    if (environmentVariable.sitePath === this.currentHostname) {
-      return environmentVariable.cdnContentHost;
+    if (this.environment?.sitePath === this.currentHostname) {
+      return this.environment?.cdnContentHost;
     }
 
     // Handle missing configuration
     if (!this.configSvc.instanceConfig?.domainList) {
-      return environmentVariable.cdnContentHost;
+      return this.environment?.cdnContentHost;
     }
 
     // Get domain-specific CDN host
     const domainData = this.configSvc.instanceConfig.domainList[this.subdomain];
-    return domainData?.cdnContentHost || environmentVariable.cdnContentHost;
+    return domainData?.cdnContentHost || this.environment?.cdnContentHost;
   }
 
   /**
    * Gets the appropriate app logo based on domain configuration
-   * @param environmentVariable - Environment configuration containing sitePath
    * @returns The app logo URL for the current domain
    */
-  getDomainAppLogo(environmentVariable: any): string {
+  getDomainAppLogo(): string {
     // Handle missing configuration
     if (!this.configSvc?.instanceConfig) {
       return '';
     }
 
     // Early return for direct hostname match
-    if (environmentVariable.sitePath === this.currentHostname) {
+    if (this.environment?.sitePath === this.currentHostname) {
       return this.configSvc.instanceConfig.logos.app;
     }
 
@@ -62,17 +63,16 @@ subdomain = this.currentHostname.split('.')[0];
 
   /**
    * Gets the appropriate redirect path based on domain configuration
-   * @param environmentVariable - Environment configuration containing sitePath
    * @returns The redirect path for the current domain
    */
-  getDomainRedirectPath(environmentVariable: any): string {
+  getDomainRedirectPath(): string {
     // Handle missing configuration
     if (!this.configSvc?.instanceConfig) {
       return '/page/home';
     }
 
     // Early return for direct hostname match
-    if (environmentVariable.sitePath === this.currentHostname) {
+    if (this.environment?.sitePath === this.currentHostname) {
       return '/page/home';
     }
 
@@ -86,26 +86,45 @@ subdomain = this.currentHostname.split('.')[0];
     return domainData?.redirectPath || '/page/home';
   }
 
-  getDomainSitePath(environmentVariable: any): string {
+  getDomainSitePath(): string {
+    debugger
     // Handle missing configuration
     if (!this.configSvc?.instanceConfig) {
-      return environmentVariable.sitePath;
+      return this.environment?.sitePath;
     }
 
     // Early return for direct hostname match
-    if (environmentVariable.sitePath === this.currentHostname) {
-      return environmentVariable.sitePath;
+    if (this.environment?.sitePath === this.currentHostname) {
+      return this.environment?.sitePath;
     }
 
     // Handle missing domain list
     if (!this.configSvc.instanceConfig.domainList) {
-      return environmentVariable.sitePath;
+      return this.environment?.sitePath;
     }
 
     // Get domain-specific redirect path
     const domainData = this.configSvc.instanceConfig.domainList[this.subdomain];
-    return domainData?.sitePath || environmentVariable.sitePath;
+    return domainData?.sitePath || this.environment?.sitePath;
   }
 
+  /**
+   * Determines if the current domain is a same portal or client portal
+   * @returns Boolean indicating if it's a same portal (true) or client portal (false)
+   */
+  isKbPortal(): boolean {
+    // Check if environment sitePath matches current hostname
+    const domainData = this.getDomainData();
+    return this.environment.sitePath === domainData.sitePath;
+  }
 
+  getDomainData(): any {
+    const defaultDomainData = {
+      "logo": "/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg",
+      "redirectPath": "/page/home",
+      "cdnContentHost": this.environment?.cdnContentHost || "https://portal.qa.karmayogibharat.net",
+      "sitePath": this.environment?.sitePath || "portal.qa.karmayogibharat.net"
+    }
+    return this.configSvc.instanceConfig?.domainList?.[this.subdomain] || defaultDomainData;
+  }
 }
