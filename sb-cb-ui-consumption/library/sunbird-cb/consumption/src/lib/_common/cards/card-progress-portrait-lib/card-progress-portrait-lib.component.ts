@@ -10,6 +10,8 @@ import * as _ from "lodash";
 import { CertificateService } from '../../../_services/certificate.service';
 import { CertificateDialogComponent } from '../../dialog-components/certificate-dialog/certificate-dialog.component';
 
+const ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION = ["Invite-Only Program", "Moderated Program", "Blended Program", "Curated Program", "Standalone Assessment", "Moderated Assessment", "Invite-Only Assessment"]
+
 @Component({
   selector: 'sb-uic-card-progress-portrait-lib',
   templateUrl: './card-progress-portrait-lib.component.html',
@@ -131,10 +133,13 @@ export class CardProgressPortraitLibComponent implements OnInit {
            new Date(b.lastIssuedOn).getTime()
        );
        let certData: any = certificate && certificate.length && certificate[0];
+      const allowedPrimaryCategory = ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION?.map(
+        (cat: string) => cat?.toLowerCase()
+      );
       if (
         this.widgetData.content &&
         this.widgetData.content.primaryCategory &&
-        this.widgetData.content.primaryCategory?.toLowerCase() !== "course"
+        allowedPrimaryCategory?.includes(this.widgetData.content.primaryCategory?.toLowerCase())
       ) {
         const payload = {
           request: {
