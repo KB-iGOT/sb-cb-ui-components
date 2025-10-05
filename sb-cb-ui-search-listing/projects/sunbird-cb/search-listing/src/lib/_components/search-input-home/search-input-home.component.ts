@@ -166,7 +166,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.disableMenu = false;
     }
 
-    //Only allow coccunities for mdo_leader and mdo moderator in MDO
+    //Only allow communities for mdo_leader and mdo moderator in MDO
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
       if (!userRoles.has("mdo_leader") && !userRoles.has("mdo_moderator")) {
@@ -260,7 +260,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   goToSearchItem(query: any) {
-    const category = query?.search_category && query?.search_category[0];
+    const category = this.selectedSearchCategory;
     const nlpSearchQuery = query?.nlp_search_query;
     if (category && category === SearchCategory.Courses && nlpSearchQuery) {
       const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
