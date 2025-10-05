@@ -375,6 +375,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const updatedFacet = SearchEventfacet.filter(item => item !== FacetType.SourceName);
       this.searchRequestEvents.request.facets = [...updatedFacet, this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey];
+      this.searchRequestEvents.request.filters["channel"] = this.configSvc.userProfile?.rootOrgId || "";
     }
 
     const result = await this.searchListingService.searchCoursesv4(this.searchRequestEvents);
