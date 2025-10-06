@@ -173,11 +173,19 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (params["q"]) {
       this.searchQuery = params["q"];
     }
+
     if ((this.searchCategory && params["category"] && this.searchCategory !== params["category"]) || !params["category"]) {
       this.selectedFilters = {};
     }
 
     this.isExploreContentTab = !!params["tab"];
+
+    if (this.searchCategory !== params["category"]) {
+      this.selectedDateRange = null;
+      if (this.selectedFilters["dateRange"]) {
+        this.selectedFilters["dateRange"] = [];
+      }
+    }
 
     this.searchCategory = params["category"];
 
@@ -853,10 +861,93 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   get isUserFacetsPresent(): boolean {
-    return this.searchCategory === SearchCategory.Users && this.formattedFacets && Object.keys(this.formattedFacets)?.length > 0;
+    return this.searchCategory === SearchCategory.Users && this.isFilterFacetsAvailable;
   }
 
   get isDesignationFacetsPresent(): boolean {
-    return this.searchCategory === SearchCategory.Designation && this.formattedFacets && Object.keys(this.formattedFacets)?.length > 0;
+    return this.searchCategory === SearchCategory.Designation && this.isFilterFacetsAvailable;
+  }
+
+  get isEventsFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.Events && this.isFilterFacetsAvailable;
+  }
+
+  get isCommunityFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.Communities && this.isFilterFacetsAvailable;
+  }
+
+  get isTrainingPlanFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.TrainingPlans && this.isFilterFacetsAvailable;
+  }
+
+  get isFilterFacetsAvailable(): boolean {
+    return (
+      this.formattedFacets &&
+      Object.keys(this.formattedFacets).length > 0 &&
+      Object.values(this.formattedFacets).some((facet: any) => facet && facet?.length > 0)
+    );
+  }
+
+  get sortedUserGroup() {
+    const groupFacet = this.formattedFacets?.[FacetType.profileGroup];
+    return !groupFacet || !Array.isArray(groupFacet)
+      ? []
+      : [
+          ...groupFacet.filter(g => g.name.toLowerCase().startsWith("group")).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" })),
+          ...groupFacet.filter(g => !g.name.toLowerCase().startsWith("group")).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
+        ];
+  }
+
+  get canShowTypeOfEventsFilter(): boolean {
+    return (
+      (this.formattedFacets["typeOfEvents"]?.some((event: any) => event.count > 0) &&
+        this.searchConfig?.applicationName !== SearchListingConfig.ApplicationNames.MDOPortal) ??
+      false
+    );
+  }
+
+  get canShowEventsStatusFilter(): boolean {
+    return !!(
+      this.searchCategory === SearchCategory.Events &&
+      this.isEventsFacetsPresent &&
+      this.formattedFacets["status"]?.length &&
+      this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal
+    );
+  }
+
+  formatFilterChips(value: string): string {
+    if (!value) {
+      return value;
+    }
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().slice(0, 10);
+    } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "live") {
+      return "Upcoming";
+    }
+
+    return value;
+  }
+
+  getCalendarLabel(): string {
+    if (this.isUserFacetsPresent) {
+      return "learnsearch.onBoardingDateRange";
+    } else if (this.isDesignationFacetsPresent) {
+      return "learnsearch.importedOn";
+    } else if (this.isEventsFacetsPresent) {
+      return "searchfilters.eventDate";
+    } else if (this.isCommunityFacetsPresent) {
+      return "searchfilters.createdOn";
+    } else if (this.isTrainingPlanFacetsPresent) {
+      return "searchfilters.createdOn";
+    }
+    return "";
+  }
+
+  formatEventStatusName(name: string): string {
+    if (name === "live") {
+      return "Upcoming";
+    }
+    return name;
   }
 }

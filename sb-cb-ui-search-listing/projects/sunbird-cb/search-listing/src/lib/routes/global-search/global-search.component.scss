@@ -8,4 +8,10 @@
   @extend %page-center;
   height: auto;
   min-height: 400px;
+  --mat-sidenav-content-background-color: #eff3f9; 
 }
+
+::ng-deep .container-body-scroll {
+  background-color: #eff3f9 !important;
+}
+
