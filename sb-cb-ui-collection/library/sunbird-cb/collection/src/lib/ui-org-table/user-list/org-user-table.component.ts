@@ -38,7 +38,7 @@ export class OrgUserTableComponent implements OnInit, AfterViewInit, OnChanges {
   widgetData: any
   length!: number
   pageSize = 20
-  pageSizeOptions = [20, 30, 40]
+  pageSizeOptions = [20, 50, 100]
   @ViewChild(MatPaginator) paginator!: MatPaginator
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     if (!this.dataSource.sort) {
