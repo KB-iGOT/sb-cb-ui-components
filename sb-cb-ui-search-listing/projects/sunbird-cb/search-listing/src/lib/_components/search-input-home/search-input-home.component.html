@@ -43,8 +43,8 @@
         mat-flat-button
         type="submit"
         class="mat-btn-flat global-search"
-        [disabled]="!queryControl.value"
-        [ngClass]="{ 'disabled-search-btn': !queryControl.value }">
+        [disabled]="!queryControl.value || queryControl?.value?.length < 3"
+        [ngClass]="{ 'disabled-search-btn': !queryControl.value || queryControl?.value?.length < 3}">
         {{ "gyaanKarmayogi.search" | translate }}
       </button>
     </form>

@@ -590,6 +590,22 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
             this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
           }
         }
+        // In case if no conditions are matched
+        else {
+          if (Array.isArray(this.selectedFilters[item.type])) {
+            const updatedArr = this.selectedFilters[item.type].filter((val: any) => val.toLowerCase() !== item.value?.toLowerCase());
+            if (updatedArr.length) {
+              this.selectedFilters = { ...this.selectedFilters, [item.type]: updatedArr };
+            } else {
+              // Remove the property if array is empty
+              const { [item.type]: _, ...rest } = this.selectedFilters;
+              this.selectedFilters = rest;
+            }
+
+            this.appliedFilter.emit(this.selectedFilters);
+            this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+          }
+        }
       }
     }
   }
@@ -921,7 +937,10 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
     const date = new Date(value);
     if (!isNaN(date.getTime())) {
-      return date.toISOString().slice(0, 10);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      return `${year}-${month}-${day}`;
     } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "live") {
       return "Upcoming";
     }
