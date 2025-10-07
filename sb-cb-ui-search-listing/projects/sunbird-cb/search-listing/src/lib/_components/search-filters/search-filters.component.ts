@@ -3,7 +3,7 @@ import { Subscription } from "rxjs";
 // tslint:disable-next-line
 import * as _ from "lodash";
 import { TranslateService } from "@ngx-translate/core";
-import { ConfigurationsService, MultilingualTranslationsService, NsContent } from "@sunbird-cb/utils-v2";
+import { ConfigurationsService, MultilingualTranslationsService } from "@sunbird-cb/utils-v2";
 import { Facet, FacetType, FormattedFacets, ICompentencyKeys, SearchCategory, SearchListingConfig } from "../../_models/search-listing.model";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from "@angular/router";
@@ -19,12 +19,13 @@ import { DateRange, DefaultMatCalendarRangeStrategy, MatRangeDateSelectionModel 
 export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   @Input() newfacets!: any;
   @Input() urlparamFilters!: any;
+  @Input() karmayogiBadge: any;
+  @Input() typesOfEvents: any;
+  @Input() applicationName!: string;
   @Output() appliedFilter = new EventEmitter<{ [key: string]: any }>();
   @Output() constructQueryParam = new EventEmitter<string>();
   @Output() applyFilterFromLearn = new EventEmitter<{ [key: string]: any }>();
-  @Input() karmayogiBadge: any;
   competencyFactet: any;
-  @Input() typesOfEvents: any;
 
   private subscription: Subscription = new Subscription();
   queryParams: any;
@@ -74,6 +75,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   environment!: any;
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
+  showEventsDateRange = false;
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
@@ -93,11 +95,12 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   async ngOnInit() {
-    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
-    this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
-    this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
-    this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
-
+    this.compentencyKey = _.get(this.configSvc, `compentency.${this.environment.compentencyVersionKey}`);
+    if (this.compentencyKey) {
+      this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
+      this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
+      this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
+    }
     this.subscription.add(
       this.activated.queryParams.subscribe(params => {
         this.isExploreContentTab = params["tab"] === "explore-content";
@@ -122,6 +125,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["newfacets"] && changes["newfacets"].currentValue) {
+      console.log('newfacets:', changes["newfacets"].currentValue);
       this.formattedFacets = this.formatFacets(changes["newfacets"].currentValue);
 
       if (this.formattedFacets?.sectorId?.length) {
@@ -156,6 +160,11 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const filters = this.getFiltersList
+      this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') ? true : false;
+    }
+
   }
 
   formatSectorName(name: string): string {
@@ -927,7 +936,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       this.searchCategory === SearchCategory.Events &&
       this.isEventsFacetsPresent &&
       this.formattedFacets["status"]?.length &&
-      this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal
+      (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal ||
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal)
     );
   }
 
@@ -964,9 +974,29 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   formatEventStatusName(name: string): string {
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      switch(name) {
+        case 'senttopublish':
+          return 'Pending';
+        case 'live':
+          return 'Approved';
+        case 'upcoming':
+          return 'Upcoming';
+        default:
+          return name;
+      }
+    }
     if (name === "live") {
       return "Upcoming";
     }
     return name;
+  }
+
+  get getFiltersList() {
+    if(this.searchCategory && this.categoryType && this.categoryType.length) {
+      const category = _.find(this.categoryType, { name: this.searchCategory });
+      return category && category.filters ? category.filters : [];
+    }
+    return []
   }
 }

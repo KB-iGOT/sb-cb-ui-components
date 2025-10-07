@@ -41,7 +41,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
+    this.compentencyKey = this.configSvc.compentency ?this.configSvc.compentency[this.environment.compentencyVersionKey] : undefined;
   }
 
   ngOnChanges(changes: SimpleChanges): void {

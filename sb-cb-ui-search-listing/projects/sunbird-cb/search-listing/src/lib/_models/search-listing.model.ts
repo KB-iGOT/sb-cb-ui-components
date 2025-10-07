@@ -123,7 +123,8 @@ export const SearchEventFields = [
   "expiryDate",
   "appIcon",
   "startDateTime",
-  "endDateTime"
+  "endDateTime",
+  "status"
 ];
 
 export const SearchResourceMimeType = ["application/pdf", "video/mp4", "text/x-url", "audio/mpeg", "application/vnd.ekstep.content-collection"];
@@ -453,6 +454,7 @@ export namespace SearchListingConfig {
     label: string;
     value: string;
     icon: string;
+    roles?: string[];
   }
 
   export interface FilterType {
@@ -470,6 +472,7 @@ export namespace SearchListingConfig {
     isChecked: boolean;
     filters: FilterType[];
     disabled: boolean;
+    facets?: string[];
   }
   export interface SearchInputConfig {
     enableRecentSearches: boolean;
@@ -488,6 +491,7 @@ export namespace SearchListingConfig {
 
   export enum ApplicationNames {
     LearnerPortal = "Learner Portal",
-    MDOPortal = "MDO Portal"
+    MDOPortal = "MDO Portal",
+    CBPPortal = "CBP Portal"
   }
 }

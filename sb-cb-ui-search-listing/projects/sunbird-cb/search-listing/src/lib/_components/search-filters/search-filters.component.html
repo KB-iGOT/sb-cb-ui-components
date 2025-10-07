@@ -108,7 +108,7 @@
     ">
     <div class="languages-filter adjust">
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "searchfilters.categoryType" | translate }}</p>
-      <div class="mat-full-radius mb-2" *ngIf="formattedFacets['courseCategory'].length > 4"></div>
+      <div class="mat-full-radius mb-2" *ngIf="formattedFacets['courseCategory']?.length > 4"></div>
 
       <mat-accordion class="filter-section margin-bottom-m">
         <mat-expansion-panel [expanded]="true">
@@ -141,15 +141,7 @@
     </div>
   </ng-container>
 
-  <ng-container
-    *ngIf="
-      searchCategory &&
-      formattedFacets &&
-      formattedFacets['typeOfEvents'] &&
-      formattedFacets['typeOfEvents'].length &&
-      canShowTypeOfEventsFilter &&
-      categoryTypeEnum.Events === searchCategory
-    ">
+  <ng-container *ngIf="searchCategory === categoryTypeEnum.Events && formattedFacets?.typeOfEvents?.length && canShowTypeOfEventsFilter">
     <div class="rating-filter">
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">
         {{ "searchfilters.typeOfEvents" | translate }}
@@ -965,7 +957,7 @@
 
   <div
     class="filter-without-search filter-calender"
-    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || isEventsFacetsPresent || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
+    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || (isEventsFacetsPresent || showEventsDateRange) || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
       {{ getCalendarLabel() | translate }}
     </p>

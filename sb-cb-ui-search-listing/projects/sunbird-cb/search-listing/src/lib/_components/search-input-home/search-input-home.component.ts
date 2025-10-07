@@ -38,6 +38,8 @@ import { WidgetContentLibService } from "@sunbird-cb/consumption";
 // import { MobileAppsService } from "../../../../../../../../../src/app/services/mobile-apps.service";
 import { SearchListingService } from "../../_services/search-listing.service";
 import { Subscription } from "rxjs";
+import { TranslateService } from "@ngx-translate/core";
+import * as _ from "lodash";
 
 @Component({
   selector: "ws-app-search-input-lib-home",
@@ -92,13 +94,16 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     private eRef: ElementRef,
     private searchListingService: SearchListingService,
     private contSvc: WidgetContentLibService, // private mobileAppsService: MobileAppsService
-    @Inject("environment") environment: any
+    @Inject("environment") environment: any,
+    private translate: TranslateService
   ) {
     this.environment = environment;
-    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
-    this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
-    this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
-    this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
+    this.compentencyKey = _.get(this.configSvc, `compentency.${this.environment.compentencyVersionKey}`);
+    if(this.compentencyKey) {
+      this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
+      this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
+      this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
+    }
 
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
@@ -120,6 +125,11 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    if (localStorage.getItem("websiteLanguage")) {
+      this.translate.setDefaultLang("en");
+      const lang = localStorage.getItem("websiteLanguage")!;
+      this.translate.use(lang);
+    }
     this.searchConfig = this.activated.snapshot.data["searchPageData"];
     if (this.searchConfig) {
       this.initialize();
@@ -142,23 +152,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   initialize() {
     let isNotMyUser = false;
     let isIgotOrg = false;
-    if (
-      this.configSvc &&
-      this.configSvc.unMappedUser &&
-      this.configSvc.unMappedUser.profileDetails &&
-      this.configSvc.unMappedUser.profileDetails.profileStatus
-    ) {
+    if ( _.get(this.configSvc, 'unMappedUser.profileDetails.profileStatus') ) {
       isNotMyUser = this.configSvc.unMappedUser.profileDetails.profileStatus.toLowerCase() === "not-my-user" ? true : false;
     }
-    if (
-      this.configSvc &&
-      this.configSvc.unMappedUser &&
-      this.configSvc.unMappedUser.profileDetails &&
-      this.configSvc.unMappedUser.profileDetails.employmentDetails &&
-      this.configSvc.unMappedUser.profileDetails.employmentDetails.departmentName
-    ) {
-      isIgotOrg = this.configSvc.unMappedUser.profileDetails.employmentDetails.departmentName.toLowerCase() === "igot" ? true : false;
-    }
+    isIgotOrg = _.get(this.configSvc, 'unMappedUser.profileDetails.employmentDetails.departmentName', '').toLowerCase() === "igot" ? true : false;
     // let isIgotOrg = true
     if (isNotMyUser && isIgotOrg) {
       this.disableMenu = true;
@@ -174,6 +171,16 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
         }
       }
+    } else if (this.searchConfig && _.get(this.searchConfig, 'applicationName') === SearchListingConfig.ApplicationNames.CBPPortal && this.configSvc && this.configSvc.userRoles) {
+      // configSvc.userRoles can be a Set<string> or an array — handle both safely
+      const userRoles = this.configSvc.userRoles as Set<string> | string[];
+      const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
+      this.searchConfig.searchCategories = this.searchConfig.searchCategories.filter(category => {
+        if (!category.roles || !Array.isArray(category.roles)) {
+          return false;
+        }
+        return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
+      });
     }
 
     this.searchSubscription.add(

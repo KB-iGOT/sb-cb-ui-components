@@ -74,7 +74,8 @@
   .root-org-name-filter .mat-full-radius,
   .sector-filter .mat-full-radius,
   .competency-filter .mat-full-radius,
-  .sectorNames-filter .mat-full-radius {
+  .sectorNames-filter .mat-full-radius,
+  .filter-section .mat-full-radius {
     position: relative;
     .mat-form-field-appearance-outline {
       .mat-form-field-flex {
@@ -229,16 +230,22 @@
   --mat-datepicker-calendar-date-selected-state-text-color: #{$white};
 }
 
+.filter-calender {
+  ::ng-deep .mat-calendar-header {
+    padding: 0px 8px 0 8px !important;
+  }
+}
+
+::ng-deep .dateRange-filter {
+  .mat-calendar-header {
+    padding-top: 0px !important;
+  }
+}
+
 @media (hover: hover) {
   ::ng-deep
     .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
     > .mat-calendar-body-cell-content:not(.mat-calendar-body-selected):not(.mat-calendar-body-comparison-identical) {
     --mat-datepicker-calendar-date-hover-state-background-color: #3f51b533;
-  }
-}
-
-.filter-calender {
-  ::ng-deep .mat-calendar-header {
-    padding: 0px 8px 0 8px !important;
   }
 }

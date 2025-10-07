@@ -245,6 +245,24 @@ mat-list-item {
   right: 3px;
 }
 
+.mat-btn-flat {
+  color: #fff !important;
+  // height: 40px !important;
+  display: flex !important;
+  padding: 12px 16px !important;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid !important;
+  border-color: #1b4ca1 !important;
+  background-color: #1b4ca1 !important;
+  border-radius: 9999px !important;
+  font-weight: 700;
+
+  mat-icon {
+    color: #1b4ca1;
+  }
+}
+
 .disabled-search-btn {
   background-color: $white !important;
   color: #999999 !important;

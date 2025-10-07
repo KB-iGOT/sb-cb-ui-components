@@ -35,7 +35,7 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.compentencyKey = this.configService.compentency[this.environment.compentencyVersionKey];
+    this.compentencyKey = this.configService.compentency ? this.configService.compentency[this.environment.compentencyVersionKey] : undefined;
     this.activated.queryParamMap.subscribe(queryParams => {
       this.userId = "";
       this.userValue = "";
