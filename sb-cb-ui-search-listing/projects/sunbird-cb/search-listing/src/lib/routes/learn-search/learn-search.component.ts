@@ -537,6 +537,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchUsersMDO() {
     this.searchPeopleLoader = true;
     this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
+
     this.searchRequestUsers.request.query = this.statedata?.param || "";
     const result = await this.searchListingService.searchUsersMDO(this.searchRequestUsers).catch(() => {
       return {
