@@ -169,7 +169,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     //Only allow communities for mdo_leader and mdo moderator in MDO
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
-      if (!userRoles.has("mdo_leader") && !userRoles.has("mdo_moderator")) {
+      if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
         if (this.searchConfig.searchCategories) {
           this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
         }
