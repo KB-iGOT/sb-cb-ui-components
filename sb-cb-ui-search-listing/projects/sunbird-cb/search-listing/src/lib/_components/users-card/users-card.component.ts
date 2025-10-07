@@ -97,9 +97,25 @@ export class UsersCardComponent {
       const designationItem = professionalDetails.find((item: any) => "designation" in item);
       const designation = designationItem?.designation ?? "";
       const rootOrgName = this.user?.rootOrgName ?? "";
-      return designation ? `${designation} at ${rootOrgName}` : rootOrgName;
+      return designation ? `${designation}` : rootOrgName;
     }
 
     return this.user?.rootOrgName ?? "";
+  }
+
+  get userEmail(): string {
+    return this.user?.email || "";
+  }
+
+  get userPhone(): string {
+    return this.user?.maskedPhone || "";
+  }
+
+  get isUserVerified(): boolean {
+    return this.user?.profileDetails?.profileStatus === "VERIFIED";
+  }
+
+  get onboardingDate(): string {
+    return this.user.createdDate || ''
   }
 }
