@@ -219,7 +219,7 @@ export class UsersRequestParams {
       "maskedPhone",
       "profileDetails.personalDetails.primaryEmail",
       "profileDetails.profileStatus",
-      "onboardingDate",
+      "createdDate",
       "rootOrgName"
     ];
     this.facets = [
@@ -227,7 +227,7 @@ export class UsersRequestParams {
       "profileDetails.profileStatus",
       "profileDetails.professionalDetails.group",
       "profileDetails.employmentDetails.departmentName",
-      "organisations.roles"
+      "roles"
     ];
     this.limit = 10;
     this.offset = 0;
