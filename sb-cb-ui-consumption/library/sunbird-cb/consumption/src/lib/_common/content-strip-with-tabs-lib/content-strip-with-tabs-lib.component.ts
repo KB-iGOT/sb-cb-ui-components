@@ -344,6 +344,12 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         }
       }
 
+    } else if (filters.createdFor && filters.createdFor.indexOf('<orgID>') >= 0) {
+      if (this.providerId) {
+        filters.createdFor = this.providerId;
+      } else {
+        filters.createdFor = userData && userData.rootOrgId;
+      }
     }
     if (filters.endDate && filters.endDate['<='].indexOf('<today>') >= 0) {
       filters.endDate['<='] = this.todayDate
