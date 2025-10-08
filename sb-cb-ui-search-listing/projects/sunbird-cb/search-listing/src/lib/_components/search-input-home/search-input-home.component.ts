@@ -63,6 +63,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   private hasReadRecentBeenCalled = false;
   searchCat: any;
   categories: any[] = [];
+  requiredQueryMinLength = 3;
 
   selectedSearchCategory: string = "";
   openSearchTemplate = false;
@@ -166,10 +167,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.disableMenu = false;
     }
 
-    //Only allow coccunities for mdo_leader and mdo moderator in MDO
+    //Only allow communities for mdo_leader and mdo moderator in MDO
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
-      if (!userRoles.has("mdo_leader") && !userRoles.has("mdo_moderator")) {
+      if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
         if (this.searchConfig.searchCategories) {
           this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
         }
@@ -260,7 +261,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   goToSearchItem(query: any) {
-    const category = query?.search_category && query?.search_category[0];
+    const category = this.selectedSearchCategory;
     const nlpSearchQuery = query?.nlp_search_query;
     if (category && category === SearchCategory.Courses && nlpSearchQuery) {
       const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
@@ -500,7 +501,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   async selectSearchCategory(category: string) {
-    if (this.queryControl.value) {
+    if (this.queryControl.value && this.queryControl.value.length > this.requiredQueryMinLength) {
       this.selectedSearchCategory = category;
       // this.searchFromQuery(this.queryControl.value);
       this.updateQuery(this.queryControl.value);

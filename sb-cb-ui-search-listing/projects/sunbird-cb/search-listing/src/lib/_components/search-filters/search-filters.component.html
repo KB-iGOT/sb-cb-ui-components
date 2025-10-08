@@ -9,7 +9,7 @@
   <div class="filter-list flex items-center flex-wrap gap-2" *ngIf="filtersAppliedCount > 0">
     <ng-container *ngFor="let item of selectedFilterChips">
       <div class="filter-pill flex items-center">
-        <span class="font-normal text-xs" [matTooltip]="item?.value">{{ item?.value }}</span>
+        <span class="font-normal text-xs" [matTooltip]="formatFilterChips(item?.value)">{{ formatFilterChips(item?.value) }}</span>
         <button mat-icon-button color="primary" (click)="clearFilterChip(item)">
           <mat-icon>close</mat-icon>
         </button>
@@ -147,6 +147,7 @@
       formattedFacets &&
       formattedFacets['typeOfEvents'] &&
       formattedFacets['typeOfEvents'].length &&
+      canShowTypeOfEventsFilter &&
       categoryTypeEnum.Events === searchCategory
     ">
     <div class="rating-filter">
@@ -165,6 +166,21 @@
           </ng-container>
         </section>
       </mat-radio-group>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="canShowEventsStatusFilter">
+    <div class="sectorNames-filter">
+      <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "searchfilters.eventStatus" | translate }}</p>
+      <mat-selection-list>
+        <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['status']">
+          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, 'status')">
+            <span class="min-width-adjust" [matTooltip]="formatEventStatusName(options?.name)" [matTooltipPosition]="'right'">
+              {{ options?.name ? formatEventStatusName(options?.name) : "" }}</span
+            >
+          </mat-checkbox>
+        </section>
+      </mat-selection-list>
     </div>
   </ng-container>
 
@@ -866,7 +882,7 @@
     ">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.groups" | translate }}</p>
     <mat-selection-list>
-      <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['profileDetails.professionalDetails.group']">
+      <section class="mat-body-2 text-capitalize" *ngFor="let options of sortedUserGroup">
         <mat-checkbox
           [checked]="options?.isChecked || getSelectedFilter(options)"
           (change)="onSelectionFilter($event, options, 'profileDetails.professionalDetails.group')">
@@ -910,7 +926,9 @@
   </div>
 
   <!-- Training Plan Status Filter  -->
-  <div class="filter-without-search" *ngIf="searchCategory && formattedFacets && formattedFacets['status'] && formattedFacets['status'].length">
+  <div
+    class="filter-without-search"
+    *ngIf="searchCategory === 'training-plans' && formattedFacets && formattedFacets['status'] && formattedFacets['status'].length">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "widgetCbpFilters.status" | translate }}</p>
     <mat-selection-list>
       <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['status']">
@@ -945,15 +963,12 @@
     </div>
   </ng-container>
 
-  <!-- Users Onboarding Date range Filter  -->
-  <div class="filter-without-search" *ngIf="searchCategory && (isUserFacetsPresent)">
-    <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.onBoardingDateRange" | translate }}</p>
-    <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)"></mat-calendar>
-  </div>
-
-  <!-- DesignationImported On Date range Filter  -->
-  <div class="filter-without-search" *ngIf="searchCategory && isDesignationFacetsPresent">
-    <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.importedOn" | translate }}</p>
+  <div
+    class="filter-without-search filter-calender"
+    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || isEventsFacetsPresent || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
+    <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
+      {{ getCalendarLabel() | translate }}
+    </p>
     <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)"></mat-calendar>
   </div>
 </div>

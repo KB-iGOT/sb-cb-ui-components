@@ -5,9 +5,9 @@
     <div class="plan-name mb-2 text-ellipse cursor-pointer" [matTooltip]="plan?.name">{{ plan?.name }}</div>
     <!-- Tags -->
     <div class="flex gap-4 mb-8">
-      <ng-container *ngIf="plan?.orgScope === 'Single'">
+      <!-- <ng-container *ngIf="plan?.orgScope === 'Single'">
         <span class="text-white text-xs px-2 py-1 org-scope rounded">For Designations</span>
-      </ng-container>
+      </ng-container> -->
       <ng-container *ngIf="plan?.isApar">
         <span class="text-white text-xs px-2 py-1 rounded font-medium is-apar-box">APAR</span>
       </ng-container>
@@ -46,14 +46,21 @@
   <!-- Right Section: Draft badge -->
   <div *ngIf="plan?.status">
     <ng-container *ngIf="plan?.status === 'Live' || plan?.status === 'live'; else elseStatus">
-      <div class="live-badge">
-        <span class="live-dot"></span>
+      <div class="badge-wrapper live-badge">
+        <span class="badge-dot live-dot"></span>
         Live
       </div>
     </ng-container>
 
     <ng-template #elseStatus>
-      <span class="bg-yellow-400 text-dark rounded-full px-3 py-1 text-xs font-semibold">{{ plan?.status | titlecase }}</span>
+      <div
+        class="badge-wrapper"
+        [ngClass]="{'retired-badge': plan?.status.toLowerCase() === 'retire', 'draft-badge': plan?.status.toLowerCase() === 'draft', }">
+        <span
+          class="badge-dot live-dot"
+          [ngClass]="{'retired-dot': plan?.status.toLowerCase() === 'retire', 'draft-dot': plan?.status.toLowerCase() === 'draft', }"></span>
+        {{ plan?.status | titlecase }}
+      </div>
     </ng-template>
   </div>
 </div>

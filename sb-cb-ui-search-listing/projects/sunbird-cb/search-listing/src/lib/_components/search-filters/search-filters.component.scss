@@ -102,6 +102,10 @@
   margin-bottom: 8px !important;
 }
 
+.mb-0 {
+  margin-bottom: 0px !important;
+}
+
 ::ng-deep .competency-area-filter .mat-selection-list {
   height: 125px;
   overflow-y: auto;
@@ -230,5 +234,11 @@
     .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
     > .mat-calendar-body-cell-content:not(.mat-calendar-body-selected):not(.mat-calendar-body-comparison-identical) {
     --mat-datepicker-calendar-date-hover-state-background-color: #3f51b533;
+  }
+}
+
+.filter-calender {
+  ::ng-deep .mat-calendar-header {
+    padding: 0px 8px 0 8px !important;
   }
 }

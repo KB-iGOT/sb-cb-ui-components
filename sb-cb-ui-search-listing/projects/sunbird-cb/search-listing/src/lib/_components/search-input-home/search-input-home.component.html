@@ -43,8 +43,8 @@
         mat-flat-button
         type="submit"
         class="mat-btn-flat global-search"
-        [disabled]="!queryControl.value"
-        [ngClass]="{ 'disabled-search-btn': !queryControl.value }">
+        [disabled]="!queryControl.value || queryControl?.value?.length < requiredQueryMinLength"
+        [ngClass]="{ 'disabled-search-btn': !queryControl.value || queryControl?.value?.length < requiredQueryMinLength}">
         {{ "gyaanKarmayogi.search" | translate }}
       </button>
     </form>
@@ -55,6 +55,7 @@
           <mat-chip-list>
             <mat-chip
               *ngFor="let category of categories"
+              [disabled]="!queryControl.value || queryControl?.value?.length < requiredQueryMinLength"
               [removable]="false"
               [disableRipple]="true"
               [selected]="category.value === selectedSearchCategory"
