@@ -37,6 +37,7 @@ export class GlobalSearchComponent implements OnInit {
   ngOnInit() {
     this.compentencyKey = this.configService.compentency[this.environment.compentencyVersionKey];
     this.activated.queryParamMap.subscribe(queryParams => {
+      this.userId = "";
       this.userValue = "";
       if (queryParams.has("tab")) {
         const tabn = queryParams.get("tab");
@@ -85,6 +86,7 @@ export class GlobalSearchComponent implements OnInit {
   }
 
   filterSelectcategory(queryParams: any) {
+    this.userId = "";
     this.router.navigate([], {
       relativeTo: this.activated.parent,
       queryParams,
@@ -97,7 +99,7 @@ export class GlobalSearchComponent implements OnInit {
   }
   updateUserStatus(event: any) {
     if (event) {
-      this.userId = '';
+      this.userId = "";
     }
   }
 }

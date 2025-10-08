@@ -37,7 +37,7 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   widgetData: any
   pageLength?: number
   pageSize = 20
-  pageSizeOptions = [20, 30, 40]
+  pageSizeOptions = [20, 50, 100]
   searchValue: string = ''
   moreThanTwoChar = false
   @Input()totalRecords?: any

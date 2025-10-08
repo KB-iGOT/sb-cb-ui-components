@@ -170,11 +170,20 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   setCategoryType() {
     const params = this.activated.snapshot.queryParams;
+    if (
+      (this.searchCategory && params["category"] && this.searchCategory !== params["category"]) ||
+      !params["category"] ||
+      (params["q"] && params["q"] !== this.searchQuery)
+    ) {
+      this.selectedFilters = {};
+      this.selectedDateRange = null;
+      if (this.selectedFilters["dateRange"]) {
+        this.selectedFilters["dateRange"] = [];
+      }
+    }
+
     if (params["q"]) {
       this.searchQuery = params["q"];
-    }
-    if ((this.searchCategory && params["category"] && this.searchCategory !== params["category"]) || !params["category"]) {
-      this.selectedFilters = {};
     }
 
     this.isExploreContentTab = !!params["tab"];
@@ -330,7 +339,9 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
           acc[name] = {};
         }
         values.forEach(({ name: valueName, count }) => {
-          acc[name][valueName] = (acc[name][valueName] || 0) + count;
+          if (valueName !== "") {
+            acc[name][valueName] = (acc[name][valueName] || 0) + count;
+          }
         });
       });
       return acc;
@@ -440,25 +451,38 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     return Object.entries(this.selectedFilters).filter(([_, arr]) => Array.isArray(arr) && arr.length > 0).length;
   }
 
+  formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
   refactorFilterData(data: Record<string, string[]>): { type: string; value: string }[] {
     if (typeof data !== "object" || data === null) {
       return [];
     }
-    const returnedData = _.flatMap(data, (values, key) =>
-      values.map((value: any) => {
-        if (key === "dateRange") {
-          const dates = value.split(" ")[0]; // Get just the date part
-          return {
-            type: key,
-            value: dates
-          };
+
+    const returnedData: { type: string; value: string }[] = [];
+
+    Object.entries(data).forEach(([key, values]) => {
+      if (key === "dateRange") {
+        const mergedDates = values.map(this.formatDate).join(" - ");
+        if (mergedDates) {
+          returnedData.push({ type: key, value: mergedDates });
         }
-        return {
-          type: key,
-          value: value === "Courses" ? "Contents" : this.formatValue(value)
-        };
-      })
-    );
+      } else {
+        values.forEach(value => {
+          returnedData.push({
+            type: key,
+            value: value === "Courses" ? "Contents" : this.formatValue(value)
+          });
+        });
+      }
+    });
+
     this.categoriseByFacet(returnedData);
     return returnedData;
   }
@@ -578,6 +602,22 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
                 delete this.selectedFilters[item.type];
               }
             }
+            this.appliedFilter.emit(this.selectedFilters);
+            this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+          }
+        }
+        // In case if no conditions are matched
+        else {
+          if (Array.isArray(this.selectedFilters[item.type])) {
+            const updatedArr = this.selectedFilters[item.type].filter((val: any) => val.toLowerCase() !== item.value?.toLowerCase());
+            if (updatedArr.length) {
+              this.selectedFilters = { ...this.selectedFilters, [item.type]: updatedArr };
+            } else {
+              // Remove the property if array is empty
+              const { [item.type]: _, ...rest } = this.selectedFilters;
+              this.selectedFilters = rest;
+            }
+
             this.appliedFilter.emit(this.selectedFilters);
             this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
           }
@@ -814,15 +854,22 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     const pad = (num: number, size = 2) => num.toString().padStart(size, "0");
 
     if (category === SearchCategory.Users) {
-      const year = date.getUTCFullYear();
-      const month = pad(date.getUTCMonth() + 1);
-      const day = pad(date.getUTCDate());
-      const hours = pad(date.getUTCHours());
-      const minutes = pad(date.getUTCMinutes());
-      const seconds = pad(date.getUTCSeconds());
-      const milliseconds = date.getUTCMilliseconds().toString().padStart(3, "0");
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+      const seconds = pad(date.getSeconds());
+      const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
 
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}+0000`;
+      const timezoneOffset = -date.getTimezoneOffset();
+      const sign = timezoneOffset >= 0 ? "+" : "-";
+      const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+      const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
+
+      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}${sign}${offsetHours}${offsetMinutes}`;
+
+      return formattedDate;
     } else {
       const year = date.getFullYear();
       const month = pad(date.getMonth() + 1);
@@ -853,10 +900,96 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   get isUserFacetsPresent(): boolean {
-    return this.searchCategory === SearchCategory.Users && this.formattedFacets && Object.keys(this.formattedFacets)?.length > 0;
+    return this.searchCategory === SearchCategory.Users && this.isFilterFacetsAvailable;
   }
 
   get isDesignationFacetsPresent(): boolean {
-    return this.searchCategory === SearchCategory.Designation && this.formattedFacets && Object.keys(this.formattedFacets)?.length > 0;
+    return this.searchCategory === SearchCategory.Designation && this.isFilterFacetsAvailable;
+  }
+
+  get isEventsFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.Events && this.isFilterFacetsAvailable;
+  }
+
+  get isCommunityFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.Communities && this.isFilterFacetsAvailable;
+  }
+
+  get isTrainingPlanFacetsPresent(): boolean {
+    return this.searchCategory === SearchCategory.TrainingPlans && this.isFilterFacetsAvailable;
+  }
+
+  get isFilterFacetsAvailable(): boolean {
+    return (
+      this.formattedFacets &&
+      Object.keys(this.formattedFacets).length > 0 &&
+      Object.values(this.formattedFacets).some((facet: any) => facet && facet?.length > 0)
+    );
+  }
+
+  get sortedUserGroup() {
+    const groupFacet = this.formattedFacets?.[FacetType.profileGroup];
+    return !groupFacet || !Array.isArray(groupFacet)
+      ? []
+      : [
+          ...groupFacet.filter(g => g.name.toLowerCase().startsWith("group")).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" })),
+          ...groupFacet.filter(g => !g.name.toLowerCase().startsWith("group")).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
+        ];
+  }
+
+  get canShowTypeOfEventsFilter(): boolean {
+    return (
+      (this.formattedFacets["typeOfEvents"]?.some((event: any) => event.count > 0) &&
+        this.searchConfig?.applicationName !== SearchListingConfig.ApplicationNames.MDOPortal) ??
+      false
+    );
+  }
+
+  get canShowEventsStatusFilter(): boolean {
+    return !!(
+      this.searchCategory === SearchCategory.Events &&
+      this.isEventsFacetsPresent &&
+      this.formattedFacets["status"]?.length &&
+      this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal
+    );
+  }
+
+  formatFilterChips(value: string): string {
+    if (!value) {
+      return value;
+    }
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "live") {
+      return "Upcoming";
+    }
+
+    return value;
+  }
+
+  getCalendarLabel(): string {
+    if (this.isUserFacetsPresent) {
+      return "learnsearch.onBoardingDateRange";
+    } else if (this.isDesignationFacetsPresent) {
+      return "learnsearch.importedOn";
+    } else if (this.isEventsFacetsPresent) {
+      return "searchfilters.eventDate";
+    } else if (this.isCommunityFacetsPresent) {
+      return "searchfilters.createdOn";
+    } else if (this.isTrainingPlanFacetsPresent) {
+      return "searchfilters.createdOn";
+    }
+    return "";
+  }
+
+  formatEventStatusName(name: string): string {
+    if (name === "live") {
+      return "Upcoming";
+    }
+    return name;
   }
 }

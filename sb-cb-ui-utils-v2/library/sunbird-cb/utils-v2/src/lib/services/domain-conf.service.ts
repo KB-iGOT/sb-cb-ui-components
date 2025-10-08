@@ -112,18 +112,26 @@ environment: any;
    * Determines if the current domain is a same portal or client portal
    * @returns Boolean indicating if it's a same portal (true) or client portal (false)
    */
-  isKbPortal(): boolean {
+    isKbPortal(): boolean {
+      // Check if environment sitePath matches current hostname
+      const domainData = this.getDomainData();
+    return this.environment.sitePath === domainData.sitePath;
+  }
+
+  getNonLoggedInPageUrl(): string {
     // Check if environment sitePath matches current hostname
     const domainData = this.getDomainData();
-    return this.environment.sitePath === domainData.sitePath;
+    return domainData?.karmayogiBharatLink || 'https://igotkarmayogi.gov.in/';
   }
 
   getDomainData(): any {
     const defaultDomainData = {
       "logo": "/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg",
       "redirectPath": "/page/home",
-      "cdnContentHost": this.environment?.cdnContentHost || "https://portal.qa.karmayogibharat.net",
-      "sitePath": this.environment?.sitePath || "portal.qa.karmayogibharat.net"
+      "cdnContentHost": this.environment?.cdnContentHost || "https://portal.igotkarmayogi.gov.in/",
+      "sitePath": this.environment?.sitePath || "portal.igotkarmayogi.gov.in",
+      "karmayogiBharatLink": this.environment?.karmayogiBharatLink || "https://igotkarmayogi.gov.in/"
+
     }
     return this.configSvc.instanceConfig?.domainList?.[this.subdomain] || defaultDomainData;
   }

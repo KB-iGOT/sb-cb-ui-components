@@ -61,7 +61,7 @@ export class Filters {
   constructor() {
     this.contentType = ["Course"];
     this.courseCategory = [];
-    this.status = ["Live"];
+    this.status = [];
   }
 }
 
@@ -104,7 +104,7 @@ export const SearchOthersFacet = [
 ];
 
 // Events
-export const SearchEventfacet = ["duration", "language", "sourceName", "startDateTimeInEpoch", "endDateTimeInEpoch", "resourceType"];
+export const SearchEventfacet = ["language", "sourceName", "startDateTimeInEpoch", "endDateTimeInEpoch", "resourceType", "status"];
 
 export const SearchEventFields = [
   "name",
@@ -173,7 +173,18 @@ export class SearchCommunitiesRequest {
     this.filterCriteriaMap = {
       status: "active"
     };
-    this.requestedFields = [];
+    this.requestedFields = [
+      "communityName",
+      "countOfAnswerPost",
+      "countOfPeopleLiked",
+      "countOfPostCreated",
+      "countOfPeopleJoined",
+      "topicName",
+      "imageUrl",
+      "posterImageUrl",
+      "orgName",
+      "createdOn"
+    ];
     this.pageNumber = 0;
     this.pageSize = 6;
     this.facets = ["topicName", "orgName", ...competenciesKey];
@@ -208,7 +219,7 @@ export class UsersRequestParams {
       "maskedPhone",
       "profileDetails.personalDetails.primaryEmail",
       "profileDetails.profileStatus",
-      "onboardingDate",
+      "createdDate",
       "rootOrgName"
     ];
     this.facets = [
@@ -216,7 +227,7 @@ export class UsersRequestParams {
       "profileDetails.profileStatus",
       "profileDetails.professionalDetails.group",
       "profileDetails.employmentDetails.departmentName",
-      "organisations.roles"
+      "roles"
     ];
     this.limit = 10;
     this.offset = 0;
@@ -329,6 +340,7 @@ export enum FacetType {
   contentPartners = "contentPartner.contentPartnerName",
   topic = "topic",
   topicName = "topicName",
+  eventStatus = "eventStatus",
 
   // Users
   profileDesignation = "profileDetails.professionalDetails.designation",

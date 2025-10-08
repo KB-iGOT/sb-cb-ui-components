@@ -69,27 +69,53 @@
   font-size: 14px;
 }
 
-.live-badge {
+.badge-wrapper {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0px 8px;
-  border: 1px solid #1d8923;
   border-radius: 4px;
-  background: #1d892329;
-  color: #1d8923;
 
   font-family: Lato;
   font-weight: 400;
   font-size: 12px;
 }
 
-.live-dot {
+.badge-dot {
   width: 8px;
   height: 8px;
-  background: #1d8923;
   border-radius: 50%;
   display: inline-block;
+}
+
+.live-badge {
+  border: 1px solid #1d8923;
+  color: #1d8923;
+  background: #1d892329;
+}
+
+.live-dot {
+  background: #1d8923;
+}
+
+.draft-badge {
+  border: 1px solid #ef951e;
+  color: #ef951e;
+  background: #ef951e29;
+}
+
+.draft-dot {
+  background: #ef951e;
+}
+
+.retired-badge {
+  border: 1px solid #d12e2e;
+  color: #d12e2e;
+  background: rgba(209, 46, 46, 0.16);
+}
+
+.retired-dot {
+  background: #d12e2e;
 }
 
 .text-ellipse {
