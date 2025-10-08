@@ -11,6 +11,7 @@ import { MatRadioChange } from "@angular/material/radio";
 // import { CATEGORY_TYPE } from "../../_constants/search-listing.constant";
 import { SearchListingService } from "../../_services/search-listing.service";
 import { DateRange, DefaultMatCalendarRangeStrategy, MatRangeDateSelectionModel } from "@angular/material/datepicker";
+
 @Component({
   selector: "ws-app-search-filters",
   templateUrl: "./search-filters.component.html",
@@ -50,6 +51,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   showAllSubSectors: boolean = false;
   showAllContentPartners: boolean = false;
   showAllTopic: boolean = false;
+  showAllRoles = false;
 
   selectedFilterChips: any;
   filterQueryOrganisation = "";
@@ -66,6 +68,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   filterCompetency = "";
   filterQueryContentPartners = "";
   filterQueryTopic = "";
+  filterQueryRoles = "";
 
   searchCategory = "";
   searchQuery = "";
@@ -74,6 +77,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   environment!: any;
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
+  maxDateCalendar = new Date();
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
@@ -111,7 +115,18 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     this.searchConfig = await this.searchService.getSearchConfig();
 
     if (this.searchConfig) {
+      //Only allow communities for mdo_leader and mdo moderator in MDO
+      if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+        const userRoles = this.configSvc?.userRoles as Set<string>;
+        if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
+          if (this.searchConfig.searchCategories) {
+            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+          }
+        }
+      }
+
       const categories = this.searchConfig.searchCategories || [];
+
       const categorieTypes = this.searchConfig.allSearchCategoriesTypes || [];
       this.categoryType = categorieTypes.filter(cat => {
         return categories.some(category => category.value === cat.name);
@@ -321,6 +336,9 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       case FacetType.topicName:
         this.showAllTopic = !this.showAllTopic;
         break;
+      case FacetType.organizationsRoles:
+        this.showAllRoles = !this.showAllRoles;
+        break;
     }
   }
 
@@ -393,6 +411,21 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   capitalizeFirstLetter(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  formatRolesNames(str: string): string {
+    const acronyms = ["MDO", "CBP", "SPV", "FRAC", "IFU", "WAT"];
+
+    return str
+      .split("_")
+      .map(part => {
+        const upperPart = part.toUpperCase();
+        if (acronyms.includes(upperPart)) {
+          return upperPart;
+        }
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      })
+      .join(" ");
   }
 
   onSelectionFilter(event: MatCheckboxChange, option: any, categoryType: string) {
@@ -770,6 +803,12 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     return this.showAllContentPartners ? filteredList : filteredList?.slice(0, 4);
   }
 
+  get filteredRoles() {
+    let filteredList = this.formattedFacets["roles.role"]?.filter((item: any) => item?.name.toLowerCase().includes(this.filterQueryRoles.toLowerCase()));
+
+    return this.showAllRoles ? filteredList : filteredList?.slice(0, 4);
+  }
+
   get filteredTopic() {
     let filterData;
     if (this.formattedFacets[FacetType.topic]) {
@@ -966,6 +1005,10 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       return `${year}-${month}-${day}`;
     } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "live") {
       return "Upcoming";
+    } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "senttopublish") {
+      return "Pending Approval";
+    } else if (value.includes("_")) {
+      return this.formatRolesNames(value);
     }
 
     return value;
@@ -987,9 +1030,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   formatEventStatusName(name: string): string {
-    if (name === "live") {
-      return "Upcoming";
-    }
-    return name;
+    if (name === "live") return "Upcoming";
+    else if (name === "senttopublish") return "Pending Approval";
+    return this.capitalizeFirstLetter(name);
   }
 }

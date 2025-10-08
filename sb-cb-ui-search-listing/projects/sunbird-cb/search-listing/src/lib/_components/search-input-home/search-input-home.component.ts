@@ -34,10 +34,11 @@ import {
   SearchUsersRequest,
   SearchV4Request
 } from "../../_models/search-listing.model";
-import { WidgetContentLibService } from "@sunbird-cb/consumption";
+import { SnackbarComponent, WidgetContentLibService } from "@sunbird-cb/consumption";
 // import { MobileAppsService } from "../../../../../../../../../src/app/services/mobile-apps.service";
 import { SearchListingService } from "../../_services/search-listing.service";
 import { Subscription } from "rxjs";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
   selector: "ws-app-search-input-lib-home",
@@ -93,7 +94,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     private eRef: ElementRef,
     private searchListingService: SearchListingService,
     private contSvc: WidgetContentLibService, // private mobileAppsService: MobileAppsService
-    @Inject("environment") environment: any
+    @Inject("environment") environment: any,
+    private snackbar: MatSnackBar
   ) {
     this.environment = environment;
     this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
@@ -501,10 +503,20 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   async selectSearchCategory(category: string) {
-    if (this.queryControl.value && this.queryControl.value.length > this.requiredQueryMinLength) {
+    if (this.queryControl.value && this.queryControl.value.length >= this.requiredQueryMinLength) {
       this.selectedSearchCategory = category;
       // this.searchFromQuery(this.queryControl.value);
       this.updateQuery(this.queryControl.value);
+    }
+  }
+
+  showMessageIfChipsDisabled(): void {
+    if (!this.queryControl.value || this.queryControl?.value?.length < this.requiredQueryMinLength) {
+      this.snackbar.openFromComponent(SnackbarComponent, {
+        data: { message: `Minimum 3 characters are required to initiate the search`, type: "error" },
+        duration: 3000,
+        panelClass: "course-error-snackbar"
+      });
     }
   }
 

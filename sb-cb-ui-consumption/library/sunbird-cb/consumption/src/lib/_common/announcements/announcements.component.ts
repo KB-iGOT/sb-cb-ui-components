@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { InsiteDataService } from '../../_services/insite-data.service';
+import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service';
 
 @Component({
   selector: 'sb-uic-announcements',
@@ -19,7 +20,10 @@ export class AnnouncementsComponent implements OnInit {
   expand = false
   expanded: boolean = false
 
-  constructor(public insightSvc: InsiteDataService) {
+  constructor(
+    public insightSvc: InsiteDataService,
+    private langtranslations: MultilingualTranslationsService,
+  ) {
   }
 
   ngOnInit() {
@@ -82,6 +86,10 @@ export class AnnouncementsComponent implements OnInit {
 
   showMoreOrLess() {
     this.expanded = !this.expanded
+  }
+
+  translateLabels(label: string, type: any) {
+    return this.langtranslations.translateLabel(label, type, '');
   }
 
 }
