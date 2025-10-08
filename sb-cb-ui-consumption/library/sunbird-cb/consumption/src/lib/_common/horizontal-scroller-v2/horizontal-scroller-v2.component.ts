@@ -27,6 +27,7 @@ export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestr
     showNavs: true,
     showDots: true,
     cerificateCardMargin: false,
+    justifyCenter: false,
   };
   @Output() loadNext = new EventEmitter();
   @Input() widgetsLength: any;

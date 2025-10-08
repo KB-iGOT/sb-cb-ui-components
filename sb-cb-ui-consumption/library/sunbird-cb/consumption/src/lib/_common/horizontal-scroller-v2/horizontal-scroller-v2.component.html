@@ -1,7 +1,8 @@
 
 <section class="horizontal-scroll-container h-full" [id]="id"
 [ngClass]="{'px-4': sliderConfig.showNavs && sliderConfig.showNavsSpacing, 'mt-5':sliderConfig.cerificateCardMargin}">
-    <div name="horizontal-scroll-content-strip" class="horizontal-scroll-content" #horizontalScrollElem>
+    <div name="horizontal-scroll-content-strip" class="horizontal-scroll-content" 
+    [ngClass]="{'justify-center': sliderConfig.justifyCenter}" #horizontalScrollElem>
         <ng-content></ng-content>
     </div>
     <div class="navigation {{isMobile? sliderConfig?.responsive?.arrowsPlacement : sliderConfig?.arrowsPlacement}}">
