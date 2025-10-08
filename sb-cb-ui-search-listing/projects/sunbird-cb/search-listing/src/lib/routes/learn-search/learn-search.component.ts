@@ -446,6 +446,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       this.searchRequestCommunities.filterCriteriaMap["orgId"] = this.configSvc.userProfile?.rootOrgId;
+      this.searchRequestCommunities.facets = this.searchRequestCommunities.facets.filter(item => item !== "orgName");
     }
 
     const result = await this.searchListingService.searchCommunity(this.searchRequestCommunities).catch(() => {
@@ -536,7 +537,13 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   async searchUsersMDO() {
     this.searchPeopleLoader = true;
-    this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
+
+    if (this.configSvc?.unMappedUser?.rootOrg?.sbOrgType === "ministry") {
+      this.searchRequestUsers.request.filters["ministryOrStateId"] = this.configSvc?.unMappedUser?.rootOrg?.ministryOrStateId || "";
+      this.searchRequestUsers.request.facets = [...this.searchRequestUsers.request.facets, "rootOrgName"];
+    } else {
+      this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
+    }
 
     this.searchRequestUsers.request.query = this.statedata?.param || "";
     const result = await this.searchListingService.searchUsersMDO(this.searchRequestUsers).catch(() => {
@@ -571,9 +578,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   processObjectFacetsForEvents(facets: any[]): any {
     return facets.map((element: any) => {
-      if (element?.name === FacetType.status) {
-        element.values = element.values.filter((val: any) => val?.name === "live" || val?.name === "draft");
-      }
       return element;
     });
   }
@@ -880,6 +884,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           this.searchRequestUsers.request.filters[FacetType.profileDesignation] = [...selectedFilters[key]];
         } else if (key === "rootOrgName") {
           this.searchRequestPeoples.filters[key] = [...selectedFilters[key]];
+          this.searchRequestUsers.request.filters[key] = [...selectedFilters[key]];
         } else if (key === "sourceName") {
           this.searchRequestEvents.request.filters.sourceName = [...selectedFilters[key]];
         } else if (key === "resourceType") {
@@ -1097,7 +1102,11 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     // For searchRequestUsers
     const userFilters = this.searchRequestUsers?.request?.filters || {};
-    removeEmpty(userFilters, [FacetType.profileGroup, FacetType.profileStatus, FacetType.organizationsRoles, FacetType.profileDesignation], false);
+    removeEmpty(
+      userFilters,
+      [FacetType.profileGroup, FacetType.profileStatus, FacetType.organizationsRoles, FacetType.profileDesignation, FacetType.rootOrgName],
+      false
+    );
 
     if (userFilters["createdDate"]) {
       const dateRange = userFilters["createdDate"];
