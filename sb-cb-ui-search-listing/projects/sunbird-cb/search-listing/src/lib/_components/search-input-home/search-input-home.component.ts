@@ -65,6 +65,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   private hasReadRecentBeenCalled = false;
   searchCat: any;
   categories: any[] = [];
+  requiredQueryMinLength = 3;
 
   selectedSearchCategory: string = "";
   openSearchTemplate = false;
@@ -507,7 +508,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   async selectSearchCategory(category: string) {
-    if (this.queryControl.value) {
+    if (this.queryControl.value && this.queryControl.value.length > this.requiredQueryMinLength) {
       this.selectedSearchCategory = category;
       // this.searchFromQuery(this.queryControl.value);
       this.updateQuery(this.queryControl.value);

@@ -179,22 +179,23 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   setCategoryType() {
     const params = this.activated.snapshot.queryParams;
-    if (params["q"]) {
-      this.searchQuery = params["q"];
-    }
-
-    if ((this.searchCategory && params["category"] && this.searchCategory !== params["category"]) || !params["category"]) {
+    if (
+      (this.searchCategory && params["category"] && this.searchCategory !== params["category"]) ||
+      !params["category"] ||
+      (params["q"] && params["q"] !== this.searchQuery)
+    ) {
       this.selectedFilters = {};
-    }
-
-    this.isExploreContentTab = !!params["tab"];
-
-    if (this.searchCategory !== params["category"]) {
       this.selectedDateRange = null;
       if (this.selectedFilters["dateRange"]) {
         this.selectedFilters["dateRange"] = [];
       }
     }
+
+    if (params["q"]) {
+      this.searchQuery = params["q"];
+    }
+
+    this.isExploreContentTab = !!params["tab"];
 
     this.searchCategory = params["category"];
 
@@ -347,7 +348,9 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
           acc[name] = {};
         }
         values.forEach(({ name: valueName, count }) => {
-          acc[name][valueName] = (acc[name][valueName] || 0) + count;
+          if (valueName !== "") {
+            acc[name][valueName] = (acc[name][valueName] || 0) + count;
+          }
         });
       });
       return acc;
@@ -457,25 +460,38 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     return Object.entries(this.selectedFilters).filter(([_, arr]) => Array.isArray(arr) && arr.length > 0).length;
   }
 
+  formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
   refactorFilterData(data: Record<string, string[]>): { type: string; value: string }[] {
     if (typeof data !== "object" || data === null) {
       return [];
     }
-    const returnedData = _.flatMap(data, (values, key) =>
-      values.map((value: any) => {
-        if (key === "dateRange") {
-          const dates = value.split(" ")[0]; // Get just the date part
-          return {
-            type: key,
-            value: dates
-          };
+
+    const returnedData: { type: string; value: string }[] = [];
+
+    Object.entries(data).forEach(([key, values]) => {
+      if (key === "dateRange") {
+        const mergedDates = values.map(this.formatDate).join(" - ");
+        if (mergedDates) {
+          returnedData.push({ type: key, value: mergedDates });
         }
-        return {
-          type: key,
-          value: value === "Courses" ? "Contents" : this.formatValue(value)
-        };
-      })
-    );
+      } else {
+        values.forEach(value => {
+          returnedData.push({
+            type: key,
+            value: value === "Courses" ? "Contents" : this.formatValue(value)
+          });
+        });
+      }
+    });
+
     this.categoriseByFacet(returnedData);
     return returnedData;
   }
@@ -847,15 +863,22 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     const pad = (num: number, size = 2) => num.toString().padStart(size, "0");
 
     if (category === SearchCategory.Users) {
-      const year = date.getUTCFullYear();
-      const month = pad(date.getUTCMonth() + 1);
-      const day = pad(date.getUTCDate());
-      const hours = pad(date.getUTCHours());
-      const minutes = pad(date.getUTCMinutes());
-      const seconds = pad(date.getUTCSeconds());
-      const milliseconds = date.getUTCMilliseconds().toString().padStart(3, "0");
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+      const seconds = pad(date.getSeconds());
+      const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
 
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}+0000`;
+      const timezoneOffset = -date.getTimezoneOffset();
+      const sign = timezoneOffset >= 0 ? "+" : "-";
+      const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+      const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
+
+      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}${sign}${offsetHours}${offsetMinutes}`;
+
+      return formattedDate;
     } else {
       const year = date.getFullYear();
       const month = pad(date.getMonth() + 1);
