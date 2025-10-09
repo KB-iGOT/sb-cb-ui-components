@@ -317,7 +317,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchCourses() {
     this.searchRequestCourse.request.filters.status = ["Live"];
     this.searchRequestCourse.request.query = this.statedata?.param;
-    const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
+    // const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
     this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
     try {
       const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
@@ -417,7 +417,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.eventsFacets = eventFacets;
         this.combinedFacets = [];
         this.combinedFacets = [...this.combinedFacets, eventFacets || []];
-        console.log('combinedFacets:', this.combinedFacets);
       } else {
         this.eventsSearchResults = [];
         this.eventSearchTotalCount = 0;
@@ -510,6 +509,45 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   async searchExternalContents() {
     this.searchRequestExternal.searchString = this.statedata?.param || "";
+    // Ensure facets array does not contain null/undefined entries
+    const baseEventFacets = [
+      ...SearchEventfacet
+    ].filter((v: string) => v !== null && v !== undefined);
+
+    const competencyKeys = [
+      this.competencyAreaNameKey,
+      this.competencyThemeKey,
+      this.competencySubThemeKey
+    ].filter(k => k !== null && k !== undefined) as string[];
+
+    // Start with base facets and append competency keys if present
+    let resolvedEventFacets: string[] = competencyKeys.length ? [...baseEventFacets, ...competencyKeys] : baseEventFacets;
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+        this.searchRequestEvents.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      }
+      const contentFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');
+      if (contentFilters.length && contentFilters[0].facets && contentFilters[0].facets.length) {
+        // Clone to avoid mutating upstream config
+        const facetsFromConfig = [...contentFilters[0].facets] as string[];
+
+        // If config contains the placeholder 'competencies', replace it with the actual competency keys
+        const compIndex = facetsFromConfig.indexOf('competencies');
+        if (compIndex !== -1) {
+          // Splice will remove the placeholder and insert competency keys (if any). If competencyKeys is empty,
+          // this effectively removes the 'competencies' placeholder.
+          facetsFromConfig.splice(compIndex, 1, ...competencyKeys);
+        }
+
+        // Filter out any null/undefined values and use config-provided facets
+        this.searchRequestExternal.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
+      } else {
+        this.searchRequestExternal.facets = resolvedEventFacets;
+      }
+    }
+    this.searchRequestExternal.facets = (_.get(this.searchRequestExternal, 'facets', []) as string[]).filter(
+      (v: string | null | undefined) => v !== null && v !== undefined
+    );
     const result = await this.searchListingService.searchExternalContent(this.searchRequestExternal).catch(() => {
       return {
         data: [],

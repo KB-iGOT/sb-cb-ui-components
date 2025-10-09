@@ -116,16 +116,30 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (this.searchConfig) {
       const categories = this.searchConfig.searchCategories || [];
       const categorieTypes = this.searchConfig.allSearchCategoriesTypes || [];
+
+      // normalize user roles which can be a Set<string> or string[]
+      const userRoles = (this.configSvc as any)?.userRoles as Set<string> | string[] | undefined;
+      const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? (userRoles as string[]) : [];
+
       this.categoryType = categorieTypes.filter(cat => {
-        return categories.some(category => category.value === cat.name);
+        // find the matching category config for this type
+        const matchedCategory = categories.find(category => category.value === cat.name);
+        if (!matchedCategory) return false;
+
+        // If matched category has no roles defined or an empty array, keep the category
+        const roles = (matchedCategory as any)?.roles as string[] | undefined;
+        if (!roles || !Array.isArray(roles) || roles.length === 0) return true;
+
+        // Otherwise include only if there's any intersection between category.roles and user roles
+        return roles.some((r: string) => userRolesArray.includes(r.toLocaleLowerCase()));
       });
+
       this.categoryTypeDup = this.categoryType;
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["newfacets"] && changes["newfacets"].currentValue) {
-      console.log('newfacets:', changes["newfacets"].currentValue);
       this.formattedFacets = this.formatFacets(changes["newfacets"].currentValue);
 
       if (this.formattedFacets?.sectorId?.length) {
@@ -348,9 +362,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
           acc[name] = {};
         }
         values.forEach(({ name: valueName, count }) => {
-          if (valueName !== "") {
-            acc[name][valueName] = (acc[name][valueName] || 0) + count;
-          }
+          acc[name][valueName] = (acc[name][valueName] || 0) + count;
         });
       });
       return acc;

@@ -13,6 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2';
 import { SearchListingService } from '../../_services/search-listing.service';
 import { SearchListingConfig } from '../../_models/search-listing.model';
+import * as _ from 'lodash';
 
 const MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const NEW_CONTENT_THRESHOLD_DAYS = 14;
@@ -130,15 +131,24 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
 
   navigateToEvent() {
     const eventId = this.content?.identifier;
-    if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
-      this.content.contentType = 'Events'
-      this.router.navigate([`/app/event-hub/home/${eventId}`]);
-      this.telemetry.emit(this.content)
-    } else if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
-      this.content.contentType = 'Events'
-      this.router.navigate([`app/home/events/edit-event/${eventId}?mode=edit&pathUrl=draft`]);
-      this.telemetry.emit(this.content)
-
+    if(eventId) {
+      this.content.contentType = 'Events';
+      this.telemetry.emit(this.content);
+      console.log('content:', this.content);
+      switch (this.searchListingService.searchConfig?.applicationName) {
+        case SearchListingConfig.ApplicationNames.LearnerPortal:
+          this.router.navigate([`/app/event-hub/home/${eventId}`]);
+          break;
+        case SearchListingConfig.ApplicationNames.MDOPortal:
+          this.router.navigate([`app/home/events/edit-event/${eventId}?mode=edit&pathUrl=draft`]);
+          break;
+        case SearchListingConfig.ApplicationNames.CBPPortal:
+          const mode = _.get(this.content, 'status', '').toLowerCase() === 'live' ? 'pastRequests' : 'newRequests'
+          this.router.navigate(['/app/event-details/', eventId, 'preview'], {
+            queryParams: { mode: mode }
+          })
+          break;
+      }
     }
   }
 
