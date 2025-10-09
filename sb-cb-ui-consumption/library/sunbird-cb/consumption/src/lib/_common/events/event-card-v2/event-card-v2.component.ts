@@ -81,6 +81,7 @@ export class EventCardV2Component extends WidgetBaseComponent
   }
 
   getStartDate(startDate: any, startTime: any) {
+    startTime = startTime ? startTime : '00:00:00+05:30'
     if(typeof(startDate) === 'string') {
       return `${startDate} ${startTime}`
     } else {
