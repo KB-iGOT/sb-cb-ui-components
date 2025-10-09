@@ -22,12 +22,15 @@ $spaceFromEnd: 0;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 0;
+  z-index: 999;
   height: 32px !important;
   width:32px !important;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.index-issue {
+  z-index: 1 !important;
 }
 
 %navBtnRounded {
