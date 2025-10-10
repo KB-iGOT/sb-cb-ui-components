@@ -6,7 +6,7 @@
         <div class="key-heading"
             [style.backgroundColor]="objectData?.header?.background"
             [style.color]="objectData?.header?.color">
-            {{objectData?.title}}
+            {{translateLabels(objectData?.title, 'events')}}
         </div>
     </div>
     <div class="key-list-container"
@@ -64,7 +64,7 @@
         <div class="key-heading"
             [style.backgroundColor]="objectData?.header?.background"
             [style.color]="objectData?.header?.color">
-            {{objectData?.title}}
+            {{translateLabels(objectData?.title, 'events')}}
         </div>
     </div>
     <div class="key-list-container"
