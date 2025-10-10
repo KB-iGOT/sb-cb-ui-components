@@ -181,8 +181,8 @@
             </div>
           </ng-container>
 
-          <!-- Users Card -->
-          <ng-container *ngIf="seeAllResult === 'users' && searchPeopleLoader">
+          <!-- Users Card || Peoples || Designations-->
+          <ng-container *ngIf="(seeAllResult === 'users' || seeAllResult === 'peoples' || seeAllResult === 'designation') && searchPeopleLoader">
             <div class="flex flex-wrap gap-x-3 gap-y-6 items-center justify-start">
               <div class="card-container" *ngFor="let user of [1, 2, 3, 4, 5, 6]">
                 <ws-app-skeleton-loader-peoples></ws-app-skeleton-loader-peoples>
@@ -265,14 +265,6 @@
             </div>
           </ng-container>
 
-          <!-- // Peoples -->
-          <ng-container *ngIf="seeAllResult === 'peoples' && searchPeopleLoader">
-            <div class="flex flex-wrap gap-x-3 gap-y-6 items-center justify-start">
-              <div class="card-container" *ngFor="let user of [1, 2, 3, 4, 5, 6]">
-                <ws-app-skeleton-loader-peoples></ws-app-skeleton-loader-peoples>
-              </div>
-            </div>
-          </ng-container>
           <ng-container *ngIf="peopleSearchTotalCount > 0 && (seeAllResult === '' || seeAllResult === 'peoples')">
             <div class="search-people-card overflow-x-hidden">
               <p *ngIf="seeAllResult === ''" class="mat-subheading-1 mt-4 font-bold-imp text-dark">
@@ -364,15 +356,6 @@
                     (pageChange)="onPageChange($event)"></ws-app-pagination>
                 </div>
               </ng-container>
-            </div>
-          </ng-container>
-
-          <!-- Designation Card -->
-          <ng-container *ngIf="seeAllResult === 'designation' && searchPeopleLoader">
-            <div class="flex flex-wrap gap-x-3 gap-y-6 items-center justify-start">
-              <div class="card-container" *ngFor="let user of [1, 2, 3, 4, 5, 6]">
-                <ws-app-skeleton-loader-peoples></ws-app-skeleton-loader-peoples>
-              </div>
             </div>
           </ng-container>
 
