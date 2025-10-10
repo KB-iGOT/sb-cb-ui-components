@@ -200,7 +200,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredSectorId?.length > 4) || (!filterQuerySectorNames && formattedFacets?.['sectorId']?.length > 4)"
+        *ngIf="((filteredSectorId?.length > 4) || (!filterQuerySectorNames && formattedFacets?.['sectorId']?.length > 4)) && !filterQuerySectorNames"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('sectorId')">
         {{ showAllSectors ? "See Less" : "See More" }}
@@ -229,7 +229,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredSubSectorId?.length > 4) || (!filterQuerySubSectorNames && formattedFacets?.['subSectorId']?.length > 4)"
+        *ngIf="((filteredSubSectorId?.length > 4) || (!filterQuerySubSectorNames && formattedFacets?.['subSectorId']?.length > 4)) && !filterQuerySubSectorNames"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('subSectorId')">
         {{ showAllSubSectors ? "See Less" : "See More" }}
@@ -286,7 +286,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredResourceCategory?.length > 4) || (!filterQueryResourceCategory && formattedFacets?.['resourceCategory']?.length > 4)"
+        *ngIf="((filteredResourceCategory?.length > 4) || (!filterQueryResourceCategory && formattedFacets?.['resourceCategory']?.length > 4)) && !filterQueryResourceCategory"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('resourceCategory')">
         {{ showResourceCategory ? "See Less" : "See More" }}
@@ -326,7 +326,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredSectorNames?.length > 4) || (!filterQuerySectorNames && formattedFacets?.['sectorDetails_v1.sectorName']?.length > 4)"
+        *ngIf="((filteredSectorNames?.length > 4) || (!filterQuerySectorNames && formattedFacets?.['sectorDetails_v1.sectorName']?.length > 4)) && !filterQuerySectorNames"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('sectorDetails_v1.sectorName')">
         {{ showAllSectors ? "See Less" : "See More" }}
@@ -366,7 +366,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredSubSectorNames?.length > 4) || (!filterQuerySubSectorNames && formattedFacets?.['sectorDetails_v1.subSectorName']?.length > 4)"
+        *ngIf="((filteredSubSectorNames?.length > 4) || (!filterQuerySubSectorNames && formattedFacets?.['sectorDetails_v1.subSectorName']?.length > 4)) && !filterQuerySubSectorNames"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('sectorDetails_v1.subSectorName')">
         {{ showAllSubSectors ? "See Less" : "See More" }}
@@ -416,7 +416,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredLanguages?.length > 4) || (!filterQueryLanguage && formattedFacets?.['language']?.length > 4)"
+        *ngIf="((filteredLanguages?.length > 4) || (!filterQueryLanguage && formattedFacets?.['language']?.length > 4)) && !filterQueryLanguage"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('language')">
         {{ showAllLanguage ? "See Less" : "See More" }}
@@ -444,7 +444,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredOrganisations?.length > 4) || (!filterQueryOrganisation && formattedFacets?.['organisation']?.length > 4)"
+        *ngIf="((filteredOrganisations?.length > 4) || (!filterQueryOrganisation && formattedFacets?.['organisation']?.length > 4)) && !filterQueryOrganisation"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('organisation')">
         {{ showAllOrganisation ? "See Less" : "See More" }}
@@ -472,7 +472,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredOrganisations?.length > 4) || (!filterQueryOrganisation && formattedFacets?.['sourceName']?.length > 4)"
+        *ngIf="((filteredOrganisations?.length > 4) || (!filterQueryOrganisation && formattedFacets?.['sourceName']?.length > 4)) && !filterQueryOrganisation"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('sourceName')">
         {{ showAllOrganisation ? "See Less" : "See More" }}
@@ -529,7 +529,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="filteredTopic?.length > 4 || (!filterQueryTopic && formattedFacets['topicName'].length > 4)"
+        *ngIf="(filteredTopic?.length > 4 || (!filterQueryTopic && formattedFacets['topicName'].length > 4)) && !filterQueryTopic"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('topicName')">
         {{ showAllTopic ? "See Less" : "See More" }}
@@ -587,7 +587,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredDesignations?.length > 4) || (!filterQueryDesignation && formattedFacets?.['profileDetails.professionalDetails.designation']?.length > 4)"
+        *ngIf="((filteredDesignations?.length > 4) || (!filterQueryDesignation && formattedFacets?.['profileDetails.professionalDetails.designation']?.length > 4)) && !filterQueryDesignation"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('designation')">
         {{ showAllDesignation ? "See Less" : "See More" }}
@@ -615,7 +615,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredRootOrgNames?.length > 4) || (!filterQueryRootOrgName && formattedFacets?.['rootOrgName']?.length > 4)"
+        *ngIf="((filteredRootOrgNames?.length > 4) || (!filterQueryRootOrgName && formattedFacets?.['rootOrgName']?.length > 4)) && !filterQueryRootOrgName"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('organisation')">
         {{ showAllOrganisation ? "See Less" : "See More" }}
@@ -653,7 +653,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredContentPartners?.length > 4) || (!filterQueryContentPartners && formattedFacets?.['contentPartner.contentPartnerName']?.length > 4)"
+        *ngIf="((filteredContentPartners?.length > 4) || (!filterQueryContentPartners && formattedFacets?.['contentPartner.contentPartnerName']?.length > 4)) && !filterQueryContentPartners"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('contentPartner.contentPartnerName')">
         {{ showAllContentPartners ? "See Less" : "See More" }}
@@ -682,7 +682,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredTopic?.length > 4) || (!filterQueryTopic && formattedFacets?.['topic']?.length > 4)"
+        *ngIf="((filteredTopic?.length > 4) || (!filterQueryTopic && formattedFacets?.['topic']?.length > 4)) && !filterQueryTopic"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('topic')">
         {{ showAllTopic ? "See Less" : "See More" }}
@@ -731,7 +731,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredCompetencyTheme?.length > 4) || (!filterQueryThemes && formattedFacets?.[competencyThemeKey]?.length > 4)"
+        *ngIf="((filteredCompetencyTheme?.length > 4) || (!filterQueryThemes && formattedFacets?.[competencyThemeKey]?.length > 4)) && !filterQueryThemes"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore(competencyThemeKey)">
         {{ showAllCompetencyTheme ? "See Less" : "See More" }}
@@ -760,7 +760,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredCompetencySubTheme?.length > 4) || (!filterQuerySubThemes && formattedFacets?.[competencySubThemeKey]?.length > 4)"
+        *ngIf="((filteredCompetencySubTheme?.length > 4) || (!filterQuerySubThemes && formattedFacets?.[competencySubThemeKey]?.length > 4)) && !filterQuerySubThemes"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore(competencySubThemeKey)">
         {{ showAllCompetencySubTheme ? "See Less" : "See More" }}
@@ -793,7 +793,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredSectorNames?.length > 4) || (!filterQuerySectorNames && (formattedFacets?.['sectorName']?.length > 4))"
+        *ngIf="((filteredSectorNames?.length > 4) || (!filterQuerySectorNames && (formattedFacets?.['sectorName']?.length > 4))) && !filterQuerySectorNames"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('sectorName')">
         {{ showAllSectors ? "See Less" : "See More" }}
@@ -823,7 +823,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredSubSectorNames?.length > 4) || (!filterQuerySubSectorNames && (formattedFacets?.['subSectorName']?.length > 4))"
+        *ngIf="((filteredSubSectorNames?.length > 4) || (!filterQuerySubSectorNames && (formattedFacets?.['subSectorName']?.length > 4))) && !filterQuerySubSectorNames"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('subSectorName')">
         {{ showAllSubSectors ? "See Less" : "See More" }}
@@ -890,7 +890,7 @@
   <ng-container *ngIf="formattedFacets && formattedFacets['roles.role'] && formattedFacets['roles.role'].length && searchCategory">
     <div class="sectorNames-filter">
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "learnsearch.roles" | translate }}</p>
-      <div class="mat-full-radius mb-2" *ngIf="(formattedFacets['roles.role'].length > 4 || filterQueryRoles)">
+      <div class="mat-full-radius mb-2" *ngIf="formattedFacets['roles.role'].length > 4 || filterQueryRoles">
         <mat-form-field appearance="outline" class="search-input-block">
           <input matInput class="search-filter-input" placeholder="Search" [(ngModel)]="filterQueryRoles" />
           <mat-icon matPrefix class="search-icon">search</mat-icon>
@@ -907,7 +907,7 @@
         </section>
       </mat-selection-list>
       <div
-        *ngIf="(filteredRoles?.length > 4) || (!filterQueryRoles && formattedFacets?.['roles.role']?.length > 4)"
+        *ngIf="((filteredRoles?.length > 4) || (!filterQueryRoles && formattedFacets?.['roles.role']?.length > 4)) && !filterQueryRoles"
         class="brand-color underline cursor-pointer"
         (click)="toggleShowMore('roles.role')">
         {{ showAllRoles ? "See Less" : "See More" }}
@@ -979,5 +979,5 @@
 </div>
 
 <ng-template #noResults>
-  <div>{{'knowledgesaved.noresultfound' | translate}}</div>
+  <div>{{ "knowledgesaved.noresultfound" | translate }}</div>
 </ng-template>

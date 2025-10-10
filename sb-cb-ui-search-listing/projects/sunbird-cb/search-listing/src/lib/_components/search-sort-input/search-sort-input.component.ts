@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { SEARCH_SORT_DROPDOWN, SEARCH_SORT_PEOPLES } from "../../_constants/search-listing.constant";
 import { SearchCategory, SearchConstantLocalStorage, SortType } from "../../_models/search-listing.model";
 
@@ -46,11 +46,11 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
       }
     }
 
-    const sortType = localStorage.getItem(SearchConstantLocalStorage.SortType);
-    if (sortType && this.options.some(option => option.value === sortType)) {
-      this.selectedOption = sortType;
-      // this.searchSorter.emit(this.selectedOption);
-    }
+    // const sortType = localStorage.getItem(SearchConstantLocalStorage.SortType);
+    // if (sortType && this.options.some(option => option.value === sortType)) {
+    //   this.selectedOption = sortType;
+    //   // this.searchSorter.emit(this.selectedOption);
+    // }
   }
 
   ngAfterViewInit() {
