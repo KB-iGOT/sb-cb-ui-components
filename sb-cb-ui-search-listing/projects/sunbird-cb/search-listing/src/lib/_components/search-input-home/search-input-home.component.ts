@@ -172,9 +172,13 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     //Only allow communities for mdo_leader and mdo moderator in MDO
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
-      if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
-        if (this.searchConfig.searchCategories) {
+      if (this.searchConfig.searchCategories) {
+        if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
           this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+        }
+        if (userRoles.has("community_moderator")) {
+          this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          this.searchConfig.searchInputConfig.defaultSearchCategory = SearchCategory.Communities;
         }
       }
     }
@@ -224,7 +228,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       const reqBody = {
         nlpSearchQuery: query.nlp_search_query,
         searchQuery: query.search_query,
-        searchCategory: query.search_category[0]
+        searchCategory: this.selectedSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
       };
       await this.searchListingService
         .recentCreate(reqBody)
@@ -263,7 +267,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   goToSearchItem(query: any) {
-    const category = this.selectedSearchCategory;
+    const category = this.selectedSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
     const nlpSearchQuery = query?.nlp_search_query;
     if (category && category === SearchCategory.Courses && nlpSearchQuery) {
       const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
@@ -438,7 +442,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     const queryParams = {
       q: query?.nlp_search_query ? query?.nlp_search_query?.trim() : "",
       // search: query && this.responseNlpQuery ? this.responseNlpQuery : null,
-      category: query?.search_category[0] || null,
+      category: this.selectedSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory || null,
       p: null,
       f: null,
       tab: null,

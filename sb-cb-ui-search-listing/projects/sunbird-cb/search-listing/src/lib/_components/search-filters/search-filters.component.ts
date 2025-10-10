@@ -118,9 +118,12 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       //Only allow communities for mdo_leader and mdo moderator in MDO
       if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
         const userRoles = this.configSvc?.userRoles as Set<string>;
-        if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
-          if (this.searchConfig.searchCategories) {
+        if (this.searchConfig.searchCategories) {
+          if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
             this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+          }
+          if (userRoles.has("community_moderator")) {
+            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
           }
         }
       }

@@ -540,7 +540,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.configSvc?.unMappedUser?.rootOrg?.sbOrgType === "ministry") {
       this.searchRequestUsers.request.filters["profileDetails.ministryOrStateId"] = this.configSvc?.unMappedUser?.rootOrg?.ministryOrStateId || "";
-      this.searchRequestUsers.request.facets = [...this.searchRequestUsers.request.facets, "rootOrgName"];
+      if (!this.searchRequestUsers.request.facets.includes("rootOrgName")) {
+        this.searchRequestUsers.request.facets = [...this.searchRequestUsers.request.facets, "rootOrgName"];
+      }
     } else {
       this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
     }
