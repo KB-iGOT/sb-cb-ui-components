@@ -974,7 +974,12 @@
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
       {{ getCalendarLabel() | translate }}
     </p>
-    <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)" [maxDate]="maxDateCalendar"></mat-calendar>
+    <ng-container *ngIf="searchCategory !== 'events'">
+      <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)" [maxDate]="maxDateCalendar"></mat-calendar>
+    </ng-container>
+    <ng-container *ngIf="searchCategory === 'events'">
+      <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)"></mat-calendar>
+    </ng-container>
   </div>
 </div>
 

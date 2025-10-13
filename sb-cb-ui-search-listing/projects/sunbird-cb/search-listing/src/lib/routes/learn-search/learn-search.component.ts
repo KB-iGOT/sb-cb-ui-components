@@ -1423,28 +1423,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestDesignation.request.offset = 0;
     this.searchRequestDesignation.request.sort_by = {};
 
-    if (this.seeAllResult) {
-      this.searchRequestPeoples.limit = this.initialPaginationSize;
-      this.searchRequestEvents.request.limit = this.initialPaginationSize;
-      this.searchRequestCourse.request.limit = this.initialPaginationSize;
-      this.searchRequestCommunities.pageSize = this.initialPaginationSize;
-      this.searchRequestResources.request.limit = this.initialPaginationSize;
-      this.searchRequestExternal.pageSize = this.initialPaginationSize;
-
-      this.searchRequestUsers.request.limit = this.initialPaginationSize;
-      this.searchRequestTrainingPlans.pageSize = this.initialPaginationSize;
-      this.searchRequestDesignation.request.limit = this.initialPaginationSize;
-    } else {
-      this.searchRequestPeoples.limit = this.initialPaginationSize;
-      this.searchRequestCommunities.pageSize = this.initialPaginationSize;
-      this.searchRequestEvents.request.limit = this.commonPageResultSize;
-      this.searchRequestCourse.request.limit = this.commonPageResultSize;
-      this.searchRequestResources.request.limit = this.commonPageResultSize;
-      this.searchRequestExternal.pageSize = this.initialPaginationSize;
-      this.searchRequestUsers.request.limit = this.initialPaginationPage;
-      this.searchRequestTrainingPlans.pageSize = this.commonPageResultSize;
-      this.searchRequestDesignation.request.limit = this.initialPaginationSize;
-    }
     const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
 
     if (event === SortType.MostRelevent) {
