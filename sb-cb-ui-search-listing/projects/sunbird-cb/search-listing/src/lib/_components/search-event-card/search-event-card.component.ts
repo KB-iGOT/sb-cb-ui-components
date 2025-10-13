@@ -128,7 +128,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
     return now >= startDateTime && now <= endDateTime;
   }
 
-  navigateToEvent() {
+   navigateToEvent() {
     const eventId = this.content?.identifier;
     if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
       this.content.contentType = "Events";
@@ -136,9 +136,15 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       this.telemetry.emit(this.content);
     } else if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       this.content.contentType = "Events";
-      this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-        queryParams: this.getEventsQueryParams(this.content?.status)
-      });
+      if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+        this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+          queryParams: { mode: "edit", pathUrl: "past" }
+        });
+      } else {
+        this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+          queryParams: this.getEventsQueryParams(this.content?.status)
+        });
+      }
       this.telemetry.emit(this.content);
     }
   }
@@ -212,6 +218,11 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       return str
     }
     
-    
+  }
+
+  get getCurrentTimeInUTC(): string {
+    const currentDate = new Date()
+    const isoString = currentDate.toISOString()
+    return isoString.replace('Z', '+0000')
   }
 }

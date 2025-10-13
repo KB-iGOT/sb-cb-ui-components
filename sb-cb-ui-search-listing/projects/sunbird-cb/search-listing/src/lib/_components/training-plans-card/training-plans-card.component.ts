@@ -15,12 +15,17 @@ export class TrainingPlansCardComponent implements OnInit {
   constructor(private configService: ConfigurationsService, private router: Router) {}
 
   ngOnInit(): void {
-    this.userProfile = this.configService.userProfile;
+    this.userProfile = { ...this.configService.userProfile, userRoles: this.configService.userRoles } as NsUser.IUserProfile;
   }
 
   public routeTrainingPlanDetails(plan: any): void {
     let url: string;
-    if (this.userProfile?.firstName === plan?.createdByName) {
+    if (
+      (this.userProfile?.firstName === plan?.createdByName ||
+        this.userProfile?.userRoles?.has("mdo_leader") ||
+        this.userProfile?.userRoles?.has("mdo_admin")) &&
+      plan?.status?.toLowerCase() !== "retire"
+    ) {
       url = `/app/training-plan/update-plan/${plan?.id}`;
     } else {
       url = `/app/training-plan/preview-plan-for-dashboard/${plan?.id}`;
