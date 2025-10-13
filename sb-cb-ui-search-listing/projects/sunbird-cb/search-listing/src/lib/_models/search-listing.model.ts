@@ -36,7 +36,8 @@ export class RequestParams {
       "mimeType",
       "contentId",
       "creatorLogo",
-      "sectorDetails_v1"
+      "sectorDetails_v1",
+      "status"
     ];
     this.facets = [...SearchOthersFacet, ...competenciesKey];
     this.query = "";

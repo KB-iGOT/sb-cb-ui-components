@@ -317,8 +317,35 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchCourses() {
     this.searchRequestCourse.request.filters.status = ["Live"];
     this.searchRequestCourse.request.query = this.statedata?.param;
-    // const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
-    this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+        this.searchRequestCourse.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      }
+      const courseFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'courses');
+      if (courseFilters.length && courseFilters[0].facets && courseFilters[0].facets.length) {
+        const competencyKeys = [
+          this.competencyAreaNameKey,
+          this.competencyThemeKey,
+          this.competencySubThemeKey
+        ].filter(k => k !== null && k !== undefined) as string[];
+        const facetsFromConfig = [...courseFilters[0].facets] as string[];
+
+        // If config contains the placeholder 'competencies', replace it with the actual competency keys
+        const compIndex = facetsFromConfig.indexOf('competencies');
+        if (compIndex !== -1) {
+          // Splice will remove the placeholder and insert competency keys (if any). If competencyKeys is empty,
+          // this effectively removes the 'competencies' placeholder.
+          facetsFromConfig.splice(compIndex, 1, ...competencyKeys);
+        }
+
+        // Filter out any null/undefined values and use config-provided facets
+        this.searchRequestCourse.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
+        if(this.searchRequestCourse.request.facets.findIndex(v => v === 'status') > -1) {
+          this.searchRequestCourse.request.filters["status"] = ["Live", "Review"];
+        }
+      }
+      this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
+    }
     try {
       const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
       if (_.get(result, 'result.content')) {

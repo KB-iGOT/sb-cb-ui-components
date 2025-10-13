@@ -76,6 +76,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
   showEventsDateRange = false;
+  displayLabels: Record<string, any> = {};
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
@@ -120,7 +121,6 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       // normalize user roles which can be a Set<string> or string[]
       const userRoles = (this.configSvc as any)?.userRoles as Set<string> | string[] | undefined;
       const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? (userRoles as string[]) : [];
-
       this.categoryType = categorieTypes.filter(cat => {
         // find the matching category config for this type
         const matchedCategory = categories.find(category => category.value === cat.name);
@@ -128,13 +128,25 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
         // If matched category has no roles defined or an empty array, keep the category
         const roles = (matchedCategory as any)?.roles as string[] | undefined;
-        if (!roles || !Array.isArray(roles) || roles.length === 0) return true;
+        if (!roles || !Array.isArray(roles) || roles.length === 0) {
+          this.addLabels(cat);
+          return true;
+        }
 
-        // Otherwise include only if there's any intersection between category.roles and user roles
-        return roles.some((r: string) => userRolesArray.includes(r.toLocaleLowerCase()));
+        const isAllowed = roles.some((r: string) => userRolesArray.includes(r.toLocaleLowerCase()));
+        if (isAllowed) {
+          this.addLabels(cat);
+        }
+        return isAllowed;
       });
-
       this.categoryTypeDup = this.categoryType;
+    }
+  }
+
+  addLabels(cat: any) {
+    const typeLabels = (cat as any)?.labels;
+    if (typeLabels) {
+      this.displayLabels[cat.name] = typeLabels;
     }
   }
 
@@ -966,14 +978,31 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     );
   }
 
-  get canShowEventsStatusFilter(): boolean {
-    return !!(
-      this.searchCategory === SearchCategory.Events &&
-      this.isEventsFacetsPresent &&
-      this.formattedFacets["status"]?.length &&
-      (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal ||
-        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal)
-    );
+  // get canShowEventsStatusFilter(): boolean {
+  //   return !!(
+  //     this.searchCategory === SearchCategory.Events &&
+  //     this.isEventsFacetsPresent &&
+  //     this.formattedFacets["status"]?.length &&
+  //     (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal ||
+  //       this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal)
+  //   );
+  // }
+
+  get canShowStatusFilter(): boolean {
+    if(this.formattedFacets["status"]?.length) {
+      if (this.searchCategory === SearchCategory.Events && 
+        this.isEventsFacetsPresent &&
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ||
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal
+      ) {
+        return true;
+      } else if (this.searchCategory === SearchCategory.Courses && 
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   formatFilterChips(value: string): string {
@@ -1024,7 +1053,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (name === "live") {
       return "Upcoming";
     }
-    return name;
+    return name ? name : '';
   }
 
   get getFiltersList() {
