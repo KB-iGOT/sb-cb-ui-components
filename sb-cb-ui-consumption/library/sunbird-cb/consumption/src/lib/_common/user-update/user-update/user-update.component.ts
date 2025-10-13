@@ -107,7 +107,7 @@ export class UserUpdateComponent implements OnInit {
       group: ['', Validators.required],
       assignMentor: [false],
       isMyUser: [true],
-      roles: [[]],
+      roles: [[], Validators.required],
     })
 
     this.otherDetailsForm = this.fb.group({
@@ -207,14 +207,22 @@ export class UserUpdateComponent implements OnInit {
       wfInfo.forEach((item: any) => {
         if(item.currentStatus === 'SEND_FOR_APPROVAL') {
           item['formatedUpdateFieldValues'] = JSON.parse(item.updateFieldValues)
+          item['wid'] = _.get(userInfo, 'wid', '')
           if(item.requestType === 'DESIGNATION_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.designation', '')
-            item['wid'] = _.get(userInfo, 'wid', '')
-            this.addControl(this.userForm, 'approveDesignation', item['toValue'], [Validators.required])
+            if(this.userForm.get('approveDesignation')) {
+              this.userForm.get('approveDesignation').setValue(item['toValue'])
+            } else {
+              this.addControl(this.userForm, 'approveDesignation', item['toValue'], [Validators.required])
+            }
             this.designationApprovalField = item
           } else if(item.requestType === 'GROUP_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.group', '')
-            this.addControl(this.userForm, 'approveGroup', item['toValue'], [Validators.required])
+            if(this.userForm.get('approveGroup')) {
+              this.userForm.get('approveGroup').setValue(item['toValue'])
+            } else {
+              this.addControl(this.userForm, 'approveGroup', item['toValue'], [Validators.required])
+            }
             this.groupApprovalField = item
           }
         }
@@ -922,9 +930,9 @@ export class UserUpdateComponent implements OnInit {
   }
 
   get showApprovalButtons() : boolean {
-    if(!(this.designationApprovalField && this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
+    if(this.designationApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
       return false
-    } else if(!(this.groupApprovalField && this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
+    } else if(this.groupApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
       return false
     }
     return true
@@ -937,12 +945,26 @@ export class UserUpdateComponent implements OnInit {
       }
       this.userService.handleWorkflowV2(request).subscribe((res: any) => {
         if (res.result.data) {
-          if (res.result.data) {
-            this.openSnackbar('Request has been updated')
-          }
+          this.designationApprovalField = null
+          this.groupApprovalField = null
+          this.getUserDetails()
+          this.openSnackbar('Request has been updated')
         }
       })
     }
+  }
+
+  getUserDetails() {
+    this.userService.getUserById(this.userId).subscribe((res: any) => {
+      if (res) {
+        this.currentDesignation = _.get(res, 'profileDetails.professionalDetails[0].designation', '')
+        this.userForm.patchValue({
+          designation: this.currentDesignation,
+          group: _.get(res, 'profileDetails.professionalDetails[0].group', ''),
+        })
+        this.getApprovalsStatus()
+      }
+    })
   }
   //#endregion (UI interactions)
 

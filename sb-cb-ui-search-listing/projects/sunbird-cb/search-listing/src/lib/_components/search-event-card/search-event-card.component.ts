@@ -131,14 +131,32 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
   navigateToEvent() {
     const eventId = this.content?.identifier;
     if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
-      this.content.contentType = 'Events'
+      this.content.contentType = "Events";
       this.router.navigate([`/app/event-hub/home/${eventId}`]);
-      this.telemetry.emit(this.content)
+      this.telemetry.emit(this.content);
     } else if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
-      this.content.contentType = 'Events'
-      this.router.navigate([`app/home/events/edit-event/${eventId}?mode=edit&pathUrl=draft`]);
-      this.telemetry.emit(this.content)
+      this.content.contentType = "Events";
+      this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+        queryParams: this.getEventsQueryParams(this.content?.status)
+      });
+      this.telemetry.emit(this.content);
+    }
+  }
 
+  getEventsQueryParams(status: string): { mode: string; pathUrl: string } {
+    switch (status) {
+      case "Draft":
+        return { mode: "edit", pathUrl: "draft" };
+      case "Live":
+        return { mode: "edit", pathUrl: "upcoming" };
+      case "Cancelled":
+        return { mode: "view", pathUrl: "cancelled" };
+      case "SentToPublish":
+        return { mode: "view", pathUrl: "pending-approval" };
+      case "Rejected":
+        return { mode: "edit", pathUrl: "rejected" };
+      default:
+        return { mode: "view", pathUrl: "draft" };
     }
   }
 

@@ -123,7 +123,8 @@ export const SearchEventFields = [
   "expiryDate",
   "appIcon",
   "startDateTime",
-  "endDateTime"
+  "endDateTime",
+  "status"
 ];
 
 export const SearchResourceMimeType = ["application/pdf", "video/mp4", "text/x-url", "audio/mpeg", "application/vnd.ekstep.content-collection"];
