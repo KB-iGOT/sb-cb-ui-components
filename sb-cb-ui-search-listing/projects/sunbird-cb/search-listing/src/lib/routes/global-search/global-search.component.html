@@ -1,8 +1,9 @@
+
 <div class="container-balanced margin-top-l margin-bottom-xl">
     <div [style.display]="!userId ? 'block' : 'none'">
         <ws-app-learn-search [userValue]="userValue" [searchQuery]="searchParam" [paramFilters]="searchparamFilters"
-            [filtersPanel]="filtersPanel" (queryParamChange)="filterSelectcategory($event)" (updateUserEvent)="updateUserDetails($event)">
-        </ws-app-learn-search>
-    </div>
-    <ws-app-user-update *ngIf="userId" [userId]="userId" (updateEvent)="updateUserStatus($event)"></ws-app-user-update>
+        [filtersPanel]="filtersPanel" (queryParamChange)="filterSelectcategory($event)" (updateUserEvent)="updateUserDetails($event)">
+    </ws-app-learn-search>
+</div>
+<ws-app-user-update *ngIf="userId" [userId]="userId" (updateEvent)="updateUserStatus($event)"></ws-app-user-update>
 </div>

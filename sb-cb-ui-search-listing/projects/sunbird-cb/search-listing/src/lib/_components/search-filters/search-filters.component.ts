@@ -172,7 +172,6 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (changes["typesOfEvents"] && changes["typesOfEvents"].currentValue) {
       this.formattedFacets["typeOfEvents"] = this.typesOfEvents;
     }
-
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
   }
 
@@ -368,15 +367,18 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       return acc;
     }, {} as { [key: string]: { [key: string]: number } });
 
-    Object.entries(mergedData).forEach(([key, values]) => {
-      if (key === FacetType.Duration) {
-        const formattedDurations = [
-          { range: [0, 1800], label: "0 - 30 mins" },
-          { range: [1801, 3600], label: "30 - 60 mins" },
-          { range: [3601, 5400], label: "60 - 90 mins" },
-          { range: [5401, Infinity], label: "90 mins" }
-        ]
-          .map(({ range, label }) => {
+    // Sort the facet keys
+    Object.entries(mergedData)
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .forEach(([key, values]) => {
+        if (key === FacetType.Duration) {
+          const formattedDurations = [
+            { range: [0, 1800], label: "0 - 30 mins" },
+            { range: [1801, 3600], label: "30 - 60 mins" },
+            { range: [3601, 5400], label: "60 - 90 mins" },
+            { range: [5401, Infinity], label: "90 mins" }
+          ]
+            .map(({ range, label }) => {
             const count = Object.entries(values)
               .filter(([key]) => {
                 const duration = parseInt(key, 10);
@@ -401,11 +403,21 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
         formattedFacets[key] = formattedRatings;
       } else {
-        formattedFacets[key] = Object.entries(values).map(([name, count]) => ({
-          name,
-          count,
-          isChecked: false
-        }));
+        const selectedFilterValue = this.selectedFilters?.[key] || [];
+        formattedFacets[key] = Object.entries(values)
+          .map(([name, count]) => ({
+            name,
+            count,
+            isChecked: selectedFilterValue.includes(name)
+          }))
+          .sort((a, b) => {
+            // First sort by checked status (checked items first)
+            if (a.isChecked !== b.isChecked) {
+              return a.isChecked ? -1 : 1;
+            }
+            // Then sort alphabetically
+            return a.name.localeCompare(b.name);
+          });
       }
     });
 
@@ -440,6 +452,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (event.checked) {
       if (!this.selectedFilters[categoryType].includes(type)) {
         this.selectedFilters[categoryType].push(type);
+        // Sort the selected filters after adding new one
+        this.selectedFilters[categoryType].sort((a: string, b: string) => a.localeCompare(b));
       }
     } else {
       this.selectedFilters[categoryType] = this.selectedFilters[categoryType].filter((item: any) => item !== type);
@@ -450,6 +464,22 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
         delete this.selectedFilters[key];
       }
     });
+
+    if (this.formattedFacets[categoryType]) {
+      this.formattedFacets[categoryType] = this.formattedFacets[categoryType]
+        .map((facet: { name: string; count: number; isChecked: boolean }) => ({
+          ...facet,
+          isChecked: this.selectedFilters[categoryType]?.includes(facet.name) || false
+        }))
+        .sort((a: { name: string; isChecked: boolean }, b: { name: string; isChecked: boolean }) => {
+          // First sort by checked status (checked items first)
+          if (a.isChecked !== b.isChecked) {
+            return a.isChecked ? -1 : 1;
+          }
+          // Then sort alphabetically
+          return a.name.localeCompare(b.name);
+        });
+    }
 
     this.appliedFilter.emit(this.selectedFilters);
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);

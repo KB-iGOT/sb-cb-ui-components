@@ -39,7 +39,7 @@
         <div class="flex items-center gap-1 trp-meta-texts" *ngIf="plan?.createdByName">
           By {{ userProfile?.firstName === plan?.createdByName ? "You" : plan?.createdByName }}
         </div>
-        <div class="flex items-center gap-1 trp-meta-texts" *ngIf="plan?.createdAt">Created On {{ plan?.createdAt ?? "" | date : "EEE, MMM d, y" }}</div>
+        <div class="flex items-center gap-1 trp-meta-texts" *ngIf="plan?.createdAt">Created On {{ plan?.createdAt ?? "" |  date : "EEE, MMM d, h:mm a" }}</div>
       </div>
     </div>
   </div>

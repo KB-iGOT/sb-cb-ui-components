@@ -13,7 +13,7 @@
           <ng-container
             *ngIf="designationStatus === 'VERIFIED' && groupStatus === 'VERIFIED'; else verificationPending">
             <div class="flex items-center justify-center gap-2 px-2 statusApproved">
-              Aproved <mat-icon class="status-info-icon">check_circle</mat-icon>
+              Approved <mat-icon class="status-info-icon">check_circle</mat-icon>
             </div>
           </ng-container>
           <ng-template #verificationPending>
@@ -344,7 +344,8 @@
               <div class="detail-item">
                 <div class="other-details-label required">Mobile Number</div>
                 <mat-form-field appearance="outline" class="w-full">
-                  <input matInput formControlName="mobile" placeholder="Enter Mobile Number">
+                  <input matInput formControlName="mobile" placeholder="Enter Mobile Number" aria-label="Mobile Number input"
+                  (paste)="numericOnly($event)" (keypress)="numericOnly($event)" maxlength="10">
                   <ng-container *ngIf="otherDetailsForm?.controls['mobile'].touched">
                     <mat-error [hidden]="false" *ngIf="otherDetailsForm?.controls['mobile'].errors?.required"
                       aria-label="Please enter your mobile number">
@@ -398,7 +399,8 @@
               <div class="detail-item">
                 <div class="other-details-label">Office Pin Code</div>
                 <mat-form-field appearance="outline" class="w-full">
-                  <input matInput formControlName="pincode" placeholder="Enter Office Pin Code">
+                  <input matInput formControlName="pincode" placeholder="Enter Office Pin Code" (paste)="numericOnly($event)"
+                  aria-label="Pin Code input field" autocomplete="off" (keypress)="numericOnly($event)" maxlength="6">
                 </mat-form-field>
               </div>
               <div class="detail-item">
