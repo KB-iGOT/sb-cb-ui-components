@@ -1,7 +1,7 @@
 <div class="p-6">
   <div class="flex items-center justify-between items-center mb-8">
     <div class="flex items-center gap-4">
-      <!-- <mat-icon class="backIcon" (click)="cancel()">arrow_back</mat-icon> -->
+      <mat-icon class="backIcon" (click)="cancel()">arrow_back</mat-icon>
       <div>
         <sb-uic-avatar-photo i18n-aria-label role="link" tabindex="0" [name]="avatarUserName"
           [photoUrl]="userDetails?.photo" size="m-side-rating">
@@ -13,7 +13,7 @@
           <ng-container
             *ngIf="designationStatus === 'VERIFIED' && groupStatus === 'VERIFIED'; else verificationPending">
             <div class="flex items-center justify-center gap-2 px-2 statusApproved">
-              Aproved <mat-icon class="status-info-icon">check_circle</mat-icon>
+              Approved <mat-icon class="status-info-icon">check_circle</mat-icon>
             </div>
           </ng-container>
           <ng-template #verificationPending>
@@ -204,7 +204,7 @@
       <!-- #region (Roles) -->
       <mat-card class="">
         <mat-card-content>
-          <div class="slot-header flex gap-2 items-center mb-5">Roles
+          <div class="slot-header flex gap-2 items-center mb-5 required">Roles
             <mat-icon class="info-icon">info_outline</mat-icon>
           </div>
           <div>
@@ -326,7 +326,7 @@
                 </mat-form-field>
               </div>
               <div class="detail-item">
-                <div class="other-details-label">Email</div>
+                <div class="other-details-label required">Email</div>
                 <mat-form-field appearance="outline" class="w-full">
                   <input matInput formControlName="primaryEmail" placeholder="Enter Email">
                   <ng-container *ngIf="otherDetailsForm?.controls['primaryEmail'].touched">
@@ -342,9 +342,10 @@
                 </mat-form-field>
               </div>
               <div class="detail-item">
-                <div class="other-details-label">Mobile Number</div>
+                <div class="other-details-label required">Mobile Number</div>
                 <mat-form-field appearance="outline" class="w-full">
-                  <input matInput formControlName="mobile" placeholder="Enter Mobile Number">
+                  <input matInput formControlName="mobile" placeholder="Enter Mobile Number" aria-label="Mobile Number input"
+                  (paste)="numericOnly($event)" (keypress)="numericOnly($event)" maxlength="10">
                   <ng-container *ngIf="otherDetailsForm?.controls['mobile'].touched">
                     <mat-error [hidden]="false" *ngIf="otherDetailsForm?.controls['mobile'].errors?.required"
                       aria-label="Please enter your mobile number">
@@ -398,7 +399,8 @@
               <div class="detail-item">
                 <div class="other-details-label">Office Pin Code</div>
                 <mat-form-field appearance="outline" class="w-full">
-                  <input matInput formControlName="pincode" placeholder="Enter Office Pin Code">
+                  <input matInput formControlName="pincode" placeholder="Enter Office Pin Code" (paste)="numericOnly($event)"
+                  aria-label="Pin Code input field" autocomplete="off" (keypress)="numericOnly($event)" maxlength="6">
                 </mat-form-field>
               </div>
               <div class="detail-item">

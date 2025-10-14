@@ -185,7 +185,8 @@ export class SearchCommunitiesRequest {
       "imageUrl",
       "posterImageUrl",
       "orgName",
-      "createdOn"
+      "createdOn",
+      "communityId"
     ];
     this.pageNumber = 0;
     this.pageSize = 6;
@@ -229,7 +230,7 @@ export class UsersRequestParams {
       "profileDetails.profileStatus",
       "profileDetails.professionalDetails.group",
       "profileDetails.employmentDetails.departmentName",
-      "roles"
+      "roles.role"
     ];
     this.limit = 10;
     this.offset = 0;
@@ -343,13 +344,14 @@ export enum FacetType {
   topic = "topic",
   topicName = "topicName",
   eventStatus = "eventStatus",
+  rootOrgName = "rootOrgName",
 
   // Users
   profileDesignation = "profileDetails.professionalDetails.designation",
   profileStatus = "profileDetails.profileStatus",
   profileGroup = "profileDetails.professionalDetails.group",
   employmentDepartment = "profileDetails.employmentDetails.departmentName",
-  organizationsRoles = "organisations.roles",
+  organizationsRoles = "roles.role",
 
   // Designations
   createdOn = "createdOn",

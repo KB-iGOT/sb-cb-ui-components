@@ -30,6 +30,12 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
   downloadCertificateLoading = false;
   isIgot = false;
   environment!: any;
+  contentStatus = ''
+  mentList: {
+    displayName: string,
+    action: string,
+  }[] = []
+  currentUserRoles: string[] = [];
   constructor(
     @Inject("environment") environment: any,
     private configSvc: ConfigurationsService,
@@ -59,6 +65,48 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
         this.isIgot = this.cbpPlans.some((ele: any) => ele.identifier === this.content.identifier);
       } else {
         this.isIgot = false;
+      }
+    }
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && changes['content'] && changes['content'].currentValue) {
+      this.contentStatus = this.content.status || ''
+      const userRoles = (this.configSvc as any)?.userRoles as Set<string> | string[] | undefined;
+      this.currentUserRoles = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? (userRoles as string[]) : [];
+      if(this.content.status) {
+        switch (this.content.status.toLowerCase()) {
+          case 'draft':
+            this.contentStatus = 'Draft'
+            this.mentList = [
+              
+            ]
+            break;
+          case 'live':
+            this.contentStatus = 'Live'
+            this.mentList = [
+              {
+                displayName: 'Edit',
+                action: 'edit'
+              }
+            ]
+            break;
+          case 'review':
+            this.contentStatus = 'For Publish'
+            this.mentList = [
+              {
+                displayName: 'Submit for Review',
+                action: 'publish'
+              }
+            ]
+            break;
+          case 'Reviewed':
+            this.contentStatus = 'For Publish'
+            this.mentList = [
+              {
+                displayName: 'Publish',
+                action: 'publish'
+              }
+            ]
+            break;
+        }
       }
     }
   }
@@ -126,11 +174,10 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     } else {
       this.telemetry.emit(content);
       if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-        const userRoles = (this.configSvc as any)?.userRoles as Set<string> | string[] | undefined;
-        const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? (userRoles as string[]) : [];
+        
         const loggedInUserId = this.configSvc.userProfile?.userId || "";
         // delegate to a dedicated handler that implements CBPPortal rules
-        this.handleContentClick(userRolesArray, content, loggedInUserId);
+        this.handleContentClick(content, loggedInUserId);
       } else {
         const urlData = await this.contSvc.getResourseLink(content);
         this.router.navigate([urlData.url], {
@@ -147,15 +194,38 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     return "";
   }
 
+  onContentAction(action: string, content: any) {
+    switch (action) {
+      case 'edit':
+        this.router.navigateByUrl(`/author/editor/${content.identifier}`);
+        break;
+      case 'publish':
+        this.router.navigate(['/author/editor/multilingual', 'edit', this.getBaseLanguageId(content)], {
+            queryParams: {
+              langEditId: content.identifier
+            }
+          })
+        break;
+    }
+  }
+
+  getBaseLanguageId(content: any) {
+    if (content && content.languageMapV1) {
+      const baseLanguage: any = Object.values(content.languageMapV1).find((lang: any) => lang.isBaseLang)
+      return baseLanguage ? baseLanguage.id : null
+    }
+    return null
+  }
+
   /**
    * Handle content click for CBPPortal application according to role and content status rules.
    * Contract:
    * - Inputs: userRolesArray (normalized), content object, loggedInUserId string
    * - Side effects: show snack messages or navigate using router
    */
-  handleContentClick(userRolesArray: string[], content: any, loggedInUserId: string): void {
+  handleContentClick(content: any, loggedInUserId: string): void {
     // Helpers
-    const hasRole = (r: string) => userRolesArray && userRolesArray.includes(r);
+    const hasRole = (r: string) => this.currentUserRoles && this.currentUserRoles.includes(r);
     const isCreator = !!(content && (content.creator || content.createdBy) && (content.creator === loggedInUserId || content.createdBy === loggedInUserId));
     const isReviewer = hasRole("REVIEWER");
     const isPublisher = hasRole("PUBLISHER");
@@ -177,31 +247,31 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
 
     const goToEditor = () => {
       // TODO: Replace with actual editor route if available in the app routing constants
-      this.router.navigate([`/app/editor/${content.identifier}`]);
+      // this.router.navigate([`/author/editor/${content.identifier}`]);
     };
 
     const goToOverviewV2 = () => {
       // TODO: Replace with actual overviewV2 route if available
-      this.router.navigate([`/app/content/overviewV2/${content.identifier}`]);
+      // this.router.navigate([`/app/content/overviewV2/${content.identifier}`]);
     };
 
     // 1. Creator logic
     if (isCreator) {
       // Creator: always allowed to edit unless explicitly Live/Rejected and not in review flow
-      if (status === "Live") {
+      if (status.toLocaleLowerCase() === "live") {
         // If content is Live and creator should not edit, navigate to overview
-        goToOverviewV2();
+        // this.router.navigateByUrl(`/author/editor/${content.identifier}`)
         return;
       }
       // Editor for creator
-      goToEditor();
+      // this.router.navigateByUrl(`/author/editor/${content.identifier}`)
       return;
     }
 
     // 2. Reviewer logic
     if (isReviewer) {
       // If reviewer and content.reviewStatus is 'review' or 'accept' allow editor
-      if (reviewStatus === "review" || reviewStatus === "accept") {
+      if (reviewStatus.toLocaleLowerCase() === "review" || reviewStatus.toLocaleLowerCase() === "accept") {
         goToEditor();
         return;
       }
@@ -213,7 +283,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     // 3. Publisher logic
     if (isPublisher) {
       // If publisher but content.reviewStatus is 'reject' or 'rejected' and content.status not Live, show message
-      if (reviewStatus === "reject" || reviewStatus === "rejected") {
+      if (reviewStatus.toLocaleLowerCase() === "reject" || reviewStatus.toLocaleLowerCase() === "rejected") {
         showMessage("Only creators can edit rejected content.");
         return;
       }
@@ -225,12 +295,12 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     // 4. SPV_PUBLISHER logic
     if (isSpvPublisher) {
       // Only allowed for reviewStatus 'accept' or 'review'
-      if (reviewStatus === "accept" || reviewStatus === "review") {
+      if (reviewStatus.toLocaleLowerCase() === "accept" || reviewStatus.toLocaleLowerCase() === "review") {
         goToEditor();
         return;
       }
       // If content.status is Live and metadata.editableBySpv is truthy allow editor
-      if (status === "Live" && metadata && metadata.editableBySpv) {
+      if (status.toLocaleLowerCase() === "live" && metadata && metadata.editableBySpv) {
         goToEditor();
         return;
       }
@@ -241,7 +311,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     // 5. CBP_ADMIN logic
     if (isCbpAdmin) {
       // Admin can edit unless reviewStatus is 'reject'/'rejected' and creator-only flag set
-      if ((reviewStatus === "reject" || reviewStatus === "rejected") && metadata && metadata.creatorOnlyEdit) {
+      if ((reviewStatus.toLocaleLowerCase() === "reject" || reviewStatus.toLocaleLowerCase() === "rejected") && metadata && metadata.creatorOnlyEdit) {
         showMessage("Only creators can edit rejected content.");
         return;
       }

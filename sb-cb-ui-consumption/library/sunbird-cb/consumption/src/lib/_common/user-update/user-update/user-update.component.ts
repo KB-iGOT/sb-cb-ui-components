@@ -107,7 +107,7 @@ export class UserUpdateComponent implements OnInit {
       group: ['', Validators.required],
       assignMentor: [false],
       isMyUser: [true],
-      roles: [[]],
+      roles: [[], Validators.required],
     })
 
     this.otherDetailsForm = this.fb.group({
@@ -207,14 +207,22 @@ export class UserUpdateComponent implements OnInit {
       wfInfo.forEach((item: any) => {
         if(item.currentStatus === 'SEND_FOR_APPROVAL') {
           item['formatedUpdateFieldValues'] = JSON.parse(item.updateFieldValues)
+          item['wid'] = _.get(userInfo, 'wid', '')
           if(item.requestType === 'DESIGNATION_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.designation', '')
-            item['wid'] = _.get(userInfo, 'wid', '')
-            this.addControl(this.userForm, 'approveDesignation', item['toValue'], [Validators.required])
+            if(this.userForm.get('approveDesignation')) {
+              this.userForm.get('approveDesignation').setValue(item['toValue'])
+            } else {
+              this.addControl(this.userForm, 'approveDesignation', item['toValue'], [Validators.required])
+            }
             this.designationApprovalField = item
           } else if(item.requestType === 'GROUP_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.group', '')
-            this.addControl(this.userForm, 'approveGroup', item['toValue'], [Validators.required])
+            if(this.userForm.get('approveGroup')) {
+              this.userForm.get('approveGroup').setValue(item['toValue'])
+            } else {
+              this.addControl(this.userForm, 'approveGroup', item['toValue'], [Validators.required])
+            }
             this.groupApprovalField = item
           }
         }
@@ -660,22 +668,19 @@ export class UserUpdateComponent implements OnInit {
   }
 
   onAssignMentorChange(isMentor: boolean) {
-    const mentor =this.rolesList.filter(role => role.roleName === 'MENTOR')
-    if(mentor.length > 0) {
-      if(isMentor) {
-        mentor[0].isSelected = true
-        if (this.userForm.get('roles')) {
-          const userRoles = this.userForm.get('roles')?.value || [];
-          if (!userRoles.includes('MENTOR')) {
-            this.userForm.get('roles')?.setValue([...userRoles, 'MENTOR']);
-          }
+    if(isMentor) {
+      if (this.userForm.get('roles')) {
+        const userRoles = this.userForm.get('roles')?.value || [];
+        if (!userRoles.includes('MENTOR')) {
+          this.userForm.get('roles')?.setValue([...userRoles, 'MENTOR']);
+          this.userRoles.add('MENTOR');
         }
-      } else {
-        mentor[0].isSelected = false
-        if (this.userForm.get('roles')) {
-          const userRoles = this.userForm.get('roles').value || [];
-          this.userForm.get('roles').setValue(userRoles.filter((r: string) => r !== 'MENTOR'));
-        }
+      }
+    } else {
+      if (this.userForm.get('roles')) {
+        const userRoles = this.userForm.get('roles').value || [];
+        this.userForm.get('roles').setValue(userRoles.filter((r: string) => r !== 'MENTOR'));
+        this.userRoles.delete('MENTOR');
       }
     }
   }
@@ -719,7 +724,6 @@ export class UserUpdateComponent implements OnInit {
           dialogData.description = 'You are about to remove this user from your organization. The user will lose all learning access and be moved out of your organization in 48 hours unless you reverse the action from the "Not My Users" tab.'
           break;
       }
-      console.log('roles', this.userRoles);
       const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: dialogData,
         width: '500px',
@@ -917,14 +921,20 @@ export class UserUpdateComponent implements OnInit {
     }
   }
 
+  numericOnly(event: any): boolean {
+    const pattren = /^([0-9])$/
+    const result = pattren.test(event.key)
+    return result
+  }
+
   showedit() {
     this.showeditText = true
   }
 
   get showApprovalButtons() : boolean {
-    if(!(this.designationApprovalField && this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
+    if(this.designationApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
       return false
-    } else if(!(this.groupApprovalField && this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
+    } else if(this.groupApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
       return false
     }
     return true
@@ -937,12 +947,26 @@ export class UserUpdateComponent implements OnInit {
       }
       this.userService.handleWorkflowV2(request).subscribe((res: any) => {
         if (res.result.data) {
-          if (res.result.data) {
-            this.openSnackbar('Request has been updated')
-          }
+          this.designationApprovalField = null
+          this.groupApprovalField = null
+          this.getUserDetails()
+          this.openSnackbar('Request has been updated')
         }
       })
     }
+  }
+
+  getUserDetails() {
+    this.userService.getUserById(this.userId).subscribe((res: any) => {
+      if (res) {
+        this.currentDesignation = _.get(res, 'profileDetails.professionalDetails[0].designation', '')
+        this.userForm.patchValue({
+          designation: this.currentDesignation,
+          group: _.get(res, 'profileDetails.professionalDetails[0].group', ''),
+        })
+        this.getApprovalsStatus()
+      }
+    })
   }
   //#endregion (UI interactions)
 

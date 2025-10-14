@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Router } from "@angular/router";
+import { SearchListingConfig } from "../../_models/search-listing.model";
+import { SearchListingService } from "../../_services/search-listing.service";
 
 @Component({
   selector: "ws-app-community-content-card",
@@ -14,7 +16,7 @@ export class CommunityContentCardComponent {
   defaultThumbnail = "/assets/instances/eagle/app_logos/default.png";
   defaultSLogo = "/assets/instances/eagle/app_logos/igot-katmayogi-logo.svg";
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private searchlistingService: SearchListingService) {}
   changeToDefaultImg($event: any) {
     $event.target.src = this.defaultSLogo;
   }
@@ -24,9 +26,13 @@ export class CommunityContentCardComponent {
   }
 
   communityCardClick() {
-    this.community.identifier = this.community?.communityId;
-    this.community.contentType = "Community";
-    this.telemetry.emit(this.community);
-    this.router.navigate(["/app/discussion-forum-v2/community", this.community.communityId]);
+    if (this.searchlistingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+      this.community.identifier = this.community?.communityId;
+      this.community.contentType = "Community";
+      this.telemetry.emit(this.community);
+      this.router.navigate(["/app/home/community/manage", this.community.communityId]);
+    } else {
+      this.router.navigate(["/app/discussion-forum-v2/community", this.community.communityId]);
+    }
   }
 }

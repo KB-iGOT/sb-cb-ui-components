@@ -11,6 +11,7 @@ import { MatRadioChange } from "@angular/material/radio";
 // import { CATEGORY_TYPE } from "../../_constants/search-listing.constant";
 import { SearchListingService } from "../../_services/search-listing.service";
 import { DateRange, DefaultMatCalendarRangeStrategy, MatRangeDateSelectionModel } from "@angular/material/datepicker";
+
 @Component({
   selector: "ws-app-search-filters",
   templateUrl: "./search-filters.component.html",
@@ -51,6 +52,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   showAllSubSectors: boolean = false;
   showAllContentPartners: boolean = false;
   showAllTopic: boolean = false;
+  showAllRoles = false;
 
   selectedFilterChips: any;
   filterQueryOrganisation = "";
@@ -67,6 +69,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   filterCompetency = "";
   filterQueryContentPartners = "";
   filterQueryTopic = "";
+  filterQueryRoles = "";
 
   searchCategory = "";
   searchQuery = "";
@@ -77,6 +80,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   selectedDateRange!: DateRange<Date> | null;
   showEventsDateRange = false;
   displayLabels: Record<string, any> = {};
+  maxDateCalendar = new Date();
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
@@ -115,7 +119,21 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     this.searchConfig = await this.searchService.getSearchConfig();
 
     if (this.searchConfig) {
+      //Only allow communities for mdo_leader and mdo moderator in MDO
+      if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+        const userRoles = this.configSvc?.userRoles as Set<string>;
+        if (this.searchConfig.searchCategories) {
+          if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
+            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+          }
+          if (userRoles.has("community_moderator")) {
+            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          }
+        }
+      }
+
       const categories = this.searchConfig.searchCategories || [];
+
       const categorieTypes = this.searchConfig.allSearchCategoriesTypes || [];
 
       // normalize user roles which can be a Set<string> or string[]
@@ -184,7 +202,6 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (changes["typesOfEvents"] && changes["typesOfEvents"].currentValue) {
       this.formattedFacets["typeOfEvents"] = this.typesOfEvents;
     }
-
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       const filters = this.getFiltersList
@@ -356,6 +373,9 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       case FacetType.topicName:
         this.showAllTopic = !this.showAllTopic;
         break;
+      case FacetType.organizationsRoles:
+        this.showAllRoles = !this.showAllRoles;
+        break;
     }
   }
 
@@ -380,15 +400,18 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       return acc;
     }, {} as { [key: string]: { [key: string]: number } });
 
-    Object.entries(mergedData).forEach(([key, values]) => {
-      if (key === FacetType.Duration) {
-        const formattedDurations = [
-          { range: [0, 1800], label: "0 - 30 mins" },
-          { range: [1801, 3600], label: "30 - 60 mins" },
-          { range: [3601, 5400], label: "60 - 90 mins" },
-          { range: [5401, Infinity], label: "90 mins" }
-        ]
-          .map(({ range, label }) => {
+    // Sort the facet keys
+    Object.entries(mergedData)
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .forEach(([key, values]) => {
+        if (key === FacetType.Duration) {
+          const formattedDurations = [
+            { range: [0, 1800], label: "0 - 30 mins" },
+            { range: [1801, 3600], label: "30 - 60 mins" },
+            { range: [3601, 5400], label: "60 - 90 mins" },
+            { range: [5401, Infinity], label: "90 mins" }
+          ]
+            .map(({ range, label }) => {
             const count = Object.entries(values)
               .filter(([key]) => {
                 const duration = parseInt(key, 10);
@@ -413,11 +436,21 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
         formattedFacets[key] = formattedRatings;
       } else {
-        formattedFacets[key] = Object.entries(values).map(([name, count]) => ({
-          name,
-          count,
-          isChecked: false
-        }));
+        const selectedFilterValue = this.selectedFilters?.[key] || [];
+        formattedFacets[key] = Object.entries(values)
+          .map(([name, count]) => ({
+            name,
+            count,
+            isChecked: selectedFilterValue.includes(name)
+          }))
+          .sort((a, b) => {
+            // First sort by checked status (checked items first)
+            if (a.isChecked !== b.isChecked) {
+              return a.isChecked ? -1 : 1;
+            }
+            // Then sort alphabetically
+            return a.name.localeCompare(b.name);
+          });
       }
     });
 
@@ -426,6 +459,21 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   capitalizeFirstLetter(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  formatRolesNames(str: string): string {
+    const acronyms = ["MDO", "CBP", "SPV", "FRAC", "IFU", "WAT"];
+
+    return str
+      .split("_")
+      .map(part => {
+        const upperPart = part.toUpperCase();
+        if (acronyms.includes(upperPart)) {
+          return upperPart;
+        }
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      })
+      .join(" ");
   }
 
   onSelectionFilter(event: MatCheckboxChange, option: any, categoryType: string) {
@@ -437,6 +485,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if (event.checked) {
       if (!this.selectedFilters[categoryType].includes(type)) {
         this.selectedFilters[categoryType].push(type);
+        // Sort the selected filters after adding new one
+        this.selectedFilters[categoryType].sort((a: string, b: string) => a.localeCompare(b));
       }
     } else {
       this.selectedFilters[categoryType] = this.selectedFilters[categoryType].filter((item: any) => item !== type);
@@ -447,6 +497,22 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
         delete this.selectedFilters[key];
       }
     });
+
+    if (this.formattedFacets[categoryType]) {
+      this.formattedFacets[categoryType] = this.formattedFacets[categoryType]
+        .map((facet: { name: string; count: number; isChecked: boolean }) => ({
+          ...facet,
+          isChecked: this.selectedFilters[categoryType]?.includes(facet.name) || false
+        }))
+        .sort((a: { name: string; isChecked: boolean }, b: { name: string; isChecked: boolean }) => {
+          // First sort by checked status (checked items first)
+          if (a.isChecked !== b.isChecked) {
+            return a.isChecked ? -1 : 1;
+          }
+          // Then sort alphabetically
+          return a.name.localeCompare(b.name);
+        });
+    }
 
     this.appliedFilter.emit(this.selectedFilters);
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
@@ -523,14 +589,47 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   categoriseByFacet(facetData: any) {
     const groupedData = _.groupBy(facetData, "type");
     const visibilityMap: { key: string; enableKey: any }[] = [
+      // Sector related
       { key: FacetType.sectorNames_v1, enableKey: "showAllSectors" },
+      { key: FacetType.sectorId, enableKey: "showAllSectors" },
+      { key: FacetType.sectorNameResource, enableKey: "showAllSectors" },
+      { key: "sectorName", enableKey: "showAllSectors" },
+      
+      // Sub-sector related
       { key: FacetType.subSectorNames_v1, enableKey: "showAllSubSectors" },
+      { key: FacetType.subSectorId, enableKey: "showAllSubSectors" },
+      { key: FacetType.subSectorNameResource, enableKey: "showAllSubSectors" },
+      { key: "subSectorName", enableKey: "showAllSubSectors" },
+      
+      // Language
       { key: FacetType.Language, enableKey: "showAllLanguage" },
+      
+      // Organization related
       { key: FacetType.Organization, enableKey: "showAllOrganisation" },
+      { key: FacetType.SourceName, enableKey: "showAllOrganisation" },
+      { key: "rootOrgName", enableKey: "showAllOrganisation" },
+      
+      // Competency related
       { key: this.competencyThemeKey, enableKey: "showAllCompetencyTheme" },
+      { key: this.competencySubThemeKey, enableKey: "showAllCompetencySubTheme" },
+      
+      // Content related
+      { key: FacetType.courseCategory, enableKey: "showAllContents" },
       { key: FacetType.contentPartners, enableKey: "showAllContentPartners" },
+      { key: "contentPartner.contentPartnerName", enableKey: "showAllContentPartners" },
+      
+      // Resource related
+      { key: FacetType.resourceCategory, enableKey: "showResourceCategory" },
+      
+      // Topics
       { key: FacetType.topic, enableKey: "showAllTopic" },
-      { key: FacetType.topicName, enableKey: "showAllTopic" }
+      { key: FacetType.topicName, enableKey: "showAllTopic" },
+      
+      // Designation
+      { key: FacetType.Designation, enableKey: "showAllDesignation" },
+      { key: "profileDetails.professionalDetails.designation", enableKey: "showAllDesignation" },
+      
+      { key: FacetType.organizationsRoles, enableKey: "showAllRoles" },
     ];
 
     visibilityMap.forEach(({ key, enableKey }) => {
@@ -698,6 +797,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
     let filteredList = data?.filter((item: any) => item.name.toLowerCase().includes(this.filterQueryOrganisation.toLowerCase()));
 
+    if (this.filterQueryOrganisation) return filteredList;
+
     return this.showAllOrganisation ? filteredList : filteredList?.slice(0, 4);
   }
 
@@ -706,11 +807,15 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQueryContents.toLowerCase())
     );
 
+    if (this.filterQueryContents) return filteredList;
+
     return this.showAllContents ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredLanguages() {
     let filteredList = this.formattedFacets[FacetType.Language].filter((item: any) => item.name.toLowerCase().includes(this.filterQueryLanguage.toLowerCase()));
+
+    if (this.filterQueryLanguage) return filteredList;
 
     return this.showAllLanguage ? filteredList : filteredList?.slice(0, 4);
   }
@@ -725,6 +830,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     let filteredList = data.filter((item: any) => item.name.toLowerCase().includes(this.filterQuerySectorNames.toLowerCase()));
 
+    if (this.filterQuerySectorNames) return filteredList;
+
     return this.showAllSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
@@ -738,6 +845,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     let filteredList = data.filter((item: any) => item.name.toLowerCase().includes(this.filterQuerySubSectorNames.toLowerCase()));
 
+    if (this.filterQuerySubSectorNames) return filteredList;
+
     return this.showAllSubSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
@@ -745,6 +854,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     let filteredList = this.formattedFacets[FacetType.sectorId].filter((item: any) =>
       item.name.toLowerCase().includes(this.filterQuerySectorNames.toLowerCase())
     );
+
+    if (this.filterQuerySectorNames) return filteredList;
 
     return this.showAllSectors ? filteredList : filteredList?.slice(0, 4);
   }
@@ -754,6 +865,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQuerySubSectorNames.toLowerCase())
     );
 
+    if (this.filterQuerySubSectorNames) return filteredList;
+
     return this.showAllSubSectors ? filteredList : filteredList?.slice(0, 4);
   }
 
@@ -762,11 +875,15 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item?.name.toLowerCase().includes(this.filterQueryDesignation.toLowerCase())
     );
 
+    if (this.filterQueryDesignation) return filteredList;
+
     return this.showAllDesignation ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredRootOrgNames() {
     let filteredList = this.formattedFacets["rootOrgName"]?.filter((item: any) => item?.name.toLowerCase().includes(this.filterQueryRootOrgName.toLowerCase()));
+
+    if (this.filterQueryRootOrgName) return filteredList;
 
     return this.showAllOrganisation ? filteredList : filteredList?.slice(0, 4);
   }
@@ -776,6 +893,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item?.name.toLowerCase().includes(this.filterQueryThemes.toLowerCase())
     );
 
+    if (this.filterQueryThemes) return filteredList;
+
     return this.showAllCompetencyTheme ? filteredList : filteredList?.slice(0, 4);
   }
 
@@ -783,6 +902,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     let filteredList = this.formattedFacets[this.competencySubThemeKey]?.filter((item: any) =>
       item?.name.toLowerCase().includes(this.filterQuerySubThemes.toLowerCase())
     );
+
+    if (this.filterQuerySubThemes) return filteredList;
 
     return this.showAllCompetencySubTheme ? filteredList : filteredList?.slice(0, 4);
   }
@@ -792,6 +913,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQueryResourceCategory.toLowerCase())
     );
 
+    if (this.filterQueryResourceCategory) return filteredList;
+
     return this.showResourceCategory ? filteredList : filteredList?.slice(0, 4);
   }
 
@@ -800,7 +923,17 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       item.name.toLowerCase().includes(this.filterQueryContentPartners.toLowerCase())
     );
 
+    if (this.filterQueryContentPartners) return filteredList;
+
     return this.showAllContentPartners ? filteredList : filteredList?.slice(0, 4);
+  }
+
+  get filteredRoles() {
+    let filteredList = this.formattedFacets["roles.role"]?.filter((item: any) => item?.name.toLowerCase().includes(this.filterQueryRoles.toLowerCase()));
+
+    if (this.filterQueryRoles) return filteredList;
+
+    return this.showAllRoles ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredTopic() {
@@ -811,6 +944,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       filterData = this.formattedFacets[FacetType.topicName];
     }
     let filteredList = filterData.filter((item: any) => item.name.toLowerCase().includes(this.filterQueryTopic.toLowerCase()));
+
+    if (this.filterQueryTopic) return filteredList;
 
     return this.showAllTopic ? filteredList : filteredList?.slice(0, 4);
   }
@@ -875,7 +1010,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     if (this.selectedDateRange?.start && this.selectedDateRange?.end) {
       const formattedStartDate = this.formatDateForFilter(this.selectedDateRange.start, this.searchCategory);
-      const formattedEndDate = this.formatDateForFilter(this.selectedDateRange.end, this.searchCategory);
+      const formattedEndDate = this.formatDateForFilter(this.selectedDateRange.end, this.searchCategory, true);
 
       this.selectedFilters["dateRange"] = [formattedStartDate, formattedEndDate];
       this.appliedFilter.emit(this.selectedFilters);
@@ -883,41 +1018,30 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private formatDateForFilter(date: Date, category: string): string {
+  private formatDateForFilter(date: Date, category: string, end = false): string {
     const pad = (num: number, size = 2) => num.toString().padStart(size, "0");
 
+    if (end) {
+      date.setHours(23, 59, 59, 999);
+    }
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
+
+    const timezoneOffset = -date.getTimezoneOffset();
+    const sign = timezoneOffset >= 0 ? "+" : "-";
+    const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+    const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
+
     if (category === SearchCategory.Users) {
-      const year = date.getFullYear();
-      const month = pad(date.getMonth() + 1);
-      const day = pad(date.getDate());
-      const hours = pad(date.getHours());
-      const minutes = pad(date.getMinutes());
-      const seconds = pad(date.getSeconds());
-      const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
-
-      const timezoneOffset = -date.getTimezoneOffset();
-      const sign = timezoneOffset >= 0 ? "+" : "-";
-      const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
-      const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
-
-      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}${sign}${offsetHours}${offsetMinutes}`;
-
-      return formattedDate;
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliseconds}${sign}${offsetHours}${offsetMinutes}`;
     } else {
-      const year = date.getFullYear();
-      const month = pad(date.getMonth() + 1);
-      const day = pad(date.getDate());
-      const hours = pad(date.getHours());
-      const minutes = pad(date.getMinutes());
-      const seconds = pad(date.getSeconds());
-      const milliseconds = date.getMilliseconds().toString().padStart(3, "0");
-
-      const offset = -date.getTimezoneOffset();
-      const offsetSign = offset >= 0 ? "+" : "-";
-      const offsetHours = pad(Math.floor(Math.abs(offset) / 60));
-      const offsetMinutes = pad(Math.abs(offset) % 60);
-
-      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${offsetHours}${offsetMinutes}`;
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${sign}${offsetHours}${offsetMinutes}`;
     }
   }
 
@@ -1016,7 +1140,11 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "live") {
-      return "Upcoming";
+      return "Published";
+    } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "senttopublish") {
+      return "Pending Approval";
+    } else if (value.includes("_")) {
+      return this.formatRolesNames(value);
     }
 
     return value;

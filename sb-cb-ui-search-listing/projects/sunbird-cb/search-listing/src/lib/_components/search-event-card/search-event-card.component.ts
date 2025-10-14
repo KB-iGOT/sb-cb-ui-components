@@ -129,7 +129,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
     return now >= startDateTime && now <= endDateTime;
   }
 
-  navigateToEvent() {
+   navigateToEvent() {
     const eventId = this.content?.identifier;
     if(eventId) {
       this.content.contentType = 'Events';
@@ -137,18 +137,48 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       console.log('content:', this.content);
       switch (this.searchListingService.searchConfig?.applicationName) {
         case SearchListingConfig.ApplicationNames.LearnerPortal:
+          this.content.contentType = "Events";
           this.router.navigate([`/app/event-hub/home/${eventId}`]);
+          this.telemetry.emit(this.content);
           break;
         case SearchListingConfig.ApplicationNames.MDOPortal:
-          this.router.navigate([`app/home/events/edit-event/${eventId}?mode=edit&pathUrl=draft`]);
+          this.content.contentType = "Events";
+          if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+            this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+              queryParams: { mode: "edit", pathUrl: "past" }
+            });
+          } else {
+            this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+              queryParams: this.getEventsQueryParams(this.content?.status)
+            });
+          }
+          this.telemetry.emit(this.content);
           break;
         case SearchListingConfig.ApplicationNames.CBPPortal:
           const mode = _.get(this.content, 'status', '').toLowerCase() === 'live' ? 'pastRequests' : 'newRequests'
           this.router.navigate(['/app/event-details/', eventId, 'preview'], {
             queryParams: { mode: mode }
           })
+          this.telemetry.emit(this.content);
           break;
       }
+    }
+  }
+
+  getEventsQueryParams(status: string): { mode: string; pathUrl: string } {
+    switch (status) {
+      case "Draft":
+        return { mode: "edit", pathUrl: "draft" };
+      case "Live":
+        return { mode: "edit", pathUrl: "upcoming" };
+      case "Cancelled":
+        return { mode: "view", pathUrl: "cancelled" };
+      case "SentToPublish":
+        return { mode: "view", pathUrl: "pending-approval" };
+      case "Rejected":
+        return { mode: "edit", pathUrl: "rejected" };
+      default:
+        return { mode: "view", pathUrl: "draft" };
     }
   }
 
@@ -204,6 +234,11 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       return str
     }
     
-    
+  }
+
+  get getCurrentTimeInUTC(): string {
+    const currentDate = new Date()
+    const isoString = currentDate.toISOString()
+    return isoString.replace('Z', '+0000')
   }
 }
