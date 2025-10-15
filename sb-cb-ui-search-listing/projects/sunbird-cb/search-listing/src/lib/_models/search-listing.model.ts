@@ -211,7 +211,9 @@ export class UsersRequestParams {
   offset: number;
 
   constructor() {
-    this.filters = {};
+    this.filters = {
+      status: 1
+    };
     this.fields = [
       "userId",
       "firstName",
