@@ -435,7 +435,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const updatedFacet = SearchEventfacet.filter(item => item !== FacetType.SourceName);
       this.searchRequestEvents.request.facets = [...updatedFacet, this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey];
-      this.searchRequestEvents.request.filters["channel"] = this.configSvc.userProfile?.rootOrgId || "";
+      this.searchRequestEvents.request.filters["createdFor"] = this.configSvc.userProfile?.rootOrgId || "";
     }
 
     try {
@@ -648,6 +648,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.configSvc?.unMappedUser?.rootOrg?.organisationType === 16 || this.configSvc?.unMappedUser?.rootOrg?.organisationType === 2048) {
       this.searchRequestUsers.request.filters["profileDetails.ministryOrStateId"] = this.configSvc.userProfile?.rootOrgId || "";
+      if (this.searchRequestUsers.request.filters!.rootOrgId) {
+        delete this.searchRequestUsers.request.filters!.rootOrgId;
+      }
       if (!this.searchRequestUsers.request.facets.includes("rootOrgName")) {
         this.searchRequestUsers.request.facets = [...this.searchRequestUsers.request.facets, "rootOrgName"];
       }
@@ -656,6 +659,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.searchRequestUsers.request.query = this.statedata?.param || "";
+
     const result = await this.searchListingService.searchUsersMDO(this.searchRequestUsers).catch(() => {
       return {
         result: { response: { content: [], count: 0, facets: {} } }
@@ -1188,6 +1192,18 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
             this.searchRequestEvents.request.filters[FacetType.status] = [...selectedFilters[key]];
           } else {
             this.searchRequestTrainingPlans.filter[FacetType.status] = [...selectedFilters[key]];
+          }
+        } else if (key === "timeline") {
+          if (selectedFilters[key].length === 2) {
+            const [startDate, endDate] = selectedFilters[key];
+            if (startDate && endDate) {
+              if (this.seeAllResult === SearchCategory.TrainingPlans) {
+                this.searchRequestTrainingPlans.filter[FacetType.endDate] = {
+                  ">=": startDate,
+                  "<=": endDate
+                };
+              }
+            }
           }
         } else if (key === FacetType.contentType) {
           this.searchRequestTrainingPlans.filter[FacetType.contentType] = [...selectedFilters[key]];

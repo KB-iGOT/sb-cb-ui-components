@@ -96,8 +96,8 @@ export class UsersCardComponent {
     if (professionalDetails?.length) {
       const designationItem = professionalDetails.find((item: any) => "designation" in item);
       const designation = designationItem?.designation ?? "";
-      const rootOrgName = this.user?.rootOrgName ?? "";
-      return designation ? `${designation}` : rootOrgName;
+      // const rootOrgName = this.user?.rootOrgName ?? "";
+      return designation ? `${designation}` : '';
     }
 
     return this.user?.rootOrgName ?? "";

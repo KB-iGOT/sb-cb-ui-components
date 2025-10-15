@@ -125,10 +125,7 @@
           </mat-selection-list>
         </mat-expansion-panel>
       </mat-accordion>
-      <div
-        *ngIf="(filteredContents?.length > 4) || (formattedFacets?.['courseCategory']?.length > 4);"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('courseCategory')">
+      <div *ngIf="shouldShowMoreLessContents" class="brand-color underline cursor-pointer" (click)="toggleShowMore('courseCategory')">
         {{ showAllContents ? "See Less" : "See More" }}
       </div>
     </div>
@@ -190,10 +187,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredSectorId?.length > 4) || (!filterQuerySectorNames && formattedFacets?.['sectorId']?.length > 4)) && !filterQuerySectorNames"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('sectorId')">
+      <div *ngIf="shouldShowMoreLessSectors" class="brand-color underline cursor-pointer" (click)="toggleShowMore('sectorId')">
         {{ showAllSectors ? "See Less" : "See More" }}
       </div>
     </div>
@@ -219,10 +213,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredSubSectorId?.length > 4) || (!filterQuerySubSectorNames && formattedFacets?.['subSectorId']?.length > 4)) && !filterQuerySubSectorNames"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('subSectorId')">
+      <div *ngIf="shouldShowMoreLessSubSectors" class="brand-color underline cursor-pointer" (click)="toggleShowMore('subSectorId')">
         {{ showAllSubSectors ? "See Less" : "See More" }}
       </div>
     </div>
@@ -276,10 +267,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredResourceCategory?.length > 4) || (!filterQueryResourceCategory && formattedFacets?.['resourceCategory']?.length > 4)) && !filterQueryResourceCategory"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('resourceCategory')">
+      <div *ngIf="shouldShowMoreLessResourceCategory" class="brand-color underline cursor-pointer" (click)="toggleShowMore('resourceCategory')">
         {{ showResourceCategory ? "See Less" : "See More" }}
       </div>
     </div>
@@ -316,10 +304,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredSectorNames?.length > 4) || (!filterQuerySectorNames && formattedFacets?.['sectorDetails_v1.sectorName']?.length > 4)) && !filterQuerySectorNames"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('sectorDetails_v1.sectorName')">
+      <div *ngIf="shouldShowMoreLessSectors" class="brand-color underline cursor-pointer" (click)="toggleShowMore('sectorDetails_v1.sectorName')">
         {{ showAllSectors ? "See Less" : "See More" }}
       </div>
     </div>
@@ -356,10 +341,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredSubSectorNames?.length > 4) || (!filterQuerySubSectorNames && formattedFacets?.['sectorDetails_v1.subSectorName']?.length > 4)) && !filterQuerySubSectorNames"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('sectorDetails_v1.subSectorName')">
+      <div *ngIf="shouldShowMoreLessSubSectors" class="brand-color underline cursor-pointer" (click)="toggleShowMore('sectorDetails_v1.subSectorName')">
         {{ showAllSubSectors ? "See Less" : "See More" }}
       </div>
     </div>
@@ -406,10 +388,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredLanguages?.length > 4) || (!filterQueryLanguage && formattedFacets?.['language']?.length > 4)) && !filterQueryLanguage"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('language')">
+      <div *ngIf="shouldShowMoreLessLanguages" class="brand-color underline cursor-pointer" (click)="toggleShowMore('language')">
         {{ showAllLanguage ? "See Less" : "See More" }}
       </div>
     </div>
@@ -434,10 +413,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredOrganisations?.length > 4) || (!filterQueryOrganisation && formattedFacets?.['organisation']?.length > 4)) && !filterQueryOrganisation"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('organisation')">
+      <div *ngIf="shouldShowMoreLessOrganizations" class="brand-color underline cursor-pointer" (click)="toggleShowMore('organisation')">
         {{ showAllOrganisation ? "See Less" : "See More" }}
       </div>
     </div>
@@ -462,10 +438,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredOrganisations?.length > 4) || (!filterQueryOrganisation && formattedFacets?.['sourceName']?.length > 4)) && !filterQueryOrganisation"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('sourceName')">
+      <div *ngIf="shouldShowMoreLessOrganizations" class="brand-color underline cursor-pointer" (click)="toggleShowMore('sourceName')">
         {{ showAllOrganisation ? "See Less" : "See More" }}
       </div>
     </div>
@@ -519,10 +492,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="(filteredTopic?.length > 4 || (!filterQueryTopic && formattedFacets['topicName'].length > 4)) && !filterQueryTopic"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('topicName')">
+      <div *ngIf="shouldShowMoreLessTopic" class="brand-color underline cursor-pointer" (click)="toggleShowMore('topicName')">
         {{ showAllTopic ? "See Less" : "See More" }}
       </div>
     </div>
@@ -577,10 +547,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredDesignations?.length > 4) || (!filterQueryDesignation && formattedFacets?.['profileDetails.professionalDetails.designation']?.length > 4)) && !filterQueryDesignation"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('designation')">
+      <div *ngIf="shouldShowMoreLessDesignations" class="brand-color underline cursor-pointer" (click)="toggleShowMore('designation')">
         {{ showAllDesignation ? "See Less" : "See More" }}
       </div>
     </div>
@@ -605,10 +572,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredRootOrgNames?.length > 4) || (!filterQueryRootOrgName && formattedFacets?.['rootOrgName']?.length > 4)) && !filterQueryRootOrgName"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('organisation')">
+      <div *ngIf="shouldShowMoreLessRootOrgs" class="brand-color underline cursor-pointer" (click)="toggleShowMore('organisation')">
         {{ showAllOrganisation ? "See Less" : "See More" }}
       </div>
     </div>
@@ -643,10 +607,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredContentPartners?.length > 4) || (!filterQueryContentPartners && formattedFacets?.['contentPartner.contentPartnerName']?.length > 4)) && !filterQueryContentPartners"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('contentPartner.contentPartnerName')">
+      <div *ngIf="shouldShowMoreLessContentPartners" class="brand-color underline cursor-pointer" (click)="toggleShowMore('contentPartner.contentPartnerName')">
         {{ showAllContentPartners ? "See Less" : "See More" }}
       </div>
     </div>
@@ -672,10 +633,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredTopic?.length > 4) || (!filterQueryTopic && formattedFacets?.['topic']?.length > 4)) && !filterQueryTopic"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('topic')">
+      <div *ngIf="shouldShowMoreLessTopic" class="brand-color underline cursor-pointer" (click)="toggleShowMore('topic')">
         {{ showAllTopic ? "See Less" : "See More" }}
       </div>
     </div>
@@ -721,10 +679,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredCompetencyTheme?.length > 4) || (!filterQueryThemes && formattedFacets?.[competencyThemeKey]?.length > 4)) && !filterQueryThemes"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore(competencyThemeKey)">
+      <div *ngIf="shouldShowMoreLessCompetencyThemes" class="brand-color underline cursor-pointer" (click)="toggleShowMore(competencyThemeKey)">
         {{ showAllCompetencyTheme ? "See Less" : "See More" }}
       </div>
     </div>
@@ -750,10 +705,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredCompetencySubTheme?.length > 4) || (!filterQuerySubThemes && formattedFacets?.[competencySubThemeKey]?.length > 4)) && !filterQuerySubThemes"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore(competencySubThemeKey)">
+      <div *ngIf="shouldShowMoreLessButton" class="brand-color underline cursor-pointer" (click)="toggleShowMore(competencySubThemeKey)">
         {{ showAllCompetencySubTheme ? "See Less" : "See More" }}
       </div>
     </div>
@@ -783,10 +735,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredSectorNames?.length > 4) || (!filterQuerySectorNames && (formattedFacets?.['sectorName']?.length > 4))) && !filterQuerySectorNames"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('sectorName')">
+      <div *ngIf="shouldShowMoreLessSectors" class="brand-color underline cursor-pointer" (click)="toggleShowMore('sectorName')">
         {{ showAllSectors ? "See Less" : "See More" }}
       </div>
     </div>
@@ -813,10 +762,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredSubSectorNames?.length > 4) || (!filterQuerySubSectorNames && (formattedFacets?.['subSectorName']?.length > 4))) && !filterQuerySubSectorNames"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('subSectorName')">
+      <div *ngIf="shouldShowMoreLessSubSectors" class="brand-color underline cursor-pointer" (click)="toggleShowMore('subSectorName')">
         {{ showAllSubSectors ? "See Less" : "See More" }}
       </div>
     </div>
@@ -897,10 +843,7 @@
           </mat-checkbox>
         </section>
       </mat-selection-list>
-      <div
-        *ngIf="((filteredRoles?.length > 4) || (!filterQueryRoles && formattedFacets?.['roles.role']?.length > 4)) && !filterQueryRoles"
-        class="brand-color underline cursor-pointer"
-        (click)="toggleShowMore('roles.role')">
+      <div *ngIf="shouldShowMoreLessRoles" class="brand-color underline cursor-pointer" (click)="toggleShowMore('roles.role')">
         {{ showAllRoles ? "See Less" : "See More" }}
       </div>
     </div>
@@ -944,18 +887,19 @@
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">
         {{ "learnsearch.planType" | translate }}
       </p>
-      <mat-radio-group (change)="onRadioTypeChange(true, $event.value, 'isApar')">
+
+      <mat-selection-list>
         <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['isApar']">
           <ng-container *ngIf="options?.count">
-            <mat-radio-button [value]="options" [checked]="options?.isChecked || getSelectedFilter(options)">
+            <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, 'isApar')">
               <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
                 {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
               >
               <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
-            </mat-radio-button>
+            </mat-checkbox>
           </ng-container>
         </section>
-      </mat-radio-group>
+      </mat-selection-list>
     </div>
   </ng-container>
 
@@ -972,6 +916,16 @@
       <mat-calendar [(selected)]="selectedDateRange" (selectedChange)="rangeChanged($event)"></mat-calendar>
     </ng-container>
   </div>
+
+  <div class="filter-without-search filter-calender" *ngIf="isTrainingPlanFacetsPresent">
+    <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
+      {{ "learnsearch.timeline" | translate }}
+    </p>
+    <ng-container>
+      <mat-calendar [(selected)]="selectedDateRangeTimeline" (selectedChange)="rangeChangedTimeline($event)"></mat-calendar>
+    </ng-container>
+  </div>
+  
 </div>
 
 <ng-template #noResults>

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
 import { ConfigurationsService } from "@sunbird-cb/utils-v2";
@@ -8,7 +8,7 @@ import { ConfigurationsService } from "@sunbird-cb/utils-v2";
   templateUrl: "./global-search.component.html",
   styleUrls: ["./global-search.component.scss"]
 })
-export class GlobalSearchComponent implements OnInit {
+export class GlobalSearchComponent implements OnInit, OnDestroy {
   searchParam = { query: "", nlp: "", searchCategory: "" };
   userValue = "";
   searchparamFilters: any;
@@ -36,6 +36,11 @@ export class GlobalSearchComponent implements OnInit {
 
   ngOnInit() {
     this.compentencyKey = this.configService.compentency ? this.configService.compentency[this.environment.compentencyVersionKey] : undefined;
+    const containerElement = document.querySelector('.container-body-scroll');
+    if (containerElement) {
+      containerElement.classList.add('search-result-active');
+    }
+    
     this.activated.queryParamMap.subscribe(queryParams => {
       this.userId = queryParams.get("user") || "";
       this.userValue = "";
@@ -115,4 +120,12 @@ export class GlobalSearchComponent implements OnInit {
       });
     }
   }
+
+  ngOnDestroy() {
+    const containerElement = document.querySelector('.container-body-scroll');
+    if (containerElement) {
+      containerElement.classList.remove('search-result-active');
+    }
+  }
+
 }
