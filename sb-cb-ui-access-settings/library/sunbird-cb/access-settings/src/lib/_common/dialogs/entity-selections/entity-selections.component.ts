@@ -100,16 +100,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType = NsAccessControlConfig.SelectionType.CustomField;
     }
 
-    if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
-      this.selectedDataTemp = [this.selectedCentralDeputation];
-    }
-
     if (this.data && this.data.selected && this.data.selected.length) {
       if (this.selectionType === NsAccessControlConfig.SelectionType.Batch) {
         this.selectedData = [...this.data.selected.map((ele: any) => _.toNumber(ele))];
         this.selectedDataTemp = [...this.selectedData];
       } else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
-        this.selectedCentralDeputation = this.data.selected[0];
+        this.selectedCentralDeputation = this.data.selected[0] === 'true' || this.data.selected[0] === true;
       } else {
         this.selectedData = [...this.data.selected];
         this.selectedDataTemp = [...this.selectedData];
@@ -121,6 +117,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
       this.activeTab = this.data?.activeTabSelected || 0;
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
+    }
+
+     if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+      this.selectedDataTemp = [this.selectedCentralDeputation];
     }
 
     // Subscribe to search control changes
