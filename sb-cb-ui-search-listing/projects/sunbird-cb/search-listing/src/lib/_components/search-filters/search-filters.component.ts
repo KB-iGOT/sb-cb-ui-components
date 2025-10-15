@@ -77,6 +77,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   environment!: any;
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
+  selectedDateRangeTimeline!: DateRange<Date> | null;
   maxDateCalendar = new Date();
   constructor(
     @Inject("environment") environment: any,
@@ -196,6 +197,9 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       this.selectedDateRange = null;
       if (this.selectedFilters["dateRange"]) {
         this.selectedFilters["dateRange"] = [];
+      }
+      if (this.selectedFilters["timeline"]) {
+        this.selectedFilters["timeline"] = [];
       }
     }
 
@@ -379,47 +383,47 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
             { range: [5401, Infinity], label: "90 mins" }
           ]
             .map(({ range, label }) => {
-            const count = Object.entries(values)
-              .filter(([key]) => {
-                const duration = parseInt(key, 10);
-                return duration >= range[0] && duration <= range[1];
-              })
-              .reduce((sum, [, count]) => sum + count, 0);
-            return count > 0 ? { name: label, count, isChecked: false } : null;
-          })
-          .filter(Boolean);
+              const count = Object.entries(values)
+                .filter(([key]) => {
+                  const duration = parseInt(key, 10);
+                  return duration >= range[0] && duration <= range[1];
+                })
+                .reduce((sum, [, count]) => sum + count, 0);
+              return count > 0 ? { name: label, count, isChecked: false } : null;
+            })
+            .filter(Boolean);
 
-        formattedFacets[key] = formattedDurations;
-      } else if (key === FacetType.AvgRating) {
-        const ratingRanges = [4.5, 4.0, 3.5, 3.0];
-        const formattedRatings = ratingRanges
-          .map(rating => {
-            const count = Object.entries(values)
-              .filter(([rate]) => parseFloat(rate) >= rating)
-              .reduce((sum, [, count]) => sum + count, 0);
-            return count > 0 ? { name: `${rating.toFixed(1)}`, count, isChecked: false } : null;
-          })
-          .filter(Boolean);
+          formattedFacets[key] = formattedDurations;
+        } else if (key === FacetType.AvgRating) {
+          const ratingRanges = [4.5, 4.0, 3.5, 3.0];
+          const formattedRatings = ratingRanges
+            .map(rating => {
+              const count = Object.entries(values)
+                .filter(([rate]) => parseFloat(rate) >= rating)
+                .reduce((sum, [, count]) => sum + count, 0);
+              return count > 0 ? { name: `${rating.toFixed(1)}`, count, isChecked: false } : null;
+            })
+            .filter(Boolean);
 
-        formattedFacets[key] = formattedRatings;
-      } else {
-        const selectedFilterValue = this.selectedFilters?.[key] || [];
-        formattedFacets[key] = Object.entries(values)
-          .map(([name, count]) => ({
-            name,
-            count,
-            isChecked: selectedFilterValue.includes(name)
-          }))
-          .sort((a, b) => {
-            // First sort by checked status (checked items first)
-            if (a.isChecked !== b.isChecked) {
-              return a.isChecked ? -1 : 1;
-            }
-            // Then sort alphabetically
-            return a.name.localeCompare(b.name);
-          });
-      }
-    });
+          formattedFacets[key] = formattedRatings;
+        } else {
+          const selectedFilterValue = this.selectedFilters?.[key] || [];
+          formattedFacets[key] = Object.entries(values)
+            .map(([name, count]) => ({
+              name,
+              count,
+              isChecked: selectedFilterValue.includes(name)
+            }))
+            .sort((a, b) => {
+              // First sort by checked status (checked items first)
+              if (a.isChecked !== b.isChecked) {
+                return a.isChecked ? -1 : 1;
+              }
+              // Then sort alphabetically
+              return a.name.localeCompare(b.name);
+            });
+        }
+      });
 
     return formattedFacets;
   }
@@ -534,7 +538,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     const returnedData: { type: string; value: string }[] = [];
 
     Object.entries(data).forEach(([key, values]) => {
-      if (key === "dateRange") {
+      if (key === "dateRange" || key === "timeline") {
         const mergedDates = values.map(this.formatDate).join(" - ");
         if (mergedDates) {
           returnedData.push({ type: key, value: mergedDates });
@@ -618,7 +622,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   clearFilterChip(item: { type: string; value: string }) {
     let facets;
-    if (item.type === "dateRange") {
+    if (item.type === "dateRange" || item.type === "timeline") {
       this.clearDateRange();
       return;
     }
@@ -755,166 +759,170 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  get filteredOrganisations() {
-    let data: any;
-    if (this.searchCategory === SearchCategory.Events) {
-      data = this.formattedFacets[FacetType.SourceName];
-    } else {
-      data = this.formattedFacets[FacetType.Organization];
+  // Generic function to filter and slice results
+  private getFilteredAndSlicedResults(items: any[], searchQuery: string, showAll: boolean) {
+    if (!items) return [];
+
+    const filteredList = items.filter((item: any) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    if (!showAll) {
+      return filteredList.slice(0, 4);
     }
-    let filteredList = data?.filter((item: any) => item.name.toLowerCase().includes(this.filterQueryOrganisation.toLowerCase()));
 
-    if (this.filterQueryOrganisation) return filteredList;
+    return filteredList;
+  }
 
-    return this.showAllOrganisation ? filteredList : filteredList?.slice(0, 4);
+  get filteredOrganisations() {
+    const data = this.searchCategory === SearchCategory.Events ? this.formattedFacets[FacetType.SourceName] : this.formattedFacets[FacetType.Organization];
+
+    return this.getFilteredAndSlicedResults(data, this.filterQueryOrganisation, this.showAllOrganisation);
   }
 
   get filteredContents() {
-    let filteredList = this.formattedFacets[FacetType.courseCategory].filter((item: any) =>
-      item.name.toLowerCase().includes(this.filterQueryContents.toLowerCase())
-    );
-
-    if (this.filterQueryContents) return filteredList;
-
-    return this.showAllContents ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[FacetType.courseCategory], this.filterQueryContents, this.showAllContents);
   }
 
   get filteredLanguages() {
-    let filteredList = this.formattedFacets[FacetType.Language].filter((item: any) => item.name.toLowerCase().includes(this.filterQueryLanguage.toLowerCase()));
-
-    if (this.filterQueryLanguage) return filteredList;
-
-    return this.showAllLanguage ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[FacetType.Language], this.filterQueryLanguage, this.showAllLanguage);
   }
 
   get filteredSectorNames() {
-    let data;
-    if (this.formattedFacets[FacetType.sectorNames_v1]) {
-      data = this.formattedFacets[FacetType.sectorNames_v1];
-    } else if (this.formattedFacets[FacetType.sectorNameResource]) {
-      data = this.formattedFacets[FacetType.sectorNameResource];
-    }
+    const data = this.formattedFacets[FacetType.sectorNames_v1] || this.formattedFacets[FacetType.sectorNameResource];
 
-    let filteredList = data.filter((item: any) => item.name.toLowerCase().includes(this.filterQuerySectorNames.toLowerCase()));
-
-    if (this.filterQuerySectorNames) return filteredList;
-
-    return this.showAllSectors ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(data, this.filterQuerySectorNames, this.showAllSectors);
   }
 
   get filteredSubSectorNames() {
-    let data;
-    if (this.formattedFacets[FacetType.subSectorNames_v1]) {
-      data = this.formattedFacets[FacetType.subSectorNames_v1];
-    } else if (this.formattedFacets[FacetType.subSectorNameResource]) {
-      data = this.formattedFacets[FacetType.subSectorNameResource];
-    }
+    const data = this.formattedFacets[FacetType.subSectorNames_v1] || this.formattedFacets[FacetType.subSectorNameResource];
 
-    let filteredList = data.filter((item: any) => item.name.toLowerCase().includes(this.filterQuerySubSectorNames.toLowerCase()));
-
-    if (this.filterQuerySubSectorNames) return filteredList;
-
-    return this.showAllSubSectors ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(data, this.filterQuerySubSectorNames, this.showAllSubSectors);
   }
 
   get filteredSectorId() {
-    let filteredList = this.formattedFacets[FacetType.sectorId].filter((item: any) =>
-      item.name.toLowerCase().includes(this.filterQuerySectorNames.toLowerCase())
-    );
-
-    if (this.filterQuerySectorNames) return filteredList;
-
-    return this.showAllSectors ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[FacetType.sectorId], this.filterQuerySectorNames, this.showAllSectors);
   }
 
   get filteredSubSectorId() {
-    let filteredList = this.formattedFacets[FacetType.subSectorId].filter((item: any) =>
-      item.name.toLowerCase().includes(this.filterQuerySubSectorNames.toLowerCase())
-    );
-
-    if (this.filterQuerySubSectorNames) return filteredList;
-
-    return this.showAllSubSectors ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[FacetType.subSectorId], this.filterQuerySubSectorNames, this.showAllSubSectors);
   }
 
   get filteredDesignations() {
-    let filteredList = this.formattedFacets["profileDetails.professionalDetails.designation"]?.filter((item: any) =>
-      item?.name.toLowerCase().includes(this.filterQueryDesignation.toLowerCase())
+    return this.getFilteredAndSlicedResults(
+      this.formattedFacets["profileDetails.professionalDetails.designation"],
+      this.filterQueryDesignation,
+      this.showAllDesignation
     );
-
-    if (this.filterQueryDesignation) return filteredList;
-
-    return this.showAllDesignation ? filteredList : filteredList?.slice(0, 4);
   }
 
   get filteredRootOrgNames() {
-    let filteredList = this.formattedFacets["rootOrgName"]?.filter((item: any) => item?.name.toLowerCase().includes(this.filterQueryRootOrgName.toLowerCase()));
-
-    if (this.filterQueryRootOrgName) return filteredList;
-
-    return this.showAllOrganisation ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets["rootOrgName"], this.filterQueryRootOrgName, this.showAllOrganisation);
   }
 
   get filteredCompetencyTheme() {
-    let filteredList = this.formattedFacets[this.competencyThemeKey]?.filter((item: any) =>
-      item?.name.toLowerCase().includes(this.filterQueryThemes.toLowerCase())
-    );
-
-    if (this.filterQueryThemes) return filteredList;
-
-    return this.showAllCompetencyTheme ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[this.competencyThemeKey], this.filterQueryThemes, this.showAllCompetencyTheme);
   }
 
   get filteredSubCompetencyTheme() {
-    let filteredList = this.formattedFacets[this.competencySubThemeKey]?.filter((item: any) =>
-      item?.name.toLowerCase().includes(this.filterQuerySubThemes.toLowerCase())
-    );
+    const allThemes = this.formattedFacets[this.competencySubThemeKey] || [];
 
-    if (this.filterQuerySubThemes) return filteredList;
+    let filteredList = this.filterQuerySubThemes
+      ? allThemes.filter((item: any) => item?.name.toLowerCase().includes(this.filterQuerySubThemes.toLowerCase()))
+      : allThemes;
 
-    return this.showAllCompetencySubTheme ? filteredList : filteredList?.slice(0, 4);
+    if (!this.showAllCompetencySubTheme) {
+      return filteredList.slice(0, 4);
+    }
+
+    return filteredList;
+  }
+
+  // function to check if we should show More/Less button for a given filter
+  private shouldShowMoreLessForFilter(items: any[], searchQuery: string): boolean {
+    if (!items) return false;
+
+    // If there's a search query, check filtered results
+    if (searchQuery) {
+      const filteredCount = items.filter((item: any) => item?.name.toLowerCase().includes(searchQuery.toLowerCase())).length;
+      return filteredCount > 4;
+    }
+
+    // If no search query, check total items
+    return items.length > 4;
+  }
+
+  get shouldShowMoreLessButton() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets[this.competencySubThemeKey], this.filterQuerySubThemes);
+  }
+
+  get shouldShowMoreLessOrganizations() {
+    let data = this.searchCategory === SearchCategory.Events ? this.formattedFacets[FacetType.SourceName] : this.formattedFacets[FacetType.Organization];
+    return this.shouldShowMoreLessForFilter(data, this.filterQueryOrganisation);
+  }
+
+  get shouldShowMoreLessContents() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets[FacetType.courseCategory], this.filterQueryContents);
+  }
+
+  get shouldShowMoreLessLanguages() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets[FacetType.Language], this.filterQueryLanguage);
+  }
+
+  get shouldShowMoreLessSectors() {
+    let data = this.formattedFacets[FacetType.sectorNames_v1] || this.formattedFacets[FacetType.sectorNameResource] || this.formattedFacets[FacetType.sectorId];
+    return this.shouldShowMoreLessForFilter(data, this.filterQuerySectorNames);
+  }
+
+  get shouldShowMoreLessSubSectors() {
+    let data =
+      this.formattedFacets[FacetType.subSectorNames_v1] || this.formattedFacets[FacetType.subSectorNameResource] || this.formattedFacets[FacetType.subSectorId];
+    return this.shouldShowMoreLessForFilter(data, this.filterQuerySubSectorNames);
+  }
+
+  get shouldShowMoreLessDesignations() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets["profileDetails.professionalDetails.designation"], this.filterQueryDesignation);
+  }
+
+  get shouldShowMoreLessRootOrgs() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets["rootOrgName"], this.filterQueryRootOrgName);
+  }
+
+  get shouldShowMoreLessCompetencyThemes() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets[this.competencyThemeKey], this.filterQueryThemes);
+  }
+
+  get shouldShowMoreLessResourceCategory() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets[FacetType.resourceCategory], this.filterQueryResourceCategory);
+  }
+
+  get shouldShowMoreLessContentPartners() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets[FacetType.contentPartners], this.filterQueryContentPartners);
+  }
+
+  get shouldShowMoreLessRoles() {
+    return this.shouldShowMoreLessForFilter(this.formattedFacets["roles.role"], this.filterQueryRoles);
+  }
+
+  get shouldShowMoreLessTopic() {
+    let data = this.formattedFacets[FacetType.topic] || this.formattedFacets[FacetType.topicName];
+    return this.shouldShowMoreLessForFilter(data, this.filterQueryTopic);
   }
 
   get filteredResourceCategory() {
-    let filteredList = this.formattedFacets[FacetType.resourceCategory].filter((item: any) =>
-      item.name.toLowerCase().includes(this.filterQueryResourceCategory.toLowerCase())
-    );
-
-    if (this.filterQueryResourceCategory) return filteredList;
-
-    return this.showResourceCategory ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[FacetType.resourceCategory], this.filterQueryResourceCategory, this.showResourceCategory);
   }
 
   get filteredContentPartners() {
-    let filteredList = this.formattedFacets[FacetType.contentPartners].filter((item: any) =>
-      item.name.toLowerCase().includes(this.filterQueryContentPartners.toLowerCase())
-    );
-
-    if (this.filterQueryContentPartners) return filteredList;
-
-    return this.showAllContentPartners ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets[FacetType.contentPartners], this.filterQueryContentPartners, this.showAllContentPartners);
   }
 
   get filteredRoles() {
-    let filteredList = this.formattedFacets["roles.role"]?.filter((item: any) => item?.name.toLowerCase().includes(this.filterQueryRoles.toLowerCase()));
-
-    if (this.filterQueryRoles) return filteredList;
-
-    return this.showAllRoles ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(this.formattedFacets["roles.role"], this.filterQueryRoles, this.showAllRoles);
   }
 
   get filteredTopic() {
-    let filterData;
-    if (this.formattedFacets[FacetType.topic]) {
-      filterData = this.formattedFacets[FacetType.topic];
-    } else if (this.formattedFacets[FacetType.topicName]) {
-      filterData = this.formattedFacets[FacetType.topicName];
-    }
-    let filteredList = filterData.filter((item: any) => item.name.toLowerCase().includes(this.filterQueryTopic.toLowerCase()));
+    const filterData = this.formattedFacets[FacetType.topic] || this.formattedFacets[FacetType.topicName];
 
-    if (this.filterQueryTopic) return filteredList;
-
-    return this.showAllTopic ? filteredList : filteredList?.slice(0, 4);
+    return this.getFilteredAndSlicedResults(filterData, this.filterQueryTopic, this.showAllTopic);
   }
 
   private recursivelySetIsCheckedFalse(filters: any[], name: string): any {
@@ -985,6 +993,23 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  rangeChangedTimeline(selectedDate: Date) {
+    const selection = this.selectionModel.selection,
+      newSelection = this.selectionStrategy.selectionFinished(selectedDate, selection);
+
+    this.selectionModel.updateSelection(newSelection, this);
+    this.selectedDateRangeTimeline = new DateRange<Date>(newSelection.start, newSelection.end);
+
+    if (this.selectedDateRangeTimeline?.start && this.selectedDateRangeTimeline?.end) {
+      const formattedStartDate = this.formatDateForFilter(this.selectedDateRangeTimeline.start, this.searchCategory);
+      const formattedEndDate = this.formatDateForFilter(this.selectedDateRangeTimeline.end, this.searchCategory, true);
+
+      this.selectedFilters["timeline"] = [formattedStartDate, formattedEndDate];
+      this.appliedFilter.emit(this.selectedFilters);
+      this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+    }
+  }
+
   private formatDateForFilter(date: Date, category: string, end = false): string {
     const pad = (num: number, size = 2) => num.toString().padStart(size, "0");
 
@@ -1014,8 +1039,14 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   clearDateRange() {
     this.selectedDateRange = null;
+    this.selectedDateRangeTimeline = null;
     if (this.selectedFilters["dateRange"]) {
       this.selectedFilters["dateRange"] = [];
+    }
+    if (this.selectedFilters["timeline"]) {
+      this.selectedFilters["timeline"] = [];
+    }
+    if (this.selectedFilters["dateRange"] || this.selectedFilters["timeline"]) {
       this.appliedFilter.emit(this.selectedFilters);
       this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
     } else {
