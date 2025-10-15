@@ -203,6 +203,12 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       })
     );
     this.categories = this.searchConfig?.searchCategories || [];
+    
+    // Check if selectedSearchCategory exists in categories, if not set to first category
+    const categoryExists = this.categories.some(category => category.value === this.selectedSearchCategory);
+    if (!categoryExists && this.categories.length > 0) {
+      this.selectedSearchCategory = this.categories[0].value;
+    }
 
     this.searchSubscription.add(
       this.router.events.subscribe(event => {

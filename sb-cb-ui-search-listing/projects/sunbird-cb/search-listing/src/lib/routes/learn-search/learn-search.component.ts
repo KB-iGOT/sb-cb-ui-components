@@ -315,7 +315,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async searchCourses() {
-    this.searchRequestCourse.request.filters.status = ["Live"];
     this.searchRequestCourse.request.query = this.statedata?.param;
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
@@ -341,10 +340,14 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         // Filter out any null/undefined values and use config-provided facets
         this.searchRequestCourse.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
         if(this.searchRequestCourse.request.facets.findIndex(v => v === 'status') > -1) {
-          this.searchRequestCourse.request.filters["status"] = ["Live", "Review"];
+          if(this.searchRequestCourse.request.filters["status"] && !this.searchRequestCourse.request.filters["status"].length) {
+            this.searchRequestCourse.request.filters["status"] = ["Live", "Review"];
+          }
         }
       }
       this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
+    } else {
+      this.searchRequestCourse.request.filters.status = ["Live"];
     }
     try {
       const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
@@ -1081,6 +1084,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           }
         } else if (key === FacetType.status) {
           this.searchRequestEvents.request.filters.status = [...selectedFilters[key]];
+          this.searchRequestCourse.request.filters.status = [...selectedFilters[key]];
           this.searchRequestTrainingPlans.filter[FacetType.status] = [...selectedFilters[key]];
         } else if (key === "competencyArea") {
           this.searchRequestCommunities.filterCriteriaMap.competencyArea = [...selectedFilters[key]];
