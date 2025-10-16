@@ -9,32 +9,32 @@
               <div class="">
                 <div class="flex items-center logo-square">
                   <img alt="Application Logo" class="logo-img" [src]="data?.logo">
-                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('logo', 'Logo', data?.logo)">
+                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('logo', 'Logo', data?.logo)" aria-label="Edit Logo">
                     <i class="material-icons">edit</i>
                   </button>
                 </div>
                 <h1 class="txt-ellipsis-2 break-words pt-10 mt-2 {{data?.titleClass}}" [style.color]="data?.titleColor">
                   {{data.title || channelName}}
-                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('title', 'Title', data?.title || channelName)">
+                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('title', 'Title', data?.title || channelName)" aria-label="Edit Title">
                     <i class="material-icons">edit</i>
                   </button>
                 </h1>
                 <h4 *ngIf="data?.subTitle" class="txt-ellipsis-2 break-words {{data?.subTitleClass}}" [style.color]="data?.subTitleColor">
                   {{data?.subTitle}}
-                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('subTitle', 'Subtitle', data?.subTitle)">
+                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('subTitle', 'Subtitle', data?.subTitle)" aria-label="Edit Subtitle">
                     <i class="material-icons">edit</i>
                   </button>
                 </h4>
                 <h4 *ngIf="data?.subTitleTwo" class="sub-title-two txt-ellipsis-2 break-words pt-4 mb-8" [style.color]="data?.subTitleColorTwo">
                   {{data?.subTitleTwo}}
-                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('subTitleTwo', 'Secondary Subtitle', data?.subTitleTwo)">
+                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('subTitleTwo', 'Secondary Subtitle', data?.subTitleTwo)" aria-label="Edit Secondary Subtitle">
                     <i class="material-icons">edit</i>
                   </button>
                 </h4>
                 <p class="mat-body-1" [style.color]="data?.descriptionColor">
                   {{data?.description | slice:0:descriptionMaxLength}}
                   <span *ngIf="data?.description?.length > descriptionMaxLength">...</span>
-                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('description', 'Description', data?.description)">
+                  <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('description', 'Description', data?.description)" aria-label="Edit Description">
                     <i class="material-icons">edit</i>
                   </button>
                 </p>
@@ -45,7 +45,7 @@
             <div class="slider slider-box" *ngIf="data?.sliderData?.sliders">
               <sb-uic-sliders [widgetData]="data?.sliderData?.sliders"
                 [styleData]="data?.sliderData?.styleData" (clickEvent)="emitEvent('slider-click', $event)"></sb-uic-sliders>
-              <button *ngIf="isEdit" class="edit-icon slider-edit" (click)="openEditor('sliderData', 'Slider Images', data?.sliderData)">
+              <button *ngIf="isEdit" class="edit-icon slider-edit" (click)="openEditor('sliderData', 'Slider Images', data?.sliderData)" aria-label="Edit Slider Images">
                 <i class="material-icons">edit</i>
               </button>
             </div>
@@ -91,7 +91,7 @@
           [slwConfig]="slwConfig"
           (metricClick)="emitEvent('metric-click', $event)">
         </sb-uic-data-points>
-        <button *ngIf="isEdit" class="edit-icon metrics-edit" (click)="openEditor('metrics', 'Metrics', data?.metrics)">
+        <button *ngIf="isEdit" class="edit-icon metrics-edit" (click)="openEditor('metrics', 'Metrics', data?.metrics)" aria-label="Edit Metrics">
           <i class="material-icons">edit</i>
         </button>
       </div>

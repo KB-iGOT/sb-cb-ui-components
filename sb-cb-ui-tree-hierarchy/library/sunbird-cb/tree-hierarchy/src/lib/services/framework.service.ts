@@ -254,10 +254,13 @@ export class FrameworkService {
     if (_childOrgData?.id !== _orgData?.id) {
       categories = this.getOrgFromChildOnwards(categories || [], _childOrgData || '')
     }
+    if (categories?.length > 0) {
+      categories = _.sortBy(categories, 'index');
+    }
     response.result.framework.categories = categories;
     (categories).forEach((a: any, _idx: number) => {
       this.list.set(a.code, {
-        code: a.code,
+        code: a.code || '',
         identifier: a.identifier,
         index: (_idx + 1),
         name: a.name,

@@ -13,25 +13,25 @@
         
         <!-- Action Buttons -->
         <div class="action-buttons d-flex">
-          <button 
-            class="btn btn-slw-config"
-            (click)="onConfigureSLW()">
-            <i class="material-icons">settings</i>
+          <button mat-button
+            class="btn-common btn-secondary"
+            (click)="onConfigureSLW()" type="button">
+            <mat-icon class="material-icons">settings</mat-icon>
             Configure State Learning Week
           </button>
           
-          <button 
-            class="btn btn-save"
+          <button mat-button
+            class="btn-common btn-secondary"
             [disabled]="!hasUnsavedChanges"
-            (click)="onSaveChanges()">
-            <i class="material-icons">save</i>
+            (click)="onSaveChanges()" type="button">
+            <mat-icon class="material-icons">save</mat-icon>
             Save Changes
           </button>
           
-          <button 
-            class="btn btn-publish"
-            (click)="onPublishChanges()">
-            <i class="material-icons">publish</i>
+          <button mat-button
+            class="btn-common btn-primary"
+            (click)="onPublishChanges()" type="button">
+            <mat-icon class="material-icons">publish</mat-icon>
             Publish Changes
           </button>
         </div>

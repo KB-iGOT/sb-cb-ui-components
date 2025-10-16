@@ -1,18 +1,19 @@
-<h2 mat-dialog-title>Configure State Learning Week</h2>
+<h2 mat-dialog-title class="flex flex-middle padding-s margin-remove">Configure State Learning Week</h2>
 
 <mat-dialog-content>
   <form [formGroup]="slwForm" class="slw-config-form">
-    <!-- Enable Checkbox -->
+    <!-- Enable Toggle -->
     <div class="form-section">
-      <label class="checkbox-label" for="slwEnabled">
-        <input
-          type="checkbox"
+      <h4>Configuration</h4>
+      <div class="toggle-container flex flex-middle">
+        <mat-slide-toggle
           id="slwEnabled"
           formControlName="enabled"
-          class="checkbox-input"
-        />
-        Enable State Learning Week
-      </label>
+          class="slw-toggle"
+        >
+          <span class="toggle-label">Enable State Learning Week</span>
+        </mat-slide-toggle>
+      </div>
     </div>
     <!-- Date Range -->
     <div class="form-section">
@@ -125,10 +126,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" type="button" aria-label="Cancel configuration">
+  <button mat-button class="btn-common btn-secondary" (click)="onCancel()" type="button" aria-label="Cancel configuration">
     Cancel
   </button>
-  <button mat-raised-button color="primary" [disabled]="slwForm.invalid" 
+  <button mat-button class="btn-common btn-primary"  [disabled]="slwForm.invalid" 
           (click)="onSave()" type="button" aria-label="Save configuration">
     <mat-icon>save</mat-icon>
     Save Configuration

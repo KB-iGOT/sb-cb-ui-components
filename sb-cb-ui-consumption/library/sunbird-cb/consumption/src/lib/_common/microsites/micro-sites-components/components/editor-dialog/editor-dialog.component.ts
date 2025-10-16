@@ -35,6 +35,8 @@ export class EditorDialogComponent implements OnInit {
   uploadStatus: string = '';
   isUploading: boolean = false;
   
+  // Week Highlights specific properties
+  
   // Slider specific properties
   sliderData: SliderData = { 
     sliders: [], 
@@ -50,17 +52,27 @@ export class EditorDialogComponent implements OnInit {
   isEditingSlider: boolean = false;
   editingIndex: number = -1;
   
+  // Speaker specific properties
+  speakerForm: FormGroup;
+  isEditingSpeaker: boolean = false;
+  editingSpeakerIndex: number = -1;
+  
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
     public dialogRef: MatDialogRef<EditorDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
+    // Initialize with field type from data
     this.formType = data.fieldType || 'text';
   }
   
   get keyHighlightsArray(): FormArray {
     return this.editorForm.get('keyHighlights') as FormArray;
+  }
+  
+  get weekHighlightsList(): FormArray {
+    return this.editorForm.get('list') as FormArray;
   }
 
   ngOnInit() {
@@ -69,12 +81,56 @@ export class EditorDialogComponent implements OnInit {
     } else {
       this.initForm();
       this.initSliderItemForm();
+      
+      // Initialize speaker form if needed
+      if (this.formType === 'speakersConfig') {
+        this.initSpeakerForm();
+      }
     }
+  }
+  
+  // Helper method to create a form group for a week highlight item
+  createWeekHighlightItem(item: any = {}): FormGroup {
+    return this.fb.group({
+      title: [item.title || '', [Validators.required]],
+      description: [item.description || '', [Validators.required]],
+      videoUrl: [item.videoUrl || '', [
+        Validators.required, 
+        Validators.pattern(/^(http|https):\/\/[a-zA-Z0-9\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/)
+      ]]
+    });
+  }
+  
+  // Methods for week highlights management
+  addWeekHighlightItem(): void {
+    this.weekHighlightsList.push(this.createWeekHighlightItem());
+  }
+  
+  removeWeekHighlightItem(index: number): void {
+    this.weekHighlightsList.removeAt(index);
+  }
+  
+  dropWeekHighlightItem(event: CdkDragDrop<any[]>): void {
+    moveItemInArray(this.weekHighlightsList.controls, event.previousIndex, event.currentIndex);
+    this.weekHighlightsList.updateValueAndValidity();
   }
 
   initForm() {
     // Create form based on field type
     switch (this.formType) {
+      case 'weekHighlights':
+        const weekHighlightsValue = this.data.value || {};
+        
+        // Initialize with an empty array if list doesn't exist
+        const highlightsList = weekHighlightsValue.list || [];
+        
+        this.editorForm = this.fb.group({
+          title: [weekHighlightsValue.title || 'Week Highlights', [Validators.required]],
+          list: this.fb.array(
+            highlightsList.map((item: any) => this.createWeekHighlightItem(item))
+          )
+        });
+        break;
       case 'textarea':
         this.editorForm = this.fb.group({
           value: [this.data.value, [Validators.required]]
@@ -96,8 +152,59 @@ export class EditorDialogComponent implements OnInit {
         });
         break;
       case 'metrics':
+        const metricsValue = this.data.value || {};
         this.editorForm = this.fb.group({
-          value: [this.data.value]
+          enabled: [metricsValue.enabled !== undefined ? metricsValue.enabled : true],
+          background: [metricsValue.background || '#FFFFFF'],
+          data: [metricsValue.data || {}]
+        });
+        break;
+      case 'topLearnersConfig':
+        // Get top learners data or set defaults
+        const topLearnersValue = this.data.value || {};
+        this.editorForm = this.fb.group({
+          enabled: [topLearnersValue.enabled !== undefined ? topLearnersValue.enabled : true],
+          title: [topLearnersValue.title || 'Top Learners'],
+          titleFontColor: [topLearnersValue.titleFontColor || '#000000'],
+          customClass: [topLearnersValue.customClass || ''],
+          cardHeight: [topLearnersValue.cardHeight || '134px'],
+          cardMinHeight: [topLearnersValue.cardMinHeight || '134px'],
+          hideEle: [topLearnersValue.hideEle || []],
+          kpIcon: [topLearnersValue.kpIcon || '']
+        });
+        break;
+      case 'userProgressConfig':
+        // Get user progress data or set defaults
+        const userProgressValue = this.data.value || {};
+        this.editorForm = this.fb.group({
+          enabled: [userProgressValue.enabled !== undefined ? userProgressValue.enabled : true],
+          title: [userProgressValue.title || 'My Progress'],
+          infoText: [userProgressValue.infoText || 'User progress information'],
+          infoIcon: [userProgressValue.infoIcon || ''],
+          hideEle: [userProgressValue.hideEle || []],
+          insights: [userProgressValue.insights || { disable: false, data: { sliderData: { styleData: {} } } }]
+        });
+        break;
+      case 'speakersConfig':
+        // Get speakers data or set defaults
+        const speakersValue = this.data.value || {};
+        
+        // Debug logs to check what data we're receiving
+        console.log('EditorDialog - speakersConfig - received data.value:', this.data.value);
+        
+        // Handle both direct structure and nested structure with 'data'
+        const speakerData = speakersValue.data || speakersValue;
+        console.log('EditorDialog - speakersConfig - processed speakerData:', speakerData);
+        console.log('EditorDialog - speakersConfig - speaker list:', speakerData.list);
+        
+        this.editorForm = this.fb.group({
+          enabled: [speakersValue.enabled !== undefined ? speakersValue.enabled : true],
+          data: this.fb.group({
+            title: [speakerData.title || ''], // Empty default
+            infoText: [speakerData.infoText || ''], // Empty default
+            infoIcon: [speakerData.infoIcon || ''],
+            list: [speakerData.list || []]
+          })
         });
         break;
       case 'slider':
@@ -167,6 +274,239 @@ export class EditorDialogComponent implements OnInit {
       queryParams: [item?.queryParams || {}],
       title: [item?.title || '']
     });
+  }
+  
+  // Initialize the speaker form
+  initSpeakerForm(speaker: any = {}) {
+    console.log('Initializing speaker form with data:', speaker);
+    
+    // Ensure we handle undefined or null values
+    const safeTitle = speaker && speaker.title !== undefined ? speaker.title : '';
+    const safeDesc = speaker && speaker.description !== undefined ? speaker.description : '';
+    const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : '';
+    const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : '';
+    
+    this.speakerForm = this.fb.group({
+      title: [safeTitle, [Validators.required]],
+      description: [safeDesc, [Validators.required]],
+      profileImage: [safeImage],
+      identifier: [safeId]
+    });
+    
+    console.log('Speaker form initialized:', this.speakerForm.value);
+  }
+  
+  // Helper method to safely get speakers list
+  getSpeakersList(): any[] {
+    try {
+      if (!this.editorForm) {
+        console.warn('Editor form not initialized');
+        return [];
+      }
+      
+      const dataControl = this.editorForm.get('data');
+      if (!dataControl) {
+        console.warn('Data form group not found');
+        return [];
+      }
+      
+      const listControl = dataControl.get('list');
+      if (!listControl) {
+        console.warn('List control not found');
+        return [];
+      }
+      
+      const list = listControl.value;
+      
+      if (!Array.isArray(list)) {
+        console.warn('List is not an array:', list);
+        return [];
+      }
+      
+      return list;
+    } catch (error) {
+      console.error('Error getting speakers list:', error);
+      return [];
+    }
+  }
+  
+  // Methods for managing speakers
+  addNewSpeaker() {
+    this.isEditingSpeaker = true;
+    this.editingSpeakerIndex = -1;
+    this.initSpeakerForm();
+  }
+  
+  editSpeaker(index: number) {
+    try {
+      console.log(`Editing speaker at index: ${index}`);
+      
+      // Get current list
+      const speakersList = this.editorForm.get('data.list')?.value || [];
+      
+      // Validate index
+      if (index >= 0 && index < speakersList.length) {
+        const speaker = speakersList[index];
+        console.log('Speaker to edit:', speaker);
+        
+        // Set editing state
+        this.isEditingSpeaker = true;
+        this.editingSpeakerIndex = index;
+        
+        // Initialize form with speaker data
+        this.initSpeakerForm(speaker);
+      } else {
+        console.warn(`Invalid speaker index: ${index}`);
+      }
+    } catch (error) {
+      console.error('Error editing speaker:', error);
+    }
+  }
+  
+  removeSpeaker(index: number) {
+    try {
+      console.log(`Removing speaker at index: ${index}`);
+      
+      // Get current list
+      let speakersList = this.editorForm.get('data.list')?.value;
+      
+      // Handle case where the list might be null or undefined
+      if (!Array.isArray(speakersList)) {
+        console.warn('Speaker list is not an array, initializing empty array');
+        speakersList = [];
+      } else {
+        console.log(`Before removal: List has ${speakersList.length} speakers`);
+        
+        if (index >= 0 && index < speakersList.length) {
+          // Remove the speaker at the specified index
+          speakersList.splice(index, 1);
+          console.log(`After removal: List has ${speakersList.length} speakers`);
+          
+          // Update the form control with a new array
+          this.editorForm.get('data.list')?.setValue([...speakersList]);
+        } else {
+          console.warn(`Invalid index: ${index} for list of length ${speakersList.length}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error removing speaker:', error);
+    }
+  }
+  
+  // Method to remove all speakers
+  removeAllSpeakers() {
+    try {
+      console.log('Removing all speakers');
+      this.editorForm.get('data.list')?.setValue([]);
+    } catch (error) {
+      console.error('Error removing all speakers:', error);
+    }
+  }
+  
+  saveSpeaker() {
+    if (this.speakerForm.valid) {
+      try {
+        console.log('Saving speaker form:', this.speakerForm.value);
+        
+        // Extract speaker data from form
+        const speakerData = {
+          title: this.speakerForm.get('title')?.value,
+          description: this.speakerForm.get('description')?.value,
+          profileImage: this.speakerForm.get('profileImage')?.value,
+          identifier: this.speakerForm.get('identifier')?.value
+        };
+        
+        // Create a deep copy of the current speakers list
+        const currentList = this.editorForm.get('data.list')?.value || [];
+        const speakersList = JSON.parse(JSON.stringify(currentList));
+        
+        console.log('Current speakers list:', currentList);
+        console.log('Editing index:', this.editingSpeakerIndex);
+        
+        if (this.editingSpeakerIndex === -1) {
+          // Add new speaker
+          console.log('Adding new speaker:', speakerData);
+          speakersList.push(speakerData);
+        } else {
+          // Update existing speaker
+          console.log(`Updating speaker at index ${this.editingSpeakerIndex}:`, speakerData);
+          speakersList[this.editingSpeakerIndex] = speakerData;
+        }
+        
+        console.log('Updated speakers list:', speakersList);
+        
+        // Update the form with the new list - use a new array reference for change detection
+        this.editorForm.get('data.list')?.setValue([...speakersList]);
+        
+        // Reset the speaker form
+        this.cancelSpeakerEdit();
+      } catch (error) {
+        console.error('Error saving speaker:', error);
+      }
+    } else {
+      console.warn('Speaker form is invalid:', this.speakerForm.errors);
+    }
+  }
+  
+  cancelSpeakerEdit() {
+    this.isEditingSpeaker = false;
+    this.editingSpeakerIndex = -1;
+    this.speakerForm.reset();
+  }
+  
+  // Handle speaker image upload
+  onSpeakerImageSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadSpeakerImage(file);
+    }
+  }
+  
+  uploadSpeakerImage(file: File) {
+    this.isUploading = true;
+    this.uploadStatus = 'Uploading...';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Headers for image upload
+    const headers = new HttpHeaders({
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'locale': 'en',
+      'org': 'dopt',
+      'rootOrg': 'igot'
+    });
+    
+    this.http.post<any>('http://localhost:3000/apis/proxies/v8/storage/orgStoreUpload', formData, { headers })
+      .subscribe({
+        next: (response) => {
+          this.isUploading = false;
+          
+          if (response.responseCode === 'OK' && response.result && response.result.url) {
+            // Transform the URL
+            const transformedUrl = this.transformImageUrl(response.result.url);
+            
+            // Update the form with the new URL
+            this.speakerForm.get('profileImage')?.setValue(transformedUrl);
+            this.uploadStatus = 'Upload successful!';
+            
+            // Clear status after 3 seconds
+            setTimeout(() => {
+              this.uploadStatus = '';
+            }, 3000);
+          } else {
+            this.uploadStatus = 'Upload failed. Invalid response.';
+          }
+        },
+        error: (error) => {
+          this.isUploading = false;
+          this.uploadStatus = 'Upload failed. Please try again.';
+          console.error('Upload error:', error);
+        }
+      });
   }
   
   // General image upload methods
@@ -382,6 +722,72 @@ export class EditorDialogComponent implements OnInit {
         }
       };
       this.dialogRef.close(updatedConfig);
+    } else if (this.formType === 'weekHighlights') {
+      if (this.editorForm.valid) {
+        // Create structured data for week highlights with proper list format
+        const formValue = this.editorForm.value;
+        const updatedConfig = {
+          title: formValue.title,
+          list: formValue.list
+        };
+        this.dialogRef.close(updatedConfig);
+      }
+    } else if (this.formType === 'metrics') {
+      if (this.editorForm.valid) {
+        // Create structured data for metrics with enabled flag
+        const formValue = this.editorForm.value;
+        const updatedConfig = {
+          enabled: formValue.enabled,
+          background: formValue.background,
+          data: formValue.data
+        };
+        this.dialogRef.close(updatedConfig);
+      }
+    } else if (this.formType === 'topLearnersConfig') {
+      if (this.editorForm.valid) {
+        // Create structured data for top learners with enabled flag
+        const formValue = this.editorForm.value;
+        this.dialogRef.close(formValue); // Return all form values as config
+      }
+    } else if (this.formType === 'userProgressConfig') {
+      if (this.editorForm.valid) {
+        // Create structured data for user progress with enabled flag
+        const formValue = this.editorForm.value;
+        this.dialogRef.close(formValue); // Return all form values as config
+      }
+    } else if (this.formType === 'speakersConfig') {
+      if (this.editorForm.valid) {
+        try {
+          console.log('Submitting speakersConfig form');
+          
+          // Get form values
+          const formValue = this.editorForm.value;
+          
+          // Get speakers list and create a deep copy to avoid reference issues
+          const speakersList = this.getSpeakersList();
+          const speakersListCopy = JSON.parse(JSON.stringify(speakersList));
+          
+          console.log('Final speakers list for submission:', speakersListCopy);
+          
+          // Return with the speakerOftheDay structure format
+          const speakerConfig = {
+            speakerOftheDay: {
+              enabled: formValue.enabled,
+              data: {
+                title: formValue.data.title,
+                infoText: formValue.data.infoText,
+                infoIcon: formValue.data.infoIcon,
+                list: speakersListCopy  // Use the deep copied list
+              }
+            }
+          };
+          
+          console.log('Final speaker config for submission:', speakerConfig);
+          this.dialogRef.close(speakerConfig);
+        } catch (error) {
+          console.error('Error submitting speakers form:', error);
+        }
+      }
     } else if (this.editorForm.valid) {
       this.dialogRef.close(this.editorForm.value.value);
     }

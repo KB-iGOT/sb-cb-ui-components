@@ -20,17 +20,45 @@
   }
   
   // Toggle section
-  mat-slide-toggle {
+  .toggle-container {
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .slw-toggle {
+    display: flex !important;
+    align-items: center !important;
     margin-bottom: 8px;
+    
+    .toggle-label {
+      margin-left: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+    }
+    
     .mat-mdc-slide-toggle-bar {
       background: #e0e0e0 !important;
     }
+    
     .mat-mdc-slide-toggle-thumb {
       background: #1976d2 !important;
     }
-    .mat-mdc-slide-toggle-label {
-      color: #333 !important;
-      font-size: 15px;
+    
+    &.mat-checked {
+      .mat-mdc-slide-toggle-bar {
+        background-color: rgba(25, 118, 210, 0.38) !important;
+      }
+    }
+    
+    ::ng-deep .mdc-switch {
+      margin-right: 12px;
+    }
+    
+    ::ng-deep .mdc-form-field {
+      display: flex;
+      align-items: center;
     }
   }
   

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs';
+import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
 
 import {
   AnnouncementsModule,
@@ -75,6 +76,7 @@ import { VideoConferenceModule } from '../../video-conference/video-conference.m
     CommonModule,
     MatIconModule,
     MatChipsModule,
+    MatTooltipModule,
     SkeletonLoaderLibModule,
     AnnouncementsModule,
     TopLearnersModule,

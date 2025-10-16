@@ -18,6 +18,9 @@ import { LookerSectionComponent } from '../../micro-sites-components/components/
 import { TopLearnersComponent } from '../../micro-sites-components/components/top-learners/top-learners.component';
 import { MainContentComponent } from '../../micro-sites-components/components/main-content/main-content.component';
 import { SupportSectionComponent } from '../../micro-sites-components/components/support-section/support-section.component';
+import { HighlightsOfWeekComponent } from '../../../highlights-of-week/highlights-of-week.component';
+import { UserProgressComponent } from '../../../user-progress/user-progress.component';
+import { SpeakersComponent } from '../../../speakers/speakers.component';
 
 @Component({
   selector: 'sb-uic-mdo-channel-v3',
@@ -49,7 +52,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     'lookerSection': LookerSectionComponent,
     'topLearners': TopLearnersComponent,
     'mainContent': MainContentComponent,
-    'supportSection': SupportSectionComponent
+    'supportSection': SupportSectionComponent,
+    'weekHighlights': HighlightsOfWeekComponent,
+    'userProgress': UserProgressComponent,
+    'speakers': SpeakersComponent
   };
   
   private _eventCallbackFn: (event: any) => void;
@@ -70,18 +76,34 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     private http: HttpClient // Add HttpClient to constructor
   ) {
     this.isMobile = this.utilsSvc.isMobile;
+    
+    // Make component globally accessible for direct access
+    (window as any).mdoChannelComponent = this;
   }
   
   ngOnInit() {
+    // Create a callback function for child components
+    this._eventCallbackFn = (event: any) => this.handleSectionEvent(event);
+    
+    // Set global injector data for components that can't use Angular's DI properly
+    (window as any).__INJECTOR_DATA = {
+      isEditable: true, // Force this to true for now to enable editing
+      eventCallback: this._eventCallbackFn
+    };
+    
+    // Set up global callbacks 
+    (window as any).INJECTED_CALLBACKS = {
+      ...(window as any).INJECTED_CALLBACKS || {},
+      highlightsOfWeek: this._eventCallbackFn
+    };
+    
     // Get active sections
     this.activeSections = this.sectionList?.filter(section => section.enabled)
       .sort((a, b) => (a.order || 0) - (b.order || 0)) || [];
     
     // Get channel info from route
     this.route.params.subscribe(params => {
-      debugger
       if (params.channelId) {
-        
         this.channelName = params.channelName || '';
         this.orgId = params.channelId;
         this.cdr.markForCheck();
@@ -99,21 +121,32 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   
   handleSectionEvent(event: any) {
     // Handle events from child components
-    console.log('Section event:', event);
+    console.log('Section event received in MdoChannelV3Component:', event);
+    
+    // Check for undefined or null event
+    if (!event) {
+      console.error('Received null/undefined event');
+      return;
+    }
     
     // Raise telemetry for the event
     if (event.action) {
-      this.raiseTelemetry(`${event.source}-${event.id}`);
+      console.log(`Raising telemetry for ${event.source}-${event.id || 'unknown'}`);
+      this.raiseTelemetry(`${event.source}-${event.id || 'unknown'}`);
     }
     
     // Handle specific events
     if (event.action === 'view-all' && event.data?.viewMoreUrl) {
+      console.log(`Navigating to ${event.data.viewMoreUrl}`);
       this.router.navigateByUrl(event.data.viewMoreUrl);
     }
     
     // Handle edit events
     if (event.action === 'edit') {
+      console.log('Opening editor dialog for', event.source);
       this.openEditorDialog(event);
+    } else {
+      console.log(`Unhandled action type: ${event.action}`);
     }
   }
   
@@ -122,7 +155,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   }
   
   createInjector(section: any, column: any): Injector {
-    // Create a stable reference to the callback function
+    // Create a stable reference to the callback function if not already created
     if (!this._eventCallbackFn) {
       this._eventCallbackFn = (event: any) => this.handleSectionEvent(event);
     }
@@ -135,6 +168,16 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       return this.injectorCache.get(cacheKey)!;
     }
 
+    // Update global injector data
+    (window as any).__INJECTOR_DATA = {
+      isEditable: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit,
+      isEdit: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit,
+      eventCallback: this._eventCallbackFn,
+      sectionData: column.data,
+      channelName: this.channelName,
+      orgId: this.orgId
+    };
+
     // Create new injector
     const injector = Injector.create({
       providers: [
@@ -142,10 +185,13 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         { provide: 'channelName', useValue: this.channelName },
         { provide: 'orgId', useValue: this.orgId },
         { provide: 'isMobile', useValue: this.isMobile },
-        ...(this.isEdit ? [{ provide: 'isEdit', useValue: this.isEdit }] : [{ provide: 'isEdit', useValue: this.isEdit }]),
+        // Always set isEdit and isEditable to true for userProgress and speakers components
+        { provide: 'isEdit', useValue: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit },
         { provide: 'slwConfiguration', useValue: this.slwConfiguration },
         { provide: 'providerId', useValue: this.orgId },
-        { provide: 'eventCallback', useValue: this._eventCallbackFn }
+        { provide: 'eventCallback', useValue: this._eventCallbackFn },
+        // Set isEditable to true for userProgress, speakers or when in edit mode
+        { provide: 'isEditable', useValue: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit }
       ],
       parent: this.injector
     });
@@ -174,23 +220,31 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   // Add new method to handle edit dialog
   openEditorDialog(event: any) {
+    const dialogWidth = this.getDialogWidth(event.data.fieldType);
+    
+    // Debug logs for speaker configuration
+    if (event.data.fieldType === 'speakersConfig') {
+      console.log('MdoChannelV3 - openEditorDialog - received event:', event);
+      console.log('MdoChannelV3 - openEditorDialog - speaker value:', event.data.value);
+    }
+    
     const dialogRef = this.dialog.open(EditorDialogComponent, {
-      width: '600px',
+      width: dialogWidth,
       data: {
         fieldName: event.data.fieldName,
         displayName: event.data.displayName,
         value: event.data.value,
         fieldType: event.data.fieldType,
         section: event.source
-      }
+      }, autoFocus: false
     });
 
     // After dialog close
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        debugger
         this.isLoading = true;
-        
-        // Use updateSectionData method to update keyHighlights
+        // Use updateSectionData method to update section data
         this.updateSectionData(event.source, event.data.fieldName, result);
         
         this.isLoading = false;
@@ -204,6 +258,9 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'textarea':
       case 'slider':
       case 'metrics':
+      case 'weekHighlights':
+      case 'userProgressConfig':
+      case 'speakersConfig':
         return '800px';
       case 'image':
         return '600px';
@@ -214,24 +271,86 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   // Method to update section data
   private updateSectionData(sectionType: string, fieldName: string, newValue: any) {
+    console.log('updateSectionData called with:', { sectionType, fieldName, newValue });
+    
     // Make a deep copy to avoid modifying the original reference
     const updatedSections = cloneDeep(this.sectionList);
+    let updated = false;
     
-    // Find the relevant section and column
-    for (const section of updatedSections) {
-      if (!section.enabled) continue;
+    // Special handling for speakersConfig
+    if (fieldName === 'speakersConfig' && sectionType === 'speakers') {
+      console.log('Handling speakersConfig special case');
       
-      for (const column of section.column) {
-        if (column.key === sectionType && column.data) {
-          // Special handling for keyHighlights which is nested under stateLearningWeekSection
-          if (fieldName === 'keyHighlights' && column.data.stateLearningWeekSection) {
-            column.data.stateLearningWeekSection.keyHighlights = newValue;
-          } else {
-            // Update other fields using the nested field helper
-            this.updateNestedField(column.data, fieldName, newValue);
+      // Find the section with speakers
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          if (column.key === 'speakers') {
+            console.log('Found speakers column:', column);
+            if (!column.data) {
+              column.data = {};
+            }
+            
+            // Update with the speakerOftheDay structure
+            column.data = newValue;
+            
+            console.log('Updated speakers data:', column.data);
+            updated = true;
+            break;
           }
-          break;
         }
+        if (updated) break;
+      }
+    }
+    
+    // Special handling for weekHighlights
+    else if (fieldName === 'weekHighlights' && sectionType === 'weekHighlights') {
+      console.log('Handling weekHighlights special case');
+      
+      // Find the section with weekHighlights
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          if (column.key === 'weekHighlights') {
+            console.log('Found weekHighlights column:', column);
+            if (!column.data) {
+              column.data = {};
+            }
+            
+            // Update the title and list
+            column.data.title = newValue.title;
+            column.data.list = newValue.list;
+            
+            console.log('Updated weekHighlights data:', column.data);
+            updated = true;
+            break;
+          }
+        }
+        if (updated) break;
+      }
+    }
+    
+    // Regular handling for other field types
+    if (!updated) {
+      // Find the relevant section and column
+      for (const section of updatedSections) {
+        if (!section.enabled) continue;
+        
+        for (const column of section.column) {
+          if (column.key === sectionType && column.data) {
+            console.log('Found matching column:', column);
+            
+            // Special handling for keyHighlights which is nested under stateLearningWeekSection
+            if (fieldName === 'keyHighlights' && column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection.keyHighlights = newValue;
+              updated = true;
+            } else {
+              // Update other fields using the nested field helper
+              this.updateNestedField(column.data, fieldName, newValue);
+              updated = true;
+            }
+            break;
+          }
+        }
+        if (updated) break;
       }
     }
     
@@ -357,7 +476,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         width: '30px',
         orgId: this.orgId,
         orgName: ''
-      }
+      },
+      autoFocus: false
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -365,7 +485,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       if (result) {
         // Update SLW configuration
         this.slwConfiguration = result;
-        this.isStateLearningWeekEnabled = true;
+        this.isStateLearningWeekEnabled = result.enabled;
         this.hasUnsavedChanges = true;
         this.cdr.detectChanges();
       } else {

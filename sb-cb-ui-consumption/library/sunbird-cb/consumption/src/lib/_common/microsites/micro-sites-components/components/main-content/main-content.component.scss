@@ -2,10 +2,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 24px;
   width: 24px;
   height: 24px;
+  line-height: 24px;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(117, 117, 117, 0.7) !important;
   color: white !important;
   border: none;
   cursor: pointer;
@@ -13,13 +15,19 @@
   transition: all 0.2s ease;
   position: relative;
   z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  padding: 0;
   
   &:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-    transform: scale(1.1);
+    background-color: rgba(97, 97, 97, 0.8) !important;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
   
   mat-icon {
-    font-size: 16px;
+    font-size: 14px;
+    height: 14px;
+    width: 14px;
+    line-height: 14px;
   }
 }

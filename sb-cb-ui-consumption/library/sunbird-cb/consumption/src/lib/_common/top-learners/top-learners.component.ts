@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import moment from 'moment';
 import { InsiteDataService } from '../../_services/insite-data.service';
 @Component({
@@ -12,6 +12,10 @@ export class TopLearnersComponent implements OnInit {
   @Input() channelId: any
   @Input() channnelName: any
   @Input() slwConfig: any = {}
+  @Input() isEdit: boolean = false;
+  @Input() isEditable: boolean = false;
+  @Output() editClicked = new EventEmitter<any>;
+  
   loading: boolean = false
   month: string = ''
   results: any = []
@@ -29,7 +33,26 @@ export class TopLearnersComponent implements OnInit {
     '#3670B2', // blue
   ]
 
-  constructor(public insightSvc: InsiteDataService,) { }
+  constructor(
+    public insightSvc: InsiteDataService,
+  ) { 
+    // Try to access global injector data
+    if (window && (window as any).__INJECTOR_DATA) {
+      console.log('Global injector data found:', (window as any).__INJECTOR_DATA);
+      
+      // Check if isEdit or isEditable is provided in global injector
+      const injectorData = (window as any).__INJECTOR_DATA;
+      if (injectorData.isEditable !== undefined) {
+        this.isEditable = injectorData.isEditable;
+        console.log('Setting isEditable from global injector:', this.isEditable);
+      }
+      
+      if (injectorData.isEdit !== undefined) {
+        this.isEdit = injectorData.isEdit;
+        console.log('Setting isEdit from global injector:', this.isEdit);
+      }
+    }
+  }
 
   ngOnInit() {
     if(this.slwConfig && this.slwConfig.enabled) {
@@ -38,6 +61,14 @@ export class TopLearnersComponent implements OnInit {
       this.getData()
     }
     this.month = new Date().toLocaleString('default', { month: 'long' })
+    
+    // For testing purposes - Force edit mode to be visible
+    // Remove this in production if you want edit to be controlled by the parent
+    this.isEdit = true;
+    
+    // For debugging
+    console.log('TopLearnersComponent - isEdit:', this.isEdit);
+    console.log('TopLearnersComponent - isEditable:', this.isEditable);
   }
 
   getData() {
@@ -117,6 +148,25 @@ export class TopLearnersComponent implements OnInit {
       }
     }
     return initials.toUpperCase()
+  }
+
+  onEdit() {
+    const eventData = {
+      source: 'topLearners',
+      action: 'edit',
+      data: {
+        fieldName: 'topLearnersConfig',
+        displayName: 'Top Learners Configuration',
+        value: this.objectData,
+        fieldType: 'topLearnersConfig'
+      }
+    };
+    this.editClicked.emit(eventData);
+    
+    // If window.__INJECTOR_DATA exists and has eventCallback, use that as well
+    if (window && (window as any).__INJECTOR_DATA && (window as any).__INJECTOR_DATA.eventCallback) {
+      (window as any).__INJECTOR_DATA.eventCallback(eventData);
+    }
   }
 
 }

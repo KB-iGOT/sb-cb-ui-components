@@ -7,8 +7,14 @@
                     <img [src]="objectData?.infoIcon" alt="" i18n-matTooltip [matTooltip]="objectData?.infoText">
                 </div>                
             </div>
-            <div class="block md:hidden">
-                <mat-icon (click)="toggleWeekHightlits()">expand_more</mat-icon>
+            <div class="flex items-center">
+                <button mat-icon-button aria-label="Edit Week Highlights" class="edit-icon"
+                  (click)="onEditClick()">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <div class="block md:hidden">
+                    <mat-icon (click)="toggleWeekHightlits()">expand_more</mat-icon>
+                </div>
             </div>
         </div>
         <div *ngIf="expand">
