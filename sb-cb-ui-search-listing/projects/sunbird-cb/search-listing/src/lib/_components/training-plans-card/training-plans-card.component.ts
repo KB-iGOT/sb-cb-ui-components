@@ -23,7 +23,7 @@ export class TrainingPlansCardComponent implements OnInit {
     if (
       (this.userProfile?.firstName === plan?.createdByName ||
         this.userProfile?.userRoles?.has("mdo_leader")) &&
-      plan?.status?.toLowerCase() !== "retire"
+      plan?.status?.toLowerCase() 
     ) {
       url = `/app/training-plan/update-plan/${plan?.id}`;
     } else {
