@@ -1689,6 +1689,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         if (categories.includes(SearchCategory.Communities)) {
           await this.searchcommunities();
         }
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Ascending;
+        if (categories.includes(SearchCategory.Designation)) {
+          await this.searchDesignations();
+        }
       }
     } else if (event === SortType.ZtoA) {
       if (this.seeAllResult === "") {

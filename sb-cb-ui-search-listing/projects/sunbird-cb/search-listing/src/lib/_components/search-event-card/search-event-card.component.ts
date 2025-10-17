@@ -138,7 +138,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       this.content.contentType = "Events";
       if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
         this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-          queryParams: { mode: "edit", pathUrl: "past" }
+          queryParams: { mode: "view", pathUrl: "past" }
         });
       } else {
         this.router.navigate([`app/home/events/edit-event/${eventId}`], {
@@ -154,7 +154,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       case "Draft":
         return { mode: "edit", pathUrl: "draft" };
       case "Live":
-        return { mode: "edit", pathUrl: "upcoming" };
+        return { mode: "view", pathUrl: "upcoming" };
       case "Cancelled":
         return { mode: "view", pathUrl: "cancelled" };
       case "SentToPublish":
