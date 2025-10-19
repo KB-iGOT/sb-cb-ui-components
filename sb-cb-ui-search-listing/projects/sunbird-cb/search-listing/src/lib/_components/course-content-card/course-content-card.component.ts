@@ -7,6 +7,7 @@ import { WidgetContentLibService } from "@sunbird-cb/consumption";
 import { CertificateDialogComponent } from "@sunbird-cb/consumption";
 import { ICompentencyKeys, SearchListingConfig } from "../../_models/search-listing.model";
 import { SearchListingService } from "../../_services/search-listing.service";
+import * as _ from "lodash";
 
 const MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const NEW_CONTENT_THRESHOLD_DAYS = 14;
@@ -43,8 +44,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     private events: EventService,
     private router: Router,
     private contSvc: WidgetContentLibService,
-    private searchListingService: SearchListingService
-    ,
+    private searchListingService: SearchListingService,
     private matSnackbarNew: MatSnackbarNew
   ) {
     this.environment = environment;
@@ -160,7 +160,12 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
   }
 
   async getRedirectUrlData(content: any) {
-    if (content && content?.contentType === "Resource" && content?.identifier) {
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const loggedInUserId = _.get(this.configSvc, 'userProfile.userId', '')
+      this.telemetry.emit(content);
+      // delegate to a dedicated handler that implements CBPPortal rules
+      this.handleContentClick(content, loggedInUserId);
+    } else if (content && content?.contentType === "Resource" && content?.identifier) {
       let resourceType;
       if (!content?.resourceType) {
         resourceType = "youtube";
@@ -173,17 +178,10 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
       });
     } else {
       this.telemetry.emit(content);
-      if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-        
-        const loggedInUserId = this.configSvc.userProfile?.userId || "";
-        // delegate to a dedicated handler that implements CBPPortal rules
-        this.handleContentClick(content, loggedInUserId);
-      } else {
-        const urlData = await this.contSvc.getResourseLink(content);
-        this.router.navigate([urlData.url], {
-          queryParams: urlData.queryParams
-        });
-      }
+      const urlData = await this.contSvc.getResourseLink(content);
+      this.router.navigate([urlData.url], {
+        queryParams: urlData.queryParams
+      });
     }
   }
 

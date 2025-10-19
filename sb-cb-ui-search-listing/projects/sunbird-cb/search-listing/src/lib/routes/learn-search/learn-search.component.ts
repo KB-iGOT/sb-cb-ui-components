@@ -656,6 +656,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
     }
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      delete this.searchRequestUsers.request.filters["status"]
+      this.searchRequestUsers.request.fields.push("isDeleted")
+    }
 
     this.searchRequestUsers.request.query = this.statedata?.param || "";
 
@@ -672,11 +676,13 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
       this.combinedFacets = [];
       this.combinedFacets = [...this.combinedFacets, result.result?.response.facets || []];
+      this.updateUserEvent.emit('');
     } else {
       this.usersSearchResults = [];
       this.usersSearchTotalCount = 0;
       this.usersFacets = [];
       this.combinedFacets = [];
+      this.updateUserEvent.emit('');
     }
 
     this.searchPeopleLoader = false;

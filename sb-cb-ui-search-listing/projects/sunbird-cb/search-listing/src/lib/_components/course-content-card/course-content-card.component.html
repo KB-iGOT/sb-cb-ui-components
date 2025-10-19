@@ -117,27 +117,6 @@
                                         'bookmark_border'}}</mat-icon>
                                 </button>
                             </div> -->
-              <ng-container *ngIf="applicationName === 'CBP Portal'">
-                <div class="flex items-center gap-3">
-                  <ng-container *ngIf="contentStatus">
-                    <div class="inprogress-course font-stats rounded">
-                      {{ contentStatus }}
-                    </div>
-                  </ng-container>
-                  <!-- <ng-container *ngIf="mentList && mentList.length">
-                    <div class="more-options relative" >
-                      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More Options">
-                        <mat-icon>more_vert</mat-icon>
-                      </button>
-                      <mat-menu #menu="matMenu">
-                        <button mat-menu-item *ngFor="let item of mentList" (click)="onContentAction(item.action, content); $event.stopPropagation()">
-                          {{ item.displayName }}
-                        </button>
-                      </mat-menu>
-                    </div>
-                  </ng-container> -->
-                </div>
-              </ng-container>
             </div>
           </div>
         </ng-container>

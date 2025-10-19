@@ -202,6 +202,7 @@
                   <div class="card-container mr-6" *ngFor="let user of usersSearchResults; let index = index">
                     <sb-cb-search-users-card
                       [user]="user"
+                      [applicationName]="applicationName"
                       (telemetry)="applyTelemetry($event, index)"
                       [category]="seeAllResult"
                       (updateUser)="updateUserDetails($event)"></sb-cb-search-users-card>
@@ -213,6 +214,7 @@
                 <div class="flex flex-wrap gap-x-3 gap-y-3 items-center justify-start mt-4">
                   <div class="card-container" *ngFor="let user of usersSearchResults; let i = index">
                     <sb-cb-search-users-card
+                      [applicationName]="applicationName"
                       [user]="user"
                       (telemetry)="applyTelemetry($event, index)"
                       [category]="seeAllResult"

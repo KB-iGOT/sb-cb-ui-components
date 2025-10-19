@@ -38,7 +38,9 @@ const API_END_POINTS = {
   FETCH_CPB_PLANS: `/apis/proxies/v8/user/v1/cbplan`,
   DOWNLOAD_CERTIFICATE_v2: (id: string) => `apis/protected/v8/cohorts/course/batch/cert/download/${id}`,
   SEARCH_USERS: `/apis/proxies/v8/user/v1/search`,
-  SEARCH_TRAINING_PLANS: `/apis/proxies/v8/cbplan/v2/search`
+  SEARCH_TRAINING_PLANS: `/apis/proxies/v8/cbplan/v2/search`,
+  BLOCK_USER: '/apis/proxies/v8/user/v1/block',
+  UNBLOCK_USER: '/apis/proxies/v8/user/v1/unblock'
 };
 
 @Injectable({
@@ -298,5 +300,13 @@ export class SearchListingService {
   searchDesignationV4(params: SearchDesignationRequest): Promise<any> {
     // This method is used to search courses using the v4 API.
     return this.http.post(API_END_POINTS.SEARCH_V4, params).toPromise();
+  }
+
+  blockUser(request: any): Observable<any> {
+    return this.http.post<any>(API_END_POINTS.BLOCK_USER, request)
+  }
+
+  unblockUser(request: any): Observable<any> {
+    return this.http.post<any>(API_END_POINTS.UNBLOCK_USER, request)
   }
 }

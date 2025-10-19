@@ -2,6 +2,9 @@ import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
 import { ConfigurationsService } from "@sunbird-cb/utils-v2";
+import { SearchListingConfig } from "../../_models/search-listing.model";
+import { SearchListingService } from "../../_services/search-listing.service";
+import * as _ from "lodash";
 
 @Component({
   selector: "ws-app-global-search",
@@ -19,12 +22,15 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   searchCategory: string = "";
   environment!: any;
   userId!: string;
+  applicationName = ''
+  searchConfig: SearchListingConfig.Config | null = null;
   constructor(
     @Inject("environment") environment: any,
     private activated: ActivatedRoute,
     private translate: TranslateService,
     private configService: ConfigurationsService,
-    private router: Router
+    private router: Router,
+    private searchListingService: SearchListingService
   ) {
     this.environment = environment;
     if (localStorage.getItem("websiteLanguage")) {
@@ -34,8 +40,10 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.compentencyKey = this.configService.compentency ? this.configService.compentency[this.environment.compentencyVersionKey] : undefined;
+    this.searchConfig = await this.searchListingService.getSearchConfig();
+    this.applicationName = _.get(this.searchConfig, "applicationName", '');
     const containerElement = document.querySelector('.container-body-scroll');
     if (containerElement) {
       containerElement.classList.add('search-result-active');
