@@ -50,7 +50,6 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
     }
     
     this.activated.queryParamMap.subscribe(queryParams => {
-      this.userId = queryParams.get("user") || "";
       this.userValue = "";
       if (queryParams.has("tab")) {
         const tabn = queryParams.get("tab");
@@ -61,6 +60,10 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
         });
       }
       if (queryParams.has("q")) {
+        const query = queryParams.get("q") || "";
+        if (query !== this.searchParam?.query) {
+          this.userId = "";
+        } else this.userId = queryParams.get("user") || "";
         this.searchParam = {
           query: queryParams.get("q") || "",
           nlp: queryParams.get("search") || "",

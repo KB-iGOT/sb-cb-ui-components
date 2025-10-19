@@ -124,11 +124,15 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
         const userRoles = this.configSvc?.userRoles as Set<string>;
         if (this.searchConfig.searchCategories) {
-          if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
+          const hasMdoAdmin = userRoles.has("mdo_admin");
+          const hasMdoLeader = userRoles.has("mdo_leader");
+          const hasCommunityModerator = userRoles.has("community_moderator");
+          if ((hasMdoAdmin && hasCommunityModerator) || (hasMdoLeader && hasCommunityModerator) || hasMdoLeader) {
+          } else if (hasMdoAdmin) {
             this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
-          }
-          if (userRoles.has("community_moderator")) {
-            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          } else if (hasCommunityModerator) {            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          } else {
+            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
           }
         }
       }

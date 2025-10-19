@@ -134,7 +134,6 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
     if(eventId) {
       this.content.contentType = 'Events';
       this.telemetry.emit(this.content);
-      console.log('content:', this.content);
       switch (this.searchListingService.searchConfig?.applicationName) {
         case SearchListingConfig.ApplicationNames.LearnerPortal:
           this.content.contentType = "Events";
@@ -145,14 +144,13 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
           this.content.contentType = "Events";
           if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
             this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-              queryParams: { mode: "edit", pathUrl: "past" }
+              queryParams: { mode: "view", pathUrl: "past" }
             });
           } else {
             this.router.navigate([`app/home/events/edit-event/${eventId}`], {
               queryParams: this.getEventsQueryParams(this.content?.status)
             });
           }
-          this.telemetry.emit(this.content);
           break;
         case SearchListingConfig.ApplicationNames.CBPPortal:
           const mode = _.get(this.content, 'status', '').toLowerCase() === 'live' ? 'pastRequests' : 'newRequests'
@@ -170,7 +168,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       case "Draft":
         return { mode: "edit", pathUrl: "draft" };
       case "Live":
-        return { mode: "edit", pathUrl: "upcoming" };
+        return { mode: "view", pathUrl: "upcoming" };
       case "Cancelled":
         return { mode: "view", pathUrl: "cancelled" };
       case "SentToPublish":
