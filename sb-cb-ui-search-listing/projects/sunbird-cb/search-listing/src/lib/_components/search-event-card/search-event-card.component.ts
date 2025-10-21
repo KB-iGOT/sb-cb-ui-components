@@ -136,9 +136,13 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       this.telemetry.emit(this.content);
     } else if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       this.content.contentType = "Events";
-      if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+      if (this.content.startDateTime <= this.getCurrentTimeInUTC && this.content.endDateTime >= this.getCurrentTimeInUTC && this.content.status === "Live") {
         this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-          queryParams: { mode: "view", pathUrl: "past" }
+          queryParams: { mode: "view", pathUrl: "upcoming" }
+        });
+      } else if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+        this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+          queryParams: { mode: "edit", pathUrl: "past" }
         });
       } else {
         this.router.navigate([`app/home/events/edit-event/${eventId}`], {
@@ -154,7 +158,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       case "Draft":
         return { mode: "edit", pathUrl: "draft" };
       case "Live":
-        return { mode: "view", pathUrl: "upcoming" };
+        return { mode: "edit", pathUrl: "upcoming" };
       case "Cancelled":
         return { mode: "view", pathUrl: "cancelled" };
       case "SentToPublish":
@@ -162,7 +166,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       case "Rejected":
         return { mode: "edit", pathUrl: "rejected" };
       default:
-        return { mode: "view", pathUrl: "draft" };
+        return { mode: "edit", pathUrl: "draft" };
     }
   }
 
