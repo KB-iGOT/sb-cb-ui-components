@@ -1865,6 +1865,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           const sRequest: any = {
             "request": {
               "filters": {
+                "courseCategory": [
+                  "Course"
+                ],
                 "identifier": coursesIds
               },
               "offset": 0,
