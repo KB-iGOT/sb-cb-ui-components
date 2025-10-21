@@ -142,9 +142,13 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
           break;
         case SearchListingConfig.ApplicationNames.MDOPortal:
           this.content.contentType = "Events";
-          if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+          if (this.compareDatesForLive(this.content.startDateTime, this.content.endDateTime) && this.content.status === "Live") {
             this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-              queryParams: { mode: "view", pathUrl: "past" }
+              queryParams: { mode: "view", pathUrl: "upcoming" }
+            });
+          } else if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+            this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+              queryParams: { mode: "edit", pathUrl: "past" }
             });
           } else {
             this.router.navigate([`app/home/events/edit-event/${eventId}`], {
@@ -168,7 +172,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       case "Draft":
         return { mode: "edit", pathUrl: "draft" };
       case "Live":
-        return { mode: "view", pathUrl: "upcoming" };
+        return { mode: "edit", pathUrl: "upcoming" };
       case "Cancelled":
         return { mode: "view", pathUrl: "cancelled" };
       case "SentToPublish":
@@ -176,7 +180,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       case "Rejected":
         return { mode: "edit", pathUrl: "rejected" };
       default:
-        return { mode: "view", pathUrl: "draft" };
+        return { mode: "edit", pathUrl: "draft" };
     }
   }
 
@@ -238,5 +242,13 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
     const currentDate = new Date()
     const isoString = currentDate.toISOString()
     return isoString.replace('Z', '+0000')
+  }
+
+  compareDatesForLive(startDateTime: string, endDateTime: string): boolean {
+    const currentDate = new Date();
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+    
+    return currentDate >= start && currentDate <= end;
   }
 }
