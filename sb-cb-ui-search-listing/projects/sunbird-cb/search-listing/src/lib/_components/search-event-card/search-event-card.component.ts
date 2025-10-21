@@ -136,7 +136,7 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
       this.telemetry.emit(this.content);
     } else if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       this.content.contentType = "Events";
-      if (this.content.startDateTime <= this.getCurrentTimeInUTC && this.content.endDateTime >= this.getCurrentTimeInUTC && this.content.status === "Live") {
+      if (this.compareDatesForLive(this.content.startDateTime, this.content.endDateTime) && this.content.status === "Live") {
         this.router.navigate([`app/home/events/edit-event/${eventId}`], {
           queryParams: { mode: "view", pathUrl: "upcoming" }
         });
@@ -228,5 +228,13 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
     const currentDate = new Date()
     const isoString = currentDate.toISOString()
     return isoString.replace('Z', '+0000')
+  }
+
+  compareDatesForLive(startDateTime: string, endDateTime: string): boolean {
+    const currentDate = new Date();
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+    
+    return currentDate >= start && currentDate <= end;
   }
 }
