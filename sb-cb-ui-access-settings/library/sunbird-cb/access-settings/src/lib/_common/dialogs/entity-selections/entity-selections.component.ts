@@ -105,8 +105,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.selectedData = [...this.data.selected.map((ele: any) => _.toNumber(ele))];
         this.selectedDataTemp = [...this.selectedData];
       } else if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
-        const tempData = _.isString(this.data.selected[0]) ? (this.data.selected[0].toLocaleLowerCase() === 'true') : this.data.selected[0];
-        this.selectedCentralDeputation = tempData;
+        this.selectedCentralDeputation = this.data.selected[0] === 'true' || this.data.selected[0] === true;
       } else {
         this.selectedData = [...this.data.selected];
         this.selectedDataTemp = [...this.selectedData];
@@ -120,7 +119,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.filterValue = this.data?.activeTabSelected > 0 ? "selected" : "all";
     }
 
-    if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
+     if (this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation) {
       this.selectedDataTemp = [this.selectedCentralDeputation];
     }
 

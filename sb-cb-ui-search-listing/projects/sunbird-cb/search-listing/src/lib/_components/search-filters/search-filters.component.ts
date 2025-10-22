@@ -120,11 +120,15 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
         const userRoles = this.configSvc?.userRoles as Set<string>;
         if (this.searchConfig.searchCategories) {
-          if (!userRoles.has("mdo_leader") && !userRoles.has("community_moderator")) {
+          const hasMdoAdmin = userRoles.has("mdo_admin");
+          const hasMdoLeader = userRoles.has("mdo_leader");
+          const hasCommunityModerator = userRoles.has("community_moderator");
+          if ((hasMdoAdmin && hasCommunityModerator) || (hasMdoLeader && hasCommunityModerator) || hasMdoLeader) {
+          } else if (hasMdoAdmin) {
             this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
-          }
-          if (userRoles.has("community_moderator")) {
-            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          } else if (hasCommunityModerator) {            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          } else {
+            this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
           }
         }
       }
@@ -1110,20 +1114,30 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   formatFilterChips(value: string): string {
-    if (!value) {
-      return value;
+    if (!value) return value;
+
+    const datePattern = /^\d{4}[-/]\d{2}[-/]\d{2}$/;
+
+    if (datePattern.test(value)) {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
     }
-    const date = new Date(value);
-    if (!isNaN(date.getTime())) {
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const day = date.getDate().toString().padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "live") {
-      return "Published";
-    } else if (this.searchCategory === SearchCategory.Events && value.toLowerCase() === "senttopublish") {
-      return "Pending Approval";
-    } else if (value.includes("_")) {
+
+    if (this.searchCategory === SearchCategory.Events) {
+      const lowerValue = value.toLowerCase();
+      if (lowerValue === "live") {
+        return "Published";
+      } else if (lowerValue === "senttopublish") {
+        return "Pending Approval";
+      }
+    }
+
+    if (value.includes("_")) {
       return this.formatRolesNames(value);
     }
 

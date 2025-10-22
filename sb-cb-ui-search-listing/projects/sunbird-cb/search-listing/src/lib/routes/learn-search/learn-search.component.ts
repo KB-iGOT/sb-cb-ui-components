@@ -537,7 +537,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   async searchUsersMDO() {
     this.searchPeopleLoader = true;
-
     if (this.configSvc?.unMappedUser?.rootOrg?.organisationType === 16 || this.configSvc?.unMappedUser?.rootOrg?.organisationType === 2048) {
       this.searchRequestUsers.request.filters["profileDetails.ministryOrStateId"] = this.configSvc.userProfile?.rootOrgId || "";
       if (this.searchRequestUsers.request.filters!.rootOrgId) {
@@ -596,8 +595,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
         if (key === FacetType.isApar) {
           name = value === "true" ? "APAR" : "NON APAR";
-        } else if (key === FacetType.status) {
-          name = value?.toLowerCase();
         } else {
           name = value;
         }
@@ -648,7 +645,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     // Initialize users search request
     this.searchRequestUsers = new SearchUsersRequest();
     this.searchRequestUsers.request.limit = this.initialPaginationSize;
-    this.searchRequestUsers.request.filters = { rootOrgId: this.configSvc.userProfile?.rootOrgId || "" };
+    this.searchRequestUsers.request.filters = { ...this.searchRequestUsers.request.filters, rootOrgId: this.configSvc.userProfile?.rootOrgId || "" };
 
     // Initialize designation search request
     this.searchRequestDesignation = new SearchDesignationRequest();
@@ -1691,6 +1688,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestCommunities.orderDirection = SortType.Ascending;
         if (categories.includes(SearchCategory.Communities)) {
           await this.searchcommunities();
+        }
+      } else if (this.seeAllResult === SearchCategory.Designation) {
+        delete this.searchRequestDesignation.request.sort_by[FacetType.createdOn];
+        this.searchRequestDesignation.request.sort_by["name"] = SortType.Ascending;
+        if (categories.includes(SearchCategory.Designation)) {
+          await this.searchDesignations();
         }
       }
     } else if (event === SortType.ZtoA) {

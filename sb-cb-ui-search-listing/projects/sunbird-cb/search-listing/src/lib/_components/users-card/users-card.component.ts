@@ -100,7 +100,7 @@ export class UsersCardComponent {
       return designation ? `${designation}` : '';
     }
 
-    return this.user?.rootOrgName ?? "";
+    return "";
   }
 
   get userEmail(): string {

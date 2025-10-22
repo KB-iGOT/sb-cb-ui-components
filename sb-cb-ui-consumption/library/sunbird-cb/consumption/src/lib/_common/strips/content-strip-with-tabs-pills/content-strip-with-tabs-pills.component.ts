@@ -20,7 +20,7 @@ import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { NsCardContent } from '../../../_models/card-content-v2.model';
+import { NsCardContent } from '../../../_models/card-content-v2.model'; 
 import { ITodayEvents } from '../../../_models/event';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
@@ -1560,6 +1560,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     let all: any[] = [];
     let upcoming: any[] = [];
     let overdue: any[] = [];
+    let apar: any[] = [];
     array.forEach((e: any) => {
       all.push(e);
       if (e.planDuration === NsCardContent.ACBPConst.OVERDUE) {
@@ -1606,11 +1607,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       return data.contentStatus < 2;
     });
 
+    apar = array.filter((e: any) => e.isApar === true);
+
     return [
       { value: 'all', widgets: this.transformContentsToWidgets(all, strip) },
       { value: 'upcoming', widgets: this.transformContentsToWidgets(upcoming, strip) },
       { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
-      { value: 'overdue', widgets: this.transformContentsToWidgets(overdue, strip) }];
+      { value: 'overdue', widgets: this.transformContentsToWidgets(overdue, strip) },
+      { value: 'apar', widgets: this.transformContentsToWidgets(apar, strip) }];
   }
   resetSelectedPill(pillData: any) {
     if (pillData && pillData.length) {
@@ -1861,6 +1865,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           const sRequest: any = {
             "request": {
               "filters": {
+                "courseCategory": [
+                  "Course"
+                ],
                 "identifier": coursesIds
               },
               "offset": 0,

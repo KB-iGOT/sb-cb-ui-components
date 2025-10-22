@@ -1502,6 +1502,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const conditions = this.fb.array([]) as any;
 
       group.userGroupCriteriaList.forEach((criteria: any) => {
+
+        if(!this.isCCA && criteria.criteriaKey === NsAccessControlConfig.SelectionType.Organizations) {
+          return; // Skip this iteration to not add the organization condition
+        }
+
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
         // Set the form values
