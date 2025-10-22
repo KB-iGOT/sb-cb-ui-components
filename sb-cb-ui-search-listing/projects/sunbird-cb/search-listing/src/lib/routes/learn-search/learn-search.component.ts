@@ -132,10 +132,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   filtersChipFromLearn: string[] = [];
   shouldReturnFromHere = false;
   isExploreContentTab = false;
-  applySelectedFilters: any = [];
+  applySelectedFilters: any;
   compentencyKeyExist = false;
   environment!: any;
   searchConfig: SearchListingConfig.Config | null = null;
+  noDataNavigationButtons: any[] = [];
+  applicationName = ''
   constructor(
     @Inject("environment") environment: any,
     private searchListingService: SearchListingService,
@@ -156,16 +158,16 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
     this.environment = environment;
-    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
-    this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
-    this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
-    this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
+    this.compentencyKey = this.configSvc.compentency ? this.configSvc.compentency[this.environment.compentencyVersionKey] : null;
+    if (this.compentencyKey) {
+      this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
+      this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
+      this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
+    }
   }
 
   async ngOnInit() {
-    if (this.configSvc.userProfile && this.configSvc.userProfile.departmentName) {
-      this.currentUserDept = this.configSvc.userProfile.departmentName;
-    }
+  this.currentUserDept = _.get(this.configSvc, 'userProfile.departmentName', '');
     this.statedata = {
       param: this.searchQuery?.nlp ? this.searchQuery?.nlp : this.searchQuery.query,
       path: "Search"
@@ -192,7 +194,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   async ngOnChanges(changes: SimpleChanges) {
     this.searchConfig = await this.searchListingService.getSearchConfig();
-
+    this.applicationName = _.get(this.searchConfig, "applicationName", '');
     if (this.configSvc.unMappedUser && this.configSvc.unMappedUser.profileDetails) {
       this.veifiedKarmayogi =
         this.configSvc.unMappedUser.profileDetails.profileStatus && this.configSvc.unMappedUser.profileDetails.profileStatus === "VERIFIED" ? true : false;
@@ -231,34 +233,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else {
         const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
         if (categories.length) {
-          if (categories.includes(SearchCategory.Courses)) {
-            await this.searchCourses();
-          }
-          if (categories.includes(SearchCategory.Events)) {
-            await this.searchEvents();
-          }
-
-          if (categories.includes(SearchCategory.People)) {
-            await this.searchPeople();
-          }
-          if (categories.includes(SearchCategory.Communities)) {
-            await this.searchcommunities();
-          }
-          if (categories.includes(SearchCategory.Resources)) {
-            await this.searchResources();
-          }
-          if (categories.includes(SearchCategory.ExternalContents)) {
-            await this.searchExternalContents();
-          }
-          if (categories.includes(SearchCategory.Designation)) {
-            await this.searchDesignations();
-          }
-          if (categories.includes(SearchCategory.TrainingPlans)) {
-            await this.searchTrainingPlans();
-          }
-          if (categories.includes(SearchCategory.Users)) {
-            await this.searchUsersMDO();
-          }
+          // iterate once and dispatch to the correct search handler
+          await this.executeSearchesForCategories(categories, true);
         }
 
         this.searchContentLoader = false;
@@ -339,34 +315,118 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async searchCourses() {
-    this.searchRequestCourse.request.filters.status = ["Live"];
     this.searchRequestCourse.request.query = this.statedata?.param;
-    const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
-    if (result?.result && result?.result?.content) {
-      this.courseSearchResults = result.result.content;
-      this.courseSearchTotalCount = result.result?.count;
-      this.coursesFacets = result.result?.facets || [];
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+        this.searchRequestCourse.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      }
+      const courseFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'courses');
+      if (courseFilters.length && courseFilters[0].facets && courseFilters[0].facets.length) {
+        const competencyKeys = [
+          this.competencyAreaNameKey,
+          this.competencyThemeKey,
+          this.competencySubThemeKey
+        ].filter(k => k !== null && k !== undefined) as string[];
+        const facetsFromConfig = [...courseFilters[0].facets] as string[];
 
-      this.combinedFacets = [];
-      this.combinedFacets = [...this.combinedFacets, result.result?.facets || []];
-      // });
+        // If config contains the placeholder 'competencies', replace it with the actual competency keys
+        const compIndex = facetsFromConfig.indexOf('competencies');
+        if (compIndex !== -1) {
+          // Splice will remove the placeholder and insert competency keys (if any). If competencyKeys is empty,
+          // this effectively removes the 'competencies' placeholder.
+          facetsFromConfig.splice(compIndex, 1, ...competencyKeys);
+        }
+
+        // Filter out any null/undefined values and use config-provided facets
+        this.searchRequestCourse.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
+        if(this.searchRequestCourse.request.facets.findIndex(v => v === 'status') > -1) {
+          if(this.searchRequestCourse.request.filters["status"] && !this.searchRequestCourse.request.filters["status"].length) {
+            this.searchRequestCourse.request.filters["status"] = ["Live", "Review"];
+          }
+        }
+      }
+      this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
     } else {
+      this.searchRequestCourse.request.filters.status = ["Live"];
+    }
+    try {
+      const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
+      if (_.get(result, 'result.content')) {
+        this.courseSearchResults = result.result.content;
+        this.courseSearchTotalCount = result.result?.count;
+        this.coursesFacets = result.result?.facets || [];
+
+        this.combinedFacets = [];
+        this.combinedFacets = [...this.combinedFacets, result.result?.facets || []];
+      } else {
+        this.courseSearchResults = [];
+        this.courseSearchTotalCount = 0;
+        this.coursesFacets = result?.result?.facets || [];
+        this.combinedFacets = [];
+      }
+    } catch (err) {
       this.courseSearchResults = [];
       this.courseSearchTotalCount = 0;
-      this.coursesFacets = result.result?.facets || [];
+      this.coursesFacets = [];
       this.combinedFacets = [];
     }
   }
 
   async searchEvents() {
-    if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
+    if (this.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
       this.searchRequestEvents.request.filters.status = ["Live"];
     }
 
+    // this.searchRequestEvents.request.sort_by.startDate = 'desc';
+    // For CBPPortal: ensure a default status filter is applied when no status is selected
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const hasStatus = typeof this.applySelectedFilters === "object" && this.applySelectedFilters["status"];
+      if (!hasStatus) {
+        this.searchRequestEvents.request.filters.status = ["Live", "SentToPublish"];
+      }
+    }
     this.searchRequestEvents.request.filters.contentType = "Event";
     this.searchRequestEvents.request.fields = SearchEventFields;
-    this.searchRequestEvents.request.facets = [...SearchEventfacet, this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey];
+    // Build base facets array and avoid passing null/undefined competency keys
+    const baseEventFacets = [
+      ...SearchEventfacet
+    ].filter((v: string) => v !== null && v !== undefined);
 
+    const competencyKeys = [
+      this.competencyAreaNameKey,
+      this.competencyThemeKey,
+      this.competencySubThemeKey
+    ].filter(k => k !== null && k !== undefined) as string[];
+
+    // Start with base facets and append competency keys if present
+    let resolvedEventFacets: string[] = competencyKeys.length ? [...baseEventFacets, ...competencyKeys] : baseEventFacets;
+
+    // If CBPPortal provides a facets configuration for events, prefer that.
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+        this.searchRequestEvents.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      }
+      const eventFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');
+      if (eventFilters.length && eventFilters[0].facets && eventFilters[0].facets.length) {
+        // Clone to avoid mutating upstream config
+        const facetsFromConfig = [...eventFilters[0].facets] as string[];
+
+        // If config contains the placeholder 'competencies', replace it with the actual competency keys
+        const compIndex = facetsFromConfig.indexOf('competencies');
+        if (compIndex !== -1) {
+          // Splice will remove the placeholder and insert competency keys (if any). If competencyKeys is empty,
+          // this effectively removes the 'competencies' placeholder.
+          facetsFromConfig.splice(compIndex, 1, ...competencyKeys);
+        }
+
+        // Filter out any null/undefined values and use config-provided facets
+        this.searchRequestEvents.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
+      } else {
+        this.searchRequestEvents.request.facets = resolvedEventFacets;
+      }
+    } else {
+      this.searchRequestEvents.request.facets = resolvedEventFacets;
+    }
     delete this.searchRequestEvents.request.filters?.courseCategory;
     delete this.searchRequestEvents.request.sort_by?.createdOn;
 
@@ -378,14 +438,23 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchRequestEvents.request.filters["createdFor"] = this.configSvc.userProfile?.rootOrgId || "";
     }
 
-    const result = await this.searchListingService.searchCoursesv4(this.searchRequestEvents);
-    if (result?.result && result?.result?.Event) {
-      this.eventsSearchResults = result.result?.Event || [];
-      this.eventSearchTotalCount = result.result?.count;
-      this.eventsFacets = this.processObjectFacetsForEvents(result.result?.facets);
-      this.combinedFacets = [];
-      this.combinedFacets = [...this.combinedFacets, this.eventsFacets || []];
-    } else {
+    try {
+      const result = await this.searchListingService.searchCoursesv4(this.searchRequestEvents);
+      if (_.get(result, 'result.Event')) {
+        const eventFacets = this.applicationName === SearchListingConfig.ApplicationNames.MDOPortal ? this.processObjectFacetsForEvents(result.result.facets) : result.result.facets || [];
+        this.eventsSearchResults = result.result.Event || [];
+        this.eventSearchTotalCount = result.result.count;
+        this.eventsFacets = eventFacets;
+        this.combinedFacets = [];
+        this.combinedFacets = [...this.combinedFacets, eventFacets || []];
+      } else {
+        this.eventsSearchResults = [];
+        this.eventSearchTotalCount = 0;
+        this.eventsFacets = result?.result?.facets || [];
+      }
+    } catch (err) {
+      // API/network error - ensure UI remains stable
+      // eslint-disable-next-line no-console
       this.eventsSearchResults = [];
       this.eventSearchTotalCount = 0;
       this.eventsFacets = [];
@@ -471,6 +540,45 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   async searchExternalContents() {
     this.searchRequestExternal.searchString = this.statedata?.param || "";
+    // Ensure facets array does not contain null/undefined entries
+    const baseEventFacets = [
+      ...SearchEventfacet
+    ].filter((v: string) => v !== null && v !== undefined);
+
+    const competencyKeys = [
+      this.competencyAreaNameKey,
+      this.competencyThemeKey,
+      this.competencySubThemeKey
+    ].filter(k => k !== null && k !== undefined) as string[];
+
+    // Start with base facets and append competency keys if present
+    let resolvedEventFacets: string[] = competencyKeys.length ? [...baseEventFacets, ...competencyKeys] : baseEventFacets;
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+        this.searchRequestEvents.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      }
+      const contentFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');
+      if (contentFilters.length && contentFilters[0].facets && contentFilters[0].facets.length) {
+        // Clone to avoid mutating upstream config
+        const facetsFromConfig = [...contentFilters[0].facets] as string[];
+
+        // If config contains the placeholder 'competencies', replace it with the actual competency keys
+        const compIndex = facetsFromConfig.indexOf('competencies');
+        if (compIndex !== -1) {
+          // Splice will remove the placeholder and insert competency keys (if any). If competencyKeys is empty,
+          // this effectively removes the 'competencies' placeholder.
+          facetsFromConfig.splice(compIndex, 1, ...competencyKeys);
+        }
+
+        // Filter out any null/undefined values and use config-provided facets
+        this.searchRequestExternal.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
+      } else {
+        this.searchRequestExternal.facets = resolvedEventFacets;
+      }
+    }
+    this.searchRequestExternal.facets = (_.get(this.searchRequestExternal, 'facets', []) as string[]).filter(
+      (v: string | null | undefined) => v !== null && v !== undefined
+    );
     const result = await this.searchListingService.searchExternalContent(this.searchRequestExternal).catch(() => {
       return {
         data: [],
@@ -548,6 +656,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       this.searchRequestUsers.request.filters!.rootOrgId = this.configSvc.userProfile?.rootOrgId || "";
     }
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      delete this.searchRequestUsers.request.filters["status"]
+      this.searchRequestUsers.request.fields.push("isDeleted")
+    }
 
     this.searchRequestUsers.request.query = this.statedata?.param || "";
 
@@ -564,14 +676,80 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
       this.combinedFacets = [];
       this.combinedFacets = [...this.combinedFacets, result.result?.response.facets || []];
+      this.updateUserEvent.emit('');
     } else {
       this.usersSearchResults = [];
       this.usersSearchTotalCount = 0;
       this.usersFacets = [];
       this.combinedFacets = [];
+      this.updateUserEvent.emit('');
     }
 
     this.searchPeopleLoader = false;
+  }
+
+  /**
+   * Execute searches for the provided categories.
+   * If awaitEach is true, run each search sequentially and await its completion.
+   * If awaitEach is false, await Courses and Events (they may affect shared state),
+   * then trigger the remaining searches without awaiting to run in parallel.
+   */
+  private async executeSearchesForCategories(categories: string[], awaitEach = false): Promise<void> {
+    if (!categories || !categories.length) {
+      return;
+    }
+
+    if (awaitEach) {
+      for (const cat of categories) {
+        // await each search sequentially
+        // runSearchForCategory returns a Promise from the underlying async search method
+        // eslint-disable-next-line no-await-in-loop
+        await this.runSearchForCategory(cat);
+      }
+      return;
+    }
+
+    // Non-await mode: await Courses and Events first (they often set shared facets/state),
+    // then fire the rest without awaiting so they can run concurrently.
+    if (categories.includes(SearchCategory.Courses)) {
+      await this.searchCourses();
+    }
+    if (categories.includes(SearchCategory.Events)) {
+      await this.searchEvents();
+    }
+
+    const others = categories.filter(cat => cat !== SearchCategory.Courses && cat !== SearchCategory.Events);
+    for (const cat of others) {
+      // intentionally not awaited to allow parallel execution
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this.runSearchForCategory(cat);
+    }
+  }
+
+  // dispatch a single category to its corresponding search method
+  private runSearchForCategory(category: string): Promise<any> {
+    switch (category) {
+      case SearchCategory.Courses:
+        return this.searchCourses();
+      case SearchCategory.Events:
+        return this.searchEvents();
+      case SearchCategory.People:
+        return this.searchPeople();
+      case SearchCategory.Communities:
+        return this.searchcommunities();
+      case SearchCategory.Resources:
+        return this.searchResources();
+      case SearchCategory.ExternalContents:
+        return this.searchExternalContents();
+      case SearchCategory.Designation:
+        return this.searchDesignations();
+      case SearchCategory.TrainingPlans:
+        return this.searchTrainingPlans();
+      case SearchCategory.Users:
+        return this.searchUsersMDO();
+      default:
+        return Promise.resolve();
+    }
   }
 
   processObjectFacets(facets: Record<string, any[]>): any {
@@ -913,6 +1091,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           }
         } else if (key === FacetType.status) {
           this.searchRequestEvents.request.filters.status = [...selectedFilters[key]];
+          this.searchRequestCourse.request.filters.status = [...selectedFilters[key]];
           this.searchRequestTrainingPlans.filter[FacetType.status] = [...selectedFilters[key]];
         } else if (key === "competencyArea") {
           this.searchRequestCommunities.filterCriteriaMap.competencyArea = [...selectedFilters[key]];
@@ -966,7 +1145,17 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           if (selectedFilters[key].length === 2) {
             const [startDate, endDate] = selectedFilters[key];
             if (startDate && endDate) {
-              if (this.seeAllResult === SearchCategory.Users) {
+              // For Events we need epoch millis; for Users/Designation keep the original string values
+              if (this.seeAllResult === SearchCategory.Events) {
+                const startEpoch = moment(startDate).valueOf();
+                const endEpoch = moment(endDate).valueOf();
+                this.searchRequestEvents.request.filters["startDateTimeInEpoch"] = {
+                  ">=": startEpoch
+                };
+                this.searchRequestEvents.request.filters["endDateTimeInEpoch"] = {
+                  "<=": endEpoch
+                };
+              } else if (this.seeAllResult === SearchCategory.Users) {
                 this.searchRequestUsers.request.filters["createdDate"] = {
                   ">=": startDate,
                   "<=": endDate
@@ -1001,6 +1190,12 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
             this.searchRequestUsers.request.filters["createdDate"] = selectedFilters[key];
             this.searchRequestDesignation.request.filters[FacetType.createdOn] = selectedFilters[key];
           }
+        } else if (key === FacetType.status) {
+          if (this.seeAllResult === SearchCategory.Events) {
+            this.searchRequestEvents.request.filters[FacetType.status] = [...selectedFilters[key]];
+          } else {
+            this.searchRequestTrainingPlans.filter[FacetType.status] = [...selectedFilters[key]];
+          }
         } else if (key === "timeline") {
           if (selectedFilters[key].length === 2) {
             const [startDate, endDate] = selectedFilters[key];
@@ -1025,7 +1220,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    if (!Object.keys(selectedFilters).includes("typeOfEvents") && !Object.keys(selectedFilters).includes("dateRange")) {
+    if (!Object.keys(selectedFilters).includes("typeOfEvents") && (this.seeAllResult === SearchCategory.Events && !Object.keys(selectedFilters).includes("dateRange"))) {
       this.resetEventsTypesRequest();
     }
 
@@ -1066,34 +1261,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
       if (categories.length) {
-        if (categories.includes(SearchCategory.Courses)) {
-          await this.searchCourses();
-        }
-        if (categories.includes(SearchCategory.Events)) {
-          await this.searchEvents();
-        }
-
-        if (categories.includes(SearchCategory.People)) {
-          this.searchPeople();
-        }
-        if (categories.includes(SearchCategory.Communities)) {
-          this.searchcommunities();
-        }
-        if (categories.includes(SearchCategory.Resources)) {
-          this.searchResources();
-        }
-        if (categories.includes(SearchCategory.ExternalContents)) {
-          this.searchExternalContents();
-        }
-        if (categories.includes(SearchCategory.Designation)) {
-          this.searchDesignations();
-        }
-        if (categories.includes(SearchCategory.TrainingPlans)) {
-          this.searchTrainingPlans();
-        }
-        if (categories.includes(SearchCategory.Users)) {
-          this.searchUsersMDO();
-        }
+        // trigger searches: await Courses and Events first, then run others concurrently
+        await this.executeSearchesForCategories(categories, false);
       }
     }
 
@@ -1226,7 +1395,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       await this.searchEvents();
       this.combinedFacets = [this.eventsFacets];
 
-      if (this.searchConfig?.applicationName !== SearchListingConfig.ApplicationNames.MDOPortal) {
+      if (this.applicationName !== SearchListingConfig.ApplicationNames.CBPPortal && this.applicationName !== SearchListingConfig.ApplicationNames.MDOPortal) {
         this.processTypeOfEventsFilter();
       }
     } else if (category === SearchCategory.People) {
@@ -1860,18 +2029,20 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           let evenStarttDate = new Date(`${event.startDate} ${event.startTime}`).getTime() / 1000;
           // Combining date and time for end event
           let eventEndDate = new Date(`${event.endDate} ${event.endTime}`).getTime() / 1000;
-          if (currentTime > eventEndDate) {
-            if (this.typesOfEventsFilters.includes("past events")) {
-              processedEvents.push(event);
-            }
-          } else if (currentTime <= eventEndDate && currentTime >= evenStarttDate) {
-            if (this.typesOfEventsFilters.includes("live")) {
-              event.showLive = true;
-              processedEvents.push(event);
-            }
-          } else {
-            if (this.typesOfEventsFilters.includes("upcoming")) {
-              processedEvents.push(event);
+          if (this.applicationName !== SearchListingConfig.ApplicationNames.CBPPortal) {
+            if (currentTime > eventEndDate) {
+              if (this.typesOfEventsFilters.includes("past events")) {
+                processedEvents.push(event);
+              }
+            } else if (currentTime <= eventEndDate && currentTime >= evenStarttDate) {
+              if (this.typesOfEventsFilters.includes("live")) {
+                event.showLive = true;
+                processedEvents.push(event);
+              }
+            } else {
+              if (this.typesOfEventsFilters.includes("upcoming")) {
+                processedEvents.push(event);
+              }
             }
           }
         }

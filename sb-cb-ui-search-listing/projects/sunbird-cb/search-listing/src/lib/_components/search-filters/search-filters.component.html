@@ -18,7 +18,6 @@
   </div>
   <ng-container *ngIf="!searchCategory">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark">{{ "searchfilters.categoryType" | translate }}</p>
-
     <div class="filter-form">
       <mat-accordion class="filter-section margin-bottom-m">
         <ng-container *ngFor="let category of categoryType">
@@ -102,7 +101,7 @@
     ">
     <div class="languages-filter adjust">
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "searchfilters.categoryType" | translate }}</p>
-      <div class="mat-full-radius mb-2" *ngIf="formattedFacets['courseCategory'].length > 4"></div>
+      <div class="mat-full-radius mb-2" *ngIf="formattedFacets['courseCategory']?.length > 4"></div>
 
       <mat-accordion class="filter-section margin-bottom-m">
         <mat-expansion-panel [expanded]="true">
@@ -132,15 +131,7 @@
     </div>
   </ng-container>
 
-  <ng-container
-    *ngIf="
-      searchCategory &&
-      formattedFacets &&
-      formattedFacets['typeOfEvents'] &&
-      formattedFacets['typeOfEvents'].length &&
-      canShowTypeOfEventsFilter &&
-      categoryTypeEnum.Events === searchCategory
-    ">
+  <ng-container *ngIf="searchCategory === categoryTypeEnum.Events && formattedFacets?.typeOfEvents?.length && canShowTypeOfEventsFilter">
     <div class="rating-filter">
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">
         {{ "searchfilters.typeOfEvents" | translate }}
@@ -160,15 +151,15 @@
     </div>
   </ng-container>
 
-  <ng-container *ngIf="canShowEventsStatusFilter">
+  <ng-container *ngIf="canShowStatusFilter">
     <div class="sectorNames-filter">
-      <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "searchfilters.eventStatus" | translate }}</p>
+      <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ (displayLabels?.[searchCategory]?.status?.label || "searchfilters.eventStatus") | translate }}</p>
       <mat-selection-list>
         <section class="mat-body-2 text-capitalize" *ngFor="let options of formattedFacets['status']">
           <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, 'status')">
-            <span class="min-width-adjust" [matTooltip]="formatEventStatusName(options?.name)" [matTooltipPosition]="'right'">
-              {{ options?.name ? formatEventStatusName(options?.name) : "" }}</span
-            >
+            <span class="min-width-adjust" [matTooltip]="(displayLabels?.[searchCategory]?.status?.filterLabels[options?.name] || formatEventStatusName(options?.name)) | translate" [matTooltipPosition]="'right'">
+              {{ (displayLabels?.[searchCategory]?.status?.filterLabels[options?.name] || formatEventStatusName(options?.name)) | translate }}
+            </span>
             <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
           </mat-checkbox>
         </section>
@@ -914,7 +905,7 @@
 
   <div
     class="filter-without-search filter-calender"
-    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || isEventsFacetsPresent || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
+    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || (isEventsFacetsPresent || showEventsDateRange) || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
       {{ getCalendarLabel() | translate }}
     </p>

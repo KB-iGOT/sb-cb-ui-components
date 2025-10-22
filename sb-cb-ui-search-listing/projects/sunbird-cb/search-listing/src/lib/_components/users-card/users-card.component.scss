@@ -84,3 +84,22 @@
   font-weight: 600 !important;
   color: $black !important;
 }
+
+.cbpUser{
+  height: 200px !important;
+}
+
+.activation-toggle {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+::ng-deep .theme-igot.day-mode .cbpUser {
+  .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+    background-color: #1b4ca18a !important;
+  }
+
+  .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+    background-color: #1b4ca1;
+  }
+}

@@ -18,12 +18,15 @@ import { DialogComponentsModule } from '../dialog-components/dialog-components.m
 import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
 import { MatLegacyAutocompleteModule } from '@angular/material/legacy-autocomplete';
 import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
+import { NotificationModule } from '../notification/notification.module';
+import { AddUsersFormMetaComponent } from './add-users-form-meta/add-users-form-meta.component';
 
 
 
 @NgModule({
   declarations: [
-    UserUpdateComponent
+    UserUpdateComponent,
+    AddUsersFormMetaComponent
   ],
   imports: [
     CommonModule,
@@ -44,10 +47,12 @@ import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
     MatLegacyChipsModule,
     MatLegacyAutocompleteModule,
     MatLegacyRadioModule,
-    DialogComponentsModule
+    DialogComponentsModule,
+    NotificationModule,
   ],
   exports: [
-    UserUpdateComponent
+    UserUpdateComponent,
+    AddUsersFormMetaComponent
   ]
 })
 export class UserUpdateModule { }

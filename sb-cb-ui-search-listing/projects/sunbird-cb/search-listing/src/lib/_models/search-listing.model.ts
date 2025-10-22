@@ -36,7 +36,8 @@ export class RequestParams {
       "mimeType",
       "contentId",
       "creatorLogo",
-      "sectorDetails_v1"
+      "sectorDetails_v1",
+      "status"
     ];
     this.facets = [...SearchOthersFacet, ...competenciesKey];
     this.query = "";
@@ -458,6 +459,7 @@ export namespace SearchListingConfig {
     label: string;
     value: string;
     icon: string;
+    roles?: string[];
   }
 
   export interface FilterType {
@@ -475,6 +477,7 @@ export namespace SearchListingConfig {
     isChecked: boolean;
     filters: FilterType[];
     disabled: boolean;
+    facets?: string[];
   }
   export interface SearchInputConfig {
     enableRecentSearches: boolean;
@@ -493,6 +496,7 @@ export namespace SearchListingConfig {
 
   export enum ApplicationNames {
     LearnerPortal = "Learner Portal",
-    MDOPortal = "MDO Portal"
+    MDOPortal = "MDO Portal",
+    CBPPortal = "CBP Portal"
   }
 }

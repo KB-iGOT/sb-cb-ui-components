@@ -3,7 +3,7 @@ import { Subscription } from "rxjs";
 // tslint:disable-next-line
 import * as _ from "lodash";
 import { TranslateService } from "@ngx-translate/core";
-import { ConfigurationsService, MultilingualTranslationsService, NsContent } from "@sunbird-cb/utils-v2";
+import { ConfigurationsService, MultilingualTranslationsService } from "@sunbird-cb/utils-v2";
 import { Facet, FacetType, FormattedFacets, ICompentencyKeys, SearchCategory, SearchListingConfig } from "../../_models/search-listing.model";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from "@angular/router";
@@ -20,12 +20,13 @@ import { DateRange, DefaultMatCalendarRangeStrategy, MatRangeDateSelectionModel 
 export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   @Input() newfacets!: any;
   @Input() urlparamFilters!: any;
+  @Input() karmayogiBadge: any;
+  @Input() typesOfEvents: any;
+  @Input() applicationName!: string;
   @Output() appliedFilter = new EventEmitter<{ [key: string]: any }>();
   @Output() constructQueryParam = new EventEmitter<string>();
   @Output() applyFilterFromLearn = new EventEmitter<{ [key: string]: any }>();
-  @Input() karmayogiBadge: any;
   competencyFactet: any;
-  @Input() typesOfEvents: any;
 
   private subscription: Subscription = new Subscription();
   queryParams: any;
@@ -77,6 +78,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   environment!: any;
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
+  showEventsDateRange = false;
+  displayLabels: Record<string, any> = {};
   selectedDateRangeTimeline!: DateRange<Date> | null;
   maxDateCalendar = new Date();
   constructor(
@@ -98,11 +101,12 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   async ngOnInit() {
-    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey];
-    this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
-    this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
-    this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
-
+    this.compentencyKey = _.get(this.configSvc, `compentency.${this.environment.compentencyVersionKey}`);
+    if (this.compentencyKey) {
+      this.competencyAreaNameKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyArea}`;
+      this.competencyThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencyTheme}`;
+      this.competencySubThemeKey = `${this.compentencyKey.vKey}.${this.compentencyKey.vCompetencySubTheme}`;
+    }
     this.subscription.add(
       this.activated.queryParams.subscribe(params => {
         this.isExploreContentTab = params["tab"] === "explore-content";
@@ -136,10 +140,36 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       const categories = this.searchConfig.searchCategories || [];
 
       const categorieTypes = this.searchConfig.allSearchCategoriesTypes || [];
+
+      // normalize user roles which can be a Set<string> or string[]
+      const userRoles = (this.configSvc as any)?.userRoles as Set<string> | string[] | undefined;
+      const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? (userRoles as string[]) : [];
       this.categoryType = categorieTypes.filter(cat => {
-        return categories.some(category => category.value === cat.name);
+        // find the matching category config for this type
+        const matchedCategory = categories.find(category => category.value === cat.name);
+        if (!matchedCategory) return false;
+
+        // If matched category has no roles defined or an empty array, keep the category
+        const roles = (matchedCategory as any)?.roles as string[] | undefined;
+        if (!roles || !Array.isArray(roles) || roles.length === 0) {
+          this.addLabels(cat);
+          return true;
+        }
+
+        const isAllowed = roles.some((r: string) => userRolesArray.includes(r.toLocaleLowerCase()));
+        if (isAllowed) {
+          this.addLabels(cat);
+        }
+        return isAllowed;
       });
       this.categoryTypeDup = this.categoryType;
+    }
+  }
+
+  addLabels(cat: any) {
+    const typeLabels = (cat as any)?.labels;
+    if (typeLabels) {
+      this.displayLabels[cat.name] = typeLabels;
     }
   }
 
@@ -178,6 +208,11 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       this.formattedFacets["typeOfEvents"] = this.typesOfEvents;
     }
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const filters = this.getFiltersList
+      this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') ? true : false;
+    }
+
   }
 
   formatSectorName(name: string): string {
@@ -367,9 +402,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
           acc[name] = {};
         }
         values.forEach(({ name: valueName, count }) => {
-          if (valueName !== "") {
-            acc[name][valueName] = (acc[name][valueName] || 0) + count;
-          }
+          acc[name][valueName] = (acc[name][valueName] || 0) + count;
         });
       });
       return acc;
@@ -1104,13 +1137,31 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     );
   }
 
-  get canShowEventsStatusFilter(): boolean {
-    return !!(
-      this.searchCategory === SearchCategory.Events &&
-      this.isEventsFacetsPresent &&
-      this.formattedFacets["status"]?.length &&
-      this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal
-    );
+  // get canShowEventsStatusFilter(): boolean {
+  //   return !!(
+  //     this.searchCategory === SearchCategory.Events &&
+  //     this.isEventsFacetsPresent &&
+  //     this.formattedFacets["status"]?.length &&
+  //     (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal ||
+  //       this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal)
+  //   );
+  // }
+
+  get canShowStatusFilter(): boolean {
+    if(this.formattedFacets["status"]?.length) {
+      if (this.searchCategory === SearchCategory.Events && 
+        this.isEventsFacetsPresent &&
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ||
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal
+      ) {
+        return true;
+      } else if (this.searchCategory === SearchCategory.Courses && 
+        this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.CBPPortal
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   formatFilterChips(value: string): string {
@@ -1160,8 +1211,29 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   formatEventStatusName(name: string): string {
-    if (name === "live") return "Published";
-    else if (name === "senttopublish") return "Pending Approval";
-    return this.capitalizeFirstLetter(name);
+    if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      switch(name) {
+        case 'senttopublish':
+          return 'Pending';
+        case 'live':
+          return 'Approved';
+        case 'upcoming':
+          return 'Upcoming';
+        default:
+          return name;
+      }
+    }
+    if (name === "live") {
+      return "Upcoming";
+    }
+    return name ? name : '';
+  }
+
+  get getFiltersList() {
+    if(this.searchCategory && this.categoryType && this.categoryType.length) {
+      const category = _.find(this.categoryType, { name: this.searchCategory });
+      return category && category.filters ? category.filters : [];
+    }
+    return []
   }
 }
