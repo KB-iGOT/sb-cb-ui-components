@@ -1,7 +1,6 @@
 %page-center {
   max-width: 1202px;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  width: 100%;
 }
 
 .container-balanced {
@@ -15,3 +14,7 @@
   background-color: #eff3f9 !important;
 }
 
+.global-content {
+  // --mat-sidenav-content-background-color: #eff3f9;
+  background-color: #eff3f9;
+}

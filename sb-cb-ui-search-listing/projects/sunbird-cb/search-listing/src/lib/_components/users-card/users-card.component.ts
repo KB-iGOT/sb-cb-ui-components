@@ -1,7 +1,10 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { Router } from "@angular/router";
+// import { Router } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
 import { ConfigurationsService, NsUser } from "@sunbird-cb/utils-v2";
+import { SearchListingService } from "../../_services/search-listing.service";
+import * as _ from "lodash";
+import { MatSnackBar as MatSnackbarNew } from "@angular/material/snack-bar";
 
 @Component({
   selector: "sb-cb-search-users-card",
@@ -11,6 +14,7 @@ import { ConfigurationsService, NsUser } from "@sunbird-cb/utils-v2";
 export class UsersCardComponent {
   @Input() user!: any;
   @Input() category!: any;
+  @Input() applicationName = '';
   @Output() telemetry = new EventEmitter<any>();
   @Output() updateUser = new EventEmitter<string>();
 
@@ -18,7 +22,13 @@ export class UsersCardComponent {
   howerUser!: any;
   unmappedUser!: any;
 
-  constructor(private configSvc: ConfigurationsService, private router: Router, private translate: TranslateService) {
+  constructor(
+    private configSvc: ConfigurationsService, 
+    // private router: Router, 
+    private translate: TranslateService,
+    private searchListingService: SearchListingService,
+    private matSnackbarNew: MatSnackbarNew
+  ) {
     if (localStorage.getItem("websiteLanguage")) {
       this.translate.setDefaultLang("en");
       const lang = localStorage.getItem("websiteLanguage")!;
@@ -80,10 +90,17 @@ export class UsersCardComponent {
   }
 
   goToUserProfile(user: any) {
-    user.contentType = "People";
-    user.identifier = user.userId;
-    this.telemetry.emit(user);
-    this.updateUser.emit(user.userId || user.id || user.wid);
+    if (this.applicationName !== 'CBP Portal' || !user.isDeleted) {
+      user.contentType = "People";
+      user.identifier = user.userId;
+      this.telemetry.emit(user);
+      this.updateUser.emit(user.userId || user.id || user.wid);
+    } else {
+      this.matSnackbarNew.open("User is Desactivated please activate to see the profile", "X", {
+        duration: 3000,
+        panelClass: ["success"]
+      });
+    }
   }
 
   get usr() {
@@ -117,5 +134,29 @@ export class UsersCardComponent {
 
   get onboardingDate(): string {
     return this.user.createdDate || ''
+  }
+
+  onUserActivationToggle (checked: boolean) {
+    const request ={
+      request: {
+        requestedBy: _.get(this.configSvc, 'userProfile.userId', ''),
+        userId: this.user.userId || this.user.id || this.user.wid
+      }
+    }
+    if (checked) {
+      this.searchListingService.unblockUser(request).subscribe(_res => {
+        this.matSnackbarNew.open("User has been activated successfully", "X", {
+          duration: 3000,
+          panelClass: ["success"]
+        });
+      })
+    } else {
+      this.searchListingService.blockUser(request).subscribe(_res => {
+        this.matSnackbarNew.open("User has been deactivated successfully", "X", {
+          duration: 3000,
+          panelClass: ["success"]
+        });
+      })
+    }
   }
 }

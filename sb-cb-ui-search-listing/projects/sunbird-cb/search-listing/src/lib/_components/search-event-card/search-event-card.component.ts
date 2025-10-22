@@ -13,6 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2';
 import { SearchListingService } from '../../_services/search-listing.service';
 import { SearchListingConfig } from '../../_models/search-listing.model';
+import * as _ from 'lodash';
 
 const MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const NEW_CONTENT_THRESHOLD_DAYS = 14;
@@ -130,26 +131,39 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
 
    navigateToEvent() {
     const eventId = this.content?.identifier;
-    if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
-      this.content.contentType = "Events";
-      this.router.navigate([`/app/event-hub/home/${eventId}`]);
+    if(eventId) {
+      this.content.contentType = 'Events';
       this.telemetry.emit(this.content);
-    } else if (eventId && this.searchListingService.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
-      this.content.contentType = "Events";
-      if (this.compareDatesForLive(this.content.startDateTime, this.content.endDateTime) && this.content.status === "Live") {
-        this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-          queryParams: { mode: "view", pathUrl: "upcoming" }
-        });
-      } else if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
-        this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-          queryParams: { mode: "edit", pathUrl: "past" }
-        });
-      } else {
-        this.router.navigate([`app/home/events/edit-event/${eventId}`], {
-          queryParams: this.getEventsQueryParams(this.content?.status)
-        });
+      switch (this.searchListingService.searchConfig?.applicationName) {
+        case SearchListingConfig.ApplicationNames.LearnerPortal:
+          this.content.contentType = "Events";
+          this.router.navigate([`/app/event-hub/home/${eventId}`]);
+          this.telemetry.emit(this.content);
+          break;
+        case SearchListingConfig.ApplicationNames.MDOPortal:
+          this.content.contentType = "Events";
+          if (this.compareDatesForLive(this.content.startDateTime, this.content.endDateTime) && this.content.status === "Live") {
+            this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+              queryParams: { mode: "view", pathUrl: "upcoming" }
+            });
+          } else if (this.content.endDateTime < this.getCurrentTimeInUTC && this.content.status === "Live") {
+            this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+              queryParams: { mode: "edit", pathUrl: "past" }
+            });
+          } else {
+            this.router.navigate([`app/home/events/edit-event/${eventId}`], {
+              queryParams: this.getEventsQueryParams(this.content?.status)
+            });
+          }
+          break;
+        case SearchListingConfig.ApplicationNames.CBPPortal:
+          const mode = _.get(this.content, 'status', '').toLowerCase() === 'live' ? 'pastRequests' : 'newRequests'
+          this.router.navigate(['/app/event-details/', eventId, 'preview'], {
+            queryParams: { mode: mode }
+          })
+          this.telemetry.emit(this.content);
+          break;
       }
-      this.telemetry.emit(this.content);
     }
   }
 
