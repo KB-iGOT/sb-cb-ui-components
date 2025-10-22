@@ -283,7 +283,6 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <input matInput formControlName="videoUrl" placeholder="Enter video URL">
                     <mat-error *ngIf="item.get('videoUrl')?.hasError('required')">Video URL is required</mat-error>
-                    <mat-error *ngIf="item.get('videoUrl')?.hasError('pattern')">Please enter a valid URL</mat-error>
                   </mat-form-field>
                 </div>
               </div>

@@ -95,8 +95,7 @@ export class EditorDialogComponent implements OnInit {
       title: [item.title || '', [Validators.required]],
       description: [item.description || '', [Validators.required]],
       videoUrl: [item.videoUrl || '', [
-        Validators.required, 
-        Validators.pattern(/^(http|https):\/\/[a-zA-Z0-9\-.]+\.[a-zA-Z]{2,}(\/\S*)?$/)
+        Validators.required,
       ]]
     });
   }
