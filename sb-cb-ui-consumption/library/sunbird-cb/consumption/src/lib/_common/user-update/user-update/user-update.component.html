@@ -102,15 +102,17 @@
           </div>
 
           <div class="flex gap-12">
-            <div class="flex flex-col gap-2">
-              <div class="label">Assign Mentor</div>
-              <div class="flex items-center gap-2">
-                <span class="toggle-label">No</span>
-                <mat-slide-toggle formControlName="assignMentor" (change)="onAssignMentorChange($event.checked)">
-                  <span class="toggle-label">Yes</span>
-                </mat-slide-toggle>
+            <ng-container *ngIf="isMdoLeader">
+              <div class="flex flex-col gap-2">
+                <div class="label">Assign Mentor</div>
+                <div class="flex items-center gap-2">
+                  <span class="toggle-label">No</span>
+                  <mat-slide-toggle formControlName="assignMentor" (change)="onAssignMentorChange($event.checked)">
+                    <span class="toggle-label">Yes</span>
+                  </mat-slide-toggle>
+                </div>
               </div>
-            </div>
+            </ng-container>
             <div class="flex flex-col gap-2">
               <div class="label">This is my user</div>
               <div class="flex items-center gap-2">
