@@ -1,26 +1,26 @@
-import { Component, OnInit, Input, Injector, Type, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2';
-import { UtilityService } from '@sunbird-cb/utils-v2';
-import { TranslateService } from '@ngx-translate/core';
-import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2';
-import * as _ from 'lodash';
-import { MatDialog } from '@angular/material/dialog';
-import { EditorDialogComponent } from '../../micro-sites-components/components/editor-dialog/editor-dialog.component';
-import { SlwConfigDialogComponent } from '../../micro-sites-components/components/slw-config-dialog/slw-config-dialog.component';
-import { cloneDeep } from 'lodash';
-import { HttpClient } from '@angular/common/http'; // Add this import
+import { Component, OnInit, Input, Injector, Type, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core'
+import { Router, ActivatedRoute } from '@angular/router'
+import { DomSanitizer } from '@angular/platform-browser'
+import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2'
+import { UtilityService } from '@sunbird-cb/utils-v2'
+import { TranslateService } from '@ngx-translate/core'
+import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
+import * as _ from 'lodash'
+import { MatDialog } from '@angular/material/dialog'
+import { EditorDialogComponent } from '../../micro-sites-components/components/editor-dialog/editor-dialog.component'
+import { SlwConfigDialogComponent } from '../../micro-sites-components/components/slw-config-dialog/slw-config-dialog.component'
+import { cloneDeep } from 'lodash'
+import { HttpClient } from '@angular/common/http' // Add this import
 
 // Import component types
-import { TopSectionComponent } from '../../micro-sites-components/components/top-section/top-section.component';
-import { LookerSectionComponent } from '../../micro-sites-components/components/looker-section/looker-section.component';
-import { TopLearnersComponent } from '../../micro-sites-components/components/top-learners/top-learners.component';
-import { MainContentComponent } from '../../micro-sites-components/components/main-content/main-content.component';
-import { SupportSectionComponent } from '../../micro-sites-components/components/support-section/support-section.component';
-import { HighlightsOfWeekComponent } from '../../../highlights-of-week/highlights-of-week.component';
-import { UserProgressComponent } from '../../../user-progress/user-progress.component';
-import { SpeakersComponent } from '../../../speakers/speakers.component';
+import { TopSectionComponent } from '../../micro-sites-components/components/top-section/top-section.component'
+import { LookerSectionComponent } from '../../micro-sites-components/components/looker-section/looker-section.component'
+import { TopLearnersComponent } from '../../micro-sites-components/components/top-learners/top-learners.component'
+import { MainContentComponent } from '../../micro-sites-components/components/main-content/main-content.component'
+import { SupportSectionComponent } from '../../micro-sites-components/components/support-section/support-section.component'
+import { HighlightsOfWeekComponent } from '../../../highlights-of-week/highlights-of-week.component'
+import { UserProgressComponent } from '../../../user-progress/user-progress.component'
+import { SpeakersComponent } from '../../../speakers/speakers.component'
 
 @Component({
   selector: 'sb-uic-mdo-channel-v3',
@@ -30,13 +30,13 @@ import { SpeakersComponent } from '../../../speakers/speakers.component';
 })
 export class MdoChannelV3Component implements OnInit, OnChanges {
   @Input() sectionList: any[] = [];
-  @Input() slwConfiguration: any;
+  @Input() slwConfiguration: any
   @Input() isEdit: boolean = false;
   activeSections: any[] = [];
   @Input() providerId: string = '123456789';
-  @Input() channelName: string;
-  @Input() orgId: string;
-  
+  @Input() channelName: string
+  @Input() orgId: string
+
   isMobile: boolean = false;
   isStateLearningWeekEnabled: boolean = false;
   hasUnsavedChanges: boolean = false;
@@ -46,8 +46,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     { title: 'Learn', url: '/page/learn', icon: 'school', disableTranslate: false },
     { title: 'MDO Channels', url: '/app/learn/mdo-channels/all-channels', icon: '', disableTranslate: true }
   ];
-  
-  private componentRegistry: {[key: string]: Type<any>} = {
+
+  private componentRegistry: { [key: string]: Type<any> } = {
     'topSection': TopSectionComponent,
     'lookerSection': LookerSectionComponent,
     'topLearners': TopLearnersComponent,
@@ -57,8 +57,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     'userProgress': UserProgressComponent,
     'speakers': SpeakersComponent
   };
-  
-  private _eventCallbackFn: (event: any) => void;
+
+  private _eventCallbackFn: (event: any) => void
   private injectorCache: Map<string, Injector> = new Map();
 
   constructor(
@@ -76,96 +76,96 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     private http: HttpClient // Add HttpClient to constructor
   ) {
     this.isMobile = this.utilsSvc.isMobile;
-    
+
     // Make component globally accessible for direct access
-    (window as any).mdoChannelComponent = this;
+    (window as any).mdoChannelComponent = this
   }
-  
+
   ngOnInit() {
     // Create a callback function for child components
     this._eventCallbackFn = (event: any) => this.handleSectionEvent(event);
-    
+
     // Set global injector data for components that can't use Angular's DI properly
     (window as any).__INJECTOR_DATA = {
       isEditable: true, // Force this to true for now to enable editing
       eventCallback: this._eventCallbackFn
     };
-    
-    // Set up global callbacks 
+
+    // Set up global callbacks
     (window as any).INJECTED_CALLBACKS = {
       ...(window as any).INJECTED_CALLBACKS || {},
       highlightsOfWeek: this._eventCallbackFn
-    };
-    
+    }
+
     // Get active sections
     this.activeSections = this.sectionList?.filter(section => section.enabled)
-      .sort((a, b) => (a.order || 0) - (b.order || 0)) || [];
-    
+      .sort((a, b) => (a.order || 0) - (b.order || 0)) || []
+
     // Get channel info from route
     this.route.params.subscribe(params => {
       if (params.channelId) {
-        this.channelName = params.channelName || '';
-        this.orgId = params.channelId;
-        this.cdr.markForCheck();
+        this.channelName = params.channelName || ''
+        this.orgId = params.channelId
+        this.cdr.markForCheck()
       }
-    });
+    })
   }
-  
+
   ngOnChanges(changes: SimpleChanges) {
     if ((changes.sectionList && !changes.sectionList.firstChange) ||
-        (changes.slwConfiguration && !changes.slwConfiguration.firstChange)) {
-      this.injectorCache.clear();
-      this.hasUnsavedChanges = true; // Enable Save button only after first change
+      (changes.slwConfiguration && !changes.slwConfiguration.firstChange)) {
+      this.injectorCache.clear()
+      this.hasUnsavedChanges = true // Enable Save button only after first change
     }
   }
-  
+
   handleSectionEvent(event: any) {
     // Handle events from child components
-    console.log('Section event received in MdoChannelV3Component:', event);
-    
+    console.log('Section event received in MdoChannelV3Component:', event)
+
     // Check for undefined or null event
     if (!event) {
-      console.error('Received null/undefined event');
-      return;
+      console.error('Received null/undefined event')
+      return
     }
-    
+
     // Raise telemetry for the event
     if (event.action) {
-      console.log(`Raising telemetry for ${event.source}-${event.id || 'unknown'}`);
-      this.raiseTelemetry(`${event.source}-${event.id || 'unknown'}`);
+      console.log(`Raising telemetry for ${event.source}-${event.id || 'unknown'}`)
+      this.raiseTelemetry(`${event.source}-${event.id || 'unknown'}`)
     }
-    
+
     // Handle specific events
     if (event.action === 'view-all' && event.data?.viewMoreUrl) {
-      console.log(`Navigating to ${event.data.viewMoreUrl}`);
-      this.router.navigateByUrl(event.data.viewMoreUrl);
+      console.log(`Navigating to ${event.data.viewMoreUrl}`)
+      this.router.navigateByUrl(event.data.viewMoreUrl)
     }
-    
+
     // Handle edit events
     if (event.action === 'edit') {
-      console.log('Opening editor dialog for', event.source);
-      this.openEditorDialog(event);
+      console.log('Opening editor dialog for', event.source)
+      this.openEditorDialog(event)
     } else {
-      console.log(`Unhandled action type: ${event.action}`);
+      console.log(`Unhandled action type: ${event.action}`)
     }
   }
-  
+
   getSectionComponent(key: string): Type<any> {
-    return this.componentRegistry[key] || null;
+    return this.componentRegistry[key] || null
   }
-  
+
   createInjector(section: any, column: any): Injector {
     // Create a stable reference to the callback function if not already created
     if (!this._eventCallbackFn) {
-      this._eventCallbackFn = (event: any) => this.handleSectionEvent(event);
+      this._eventCallbackFn = (event: any) => this.handleSectionEvent(event)
     }
 
     // Create a cache key based on section and column keys
-    const cacheKey = `${section.key}-${column.key}`;
-    
+    const cacheKey = `${section.key}-${column.key}`
+
     // Return cached injector if available
     if (this.injectorCache.has(cacheKey)) {
-      return this.injectorCache.get(cacheKey)!;
+      return this.injectorCache.get(cacheKey)!
     }
 
     // Update global injector data
@@ -176,7 +176,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       sectionData: column.data,
       channelName: this.channelName,
       orgId: this.orgId
-    };
+    }
 
     // Create new injector
     const injector = Injector.create({
@@ -194,18 +194,18 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         { provide: 'isEditable', useValue: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit }
       ],
       parent: this.injector
-    });
-    
+    })
+
     // Cache the injector
-    this.injectorCache.set(cacheKey, injector);
-    
-    return injector;
+    this.injectorCache.set(cacheKey, injector)
+
+    return injector
   }
-  
+
   trackByFn(index: number, item: any): any {
-    return item.version || item.key || index;
+    return item.version || item.key || index
   }
-  
+
   raiseTelemetry(name: string) {
     this.eventSvc.raiseInteractTelemetry(
       {
@@ -215,41 +215,77 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       },
       {},
       { module: 'LEARN' }
-    );
+    )
   }
 
   // Add new method to handle edit dialog
   openEditorDialog(event: any) {
-    const dialogWidth = this.getDialogWidth(event.data.fieldType);
-    
-    // Debug logs for speaker configuration
-    if (event.data.fieldType === 'speakersConfig') {
-      console.log('MdoChannelV3 - openEditorDialog - received event:', event);
-      console.log('MdoChannelV3 - openEditorDialog - speaker value:', event.data.value);
+    const dialogWidth = this.getDialogWidth(event.data.fieldType)
+
+    // Debug logs for all configurations
+    console.log('MdoChannelV3 - openEditorDialog - received event:', event)
+    console.log('MdoChannelV3 - openEditorDialog - field type:', event.data.fieldType)
+    console.log('MdoChannelV3 - openEditorDialog - value:', event.data.value)
+
+    // Get the actual value to pass to the dialog
+    let dialogValue = event.data.value
+
+    // Special handling for weekHighlights - retrieve from nested structure
+    if (event.data.fieldType === 'weekHighlights') {
+      console.log('MdoChannelV3 - weekHighlights - current sectionList:', this.sectionList)
+      // Find the mainContent section and log its current weekHighlights data
+      for (const section of this.sectionList) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.weekHighlights) {
+            console.log('MdoChannelV3 - weekHighlights - current stored data:',
+              column.data.stateLearningWeekSection.weekHighlights.data)
+            console.log('MdoChannelV3 - weekHighlights - stored list length:',
+              column.data.stateLearningWeekSection.weekHighlights.data?.list?.length)
+            // Use the nested data for the dialog
+            dialogValue = column.data.stateLearningWeekSection.weekHighlights.data
+          }
+        }
+      }
     }
-    
+
+    // Special handling for userProgressConfig - retrieve from nested structure
+    if (event.data.fieldType === 'userProgressConfig') {
+      console.log('MdoChannelV3 - userProgressConfig - current sectionList:', this.sectionList)
+      // Find the mainContent section and get its myprogress data
+      for (const section of this.sectionList) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.myprogress) {
+            console.log('MdoChannelV3 - userProgressConfig - current stored data:',
+              column.data.stateLearningWeekSection.myprogress)
+            // Use the nested data for the dialog
+            dialogValue = column.data.stateLearningWeekSection.myprogress
+          }
+        }
+      }
+    }
+
     const dialogRef = this.dialog.open(EditorDialogComponent, {
       width: dialogWidth,
       data: {
         fieldName: event.data.fieldName,
         displayName: event.data.displayName,
-        value: event.data.value,
+        value: dialogValue,  // Use the retrieved value
         fieldType: event.data.fieldType,
         section: event.source
       }, autoFocus: false
-    });
+    })
 
     // After dialog close
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         debugger
-        this.isLoading = true;
+        this.isLoading = true
         // Use updateSectionData method to update section data
-        this.updateSectionData(event.source, event.data.fieldName, result);
-        
-        this.isLoading = false;
+        this.updateSectionData(event.source, event.data.fieldName, result)
+
+        this.isLoading = false
       }
-    });
+    })
   }
 
   // Helper method to determine dialog width based on field type
@@ -261,143 +297,261 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'weekHighlights':
       case 'userProgressConfig':
       case 'speakersConfig':
-        return '800px';
+        return '800px'
       case 'image':
-        return '600px';
+        return '600px'
       default:
-        return '400px';
+        return '400px'
     }
   }
 
   // Method to update section data
   private updateSectionData(sectionType: string, fieldName: string, newValue: any) {
-    console.log('updateSectionData called with:', { sectionType, fieldName, newValue });
-    
+    console.log('updateSectionData called with:', { sectionType, fieldName, newValue })
+
     // Make a deep copy to avoid modifying the original reference
-    const updatedSections = cloneDeep(this.sectionList);
-    let updated = false;
-    
+    const updatedSections = cloneDeep(this.sectionList)
+    let updated = false
+
     // Special handling for speakersConfig
     if (fieldName === 'speakersConfig' && sectionType === 'speakers') {
-      console.log('Handling speakersConfig special case');
-      
+      console.log('Handling speakersConfig special case')
+
       // Find the section with speakers
       for (const section of updatedSections) {
         for (const column of section.column) {
           if (column.key === 'speakers') {
-            console.log('Found speakers column:', column);
+            console.log('Found speakers column:', column)
             if (!column.data) {
-              column.data = {};
+              column.data = {}
             }
-            
+
             // Update with the speakerOftheDay structure
-            column.data = newValue;
-            
-            console.log('Updated speakers data:', column.data);
-            updated = true;
-            break;
+            column.data = newValue
+
+            console.log('Updated speakers data:', column.data)
+            updated = true
+            break
           }
         }
-        if (updated) break;
+        if (updated) break
       }
     }
-    
+
     // Special handling for weekHighlights
     else if (fieldName === 'weekHighlights' && sectionType === 'weekHighlights') {
-      console.log('Handling weekHighlights special case');
-      
-      // Find the section with weekHighlights
+      console.log('Handling weekHighlights special case')
+      console.log('newValue received:', newValue)
+      console.log('newValue.list length:', newValue.list?.length)
+      console.log('newValue.list contents:', newValue.list)
+
+      // weekHighlights is nested inside mainContent column's data structure
+      // Path: column.data.stateLearningWeekSection.weekHighlights.data
       for (const section of updatedSections) {
         for (const column of section.column) {
-          if (column.key === 'weekHighlights') {
-            console.log('Found weekHighlights column:', column);
+          // Look for mainContent column which contains the weekHighlights
+          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.weekHighlights) {
+            console.log('Found column with weekHighlights nested data. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
             if (!column.data) {
-              column.data = {};
+              column.data = {}
             }
-            
-            // Update the title and list
-            column.data.title = newValue.title;
-            column.data.list = newValue.list;
-            
-            console.log('Updated weekHighlights data:', column.data);
-            updated = true;
-            break;
+
+            // Ensure the nested structure exists
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.weekHighlights) {
+              column.data.stateLearningWeekSection.weekHighlights = { enabled: true }
+            }
+            if (!column.data.stateLearningWeekSection.weekHighlights.data) {
+              column.data.stateLearningWeekSection.weekHighlights.data = {}
+            }
+
+            // Update the nested data with deep copy to avoid reference issues
+            column.data.stateLearningWeekSection.weekHighlights.data.title = newValue.title
+            column.data.stateLearningWeekSection.weekHighlights.data.list = JSON.parse(JSON.stringify(newValue.list))
+
+            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
+            console.log('Updated list length:', column.data.stateLearningWeekSection.weekHighlights.data.list?.length)
+            updated = true
+            break
           }
         }
-        if (updated) break;
+        if (updated) break
+      }
+
+      // Log the entire sectionList to verify the update
+      if (updated) {
+        console.log('Entire sectionList after weekHighlights update - checking all sections...')
+        updatedSections.forEach((section, idx) => {
+          section.column.forEach((col, colIdx) => {
+            if (col.data?.stateLearningWeekSection?.weekHighlights?.data?.list) {
+              console.log(`Section[${idx}].column[${colIdx}] weekHighlights list length:`,
+                col.data.stateLearningWeekSection.weekHighlights.data.list.length)
+            }
+          })
+        })
       }
     }
-    
+
+    // Special handling for userProgressConfig (myprogress)
+    else if (fieldName === 'userProgressConfig' && sectionType === 'userProgress') {
+      console.log('Handling userProgressConfig (myprogress) special case')
+      console.log('newValue received:', newValue)
+
+      // myprogress is nested inside mainContent column's data structure
+      // Path: column.data.stateLearningWeekSection.myprogress
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          // Look for mainContent column which contains the myprogress
+          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.myprogress) {
+            console.log('Found column with myprogress nested data. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+
+            // Ensure the nested structure exists
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.myprogress) {
+              column.data.stateLearningWeekSection.myprogress = { enabled: true }
+            }
+
+            // Update the nested data with deep copy to avoid reference issues
+            // The newValue contains the full userProgress config, we store it under myprogress
+            debugger
+            column.data.stateLearningWeekSection.myprogress = JSON.parse(JSON.stringify(newValue))
+
+            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
+            console.log('Updated myprogress data:', column.data.stateLearningWeekSection.myprogress)
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+
+      if (updated) {
+        console.log('Successfully updated myprogress configuration')
+      }
+    }
+
+    // Also handle if it comes as 'myprogress' directly
+    else if ((fieldName === 'myprogress' || fieldName === 'userProgressConfig') &&
+      (sectionType === 'mainContent' || sectionType === 'myprogress' || sectionType === 'userProgress')) {
+      console.log('Handling myprogress/userProgressConfig special case (alternate path)')
+      console.log('newValue received:', newValue)
+
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.myprogress) {
+            console.log('Found column with myprogress nested data. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.myprogress) {
+              column.data.stateLearningWeekSection.myprogress = { enabled: true }
+            }
+
+            column.data.stateLearningWeekSection.myprogress = JSON.parse(JSON.stringify(newValue))
+
+            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
+            console.log('Updated myprogress data:', column.data.stateLearningWeekSection.myprogress)
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+
+      if (updated) {
+        console.log('Successfully updated myprogress configuration (alternate path)')
+      }
+    }
+
     // Regular handling for other field types
     if (!updated) {
       // Find the relevant section and column
       for (const section of updatedSections) {
-        if (!section.enabled) continue;
-        
+        if (!section.enabled) continue
+
         for (const column of section.column) {
           if (column.key === sectionType && column.data) {
-            console.log('Found matching column:', column);
-            
+            console.log('Found matching column:', column)
+
             // Special handling for keyHighlights which is nested under stateLearningWeekSection
             if (fieldName === 'keyHighlights' && column.data.stateLearningWeekSection) {
-              column.data.stateLearningWeekSection.keyHighlights = newValue;
-              updated = true;
+              column.data.stateLearningWeekSection.keyHighlights = newValue
+              updated = true
             } else {
               // Update other fields using the nested field helper
-              this.updateNestedField(column.data, fieldName, newValue);
-              updated = true;
+              this.updateNestedField(column.data, fieldName, newValue)
+              updated = true
             }
-            break;
+            break
           }
         }
-        if (updated) break;
+        if (updated) break
       }
     }
-    
+
     // Clear the injector cache to force component recreation
-    this.injectorCache.clear();
-    
+    this.injectorCache.clear()
+
+    debugger
+
     // Update the sectionList with new reference (this will trigger change detection)
-    this.sectionList = updatedSections;
-    console.log('Updated sectionList:', this.sectionList);
-    
+    this.sectionList = updatedSections
+    console.log('Updated sectionList:', this.sectionList)
+
     // Update active sections with new reference
     this.activeSections = this.sectionList.filter(section => section.enabled)
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-    
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+
     // Mark for change detection
-    this.hasUnsavedChanges = true;
-    
+    this.hasUnsavedChanges = true
+
     // Force change detection to ensure UI updates
-    this.cdr.detectChanges();
+    this.cdr.detectChanges()
   }
 
   // Helper method to update nested fields
   private updateNestedField(obj: any, path: string, value: any) {
     // Handle nested paths (e.g., "sliderData.styleData.borderRadius")
-    const parts = path.split('.');
-    let current = obj;
-    
+    const parts = path.split('.')
+    let current = obj
+
     // Navigate to the parent object
     for (let i = 0; i < parts.length - 1; i++) {
       if (!current[parts[i]]) {
-        current[parts[i]] = {};
+        current[parts[i]] = {}
       }
-      current = current[parts[i]];
+      current = current[parts[i]]
     }
-    
+
     // Update the final property
-    current[parts[parts.length - 1]] = value;
+    current[parts[parts.length - 1]] = value
   }
 
   // Action handlers
   toggleStateLearningWeek() {
-    this.isStateLearningWeekEnabled = !this.isStateLearningWeekEnabled;
-    this.hasUnsavedChanges = true;
-    this.cdr.markForCheck();
-    
+    this.isStateLearningWeekEnabled = !this.isStateLearningWeekEnabled
+    this.hasUnsavedChanges = true
+    this.cdr.markForCheck()
+
     // Raise telemetry
-    this.raiseTelemetry('toggle-state-learning-week');
+    this.raiseTelemetry('toggle-state-learning-week')
   }
 
   saveChanges() {
@@ -415,9 +569,9 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       created_on: new Date().toISOString(),
       last_modified_on: new Date().toISOString(),
       rootOrgId: this.orgId || ''
-    };
+    }
 
-    console.log('Payload:', payload);
+    console.log('Payload:', payload)
     // Call the API
     // this.http.post('http://localhost:3000/apis/v1/form/update', payload, {
     //   headers: {
@@ -440,26 +594,26 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     // });
 
     // Raise telemetry
-    this.raiseTelemetry('save-changes');
+    this.raiseTelemetry('save-changes')
   }
 
   publishChanges() {
     if (this.hasUnsavedChanges) {
-      this.saveChanges();
+      this.saveChanges()
     }
-    
+
     // Implement publish logic here
-    console.log('Publishing changes...');
-    
+    console.log('Publishing changes...')
+
     // Raise telemetry
-    this.raiseTelemetry('publish-changes');
-    
+    this.raiseTelemetry('publish-changes')
+
     // You can emit an event or call a service to publish the data
   }
 
   // Add method to open SLW configuration dialog
   openSLWConfigDialog(currentConfig: any) {
-    console.log('Opening SLW config dialog');
+    console.log('Opening SLW config dialog')
     const dialogRef = this.dialog.open(SlwConfigDialogComponent, {
       width: '800px',
       maxHeight: '90vh',
@@ -478,40 +632,40 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         orgName: ''
       },
       autoFocus: false
-    });
+    })
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('Dialog closed with result:', result);
+      console.log('Dialog closed with result:', result)
       if (result) {
         // Update SLW configuration
-        this.slwConfiguration = result;
-        this.isStateLearningWeekEnabled = result.enabled;
-        this.hasUnsavedChanges = true;
-        this.cdr.detectChanges();
+        this.slwConfiguration = result
+        this.isStateLearningWeekEnabled = result.enabled
+        this.hasUnsavedChanges = true
+        this.cdr.detectChanges()
       } else {
         // If dialog was cancelled, disable SLW
-        this.isStateLearningWeekEnabled = false;
+        this.isStateLearningWeekEnabled = false
         if (this.slwConfiguration) {
-          this.slwConfiguration.enabled = false;
+          this.slwConfiguration.enabled = false
         }
-        this.hasUnsavedChanges = true;
-        this.cdr.detectChanges();
+        this.hasUnsavedChanges = true
+        this.cdr.detectChanges()
       }
-    });
+    })
   }
 
   handleToggleSLW() {
     if (this.slwConfiguration) {
-      this.slwConfiguration.enabled = !this.slwConfiguration.enabled;
-      this.hasUnsavedChanges = true;
-      this.cdr.markForCheck();
+      this.slwConfiguration.enabled = !this.slwConfiguration.enabled
+      this.hasUnsavedChanges = true
+      this.cdr.markForCheck()
     }
   }
 
   handleConfigureSLW(currentConfig: any) {
-    console.log('Configure SLW called with:', currentConfig);
-    this.openSLWConfigDialog(currentConfig);
+    console.log('Configure SLW called with:', currentConfig)
+    this.openSLWConfigDialog(currentConfig)
   }
 
-  
+
 }
