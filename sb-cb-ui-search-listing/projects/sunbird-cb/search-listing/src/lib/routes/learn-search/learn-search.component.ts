@@ -183,13 +183,19 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.updateNoResultMessage(this.statedata.param);
-
-    if (this.searchConfig?.searchCategories.some(cat => cat.value === SearchCategory.Courses)) {
+    if (this.getCurrentSearchCategories.some(cat => cat.value === SearchCategory.Courses)) {
       this.checkCourseEnrollmentAndCbpPlan();
     }
     // this.fetchCbpPlan()
     this.checkIfExploreContentTab();
     localStorage.removeItem(SearchConstantLocalStorage.SortType);
+  }
+
+  get getCurrentSearchCategories(): SearchListingConfig.SearchCategory[] {
+    if(this.searchConfig && this.searchConfig.currentSearchCategories && this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      return this.searchConfig.currentSearchCategories;
+    }
+    return this.searchConfig ? this.searchConfig.searchCategories : [];
   }
 
   async ngOnChanges(changes: SimpleChanges) {
@@ -231,7 +237,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
         this.seeAllResults(category);
       } else {
-        const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
+        const categories = this.getCurrentSearchCategories?.map(cat => cat.value) || [];
         if (categories.length) {
           // iterate once and dispatch to the correct search handler
           await this.executeSearchesForCategories(categories, true);
@@ -1259,7 +1265,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     } else if (this.seeAllResult === SearchCategory.Users) {
       this.searchUsersMDO();
     } else {
-      const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
+      const categories = this.getCurrentSearchCategories.map(cat => cat.value) || [];
       if (categories.length) {
         // trigger searches: await Courses and Events first, then run others concurrently
         await this.executeSearchesForCategories(categories, false);
@@ -1605,7 +1611,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     this.searchRequestDesignation.request.offset = 0;
     this.searchRequestDesignation.request.sort_by = {};
 
-    const categories = this.searchConfig?.searchCategories?.map(cat => cat.value) || [];
+    const categories = this.getCurrentSearchCategories.map(cat => cat.value) || [];
 
     if (event === SortType.MostRelevent) {
       if (this.seeAllResult === "") {
