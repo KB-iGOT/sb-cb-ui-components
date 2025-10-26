@@ -151,7 +151,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
       if (
         this.widgetData.content &&
         this.widgetData.content.primaryCategory &&
-        allowedPrimaryCategory?.includes(this.widgetData.content.primaryCategory?.toLowerCase())
+        allowedPrimaryCategory?.includes(this.widgetData.content?.primaryCategory?.toLowerCase()) || 
+        allowedPrimaryCategory?.includes(this.widgetData.content?.courseCategory?.toLowerCase()) 
       ) {
         const payload = {
           request: {
