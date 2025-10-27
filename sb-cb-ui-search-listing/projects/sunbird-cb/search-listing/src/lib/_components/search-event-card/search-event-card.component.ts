@@ -179,8 +179,10 @@ export class SearchEventCardComponent implements OnInit, OnChanges {
         return { mode: "view", pathUrl: "pending-approval" };
       case "Rejected":
         return { mode: "edit", pathUrl: "rejected" };
+      case "Retired":
+        return { mode: "view", pathUrl: "cancelled" };
       default:
-        return { mode: "edit", pathUrl: "draft" };
+        return { mode: "view", pathUrl: "past" };
     }
   }
 

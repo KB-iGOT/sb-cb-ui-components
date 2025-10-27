@@ -1,6 +1,6 @@
 {
   "name": "sunbird-cb-ui-search-listing",
-  "version": "0.0.1-cbrelease-4.8.30",
+  "version": "0.0.28-cbrelease-4.8.29",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -54,7 +54,7 @@
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "8.0.0",
     "@sunbird-cb/collection": "^1.0.56-ang-13-16",
-    "@sunbird-cb/consumption": "0.0.1-cbrelease-4.8.30",
+    "@sunbird-cb/consumption": "0.0.16-cbrelease-4.8.29",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@sunbird-cb/utils-v2": "0.0.27-ang-13-16",
