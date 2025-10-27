@@ -11,8 +11,8 @@ import { CertificateService } from '../../../_services/certificate.service';
 import { CertificateDialogComponent } from '../../dialog-components/certificate-dialog/certificate-dialog.component';
 
 const ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION = [
-  "Course",
-  "Moderated Course",
+  // "Course",
+  // "Moderated Course",
   "Invite-Only Program",
   "Moderated Program",
   "Blended Program",
@@ -20,7 +20,9 @@ const ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION = [
   "Standalone Assessment",
   "Moderated Assessment",
   "Invite-Only Assessment",
-  "External Redirect",
+  "Comprehensive Assessment Program",
+  "Pre Enrolment Assessment"
+  // "External Redirect",
 ];
 @Component({
   selector: 'sb-uic-card-progress-portrait-lib',
@@ -149,7 +151,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
       if (
         this.widgetData.content &&
         this.widgetData.content.primaryCategory &&
-        allowedPrimaryCategory?.includes(this.widgetData.content.primaryCategory?.toLowerCase())
+        allowedPrimaryCategory?.includes(this.widgetData.content?.primaryCategory?.toLowerCase()) || 
+        allowedPrimaryCategory?.includes(this.widgetData.content?.courseCategory?.toLowerCase()) 
       ) {
         const payload = {
           request: {
