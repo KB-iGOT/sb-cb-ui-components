@@ -132,6 +132,59 @@
         </div>
       </div>
 
+      <!-- Events Configuration -->
+      <div *ngSwitchCase="'eventsConfig'" class="complex-editor">
+        <div class="events-editor">
+          <h4>Events Configuration</h4>
+          <mat-slide-toggle formControlName="enabled">
+            {{editorForm.get('enabled')?.value ? 'Enabled Events Section' : 'Disabled Events Section'}}
+          </mat-slide-toggle>
+          <p class="helper-text" *ngIf="!editorForm.get('enabled')?.value">
+            Events section will be hidden when disabled but all settings will be preserved.
+          </p>
+        </div>
+      </div>
+
+      <!-- MDO Leaderboard Configuration -->
+      <div *ngSwitchCase="'mdoLeaderboardConfig'" class="complex-editor">
+        <div class="mdo-leaderboard-editor">
+          <h4>MDO Leaderboard Configuration</h4>
+          <mat-slide-toggle formControlName="enabled">
+            {{editorForm.get('enabled')?.value ? 'Enabled MDO Leaderboard' : 'Disabled MDO Leaderboard'}}
+          </mat-slide-toggle>
+          <p class="helper-text" *ngIf="!editorForm.get('enabled')?.value">
+            MDO Leaderboard section will be hidden when disabled but all settings will be preserved.
+          </p>
+        </div>
+      </div>
+
+      <!-- CBP Plan Configuration -->
+      <div *ngSwitchCase="'cbpPlanConfig'" class="complex-editor">
+        <div class="cbp-plan-editor">
+          <h4>CBP Plan Configuration</h4>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" placeholder="Enter CBP Plan title">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>PDF URL</mat-label>
+            <input matInput formControlName="pdfUrl" placeholder="Enter PDF URL or upload a file">
+          </mat-form-field>
+
+          <div class="upload-section">
+            <input type="file" #pdfFileInput accept="application/pdf" (change)="onPdfFileSelected($event)"
+              style="display: none">
+            <button mat-raised-button color="primary" (click)="pdfFileInput.click()" [disabled]="isUploading">
+              <mat-icon>upload_file</mat-icon>
+              {{ isUploading ? 'Uploading...' : 'Upload PDF' }}
+            </button>
+            <span *ngIf="isUploading" class="upload-status">{{ uploadStatus }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Speakers Configuration -->
       <div *ngSwitchCase="'speakersConfig'" class="complex-editor">
         <div class="speakers-editor">

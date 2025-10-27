@@ -213,6 +213,38 @@ export class EditorDialogComponent implements OnInit {
           })
         })
         break
+      case 'eventsConfig':
+        // Get events data or set defaults
+        const eventsValue = this.data.value || {}
+
+        console.log('EditorDialog - eventsConfig - received data.value:', this.data.value)
+
+        this.editorForm = this.fb.group({
+          enabled: [eventsValue.enabled !== undefined ? eventsValue.enabled : true]
+        })
+        break
+      case 'mdoLeaderboardConfig':
+        // Get mdo leaderboard data or set defaults
+        const mdoLeaderboardValue = this.data.value || {}
+
+        console.log('EditorDialog - mdoLeaderboardConfig - received data.value:', this.data.value)
+
+        this.editorForm = this.fb.group({
+          enabled: [mdoLeaderboardValue.enabled !== undefined ? mdoLeaderboardValue.enabled : true]
+        })
+        break
+      case 'cbpPlanConfig':
+        // Get CBP plan data or set defaults
+        const cbpPlanValue = this.data.value || {}
+        const cbpPlanData = cbpPlanValue.data || {}
+
+        console.log('EditorDialog - cbpPlanConfig - received data.value:', this.data.value)
+
+        this.editorForm = this.fb.group({
+          title: [cbpPlanData.title || ''],
+          pdfUrl: [cbpPlanData.pdfUrl || '']
+        })
+        break
       case 'slider':
         // Initialize slider data from the input or use defaults
         if (this.data.value && this.data.value.sliders && this.data.value.styleData) {
@@ -570,6 +602,63 @@ export class EditorDialogComponent implements OnInit {
       })
   }
 
+  // PDF upload methods for CBP Plan
+  onPdfFileSelected(event: any) {
+    const file = event.target.files[0]
+    if (file && file.type === 'application/pdf') {
+      this.uploadPdfFile(file)
+    } else {
+      this.uploadStatus = 'Please select a valid PDF file.'
+    }
+  }
+
+  uploadPdfFile(file: File) {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading PDF...'
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    // Headers as specified in the curl command
+    const headers = new HttpHeaders({
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'locale': 'en',
+      'org': 'dopt',
+      'rootOrg': 'igot'
+    })
+
+    this.http.post<any>('http://localhost:3000/apis/proxies/v8/storage/orgStoreUpload', formData, { headers })
+      .subscribe({
+        next: (response) => {
+          this.isUploading = false
+
+          if (response.responseCode === 'OK' && response.result && response.result.url) {
+            // Transform the URL
+            const transformedUrl = this.transformImageUrl(response.result.url)
+
+            // Update the pdfUrl form field
+            this.editorForm.get('pdfUrl')?.setValue(transformedUrl)
+            this.uploadStatus = 'PDF uploaded successfully!'
+
+            // Clear status after 3 seconds
+            setTimeout(() => {
+              this.uploadStatus = ''
+            }, 3000)
+          } else {
+            this.uploadStatus = 'Upload failed. Invalid response.'
+          }
+        },
+        error: (error) => {
+          this.isUploading = false
+          this.uploadStatus = 'Upload failed. Please try again.'
+          console.error('PDF upload error:', error)
+        }
+      })
+  }
+
   // Slider specific methods
   onSliderClick(event: any) {
     console.log('Slider click:', event)
@@ -762,6 +851,33 @@ export class EditorDialogComponent implements OnInit {
         const formValue = this.editorForm.value
         console.log('Submitting userProgressConfig form:', formValue)
         this.dialogRef.close(formValue) // Return the form value with enabled and nested data
+      }
+    } else if (this.formType === 'eventsConfig') {
+      if (this.editorForm.valid) {
+        // Return structured data with enabled flag
+        this.data.value.enabled = this.editorForm.value.enabled
+        this.dialogRef.close(this.data.value) // Return the form value with enabled flag
+      }
+    } else if (this.formType === 'mdoLeaderboardConfig') {
+      if (this.editorForm.valid) {
+        // Return structured data with enabled flag
+        const formValue = this.editorForm.value
+        console.log('Submitting mdoLeaderboardConfig form:', formValue)
+        this.data.value.enabled = formValue.enabled
+        this.dialogRef.close(this.data.value) // Return the data value with updated enabled flag
+      }
+    } else if (this.formType === 'cbpPlanConfig') {
+      if (this.editorForm.valid) {
+        // Return structured data with title and pdfUrl
+        const formValue = this.editorForm.value
+        console.log('Submitting cbpPlanConfig form:', formValue)
+
+        const cbpPlanConfig = {
+          title: formValue.title,
+          pdfUrl: formValue.pdfUrl
+        }
+
+        this.dialogRef.close(cbpPlanConfig)
       }
     } else if (this.formType === 'speakersConfig') {
       if (this.editorForm.valid) {

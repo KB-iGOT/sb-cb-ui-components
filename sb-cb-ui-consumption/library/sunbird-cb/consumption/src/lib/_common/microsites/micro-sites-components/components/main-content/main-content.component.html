@@ -28,7 +28,7 @@
       <!-- Mobile CBP Plan -->
       <div class="block md:hidden col-span-12 padding-left-m padding-right-m padding-top-m padding-bottom-m">
         <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true" [channelId]="orgId"
-          [objectData]="data?.cbpPlanSection?.data">
+          [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit" [isEditable]="isEditable">
         </sb-uic-cbp-plan>
       </div>
 
@@ -113,10 +113,9 @@
         </ng-container>
 
         <!-- Events -->
-        <div *ngIf="slwConfig?.enabled && (data?.stateLearningWeekSection?.events?.enabled &&
-                  data?.stateLearningWeekSection?.events?.column?.length &&
-                  data?.stateLearningWeekSection?.events?.column[0] || isEdit)">
-          <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]" [nwlEventsConfig]="slwConfig">
+        <div *ngIf="isEdit">
+          <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]" [nwlEventsConfig]="slwConfig"
+            [isEdit]="isEdit" [isEditable]="isEdit">
           </sb-uic-events>
         </div>
 
@@ -192,9 +191,10 @@
           <!-- Leaderboard -->
           <div class="hidden md:block padding-top-xl padding-bottom-m"
             *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled || isEdit">
-            <div *ngIf="data?.stateLearningWeekSection?.mdoLeaderboard?.enabled">
+            <div>
               <sb-uic-mdo-leaderboard [object]="data?.stateLearningWeekSection?.mdoLeaderboard?.data"
-                [slwConfig]="slwConfig" (tabClicked)="raiseTabClick($event)" [orgId]="orgId">
+                [slwConfig]="slwConfig" (tabClicked)="raiseTabClick($event)" [orgId]="orgId" [isEdit]="isEdit"
+                [isEditable]="isEdit">
               </sb-uic-mdo-leaderboard>
             </div>
           </div>
@@ -203,7 +203,7 @@
           <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.cbpPlanSection?.data">
             <div class="pt-4">
               <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true" [channelId]="orgId"
-                [objectData]="data?.cbpPlanSection?.data">
+                [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit" [isEditable]="isEditable">
               </sb-uic-cbp-plan>
             </div>
           </div>

@@ -263,6 +263,54 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
       }
     }
+    debugger
+    // Special handling for eventsConfig - retrieve from nested structure
+    if (event.data.fieldType === 'eventsConfig') {
+      console.log('MdoChannelV3 - eventsConfig - current sectionList:', this.sectionList)
+      // Find the mainContent section and get its events data
+      for (const section of this.sectionList) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.events) {
+            console.log('MdoChannelV3 - eventsConfig - current stored data:',
+              column.data.stateLearningWeekSection.events)
+            // Use the nested data for the dialog
+            dialogValue = column.data.stateLearningWeekSection.events
+          }
+        }
+      }
+    }
+
+    // Special handling for mdoLeaderboardConfig - retrieve from nested structure
+    if (event.data.fieldType === 'mdoLeaderboardConfig') {
+      console.log('MdoChannelV3 - mdoLeaderboardConfig - current sectionList:', this.sectionList)
+      // Find the mainContent section and get its mdoLeaderboard data
+      for (const section of this.sectionList) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.mdoLeaderboard) {
+            console.log('MdoChannelV3 - mdoLeaderboardConfig - current stored data:',
+              column.data.stateLearningWeekSection.mdoLeaderboard)
+            // Use the nested data for the dialog
+            dialogValue = column.data.stateLearningWeekSection.mdoLeaderboard
+          }
+        }
+      }
+    }
+
+    // Special handling for cbpPlanConfig - retrieve from nested structure
+    if (event.data.fieldType === 'cbpPlanConfig') {
+      console.log('MdoChannelV3 - cbpPlanConfig - current sectionList:', this.sectionList)
+      // Find the mainContent section and get its cbpPlan data
+      for (const section of this.sectionList) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.cbpPlan) {
+            console.log('MdoChannelV3 - cbpPlanConfig - current stored data:',
+              column.data.stateLearningWeekSection.cbpPlan)
+            // Use the nested data for the dialog
+            dialogValue = column.data.stateLearningWeekSection.cbpPlan
+          }
+        }
+      }
+    }
 
     const dialogRef = this.dialog.open(EditorDialogComponent, {
       width: dialogWidth,
@@ -297,6 +345,9 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'weekHighlights':
       case 'userProgressConfig':
       case 'speakersConfig':
+      case 'eventsConfig':
+      case 'mdoLeaderboardConfig':
+      case 'cbpPlanConfig':
         return '800px'
       case 'image':
         return '600px'
@@ -477,6 +528,135 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
       if (updated) {
         console.log('Successfully updated myprogress configuration (alternate path)')
+      }
+    }
+
+    // Special handling for eventsConfig
+    else if (fieldName === 'eventsConfig' && sectionType === 'events') {
+      console.log('Handling eventsConfig special case')
+      console.log('newValue received:', newValue)
+
+      // events is nested inside mainContent column's data structure
+      // Path: column.data.stateLearningWeekSection.events
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          // Look for mainContent column which contains the events
+          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.events) {
+            console.log('Found column with events nested data. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+
+            // Ensure the nested structure exists
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.events) {
+              column.data.stateLearningWeekSection.events = { enabled: true }
+            }
+
+            // Update the nested data with deep copy to avoid reference issues
+            column.data.stateLearningWeekSection.events = JSON.parse(JSON.stringify(newValue))
+
+            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
+            console.log('Updated events data:', column.data.stateLearningWeekSection.events)
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+
+      if (updated) {
+        console.log('Successfully updated events configuration')
+      }
+    }
+
+    // Special handling for mdoLeaderboardConfig
+    else if (fieldName === 'mdoLeaderboardConfig' && sectionType === 'mdoLeaderboard') {
+      console.log('Handling mdoLeaderboardConfig special case')
+      console.log('newValue received:', newValue)
+
+      // mdoLeaderboard is nested inside mainContent column's data structure
+      // Path: column.data.stateLearningWeekSection.mdoLeaderboard
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          // Look for mainContent column which contains the mdoLeaderboard
+          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.mdoLeaderboard) {
+            console.log('Found column with mdoLeaderboard nested data. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+
+            // Ensure the nested structure exists
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.mdoLeaderboard) {
+              column.data.stateLearningWeekSection.mdoLeaderboard = { enabled: true }
+            }
+
+            // Update the nested data with deep copy to avoid reference issues
+            column.data.stateLearningWeekSection.mdoLeaderboard = JSON.parse(JSON.stringify(newValue))
+
+            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
+            console.log('Updated mdoLeaderboard data:', column.data.stateLearningWeekSection.mdoLeaderboard)
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+
+      if (updated) {
+        console.log('Successfully updated mdoLeaderboard configuration')
+      }
+    }
+
+    // Special handling for cbpPlanConfig
+    else if (fieldName === 'cbpPlanConfig' && sectionType === 'cbpPlan') {
+      console.log('Handling cbpPlanConfig special case')
+      console.log('newValue received:', newValue)
+
+      // cbpPlan is nested inside mainContent column's data structure
+      // Path: column.data.stateLearningWeekSection.cbpPlan
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          // Look for mainContent column which contains the cbpPlan
+          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.cbpPlan) {
+            console.log('Found column with cbpPlan nested data. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+
+            // Ensure the nested structure exists
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.cbpPlan) {
+              column.data.stateLearningWeekSection.cbpPlan = { enabled: true }
+            }
+
+            // Update the nested data with deep copy to avoid reference issues
+            column.data.stateLearningWeekSection.cbpPlan = JSON.parse(JSON.stringify(newValue))
+
+            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
+            console.log('Updated cbpPlan data:', column.data.stateLearningWeekSection.cbpPlan)
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+
+      if (updated) {
+        console.log('Successfully updated cbpPlan configuration')
       }
     }
 
