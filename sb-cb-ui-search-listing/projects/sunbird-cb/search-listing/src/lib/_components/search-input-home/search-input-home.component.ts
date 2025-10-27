@@ -165,32 +165,34 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     } else {
       this.disableMenu = false;
     }
+    let searchCategoriesCopy: SearchListingConfig.SearchCategory[] = _.get(this.searchConfig, 'searchCategories', [])
     if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
-      if (this.searchConfig.searchCategories) {
+      if (searchCategoriesCopy.length) {
         const hasMdoAdmin = userRoles.has("mdo_admin");
         const hasMdoLeader = userRoles.has("mdo_leader");
         const hasCommunityModerator = userRoles.has("community_moderator");
         if ((hasMdoAdmin && hasCommunityModerator) || (hasMdoLeader && hasCommunityModerator) || hasMdoLeader) {
         } else if (hasMdoAdmin) {
-          this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+          searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value !== SearchCategory.Communities);
         } else if (hasCommunityModerator) {
-          this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value === SearchCategory.Communities);
+          searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value === SearchCategory.Communities);
           this.searchConfig.searchInputConfig.defaultSearchCategory = SearchCategory.Communities;
         } else {
-          this.searchConfig.searchCategories = this.searchConfig?.searchCategories.filter(category => category?.value !== SearchCategory.Communities);
+          searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value !== SearchCategory.Communities);
         }
       }
     } else if (this.searchConfig && _.get(this.searchConfig, 'applicationName') === SearchListingConfig.ApplicationNames.CBPPortal && this.configSvc && this.configSvc.userRoles) {
       // configSvc.userRoles can be a Set<string> or an array — handle both safely
       const userRoles = this.configSvc.userRoles as Set<string> | string[];
       const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
-      this.searchConfig.searchCategories = this.searchConfig.searchCategories.filter(category => {
+      searchCategoriesCopy = searchCategoriesCopy.filter((category: SearchListingConfig.SearchCategory) => {
         if (!category.roles || !Array.isArray(category.roles)) {
           return false;
         }
         return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
       });
+      this.searchConfig.currentSearchCategories = searchCategoriesCopy;
     }
 
     this.searchSubscription.add(
@@ -205,7 +207,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
         }
       })
     );
-    this.categories = this.searchConfig?.searchCategories || [];
+    this.categories = searchCategoriesCopy || [];
     
     // Check if selectedSearchCategory exists in categories, if not set to first category
     const categoryExists = this.categories.some(category => category.value === this.selectedSearchCategory);

@@ -7,14 +7,16 @@
   @extend %page-center;
   height: auto;
   min-height: 400px;
+  margin-inline: auto;
   --mat-sidenav-content-background-color: #eff3f9; 
+}
+
+::ng-deep .container-balanced{
+  .mat-drawer-container {
+    background-color: unset !important;
+  }
 }
 
 ::ng-deep .search-result-active.container-body-scroll {
   background-color: #eff3f9 !important;
-}
-
-.global-content {
-  // --mat-sidenav-content-background-color: #eff3f9;
-  background-color: #eff3f9;
 }

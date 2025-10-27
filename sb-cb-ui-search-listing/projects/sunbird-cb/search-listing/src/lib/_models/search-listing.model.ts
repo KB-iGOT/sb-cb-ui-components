@@ -447,6 +447,7 @@ export enum IGOTConst {
 export namespace SearchListingConfig {
   export interface Config {
     searchCategories: SearchCategory[];
+    currentSearchCategories?: SearchCategory[];
     searchListing: boolean;
     allSearchCategoriesTypes: SearchCategoryType[];
     searchInputConfig: SearchInputConfig;
