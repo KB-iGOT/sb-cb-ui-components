@@ -5,7 +5,9 @@
         </ws-app-learn-search>
     </div>
     <ng-container *ngIf="applicationName === 'CBP Portal' && userId">
-        <ws-auth-add-users-form-meta [userId]="userId" (updateEvent)="updateUserStatus($event)"></ws-auth-add-users-form-meta>
+        <div class="cbp-user">
+            <ws-auth-add-users-form-meta [userId]="userId" (updateEvent)="updateUserStatus($event)"></ws-auth-add-users-form-meta>
+        </div>
     </ng-container>
     <ng-container *ngIf="applicationName !== 'CBP Portal' && userId">
         <ws-app-user-update [userId]="userId" (updateEvent)="updateUserStatus($event)"></ws-app-user-update>
