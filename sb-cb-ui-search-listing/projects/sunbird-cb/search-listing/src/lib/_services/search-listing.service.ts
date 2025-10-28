@@ -40,7 +40,8 @@ const API_END_POINTS = {
   SEARCH_USERS: `/apis/proxies/v8/user/v1/search`,
   SEARCH_TRAINING_PLANS: `/apis/proxies/v8/cbplan/v2/search`,
   BLOCK_USER: '/apis/proxies/v8/user/v1/block',
-  UNBLOCK_USER: '/apis/proxies/v8/user/v1/unblock'
+  UNBLOCK_USER: '/apis/proxies/v8/user/v1/unblock',
+  CONTENT_GET: '/apis/proxies/v8/action/content/v3/hierarchy/'
 };
 
 @Injectable({
@@ -308,5 +309,9 @@ export class SearchListingService {
 
   unblockUser(request: any): Observable<any> {
     return this.http.post<any>(API_END_POINTS.UNBLOCK_USER, request)
+  }
+
+  getCourseDetails(contentId: string): Observable<any> {
+    return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}`);
   }
 }
