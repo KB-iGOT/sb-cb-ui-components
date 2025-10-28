@@ -1,15 +1,9 @@
 <ng-container *ngIf="!data?.contentStrip?.hideSection || isEdit">
-  {{data|json}}
   <div class="flex mb-8">
     <div class="w-full">
-      <sb-uic-content-strip-with-tabs 
-        [emitViewAll]="true" 
-        (viewAllResponse)="showAllContent($event)"
-        (telemtryResponse)="raiseTelemetryInteratEvent($event)" 
-        [providerId]="orgId"
-        [widgetData]="data?.contentStrip" 
-        (emptyResponse)="hideContentStrip($event, data?.contentStrip)"
-        [channnelName]="channelName">
+      <sb-uic-content-strip-with-tabs [emitViewAll]="true" (viewAllResponse)="showAllContent($event)"
+        (telemtryResponse)="raiseTelemetryInteratEvent($event)" [providerId]="orgId" [widgetData]="data?.contentStrip"
+        (emptyResponse)="hideContentStrip($event, data?.contentStrip)" [channnelName]="channelName">
       </sb-uic-content-strip-with-tabs>
     </div>
   </div>

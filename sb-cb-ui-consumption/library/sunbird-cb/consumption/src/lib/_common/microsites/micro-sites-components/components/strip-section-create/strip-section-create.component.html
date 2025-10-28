@@ -1,0 +1,44 @@
+<div class="strip-section-header">
+  <div class="section-title-container">
+    <span class="section-title" *ngIf="!isEditingTitle">{{ sectionData?.name || 'Add Section Name' }}</span>
+
+    <div class="title-edit-container" *ngIf="isEditingTitle">
+      <input type="text" class="title-input" [(ngModel)]="tempTitle" (keydown)="onTitleKeydown($event)"
+        (blur)="saveTitle()" placeholder="Enter section name" autofocus>
+    </div>
+
+    <button mat-icon-button class="edit-icon-btn" (click)="startEditTitle()" *ngIf="!isEditingTitle">
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <div class="edit-actions" *ngIf="isEditingTitle">
+      <button mat-icon-button class="save-btn" (click)="saveTitle()" matTooltip="Save">
+        <mat-icon>check</mat-icon>
+      </button>
+      <button mat-icon-button class="cancel-btn" (click)="cancelEdit()" matTooltip="Cancel">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button mat-button class="action-btn">
+      <mat-icon>add</mat-icon>
+      Add Tabs
+    </button>
+
+    <button mat-button class="action-btn" (click)="openAddContentDialog()">
+      <mat-icon>add</mat-icon>
+      Add content
+    </button>
+
+    <div class="hide-section-container">
+      <span class="hide-section-label">Hide section</span>
+      <mat-slide-toggle class="section-toggle" [(ngModel)]="sectionData.visible"></mat-slide-toggle>
+    </div>
+
+    <button mat-icon-button class="delete-btn" (click)="onRemoveSection()" matTooltip="Delete Section">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+</div>

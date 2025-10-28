@@ -1,0 +1,140 @@
+.strip-add-content-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .dialog-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+
+    .dialog-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+
+  .dialog-body {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 100%;
+
+      .filter-dropdown {
+        flex-shrink: 0;
+
+        .program-select {
+          width: 180px;
+
+          ::ng-deep .mat-form-field-wrapper {
+            padding-bottom: 0;
+            margin-bottom: 0;
+          }
+
+          ::ng-deep .mat-form-field-flex {
+            align-items: center;
+          }
+
+          ::ng-deep .mat-form-field-infix {
+            padding: 0.5em 0;
+            border-top: 0;
+          }
+
+          ::ng-deep .mat-select {
+            padding: 0;
+          }
+        }
+      }
+
+      .search-input-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+
+        .search-field {
+          flex: 1;
+
+          ::ng-deep .mat-form-field-wrapper {
+            padding-bottom: 0;
+            margin-bottom: 0;
+          }
+
+          ::ng-deep .mat-form-field-flex {
+            align-items: center;
+          }
+
+          ::ng-deep .mat-form-field-infix {
+            padding: 0.5em 0;
+            border-top: 0;
+            display: flex;
+            align-items: center;
+          }
+
+          ::ng-deep .mat-form-field-prefix {
+            top: 0;
+            display: flex;
+            align-items: center;
+            margin-right: 8px;
+          }
+
+          ::ng-deep input.mat-input-element {
+            margin: 0;
+            padding: 0;
+          }
+
+          ::ng-deep mat-icon.search-icon {
+            color: #666;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            vertical-align: middle;
+          }
+        }
+
+        .search-btn {
+          height: 40px;
+          padding: 0 32px;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+
+    .preview-btn {
+      color: #1976d2;
+
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 12px;
+
+      .cancel-btn {
+        color: #666;
+      }
+
+      .add-btn {
+        background-color: #1976d2;
+        color: white;
+      }
+    }
+  }
+}

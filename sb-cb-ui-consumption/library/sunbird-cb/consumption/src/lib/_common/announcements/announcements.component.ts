@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, Injector } from '@angular/core';
 import { InsiteDataService } from '../../_services/insite-data.service';
 import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service';
 
@@ -14,16 +14,44 @@ export class AnnouncementsComponent implements OnInit {
   @Input() mobileHeight: boolean = false
   @Input() fetchDataFromApi: boolean = false
   @Input() channelId: any
+  @Input() isEdit: boolean = false;
+  @Input() isEditable: boolean = false;
   @Output() openDialog = new EventEmitter<any>()
+  @Output() editClicked = new EventEmitter<any>();
   isLoading: boolean = false
   announcements: any = []
   expand = false
   expanded: boolean = false
 
+  // Will store the event callback function from the parent
+  private eventCallback: Function | undefined
+
   constructor(
     public insightSvc: InsiteDataService,
     private langtranslations: MultilingualTranslationsService,
+    private injector: Injector
   ) {
+    try {
+      // Get values from injector
+      const isEditInput = this.injector.get('isEdit', false)
+      const isEditableInput = this.injector.get('isEditable', false)
+      const eventCallbackInput = this.injector.get('eventCallback', null)
+
+      // Set edit flags from injector
+      if (typeof isEditInput === 'boolean') {
+        this.isEdit = isEditInput
+      }
+      if (typeof isEditableInput === 'boolean') {
+        this.isEditable = isEditableInput
+      }
+
+      // Store the event callback function
+      if (eventCallbackInput && typeof eventCallbackInput === 'function') {
+        this.eventCallback = eventCallbackInput
+      }
+    } catch (e) {
+      console.error('Error getting values from injector', e)
+    }
   }
 
   ngOnInit() {
@@ -90,6 +118,37 @@ export class AnnouncementsComponent implements OnInit {
 
   translateLabels(label: string, type: any) {
     return this.langtranslations.translateLabel(label, type, '');
+  }
+
+  /**
+   * Handle edit button click
+   * Emits an event to be handled by parent component (mdo-channel-v3)
+   */
+  onEdit() {
+    console.log('AnnouncementsComponent: onEdit clicked')
+    const eventData = {
+      source: 'announcements',
+      action: 'edit',
+      data: {
+        fieldName: 'announcementsConfig',
+        displayName: 'Announcements Configuration',
+        value: this.objectData,
+        fieldType: 'announcementsConfig'
+      }
+    }
+
+    // Use only the callback from injector which is the most reliable method
+    if (this.eventCallback && typeof this.eventCallback === 'function') {
+      console.log('AnnouncementsComponent: calling parent eventCallback directly')
+      this.eventCallback(eventData)
+      return
+    }
+
+    // Fallback to global injector if direct callback isn't available
+    if ((window as any).__INJECTOR_DATA?.eventCallback) {
+      console.log('AnnouncementsComponent: calling global injector eventCallback');
+      (window as any).__INJECTOR_DATA.eventCallback(eventData)
+    }
   }
 
 }

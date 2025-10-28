@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
+import { MicrositeV3Service } from '../../../../../_services/microsite-v3.service'
 
 interface SliderItem {
   active: boolean
@@ -60,6 +61,7 @@ export class EditorDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
+    private micrositeService: MicrositeV3Service,
     public dialogRef: MatDialogRef<EditorDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -75,7 +77,12 @@ export class EditorDialogComponent implements OnInit {
     return this.editorForm.get('list') as FormArray
   }
 
+  get cbpPlanListArray(): FormArray {
+    return this.editorForm.get('list') as FormArray
+  }
+
   ngOnInit() {
+    debugger
     if (this.formType === 'keyHighlights') {
       this.initKeyHighlightsForm()
     } else {
@@ -113,6 +120,25 @@ export class EditorDialogComponent implements OnInit {
     moveItemInArray(this.weekHighlightsList.controls, event.previousIndex, event.currentIndex)
     this.weekHighlightsList.updateValueAndValidity()
   }
+
+  // Methods for CBP plan management
+  addCbpPlanItem(): void {
+    this.cbpPlanListArray.push(this.fb.group({
+      title: [''],
+      pdfUrl: ['']
+    }))
+  }
+
+  removeCbpPlanItem(index: number): void {
+    this.cbpPlanListArray.removeAt(index)
+  }
+
+  dropCbpPlanItem(event: CdkDragDrop<any[]>): void {
+    moveItemInArray(this.cbpPlanListArray.controls, event.previousIndex, event.currentIndex)
+    this.cbpPlanListArray.updateValueAndValidity()
+  }
+
+
 
   initForm() {
     // Create form based on field type
@@ -202,7 +228,7 @@ export class EditorDialogComponent implements OnInit {
         const speakerData = speakersValue.data || speakersValue
         console.log('EditorDialog - speakersConfig - processed speakerData:', speakerData)
         console.log('EditorDialog - speakersConfig - speaker list:', speakerData.list)
-
+        debugger
         this.editorForm = this.fb.group({
           enabled: [speakersValue.enabled !== undefined ? speakersValue.enabled : true],
           data: this.fb.group({
@@ -236,13 +262,36 @@ export class EditorDialogComponent implements OnInit {
       case 'cbpPlanConfig':
         // Get CBP plan data or set defaults
         const cbpPlanValue = this.data.value || {}
-        const cbpPlanData = cbpPlanValue.data || {}
+        const cbpPlanList = cbpPlanValue.list || []
 
         console.log('EditorDialog - cbpPlanConfig - received data.value:', this.data.value)
 
         this.editorForm = this.fb.group({
-          title: [cbpPlanData.title || ''],
-          pdfUrl: [cbpPlanData.pdfUrl || '']
+          list: this.fb.array([])
+        })
+
+        // Populate existing CBP plan items
+        if (cbpPlanList.length > 0) {
+          cbpPlanList.forEach((item: any) => {
+            this.cbpPlanListArray.push(this.fb.group({
+              title: [item.title || ''],
+              pdfUrl: [item.downloaUrl || '']
+            }))
+          })
+        } else {
+          // Add one empty item by default
+          this.addCbpPlanItem()
+        }
+        break
+      case 'announcementsConfig':
+        // Get announcements data or set defaults
+        const announcementsValue = this.data.value || {}
+
+        console.log('EditorDialog - announcementsConfig - received data.value:', this.data.value)
+
+        this.editorForm = this.fb.group({
+          enabled: [announcementsValue.enabled !== undefined ? announcementsValue.enabled : true],
+          title: [announcementsValue.title || '']
         })
         break
       case 'slider':
@@ -323,7 +372,7 @@ export class EditorDialogComponent implements OnInit {
     const safeDesc = speaker && speaker.description !== undefined ? speaker.description : ''
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
-
+    debugger
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
@@ -504,47 +553,25 @@ export class EditorDialogComponent implements OnInit {
     this.isUploading = true
     this.uploadStatus = 'Uploading...'
 
-    const formData = new FormData()
-    formData.append('file', file)
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
 
-    // Headers for image upload
-    const headers = new HttpHeaders({
-      'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
-      'locale': 'en',
-      'org': 'dopt',
-      'rootOrg': 'igot'
+        // Update the form with the new URL
+        this.speakerForm.get('profileImage')?.setValue(transformedUrl)
+        this.uploadStatus = 'Upload successful!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('Upload error:', error)
+      }
     })
-
-    this.http.post<any>('http://localhost:3000/apis/proxies/v8/storage/orgStoreUpload', formData, { headers })
-      .subscribe({
-        next: (response) => {
-          this.isUploading = false
-
-          if (response.responseCode === 'OK' && response.result && response.result.url) {
-            // Transform the URL
-            const transformedUrl = this.transformImageUrl(response.result.url)
-
-            // Update the form with the new URL
-            this.speakerForm.get('profileImage')?.setValue(transformedUrl)
-            this.uploadStatus = 'Upload successful!'
-
-            // Clear status after 3 seconds
-            setTimeout(() => {
-              this.uploadStatus = ''
-            }, 3000)
-          } else {
-            this.uploadStatus = 'Upload failed. Invalid response.'
-          }
-        },
-        error: (error) => {
-          this.isUploading = false
-          this.uploadStatus = 'Upload failed. Please try again.'
-          console.error('Upload error:', error)
-        }
-      })
   }
 
   // General image upload methods
@@ -559,104 +586,66 @@ export class EditorDialogComponent implements OnInit {
     this.isUploading = true
     this.uploadStatus = 'Uploading...'
 
-    const formData = new FormData()
-    formData.append('file', file)
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
 
-    // Headers as specified in the curl command
-    const headers = new HttpHeaders({
-      'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
-      'locale': 'en',
-      'org': 'dopt',
-      'rootOrg': 'igot'
+        // Update the form with the new URL
+        this.editorForm.get('value')?.setValue(transformedUrl)
+        this.uploadStatus = 'Upload successful!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('Upload error:', error)
+      }
     })
-
-    this.http.post<any>('http://localhost:3000/apis/proxies/v8/storage/orgStoreUpload', formData, { headers })
-      .subscribe({
-        next: (response) => {
-          this.isUploading = false
-
-          if (response.responseCode === 'OK' && response.result && response.result.url) {
-            // Transform the URL
-            const transformedUrl = this.transformImageUrl(response.result.url)
-
-            // Update the form with the new URL
-            this.editorForm.get('value')?.setValue(transformedUrl)
-            this.uploadStatus = 'Upload successful!'
-
-            // Clear status after 3 seconds
-            setTimeout(() => {
-              this.uploadStatus = ''
-            }, 3000)
-          } else {
-            this.uploadStatus = 'Upload failed. Invalid response.'
-          }
-        },
-        error: (error) => {
-          this.isUploading = false
-          this.uploadStatus = 'Upload failed. Please try again.'
-          console.error('Upload error:', error)
-        }
-      })
   }
 
   // PDF upload methods for CBP Plan
-  onPdfFileSelected(event: any) {
+  currentUploadingIndex: number = -1
+
+  onPdfFileSelected(event: any, index: number) {
     const file = event.target.files[0]
     if (file && file.type === 'application/pdf') {
-      this.uploadPdfFile(file)
+      this.currentUploadingIndex = index
+      this.uploadPdfFile(file, index)
     } else {
       this.uploadStatus = 'Please select a valid PDF file.'
     }
   }
 
-  uploadPdfFile(file: File) {
+  uploadPdfFile(file: File, index: number) {
     this.isUploading = true
     this.uploadStatus = 'Uploading PDF...'
 
-    const formData = new FormData()
-    formData.append('file', file)
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
 
-    // Headers as specified in the curl command
-    const headers = new HttpHeaders({
-      'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
-      'locale': 'en',
-      'org': 'dopt',
-      'rootOrg': 'igot'
-    })
-
-    this.http.post<any>('http://localhost:3000/apis/proxies/v8/storage/orgStoreUpload', formData, { headers })
-      .subscribe({
-        next: (response) => {
-          this.isUploading = false
-
-          if (response.responseCode === 'OK' && response.result && response.result.url) {
-            // Transform the URL
-            const transformedUrl = this.transformImageUrl(response.result.url)
-
-            // Update the pdfUrl form field
-            this.editorForm.get('pdfUrl')?.setValue(transformedUrl)
-            this.uploadStatus = 'PDF uploaded successfully!'
-
-            // Clear status after 3 seconds
-            setTimeout(() => {
-              this.uploadStatus = ''
-            }, 3000)
-          } else {
-            this.uploadStatus = 'Upload failed. Invalid response.'
-          }
-        },
-        error: (error) => {
-          this.isUploading = false
-          this.uploadStatus = 'Upload failed. Please try again.'
-          console.error('PDF upload error:', error)
+        // Update the pdfUrl form field for the specific item
+        const listArray = this.editorForm.get('list') as FormArray
+        if (listArray && listArray.at(index)) {
+          listArray.at(index).get('pdfUrl')?.setValue(transformedUrl)
         }
-      })
+        this.uploadStatus = 'PDF uploaded successfully!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('PDF upload error:', error)
+      }
+    })
   }
 
   // Slider specific methods
@@ -674,52 +663,31 @@ export class EditorDialogComponent implements OnInit {
   uploadSliderImage(file: File) {
     this.uploadStatus = 'Uploading...'
 
-    const formData = new FormData()
-    formData.append('file', file)
-
-    const headers = new HttpHeaders({
-      'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
-      'locale': 'en',
-      'org': 'dopt',
-      'rootOrg': 'igot'
-    })
-
-    this.http.post<any>('http://localhost:3000/apis/proxies/v8/storage/orgStoreUpload', formData, { headers })
-      .subscribe({
-        next: (response) => {
-          if (response.responseCode === 'OK' && response.result && response.result.url) {
-            // Transform the URL
-            const transformedUrl = this.transformImageUrl(response.result.url)
-
-            // Update all banner sizes with the same URL
-            const bannersControl = this.sliderItemForm.get('banners')
-            if (bannersControl) {
-              bannersControl.get('l')?.setValue(transformedUrl)
-              bannersControl.get('m')?.setValue(transformedUrl)
-              bannersControl.get('s')?.setValue(transformedUrl)
-              bannersControl.get('xl')?.setValue(transformedUrl)
-              bannersControl.get('xs')?.setValue(transformedUrl)
-              bannersControl.get('xxl')?.setValue(transformedUrl)
-            }
-
-            this.uploadStatus = 'Upload successful!'
-
-            // Clear status after 3 seconds
-            setTimeout(() => {
-              this.uploadStatus = ''
-            }, 3000)
-          } else {
-            this.uploadStatus = 'Upload failed. Invalid response.'
-          }
-        },
-        error: (error) => {
-          this.uploadStatus = 'Upload failed. Please try again.'
-          console.error('Upload error:', error)
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        // Update all banner sizes with the same URL
+        const bannersControl = this.sliderItemForm.get('banners')
+        if (bannersControl) {
+          bannersControl.get('l')?.setValue(transformedUrl)
+          bannersControl.get('m')?.setValue(transformedUrl)
+          bannersControl.get('s')?.setValue(transformedUrl)
+          bannersControl.get('xl')?.setValue(transformedUrl)
+          bannersControl.get('xs')?.setValue(transformedUrl)
+          bannersControl.get('xxl')?.setValue(transformedUrl)
         }
-      })
+
+        this.uploadStatus = 'Upload successful!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('Upload error:', error)
+      }
+    })
   }
 
   addSliderItem() {
@@ -805,6 +773,7 @@ export class EditorDialogComponent implements OnInit {
   }
 
   onSubmit() {
+    debugger
     if (this.formType === 'keyHighlights') {
       const formValue = this.editorForm.value
       const updatedConfig = {
@@ -841,8 +810,8 @@ export class EditorDialogComponent implements OnInit {
     } else if (this.formType === 'topLearnersConfig') {
       if (this.editorForm.valid) {
         // Create structured data for top learners with enabled flag
-        const formValue = this.editorForm.value
-        this.dialogRef.close(formValue) // Return all form values as config
+        this.data.value.enabled = this.editorForm.value.enabled
+        this.dialogRef.close(this.data.value) // Return all form values as config
       }
     } else if (this.formType === 'userProgressConfig') {
       if (this.editorForm.valid) {
@@ -868,16 +837,21 @@ export class EditorDialogComponent implements OnInit {
       }
     } else if (this.formType === 'cbpPlanConfig') {
       if (this.editorForm.valid) {
-        // Return structured data with title and pdfUrl
+        // Return structured data with list of CBP plans
         const formValue = this.editorForm.value
-        console.log('Submitting cbpPlanConfig form:', formValue)
+        this.data.value.list = formValue.list
 
-        const cbpPlanConfig = {
-          title: formValue.title,
-          pdfUrl: formValue.pdfUrl
-        }
+        this.dialogRef.close(this.data.value)
+      }
+    } else if (this.formType === 'announcementsConfig') {
+      if (this.editorForm.valid) {
+        // Return structured data with enabled and title
+        const formValue = this.editorForm.value
+        this.data.value.enabled = formValue.enabled
+        this.data.value.title = formValue.title
 
-        this.dialogRef.close(cbpPlanConfig)
+        console.log('Submitting announcementsConfig:', this.data.value)
+        this.dialogRef.close(this.data.value)
       }
     } else if (this.formType === 'speakersConfig') {
       if (this.editorForm.valid) {
@@ -905,7 +879,6 @@ export class EditorDialogComponent implements OnInit {
               }
             }
           }
-
           console.log('Final speaker config for submission:', speakerConfig)
           this.dialogRef.close(speakerConfig)
         } catch (error) {

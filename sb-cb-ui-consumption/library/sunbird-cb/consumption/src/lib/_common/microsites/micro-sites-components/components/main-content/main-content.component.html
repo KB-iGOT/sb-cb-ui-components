@@ -28,14 +28,15 @@
       <!-- Mobile CBP Plan -->
       <div class="block md:hidden col-span-12 padding-left-m padding-right-m padding-top-m padding-bottom-m">
         <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true" [channelId]="orgId"
-          [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit" [isEditable]="isEditable">
+          [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit">
         </sb-uic-cbp-plan>
       </div>
 
       <!-- Mobile announcements -->
       <div class="block md:hidden col-span-12 mt-6" *ngIf="!data?.announcementSection?.disable">
         <sb-uic-announcements [layoutType]="'mobile'" (openDialog)="triggerOpenDialog($event)"
-          [objectData]="data?.announcementSection?.data" [fetchDataFromApi]="false" [channelId]="orgId">
+          [objectData]="data?.announcementSection?.data" [fetchDataFromApi]="false" [channelId]="orgId"
+          [isEdit]="isEdit">
         </sb-uic-announcements>
 
         <!-- Announcement dialog -->
@@ -119,15 +120,29 @@
           </sb-uic-events>
         </div>
 
+        <!-- Add New Section Button -->
+        <div class="add-section-container" *ngIf="isEdit">
+          <button mat-stroked-button class="add-section-btn" (click)="addNewSection()" type="button">
+            <mat-icon>add</mat-icon>
+            Add New Section
+          </button>
+        </div>
+
+        <!-- Strip Section Create Components (Array) -->
+        <div *ngFor="let section of stripSections; let i = index" class="strip-section-wrapper">
+          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" (removeSection)="removeSection(i)">
+          </sb-uic-strip-section-create>
+        </div>
+
         <!-- Tabs -->
-        <ng-container *ngIf="!data?.tabSection?.disable  || isEdit">
+        <!-- <ng-container *ngIf="!data?.tabSection?.disable  || isEdit">
           <mat-tab-group animationDuration="0ms" class="mat-tab-labels mytabs w-full" [selectedIndex]="selectedIndex"
             (selectedTabChange)="tabClicked($event)">
 
-            <!-- Content Tab -->
+            <!-- Content Tab
             <mat-tab label="Content">
               <ng-template mat-tab-label i18n>Learn</ng-template>
-              <!-- Empty state -->
+              <!-- Empty state
               <ng-container *ngIf="data?.tabSection?.contentTab?.length === contentTabEmptyResponseCount">
                 <div class="flex justify-center w-full">
                   <div class="margin-xl text-center">
@@ -137,7 +152,7 @@
                   </div>
                 </div>
               </ng-container>
-              <!-- Content tab content -->
+              <!-- Content tab content
               <div class="padding-top-l">
                 <app-column-section-display [data]="data.tabSection.contentTab" [orgId]="orgId" [isEdit]="isEdit"
                   [channelName]="channelName" (competencyEvent)="hideCompetency($event)"
@@ -148,7 +163,7 @@
               </div>
             </mat-tab>
 
-            <!-- Competency Tab -->
+            <!-- Competency Tab
             <mat-tab label="Core Areas">
               <ng-template mat-tab-label i18n>Competency</ng-template>
               <div>
@@ -161,7 +176,7 @@
               </div>
             </mat-tab>
           </mat-tab-group>
-        </ng-container>
+        </ng-container> -->
       </div>
 
       <!-- Sidebar -->
@@ -179,11 +194,10 @@
           </div>
 
           <!-- Speakers -->
-          <div class="hidden md:block padding-top-xl padding-bottom-m"
-            *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled || isEdit">
+          <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="isEdit">
             <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
               <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
-                [objectData]="data?.stateLearningWeekSection?.speakerOftheDay?.data">
+                [objectData]="data?.stateLearningWeekSection">
               </sb-uic-speakers>
             </div>
           </div>
@@ -203,7 +217,7 @@
           <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.cbpPlanSection?.data">
             <div class="pt-4">
               <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true" [channelId]="orgId"
-                [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit" [isEditable]="isEditable">
+                [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit">
               </sb-uic-cbp-plan>
             </div>
           </div>
@@ -212,7 +226,7 @@
           <div class="hidden md:block" *ngIf="!data?.announcementSection?.disable || isEdit">
             <div class="pt-4">
               <sb-uic-announcements [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
-                [channelId]="orgId" [objectData]="data?.announcementSection?.data">
+                [channelId]="orgId" [objectData]="data?.announcementSection?.data" [isEdit]="isEdit">
               </sb-uic-announcements>
             </div>
           </div>

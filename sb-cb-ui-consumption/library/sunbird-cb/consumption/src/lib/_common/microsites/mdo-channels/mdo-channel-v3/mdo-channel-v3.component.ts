@@ -181,7 +181,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     // Create new injector
     const injector = Injector.create({
       providers: [
-        { provide: 'sectionData', useValue: column.data },
+        { provide: 'sectionData', useValue: (column.key === 'topLearners') ? column : column.data },
         { provide: 'channelName', useValue: this.channelName },
         { provide: 'orgId', useValue: this.orgId },
         { provide: 'isMobile', useValue: this.isMobile },
@@ -263,7 +263,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
       }
     }
-    debugger
     // Special handling for eventsConfig - retrieve from nested structure
     if (event.data.fieldType === 'eventsConfig') {
       console.log('MdoChannelV3 - eventsConfig - current sectionList:', this.sectionList)
@@ -302,16 +301,31 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       // Find the mainContent section and get its cbpPlan data
       for (const section of this.sectionList) {
         for (const column of section.column) {
-          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.cbpPlan) {
+          if (column.key === 'mainContent' && column.data?.cbpPlanSection) {
             console.log('MdoChannelV3 - cbpPlanConfig - current stored data:',
-              column.data.stateLearningWeekSection.cbpPlan)
+              column.data.cbpPlanSection?.data)
             // Use the nested data for the dialog
-            dialogValue = column.data.stateLearningWeekSection.cbpPlan
+            dialogValue = column.data.cbpPlanSection?.data
           }
         }
       }
     }
-
+    debugger
+    // Special handling for speakersConfig - retrieve from nested structure
+    if (event.data.fieldType === 'speakersConfig') {
+      console.log('MdoChannelV3 - speakersConfig - current sectionList:', this.sectionList)
+      // Find the mainContent section and get its speakers data
+      for (const section of this.sectionList) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.speakerOftheDay) {
+            console.log('MdoChannelV3 - speakersConfig - current stored data:',
+              column.data.stateLearningWeekSection.speakerOftheDay)
+            // Use the nested data for the dialog
+            dialogValue = column.data.stateLearningWeekSection.speakerOftheDay
+          }
+        }
+      }
+    }
     const dialogRef = this.dialog.open(EditorDialogComponent, {
       width: dialogWidth,
       data: {
@@ -349,6 +363,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'mdoLeaderboardConfig':
       case 'cbpPlanConfig':
         return '800px'
+      case 'announcementsConfig':
       case 'image':
         return '600px'
       default:
@@ -365,22 +380,55 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     let updated = false
 
     // Special handling for speakersConfig
+    debugger
     if (fieldName === 'speakersConfig' && sectionType === 'speakers') {
       console.log('Handling speakersConfig special case')
-
       // Find the section with speakers
       for (const section of updatedSections) {
         for (const column of section.column) {
-          if (column.key === 'speakers') {
+          if (column.key === 'mainContent') {
             console.log('Found speakers column:', column)
+
+            // Ensure nested objects exist before assignment (avoid optional-chaining on LHS)
             if (!column.data) {
               column.data = {}
             }
-
-            // Update with the speakerOftheDay structure
-            column.data = newValue
+            if (!column.data.stateLearningWeekSection) {
+              column.data.stateLearningWeekSection = {}
+            }
+            if (!column.data.stateLearningWeekSection.speakerOftheDay) {
+              column.data.stateLearningWeekSection.speakerOftheDay = {}
+            }
+            column.data.stateLearningWeekSection.speakerOftheDay = newValue?.speakerOftheDay
 
             console.log('Updated speakers data:', column.data)
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+    }
+
+    // Special handling for announcementsConfig
+    if (fieldName === 'announcementsConfig' && sectionType === 'announcements') {
+      console.log('Handling announcementsConfig special case')
+      // Find the section with speakers
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          if (column.key === 'mainContent') {
+            console.log('Found speakers column:', column)
+
+            // Ensure nested objects exist before assignment (avoid optional-chaining on LHS)
+            if (!column.data) {
+              column.data = {}
+            }
+            if (!column.data.announcementSection) {
+              column.data.announcementSection = {}
+            }
+            column.data.announcementSection.data = newValue
+
+            console.log('Updated announcement data:', column.data)
             updated = true
             break
           }
@@ -627,7 +675,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       for (const section of updatedSections) {
         for (const column of section.column) {
           // Look for mainContent column which contains the cbpPlan
-          if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.cbpPlan) {
+          if (column.key === 'mainContent' || column.data?.cbpPlanSection) {
             console.log('Found column with cbpPlan nested data. Column key:', column.key)
             console.log('Column data before update:', JSON.stringify(column.data, null, 2))
 
@@ -636,18 +684,18 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             }
 
             // Ensure the nested structure exists
-            if (!column.data.stateLearningWeekSection) {
-              column.data.stateLearningWeekSection = {}
+            if (!column.data.cbpPlanSection) {
+              column.data.cbpPlanSection = {}
             }
-            if (!column.data.stateLearningWeekSection.cbpPlan) {
-              column.data.stateLearningWeekSection.cbpPlan = { enabled: true }
+            if (!column.data.cbpPlanSection.data) {
+              column.data.cbpPlanSection.data = { enabled: true }
             }
 
             // Update the nested data with deep copy to avoid reference issues
-            column.data.stateLearningWeekSection.cbpPlan = JSON.parse(JSON.stringify(newValue))
+            column.data.cbpPlanSection.data = JSON.parse(JSON.stringify(newValue))
 
             console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated cbpPlan data:', column.data.stateLearningWeekSection.cbpPlan)
+            console.log('Updated cbpPlan data:', column.data.cbpPlanSection.data)
             updated = true
             break
           }

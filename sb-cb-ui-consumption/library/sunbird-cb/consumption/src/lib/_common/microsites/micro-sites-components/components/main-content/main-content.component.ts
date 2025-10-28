@@ -12,6 +12,7 @@ export class MainContentComponent implements OnInit {
   hideCompetencyBlock = false;
   contentTabEmptyResponseCount = 0;
   showModal = false;
+  stripSections: any[] = [];
 
   constructor(
     @Inject('sectionData') public data: any,
@@ -136,5 +137,22 @@ export class MainContentComponent implements OnInit {
     if (fieldName === 'keyHighlights') return 'keyHighlights'
     // Add other field type logic as needed
     return typeof value
+  }
+
+  addNewSection() {
+    this.stripSections.push({
+      id: Date.now(),
+      name: 'Add Section Name',
+      visible: true
+    })
+    this.eventCallback({
+      action: 'add-section',
+      source: 'mainContent',
+      id: 'add-new-section'
+    })
+  }
+
+  removeSection(index: number) {
+    this.stripSections.splice(index, 1)
   }
 }

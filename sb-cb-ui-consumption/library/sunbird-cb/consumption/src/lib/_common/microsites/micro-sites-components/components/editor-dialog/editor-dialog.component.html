@@ -163,25 +163,77 @@
         <div class="cbp-plan-editor">
           <h4>CBP Plan Configuration</h4>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Title</mat-label>
-            <input matInput formControlName="title" placeholder="Enter CBP Plan title">
-          </mat-form-field>
+          <div formArrayName="list" class="cbp-plan-list">
+            <h5>PDF Documents <span class="item-count">({{cbpPlanListArray.controls.length}} items)</span></h5>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>PDF URL</mat-label>
-            <input matInput formControlName="pdfUrl" placeholder="Enter PDF URL or upload a file">
-          </mat-form-field>
+            <div cdkDropList (cdkDropListDropped)="dropCbpPlanItem($event)" class="cbp-plan-container-list">
+              <div *ngFor="let item of cbpPlanListArray.controls; let i = index" [formGroupName]="i"
+                class="cbp-plan-item" cdkDrag>
+                <div class="drag-handle" cdkDragHandle>
+                  <mat-icon>drag_indicator</mat-icon>
+                </div>
 
-          <div class="upload-section">
-            <input type="file" #pdfFileInput accept="application/pdf" (change)="onPdfFileSelected($event)"
-              style="display: none">
-            <button mat-raised-button color="primary" (click)="pdfFileInput.click()" [disabled]="isUploading">
-              <mat-icon>upload_file</mat-icon>
-              {{ isUploading ? 'Uploading...' : 'Upload PDF' }}
+                <div class="item-content">
+                  <div class="item-header">
+                    <h6>Document {{i + 1}}</h6>
+                    <button mat-icon-button color="warn" type="button" (click)="removeCbpPlanItem(i)"
+                      class="remove-btn" *ngIf="cbpPlanListArray.controls.length > 1">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Title</mat-label>
+                    <input matInput formControlName="title" placeholder="Enter document title">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>PDF URL</mat-label>
+                    <input matInput formControlName="pdfUrl" placeholder="Enter PDF URL or upload a file">
+                  </mat-form-field>
+
+                  <div class="upload-section">
+                    <input type="file" #pdfFileInput accept="application/pdf" (change)="onPdfFileSelected($event, i)"
+                      style="display: none">
+                    <button mat-button class="btn-common btn-secondary" (click)="pdfFileInput.click()"
+                      [disabled]="isUploading && currentUploadingIndex === i">
+                      <mat-icon>upload_file</mat-icon>
+                      {{ (isUploading && currentUploadingIndex === i) ? 'Uploading...' : 'Upload PDF' }}
+                    </button>
+                    <span *ngIf="isUploading && currentUploadingIndex === i" class="upload-status">{{ uploadStatus
+                      }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="cbpPlanListArray.controls.length === 0" class="no-items">
+                No PDF documents available. Add some items below.
+              </div>
+            </div>
+
+            <button mat-button class="btn-common btn-secondary flex-center mt-3" type="button"
+              (click)="addCbpPlanItem()">
+              <mat-icon>add</mat-icon> Add PDF Document
             </button>
-            <span *ngIf="isUploading" class="upload-status">{{ uploadStatus }}</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Announcements Configuration -->
+      <div *ngSwitchCase="'announcementsConfig'" class="complex-editor">
+        <div class="announcements-editor">
+          <h4>Announcements Configuration</h4>
+          <mat-slide-toggle formControlName="enabled">
+            {{editorForm.get('enabled')?.value ? 'Enabled Announcements' : 'Disabled Announcements'}}
+          </mat-slide-toggle>
+          <p class="helper-text" *ngIf="!editorForm.get('enabled')?.value">
+            Announcements section will be hidden when disabled but all settings will be preserved.
+          </p>
+
+          <mat-form-field appearance="outline" class="full-width mt-3" *ngIf="editorForm.get('enabled')?.value">
+            <mat-label>Section Title</mat-label>
+            <input matInput formControlName="title" placeholder="Enter announcements title">
+          </mat-form-field>
         </div>
       </div>
 

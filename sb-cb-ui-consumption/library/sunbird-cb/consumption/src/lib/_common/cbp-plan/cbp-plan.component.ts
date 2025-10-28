@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren, Injector } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren, Injector, OnChanges, SimpleChanges } from '@angular/core'
 import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrollable-item.directive'
 import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service'
@@ -9,7 +9,7 @@ import { MultilingualTranslationsService } from '../../_services/multilingual-tr
   templateUrl: './cbp-plan.component.html',
   styleUrls: ['./cbp-plan.component.scss']
 })
-export class CbpPlanComponent implements OnInit {
+export class CbpPlanComponent implements OnInit, OnChanges {
 
   @Input() objectData: any
   @Input() layoutType: any
@@ -59,7 +59,23 @@ export class CbpPlanComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadContentData()
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // Reload content data when objectData changes
+    if (changes['objectData']) {
+      console.log('CBP Plan ngOnChanges - objectData changed:', changes['objectData'].currentValue);
+      this.loadContentData()
+    }
+  }
+
+  /**
+   * Load content data from objectData
+   */
+  private loadContentData() {
     this.styleData = this.objectData && this.objectData.sliderData && this.objectData.sliderData.styleData
+    this.contentdata = []
     if (this.objectData && this.objectData.list) {
       this.objectData.list.forEach((contentEle: any) => {
         let localData = {}

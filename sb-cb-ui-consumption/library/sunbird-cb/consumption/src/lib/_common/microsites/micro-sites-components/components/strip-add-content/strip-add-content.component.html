@@ -1,0 +1,38 @@
+<div class="strip-add-content-dialog">
+  <div class="dialog-header">
+    <h2 class="dialog-title">Add Content</h2>
+  </div>
+
+  <div class="dialog-body">
+    <div class="search-container">
+      <div class="filter-dropdown">
+        <mat-form-field appearance="outline" class="program-select">
+          <mat-select placeholder="All Content" [(ngModel)]="selectedContents" name="selectedContents">
+            <mat-option *ngFor="let content of contents" [value]="content.value">
+              {{ content.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="search-input-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix class="search-icon">search</mat-icon>
+          <input matInput placeholder="Select" [(ngModel)]="searchText" name="searchText">
+        </mat-form-field>
+        <button mat-button class="btn-common btn-primary" type="button" (click)="onSearch()">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-button class="btn-common btn-secondary" type="button" (click)="onPreview()">
+      <mat-icon>visibility</mat-icon>
+      Preview
+    </button>
+    <div class="footer-right">
+      <button mat-button class="btn-common btn-secondary" (click)="onCancel()">Cancel</button>
+      <button mat-button class="btn-common btn-primary" (click)="onAdd()">Add</button>
+    </div>
+  </div>
+</div>

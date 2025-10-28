@@ -149,7 +149,7 @@ export class SpeakersComponent implements OnInit {
     console.log('Speaker component objectData:', this.objectData);
     console.log('Speaker list in component:', this.contentdata);
     console.log('Original speakerData being sent to editor:', speakerData);
-    
+    debugger
     // Check if we have the original list in the data
     if (!speakerData.data || !speakerData.data.list || speakerData.data.list.length === 0) {
       // If the list is missing or empty, but we have contentdata, reconstruct the list
