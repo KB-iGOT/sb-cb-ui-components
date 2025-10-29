@@ -323,9 +323,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchCourses() {
     this.searchRequestCourse.request.query = this.statedata?.param;
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
-        this.searchRequestCourse.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
-      }
+      // if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+      //   this.searchRequestCourse.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      // }
       const courseFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'courses');
       if (courseFilters.length && courseFilters[0].facets && courseFilters[0].facets.length) {
         const competencyKeys = [
@@ -347,7 +347,17 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestCourse.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
         if(this.searchRequestCourse.request.facets.findIndex(v => v === 'status') > -1) {
           if(this.searchRequestCourse.request.filters["status"] && !this.searchRequestCourse.request.filters["status"].length) {
-            this.searchRequestCourse.request.filters["status"] = ["Live", "Review"];
+            this.searchRequestCourse.request.filters["status"] = [
+              "Live",
+              "UnderPublish", 
+              "Failed",
+              "Review",
+              "Retired",
+              "InReview",
+              "Reviewed",
+              "UnderReview",
+              "QualityReview"
+            ];
           }
         }
       }
@@ -409,9 +419,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     // If CBPPortal provides a facets configuration for events, prefer that.
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
-        this.searchRequestEvents.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
-      }
+      // if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
+      //   this.searchRequestEvents.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
+      // }
       const eventFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');
       if (eventFilters.length && eventFilters[0].facets && eventFilters[0].facets.length) {
         // Clone to avoid mutating upstream config
