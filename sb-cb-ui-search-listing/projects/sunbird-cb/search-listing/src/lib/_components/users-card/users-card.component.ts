@@ -5,6 +5,8 @@ import { ConfigurationsService, NsUser } from "@sunbird-cb/utils-v2";
 import { SearchListingService } from "../../_services/search-listing.service";
 import * as _ from "lodash";
 import { MatSnackBar as MatSnackbarNew } from "@angular/material/snack-bar";
+import { ConfirmationDialogComponent } from "@sunbird-cb/consumption";
+import { MatLegacyDialog } from "@angular/material/legacy-dialog";
 
 @Component({
   selector: "sb-cb-search-users-card",
@@ -27,7 +29,8 @@ export class UsersCardComponent {
     // private router: Router, 
     private translate: TranslateService,
     private searchListingService: SearchListingService,
-    private matSnackbarNew: MatSnackbarNew
+    private matSnackbarNew: MatSnackbarNew,
+    private dialog: MatLegacyDialog
   ) {
     if (localStorage.getItem("websiteLanguage")) {
       this.translate.setDefaultLang("en");
@@ -136,8 +139,74 @@ export class UsersCardComponent {
     return this.user.createdDate || ''
   }
 
-  onUserActivationToggle (checked: boolean) {
-    const request ={
+  /**
+   * Handle activation toggle. The template may pass either a boolean (checked) or a
+   * MatSlideToggleChange-like event. We open a confirmation dialog; if user confirms
+   * we call updateUserStatus. If user cancels, we revert the UI toggle and restore
+   * the previous user state so the toggle remains unchanged.
+   */
+  onUserActivationToggle(eventOrChecked: any, user: any) {
+    if (!user) {
+      return;
+    }
+    // Determine checked value and toggle source (if provided)
+    const isEvent = eventOrChecked && typeof eventOrChecked === 'object' && 'checked' in eventOrChecked;
+    const checked = isEvent ? eventOrChecked.checked : !!eventOrChecked;
+    // Capture previous state to allow reversion
+    const prevIsDeleted = !!user.isDeleted;
+    const prevChecked = !prevIsDeleted; // assuming toggle checked === !user.isDeleted
+
+    const data: any = {
+      type: 'warning',
+      iconName: 'info_outline',
+      planeDescription: 'Are you sure you want to ' + (checked ? 'activate' : 'deactivate') + ' ' + (user.firstName || '') + '?',
+      buttonsPositionClass: 'justify-center',
+      buttons: [
+        {
+          classes: 'succes-button',
+          text: 'Yes',
+          response: true
+        },
+        {
+          classes: 'btn-out-line',
+          text: 'No',
+          response: false
+        }
+      ]
+    };
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data,
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // user confirmed
+        this.updateUserStatus(checked, user);
+      } else {
+        // user cancelled -> revert UI and restore previous state
+        try {
+          if (isEvent) {
+            // MatSlideToggleChange has a source with checked property
+            const source = eventOrChecked.source || eventOrChecked.toggle || eventOrChecked.target;
+            if (source && typeof source.checked !== 'undefined') {
+              source.checked = prevChecked;
+            }
+          } else {
+            // Template passed a boolean; try to restore model-bound value
+            user.isDeleted = prevIsDeleted;
+          }
+        } catch (e) {
+          // best-effort revert
+          user.isDeleted = prevIsDeleted;
+        }
+      }
+    });
+  }
+
+updateUserStatus(checked: boolean, user: any) {
+  const request ={
       request: {
         requestedBy: _.get(this.configSvc, 'userProfile.userId', ''),
         userId: this.user.userId || this.user.id || this.user.wid
@@ -145,6 +214,7 @@ export class UsersCardComponent {
     }
     if (checked) {
       this.searchListingService.unblockUser(request).subscribe(_res => {
+        user.isDeleted = false
         this.matSnackbarNew.open("User has been activated successfully", "X", {
           duration: 3000,
           panelClass: ["success"]
@@ -152,6 +222,7 @@ export class UsersCardComponent {
       })
     } else {
       this.searchListingService.blockUser(request).subscribe(_res => {
+        user.isDeleted = true
         this.matSnackbarNew.open("User has been deactivated successfully", "X", {
           duration: 3000,
           panelClass: ["success"]
