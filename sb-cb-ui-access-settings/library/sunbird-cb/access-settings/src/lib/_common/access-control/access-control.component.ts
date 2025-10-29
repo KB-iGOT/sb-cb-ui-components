@@ -50,6 +50,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   accessControlForm!: FormGroup;
   MDO_SPECIFIC = NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
   MDO_APPLICATION = NsAccessControlConfig.Application.MDO;
+  CBP_APPLICATION = NsAccessControlConfig.Application.Creation_Portal;
 
   cadreConfigData: any;
   isSaveFltrBtnDisabled = true;
@@ -89,15 +90,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.mdoContent = this.config?.mdoContent
     }
 
-    // Dont call read api for MDO its only for CBP for now
-    if (this.config.application !== NsAccessControlConfig.Application.MDO) {
-      this.getAccessControl();
-    }
-
-    if (!this.cadreConfigData) {
-      await this.fetchCadreConfigData();
-    }
-
     this.config.content = this.content;
     this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
 
@@ -107,7 +99,16 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.usersTableConfig = this.config?.usersTableConfig;
 
-    if (this.content) {
+    // Dont call read api for MDO its only for CBP for now
+    if (this.config.application !== NsAccessControlConfig.Application.MDO) {
+      this.getAccessControl();
+    }
+
+    if (!this.cadreConfigData) {
+      await this.fetchCadreConfigData();
+    }
+
+    if (this.content && !this.content?.externalId) {
       const isAllUsers = this.content.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS;
       const isCustomAccess =
         this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
@@ -133,8 +134,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
 
       this.processConditionsForContentType();
-    } else {
+    } else if(this.config.application === NsAccessControlConfig.Application.MDO){ 
       // Condition for MDO
+      this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
+    } 
+    // For curated content of marketplace with external id 
+    else if(this.content && this.content?.externalId) {
       this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
     }
 
@@ -145,7 +150,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     // Add config to signal 
     this.accessControlService.accessControlConfig.set(this.config);
 
-    if (this.tempAccessControl) {
+   if(this.config.application === this.MDO_APPLICATION) {
+     if (this.tempAccessControl) {
       this.processTempAccessControl(this.tempAccessControl);
     } else {
       this.addUserGroup();
@@ -154,6 +160,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.setupFormChangeDetection();
       }, 0);
     }
+   }
 
   }
 
@@ -825,7 +832,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
             // Update secure setting for moderated content
             // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-            if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live") {
+            if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live" && !this.isCuratedContentWithExternalId) {
               this.updateContentAccessSetting();
             }
             // }
@@ -951,13 +958,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.processAccessControlResult(response.result.accessControl);
       this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType });
 
-      // Temporary fix to updated the failed content for moderated
-      // if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      //   if (!this.content?.accessSettingsEnabled) {
-      //     this.updateContentAccessSetting();
-      //   }
-      // }
-      // this.updateContentAccessSetting();
     }
   }
 
@@ -1037,7 +1037,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.calculateUserCountForUserGroup(index);
       if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
-        (this.config.userConfig.userRoles.has("content_creator") || this.config.userConfig.userRoles.has("spv_publisher"))
+        (this.config.userConfig.userRoles.has("content_creator") || this.config.userConfig.userRoles.has("spv_publisher") && !this.isCuratedContentWithExternalId)
       ) {
         // publisher (cannot edit already added)
         for (let i = 0; i < this.userGroup.length; i++) {
@@ -1614,5 +1614,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     return false;
+  }
+
+  get isCuratedContentWithExternalId(): boolean {    
+    return !!(this.content && this.content.externalId);
   }
 }
