@@ -20,7 +20,7 @@
           <div class="users-info flex justify-center mt-2">
             <mat-slide-toggle 
               [(ngModel)]="!user.isDeleted" 
-              (change)="onUserActivationToggle($event.checked)"
+              (change)="onUserActivationToggle($event, user)"
               [color]="'primary'"
               class="activation-toggle">
               {{ user.isDeleted ? 'Activate User' : 'Deactivate User' }}
