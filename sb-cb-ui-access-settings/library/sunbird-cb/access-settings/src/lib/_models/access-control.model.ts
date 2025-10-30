@@ -5,7 +5,7 @@ export namespace NsAccessControlConfig {
     bulkUploadKarmayogi: IBulkUploadKarmayogi;
     accessControlGuide: IAccessControlGuide;
     visiblilityOnOff: IVisiblilityOnOff;
-    userConfig: { [key: string]: any; userRoles: any; org: any };
+    userConfig: { [key: string]: any; userRoles: any; org?: any };
     content: any;
     application: string;
     mdoContent: any
