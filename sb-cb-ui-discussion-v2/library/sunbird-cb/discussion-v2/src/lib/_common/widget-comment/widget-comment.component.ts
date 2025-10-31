@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { CommentsService } from '../../_services/comments.service'
-import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 
 // tslint:disable-next-line
@@ -30,7 +30,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentTree: any
   @Output() commentDataChange = new EventEmitter<any>()
   constructor(
-    private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar
+    private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar, private events: EventService 
   ) { }
 
   ngOnInit() {
@@ -96,20 +96,36 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       workflow,
       "entityId": this.entityId,
     }
-    this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
-      let commentTreeDataLocal = commentRes.result
-      if (this.commentId) {
-        this.fetchCommentTreeAndComment_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
-      } else {
+    if(this.entityId) {
+      this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
+        let commentTreeDataLocal = commentRes.result
+        if (this.commentId) {
+          this.fetchCommentTreeAndComment_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
+        } else {
+          this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
+        }
+      }, (err: any) => {
+        this.loadingMore = false
+        let commentTreeDataLocal = {}
+        // tslint:disable-next-line: no-console
         this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
-      }
-    }, (err: any) => {
-      this.loadingMore = false
-      let commentTreeDataLocal = {}
-      // tslint:disable-next-line: no-console
-      this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
-      console.error('Error in fetching all comments', err)
-    })
+        console.error('Error in fetching all comments', err)
+      })
+    } else {
+      this.events.raiseInteractTelemetry(
+        {
+          type: 'click',
+          subType: 'CommentTreeGet',
+        },
+        {
+          pageUrl: window.location.href || window.location.pathname,
+
+        },
+        {
+          pageIdExt: 'Comment',
+          module: 'CommentTreeGet',
+      })
+    }
 
   }
 
