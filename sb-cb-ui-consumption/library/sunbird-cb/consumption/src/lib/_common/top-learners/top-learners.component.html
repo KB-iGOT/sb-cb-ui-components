@@ -135,8 +135,6 @@
     </ng-container>
 
     <!-- Show disabled message when component is disabled -->
-
-    {{objectData?.enabled}} {{isEdit}}
     <div class="disabled-message" *ngIf="objectData?.enabled === false && (isEdit || isEditable)">
         <div class="message-content">
             <mat-icon>visibility_off</mat-icon>

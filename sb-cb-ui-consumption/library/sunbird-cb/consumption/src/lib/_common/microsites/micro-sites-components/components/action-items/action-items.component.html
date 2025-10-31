@@ -2,42 +2,39 @@
   <div class="action-items-container">
     <div class="action-items-header">
       <h3 class="title">Channel Actions</h3>
-      
+
       <div class="action-controls">
-        <!-- State Learning Week Status Badge -->
-        <span 
-          class="slw-status-badge"
-          [ngClass]="isStateLearningWeekEnabled ? 'enabled' : 'disabled'">
-          State Learning Week: {{ isStateLearningWeekEnabled ? 'Enabled' : 'Disabled' }}
-        </span>
-        
+
+
         <!-- Action Buttons -->
         <div class="action-buttons d-flex">
-          <button mat-button
-            class="btn-common btn-secondary"
-            (click)="onConfigureSLW()" type="button">
+          <!-- User Redirection Toggle -->
+          <div class="user-redirection-toggle">
+            <mat-slide-toggle class="custom-toggle" [(ngModel)]="userRedirectionEnabled"
+              (change)="onUserRedirectionToggle($event)">
+              User Redirection
+            </mat-slide-toggle>
+          </div>
+
+          <button mat-button class="btn-common btn-secondary" (click)="onConfigureSLW()" type="button">
             <mat-icon class="material-icons">settings</mat-icon>
             Configure State Learning Week
           </button>
-          
-          <button mat-button
-            class="btn-common btn-secondary"
-            [disabled]="!hasUnsavedChanges"
-            (click)="onSaveChanges()" type="button">
+
+          <button mat-button class="btn-common btn-secondary" [disabled]="!hasUnsavedChanges" (click)="onSaveChanges()"
+            type="button">
             <mat-icon class="material-icons">save</mat-icon>
             Save Changes
           </button>
-          
-          <button mat-button
-            class="btn-common btn-primary"
-            (click)="onPublishChanges()" type="button">
+
+          <button mat-button class="btn-common btn-primary" (click)="onPublishChanges()" type="button">
             <mat-icon class="material-icons">publish</mat-icon>
             Publish Changes
           </button>
         </div>
       </div>
     </div>
-    
+
     <!-- Status Indicator -->
     <div class="status-indicator" *ngIf="hasUnsavedChanges">
       <i class="material-icons warning-icon">warning</i>

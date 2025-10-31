@@ -166,7 +166,7 @@ export class MainContentComponent implements OnInit {
       } else {
         // For numbers beyond ten, use numeric format
         sectionName = `Section ${sectionNumber}`
-        sectionKey = `section${sectionNumber}`
+        sectionKey = `mdo_section`
       }
     }
     this.stripSections.push(this.microSiteV3Service.getCreateSectionReq(sectionName, `${sectionKey}_${uuid()}`, true))

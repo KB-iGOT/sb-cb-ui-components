@@ -41,14 +41,14 @@ mat-form-field {
 .image-container {
     margin-bottom: 16px;
   }
-  
+
   .upload-section {
     display: flex;
     align-items: center;
     margin: 16px 0;
     gap: 16px;
   }
-  
+
   .upload-status {
     margin-left: 12px;
     font-size: 14px;
@@ -61,7 +61,7 @@ mat-form-field {
   background-color: #f5f5f5;
   border-radius: 4px;
   padding: 8px;
-  
+
   img {
     max-width: 100%;
     max-height: 200px;
@@ -87,23 +87,23 @@ mat-form-field {
     border-bottom: 1px solid #eee;
     padding-bottom: 8px;
   }
-  
+
   .speaker-list-preview {
     margin-top: 24px;
-    
+
     .speaker-item {
       padding: 12px;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       background-color: #fff;
       margin-bottom: 12px;
-      
+
       .speaker-item-header {
         display: flex;
         gap: 16px;
         align-items: center;
       }
-      
+
       .speaker-image {
         width: 60px;
         height: 60px;
@@ -114,53 +114,53 @@ mat-form-field {
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        
+
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
-        
+
         .speaker-initials {
           font-size: 20px;
           font-weight: bold;
           color: #1B4CA1;
         }
       }
-      
+
       .speaker-info {
         flex: 1;
-        
+
         h6 {
           margin: 0 0 4px 0;
           font-size: 16px;
           font-weight: 500;
         }
-        
+
         p {
           margin: 0 0 8px 0;
           color: #666;
         }
-        
+
         small {
           color: #888;
           font-size: 12px;
         }
       }
-      
+
       .speaker-actions {
         flex-shrink: 0;
       }
     }
   }
-  
+
   .speaker-editor {
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 15px;
     margin-top: 20px;
     background-color: #f9f9f9;
-    
+
     h3 {
       margin-top: 0;
       margin-bottom: 16px;
@@ -170,16 +170,16 @@ mat-form-field {
       border-bottom: 1px solid #ddd;
       padding-bottom: 8px;
     }
-    
+
     .speaker-form {
       display: flex;
       flex-direction: column;
       gap: 15px;
-      
+
       .image-preview {
         margin: 10px 0;
         max-width: 100%;
-        
+
         img {
           max-width: 100px;
           max-height: 100px;
@@ -188,7 +188,7 @@ mat-form-field {
           object-fit: cover;
         }
       }
-      
+
       .form-actions {
         display: flex;
         justify-content: flex-end;
@@ -241,28 +241,28 @@ button[mat-button], button[mat-raised-button] {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .slider-preview-container {
     margin-bottom: 20px;
   }
-  
+
   .slider-preview {
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 16px;
     background-color: #f9f9f9;
   }
-  
+
   .slider-items-container {
     margin-bottom: 20px;
   }
-  
+
   .slider-items {
     max-height: 300px;
     overflow-y: auto;
     margin-bottom: 15px;
   }
-  
+
   .slider-item {
     display: flex;
     align-items: center;
@@ -272,46 +272,46 @@ button[mat-button], button[mat-raised-button] {
     margin-bottom: 10px;
     background-color: white;
     cursor: move;
-    
+
     &:hover {
       border-color: #aaa;
       background-color: #f8f8f8;
     }
-    
+
     &.cdk-drag-placeholder {
       opacity: 0;
     }
-    
+
     &.cdk-drag-preview {
       box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
                   0 8px 10px 1px rgba(0, 0, 0, 0.14),
                   0 3px 14px 2px rgba(0, 0, 0, 0.12);
     }
   }
-  
+
   .item-preview {
     display: flex;
     align-items: center;
     gap: 10px;
     flex: 1;
   }
-  
+
   .item-image {
     width: 80px;
     height: 50px;
     object-fit: cover;
     border-radius: 4px;
   }
-  
+
   .item-details {
     display: flex;
     flex-direction: column;
   }
-  
+
   .item-title {
     font-weight: bold;
   }
-  
+
   .item-description {
     font-size: 0.9em;
     color: #666;
@@ -320,12 +320,12 @@ button[mat-button], button[mat-raised-button] {
     text-overflow: ellipsis;
     max-width: 200px;
   }
-  
+
   .item-actions {
     display: flex;
     gap: 5px;
   }
-  
+
   .no-items {
     padding: 15px;
     text-align: center;
@@ -334,59 +334,60 @@ button[mat-button], button[mat-raised-button] {
     border-radius: 4px;
     margin-bottom: 15px;
   }
-  
+
   .add-item-btn {
     margin-bottom: 15px;
   }
-  
+
   .slider-item-editor {
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 15px;
     margin-top: 20px;
+    background: #f5f5f5;
   }
-  
+
   .slider-item-form {
     display: flex;
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .image-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .upload-section {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  
+
   .upload-status {
     color: #1B4CA1;
     font-style: italic;
   }
-  
+
   .image-preview {
     margin-top: 10px;
   }
-  
+
   .image-preview img {
     max-width: 100%;
     max-height: 200px;
     border-radius: 4px;
     border: 1px solid #ddd;
   }
-  
+
   .item-form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 10px;
   }
-  
+
   .full-width {
     width: 100%;
   }
@@ -410,7 +411,7 @@ button[mat-button], button[mat-raised-button] {
 .active-toggle {
   display: flex;
   align-items: center;
-  
+
   .mat-slide-toggle-content {
     font-weight: 500;
   }
@@ -420,7 +421,7 @@ button[mat-button], button[mat-raised-button] {
   margin-left: 8px;
   font-weight: 500;
   color: #333;
-  
+
   &:empty:before {
     content: "Inactive";
     color: #888;
@@ -434,7 +435,7 @@ button[mat-button], button[mat-raised-button] {
 
 .form-section {
   // margin-bottom: 24px;
-  
+
   h4 {
     margin-bottom: 12px;
     font-weight: 500;
@@ -519,7 +520,7 @@ button[mat-button], button[mat-raised-button] {
 // General styles
 .editor-form {
   min-width: 300px;
-  
+
   .full-width {
     width: 100%;
     margin-bottom: 16px;
@@ -593,7 +594,7 @@ button[mat-button], button[mat-raised-button] {
     &.cdk-drag-animating {
       transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
     }
-    
+
     &:hover {
       border-color: #bbbbbb;
       background: #f5f5f5;
@@ -613,48 +614,48 @@ button[mat-button], button[mat-raised-button] {
       width: 20px;
     }
   }
-  
+
   .item-content {
     flex: 1;
-    
+
     .mat-form-field-wrapper {
       margin-bottom: 0;
     }
   }
-  
+
   .item-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    
+
     h5 {
       margin: 0;
       color: #1B4CA1;
       font-weight: 500;
     }
   }
-  
+
   .video-preview {
     margin-top: 8px;
     margin-bottom: 8px;
   }
-  
+
   .video-container {
     background-color: #f0f0f0;
     border-radius: 4px;
     padding: 12px;
   }
-  
+
   .video-placeholder {
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     mat-icon {
       color: #1B4CA1;
     }
-    
+
     .video-url {
       color: #666;
       font-size: 14px;
@@ -664,7 +665,7 @@ button[mat-button], button[mat-raised-button] {
       max-width: 400px;
     }
   }
-  
+
   .no-items {
     padding: 20px;
     text-align: center;
@@ -673,7 +674,7 @@ button[mat-button], button[mat-raised-button] {
     border-radius: 4px;
     border: 1px dashed #ccc;
   }
-  
+
   .item-count {
     font-weight: normal;
     color: #666;
@@ -722,7 +723,7 @@ button[mat-button], button[mat-raised-button] {
   &.cdk-drag-animating {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
   }
-  
+
   &:hover {
     border-color: #bbbbbb;
     background: #f5f5f5;
@@ -730,7 +731,7 @@ button[mat-button], button[mat-raised-button] {
 
   .item-content {
     flex: 1;
-    
+
     .mat-form-field {
       margin-bottom: 8px;
     }
@@ -741,7 +742,7 @@ button[mat-button], button[mat-raised-button] {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    
+
     h6 {
       margin: 0;
       color: #1B4CA1;
@@ -818,7 +819,7 @@ button[mat-button], button[mat-raised-button] {
   &.cdk-drag-animating {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
   }
-  
+
   &:hover {
     border-color: #bbbbbb;
     background: #f5f5f5;
@@ -826,7 +827,7 @@ button[mat-button], button[mat-raised-button] {
 
   .item-content {
     flex: 1;
-    
+
     .mat-form-field {
       margin-bottom: 8px;
     }
@@ -837,7 +838,7 @@ button[mat-button], button[mat-raised-button] {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    
+
     h6 {
       margin: 0;
       color: #1B4CA1;
@@ -854,14 +855,14 @@ button[mat-button], button[mat-raised-button] {
 
   .toggle-field {
     margin-top: 12px;
-    
+
     .mat-slide-toggle {
       margin: 0;
     }
   }
 
 }
-  
 
-  
+
+
 

@@ -42,6 +42,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   isMobile: boolean = false;
   isStateLearningWeekEnabled: boolean = false;
   hasUnsavedChanges: boolean = false;
+  userRedirectionEnabled: boolean = false;
   isLoading: boolean = false;
 
   navigationTitles = [
@@ -426,6 +427,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'eventsConfig':
       case 'mdoLeaderboardConfig':
       case 'cbpPlanConfig':
+      case 'keyHighlights':
         return '800px'
       case 'announcementsConfig':
       case 'image':
@@ -853,7 +855,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         framework: '*',
         data: {
           stateLearningWeekConfig: this.slwConfiguration || {},
-          sectionList: this.sectionList || []
+          sectionList: this.sectionList || [],
+          userRedirectionEnabled: this.userRedirectionEnabled || false
         },
         rootOrgId: this.orgId || ''
       }
@@ -959,6 +962,13 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   handleConfigureSLW(currentConfig: any) {
     console.log('Configure SLW called with:', currentConfig)
     this.openSLWConfigDialog(currentConfig)
+  }
+
+  handleUserRedirectionToggle(enabled: boolean) {
+    console.log('User Redirection toggled:', enabled)
+    this.userRedirectionEnabled = enabled
+    this.hasUnsavedChanges = true
+    this.cdr.markForCheck()
   }
 
 

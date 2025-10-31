@@ -182,3 +182,11 @@
     justify-content: flex-end;
   }
 }
+// Custom toggle styles
+.custom-toggle {
+  ::ng-deep .mat-slide-toggle-label {
+    border: 1px solid #1B4CA1 !important;
+    padding: 4px 16px !important;
+    border-radius: 20px !important;
+  }
+}
