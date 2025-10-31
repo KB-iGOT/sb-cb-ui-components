@@ -113,11 +113,34 @@
           </div>
         </ng-container>
 
+
         <!-- Events -->
         <div *ngIf="isEdit">
           <sb-uic-events [object]="data?.stateLearningWeekSection?.events?.column[0]" [nwlEventsConfig]="slwConfig"
             [isEdit]="isEdit" [isEditable]="isEdit">
           </sb-uic-events>
+        </div>
+
+        <!-- Strip formArrayName content -->
+        <ng-container *ngIf="data?.stripsArray?.length > 0  || isEdit">
+          <div *ngFor="let item of data?.stripsArray">
+            <ng-container *ngIf="item?.strips?.length > 0">
+              <div class="margin-top-l nlw-mandatoryCourse">
+                <sb-uic-content-strip-with-tabs [emitViewAll]="false"
+                  (telemtryResponse)="raiseTelemetryInteratEvent($event)" [providerId]="orgId" [widgetData]="item"
+                  [channnelName]="channelName" [isEdit]="isEdit" (editStripContent)="onEditStripContent($event)"
+                  (toggleSectionVisibility)="onToggleSectionVisibility($event)">
+                </sb-uic-content-strip-with-tabs>
+              </div>
+            </ng-container>
+          </div>
+        </ng-container>
+
+        <!-- Strip Section Create Components (Array) -->
+        <div *ngFor="let section of stripSections; let i = index; trackBy: trackByIndex" class="strip-section-wrapper">
+          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" (removeSection)="removeSection(i)"
+            (playlistCreated)="onPlaylistCreated($event)">
+          </sb-uic-strip-section-create>
         </div>
 
         <!-- Add New Section Button -->
@@ -126,12 +149,6 @@
             <mat-icon>add</mat-icon>
             Add New Section
           </button>
-        </div>
-
-        <!-- Strip Section Create Components (Array) -->
-        <div *ngFor="let section of stripSections; let i = index" class="strip-section-wrapper">
-          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" (removeSection)="removeSection(i)">
-          </sb-uic-strip-section-create>
         </div>
 
         <!-- Tabs -->

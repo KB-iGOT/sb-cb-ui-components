@@ -82,7 +82,6 @@ export class EditorDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    debugger
     if (this.formType === 'keyHighlights') {
       this.initKeyHighlightsForm()
     } else {
@@ -228,7 +227,6 @@ export class EditorDialogComponent implements OnInit {
         const speakerData = speakersValue.data || speakersValue
         console.log('EditorDialog - speakersConfig - processed speakerData:', speakerData)
         console.log('EditorDialog - speakersConfig - speaker list:', speakerData.list)
-        debugger
         this.editorForm = this.fb.group({
           enabled: [speakersValue.enabled !== undefined ? speakersValue.enabled : true],
           data: this.fb.group({
@@ -372,7 +370,6 @@ export class EditorDialogComponent implements OnInit {
     const safeDesc = speaker && speaker.description !== undefined ? speaker.description : ''
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
-    debugger
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
@@ -773,7 +770,6 @@ export class EditorDialogComponent implements OnInit {
   }
 
   onSubmit() {
-    debugger
     if (this.formType === 'keyHighlights') {
       const formValue = this.editorForm.value
       const updatedConfig = {

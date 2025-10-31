@@ -21,6 +21,7 @@ import { SupportSectionComponent } from '../../micro-sites-components/components
 import { HighlightsOfWeekComponent } from '../../../highlights-of-week/highlights-of-week.component'
 import { UserProgressComponent } from '../../../user-progress/user-progress.component'
 import { SpeakersComponent } from '../../../speakers/speakers.component'
+import { MicrositeV3Service } from '../../../../_services/microsite-v3.service'
 
 @Component({
   selector: 'sb-uic-mdo-channel-v3',
@@ -36,6 +37,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   @Input() providerId: string = '123456789';
   @Input() channelName: string
   @Input() orgId: string
+  @Input() defaultMicrosite: boolean = false;
 
   isMobile: boolean = false;
   isStateLearningWeekEnabled: boolean = false;
@@ -73,7 +75,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     private injector: Injector,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    private http: HttpClient // Add HttpClient to constructor
+    public microSiteV3Service: MicrositeV3Service,
   ) {
     this.isMobile = this.utilsSvc.isMobile;
 
@@ -145,8 +147,72 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     if (event.action === 'edit') {
       console.log('Opening editor dialog for', event.source)
       this.openEditorDialog(event)
-    } else {
-      console.log(`Unhandled action type: ${event.action}`)
+    }
+
+    // Handle playlist updates
+    if (event.action === 'playlist-updated') {
+      console.log('Playlist updated, clearing cache and enabling save button')
+      this.injectorCache.clear()
+      this.hasUnsavedChanges = true
+      this.cdr.detectChanges()
+    }
+
+    // Handle playlist created
+    if (event.action === 'playlist-created') {
+      console.log('Playlist created, enabling save button')
+      this.injectorCache.clear()
+      this.hasUnsavedChanges = true
+      this.cdr.detectChanges()
+    }
+
+    // Handle section visibility toggled
+    if (event.action === 'section-visibility-toggled') {
+      console.log('Section visibility toggled, enabling save button')
+      this.hasUnsavedChanges = true
+      // this.updateStripSections(event.data?.stripSections)
+    }
+
+
+
+    // Handle strip sections updates (only from notifyStripSectionsChange)
+    if (event.action === 'update-strip-sections') {
+      console.log('Updating strip sections:', event.data?.stripSections)
+      this.updateStripSections(event.data?.stripSections)
+    }
+  }
+
+  updateStripSections(stripSections: any[]) {
+    // Find the mainContent section and update its stripsArray data
+    const mainContentSection = this.sectionList?.find(section => section.key === 'sectionMain')
+
+    if (mainContentSection) {
+      // Check if columns exist and find mainContent column
+      if (mainContentSection.column && Array.isArray(mainContentSection.column)) {
+        const mainContentColumn = mainContentSection.column.find(col => col.key === 'mainContent')
+        if (mainContentColumn && mainContentColumn.data) {
+          // Update stripsArray in the column's data
+          if (!mainContentColumn.data.stripsArray) {
+            mainContentColumn.data.stripsArray = []
+          }
+          mainContentColumn.data.stripsArray = [...mainContentColumn.data.stripsArray, ...stripSections]
+          this.hasUnsavedChanges = true
+          this.cdr.markForCheck()
+          console.log('Strip sections updated in column data.stripsArray:', mainContentColumn.data.stripsArray)
+          return
+        }
+      }
+
+      // If no columns or mainContent column not found, update directly in section data
+      if (!mainContentSection.data) {
+        mainContentSection.data = {}
+      }
+      if (!mainContentSection.data.stripsArray) {
+        mainContentSection.data.stripsArray = []
+      }
+      mainContentSection.data.stripsArray = stripSections
+      this.hasUnsavedChanges = true
+      this.cdr.markForCheck()
+      console.log('Strip sections updated in section data.stripsArray:', mainContentSection.data.stripsArray)
     }
   }
 
@@ -310,7 +376,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
       }
     }
-    debugger
     // Special handling for speakersConfig - retrieve from nested structure
     if (event.data.fieldType === 'speakersConfig') {
       console.log('MdoChannelV3 - speakersConfig - current sectionList:', this.sectionList)
@@ -340,7 +405,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     // After dialog close
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        debugger
         this.isLoading = true
         // Use updateSectionData method to update section data
         this.updateSectionData(event.source, event.data.fieldName, result)
@@ -380,7 +444,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     let updated = false
 
     // Special handling for speakersConfig
-    debugger
     if (fieldName === 'speakersConfig' && sectionType === 'speakers') {
       console.log('Handling speakersConfig special case')
       // Find the section with speakers
@@ -523,7 +586,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
             // Update the nested data with deep copy to avoid reference issues
             // The newValue contains the full userProgress config, we store it under myprogress
-            debugger
             column.data.stateLearningWeekSection.myprogress = JSON.parse(JSON.stringify(newValue))
 
             console.log('Column data after update:', JSON.stringify(column.data, null, 2))
@@ -737,8 +799,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     // Clear the injector cache to force component recreation
     this.injectorCache.clear()
 
-    debugger
-
     // Update the sectionList with new reference (this will trigger change detection)
     this.sectionList = updatedSections
     console.log('Updated sectionList:', this.sectionList)
@@ -785,44 +845,50 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   saveChanges() {
     // Prepare payload
     const payload = {
-      type: 'mdo-channel',
-      subtype: 'microsite-v2',
-      action: 'page-configuration',
-      component: 'portal',
-      framework: '*',
-      data: {
-        stateLearningWeekConfig: this.slwConfiguration || {},
-        sectionList: this.sectionList || []
-      },
-      created_on: new Date().toISOString(),
-      last_modified_on: new Date().toISOString(),
-      rootOrgId: this.orgId || ''
+      request: {
+        type: 'mdo-channel',
+        subType: 'microsite-v2-preview',
+        action: 'page-configuration',
+        component: 'portal',
+        framework: '*',
+        data: {
+          stateLearningWeekConfig: this.slwConfiguration || {},
+          sectionList: this.sectionList || []
+        },
+        rootOrgId: this.orgId || ''
+      }
     }
-
-    console.log('Payload:', payload)
-    // Call the API
-    // this.http.post('http://localhost:3000/apis/v1/form/update', payload, {
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Accept': 'application/json, text/plain, */*',
-    //     'hostPath': 'localhost_3000',
-    //     'locale': 'en',
-    //     'org': 'dopt',
-    //     'rootOrg': 'igot'
-    //   }
-    // }).subscribe({
-    //   next: (res) => {
-    //     console.log('Form update success:', res);
-    //     this.hasUnsavedChanges = false;
-    //     this.cdr.markForCheck();
-    //   },
-    //   error: (err) => {
-    //     console.error('Form update failed:', err);
-    //   }
-    // });
-
-    // Raise telemetry
-    this.raiseTelemetry('save-changes')
+    if (this.defaultMicrosite) {
+      console.log('Payload:', payload)
+      // Call the API
+      this.microSiteV3Service.createMicrosite(payload).subscribe({
+        next: (res) => {
+          console.log('Form update success:', res)
+          this.hasUnsavedChanges = false
+          this.cdr.markForCheck()
+        },
+        error: (err) => {
+          console.error('Form update failed:', err)
+        }
+      })
+      // Raise telemetry
+      this.raiseTelemetry('update-changes')
+    } else {
+      console.log('Payload:', payload)
+      // Call the API
+      this.microSiteV3Service.updateMicrosite(payload).subscribe({
+        next: (res) => {
+          console.log('Form update success:', res)
+          this.hasUnsavedChanges = false
+          this.cdr.markForCheck()
+        },
+        error: (err) => {
+          console.error('Form update failed:', err)
+        }
+      })
+      // Raise telemetry
+      this.raiseTelemetry('update-changes')
+    }
   }
 
   publishChanges() {

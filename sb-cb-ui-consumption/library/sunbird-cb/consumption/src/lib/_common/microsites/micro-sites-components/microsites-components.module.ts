@@ -46,6 +46,9 @@ import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy
 import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
 import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle'
 import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select'
+import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
+import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { SlwConfigDialogComponent } from './components/slw-config-dialog/slw-config-dialog.component'
 import { ActionItemsComponent } from './components/action-items/action-items.component'
@@ -121,6 +124,9 @@ import { StripAddContentComponent } from './components/strip-add-content/strip-a
     MatButtonModule,
     MatSlideToggleModule,
     MatSelectModule,
+    MatPaginatorModule,
+    MatCardModule,
+    MatCheckboxModule,
     DragDropModule,
     HttpClientModule,
     MatIconModule,
@@ -139,7 +145,8 @@ import { StripAddContentComponent } from './components/strip-add-content/strip-a
     MobileSectionsComponent,
     EditorDialogComponent,
     SlwConfigDialogComponent,
-    ActionItemsComponent
+    ActionItemsComponent,
+    StripAddContentComponent
   ],
   providers: [
     CommonMethodsService

@@ -1,6 +1,6 @@
-<div class="strip-section-header">
+<div class="strip-section-header" *ngIf="sectionData && sectionData.strips && sectionData.strips.length > 0">
   <div class="section-title-container">
-    <span class="section-title" *ngIf="!isEditingTitle">{{ sectionData?.name || 'Add Section Name' }}</span>
+    <span class="section-title" *ngIf="!isEditingTitle">{{ sectionData.strips[0].title || 'Add Section Name' }}</span>
 
     <div class="title-edit-container" *ngIf="isEditingTitle">
       <input type="text" class="title-input" [(ngModel)]="tempTitle" (keydown)="onTitleKeydown($event)"
@@ -33,8 +33,9 @@
     </button>
 
     <div class="hide-section-container">
-      <span class="hide-section-label">Hide section</span>
-      <mat-slide-toggle class="section-toggle" [(ngModel)]="sectionData.visible"></mat-slide-toggle>
+      <span class="hide-section-label">Enable section</span>
+      <mat-slide-toggle class="section-toggle" [(ngModel)]="tempEnabled"
+        (change)="onToggleSectionVisibility($event)"></mat-slide-toggle>
     </div>
 
     <button mat-icon-button class="delete-btn" (click)="onRemoveSection()" matTooltip="Delete Section">
