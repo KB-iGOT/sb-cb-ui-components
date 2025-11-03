@@ -1,8 +1,20 @@
 <div class="nlw-speakers-wrapper px-4 md:px-0 my-4 md:my-0">
+    <!-- Edit button - always visible for speakers component -->
+    <div class="edit-section">
+        <button class="edit-icon" (click)="onEdit()" 
+                matTooltip="Edit Speakers" aria-label="Edit Speakers">
+            <mat-icon>edit</mat-icon>
+        </button>
+    </div>
+    
     <div class="flex speakers-title gap-2 justify-between pb-1" *ngIf="contentdata.length">
         <div class="flex gap-2">
-            {{objectData?.title}}
-            <div><img [src]="objectData?.infoIcon" alt="" i18n-matTooltip [matTooltip]="objectData?.infoText"></div>
+            <!-- Use 'Speaker of the day' as a fallback only when rendering -->
+            {{getTitleText()}}
+            <div *ngIf="objectData?.speakerOftheDay?.data?.infoIcon || objectData?.data?.infoIcon || objectData?.infoIcon">
+                <img [src]="objectData?.speakerOftheDay?.data?.infoIcon || objectData?.data?.infoIcon || objectData?.infoIcon" alt="" 
+                     i18n-matTooltip [matTooltip]="objectData?.speakerOftheDay?.data?.infoText || objectData?.data?.infoText || objectData?.infoText || ''">
+            </div>
         </div>
         <div class="block md:hidden">
             <mat-icon (click)="toggleWeekHightlits()">expand_more</mat-icon>

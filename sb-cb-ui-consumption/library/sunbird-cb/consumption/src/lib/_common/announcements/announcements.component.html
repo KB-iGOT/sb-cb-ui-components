@@ -8,6 +8,9 @@
             [style.color]="objectData?.header?.color">
             {{translateLabels(objectData?.title, 'events')}}
         </div>
+        <button *ngIf="isEdit" mat-icon-button class="edit-icon" (click)="onEdit()">
+            <mat-icon>edit</mat-icon>
+        </button>
     </div>
     <div class="key-list-container"
         [style.borderColor]="objectData?.panelborder"
