@@ -452,6 +452,12 @@ export namespace SearchListingConfig {
     allSearchCategoriesTypes: SearchCategoryType[];
     searchInputConfig: SearchInputConfig;
     applicationName: string;
+    sortings?: {
+      [key: string]: SortingOptions[];
+    };
+    fields?: {
+      [key: string]: string[];
+    }
     noDataFoundFlags: {
       [key: string]: SearchNoDataFoundFlags;
     };
@@ -483,6 +489,11 @@ export namespace SearchListingConfig {
   export interface SearchInputConfig {
     enableRecentSearches: boolean;
     defaultSearchCategory: string;
+  }
+
+  export interface SortingOptions {
+    name: string;
+    value: string;
   }
   export interface SearchNoDataFoundFlags {
     showButtons: boolean;

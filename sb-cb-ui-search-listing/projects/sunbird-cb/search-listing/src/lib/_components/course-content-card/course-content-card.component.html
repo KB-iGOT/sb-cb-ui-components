@@ -91,23 +91,41 @@
             </div>
             <!-- Bookmark button -->
             <div class="flex items-center gap-3">
-              <ng-container *ngIf="courseEnrollment && courseEnrollment?.issuedCertificates && courseEnrollment?.completionPercentage === 100">
-                <div
-                  matRipple
-                  (click)="$event.stopPropagation(); downloadCertificate(courseEnrollment)"
-                  class="download-certificate-course font-stats flex items-center gap-1 px-1 pt-1 rounded cursor-pointer">
-                  <mat-icon [svgIcon]="'download'" class="mb-1" *ngIf="!downloadCertificateLoading"></mat-icon>
-                  <div class="flex items-center mb-1" *ngIf="downloadCertificateLoading">
-                    <mat-spinner strokeWidth="2" stroke="'red'" [diameter]="16"></mat-spinner>
+              <ng-container *ngIf="applicationName !== 'CBP Portal'">
+                <ng-container *ngIf="courseEnrollment && courseEnrollment?.issuedCertificates && courseEnrollment?.completionPercentage === 100">
+                  <div
+                    matRipple
+                    (click)="$event.stopPropagation(); downloadCertificate(courseEnrollment)"
+                    class="download-certificate-course font-stats flex items-center gap-1 px-1 pt-1 rounded cursor-pointer">
+                    <mat-icon [svgIcon]="'download'" class="mb-1" *ngIf="!downloadCertificateLoading"></mat-icon>
+                    <div class="flex items-center mb-1" *ngIf="downloadCertificateLoading">
+                      <mat-spinner strokeWidth="2" stroke="'red'" [diameter]="16"></mat-spinner>
+                    </div>
+                    <span>Download Certificate</span>
                   </div>
-                  <span>Download Certificate</span>
-                </div>
+                </ng-container>
+                <ng-container *ngIf="courseEnrollment && courseEnrollment?.completionPercentage < 100">
+                  <div class="inprogress-course font-stats rounded">In - Progress</div>
+                </ng-container>
+                <ng-container *ngIf="courseEnrollment && courseEnrollment?.completionPercentage === 100">
+                  <div class="inprogress-course font-stats rounded">Completed</div>
+                </ng-container>
               </ng-container>
-              <ng-container *ngIf="courseEnrollment && courseEnrollment?.completionPercentage < 100">
-                <div class="inprogress-course font-stats rounded">In - Progress</div>
-              </ng-container>
-              <ng-container *ngIf="courseEnrollment && courseEnrollment?.completionPercentage === 100">
-                <div class="inprogress-course font-stats rounded">Completed</div>
+              <ng-container *ngIf="applicationName === 'CBP Portal' && content?.status">
+                <ng-container [ngSwitch]="content?.status">
+                  <ng-container *ngSwitchCase="'Live'">
+                    <div class="live-course">{{content?.status}}</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'Draft'">
+                    <div class="draft-course">{{content?.status}}</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'Failed'">
+                    <div class="draft-course">{{content?.status}}</div>
+                  </ng-container>
+                  <ng-container *ngSwitchDefault>
+                    <div class="draft-course">{{content?.status}}</div>
+                  </ng-container>
+                </ng-container>
               </ng-container>
               <!-- <div class="bookmark-container">
                                 <button mat-icon-button aria-label="Bookmark this course"
@@ -128,6 +146,14 @@
         <div class="course-tags mb-3 font-normal text-ellipse" *ngIf="content?.primaryCategory == 'Learning Resource'">
           {{ content?.description }}
         </div>
+        <ng-container *ngIf="applicationName === 'CBP Portal'">
+          <ng-container *ngIf="content?.createdOn">
+            <div><span class="organization-name">Created On: </span> <span class="course-title">{{ content?.createdOn | date: "dd/MM/yyyy (HH:mm)" }}</span></div>
+          </ng-container>
+          <ng-container *ngIf="content?.lastUpdatedOn">
+            <div><span class="organization-name">Last Updated On: </span> <span class="course-title">{{ content?.lastUpdatedOn | date: "dd/MM/yyyy (HH:mm)" }}</span></div>
+          </ng-container>
+        </ng-container>
         <!-- <div class="course-tags mb-3 font-normal text-ellipse"
                     *ngIf="content && content[compentencyKey.vKey] && content[compentencyKey.vKey]"
                     [matTooltip]="'Sub Theme - ' + generateCompetencySubThemeString()">
