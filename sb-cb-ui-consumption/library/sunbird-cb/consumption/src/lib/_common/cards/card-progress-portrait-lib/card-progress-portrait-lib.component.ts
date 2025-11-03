@@ -121,7 +121,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
       })
   }
 
-  downloadCertificate(certificateData: any, event: any) {
+  downloadCertificate(certificateData: any, event: any, enableForAll = true) {
     event.stopPropagation();
     this.events.raiseInteractTelemetry(
       {
@@ -144,15 +144,14 @@ export class CardProgressPortraitLibComponent implements OnInit {
            new Date(a.lastIssuedOn).getTime() -
            new Date(b.lastIssuedOn).getTime()
        );
-       let certData: any = certificate && certificate.length && certificate[0];
-      const allowedPrimaryCategory = ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION?.map(
+        let certData: any = certificate && certificate.length && certificate[0];
+        const allowedPrimaryCategory = ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION?.map(
         (cat: string) => cat?.toLowerCase()
       );
       if (
-        this.widgetData.content &&
-        this.widgetData.content.primaryCategory &&
-        allowedPrimaryCategory?.includes(this.widgetData.content?.primaryCategory?.toLowerCase()) || 
-        allowedPrimaryCategory?.includes(this.widgetData.content?.courseCategory?.toLowerCase()) 
+        enableForAll ||
+        allowedPrimaryCategory?.includes(this.widgetData.content?.primaryCategory?.toLowerCase()) ||
+        allowedPrimaryCategory?.includes(this.widgetData.content?.courseCategory?.toLowerCase())
       ) {
         const payload = {
           request: {
