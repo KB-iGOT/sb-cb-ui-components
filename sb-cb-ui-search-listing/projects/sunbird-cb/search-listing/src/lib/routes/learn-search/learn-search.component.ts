@@ -167,7 +167,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async ngOnInit() {
-  this.currentUserDept = _.get(this.configSvc, 'userProfile.departmentName', '');
+    this.currentUserDept = _.get(this.configSvc, 'userProfile.departmentName', '');
     this.statedata = {
       param: this.searchQuery?.nlp ? this.searchQuery?.nlp : this.searchQuery.query,
       path: "Search"
@@ -323,9 +323,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchCourses() {
     this.searchRequestCourse.request.query = this.statedata?.param;
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      // if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
-      //   this.searchRequestCourse.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
-      // }
+      this.searchRequestCourse.request.filters["channel"] = {
+        "!=": [this.environment.spvorgID]
+      };
       const courseFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'courses');
       if (courseFilters.length && courseFilters[0].facets && courseFilters[0].facets.length) {
         const competencyKeys = [
@@ -342,7 +342,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           // this effectively removes the 'competencies' placeholder.
           facetsFromConfig.splice(compIndex, 1, ...competencyKeys);
         }
-
+        if(_.get(this.searchConfig, 'fields.courses')) {
+          this.searchRequestCourse.request.fields = _.get(this.searchConfig, 'fields.courses')
+        }
         // Filter out any null/undefined values and use config-provided facets
         this.searchRequestCourse.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
         if(this.searchRequestCourse.request.facets.findIndex(v => v === 'status') > -1) {
@@ -356,7 +358,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
               "InReview",
               "Reviewed",
               "UnderReview",
-              "QualityReview"
+              "QualityReview",
+              "Draft"
             ];
           }
         }
@@ -392,15 +395,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     if (this.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
       this.searchRequestEvents.request.filters.status = ["Live"];
     }
-
-    // this.searchRequestEvents.request.sort_by.startDate = 'desc';
-    // For CBPPortal: ensure a default status filter is applied when no status is selected
-    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      const hasStatus = typeof this.applySelectedFilters === "object" && this.applySelectedFilters["status"];
-      if (!hasStatus) {
-        this.searchRequestEvents.request.filters.status = ["Live", "SentToPublish"];
-      }
-    }
     this.searchRequestEvents.request.filters.contentType = "Event";
     this.searchRequestEvents.request.fields = SearchEventFields;
     // Build base facets array and avoid passing null/undefined competency keys
@@ -419,9 +413,13 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     // If CBPPortal provides a facets configuration for events, prefer that.
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      // if(_.get(this.configSvc, 'userProfileV2.rootOrgId', '')) {
-      //   this.searchRequestEvents.request.filters["channel"] = _.get(this.configSvc, 'userProfileV2.rootOrgId', '');
-      // }
+      const hasStatus = typeof this.applySelectedFilters === "object" && this.applySelectedFilters["status"];
+      if (!hasStatus && hasStatus.length === 0) {
+        this.searchRequestEvents.request.filters.status = ["Live", "SentToPublish"];
+      }
+      this.searchRequestEvents.request.filters["channel"] = {
+        "!=": [this.environment.spvorgID]
+      };
       const eventFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');
       if (eventFilters.length && eventFilters[0].facets && eventFilters[0].facets.length) {
         // Clone to avoid mutating upstream config
