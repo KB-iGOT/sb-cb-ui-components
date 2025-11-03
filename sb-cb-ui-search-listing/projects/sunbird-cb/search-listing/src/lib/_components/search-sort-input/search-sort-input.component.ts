@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { SEARCH_SORT_DROPDOWN, SEARCH_SORT_PEOPLES } from "../../_constants/search-listing.constant";
-import { SearchCategory, SearchConstantLocalStorage, SortType } from "../../_models/search-listing.model";
+import { SearchCategory, SearchListingConfig, SortType } from "../../_models/search-listing.model";
+import { SearchListingService } from "../../_services/search-listing.service";
+import * as _ from "lodash";
 
 @Component({
   selector: "ws-app-search-sort-input",
@@ -11,14 +13,19 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
   @Output() searchSorter = new EventEmitter();
   @Input() category!: string;
   @Input() isExploreContentTab: boolean = false;
+  @Input() sortingsList!: {
+    [key: string]: SearchListingConfig.SortingOptions[];
+  };
   selectedOption: string = SortType.MostRelevent;
   options = SEARCH_SORT_DROPDOWN;
 
   @ViewChild("sortSelect") sortSelect!: ElementRef;
 
-  constructor() {}
+  constructor(
+      private searchListingService: SearchListingService,
+    ) {}
 
-  ngOnChanges(): void {
+  async ngOnChanges(): Promise<void> {
     if (this.category === SearchCategory.People) {
       this.options = SEARCH_SORT_PEOPLES;
       this.selectedOption = SortType.MostRelevent;
@@ -44,6 +51,11 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
         this.options = SEARCH_SORT_DROPDOWN;
         this.selectedOption = SortType.MostRelevent;
       }
+    }
+
+    const categorySortings = _.get(this.sortingsList, `${this.category}`, []);
+    if (categorySortings.length > 0) {
+      this.options = categorySortings;
     }
 
     // const sortType = localStorage.getItem(SearchConstantLocalStorage.SortType);

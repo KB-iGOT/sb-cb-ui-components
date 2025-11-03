@@ -228,3 +228,28 @@
   background: $brandAccentDarkShade;
   padding: 7px 8px;
 }
+
+.live-course {
+    border: 1px solid #00a650;
+    background: rgba(29, 137, 35, .1607843137);
+    color: #00a650;
+    padding: 0px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.draft-course {
+    border: 1px solid #F3962F;
+    background: rgba(243, 150, 47, .0784313725);
+    color: #1b2133;
+    padding: 0 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    height: 20px;
+}
