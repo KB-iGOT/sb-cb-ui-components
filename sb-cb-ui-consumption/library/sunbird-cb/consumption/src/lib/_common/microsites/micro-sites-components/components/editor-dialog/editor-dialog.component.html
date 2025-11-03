@@ -399,9 +399,21 @@
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
-                    <input matInput formControlName="videoUrl" placeholder="Enter video URL">
+                    <input matInput formControlName="videoUrl" placeholder="Enter video URL or upload MP4">
                     <mat-error *ngIf="item.get('videoUrl')?.hasError('required')">Video URL is required</mat-error>
                   </mat-form-field>
+
+                  <div class="upload-section">
+                    <input type="file" #videoFileInput accept="video/mp4" (change)="onVideoFileSelected($event, i)"
+                      style="display: none">
+                    <button mat-button class="btn-common btn-secondary" type="button" (click)="videoFileInput.click()"
+                      [disabled]="isUploading && currentUploadingIndex === i">
+                      <mat-icon>upload</mat-icon>
+                      {{ (isUploading && currentUploadingIndex === i) ? 'Uploading...' : 'Upload MP4' }}
+                    </button>
+                    <span *ngIf="isUploading && currentUploadingIndex === i" class="upload-status">{{ uploadStatus
+                      }}</span>
+                  </div>
                 </div>
               </div>
 
@@ -423,10 +435,13 @@
         <!-- Slider Preview -->
         <div class="slider-preview-container">
           <h3>Preview</h3>
-          <div class="slider-preview">
+          <div class="slider-preview" *ngIf="sliderData.sliders.length">
             <sb-uic-sliders [widgetData]="sliderData.sliders" [styleData]="sliderData.styleData"
               (clickEvent)="onSliderClick($event)">
             </sb-uic-sliders>
+          </div>
+          <div *ngIf="!sliderData.sliders.length" class="no-items">
+            No items available for preview. Add some items.
           </div>
         </div>
 

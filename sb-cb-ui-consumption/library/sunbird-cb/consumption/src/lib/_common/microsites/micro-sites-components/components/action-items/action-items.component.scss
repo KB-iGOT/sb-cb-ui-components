@@ -186,7 +186,10 @@
 .custom-toggle {
   ::ng-deep .mat-slide-toggle-label {
     border: 1px solid #1B4CA1 !important;
-    padding: 4px 16px !important;
+    padding: 5px 16px 4px 16px !important;
     border-radius: 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1B4CA1 !important;
   }
 }

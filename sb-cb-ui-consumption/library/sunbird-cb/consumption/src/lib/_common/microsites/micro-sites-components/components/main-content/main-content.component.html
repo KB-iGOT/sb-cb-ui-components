@@ -58,7 +58,7 @@
     <div class="col-span-12">
       <div class="flex items-center justify-center">
         <div class="container margin-top-xl">
-          <div class="feature-header" *ngIf="isEdit">
+          <div class="feature-header" *ngIf="isEdit && data?.stateLearningWeekSection?.keyHighlights?.content.length">
             <button mat-icon-button aria-label="Edit Key Highlights" class="edit-icon"
               (click)="openEditor('keyHighlights', 'Key Highlights', data?.stateLearningWeekSection?.keyHighlights)">
               <mat-icon>edit</mat-icon>
@@ -67,7 +67,7 @@
           <!-- Show if enabled OR if in edit mode -->
           <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
             <sb-uic-key-highlights
-              (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
+              (emptyResponse)="openEditor('keyHighlights', 'Key Highlights', data?.stateLearningWeekSection?.keyHighlights)"
               [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'desktop'">
             </sb-uic-key-highlights>
           </div>
@@ -210,6 +210,24 @@
             </div>
           </div>
 
+          <!-- CBP Plan -->
+          <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.cbpPlanSection?.data">
+            <div class="pt-4">
+              <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true" [channelId]="orgId"
+                [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit">
+              </sb-uic-cbp-plan>
+            </div>
+          </div>
+
+          <!-- Announcements - Always show when editing -->
+          <div class="hidden md:block" *ngIf="!data?.announcementSection?.disable || isEdit">
+            <div class="pt-4">
+              <sb-uic-announcements [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
+                [channelId]="orgId" [objectData]="data?.announcementSection?.data" [isEdit]="isEdit">
+              </sb-uic-announcements>
+            </div>
+          </div>
+
           <!-- Speakers -->
           <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="isEdit">
             <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
@@ -227,24 +245,6 @@
                 [slwConfig]="slwConfig" (tabClicked)="raiseTabClick($event)" [orgId]="orgId" [isEdit]="isEdit"
                 [isEditable]="isEdit">
               </sb-uic-mdo-leaderboard>
-            </div>
-          </div>
-
-          <!-- CBP Plan -->
-          <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="data?.cbpPlanSection?.data">
-            <div class="pt-4">
-              <sb-uic-cbp-plan [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true" [channelId]="orgId"
-                [objectData]="data?.cbpPlanSection?.data" [isEdit]="isEdit">
-              </sb-uic-cbp-plan>
-            </div>
-          </div>
-
-          <!-- Announcements - Always show when editing -->
-          <div class="hidden md:block" *ngIf="!data?.announcementSection?.disable || isEdit">
-            <div class="pt-4">
-              <sb-uic-announcements [layoutType]="'web'" [mobileHeight]="false" [fetchDataFromApi]="true"
-                [channelId]="orgId" [objectData]="data?.announcementSection?.data" [isEdit]="isEdit">
-              </sb-uic-announcements>
             </div>
           </div>
         </ng-container>

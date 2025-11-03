@@ -645,6 +645,46 @@ export class EditorDialogComponent implements OnInit {
     })
   }
 
+  onVideoFileSelected(event: any, index: number) {
+    const file = event.target.files[0]
+    if (file && file.type === 'video/mp4') {
+      this.currentUploadingIndex = index
+      this.uploadVideoFile(file, index)
+    } else {
+      this.uploadStatus = 'Please select a valid MP4 video file.'
+    }
+  }
+
+  uploadVideoFile(file: File, index: number) {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading video...'
+
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
+
+        // Update the videoUrl form field for the specific item
+        const listArray = this.editorForm.get('list') as FormArray
+        if (listArray && listArray.at(index)) {
+          listArray.at(index).get('videoUrl')?.setValue(transformedUrl)
+        }
+        this.uploadStatus = 'Video uploaded successfully!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        this.currentUploadingIndex = -1
+        console.error('Video upload error:', error)
+      }
+    })
+  }
+
   // Slider specific methods
   onSliderClick(event: any) {
     console.log('Slider click:', event)

@@ -844,12 +844,12 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     this.raiseTelemetry('toggle-state-learning-week')
   }
 
-  saveChanges() {
+  saveChanges(type?: string) {
     // Prepare payload
     const payload = {
       request: {
         type: 'mdo-channel',
-        subType: 'microsite-v2-preview',
+        subType: (type === 'publish') ? 'microsite-v2' : 'microsite-v2-preview',
         action: 'page-configuration',
         component: 'portal',
         framework: '*',
@@ -896,7 +896,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   publishChanges() {
     if (this.hasUnsavedChanges) {
-      this.saveChanges()
+      this.saveChanges('publish')
     }
 
     // Implement publish logic here
