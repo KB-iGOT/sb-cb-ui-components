@@ -413,8 +413,11 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     // If CBPPortal provides a facets configuration for events, prefer that.
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      const hasStatus = typeof this.applySelectedFilters === "object" && this.applySelectedFilters["status"];
-      if (!hasStatus && hasStatus.length === 0) {
+      const hasStatus = typeof this.applySelectedFilters === "object" && 
+               this.applySelectedFilters["status"] && 
+               Array.isArray(this.applySelectedFilters["status"]) && 
+               this.applySelectedFilters["status"].length > 0;
+      if (!hasStatus) {
         this.searchRequestEvents.request.filters.status = ["Live", "SentToPublish"];
       }
       this.searchRequestEvents.request.filters["channel"] = {
