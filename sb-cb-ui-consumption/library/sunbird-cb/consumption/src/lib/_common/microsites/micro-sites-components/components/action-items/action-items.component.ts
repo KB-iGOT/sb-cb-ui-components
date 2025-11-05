@@ -12,13 +12,14 @@ export class ActionItemsComponent implements OnInit {
   @Input() isStateLearningWeekEnabled: boolean = false;
   @Input() hasUnsavedChanges: boolean = false;
   @Input() slwConfiguration: any
-  @Input() userRedirectionEnabled: boolean = false
+  @Input() userRedirData: any = {}
 
   @Output() toggleSLW = new EventEmitter<void>();
   @Output() saveChanges = new EventEmitter<void>();
   @Output() publishChanges = new EventEmitter<void>();
   @Output() configureSLW = new EventEmitter<any>();
   @Output() userRedirectionToggle = new EventEmitter<boolean>()
+  userRedirectionEnabled: boolean = false
 
   constructor(private dialog: MatDialog) { }
 
@@ -28,6 +29,8 @@ export class ActionItemsComponent implements OnInit {
       isStateLearningWeekEnabled: this.isStateLearningWeekEnabled,
       slwConfiguration: this.slwConfiguration
     })
+    console.log('User Redirection Enabled:', this.userRedirData)
+    this.userRedirectionEnabled = this.userRedirData?.enabled || false
   }
 
   onToggleStateLearningWeek(event: any) {
@@ -91,7 +94,6 @@ export class ActionItemsComponent implements OnInit {
   }
 
   onUserRedirectionToggle(event: any) {
-    console.log('User Redirection toggled:', event.checked)
     this.userRedirectionToggle.emit(event.checked)
   }
 }
