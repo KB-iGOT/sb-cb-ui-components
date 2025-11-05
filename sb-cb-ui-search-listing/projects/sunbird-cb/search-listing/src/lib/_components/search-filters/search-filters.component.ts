@@ -210,7 +210,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       const filters = this.getFiltersList
-      this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') ? true : false;
+      this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') && this.isFilterFacetsAvailable ? true : false;
     }
 
   }
