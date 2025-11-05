@@ -155,7 +155,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
       ) {
         const payload = {
           request: {
-            courseId: this.widgetData.content.identifier,
+            courseId: this.widgetData.content.identifier || this.widgetData.content?.contentId,
             batchId: this.widgetData.content.batchId || "",
             userId: this.configSvc.userProfile.userId,
           },
