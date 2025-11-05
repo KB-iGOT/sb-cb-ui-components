@@ -999,7 +999,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
   getSelectedFilter(item: any) {
     if (Object.keys(this.selectedFilters).length) {
-      return this.filterValueExists(this.selectedFilters, item?.name);
+      return this.filterValueExists(this.selectedFilters, this.formatEventStatusName(item?.name));
     }
   }
 
@@ -1181,10 +1181,14 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
 
     if (this.searchCategory === SearchCategory.Events) {
       const lowerValue = value.toLowerCase();
-      if (lowerValue === "live") {
-        return "Published";
-      } else if (lowerValue === "senttopublish") {
-        return "Pending Approval";
+      if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+        return this.formatEventStatusName(lowerValue);
+      } else {
+        if (lowerValue === "live") {
+          return "Published";
+        } else if (lowerValue === "senttopublish") {
+          return "Pending Approval";
+        }
       }
     }
 

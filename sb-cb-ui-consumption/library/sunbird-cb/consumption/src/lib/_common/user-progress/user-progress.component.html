@@ -1,4 +1,12 @@
-<div class="px-4 md:px-0 pt-4 md:pt-0 week-progress {{expand ? 'pb-4' : 'pb-1'}}">
+<div class="px-4 md:px-0 pt-4 md:pt-0 week-progress {{expand ? 'pb-4' : 'pb-1'}} user-progress-main-wrapper">
+    <!-- Edit button - always visible for user progress -->
+    <div class="edit-section">
+        <button class="edit-icon" (click)="onEdit()" 
+                matTooltip="Edit User Progress" aria-label="Edit User Progress">
+            <mat-icon>edit</mat-icon>
+        </button>
+    </div>
+    
     <div class="flex user-progress-title gap-2 margin-bottom-xs items-center justify-between">
         <div class="flex gap-2">
             {{objectData?.title}}
@@ -8,12 +16,14 @@
             <mat-icon (click)="toggleWeekHightlits()">expand_more</mat-icon>
         </div>
     </div>
-    <div class="user-progress-wrapper" *ngIf="expand">
-        <div class="user-rank flex items-center">
-            <div class="flex item-center">
-                <div class="current-rank" *ngIf="userProgress?.rank > 0">#{{userProgress?.rank}} Rank</div>
+    <!-- Only show content if enabled -->
+    <ng-container *ngIf="objectData?.enabled !== false">
+        <div class="user-progress-wrapper" *ngIf="expand">
+            <div class="user-rank flex items-center">
+                <div class="flex item-center">
+                    <div class="current-rank" *ngIf="userProgress?.rank > 0">#{{userProgress?.rank}} Rank</div>
+                </div>
             </div>
-        </div>
         <div class="user-details-wrapper">
             <div class="user-details flex gap-2">
                 <div class="user-initial" *ngIf="userProgress?.profile_image">
@@ -84,7 +94,16 @@
                         </div>
                     </sb-uic-sliders-ng-content>
                 </div>
+                </div>
             </div>
+        </div>
+    </ng-container>
+
+    <!-- Show disabled message when component is disabled -->
+    <div class="disabled-message" *ngIf="objectData?.enabled === false && (isEdit || isEditable)">
+        <div class="message-content">
+            <mat-icon>visibility_off</mat-icon>
+            <span>User Progress section is currently disabled</span>
         </div>
     </div>
 </div>

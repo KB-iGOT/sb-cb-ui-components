@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.0.1-cbrelease-4.8.30",
+  "version": "0.0.3-cbrelease-4.8.30",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -76,6 +76,7 @@
     "@types/lodash": "4.14.161",
     "@types/mustache": "^0.8.32",
     "@types/node": "^12.11.1",
+    "@types/uuid": "^8.3.4",
     "angular-cli-alias": "^1.0.9",
     "codelyzer": "^6.0.0",
     "jasmine-core": "~3.6.0",
