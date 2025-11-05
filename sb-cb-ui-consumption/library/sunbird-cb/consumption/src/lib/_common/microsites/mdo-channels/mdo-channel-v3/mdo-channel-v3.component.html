@@ -2,7 +2,7 @@
 
 <!-- Action Items Section -->
 <app-action-items [isEdit]="isEdit" [hasUnsavedChanges]="hasUnsavedChanges" [slwConfiguration]="slwConfiguration"
-  [isStateLearningWeekEnabled]="slwConfiguration?.enabled" [userRedirectionEnabled]="userRedirectionEnabled"
+  [isStateLearningWeekEnabled]="slwConfiguration?.enabled" [userRedirData]="userRedirectionData"
   (toggleSLW)="handleToggleSLW()" (configureSLW)="handleConfigureSLW($event)" (saveChanges)="saveChanges()"
   (publishChanges)="publishChanges()" (userRedirectionToggle)="handleUserRedirectionToggle($event)"></app-action-items>
 <div class="container-fluid" id="section-micro-sites">

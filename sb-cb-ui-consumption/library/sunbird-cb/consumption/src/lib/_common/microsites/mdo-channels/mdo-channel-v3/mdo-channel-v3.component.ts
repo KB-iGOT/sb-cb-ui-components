@@ -32,6 +32,7 @@ import { MicrositeV3Service } from '../../../../_services/microsite-v3.service'
 export class MdoChannelV3Component implements OnInit, OnChanges {
   @Input() sectionList: any[] = [];
   @Input() slwConfiguration: any
+  @Input() userRedirectionData: any
   @Input() isEdit: boolean = false;
   activeSections: any[] = [];
   @Input() providerId: string = '123456789';
@@ -42,7 +43,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   isMobile: boolean = false;
   isStateLearningWeekEnabled: boolean = false;
   hasUnsavedChanges: boolean = false;
-  userRedirectionEnabled: boolean = false;
+  userRedirectionEnabled: any
   isLoading: boolean = false;
 
   navigationTitles = [
@@ -849,14 +850,18 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     const payload = {
       request: {
         type: 'mdo-channel',
-        subType: (type === 'publish') ? 'microsite-v2' : 'microsite-v2-preview',
+        subType: (type === 'publish') ? 'microsite-v3' : 'microsite-v3-preview',
         action: 'page-configuration',
         component: 'portal',
         framework: '*',
         data: {
           stateLearningWeekConfig: this.slwConfiguration || {},
           sectionList: this.sectionList || [],
-          userRedirectionEnabled: this.userRedirectionEnabled || false
+          userRedirectionData: {
+            enabled: this.userRedirectionEnabled || false,
+            orgId: this.orgId || '',
+            channelName: this.channelName || ''
+          }
         },
         rootOrgId: this.orgId || ''
       }
