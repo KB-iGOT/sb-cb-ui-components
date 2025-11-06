@@ -464,7 +464,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       p: null,
       f: null,
       tab: null,
-      filtersPanel: "show"
+      filtersPanel: "show",
+      search: query?.nlp_search_query || null
     };
     const navigationExtras = {
       queryParams,

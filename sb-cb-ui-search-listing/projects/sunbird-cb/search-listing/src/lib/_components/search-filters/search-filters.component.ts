@@ -4,7 +4,7 @@ import { Subscription } from "rxjs";
 import * as _ from "lodash";
 import { TranslateService } from "@ngx-translate/core";
 import { ConfigurationsService, MultilingualTranslationsService } from "@sunbird-cb/utils-v2";
-import { Facet, FacetType, FormattedFacets, ICompentencyKeys, SearchCategory, SearchListingConfig } from "../../_models/search-listing.model";
+import { CBPstatusMapping, Facet, FacetType, FormattedFacets, ICompentencyKeys, SearchCategory, SearchListingConfig } from "../../_models/search-listing.model";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from "@angular/router";
 import { MatRadioChange } from "@angular/material/radio";
@@ -210,7 +210,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       const filters = this.getFiltersList
-      this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') ? true : false;
+      this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') && this.isFilterFacetsAvailable ? true : false;
     }
 
   }
@@ -1164,7 +1164,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     return false;
   }
 
-  formatFilterChips(value: string): string {
+  formatFilterChips(value: string, type: string): string {
     if (!value) return value;
 
     const datePattern = /^\d{4}[-/]\d{2}[-/]\d{2}$/;
@@ -1190,6 +1190,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
           return "Pending Approval";
         }
       }
+    } else if (this.searchCategory === SearchCategory.Courses && this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && type === "status") {
+      return this.formatEventStatusName(value);
     }
 
     if (value.includes("_")) {
@@ -1214,17 +1216,21 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     return "";
   }
 
-  formatEventStatusName(name: string): string {
+  formatEventStatusName(name: string, type?: string): string {
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      switch(name) {
-        case 'senttopublish':
-          return 'Pending';
-        case 'live':
-          return 'Approved';
-        case 'upcoming':
-          return 'Upcoming';
-        default:
-          return name;
+      if (this.searchCategory.toLocaleLowerCase() === "courses" || type === "courses") {
+        return CBPstatusMapping[name.toLocaleLowerCase()]
+      } else {
+        switch(name) {
+          case 'senttopublish':
+            return 'Pending';
+          case 'live':
+            return 'Approved';
+          case 'upcoming':
+            return 'Upcoming';
+          default:
+            return name;
+        }
       }
     }
     if (name === "live") {
