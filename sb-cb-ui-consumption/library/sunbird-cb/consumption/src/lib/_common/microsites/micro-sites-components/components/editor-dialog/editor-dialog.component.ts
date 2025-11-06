@@ -81,6 +81,14 @@ export class EditorDialogComponent implements OnInit {
     return this.editorForm.get('list') as FormArray
   }
 
+  get imageItemsArray(): FormArray {
+    return this.editorForm?.get('items') as FormArray
+  }
+
+  get isMultipleImages(): boolean {
+    return this.formType === 'image' && this.editorForm && this.editorForm.get('items') !== null
+  }
+
   ngOnInit() {
     if (this.formType === 'keyHighlights') {
       this.initKeyHighlightsForm()
@@ -137,6 +145,67 @@ export class EditorDialogComponent implements OnInit {
     this.cbpPlanListArray.updateValueAndValidity()
   }
 
+  // Methods for image logo items management
+  addImageLogoItem(): void {
+    if (this.imageItemsArray) {
+      this.imageItemsArray.push(this.fb.group({
+        url: ['', [Validators.required]]
+      }))
+    }
+  }
+
+  removeImageLogoItem(index: number): void {
+    if (this.imageItemsArray) {
+      this.imageItemsArray.removeAt(index)
+    }
+  }
+
+  dropImageLogoItem(event: CdkDragDrop<any[]>): void {
+    if (this.imageItemsArray) {
+      moveItemInArray(this.imageItemsArray.controls, event.previousIndex, event.currentIndex)
+      this.imageItemsArray.updateValueAndValidity()
+    }
+  }
+
+  onImageLogoSelected(event: any, index: number): void {
+    const file = event.target.files[0]
+    if (file && file.type.startsWith('image/')) {
+      this.currentUploadingIndex = index
+      this.uploadImageLogo(file, index)
+    } else {
+      this.uploadStatus = 'Please select a valid image file.'
+    }
+  }
+
+  uploadImageLogo(file: File, index: number): void {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading image...'
+
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
+
+        // Update the url form field for the specific item
+        if (this.imageItemsArray && this.imageItemsArray.at(index)) {
+          this.imageItemsArray.at(index).get('url')?.setValue(transformedUrl)
+        }
+        this.uploadStatus = 'Image uploaded successfully!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        this.currentUploadingIndex = -1
+        console.error('Image upload error:', error)
+      }
+    })
+  }
+
 
 
   initForm() {
@@ -166,9 +235,25 @@ export class EditorDialogComponent implements OnInit {
         })
         break
       case 'image':
-        this.editorForm = this.fb.group({
-          value: [this.data.value, [Validators.required]]
-        })
+        // Check if value is an array (multiple items) or single value
+        const imageValue = this.data.value || []
+        const isArray = Array.isArray(imageValue)
+
+        if (isArray) {
+          // Multiple highlight items
+          this.editorForm = this.fb.group({
+            items: this.fb.array(
+              imageValue.map((item: any) => this.fb.group({
+                url: [item.url || item || '', [Validators.required]]
+              }))
+            )
+          })
+        } else {
+          // Single image URL
+          this.editorForm = this.fb.group({
+            value: [imageValue, [Validators.required]]
+          })
+        }
         break
       case 'boolean':
         this.editorForm = this.fb.group({
@@ -921,6 +1006,8 @@ export class EditorDialogComponent implements OnInit {
           console.error('Error submitting speakers form:', error)
         }
       }
+    } else if (this.formType === 'image') {
+      this.dialogRef.close(this.editorForm.value.items)
     } else if (this.editorForm.valid) {
       this.dialogRef.close(this.editorForm.value.value)
     }
