@@ -48,21 +48,82 @@
 
       <!-- Image URL with upload option -->
       <div *ngSwitchCase="'image'" class="image-container">
-        <mat-form-field appearance="outline" class="full-width">
-          <input matInput formControlName="value" placeholder="Enter image URL">
-          <mat-error *ngIf="editorForm.get('value')?.invalid">Valid image URL is required</mat-error>
-        </mat-form-field>
+        <!-- Single image mode -->
+        <div *ngIf="!isMultipleImages">
+          <mat-form-field appearance="outline" class="full-width">
+            <input matInput formControlName="value" placeholder="Enter image URL">
+            <mat-error *ngIf="editorForm.get('value')?.invalid">Valid image URL is required</mat-error>
+          </mat-form-field>
 
-        <div class="upload-section">
-          <button type="button" mat-button class="btn-common btn-secondary" (click)="fileInput.click()">
-            <mat-icon>cloud_upload</mat-icon> Upload Image
-          </button>
-          <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept="image/*">
-          <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+          <div class="upload-section">
+            <button type="button" mat-button class="btn-common btn-secondary" (click)="fileInput.click()">
+              <mat-icon>cloud_upload</mat-icon> Upload Image
+            </button>
+            <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept="image/*">
+            <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+          </div>
+
+          <div class="image-preview">
+            <img [src]="editorForm.get('value')?.value" alt="Image Preview" *ngIf="editorForm.get('value')?.value">
+          </div>
         </div>
 
-        <div class="image-preview">
-          <img [src]="editorForm.get('value')?.value" alt="Image Preview" *ngIf="editorForm.get('value')?.value">
+        <!-- Multiple Logo items mode -->
+        <div *ngIf="isMultipleImages" formArrayName="items" class="highlight-items-container">
+          <h4>Logo Items <span class="item-count">({{imageItemsArray?.controls?.length || 0}} items)</span></h4>
+
+          <div cdkDropList (cdkDropListDropped)="dropImageLogoItem($event)" class="image-items-list">
+            <div *ngFor="let item of imageItemsArray?.controls; let i = index" [formGroupName]="i"
+              class="image-highlight-item" cdkDrag>
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+
+              <div class="item-content">
+                <div class="item-header flex flex-middle">
+                  <h5 class="margin-remove">Item {{i + 1}}</h5>
+                  <div class="delete-btn-container ml-auto">
+                    <button mat-icon-button color="warn" type="button" (click)="removeImageLogoItem(i)"
+                      class="remove-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width margin-remove">
+                  <mat-label>Image URL</mat-label>
+                  <input matInput formControlName="url" placeholder="Enter image URL or upload">
+                  <mat-error *ngIf="item.get('url')?.invalid">Image URL is required</mat-error>
+                </mat-form-field>
+
+                <div class="upload-section">
+                  <input type="file" #imageFileInput accept="image/*" (change)="onImageLogoSelected($event, i)"
+                    style="display: none">
+                  <button mat-button class="btn-common btn-secondary margin-remove" type="button"
+                    (click)="imageFileInput.click()" [disabled]="isUploading && currentUploadingIndex === i">
+                    <mat-icon>cloud_upload</mat-icon>
+                    {{ (isUploading && currentUploadingIndex === i) ? 'Uploading...' : 'Upload Image' }}
+                  </button>
+                  <span *ngIf="isUploading && currentUploadingIndex === i" class="upload-status">{{ uploadStatus
+                    }}</span>
+                </div>
+
+                <div class="image-preview" *ngIf="item.get('url')?.value">
+                  <img [src]="item.get('url')?.value" alt="Image Preview">
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="!imageItemsArray?.controls?.length" class="no-items">
+              No logo items available. Add some items below.
+            </div>
+          </div>
+
+          <button mat-button class="btn-common btn-secondary flex-center mt-3" type="button"
+            (click)="addImageLogoItem()" [disabled]="imageItemsArray?.controls?.length >= 4"
+            [ngClass]="{'btn-disable': imageItemsArray?.controls?.length >= 4}">
+            <mat-icon>add</mat-icon> Add Logo Item
+          </button>
         </div>
       </div>
 
