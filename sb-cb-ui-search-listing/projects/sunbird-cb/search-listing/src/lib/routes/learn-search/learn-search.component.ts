@@ -396,7 +396,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         courseCategory: [],
         resourceCategory: []
       },
-      status: []
+      status: [],
+      contentType: "Course"
     };
 
     const mergeUnique = (target: any[], source: any[] = []) => {
@@ -532,7 +533,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (!hasStatus) {
         this.searchRequestEvents.request.filters.status = ["Live", "SentToPublish"];
       }
-      this.searchRequestEvents.request.filters["channel"] = {
+      this.searchRequestEvents.request.filters["createdFor"] = {
         "!=": [this.environment.spvorgID]
       };
       const eventFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');
