@@ -117,7 +117,7 @@
       <div class="flex flex-align-end progress-wrapper flex-end mt-1">
         <div class="progress-btn">
           <ng-container *ngIf="widgetData?.content?.surveyCompletionStatus === false; else viewCertificateBtn">
-            <button class="resume-btn flex flex-middle flex-between view-btn"
+            <button class="resume-btn flex flex-middle flex-between view-btn takeSurveyBtn"
               (click)="getRedirectUrlData(widgetData?.content)">
               {{'cardcontentv2.takeSurveyToUnlock' | translate }}
             </button>
