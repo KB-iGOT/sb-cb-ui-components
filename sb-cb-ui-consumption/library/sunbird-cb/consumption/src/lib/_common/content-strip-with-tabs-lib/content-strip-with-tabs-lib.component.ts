@@ -1165,7 +1165,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     ) {
       return true
     }
-    return false
+    return strip?.tabs?.length ? true : false
   }
 
   public tabClicked(tabEvent: any, stripMap: IStripUnitContentData, stripKey: string) {
@@ -1218,6 +1218,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         }
         if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent]) {
           stripMap.tabs[tabEvent].tabLoading = false
+          stripMap.tabs[tabEvent].fetchTabStatus = 'done'
         }
       } else {
         this.getTabDataByfilter(currentStrip, currentTabFromMap, true)
@@ -1905,57 +1906,70 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   async fetchPlaylistReadData(strip: NsContentStripWithTabs.IContentStripUnit, calculateParentStatus = true) {
-    if (strip.request && strip.request.playlistRead && Object.keys(strip.request.playlistRead).length) {
-      let originalFilters: any = []
-      if (strip.request &&
-        strip.request.playlistRead &&
-        strip.request.playlistRead.type) {
-        strip.request.apiUrl = this.getFullUrl(strip.request.apiUrl, strip.request.playlistRead.type)
-      }
-      if (strip.tabs && strip.tabs.length) {
-        // TODO: Have to extract requestRequired to outer level of tabs config
-        const firstTab = strip.tabs[0]
-        if (firstTab.requestRequired) {
-          if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-            const allTabs = this.stripsResultDataMap[strip.key].tabs
-            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
+    if (strip?.tabs?.length) {
+      // TODO: Have to extract requestRequired to outer level of tabs config
+      const firstTab = strip.tabs[0]
+      if (firstTab.requestRequired) {
+        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+          const allTabs = this.stripsResultDataMap[strip.key].tabs
+          const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
 
-            this.getTabDataByNewReqPlaylistReadContent(strip, 0, currentTabFromMap, calculateParentStatus)
-          }
+          this.getTabDataByNewReqPlaylistReadContent(strip, 0, currentTabFromMap, calculateParentStatus)
         }
+      }
+    } else {
+      if (strip.request && strip.request.playlistRead && Object.keys(strip.request.playlistRead).length) {
+        let originalFilters: any = []
+        if (strip.request &&
+          strip.request.playlistRead &&
+          strip.request.playlistRead.type) {
+          strip.request.apiUrl = this.getFullUrl(strip.request.apiUrl, strip.request.playlistRead.type)
+        }
+        if (strip.tabs && strip.tabs.length) {
+          // TODO: Have to extract requestRequired to outer level of tabs config
+          const firstTab = strip.tabs[0]
+          if (firstTab.requestRequired) {
+            if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+              const allTabs = this.stripsResultDataMap[strip.key].tabs
+              const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
 
-      } else {
-        try {
-          const response = await this.getRequestMethod(strip, strip.request.playlistRead, strip.request.apiUrl, calculateParentStatus)
-
-          if (response && response.results.result.content) {
-            let content = response.results.result.content
-            if (strip.key === 'providers') {
-              let featuredProviders: any = JSON.parse(content.featuredProviders || '[]')
-              this.processStrip(
-                strip,
-                this.transformAllContentsToWidgets(featuredProviders, strip),
-                'done',
-                calculateParentStatus,
-                response,
-              )
-            } else {
-              this.processStrip(
-                strip,
-                this.transformAllContentsToWidgets(content, strip),
-                'done',
-                calculateParentStatus,
-                response,
-              )
+              this.getTabDataByNewReqPlaylistReadContent(strip, 0, currentTabFromMap, calculateParentStatus)
             }
-          } else {
-            this.processStrip(strip, [], 'error', calculateParentStatus, null)
-            this.emptyResponse.emit(true)
           }
-        } catch (error) {
-          this.emptyResponse.emit(true)
-          // Handle errors
-          // console.error('Error:', error);
+
+        } else {
+          try {
+            const response = await this.getRequestMethod(strip, strip.request.playlistRead, strip.request.apiUrl, calculateParentStatus)
+
+            if (response && response.results.result.content) {
+              let content = response.results.result.content
+              if (strip.key === 'providers') {
+                let featuredProviders: any = JSON.parse(content.featuredProviders || '[]')
+                this.processStrip(
+                  strip,
+                  this.transformAllContentsToWidgets(featuredProviders, strip),
+                  'done',
+                  calculateParentStatus,
+                  response,
+                )
+              } else {
+                this.processStrip(
+                  strip,
+                  this.transformAllContentsToWidgets(content, strip),
+                  'done',
+                  calculateParentStatus,
+                  response,
+                )
+              }
+            } else {
+              this.processStrip(strip, [], 'error', calculateParentStatus, null)
+              this.emptyResponse.emit(true)
+            }
+          } catch (error) {
+            this.emptyResponse.emit(true)
+            // Handle errors
+            // console.error('Error:', error);
+          }
         }
       }
     }
@@ -2444,6 +2458,50 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     this.editStripContent.emit({
       stripKey: stripKey,
       stripData: stripData
+    })
+  }
+
+  openEditTabDialog(stripKey: string, tab: any) {
+    // Find the strip data for this key
+    const stripData = this.widgetData?.strips?.find(strip => strip.key === stripKey)
+
+    if (!stripData) {
+      console.error('Strip data not found for key:', stripKey)
+      return
+    }
+    // Emit event to parent component to handle the tab edit
+    this.editStripContent.emit({
+      stripKey: stripKey,
+      stripData: stripData,
+      tab: tab,
+      isTabEdit: true
+    })
+  }
+
+  openAddNewTabDialog(stripKey: string) {
+    // Find the strip data for this key
+    const stripData = this.widgetData?.strips?.find(strip => strip.key === stripKey)
+
+    if (!stripData) {
+      console.error('Strip data not found for key:', stripKey)
+      return
+    }
+
+    // Emit event to parent component to handle adding a new tab
+    this.editStripContent.emit({
+      stripKey: stripKey,
+      stripData: stripData,
+      isAddNewTab: true
+    })
+  }
+
+  removeTabData(stripKey: string, tabData: any) {
+    const stripData = this.widgetData?.strips?.find(strip => strip.key === stripKey)
+    this.editStripContent.emit({
+      stripKey: stripKey,
+      stripData: stripData,
+      isRemoveTab: true,
+      tab: tabData
     })
   }
 
