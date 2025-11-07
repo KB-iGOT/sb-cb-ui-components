@@ -1,7 +1,7 @@
 <div class="strip-add-content-dialog">
   <div class="dialog-header">
     <div class="header-title-container">
-      <span class="dialog-title" *ngIf="!isEditingTitle">{{ data?.sectionData?.strips?.[0]?.title || 'Add Section Name'
+      <span class="dialog-title" *ngIf="!isEditingTitle">{{ tempTitle || 'Add Section Name'
         }}</span>
 
       <div class="title-edit-container" *ngIf="isEditingTitle">

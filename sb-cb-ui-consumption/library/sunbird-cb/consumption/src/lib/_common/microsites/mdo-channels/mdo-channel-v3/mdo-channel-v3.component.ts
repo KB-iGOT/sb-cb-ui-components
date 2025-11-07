@@ -105,12 +105,15 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     this.activeSections = this.sectionList?.filter(section => section.enabled)
       .sort((a, b) => (a.order || 0) - (b.order || 0)) || []
 
+    // Trigger change detection after initialization
+    this.cdr.detectChanges()
+
     // Get channel info from route
     this.route.params.subscribe(params => {
       if (params.channelId) {
         this.channelName = params.channelName || ''
         this.orgId = params.channelId
-        this.cdr.markForCheck()
+        this.cdr.detectChanges()
       }
     })
   }
@@ -120,6 +123,15 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       (changes.slwConfiguration && !changes.slwConfiguration.firstChange)) {
       this.injectorCache.clear()
       this.hasUnsavedChanges = true // Enable Save button only after first change
+
+      // Recalculate active sections when sectionList changes
+      if (changes.sectionList) {
+        this.activeSections = this.sectionList?.filter(section => section.enabled)
+          .sort((a, b) => (a.order || 0) - (b.order || 0)) || []
+      }
+
+      // Trigger change detection
+      this.cdr.detectChanges()
     }
   }
 
@@ -192,13 +204,15 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       if (mainContentSection.column && Array.isArray(mainContentSection.column)) {
         const mainContentColumn = mainContentSection.column.find(col => col.key === 'mainContent')
         if (mainContentColumn && mainContentColumn.data) {
-          // Update stripsArray in the column's data
+          // Update stripsArray in the column's data using spread operator
           if (!mainContentColumn.data.stripsArray) {
             mainContentColumn.data.stripsArray = []
           }
           mainContentColumn.data.stripsArray = [...mainContentColumn.data.stripsArray, ...stripSections]
           this.hasUnsavedChanges = true
-          this.cdr.markForCheck()
+
+          // Force immediate change detection
+          this.cdr.detectChanges()
           console.log('Strip sections updated in column data.stripsArray:', mainContentColumn.data.stripsArray)
           return
         }
@@ -211,9 +225,11 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       if (!mainContentSection.data.stripsArray) {
         mainContentSection.data.stripsArray = []
       }
-      mainContentSection.data.stripsArray = stripSections
+      mainContentSection.data.stripsArray = [...stripSections]
       this.hasUnsavedChanges = true
-      this.cdr.markForCheck()
+
+      // Force immediate change detection
+      this.cdr.detectChanges()
       console.log('Strip sections updated in section data.stripsArray:', mainContentSection.data.stripsArray)
     }
   }
@@ -839,7 +855,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   toggleStateLearningWeek() {
     this.isStateLearningWeekEnabled = !this.isStateLearningWeekEnabled
     this.hasUnsavedChanges = true
-    this.cdr.markForCheck()
+    this.cdr.detectChanges()
 
     // Raise telemetry
     this.raiseTelemetry('toggle-state-learning-week')
@@ -873,7 +889,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         next: (res) => {
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
-          this.cdr.markForCheck()
+          this.cdr.detectChanges()
         },
         error: (err) => {
           console.error('Form update failed:', err)
@@ -888,7 +904,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         next: (res) => {
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
-          this.cdr.markForCheck()
+          this.cdr.detectChanges()
         },
         error: (err) => {
           console.error('Form update failed:', err)
@@ -960,7 +976,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     if (this.slwConfiguration) {
       this.slwConfiguration.enabled = !this.slwConfiguration.enabled
       this.hasUnsavedChanges = true
-      this.cdr.markForCheck()
+      this.cdr.detectChanges()
     }
   }
 
@@ -973,7 +989,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     console.log('User Redirection toggled:', enabled)
     this.userRedirectionEnabled = enabled
     this.hasUnsavedChanges = true
-    this.cdr.markForCheck()
+    this.cdr.detectChanges()
   }
 
 

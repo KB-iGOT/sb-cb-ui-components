@@ -5,6 +5,8 @@ import { MicrositeV3Service } from '../../../../../_services/microsite-v3.servic
 import { v4 as uuid } from 'uuid'
 import { MatDialog } from '@angular/material/dialog'
 import { StripAddContentComponent } from '../strip-add-content/strip-add-content.component'
+import { AddTabDialogComponent } from '../add-tab-dialog/add-tab-dialog.component'
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component'
 
 @Component({
   selector: 'app-main-content',
@@ -17,6 +19,7 @@ export class MainContentComponent implements OnInit {
   contentTabEmptyResponseCount = 0;
   showModal = false;
   stripSections: any[] = [];
+  sectionData: any
 
   constructor(
     @Inject('sectionData') public data: any,
@@ -37,6 +40,7 @@ export class MainContentComponent implements OnInit {
     // Initialization logic
     // Initialize stripSections from existing data if available
     if (this.data?.stripSections && Array.isArray(this.data.stripSections)) {
+
       this.stripSections = [...this.data.stripSections]
     }
   }
@@ -169,11 +173,20 @@ export class MainContentComponent implements OnInit {
         sectionKey = `mdo_section`
       }
     }
-    this.stripSections.push(this.microSiteV3Service.getCreateSectionReq(sectionName, `${sectionKey}_${uuid()}`, true))
+
+    // Use array reassignment to trigger change detection
+    const newSection = this.microSiteV3Service.getCreateSectionReq(sectionName, `${sectionKey}_${uuid()}`, true)
+    this.stripSections = [...this.stripSections, newSection]
+
+    // Force change detection
+    this.cdr.detectChanges()
+
+    console.log('Section added. Total sections:', this.stripSections.length)
   }
 
   removeSection(index: number) {
-    this.stripSections.splice(index, 1)
+    // Use array filter to create new array reference for change detection
+    this.stripSections = this.stripSections.filter((_, i) => i !== index)
 
     // Force change detection
     this.cdr.detectChanges()
@@ -192,35 +205,102 @@ export class MainContentComponent implements OnInit {
   }
 
   onEditStripContent(event: any) {
-    const { stripKey, stripData } = event
+    const { stripKey, stripData, tab } = event
+    if (event?.isAddNewTab) {
+      this.sectionData = this.data.stripsArray.find((stripItem: any) => {
+        return stripItem?.strips?.[0]?.key === stripKey
+      })
+      this.openAddTabDialog()
+    } else if (stripData?.tabs?.length > 0 && !event?.isTabEdit && !event?.isRemoveTab) {
+      this.openAddTabDialog(stripData)
+    } else if (event?.isRemoveTab) {
+      this.removeTab(stripData?.tabs?.indexOf(event.tab), stripData)
+    } else {
+      const dialogRef = this.dialog.open(StripAddContentComponent, {
+        width: '1000px',
+        height: '80vh',
+        maxHeight: '800px',
+        data: {
+          sectionIndex: 0,
+          sectionData: {
+            enabled: true,
+            strips: [stripData],
+          },
+          tabData: tab
+        },
+        position: { top: '50px' },
+        autoFocus: false
+      })
 
-    const dialogRef = this.dialog.open(StripAddContentComponent, {
-      width: '1000px',
-      height: '80vh',
-      maxHeight: '800px',
-      data: {
-        sectionIndex: 0,
-        sectionData: {
-          enabled: true,
-          strips: [stripData]
+      dialogRef.afterClosed().subscribe(result => {
+        if (result && result.selectedItems && result.selectedItems.length > 0) {
+          console.log('Content added to existing section:', result.selectedItems)
+          const contentIds: string[] = []
+          result.selectedItems.forEach((item: any) => {
+            if (!contentIds.includes(item.identifier)) {
+              contentIds.push(item.identifier)
+            }
+          })
+          if (Object.keys(result?.tabDetails)?.length > 0) {
+            if (result.tabDetails.request.playlistRead.type) {
+              this.updatePlaylist(stripData, result.tabDetails.request.playlistRead.type, contentIds, result.allOrgContent)
+            } else {
+              this.createPlaylist(stripData, contentIds, result.allOrgContent, result.tabDetails)
+            }
+
+          } else {
+            this.updatePlaylist(stripData, result.requestData.playlistRead.type, contentIds, result.allOrgContent)
+          }
+        }
+      })
+    }
+  }
+
+  createPlaylist(stripData: any, contentIds: string[], allOrgContent: boolean, tabDetails: any) {
+    let tempType = ``
+    if (tabDetails) {
+      tempType = `MDO_${tabDetails?.value?.split(' ').join('_')}_${uuid()}_ALLCONTENT_${allOrgContent ? 'TRUE' : 'FALSE'}`
+    }
+    const requestBody = {
+      type: tempType,
+      orgId: this.configSvc.userProfile?.rootOrgId || '',
+      ownerId: this.configSvc.userProfile?.userId,
+      children: contentIds
+    }
+    this.microSiteV3Service.createPlaylistApi(requestBody).subscribe(
+      (response) => {
+        if (response?.result?.status?.toLowerCase() === 'created') {
+          if (tabDetails) {
+            stripData.tabs = stripData.tabs.map((tab: any) => {
+              if (tab.value === tabDetails.value) {
+                tab.request = {
+                  apiUrl: "/apis/proxies/v8/playList/read/<playlistKey>/<orgID>",
+                  playlistRead: {
+                    type: requestBody.type,
+                  }
+                }
+                tab.requestRequired = true
+              }
+              return tab
+            })
+          }
+
+          // Trigger a refresh or notify parent to clear injector cache
+          this.eventCallback({
+            action: 'playlist-updated',
+            source: 'mainContent',
+            id: 'strip-content-updated',
+            data: { stripData },
+            clearCache: true  // Request parent to clear injector cache
+          })
+
+          console.log('Playlist created successfully and emitted to parent')
         }
       },
-      position: { top: '50px' },
-      autoFocus: false
-    })
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result.selectedItems && result.selectedItems.length > 0) {
-        console.log('Content added to existing section:', result.selectedItems)
-        const contentIds: string[] = []
-        result.selectedItems.forEach((item: any) => {
-          if (!contentIds.includes(item.identifier)) {
-            contentIds.push(item.identifier)
-          }
-        })
-        this.updatePlaylist(stripData, result.requestData.playlistRead.type, contentIds, result.allOrgContent)
+      (error) => {
+        console.error('Error creating playlist:', error)
       }
-    })
+    )
   }
 
   updatePlaylist(stripData: any, playlistReadType: any, contentIds: string[], allOrgContent: boolean) {
@@ -302,17 +382,19 @@ export class MainContentComponent implements OnInit {
     )
 
     if (existingIndex === -1) {
-      // Add new section to stripsArray
-      this.data.stripsArray.push(event.sectionData)
+      // Add new section to stripsArray using array reassignment
+      this.data.stripsArray = [...this.data.stripsArray, event.sectionData]
     } else {
       // Update existing section
       this.data.stripsArray[existingIndex] = event.sectionData
+      // Reassign to trigger change detection
+      this.data.stripsArray = [...this.data.stripsArray]
     }
 
     // Remove the section from stripSections array after playlist is created
     const stripSectionIndex = event.sectionIndex
     if (stripSectionIndex !== undefined && this.stripSections[stripSectionIndex]) {
-      this.stripSections.splice(stripSectionIndex, 1)
+      this.stripSections = this.stripSections.filter((_, i) => i !== stripSectionIndex)
       console.log('Removed section from stripSections. Remaining:', this.stripSections.length)
     }
 
@@ -325,6 +407,97 @@ export class MainContentComponent implements OnInit {
       source: 'mainContent',
       id: 'new-playlist-created',
       data: event
+    })
+  }
+
+  openAddTabDialog(stripData?: any) {
+    const dialogRef = this.dialog.open(AddTabDialogComponent, {
+      width: '500px',
+      disableClose: false,
+      autoFocus: false,
+      data: stripData
+    })
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.trim() && !stripData) {
+        this.addTab(result.trim())
+      } else if (stripData) {
+        stripData.title = result?.trim()
+        this.eventCallback({
+          action: 'playlist-updated',
+          source: 'mainContent',
+          id: 'strip-content-updated',
+          data: { stripData },
+          clearCache: true  // Request parent to clear injector cache
+        })
+      }
+    })
+  }
+
+  addTab(title: string) {
+    if (!this.sectionData.strips[0].tabs) {
+      this.sectionData.strips[0].tabs = []
+    }
+
+    // Create new tab object with minimal structure for edit mode
+    const newTab = {
+      label: title,
+      value: title,
+      computeDataOnClick: false,
+      disableTranslate: true,
+      computeDataOnClickKey: "",
+      requestRequired: false,  // Set to false to prevent API calls in edit mode
+      showTabDataCount: false,
+      maxWidgets: 100,
+      nodataMsg: "No content available",
+      contentShuffel: true,
+      request: {
+        apiUrl: '',
+        playlistRead: {
+          type: ''
+        }
+      }
+    }
+    this.sectionData.strips[0].tabs = [...this.sectionData.strips[0].tabs, newTab]
+    this.cdr.detectChanges()
+    // Notify parent component
+    this.eventCallback({
+      action: 'playlist-created',
+      source: 'mainContent',
+      id: 'new-playlist-created',
+      data: event
+    })
+  }
+
+  removeTab(index: number, stripData: any) {
+    if (!stripData?.tabs) {
+      return
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Remove Tab',
+        message: 'Are you sure you want to remove this tab? This action cannot be undone.',
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+      },
+      autoFocus: false
+    })
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Create new array without the item at index to trigger change detection
+        stripData.tabs = stripData.tabs.filter((_, i) => i !== index)
+        console.log('Tab removed at index:', index, 'Remaining tabs:', stripData.tabs.length)
+        this.eventCallback({
+          action: 'playlist-updated',
+          source: 'mainContent',
+          id: 'strip-content-updated',
+          data: { stripData },
+          clearCache: true  // Request parent to clear injector cache
+        })
+      }
     })
   }
 }

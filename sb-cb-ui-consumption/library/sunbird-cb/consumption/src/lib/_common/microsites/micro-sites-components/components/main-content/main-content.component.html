@@ -138,7 +138,8 @@
 
         <!-- Strip Section Create Components (Array) -->
         <div *ngFor="let section of stripSections; let i = index; trackBy: trackByIndex" class="strip-section-wrapper">
-          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" (removeSection)="removeSection(i)"
+          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" [providerId]="orgId"
+            [channelName]="channelName" (removeSection)="removeSection(i)"
             (playlistCreated)="onPlaylistCreated($event)">
           </sb-uic-strip-section-create>
         </div>

@@ -170,3 +170,61 @@
     }
   }
 }
+
+// Tabs Section
+.tabs-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+
+  .tab-label-text {
+    font-size: 16px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tab-remove-btn {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    min-width: auto;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 1;
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  .tab-content {
+    padding: 20px;
+    min-height: 200px;
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+
+      p {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 16px;
+      }
+    }
+  }
+}
