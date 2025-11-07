@@ -26,13 +26,16 @@
 
       <!-- Text input -->
       <mat-form-field *ngSwitchCase="'text'" appearance="outline" class="full-width">
-        <input matInput formControlName="value" placeholder="Enter {{data.displayName}}">
+        <input matInput formControlName="value" placeholder="Enter {{data.displayName}}" maxlength="75">
+        <mat-hint align="end">{{editorForm.get('value')?.value?.length || 0}}/75</mat-hint>
         <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
       </mat-form-field>
 
       <!-- Textarea -->
       <mat-form-field *ngSwitchCase="'textarea'" appearance="outline" class="full-width">
-        <textarea matInput formControlName="value" placeholder="Enter {{data.displayName}}" rows="5"></textarea>
+        <textarea matInput formControlName="value" placeholder="Enter {{data.displayName}}" rows="5"
+          maxlength="150"></textarea>
+        <mat-hint align="end">{{editorForm.get('value')?.value?.length || 0}}/150</mat-hint>
         <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
       </mat-form-field>
 
@@ -174,7 +177,8 @@
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Section Title</mat-label>
-              <input matInput formControlName="title" placeholder="Enter section title">
+              <input matInput formControlName="title" placeholder="Enter section title" maxlength="75">
+              <mat-hint align="end">{{editorForm.get('data.title')?.value?.length || 0}}/75</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
@@ -237,7 +241,8 @@
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Title</mat-label>
-                    <input matInput formControlName="title" placeholder="Enter document title">
+                    <input matInput formControlName="title" placeholder="Enter document title" maxlength="75">
+                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/75</mat-hint>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
@@ -285,7 +290,8 @@
 
           <mat-form-field appearance="outline" class="full-width mt-3" *ngIf="editorForm.get('enabled')?.value">
             <mat-label>Section Title</mat-label>
-            <input matInput formControlName="title" placeholder="Enter announcements title">
+            <input matInput formControlName="title" placeholder="Enter announcements title" maxlength="75">
+            <mat-hint align="end">{{editorForm.get('title')?.value?.length || 0}}/75</mat-hint>
           </mat-form-field>
         </div>
       </div>
@@ -306,7 +312,8 @@
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Section Title</mat-label>
-              <input matInput formControlName="title" placeholder="Leave empty for default title">
+              <input matInput formControlName="title" placeholder="Leave empty for default title" maxlength="75">
+              <mat-hint align="end">{{editorForm.get('data.title')?.value?.length || 0}}/75</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
@@ -362,7 +369,8 @@
                 <div class="form-section">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Speaker Name</mat-label>
-                    <input matInput formControlName="title" placeholder="Enter speaker name" required>
+                    <input matInput formControlName="title" placeholder="Enter speaker name" required maxlength="75">
+                    <mat-hint align="end">{{speakerForm.get('title')?.value?.length || 0}}/75</mat-hint>
                     <mat-error *ngIf="speakerForm.get('title')?.hasError('required')">
                       Speaker name is required
                     </mat-error>
@@ -424,7 +432,8 @@
           <h4>Week Highlights</h4>
 
           <mat-form-field appearance="outline" class="full-width">
-            <input matInput formControlName="title" placeholder="Enter section title">
+            <input matInput formControlName="title" placeholder="Enter section title" maxlength="75">
+            <mat-hint align="end">{{editorForm.get('title')?.value?.length || 0}}/75</mat-hint>
             <mat-error *ngIf="editorForm.get('title')?.invalid">Title is required</mat-error>
           </mat-form-field>
 
@@ -449,13 +458,15 @@
                   </div>
 
                   <mat-form-field appearance="outline" class="full-width">
-                    <input matInput formControlName="title" placeholder="Enter title">
+                    <input matInput formControlName="title" placeholder="Enter title" maxlength="75">
+                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/75</mat-hint>
                     <mat-error *ngIf="item.get('title')?.invalid">Title is required</mat-error>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
-                    <textarea matInput formControlName="description" placeholder="Enter description"
-                      rows="3"></textarea>
+                    <textarea matInput formControlName="description" placeholder="Enter description" rows="3"
+                      maxlength="150"></textarea>
+                    <mat-hint align="end">{{item.get('description')?.value?.length || 0}}/150</mat-hint>
                     <mat-error *ngIf="item.get('description')?.invalid">Description is required</mat-error>
                   </mat-form-field>
 
@@ -559,7 +570,8 @@
               </div>
 
               <mat-form-field appearance="outline" class="full-width">
-                <input matInput formControlName="title" placeholder="Enter title">
+                <input matInput formControlName="title" placeholder="Enter title" maxlength="75">
+                <mat-hint align="end">{{sliderItemForm.get('title')?.value?.length || 0}}/75</mat-hint>
               </mat-form-field>
             </div>
 
