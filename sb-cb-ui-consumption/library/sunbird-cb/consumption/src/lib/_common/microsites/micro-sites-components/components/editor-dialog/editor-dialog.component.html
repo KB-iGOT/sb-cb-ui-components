@@ -62,9 +62,14 @@
             <button type="button" mat-button class="btn-common btn-secondary" (click)="fileInput.click()">
               <mat-icon>cloud_upload</mat-icon> Upload Image
             </button>
-            <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept="image/*">
-            <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+            <input hidden (change)="onFileSelected($event)" #fileInput type="file"
+              accept="image/jpeg,image/jpg,image/png">
           </div>
+          <span *ngIf="uploadStatus" class="upload-status"
+            [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+          <p class="file-requirements">
+            <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
+          </p>
 
           <div class="image-preview">
             <img [src]="editorForm.get('value')?.value" alt="Image Preview" *ngIf="editorForm.get('value')?.value">
@@ -100,16 +105,19 @@
                 </mat-form-field>
 
                 <div class="upload-section">
-                  <input type="file" #imageFileInput accept="image/*" (change)="onImageLogoSelected($event, i)"
-                    style="display: none">
+                  <input type="file" #imageFileInput accept="image/jpeg,image/jpg,image/png"
+                    (change)="onImageLogoSelected($event, i)" style="display: none">
                   <button mat-button class="btn-common btn-secondary margin-remove" type="button"
                     (click)="imageFileInput.click()" [disabled]="isUploading && currentUploadingIndex === i">
                     <mat-icon>cloud_upload</mat-icon>
                     {{ (isUploading && currentUploadingIndex === i) ? 'Uploading...' : 'Upload Image' }}
                   </button>
-                  <span *ngIf="isUploading && currentUploadingIndex === i" class="upload-status">{{ uploadStatus
-                    }}</span>
                 </div>
+                <span *ngIf="uploadStatus && currentUploadingIndex === i" class="upload-status"
+                  [class.error]="uploadStatus.startsWith('Error')">{{ uploadStatus }}</span>
+                <p class="file-requirements">
+                  <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
+                </p>
 
                 <div class="image-preview" *ngIf="item.get('url')?.value">
                   <img [src]="item.get('url')?.value" alt="Image Preview">
@@ -396,9 +404,13 @@
                       <mat-icon>cloud_upload</mat-icon> Upload Speaker Image
                     </button>
                     <input hidden (change)="onSpeakerImageSelected($event)" #speakerImageInput type="file"
-                      accept="image/*">
-                    <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+                      accept="image/jpeg,image/jpg,image/png">
                   </div>
+                  <span *ngIf="uploadStatus" class="upload-status"
+                    [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+                  <p class="file-requirements">
+                    <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
+                  </p>
 
                   <div class="image-preview" *ngIf="speakerForm.get('profileImage')?.value">
                     <img [src]="speakerForm.get('profileImage')?.value" alt="Speaker Preview">
@@ -588,9 +600,14 @@
                   <button type="button" mat-button class="btn-common btn-secondary" (click)="sliderFileInput.click()">
                     <mat-icon>cloud_upload</mat-icon> Upload Image
                   </button>
-                  <input hidden (change)="onSliderImageSelected($event)" #sliderFileInput type="file" accept="image/*">
-                  <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+                  <input hidden (change)="onSliderImageSelected($event)" #sliderFileInput type="file"
+                    accept="image/jpeg,image/jpg,image/png">
                 </div>
+                <span *ngIf="uploadStatus" class="upload-status"
+                  [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+                <p class="file-requirements">
+                  <small>Allowed formats: JPG, PNG | Max size: 500KB</small>
+                </p>
 
                 <div class="image-preview">
                   <img [src]="sliderItemForm.get('banners.l')?.value" alt="Image Preview"
