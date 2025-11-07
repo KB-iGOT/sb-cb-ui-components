@@ -4,7 +4,8 @@
 
     <div class="title-edit-container" *ngIf="isEditingTitle">
       <input type="text" class="title-input" [(ngModel)]="tempTitle" (keydown)="onTitleKeydown($event)"
-        (blur)="saveTitle()" placeholder="Enter section name" autofocus>
+        (blur)="saveTitle()" placeholder="Enter section name" autofocus maxlength="75">
+      <span class="char-counter">{{tempTitle?.length || 0}}/75</span>
     </div>
 
     <button mat-icon-button class="edit-icon-btn" (click)="startEditTitle()" *ngIf="!isEditingTitle">
