@@ -81,6 +81,14 @@ export class EditorDialogComponent implements OnInit {
     return this.editorForm.get('list') as FormArray
   }
 
+  get imageItemsArray(): FormArray {
+    return this.editorForm?.get('items') as FormArray
+  }
+
+  get isMultipleImages(): boolean {
+    return this.formType === 'image' && this.editorForm && this.editorForm.get('items') !== null
+  }
+
   ngOnInit() {
     if (this.formType === 'keyHighlights') {
       this.initKeyHighlightsForm()
@@ -124,7 +132,7 @@ export class EditorDialogComponent implements OnInit {
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
       title: [''],
-      pdfUrl: ['']
+      downloaUrl: ['']
     }))
   }
 
@@ -135,6 +143,91 @@ export class EditorDialogComponent implements OnInit {
   dropCbpPlanItem(event: CdkDragDrop<any[]>): void {
     moveItemInArray(this.cbpPlanListArray.controls, event.previousIndex, event.currentIndex)
     this.cbpPlanListArray.updateValueAndValidity()
+  }
+
+  // Methods for image logo items management
+  addImageLogoItem(): void {
+    if (this.imageItemsArray) {
+      this.imageItemsArray.push(this.fb.group({
+        url: ['', [Validators.required]]
+      }))
+    }
+  }
+
+  removeImageLogoItem(index: number): void {
+    if (this.imageItemsArray) {
+      this.imageItemsArray.removeAt(index)
+    }
+  }
+
+  dropImageLogoItem(event: CdkDragDrop<any[]>): void {
+    if (this.imageItemsArray) {
+      moveItemInArray(this.imageItemsArray.controls, event.previousIndex, event.currentIndex)
+      this.imageItemsArray.updateValueAndValidity()
+    }
+  }
+
+  onImageLogoSelected(event: any, index: number): void {
+    const file = event.target.files[0]
+    if (file) {
+      // Set current index for error display
+      this.currentUploadingIndex = index
+
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 100KB)
+      const maxSize = 100 * 1024 // 100KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 100KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      this.uploadImageLogo(file, index)
+    }
+  }
+
+  uploadImageLogo(file: File, index: number): void {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading image...'
+
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
+
+        // Update the url form field for the specific item
+        if (this.imageItemsArray && this.imageItemsArray.at(index)) {
+          this.imageItemsArray.at(index).get('url')?.setValue(transformedUrl)
+        }
+        this.uploadStatus = 'Image uploaded successfully!'
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        this.currentUploadingIndex = -1
+        console.error('Image upload error:', error)
+      }
+    })
   }
 
 
@@ -166,9 +259,25 @@ export class EditorDialogComponent implements OnInit {
         })
         break
       case 'image':
-        this.editorForm = this.fb.group({
-          value: [this.data.value, [Validators.required]]
-        })
+        // Check if value is an array (multiple items) or single value
+        const imageValue = this.data.value || []
+        const isArray = Array.isArray(imageValue)
+
+        if (isArray) {
+          // Multiple highlight items
+          this.editorForm = this.fb.group({
+            items: this.fb.array(
+              imageValue.map((item: any) => this.fb.group({
+                url: [item.url || item || '', [Validators.required]]
+              }))
+            )
+          })
+        } else {
+          // Single image URL
+          this.editorForm = this.fb.group({
+            value: [imageValue, [Validators.required]]
+          })
+        }
         break
       case 'boolean':
         this.editorForm = this.fb.group({
@@ -273,7 +382,7 @@ export class EditorDialogComponent implements OnInit {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
               title: [item.title || ''],
-              pdfUrl: [item.downloaUrl || '']
+              downloaUrl: [item.downloaUrl || '']
             }))
           })
         } else {
@@ -370,10 +479,14 @@ export class EditorDialogComponent implements OnInit {
     const safeDesc = speaker && speaker.description !== undefined ? speaker.description : ''
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
+
+    // URL validation pattern
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
-      profileImage: [safeImage],
+      profileImage: [safeImage, [Validators.pattern(urlPattern)]],
       identifier: [safeId]
     })
 
@@ -542,6 +655,28 @@ export class EditorDialogComponent implements OnInit {
   onSpeakerImageSelected(event: any) {
     const file = event.target.files[0]
     if (file) {
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 100KB)
+      const maxSize = 100 * 1024 // 100KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 100KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadSpeakerImage(file)
     }
   }
@@ -575,6 +710,28 @@ export class EditorDialogComponent implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0]
     if (file) {
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 100KB)
+      const maxSize = 100 * 1024 // 100KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 100KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadImage(file)
     }
   }
@@ -625,10 +782,10 @@ export class EditorDialogComponent implements OnInit {
       next: (transformedUrl) => {
         this.isUploading = false
 
-        // Update the pdfUrl form field for the specific item
+        // Update the downloaUrl form field for the specific item
         const listArray = this.editorForm.get('list') as FormArray
         if (listArray && listArray.at(index)) {
-          listArray.at(index).get('pdfUrl')?.setValue(transformedUrl)
+          listArray.at(index).get('downloaUrl')?.setValue(transformedUrl)
         }
         this.uploadStatus = 'PDF uploaded successfully!'
 
@@ -693,6 +850,28 @@ export class EditorDialogComponent implements OnInit {
   onSliderImageSelected(event: any) {
     const file = event.target.files[0]
     if (file) {
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 500KB)
+      const maxSize = 500 * 1024 // 500KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 500KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadSliderImage(file)
     }
   }
@@ -921,6 +1100,8 @@ export class EditorDialogComponent implements OnInit {
           console.error('Error submitting speakers form:', error)
         }
       }
+    } else if (this.formType === 'image') {
+      this.dialogRef.close(this.editorForm.value.items)
     } else if (this.editorForm.valid) {
       this.dialogRef.close(this.editorForm.value.value)
     }

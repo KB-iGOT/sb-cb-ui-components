@@ -12,27 +12,32 @@
               <mat-icon>drag_indicator</mat-icon>
             </div>
             <mat-form-field appearance="outline" class="highlight-input">
-              <input matInput [formControlName]="i" placeholder="Highlight text">
+              <input matInput [formControlName]="i" placeholder="Heading text">
             </mat-form-field>
             <button mat-icon-button color="warn" (click)="removeKeyHighlight(i)" class="delete-btn">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>
-        <button mat-button class="btn-common btn-secondary flex-center" type="button" (click)="addKeyHighlight()">
-          <mat-icon>add</mat-icon> Add Highlight
+        <button mat-button class="btn-common btn-secondary flex-center" type="button" (click)="addKeyHighlight()"
+          [disabled]="keyHighlightsArray.controls.length > 9"
+          [ngClass]="{'btn-disable': keyHighlightsArray.controls.length > 9}">
+          <mat-icon>add</mat-icon> Add Heading
         </button>
       </div>
 
       <!-- Text input -->
       <mat-form-field *ngSwitchCase="'text'" appearance="outline" class="full-width">
-        <input matInput formControlName="value" placeholder="Enter {{data.displayName}}">
+        <input matInput formControlName="value" placeholder="Enter {{data.displayName}}" maxlength="75">
+        <mat-hint align="end">{{editorForm.get('value')?.value?.length || 0}}/75</mat-hint>
         <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
       </mat-form-field>
 
       <!-- Textarea -->
       <mat-form-field *ngSwitchCase="'textarea'" appearance="outline" class="full-width">
-        <textarea matInput formControlName="value" placeholder="Enter {{data.displayName}}" rows="5"></textarea>
+        <textarea matInput formControlName="value" placeholder="Enter {{data.displayName}}" rows="5"
+          maxlength="150"></textarea>
+        <mat-hint align="end">{{editorForm.get('value')?.value?.length || 0}}/150</mat-hint>
         <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
       </mat-form-field>
 
@@ -48,21 +53,90 @@
 
       <!-- Image URL with upload option -->
       <div *ngSwitchCase="'image'" class="image-container">
-        <mat-form-field appearance="outline" class="full-width">
-          <input matInput formControlName="value" placeholder="Enter image URL">
-          <mat-error *ngIf="editorForm.get('value')?.invalid">Valid image URL is required</mat-error>
-        </mat-form-field>
+        <!-- Single image mode -->
+        <div *ngIf="!isMultipleImages">
+          <mat-form-field appearance="outline" class="full-width">
+            <input matInput formControlName="value" placeholder="Enter image URL">
+            <mat-error *ngIf="editorForm.get('value')?.invalid">Valid image URL is required</mat-error>
+          </mat-form-field>
 
-        <div class="upload-section">
-          <button type="button" mat-button class="btn-common btn-secondary" (click)="fileInput.click()">
-            <mat-icon>cloud_upload</mat-icon> Upload Image
-          </button>
-          <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept="image/*">
-          <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+          <div class="upload-section">
+            <button type="button" mat-button class="btn-common btn-secondary" (click)="fileInput.click()">
+              <mat-icon>cloud_upload</mat-icon> Upload Image
+            </button>
+            <input hidden (change)="onFileSelected($event)" #fileInput type="file"
+              accept="image/jpeg,image/jpg,image/png">
+          </div>
+          <span *ngIf="uploadStatus" class="upload-status"
+            [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+          <p class="file-requirements">
+            <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
+          </p>
+
+          <div class="image-preview">
+            <img [src]="editorForm.get('value')?.value" alt="Image Preview" *ngIf="editorForm.get('value')?.value">
+          </div>
         </div>
 
-        <div class="image-preview">
-          <img [src]="editorForm.get('value')?.value" alt="Image Preview" *ngIf="editorForm.get('value')?.value">
+        <!-- Multiple Logo items mode -->
+        <div *ngIf="isMultipleImages" formArrayName="items" class="highlight-items-container">
+          <h4>Logo Items <span class="item-count">({{imageItemsArray?.controls?.length || 0}} items)</span></h4>
+
+          <div cdkDropList (cdkDropListDropped)="dropImageLogoItem($event)" class="image-items-list">
+            <div *ngFor="let item of imageItemsArray?.controls; let i = index" [formGroupName]="i"
+              class="image-highlight-item" cdkDrag>
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+
+              <div class="item-content">
+                <div class="item-header flex flex-middle">
+                  <h5 class="margin-remove">Item {{i + 1}}</h5>
+                  <div class="delete-btn-container ml-auto">
+                    <button mat-icon-button color="warn" type="button" (click)="removeImageLogoItem(i)"
+                      class="remove-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width margin-remove">
+                  <mat-label>Image URL</mat-label>
+                  <input matInput formControlName="url" placeholder="Enter image URL or upload">
+                  <mat-error *ngIf="item.get('url')?.invalid">Image URL is required</mat-error>
+                </mat-form-field>
+
+                <div class="upload-section">
+                  <input type="file" #imageFileInput accept="image/jpeg,image/jpg,image/png"
+                    (change)="onImageLogoSelected($event, i)" style="display: none">
+                  <button mat-button class="btn-common btn-secondary margin-remove" type="button"
+                    (click)="imageFileInput.click()" [disabled]="isUploading && currentUploadingIndex === i">
+                    <mat-icon>cloud_upload</mat-icon>
+                    {{ (isUploading && currentUploadingIndex === i) ? 'Uploading...' : 'Upload Image' }}
+                  </button>
+                </div>
+                <span *ngIf="uploadStatus && currentUploadingIndex === i" class="upload-status"
+                  [class.error]="uploadStatus.startsWith('Error')">{{ uploadStatus }}</span>
+                <p class="file-requirements">
+                  <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
+                </p>
+
+                <div class="image-preview" *ngIf="item.get('url')?.value">
+                  <img [src]="item.get('url')?.value" alt="Image Preview">
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="!imageItemsArray?.controls?.length" class="no-items">
+              No logo items available. Add some items below.
+            </div>
+          </div>
+
+          <button mat-button class="btn-common btn-secondary flex-center mt-3" type="button"
+            (click)="addImageLogoItem()" [disabled]="imageItemsArray?.controls?.length >= 4"
+            [ngClass]="{'btn-disable': imageItemsArray?.controls?.length >= 4}">
+            <mat-icon>add</mat-icon> Add Logo Item
+          </button>
         </div>
       </div>
 
@@ -113,7 +187,8 @@
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Section Title</mat-label>
-              <input matInput formControlName="title" placeholder="Enter section title">
+              <input matInput formControlName="title" placeholder="Enter section title" maxlength="75">
+              <mat-hint align="end">{{editorForm.get('data.title')?.value?.length || 0}}/75</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
@@ -176,12 +251,13 @@
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Title</mat-label>
-                    <input matInput formControlName="title" placeholder="Enter document title">
+                    <input matInput formControlName="title" placeholder="Enter document title" maxlength="75">
+                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/75</mat-hint>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>PDF URL</mat-label>
-                    <input matInput formControlName="pdfUrl" placeholder="Enter PDF URL or upload a file">
+                    <input matInput formControlName="downloaUrl" placeholder="Enter PDF URL or upload a file">
                   </mat-form-field>
 
                   <div class="upload-section">
@@ -224,7 +300,8 @@
 
           <mat-form-field appearance="outline" class="full-width mt-3" *ngIf="editorForm.get('enabled')?.value">
             <mat-label>Section Title</mat-label>
-            <input matInput formControlName="title" placeholder="Enter announcements title">
+            <input matInput formControlName="title" placeholder="Enter announcements title" maxlength="75">
+            <mat-hint align="end">{{editorForm.get('title')?.value?.length || 0}}/75</mat-hint>
           </mat-form-field>
         </div>
       </div>
@@ -245,13 +322,15 @@
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Section Title</mat-label>
-              <input matInput formControlName="title" placeholder="Leave empty for default title">
+              <input matInput formControlName="title" placeholder="Leave empty for default title" maxlength="75">
+              <mat-hint align="end">{{editorForm.get('data.title')?.value?.length || 0}}/75</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Information Text</mat-label>
               <textarea matInput formControlName="infoText" placeholder="Leave empty for default information text"
-                rows="3"></textarea>
+                rows="3" maxlength="150"></textarea>
+              <mat-hint align="end">{{editorForm.get('data.infoText')?.value?.length || 0}}/150</mat-hint>
             </mat-form-field>
 
             <div class="speaker-list-preview">
@@ -301,7 +380,8 @@
                 <div class="form-section">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Speaker Name</mat-label>
-                    <input matInput formControlName="title" placeholder="Enter speaker name" required>
+                    <input matInput formControlName="title" placeholder="Enter speaker name" required maxlength="75">
+                    <mat-hint align="end">{{speakerForm.get('title')?.value?.length || 0}}/75</mat-hint>
                     <mat-error *ngIf="speakerForm.get('title')?.hasError('required')">
                       Speaker name is required
                     </mat-error>
@@ -310,7 +390,8 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Description</mat-label>
                     <textarea matInput formControlName="description" placeholder="Enter speaker description" rows="2"
-                      required></textarea>
+                      maxlength="150" required></textarea>
+                    <mat-hint align="end">{{speakerForm.get('description')?.value?.length || 0}}/150</mat-hint>
                     <mat-error *ngIf="speakerForm.get('description')?.hasError('required')">
                       Description is required
                     </mat-error>
@@ -319,6 +400,9 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Profile Image URL</mat-label>
                     <input matInput formControlName="profileImage" placeholder="Enter profile image URL">
+                    <mat-error *ngIf="speakerForm.get('profileImage')?.hasError('pattern')">
+                      Please enter a valid URL
+                    </mat-error>
                   </mat-form-field>
 
                   <div class="upload-section">
@@ -327,11 +411,16 @@
                       <mat-icon>cloud_upload</mat-icon> Upload Speaker Image
                     </button>
                     <input hidden (change)="onSpeakerImageSelected($event)" #speakerImageInput type="file"
-                      accept="image/*">
-                    <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+                      accept="image/jpeg,image/jpg,image/png">
                   </div>
+                  <span *ngIf="uploadStatus" class="upload-status"
+                    [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+                  <p class="file-requirements">
+                    <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
+                  </p>
 
-                  <div class="image-preview" *ngIf="speakerForm.get('profileImage')?.value">
+                  <div class="image-preview"
+                    *ngIf="speakerForm.get('profileImage')?.value && !speakerForm.get('profileImage')?.hasError('pattern')">
                     <img [src]="speakerForm.get('profileImage')?.value" alt="Speaker Preview">
                   </div>
 
@@ -363,7 +452,8 @@
           <h4>Week Highlights</h4>
 
           <mat-form-field appearance="outline" class="full-width">
-            <input matInput formControlName="title" placeholder="Enter section title">
+            <input matInput formControlName="title" placeholder="Enter section title" maxlength="75">
+            <mat-hint align="end">{{editorForm.get('title')?.value?.length || 0}}/75</mat-hint>
             <mat-error *ngIf="editorForm.get('title')?.invalid">Title is required</mat-error>
           </mat-form-field>
 
@@ -388,13 +478,15 @@
                   </div>
 
                   <mat-form-field appearance="outline" class="full-width">
-                    <input matInput formControlName="title" placeholder="Enter title">
+                    <input matInput formControlName="title" placeholder="Enter title" maxlength="75">
+                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/75</mat-hint>
                     <mat-error *ngIf="item.get('title')?.invalid">Title is required</mat-error>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
-                    <textarea matInput formControlName="description" placeholder="Enter description"
-                      rows="3"></textarea>
+                    <textarea matInput formControlName="description" placeholder="Enter description" rows="3"
+                      maxlength="150"></textarea>
+                    <mat-hint align="end">{{item.get('description')?.value?.length || 0}}/150</mat-hint>
                     <mat-error *ngIf="item.get('description')?.invalid">Description is required</mat-error>
                   </mat-form-field>
 
@@ -498,7 +590,8 @@
               </div>
 
               <mat-form-field appearance="outline" class="full-width">
-                <input matInput formControlName="title" placeholder="Enter title">
+                <input matInput formControlName="title" placeholder="Enter title" maxlength="75">
+                <mat-hint align="end">{{sliderItemForm.get('title')?.value?.length || 0}}/75</mat-hint>
               </mat-form-field>
             </div>
 
@@ -515,9 +608,14 @@
                   <button type="button" mat-button class="btn-common btn-secondary" (click)="sliderFileInput.click()">
                     <mat-icon>cloud_upload</mat-icon> Upload Image
                   </button>
-                  <input hidden (change)="onSliderImageSelected($event)" #sliderFileInput type="file" accept="image/*">
-                  <span *ngIf="uploadStatus" class="upload-status">{{uploadStatus}}</span>
+                  <input hidden (change)="onSliderImageSelected($event)" #sliderFileInput type="file"
+                    accept="image/jpeg,image/jpg,image/png">
                 </div>
+                <span *ngIf="uploadStatus" class="upload-status"
+                  [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+                <p class="file-requirements">
+                  <small>Allowed formats: JPG, PNG | Max size: 500KB</small>
+                </p>
 
                 <div class="image-preview">
                   <img [src]="sliderItemForm.get('banners.l')?.value" alt="Image Preview"

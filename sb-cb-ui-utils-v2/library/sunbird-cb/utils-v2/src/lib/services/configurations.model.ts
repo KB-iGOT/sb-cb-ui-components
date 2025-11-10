@@ -91,7 +91,7 @@ export namespace NsInstanceConfig {
     }
   }
 
-  
+
   export interface IPortalUrls {
     igot: string,
     spv: string,
@@ -323,6 +323,7 @@ export namespace NsUser {
     departmentImg?: any,
     profileBannerUrl?: string
     mobile?: string
+    userRootOrg?: any
   }
 
   export interface INodebbUserProfile {

@@ -5,7 +5,7 @@ import { MatSnackBar as MatSnackbarNew } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
 import { WidgetContentLibService } from "@sunbird-cb/consumption";
 import { CertificateDialogComponent } from "@sunbird-cb/consumption";
-import { ICompentencyKeys, SearchListingConfig } from "../../_models/search-listing.model";
+import { ICompentencyKeys, SearchListingConfig, CBPstatusMapping } from "../../_models/search-listing.model";
 import { SearchListingService } from "../../_services/search-listing.service";
 import * as _ from "lodash";
 
@@ -26,6 +26,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
   defaultThumbnail = "/assets/instances/eagle/app_logos/default.png";
   defaultSLogo = "/assets/instances/eagle/app_logos/igot-katmayogi-logo.svg";
   compentencyKey!: ICompentencyKeys;
+  public cbpStatusMapping = CBPstatusMapping;
 
   courseEnrollment: any;
   downloadCertificateLoading = false;

@@ -9,7 +9,7 @@
   <div class="filter-list flex items-center flex-wrap gap-2" *ngIf="filtersAppliedCount > 0">
     <ng-container *ngFor="let item of selectedFilterChips">
       <div class="filter-pill flex items-center">
-        <span class="font-normal text-xs" [matTooltip]="formatFilterChips(item?.value)">{{ formatFilterChips(item?.value) }}</span>
+        <span class="font-normal text-xs" [matTooltip]="formatFilterChips(item?.value, item?.type)">{{ formatFilterChips(item?.value, item?.type) }}</span>
         <button mat-icon-button color="primary" (click)="clearFilterChip(item)">
           <mat-icon>close</mat-icon>
         </button>
@@ -115,10 +115,12 @@
 
           <mat-selection-list *ngIf="filteredContents.length; else noResults">
             <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredContents">
-              <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, 'contentType')">
+              <mat-checkbox
+                [checked]="options?.isChecked || getSelectedFilter(options)"
+                (change)="onSelectionFilter($event, options, applicationName === 'CBP Portal' ? 'courseCategory' : 'contentType')">
                 <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
-                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
-                >
+                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}
+                </span>
                 <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
               </mat-checkbox>
             </section>

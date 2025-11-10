@@ -59,15 +59,15 @@
       <div class="flex items-center justify-center">
         <div class="container margin-top-xl">
           <div class="feature-header" *ngIf="isEdit && data?.stateLearningWeekSection?.keyHighlights?.content.length">
-            <button mat-icon-button aria-label="Edit Key Highlights" class="edit-icon"
-              (click)="openEditor('keyHighlights', 'Key Highlights', data?.stateLearningWeekSection?.keyHighlights)">
+            <button mat-icon-button aria-label="Edit Key Heading" class="edit-icon"
+              (click)="openEditor('keyHighlights', 'Key Heading', data?.stateLearningWeekSection?.keyHighlights)">
               <mat-icon>edit</mat-icon>
             </button>
           </div>
           <!-- Show if enabled OR if in edit mode -->
           <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
             <sb-uic-key-highlights
-              (emptyResponse)="openEditor('keyHighlights', 'Key Highlights', data?.stateLearningWeekSection?.keyHighlights)"
+              (emptyResponse)="openEditor('keyHighlights', 'Key Heading', data?.stateLearningWeekSection?.keyHighlights)"
               [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'desktop'">
             </sb-uic-key-highlights>
           </div>
@@ -138,7 +138,8 @@
 
         <!-- Strip Section Create Components (Array) -->
         <div *ngFor="let section of stripSections; let i = index; trackBy: trackByIndex" class="strip-section-wrapper">
-          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" (removeSection)="removeSection(i)"
+          <sb-uic-strip-section-create [sectionData]="section" [sectionIndex]="i" [providerId]="orgId"
+            [channelName]="channelName" (removeSection)="removeSection(i)"
             (playlistCreated)="onPlaylistCreated($event)">
           </sb-uic-strip-section-create>
         </div>

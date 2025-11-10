@@ -8,12 +8,24 @@
             <div class="flex-1 flex flex-col mr-4 ws-mat-black-text">
               <div class="">
                 <div class="flex items-center logo-square">
-                  <ng-container *ngIf="data?.logo">
-                    <img alt="Application Logo" class="logo-img" [src]="data?.logo">
+                  <!-- Multiple logos (array) -->
+                  <ng-container *ngIf="data?.logo && isArray(data?.logo); else singleLogo">
+                    <div class="flex items-center gap-3 logo-container-multiple">
+                      <ng-container *ngFor="let logoUrl of data?.logo; let i = index">
+                        <img alt="Application Logo" class="logo-img" [src]="logoUrl.url">
+                        <div *ngIf="i < data?.logo.length - 1" class="logo-separator"></div>
+                      </ng-container>
+                    </div>
                   </ng-container>
-                  <ng-container *ngIf="!data?.logo">
-                    <label>Upload logo</label>
-                  </ng-container>
+                  <!-- Single logo (string) -->
+                  <ng-template #singleLogo>
+                    <ng-container *ngIf="data?.logo">
+                      <img alt="Application Logo" class="logo-img" [src]="data?.logo">
+                    </ng-container>
+                    <ng-container *ngIf="!data?.logo">
+                      <label>Upload logo</label>
+                    </ng-container>
+                  </ng-template>
                   <button *ngIf="isEdit" class="edit-icon" (click)="openEditor('logo', 'Logo', data?.logo)"
                     aria-label="Edit Logo">
                     <i class="material-icons">edit</i>
@@ -91,8 +103,19 @@
   <div class="container px-4 flex flex-col mob-container">
     <div class="mr-4 logo-box-container">
       <div class="flex logo-box-square top mr-4">
-        <img alt="Application Logo" class="logo-img logo-img-mb {{data?.customMobileClass}}"
-          [src]="data?.logoMobile || data?.logo">
+        <!-- Check if logo is array -->
+        <ng-container *ngIf="isArray(data?.logoMobile || data?.logo); else singleMobileLogo">
+          <div class="flex items-center gap-2 logo-container-multiple">
+            <ng-container *ngFor="let logoUrl of (data?.logoMobile || data?.logo); let i = index">
+              <img alt="Application Logo" class="logo-img logo-img-mb {{data?.customMobileClass}}" [src]="logoUrl.url">
+              <div *ngIf="i < (data?.logoMobile || data?.logo).length - 1" class="logo-separator"></div>
+            </ng-container>
+          </div>
+        </ng-container>
+        <ng-template #singleMobileLogo>
+          <img alt="Application Logo" class="logo-img logo-img-mb {{data?.customMobileClass}}"
+            [src]="data?.logoMobile || data?.logo">
+        </ng-template>
       </div>
     </div>
     <div class="w-full flex-1 flex flex-col">
