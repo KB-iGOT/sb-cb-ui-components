@@ -65,7 +65,6 @@ export class CbpPlanComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     // Reload content data when objectData changes
     if (changes['objectData']) {
-      console.log('CBP Plan ngOnChanges - objectData changed:', changes['objectData'].currentValue);
       this.loadContentData()
     }
   }
@@ -103,29 +102,37 @@ export class CbpPlanComponent implements OnInit, OnChanges {
 
   downloadCBPPlan(item: any) {
     const downloadUrl = item.downloaUrl
-    const xhr = new XMLHttpRequest()
-    xhr.open('GET', downloadUrl, true)
-    xhr.responseType = 'blob'
-
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        const blob = new Blob([xhr.response], { type: 'application/pdf' })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = downloadUrl.split("/").at(-1)
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
-      } else {
-        console.error('Error downloading the PDF', xhr.statusText)
-      }
+    if (downloadUrl) {
+      // Use fetch to download and convert to blob for forced download
+      fetch(downloadUrl, {
+        method: 'GET',
+        mode: 'cors'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          return response.blob()
+        })
+        .then(blob => {
+          // Create a blob URL and trigger download
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = downloadUrl.split("/").at(-1) || 'document.pdf'
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          window.URL.revokeObjectURL(url)
+        })
+        .catch(error => {
+          console.error('Error downloading the PDF:', error)
+          // Fallback: open in new tab if fetch fails
+          window.open(downloadUrl, '_blank')
+        })
+    } else {
+      console.error('Download URL is not available')
     }
-    xhr.onerror = function () {
-      console.error('Network error')
-    }
-    xhr.send()
   }
 
   /**

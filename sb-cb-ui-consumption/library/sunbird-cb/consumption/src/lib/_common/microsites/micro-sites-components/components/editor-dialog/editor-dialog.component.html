@@ -257,7 +257,7 @@
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>PDF URL</mat-label>
-                    <input matInput formControlName="pdfUrl" placeholder="Enter PDF URL or upload a file">
+                    <input matInput formControlName="downloaUrl" placeholder="Enter PDF URL or upload a file">
                   </mat-form-field>
 
                   <div class="upload-section">
@@ -329,7 +329,8 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Information Text</mat-label>
               <textarea matInput formControlName="infoText" placeholder="Leave empty for default information text"
-                rows="3"></textarea>
+                rows="3" maxlength="150"></textarea>
+              <mat-hint align="end">{{editorForm.get('data.infoText')?.value?.length || 0}}/150</mat-hint>
             </mat-form-field>
 
             <div class="speaker-list-preview">
@@ -389,7 +390,8 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Description</mat-label>
                     <textarea matInput formControlName="description" placeholder="Enter speaker description" rows="2"
-                      required></textarea>
+                      maxlength="150" required></textarea>
+                    <mat-hint align="end">{{speakerForm.get('description')?.value?.length || 0}}/150</mat-hint>
                     <mat-error *ngIf="speakerForm.get('description')?.hasError('required')">
                       Description is required
                     </mat-error>
@@ -398,6 +400,9 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Profile Image URL</mat-label>
                     <input matInput formControlName="profileImage" placeholder="Enter profile image URL">
+                    <mat-error *ngIf="speakerForm.get('profileImage')?.hasError('pattern')">
+                      Please enter a valid URL
+                    </mat-error>
                   </mat-form-field>
 
                   <div class="upload-section">
@@ -414,7 +419,8 @@
                     <small>Allowed formats: JPG, PNG | Max size: 100KB</small>
                   </p>
 
-                  <div class="image-preview" *ngIf="speakerForm.get('profileImage')?.value">
+                  <div class="image-preview"
+                    *ngIf="speakerForm.get('profileImage')?.value && !speakerForm.get('profileImage')?.hasError('pattern')">
                     <img [src]="speakerForm.get('profileImage')?.value" alt="Speaker Preview">
                   </div>
 
