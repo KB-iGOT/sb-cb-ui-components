@@ -390,6 +390,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
   private getContentSearchFilters(): any {
     const userRoles = this.configSvc?.userRoles as Set<string>;
+    const userId = _.get(this.configSvc, 'userProfile.userId');
+    const userOrgId = _.get(this.configSvc, 'userProfile.rootOrgId');
 
     const filters: any = {
       must: {
@@ -426,10 +428,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       ]);
       mergeUnique(filters.status, [
         "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
-        "UnderReview", "QualityReview"
+        "UnderReview", "QualityReview", "Draft"
       ]);
       anyExclusiveFilters.push({
-        createdFor: ["0140908831042437120"]
+        createdFor: [userOrgId]
       })
     }
 
@@ -446,7 +448,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       ]);
       mergeUnique(filters.status, ["Live", "Review", "InReview"]);
       anyExclusiveFilters.push({
-        reviewerIDs: ["9918af6c-765f-43c2-b3b4-0e518fe03872"]
+        reviewerIDs: [userId]
       })
     }
 
@@ -457,15 +459,15 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       ]);
       mergeUnique(filters.status, ["Review", "Live"]);
       anyExclusiveFilters.push({
-        publisherIDs: ["94bc775b-f380-42d7-b234-69b5c5d9f10d"]
+        publisherIDs: [userId]
       })
     }
 
     // ---- PROGRAM_COORDINATOR ----
     if (hasRole("PROGRAM_COORDINATOR")) {
       anyExclusiveFilters.push(
-        { programCoordinatorIds: "519f8568-bd8c-4d4e-81b6-acd07e16abde" },
-        { createdFor: "01392275379456409617" }
+        { programCoordinatorIds: userId },
+        { createdFor: userOrgId }
       )
       mergeUnique(filters.must.courseCategory, [
         "Blended Program", "Curated Program", "Moderated Program", "Invite-Only Program", "Invite-Only Assessment"

@@ -1219,7 +1219,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   formatEventStatusName(name: string, type?: string): string {
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       if (this.searchCategory.toLocaleLowerCase() === "courses" || type === "courses") {
-        return CBPstatusMapping[name.toLocaleLowerCase()]
+        return CBPstatusMapping[name.toLocaleLowerCase()] || CBPstatusMapping[name]
       } else {
         switch(name) {
           case 'senttopublish':

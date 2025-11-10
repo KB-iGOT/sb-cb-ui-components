@@ -517,5 +517,6 @@ export const CBPstatusMapping: Record<string, string> = {
   live: 'Live',
   review: 'Under Publish',
   inreview: 'Under Publish',
-  retired: 'Inactive'
+  retired: 'Inactive',
+  draft: 'Draft'
 };
