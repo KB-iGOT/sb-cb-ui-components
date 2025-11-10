@@ -62,6 +62,8 @@ import { SafeUrlPipeModule } from '../../../_pipes/safe-url/safe-url.module'
 import { VideoConferenceModule } from '../../video-conference/video-conference.module'
 import { StripSectionCreateComponent } from './components/strip-section-create/strip-section-create.component'
 import { StripAddContentComponent } from './components/strip-add-content/strip-add-content.component'
+import { AddTabDialogComponent } from './components/add-tab-dialog/add-tab-dialog.component'
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component'
 
 @NgModule({
   declarations: [
@@ -78,7 +80,9 @@ import { StripAddContentComponent } from './components/strip-add-content/strip-a
     SlwConfigDialogComponent,
     ActionItemsComponent,
     StripSectionCreateComponent,
-    StripAddContentComponent
+    StripAddContentComponent,
+    AddTabDialogComponent,
+    ConfirmDialogComponent
   ],
   imports: [
     CommonModule,

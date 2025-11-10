@@ -169,11 +169,35 @@ export class EditorDialogComponent implements OnInit {
 
   onImageLogoSelected(event: any, index: number): void {
     const file = event.target.files[0]
-    if (file && file.type.startsWith('image/')) {
+    if (file) {
+      // Set current index for error display
       this.currentUploadingIndex = index
+
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 100KB)
+      const maxSize = 100 * 1024 // 100KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 100KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+          this.currentUploadingIndex = -1
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadImageLogo(file, index)
-    } else {
-      this.uploadStatus = 'Please select a valid image file.'
     }
   }
 
@@ -627,6 +651,28 @@ export class EditorDialogComponent implements OnInit {
   onSpeakerImageSelected(event: any) {
     const file = event.target.files[0]
     if (file) {
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 100KB)
+      const maxSize = 100 * 1024 // 100KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 100KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadSpeakerImage(file)
     }
   }
@@ -660,6 +706,28 @@ export class EditorDialogComponent implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0]
     if (file) {
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 100KB)
+      const maxSize = 100 * 1024 // 100KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 100KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadImage(file)
     }
   }
@@ -778,6 +846,28 @@ export class EditorDialogComponent implements OnInit {
   onSliderImageSelected(event: any) {
     const file = event.target.files[0]
     if (file) {
+      // Validate file type (only jpg, jpeg, and png)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
+      // Validate file size (max 500KB)
+      const maxSize = 500 * 1024 // 500KB in bytes
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 500KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = '' // Reset file input
+        return
+      }
+
       this.uploadSliderImage(file)
     }
   }
