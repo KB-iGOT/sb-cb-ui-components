@@ -115,10 +115,12 @@
 
           <mat-selection-list *ngIf="filteredContents.length; else noResults">
             <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredContents">
-              <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, 'contentType')">
+              <mat-checkbox
+                [checked]="options?.isChecked || getSelectedFilter(options)"
+                (change)="onSelectionFilter($event, options, applicationName === 'CBP Portal' ? 'courseCategory' : 'contentType')">
                 <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
-                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
-                >
+                  {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}
+                </span>
                 <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
               </mat-checkbox>
             </section>

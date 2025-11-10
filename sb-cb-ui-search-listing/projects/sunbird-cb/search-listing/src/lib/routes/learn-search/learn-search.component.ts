@@ -354,8 +354,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
                this.applySelectedFilters["status"] && 
                Array.isArray(this.applySelectedFilters["status"]) && 
                this.applySelectedFilters["status"].length > 0;        
-        
-        this.searchRequestCourse.request.filters = this.getContentSearchFilters()
+        this.searchRequestCourse.request.filters = this.getContentSearchFilters(this.searchRequestCourse.request.filters)
 
         if (hasStatus) {
           this.searchRequestCourse.request.filters.status = this.applySelectedFilters["status"]
@@ -388,19 +387,29 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  private getContentSearchFilters(): any {
+  private getContentSearchFilters(filters: any): any {
     const userRoles = this.configSvc?.userRoles as Set<string>;
     const userId = _.get(this.configSvc, 'userProfile.userId');
     const userOrgId = _.get(this.configSvc, 'userProfile.rootOrgId');
 
-    const filters: any = {
-      must: {
-        courseCategory: [],
-        resourceCategory: []
-      },
-      status: [],
-      contentType: "Course"
-    };
+    if (!filters.must) {
+      filters.must = {
+      courseCategory: [],
+      resourceCategory: []
+      };
+    } else {
+      if (!Array.isArray(filters.must.courseCategory)) {
+        filters.must.courseCategory = [];
+      }
+      if (!Array.isArray(filters.must.resourceCategory)) {
+        filters.must.resourceCategory = [];
+      }
+    }
+
+    if (!Array.isArray(filters.status)) {
+      filters.status = [];
+    }
+    delete filters.contentType;
 
     const mergeUnique = (target: any[], source: any[] = []) => {
       source.forEach(item => {
@@ -493,7 +502,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (anyExclusiveFilters.length) {
-      filters.any = anyExclusiveFilters;
+      filters['any'] = anyExclusiveFilters;
     }
 
     // Remove empty must arrays
