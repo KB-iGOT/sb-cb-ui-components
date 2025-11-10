@@ -512,3 +512,11 @@ export namespace SearchListingConfig {
     CBPPortal = "CBP Portal"
   }
 }
+
+export const CBPstatusMapping: Record<string, string> = {
+  live: 'Live',
+  review: 'Under Publish',
+  inreview: 'Under Publish',
+  retired: 'Inactive',
+  draft: 'Draft'
+};

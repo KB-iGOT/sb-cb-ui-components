@@ -509,14 +509,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
     let resetFilterFlag = false;
-    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION) {
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION || this.content?.contentId) {
       if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
         resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
-      } else if (this.config.application === this.MDO_APPLICATION) {
+      } else if (this.config.application === this.MDO_APPLICATION || this.content?.contentId) {
         // For MDO applications, check if the user group is in initial state
         const currentGroup = this.userGroup.at(userGroupIndex);
         const isInInitialState = (() => {
-          if (this.config?.mdoContent?.status === 'Live') {
+          if (this.config?.mdoContent?.status === 'Live' || this.content?.status === 'live') {
             const initialUserGroups = this.getInitialState();
             if (initialUserGroups) {
               return initialUserGroups.some(group => group.userGroupName === currentGroup.get('name')?.value);
@@ -530,6 +530,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
         }
       }
+      
       if (resetFilterFlag) {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
           width: "470px",
@@ -604,7 +605,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             }
 
             // Enable Deputation if Service is selected 'All India Services'
-            if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO && condition.entity === NsAccessControlConfig.SelectionType.Service) {
+            if (condition.entity === NsAccessControlConfig.SelectionType.Service) {
               this.checkServicesAndResetReleated(ruleIndex, conditionIndex);
               const serviceNames = this.cadreMappingService.getServicesByNames(result.selected || []);
               const selections = serviceNames.map((service) => service.name);
@@ -816,6 +817,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
       this.isSaveFltrBtnDisabled = true;
       this.isSaving = false;
+
+      this.isAddUserGroupBtnDisabled = true
+      this.isApplying = false
       return;
     }
 
@@ -829,6 +833,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
             this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
             this.isSaveFltrBtnDisabled = true;
+            this.isApplyBtnDisabled = true;
 
             // Update secure setting for moderated content
             // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
@@ -840,7 +845,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
           if (this.content?.status === "Live") this.isApplying = false;
-          else this.isSaving = false;
+          else this.isSaving = false, this.isApplying = false;
         },
         error: () => {
           this.callSnackbar("Could not save access control, Please try again.", "error");
@@ -965,10 +970,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.accessControlForm.valueChanges.subscribe(() => {
       const currentValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
       if (this.content?.status === "Live" || this.content?.prevStatus === "Live") {
-        // this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
+        this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
       } else {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
+        this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
       }
     });
   }
@@ -989,6 +995,18 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     accessControl.userGroups.forEach((group: any, index: number) => {
       const conditions = this.fb.array([]) as any;
+
+      //Check and Enable Deputation if Service is selected 'All India Services'
+      const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service)
+      if (isContainsService?.criteriaKey === NsAccessControlConfig.SelectionType.Service) {
+        const serviceNames = this.cadreMappingService.getServicesByNames(isContainsService.criteriaValue || []);
+        const selections = serviceNames.map((service) => service.name);
+        if (selections.includes("All India Services")) {
+          this.accessControlService.enableDeputation(true);
+        } else {
+          this.accessControlService.enableDeputation(false);
+        }
+      }
 
       group.userGroupCriteriaList.forEach((criteria: any) => {
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
@@ -1618,5 +1636,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   get isCuratedContentWithExternalId(): boolean {    
     return !!(this.content && this.content.externalId);
+  }
+
+  get isContentPublished(): boolean {
+    return this.content?.externalId && this.content?.status?.toLowerCase() === 'live'
   }
 }

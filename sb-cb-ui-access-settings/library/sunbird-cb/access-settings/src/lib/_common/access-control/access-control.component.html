@@ -253,7 +253,7 @@
               (click)="applyAccessControlValue()"
             >
               <mat-spinner *ngIf="isSaving" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>
-              <span>Save Filter</span>
+              <span>{{ isContentPublished ? 'Apply' : 'Save Filter'}}</span>
             </button>
 
             <!-- Apply Button -->

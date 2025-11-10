@@ -140,16 +140,6 @@
   margin-right: 0.25rem !important;
 }
 
-::ng-deep .mat-menu-panel {
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-}
-
-::ng-deep .mat-menu-content:not(:empty) {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
 :host ::ng-deep .mdc-dialog .mdc-dialog__content {
   padding: 0 24px 24px !important;
 }
