@@ -12,15 +12,17 @@
               <mat-icon>drag_indicator</mat-icon>
             </div>
             <mat-form-field appearance="outline" class="highlight-input">
-              <input matInput [formControlName]="i" placeholder="Highlight text">
+              <input matInput [formControlName]="i" placeholder="Heading text">
             </mat-form-field>
             <button mat-icon-button color="warn" (click)="removeKeyHighlight(i)" class="delete-btn">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>
-        <button mat-button class="btn-common btn-secondary flex-center" type="button" (click)="addKeyHighlight()">
-          <mat-icon>add</mat-icon> Add Highlight
+        <button mat-button class="btn-common btn-secondary flex-center" type="button" (click)="addKeyHighlight()"
+          [disabled]="keyHighlightsArray.controls.length > 9"
+          [ngClass]="{'btn-disable': keyHighlightsArray.controls.length > 9}">
+          <mat-icon>add</mat-icon> Add Heading
         </button>
       </div>
 
