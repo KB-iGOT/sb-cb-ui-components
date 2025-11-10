@@ -30,7 +30,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentTree: any
   @Output() commentDataChange = new EventEmitter<any>()
   constructor(
-    private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar, private events: EventService 
+    private commentSvc: CommentsService, private configSvc: ConfigurationsService, private _snackBar: MatSnackBar, private events: EventService
   ) { }
 
   ngOnInit() {
@@ -96,7 +96,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
       workflow,
       "entityId": this.entityId,
     }
-    if(this.entityId) {
+    if (this.entityId) {
       this.commentSvc.getCommentTree(commentTreePayload).subscribe((commentRes: any) => {
         let commentTreeDataLocal = commentRes.result
         if (this.commentId) {
@@ -105,11 +105,13 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
           this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
         }
       }, (err: any) => {
-        this.loadingMore = false
+        if (err) {
+          this.loadingMore = false
+        }
         let commentTreeDataLocal = {}
         // tslint:disable-next-line: no-console
         this.fetchComments_V3(commentTreeDataLocal, commentTreeId, overrideCacheValue, entityType, workflow)
-        console.error('Error in fetching all comments', err)
+        // console.error('Error in fetching all comments', err)
       })
     } else {
       this.events.raiseInteractTelemetry(
@@ -124,7 +126,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
         {
           pageIdExt: 'Comment',
           module: 'CommentTreeGet',
-      })
+        })
     }
 
   }
