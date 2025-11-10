@@ -68,14 +68,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   isCCA = false;
   environment: any
   ODCSMasterFramework: any
- constructor(
-    public dialogRef: MatDialogRef<EntitySelectionsComponent>,
-    private accessControlService: AccessControlService,
-    private cadreMappingService: CadreMappingService,
-    @Inject("environment") environment: any
-  ) {
-    this.environment = environment;
-  }
+  applyNewServiceSelections = false
+  constructor(
+      public dialogRef: MatDialogRef<EntitySelectionsComponent>,
+      private accessControlService: AccessControlService,
+      private cadreMappingService: CadreMappingService,
+      @Inject("environment") environment: any
+    ) {
+      this.environment = environment;
+    }
 
   ngOnInit(): void {
     // If data was passed to the dialog, initialize selections
@@ -89,6 +90,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.content = this.accessControlConfig?.content;
     this.application = this.accessControlConfig?.application || "";
     this.isCCA = this.accessControlConfig?.userConfig?.org?.isCCA ?? false;
+    
+    if(this.content && this.content?.externalId) {
+      this.applyNewServiceSelections = true
+    }
     
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
@@ -622,7 +627,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   getServicesList(query: string): void {
-    if (this.application === NsAccessControlConfig.Application.MDO) {
+    if (this.application === NsAccessControlConfig.Application.MDO || this.applyNewServiceSelections) {
       const baseList = this.accessControlService.holdServiceCadrebatch().service;
       const baseServiceNames = new Set(baseList.map(service => service.name?.trim().toLowerCase()));
       
