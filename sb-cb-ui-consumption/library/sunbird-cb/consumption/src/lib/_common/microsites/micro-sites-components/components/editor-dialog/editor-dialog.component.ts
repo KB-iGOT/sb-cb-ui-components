@@ -132,7 +132,7 @@ export class EditorDialogComponent implements OnInit {
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
       title: [''],
-      pdfUrl: ['']
+      downloaUrl: ['']
     }))
   }
 
@@ -382,7 +382,7 @@ export class EditorDialogComponent implements OnInit {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
               title: [item.title || ''],
-              pdfUrl: [item.downloaUrl || '']
+              downloaUrl: [item.downloaUrl || '']
             }))
           })
         } else {
@@ -479,10 +479,14 @@ export class EditorDialogComponent implements OnInit {
     const safeDesc = speaker && speaker.description !== undefined ? speaker.description : ''
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
+
+    // URL validation pattern
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
-      profileImage: [safeImage],
+      profileImage: [safeImage, [Validators.pattern(urlPattern)]],
       identifier: [safeId]
     })
 
@@ -778,10 +782,10 @@ export class EditorDialogComponent implements OnInit {
       next: (transformedUrl) => {
         this.isUploading = false
 
-        // Update the pdfUrl form field for the specific item
+        // Update the downloaUrl form field for the specific item
         const listArray = this.editorForm.get('list') as FormArray
         if (listArray && listArray.at(index)) {
-          listArray.at(index).get('pdfUrl')?.setValue(transformedUrl)
+          listArray.at(index).get('downloaUrl')?.setValue(transformedUrl)
         }
         this.uploadStatus = 'PDF uploaded successfully!'
 
