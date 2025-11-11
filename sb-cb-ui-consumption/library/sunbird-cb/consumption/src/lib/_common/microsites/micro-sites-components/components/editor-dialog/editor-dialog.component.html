@@ -625,7 +625,8 @@
           <div *ngIf="!sliderData.sliders.length" class="no-items">
             No slider items available. Add some items to see them here.
           </div>
-          <button mat-button class="btn-common btn-secondary flex flex-middle" type="button" (click)="addSliderItem()">
+          <button mat-button class="btn-common btn-secondary flex flex-middle" type="button" (click)="addSliderItem()"
+            [disabled]="sliderData?.sliders?.length > 4" [ngClass]="{'btn-disable': sliderData?.sliders?.length > 4}">
             <mat-icon>add</mat-icon> Add Slider Item
           </button>
         </div>
