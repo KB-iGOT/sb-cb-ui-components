@@ -516,7 +516,9 @@ export namespace SearchListingConfig {
 export const CBPstatusMapping: Record<string, string> = {
   live: 'Live',
   review: 'Under Publish',
-  inreview: 'Under Publish',
+  reviewed: 'Under Publish',
+  inreview: 'Under Review',
   retired: 'Inactive',
-  draft: 'Draft'
+  draft: 'Draft',
+  failed: 'Failed'
 };
