@@ -12,7 +12,8 @@
               <mat-icon>drag_indicator</mat-icon>
             </div>
             <mat-form-field appearance="outline" class="highlight-input">
-              <input matInput [formControlName]="i" placeholder="Heading text">
+              <input matInput [formControlName]="i" placeholder="Heading text" maxlength="100">
+              <mat-hint align="end">{{keyHighlightsArray.controls[i].value?.length || 0}}/100</mat-hint>
             </mat-form-field>
             <button mat-icon-button color="warn" (click)="removeKeyHighlight(i)" class="delete-btn">
               <mat-icon>delete</mat-icon>
