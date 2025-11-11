@@ -908,7 +908,12 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       console.log('Payload:', payload)
       // Call the API
       this.microSiteV3Service.updateMicrosite(payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
+          if (type === 'publish') {
+            const updateOrgBookmarkPromises: Promise<any>[] = []
+            updateOrgBookmarkPromises.push(this.updateOrgBookmark())
+            await Promise.all(updateOrgBookmarkPromises)
+          }
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()
