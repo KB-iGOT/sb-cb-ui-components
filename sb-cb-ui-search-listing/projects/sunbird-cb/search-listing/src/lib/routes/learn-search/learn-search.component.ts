@@ -323,9 +323,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchCourses() {
     this.searchRequestCourse.request.query = this.statedata?.param;
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      this.searchRequestCourse.request.filters["channel"] = {
-        "!=": [this.environment.spvorgID]
-      };
       const courseFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'courses');
       if (courseFilters.length && courseFilters[0].facets && courseFilters[0].facets.length) {
         const competencyKeys = [
@@ -357,7 +354,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchRequestCourse.request.filters = this.getContentSearchFilters(this.searchRequestCourse.request.filters)
 
         if (hasStatus) {
-          this.searchRequestCourse.request.filters.status = this.applySelectedFilters["status"]
+          this.formatSelectedStatusFilters()
         }
       }
       this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
@@ -369,10 +366,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (_.get(result, 'result.content')) {
         this.courseSearchResults = result.result.content;
         this.courseSearchTotalCount = result.result?.count;
-        this.coursesFacets = result.result?.facets || [];
-
+        this.coursesFacets = this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ? this.formateCoursesFacets(result.result?.facets) : result.result?.facets || [];
         this.combinedFacets = [];
-        this.combinedFacets = [...this.combinedFacets, result.result?.facets || []];
+        this.combinedFacets = [...this.combinedFacets, this.coursesFacets || []];
       } else {
         this.courseSearchResults = [];
         this.courseSearchTotalCount = 0;
@@ -392,117 +388,98 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     const userId = _.get(this.configSvc, 'userProfile.userId');
     const userOrgId = _.get(this.configSvc, 'userProfile.rootOrgId');
 
-    if (!filters.must) {
-      filters.must = {
-      courseCategory: [],
-      resourceCategory: []
-      };
-    } else {
-      if (!Array.isArray(filters.must.courseCategory)) {
-        filters.must.courseCategory = [];
-      }
-      if (!Array.isArray(filters.must.resourceCategory)) {
-        filters.must.resourceCategory = [];
-      }
+    // Get single role (case-insensitive)
+    const role = Array.from(userRoles || [])[0]?.toUpperCase();
+    if (!role) {
+      return filters;
     }
 
-    if (!Array.isArray(filters.status)) {
-      filters.status = [];
+    // Ensure filter structure
+    if (!filters.must) {
+      filters.must = { courseCategory: [], resourceCategory: [] };
+    } else {
+      if (!Array.isArray(filters.must.courseCategory)) filters.must.courseCategory = [];
+      if (!Array.isArray(filters.must.resourceCategory)) filters.must.resourceCategory = [];
     }
+    if (!Array.isArray(filters.status)) filters.status = [];
+
     delete filters.contentType;
+    delete filters.reviewStatus;
 
     const mergeUnique = (target: any[], source: any[] = []) => {
       source.forEach(item => {
-        if (!target.includes(item)) {
-          target.push(item);
-        }
+        if (!target.includes(item)) target.push(item);
       });
     };
 
-    const hasRole = (role: string) =>
-    Array.from(userRoles || []).some(r => r.toLowerCase() === role.toLowerCase());
+    // ---- Role-based logic ----
+    switch (role) {
+      case "CONTENT_CREATOR":
+        mergeUnique(filters.must.courseCategory, [
+          "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
+          "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
+          "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
+        ]);
+        mergeUnique(filters.must.resourceCategory, [
+          "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
+          "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
+        ]);
+        mergeUnique(filters.status, [
+          "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
+          "UnderReview", "QualityReview", "Draft"
+        ]);
+        filters.createdFor = [userOrgId];
+        break;
 
-    const anyExclusiveFilters: any[] = []
+      case "CONTENT_REVIEWER":
+        mergeUnique(filters.must.courseCategory, [
+          "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
+          "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
+          "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
+        ]);
+        mergeUnique(filters.must.resourceCategory, [
+          "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
+          "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
+        ]);
+        mergeUnique(filters.status, ["Live", "Review", "InReview"]);
+        filters.reviewerIDs = [userId];
+        break;
 
-    // ---- CONTENT_CREATOR ----
-    if (hasRole("CONTENT_CREATOR")) {
-      mergeUnique(filters.must.courseCategory, [
-        "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
-        "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
-        "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
-      ]);
-      mergeUnique(filters.must.resourceCategory, [
-        "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
-        "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
-      ]);
-      mergeUnique(filters.status, [
-        "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
-        "UnderReview", "QualityReview", "Draft"
-      ]);
-      anyExclusiveFilters.push({
-        createdFor: [userOrgId]
-      })
-    }
+      case "CONTENT_PUBLISHER":
+        mergeUnique(filters.must.courseCategory, [
+          "Moderated Course", "Moderated Assessment", "Moderated Program"
+        ]);
+        mergeUnique(filters.status, ["Review", "Live"]);
+        filters.publisherIDs = [userId];
+        break;
 
-    // ---- CONTENT_REVIEWER ----
-    if (hasRole("CONTENT_REVIEWER")) {
-      mergeUnique(filters.must.courseCategory, [
-        "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
-        "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
-        "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
-      ]);
-      mergeUnique(filters.must.resourceCategory, [
-        "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
-        "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
-      ]);
-      mergeUnique(filters.status, ["Live", "Review", "InReview"]);
-      anyExclusiveFilters.push({
-        reviewerIDs: [userId]
-      })
-    }
+      case "PROGRAM_COORDINATOR":
+        filters.any = [
+          { programCoordinatorIds: userId },
+          { createdFor: userOrgId }
+        ];
+        mergeUnique(filters.must.courseCategory, [
+          "Blended Program", "Curated Program", "Moderated Program", "Invite-Only Program", "Invite-Only Assessment"
+        ]);
+        mergeUnique(filters.status, ["Live"]);
+        break;
 
-    // ---- CONTENT_PUBLISHER ----
-    if (hasRole("CONTENT_PUBLISHER")) {
-      mergeUnique(filters.must.courseCategory, [
-        "Moderated Course", "Moderated Assessment", "Moderated Program"
-      ]);
-      mergeUnique(filters.status, ["Review", "Live"]);
-      anyExclusiveFilters.push({
-        publisherIDs: [userId]
-      })
-    }
+      case "SPV_PUBLISHER":
+        mergeUnique(filters.must.courseCategory, [
+          "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
+          "invite-only program", "invite-only assessment", "Case Study", "Comprehensive Assessment Program",
+          "Multilingual Course"
+        ]);
+        mergeUnique(filters.must.resourceCategory, [
+          "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
+          "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
+        ]);
+        mergeUnique(filters.status, ["Review", "Live"]);
+        break;
 
-    // ---- PROGRAM_COORDINATOR ----
-    if (hasRole("PROGRAM_COORDINATOR")) {
-      anyExclusiveFilters.push(
-        { programCoordinatorIds: userId },
-        { createdFor: userOrgId }
-      )
-      mergeUnique(filters.must.courseCategory, [
-        "Blended Program", "Curated Program", "Moderated Program", "Invite-Only Program", "Invite-Only Assessment"
-      ]);
-      mergeUnique(filters.status, ["Live"]);
-    }
-
-    // ---- SPV_PUBLISHER ----
-    if (hasRole("SPV_PUBLISHER")) {
-      mergeUnique(filters.must.courseCategory, [
-        "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
-        "invite-only program", "invite-only assessment", "Case Study", "Comprehensive Assessment Program",
-        "Multilingual Course"
-      ]);
-      mergeUnique(filters.must.resourceCategory, [
-        "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
-        "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
-      ]);
-      mergeUnique(filters.status, ["Review", "Live"]);
-      anyExclusiveFilters.push(
-        {reviewStatus: "Reviewed"}
-      )
-    }
-
-    if (anyExclusiveFilters.length) {
-      filters['any'] = anyExclusiveFilters;
+      default:
+        // Unknown role — leave filters untouched
+        break;
     }
 
     // Remove empty must arrays
@@ -510,8 +487,61 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (!filters.must[key].length) delete filters.must[key];
     });
     if (!Object.keys(filters.must).length) delete filters.must;
+    if (this.applySelectedFilters && this.applySelectedFilters.resourceCategory) {
+      filters.must.resourceCategory = this.applySelectedFilters.resourceCategory;
+      filters.must.courseCategory = []
+    }
 
     return filters;
+  }
+
+  formateCoursesFacets(facets: any) {
+    let formattedFacets: any = [];
+    let statusFacets: any
+    let reviewStatusFacets: any
+    if (facets && facets.length) {
+      formattedFacets = facets
+      formattedFacets.forEach((facet: any) => {
+        if (facet.name === 'status') {
+          statusFacets = facet;
+        } else if (facet.name === 'reviewStatus') {
+          reviewStatusFacets = facet;
+        }
+
+        if (statusFacets && reviewStatusFacets) {
+          // statusFacets.values = statusFacets.filter.values.filter((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
+          const reviewIndex = statusFacets.values.findIndex((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
+          if (reviewIndex !== -1) {
+            let reviewStatusFacetsValues = reviewStatusFacets.values.filter((reviewStatusFacet: any) => reviewStatusFacet.name.toLowerCase() === 'reviewed' || reviewStatusFacet.name.toLowerCase() === 'inreview');
+            if (reviewStatusFacetsValues.length) {
+              statusFacets.values.splice(reviewIndex, 1, ...reviewStatusFacetsValues)
+            }
+          }
+        }
+      })
+    }
+    return formattedFacets;
+  }
+
+  formatSelectedStatusFilters(): any {
+    const filters: any = this.searchRequestCourse.request.filters
+    if (this.applySelectedFilters["status"]) {
+      filters.status = []
+      this.applySelectedFilters["status"].forEach((statusFilter: string) => {
+        if (statusFilter.toLowerCase() === 'inreview' || statusFilter.toLowerCase() === 'reviewed') {
+          if (!Array.isArray(filters.reviewStatus)) {
+            filters.reviewStatus = [];
+          }
+          filters.reviewStatus.push(statusFilter);
+        } else {
+          filters.status.push(statusFilter);
+        }
+      });
+
+    }
+    if (filters.reviewStatus && filters.reviewStatus.length > 0) {
+      filters.status.push('review');
+    }
   }
 
 

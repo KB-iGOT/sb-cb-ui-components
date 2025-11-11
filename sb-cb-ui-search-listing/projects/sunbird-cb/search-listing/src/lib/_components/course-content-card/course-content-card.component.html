@@ -125,6 +125,9 @@
                   <ng-container *ngSwitchCase="'Failed'">
                     <div class="failed-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
+                  <ng-container *ngSwitchCase="'Review'">
+                    <div class="draft-course">{{ cbpStatusMapping[(content?.reviewStatus || '') | lowercase] || content?.reviewStatus }}</div>
+                  </ng-container>
                   <ng-container *ngSwitchDefault>
                     <div class="draft-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
