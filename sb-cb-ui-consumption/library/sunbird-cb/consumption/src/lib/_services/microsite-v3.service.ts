@@ -15,6 +15,8 @@ const API_END_POINTS = {
   READ_ANNOUNCEMENTS: (announceMentId: string) => `/apis/proxies/v8/announcements/v1/read/${announceMentId}`,
   UPDATE_ANNOUNCEMENTS: '/apis/proxies/v8/announcements/v1/update',
   DELETE_ANNOUNCEMENTS: (announceMentId: string) => `/apis/proxies/v8/announcements/v1/delete/${announceMentId}`,
+  READ_ORGBOOKMARK: (bookmarkId: string) => `apis/proxies/v8/orgBookmark/v1/read/${bookmarkId}`,
+  UPDATE_ORGBOOKMARK: `/apis/proxies/v8/orgBookmark/v1/update`,
 }
 
 @Injectable({
@@ -137,5 +139,16 @@ export class MicrositeV3Service {
 
   readAnnouncements(announceMentId: string): Observable<any> {
     return this.http.get<any>(`${API_END_POINTS.READ_ANNOUNCEMENTS(announceMentId)}`)
+  }
+
+  readOrgBookmark(): Observable<any> {
+    return this.http.get<any>(`${API_END_POINTS.READ_ORGBOOKMARK(this.environment?.mdoChannelsBookmarkId)}`)
+  }
+
+  updateOrgBookmark(requestBody: any): Observable<any> {
+    if (requestBody?.orgBookmarkId === '') {
+      requestBody.orgBookmarkId = this.environment?.mdoChannelsBookmarkId
+    }
+    return this.http.post<any>(`${API_END_POINTS.UPDATE_ORGBOOKMARK}`, requestBody)
   }
 }
