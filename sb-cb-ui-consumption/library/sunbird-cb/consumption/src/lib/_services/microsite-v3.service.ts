@@ -10,7 +10,11 @@ const API_END_POINTS = {
   UPDATE_PLAYLIST: 'apis/proxies/v8/playList/update',
   READ_PLAYLIST: (playlistID: string, OrgId: string) => `apis/proxies/v8/playList/read/${playlistID}/${OrgId}`,
   UPDATE_MICROSITE: 'apis/v1/form/update',
-  CREATE_MICROSITE: 'apis/v1/form/create'
+  CREATE_MICROSITE: 'apis/v1/form/create',
+  CREATE_ANNOUNCEMENTS: '/apis/proxies/v8/announcements/v1/create',
+  READ_ANNOUNCEMENTS: (announceMentId: string) => `/apis/proxies/v8/announcements/v1/read/${announceMentId}`,
+  UPDATE_ANNOUNCEMENTS: '/apis/proxies/v8/announcements/v1/update',
+  DELETE_ANNOUNCEMENTS: (announceMentId: string) => `/apis/proxies/v8/announcements/v1/delete/${announceMentId}`,
 }
 
 @Injectable({
@@ -117,5 +121,21 @@ export class MicrositeV3Service {
 
   createMicrosite(requestBody: any): Observable<any> {
     return this.http.post<any>(`${API_END_POINTS.CREATE_MICROSITE}`, requestBody)
+  }
+
+  createAnnouncements(requestBody: any): Observable<any> {
+    return this.http.post<any>(`${API_END_POINTS.CREATE_ANNOUNCEMENTS}`, requestBody)
+  }
+
+  updateAnnouncements(requestBody: any): Observable<any> {
+    return this.http.put<any>(`${API_END_POINTS.UPDATE_ANNOUNCEMENTS}`, requestBody)
+  }
+
+  deleteAnnouncements(announceMentId: string): Observable<any> {
+    return this.http.delete<any>(`${API_END_POINTS.DELETE_ANNOUNCEMENTS(announceMentId)}`)
+  }
+
+  readAnnouncements(announceMentId: string): Observable<any> {
+    return this.http.get<any>(`${API_END_POINTS.READ_ANNOUNCEMENTS(announceMentId)}`)
   }
 }

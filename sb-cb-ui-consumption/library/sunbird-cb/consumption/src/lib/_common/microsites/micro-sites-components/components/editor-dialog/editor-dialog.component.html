@@ -303,6 +303,61 @@
             <input matInput formControlName="title" placeholder="Enter announcements title" maxlength="75">
             <mat-hint align="end">{{editorForm.get('title')?.value?.length || 0}}/75</mat-hint>
           </mat-form-field>
+
+          <!-- Announcements List -->
+          <div formArrayName="list" class="announcements-list" *ngIf="editorForm.get('enabled')?.value">
+            <h5>Announcements <span class="item-count">({{announcementsList.controls.length}} items)</span></h5>
+
+            <div cdkDropList (cdkDropListDropped)="dropAnnouncementItem($event)" class="announcements-container">
+              <div *ngFor="let item of announcementsList.controls; let i = index" [formGroupName]="i"
+                class="announcement-item flex-middle" cdkDrag>
+                <div class="drag-handle" cdkDragHandle>
+                  <mat-icon>drag_indicator</mat-icon>
+                </div>
+
+                <div class="item-content">
+                  <div class="item-header">
+                    <h6>Announcement {{i + 1}}</h6>
+                    <button mat-icon-button color="warn" type="button" (click)="removeAnnouncementItem(i)"
+                      class="remove-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Enter announcement name" maxlength="75">
+                    <mat-hint align="end">{{item.get('name')?.value?.length || 0}}/75</mat-hint>
+                    <mat-error *ngIf="item.get('name')?.invalid">Name is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" placeholder="Enter description" rows="3"
+                      maxlength="150"></textarea>
+                    <mat-hint align="end">{{item.get('description')?.value?.length || 0}}/150</mat-hint>
+                    <mat-error *ngIf="item.get('description')?.invalid">Description is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Category</mat-label>
+                    <input matInput formControlName="category" placeholder="Enter category" maxlength="50">
+                    <mat-hint align="end">{{item.get('category')?.value?.length || 0}}/50</mat-hint>
+                    <mat-error *ngIf="item.get('category')?.invalid">Category is required</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div *ngIf="announcementsList.controls.length === 0" class="no-items">
+                No announcements available. Add some items below.
+              </div>
+            </div>
+
+            <button mat-button class="btn-common btn-secondary flex-center mt-3" type="button"
+              (click)="addAnnouncementItem()">
+              <mat-icon>add</mat-icon> Add Announcement
+            </button>
+          </div>
         </div>
       </div>
 
