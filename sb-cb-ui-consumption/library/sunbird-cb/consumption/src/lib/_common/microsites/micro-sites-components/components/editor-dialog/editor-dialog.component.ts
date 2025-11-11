@@ -1105,8 +1105,9 @@ export class EditorDialogComponent implements OnInit {
         this.data.value.enabled = formValue.enabled
         this.data.value.title = formValue.title
         if (Array.isArray(formValue.list) && formValue.list.length > 0) {
-          const childPromises: Promise<any>[] = []
-          childPromises.push(this.checkAndCreateAnnouncementItem(formValue.list))
+          const announcementPromises: Promise<any>[] = []
+          announcementPromises.push(this.checkAndCreateAnnouncementItem(formValue.list))
+          await Promise.all(announcementPromises)
         }
         console.log('Submitting announcementsConfig:', this.data.value)
         this.dialogRef.close(this.data.value)
