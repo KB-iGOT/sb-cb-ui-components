@@ -22,6 +22,7 @@ import { HighlightsOfWeekComponent } from '../../../highlights-of-week/highlight
 import { UserProgressComponent } from '../../../user-progress/user-progress.component'
 import { SpeakersComponent } from '../../../speakers/speakers.component'
 import { MicrositeV3Service } from '../../../../_services/microsite-v3.service'
+import { map, switchMap } from 'rxjs/operators'
 
 @Component({
   selector: 'sb-uic-mdo-channel-v3',
@@ -409,6 +410,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
       }
     }
+
     const dialogRef = this.dialog.open(EditorDialogComponent, {
       width: dialogWidth,
       data: {
@@ -886,7 +888,12 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       console.log('Payload:', payload)
       // Call the API
       this.microSiteV3Service.createMicrosite(payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
+          if (type === 'publish') {
+            const updateOrgBookmarkPromises: Promise<any>[] = []
+            updateOrgBookmarkPromises.push(this.updateOrgBookmark())
+            await Promise.all(updateOrgBookmarkPromises)
+          }
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()
@@ -901,7 +908,12 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       console.log('Payload:', payload)
       // Call the API
       this.microSiteV3Service.updateMicrosite(payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
+          if (type === 'publish') {
+            const updateOrgBookmarkPromises: Promise<any>[] = []
+            updateOrgBookmarkPromises.push(this.updateOrgBookmark())
+            await Promise.all(updateOrgBookmarkPromises)
+          }
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()
@@ -915,17 +927,56 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     }
   }
 
-  publishChanges() {
-    if (this.hasUnsavedChanges) {
-      this.saveChanges('publish')
-    }
+  updateOrgBookmark() {
+    return new Promise<boolean>((resolve) => {
+      this.microSiteV3Service.readOrgBookmark().pipe(
+        switchMap((bookmarkRes: any) => {
+          if (bookmarkRes?.result?.data?.orgList?.length) {
+            if (!bookmarkRes.result.data.orgList.find((org: any) => org.rootOrgId === this.orgId)) {
+              const tempData = []
+              bookmarkRes?.result?.data?.orgList.forEach((org: any) => {
+                tempData.push(org.rootOrgId)
+              })
+              const reqBody: any = {
+                orgBookmarkId: '',
+                title: this.configSvc.orgReadData.channel || '',
+                description: this.configSvc.orgReadData.description || '',
+                category: this.configSvc.orgReadData.category || 'MDO_ORG_LIST',
+                orgId: this.configSvc.orgReadData.rootOrgId || '',
+                orgList: [this.orgId, ...tempData],
+              }
+              // Only include imgUrl if it's a valid non-empty string
+              if (this.configSvc.orgReadData.imgUrl && this.configSvc.orgReadData.imgUrl.trim() !== '') {
+                reqBody.imageUrl = this.configSvc.orgReadData.imgUrl
+              }
+              return this.microSiteV3Service.updateOrgBookmark(reqBody).pipe(
+                map((res: any) => {
+                  return res
+                })
+              )
+            }
+          }
+          return bookmarkRes
+        })
+      ).subscribe({
+        next: (bookmarkRes: any) => {
+          console.log('Updating org bookmark with new microsite URL', bookmarkRes)
+          resolve(true)
+        },
+        error: (err) => {
+          console.error('Error reading org bookmark:', err)
+          resolve(false)
+        }
+      })
+    })
+  }
 
+  publishChanges() {
+    this.saveChanges('publish')
     // Implement publish logic here
     console.log('Publishing changes...')
-
     // Raise telemetry
     this.raiseTelemetry('publish-changes')
-
     // You can emit an event or call a service to publish the data
   }
 
