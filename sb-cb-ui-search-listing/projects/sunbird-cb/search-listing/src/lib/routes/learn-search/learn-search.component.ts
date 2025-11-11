@@ -429,7 +429,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       mergeUnique(filters.must.courseCategory, [
         "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
         "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
-        "invite-only assessment", "Case Study", "Comprehensive Assessment Program"
+        "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
       ]);
       mergeUnique(filters.must.resourceCategory, [
         "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
@@ -537,6 +537,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     // If CBPPortal provides a facets configuration for events, prefer that.
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if(_.get(this.searchConfig, 'fields.courses')) {
+          this.searchRequestEvents.request.fields = _.get(this.searchConfig, 'fields.events')
+        }
       const hasStatus = typeof this.applySelectedFilters === "object" && 
                this.applySelectedFilters["status"] && 
                Array.isArray(this.applySelectedFilters["status"]) && 
