@@ -224,6 +224,10 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
    */
   handleContentClick(content: any, loggedInUserId: string): void {
     // Helpers
+    if (content && content.status && content.status.toLowerCase() === 'failed') {
+      this.openSnackBar('You don\'t have access!');
+      return;
+    }
     if (content && content.identifier) {
       this.searchListingService.getCourseDetails(content.identifier).subscribe((res: any) => {
         if (res && res.params && res.params.status === 'successful') {
@@ -334,10 +338,10 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
           // Default: no special roles -> navigate to overview
           goToOverviewV2();
         } else {
-          this.openSnackBar('Failed to fetch course details');
+          this.openSnackBar('You don\'t have access!');
         }
       }, () => {
-        this.openSnackBar('Failed to fetch course details');
+        this.openSnackBar('You don\'t have access!');
       });
     }
   }

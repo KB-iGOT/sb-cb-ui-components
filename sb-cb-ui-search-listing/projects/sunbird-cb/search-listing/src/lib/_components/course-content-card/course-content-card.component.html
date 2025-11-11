@@ -119,8 +119,11 @@
                   <ng-container *ngSwitchCase="'Draft'">
                     <div class="draft-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
+                  <ng-container *ngSwitchCase="'Retired'">
+                    <div class="inactive-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
+                  </ng-container>
                   <ng-container *ngSwitchCase="'Failed'">
-                    <div class="draft-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
+                    <div class="failed-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
                   <ng-container *ngSwitchDefault>
                     <div class="draft-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>

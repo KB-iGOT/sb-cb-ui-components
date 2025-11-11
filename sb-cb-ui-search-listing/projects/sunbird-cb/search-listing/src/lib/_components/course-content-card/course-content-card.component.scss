@@ -253,3 +253,29 @@
     width: fit-content;
     height: 20px;
 }
+
+.failed-course {
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.1607843137);
+    color: rgba(0, 0, 0, 0.6);
+    padding: 0 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    height: 20px;
+}
+
+.inactive-course {
+    border: 1px solid #D13924;
+    background: rgba(209, 57, 36, 0.1607843137);
+    color: #D13924;
+    padding: 0 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    height: 20px;
+}
