@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { MicrositeV3Service } from '../../../../../_services/microsite-v3.service'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 interface SliderItem {
   active: boolean
@@ -63,7 +64,8 @@ export class EditorDialogComponent implements OnInit {
     private http: HttpClient,
     private micrositeService: MicrositeV3Service,
     public dialogRef: MatDialogRef<EditorDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public configSvc: ConfigurationsService
   ) {
     // Initialize with field type from data
     this.formType = data.fieldType || 'text'
@@ -78,6 +80,10 @@ export class EditorDialogComponent implements OnInit {
   }
 
   get cbpPlanListArray(): FormArray {
+    return this.editorForm.get('list') as FormArray
+  }
+
+  get announcementsList(): FormArray {
     return this.editorForm.get('list') as FormArray
   }
 
@@ -143,6 +149,33 @@ export class EditorDialogComponent implements OnInit {
   dropCbpPlanItem(event: CdkDragDrop<any[]>): void {
     moveItemInArray(this.cbpPlanListArray.controls, event.previousIndex, event.currentIndex)
     this.cbpPlanListArray.updateValueAndValidity()
+  }
+
+  // Methods for announcements management
+  addAnnouncementItem(announcement: any = {}): void {
+    this.announcementsList.push(this.fb.group({
+      name: [announcement.name || '', [Validators.required]],
+      description: [announcement.description || '', [Validators.required]],
+      category: [announcement.category || '', [Validators.required]],
+      announcementId: [announcement.announcementId || '']
+    }))
+  }
+
+  removeAnnouncementItem(index: number): void {
+    const tempValue = this.announcementsList.at(index).value
+    this.micrositeService.deleteAnnouncements(tempValue.announcementId).subscribe({
+      next: () => {
+        this.announcementsList.removeAt(index)
+      },
+      error: (error) => {
+        console.error('Error removing announcement:', error)
+      }
+    })
+  }
+
+  dropAnnouncementItem(event: CdkDragDrop<any[]>): void {
+    moveItemInArray(this.announcementsList.controls, event.previousIndex, event.currentIndex)
+    this.announcementsList.updateValueAndValidity()
   }
 
   // Methods for image logo items management
@@ -398,8 +431,15 @@ export class EditorDialogComponent implements OnInit {
 
         this.editorForm = this.fb.group({
           enabled: [announcementsValue.enabled !== undefined ? announcementsValue.enabled : true],
-          title: [announcementsValue.title || '']
+          title: [announcementsValue.title || ''],
+          list: this.fb.array([])
         })
+        // Initialize announcements list if exists
+        if (announcementsValue.list && Array.isArray(announcementsValue.list)) {
+          announcementsValue.list.forEach((announcement: any) => {
+            this.addAnnouncementItem(announcement)
+          })
+        }
         break
       case 'slider':
         // Initialize slider data from the input or use defaults
@@ -988,7 +1028,7 @@ export class EditorDialogComponent implements OnInit {
     this.keyHighlightsArray.updateValueAndValidity()
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.formType === 'keyHighlights') {
       const formValue = this.editorForm.value
       const updatedConfig = {
@@ -1060,11 +1100,14 @@ export class EditorDialogComponent implements OnInit {
       }
     } else if (this.formType === 'announcementsConfig') {
       if (this.editorForm.valid) {
-        // Return structured data with enabled and title
+        // Return structured data with enabled, title, and list
         const formValue = this.editorForm.value
         this.data.value.enabled = formValue.enabled
         this.data.value.title = formValue.title
-
+        if (Array.isArray(formValue.list) && formValue.list.length > 0) {
+          const childPromises: Promise<any>[] = []
+          childPromises.push(this.checkAndCreateAnnouncementItem(formValue.list))
+        }
         console.log('Submitting announcementsConfig:', this.data.value)
         this.dialogRef.close(this.data.value)
       }
@@ -1105,6 +1148,72 @@ export class EditorDialogComponent implements OnInit {
     } else if (this.editorForm.valid) {
       this.dialogRef.close(this.editorForm.value.value)
     }
+  }
+
+  checkAndCreateAnnouncementItem(list: any[]) {
+    return new Promise<boolean>((resolve) => {
+      if (Array.isArray(list) && list.length > 0) {
+        list.forEach(item => {
+          if (item.name && item.description && !item.announcementId) {
+            // Create announcement item
+            const reqBody = {
+              name: item.name || '',
+              description: item.description || '',
+              category: item.category || '',
+              createdBy: this.configSvc.userProfile?.userId || '',
+              sourceName: this.configSvc.userProfile?.departmentName || '',
+              createdFor: [this.configSvc.userProfile?.rootOrgId || ''],
+              channel: this.configSvc.userProfile?.rootOrgId || ''
+            }
+            this.micrositeService.createAnnouncements(reqBody).subscribe({
+              next: () => {
+                resolve(true)
+              },
+              error: (error) => {
+                console.error('Error creating announcement:', error)
+                resolve(false)
+              }
+            })
+          } else if (item.announcementId) {
+            // Check if announcement item has changed by comparing with existing data
+            const existingItem = this.data.value.list?.find((existing: any) => existing.announcementId === item.announcementId)
+
+            if (existingItem) {
+              // Check if any field has changed
+              const hasChanged = existingItem.name !== item.name ||
+                existingItem.description !== item.description ||
+                existingItem.category !== item.category
+
+              if (hasChanged) {
+                // Update announcement item
+                const updateReqBody = {
+                  announcementId: item.announcementId,
+                  name: item.name || '',
+                  description: item.description || '',
+                  category: item.category || ''
+                }
+                console.log('Announcement has changed, updating:', updateReqBody)
+                this.micrositeService.updateAnnouncements(updateReqBody).subscribe({
+                  next: () => {
+                    resolve(true)
+                  },
+                  error: (error) => {
+                    console.error('Error updating announcement:', error)
+                    resolve(false)
+                  }
+                })
+                resolve(true)
+              } else {
+                resolve(true)
+              }
+            } else {
+              console.warn('No existing item found for announcementId:', item.announcementId)
+              resolve(true)
+            }
+          }
+        })
+      }
+    })
   }
 
   onCancel() {
