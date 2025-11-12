@@ -138,7 +138,7 @@ export class EditorDialogComponent implements OnInit {
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
       title: [''],
-      downloaUrl: ['']
+      downloaUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]]
     }))
   }
 
@@ -415,7 +415,7 @@ export class EditorDialogComponent implements OnInit {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
               title: [item.title || ''],
-              downloaUrl: [item.downloaUrl || '']
+              downloaUrl: [item.downloaUrl || '', [Validators.pattern(/^https?:\/\/.+/)]]
             }))
           })
         } else {
@@ -551,13 +551,16 @@ export class EditorDialogComponent implements OnInit {
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
 
-    // URL validation pattern
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+    // Simplified URL validation pattern
+    const urlPattern = /^https?:\/\/.+/
 
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
-      profileImage: [safeImage, [Validators.pattern(urlPattern)]],
+      profileImage: [safeImage, {
+        validators: [Validators.pattern(urlPattern)],
+        updateOn: 'blur'  // Only validate when user leaves the field
+      }],
       identifier: [safeId]
     })
 

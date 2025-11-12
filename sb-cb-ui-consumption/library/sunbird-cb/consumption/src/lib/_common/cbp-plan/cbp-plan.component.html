@@ -21,8 +21,14 @@
                         [style.backgroundColor]="objectData?.listItem?.background">
                         <div class="cbp-item-title">{{item?.title}}</div>
                         <div class="flex download-sec">
-                            <div class="flex gap-3 cbp-download" (click)="downloadCBPPlan(item)">
-                                <img [src]="objectData?.downloadIcon">Download
+                            <div class="flex gap-3">
+                                <ng-container *ngIf="item?.downloaUrl">
+                                    <button align-end mat-button class="btn-common btn-secondary cursor-pointer"
+                                        type="button" (click)="downloadCBPPlan(item)">
+                                        <mat-icon>download</mat-icon>
+                                        Download
+                                    </button>
+                                </ng-container>
                             </div>
                         </div>
                     </div>
