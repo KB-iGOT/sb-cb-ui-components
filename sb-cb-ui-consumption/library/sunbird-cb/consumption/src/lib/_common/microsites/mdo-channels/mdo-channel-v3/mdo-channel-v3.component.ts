@@ -410,7 +410,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
       }
     }
-
+    debugger
     const dialogRef = this.dialog.open(EditorDialogComponent, {
       width: dialogWidth,
       data: {

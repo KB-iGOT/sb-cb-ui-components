@@ -64,6 +64,7 @@ import { StripSectionCreateComponent } from './components/strip-section-create/s
 import { StripAddContentComponent } from './components/strip-add-content/strip-add-content.component'
 import { AddTabDialogComponent } from './components/add-tab-dialog/add-tab-dialog.component'
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component'
+import { EventsCalendarModule } from '../../events-calendar/events-calendar.module'
 
 @NgModule({
   declarations: [
@@ -135,7 +136,8 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     HttpClientModule,
     MatIconModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    EventsCalendarModule
   ],
   exports: [
     TopSectionComponent,

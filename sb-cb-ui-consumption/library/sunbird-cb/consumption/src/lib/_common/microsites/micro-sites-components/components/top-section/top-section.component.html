@@ -1,5 +1,12 @@
 <div class="hidden md:block" *ngIf="!isMobile">
   <div class="web-banner-background" [style.background]="data?.background">
+    <div class="p-4 flex flex-center" *ngIf="isEdit">
+      <button mat-button class="btn-common btn-secondary"
+        (click)="openEditor('background', 'Background', data?.background)" aria-label="Edit Background" type="button">
+        <i class="material-icons">edit</i>
+        <span> Edit Background</span>
+      </button>
+    </div>
     <div class="flex items-center justify-center">
       <div class="container">
         <div *ngIf="!isEdit" class="flex sticky-logo-square" [style.width]="stripWidth"></div>
