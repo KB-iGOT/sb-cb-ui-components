@@ -105,7 +105,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     if (!this.cadreConfigData) {
-      await this.fetchCadreConfigData();
+      this.fetchCadreConfigData();
     }
 
     if (this.content && !this.content?.externalId) {
@@ -255,11 +255,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.processCadreConfigMapping(userGroupIndex);
     const conditions = this.ruleConditions(userGroupIndex);
     const accessSetting = this.content?.accessSetting;
-
-    if (conditions?.value?.length === 8) {
-      this.callSnackbar("You have already added all types of conditions", "error");
-      return;
-    }
 
     // Check if organization/users already exists based on access setting
     if (accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC || accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER) {
@@ -836,11 +831,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.isApplyBtnDisabled = true;
 
             // Update secure setting for moderated content
-            // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
             if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live" && !this.isCuratedContentWithExternalId) {
               this.updateContentAccessSetting();
             }
-            // }
+
+            // Remove initialstate for saved content for Marketplace external content on live status 
+            if(this.content?.status === 'live' && this.isCuratedContentWithExternalId) {
+              localStorage.removeItem(`${NsAccessControlConfig.Application.Creation_Portal}_access_control_${this.contentId}`)
+            }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
@@ -993,6 +991,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.userGroup.removeAt(0);
     }
 
+    // Save initial state if not already saved for live content
+    if (!this.getInitialState()) {
+      this.saveInitialState(accessControl?.userGroups);
+    }
+
     accessControl.userGroups.forEach((group: any, index: number) => {
       const conditions = this.fb.array([]) as any;
 
@@ -1066,9 +1069,39 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           group.get("conditions")?.disable();
           group.get("isUserGroupDisabled")?.setValue(true);
         }
+
         this.isSaveFltrBtnDisabled = true;
         this.isApplyBtnDisabled = false;
       }
+
+      // For marketplace curated content with external id, disable only those user groups which were in live
+       if (this.content?.status === "live" && this.isCuratedContentWithExternalId) {
+          // Get initial state from localStorage
+          const initialUserGroups = this.getInitialState();
+
+          if (initialUserGroups) {
+            // Only disable user groups that were in the initial state
+            const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
+
+            for (let i = 0; i < this.userGroup.length; i++) {
+              const group = this.userGroup.at(i);
+              const groupId = group.get("name")?.value;
+
+              // If this group was in the initial state, disable it
+              if (initialGroupIds.includes(groupId)) {
+                group.get("id")?.disable();
+                group.get("name")?.disable();
+                group.get("description")?.disable();
+                group.get("conditions")?.disable();
+                group.get("isUserGroupDisabled")?.setValue(true);
+              }
+            }
+          }
+
+          this.isSaveFltrBtnDisabled = true;
+          this.isApplyBtnDisabled = false;
+        }
+
       setTimeout(() => {
         this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
         this.setupFormChangeDetection();
@@ -1474,8 +1507,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private saveInitialState(userGroups: any[]): void {
-    if (this.config?.application === this.MDO_APPLICATION && 
-        this.config?.mdoContent?.status === "Live") {
+    if ((this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") || 
+    (this.content?.status === "live" && this.isCuratedContentWithExternalId)) {
       const state = {
         initialUserGroups: userGroups,
         timestamp: new Date().getTime()
@@ -1498,7 +1531,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.userGroup.removeAt(0);
     }
 
-    // Save initial state if not already saved
+    // Save initial state if not already saved for live content
     if (!this.getInitialState()) {
       this.saveInitialState(tempAccessControl.userGroups);
     }
