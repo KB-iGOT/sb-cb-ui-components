@@ -449,6 +449,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'keyHighlights':
         return '800px'
       case 'announcementsConfig':
+      case 'lookerConfig':
       case 'image':
         return '600px'
       default:
@@ -788,6 +789,42 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
       if (updated) {
         console.log('Successfully updated cbpPlan configuration')
+      }
+    }
+
+    // Special handling for lookerConfig
+    else if (fieldName === 'lookerConfig' && sectionType === 'lookerSection') {
+      console.log('Handling lookerConfig special case')
+      console.log('newValue received:', newValue)
+
+      // lookerConfig is in the lookerSection column data
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          if (column.key === 'lookerSection') {
+            console.log('Found lookerSection column. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+            column.data.enabled = newValue.enabled
+            if (!column.data.header) {
+              column.data.header = {}
+            }
+            column.data.header.headerText = newValue.header?.headerText || ''
+            column.data.header.description = newValue.header?.description || ''
+            column.data.desktopHeight = newValue.desktopHeight ? `${newValue.desktopHeight}px` : '600px'
+            column.data.mobileHeight = newValue.mobileHeight ? `${newValue.mobileHeight}px` : '400px'
+            column.data.lookerProDesktopUrl = newValue.lookerProDesktopUrl
+            column.data.lookerProMobileUrl = newValue.lookerProMobileUrl
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+      if (updated) {
+        console.log('Successfully updated looker configuration')
       }
     }
 

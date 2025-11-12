@@ -288,6 +288,77 @@
         </div>
       </div>
 
+      <!-- Looker Configuration -->
+      <div *ngSwitchCase="'lookerConfig'" class="complex-editor">
+        <div class="looker-editor">
+          <h4>Looker Configuration</h4>
+
+          <!-- Enable/Disable Toggle -->
+          <div class="form-row">
+            <mat-slide-toggle formControlName="enabled">
+              Enable Looker Section
+            </mat-slide-toggle>
+          </div>
+
+          <!-- Header Title -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Header Title</mat-label>
+            <input matInput formControlName="headerText" placeholder="Enter header title" maxlength="70">
+            <mat-hint align="end">{{editorForm.get('headerText')?.value?.length || 0}}/70</mat-hint>
+          </mat-form-field>
+
+          <!-- Header Description -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Header Description</mat-label>
+            <textarea matInput formControlName="headerDescription" placeholder="Enter header description" rows="3"
+              maxlength="300"></textarea>
+            <mat-hint align="end">{{editorForm.get('headerDescription')?.value?.length || 0}}/300</mat-hint>
+          </mat-form-field>
+
+          <!-- Desktop Height -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Desktop Height (px)</mat-label>
+            <input matInput type="number" formControlName="desktopHeight" placeholder="Enter desktop height">
+            <mat-hint>Height of the iframe on desktop devices</mat-hint>
+          </mat-form-field>
+
+          <!-- Mobile Height -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mobile Height (px)</mat-label>
+            <input matInput type="number" formControlName="mobileHeight" placeholder="Enter mobile height">
+            <mat-hint>Height of the iframe on mobile devices</mat-hint>
+          </mat-form-field>
+
+          <!-- Desktop URL -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Desktop URL</mat-label>
+            <input matInput type="url" formControlName="lookerProDesktopUrl"
+              placeholder="https://lookerstudio.google.com/...">
+            <mat-hint>Must start with https://lookerstudio.google.com/</mat-hint>
+            <mat-error *ngIf="editorForm.get('lookerProDesktopUrl')?.hasError('required')">
+              Desktop URL is required
+            </mat-error>
+            <mat-error *ngIf="editorForm.get('lookerProDesktopUrl')?.hasError('pattern')">
+              URL must start with https://lookerstudio.google.com/
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Mobile URL -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mobile URL</mat-label>
+            <input matInput type="url" formControlName="lookerProMobileUrl"
+              placeholder="https://lookerstudio.google.com/...">
+            <mat-hint>Must start with https://lookerstudio.google.com/</mat-hint>
+            <mat-error *ngIf="editorForm.get('lookerProMobileUrl')?.hasError('required')">
+              Mobile URL is required
+            </mat-error>
+            <mat-error *ngIf="editorForm.get('lookerProMobileUrl')?.hasError('pattern')">
+              URL must start with https://lookerstudio.google.com/
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
       <!-- Announcements Configuration -->
       <div *ngSwitchCase="'announcementsConfig'" class="complex-editor">
         <div class="announcements-editor">
