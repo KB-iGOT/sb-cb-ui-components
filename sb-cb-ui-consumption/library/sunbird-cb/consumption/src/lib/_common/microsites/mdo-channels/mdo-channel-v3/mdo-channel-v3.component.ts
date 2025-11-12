@@ -7,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 import * as _ from 'lodash'
 import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { EditorDialogComponent } from '../../micro-sites-components/components/editor-dialog/editor-dialog.component'
 import { SlwConfigDialogComponent } from '../../micro-sites-components/components/slw-config-dialog/slw-config-dialog.component'
 import { cloneDeep } from 'lodash'
@@ -65,7 +66,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   private _eventCallbackFn: (event: any) => void
   private injectorCache: Map<string, Injector> = new Map();
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -79,6 +79,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     public microSiteV3Service: MicrositeV3Service,
+    private snackBar: MatSnackBar,
   ) {
     this.isMobile = this.utilsSvc.isMobile;
 
@@ -255,8 +256,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Update global injector data
     (window as any).__INJECTOR_DATA = {
-      isEditable: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit,
-      isEdit: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit,
+      isEditable: (column.key === 'weekHighlights' || column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit,
+      isEdit: (column.key === 'weekHighlights' || column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit,
       eventCallback: this._eventCallbackFn,
       sectionData: column.data,
       channelName: this.channelName,
@@ -270,13 +271,11 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         { provide: 'channelName', useValue: this.channelName },
         { provide: 'orgId', useValue: this.orgId },
         { provide: 'isMobile', useValue: this.isMobile },
-        // Always set isEdit and isEditable to true for userProgress and speakers components
-        { provide: 'isEdit', useValue: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit },
+        { provide: 'isEdit', useValue: (column.key === 'weekHighlights' || column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit },
         { provide: 'slwConfiguration', useValue: this.slwConfiguration },
         { provide: 'providerId', useValue: this.orgId },
         { provide: 'eventCallback', useValue: this._eventCallbackFn },
-        // Set isEditable to true for userProgress, speakers or when in edit mode
-        { provide: 'isEditable', useValue: (column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit }
+        { provide: 'isEditable', useValue: (column.key === 'weekHighlights' || column.key === 'userProgress' || column.key === 'speakers') ? true : this.isEdit }
       ],
       parent: this.injector
     })
@@ -410,7 +409,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
       }
     }
-
     const dialogRef = this.dialog.open(EditorDialogComponent, {
       width: dialogWidth,
       data: {
@@ -449,7 +447,9 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       case 'keyHighlights':
         return '800px'
       case 'announcementsConfig':
+      case 'lookerConfig':
       case 'image':
+      case 'color':
         return '600px'
       default:
         return '400px'
@@ -791,6 +791,42 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       }
     }
 
+    // Special handling for lookerConfig
+    else if (fieldName === 'lookerConfig' && sectionType === 'lookerSection') {
+      console.log('Handling lookerConfig special case')
+      console.log('newValue received:', newValue)
+
+      // lookerConfig is in the lookerSection column data
+      for (const section of updatedSections) {
+        for (const column of section.column) {
+          if (column.key === 'lookerSection') {
+            console.log('Found lookerSection column. Column key:', column.key)
+            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
+
+            if (!column.data) {
+              column.data = {}
+            }
+            column.data.enabled = newValue.enabled
+            if (!column.data.header) {
+              column.data.header = {}
+            }
+            column.data.header.headerText = newValue.header?.headerText || ''
+            column.data.header.description = newValue.header?.description || ''
+            column.data.desktopHeight = newValue.desktopHeight ? `${newValue.desktopHeight}px` : '600px'
+            column.data.mobileHeight = newValue.mobileHeight ? `${newValue.mobileHeight}px` : '400px'
+            column.data.lookerProDesktopUrl = newValue.lookerProDesktopUrl
+            column.data.lookerProMobileUrl = newValue.lookerProMobileUrl
+            updated = true
+            break
+          }
+        }
+        if (updated) break
+      }
+      if (updated) {
+        console.log('Successfully updated looker configuration')
+      }
+    }
+
     // Regular handling for other field types
     if (!updated) {
       // Find the relevant section and column
@@ -892,8 +928,8 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
           if (type === 'publish') {
             const updateOrgBookmarkPromises: Promise<any>[] = []
             updateOrgBookmarkPromises.push(this.updateOrgBookmark())
-            await Promise.all(updateOrgBookmarkPromises)
           }
+          this.snackBar.open('Microsite Created successfully')
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()
@@ -913,7 +949,11 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             const updateOrgBookmarkPromises: Promise<any>[] = []
             updateOrgBookmarkPromises.push(this.updateOrgBookmark())
             await Promise.all(updateOrgBookmarkPromises)
+            this.snackBar.open('Microsite published successfully')
+          } else {
+            this.snackBar.open('Microsite updated successfully')
           }
+
           console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()

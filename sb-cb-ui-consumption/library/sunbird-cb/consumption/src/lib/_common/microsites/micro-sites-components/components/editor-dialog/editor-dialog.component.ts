@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core'
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core'
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
@@ -65,7 +65,8 @@ export class EditorDialogComponent implements OnInit {
     private micrositeService: MicrositeV3Service,
     public dialogRef: MatDialogRef<EditorDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    public configSvc: ConfigurationsService
+    public configSvc: ConfigurationsService,
+    private cdr: ChangeDetectorRef
   ) {
     // Initialize with field type from data
     this.formType = data.fieldType || 'text'
@@ -93,6 +94,14 @@ export class EditorDialogComponent implements OnInit {
 
   get isMultipleImages(): boolean {
     return this.formType === 'image' && this.editorForm && this.editorForm.get('items') !== null
+  }
+
+  get isColorMode(): boolean {
+    return this.editorForm?.get('inputType')?.value === 'color'
+  }
+
+  get isImageMode(): boolean {
+    return this.editorForm?.get('inputType')?.value === 'image'
   }
 
   ngOnInit() {
@@ -138,7 +147,7 @@ export class EditorDialogComponent implements OnInit {
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
       title: [''],
-      downloaUrl: ['']
+      downloaUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]]
     }))
   }
 
@@ -287,8 +296,9 @@ export class EditorDialogComponent implements OnInit {
         })
         break
       case 'color':
+        // Treat as banner image field with URL validation
         this.editorForm = this.fb.group({
-          value: [this.data.value, [Validators.required, Validators.pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)]]
+          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
         })
         break
       case 'image':
@@ -415,13 +425,44 @@ export class EditorDialogComponent implements OnInit {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
               title: [item.title || ''],
-              downloaUrl: [item.downloaUrl || '']
+              downloaUrl: [item.downloaUrl || '', [Validators.pattern(/^https?:\/\/.+/)]]
             }))
           })
         } else {
           // Add one empty item by default
           this.addCbpPlanItem()
         }
+        break
+      case 'lookerConfig':
+        // Get looker data or set defaults
+        const lookerValue = this.data.value || {}
+        const headerData = lookerValue.header || {}
+
+        console.log('EditorDialog - lookerConfig - received data.value:', this.data.value)
+
+        // Parse height values - remove 'px' suffix if present
+        const parseHeight = (value: any, defaultValue: number): number => {
+          if (typeof value === 'string') {
+            return parseInt(value.replace('px', ''), 10) || defaultValue
+          }
+          return value || defaultValue
+        }
+
+        this.editorForm = this.fb.group({
+          enabled: [lookerValue.enabled !== undefined ? lookerValue.enabled : true],
+          headerText: [headerData.headerText || '', [Validators.maxLength(100)]],
+          headerDescription: [headerData.description || '', [Validators.maxLength(300)]],
+          desktopHeight: [parseHeight(lookerValue.desktopHeight, 600), [Validators.required, Validators.min(100)]],
+          mobileHeight: [parseHeight(lookerValue.mobileHeight, 400), [Validators.required, Validators.min(100)]],
+          lookerProDesktopUrl: [lookerValue.lookerProDesktopUrl || '', [
+            Validators.required,
+            Validators.pattern(/^https:\/\/lookerstudio\.google\.com\/.*$/)
+          ]],
+          lookerProMobileUrl: [lookerValue.lookerProMobileUrl || '', [
+            Validators.required,
+            Validators.pattern(/^https:\/\/lookerstudio\.google\.com\/.*$/)
+          ]]
+        })
         break
       case 'announcementsConfig':
         // Get announcements data or set defaults
@@ -520,13 +561,16 @@ export class EditorDialogComponent implements OnInit {
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
 
-    // URL validation pattern
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+    // Simplified URL validation pattern
+    const urlPattern = /^https?:\/\/.+/
 
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
-      profileImage: [safeImage, [Validators.pattern(urlPattern)]],
+      profileImage: [safeImage, {
+        validators: [Validators.pattern(urlPattern)],
+        updateOn: 'blur'  // Only validate when user leaves the field
+      }],
       identifier: [safeId]
     })
 
@@ -734,6 +778,63 @@ export class EditorDialogComponent implements OnInit {
         this.uploadStatus = 'Upload successful!'
 
         // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('Upload error:', error)
+      }
+    })
+  }
+
+  // Color picker change handler
+  onColorPickerChange(event: any) {
+    const hexColor = event.target.value
+    this.editorForm.get('value')?.setValue(hexColor)
+  }
+
+  // Banner image upload for color/banner field
+  onBannerImageSelected(event: any) {
+    const file = event.target.files[0]
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = ''
+        return
+      }
+
+      // Validate file size (max 700KB)
+      const maxSize = 700 * 1024
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 700KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = ''
+        return
+      }
+
+      this.uploadBannerImage(file)
+    }
+  }
+
+  uploadBannerImage(file: File) {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading...'
+
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
+        this.editorForm.get('value')?.setValue(transformedUrl)
+        this.uploadStatus = 'Upload successful!'
         setTimeout(() => {
           this.uploadStatus = ''
         }, 3000)
@@ -1096,6 +1197,27 @@ export class EditorDialogComponent implements OnInit {
         const formValue = this.editorForm.value
         this.data.value.list = formValue.list
 
+        this.dialogRef.close(this.data.value)
+      }
+    } else if (this.formType === 'lookerConfig') {
+      if (this.editorForm.valid) {
+        // Return looker configuration data
+        const formValue = this.editorForm.value
+        this.data.value.enabled = formValue.enabled
+
+        // Update header data
+        if (!this.data.value.header) {
+          this.data.value.header = {}
+        }
+        this.data.value.header.headerText = formValue.headerText
+        this.data.value.header.description = formValue.headerDescription
+
+        this.data.value.desktopHeight = formValue.desktopHeight
+        this.data.value.mobileHeight = formValue.mobileHeight
+        this.data.value.lookerProDesktopUrl = formValue.lookerProDesktopUrl
+        this.data.value.lookerProMobileUrl = formValue.lookerProMobileUrl
+
+        console.log('Submitting lookerConfig:', this.data.value)
         this.dialogRef.close(this.data.value)
       }
     } else if (this.formType === 'announcementsConfig') {

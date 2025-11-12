@@ -48,10 +48,6 @@ export class SpeakersComponent implements OnInit {
     } catch (e) {
       console.error('Error getting values from injector', e)
     }
-
-    // Always make edit functionality available
-    this.isEdit = true
-    this.isEditable = true
   }
 
   ngOnInit() {

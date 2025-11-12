@@ -9,7 +9,7 @@ import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrol
 export class HighlightsOfWeekComponent implements OnInit, OnChanges {
 
   @Input() objectData: any
-  @Input() isEditable: boolean = true; // Default to true
+  @Input() isEdit: boolean = false;
   @Output() editEvent = new EventEmitter<any>();
 
   currentIndex = 0;
@@ -24,12 +24,15 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
   constructor() {
     console.log('HighlightsOfWeekComponent constructor')
 
-    // Always set isEditable to true for testing
-    this.isEditable = true
-
     // Manual property check from window.__INJECTOR__ (which will be set by MdoChannelV3Component)
     try {
       const injectorData = (window as any).__INJECTOR_DATA || {}
+
+      // Set isEdit from global injector data
+      if (injectorData.isEdit !== undefined) {
+        this.isEdit = injectorData.isEdit
+        console.log('isEdit set from __INJECTOR_DATA:', this.isEdit)
+      }
 
       // Try to find the eventCallback
       if (typeof injectorData.eventCallback === 'function') {
@@ -52,16 +55,20 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
 
     // Check if we're injected with an eventCallback (from parent MDO component)
     try {
+      // Check for isEdit from __INJECTOR_DATA again in ngOnInit
+      const injectorData = (window as any).__INJECTOR_DATA || {}
+      if (injectorData.isEdit !== undefined) {
+        this.isEdit = injectorData.isEdit
+        console.log('isEdit updated in ngOnInit:', this.isEdit)
+      }
+
       // Try multiple methods to get the callback
       this.eventCallback = (window as any).INJECTED_CALLBACKS?.['highlightsOfWeek'] ||
         (window as any).__INJECTOR_DATA?.eventCallback ||
         null
 
       console.log('Found eventCallback:', !!this.eventCallback)
-
-      // Force isEditable to true for testing
-      this.isEditable = true
-      console.log('isEditable set to:', this.isEditable)
+      console.log('Final isEdit value:', this.isEdit)
     } catch (e) {
       console.error('Error finding event callback:', e)
     }
@@ -117,7 +124,6 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
     }
 
     console.log('Highlights data:', highlightsData)
-    console.log('isEditable:', this.isEditable)
     console.log('eventCallback exists:', !!this.eventCallback)
 
     // Option 1: Use EventEmitter if the component is used with a direct parent-child relationship
