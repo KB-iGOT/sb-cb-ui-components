@@ -238,6 +238,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     let mode = '';
     if (
       (isReviewer && content.reviewStatus && (content.reviewStatus.toLowerCase() === 'inreview' || content.reviewStatus.toLowerCase() === 'reviewed') && content.status && content.status.toLowerCase() === 'review')||
+      (isPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus) ||
       (isSpvPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && 
         (
           content.reviewStatus.toLowerCase() === 'inreview' || 
