@@ -1,6 +1,6 @@
 <div class="nlw-speakers-wrapper px-4 md:px-0 my-4 md:my-0">
     <!-- Edit button - always visible for speakers component -->
-    <div class="edit-section">
+    <div class="edit-section" *ngIf="isEdit">
         <button class="edit-icon" (click)="onEdit()" matTooltip="Edit Speakers" aria-label="Edit Speakers">
             <mat-icon>edit</mat-icon>
         </button>
@@ -43,7 +43,7 @@
                                 <div class="flex items-center justify-center">
                                     <div class="speaker-description">{{item.description}}</div>
                                 </div>
-                                <div class="flex items-center justify-center mt-2">
+                                <div class="flex items-center justify-center mt-2" *ngIf="item?.identifier">
                                     <button class="view-event-btn" (click)="goToEvent(item)">
                                         View Event
                                     </button>

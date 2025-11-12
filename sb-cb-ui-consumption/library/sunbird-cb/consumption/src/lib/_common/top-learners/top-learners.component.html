@@ -1,6 +1,6 @@
 <div class="top-learners-main-wrapper relative">
     <!-- Always show the edit button even when component is disabled -->
-    <div class="edit-section" *ngIf="isEdit || isEditable">
+    <div class="edit-section" *ngIf="isEdit">
         <button class="edit-icon" (click)="onEdit()" matTooltip="Edit Top Learners" aria-label="Edit Top Learners">
             <mat-icon>edit</mat-icon>
         </button>
@@ -135,7 +135,7 @@
     </ng-container>
 
     <!-- Show disabled message when component is disabled -->
-    <div class="disabled-message" *ngIf="objectData?.enabled === false && (isEdit || isEditable)">
+    <div class="disabled-message" *ngIf="objectData?.enabled === false && (isEdit)">
         <div class="message-content">
             <mat-icon>visibility_off</mat-icon>
             <span>Top Learners section is currently disabled</span>

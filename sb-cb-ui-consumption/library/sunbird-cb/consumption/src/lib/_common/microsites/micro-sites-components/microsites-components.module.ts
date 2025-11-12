@@ -49,6 +49,7 @@ import { MatLegacySelectModule as MatSelectModule } from '@angular/material/lega
 import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
+import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { SlwConfigDialogComponent } from './components/slw-config-dialog/slw-config-dialog.component'
 import { ActionItemsComponent } from './components/action-items/action-items.component'
@@ -132,6 +133,7 @@ import { EventsCalendarModule } from '../../events-calendar/events-calendar.modu
     MatPaginatorModule,
     MatCardModule,
     MatCheckboxModule,
+    MatRadioModule,
     DragDropModule,
     HttpClientModule,
     MatIconModule,

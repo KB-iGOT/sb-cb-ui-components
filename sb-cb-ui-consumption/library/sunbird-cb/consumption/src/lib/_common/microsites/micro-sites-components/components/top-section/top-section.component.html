@@ -1,5 +1,5 @@
 <div class="hidden md:block" *ngIf="!isMobile">
-  <div class="web-banner-background" [style.background]="data?.background">
+  <div class="web-banner-background" [ngStyle]="getBackgroundStyle(data?.background)">
     <div class="p-4 flex flex-center" *ngIf="isEdit">
       <button mat-button class="btn-common btn-secondary"
         (click)="openEditor('background', 'Background', data?.background)" aria-label="Edit Background" type="button">

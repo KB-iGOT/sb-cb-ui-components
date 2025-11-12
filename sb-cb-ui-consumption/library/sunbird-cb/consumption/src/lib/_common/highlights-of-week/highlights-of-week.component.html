@@ -7,9 +7,11 @@
             </div>
         </div>
         <div class="flex items-center">
-            <button mat-icon-button aria-label="Edit Week Highlights" class="edit-icon" (click)="onEditClick()">
-                <mat-icon>edit</mat-icon>
-            </button>
+            <ng-container *ngIf="isEdit">
+                <button mat-icon-button aria-label="Edit Week Highlights" class="edit-icon" (click)="onEditClick()">
+                    <mat-icon>edit</mat-icon>
+                </button>
+            </ng-container>
             <div class="block md:hidden">
                 <mat-icon (click)="toggleWeekHightlits()">expand_more</mat-icon>
             </div>
