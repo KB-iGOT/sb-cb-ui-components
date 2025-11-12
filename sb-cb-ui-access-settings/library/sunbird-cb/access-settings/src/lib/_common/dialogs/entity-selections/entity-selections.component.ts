@@ -555,7 +555,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
 
     // For isCCA = false , fetch designations within their orgs only
-    if(!this.isCCA) {
+    if(!this.isCCA && this.application === NsAccessControlConfig.Application.MDO) {
       this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
     } else {
       this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;

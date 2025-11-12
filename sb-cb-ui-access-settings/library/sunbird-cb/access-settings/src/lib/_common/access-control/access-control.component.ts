@@ -54,9 +54,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   cadreConfigData: any;
   isSaveFltrBtnDisabled = true;
-  isApplyBtnDisabled = true;
   isAddUserGroupBtnDisabled = false;
-  isApplying = false;
   isSaving = false;
   userCount: any = {};
 
@@ -802,8 +800,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (!validated) return;
     }
 
-    if (this.content?.status === "Live") this.isApplying = true;
-    else this.isSaving = true;
+    this.isSaving = true;
 
     const payload = await this.processRequestCreation();
 
@@ -814,7 +811,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isSaving = false;
 
       this.isAddUserGroupBtnDisabled = true
-      this.isApplying = false
       return;
     }
 
@@ -828,7 +824,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
             this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
             this.isSaveFltrBtnDisabled = true;
-            this.isApplyBtnDisabled = true;
 
             // Update secure setting for moderated content
             if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live" && !this.isCuratedContentWithExternalId) {
@@ -842,13 +837,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
-          if (this.content?.status === "Live") this.isApplying = false;
-          else this.isSaving = false, this.isApplying = false;
+          this.isSaving = false
         },
         error: () => {
           this.callSnackbar("Could not save access control, Please try again.", "error");
-          if (this.content?.status === "Live") this.isApplying = false;
-          else this.isSaving = false;
+          this.isSaving = false
         }
       });
   }
@@ -972,7 +965,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
       } else {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
-        this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
       }
     });
   }
@@ -1071,7 +1063,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
 
         this.isSaveFltrBtnDisabled = true;
-        this.isApplyBtnDisabled = false;
       }
 
       // For marketplace curated content with external id, disable only those user groups which were in live
@@ -1099,7 +1090,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
 
           this.isSaveFltrBtnDisabled = true;
-          this.isApplyBtnDisabled = false;
         }
 
       setTimeout(() => {
@@ -1211,7 +1201,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // reviewer(readonly)
       this.accessControlCriteriaSelection.readOnly = true;
       this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
     } else if (
       (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
       (this.config.userConfig.userRoles.has("spv_publisher") ||
@@ -1222,7 +1211,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // publisher (disabled all)
       this.accessControlCriteriaSelection.readOnly = true;
       this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
     }
   }
 
@@ -1616,7 +1604,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         
         this.isSaveFltrBtnDisabled = true;
-        this.isApplyBtnDisabled = false;
       }
 
         // Check if add condition should be disabled for this user group
