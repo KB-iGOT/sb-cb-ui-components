@@ -252,13 +252,16 @@
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Title</mat-label>
-                    <input matInput formControlName="title" placeholder="Enter document title" maxlength="75">
-                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/75</mat-hint>
+                    <input matInput formControlName="title" placeholder="Enter document title" maxlength="100">
+                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/100</mat-hint>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>PDF URL</mat-label>
                     <input matInput formControlName="downloaUrl" placeholder="Enter PDF URL or upload a file">
+                    <mat-error *ngIf="item.get('downloaUrl')?.hasError('pattern')">
+                      Please enter a valid URL (must start with http:// or https://)
+                    </mat-error>
                   </mat-form-field>
 
                   <div class="upload-section">
