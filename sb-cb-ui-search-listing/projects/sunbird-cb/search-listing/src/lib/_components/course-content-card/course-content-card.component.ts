@@ -238,6 +238,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     let mode = '';
     if (
       (isReviewer && content.reviewStatus && (content.reviewStatus.toLowerCase() === 'inreview' || content.reviewStatus.toLowerCase() === 'reviewed') && content.status && content.status.toLowerCase() === 'review')||
+      (isPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus) ||
       (isSpvPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && 
         (
           content.reviewStatus.toLowerCase() === 'inreview' || 
@@ -258,8 +259,8 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
       this.searchListingService.getCourseDetails(content.identifier, mode).subscribe((res: any) => {
         if (res && res.params && res.params.status === 'successful') {
 
-          const status = (content && content.status) ? String(content.status) : "";
-          const reviewStatus = (content && content.reviewStatus) ? String(content.reviewStatus) : "";
+          const status = (content && content.status) ? String(content.status).toLocaleLowerCase() : "";
+          const reviewStatus = (content && content.reviewStatus) ? String(content.reviewStatus).toLocaleLowerCase() : "";
 
           const showMessage = (msg: string) => {
             try {
@@ -371,8 +372,8 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
             if (content.status && content.status.toLowerCase() === 'live') {
               goToOverviewV2();
               return;
-            } else if (content.status === 'review' && reviewStatus === 'reviewed') {
-              goToOverviewV2();
+            } else if (status=== 'review' && reviewStatus === 'reviewed') {
+              goToEditor();
               return;
             }
             showMessage(accessMessage);

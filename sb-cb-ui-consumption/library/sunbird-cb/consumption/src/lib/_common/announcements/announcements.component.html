@@ -5,7 +5,7 @@
     <div class="flex item-center key-logo">
         <div class="key-heading" [style.backgroundColor]="objectData?.header?.background"
             [style.color]="objectData?.header?.color">
-            {{translateLabels(objectData?.title, 'events')}}
+            {{objectData?.title}}
         </div>
         <button *ngIf="isEdit" mat-icon-button class="edit-icon" (click)="onEdit()">
             <mat-icon>edit</mat-icon>
@@ -68,7 +68,7 @@
     <div class="flex item-center key-logo pt-1">
         <div class="key-heading" [style.backgroundColor]="objectData?.header?.background"
             [style.color]="objectData?.header?.color">
-            {{translateLabels(objectData?.title, 'events')}}
+            {{objectData?.title}}
         </div>
     </div>
     <div class="key-list-container" [style.borderColor]="objectData?.panelborder"

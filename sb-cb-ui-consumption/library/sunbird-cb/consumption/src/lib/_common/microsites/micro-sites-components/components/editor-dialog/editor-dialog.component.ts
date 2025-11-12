@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core'
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core'
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
@@ -65,7 +65,8 @@ export class EditorDialogComponent implements OnInit {
     private micrositeService: MicrositeV3Service,
     public dialogRef: MatDialogRef<EditorDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    public configSvc: ConfigurationsService
+    public configSvc: ConfigurationsService,
+    private cdr: ChangeDetectorRef
   ) {
     // Initialize with field type from data
     this.formType = data.fieldType || 'text'
@@ -93,6 +94,14 @@ export class EditorDialogComponent implements OnInit {
 
   get isMultipleImages(): boolean {
     return this.formType === 'image' && this.editorForm && this.editorForm.get('items') !== null
+  }
+
+  get isColorMode(): boolean {
+    return this.editorForm?.get('inputType')?.value === 'color'
+  }
+
+  get isImageMode(): boolean {
+    return this.editorForm?.get('inputType')?.value === 'image'
   }
 
   ngOnInit() {
@@ -287,8 +296,9 @@ export class EditorDialogComponent implements OnInit {
         })
         break
       case 'color':
+        // Treat as banner image field with URL validation
         this.editorForm = this.fb.group({
-          value: [this.data.value, [Validators.required, Validators.pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)]]
+          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
         })
         break
       case 'image':
@@ -768,6 +778,63 @@ export class EditorDialogComponent implements OnInit {
         this.uploadStatus = 'Upload successful!'
 
         // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('Upload error:', error)
+      }
+    })
+  }
+
+  // Color picker change handler
+  onColorPickerChange(event: any) {
+    const hexColor = event.target.value
+    this.editorForm.get('value')?.setValue(hexColor)
+  }
+
+  // Banner image upload for color/banner field
+  onBannerImageSelected(event: any) {
+    const file = event.target.files[0]
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = ''
+        return
+      }
+
+      // Validate file size (max 700KB)
+      const maxSize = 700 * 1024
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 700KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = ''
+        return
+      }
+
+      this.uploadBannerImage(file)
+    }
+  }
+
+  uploadBannerImage(file: File) {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading...'
+
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
+        this.editorForm.get('value')?.setValue(transformedUrl)
+        this.uploadStatus = 'Upload successful!'
         setTimeout(() => {
           this.uploadStatus = ''
         }, 3000)
