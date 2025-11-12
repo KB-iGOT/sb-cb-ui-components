@@ -67,6 +67,9 @@ export class PaginationComponent implements OnInit, OnChanges {
     let paginationLength = this.paginationDup(this.currentPage, dividedPagination);
 
     let currentIndex = this.showingArray[this.currentPage - 1];
+    if (currentIndex === undefined) {
+      currentIndex = this.showingArray[this.showingArray.length - 1]
+    }
     let lowerPagination = this.totalItemsCount ? currentIndex[0] + 1 : "";
     let upperPagination = this.totalItemsCount ? currentIndex[1] : "";
 
