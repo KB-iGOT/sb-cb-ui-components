@@ -423,6 +423,37 @@ export class EditorDialogComponent implements OnInit {
           this.addCbpPlanItem()
         }
         break
+      case 'lookerConfig':
+        // Get looker data or set defaults
+        const lookerValue = this.data.value || {}
+        const headerData = lookerValue.header || {}
+
+        console.log('EditorDialog - lookerConfig - received data.value:', this.data.value)
+
+        // Parse height values - remove 'px' suffix if present
+        const parseHeight = (value: any, defaultValue: number): number => {
+          if (typeof value === 'string') {
+            return parseInt(value.replace('px', ''), 10) || defaultValue
+          }
+          return value || defaultValue
+        }
+
+        this.editorForm = this.fb.group({
+          enabled: [lookerValue.enabled !== undefined ? lookerValue.enabled : true],
+          headerText: [headerData.headerText || '', [Validators.maxLength(100)]],
+          headerDescription: [headerData.description || '', [Validators.maxLength(300)]],
+          desktopHeight: [parseHeight(lookerValue.desktopHeight, 600), [Validators.required, Validators.min(100)]],
+          mobileHeight: [parseHeight(lookerValue.mobileHeight, 400), [Validators.required, Validators.min(100)]],
+          lookerProDesktopUrl: [lookerValue.lookerProDesktopUrl || '', [
+            Validators.required,
+            Validators.pattern(/^https:\/\/lookerstudio\.google\.com\/.*$/)
+          ]],
+          lookerProMobileUrl: [lookerValue.lookerProMobileUrl || '', [
+            Validators.required,
+            Validators.pattern(/^https:\/\/lookerstudio\.google\.com\/.*$/)
+          ]]
+        })
+        break
       case 'announcementsConfig':
         // Get announcements data or set defaults
         const announcementsValue = this.data.value || {}
@@ -1096,6 +1127,27 @@ export class EditorDialogComponent implements OnInit {
         const formValue = this.editorForm.value
         this.data.value.list = formValue.list
 
+        this.dialogRef.close(this.data.value)
+      }
+    } else if (this.formType === 'lookerConfig') {
+      if (this.editorForm.valid) {
+        // Return looker configuration data
+        const formValue = this.editorForm.value
+        this.data.value.enabled = formValue.enabled
+
+        // Update header data
+        if (!this.data.value.header) {
+          this.data.value.header = {}
+        }
+        this.data.value.header.headerText = formValue.headerText
+        this.data.value.header.description = formValue.headerDescription
+
+        this.data.value.desktopHeight = formValue.desktopHeight
+        this.data.value.mobileHeight = formValue.mobileHeight
+        this.data.value.lookerProDesktopUrl = formValue.lookerProDesktopUrl
+        this.data.value.lookerProMobileUrl = formValue.lookerProMobileUrl
+
+        console.log('Submitting lookerConfig:', this.data.value)
         this.dialogRef.close(this.data.value)
       }
     } else if (this.formType === 'announcementsConfig') {
