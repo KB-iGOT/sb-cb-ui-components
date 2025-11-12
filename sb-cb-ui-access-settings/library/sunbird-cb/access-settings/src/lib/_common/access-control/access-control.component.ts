@@ -1658,7 +1658,24 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return !!(this.content && this.content.externalId);
   }
 
-  get isContentPublished(): boolean {
-    return this.content?.externalId && this.content?.status?.toLowerCase() === 'live'
+  saveAccessSettings(): void {
+    const isLiveContent = this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "live";
+    const isMdoLiveContent = this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live";
+    const isCuratedLiveWithExternalId = this.content?.status === "live" && this.isCuratedContentWithExternalId;
+
+    if (isLiveContent || isMdoLiveContent || isCuratedLiveWithExternalId) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "520px",
+        data: { type: "confirm-apply-accesscontrol-for-live" }
+      });
+
+      dialogRef.afterClosed().subscribe((result: any) => {
+        if (result?.action === "confirm") {
+          this.applyAccessControlValue(true, true);
+        }
+      });
+    } else {
+      this.applyAccessControlValue(true, true);
+    }
   }
 }

@@ -48,7 +48,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.isCCA = this.accessControlService.accessControlConfig()?.userConfig?.org?.isCCA ?? false;
     if (this.data && this.data.selected && this.data.selected.length) {
       if (!this.isArrayOfObjects(this.data?.selected)) {
-        this.getUsersList("", this.pagination.limit, this.pagination.offset, this.data?.selected);
+        this.getUsersList("", this.data?.selected?.length, this.pagination.offset, this.data?.selected);
       } else {
         this.usersFinalList = [...this.data.selected];
         this.holdSelectedUsers = [...this.usersFinalList];
