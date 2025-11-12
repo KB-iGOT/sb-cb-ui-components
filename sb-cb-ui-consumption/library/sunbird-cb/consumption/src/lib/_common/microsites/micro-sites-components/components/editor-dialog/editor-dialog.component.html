@@ -42,14 +42,34 @@
         <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
       </mat-form-field>
 
-      <!-- Color picker -->
-      <div *ngSwitchCase="'color'" class="color-picker-container">
+      <!-- Banner Image for Background -->
+      <div *ngSwitchCase="'color'" class="color-banner-container">
+        <h4>Background Banner Image</h4>
+
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput formControlName="value" placeholder="Enter color code (e.g., #FF5733)">
-          <mat-error *ngIf="editorForm.get('value')?.hasError('required')">Color is required</mat-error>
-          <mat-error *ngIf="editorForm.get('value')?.hasError('pattern')">Invalid color format</mat-error>
+          <mat-label>Banner Image URL</mat-label>
+          <input matInput formControlName="value" placeholder="Enter banner image URL">
+          <mat-error *ngIf="editorForm.get('value')?.hasError('required')">Banner image URL is required</mat-error>
+          <mat-error *ngIf="editorForm.get('value')?.hasError('pattern')">Please enter a valid URL (must start with
+            http:// or https://)</mat-error>
         </mat-form-field>
-        <div class="color-preview" [style.background-color]="editorForm.get('value')?.value"></div>
+
+        <div class="upload-section">
+          <button type="button" mat-button class="btn-common btn-secondary" (click)="bannerFileInput.click()">
+            <mat-icon>cloud_upload</mat-icon> Upload Banner Image
+          </button>
+          <input hidden (change)="onBannerImageSelected($event)" #bannerFileInput type="file"
+            accept="image/jpeg,image/jpg,image/png">
+        </div>
+        <span *ngIf="uploadStatus" class="upload-status"
+          [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+        <p class="file-requirements">
+          <small>Allowed formats: JPG, PNG | Max size: 700KB</small>
+        </p>
+
+        <div class="image-preview" *ngIf="editorForm.get('value')?.value">
+          <img [src]="editorForm.get('value')?.value" alt="Banner Preview">
+        </div>
       </div>
 
       <!-- Image URL with upload option -->

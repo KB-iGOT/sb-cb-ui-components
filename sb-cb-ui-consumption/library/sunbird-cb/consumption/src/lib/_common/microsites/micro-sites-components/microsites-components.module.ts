@@ -49,6 +49,7 @@ import { MatLegacySelectModule as MatSelectModule } from '@angular/material/lega
 import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator'
 import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
+import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { SlwConfigDialogComponent } from './components/slw-config-dialog/slw-config-dialog.component'
 import { ActionItemsComponent } from './components/action-items/action-items.component'
@@ -64,6 +65,7 @@ import { StripSectionCreateComponent } from './components/strip-section-create/s
 import { StripAddContentComponent } from './components/strip-add-content/strip-add-content.component'
 import { AddTabDialogComponent } from './components/add-tab-dialog/add-tab-dialog.component'
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component'
+import { EventsCalendarModule } from '../../events-calendar/events-calendar.module'
 
 @NgModule({
   declarations: [
@@ -131,11 +133,13 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     MatPaginatorModule,
     MatCardModule,
     MatCheckboxModule,
+    MatRadioModule,
     DragDropModule,
     HttpClientModule,
     MatIconModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    EventsCalendarModule
   ],
   exports: [
     TopSectionComponent,

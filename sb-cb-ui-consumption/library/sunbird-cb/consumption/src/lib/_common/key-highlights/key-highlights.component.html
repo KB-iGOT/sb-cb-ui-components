@@ -40,7 +40,7 @@
 </ng-container>
 
 <!-- Placeholder when no highlights -->
-<ng-container *ngIf="!contentdata || contentdata?.length < 1">
+<ng-container *ngIf="(!contentdata || contentdata?.length < 1) && isEdit">
     <div class="key-highlights-placeholder">
         <button mat-button type="button" class="btn-common btn-secondary cursor-pointer" (click)="emptyResponse.emit()"
             aria-label="Add Heading">
