@@ -196,7 +196,7 @@ export class EditorDialogComponent implements OnInit {
   addImageLogoItem(): void {
     if (this.imageItemsArray) {
       this.imageItemsArray.push(this.fb.group({
-        url: ['', [Validators.required]]
+        url: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
       }))
     }
   }
@@ -316,7 +316,7 @@ export class EditorDialogComponent implements OnInit {
           this.editorForm = this.fb.group({
             items: this.fb.array(
               imageValue.map((item: any) => this.fb.group({
-                url: [item.url || item || '', [Validators.required]]
+                url: [item.url || item || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
               }))
             )
           })
