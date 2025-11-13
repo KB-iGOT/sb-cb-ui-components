@@ -77,7 +77,6 @@ export class MdoLeaderboardComponent implements OnInit {
       }
 
     }, error => {
-      console.log(error)
     })
   }
 
@@ -89,7 +88,6 @@ export class MdoLeaderboardComponent implements OnInit {
       }
 
     }, error => {
-      console.log(error)
     })
   }
 
@@ -184,7 +182,6 @@ export class MdoLeaderboardComponent implements OnInit {
    * Emits an event to be handled by parent component (mdo-channel-v3)
    */
   onEdit() {
-    console.log('MdoLeaderboardComponent: onEdit clicked')
     const eventData = {
       source: 'mdoLeaderboard',
       action: 'edit',
@@ -198,14 +195,12 @@ export class MdoLeaderboardComponent implements OnInit {
 
     // Use only the callback from injector which is the most reliable method
     if (this.eventCallback && typeof this.eventCallback === 'function') {
-      console.log('MdoLeaderboardComponent: calling parent eventCallback directly')
       this.eventCallback(eventData)
       return
     }
 
     // Fallback to global injector if direct callback isn't available
     if ((window as any).__INJECTOR_DATA?.eventCallback) {
-      console.log('MdoLeaderboardComponent: calling global injector eventCallback');
       (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }
