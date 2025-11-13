@@ -3,6 +3,7 @@
     <div class="icon mb-6" [ngSwitch]="data.type">
       <mat-icon *ngSwitchCase="'delete'">delete</mat-icon>
       <mat-icon *ngSwitchCase="'confirm-access-type'" svgIcon="radio-on"></mat-icon>
+      <mat-icon *ngSwitchCase="'confirm-apply-accesscontrol-for-live'" svgIcon="radio-on"></mat-icon>
     </div>
 
     <div [ngSwitch]="data?.type">
@@ -22,6 +23,15 @@
         <div class="confirm-title text-center">Are you sure you want to save without adding user group/s?</div>
         <div class="confirm-desc text-center">Or please cancel and <strong>“Add User Group”</strong> for the restricted content access,</div>
       </ng-container>
+
+      <ng-container *ngSwitchCase="'confirm-apply-accesscontrol-for-live'">
+        <div class="confirm-title text-center">
+          Are you sure you want to apply changes without any more modifications?
+        </div>
+        <div class="confirm-desc text-center">
+          <p><strong>These changes will go live immediately</strong> and affect <strong>all enrolled learners</strong>.</p>
+        </div>
+      </ng-container>
     </div>
 
     <ng-container *ngIf="data?.type === 'delete'">
@@ -31,7 +41,7 @@
       </div>
     </ng-container>
 
-    <ng-container *ngIf="data?.type === 'confirm-access-type' || data?.type === 'confirm-save-without-user-group'">
+    <ng-container *ngIf="data?.type === 'confirm-access-type' || data?.type === 'confirm-save-without-user-group' || data?.type === 'confirm-apply-accesscontrol-for-live'">
       <div class="confirm-actions flex items-center gap-4 mt-4">
         <button mat-flat-button class="mat-btn-outline mt-2 gap-2 border-radius-4" (click)="confirmNo()">Cancel</button>
         <button mat-flat-button class="new-bg-color text-white mt-2" (click)="confirmYes()">Yes</button>
