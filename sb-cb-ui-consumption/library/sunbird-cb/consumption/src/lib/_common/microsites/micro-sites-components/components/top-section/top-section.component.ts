@@ -20,9 +20,6 @@ export class TopSectionComponent implements OnInit {
     @Inject('eventCallback') public eventCallback: (event: any) => void,
     public sanitizer: DomSanitizer
   ) {
-    if (this.isEdit) {
-      console.log('Edit mode active for top section')
-    }
   }
 
   ngOnInit() {

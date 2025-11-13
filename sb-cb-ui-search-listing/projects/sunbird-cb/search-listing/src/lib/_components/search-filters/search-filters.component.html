@@ -907,7 +907,13 @@
 
   <div
     class="filter-without-search filter-calender"
-    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || (isEventsFacetsPresent || showEventsDateRange) || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
+    *ngIf="
+      isUserFacetsPresent || 
+      isDesignationFacetsPresent || 
+      (isEventsFacetsPresent || showEventsDateRange) || 
+      isCommunityFacetsPresent || 
+      isTrainingPlanFacetsPresent ||
+      showCoursesCreatedDateRange">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
       {{ getCalendarLabel() | translate }}
     </p>
