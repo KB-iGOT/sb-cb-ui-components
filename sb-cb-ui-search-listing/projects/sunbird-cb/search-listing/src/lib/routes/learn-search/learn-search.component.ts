@@ -1,3 +1,4 @@
+//#region (imports)
 import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges, Output, EventEmitter, Inject } from "@angular/core";
 import { ConfigurationsService, EventService, MultilingualTranslationsService, ValueService } from "@sunbird-cb/utils-v2";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -30,6 +31,7 @@ import moment from "moment";
 import { takeUntil } from "rxjs/operators";
 import { NetworkService } from "../../_services/network.service";
 import { SearchListingService } from "../../_services/search-listing.service";
+//#endregion (imports)
 
 @Component({
   selector: "ws-app-learn-search",
@@ -37,12 +39,16 @@ import { SearchListingService } from "../../_services/search-listing.service";
   styleUrls: ["./learn-search.component.scss"]
 })
 export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
+  // #region (properties)
+
+  //#region (inputs/outputs)
   @Input() searchQuery!: { query: string; nlp: string; searchCategory: string };
   @Input() userValue = "";
   @Input() paramFilters: any = [];
   @Input() filtersPanel!: string;
   @Output() queryParamChange = new EventEmitter<any>();
   @Output() updateUserEvent = new EventEmitter<string>();
+  //#endregion (inputs/outputs)
 
   // searchResults: any = [];
   defaultThumbnail = "";
@@ -138,6 +144,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   searchConfig: SearchListingConfig.Config | null = null;
   noDataNavigationButtons: any[] = [];
   applicationName = ''
+  //#endregion (properties)
   constructor(
     @Inject("environment") environment: any,
     private searchListingService: SearchListingService,
@@ -320,6 +327,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  //#region (get courses methods)
+
   async searchCourses() {
     this.searchRequestCourse.request.query = this.statedata?.param;
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
@@ -361,12 +370,15 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       this.searchRequestCourse.request.filters.status = ["Live"];
     }
+
+    //#region (api call and response handling)
     try {
       const result = await this.searchListingService.searchCoursesv4(this.searchRequestCourse);
       if (_.get(result, 'result.content')) {
         this.courseSearchResults = result.result.content;
         this.courseSearchTotalCount = result.result?.count;
-        this.coursesFacets = this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ? this.formateCoursesFacets(result.result?.facets) : result.result?.facets || [];
+        // this.coursesFacets = this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ? this.formateCoursesFacets(result.result?.facets) : result.result?.facets || [];
+        this.coursesFacets = result.result?.facets || [];
         this.combinedFacets = [];
         this.combinedFacets = [...this.combinedFacets, this.coursesFacets || []];
       } else {
@@ -381,6 +393,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.coursesFacets = [];
       this.combinedFacets = [];
     }
+    //#endregion (api call and response handling)
   }
 
   private getContentSearchFilters(filters: any): any {
@@ -404,7 +417,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     if (!Array.isArray(filters.status)) filters.status = [];
 
     delete filters.contentType;
-    delete filters.reviewStatus;
 
     const mergeUnique = (target: any[], source: any[] = []) => {
       source.forEach(item => {
@@ -428,6 +440,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
           "UnderReview", "QualityReview", "Draft"
         ]);
+        filters['reviewStatus'] =["reviewed", "SentToPublish", "inReview"];
         filters.createdFor = [userOrgId];
         break;
 
@@ -450,6 +463,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Moderated Course", "Moderated Assessment", "Moderated Program"
         ]);
         mergeUnique(filters.status, ["Review", "Live"]);
+        filters['reviewStatus'] = ["reviewed", "SentToPublish"];
         filters.publisherIDs = [userId];
         break;
 
@@ -475,6 +489,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
         mergeUnique(filters.status, ["Review", "Live"]);
+        filters['reviewStatus'] = ["reviewed", "SentToPublish"];
         break;
 
       default:
@@ -493,6 +508,55 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     return filters;
+  }
+
+  formatSelectedStatusFilters(): any {
+    const filters: any = this.searchRequestCourse.request.filters
+    if (this.applySelectedFilters["status"]) {
+      filters.status = []
+      filters.reviewStatus = []
+      const userRoles = this.configSvc?.userRoles as Set<string>;
+      const role = Array.from(userRoles || [])[0]?.toUpperCase();
+      this.applySelectedFilters["status"].forEach((statusFilter: string) => {
+        const addReviewStatus = (val: string) => {
+          if (!Array.isArray(filters.reviewStatus)) {
+            filters.reviewStatus = [];
+          }
+          if (!filters.reviewStatus.includes(val)) {
+            filters.reviewStatus.push(val);
+          }
+        };
+
+        const addReviewStatuses = (vals: string[]) => {
+          vals.forEach(v => addReviewStatus(v));
+        };
+
+        const sf = String(statusFilter || "").toLowerCase();
+        if (sf === "inreview" || sf === "reviewed") {
+          addReviewStatus(statusFilter);
+        } else if (sf === "review") {
+          if (role === "CONTENT_PUBLISHER" || role === "SPV_PUBLISHER") {
+            addReviewStatus("reviewed");
+          } else {
+            addReviewStatuses(["inreview", "reviewed"]);
+          }
+          filters.status.push(statusFilter);
+        } else if (sf === "live") {
+          addReviewStatuses(["reviewed", "SentToPublish"]);
+          filters.status.push(statusFilter);
+        } else {
+          if (!Array.isArray(filters.status)) {
+            filters.status = [];
+          }
+          if (!filters.status.includes(statusFilter)) {
+            filters.status.push(statusFilter);
+          }
+        }
+      });
+    }
+    // if (filters.reviewStatus && filters.reviewStatus.length > 0) {
+    //   filters.status.push('review');
+    // }
   }
 
   formateCoursesFacets(facets: any) {
@@ -523,26 +587,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     return formattedFacets;
   }
 
-  formatSelectedStatusFilters(): any {
-    const filters: any = this.searchRequestCourse.request.filters
-    if (this.applySelectedFilters["status"]) {
-      filters.status = []
-      this.applySelectedFilters["status"].forEach((statusFilter: string) => {
-        if (statusFilter.toLowerCase() === 'inreview' || statusFilter.toLowerCase() === 'reviewed') {
-          if (!Array.isArray(filters.reviewStatus)) {
-            filters.reviewStatus = [];
-          }
-          filters.reviewStatus.push(statusFilter);
-        } else {
-          filters.status.push(statusFilter);
-        }
-      });
-
-    }
-    if (filters.reviewStatus && filters.reviewStatus.length > 0) {
-      filters.status.push('review');
-    }
-  }
+  //#endregion (get courses methods)
 
 
   async searchEvents() {
@@ -850,6 +895,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
       this.combinedFacets = [];
       this.combinedFacets = [...this.combinedFacets, result.result?.response.facets || []];
+      if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+        this.combinedFacets = this.filterRolesWithAppliedRoles(this.combinedFacets);
+      }
       this.updateUserEvent.emit('');
     } else {
       this.usersSearchResults = [];
@@ -860,6 +908,34 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.searchPeopleLoader = false;
+  }
+
+  filterRolesWithAppliedRoles(facets: any[]): any[] {
+    const appliedRoles: string[] = _.get(this.searchRequestUsers, "request.filters", {})['roles.role'] || [];
+
+    // If no facets or no applied roles, return original facets
+    if (!facets || !facets.length || !appliedRoles.length) return facets;
+
+    const appliedLower = appliedRoles.map(r => String(r).toLowerCase());
+
+    const filteredFacets = facets[0].map((facet: any) => {
+      if (
+        facet &&
+        typeof facet.name === "string" &&
+        facet.name.toLowerCase() === "roles.role" &&
+        Array.isArray(facet.values)
+      ) {
+        const filteredValues = facet.values.filter((v: any) => {
+          const name = v && v.name ? String(v.name).toLowerCase() : "";
+          return appliedLower.includes(name);
+        });
+        facet.values = filteredValues;
+        return facet;
+      }
+      return facet;
+    });
+    facets[0] = filteredFacets;
+    return facets;
   }
 
   /**
