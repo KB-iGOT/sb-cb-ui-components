@@ -24,36 +24,24 @@ export class ActionItemsComponent implements OnInit {
   constructor(private dialog: MatDialog) { }
 
   ngOnInit(): void {
-    console.log('Action Items Component initialized:', {
-      isEdit: this.isEdit,
-      isStateLearningWeekEnabled: this.isStateLearningWeekEnabled,
-      slwConfiguration: this.slwConfiguration
-    })
-    console.log('User Redirection Enabled:', this.userRedirData)
     this.userRedirectionEnabled = this.userRedirData?.enabled || false
   }
 
   onToggleStateLearningWeek(event: any) {
-    console.log('Toggle clicked:', event.target.checked)
-
     if (event.target.checked) {
       // If enabling SLW, open configuration dialog
-      console.log('Opening SLW configuration dialog')
       this.configureSLW.emit(this.slwConfiguration)
     } else {
       // If disabling, just toggle
-      console.log('Disabling SLW')
       this.toggleSLW.emit()
     }
   }
 
   onSaveChanges() {
-    console.log('Save changes clicked')
     this.saveChanges.emit()
   }
 
   onPublishChanges() {
-    console.log('Publish changes clicked')
 
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '500px',
@@ -81,10 +69,7 @@ export class ActionItemsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {
       if (confirmed) {
-        console.log('Publish confirmed')
         this.publishChanges.emit()
-      } else {
-        console.log('Publish cancelled')
       }
     })
   }

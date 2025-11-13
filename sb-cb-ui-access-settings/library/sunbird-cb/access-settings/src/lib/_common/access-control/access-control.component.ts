@@ -1022,11 +1022,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         condition.patchValue({
           entity: entityMap[criteria.criteriaKey] || criteria.criteriaKey,
           selections:
-            criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
-              ? Array.isArray(criteria.criteriaValue)
-                ? criteria.criteriaValue.map((b: any) => Number(b))
-                : []
-              : criteria.criteriaValue
+              criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue.map((b: any) => Number(b))
+                  : []
+                : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue
+                  : [criteria.criteriaValue]
+                : criteria.criteriaValue,
         });
 
         conditions.push(condition);
