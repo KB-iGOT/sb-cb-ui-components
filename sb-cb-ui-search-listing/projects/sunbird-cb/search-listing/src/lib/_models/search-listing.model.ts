@@ -15,6 +15,7 @@ export class RequestParams {
   offset: number;
   sort_by: SortBy;
   exists?: string[];
+  reviewStatus?: string[];
   constructor(competenciesKey: any) {
     this.filters = new Filters();
     this.fields = [
@@ -512,3 +513,13 @@ export namespace SearchListingConfig {
     CBPPortal = "CBP Portal"
   }
 }
+
+export const CBPstatusMapping: Record<string, string> = {
+  live: 'Live',
+  review: 'Under Publish',
+  reviewed: 'Under Publish',
+  inreview: 'Under Review',
+  retired: 'Inactive',
+  draft: 'Draft',
+  failed: 'Failed'
+};

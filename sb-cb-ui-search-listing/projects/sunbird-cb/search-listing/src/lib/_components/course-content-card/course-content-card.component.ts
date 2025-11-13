@@ -5,7 +5,7 @@ import { MatSnackBar as MatSnackbarNew } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
 import { WidgetContentLibService } from "@sunbird-cb/consumption";
 import { CertificateDialogComponent } from "@sunbird-cb/consumption";
-import { ICompentencyKeys, SearchListingConfig } from "../../_models/search-listing.model";
+import { ICompentencyKeys, SearchListingConfig, CBPstatusMapping } from "../../_models/search-listing.model";
 import { SearchListingService } from "../../_services/search-listing.service";
 import * as _ from "lodash";
 
@@ -26,6 +26,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
   defaultThumbnail = "/assets/instances/eagle/app_logos/default.png";
   defaultSLogo = "/assets/instances/eagle/app_logos/igot-katmayogi-logo.svg";
   compentencyKey!: ICompentencyKeys;
+  public cbpStatusMapping = CBPstatusMapping;
 
   courseEnrollment: any;
   downloadCertificateLoading = false;
@@ -223,21 +224,48 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
    */
   handleContentClick(content: any, loggedInUserId: string): void {
     // Helpers
+    if (content && content.status && content.status.toLowerCase() === 'failed') {
+      this.openSnackBar('You don\'t have access!');
+      return;
+    }
+    const hasRole = (r: string) => this.currentUserRoles && this.currentUserRoles.includes(r.toLowerCase());
+    const isCreator = hasRole("CONTENT_CREATOR") ;
+    const isReviewer = hasRole("CONTENT_REVIEWER");
+    const isPublisher = hasRole("CONTENT_PUBLISHER");
+    const isSpvPublisher = hasRole("SPV_PUBLISHER");
+    const isProgramCoordinator = hasRole("PROGRAM_COORDINATOR");
+    const accessMessage = 'You don\'t have access!'
+    let mode = '';
+    if (
+      (isReviewer && content.reviewStatus && (content.reviewStatus.toLowerCase() === 'inreview' || content.reviewStatus.toLowerCase() === 'reviewed') && content.status && content.status.toLowerCase() === 'review')||
+      (isPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus) ||
+      (isSpvPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && 
+        (
+          content.reviewStatus.toLowerCase() === 'inreview' || 
+          content.reviewStatus.toLowerCase() === 'reviewed'
+        )
+      ) ||
+      ( isCreator && content.status && 
+        (
+          content.status.toLowerCase() === 'failed' ||
+          content.status.toLowerCase() === 'retired' ||
+          content.status.toLowerCase() === 'draft'
+        )
+      )
+    ) {
+      mode = 'edit';
+    }
     if (content && content.identifier) {
-      this.searchListingService.getCourseDetails(content.identifier).subscribe((res: any) => {
+      this.searchListingService.getCourseDetails(content.identifier, mode).subscribe((res: any) => {
         if (res && res.params && res.params.status === 'successful') {
-          const hasRole = (r: string) => this.currentUserRoles && this.currentUserRoles.includes(r.toLowerCase());
-          const isCreator = !!(content && (content.creator || content.createdBy) && (content.creator === loggedInUserId || content.createdBy === loggedInUserId));
-          const isReviewer = hasRole("reviewer");
-          const isPublisher = hasRole("publisher");
-          const isSpvPublisher = hasRole("spv_publisher");
-          const isCbpAdmin = hasRole("cbp_admin");
 
-          const status = (content && content.status) ? String(content.status) : "";
+          const status = (content && content.status) ? String(content.status).toLocaleLowerCase() : "";
+          const reviewStatus = (content && content.reviewStatus) ? String(content.reviewStatus).toLocaleLowerCase() : "";
 
           const showMessage = (msg: string) => {
             try {
-              this.matSnackbarNew.open(msg, "X", { duration: 3000 });
+              this.openSnackBar(msg);
+              // this.matSnackbarNew.open(msg, "X", { duration: 3000 });
             } catch (e) {
               // fallback
               console.warn(msg);
@@ -245,15 +273,31 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
           };
 
           const goToEditor = () => {
-            this.router.navigateByUrl(`/author/editor/${content.identifier}`);
+            if (content.prevStatus && content.prevStatus.toLowerCase() !== 'live' &&
+            content.status.toLowerCase() !== 'live' &&
+            content.courseCategory === 'Multilingual Course' &&
+            this.getBaseLanguageId(content)
+        ) {
+          this.router.navigate(['/author/editor/multilingual', 'edit', this.getBaseLanguageId(content)], {
+            queryParams: {
+              langEditId: content.identifier
+            }
+          })
+        } else {
+          this.router.navigateByUrl(`/author/editor/${content.identifier}`)
+        }
           };
 
           const goToReview = () => {
-            this.router.navigate(['/author/editor/multilingual', 'edit', this.getBaseLanguageId(content)], {
-              queryParams: {
-                langEditId: content.identifier
-              }
-            });
+            if (content.prevStatus && content.prevStatus.toLowerCase() === 'live') {
+              this.router.navigate(['/author/editor/multilingual', 'edit', this.getBaseLanguageId(content)], {
+                queryParams: {
+                  langEditId: content.identifier
+                }
+              });
+            } else {
+              this.router.navigateByUrl(`/author/editor/${content.identifier}`);
+            }
           };
 
           const goToOverviewV2 = () => {
@@ -271,72 +315,87 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
 
           // 1. Creator logic
           if (isCreator) {
-            // Creator: always allowed to edit unless explicitly Live/Rejected and not in review flow
-            if (status.toLocaleLowerCase() === "live") {
-              goToEditor();
-              return;
+            switch (status.toLocaleLowerCase()) {
+              case "live":
+                goToOverviewV2();
+                break;
+              case "review":
+                if (reviewStatus.toLocaleLowerCase() === "inreview") {
+                  goToEditor();
+                } else if (reviewStatus.toLocaleLowerCase() === "reviewed") {
+                  goToEditor();
+                }
+                break;
+              case "draft":
+              case "retired":
+              case "failed":
+                goToEditor()
+                break;
+              default:
+                showMessage(accessMessage);
             }
-            goToOverviewV2();
             return;
           }
 
           // 2. Reviewer logic
           if (isReviewer) {
             // If reviewer and content.status is 'review' or 'accept' allow editor
-            if (status.toLocaleLowerCase() === "review" || status.toLocaleLowerCase() === "reviewed") {
+            if (status.toLocaleLowerCase() === "review" && reviewStatus.toLocaleLowerCase() === "inreview") {
               goToReview()
               return;
+            } else if (status.toLocaleLowerCase() === "review" && reviewStatus.toLocaleLowerCase() === "reviewed") {
+              goToEditor();
+              return;
+            } else if (status.toLocaleLowerCase() === "live") {
+              goToOverviewV2();
+              return;
             }
-            showMessage("Only creators or reviewers can edit this content.");
+            showMessage(accessMessage);
             return;
           }
 
           // 3. Publisher logic
           if (isPublisher) {
-            // If publisher but content.status is 'reject' or 'rejected' and content.status not Live, show message
-            if (status.toLocaleLowerCase() === "reject" || status.toLocaleLowerCase() === "rejected") {
-              showMessage("Only creators can edit rejected content.");
+            if (content.status && content.status.toLowerCase() === 'live') {
+              goToOverviewV2();
+              return;
+            } else if (status.toLocaleLowerCase() === "review" && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed') {
+              goToEditor();
               return;
             }
-            // Publisher allowed to edit
-            goToEditor();
+            showMessage(accessMessage);
             return;
           }
 
           // 4. SPV_PUBLISHER logic
           if (isSpvPublisher) {
-            // Only allowed for status 'accept' or 'review'
-            if (status.toLocaleLowerCase() === "accept" || status.toLocaleLowerCase() === "review") {
+            if (content.status && content.status.toLowerCase() === 'live') {
+              goToOverviewV2();
+              return;
+            } else if (status=== 'review' && reviewStatus === 'reviewed') {
               goToEditor();
               return;
             }
-            // If content.status is Live and metadata.editableBySpv is truthy allow editor
-            if (status.toLocaleLowerCase() === "live") {
-              goToEditor();
-              return;
-            }
-            showMessage("You don't have permission to edit this content.");
-            return;
+            showMessage(accessMessage);
           }
 
-          // 5. CBP_ADMIN logic
-          if (isCbpAdmin) {
-            // Admin can edit unless status is 'reject'/'rejected' and creator-only flag set
-            if ((status.toLocaleLowerCase() === "reject" || status.toLocaleLowerCase() === "rejected")) {
-              showMessage("Only creators can edit rejected content.");
+          // 5. PROGRAM_COORDINATOR logic
+          if (isProgramCoordinator) {
+            if (content.status && content.status.toLowerCase() === 'live') {
+              goToOverviewV2();
               return;
             }
-            goToEditor();
+            showMessage(accessMessage);
             return;
           }
 
           // Default: no special roles -> navigate to overview
           goToOverviewV2();
         } else {
-          this.openSnackBar('Failed to fetch course details');
+          this.openSnackBar('You don\'t have access!');
         }
       }, () => {
-        this.openSnackBar('Failed to fetch course details');
+        this.openSnackBar('You don\'t have access!');
       });
     }
   }

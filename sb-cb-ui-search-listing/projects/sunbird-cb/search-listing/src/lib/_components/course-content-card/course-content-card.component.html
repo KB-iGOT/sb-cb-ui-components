@@ -114,16 +114,22 @@
               <ng-container *ngIf="applicationName === 'CBP Portal' && content?.status">
                 <ng-container [ngSwitch]="content?.status">
                   <ng-container *ngSwitchCase="'Live'">
-                    <div class="live-course">{{content?.status}}</div>
+                    <div class="live-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
                   <ng-container *ngSwitchCase="'Draft'">
-                    <div class="draft-course">{{content?.status}}</div>
+                    <div class="draft-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'Retired'">
+                    <div class="inactive-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
                   <ng-container *ngSwitchCase="'Failed'">
-                    <div class="draft-course">{{content?.status}}</div>
+                    <div class="failed-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'Review'">
+                    <div class="draft-course">{{ cbpStatusMapping[(content?.reviewStatus || '') | lowercase] || content?.reviewStatus }}</div>
                   </ng-container>
                   <ng-container *ngSwitchDefault>
-                    <div class="draft-course">{{content?.status}}</div>
+                    <div class="draft-course">{{ cbpStatusMapping[(content?.status || '') | lowercase] || content?.status }}</div>
                   </ng-container>
                 </ng-container>
               </ng-container>
@@ -148,10 +154,10 @@
         </div>
         <ng-container *ngIf="applicationName === 'CBP Portal'">
           <ng-container *ngIf="content?.createdOn">
-            <div><span class="organization-name">Created On: </span> <span class="course-title">{{ content?.createdOn | date: "dd/MM/yyyy (HH:mm)" }}</span></div>
+            <div><span class="organization-name">Created On: </span> <span class="course-title">{{ content?.createdOn | date: "MMM dd,yyyy h:mm a" }}</span></div>
           </ng-container>
           <ng-container *ngIf="content?.lastUpdatedOn">
-            <div><span class="organization-name">Last Updated On: </span> <span class="course-title">{{ content?.lastUpdatedOn | date: "dd/MM/yyyy (HH:mm)" }}</span></div>
+            <div><span class="organization-name">Last Updated On: </span> <span class="course-title">{{ content?.lastUpdatedOn | date: "MMM dd,yyyy h:mm a" }}</span></div>
           </ng-container>
         </ng-container>
         <!-- <div class="course-tags mb-3 font-normal text-ellipse"

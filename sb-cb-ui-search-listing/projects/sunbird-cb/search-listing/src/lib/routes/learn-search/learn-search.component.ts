@@ -323,9 +323,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   async searchCourses() {
     this.searchRequestCourse.request.query = this.statedata?.param;
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      this.searchRequestCourse.request.filters["channel"] = {
-        "!=": [this.environment.spvorgID]
-      };
       const courseFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'courses');
       if (courseFilters.length && courseFilters[0].facets && courseFilters[0].facets.length) {
         const competencyKeys = [
@@ -333,6 +330,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           this.competencyThemeKey,
           this.competencySubThemeKey
         ].filter(k => k !== null && k !== undefined) as string[];
+        //#region (adding facets from config)
         const facetsFromConfig = [...courseFilters[0].facets] as string[];
 
         // If config contains the placeholder 'competencies', replace it with the actual competency keys
@@ -347,21 +345,16 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         }
         // Filter out any null/undefined values and use config-provided facets
         this.searchRequestCourse.request.facets = facetsFromConfig.filter(v => v !== null && v !== undefined);
-        if(this.searchRequestCourse.request.facets.findIndex(v => v === 'status') > -1) {
-          if(this.searchRequestCourse.request.filters["status"] && !this.searchRequestCourse.request.filters["status"].length) {
-            this.searchRequestCourse.request.filters["status"] = [
-              "Live",
-              "UnderPublish", 
-              "Failed",
-              "Review",
-              "Retired",
-              "InReview",
-              "Reviewed",
-              "UnderReview",
-              "QualityReview",
-              "Draft"
-            ];
-          }
+        //#endregion (adding facets from config)
+
+        const hasStatus = typeof this.applySelectedFilters === "object" && 
+               this.applySelectedFilters["status"] && 
+               Array.isArray(this.applySelectedFilters["status"]) && 
+               this.applySelectedFilters["status"].length > 0;        
+        this.searchRequestCourse.request.filters = this.getContentSearchFilters(this.searchRequestCourse.request.filters)
+
+        if (hasStatus) {
+          this.formatSelectedStatusFilters()
         }
       }
       this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
@@ -373,10 +366,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (_.get(result, 'result.content')) {
         this.courseSearchResults = result.result.content;
         this.courseSearchTotalCount = result.result?.count;
-        this.coursesFacets = result.result?.facets || [];
-
+        this.coursesFacets = this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ? this.formateCoursesFacets(result.result?.facets) : result.result?.facets || [];
         this.combinedFacets = [];
-        this.combinedFacets = [...this.combinedFacets, result.result?.facets || []];
+        this.combinedFacets = [...this.combinedFacets, this.coursesFacets || []];
       } else {
         this.courseSearchResults = [];
         this.courseSearchTotalCount = 0;
@@ -390,6 +382,168 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.combinedFacets = [];
     }
   }
+
+  private getContentSearchFilters(filters: any): any {
+    const userRoles = this.configSvc?.userRoles as Set<string>;
+    const userId = _.get(this.configSvc, 'userProfile.userId');
+    const userOrgId = _.get(this.configSvc, 'userProfile.rootOrgId');
+
+    // Get single role (case-insensitive)
+    const role = Array.from(userRoles || [])[0]?.toUpperCase();
+    if (!role) {
+      return filters;
+    }
+
+    // Ensure filter structure
+    if (!filters.must) {
+      filters.must = { courseCategory: [], resourceCategory: [] };
+    } else {
+      if (!Array.isArray(filters.must.courseCategory)) filters.must.courseCategory = [];
+      if (!Array.isArray(filters.must.resourceCategory)) filters.must.resourceCategory = [];
+    }
+    if (!Array.isArray(filters.status)) filters.status = [];
+
+    delete filters.contentType;
+    delete filters.reviewStatus;
+
+    const mergeUnique = (target: any[], source: any[] = []) => {
+      source.forEach(item => {
+        if (!target.includes(item)) target.push(item);
+      });
+    };
+
+    // ---- Role-based logic ----
+    switch (role) {
+      case "CONTENT_CREATOR":
+        mergeUnique(filters.must.courseCategory, [
+          "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
+          "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
+          "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
+        ]);
+        mergeUnique(filters.must.resourceCategory, [
+          "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
+          "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
+        ]);
+        mergeUnique(filters.status, [
+          "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
+          "UnderReview", "QualityReview", "Draft"
+        ]);
+        filters.createdFor = [userOrgId];
+        break;
+
+      case "CONTENT_REVIEWER":
+        mergeUnique(filters.must.courseCategory, [
+          "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
+          "invite-only program", "Moderated Course", "Moderated Assessment", "Moderated Program",
+          "invite-only assessment", "Case Study", "Comprehensive Assessment Program", "Multilingual Course"
+        ]);
+        mergeUnique(filters.must.resourceCategory, [
+          "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
+          "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
+        ]);
+        mergeUnique(filters.status, ["Live", "Review", "InReview"]);
+        filters.reviewerIDs = [userId];
+        break;
+
+      case "CONTENT_PUBLISHER":
+        mergeUnique(filters.must.courseCategory, [
+          "Moderated Course", "Moderated Assessment", "Moderated Program"
+        ]);
+        mergeUnique(filters.status, ["Review", "Live"]);
+        filters.publisherIDs = [userId];
+        break;
+
+      case "PROGRAM_COORDINATOR":
+        filters.any = [
+          { programCoordinatorIds: userId },
+          { createdFor: userOrgId }
+        ];
+        mergeUnique(filters.must.courseCategory, [
+          "Blended Program", "Curated Program", "Moderated Program", "Invite-Only Program", "Invite-Only Assessment"
+        ]);
+        mergeUnique(filters.status, ["Live"]);
+        break;
+
+      case "SPV_PUBLISHER":
+        mergeUnique(filters.must.courseCategory, [
+          "Course", "Program", "Standalone Assessment", "Curated Program", "Blended Program",
+          "invite-only program", "invite-only assessment", "Case Study", "Comprehensive Assessment Program",
+          "Multilingual Course"
+        ]);
+        mergeUnique(filters.must.resourceCategory, [
+          "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
+          "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
+        ]);
+        mergeUnique(filters.status, ["Review", "Live"]);
+        break;
+
+      default:
+        // Unknown role — leave filters untouched
+        break;
+    }
+
+    // Remove empty must arrays
+    Object.keys(filters.must).forEach(key => {
+      if (!filters.must[key].length) delete filters.must[key];
+    });
+    if (!Object.keys(filters.must).length) delete filters.must;
+    if (this.applySelectedFilters && this.applySelectedFilters.resourceCategory) {
+      filters.must.resourceCategory = this.applySelectedFilters.resourceCategory;
+      filters.must.courseCategory = []
+    }
+
+    return filters;
+  }
+
+  formateCoursesFacets(facets: any) {
+    let formattedFacets: any = [];
+    let statusFacets: any
+    let reviewStatusFacets: any
+    if (facets && facets.length) {
+      formattedFacets = facets
+      formattedFacets.forEach((facet: any) => {
+        if (facet.name === 'status') {
+          statusFacets = facet;
+        } else if (facet.name === 'reviewStatus') {
+          reviewStatusFacets = facet;
+        }
+
+        if (statusFacets && reviewStatusFacets) {
+          // statusFacets.values = statusFacets.filter.values.filter((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
+          const reviewIndex = statusFacets.values.findIndex((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
+          if (reviewIndex !== -1) {
+            let reviewStatusFacetsValues = reviewStatusFacets.values.filter((reviewStatusFacet: any) => reviewStatusFacet.name.toLowerCase() === 'reviewed' || reviewStatusFacet.name.toLowerCase() === 'inreview');
+            if (reviewStatusFacetsValues.length) {
+              statusFacets.values.splice(reviewIndex, 1, ...reviewStatusFacetsValues)
+            }
+          }
+        }
+      })
+    }
+    return formattedFacets;
+  }
+
+  formatSelectedStatusFilters(): any {
+    const filters: any = this.searchRequestCourse.request.filters
+    if (this.applySelectedFilters["status"]) {
+      filters.status = []
+      this.applySelectedFilters["status"].forEach((statusFilter: string) => {
+        if (statusFilter.toLowerCase() === 'inreview' || statusFilter.toLowerCase() === 'reviewed') {
+          if (!Array.isArray(filters.reviewStatus)) {
+            filters.reviewStatus = [];
+          }
+          filters.reviewStatus.push(statusFilter);
+        } else {
+          filters.status.push(statusFilter);
+        }
+      });
+
+    }
+    if (filters.reviewStatus && filters.reviewStatus.length > 0) {
+      filters.status.push('review');
+    }
+  }
+
 
   async searchEvents() {
     if (this.applicationName === SearchListingConfig.ApplicationNames.LearnerPortal) {
@@ -413,11 +567,17 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
 
     // If CBPPortal provides a facets configuration for events, prefer that.
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      const hasStatus = typeof this.applySelectedFilters === "object" && this.applySelectedFilters["status"];
-      if (!hasStatus && hasStatus.length === 0) {
+      if(_.get(this.searchConfig, 'fields.courses')) {
+          this.searchRequestEvents.request.fields = _.get(this.searchConfig, 'fields.events')
+        }
+      const hasStatus = typeof this.applySelectedFilters === "object" && 
+               this.applySelectedFilters["status"] && 
+               Array.isArray(this.applySelectedFilters["status"]) && 
+               this.applySelectedFilters["status"].length > 0;
+      if (!hasStatus) {
         this.searchRequestEvents.request.filters.status = ["Live", "SentToPublish"];
       }
-      this.searchRequestEvents.request.filters["channel"] = {
+      this.searchRequestEvents.request.filters["createdFor"] = {
         "!=": [this.environment.spvorgID]
       };
       const eventFilters = _.get(this.searchConfig, 'allSearchCategoriesTypes', []).filter((ele: any) => ele.name === 'events');

@@ -95,8 +95,8 @@
                   </div>
 
                   <!-- Selections for Service -->
-                  <ng-container *ngIf="selectionType === selectionTypeEnum.Service && application === APPLICATION_ENUM.MDO">
-                    <ng-container *ngIf="filterValue === 'all'">
+                  <ng-container *ngIf="selectionType === selectionTypeEnum.Service && (application === APPLICATION_ENUM.MDO || applyNewServiceSelections)">
+                    <ng-container *ngIf="filterValue === 'all' && selectionType === selectionTypeEnum.Service">
                       <div class="flex gap-4 items-center px-2 my-3 options-radio">
                         <mat-radio-group [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled" 
                                        [(ngModel)]="selectedServiceType" 
@@ -121,7 +121,7 @@
                     </ng-container>
                   </ng-container>
 
-                  <ng-container *ngIf="application !== APPLICATION_ENUM.MDO || selectionType !== selectionTypeEnum.Service">
+                  <ng-container *ngIf="(application !== APPLICATION_ENUM.MDO && selectionType !== selectionTypeEnum.Service)">
                     <ng-container *ngIf="checkIfData; else noData">
                       <ng-container *ngTemplateOutlet="entityListTemplate"></ng-container>
                     </ng-container>
@@ -185,10 +185,10 @@
             [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
             [(ngModel)]="selectedCentralDeputation"
             (change)="onCentralDeputationChange($event)"
-            id="switch"
+            id="switch-onDeputation"
             type="checkbox"
           />
-          <label for="switch" [attr.data-disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"></label>
+          <label for="switch-onDeputation" [attr.data-disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"></label>
         </div>
       </div>
     </div>

@@ -69,6 +69,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   requiredQueryMinLength = 3;
 
   selectedSearchCategory: string = "";
+  defaultSearchCategory: string = "";
   openSearchTemplate = false;
   loaderSearching = false;
   responseNlpQuery = "";
@@ -203,7 +204,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
         if (queryParam.has("category")) {
           this.selectedSearchCategory = queryParam.get("category") || "";
         } else {
-          this.selectedSearchCategory = this.searchConfig?.searchInputConfig?.defaultSearchCategory || "";
+          this.selectedSearchCategory = this.defaultSearchCategory || this.searchConfig?.searchInputConfig?.defaultSearchCategory || "";
         }
       })
     );
@@ -213,6 +214,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     const categoryExists = this.categories.some(category => category.value === this.selectedSearchCategory);
     if (!categoryExists && this.categories.length > 0) {
       this.selectedSearchCategory = this.categories[0].value;
+      this.defaultSearchCategory = this.categories[0].value;
     }
 
     this.searchSubscription.add(
@@ -246,7 +248,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       const reqBody = {
         nlpSearchQuery: query.nlp_search_query,
         searchQuery: query.search_query,
-        searchCategory: this.selectedSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
+        searchCategory: this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
       };
       await this.searchListingService
         .recentCreate(reqBody)
@@ -285,7 +287,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   goToSearchItem(query: any) {
-    const category = this.selectedSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
+    const category = this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
     const nlpSearchQuery = query?.nlp_search_query;
     if (category && category === SearchCategory.Courses && nlpSearchQuery) {
       const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
@@ -460,11 +462,12 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     const queryParams = {
       q: query?.nlp_search_query ? query?.nlp_search_query?.trim() : "",
       // search: query && this.responseNlpQuery ? this.responseNlpQuery : null,
-      category: this.selectedSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory || null,
+      category: this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory || null,
       p: null,
       f: null,
       tab: null,
-      filtersPanel: "show"
+      filtersPanel: "show",
+      search: query?.nlp_search_query || null
     };
     const navigationExtras = {
       queryParams,
@@ -486,7 +489,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     const queryParams = {
       q: query ? query?.trim() : "",
       search: query && this.responseNlpQuery ? this.responseNlpQuery : null,
-      category: this.selectedSearchCategory || null,
+      category: this.selectedSearchCategory || this.defaultSearchCategory || null,
       p: null,
       f: null,
       tab: null,
@@ -514,15 +517,17 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }, 0);
     this.queryControl.reset();
 
-    const params = { ...this.activated.snapshot.queryParams };
-    params["q"] = "";
-    params["search"] = "";
+    if (_.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal) {
+      const params = { ...this.activated.snapshot.queryParams };
+      params["q"] = "";
+      params["search"] = "";
 
-    this.router.navigate([], {
-      relativeTo: this.activated.parent,
-      queryParams: params,
-      queryParamsHandling: "merge"
-    });
+      this.router.navigate([], {
+        relativeTo: this.activated.parent,
+        queryParams: params,
+        queryParamsHandling: "merge"
+      });
+    }
   }
 
   async selectSearchCategory(category: string) {

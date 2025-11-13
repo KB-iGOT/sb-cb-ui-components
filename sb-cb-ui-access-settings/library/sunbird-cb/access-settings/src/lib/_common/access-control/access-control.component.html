@@ -250,7 +250,7 @@
               mat-flat-button
               class="flex rounded-full px-4 py-2 mat-btn-outline font-bold text-sm items-center gap-2"
               [disabled]="isSaveFltrBtnDisabled || isSaving || hasUserGroupBeenAdded"
-              (click)="applyAccessControlValue()"
+              (click)="saveAccessSettings()"
             >
               <mat-spinner *ngIf="isSaving" diameter="18" strokeWidth="3" class="!inline !m-0 mr-2"></mat-spinner>
               <span>Save Filter</span>

@@ -311,7 +311,10 @@ export class SearchListingService {
     return this.http.post<any>(API_END_POINTS.UNBLOCK_USER, request)
   }
 
-  getCourseDetails(contentId: string): Observable<any> {
+  getCourseDetails(contentId: string, mode: string): Observable<any> {
+    if (mode) {
+      return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}?mode=${mode}`);
+    }
     return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}`);
   }
 }
