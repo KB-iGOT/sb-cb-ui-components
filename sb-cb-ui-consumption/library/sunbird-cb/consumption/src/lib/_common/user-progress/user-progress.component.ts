@@ -84,7 +84,6 @@ export class UserProgressComponent implements OnInit {
       try {
         this.eventCallback = this.injector.get('eventCallback')
       } catch (e) {
-        console.log('No eventCallback in injector')
       }
     }
   }
@@ -187,7 +186,6 @@ export class UserProgressComponent implements OnInit {
    * Emits an event to be handled by parent component (mdo-channel-v3)
    */
   onEdit() {
-    console.log('UserProgressComponent: onEdit clicked')
     const eventData = {
       source: 'userProgress',
       action: 'edit',
@@ -201,14 +199,12 @@ export class UserProgressComponent implements OnInit {
 
     // Use only the callback from injector which is the most reliable method
     if (this.eventCallback && typeof this.eventCallback === 'function') {
-      console.log('UserProgressComponent: calling parent eventCallback directly')
       this.eventCallback(eventData)
       return
     }
 
     // Fallback to global injector if direct callback isn't available
     if ((window as any).__INJECTOR_DATA?.eventCallback) {
-      console.log('UserProgressComponent: calling global injector eventCallback');
       (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }
