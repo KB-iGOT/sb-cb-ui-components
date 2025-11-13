@@ -124,7 +124,9 @@
                 <mat-form-field appearance="outline" class="full-width margin-remove">
                   <mat-label>Image URL</mat-label>
                   <input matInput formControlName="url" placeholder="Enter image URL or upload">
-                  <mat-error *ngIf="item.get('url')?.invalid">Image URL is required</mat-error>
+                  <mat-error *ngIf="item.get('url')?.hasError('required')">Image URL is required</mat-error>
+                  <mat-error *ngIf="item.get('url')?.hasError('pattern')">Please enter a valid URL (must start with
+                    http:// or https://)</mat-error>
                 </mat-form-field>
 
                 <div class="upload-section">
