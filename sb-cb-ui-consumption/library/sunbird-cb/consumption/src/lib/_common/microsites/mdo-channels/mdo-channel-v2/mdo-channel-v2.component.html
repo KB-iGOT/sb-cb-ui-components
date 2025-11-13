@@ -318,7 +318,7 @@
                     <div class="">
                         <div *ngIf="data?.stripsArray?.length > 0">
                             <div *ngFor="let item of data?.stripsArray">
-                                <ng-container *ngIf="item?.strips?.length > 0">
+                                <ng-container *ngIf="item?.strips?.length > 0 && item?.enabled">
                                     <div class="margin-top-l nlw-mandatoryCourse">
                                         <sb-uic-content-strip-with-tabs [emitViewAll]="false"
                                             (telemtryResponse)="raiseTelemetryInteratEvent($event)" [providerId]="orgId"

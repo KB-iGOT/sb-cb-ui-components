@@ -125,6 +125,7 @@ export class EditorDialogComponent implements OnInit {
       description: [item.description || '', [Validators.required]],
       videoUrl: [item.videoUrl || '', [
         Validators.required,
+        Validators.pattern(/^https?:\/\/.+/)
       ]]
     })
   }
@@ -172,14 +173,18 @@ export class EditorDialogComponent implements OnInit {
 
   removeAnnouncementItem(index: number): void {
     const tempValue = this.announcementsList.at(index).value
-    this.micrositeService.deleteAnnouncements(tempValue.announcementId).subscribe({
-      next: () => {
-        this.announcementsList.removeAt(index)
-      },
-      error: (error) => {
-        console.error('Error removing announcement:', error)
-      }
-    })
+    if (tempValue.announcementId) {
+      this.micrositeService.deleteAnnouncements(tempValue.announcementId).subscribe({
+        next: () => {
+          this.announcementsList.removeAt(index)
+        },
+        error: (error) => {
+          console.error('Error removing announcement:', error)
+        }
+      })
+    } else {
+      this.announcementsList.removeAt(index)
+    }
   }
 
   dropAnnouncementItem(event: CdkDragDrop<any[]>): void {

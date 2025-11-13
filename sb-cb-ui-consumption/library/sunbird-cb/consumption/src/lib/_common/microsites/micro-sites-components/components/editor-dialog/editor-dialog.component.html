@@ -449,7 +449,8 @@
             </div>
 
             <button mat-button class="btn-common btn-secondary flex-center mt-3" type="button"
-              (click)="addAnnouncementItem()">
+              (click)="addAnnouncementItem()" [disabled]="announcementsList.controls.length >= 15"
+              [ngClass]="{'btn-disable': announcementsList.controls.length >= 15}">
               <mat-icon>add</mat-icon> Add Announcement
             </button>
           </div>
@@ -643,6 +644,8 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <input matInput formControlName="videoUrl" placeholder="Enter video URL or upload MP4">
                     <mat-error *ngIf="item.get('videoUrl')?.hasError('required')">Video URL is required</mat-error>
+                    <mat-error *ngIf="item.get('videoUrl')?.hasError('pattern')">Please enter a valid URL (must start
+                      with http:// or https://)</mat-error>
                   </mat-form-field>
 
                   <div class="upload-section">
