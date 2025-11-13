@@ -1358,6 +1358,11 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
                   ">=": startDate,
                   "<=": endDate
                 };
+              } else if (this.seeAllResult === SearchCategory.Courses) {
+                this.searchRequestCourse.request.filters[FacetType.createdOn] = {
+                  ">=": startDate,
+                  "<=": endDate
+                };
               }
             }
           } else {
