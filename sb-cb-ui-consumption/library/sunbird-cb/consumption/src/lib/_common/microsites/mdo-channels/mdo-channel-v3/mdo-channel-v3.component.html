@@ -10,7 +10,7 @@
     <section [id]="section.key" class="w-full grid grid-cols-12 gap-4 {{section.customClass}}"
       [ngClass]="{'container': section.wrapperClass}">
       <ng-container *ngFor="let column of section.column; trackBy: trackByFn">
-        <div *ngIf="column?.enabled" [id]="column.key" class="col-span-{{column.colspan || 12}}">
+        <div [id]="column.key" class="col-span-{{column.colspan || 12}}">
           <ng-container *ngIf="getSectionComponent(column.key)" [ngComponentOutlet]="getSectionComponent(column.key)"
             [ngComponentOutletInjector]="createInjector(section, column)">
           </ng-container>
