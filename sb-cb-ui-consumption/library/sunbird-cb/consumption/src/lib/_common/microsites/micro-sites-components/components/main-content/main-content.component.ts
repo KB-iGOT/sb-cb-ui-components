@@ -422,7 +422,7 @@ export class MainContentComponent implements OnInit {
       if (result && result.trim() && !stripData) {
         this.addTab(result.trim())
       } else if (stripData) {
-        stripData.title = result?.trim()
+        stripData.title = (result) ? result?.trim() : stripData.title
         this.eventCallback({
           action: 'playlist-updated',
           source: 'mainContent',

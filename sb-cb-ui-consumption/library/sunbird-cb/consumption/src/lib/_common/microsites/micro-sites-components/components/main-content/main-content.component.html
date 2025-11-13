@@ -5,7 +5,8 @@
       <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
         <sb-uic-key-highlights
           (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
-          [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'mobile'">
+          [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'mobile'"
+          [isEdit]="isEdit">
         </sb-uic-key-highlights>
       </div>
 
@@ -68,7 +69,8 @@
           <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
             <sb-uic-key-highlights
               (emptyResponse)="openEditor('keyHighlights', 'Key Heading', data?.stateLearningWeekSection?.keyHighlights)"
-              [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'desktop'">
+              [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'desktop'"
+              [isEdit]="isEdit">
             </sb-uic-key-highlights>
           </div>
         </div>
