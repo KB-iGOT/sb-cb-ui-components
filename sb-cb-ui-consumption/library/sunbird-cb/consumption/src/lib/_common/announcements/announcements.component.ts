@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output, Injector } from '@angular/core';
-import { InsiteDataService } from '../../_services/insite-data.service';
-import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service';
+import { Component, EventEmitter, Input, OnInit, Output, Injector } from '@angular/core'
+import { InsiteDataService } from '../../_services/insite-data.service'
+import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service'
 
 @Component({
   selector: 'sb-uic-announcements',
@@ -10,7 +10,7 @@ import { MultilingualTranslationsService } from '../../_services/multilingual-tr
 export class AnnouncementsComponent implements OnInit {
 
   @Input() objectData: any
-  @Input() layoutType:  any
+  @Input() layoutType: any
   @Input() mobileHeight: boolean = false
   @Input() fetchDataFromApi: boolean = false
   @Input() channelId: any
@@ -72,7 +72,8 @@ export class AnnouncementsComponent implements OnInit {
         "description",
         "createdOn",
         "updatedOn",
-        "category"
+        "category",
+        "announcementId"
       ],
       orderBy: "createdOn",
       orderDirection: "ASC",
@@ -81,12 +82,15 @@ export class AnnouncementsComponent implements OnInit {
       ],
       pageSize: this.objectData.pageSize
     }
-    this.insightSvc.fetchAnnouncementsData(request).subscribe((res: any)=> {
-      if(res && res.result && res.result.data) {
+    this.insightSvc.fetchAnnouncementsData(request).subscribe((res: any) => {
+      if (res && res.result && res.result.data) {
         res.result.data.forEach((resp: any) => {
           this.announcements.push({
-            value: resp.description,
-            expanded: false
+            description: resp.description,
+            expanded: false,
+            announcementId: resp.announcementId,
+            name: resp.name,
+            category: resp.category,
           })
         })
       }
@@ -95,8 +99,7 @@ export class AnnouncementsComponent implements OnInit {
       }
       this.objectData.list = this.announcements
       this.isLoading = false
-    }, error => {
-      console.log(error)
+    }, _error => {
       this.objectData.list = []
       this.isLoading = false
     })
@@ -117,7 +120,7 @@ export class AnnouncementsComponent implements OnInit {
   }
 
   translateLabels(label: string, type: any) {
-    return this.langtranslations.translateLabel(label, type, '');
+    return this.langtranslations.translateLabel(label, type, '')
   }
 
   /**
@@ -125,7 +128,6 @@ export class AnnouncementsComponent implements OnInit {
    * Emits an event to be handled by parent component (mdo-channel-v3)
    */
   onEdit() {
-    console.log('AnnouncementsComponent: onEdit clicked')
     const eventData = {
       source: 'announcements',
       action: 'edit',
@@ -136,17 +138,14 @@ export class AnnouncementsComponent implements OnInit {
         fieldType: 'announcementsConfig'
       }
     }
-
     // Use only the callback from injector which is the most reliable method
     if (this.eventCallback && typeof this.eventCallback === 'function') {
-      console.log('AnnouncementsComponent: calling parent eventCallback directly')
       this.eventCallback(eventData)
       return
     }
 
     // Fallback to global injector if direct callback isn't available
     if ((window as any).__INJECTOR_DATA?.eventCallback) {
-      console.log('AnnouncementsComponent: calling global injector eventCallback');
       (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }

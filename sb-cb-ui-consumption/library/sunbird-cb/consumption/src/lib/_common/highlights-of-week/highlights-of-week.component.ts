@@ -9,7 +9,7 @@ import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrol
 export class HighlightsOfWeekComponent implements OnInit, OnChanges {
 
   @Input() objectData: any
-  @Input() isEditable: boolean = true; // Default to true
+  @Input() isEdit: boolean = false;
   @Output() editEvent = new EventEmitter<any>();
 
   currentIndex = 0;
@@ -22,24 +22,21 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
   private eventCallback: ((event: any) => void) | null = null;
 
   constructor() {
-    console.log('HighlightsOfWeekComponent constructor')
-
-    // Always set isEditable to true for testing
-    this.isEditable = true
-
     // Manual property check from window.__INJECTOR__ (which will be set by MdoChannelV3Component)
     try {
       const injectorData = (window as any).__INJECTOR_DATA || {}
 
+      // Set isEdit from global injector data
+      if (injectorData.isEdit !== undefined) {
+        this.isEdit = injectorData.isEdit
+      }
+
       // Try to find the eventCallback
       if (typeof injectorData.eventCallback === 'function') {
-        console.log('Found eventCallback in __INJECTOR_DATA')
         this.eventCallback = injectorData.eventCallback
       } else if ((window as any).INJECTED_CALLBACKS?.highlightsOfWeek) {
-        console.log('Found eventCallback in INJECTED_CALLBACKS')
         this.eventCallback = (window as any).INJECTED_CALLBACKS.highlightsOfWeek
       } else if ((window as any).mdoChannelComponent?.handleSectionEvent) {
-        console.log('Using direct mdoChannelComponent reference')
         this.eventCallback = (event: any) => (window as any).mdoChannelComponent.handleSectionEvent(event)
       }
     } catch (e) {
@@ -48,20 +45,19 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    console.log('HighlightsOfWeekComponent initialized')
-
     // Check if we're injected with an eventCallback (from parent MDO component)
     try {
+      // Check for isEdit from __INJECTOR_DATA again in ngOnInit
+      const injectorData = (window as any).__INJECTOR_DATA || {}
+      if (injectorData.isEdit !== undefined) {
+        this.isEdit = injectorData.isEdit
+      }
+
       // Try multiple methods to get the callback
       this.eventCallback = (window as any).INJECTED_CALLBACKS?.['highlightsOfWeek'] ||
         (window as any).__INJECTOR_DATA?.eventCallback ||
         null
 
-      console.log('Found eventCallback:', !!this.eventCallback)
-
-      // Force isEditable to true for testing
-      this.isEditable = true
-      console.log('isEditable set to:', this.isEditable)
     } catch (e) {
       console.error('Error finding event callback:', e)
     }
@@ -104,8 +100,6 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
   }
 
   onEditClick() {
-    console.log('Edit clicked on HighlightsOfWeekComponent')
-
     // Prepare the data structure with the list of highlights
     const highlightsData = {
       title: this.objectData?.title || 'Week Highlights',
@@ -115,10 +109,6 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
         videoUrl: item.videoUrl || ''
       }))
     }
-
-    console.log('Highlights data:', highlightsData)
-    console.log('isEditable:', this.isEditable)
-    console.log('eventCallback exists:', !!this.eventCallback)
 
     // Option 1: Use EventEmitter if the component is used with a direct parent-child relationship
     const eventData = {
@@ -133,26 +123,18 @@ export class HighlightsOfWeekComponent implements OnInit, OnChanges {
       }
     }
 
-    console.log('Emitting event data:', eventData)
     this.editEvent.emit(eventData)
 
     // Option 2: Use the eventCallback if the component is used with the injector pattern
     if (this.eventCallback) {
-      console.log('Using eventCallback')
       this.eventCallback(eventData)
     } else {
-      console.log('No eventCallback available')
-
       // Fallback to using window.__INJECTOR_DATA if it exists
       if ((window as any).__INJECTOR_DATA && typeof (window as any).__INJECTOR_DATA.eventCallback === 'function') {
-        console.log('Using window.__INJECTOR_DATA.eventCallback as fallback');
         (window as any).__INJECTOR_DATA.eventCallback(eventData)
       } else {
-        console.log('No fallback available either')
-
         // Direct call to MdoChannelV3Component if it exists in window
         if ((window as any).mdoChannelComponent && typeof (window as any).mdoChannelComponent.handleSectionEvent === 'function') {
-          console.log('Using direct reference to mdoChannelComponent');
           (window as any).mdoChannelComponent.handleSectionEvent(eventData)
         } else {
           console.error('No way to handle edit event! Edit functionality will not work.')

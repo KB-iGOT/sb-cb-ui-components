@@ -40,7 +40,6 @@ export class ContentStripComponent {
     })
   }
   hideContentStrip(event: any, contentStrip: any) {
-    console.log(event)
     this.eventCallback({
       action: 'hide-content-strip',
       source: 'contentStrip',

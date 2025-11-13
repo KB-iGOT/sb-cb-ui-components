@@ -12,7 +12,8 @@
               <mat-icon>drag_indicator</mat-icon>
             </div>
             <mat-form-field appearance="outline" class="highlight-input">
-              <input matInput [formControlName]="i" placeholder="Heading text">
+              <input matInput [formControlName]="i" placeholder="Heading text" maxlength="100">
+              <mat-hint align="end">{{keyHighlightsArray.controls[i].value?.length || 0}}/100</mat-hint>
             </mat-form-field>
             <button mat-icon-button color="warn" (click)="removeKeyHighlight(i)" class="delete-btn">
               <mat-icon>delete</mat-icon>
@@ -41,14 +42,34 @@
         <mat-error *ngIf="editorForm.get('value')?.invalid">This field is required</mat-error>
       </mat-form-field>
 
-      <!-- Color picker -->
-      <div *ngSwitchCase="'color'" class="color-picker-container">
+      <!-- Banner Image for Background -->
+      <div *ngSwitchCase="'color'" class="color-banner-container">
+        <h4>Background Banner Image</h4>
+
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput formControlName="value" placeholder="Enter color code (e.g., #FF5733)">
-          <mat-error *ngIf="editorForm.get('value')?.hasError('required')">Color is required</mat-error>
-          <mat-error *ngIf="editorForm.get('value')?.hasError('pattern')">Invalid color format</mat-error>
+          <mat-label>Banner Image URL</mat-label>
+          <input matInput formControlName="value" placeholder="Enter banner image URL">
+          <mat-error *ngIf="editorForm.get('value')?.hasError('required')">Banner image URL is required</mat-error>
+          <mat-error *ngIf="editorForm.get('value')?.hasError('pattern')">Please enter a valid URL (must start with
+            http:// or https://)</mat-error>
         </mat-form-field>
-        <div class="color-preview" [style.background-color]="editorForm.get('value')?.value"></div>
+
+        <div class="upload-section">
+          <button type="button" mat-button class="btn-common btn-secondary" (click)="bannerFileInput.click()">
+            <mat-icon>cloud_upload</mat-icon> Upload Banner Image
+          </button>
+          <input hidden (change)="onBannerImageSelected($event)" #bannerFileInput type="file"
+            accept="image/jpeg,image/jpg,image/png">
+        </div>
+        <span *ngIf="uploadStatus" class="upload-status"
+          [class.error]="uploadStatus.startsWith('Error')">{{uploadStatus}}</span>
+        <p class="file-requirements">
+          <small>Allowed formats: JPG, PNG | Max size: 700KB</small>
+        </p>
+
+        <div class="image-preview" *ngIf="editorForm.get('value')?.value">
+          <img [src]="editorForm.get('value')?.value" alt="Banner Preview">
+        </div>
       </div>
 
       <!-- Image URL with upload option -->
@@ -103,7 +124,9 @@
                 <mat-form-field appearance="outline" class="full-width margin-remove">
                   <mat-label>Image URL</mat-label>
                   <input matInput formControlName="url" placeholder="Enter image URL or upload">
-                  <mat-error *ngIf="item.get('url')?.invalid">Image URL is required</mat-error>
+                  <mat-error *ngIf="item.get('url')?.hasError('required')">Image URL is required</mat-error>
+                  <mat-error *ngIf="item.get('url')?.hasError('pattern')">Please enter a valid URL (must start with
+                    http:// or https://)</mat-error>
                 </mat-form-field>
 
                 <div class="upload-section">
@@ -251,13 +274,16 @@
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Title</mat-label>
-                    <input matInput formControlName="title" placeholder="Enter document title" maxlength="75">
-                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/75</mat-hint>
+                    <input matInput formControlName="title" placeholder="Enter document title" maxlength="100">
+                    <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/100</mat-hint>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>PDF URL</mat-label>
                     <input matInput formControlName="downloaUrl" placeholder="Enter PDF URL or upload a file">
+                    <mat-error *ngIf="item.get('downloaUrl')?.hasError('pattern')">
+                      Please enter a valid URL (must start with http:// or https://)
+                    </mat-error>
                   </mat-form-field>
 
                   <div class="upload-section">
@@ -287,6 +313,77 @@
         </div>
       </div>
 
+      <!-- Looker Configuration -->
+      <div *ngSwitchCase="'lookerConfig'" class="complex-editor">
+        <div class="looker-editor">
+          <h4>Looker Configuration</h4>
+
+          <!-- Enable/Disable Toggle -->
+          <div class="form-row">
+            <mat-slide-toggle formControlName="enabled">
+              Enable Looker Section
+            </mat-slide-toggle>
+          </div>
+
+          <!-- Header Title -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Header Title</mat-label>
+            <input matInput formControlName="headerText" placeholder="Enter header title" maxlength="70">
+            <mat-hint align="end">{{editorForm.get('headerText')?.value?.length || 0}}/70</mat-hint>
+          </mat-form-field>
+
+          <!-- Header Description -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Header Description</mat-label>
+            <textarea matInput formControlName="headerDescription" placeholder="Enter header description" rows="3"
+              maxlength="300"></textarea>
+            <mat-hint align="end">{{editorForm.get('headerDescription')?.value?.length || 0}}/300</mat-hint>
+          </mat-form-field>
+
+          <!-- Desktop Height -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Desktop Height (px)</mat-label>
+            <input matInput type="number" formControlName="desktopHeight" placeholder="Enter desktop height">
+            <mat-hint>Height of the iframe on desktop devices</mat-hint>
+          </mat-form-field>
+
+          <!-- Mobile Height -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mobile Height (px)</mat-label>
+            <input matInput type="number" formControlName="mobileHeight" placeholder="Enter mobile height">
+            <mat-hint>Height of the iframe on mobile devices</mat-hint>
+          </mat-form-field>
+
+          <!-- Desktop URL -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Desktop URL</mat-label>
+            <input matInput type="url" formControlName="lookerProDesktopUrl"
+              placeholder="https://lookerstudio.google.com/...">
+            <mat-hint>Must start with https://lookerstudio.google.com/</mat-hint>
+            <mat-error *ngIf="editorForm.get('lookerProDesktopUrl')?.hasError('required')">
+              Desktop URL is required
+            </mat-error>
+            <mat-error *ngIf="editorForm.get('lookerProDesktopUrl')?.hasError('pattern')">
+              URL must start with https://lookerstudio.google.com/
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Mobile URL -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mobile URL</mat-label>
+            <input matInput type="url" formControlName="lookerProMobileUrl"
+              placeholder="https://lookerstudio.google.com/...">
+            <mat-hint>Must start with https://lookerstudio.google.com/</mat-hint>
+            <mat-error *ngIf="editorForm.get('lookerProMobileUrl')?.hasError('required')">
+              Mobile URL is required
+            </mat-error>
+            <mat-error *ngIf="editorForm.get('lookerProMobileUrl')?.hasError('pattern')">
+              URL must start with https://lookerstudio.google.com/
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
       <!-- Announcements Configuration -->
       <div *ngSwitchCase="'announcementsConfig'" class="complex-editor">
         <div class="announcements-editor">
@@ -303,6 +400,62 @@
             <input matInput formControlName="title" placeholder="Enter announcements title" maxlength="75">
             <mat-hint align="end">{{editorForm.get('title')?.value?.length || 0}}/75</mat-hint>
           </mat-form-field>
+
+          <!-- Announcements List -->
+          <div formArrayName="list" class="announcements-list" *ngIf="editorForm.get('enabled')?.value">
+            <h5>Announcements <span class="item-count">({{announcementsList.controls.length}} items)</span></h5>
+
+            <div cdkDropList (cdkDropListDropped)="dropAnnouncementItem($event)" class="announcements-container">
+              <div *ngFor="let item of announcementsList.controls; let i = index" [formGroupName]="i"
+                class="announcement-item flex-middle" cdkDrag>
+                <div class="drag-handle" cdkDragHandle>
+                  <mat-icon>drag_indicator</mat-icon>
+                </div>
+
+                <div class="item-content">
+                  <div class="item-header">
+                    <h6>Announcement {{i + 1}}</h6>
+                    <button mat-icon-button color="warn" type="button" (click)="removeAnnouncementItem(i)"
+                      class="remove-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Enter announcement name" maxlength="75">
+                    <mat-hint align="end">{{item.get('name')?.value?.length || 0}}/75</mat-hint>
+                    <mat-error *ngIf="item.get('name')?.invalid">Name is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" placeholder="Enter description" rows="3"
+                      maxlength="150"></textarea>
+                    <mat-hint align="end">{{item.get('description')?.value?.length || 0}}/150</mat-hint>
+                    <mat-error *ngIf="item.get('description')?.invalid">Description is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Category</mat-label>
+                    <input matInput formControlName="category" placeholder="Enter category" maxlength="50">
+                    <mat-hint align="end">{{item.get('category')?.value?.length || 0}}/50</mat-hint>
+                    <mat-error *ngIf="item.get('category')?.invalid">Category is required</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div *ngIf="announcementsList.controls.length === 0" class="no-items">
+                No announcements available. Add some items below.
+              </div>
+            </div>
+
+            <button mat-button class="btn-common btn-secondary flex-center mt-3" type="button"
+              (click)="addAnnouncementItem()" [disabled]="announcementsList.controls.length >= 15"
+              [ngClass]="{'btn-disable': announcementsList.controls.length >= 15}">
+              <mat-icon>add</mat-icon> Add Announcement
+            </button>
+          </div>
         </div>
       </div>
 
@@ -493,6 +646,8 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <input matInput formControlName="videoUrl" placeholder="Enter video URL or upload MP4">
                     <mat-error *ngIf="item.get('videoUrl')?.hasError('required')">Video URL is required</mat-error>
+                    <mat-error *ngIf="item.get('videoUrl')?.hasError('pattern')">Please enter a valid URL (must start
+                      with http:// or https://)</mat-error>
                   </mat-form-field>
 
                   <div class="upload-section">
@@ -570,7 +725,8 @@
           <div *ngIf="!sliderData.sliders.length" class="no-items">
             No slider items available. Add some items to see them here.
           </div>
-          <button mat-button class="btn-common btn-secondary flex flex-middle" type="button" (click)="addSliderItem()">
+          <button mat-button class="btn-common btn-secondary flex flex-middle" type="button" (click)="addSliderItem()"
+            [disabled]="sliderData?.sliders?.length > 4" [ngClass]="{'btn-disable': sliderData?.sliders?.length > 4}">
             <mat-icon>add</mat-icon> Add Slider Item
           </button>
         </div>

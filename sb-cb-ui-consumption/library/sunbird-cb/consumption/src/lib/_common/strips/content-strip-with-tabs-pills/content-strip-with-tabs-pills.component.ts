@@ -1,10 +1,10 @@
-import { Component, OnInit, Input, OnDestroy, HostBinding, Inject, EventEmitter, Output } from '@angular/core';
-import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2';
-import { NsContentStripWithTabsAndPills } from './content-strip-with-tabs-pills.model';
+import { Component, OnInit, Input, OnDestroy, HostBinding, Inject, EventEmitter, Output } from '@angular/core'
+import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
+import { NsContentStripWithTabsAndPills } from './content-strip-with-tabs-pills.model'
 // import { HttpClient } from '@angular/common/http'
-import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
-import { NsContent } from '../../../_models/widget-content.model';
-import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
+import { WidgetContentLibService } from '../../../_services/widget-content-lib.service'
+import { NsContent } from '../../../_models/widget-content.model'
+import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
 import {
   TFetchStatus,
   LoggerService,
@@ -13,60 +13,60 @@ import {
   UtilityService,
   WsEvents,
   WidgetEnrollService,
-} from '@sunbird-cb/utils-v2';
-import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service';
+} from '@sunbird-cb/utils-v2'
+import { Subscription } from 'rxjs'
+import { filter } from 'rxjs/operators'
+import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service'
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { NsCardContent } from '../../../_models/card-content-v2.model'; 
-import { ITodayEvents } from '../../../_models/event';
-import { TranslateService } from '@ngx-translate/core';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { AddCompetencyPopupComponent } from '../../dialog-components/add-competency-popup/add-competency-popup.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.component';
-import { fadeAnimation } from '../../_animations/fade-animation';
-import { SakshamAI } from '../../../consumption.config';
+import { NsCardContent } from '../../../_models/card-content-v2.model'
+import { ITodayEvents } from '../../../_models/event'
+import { TranslateService } from '@ngx-translate/core'
+import { Router } from '@angular/router'
+import { MatDialog } from '@angular/material/dialog'
+import { AddCompetencyPopupComponent } from '../../dialog-components/add-competency-popup/add-competency-popup.component'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.component'
+import { fadeAnimation } from '../../_animations/fade-animation'
+import { SakshamAI } from '../../../consumption.config'
 
 interface IStripUnitContentData {
-  key: string;
-  canHideStrip: boolean;
-  mode?: string;
-  showStrip: boolean;
-  disableTranslate: boolean;
-  widgets?: NsWidgetResolver.IRenderConfigWithAnyData[];
-  stripTitle: string;
+  key: string
+  canHideStrip: boolean
+  mode?: string
+  showStrip: boolean
+  disableTranslate: boolean
+  widgets?: NsWidgetResolver.IRenderConfigWithAnyData[]
+  stripTitle: string
   stripTitleLink?: {
     link: {
       queryParams: string
     },
     icon: string,
     queryParams: string
-  };
+  }
   sliderConfig?: {
     showNavs: boolean,
     showDots: boolean,
     maxWidgets?: number
     cerificateCardMargin?: boolean
-  };
-  stripConfig: any;
-  tabs?: NsContentStripWithTabsAndPills.IContentStripTab[] | undefined;
-  stripName?: string;
-  stripLogo?: string;
-  description?: string;
-  stripInfo?: NsContentStripWithTabsAndPills.IStripInfo;
-  noDataWidget?: NsWidgetResolver.IRenderConfigWithAnyData;
-  errorWidget?: NsWidgetResolver.IRenderConfigWithAnyData;
-  showOnNoData: boolean;
-  showOnLoader: boolean;
-  showOnError: boolean;
-  loaderWidgets?: any;
-  stripBackground?: string;
-  secondaryHeading?: any;
-  viewMoreUrl: any;
+  }
+  stripConfig: any
+  tabs?: NsContentStripWithTabsAndPills.IContentStripTab[] | undefined
+  stripName?: string
+  stripLogo?: string
+  description?: string
+  stripInfo?: NsContentStripWithTabsAndPills.IStripInfo
+  noDataWidget?: NsWidgetResolver.IRenderConfigWithAnyData
+  errorWidget?: NsWidgetResolver.IRenderConfigWithAnyData
+  showOnNoData: boolean
+  showOnLoader: boolean
+  showOnError: boolean
+  loaderWidgets?: any
+  stripBackground?: string
+  secondaryHeading?: any
+  viewMoreUrl: any
   request?: any
 
 }
@@ -83,7 +83,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   OnInit,
   OnDestroy,
   NsWidgetResolver.IWidgetData<NsContentStripWithTabsAndPills.IContentStripMultiple> {
-  @Input() widgetData!: NsContentStripWithTabsAndPills.IContentStripMultiple;
+  @Input() widgetData!: NsContentStripWithTabsAndPills.IContentStripMultiple
   @Output() emptyResponse = new EventEmitter<any>()
   @Output() viewAllResponse = new EventEmitter<any>()
   @Output() telemtryResponse = new EventEmitter<any>()
@@ -104,11 +104,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   contentAvailable = true;
   baseUrl = this.configSvc.sitePath || '';
   veifiedKarmayogi = false;
-  environment!: any;
+  environment!: any
   changeEventSubscription: Subscription | null = null;
   defaultMaxWidgets = 12;
   maxWidgetsSakshamAI = 100;
-  enrollInterval: any;
+  enrollInterval: any
   todaysEvents: any = [];
   activeTabIndex: number = 0
   activePillIndex: number = 0
@@ -120,10 +120,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   releventNotReleventSubscription: Subscription | null = null;
   telementrySubscription: Subscription | null = null;
   feedbackCourseId = ''
-  currentStripG: any;
-  tabEventG: any;
+  currentStripG: any
+  tabEventG: any
   firstTimeLoaded = false
-  localRecommended: any;
+  localRecommended: any
   sakshamAIEnum = SakshamAI
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
@@ -143,12 +143,12 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     private matDialog: MatDialog,
     public snackBar: MatSnackBar,
   ) {
-    super();
+    super()
     if (localStorage.getItem('websiteLanguage')) {
-      this.translate.setDefaultLang('en');
-      let lang = JSON.stringify(localStorage.getItem('websiteLanguage'));
-      lang = lang.replace(/\"/g, '');
-      this.translate.use(lang);
+      this.translate.setDefaultLang('en')
+      let lang = JSON.stringify(localStorage.getItem('websiteLanguage'))
+      lang = lang.replace(/\"/g, '')
+      this.translate.use(lang)
     }
     this.environment = environment
   }
@@ -156,7 +156,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ngOnInit() {
     // const url = window.location.href
     this.localRecommended = this.contentSvc.getRecommendedIds(this.configSvc.userProfile.userId)
-    this.initData();
+    this.initData()
     this.subscribeToTelementry()
   }
 
@@ -173,7 +173,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           && this.widgetData.strips[0].key === data.typeOfTelemetry) {
           const tab = this.widgetData.strips[0].tabs[this.activeTabIndex]
           // const pill = tab.pillsData[this.activePillIndex]
-          const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill?.selected);
+          const pill = this.widgetData.strips[0]?.tabs[this.activeTabIndex]?.pillsData.find((pill: any) => pill?.selected)
           if (tab && pill) {
             data.selectedTab = this.parametrizedText(tab.label)
             data.selectedPill = pill.label.split(" ").join("").toLocaleLowerCase()
@@ -197,7 +197,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   ngOnDestroy() {
     if (this.changeEventSubscription) {
-      this.changeEventSubscription.unsubscribe();
+      this.changeEventSubscription.unsubscribe()
     }
 
     if (this.releventNotReleventSubscription) {
@@ -212,31 +212,31 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   showAccordion(key: string) {
     if (this.utilitySvc.isMobile && this.stripsResultDataMap[key].mode === 'accordion') {
-      return this.showAccordionData;
+      return this.showAccordionData
     }
-    return true;
+    return true
   }
 
   setHiddenForStrip(key: string) {
-    this.stripsResultDataMap[key].showStrip = false;
-    sessionStorage.setItem(`cstrip_${key}`, '1');
+    this.stripsResultDataMap[key].showStrip = false
+    sessionStorage.setItem(`cstrip_${key}`, '1')
   }
   private getIfStripHidden(key: string): boolean {
-    const storageItem = sessionStorage.getItem(`cstrip_${key}`);
-    return Boolean(storageItem !== '1');
+    const storageItem = sessionStorage.getItem(`cstrip_${key}`)
+    return Boolean(storageItem !== '1')
   }
 
   public initData() {
-    this.stripsKeyOrder = this.widgetData && this.widgetData.strips && this.widgetData.strips.map(strip => strip.key) || [];
+    this.stripsKeyOrder = this.widgetData && this.widgetData.strips && this.widgetData.strips.map(strip => strip.key) || []
     if (this.widgetData.loader && this.widgetData.strips.length) {
-      this.showParentLoader = true;
+      this.showParentLoader = true
     }
     // Fetch the data
     for (const strip of this.widgetData.strips) {
       if (this.checkForEmptyWidget(strip)) {
-        this.fetchStripFromRequestData(strip, true);
+        this.fetchStripFromRequestData(strip, true)
       } else {
-        this.processStrip(strip, [], 'done', true, null);
+        this.processStrip(strip, [], 'done', true, null)
       }
     }
     // Subscription for changes
@@ -246,54 +246,53 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         type: (strip.refreshEvent && strip.refreshEvent.eventType) || '',
         from: (strip.refreshEvent && strip.refreshEvent.from.toString()) || '',
       }))
-      .filter(({ key, type, from }) => key && type && from);
-    const eventTypeSet = new Set(keyAndEvent.map(e => e.type));
+      .filter(({ key, type, from }) => key && type && from)
+    const eventTypeSet = new Set(keyAndEvent.map(e => e.type))
     this.changeEventSubscription = this.eventSvc.events$
       .pipe(filter(event => eventTypeSet.has(event.eventType)))
       .subscribe(event => {
         keyAndEvent
           .filter(e => e.type === event.eventType && e.from === event.from)
           .map(e => e.key)
-          .forEach(k => this.fetchStripFromKey(k, false));
-      });
+          .forEach(k => this.fetchStripFromKey(k, false))
+      })
   }
 
   private fetchStripFromKey(key: string, calculateParentStatus = true) {
-    const stripData = this.widgetData.strips.find(strip => strip.key === key);
+    const stripData = this.widgetData.strips.find(strip => strip.key === key)
     if (stripData) {
-      this.fetchStripFromRequestData(stripData, calculateParentStatus);
+      this.fetchStripFromRequestData(stripData, calculateParentStatus)
     }
   }
 
   isStripShowing(data: any) {
-    let count = 0;
+    let count = 0
 
     if (data && data.key === this.environment.programStripKey && (!data.tabs || !data.tabs.length) &&
       data.stripTitle === this.environment.programStripName && data.widgets.length > 0) {
       data.widgets.forEach((key: any) => {
         if (key && key.widgetData.content.primaryCategory === this.environment.programStripPrimaryCategory) {
-          count = count + 1;
+          count = count + 1
         }
-      });
+      })
       if (count > 0) {
-        data.showStrip = true;
+        data.showStrip = true
       } else {
-        data.showStrip = false;
+        data.showStrip = false
       }
     }
-    // console.log('data.key', data, data.key, data.widgets);
-    return data.showStrip;
+    return data.showStrip
   }
 
   get isMobile() {
-    return this.utilitySvc.isMobile || false;
+    return this.utilitySvc.isMobile || false
   }
 
   getdata(data: IStripUnitContentData) {
     if (data.stripInfo) {
-      return data.stripInfo.widget;
+      return data.stripInfo.widget
     }
-    return {};
+    return {}
 
   }
   checkCondition(
@@ -305,35 +304,35 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       wData.strips[0].stripConfig &&
       wData.strips[0].stripConfig.hideShowAll
     ) {
-      return !wData.strips[0].stripConfig.hideShowAll;
+      return !wData.strips[0].stripConfig.hideShowAll
     }
     if (data.key && data.key === "cbpPlan") {
       const selectedPill = data.tabs[this.activeTabIndex]?.pillsData.find(
         (pill: any) => pill.selected
-      );
+      )
       if (selectedPill) {
-        return selectedPill.widgets && selectedPill?.widgets.length > 4;
+        return selectedPill.widgets && selectedPill?.widgets.length > 4
       }
     } else if (data.key && data.key === "continueLearning") {
       return (
         wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 1
-      );
+      )
     } else {
       return (
         wData.strips[0].viewMoreUrl && data.widgets && data.widgets.length >= 4
-      );
+      )
     }
   }
   checkVisible(data: IStripUnitContentData) {
-    return data.stripInfo && data.stripInfo.visibilityMode === 'visible';
+    return data.stripInfo && data.stripInfo.visibilityMode === 'visible'
   }
 
   getContineuLearningLenth(data: IStripUnitContentData) {
-    return data.widgets ? data.widgets.length : 0;
+    return data.widgets ? data.widgets.length : 0
   }
   getLength(data: IStripUnitContentData) {
     if (!data.tabs || !data.tabs.length) {
-      return data.widgets ? data.widgets.length : 0;
+      return data.widgets ? data.widgets.length : 0
     } {
       // if tabs are there check if each tab has widgets and get the tab with max widgets
       // let tabWithMaxWidgets: any = {}
@@ -361,40 +360,40 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       //   }
       // })
       // if tabs has atleast 1 widgets then strip will show or else not
-      return true;
+      return true
     }
   }
 
   private getFiltersFromArray(v6filters: any) {
-    const filters: any = {};
+    const filters: any = {}
     if (v6filters.constructor === Array) {
       v6filters.forEach(((f: any) => {
         Object.keys(f).forEach(key => {
-          filters[key] = f[key];
-        });
-      }));
-      return filters;
+          filters[key] = f[key]
+        })
+      }))
+      return filters
     }
-    return v6filters;
+    return v6filters
   }
 
   private transformSearchV6FiltersV2(v6filters: any) {
-    const filters: any = {};
+    const filters: any = {}
     if (v6filters.constructor === Array) {
       v6filters.forEach(((f: any) => {
         Object.keys(f).forEach(key => {
-          filters[key] = f[key];
-        });
-      }));
-      return filters;
+          filters[key] = f[key]
+        })
+      }))
+      return filters
     }
-    return v6filters;
+    return v6filters
   }
 
   checkForDateFilters(filters: any) {
-    let userData: any;
+    let userData: any
     if (this.configSvc.userProfile) {
-      userData = this.configSvc.userProfile;
+      userData = this.configSvc.userProfile
     }
 
     if (filters && filters.hasOwnProperty('batches.endDate')) {
@@ -407,18 +406,18 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       filters.organisation.indexOf('<orgID>') >= 0
     ) {
       if (this.providerId) {
-        filters.organisation = this.providerId;
+        filters.organisation = this.providerId
       } else {
-        filters.organisation = userData && userData.rootOrgId;
+        filters.organisation = userData && userData.rootOrgId
 
         if (filters && filters.hasOwnProperty('designation')) {
           filters.designation = userData.professionalDetails.length > 0 ?
-            userData.professionalDetails[0].designation : '';
+            userData.professionalDetails[0].designation : ''
         }
       }
 
     }
-    return filters;
+    return filters
   }
 
   private async fetchStripFromRequestData(
@@ -426,11 +425,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus = true,
   ) {
     // setting initial values
-    strip.loaderWidgets = this.transformSkeletonToWidgets(strip);
-    this.processStrip(strip, [], 'fetching', false, null);
-    this.fetchFromSearchV6(strip, calculateParentStatus);
+    strip.loaderWidgets = this.transformSkeletonToWidgets(strip)
+    this.processStrip(strip, [], 'fetching', false, null)
+    this.fetchFromSearchV6(strip, calculateParentStatus)
     this.fetchForYouData(strip, calculateParentStatus)
-    await this.fetchAllCbpPlans(strip, calculateParentStatus);
+    await this.fetchAllCbpPlans(strip, calculateParentStatus)
     this.fetchUserEnrolledData(strip, 0, 0, calculateParentStatus)
     await this.fetchDesignationBasedCourses(strip, 2, true)
 
@@ -446,17 +445,17 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   }
 
   toggleInfo(data: IStripUnitContentData) {
-    const stripInfo = this.stripsResultDataMap[data.key].stripInfo;
+    const stripInfo = this.stripsResultDataMap[data.key].stripInfo
     if (stripInfo) {
       if (stripInfo.mode !== 'below') {
-        this.loggerSvc.warn(`strip info mode: ${stripInfo.mode} not implemented yet`);
-        stripInfo.mode = 'below';
+        this.loggerSvc.warn(`strip info mode: ${stripInfo.mode} not implemented yet`)
+        stripInfo.mode = 'below'
       }
       if (stripInfo.mode === 'below') {
         this.stripsResultDataMap[data.key].stripInfo = {
           ...stripInfo,
           visibilityMode: stripInfo.visibilityMode === 'hidden' ? 'visible' : 'hidden',
-        };
+        }
       }
     }
   }
@@ -489,14 +488,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         widgetHostClass: 'mb-2',
         widgetData: {},
       }
-    ));
+    ))
   }
 
   private transformEventsToWidgets(
     contents: ITodayEvents[],
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
   ) {
-    this.eventSvc.setEventListData(contents);
+    this.eventSvc.setEventListData(contents)
     return (this.eventSvc.todaysEvents || []).map((content: any, idx: any) => (content ? {
       widgetType: 'card',
       widgetSubType: 'eventHubCard',
@@ -516,7 +515,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       widgetHostClass: 'mb-2',
       widgetData: {},
     }
-    ));
+    ))
   }
   private transformSkeletonToWidgets(
     strip: any
@@ -529,7 +528,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         cardSubType: strip.loaderConfig && strip.loaderConfig.cardSubType || 'card-standard-skeleton',
         cardCustomeClass: strip.customeClass ? strip.customeClass : '',
       },
-    }));
+    }))
   }
 
   private async processStrip(
@@ -581,46 +580,46 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       ),
       showOnLoader: Boolean(strip.loader && fetchStatus === 'fetching'),
       showOnError: Boolean(strip.errorWidget && fetchStatus === 'error'),
-    };
+    }
     // const stripData = this.stripsResultDataMap[strip.key]
     this.stripsResultDataMap = {
       ...this.stripsResultDataMap,
       [strip.key]: stripData,
-    };
+    }
     if (!tabsResults) {
       if (
         calculateParentStatus &&
         (fetchStatus === 'done' || fetchStatus === 'error') &&
         stripData.widgets
       ) {
-        this.checkParentStatus(fetchStatus, stripData.widgets.length);
+        this.checkParentStatus(fetchStatus, stripData.widgets.length)
       }
       if (calculateParentStatus && !(results && results.length > 0)) {
-        this.contentAvailable = false;
+        this.contentAvailable = false
       } else if (results && results.length > 0) {
-        this.contentAvailable = true;
+        this.contentAvailable = true
       }
     } else {
-      this.contentAvailable = true;
+      this.contentAvailable = true
     }
   }
   private checkParentStatus(fetchStatus: TFetchStatus, stripWidgetsCount: number): void {
     if (fetchStatus === 'done' && !stripWidgetsCount) {
-      this.noDataCount += 1;
+      this.noDataCount += 1
     } else if (fetchStatus === 'done' && stripWidgetsCount) {
-      this.successDataCount += 1;
+      this.successDataCount += 1
     } else if (fetchStatus === 'error') {
-      this.errorDataCount += 1;
+      this.errorDataCount += 1
     }
-    const settledCount = this.noDataCount + this.successDataCount + this.errorDataCount;
-    const totalCount = this.widgetData.strips.length;
+    const settledCount = this.noDataCount + this.successDataCount + this.errorDataCount
+    const totalCount = this.widgetData.strips.length
     if (this.successDataCount > 0 && settledCount < totalCount) {
-      return;
+      return
     }
-    this.showParentLoader = settledCount !== totalCount;
+    this.showParentLoader = settledCount !== totalCount
     this.showParentNoData =
-      this.noDataCount > 0 && this.noDataCount + this.errorDataCount === totalCount;
-    this.showParentError = this.errorDataCount === totalCount;
+      this.noDataCount > 0 && this.noDataCount + this.errorDataCount === totalCount
+    this.showParentError = this.errorDataCount === totalCount
   }
   checkForEmptyWidget(strip: NsContentStripWithTabsAndPills.IContentStripUnit): boolean {
     if (
@@ -633,28 +632,28 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         (strip && strip.tabs.length)
       )
     ) {
-      return true;
+      return true
     }
-    return false;
+    return false
   }
 
   getRecommendedId(strip: any): string {
     if (!strip?.tabs || !Array.isArray(strip.tabs)) {
-      return '';
+      return ''
     }
 
     if (strip.tabs[0]?.hideTab === true) {
-      return this.recommendedCoursesId;
+      return this.recommendedCoursesId
     }
 
     else if (
       (strip.tabs[0]?.value === SakshamAI.SakshamAI && this.activeTabIndex === 0) ||
       (strip.tabs[1]?.value === SakshamAI.SakshamAI && this.activeTabIndex === 1)
     ) {
-      return this.recommendedCoursesId;
+      return this.recommendedCoursesId
     }
 
-    return '';
+    return ''
   }
 
   getTabDataByfilter(
@@ -662,28 +661,22 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     currentTab: NsContentStripWithTabsAndPills.IContentStripTab,
     calculateParentStatus: boolean
   ) {
-    // tslint:disable:no-console
-    console.log('strip -- ', strip);
-    // tslint:disable:no-console
-    console.log('currentTab -- ', currentTab);
-    // tslint:disable:no-console
-    console.log('calculateParentStatus-- ', calculateParentStatus);
     // TODO: Write logic for individual filter if passed in config
     // add switch case based on config key passed
   }
 
   getSelectedIndex(stripsResultDataMap: any, key: any): number {
-    let returnValue = 0;
-    return returnValue;
+    let returnValue = 0
+    return returnValue
   }
 
   translateLabels(label: string, type: any) {
-    return this.langtranslations.translateLabel(label, type, '');
+    return this.langtranslations.translateLabel(label, type, '')
   }
 
   identify(index: number, item: any) {
     if (index >= 0) { }
-    return item;
+    return item
   }
   tracker(index: number, item: any) {
     if (index >= 0) { }
@@ -713,20 +706,20 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   fetchForYouData(strip: NsContentStripWithTabsAndPills.IContentStripUnit, calculateParentStatus = true) {
     if (strip && strip.type === 'forYou') {
       if (strip.tabs && strip.tabs.length) {
-        const firstTab = strip.tabs[0];
+        const firstTab = strip.tabs[0]
         const pillData = firstTab.pillsData[0]
         if (pillData.requestRequired) {
           if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-            const allPills = this.stripsResultDataMap[strip.key].tabs[0].pillsData;
-            const currenPillsFromMap = (allPills && allPills.length && allPills[0]) as NsContentStripWithTabsAndPills.IContentStripTab;
-            this.getTabDataByNewReqTrending(strip, 0, 0, currenPillsFromMap, calculateParentStatus);
+            const allPills = this.stripsResultDataMap[strip.key].tabs[0].pillsData
+            const currenPillsFromMap = (allPills && allPills.length && allPills[0]) as NsContentStripWithTabsAndPills.IContentStripTab
+            this.getTabDataByNewReqTrending(strip, 0, 0, currenPillsFromMap, calculateParentStatus)
             if (this.stripsResultDataMap[strip.key] && currenPillsFromMap) {
               this.stripsResultDataMap[strip.key].viewMoreUrl.queryParams = {
                 ...this.stripsResultDataMap[strip.key].viewMoreUrl.queryParams,
                 key: strip.key,
                 tabSelected: firstTab.value,
                 pillSelected: pillData.value,
-              };
+              }
             }
           }
         }
@@ -744,36 +737,34 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       //     strip.request.searchV6.locale = ['en']
       //   }
       // }
-      let originalFilters: any = [];
+      let originalFilters: any = []
       // tslint:disable:no-console
       if (strip.request &&
         strip.request.searchV6 &&
         strip.request.searchV6.request &&
         strip.request.searchV6.request.filters) {
-        originalFilters = strip.request.searchV6.request.filters;
-        strip.request.searchV6.request.filters = this.checkForDateFilters(strip.request.searchV6.request.filters);
+        originalFilters = strip.request.searchV6.request.filters
+        strip.request.searchV6.request.filters = this.checkForDateFilters(strip.request.searchV6.request.filters)
         strip.request.searchV6.request.filters = this.getFiltersFromArray(
           strip.request.searchV6.request.filters,
-        );
+        )
       }
       if (strip.tabs && strip.tabs.length) {
         // TODO: Have to extract requestRequired to outer level of tabs config
-        const firstTab = strip.tabs[0];
+        const firstTab = strip.tabs[0]
         if (firstTab.requestRequired) {
           if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-            const allTabs = this.stripsResultDataMap[strip.key].tabs;
-            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabsAndPills.IContentStripTab;
+            const allTabs = this.stripsResultDataMap[strip.key].tabs
+            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabsAndPills.IContentStripTab
 
-            this.getTabDataByNewReqSearchV6(strip, 0, 0, currentTabFromMap, calculateParentStatus);
+            this.getTabDataByNewReqSearchV6(strip, 0, 0, currentTabFromMap, calculateParentStatus)
           }
         }
 
       } else {
         try {
-          const response = await this.searchV6Request(strip, strip.request, calculateParentStatus);
-          // console.log('calling  after - response, ', response)
+          const response = await this.searchV6Request(strip, strip.request, calculateParentStatus)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.result.content) {
 
               this.processStrip(
@@ -782,7 +773,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 'done',
                 calculateParentStatus,
                 response.viewMoreUrl,
-              );
+              )
 
 
             } else if (response.results.result.Event) {
@@ -792,13 +783,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 'done',
                 calculateParentStatus,
                 response.viewMoreUrl,
-              );
+              )
             } else {
-              this.processStrip(strip, [], 'error', calculateParentStatus, null);
+              this.processStrip(strip, [], 'error', calculateParentStatus, null)
             }
 
           } else {
-            this.processStrip(strip, [], 'error', calculateParentStatus, null);
+            this.processStrip(strip, [], 'error', calculateParentStatus, null)
           }
         } catch (error) {
           // Handle errors
@@ -816,15 +807,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.trendingSearchRequest(strip, currentTab.request, calculateParentStatus);
-      let tabResults: any[] = [];
+      const response = await this.trendingSearchRequest(strip, currentTab.request, calculateParentStatus)
+      let tabResults: any[] = []
       if (response && response.results && response.results.response) {
-        const content = response.results.response[currentTab.value] || [];
-        const widgets = this.transformContentsToWidgets(content, strip);
+        const content = response.results.response[currentTab.value] || []
+        const widgets = this.transformContentsToWidgets(content, strip)
 
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
+          const allTabs = this.stripsResultDataMap[strip.key].tabs
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -833,14 +824,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 widgets,
                 // fetchTabStatus: 'done',
                 // selected: true
-              };
+              }
             }
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
               widgets,
               fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
+            }
+            tabResults = allTabs
           }
         }
         this.processStrip(
@@ -850,12 +841,12 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           calculateParentStatus,
           response.viewMoreUrl,
           tabResults // tabResults as widgets
-        );
-        this.statusChangetoDone(strip, tabIndex, pillIndex);
+        )
+        this.statusChangetoDone(strip, tabIndex, pillIndex)
       } else {
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
+          const allTabs = this.stripsResultDataMap[strip.key].tabs
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -864,21 +855,21 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 widgets: [],
                 fetchTabStatus: 'done',
                 selected: true
-              };
+              }
             }
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
               widgets: [],
               fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
+            }
+            tabResults = allTabs
           }
         }
-        this.processStrip(strip, [], 'done', calculateParentStatus, null);
+        this.processStrip(strip, [], 'done', calculateParentStatus, null)
       }
     } catch (error) {
       // Handle errors
-      this.processStrip(strip, [], 'error', calculateParentStatus, null);
+      this.processStrip(strip, [], 'error', calculateParentStatus, null)
     }
   }
 
@@ -890,13 +881,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus);
+      const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
       if (response && response.results) {
-        const widgets = this.transformContentsToWidgets(response.results.result.content, strip);
-        let tabResults: any[] = [];
+        const widgets = this.transformContentsToWidgets(response.results.result.content, strip)
+        let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-          const allTabs = this.stripsResultDataMap[strip.key].tabs;
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
+          const allTabs = this.stripsResultDataMap[strip.key].tabs
+          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
           this.resetSelectedPill(allPills)
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
             if (allPills && allPills.length && allPills[pillIndex]) {
@@ -905,14 +896,14 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 widgets,
                 // fetchTabStatus: 'done',
                 // selected: true
-              };
+              }
             }
             allTabs[tabIndex] = {
               ...allTabs[tabIndex],
               widgets,
               fetchTabStatus: 'done',
-            };
-            tabResults = allTabs;
+            }
+            tabResults = allTabs
           }
         }
         this.processStrip(
@@ -922,10 +913,10 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           calculateParentStatus,
           response.viewMoreUrl,
           tabResults // tabResults as widgets
-        );
-        this.statusChangetoDone(strip, tabIndex, pillIndex);
+        )
+        this.statusChangetoDone(strip, tabIndex, pillIndex)
       } else {
-        this.processStrip(strip, [], 'error', calculateParentStatus, null);
+        this.processStrip(strip, [], 'error', calculateParentStatus, null)
       }
     } catch (error) {
       // Handle errors
@@ -937,18 +928,18 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     request: NsContentStripWithTabsAndPills.IContentStripUnit['request'],
     calculateParentStatus: boolean
   ): Promise<any> {
-    const originalFilters: any = [];
+    const originalFilters: any = []
     return new Promise<any>((resolve, reject) => {
       if (request && request.trendingSearch) {
         // check for the request if it has dynamic values]
         if (request.trendingSearch.request.filters.organisation &&
           request.trendingSearch.request.filters.organisation.indexOf('<orgID>') >= 0
         ) {
-          let userRootOrgId;
+          let userRootOrgId
           if (this.configSvc.userProfile) {
-            userRootOrgId = this.configSvc.userProfile.rootOrgId;
+            userRootOrgId = this.configSvc.userProfile.rootOrgId
           }
-          request.trendingSearch.request.filters.organisation = userRootOrgId;
+          request.trendingSearch.request.filters.organisation = userRootOrgId
         }
         this.contentSvc.trendingContentSearch(request.trendingSearch).subscribe(results => {
           const showViewMore = Boolean(
@@ -957,7 +948,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             results.result[strip.request.trendingSearch.responseKey] &&
             results.result[strip.request.trendingSearch.responseKey].length > 5 &&
             strip.stripConfig && strip.stripConfig.postCardForSearch,
-          );
+          )
 
           const viewMoreUrl = showViewMore
             ? {
@@ -978,7 +969,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                     : {},
               },
             }
-            : null;
+            : null
 
           let proccesedResult: any = []
           if (results && results.response && results.response.certifications) {
@@ -989,20 +980,20 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             })
             results = { response: { certifications: proccesedResult } }
           }
-          resolve({ results, viewMoreUrl });
+          resolve({ results, viewMoreUrl })
         }, (error: any) => {
           if (error.error && error.error.status === 400) {
-            this.processStrip(strip, [], 'done', calculateParentStatus, null);
+            this.processStrip(strip, [], 'done', calculateParentStatus, null)
           }
           // this.processStrip(strip, [], 'done', calculateParentStatus, null)
-          reject(error);
-        },);
+          reject(error)
+        },)
       }
-    });
+    })
   }
 
   public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
-    let tabEventIndex;
+    let tabEventIndex
     if (tabEvent === 1 && stripMap.tabs[tabEvent].hideTab) {
       this.activeTabIndex = 2
       tabEventIndex = 2
@@ -1011,9 +1002,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       tabEventIndex = tabEvent
     }
     if (stripMap && stripMap.tabs && stripMap.tabs[tabEventIndex]) {
-      stripMap.tabs[tabEventIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-      stripMap.tabs[tabEventIndex].pillsData[pillIndex].tabLoading = true;
-      stripMap.showOnLoader = true;
+      stripMap.tabs[tabEventIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress'
+      stripMap.tabs[tabEventIndex].pillsData[pillIndex].tabLoading = true
+      stripMap.showOnLoader = true
       this.resetSelectedPill(stripMap.tabs[tabEventIndex].pillsData)
     }
     // const data: WsEvents.ITelemetryTabData = {
@@ -1032,26 +1023,26 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     //   }
 
     // );
-    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex];
-    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]?.pillsData[pillIndex];
-    const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
-    this.currentStripG = currentStrip;
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]?.pillsData[pillIndex]
+    const currentStrip = this.widgetData.strips.find(s => s.key === stripKey)
+    this.currentStripG = currentStrip
     this.tabEventG = tabEvent
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
         ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
         tabSelected: currentTabFromMap.value,
         pillSelected: currentPillFromMap.value,
-      };
+      }
     }
     if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
       if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
         // call API to get tab data and process
         // this.processStrip(currentStrip, [], 'fetching', true, null)
         if (currentPillFromMap.request.searchV6) {
-          this.getTabDataByNewReqSearchV6(currentStrip, tabEventIndex, 0, currentPillFromMap, true);
+          this.getTabDataByNewReqSearchV6(currentStrip, tabEventIndex, 0, currentPillFromMap, true)
         } else if (currentPillFromMap.request.trendingSearch) {
-          this.getTabDataByNewReqTrending(currentStrip, tabEventIndex, 0, currentPillFromMap, true);
+          this.getTabDataByNewReqTrending(currentStrip, tabEventIndex, 0, currentPillFromMap, true)
         } else if (currentPillFromMap.request.type === 'eventEnrollment') {
           this.fetchEventEnrollmentList(currentStrip, tabEventIndex, pillIndex, true)
         } else if (currentPillFromMap.request.type === 'enrollment') {
@@ -1130,11 +1121,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                             pill.fetchTabStatus = 'done'
                             pill.tabLoading = false
                             countOfWidget = false
-                          }else {
+                          } else {
                             pill.selected = false
                           }
                         }
-                      });
+                      })
                     }
                   })
                 }
@@ -1208,7 +1199,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           calculateParentStatus,
           '',
           tabs
-        );
+        )
       }
 
     }
@@ -1224,11 +1215,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   splitDesignationsTabData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit,
     enollData: any, coursesArray: any, type: string) {
-    let tabResults: any[] = [];
+    let tabResults: any[] = []
     const splitData = this.getTabsDesignationsList(
       contentNew,
       strip, enollData, coursesArray
-    );
+    )
     if (strip.tabs && strip.tabs.length) {
       for (let i = 0; i < strip.tabs.length; i += 1) {
         if (strip.tabs[i].value === type) {
@@ -1304,29 +1295,29 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.resetSelectedPill(stripMap.tabs[tabIndex].pillsData)
     this.activePillIndex = pillIndex
     if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
-      stripMap.tabs[tabIndex].pillsData[pillIndex].selected = true;
-      stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
-      stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true;
-      stripMap.showOnLoader = true;
+      stripMap.tabs[tabIndex].pillsData[pillIndex].selected = true
+      stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress'
+      stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = true
+      stripMap.showOnLoader = true
     }
-    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex];
-    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex].pillsData[pillIndex];
-    const currentStrip = this.widgetData.strips.find(s => s.key === stripKey);
+    const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex]
+    const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabIndex].pillsData[pillIndex]
+    const currentStrip = this.widgetData.strips.find(s => s.key === stripKey)
     if (this.stripsResultDataMap[stripKey] && currentTabFromMap) {
       this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams = {
         ...this.stripsResultDataMap[stripKey].viewMoreUrl.queryParams,
         tabSelected: currentTabFromMap.value,
         pillSelected: currentPillFromMap.value,
-      };
+      }
     }
     if (currentStrip && currentTabFromMap && !currentTabFromMap.computeDataOnClick && currentPillFromMap) {
       if (currentPillFromMap.requestRequired && currentPillFromMap.request) {
         // call API to get tab data and process
         // this.processStrip(currentStrip, [], 'fetching', true, null)
         if (currentPillFromMap.request.searchV6) {
-          this.getTabDataByNewReqSearchV6(currentStrip, tabIndex, pillIndex, currentPillFromMap, true);
+          this.getTabDataByNewReqSearchV6(currentStrip, tabIndex, pillIndex, currentPillFromMap, true)
         } else if (currentPillFromMap.request.trendingSearch) {
-          this.getTabDataByNewReqTrending(currentStrip, tabIndex, pillIndex, currentPillFromMap, true);
+          this.getTabDataByNewReqTrending(currentStrip, tabIndex, pillIndex, currentPillFromMap, true)
         } else if (currentPillFromMap.request.type === 'enrollment') {
           this.fetchFromInternalEnrollmentList(currentStrip, tabIndex, pillIndex, true)
         } else if (currentPillFromMap.request.type === 'eventEnrollment') {
@@ -1341,7 +1332,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         //   stripMap.showOnLoader = false;
         // }, 200);
       } else {
-        this.getTabDataByfilter(currentStrip, currentTabFromMap, true);
+        this.getTabDataByfilter(currentStrip, currentTabFromMap, true)
         // if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
         //   stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress';
         //   stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
@@ -1349,13 +1340,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         // }
         setTimeout(() => {
           if (stripMap && stripMap.tabs && stripMap.tabs[tabIndex]) {
-            stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'done';
-            stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false;
-            stripMap.showOnLoader = false;
+            stripMap.tabs[tabIndex].pillsData[pillIndex].fetchTabStatus = 'done'
+            stripMap.tabs[tabIndex].pillsData[pillIndex].tabLoading = false
+            stripMap.showOnLoader = false
             this.resetSelectedPill(stripMap.tabs[tabIndex].pillsData)
             stripMap.tabs[tabIndex].pillsData[pillIndex]['selected'] = true
           }
-        }, 200);
+        }, 200)
       }
     }
   }
@@ -1364,13 +1355,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     request: NsContentStripWithTabsAndPills.IContentStripUnit['request'],
     calculateParentStatus: boolean
   ): Promise<any> {
-    const originalFilters: any = [];
+    const originalFilters: any = []
     return new Promise<any>((resolve, reject) => {
       if (request && request.searchV6) {
         this.contentSvc.searchV6(request.searchV6).subscribe(results => {
           const showViewMore = Boolean(
             results.result.content && results.result.content.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
-          );
+          )
           const viewMoreUrl = showViewMore
             ? {
               path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
@@ -1390,18 +1381,18 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                     : {},
               },
             }
-            : null;
+            : null
           // if (viewMoreUrl && viewMoreUrl.queryParams) {
           //   viewMoreUrl.queryParams = viewMoreUrl.queryParams
           // }
-          resolve({ results, viewMoreUrl });
+          resolve({ results, viewMoreUrl })
         }, (error: any) => {
-          this.processStrip(strip, [], 'error', calculateParentStatus, null);
-          reject(error);
+          this.processStrip(strip, [], 'error', calculateParentStatus, null)
+          reject(error)
         },
-        );
+        )
       }
-    });
+    })
   }
 
 
@@ -1409,7 +1400,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     if (tabdata.pillsData && tabdata.pillsData.length) {
       let index = tabdata.pillsData.findIndex((pill: any) => {
         return pill.selected
-      });
+      })
       return index
     }
     return 0
@@ -1417,26 +1408,26 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   canShowHeading(strip: any): boolean {
     if (!strip?.tabs || !Array.isArray(strip.tabs)) {
-      return true;
+      return true
     }
-    const isAllHidden = strip.tabs.every(tab => tab.hasOwnProperty('hideTab') && tab.hideTab === true);
-    return !isAllHidden;
+    const isAllHidden = strip.tabs.every(tab => tab.hasOwnProperty('hideTab') && tab.hideTab === true)
+    return !isAllHidden
   }
 
 
   // cbp plans
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
-      let courses: NsContent.IContent[];
-      let tabResults: any[] = [];
+      let courses: NsContent.IContent[]
+      let tabResults: any[] = []
       let userId = this.configSvc.userProfile.userId
-      const response = await this.userSvc.fetchCbpPlanList(userId).toPromise();
+      const response = await this.userSvc.fetchCbpPlanList(userId).toPromise()
 
       if (Array.isArray(response) && response.length > 0) {
-        courses = response;
+        courses = response
 
         if (strip.tabs && strip.tabs.length) {
-          tabResults = this.splitCbpTabsData(courses, strip);
+          tabResults = this.splitCbpTabsData(courses, strip)
           let countOfWidget = true
           if (strip && strip.tabs && strip.tabs.length) {
             strip.tabs.forEach((tab: any) => {
@@ -1448,7 +1439,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                       countOfWidget = false
                     }
                   }
-                });
+                })
               }
             })
           }
@@ -1459,7 +1450,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             calculateParentStatus,
             '',
             tabResults
-          );
+          )
         } else {
           this.processStrip(
             strip,
@@ -1467,7 +1458,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             'done',
             calculateParentStatus,
             'viewMoreUrl',
-          );
+          )
         }
       } else {
         strip.tabs[0].pillsData[0].selected = true
@@ -1485,9 +1476,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           calculateParentStatus,
           '',
           strip.tabs
-        );
+        )
       }
-      clearInterval(this.enrollInterval);
+      clearInterval(this.enrollInterval)
     }
   }
 
@@ -1497,7 +1488,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
       let userProfile = this.configSvc && this.configSvc.userProfile
       if (userProfile.rootOrgId) {
-        let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
+        let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise()
         if (response?.sakshamAIenabled) {
           strip.tabs[1].hideTab = false
           this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
@@ -1513,11 +1504,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   }
 
   splitCbpTabsData(contentNew: NsContent.IContent[], strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
-    let tabResults: any[] = [];
+    let tabResults: any[] = []
     const splitData = this.getTabsList(
       contentNew,
       strip,
-    );
+    )
     if (strip.tabs && strip.tabs.length) {
       for (let i = 0; i < strip.tabs.length; i += 1) {
         if (strip.tabs[i].value === "myIgotPlans") {
@@ -1538,12 +1529,12 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                     fetchTabStatus: 'done',
                     ...(splitData.find(itmInner => {
                       if (strip.tabs[i].pillsData && strip.tabs[i].pillsData[j] && itmInner.value === strip.tabs[i].pillsData[j].value) {
-                        return itmInner;
+                        return itmInner
                       }
-                      return undefined;
+                      return undefined
                     })),
                   }
-                );
+                )
               }
             }
             strip.tabs[i].pillsData = tabResults
@@ -1552,75 +1543,75 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       }
     }
 
-    return strip.tabs;
+    return strip.tabs
   }
 
   getTabsList(array: NsContent.IContent[],
     strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
-    let all: any[] = [];
-    let upcoming: any[] = [];
-    let overdue: any[] = [];
-    let apar: any[] = [];
+    let all: any[] = []
+    let upcoming: any[] = []
+    let overdue: any[] = []
+    let apar: any[] = []
     array.forEach((e: any) => {
-      all.push(e);
+      all.push(e)
       if (e.planDuration === NsCardContent.ACBPConst.OVERDUE) {
-        overdue.push(e);
+        overdue.push(e)
       } else if (e.planDuration === NsCardContent.ACBPConst.UPCOMING) {
-        upcoming.push(e);
+        upcoming.push(e)
       }
-    });
-    const allCompleted = all.filter((allData: any) => allData.contentStatus === 2);
-    let allInCompleted = all.filter((allData: any) => allData.contentStatus < 2);
+    })
+    const allCompleted = all.filter((allData: any) => allData.contentStatus === 2)
+    let allInCompleted = all.filter((allData: any) => allData.contentStatus < 2)
 
-    let allCompletedOverDue = allCompleted.filter((allData: any) => allData.planDuration === NsCardContent.ACBPConst.OVERDUE);
-    const allCompletedAll = allCompleted.filter((allData: any) => allData.planDuration !== NsCardContent.ACBPConst.OVERDUE);
+    let allCompletedOverDue = allCompleted.filter((allData: any) => allData.planDuration === NsCardContent.ACBPConst.OVERDUE)
+    const allCompletedAll = allCompleted.filter((allData: any) => allData.planDuration !== NsCardContent.ACBPConst.OVERDUE)
 
     allCompletedOverDue = allCompletedOverDue.sort((a: any, b: any): any => {
       if (a.planDuration === NsCardContent.ACBPConst.OVERDUE && b.planDuration === NsCardContent.ACBPConst.OVERDUE) {
-        const firstDate: any = new Date(a.endDate);
-        const secondDate: any = new Date(b.endDate);
-        return firstDate > secondDate ? -1 : 1;
+        const firstDate: any = new Date(a.endDate)
+        const secondDate: any = new Date(b.endDate)
+        return firstDate > secondDate ? -1 : 1
       }
-    });
+    })
 
     allInCompleted = allInCompleted.sort((a: any, b: any): any => {
       if (a.planDuration === NsCardContent.ACBPConst.OVERDUE && b.planDuration === NsCardContent.ACBPConst.OVERDUE) {
-        const firstDate: any = new Date(a.endDate);
-        const secondDate: any = new Date(b.endDate);
-        return firstDate > secondDate ? -1 : 1;
+        const firstDate: any = new Date(a.endDate)
+        const secondDate: any = new Date(b.endDate)
+        return firstDate > secondDate ? -1 : 1
       }
-    });
+    })
 
-    all = [...allInCompleted, ...allCompletedAll, ...allCompletedOverDue];
+    all = [...allInCompleted, ...allCompletedAll, ...allCompletedOverDue]
 
     overdue = overdue.filter((data: any): any => {
-      return data.contentStatus < 2;
-    });
+      return data.contentStatus < 2
+    })
 
     overdue = overdue.sort((a: any, b: any): any => {
-      const firstDate: any = new Date(a.endDate);
-      const secondDate: any = new Date(b.endDate);
-      return firstDate > secondDate ? -1 : 1;
-    });
+      const firstDate: any = new Date(a.endDate)
+      const secondDate: any = new Date(b.endDate)
+      return firstDate > secondDate ? -1 : 1
+    })
 
     upcoming = upcoming.filter((data: any): any => {
-      return data.contentStatus < 2;
-    });
+      return data.contentStatus < 2
+    })
 
-    apar = array.filter((e: any) => e.isApar === true);
+    apar = array.filter((e: any) => e.isApar === true)
 
     return [
       { value: 'all', widgets: this.transformContentsToWidgets(all, strip) },
       { value: 'upcoming', widgets: this.transformContentsToWidgets(upcoming, strip) },
       { value: 'completed', widgets: this.transformContentsToWidgets(allCompleted, strip) },
       { value: 'overdue', widgets: this.transformContentsToWidgets(overdue, strip) },
-      { value: 'apar', widgets: this.transformContentsToWidgets(apar, strip) }];
+      { value: 'apar', widgets: this.transformContentsToWidgets(apar, strip) }]
   }
   resetSelectedPill(pillData: any) {
     if (pillData && pillData.length) {
       pillData.forEach((pill: any) => {
         pill['selected'] = false
-      });
+      })
     }
   }
 
@@ -1641,7 +1632,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             ...strip.viewMoreUrl.queryParams,
             tabSelected: currentTabFromMap.value,
             pillSelected: currentPillFromMap.value,
-          };
+          }
         }
       }
     }
@@ -1653,7 +1644,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
       let userId = ''
       if (this.configSvc.userProfile) {
-        userId = this.configSvc.userProfile.userId;
+        userId = this.configSvc.userProfile.userId
       }
       this.enrollSvc.fetchInternalEnrollmentData(userId, currentPillFromMap.request.payload).subscribe((res: any) => {
         let courses: any = []
@@ -1677,8 +1668,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               calculateParentStatus,
               {},
               strip.tabs
-            );
-            this.statusChangetoDone(strip, tabIndex, pillIndex);
+            )
+            this.statusChangetoDone(strip, tabIndex, pillIndex)
           }
         })
       }, (_err: any) => {
@@ -1697,9 +1688,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             calculateParentStatus,
             {},
             strip.tabs
-          );
+          )
 
-          this.statusChangetoDone(strip, tabIndex, pillIndex);
+          this.statusChangetoDone(strip, tabIndex, pillIndex)
         })
       })
     }
@@ -1710,7 +1701,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
       let userId = ''
       if (this.configSvc.userProfile) {
-        userId = this.configSvc.userProfile.userId;
+        userId = this.configSvc.userProfile.userId
       }
       this.enrollSvc.fetchEventsEnrollmentData(userId, currentPillFromMap.request.payload).subscribe((res: any) => {
 
@@ -1727,38 +1718,38 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           calculateParentStatus,
           {},
           strip.tabs
-        );
-        this.statusChangetoDone(strip, tabIndex, pillIndex);
+        )
+        this.statusChangetoDone(strip, tabIndex, pillIndex)
       })
     }
   }
 
   formatNewEnrollmentData(strip: any, tabIndex: number, pillIndex: number, courses: any, calculateParentStatus: any = true) {
-    let content: NsContent.IContent[];
+    let content: NsContent.IContent[]
     if (courses && courses.length) {
       content = courses.map((c: any) => {
-        const contentTemp: NsContent.IContent = c.content || c.event || {};
-        contentTemp.completionPercentage = c.completionPercentage || c.progress || 0;
-        contentTemp.completionStatus = c.completionStatus || c.status || 0;
-        contentTemp.enrolledDate = c.enrolledDate || '';
-        contentTemp.lastContentAccessTime = c.lastContentAccessTime || '';
-        contentTemp.lastReadContentStatus = c.lastReadContentStatus || '';
-        contentTemp.lastReadContentId = c.lastReadContentId || '';
-        contentTemp.lrcProgressDetails = c.lrcProgressDetails || '';
-        contentTemp.issuedCertificates = c.issuedCertificates || c.issued_certificates || [];
-        contentTemp.batchId = c.batchId || '';
-        contentTemp.content = c.content || c.event || {};
-        contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || '';
-        contentTemp.cType = c.event ? 'event' : '';
-        return contentTemp;
-      });
+        const contentTemp: NsContent.IContent = c.content || c.event || {}
+        contentTemp.completionPercentage = c.completionPercentage || c.progress || 0
+        contentTemp.completionStatus = c.completionStatus || c.status || 0
+        contentTemp.enrolledDate = c.enrolledDate || ''
+        contentTemp.lastContentAccessTime = c.lastContentAccessTime || ''
+        contentTemp.lastReadContentStatus = c.lastReadContentStatus || ''
+        contentTemp.lastReadContentId = c.lastReadContentId || ''
+        contentTemp.lrcProgressDetails = c.lrcProgressDetails || ''
+        contentTemp.issuedCertificates = c.issuedCertificates || c.issued_certificates || []
+        contentTemp.batchId = c.batchId || ''
+        contentTemp.content = c.content || c.event || {}
+        contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || ''
+        contentTemp.cType = c.event ? 'event' : ''
+        return contentTemp
+      })
     }
 
     let sortedContent: any = (content || []).sort((a: any, b: any) => {
-      const dateA: any = new Date(a.lastContentAccessTime || 0);
-      const dateB: any = new Date(b.lastContentAccessTime || 0);
-      return dateB - dateA;
-    });
+      const dateA: any = new Date(a.lastContentAccessTime || 0)
+      const dateB: any = new Date(b.lastContentAccessTime || 0)
+      return dateB - dateA
+    })
     if (strip && strip.tabs && strip.tabs.length) {
       if (strip.tabs[tabIndex].pillsData && strip.tabs[tabIndex].pillsData.length) {
         let currentPillFromMap: any = strip.tabs[tabIndex].pillsData[pillIndex]
@@ -1774,8 +1765,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           calculateParentStatus,
           {},
           strip.tabs
-        );
-        this.statusChangetoDone(strip, tabIndex, pillIndex);
+        )
+        this.statusChangetoDone(strip, tabIndex, pillIndex)
       }
     }
   }
@@ -1878,7 +1869,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }
           // this.contentSvc.searchContentSearch_PROD(sRequestV1).subscribe(results => {
           this.contentSvc.searchV6(sRequest).subscribe(results => {
-            if(results.result.count > 0) {
+            if (results.result.count > 0) {
               if (results && results?.result && results?.result?.content) {
                 // let courses = results.result.content
                 let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
@@ -1896,7 +1887,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                               countOfWidget = false
                             }
                           }
-                        });
+                        })
                       }
                     })
                   }
@@ -1954,7 +1945,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             calculateParentStatus,
             '',
             tabs
-          );
+          )
         }
       }
       else {
@@ -1988,7 +1979,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         }, duration: SNACKBAR_DURATION, panelClass: 'course-error-snackbar',
       })
     }
-    this.sakshamFeedbackPopup = false;
+    this.sakshamFeedbackPopup = false
   }
 
   subscribeToReleventEmmitter() {
@@ -2002,25 +1993,25 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
             this.sakshamFeedbackPopup = true
           }
         }
-      });
+      })
     }
   }
 
   cancelFeedbackPopup() {
-    this.sakshamFeedbackPopup = false;
+    this.sakshamFeedbackPopup = false
     this.feedbackCourseId = ''
   }
 
-  statusChangetoDone(strip: any,tabIndex:number,pillIndex:number) {
-    const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData;
+  statusChangetoDone(strip: any, tabIndex: number, pillIndex: number) {
+    const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
     if (allPills && allPills.length && allPills[pillIndex]) {
       allPills[pillIndex] = {
         ...allPills[pillIndex],
         fetchTabStatus: 'done',
         tabLoading: false,
         selected: true
-      };
-      this.stripsResultDataMap[strip.key].showOnLoader = false;
+      }
+      this.stripsResultDataMap[strip.key].showOnLoader = false
     }
   }
 

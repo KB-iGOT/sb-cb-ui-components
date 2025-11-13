@@ -1,6 +1,6 @@
 <div class="top-learners-main-wrapper relative">
     <!-- Always show the edit button even when component is disabled -->
-    <div class="edit-section" *ngIf="isEdit || isEditable">
+    <div class="edit-section" *ngIf="isEdit">
         <button class="edit-icon" (click)="onEdit()" matTooltip="Edit Top Learners" aria-label="Edit Top Learners">
             <mat-icon>edit</mat-icon>
         </button>
@@ -67,7 +67,9 @@
                                 </div>
                             </div>
                             <div class="flex gap-2 kp-section" *ngIf="!objectData?.hideEle?.includes('karma-points')">
-                                <div class="kp-icon"><img [src]="objectData?.kpIcon" class="kp-image" /></div>
+                                <div class="kp-icon">
+                                    <img [src]="objectData?.data?.kpIcon" class="kp-image" />
+                                </div>
                                 <div class="points">{{obj?.total_points || 0}}</div>
                             </div>
                         </div>
@@ -135,7 +137,7 @@
     </ng-container>
 
     <!-- Show disabled message when component is disabled -->
-    <div class="disabled-message" *ngIf="objectData?.enabled === false && (isEdit || isEditable)">
+    <div class="disabled-message" *ngIf="objectData?.enabled === false && (isEdit)">
         <div class="message-content">
             <mat-icon>visibility_off</mat-icon>
             <span>Top Learners section is currently disabled</span>

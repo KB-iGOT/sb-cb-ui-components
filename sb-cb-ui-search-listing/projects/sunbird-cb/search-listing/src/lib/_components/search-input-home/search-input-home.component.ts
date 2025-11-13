@@ -517,15 +517,17 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }, 0);
     this.queryControl.reset();
 
-    const params = { ...this.activated.snapshot.queryParams };
-    params["q"] = "";
-    params["search"] = "";
+    if (_.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal) {
+      const params = { ...this.activated.snapshot.queryParams };
+      params["q"] = "";
+      params["search"] = "";
 
-    this.router.navigate([], {
-      relativeTo: this.activated.parent,
-      queryParams: params,
-      queryParamsHandling: "merge"
-    });
+      this.router.navigate([], {
+        relativeTo: this.activated.parent,
+        queryParams: params,
+        queryParamsHandling: "merge"
+      });
+    }
   }
 
   async selectSearchCategory(category: string) {

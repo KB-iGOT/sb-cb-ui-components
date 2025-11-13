@@ -1,9 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core'
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core'
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { MicrositeV3Service } from '../../../../../_services/microsite-v3.service'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 interface SliderItem {
   active: boolean
@@ -63,7 +64,9 @@ export class EditorDialogComponent implements OnInit {
     private http: HttpClient,
     private micrositeService: MicrositeV3Service,
     public dialogRef: MatDialogRef<EditorDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public configSvc: ConfigurationsService,
+    private cdr: ChangeDetectorRef
   ) {
     // Initialize with field type from data
     this.formType = data.fieldType || 'text'
@@ -81,12 +84,24 @@ export class EditorDialogComponent implements OnInit {
     return this.editorForm.get('list') as FormArray
   }
 
+  get announcementsList(): FormArray {
+    return this.editorForm.get('list') as FormArray
+  }
+
   get imageItemsArray(): FormArray {
     return this.editorForm?.get('items') as FormArray
   }
 
   get isMultipleImages(): boolean {
     return this.formType === 'image' && this.editorForm && this.editorForm.get('items') !== null
+  }
+
+  get isColorMode(): boolean {
+    return this.editorForm?.get('inputType')?.value === 'color'
+  }
+
+  get isImageMode(): boolean {
+    return this.editorForm?.get('inputType')?.value === 'image'
   }
 
   ngOnInit() {
@@ -110,6 +125,7 @@ export class EditorDialogComponent implements OnInit {
       description: [item.description || '', [Validators.required]],
       videoUrl: [item.videoUrl || '', [
         Validators.required,
+        Validators.pattern(/^https?:\/\/.+/)
       ]]
     })
   }
@@ -132,7 +148,7 @@ export class EditorDialogComponent implements OnInit {
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
       title: [''],
-      downloaUrl: ['']
+      downloaUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]]
     }))
   }
 
@@ -145,11 +161,42 @@ export class EditorDialogComponent implements OnInit {
     this.cbpPlanListArray.updateValueAndValidity()
   }
 
+  // Methods for announcements management
+  addAnnouncementItem(announcement: any = {}): void {
+    this.announcementsList.push(this.fb.group({
+      name: [announcement.name || '', [Validators.required]],
+      description: [announcement.description || '', [Validators.required]],
+      category: [announcement.category || '', [Validators.required]],
+      announcementId: [announcement.announcementId || '']
+    }))
+  }
+
+  removeAnnouncementItem(index: number): void {
+    const tempValue = this.announcementsList.at(index).value
+    if (tempValue.announcementId) {
+      this.micrositeService.deleteAnnouncements(tempValue.announcementId).subscribe({
+        next: () => {
+          this.announcementsList.removeAt(index)
+        },
+        error: (error) => {
+          console.error('Error removing announcement:', error)
+        }
+      })
+    } else {
+      this.announcementsList.removeAt(index)
+    }
+  }
+
+  dropAnnouncementItem(event: CdkDragDrop<any[]>): void {
+    moveItemInArray(this.announcementsList.controls, event.previousIndex, event.currentIndex)
+    this.announcementsList.updateValueAndValidity()
+  }
+
   // Methods for image logo items management
   addImageLogoItem(): void {
     if (this.imageItemsArray) {
       this.imageItemsArray.push(this.fb.group({
-        url: ['', [Validators.required]]
+        url: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
       }))
     }
   }
@@ -254,8 +301,9 @@ export class EditorDialogComponent implements OnInit {
         })
         break
       case 'color':
+        // Treat as banner image field with URL validation
         this.editorForm = this.fb.group({
-          value: [this.data.value, [Validators.required, Validators.pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)]]
+          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
         })
         break
       case 'image':
@@ -268,7 +316,7 @@ export class EditorDialogComponent implements OnInit {
           this.editorForm = this.fb.group({
             items: this.fb.array(
               imageValue.map((item: any) => this.fb.group({
-                url: [item.url || item || '', [Validators.required]]
+                url: [item.url || item || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
               }))
             )
           })
@@ -329,13 +377,8 @@ export class EditorDialogComponent implements OnInit {
         // Get speakers data or set defaults
         const speakersValue = this.data.value || {}
 
-        // Debug logs to check what data we're receiving
-        console.log('EditorDialog - speakersConfig - received data.value:', this.data.value)
-
         // Handle both direct structure and nested structure with 'data'
         const speakerData = speakersValue.data || speakersValue
-        console.log('EditorDialog - speakersConfig - processed speakerData:', speakerData)
-        console.log('EditorDialog - speakersConfig - speaker list:', speakerData.list)
         this.editorForm = this.fb.group({
           enabled: [speakersValue.enabled !== undefined ? speakersValue.enabled : true],
           data: this.fb.group({
@@ -350,8 +393,6 @@ export class EditorDialogComponent implements OnInit {
         // Get events data or set defaults
         const eventsValue = this.data.value || {}
 
-        console.log('EditorDialog - eventsConfig - received data.value:', this.data.value)
-
         this.editorForm = this.fb.group({
           enabled: [eventsValue.enabled !== undefined ? eventsValue.enabled : true]
         })
@@ -359,8 +400,6 @@ export class EditorDialogComponent implements OnInit {
       case 'mdoLeaderboardConfig':
         // Get mdo leaderboard data or set defaults
         const mdoLeaderboardValue = this.data.value || {}
-
-        console.log('EditorDialog - mdoLeaderboardConfig - received data.value:', this.data.value)
 
         this.editorForm = this.fb.group({
           enabled: [mdoLeaderboardValue.enabled !== undefined ? mdoLeaderboardValue.enabled : true]
@@ -371,8 +410,6 @@ export class EditorDialogComponent implements OnInit {
         const cbpPlanValue = this.data.value || {}
         const cbpPlanList = cbpPlanValue.list || []
 
-        console.log('EditorDialog - cbpPlanConfig - received data.value:', this.data.value)
-
         this.editorForm = this.fb.group({
           list: this.fb.array([])
         })
@@ -382,7 +419,7 @@ export class EditorDialogComponent implements OnInit {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
               title: [item.title || ''],
-              downloaUrl: [item.downloaUrl || '']
+              downloaUrl: [item.downloaUrl || '', [Validators.pattern(/^https?:\/\/.+/)]]
             }))
           })
         } else {
@@ -390,16 +427,50 @@ export class EditorDialogComponent implements OnInit {
           this.addCbpPlanItem()
         }
         break
+      case 'lookerConfig':
+        // Get looker data or set defaults
+        const lookerValue = this.data.value || {}
+        const headerData = lookerValue.header || {}
+
+        // Parse height values - remove 'px' suffix if present
+        const parseHeight = (value: any, defaultValue: number): number => {
+          if (typeof value === 'string') {
+            return parseInt(value.replace('px', ''), 10) || defaultValue
+          }
+          return value || defaultValue
+        }
+
+        this.editorForm = this.fb.group({
+          enabled: [lookerValue.enabled !== undefined ? lookerValue.enabled : true],
+          headerText: [headerData.headerText || '', [Validators.maxLength(100)]],
+          headerDescription: [headerData.description || '', [Validators.maxLength(300)]],
+          desktopHeight: [parseHeight(lookerValue.desktopHeight, 600), [Validators.required, Validators.min(100)]],
+          mobileHeight: [parseHeight(lookerValue.mobileHeight, 400), [Validators.required, Validators.min(100)]],
+          lookerProDesktopUrl: [lookerValue.lookerProDesktopUrl || '', [
+            Validators.required,
+            Validators.pattern(/^https:\/\/lookerstudio\.google\.com\/.*$/)
+          ]],
+          lookerProMobileUrl: [lookerValue.lookerProMobileUrl || '', [
+            Validators.required,
+            Validators.pattern(/^https:\/\/lookerstudio\.google\.com\/.*$/)
+          ]]
+        })
+        break
       case 'announcementsConfig':
         // Get announcements data or set defaults
         const announcementsValue = this.data.value || {}
 
-        console.log('EditorDialog - announcementsConfig - received data.value:', this.data.value)
-
         this.editorForm = this.fb.group({
           enabled: [announcementsValue.enabled !== undefined ? announcementsValue.enabled : true],
-          title: [announcementsValue.title || '']
+          title: [announcementsValue.title || ''],
+          list: this.fb.array([])
         })
+        // Initialize announcements list if exists
+        if (announcementsValue.list && Array.isArray(announcementsValue.list)) {
+          announcementsValue.list.forEach((announcement: any) => {
+            this.addAnnouncementItem(announcement)
+          })
+        }
         break
       case 'slider':
         // Initialize slider data from the input or use defaults
@@ -472,25 +543,24 @@ export class EditorDialogComponent implements OnInit {
 
   // Initialize the speaker form
   initSpeakerForm(speaker: any = {}) {
-    console.log('Initializing speaker form with data:', speaker)
-
     // Ensure we handle undefined or null values
     const safeTitle = speaker && speaker.title !== undefined ? speaker.title : ''
     const safeDesc = speaker && speaker.description !== undefined ? speaker.description : ''
     const safeImage = speaker && speaker.profileImage !== undefined ? speaker.profileImage : ''
     const safeId = speaker && speaker.identifier !== undefined ? speaker.identifier : ''
 
-    // URL validation pattern
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+    // Simplified URL validation pattern
+    const urlPattern = /^https?:\/\/.+/
 
     this.speakerForm = this.fb.group({
       title: [safeTitle, [Validators.required]],
       description: [safeDesc, [Validators.required]],
-      profileImage: [safeImage, [Validators.pattern(urlPattern)]],
+      profileImage: [safeImage, {
+        validators: [Validators.pattern(urlPattern)],
+        updateOn: 'blur'  // Only validate when user leaves the field
+      }],
       identifier: [safeId]
     })
-
-    console.log('Speaker form initialized:', this.speakerForm.value)
   }
 
   // Helper method to safely get speakers list
@@ -536,15 +606,12 @@ export class EditorDialogComponent implements OnInit {
 
   editSpeaker(index: number) {
     try {
-      console.log(`Editing speaker at index: ${index}`)
-
       // Get current list
       const speakersList = this.editorForm.get('data.list')?.value || []
 
       // Validate index
       if (index >= 0 && index < speakersList.length) {
         const speaker = speakersList[index]
-        console.log('Speaker to edit:', speaker)
 
         // Set editing state
         this.isEditingSpeaker = true
@@ -562,8 +629,6 @@ export class EditorDialogComponent implements OnInit {
 
   removeSpeaker(index: number) {
     try {
-      console.log(`Removing speaker at index: ${index}`)
-
       // Get current list
       let speakersList = this.editorForm.get('data.list')?.value
 
@@ -572,12 +637,9 @@ export class EditorDialogComponent implements OnInit {
         console.warn('Speaker list is not an array, initializing empty array')
         speakersList = []
       } else {
-        console.log(`Before removal: List has ${speakersList.length} speakers`)
-
         if (index >= 0 && index < speakersList.length) {
           // Remove the speaker at the specified index
           speakersList.splice(index, 1)
-          console.log(`After removal: List has ${speakersList.length} speakers`)
 
           // Update the form control with a new array
           this.editorForm.get('data.list')?.setValue([...speakersList])
@@ -593,7 +655,6 @@ export class EditorDialogComponent implements OnInit {
   // Method to remove all speakers
   removeAllSpeakers() {
     try {
-      console.log('Removing all speakers')
       this.editorForm.get('data.list')?.setValue([])
     } catch (error) {
       console.error('Error removing all speakers:', error)
@@ -603,8 +664,6 @@ export class EditorDialogComponent implements OnInit {
   saveSpeaker() {
     if (this.speakerForm.valid) {
       try {
-        console.log('Saving speaker form:', this.speakerForm.value)
-
         // Extract speaker data from form
         const speakerData = {
           title: this.speakerForm.get('title')?.value,
@@ -617,20 +676,13 @@ export class EditorDialogComponent implements OnInit {
         const currentList = this.editorForm.get('data.list')?.value || []
         const speakersList = JSON.parse(JSON.stringify(currentList))
 
-        console.log('Current speakers list:', currentList)
-        console.log('Editing index:', this.editingSpeakerIndex)
-
         if (this.editingSpeakerIndex === -1) {
           // Add new speaker
-          console.log('Adding new speaker:', speakerData)
           speakersList.push(speakerData)
         } else {
           // Update existing speaker
-          console.log(`Updating speaker at index ${this.editingSpeakerIndex}:`, speakerData)
           speakersList[this.editingSpeakerIndex] = speakerData
         }
-
-        console.log('Updated speakers list:', speakersList)
 
         // Update the form with the new list - use a new array reference for change detection
         this.editorForm.get('data.list')?.setValue([...speakersList])
@@ -694,6 +746,63 @@ export class EditorDialogComponent implements OnInit {
         this.uploadStatus = 'Upload successful!'
 
         // Clear status after 3 seconds
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+      },
+      error: (error) => {
+        this.isUploading = false
+        this.uploadStatus = 'Upload failed. Please try again.'
+        console.error('Upload error:', error)
+      }
+    })
+  }
+
+  // Color picker change handler
+  onColorPickerChange(event: any) {
+    const hexColor = event.target.value
+    this.editorForm.get('value')?.setValue(hexColor)
+  }
+
+  // Banner image upload for color/banner field
+  onBannerImageSelected(event: any) {
+    const file = event.target.files[0]
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedTypes.includes(file.type)) {
+        this.uploadStatus = 'Error: Only JPG and PNG files are allowed'
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = ''
+        return
+      }
+
+      // Validate file size (max 700KB)
+      const maxSize = 700 * 1024
+      if (file.size > maxSize) {
+        this.uploadStatus = `Error: File size must be less than 700KB (current: ${(file.size / 1024).toFixed(2)}KB)`
+        setTimeout(() => {
+          this.uploadStatus = ''
+        }, 3000)
+        event.target.value = ''
+        return
+      }
+
+      this.uploadBannerImage(file)
+    }
+  }
+
+  uploadBannerImage(file: File) {
+    this.isUploading = true
+    this.uploadStatus = 'Uploading...'
+
+    this.micrositeService.uploadFile(file).subscribe({
+      next: (transformedUrl) => {
+        this.isUploading = false
+        this.editorForm.get('value')?.setValue(transformedUrl)
+        this.uploadStatus = 'Upload successful!'
         setTimeout(() => {
           this.uploadStatus = ''
         }, 3000)
@@ -844,7 +953,7 @@ export class EditorDialogComponent implements OnInit {
 
   // Slider specific methods
   onSliderClick(event: any) {
-    console.log('Slider click:', event)
+    // Slider click handling
   }
 
   onSliderImageSelected(event: any) {
@@ -988,7 +1097,7 @@ export class EditorDialogComponent implements OnInit {
     this.keyHighlightsArray.updateValueAndValidity()
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.formType === 'keyHighlights') {
       const formValue = this.editorForm.value
       const updatedConfig = {
@@ -1033,7 +1142,6 @@ export class EditorDialogComponent implements OnInit {
         // Return structured data matching the expected format:
         // { enabled: true, data: { title, infoText, infoIcon, profleDetails, hideEle, insights } }
         const formValue = this.editorForm.value
-        console.log('Submitting userProgressConfig form:', formValue)
         this.dialogRef.close(formValue) // Return the form value with enabled and nested data
       }
     } else if (this.formType === 'eventsConfig') {
@@ -1046,7 +1154,6 @@ export class EditorDialogComponent implements OnInit {
       if (this.editorForm.valid) {
         // Return structured data with enabled flag
         const formValue = this.editorForm.value
-        console.log('Submitting mdoLeaderboardConfig form:', formValue)
         this.data.value.enabled = formValue.enabled
         this.dialogRef.close(this.data.value) // Return the data value with updated enabled flag
       }
@@ -1058,29 +1165,48 @@ export class EditorDialogComponent implements OnInit {
 
         this.dialogRef.close(this.data.value)
       }
+    } else if (this.formType === 'lookerConfig') {
+      if (this.editorForm.valid) {
+        // Return looker configuration data
+        const formValue = this.editorForm.value
+        this.data.value.enabled = formValue.enabled
+
+        // Update header data
+        if (!this.data.value.header) {
+          this.data.value.header = {}
+        }
+        this.data.value.header.headerText = formValue.headerText
+        this.data.value.header.description = formValue.headerDescription
+
+        this.data.value.desktopHeight = formValue.desktopHeight
+        this.data.value.mobileHeight = formValue.mobileHeight
+        this.data.value.lookerProDesktopUrl = formValue.lookerProDesktopUrl
+        this.data.value.lookerProMobileUrl = formValue.lookerProMobileUrl
+
+        this.dialogRef.close(this.data.value)
+      }
     } else if (this.formType === 'announcementsConfig') {
       if (this.editorForm.valid) {
-        // Return structured data with enabled and title
+        // Return structured data with enabled, title, and list
         const formValue = this.editorForm.value
         this.data.value.enabled = formValue.enabled
         this.data.value.title = formValue.title
-
-        console.log('Submitting announcementsConfig:', this.data.value)
+        if (Array.isArray(formValue.list) && formValue.list.length > 0) {
+          const announcementPromises: Promise<any>[] = []
+          announcementPromises.push(this.checkAndCreateAnnouncementItem(formValue.list))
+          await Promise.all(announcementPromises)
+        }
         this.dialogRef.close(this.data.value)
       }
     } else if (this.formType === 'speakersConfig') {
       if (this.editorForm.valid) {
         try {
-          console.log('Submitting speakersConfig form')
-
           // Get form values
           const formValue = this.editorForm.value
 
           // Get speakers list and create a deep copy to avoid reference issues
           const speakersList = this.getSpeakersList()
           const speakersListCopy = JSON.parse(JSON.stringify(speakersList))
-
-          console.log('Final speakers list for submission:', speakersListCopy)
 
           // Return with the speakerOftheDay structure format
           const speakerConfig = {
@@ -1094,7 +1220,6 @@ export class EditorDialogComponent implements OnInit {
               }
             }
           }
-          console.log('Final speaker config for submission:', speakerConfig)
           this.dialogRef.close(speakerConfig)
         } catch (error) {
           console.error('Error submitting speakers form:', error)
@@ -1105,6 +1230,71 @@ export class EditorDialogComponent implements OnInit {
     } else if (this.editorForm.valid) {
       this.dialogRef.close(this.editorForm.value.value)
     }
+  }
+
+  checkAndCreateAnnouncementItem(list: any[]) {
+    return new Promise<boolean>((resolve) => {
+      if (Array.isArray(list) && list.length > 0) {
+        list.forEach(item => {
+          if (item.name && item.description && !item.announcementId) {
+            // Create announcement item
+            const reqBody = {
+              name: item.name || '',
+              description: item.description || '',
+              category: item.category || '',
+              createdBy: this.configSvc.userProfile?.userId || '',
+              sourceName: this.configSvc.userProfile?.departmentName || '',
+              createdFor: [this.configSvc.userProfile?.rootOrgId || ''],
+              channel: this.configSvc.userProfile?.rootOrgId || ''
+            }
+            this.micrositeService.createAnnouncements(reqBody).subscribe({
+              next: () => {
+                resolve(true)
+              },
+              error: (error) => {
+                console.error('Error creating announcement:', error)
+                resolve(false)
+              }
+            })
+          } else if (item.announcementId) {
+            // Check if announcement item has changed by comparing with existing data
+            const existingItem = this.data.value.list?.find((existing: any) => existing.announcementId === item.announcementId)
+
+            if (existingItem) {
+              // Check if any field has changed
+              const hasChanged = existingItem.name !== item.name ||
+                existingItem.description !== item.description ||
+                existingItem.category !== item.category
+
+              if (hasChanged) {
+                // Update announcement item
+                const updateReqBody = {
+                  announcementId: item.announcementId,
+                  name: item.name || '',
+                  description: item.description || '',
+                  category: item.category || ''
+                }
+                this.micrositeService.updateAnnouncements(updateReqBody).subscribe({
+                  next: () => {
+                    resolve(true)
+                  },
+                  error: (error) => {
+                    console.error('Error updating announcement:', error)
+                    resolve(false)
+                  }
+                })
+                resolve(true)
+              } else {
+                resolve(true)
+              }
+            } else {
+              console.warn('No existing item found for announcementId:', item.announcementId)
+              resolve(true)
+            }
+          }
+        })
+      }
+    })
   }
 
   onCancel() {

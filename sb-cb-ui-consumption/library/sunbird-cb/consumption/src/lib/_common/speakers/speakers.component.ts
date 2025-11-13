@@ -48,10 +48,6 @@ export class SpeakersComponent implements OnInit {
     } catch (e) {
       console.error('Error getting values from injector', e)
     }
-
-    // Always make edit functionality available
-    this.isEdit = true
-    this.isEditable = true
   }
 
   ngOnInit() {
@@ -83,7 +79,7 @@ export class SpeakersComponent implements OnInit {
       try {
         this.eventCallback = this.injector.get('eventCallback')
       } catch (e) {
-        console.log('No eventCallback in injector')
+        // No eventCallback in injector
       }
     }
   }
@@ -140,21 +136,13 @@ export class SpeakersComponent implements OnInit {
    * Emits an event to be handled by parent component (mdo-channel-v3)
    */
   onEdit() {
-    console.log('SpeakersComponent: onEdit clicked')
-
     // Extract data for editing - handle both structures and ensure we're sending complete data
     const speakerData = this.objectData?.speakerOftheDay || this.objectData
 
-    // Log current data structure to debug
-    console.log('Speaker component objectData:', this.objectData)
-    console.log('Speaker list in component:', this.contentdata)
-    console.log('Original speakerData being sent to editor:', speakerData)
     // Check if we have the original list in the data
     if (!speakerData.data || !speakerData.data.list || speakerData.data.list.length === 0) {
       // If the list is missing or empty, but we have contentdata, reconstruct the list
       if (this.contentdata && this.contentdata.length > 0) {
-        console.log('Reconstructing speaker list from contentdata')
-
         // Create a properly formatted data structure if it's missing
         if (!speakerData.data) {
           speakerData.data = {
@@ -173,8 +161,6 @@ export class SpeakersComponent implements OnInit {
           profileImage: item.profileImage,
           identifier: item.identifier
         }))
-
-        console.log('Reconstructed speakerData:', speakerData)
       }
     }
 
@@ -191,14 +177,12 @@ export class SpeakersComponent implements OnInit {
 
     // Use only the callback from injector which is the most reliable method
     if (this.eventCallback && typeof this.eventCallback === 'function') {
-      console.log('SpeakersComponent: calling parent eventCallback directly')
       this.eventCallback(eventData)
       return
     }
 
     // Fallback to global injector if direct callback isn't available
     if ((window as any).__INJECTOR_DATA?.eventCallback) {
-      console.log('SpeakersComponent: calling global injector eventCallback');
       (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }

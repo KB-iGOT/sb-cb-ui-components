@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import moment from 'moment';
-import { InsiteDataService } from '../../_services/insite-data.service';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core'
+import moment from 'moment'
+import { InsiteDataService } from '../../_services/insite-data.service'
 @Component({
   selector: 'sb-uic-top-learners',
   templateUrl: './top-learners.component.html',
@@ -15,7 +15,7 @@ export class TopLearnersComponent implements OnInit {
   @Input() isEdit: boolean = false;
   @Input() isEditable: boolean = false;
   @Output() editClicked = new EventEmitter<any>;
-  
+
   loading: boolean = false
   month: string = ''
   results: any = []
@@ -35,47 +35,36 @@ export class TopLearnersComponent implements OnInit {
 
   constructor(
     public insightSvc: InsiteDataService,
-  ) { 
+  ) {
     // Try to access global injector data
     if (window && (window as any).__INJECTOR_DATA) {
-      console.log('Global injector data found:', (window as any).__INJECTOR_DATA);
-      
+
       // Check if isEdit or isEditable is provided in global injector
-      const injectorData = (window as any).__INJECTOR_DATA;
+      const injectorData = (window as any).__INJECTOR_DATA
       if (injectorData.isEditable !== undefined) {
-        this.isEditable = injectorData.isEditable;
-        console.log('Setting isEditable from global injector:', this.isEditable);
+        this.isEditable = injectorData.isEditable
       }
-      
+
       if (injectorData.isEdit !== undefined) {
-        this.isEdit = injectorData.isEdit;
-        console.log('Setting isEdit from global injector:', this.isEdit);
+        this.isEdit = injectorData.isEdit
       }
     }
   }
 
   ngOnInit() {
-    if(this.slwConfig && this.slwConfig.enabled) {
+    if (this.slwConfig && this.slwConfig.enabled) {
       this.getSlwData()
     } else {
       this.getData()
     }
     this.month = new Date().toLocaleString('default', { month: 'long' })
-    
-    // For testing purposes - Force edit mode to be visible
-    // Remove this in production if you want edit to be controlled by the parent
-    this.isEdit = true;
-    
-    // For debugging
-    console.log('TopLearnersComponent - isEdit:', this.isEdit);
-    console.log('TopLearnersComponent - isEditable:', this.isEditable);
   }
 
   getData() {
     this.loading = true
-    this.insightSvc.fetchLearner(this.channelId).subscribe((res: any)=> {
+    this.insightSvc.fetchLearner(this.channelId).subscribe((res: any) => {
       if (res && res.result && res.result.result && res.result.result.length) {
-        this.results =  res.result.result
+        this.results = res.result.result
         this.getMonth(res.result.result)
       }
       this.loading = false
@@ -87,9 +76,9 @@ export class TopLearnersComponent implements OnInit {
 
   getSlwData() {
     this.loading = true
-    this.insightSvc.fetchSlwLearner(this.channelId).subscribe((res: any)=> {
+    this.insightSvc.fetchSlwLearner(this.channelId).subscribe((res: any) => {
       if (res && res.result && res.result.result && res.result.result.length) {
-        this.results =  res.result.result
+        this.results = res.result.result
         this.getMonth(res.result.result)
       }
       this.loading = false
@@ -109,15 +98,15 @@ export class TopLearnersComponent implements OnInit {
   getRank(rank: number) {
     if (rank === 1) {
       return "1st"
-    } 
+    }
     if (rank === 2) {
       return "2nd"
-    } 
+    }
     if (rank === 3) {
       return "3rd"
     } else {
       return `${rank}th`
-    }    
+    }
   }
 
   getColor() {
@@ -160,12 +149,12 @@ export class TopLearnersComponent implements OnInit {
         value: this.objectData,
         fieldType: 'topLearnersConfig'
       }
-    };
-    this.editClicked.emit(eventData);
-    
+    }
+    this.editClicked.emit(eventData)
+
     // If window.__INJECTOR_DATA exists and has eventCallback, use that as well
     if (window && (window as any).__INJECTOR_DATA && (window as any).__INJECTOR_DATA.eventCallback) {
-      (window as any).__INJECTOR_DATA.eventCallback(eventData);
+      (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }
 

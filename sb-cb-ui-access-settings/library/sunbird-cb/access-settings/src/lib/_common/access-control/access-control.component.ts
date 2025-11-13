@@ -54,9 +54,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   cadreConfigData: any;
   isSaveFltrBtnDisabled = true;
-  isApplyBtnDisabled = true;
   isAddUserGroupBtnDisabled = false;
-  isApplying = false;
   isSaving = false;
   userCount: any = {};
 
@@ -105,7 +103,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     if (!this.cadreConfigData) {
-      await this.fetchCadreConfigData();
+      this.fetchCadreConfigData();
     }
 
     if (this.content && !this.content?.externalId) {
@@ -255,11 +253,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.processCadreConfigMapping(userGroupIndex);
     const conditions = this.ruleConditions(userGroupIndex);
     const accessSetting = this.content?.accessSetting;
-
-    if (conditions?.value?.length === 8) {
-      this.callSnackbar("You have already added all types of conditions", "error");
-      return;
-    }
 
     // Check if organization/users already exists based on access setting
     if (accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC || accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER) {
@@ -807,8 +800,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (!validated) return;
     }
 
-    if (this.content?.status === "Live") this.isApplying = true;
-    else this.isSaving = true;
+    this.isSaving = true;
 
     const payload = await this.processRequestCreation();
 
@@ -819,7 +811,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isSaving = false;
 
       this.isAddUserGroupBtnDisabled = true
-      this.isApplying = false
       return;
     }
 
@@ -833,24 +824,24 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             if (displaySuccessMessage) this.callSnackbar("Access Control saved successfully", "success");
             this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
             this.isSaveFltrBtnDisabled = true;
-            this.isApplyBtnDisabled = true;
 
             // Update secure setting for moderated content
-            // if (this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
             if (this.content?.status !== "Live" && this.content?.prevStatus !== "Live" && !this.isCuratedContentWithExternalId) {
               this.updateContentAccessSetting();
             }
-            // }
+
+            // Remove initialstate for saved content for Marketplace external content on live status 
+            if(this.content?.status === 'live' && this.isCuratedContentWithExternalId) {
+              localStorage.removeItem(`${NsAccessControlConfig.Application.Creation_Portal}_access_control_${this.contentId}`)
+            }
           } else {
             this.callSnackbar("Could not save access control, Please try again.", "error");
           }
-          if (this.content?.status === "Live") this.isApplying = false;
-          else this.isSaving = false, this.isApplying = false;
+          this.isSaving = false
         },
         error: () => {
           this.callSnackbar("Could not save access control, Please try again.", "error");
-          if (this.content?.status === "Live") this.isApplying = false;
-          else this.isSaving = false;
+          this.isSaving = false
         }
       });
   }
@@ -974,7 +965,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
       } else {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
-        this.isApplyBtnDisabled = currentValue === this.initialUserGroupValue;
       }
     });
   }
@@ -991,6 +981,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     while (this.userGroup.length) {
       this.userGroup.removeAt(0);
+    }
+
+    // Save initial state if not already saved for live content
+    if (!this.getInitialState()) {
+      this.saveInitialState(accessControl?.userGroups);
     }
 
     accessControl.userGroups.forEach((group: any, index: number) => {
@@ -1027,11 +1022,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         condition.patchValue({
           entity: entityMap[criteria.criteriaKey] || criteria.criteriaKey,
           selections:
-            criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
-              ? Array.isArray(criteria.criteriaValue)
-                ? criteria.criteriaValue.map((b: any) => Number(b))
-                : []
-              : criteria.criteriaValue
+              criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue.map((b: any) => Number(b))
+                  : []
+                : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
+                ? Array.isArray(criteria.criteriaValue)
+                  ? criteria.criteriaValue
+                  : [criteria.criteriaValue]
+                : criteria.criteriaValue,
         });
 
         conditions.push(condition);
@@ -1066,9 +1065,37 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           group.get("conditions")?.disable();
           group.get("isUserGroupDisabled")?.setValue(true);
         }
+
         this.isSaveFltrBtnDisabled = true;
-        this.isApplyBtnDisabled = false;
       }
+
+      // For marketplace curated content with external id, disable only those user groups which were in live
+       if (this.content?.status === "live" && this.isCuratedContentWithExternalId) {
+          // Get initial state from localStorage
+          const initialUserGroups = this.getInitialState();
+
+          if (initialUserGroups) {
+            // Only disable user groups that were in the initial state
+            const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
+
+            for (let i = 0; i < this.userGroup.length; i++) {
+              const group = this.userGroup.at(i);
+              const groupId = group.get("name")?.value;
+
+              // If this group was in the initial state, disable it
+              if (initialGroupIds.includes(groupId)) {
+                group.get("id")?.disable();
+                group.get("name")?.disable();
+                group.get("description")?.disable();
+                group.get("conditions")?.disable();
+                group.get("isUserGroupDisabled")?.setValue(true);
+              }
+            }
+          }
+
+          this.isSaveFltrBtnDisabled = true;
+        }
+
       setTimeout(() => {
         this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
         this.setupFormChangeDetection();
@@ -1178,7 +1205,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // reviewer(readonly)
       this.accessControlCriteriaSelection.readOnly = true;
       this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
     } else if (
       (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
       (this.config.userConfig.userRoles.has("spv_publisher") ||
@@ -1189,7 +1215,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // publisher (disabled all)
       this.accessControlCriteriaSelection.readOnly = true;
       this.isSaveFltrBtnDisabled = true;
-      this.isApplyBtnDisabled = true;
     }
   }
 
@@ -1474,8 +1499,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private saveInitialState(userGroups: any[]): void {
-    if (this.config?.application === this.MDO_APPLICATION && 
-        this.config?.mdoContent?.status === "Live") {
+    if ((this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") || 
+    (this.content?.status === "live" && this.isCuratedContentWithExternalId)) {
       const state = {
         initialUserGroups: userGroups,
         timestamp: new Date().getTime()
@@ -1498,7 +1523,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.userGroup.removeAt(0);
     }
 
-    // Save initial state if not already saved
+    // Save initial state if not already saved for live content
     if (!this.getInitialState()) {
       this.saveInitialState(tempAccessControl.userGroups);
     }
@@ -1583,7 +1608,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         
         this.isSaveFltrBtnDisabled = true;
-        this.isApplyBtnDisabled = false;
       }
 
         // Check if add condition should be disabled for this user group
@@ -1638,7 +1662,24 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return !!(this.content && this.content.externalId);
   }
 
-  get isContentPublished(): boolean {
-    return this.content?.externalId && this.content?.status?.toLowerCase() === 'live'
+  saveAccessSettings(): void {
+    const isLiveContent = this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "live";
+    const isMdoLiveContent = this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live";
+    const isCuratedLiveWithExternalId = this.content?.status === "live" && this.isCuratedContentWithExternalId;
+
+    if (isLiveContent || isMdoLiveContent || isCuratedLiveWithExternalId) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "520px",
+        data: { type: "confirm-apply-accesscontrol-for-live" }
+      });
+
+      dialogRef.afterClosed().subscribe((result: any) => {
+        if (result?.action === "confirm") {
+          this.applyAccessControlValue(true, true);
+        }
+      });
+    } else {
+      this.applyAccessControlValue(true, true);
+    }
   }
 }

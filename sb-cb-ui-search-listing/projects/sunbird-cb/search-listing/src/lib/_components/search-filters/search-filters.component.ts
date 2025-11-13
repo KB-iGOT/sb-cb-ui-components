@@ -79,6 +79,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
   showEventsDateRange = false;
+  showCoursesCreatedDateRange = false;
   displayLabels: Record<string, any> = {};
   selectedDateRangeTimeline!: DateRange<Date> | null;
   maxDateCalendar = new Date();
@@ -211,6 +212,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       const filters = this.getFiltersList
       this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') && this.isFilterFacetsAvailable ? true : false;
+      this.showCoursesCreatedDateRange = filters.some((filter: any) => filter.sectionKey === 'createdDateRange') && this.isFilterFacetsAvailable ? true : false;
     }
 
   }
@@ -1212,13 +1214,15 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       return "searchfilters.createdOn";
     } else if (this.isTrainingPlanFacetsPresent) {
       return "searchfilters.createdOn";
+    } else if (this.showCoursesCreatedDateRange) {
+      return "searchfilters.createdDate";
     }
     return "";
   }
 
   formatEventStatusName(name: string, type?: string): string {
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      if (this.searchCategory.toLocaleLowerCase() === "courses" || type === "courses") {
+      if (this.searchCategory && this.searchCategory.toLocaleLowerCase() === "courses" || type === "courses") {
         return CBPstatusMapping[name.toLocaleLowerCase()] || CBPstatusMapping[name]
       } else {
         switch(name) {

@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core'
-import { DomSanitizer } from '@angular/platform-browser'
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser'
 
 @Component({
   selector: 'app-top-section',
@@ -20,9 +20,6 @@ export class TopSectionComponent implements OnInit {
     @Inject('eventCallback') public eventCallback: (event: any) => void,
     public sanitizer: DomSanitizer
   ) {
-    if (this.isEdit) {
-      console.log('Edit mode active for top section')
-    }
   }
 
   ngOnInit() {
@@ -57,6 +54,8 @@ export class TopSectionComponent implements OnInit {
   getFieldType(fieldName: string, value: any): string {
     if (fieldName === 'logo' || fieldName === 'logoMobile' || fieldName.includes('banner')) {
       return 'image'
+    } else if (fieldName === 'background') {
+      return 'color'
     } else if (fieldName === 'sliderData') {
       return 'slider'
     } else if (fieldName === 'metrics') {
@@ -74,5 +73,21 @@ export class TopSectionComponent implements OnInit {
 
   isArray(value: any): boolean {
     return Array.isArray(value)
+  }
+
+  getBackgroundStyle(background: string): any {
+    if (!background) {
+      return {}
+    }
+
+    // Check if it's a hex color (starts with #)
+    if (background.startsWith('#')) {
+      return { 'background-color': background }
+    }
+
+    // Otherwise, treat it as an image URL - return all background properties
+    return {
+      'background': `url('${background}') center center / cover no-repeat`
+    }
   }
 }

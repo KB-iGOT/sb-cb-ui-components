@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
-import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrollable-item.directive';
+import { Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core'
+import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrollable-item.directive'
 
 @Component({
   selector: 'sb-uic-key-highlights',
@@ -8,13 +8,14 @@ import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrol
 })
 export class KeyHighlightsComponent implements OnInit {
   currentIndex: any = 0
-  @Input() providerId : any = ''
-  @Input() formData : any = ''
+  @Input() providerId: any = ''
+  @Input() formData: any = ''
   @Input() mode: any
+  @Input() isEdit: boolean = false;
   @Output() emptyResponse = new EventEmitter<any>()
   titleMaxLength = 100
 
-  styleData: any = {}  
+  styleData: any = {}
   contentdata: any = []
   @ViewChildren(ScrollableItemDirective) scrollableItems: QueryList<ScrollableItemDirective>
   constructor() { }

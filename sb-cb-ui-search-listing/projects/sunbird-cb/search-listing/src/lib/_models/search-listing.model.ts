@@ -15,6 +15,7 @@ export class RequestParams {
   offset: number;
   sort_by: SortBy;
   exists?: string[];
+  reviewStatus?: string[];
   constructor(competenciesKey: any) {
     this.filters = new Filters();
     this.fields = [
