@@ -422,6 +422,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // After dialog close
     dialogRef.afterClosed().subscribe(result => {
+      debugger
       if (result) {
         this.isLoading = true
         // Use updateSectionData method to update section data
