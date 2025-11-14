@@ -440,7 +440,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
           "UnderReview", "QualityReview", "Draft"
         ]);
-        filters['reviewStatus'] =["reviewed", "SentToPublish", "inReview"];
         filters.createdFor = [userOrgId];
         break;
 
@@ -502,8 +501,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (!filters.must[key].length) delete filters.must[key];
     });
     if (!Object.keys(filters.must).length) delete filters.must;
-    if (this.applySelectedFilters && this.applySelectedFilters.resourceCategory) {
-      filters.must.resourceCategory = this.applySelectedFilters.resourceCategory;
+    if (this.applySelectedFilters && this.applySelectedFilters.resourceCategory && this.applySelectedFilters.resourceCategory.length) {
+      filters.must.resourceCategory = JSON.parse(JSON.stringify(this.applySelectedFilters?.resourceCategory || []));
+      filters.must.courseCategory = [];
       filters.must.courseCategory = []
     }
 
