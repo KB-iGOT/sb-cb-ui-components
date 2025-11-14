@@ -139,7 +139,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   handleSectionEvent(event: any) {
     // Handle events from child components
-    console.log('Section event received in MdoChannelV3Component:', event)
 
     // Check for undefined or null event
     if (!event) {
@@ -149,25 +148,21 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Raise telemetry for the event
     if (event.action) {
-      console.log(`Raising telemetry for ${event.source}-${event.id || 'unknown'}`)
       this.raiseTelemetry(`${event.source}-${event.id || 'unknown'}`)
     }
 
     // Handle specific events
     if (event.action === 'view-all' && event.data?.viewMoreUrl) {
-      console.log(`Navigating to ${event.data.viewMoreUrl}`)
       this.router.navigateByUrl(event.data.viewMoreUrl)
     }
 
     // Handle edit events
     if (event.action === 'edit') {
-      console.log('Opening editor dialog for', event.source)
       this.openEditorDialog(event)
     }
 
     // Handle playlist updates
     if (event.action === 'playlist-updated') {
-      console.log('Playlist updated, clearing cache and enabling save button')
       this.injectorCache.clear()
       this.hasUnsavedChanges = true
       this.cdr.detectChanges()
@@ -175,7 +170,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Handle playlist created
     if (event.action === 'playlist-created') {
-      console.log('Playlist created, enabling save button')
       this.injectorCache.clear()
       this.hasUnsavedChanges = true
       this.cdr.detectChanges()
@@ -183,7 +177,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Handle section visibility toggled
     if (event.action === 'section-visibility-toggled') {
-      console.log('Section visibility toggled, enabling save button')
       this.hasUnsavedChanges = true
       // this.updateStripSections(event.data?.stripSections)
     }
@@ -192,7 +185,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Handle strip sections updates (only from notifyStripSectionsChange)
     if (event.action === 'update-strip-sections') {
-      console.log('Updating strip sections:', event.data?.stripSections)
       this.updateStripSections(event.data?.stripSections)
     }
   }
@@ -215,7 +207,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
           // Force immediate change detection
           this.cdr.detectChanges()
-          console.log('Strip sections updated in column data.stripsArray:', mainContentColumn.data.stripsArray)
           return
         }
       }
@@ -232,7 +223,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
       // Force immediate change detection
       this.cdr.detectChanges()
-      console.log('Strip sections updated in section data.stripsArray:', mainContentSection.data.stripsArray)
     }
   }
 
@@ -307,24 +297,16 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     const dialogWidth = this.getDialogWidth(event.data.fieldType)
 
     // Debug logs for all configurations
-    console.log('MdoChannelV3 - openEditorDialog - received event:', event)
-    console.log('MdoChannelV3 - openEditorDialog - field type:', event.data.fieldType)
-    console.log('MdoChannelV3 - openEditorDialog - value:', event.data.value)
 
     // Get the actual value to pass to the dialog
     let dialogValue = event.data.value
 
     // Special handling for weekHighlights - retrieve from nested structure
     if (event.data.fieldType === 'weekHighlights') {
-      console.log('MdoChannelV3 - weekHighlights - current sectionList:', this.sectionList)
       // Find the mainContent section and log its current weekHighlights data
       for (const section of this.sectionList) {
         for (const column of section.column) {
           if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.weekHighlights) {
-            console.log('MdoChannelV3 - weekHighlights - current stored data:',
-              column.data.stateLearningWeekSection.weekHighlights.data)
-            console.log('MdoChannelV3 - weekHighlights - stored list length:',
-              column.data.stateLearningWeekSection.weekHighlights.data?.list?.length)
             // Use the nested data for the dialog
             dialogValue = column.data.stateLearningWeekSection.weekHighlights.data
           }
@@ -334,13 +316,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Special handling for userProgressConfig - retrieve from nested structure
     if (event.data.fieldType === 'userProgressConfig') {
-      console.log('MdoChannelV3 - userProgressConfig - current sectionList:', this.sectionList)
       // Find the mainContent section and get its myprogress data
       for (const section of this.sectionList) {
         for (const column of section.column) {
           if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.myprogress) {
-            console.log('MdoChannelV3 - userProgressConfig - current stored data:',
-              column.data.stateLearningWeekSection.myprogress)
             // Use the nested data for the dialog
             dialogValue = column.data.stateLearningWeekSection.myprogress
           }
@@ -349,13 +328,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     }
     // Special handling for eventsConfig - retrieve from nested structure
     if (event.data.fieldType === 'eventsConfig') {
-      console.log('MdoChannelV3 - eventsConfig - current sectionList:', this.sectionList)
       // Find the mainContent section and get its events data
       for (const section of this.sectionList) {
         for (const column of section.column) {
           if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.events) {
-            console.log('MdoChannelV3 - eventsConfig - current stored data:',
-              column.data.stateLearningWeekSection.events)
             // Use the nested data for the dialog
             dialogValue = column.data.stateLearningWeekSection.events
           }
@@ -365,13 +341,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Special handling for mdoLeaderboardConfig - retrieve from nested structure
     if (event.data.fieldType === 'mdoLeaderboardConfig') {
-      console.log('MdoChannelV3 - mdoLeaderboardConfig - current sectionList:', this.sectionList)
       // Find the mainContent section and get its mdoLeaderboard data
       for (const section of this.sectionList) {
         for (const column of section.column) {
           if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.mdoLeaderboard) {
-            console.log('MdoChannelV3 - mdoLeaderboardConfig - current stored data:',
-              column.data.stateLearningWeekSection.mdoLeaderboard)
             // Use the nested data for the dialog
             dialogValue = column.data.stateLearningWeekSection.mdoLeaderboard
           }
@@ -381,13 +354,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Special handling for cbpPlanConfig - retrieve from nested structure
     if (event.data.fieldType === 'cbpPlanConfig') {
-      console.log('MdoChannelV3 - cbpPlanConfig - current sectionList:', this.sectionList)
       // Find the mainContent section and get its cbpPlan data
       for (const section of this.sectionList) {
         for (const column of section.column) {
           if (column.key === 'mainContent' && column.data?.cbpPlanSection) {
-            console.log('MdoChannelV3 - cbpPlanConfig - current stored data:',
-              column.data.cbpPlanSection?.data)
             // Use the nested data for the dialog
             dialogValue = column.data.cbpPlanSection?.data
           }
@@ -396,13 +366,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     }
     // Special handling for speakersConfig - retrieve from nested structure
     if (event.data.fieldType === 'speakersConfig') {
-      console.log('MdoChannelV3 - speakersConfig - current sectionList:', this.sectionList)
       // Find the mainContent section and get its speakers data
       for (const section of this.sectionList) {
         for (const column of section.column) {
           if (column.key === 'mainContent' && column.data?.stateLearningWeekSection?.speakerOftheDay) {
-            console.log('MdoChannelV3 - speakersConfig - current stored data:',
-              column.data.stateLearningWeekSection.speakerOftheDay)
             // Use the nested data for the dialog
             dialogValue = column.data.stateLearningWeekSection.speakerOftheDay
           }
@@ -458,21 +425,16 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   // Method to update section data
   private updateSectionData(sectionType: string, fieldName: string, newValue: any) {
-    console.log('updateSectionData called with:', { sectionType, fieldName, newValue })
-
     // Make a deep copy to avoid modifying the original reference
     const updatedSections = cloneDeep(this.sectionList)
     let updated = false
 
     // Special handling for speakersConfig
     if (fieldName === 'speakersConfig' && sectionType === 'speakers') {
-      console.log('Handling speakersConfig special case')
       // Find the section with speakers
       for (const section of updatedSections) {
         for (const column of section.column) {
           if (column.key === 'mainContent') {
-            console.log('Found speakers column:', column)
-
             // Ensure nested objects exist before assignment (avoid optional-chaining on LHS)
             if (!column.data) {
               column.data = {}
@@ -485,7 +447,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             }
             column.data.stateLearningWeekSection.speakerOftheDay = newValue?.speakerOftheDay
 
-            console.log('Updated speakers data:', column.data)
             updated = true
             break
           }
@@ -496,13 +457,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Special handling for announcementsConfig
     if (fieldName === 'announcementsConfig' && sectionType === 'announcements') {
-      console.log('Handling announcementsConfig special case')
       // Find the section with speakers
       for (const section of updatedSections) {
         for (const column of section.column) {
           if (column.key === 'mainContent') {
-            console.log('Found speakers column:', column)
-
             // Ensure nested objects exist before assignment (avoid optional-chaining on LHS)
             if (!column.data) {
               column.data = {}
@@ -512,7 +470,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             }
             column.data.announcementSection.data = newValue
 
-            console.log('Updated announcement data:', column.data)
             updated = true
             break
           }
@@ -523,20 +480,12 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Special handling for weekHighlights
     else if (fieldName === 'weekHighlights' && sectionType === 'weekHighlights') {
-      console.log('Handling weekHighlights special case')
-      console.log('newValue received:', newValue)
-      console.log('newValue.list length:', newValue.list?.length)
-      console.log('newValue.list contents:', newValue.list)
-
       // weekHighlights is nested inside mainContent column's data structure
       // Path: column.data.stateLearningWeekSection.weekHighlights.data
       for (const section of updatedSections) {
         for (const column of section.column) {
           // Look for mainContent column which contains the weekHighlights
           if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.weekHighlights) {
-            console.log('Found column with weekHighlights nested data. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -556,8 +505,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             column.data.stateLearningWeekSection.weekHighlights.data.title = newValue.title
             column.data.stateLearningWeekSection.weekHighlights.data.list = JSON.parse(JSON.stringify(newValue.list))
 
-            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated list length:', column.data.stateLearningWeekSection.weekHighlights.data.list?.length)
             updated = true
             break
           }
@@ -565,34 +512,16 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         if (updated) break
       }
 
-      // Log the entire sectionList to verify the update
-      if (updated) {
-        console.log('Entire sectionList after weekHighlights update - checking all sections...')
-        updatedSections.forEach((section, idx) => {
-          section.column.forEach((col, colIdx) => {
-            if (col.data?.stateLearningWeekSection?.weekHighlights?.data?.list) {
-              console.log(`Section[${idx}].column[${colIdx}] weekHighlights list length:`,
-                col.data.stateLearningWeekSection.weekHighlights.data.list.length)
-            }
-          })
-        })
-      }
     }
 
     // Special handling for userProgressConfig (myprogress)
     else if (fieldName === 'userProgressConfig' && sectionType === 'userProgress') {
-      console.log('Handling userProgressConfig (myprogress) special case')
-      console.log('newValue received:', newValue)
-
       // myprogress is nested inside mainContent column's data structure
       // Path: column.data.stateLearningWeekSection.myprogress
       for (const section of updatedSections) {
         for (const column of section.column) {
           // Look for mainContent column which contains the myprogress
           if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.myprogress) {
-            console.log('Found column with myprogress nested data. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -609,32 +538,20 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             // The newValue contains the full userProgress config, we store it under myprogress
             column.data.stateLearningWeekSection.myprogress = JSON.parse(JSON.stringify(newValue))
 
-            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated myprogress data:', column.data.stateLearningWeekSection.myprogress)
             updated = true
             break
           }
         }
         if (updated) break
       }
-
-      if (updated) {
-        console.log('Successfully updated myprogress configuration')
-      }
     }
 
     // Also handle if it comes as 'myprogress' directly
     else if ((fieldName === 'myprogress' || fieldName === 'userProgressConfig') &&
       (sectionType === 'mainContent' || sectionType === 'myprogress' || sectionType === 'userProgress')) {
-      console.log('Handling myprogress/userProgressConfig special case (alternate path)')
-      console.log('newValue received:', newValue)
-
       for (const section of updatedSections) {
         for (const column of section.column) {
           if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.myprogress) {
-            console.log('Found column with myprogress nested data. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -648,34 +565,22 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
             column.data.stateLearningWeekSection.myprogress = JSON.parse(JSON.stringify(newValue))
 
-            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated myprogress data:', column.data.stateLearningWeekSection.myprogress)
             updated = true
             break
           }
         }
         if (updated) break
       }
-
-      if (updated) {
-        console.log('Successfully updated myprogress configuration (alternate path)')
-      }
     }
 
     // Special handling for eventsConfig
     else if (fieldName === 'eventsConfig' && sectionType === 'events') {
-      console.log('Handling eventsConfig special case')
-      console.log('newValue received:', newValue)
-
       // events is nested inside mainContent column's data structure
       // Path: column.data.stateLearningWeekSection.events
       for (const section of updatedSections) {
         for (const column of section.column) {
           // Look for mainContent column which contains the events
           if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.events) {
-            console.log('Found column with events nested data. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -691,34 +596,22 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             // Update the nested data with deep copy to avoid reference issues
             column.data.stateLearningWeekSection.events = JSON.parse(JSON.stringify(newValue))
 
-            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated events data:', column.data.stateLearningWeekSection.events)
             updated = true
             break
           }
         }
         if (updated) break
       }
-
-      if (updated) {
-        console.log('Successfully updated events configuration')
-      }
     }
 
     // Special handling for mdoLeaderboardConfig
     else if (fieldName === 'mdoLeaderboardConfig' && sectionType === 'mdoLeaderboard') {
-      console.log('Handling mdoLeaderboardConfig special case')
-      console.log('newValue received:', newValue)
-
       // mdoLeaderboard is nested inside mainContent column's data structure
       // Path: column.data.stateLearningWeekSection.mdoLeaderboard
       for (const section of updatedSections) {
         for (const column of section.column) {
           // Look for mainContent column which contains the mdoLeaderboard
           if (column.key === 'mainContent' || column.data?.stateLearningWeekSection?.mdoLeaderboard) {
-            console.log('Found column with mdoLeaderboard nested data. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -734,34 +627,22 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             // Update the nested data with deep copy to avoid reference issues
             column.data.stateLearningWeekSection.mdoLeaderboard = JSON.parse(JSON.stringify(newValue))
 
-            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated mdoLeaderboard data:', column.data.stateLearningWeekSection.mdoLeaderboard)
             updated = true
             break
           }
         }
         if (updated) break
       }
-
-      if (updated) {
-        console.log('Successfully updated mdoLeaderboard configuration')
-      }
     }
 
     // Special handling for cbpPlanConfig
     else if (fieldName === 'cbpPlanConfig' && sectionType === 'cbpPlan') {
-      console.log('Handling cbpPlanConfig special case')
-      console.log('newValue received:', newValue)
-
       // cbpPlan is nested inside mainContent column's data structure
       // Path: column.data.stateLearningWeekSection.cbpPlan
       for (const section of updatedSections) {
         for (const column of section.column) {
           // Look for mainContent column which contains the cbpPlan
           if (column.key === 'mainContent' || column.data?.cbpPlanSection) {
-            console.log('Found column with cbpPlan nested data. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -777,32 +658,20 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             // Update the nested data with deep copy to avoid reference issues
             column.data.cbpPlanSection.data = JSON.parse(JSON.stringify(newValue))
 
-            console.log('Column data after update:', JSON.stringify(column.data, null, 2))
-            console.log('Updated cbpPlan data:', column.data.cbpPlanSection.data)
             updated = true
             break
           }
         }
         if (updated) break
       }
-
-      if (updated) {
-        console.log('Successfully updated cbpPlan configuration')
-      }
     }
 
     // Special handling for lookerConfig
     else if (fieldName === 'lookerConfig' && sectionType === 'lookerSection') {
-      console.log('Handling lookerConfig special case')
-      console.log('newValue received:', newValue)
-
       // lookerConfig is in the lookerSection column data
       for (const section of updatedSections) {
         for (const column of section.column) {
           if (column.key === 'lookerSection') {
-            console.log('Found lookerSection column. Column key:', column.key)
-            console.log('Column data before update:', JSON.stringify(column.data, null, 2))
-
             if (!column.data) {
               column.data = {}
             }
@@ -822,9 +691,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         }
         if (updated) break
       }
-      if (updated) {
-        console.log('Successfully updated looker configuration')
-      }
     }
 
     // Regular handling for other field types
@@ -835,7 +701,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
         for (const column of section.column) {
           if (column.key === sectionType && column.data) {
-            console.log('Found matching column:', column)
 
             // Special handling for keyHighlights which is nested under stateLearningWeekSection
             if (fieldName === 'keyHighlights' && column.data.stateLearningWeekSection) {
@@ -858,7 +723,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
     // Update the sectionList with new reference (this will trigger change detection)
     this.sectionList = updatedSections
-    console.log('Updated sectionList:', this.sectionList)
 
     // Update active sections with new reference
     this.activeSections = this.sectionList.filter(section => section.enabled)
@@ -921,7 +785,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       }
     }
     if (this.defaultMicrosite) {
-      console.log('Payload:', payload)
       // Call the API
       this.microSiteV3Service.createMicrosite(payload).subscribe({
         next: async (res) => {
@@ -930,7 +793,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             updateOrgBookmarkPromises.push(this.updateOrgBookmark())
           }
           this.snackBar.open('Microsite Created successfully')
-          console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()
         },
@@ -941,7 +803,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
       // Raise telemetry
       this.raiseTelemetry('update-changes')
     } else {
-      console.log('Payload:', payload)
       // Call the API
       this.microSiteV3Service.updateMicrosite(payload).subscribe({
         next: async (res) => {
@@ -954,7 +815,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
             this.snackBar.open('Microsite updated successfully')
           }
 
-          console.log('Form update success:', res)
           this.hasUnsavedChanges = false
           this.cdr.detectChanges()
         },
@@ -1000,7 +860,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
         })
       ).subscribe({
         next: (bookmarkRes: any) => {
-          console.log('Updating org bookmark with new microsite URL', bookmarkRes)
           resolve(true)
         },
         error: (err) => {
@@ -1014,7 +873,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   publishChanges() {
     this.saveChanges('publish')
     // Implement publish logic here
-    console.log('Publishing changes...')
     // Raise telemetry
     this.raiseTelemetry('publish-changes')
     // You can emit an event or call a service to publish the data
@@ -1022,7 +880,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
 
   // Add method to open SLW configuration dialog
   openSLWConfigDialog(currentConfig: any) {
-    console.log('Opening SLW config dialog')
     const dialogRef = this.dialog.open(SlwConfigDialogComponent, {
       width: '800px',
       maxHeight: '90vh',
@@ -1044,7 +901,6 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     })
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('Dialog closed with result:', result)
       if (result) {
         // Update SLW configuration
         this.slwConfiguration = result
@@ -1072,12 +928,10 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
   }
 
   handleConfigureSLW(currentConfig: any) {
-    console.log('Configure SLW called with:', currentConfig)
     this.openSLWConfigDialog(currentConfig)
   }
 
   handleUserRedirectionToggle(enabled: boolean) {
-    console.log('User Redirection toggled:', enabled)
     this.userRedirectionEnabled = enabled
     this.hasUnsavedChanges = true
     this.cdr.detectChanges()

@@ -35,7 +35,7 @@
 <ng-template #topSection let-data="data">
     <!-- top section desktop layout -->
     <div class="hidden md:block">
-        <div class="web-banner-background">
+        <div class="web-banner-background" [ngStyle]="getBackgroundStyle(data?.background)">
             <div class="flex  items-center justify-center">
                 <div class="container">
                     <div class="grid grid-cols-12 gap-4 padding-top-xxxl mb-10">
@@ -136,7 +136,7 @@
     </div>
     <div class="flex items-center justify-center">
         <div class="container metrics-section">
-            <div class="hidden md:block">
+            <div class="hidden md:block" *ngIf="data?.metrics.enabled">
                 <div class="metrics" [ngStyle]="{'background': data?.metrics?.background}">
                     <sb-uic-data-points [providerId]="orgId" [fetchDataFromApi]="true"
                         [objectData]="data?.metrics?.data" [layoutType]="'singleFlexeRow'" [pageLayout]="'mdo'"
@@ -144,7 +144,7 @@
                     </sb-uic-data-points>
                 </div>
             </div>
-            <div class="block md:hidden  pt-14 px-4">
+            <div class="block md:hidden  pt-14 px-4" *ngIf="data?.metrics.enabled">
                 <div class="mob-metrics mob-metrics-sec">
                     <sb-uic-data-points [providerId]="orgId" [fetchDataFromApi]="true"
                         [objectData]="data?.metrics?.data" [layoutType]="'singleRow'" [pageLayout]="'mdo'"
@@ -203,7 +203,7 @@
                         [channelId]="orgId" [objectData]="data?.cbpPlanSection?.data">
                     </sb-uic-cbp-plan>
                 </div>
-                <div class="block md:hidden col-span-12 mt-6" *ngIf="!data?.announcementSection?.disable">
+                <div class="block md:hidden col-span-12 mt-6" *ngIf="data?.announcementSection?.data?.enabled">
                     <sb-uic-announcements [layoutType]="'mobile'" (openDialog)="triggerOpenDialog($event)"
                         [objectData]="data?.announcementSection?.data" [fetchDataFromApi]="false" [channelId]="orgId">
                     </sb-uic-announcements>
@@ -318,7 +318,7 @@
                     <div class="">
                         <div *ngIf="data?.stripsArray?.length > 0">
                             <div *ngFor="let item of data?.stripsArray">
-                                <ng-container *ngIf="item?.strips?.length > 0">
+                                <ng-container *ngIf="item?.strips?.length > 0 && item?.enabled">
                                     <div class="margin-top-l nlw-mandatoryCourse">
                                         <sb-uic-content-strip-with-tabs [emitViewAll]="false"
                                             (telemtryResponse)="raiseTelemetryInteratEvent($event)" [providerId]="orgId"
@@ -489,17 +489,19 @@
 </ng-template>
 
 <ng-template #lookerproSection let-data="data">
-    <div class="flex items-center justify-center flex-wrap">
-        <div class=" w-full flex flex-col items-center justify-center">
-            <h2 *ngIf="data?.header?.headerText" class="pt-4">{{data?.header?.headerText}}</h2>
-            <p *ngIf="data?.header?.description">{{data?.header?.description}}</p>
+    <ng-container *ngIf="data?.enabled">
+        <div class="flex items-center justify-center flex-wrap">
+            <div class=" w-full flex flex-col items-center justify-center">
+                <h2 *ngIf="data?.header?.headerText" class="pt-4">{{data?.header?.headerText}}</h2>
+                <p *ngIf="data?.header?.description">{{data?.header?.description}}</p>
+            </div>
+            <div class="container mt-4 mb-4" *ngIf="lookerProUrl">
+                <iframe class="w-full " height="{{iframeHeight}}" [src]="lookerProUrl" frameborder="0" style="border:0"
+                    allowfullscreen
+                    sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+            </div>
         </div>
-        <div class="container mt-4 mb-4" *ngIf="lookerProUrl">
-            <iframe class="w-full " height="{{iframeHeight}}" [src]="lookerProUrl" frameborder="0" style="border:0"
-                allowfullscreen
-                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-        </div>
-    </div>
+    </ng-container>
 </ng-template>
 <ng-template #supportSection let-data="data">
     <div class="flex items-center justify-center">

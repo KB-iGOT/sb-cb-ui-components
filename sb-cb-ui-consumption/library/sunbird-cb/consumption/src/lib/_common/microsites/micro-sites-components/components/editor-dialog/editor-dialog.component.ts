@@ -125,6 +125,7 @@ export class EditorDialogComponent implements OnInit {
       description: [item.description || '', [Validators.required]],
       videoUrl: [item.videoUrl || '', [
         Validators.required,
+        Validators.pattern(/^https?:\/\/.+/)
       ]]
     })
   }
@@ -172,14 +173,18 @@ export class EditorDialogComponent implements OnInit {
 
   removeAnnouncementItem(index: number): void {
     const tempValue = this.announcementsList.at(index).value
-    this.micrositeService.deleteAnnouncements(tempValue.announcementId).subscribe({
-      next: () => {
-        this.announcementsList.removeAt(index)
-      },
-      error: (error) => {
-        console.error('Error removing announcement:', error)
-      }
-    })
+    if (tempValue.announcementId) {
+      this.micrositeService.deleteAnnouncements(tempValue.announcementId).subscribe({
+        next: () => {
+          this.announcementsList.removeAt(index)
+        },
+        error: (error) => {
+          console.error('Error removing announcement:', error)
+        }
+      })
+    } else {
+      this.announcementsList.removeAt(index)
+    }
   }
 
   dropAnnouncementItem(event: CdkDragDrop<any[]>): void {
@@ -191,7 +196,7 @@ export class EditorDialogComponent implements OnInit {
   addImageLogoItem(): void {
     if (this.imageItemsArray) {
       this.imageItemsArray.push(this.fb.group({
-        url: ['', [Validators.required]]
+        url: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
       }))
     }
   }
@@ -311,7 +316,7 @@ export class EditorDialogComponent implements OnInit {
           this.editorForm = this.fb.group({
             items: this.fb.array(
               imageValue.map((item: any) => this.fb.group({
-                url: [item.url || item || '', [Validators.required]]
+                url: [item.url || item || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
               }))
             )
           })
@@ -372,13 +377,8 @@ export class EditorDialogComponent implements OnInit {
         // Get speakers data or set defaults
         const speakersValue = this.data.value || {}
 
-        // Debug logs to check what data we're receiving
-        console.log('EditorDialog - speakersConfig - received data.value:', this.data.value)
-
         // Handle both direct structure and nested structure with 'data'
         const speakerData = speakersValue.data || speakersValue
-        console.log('EditorDialog - speakersConfig - processed speakerData:', speakerData)
-        console.log('EditorDialog - speakersConfig - speaker list:', speakerData.list)
         this.editorForm = this.fb.group({
           enabled: [speakersValue.enabled !== undefined ? speakersValue.enabled : true],
           data: this.fb.group({
@@ -393,8 +393,6 @@ export class EditorDialogComponent implements OnInit {
         // Get events data or set defaults
         const eventsValue = this.data.value || {}
 
-        console.log('EditorDialog - eventsConfig - received data.value:', this.data.value)
-
         this.editorForm = this.fb.group({
           enabled: [eventsValue.enabled !== undefined ? eventsValue.enabled : true]
         })
@@ -402,8 +400,6 @@ export class EditorDialogComponent implements OnInit {
       case 'mdoLeaderboardConfig':
         // Get mdo leaderboard data or set defaults
         const mdoLeaderboardValue = this.data.value || {}
-
-        console.log('EditorDialog - mdoLeaderboardConfig - received data.value:', this.data.value)
 
         this.editorForm = this.fb.group({
           enabled: [mdoLeaderboardValue.enabled !== undefined ? mdoLeaderboardValue.enabled : true]
@@ -413,8 +409,6 @@ export class EditorDialogComponent implements OnInit {
         // Get CBP plan data or set defaults
         const cbpPlanValue = this.data.value || {}
         const cbpPlanList = cbpPlanValue.list || []
-
-        console.log('EditorDialog - cbpPlanConfig - received data.value:', this.data.value)
 
         this.editorForm = this.fb.group({
           list: this.fb.array([])
@@ -437,8 +431,6 @@ export class EditorDialogComponent implements OnInit {
         // Get looker data or set defaults
         const lookerValue = this.data.value || {}
         const headerData = lookerValue.header || {}
-
-        console.log('EditorDialog - lookerConfig - received data.value:', this.data.value)
 
         // Parse height values - remove 'px' suffix if present
         const parseHeight = (value: any, defaultValue: number): number => {
@@ -467,8 +459,6 @@ export class EditorDialogComponent implements OnInit {
       case 'announcementsConfig':
         // Get announcements data or set defaults
         const announcementsValue = this.data.value || {}
-
-        console.log('EditorDialog - announcementsConfig - received data.value:', this.data.value)
 
         this.editorForm = this.fb.group({
           enabled: [announcementsValue.enabled !== undefined ? announcementsValue.enabled : true],
@@ -553,8 +543,6 @@ export class EditorDialogComponent implements OnInit {
 
   // Initialize the speaker form
   initSpeakerForm(speaker: any = {}) {
-    console.log('Initializing speaker form with data:', speaker)
-
     // Ensure we handle undefined or null values
     const safeTitle = speaker && speaker.title !== undefined ? speaker.title : ''
     const safeDesc = speaker && speaker.description !== undefined ? speaker.description : ''
@@ -573,8 +561,6 @@ export class EditorDialogComponent implements OnInit {
       }],
       identifier: [safeId]
     })
-
-    console.log('Speaker form initialized:', this.speakerForm.value)
   }
 
   // Helper method to safely get speakers list
@@ -620,15 +606,12 @@ export class EditorDialogComponent implements OnInit {
 
   editSpeaker(index: number) {
     try {
-      console.log(`Editing speaker at index: ${index}`)
-
       // Get current list
       const speakersList = this.editorForm.get('data.list')?.value || []
 
       // Validate index
       if (index >= 0 && index < speakersList.length) {
         const speaker = speakersList[index]
-        console.log('Speaker to edit:', speaker)
 
         // Set editing state
         this.isEditingSpeaker = true
@@ -646,8 +629,6 @@ export class EditorDialogComponent implements OnInit {
 
   removeSpeaker(index: number) {
     try {
-      console.log(`Removing speaker at index: ${index}`)
-
       // Get current list
       let speakersList = this.editorForm.get('data.list')?.value
 
@@ -656,12 +637,9 @@ export class EditorDialogComponent implements OnInit {
         console.warn('Speaker list is not an array, initializing empty array')
         speakersList = []
       } else {
-        console.log(`Before removal: List has ${speakersList.length} speakers`)
-
         if (index >= 0 && index < speakersList.length) {
           // Remove the speaker at the specified index
           speakersList.splice(index, 1)
-          console.log(`After removal: List has ${speakersList.length} speakers`)
 
           // Update the form control with a new array
           this.editorForm.get('data.list')?.setValue([...speakersList])
@@ -677,7 +655,6 @@ export class EditorDialogComponent implements OnInit {
   // Method to remove all speakers
   removeAllSpeakers() {
     try {
-      console.log('Removing all speakers')
       this.editorForm.get('data.list')?.setValue([])
     } catch (error) {
       console.error('Error removing all speakers:', error)
@@ -687,8 +664,6 @@ export class EditorDialogComponent implements OnInit {
   saveSpeaker() {
     if (this.speakerForm.valid) {
       try {
-        console.log('Saving speaker form:', this.speakerForm.value)
-
         // Extract speaker data from form
         const speakerData = {
           title: this.speakerForm.get('title')?.value,
@@ -701,20 +676,13 @@ export class EditorDialogComponent implements OnInit {
         const currentList = this.editorForm.get('data.list')?.value || []
         const speakersList = JSON.parse(JSON.stringify(currentList))
 
-        console.log('Current speakers list:', currentList)
-        console.log('Editing index:', this.editingSpeakerIndex)
-
         if (this.editingSpeakerIndex === -1) {
           // Add new speaker
-          console.log('Adding new speaker:', speakerData)
           speakersList.push(speakerData)
         } else {
           // Update existing speaker
-          console.log(`Updating speaker at index ${this.editingSpeakerIndex}:`, speakerData)
           speakersList[this.editingSpeakerIndex] = speakerData
         }
-
-        console.log('Updated speakers list:', speakersList)
 
         // Update the form with the new list - use a new array reference for change detection
         this.editorForm.get('data.list')?.setValue([...speakersList])
@@ -985,7 +953,7 @@ export class EditorDialogComponent implements OnInit {
 
   // Slider specific methods
   onSliderClick(event: any) {
-    console.log('Slider click:', event)
+    // Slider click handling
   }
 
   onSliderImageSelected(event: any) {
@@ -1174,7 +1142,6 @@ export class EditorDialogComponent implements OnInit {
         // Return structured data matching the expected format:
         // { enabled: true, data: { title, infoText, infoIcon, profleDetails, hideEle, insights } }
         const formValue = this.editorForm.value
-        console.log('Submitting userProgressConfig form:', formValue)
         this.dialogRef.close(formValue) // Return the form value with enabled and nested data
       }
     } else if (this.formType === 'eventsConfig') {
@@ -1187,7 +1154,6 @@ export class EditorDialogComponent implements OnInit {
       if (this.editorForm.valid) {
         // Return structured data with enabled flag
         const formValue = this.editorForm.value
-        console.log('Submitting mdoLeaderboardConfig form:', formValue)
         this.data.value.enabled = formValue.enabled
         this.dialogRef.close(this.data.value) // Return the data value with updated enabled flag
       }
@@ -1217,7 +1183,6 @@ export class EditorDialogComponent implements OnInit {
         this.data.value.lookerProDesktopUrl = formValue.lookerProDesktopUrl
         this.data.value.lookerProMobileUrl = formValue.lookerProMobileUrl
 
-        console.log('Submitting lookerConfig:', this.data.value)
         this.dialogRef.close(this.data.value)
       }
     } else if (this.formType === 'announcementsConfig') {
@@ -1231,22 +1196,17 @@ export class EditorDialogComponent implements OnInit {
           announcementPromises.push(this.checkAndCreateAnnouncementItem(formValue.list))
           await Promise.all(announcementPromises)
         }
-        console.log('Submitting announcementsConfig:', this.data.value)
         this.dialogRef.close(this.data.value)
       }
     } else if (this.formType === 'speakersConfig') {
       if (this.editorForm.valid) {
         try {
-          console.log('Submitting speakersConfig form')
-
           // Get form values
           const formValue = this.editorForm.value
 
           // Get speakers list and create a deep copy to avoid reference issues
           const speakersList = this.getSpeakersList()
           const speakersListCopy = JSON.parse(JSON.stringify(speakersList))
-
-          console.log('Final speakers list for submission:', speakersListCopy)
 
           // Return with the speakerOftheDay structure format
           const speakerConfig = {
@@ -1260,7 +1220,6 @@ export class EditorDialogComponent implements OnInit {
               }
             }
           }
-          console.log('Final speaker config for submission:', speakerConfig)
           this.dialogRef.close(speakerConfig)
         } catch (error) {
           console.error('Error submitting speakers form:', error)
@@ -1315,7 +1274,6 @@ export class EditorDialogComponent implements OnInit {
                   description: item.description || '',
                   category: item.category || ''
                 }
-                console.log('Announcement has changed, updating:', updateReqBody)
                 this.micrositeService.updateAnnouncements(updateReqBody).subscribe({
                   next: () => {
                     resolve(true)

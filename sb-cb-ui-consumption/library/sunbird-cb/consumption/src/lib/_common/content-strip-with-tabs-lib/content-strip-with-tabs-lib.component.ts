@@ -237,7 +237,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         data.showStrip = false
       }
     }
-    // console.log('data.key', data, data.key, data.widgets);
     return data ? data.showStrip : false
   }
 
@@ -607,7 +606,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       // }
       let originalFilters: any = []
       // tslint:disable:no-console
-      console.log(originalFilters)
       if (strip.request &&
         strip.request.searchV6 &&
         strip.request.searchV6.request &&
@@ -633,9 +631,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.searchV6Request(strip, strip.request, calculateParentStatus)
-          // console.log('calling  after - response, ', response)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.result.content) {
               if (strip.key === 'scheduledAssessment') {
                 let searchRequest: any = {
@@ -849,7 +845,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       // }
       let originalFilters: any = []
       // tslint:disable:no-console
-      console.log(originalFilters)
       if (strip.request &&
         strip.request.trendingSearch &&
         strip.request.trendingSearch.request &&
@@ -1284,7 +1279,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       if (response && response.results && response.results.response) {
         const content = response.results.response[currentTab.value] || []
         const widgets = this.transformContentsToWidgets(content, strip)
-        // console.log('currentTab --- widgets', widgets)
         let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs
@@ -1297,8 +1291,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             tabResults = allTabs
           }
         }
-        // console.log('tabResults -++++***--', tabResults)
-        // console.log('calling  after-- ')
         this.processStrip(
           strip,
           widgets,
@@ -1321,12 +1313,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     currentTab: NsContentStripWithTabs.IContentStripTab,
     calculateParentStatus: boolean
   ) {
-    // tslint:disable:no-console
-    console.log('strip -- ', strip)
-    // tslint:disable:no-console
-    console.log('currentTab -- ', currentTab)
-    // tslint:disable:no-console
-    console.log('calculateParentStatus-- ', calculateParentStatus)
     // TODO: Write logic for individual filter if passed in config
     // add switch case based on config key passed
   }
@@ -1497,9 +1483,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.postRequestMethod(strip, strip.request.topContent, strip.request.apiUrl, calculateParentStatus)
-          // console.log('calling  after - response, ', response)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.result.content && response.results.result.content.length) {
               this.processStrip(
                 strip,
@@ -1537,9 +1521,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
       try {
         const response = await this.postRequestMethod(strip, strip.request.featureContent, strip.request.apiUrl, calculateParentStatus)
-        // console.log('calling  after - response, ', response)
         if (response && response.results) {
-          // console.log('calling  after-- ')
           if (response.results.result.content && response.results.result.content.length) {
             this.processStrip(
               strip,
@@ -1866,9 +1848,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
       try {
         const response = await this.postRequestMethod(strip, strip.request.playlistSearch.request, strip.request.apiUrl, calculateParentStatus)
-        // console.log('calling  after - response, ', response)
         if (response && response.results) {
-          // console.log('calling  after-- ')
           if (response.results.result.data && response.results.result.data.length) {
             let finalPlaylistData: any = []
             let programData: any = response.results.result.data
@@ -2077,9 +2057,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.postRequestMethod(strip, strip.request.ciosContent, strip.request.apiUrl, calculateParentStatus)
-          // console.log('calling  after - response, ', response)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.data && response.results.data.length) {
               let extContentData: any = response.results.data
               if (extContentData.length) {

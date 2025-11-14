@@ -180,8 +180,6 @@ export class MainContentComponent implements OnInit {
 
     // Force change detection
     this.cdr.detectChanges()
-
-    console.log('Section added. Total sections:', this.stripSections.length)
   }
 
   removeSection(index: number) {
@@ -190,8 +188,6 @@ export class MainContentComponent implements OnInit {
 
     // Force change detection
     this.cdr.detectChanges()
-
-    console.log('Section removed. Remaining sections:', this.stripSections.length)
   }
 
   notifyStripSectionsChange() {
@@ -234,7 +230,6 @@ export class MainContentComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result && result.selectedItems && result.selectedItems.length > 0) {
-          console.log('Content added to existing section:', result.selectedItems)
           const contentIds: string[] = []
           result.selectedItems.forEach((item: any) => {
             if (!contentIds.includes(item.identifier)) {
@@ -293,8 +288,6 @@ export class MainContentComponent implements OnInit {
             data: { stripData },
             clearCache: true  // Request parent to clear injector cache
           })
-
-          console.log('Playlist created successfully and emitted to parent')
         }
       },
       (error) => {
@@ -314,8 +307,6 @@ export class MainContentComponent implements OnInit {
     this.microSiteV3Service.updatePlaylistApi(requestBody).subscribe(
       (response) => {
         if (response?.result?.status?.toLowerCase() === 'updated') {
-          console.log('Playlist updated successfully')
-
           // Trigger a refresh or notify parent to clear injector cache
           this.eventCallback({
             action: 'playlist-updated',
@@ -334,7 +325,6 @@ export class MainContentComponent implements OnInit {
 
   onToggleSectionVisibility(event: any) {
     const { stripKey, stripSections, enabled } = event
-    console.log('Toggle section visibility:', { stripKey, enabled })
 
     // Find the matching strip in stripsArray and update its enabled state
     if (this.data?.stripsArray && Array.isArray(this.data.stripsArray)) {
@@ -343,7 +333,6 @@ export class MainContentComponent implements OnInit {
       })
       if (matchingStrip) {
         matchingStrip.enabled = enabled
-        console.log('Updated stripsArray enabled state:', matchingStrip)
       }
     }
 
@@ -369,8 +358,6 @@ export class MainContentComponent implements OnInit {
   }
 
   onPlaylistCreated(event: any) {
-    console.log('Playlist created in strip-section-create:', event)
-
     // Add the new section to data.stripsArray if it doesn't exist
     if (!this.data.stripsArray) {
       this.data.stripsArray = []
@@ -395,7 +382,6 @@ export class MainContentComponent implements OnInit {
     const stripSectionIndex = event.sectionIndex
     if (stripSectionIndex !== undefined && this.stripSections[stripSectionIndex]) {
       this.stripSections = this.stripSections.filter((_, i) => i !== stripSectionIndex)
-      console.log('Removed section from stripSections. Remaining:', this.stripSections.length)
     }
 
     // Force change detection
@@ -422,7 +408,7 @@ export class MainContentComponent implements OnInit {
       if (result && result.trim() && !stripData) {
         this.addTab(result.trim())
       } else if (stripData) {
-        stripData.title = result?.trim()
+        stripData.title = (result) ? result?.trim() : stripData.title
         this.eventCallback({
           action: 'playlist-updated',
           source: 'mainContent',
@@ -489,7 +475,6 @@ export class MainContentComponent implements OnInit {
       if (result) {
         // Create new array without the item at index to trigger change detection
         stripData.tabs = stripData.tabs.filter((_, i) => i !== index)
-        console.log('Tab removed at index:', index, 'Remaining tabs:', stripData.tabs.length)
         this.eventCallback({
           action: 'playlist-updated',
           source: 'mainContent',

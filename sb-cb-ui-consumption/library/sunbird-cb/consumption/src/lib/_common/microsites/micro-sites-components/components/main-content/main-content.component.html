@@ -5,7 +5,8 @@
       <div class="block md:hidden mb-4" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
         <sb-uic-key-highlights
           (emptyResponse)="hideKeyHightlight($event, data?.stateLearningWeekSection?.keyHighlights)"
-          [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'mobile'">
+          [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'mobile'"
+          [isEdit]="isEdit">
         </sb-uic-key-highlights>
       </div>
 
@@ -68,7 +69,8 @@
           <div class="hidden md:block" *ngIf="data?.stateLearningWeekSection?.keyHighlights?.enabled || isEdit">
             <sb-uic-key-highlights
               (emptyResponse)="openEditor('keyHighlights', 'Key Heading', data?.stateLearningWeekSection?.keyHighlights)"
-              [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'desktop'">
+              [formData]="data?.stateLearningWeekSection?.keyHighlights" [providerId]="providerId" [mode]="'desktop'"
+              [isEdit]="isEdit">
             </sb-uic-key-highlights>
           </div>
         </div>
@@ -231,7 +233,7 @@
 
           <!-- Speakers -->
           <div class="hidden md:block padding-top-xl padding-bottom-m" *ngIf="isEdit">
-            <div *ngIf="data?.stateLearningWeekSection?.speakerOftheDay?.enabled">
+            <div>
               <sb-uic-speakers [layoutType]="'web'" [mobileHeight]="false"
                 [objectData]="data?.stateLearningWeekSection">
               </sb-uic-speakers>

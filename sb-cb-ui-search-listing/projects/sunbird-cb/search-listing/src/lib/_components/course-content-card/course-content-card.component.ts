@@ -224,7 +224,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
    */
   handleContentClick(content: any, loggedInUserId: string): void {
     // Helpers
-    if (content && content.status && content.status.toLowerCase() === 'failed') {
+    if (content && content.status && (content.status.toLowerCase() === 'failed' || content.status.toLowerCase() === 'retired')) {
       this.openSnackBar('You don\'t have access!');
       return;
     }
