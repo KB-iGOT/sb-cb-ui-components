@@ -256,7 +256,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
       mode = 'edit';
     }
     if (content && content.identifier) {
-      this.searchListingService.getCourseDetails(content.identifier, mode).subscribe((res: any) => {
+      this.searchListingService.getCourseDetails(content.identifier, mode, content.primaryCategory).subscribe((res: any) => {
         if (res && res.params && res.params.status === 'successful') {
 
           const status = (content && content.status) ? String(content.status).toLocaleLowerCase() : "";
