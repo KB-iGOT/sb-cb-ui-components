@@ -1054,7 +1054,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.calculateUserCountForUserGroup(index);
       if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
-        (this.config.userConfig.userRoles.has("content_creator") || this.config.userConfig.userRoles.has("spv_publisher") && !this.isCuratedContentWithExternalId)
+        ( this.config.userConfig.userRoles.has("spv_publisher") && !this.isCuratedContentWithExternalId)
       ) {
         // publisher (cannot edit already added)
         for (let i = 0; i < this.userGroup.length; i++) {
