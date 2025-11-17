@@ -1207,10 +1207,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isSaveFltrBtnDisabled = true;
     } else if (
       (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
-      (this.config.userConfig.userRoles.has("spv_publisher") ||
-        this.config.userConfig.userRoles.has("content_publisher") ||
-        this.config.userConfig.userRoles.has("content_creator")) &&
-      this.content?.courseCategory !== "Comprehensive Assessment Program"
+      this.content?.courseCategory !== "Comprehensive Assessment Program" &&
+      (this.config.userConfig.userRoles.has("spv_publisher") || this.config.userConfig.userRoles.has("content_publisher")) &&
+      !this.config.userConfig.userRoles.has("content_creator")
     ) {
       // publisher (disabled all)
       this.accessControlCriteriaSelection.readOnly = true;
