@@ -59,6 +59,8 @@ export class Filters {
   sectorId?: string[];
   subSectorId?: string[];
   resourceType?: string[];
+  must?: any;
+  resourceCategory?: string[];
   [key: string]: any;
   constructor() {
     this.contentType = ["Course"];

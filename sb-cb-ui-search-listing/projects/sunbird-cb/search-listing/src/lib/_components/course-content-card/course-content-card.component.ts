@@ -273,7 +273,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
           };
 
           const goToEditor = () => {
-            if (content.prevStatus && content.prevStatus.toLowerCase() !== 'live' &&
+            if (_.get(content, 'prevStatus', '').toLowerCase() !== 'live' &&
             content.status.toLowerCase() !== 'live' &&
             content.courseCategory === 'Multilingual Course' &&
             this.getBaseLanguageId(content)
