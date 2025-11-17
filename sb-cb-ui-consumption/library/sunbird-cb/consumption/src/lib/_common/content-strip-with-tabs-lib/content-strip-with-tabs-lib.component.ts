@@ -634,23 +634,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             // console.log('calling  after-- ')
             if (response.results.result.content) {
               if (strip.key === 'scheduledAssessment') {
-                let searchRequest: any = { searchV6:{
-                  "request": {
-                      "filters": {
-                          "courseCategory": NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM,
-                          "contentType": [
-                              "Course"
-                          ]
-                      },
-                      "query": "",
-                      "sort_by": {
-                          "lastUpdatedOn": "desc"
-                      }
-                  },
-                  "query": ""
+                let requestData: any = {
+                  "courseCategory": "Comprehensive Assessment Program"
                 }
-              }
-                const comprehensiveResponse = await this.searchV6Request(strip, searchRequest, calculateParentStatus);
+                const comprehensiveResponse = await this.postRequestMethod(strip, requestData, 'apis/proxies/v8/user/v2/assignedcourses', calculateParentStatus);
                 let comprehensiveContent: any = []
                 let comprehensiveResult: any = []
                 let result: any = []
