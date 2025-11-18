@@ -1,0 +1,127 @@
+<!-- Dynamic Strips Container -->
+<div class="dynamic-strips-container" *ngIf="widgetData?.strips?.length">
+
+  <!-- Iterate through each strip -->
+  <div *ngFor="let strip of widgetData.strips; let stripIndex = index" class="strip-wrapper mb-8"
+    [attr.data-strip-key]="strip.key">
+
+    <!-- Strip Header -->
+    <div class="strip-header px-4 md:px-0 mb-6">
+      <div class="flex justify-between items-center">
+
+        <!-- Strip Title -->
+        <h2 class="text-2xl font-bold text-gray-900">
+          {{ strip.title }}
+        </h2>
+
+        <!-- View More Button -->
+        <button *ngIf="strip.viewMoreUrl"
+          class="view-more-btn px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200"
+          (click)="handleViewMore(strip)" type="button">
+          {{ strip.viewMoreUrl.viewMoreText }}
+          <i class="material-icons ml-2 text-sm">arrow_forward</i>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-section" *ngIf="strip.tabs?.length">
+
+      <!-- Material Tab Group -->
+      <mat-tab-group class="dynamic-tab-group" animationDuration="0ms" [selectedIndex]="getActiveTabIndex(strip)"
+        (selectedIndexChange)="onTabChange($event, strip, stripIndex)" [disableRipple]="true">
+
+        <!-- Dynamic Tab Generation -->
+        <mat-tab *ngFor="let tab of strip.tabs; let tabIndex = index" [disabled]="isTabDisabled(tab)">
+
+          <!-- Tab Label Template -->
+          <ng-template mat-tab-label>
+            <span class="tab-label">{{ tab.label }}</span>
+          </ng-template>
+
+          <!-- Tab Content -->
+          <div class="tab-content pt-6" *ngIf="tab.pillsData?.length">
+
+            <!-- Pills Navigation -->
+            <div class="pills-section">
+              <mat-chip-list class="pills-container" aria-label="Content filter pills">
+                <mat-chip *ngFor="let pill of tab.pillsData; let pillIndex = index"
+                  [selected]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)"
+                  (click)="onPillClick(pill, tab, strip, pillIndex, tabIndex, stripIndex)"
+                  (keydown.enter)="onPillClick(pill, tab, strip, pillIndex, tabIndex, stripIndex)"
+                  class="pill-chip cursor-pointer"
+                  [class.active]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)" tabindex="0">
+                  <span class="pill-name" [class.active]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)">{{
+                    pill.label }}</span>
+                </mat-chip>
+              </mat-chip-list>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+
+              <!-- Loading State with Skeleton Loaders -->
+              <div *ngIf="isPillLoading(tab, strip, tabIndex)" class="loading-state">
+
+                <!-- Horizontal Scroller with Skeleton Widgets -->
+                <sb-uic-horizontal-scroller-v2 [id]="'strip-skeleton-' + stripIndex + '-tab-' + tabIndex"
+                  [sliderConfig]="strip.sliderConfig" [widgetsLength]="getSkeletonWidgets(strip, tabIndex).length"
+                  [loadStatus]="'fetching'" [defaultMaxWidgets]="getMaxWidgets(tab, strip, tabIndex)"
+                  [stripConfig]="strip.stripConfig">
+
+                  <!-- Skeleton Loader Cards -->
+                  <ng-container *ngFor="let widget of getSkeletonWidgets(strip, tabIndex); trackBy: trackWidget">
+                    <ng-container [sbUiResolverWidget]="widget"></ng-container>
+                  </ng-container>
+
+                </sb-uic-horizontal-scroller-v2>
+              </div>
+
+              <!-- No Data State -->
+              <div *ngIf="isPillEmpty(tab, strip, tabIndex)" class="no-data-state text-center py-12">
+                <img src="assets/icons/home/nodataDefault.svg" alt="No data available"
+                  class="mx-auto mb-4 w-24 h-24 opacity-50">
+                <p class="text-gray-600 text-lg">
+                  {{ getSelectedPillData(tab, strip, tabIndex)?.nodataMsg || 'No content available at the moment.' }}
+                </p>
+              </div>
+
+              <!-- Content Grid -->
+              <div *ngIf="hasContentToShow(tab, strip, tabIndex)" class="content-grid">
+
+                <!-- Horizontal Scroller Integration -->
+                <sb-uic-horizontal-scroller-v2 [id]="'strip-' + stripIndex + '-tab-' + tabIndex"
+                  [sliderConfig]="strip.sliderConfig" [widgetsLength]="getContentLength(tab, strip, tabIndex)"
+                  [loadStatus]="'done'" [defaultMaxWidgets]="getMaxWidgets(tab, strip, tabIndex)"
+                  [stripConfig]="strip.stripConfig">
+
+                  <!-- Dynamic Content Rendering -->
+                  <ng-container *ngFor="let widget of getDisplayContent(tab, strip, tabIndex); trackBy: trackWidget">
+                    <ng-container [sbUiResolverWidget]="widget"></ng-container>
+                  </ng-container>
+
+                </sb-uic-horizontal-scroller-v2>
+              </div>
+
+            </div>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+
+    <!-- Fallback: No Tabs Content -->
+    <div *ngIf="!strip.tabs || !strip.tabs.length" class="no-tabs-content py-8 text-center text-gray-500">
+      <p>No tabs configured for this strip.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Fallback: No Widget Data -->
+<div *ngIf="!widgetData?.strips?.length" class="no-widget-data text-center py-12">
+  <img src="assets/icons/home/nodataDefault.svg" alt="No data available" class="mx-auto mb-4 w-32 h-32 opacity-50">
+  <h3 class="text-xl text-gray-700 mb-2">No Strips Available</h3>
+  <p class="text-gray-500">Please configure widget data with strips to display content.</p>
+</div>

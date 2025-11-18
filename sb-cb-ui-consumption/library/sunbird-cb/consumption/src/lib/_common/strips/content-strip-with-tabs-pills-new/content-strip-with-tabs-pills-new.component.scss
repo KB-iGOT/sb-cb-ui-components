@@ -1,0 +1,12 @@
+::ng-deep .dynamic-strips-container .mat-tab-body-content {
+    overflow: none !important;
+  }
+
+  .mat-chip-selected {
+    background-color: #1b4ca1!important;
+    color: white !important;
+  }
+
+  ::ng-deep .pills-container .pill-name.active {
+    color: white !important;
+  }
