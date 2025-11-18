@@ -1052,22 +1052,25 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Calculate count for each user group
       this.calculateUserCountForUserGroup(index);
-      // if (
-      //   (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
-      //   ( this.config.userConfig.userRoles.has("spv_publisher") && !this.isCuratedContentWithExternalId)
-      // ) {
-      //   // publisher (cannot edit already added)
-      //   for (let i = 0; i < this.userGroup.length; i++) {
-      //     const group = this.userGroup.at(i);
-      //     group.get("id")?.disable();
-      //     group.get("name")?.disable();
-      //     group.get("description")?.disable();
-      //     group.get("conditions")?.disable();
-      //     group.get("isUserGroupDisabled")?.setValue(true);
-      //   }
 
-      //   this.isSaveFltrBtnDisabled = true;
-      // }
+      if (
+        (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
+        (!this.isCuratedContentWithExternalId)
+      ) {
+        // publisher (cannot edit already added)
+        for (let i = 0; i < this.userGroup.length; i++) {
+          const group = this.userGroup.at(i);
+          group.get("id")?.disable();
+          group.get("name")?.disable();
+          group.get("description")?.disable();
+          group.get("conditions")?.disable();
+          group.get("isUserGroupDisabled")?.setValue(true);
+        }
+        this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
+            type.disabled = true;
+        });
+        this.isSaveFltrBtnDisabled = true;
+      }
 
       // For marketplace curated content with external id, disable only those user groups which were in live
        if (this.content?.status === "live" && this.isCuratedContentWithExternalId) {
