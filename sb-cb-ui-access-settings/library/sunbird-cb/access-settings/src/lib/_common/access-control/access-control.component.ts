@@ -962,7 +962,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const currentValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
       if (this.content?.status === "Live" || this.content?.prevStatus === "Live") {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
-        this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
+
+        if(this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
+        }
       } else {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
       }
