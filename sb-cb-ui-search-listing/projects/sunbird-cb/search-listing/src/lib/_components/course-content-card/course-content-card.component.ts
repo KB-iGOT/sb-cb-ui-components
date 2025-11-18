@@ -236,6 +236,10 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     const isProgramCoordinator = hasRole("PROGRAM_COORDINATOR");
     const accessMessage = 'You don\'t have access!'
     let mode = '';
+    if (isCreator && content.createdBy !== loggedInUserId && content.status && content.status.toLowerCase() === 'draft') {
+      this.openSnackBar('You don\'t have access!');
+      return;
+    }
     if (
       (isReviewer && content.reviewStatus && (content.reviewStatus.toLowerCase() === 'inreview' || content.reviewStatus.toLowerCase() === 'reviewed') && content.status && content.status.toLowerCase() === 'review')||
       (isPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus) ||
@@ -249,7 +253,12 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
         (
           content.status.toLowerCase() === 'failed' ||
           content.status.toLowerCase() === 'retired' ||
-          content.status.toLowerCase() === 'draft'
+          content.status.toLowerCase() === 'draft' ||
+          (
+            content.status.toLowerCase() === 'review' && 
+            content.createdBy === loggedInUserId &&
+            content.courseCategory === 'Multilingual Course'
+          )
         )
       )
     ) {
@@ -273,7 +282,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
           };
 
           const goToEditor = () => {
-            if (content.prevStatus && content.prevStatus.toLowerCase() !== 'live' &&
+            if (_.get(content, 'prevStatus', '').toLowerCase() !== 'live' &&
             content.status.toLowerCase() !== 'live' &&
             content.courseCategory === 'Multilingual Course' &&
             this.getBaseLanguageId(content)
@@ -341,7 +350,8 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
           if (isReviewer) {
             // If reviewer and content.status is 'review' or 'accept' allow editor
             if (status.toLocaleLowerCase() === "review" && reviewStatus.toLocaleLowerCase() === "inreview") {
-              goToReview()
+
+              goToEditor()
               return;
             } else if (status.toLocaleLowerCase() === "review" && reviewStatus.toLocaleLowerCase() === "reviewed") {
               goToEditor();
