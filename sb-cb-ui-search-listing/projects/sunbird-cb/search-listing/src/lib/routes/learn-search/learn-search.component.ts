@@ -650,6 +650,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else {
         this.searchRequestEvents.request.facets = resolvedEventFacets;
       }
+      this.searchRequestEvents.request.filters["startDate"] = {
+        '>=': this.environment.eventPhaseTwo || '2025-02-18',
+      };
     } else {
       this.searchRequestEvents.request.facets = resolvedEventFacets;
     }

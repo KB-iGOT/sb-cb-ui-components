@@ -112,6 +112,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
     this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
+      this.hasReadRecentBeenCalled = false;
       if (value && value.length > 100) {
         await this.searchFromQuery(value);
         this.loaderSearching = false;
