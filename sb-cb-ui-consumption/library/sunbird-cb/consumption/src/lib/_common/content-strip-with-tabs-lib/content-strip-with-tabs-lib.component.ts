@@ -1962,6 +1962,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         if (currentTab.value === 'providers') {
           let featuredProviders: any = JSON.parse(content.featuredProviders || '[]')
           widgets = this.transformAllTabContentsToWidgets(featuredProviders, currentTab)
+          strip['viewMoreUrl']['path'] = "app/learn/browse-by/provider/all-providers"
         } else {
           if (currentTab && currentTab.contentShuffel) {
             content = content.sort(() => Math.random() - 0.5);
@@ -1985,7 +1986,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           widgets,
           'done',
           calculateParentStatus,
-          response.viewMoreUrl,
+          strip.viewMoreUrl,
           tabResults // tabResults as widgets
         );
       } else {
@@ -2086,7 +2087,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise();;
+      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise();
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip);
         let tabResults: any[] = [];
@@ -2101,12 +2102,13 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             tabResults = allTabs;
           }
         }
+        strip['viewMoreUrl']['path'] = "app/seeAll"
         this.processStrip(
           strip,
           widgets,
           'done',
           calculateParentStatus,
-          response.viewMoreUrl,
+          strip.viewMoreUrl,
           tabResults // tabResults as widgets
         );
       } else {
