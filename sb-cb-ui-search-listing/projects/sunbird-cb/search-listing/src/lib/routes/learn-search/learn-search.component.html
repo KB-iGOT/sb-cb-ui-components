@@ -99,6 +99,7 @@
               [category]="seeAllResult"
               [isExploreContentTab]="isExploreContentTab"
               [sortingsList]="searchConfig?.sortings"
+              [applicationName]="applicationName"
               (searchSorter)="onChangeSortSearch($event)"></ws-app-search-sort-input>
           </div>
         </div>
@@ -113,7 +114,7 @@
             <mat-icon>menu</mat-icon>
           </button>
           <div class="sort-search ml-auto">
-            <ws-app-search-sort-input [category]="seeAllResult" (searchSorter)="onChangeSortSearch($event)"></ws-app-search-sort-input>
+            <ws-app-search-sort-input [category]="seeAllResult" (searchSorter)="onChangeSortSearch($event)" [applicationName]="applicationName"></ws-app-search-sort-input>
           </div>
         </div>
 

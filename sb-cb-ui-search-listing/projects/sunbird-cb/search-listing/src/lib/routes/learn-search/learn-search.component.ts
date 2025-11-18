@@ -400,6 +400,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     const userRoles = this.configSvc?.userRoles as Set<string>;
     const userId = _.get(this.configSvc, 'userProfile.userId');
     const userOrgId = _.get(this.configSvc, 'userProfile.rootOrgId');
+    const hasStatus = filters && filters.status && Array.isArray(filters.status) && filters.status.length > 0 ? true : false;
 
     // Get single role (case-insensitive)
     const role = Array.from(userRoles || [])[0]?.toUpperCase();
@@ -414,7 +415,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (!Array.isArray(filters.must.courseCategory)) filters.must.courseCategory = [];
       if (!Array.isArray(filters.must.resourceCategory)) filters.must.resourceCategory = [];
     }
-    if (!Array.isArray(filters.status)) filters.status = [];
+    if (!Array.isArray(filters.status) && !hasStatus) filters.status = [];
 
     delete filters.contentType;
 
@@ -436,10 +437,11 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
-        mergeUnique(filters.status, [
-          "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
-          "UnderReview", "QualityReview", "Draft"
-        ]);
+        if (!hasStatus) {
+          mergeUnique(filters.status, [
+            "Live", "Failed", "Review", "Retired", "Draft"
+          ]);
+        }
         filters.createdFor = [userOrgId];
         break;
 
@@ -453,7 +455,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
-        mergeUnique(filters.status, ["Live", "Review", "InReview"]);
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Live", "Review"]);
+          filters['reviewStatus'] = ["sentToPublish", "inreview", "reviewed"];
+        }
         filters.reviewerIDs = [userId];
         break;
 
@@ -461,8 +466,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         mergeUnique(filters.must.courseCategory, [
           "Moderated Course", "Moderated Assessment", "Moderated Program"
         ]);
-        mergeUnique(filters.status, ["Review", "Live"]);
-        filters['reviewStatus'] = ["reviewed", "SentToPublish"];
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Review", "Live"]);
+          filters['reviewStatus'] = ["reviewed", "SentToPublish"];
+        }
         filters.publisherIDs = [userId];
         break;
 
@@ -474,7 +481,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         mergeUnique(filters.must.courseCategory, [
           "Blended Program", "Curated Program", "Moderated Program", "Invite-Only Program", "Invite-Only Assessment"
         ]);
-        mergeUnique(filters.status, ["Live"]);
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Live"]);
+        }
         break;
 
       case "SPV_PUBLISHER":
@@ -487,12 +496,10 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
-        mergeUnique(filters.status, ["Review", "Live"]);
-        filters['reviewStatus'] = ["reviewed", "SentToPublish"];
-        break;
-
-      default:
-        // Unknown role — leave filters untouched
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Review", "Live"]);
+          filters['reviewStatus'] = ["reviewed", "SentToPublish"];
+        }
         break;
     }
 
@@ -1747,6 +1754,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   resetAllSearchParams() {
+    this.applySelectedFilters = {};
     this.searchRequestCourse = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
     this.searchRequestEvents = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
     this.searchRequestPeoples = new SearchPeoplesRequest();
