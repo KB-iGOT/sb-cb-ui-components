@@ -1062,7 +1062,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         && (!this.isCuratedContentWithExternalId)
       ) {
         // publisher (cannot edit already added)
-        for (let i = 0; i < this.userGroup.length; i++) {
+        for (let i = 0; i < this.userGroup?.length; i++) {
           const group = this.userGroup.at(i);
           group.get("id")?.disable();
           group.get("name")?.disable();
