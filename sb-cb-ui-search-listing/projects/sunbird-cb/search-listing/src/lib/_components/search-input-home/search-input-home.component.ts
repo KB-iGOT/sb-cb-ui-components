@@ -222,7 +222,14 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
           const path = event.url.split("?")[0];
-          if (!path.split("/").includes("globalsearch")) {
+          if (!path.split("/").includes("globalsearch")
+            //  && 
+            // (
+            //   _.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal ||
+            //   this.selectedSearchCategory !== 'courses'
+            // )
+          ) 
+          {
             this.queryControl.reset();
           }
         }

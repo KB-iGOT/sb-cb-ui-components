@@ -238,7 +238,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     let mode = '';
     if (
       (isCreator && content.createdBy !== loggedInUserId && content.status && content.status.toLowerCase() === 'draft') ||
-      (isReviewer && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed' && content.courseCategory !== 'Multilingual Course')
+      (isReviewer && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed' && content.courseCategory !== 'Multilingual Course')
     ) {
       this.openSnackBar('You don\'t have access!');
       return;
