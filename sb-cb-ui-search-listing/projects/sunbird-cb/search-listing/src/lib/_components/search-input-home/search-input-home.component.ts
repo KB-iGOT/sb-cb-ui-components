@@ -112,6 +112,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
     this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
+      this.hasReadRecentBeenCalled = false;
       if (value && value.length > 100) {
         await this.searchFromQuery(value);
         this.loaderSearching = false;
@@ -221,7 +222,14 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
           const path = event.url.split("?")[0];
-          if (!path.split("/").includes("globalsearch")) {
+          if (!path.split("/").includes("globalsearch")
+            //  && 
+            // (
+            //   _.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal ||
+            //   this.selectedSearchCategory !== 'courses'
+            // )
+          ) 
+          {
             this.queryControl.reset();
           }
         }

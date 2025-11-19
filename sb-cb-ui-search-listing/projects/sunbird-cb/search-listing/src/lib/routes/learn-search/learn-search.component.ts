@@ -189,7 +189,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || "";
     }
 
-    this.updateNoResultMessage(this.statedata.param);
+    const searchQuery = _.get(this.searchQuery, 'query', this.statedata.param)
+    this.updateNoResultMessage(searchQuery);
     if (this.getCurrentSearchCategories.some(cat => cat.value === SearchCategory.Courses)) {
       this.checkCourseEnrollmentAndCbpPlan();
     }
@@ -253,7 +254,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchContentLoader = false;
       }
 
-      this.updateNoResultMessage(this.statedata.param);
+      const searchQuery = _.get(this.searchQuery, 'query', this.statedata.param)
+      this.updateNoResultMessage(searchQuery);
 
       if (changes["filtersPanel"] && changes["filtersPanel"].currentValue === "show") {
         this.sideNavBarOpened = true;
@@ -650,6 +652,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else {
         this.searchRequestEvents.request.facets = resolvedEventFacets;
       }
+      this.searchRequestEvents.request.filters["startDate"] = {
+        '>=': this.environment.eventPhaseTwo || '2025-02-18',
+      };
     } else {
       this.searchRequestEvents.request.facets = resolvedEventFacets;
     }

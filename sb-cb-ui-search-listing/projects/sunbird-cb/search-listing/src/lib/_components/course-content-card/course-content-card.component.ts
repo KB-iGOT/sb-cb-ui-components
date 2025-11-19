@@ -236,7 +236,10 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     const isProgramCoordinator = hasRole("PROGRAM_COORDINATOR");
     const accessMessage = 'You don\'t have access!'
     let mode = '';
-    if (isCreator && content.createdBy !== loggedInUserId && content.status && content.status.toLowerCase() === 'draft') {
+    if (
+      (isCreator && content.createdBy !== loggedInUserId && content.status && content.status.toLowerCase() === 'draft') ||
+      (isReviewer && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed' && content.courseCategory !== 'Multilingual Course')
+    ) {
       this.openSnackBar('You don\'t have access!');
       return;
     }

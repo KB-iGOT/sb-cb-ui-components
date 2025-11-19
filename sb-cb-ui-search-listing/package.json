@@ -1,6 +1,6 @@
 {
   "name": "sunbird-cb-ui-search-listing",
-  "version": "0.0.21-cbrelease-4.8.30",
+  "version": "0.0.23-cbrelease-4.8.30",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
