@@ -942,9 +942,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
           this.applyAccessControlValue(false, false);
           this.updateContentAccessSetting();
-        } else {
-          // this.addUserGroup();
-        }
+        } 
+
+        // For a content not having any user group disable the access control type change
+        if (
+        (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
+        this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC
+        && (!this.isCuratedContentWithExternalId)
+        ) {
+        this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
+            type.disabled = true;
+        });
+        this.isSaveFltrBtnDisabled = true;
+      }
         setTimeout(() => {
           this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
           this.setupFormChangeDetection();
