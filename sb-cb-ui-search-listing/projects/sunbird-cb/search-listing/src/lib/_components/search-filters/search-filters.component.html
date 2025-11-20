@@ -670,7 +670,7 @@
       </div>
       <mat-selection-list *ngIf="filteredCompetencyTheme.length; else noResults">
         <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredCompetencyTheme">
-          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, competencyThemeKey)">
+          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options, competencyThemeKey)" (change)="onSelectionFilter($event, options, competencyThemeKey)">
             <!-- <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
                             {{ options?.name + ' (' + options.count + ')'}}
                         </span> -->
@@ -699,7 +699,7 @@
       </div>
       <mat-selection-list *ngIf="filteredSubCompetencyTheme.length; else noResults">
         <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredSubCompetencyTheme">
-          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, competencySubThemeKey)">
+          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options, competencySubThemeKey)" (change)="onSelectionFilter($event, options, competencySubThemeKey)">
             <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
               {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
             >
