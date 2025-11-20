@@ -28,11 +28,11 @@
           <span
             class="badge duration-badge font-normal"
             *ngIf="content?.duration && content?.duration !== '0' && content?.primaryCategory !== 'Blended Program'">
-            <mat-icon>schedule</mat-icon>
+            <mat-icon class="schedule-icon">schedule</mat-icon>
             {{ checkForCiosDuration(content) | pipeDurationTransform : "hms" }}
           </span>
           <span class="badge duration-badge font-normal" *ngIf="content?.programDuration > 0 && content?.primaryCategory === 'Blended Program'">
-            <mat-icon>schedule</mat-icon>
+            <mat-icon class="schedule-icon">schedule</mat-icon>
             {{ content?.programDuration }} {{ content?.programDuration === 1 ? "day" : "days" }}
           </span>
         </div>
