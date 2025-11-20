@@ -467,8 +467,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
 
   processRecentSearchText(query: any) {
     document.getElementById("global-search-input")?.blur();
+    const isCBPPortal = _.get(this.searchConfig, "applicationName") === SearchListingConfig.ApplicationNames.CBPPortal;
+    const searchQuery = isCBPPortal && _.get(query, "search_query", "") ? query.search_query.trim() : _.get(query, "nlp_search_query", "").trim();
     const queryParams = {
-      q: query?.nlp_search_query ? query?.nlp_search_query?.trim() : "",
+      q: searchQuery,
       // search: query && this.responseNlpQuery ? this.responseNlpQuery : null,
       category: this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory || null,
       p: null,

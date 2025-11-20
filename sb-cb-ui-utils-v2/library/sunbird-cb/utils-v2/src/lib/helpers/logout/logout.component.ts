@@ -29,7 +29,7 @@ export class LogoutComponent implements OnInit {
       const lang = localStorage.getItem('websiteLanguage') || null!
       this.translate.use(lang)
     }
-   }
+  }
 
   ngOnInit() {
     if (this.configSvc.restrictedFeatures) {
@@ -66,6 +66,9 @@ export class LogoutComponent implements OnInit {
     }
     if (localStorage.getItem('motivationalMessage')) {
       localStorage.removeItem('motivationalMessage')
+    }
+    if (localStorage.getItem('microSiteRedirectionData')) {
+      localStorage.removeItem('microSiteRedirectionData')
     }
   }
 
