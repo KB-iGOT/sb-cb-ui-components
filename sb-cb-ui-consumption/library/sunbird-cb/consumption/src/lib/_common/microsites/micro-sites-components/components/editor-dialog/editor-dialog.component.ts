@@ -147,8 +147,8 @@ export class EditorDialogComponent implements OnInit {
   // Methods for CBP plan management
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
-      title: [''],
-      downloaUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]]
+      title: ['', [Validators.required]],
+      downloaUrl: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
     }))
   }
 
@@ -302,8 +302,10 @@ export class EditorDialogComponent implements OnInit {
         break
       case 'color':
         // Treat as banner image field with URL validation
+        const isDefaultBanner = this.data.value === '/assets/images/default_banner.png'
         this.editorForm = this.fb.group({
-          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
+          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+|^\/assets\/.+/)]],
+          useDefaultBanner: [isDefaultBanner]
         })
         break
       case 'image':
@@ -418,8 +420,8 @@ export class EditorDialogComponent implements OnInit {
         if (cbpPlanList.length > 0) {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
-              title: [item.title || ''],
-              downloaUrl: [item.downloaUrl || '', [Validators.pattern(/^https?:\/\/.+/)]]
+              title: [item.title || '', [Validators.required]],
+              downloaUrl: [item.downloaUrl || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
             }))
           })
         } else {
@@ -802,6 +804,7 @@ export class EditorDialogComponent implements OnInit {
       next: (transformedUrl) => {
         this.isUploading = false
         this.editorForm.get('value')?.setValue(transformedUrl)
+        this.editorForm.get('useDefaultBanner')?.setValue(false)
         this.uploadStatus = 'Upload successful!'
         setTimeout(() => {
           this.uploadStatus = ''
@@ -813,6 +816,15 @@ export class EditorDialogComponent implements OnInit {
         console.error('Upload error:', error)
       }
     })
+  }
+
+  onDefaultBannerToggle(event: any) {
+    const isChecked = event.checked
+    if (isChecked) {
+      this.editorForm.get('value')?.setValue('/assets/images/default_banner.png')
+    } else {
+      this.editorForm.get('value')?.setValue('')
+    }
   }
 
   // General image upload methods
