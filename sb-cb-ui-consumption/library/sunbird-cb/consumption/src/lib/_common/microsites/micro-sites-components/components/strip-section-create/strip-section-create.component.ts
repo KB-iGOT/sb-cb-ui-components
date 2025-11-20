@@ -210,7 +210,7 @@ export class StripSectionCreateComponent implements OnInit {
     this.microSiteV3Service.createPlaylistApi(requestBody).subscribe(
       (response) => {
         if (response?.result?.status?.toLowerCase() === 'created') {
-          if (tabDetails) {
+          if (Object.keys(tabDetails).length > 0) {
             this.sectionData.strips[0].tabs = this.sectionData.strips[0].tabs.map((tab: any) => {
               if (tab.value === tabDetails.value) {
                 tab.request = {

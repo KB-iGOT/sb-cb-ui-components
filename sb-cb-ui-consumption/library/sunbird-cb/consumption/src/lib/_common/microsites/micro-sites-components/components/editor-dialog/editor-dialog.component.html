@@ -46,9 +46,15 @@
       <div *ngSwitchCase="'color'" class="color-banner-container">
         <h4>Background Banner Image</h4>
 
+        <mat-checkbox formControlName="useDefaultBanner" (change)="onDefaultBannerToggle($event)"
+          class="margin-bottom-xs">
+          Default Banner
+        </mat-checkbox>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Banner Image URL</mat-label>
-          <input matInput formControlName="value" placeholder="Enter banner image URL">
+          <input matInput formControlName="value" placeholder="Enter banner image URL"
+            [readonly]="editorForm.get('useDefaultBanner')?.value">
           <mat-error *ngIf="editorForm.get('value')?.hasError('required')">Banner image URL is required</mat-error>
           <mat-error *ngIf="editorForm.get('value')?.hasError('pattern')">Please enter a valid URL (must start with
             http:// or https://)</mat-error>
@@ -266,8 +272,8 @@
                 <div class="item-content">
                   <div class="item-header">
                     <h6>Document {{i + 1}}</h6>
-                    <button mat-icon-button color="warn" type="button" (click)="removeCbpPlanItem(i)" class="remove-btn"
-                      *ngIf="cbpPlanListArray.controls.length > 1">
+                    <button mat-icon-button color="warn" type="button" (click)="removeCbpPlanItem(i)"
+                      class="remove-btn">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </div>
@@ -276,11 +282,17 @@
                     <mat-label>Title</mat-label>
                     <input matInput formControlName="title" placeholder="Enter document title" maxlength="100">
                     <mat-hint align="end">{{item.get('title')?.value?.length || 0}}/100</mat-hint>
+                    <mat-error *ngIf="item.get('title')?.hasError('required')">
+                      Title is required
+                    </mat-error>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>PDF URL</mat-label>
                     <input matInput formControlName="downloaUrl" placeholder="Enter PDF URL or upload a file">
+                    <mat-error *ngIf="item.get('downloaUrl')?.hasError('required')">
+                      PDF URL is required
+                    </mat-error>
                     <mat-error *ngIf="item.get('downloaUrl')?.hasError('pattern')">
                       Please enter a valid URL (must start with http:// or https://)
                     </mat-error>
