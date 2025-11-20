@@ -121,80 +121,113 @@ export class CardProgressPortraitLibComponent implements OnInit {
       })
   }
 
+  // downloadCertificate(certificateData: any, event: any) {
+  //   event.stopPropagation();
+  //   this.events.raiseInteractTelemetry(
+  //     {
+  //       type: WsEvents.EnumInteractTypes.CLICK,
+  //       id: "view-certificate",
+  //       subType: WsEvents.EnumInteractSubTypes.CERTIFICATE,
+  //     },
+  //     {
+  //       id:
+  //         certificateData.issuedCertificates &&
+  //         certificateData.issuedCertificates.length &&
+  //         certificateData.issuedCertificates[0].identifier, // id of the certificate
+  //       type: WsEvents.EnumInteractSubTypes.CERTIFICATE,
+  //     }
+  //   );
+  //   if (certificateData?.issuedCertificates?.length > 0) {
+  //     this.downloadCertificateLoading = true;
+  //       const certificate: any = certificateData.issuedCertificates.sort(
+  //        (a: any, b: any) =>
+  //          new Date(a.lastIssuedOn).getTime() -
+  //          new Date(b.lastIssuedOn).getTime()
+  //      );
+  //      let certData: any = certificate && certificate.length && certificate[0];
+  //     const allowedPrimaryCategory = ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION?.map(
+  //       (cat: string) => cat?.toLowerCase()
+  //     );
+  //     if (
+  //       this.widgetData.content &&
+  //       this.widgetData.content.primaryCategory &&
+  //       allowedPrimaryCategory?.includes(this.widgetData.content?.primaryCategory?.toLowerCase()) || 
+  //       allowedPrimaryCategory?.includes(this.widgetData.content?.courseCategory?.toLowerCase()) 
+  //     ) {
+  //       const payload = {
+  //         request: {
+  //           courseId: this.widgetData.content.identifier,
+  //           batchId: this.widgetData.content.batchId || "",
+  //           userId: this.configSvc.userProfile.userId,
+  //         },
+  //       };
+  //       this.contentSvcUtils.downloadCertV2(payload).subscribe(
+  //         (response) => {
+  //           if (this.widgetData.content) {
+  //             this.downloadCertificateLoading = false;
+  //             this.dialog.open(CertificateDialogComponent, {
+  //               width: "1200px",
+  //               data: {
+  //                 cet: response.result.printUri,
+  //                 certId: this.widgetData.content && certData.identifier,
+  //               },
+  //             });
+  //           }
+  //           this.downloadCertificateLoading = false;
+  //         },
+  //         (error: any) => {
+  //           this.downloadCertificateLoading = false;
+  //         }
+  //       );
+  //     } else {
+ 
+  //      this.certificateService
+  //        .downloadCertificate_v2(certData.identifier)
+  //        .subscribe((res: any) => {
+  //          this.downloadCertificateLoading = false;
+  //          const cet = res.result.printUri;
+  //          this.dialog.open(CertificateDialogComponent, {
+  //            width: "1300px",
+  //            data: { cet, certId: certData.identifier },
+  //          });
+  //        });
+  //      this.downloadCertificateLoading = false;
+  //    }
+  //   } else {
+  //      this.downloadCertificateLoading = false;
+  //   }
+  // }
+
   downloadCertificate(certificateData: any, event: any) {
     event.stopPropagation();
     this.events.raiseInteractTelemetry(
       {
         type: WsEvents.EnumInteractTypes.CLICK,
-        id: "view-certificate",
+        id: 'view-certificate',
         subType: WsEvents.EnumInteractSubTypes.CERTIFICATE,
       },
       {
-        id:
-          certificateData.issuedCertificates &&
-          certificateData.issuedCertificates.length &&
-          certificateData.issuedCertificates[0].identifier, // id of the certificate
+        id: certificateData.issuedCertificates && certificateData.issuedCertificates.length && certificateData.issuedCertificates[0].identifier,   // id of the certificate
         type: WsEvents.EnumInteractSubTypes.CERTIFICATE,
-      }
-    );
-    if (certificateData?.issuedCertificates?.length > 0) {
-      this.downloadCertificateLoading = true;
-        const certificate: any = certificateData.issuedCertificates.sort(
-         (a: any, b: any) =>
-           new Date(a.lastIssuedOn).getTime() -
-           new Date(b.lastIssuedOn).getTime()
-       );
-       let certData: any = certificate && certificate.length && certificate[0];
-      const allowedPrimaryCategory = ALLOWED_CATEGORY_FOR_DYNAMIC_GENERATION?.map(
-        (cat: string) => cat?.toLowerCase()
-      );
-      if (
-        this.widgetData.content &&
-        this.widgetData.content.primaryCategory &&
-        allowedPrimaryCategory?.includes(this.widgetData.content?.primaryCategory?.toLowerCase()) || 
-        allowedPrimaryCategory?.includes(this.widgetData.content?.courseCategory?.toLowerCase()) 
-      ) {
-        const payload = {
-          request: {
-            courseId: this.widgetData.content.identifier,
-            batchId: this.widgetData.content.batchId || "",
-            userId: this.configSvc.userProfile.userId,
-          },
-        };
-        this.contentSvcUtils.downloadCertV2(payload).subscribe(
-          (response) => {
-            if (this.widgetData.content) {
-              this.downloadCertificateLoading = false;
-              this.dialog.open(CertificateDialogComponent, {
-                width: "1200px",
-                data: {
-                  cet: response.result.printUri,
-                  certId: this.widgetData.content && certData.identifier,
-                },
-              });
-            }
-            this.downloadCertificateLoading = false;
-          },
-          (error: any) => {
-            this.downloadCertificateLoading = false;
-          }
-        );
-      } else {
- 
-       this.certificateService
-         .downloadCertificate_v2(certData.identifier)
-         .subscribe((res: any) => {
-           this.downloadCertificateLoading = false;
-           const cet = res.result.printUri;
-           this.dialog.open(CertificateDialogComponent, {
-             width: "1300px",
-             data: { cet, certId: certData.identifier },
-           });
-         });
-       this.downloadCertificateLoading = false;
-     }
+      })
+    if(certificateData.issuedCertificates.length > 0) {
+      this.downloadCertificateLoading = true
+      const certificate: any = certificateData.issuedCertificates.sort((a: any, b: any) =>
+        new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
+      let certData: any = certificate && certificate.length && certificate[0]
+
+      if (!certData.identifier) return 
+      
+      this.certificateService.downloadCertificate_v2(certData.identifier).subscribe((res: any)=>{
+        this.downloadCertificateLoading = false
+        const cet = res.result.printUri
+        this.dialog.open(CertificateDialogComponent, {
+          width: '1300px',
+          data: { cet, certId: certData.identifier },
+        })
+      })
     } else {
-       this.downloadCertificateLoading = false;
+      this.downloadCertificateLoading = false
     }
   }
 

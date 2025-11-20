@@ -826,13 +826,28 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   disableOrganisationIfModerated(item: any): boolean {
     const value = this.getSelectionValue(item);
-    if (value === this.userProfile?.rootOrgId && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
-    return false;
+
+    // Case 1: It's the user's own root org AND content is MDO-specific
+    const isOwnRootOrgAndMdoSpecific =
+      value === this.userProfile?.rootOrgId &&
+      this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
+
+    // Case 2: Org is already selected AND content is/was Live → prevent deselection
+    const isAlreadySelectedAndLive =
+      this.data.selected.includes(value) &&
+      (this.content?.status === "Live" || this.content?.prevStatus === "Live");
+
+    // Disable if EITHER condition is true
+    return isOwnRootOrgAndMdoSpecific || isAlreadySelectedAndLive;
   }
 
   disabledVerifiedIfModerated(item: any): boolean {
-    if (item?.value === "VERIFIED" && this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) return true;
-    return false;
+    const isVerifiedOption = item?.value === "VERIFIED";
+    const isMdoSpecific = this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
+
+    const isSelectedAndLive = this.data.selected.includes(item?.value) && (this.content?.status === "Live" || this.content?.prevStatus === "Live");
+
+    return isMdoSpecific && (isVerifiedOption || isSelectedAndLive);
   }
 
   // On Mdo Portal, Service Selection Type Change

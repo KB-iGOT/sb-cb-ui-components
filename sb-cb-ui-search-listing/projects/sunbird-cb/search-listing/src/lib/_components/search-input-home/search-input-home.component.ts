@@ -112,6 +112,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
     this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
+      this.hasReadRecentBeenCalled = false;
       if (value && value.length > 100) {
         await this.searchFromQuery(value);
         this.loaderSearching = false;
@@ -221,7 +222,14 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
           const path = event.url.split("?")[0];
-          if (!path.split("/").includes("globalsearch")) {
+          if (!path.split("/").includes("globalsearch")
+            //  && 
+            // (
+            //   _.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal ||
+            //   this.selectedSearchCategory !== 'courses'
+            // )
+          ) 
+          {
             this.queryControl.reset();
           }
         }
@@ -459,8 +467,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
 
   processRecentSearchText(query: any) {
     document.getElementById("global-search-input")?.blur();
+    const isCBPPortal = _.get(this.searchConfig, "applicationName") === SearchListingConfig.ApplicationNames.CBPPortal;
+    const searchQuery = isCBPPortal && _.get(query, "search_query", "") ? query.search_query.trim() : _.get(query, "nlp_search_query", "").trim();
     const queryParams = {
-      q: query?.nlp_search_query ? query?.nlp_search_query?.trim() : "",
+      q: searchQuery,
       // search: query && this.responseNlpQuery ? this.responseNlpQuery : null,
       category: this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory || null,
       p: null,
