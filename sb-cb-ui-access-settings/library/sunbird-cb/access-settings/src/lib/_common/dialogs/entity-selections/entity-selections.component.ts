@@ -68,7 +68,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   isCCA = false;
   environment: any
   ODCSMasterFramework: any
-  applyNewServiceSelections = false
+  applyNewServiceSelections = true
   constructor(
       public dialogRef: MatDialogRef<EntitySelectionsComponent>,
       private accessControlService: AccessControlService,
@@ -91,9 +91,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.application = this.accessControlConfig?.application || "";
     this.isCCA = this.accessControlConfig?.userConfig?.org?.isCCA ?? false;
     
-    if(this.content && this.content?.externalId) {
-      this.applyNewServiceSelections = true
-    }
+    // if(this.content && this.content?.externalId) {
+    //   this.applyNewServiceSelections = true
+    // }
     
     if (this.data) {
       this.selectionType = this.data?.condition?.entity;
