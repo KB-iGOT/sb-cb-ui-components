@@ -364,9 +364,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
                this.applySelectedFilters["status"].length > 0;        
         this.searchRequestCourse.request.filters = this.getContentSearchFilters(this.searchRequestCourse.request.filters)
 
-        if (hasStatus) {
-          this.formatSelectedStatusFilters()
-        }
       }
       this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
     } else {
@@ -379,7 +376,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (_.get(result, 'result.content')) {
         this.courseSearchResults = result.result.content;
         this.courseSearchTotalCount = result.result?.count;
-        // this.coursesFacets = this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ? this.formateCoursesFacets(result.result?.facets) : result.result?.facets || [];
         this.coursesFacets = result.result?.facets || [];
         this.combinedFacets = [];
         this.combinedFacets = [...this.combinedFacets, this.coursesFacets || []];
@@ -459,7 +455,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         ]);
         if (!hasStatus) {
           mergeUnique(filters.status, ["Live", "Review"]);
-          filters['reviewStatus'] = ["sentToPublish", "inreview", "reviewed"];
         }
         filters.reviewerIDs = [userId];
         break;
@@ -470,7 +465,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         ]);
         if (!hasStatus) {
           mergeUnique(filters.status, ["Review", "Live"]);
-          filters['reviewStatus'] = ["reviewed", "SentToPublish"];
         }
         filters.publisherIDs = [userId];
         break;
@@ -500,7 +494,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         ]);
         if (!hasStatus) {
           mergeUnique(filters.status, ["Review", "Live"]);
-          filters['reviewStatus'] = ["reviewed", "SentToPublish"];
         }
         break;
     }
@@ -517,83 +510,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     return filters;
-  }
-
-  formatSelectedStatusFilters(): any {
-    const filters: any = this.searchRequestCourse.request.filters
-    if (this.applySelectedFilters["status"]) {
-      filters.status = []
-      filters.reviewStatus = []
-      const userRoles = this.configSvc?.userRoles as Set<string>;
-      const role = Array.from(userRoles || [])[0]?.toUpperCase();
-      this.applySelectedFilters["status"].forEach((statusFilter: string) => {
-        const addReviewStatus = (val: string) => {
-          if (!Array.isArray(filters.reviewStatus)) {
-            filters.reviewStatus = [];
-          }
-          if (!filters.reviewStatus.includes(val)) {
-            filters.reviewStatus.push(val);
-          }
-        };
-
-        const addReviewStatuses = (vals: string[]) => {
-          vals.forEach(v => addReviewStatus(v));
-        };
-
-        const sf = String(statusFilter || "").toLowerCase();
-        if (sf === "inreview" || sf === "reviewed") {
-          addReviewStatus(statusFilter);
-        } else if (sf === "review") {
-          if (role === "CONTENT_PUBLISHER" || role === "SPV_PUBLISHER") {
-            addReviewStatus("reviewed");
-          } else {
-            addReviewStatuses(["inreview", "reviewed"]);
-          }
-          filters.status.push(statusFilter);
-        } else if (sf === "live") {
-          addReviewStatuses(["reviewed", "SentToPublish"]);
-          filters.status.push(statusFilter);
-        } else {
-          if (!Array.isArray(filters.status)) {
-            filters.status = [];
-          }
-          if (!filters.status.includes(statusFilter)) {
-            filters.status.push(statusFilter);
-          }
-        }
-      });
-    }
-    // if (filters.reviewStatus && filters.reviewStatus.length > 0) {
-    //   filters.status.push('review');
-    // }
-  }
-
-  formateCoursesFacets(facets: any) {
-    let formattedFacets: any = [];
-    let statusFacets: any
-    let reviewStatusFacets: any
-    if (facets && facets.length) {
-      formattedFacets = facets
-      formattedFacets.forEach((facet: any) => {
-        if (facet.name === 'status') {
-          statusFacets = facet;
-        } else if (facet.name === 'reviewStatus') {
-          reviewStatusFacets = facet;
-        }
-
-        if (statusFacets && reviewStatusFacets) {
-          // statusFacets.values = statusFacets.filter.values.filter((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
-          const reviewIndex = statusFacets.values.findIndex((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
-          if (reviewIndex !== -1) {
-            let reviewStatusFacetsValues = reviewStatusFacets.values.filter((reviewStatusFacet: any) => reviewStatusFacet.name.toLowerCase() === 'reviewed' || reviewStatusFacet.name.toLowerCase() === 'inreview');
-            if (reviewStatusFacetsValues.length) {
-              statusFacets.values.splice(reviewIndex, 1, ...reviewStatusFacetsValues)
-            }
-          }
-        }
-      })
-    }
-    return formattedFacets;
   }
 
   //#endregion (get courses methods)
