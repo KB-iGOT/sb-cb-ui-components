@@ -85,6 +85,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   @Output() telemtryResponse = new EventEmitter<any>()
   @Output() editStripContent = new EventEmitter<any>()
   @Output() toggleSectionVisibility = new EventEmitter<any>()
+  @Output() removeStrip = new EventEmitter<any>()
   @Input() providerId: any = ''
   @Input() emitViewAll: boolean = false
   @Input() channnelName: any = ''
@@ -637,7 +638,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                 let requestData: any = {
                   "courseCategory": "Comprehensive Assessment Program"
                 }
-                const comprehensiveResponse = await this.postRequestMethod(strip, requestData, 'apis/proxies/v8/user/v2/assignedcourses', calculateParentStatus);
+                const comprehensiveResponse = await this.postRequestMethod(strip, requestData, 'apis/proxies/v8/user/v2/assignedcourses', calculateParentStatus)
                 let comprehensiveContent: any = []
                 let comprehensiveResult: any = []
                 let result: any = []
@@ -2083,7 +2084,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise();
+      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise()
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip)
         let tabResults: any[] = []
@@ -2484,6 +2485,21 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       stripKey: stripKey,
       stripSections: this.widgetData,
       enabled: event.checked
+    })
+  }
+
+  removeStripContent(stripKey: string) {
+    // Find the strip data for this key
+    const stripData = this.widgetData?.strips?.find(strip => strip.key === stripKey)
+
+    if (!stripData) {
+      console.error('Strip data not found for key:', stripKey)
+      return
+    }
+    // Emit event to parent component to handle the removal
+    this.removeStrip.emit({
+      stripKey: stripKey,
+      stripData: this.widgetData
     })
   }
 
