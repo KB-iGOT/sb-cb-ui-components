@@ -235,21 +235,24 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     const isSpvPublisher = hasRole("SPV_PUBLISHER");
     const isProgramCoordinator = hasRole("PROGRAM_COORDINATOR");
     const accessMessage = 'You don\'t have access!'
+    const isCourseReview = content.status && content.status.toLowerCase() === 'review' ? true : false
+    const reviewStatus = content.reviewStatus ? content.reviewStatus.toLowerCase() : ''
     let mode = '';
     if (
       (isCreator && content.createdBy !== loggedInUserId && content.status && content.status.toLowerCase() === 'draft') ||
-      (isReviewer && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed' && content.courseCategory !== 'Multilingual Course')
+      (isReviewer && isCourseReview && content.reviewStatus && reviewStatus === 'reviewed' && content.courseCategory !== 'Multilingual Course') || 
+      ((isPublisher || isSpvPublisher) && isCourseReview && reviewStatus === 'inreview') 
     ) {
       this.openSnackBar('You don\'t have access!');
       return;
     }
     if (
-      (isReviewer && content.reviewStatus && (content.reviewStatus.toLowerCase() === 'inreview' || content.reviewStatus.toLowerCase() === 'reviewed') && content.status && content.status.toLowerCase() === 'review')||
-      (isPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus) ||
-      (isSpvPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && 
+      (isReviewer && content.reviewStatus && (reviewStatus === 'inreview' || reviewStatus === 'reviewed') && isCourseReview)||
+      (isPublisher && isCourseReview && content.reviewStatus) ||
+      (isSpvPublisher && isCourseReview && content.reviewStatus && 
         (
-          content.reviewStatus.toLowerCase() === 'inreview' || 
-          content.reviewStatus.toLowerCase() === 'reviewed'
+          reviewStatus === 'inreview' || 
+          reviewStatus === 'reviewed'
         )
       ) ||
       ( isCreator && content.status && 
@@ -372,7 +375,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
             if (content.status && content.status.toLowerCase() === 'live') {
               goToOverviewV2();
               return;
-            } else if (status.toLocaleLowerCase() === "review" && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed') {
+            } else if (status.toLocaleLowerCase() === "review" && content.reviewStatus && reviewStatus === 'reviewed') {
               goToEditor();
               return;
             }
