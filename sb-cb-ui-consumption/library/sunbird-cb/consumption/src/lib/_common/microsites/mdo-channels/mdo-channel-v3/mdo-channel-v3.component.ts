@@ -176,7 +176,7 @@ export class MdoChannelV3Component implements OnInit, OnChanges {
     }
 
     // Handle section visibility toggled
-    if (event.action === 'section-visibility-toggled') {
+    if (event.action === 'section-visibility-toggled' || event.action === 'strip-removed') {
       this.hasUnsavedChanges = true
       // this.updateStripSections(event.data?.stripSections)
     }
