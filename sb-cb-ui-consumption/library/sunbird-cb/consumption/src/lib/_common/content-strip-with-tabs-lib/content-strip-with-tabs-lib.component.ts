@@ -2489,13 +2489,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   removeStripContent(stripKey: string) {
-    // Find the strip data for this key
-    const stripData = this.widgetData?.strips?.find(strip => strip.key === stripKey)
-
-    if (!stripData) {
-      console.error('Strip data not found for key:', stripKey)
-      return
-    }
     // Emit event to parent component to handle the removal
     this.removeStrip.emit({
       stripKey: stripKey,
