@@ -44,7 +44,7 @@ export class StripAddContentComponent {
     public micrositeV3Service: MicrositeV3Service,
     public configSvc: ConfigurationsService
   ) {
-    if (Object.keys(this.data?.tabData).length > 0) {
+    if (Object.keys(this.data?.tabData || {})?.length > 0) {
       this.tempTitle = this.data?.tabData?.label || 'Add Section Name'
       this.checkAndLoadExistingTabData()
     } else {
