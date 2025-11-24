@@ -711,9 +711,13 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         if (pillData.requestRequired) {
           if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
             const allPills = this.stripsResultDataMap[strip.key].tabs[0].pillsData
-            const currenPillsFromMap = (allPills && allPills.length && allPills[0]) as NsContentStripWithTabsAndPills.IContentStripTab
-            this.getTabDataByNewReqTrending(strip, 0, 0, currenPillsFromMap, calculateParentStatus)
-            if (this.stripsResultDataMap[strip.key] && currenPillsFromMap) {
+            const currentPillsFromMap = (allPills && allPills.length && allPills[0]) as NsContentStripWithTabsAndPills.IContentStripTab
+            if(pillData?.request?.searchV6) {
+              this.getTabDataByNewReqSearchV6(strip, 0, 0, currentPillsFromMap, true)
+            } else {
+              this.getTabDataByNewReqTrending(strip, 0, 0, currentPillsFromMap, calculateParentStatus)
+            }
+            if (this.stripsResultDataMap[strip.key] && currentPillsFromMap) {
               this.stripsResultDataMap[strip.key].viewMoreUrl.queryParams = {
                 ...this.stripsResultDataMap[strip.key].viewMoreUrl.queryParams,
                 key: strip.key,
