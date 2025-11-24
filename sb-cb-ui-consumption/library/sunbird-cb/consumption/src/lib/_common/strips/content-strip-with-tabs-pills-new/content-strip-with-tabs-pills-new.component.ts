@@ -165,6 +165,22 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     return !tab.pillsData || tab.pillsData.length === 0
   }
 
+  isTabHidden(tab: ITabData, tabIndex: number): boolean {
+    // Check if the first pill has been loaded and has no data
+    const firstPill = tab.pillsData?.[0]
+    if (!firstPill) {
+      return true // Hide if no pills
+    }
+
+    // Hide tab if the pill has been loaded and has no widgets
+    if (firstPill.fetchStatus === 'empty' ||
+      (firstPill.fetchStatus === 'done' && (!firstPill.widgets || firstPill.widgets.length === 0))) {
+      return true
+    }
+
+    return false
+  }
+
   getTabContentCount(tab: ITabData): number {
     if (!tab.pillsData) return 0
 
@@ -367,17 +383,12 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
         request.microSearch.request.filters.organisation = userRootOrgId
       }
 
-      this.contentSvc.trendingContentSearch(request.microSearch).subscribe(
+      this.contentSvc.microContentSearch(request.microSearch).subscribe(
         (result) => {
           this.loadingTabs.delete(loadingKey)
-
           if (result && result.response) {
             let content: any[] = []
-            if (Array.isArray(result.response)) {
-              content = result.response
-            } else if (result.response[pill.value]) {
-              content = result.response[pill.value]
-            } else if (result.response.content) {
+            if (result.response.content) {
               content = result.response.content
             } else {
               const firstArrayKey = Object.keys(result.response).find(key => Array.isArray(result.response[key]))
@@ -385,7 +396,6 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
                 content = result.response[firstArrayKey]
               }
             }
-
             pill.widgets = this.transformContentsToWidgets(content, strip, pill)
             pill.fetchStatus = pill.widgets.length > 0 ? 'done' : 'empty'
             this.clearSkeletonCache(strip)
