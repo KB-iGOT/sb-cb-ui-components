@@ -1068,8 +1068,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
-        this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC
-        && (!this.isCuratedContentWithExternalId)
+        // this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC && 
+        (!this.isCuratedContentWithExternalId)
       ) {
         // publisher (cannot edit already added)
         for (let i = 0; i < this.userGroup?.length; i++) {
