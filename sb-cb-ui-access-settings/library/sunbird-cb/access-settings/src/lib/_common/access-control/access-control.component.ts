@@ -947,8 +947,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         // For a content not having any user group disable the access control type change
         if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
-        this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC
-        && (!this.isCuratedContentWithExternalId)
+        // this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC &&
+        (!this.isCuratedContentWithExternalId)
         ) {
         this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
             type.disabled = true;
