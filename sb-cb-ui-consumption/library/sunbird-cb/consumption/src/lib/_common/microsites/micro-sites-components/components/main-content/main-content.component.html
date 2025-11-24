@@ -131,7 +131,7 @@
                 <sb-uic-content-strip-with-tabs [emitViewAll]="false"
                   (telemtryResponse)="raiseTelemetryInteratEvent($event)" [providerId]="orgId" [widgetData]="item"
                   [channnelName]="channelName" [isEdit]="isEdit" (editStripContent)="onEditStripContent($event)"
-                  (toggleSectionVisibility)="onToggleSectionVisibility($event)">
+                  (toggleSectionVisibility)="onToggleSectionVisibility($event)" (removeStrip)="onRemoveStrip($event)">
                 </sb-uic-content-strip-with-tabs>
               </div>
             </ng-container>

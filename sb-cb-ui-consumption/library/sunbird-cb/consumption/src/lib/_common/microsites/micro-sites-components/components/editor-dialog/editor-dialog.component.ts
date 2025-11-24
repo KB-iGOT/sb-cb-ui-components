@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { MicrositeV3Service } from '../../../../../_services/microsite-v3.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { map, switchMap } from 'rxjs/operators'
 
 interface SliderItem {
   active: boolean
@@ -1280,13 +1281,28 @@ export class EditorDialogComponent implements OnInit {
 
               if (hasChanged) {
                 // Update announcement item
-                const updateReqBody = {
-                  announcementId: item.announcementId,
-                  name: item.name || '',
-                  description: item.description || '',
-                  category: item.category || ''
-                }
-                this.micrositeService.updateAnnouncements(updateReqBody).subscribe({
+
+                this.micrositeService.readAnnouncements(item.announcementId).pipe(
+                  switchMap((existingAnnouncement: any) => {
+                    const tempData = existingAnnouncement?.result?.data || {}
+                    const updateReqBody = {
+                      announcementId: item.announcementId,
+                      name: item.name || '',
+                      description: item.description || '',
+                      category: item.category || '',
+                      createdBy: tempData.createdBy || '',
+                      sourceName: tempData.sourceName || '',
+                      imgUrl: tempData.imgUrl || '',
+                      createdFor: tempData.createdFor || [],
+                      channel: tempData.channel || ''
+                    }
+                    return this.micrositeService.updateAnnouncements(updateReqBody).pipe(
+                      map((updateRes: any) => {
+                        return { existingAnnouncement, updateRes }
+                      })
+                    )
+                  })
+                ).subscribe({
                   next: () => {
                     resolve(true)
                   },
@@ -1295,7 +1311,6 @@ export class EditorDialogComponent implements OnInit {
                     resolve(false)
                   }
                 })
-                resolve(true)
               } else {
                 resolve(true)
               }
