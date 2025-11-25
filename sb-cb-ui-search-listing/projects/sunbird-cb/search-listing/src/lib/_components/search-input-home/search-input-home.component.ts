@@ -8,7 +8,7 @@ import {
   OnChanges,
   OnInit,
   Output,
-  SimpleChange,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation
 } from "@angular/core";
@@ -52,7 +52,9 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 export class SearchInputHomeComponent implements OnInit, OnChanges {
   @Input() placeHolder = "";
   @Input() ref = "";
+  @Input() userRoles: string[] = [];
   @Output() closed: EventEmitter<boolean> = new EventEmitter();
+  @Output() selectedPillRole: EventEmitter<any> = new EventEmitter();
 
   queryControl: UntypedFormControl;
   languageSearch: string[] = [];
@@ -81,6 +83,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   competencyThemeKey!: string;
   competencySubThemeKey!: string;
   compentencyKey!: ICompentencyKeys;
+
+  applicationName: string = "";
 
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
   @HostListener("document:click", ["$event"])
@@ -145,15 +149,21 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }
   }
 
-  ngOnChanges() {
-    for (const change in SimpleChange) {
+  ngOnChanges( changes: SimpleChanges ) {
+    for (const change in changes) {
       if (change === "placeHolder") {
         this.placeHolder = this.placeHolder;
       }
     }
+
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && changes['userRoles']) {
+      this.getSearchCategoriesCopyForCBP(_.get(this.searchConfig, 'searchCategories', []))
+    }
   }
+  
 
   initialize() {
+    this.applicationName = _.get(this.searchConfig, 'applicationName', '');
     let isNotMyUser = false;
     let isIgotOrg = false;
     if ( _.get(this.configSvc, 'unMappedUser.profileDetails.profileStatus') ) {
@@ -167,7 +177,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.disableMenu = false;
     }
     let searchCategoriesCopy: SearchListingConfig.SearchCategory[] = _.get(this.searchConfig, 'searchCategories', [])
-    if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+    if (this.applicationName  === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
       if (searchCategoriesCopy.length) {
         const hasMdoAdmin = userRoles.has("mdo_admin");
@@ -178,22 +188,15 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value !== SearchCategory.Communities);
         } else if (hasCommunityModerator) {
           searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value === SearchCategory.Communities);
-          this.searchConfig.searchInputConfig.defaultSearchCategory = SearchCategory.Communities;
+          if (this.searchConfig && this.searchConfig.searchInputConfig) {
+            this.searchConfig.searchInputConfig.defaultSearchCategory = SearchCategory.Communities;
+          }
         } else {
           searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value !== SearchCategory.Communities);
         }
       }
-    } else if (this.searchConfig && _.get(this.searchConfig, 'applicationName') === SearchListingConfig.ApplicationNames.CBPPortal && this.configSvc && this.configSvc.userRoles) {
-      // configSvc.userRoles can be a Set<string> or an array — handle both safely
-      const userRoles = this.configSvc.userRoles as Set<string> | string[];
-      const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
-      searchCategoriesCopy = searchCategoriesCopy.filter((category: SearchListingConfig.SearchCategory) => {
-        if (!category.roles || !Array.isArray(category.roles)) {
-          return false;
-        }
-        return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
-      });
-      this.searchConfig.currentSearchCategories = searchCategoriesCopy;
+    } else if (this.searchConfig && this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && this.configSvc && this.configSvc.userRoles) {
+      searchCategoriesCopy = this.getSearchCategoriesCopyForCBP(searchCategoriesCopy);
     }
 
     this.searchSubscription.add(
@@ -227,6 +230,22 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
         }
       })
     );
+  }
+
+  getSearchCategoriesCopyForCBP(searchCategoriesCopy: SearchListingConfig.SearchCategory[]): SearchListingConfig.SearchCategory[] {
+    const userRoles = this.configSvc.userRoles as Set<string> | string[];
+    const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
+    searchCategoriesCopy = searchCategoriesCopy.filter((category: SearchListingConfig.SearchCategory) => {
+      if (!category.roles || !Array.isArray(category.roles)) {
+        return false;
+      }
+      return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
+    });
+    if (this.searchConfig && this.searchConfig.currentSearchCategories) {
+      this.searchConfig.currentSearchCategories = searchCategoriesCopy;
+    }
+    this.categories = searchCategoriesCopy || [];
+    return searchCategoriesCopy
   }
 
   async updateQuery(query: string) {
@@ -517,7 +536,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }, 0);
     this.queryControl.reset();
 
-    if (_.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal) {
+    if (this.applicationName !== SearchListingConfig.ApplicationNames.CBPPortal) {
       const params = { ...this.activated.snapshot.queryParams };
       params["q"] = "";
       params["search"] = "";
@@ -530,7 +549,27 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }
   }
 
-  async selectSearchCategory(category: string) {
+  async selectSearchCategory(category: string, roles?: string[]) {
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const userRoles = this.configSvc.userRoles as Set<string> | string[];
+    const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
+    if (userRolesArray.length > 1) {
+      if (roles && roles.length === 1) {
+        if (userRolesArray.includes(roles[0].toLocaleLowerCase())) {
+          this.configSvc.userRoles = new Set([roles[0].toLocaleLowerCase()]);
+          this.selectedPillRole.emit(roles[0].toLocaleLowerCase());
+        }
+      } else if (roles && roles.length > 1) {
+        for (const role of roles) {
+          if (userRolesArray.includes(role.toLocaleLowerCase())) {
+            this.configSvc.userRoles = new Set([role.toLocaleLowerCase()]);
+            this.selectedPillRole.emit(role.toLocaleLowerCase());
+            break;
+          }
+        }
+      }
+    }
+    }
     if (this.queryControl.value && this.queryControl.value.length >= this.requiredQueryMinLength) {
       this.selectedSearchCategory = category;
       // this.searchFromQuery(this.queryControl.value);

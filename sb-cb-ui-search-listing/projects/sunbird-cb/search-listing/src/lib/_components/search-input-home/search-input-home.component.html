@@ -59,7 +59,7 @@
               [removable]="false"
               [disableRipple]="true"
               [selected]="category.value === selectedSearchCategory"
-              (click)="selectSearchCategory(category.value)"
+              (click)="selectSearchCategory(category.value, category.roles)"
               class="category-chip"
               [ngClass]="{ 'selected-search-category': category.value === selectedSearchCategory }">
               <mat-icon *ngIf="category.icon" [svgIcon]="category.icon" class="mr-1 categories-icon"></mat-icon>
