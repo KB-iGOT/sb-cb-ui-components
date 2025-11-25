@@ -24,92 +24,98 @@
         [disableRipple]="true">
 
         <!-- Dynamic Tab Generation -->
-        <mat-tab *ngFor="let tab of strip.tabs; let tabIndex = index" [disabled]="isTabDisabled(tab)">
+        <ng-container *ngFor="let tab of getVisibleTabs(strip); let visibleIndex = index">
+          <mat-tab [disabled]="isTabDisabled(tab)">
 
-          <!-- Tab Label Template -->
-          <ng-template mat-tab-label>
-            <span class="tab-label">{{ translateLabels(tab?.label, 'home') }} &nbsp;</span>
-          </ng-template>
+            <!-- Tab Label Template -->
+            <ng-template mat-tab-label>
+              <span class="tab-label">{{ translateLabels(tab?.label, 'home') }} &nbsp;</span>
+            </ng-template>
 
-          <!-- Tab Content -->
-          <div class="tab-content" *ngIf="tab.pillsData?.length">
+            <!-- Tab Content -->
+            <div class="tab-content" *ngIf="tab.pillsData?.length">
+              <ng-container *ngIf="getActualTabIndexFromTab(strip, tab) as tabIndex">
 
-            <!-- Pills Navigation -->
-            <div class="pills-section flex justify-between items-center ws-mat-default-text">
-              <mat-chip-list class="pills-container" aria-label="Content filter pills">
-                <mat-chip *ngFor="let pill of tab.pillsData; let pillIndex = index"
-                  [selected]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)"
-                  (click)="onPillClick(pill, tab, strip, pillIndex, tabIndex, stripIndex)"
-                  (keydown.enter)="onPillClick(pill, tab, strip, pillIndex, tabIndex, stripIndex)"
-                  class="pill-chip cursor-pointer"
-                  [class.active]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)" tabindex="0">
-                  <span class="pill-name" [class.active]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)">{{
-                    pill.label }}</span>
-                </mat-chip>
-              </mat-chip-list>
-              <!-- View More Button -->
-              <div *ngIf="shouldShowViewMore(tab, strip, tabIndex)" class="flex items-center cursor-pointer"
-                (click)="handleViewMore(strip)" (keyup)="handleViewMore(strip)">
-                <span>
-                  {{ translateLabels(strip.viewMoreUrl.viewMoreText, 'home') || 'See all' }}
-                </span>
-                <mat-icon class="material-icons text-sm">navigate_next</mat-icon>
-              </div>
-            </div>
-            <!-- Content Area -->
-            <div class="content-area">
-
-              <!-- Loading State with Skeleton Loaders -->
-              <div *ngIf="isPillLoading(tab, strip, tabIndex)" class="loading-state">
-
-                <!-- Horizontal Scroller with Skeleton Widgets -->
-                <sb-uic-horizontal-scroller-v2 [id]="'strip-skeleton-' + stripIndex + '-tab-' + tabIndex"
-                  [sliderConfig]="strip.sliderConfig" [widgetsLength]="getSkeletonWidgets(strip, tabIndex).length"
-                  [loadStatus]="'fetching'" [defaultMaxWidgets]="getMaxWidgets(tab, strip, tabIndex)"
-                  [stripConfig]="strip.stripConfig">
-
-                  <!-- Skeleton Loader Cards -->
-                  <ng-container *ngFor="let widget of getSkeletonWidgets(strip, tabIndex); trackBy: trackWidget">
-                    <ng-container [sbUiResolverWidget]="widget"></ng-container>
-                  </ng-container>
-
-                </sb-uic-horizontal-scroller-v2>
-              </div>
-
-              <!-- No Data State -->
-              <div *ngIf="isPillEmpty(tab, strip, tabIndex)" class="no-data-state">
-                <ng-template #noDataTemplate>
-                  <div class="w-full flex flex-col items-center justify-center">
-                    <img alt="No data available" class="mt-4 mb-4" src="assets/icons/home/nodataDefault.png">
-                    <div class="mat-subheading-1 text-center">
-                      {{ getSelectedPillData(tab, strip, tabIndex)?.nodataMsg || 'No content available at the moment.'
-                      }}
-                    </div>
+                <!-- Pills Navigation -->
+                <div class="pills-section flex justify-between items-center ws-mat-default-text">
+                  <mat-chip-list class="pills-container" aria-label="Content filter pills">
+                    <mat-chip *ngFor="let pill of tab.pillsData; let pillIndex = index"
+                      [selected]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)"
+                      (click)="onPillClick(pill, tab, strip, pillIndex, tabIndex, stripIndex)"
+                      (keydown.enter)="onPillClick(pill, tab, strip, pillIndex, tabIndex, stripIndex)"
+                      class="pill-chip cursor-pointer"
+                      [class.active]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)" tabindex="0">
+                      <span class="pill-name" [class.active]="isPillSelected(pill, tab, strip, pillIndex, tabIndex)">{{
+                        pill.label }}</span>
+                    </mat-chip>
+                  </mat-chip-list>
+                  <!-- View More Button -->
+                  <div *ngIf="shouldShowViewMore(tab, strip, tabIndex)" class="flex items-center cursor-pointer"
+                    (click)="handleViewMore(strip)" (keyup)="handleViewMore(strip)">
+                    <span>
+                      {{ translateLabels(strip.viewMoreUrl.viewMoreText, 'home') || 'See all' }}
+                    </span>
+                    <mat-icon class="material-icons text-sm">navigate_next</mat-icon>
                   </div>
-                </ng-template>
-                <ng-container *ngTemplateOutlet="noDataTemplate"></ng-container>
-              </div>
+                </div>
+                <!-- Content Area -->
+                <div class="content-area">
 
-              <!-- Content Grid -->
-              <div *ngIf="hasContentToShow(tab, strip, tabIndex)" class="content-grid">
+                  <!-- Loading State with Skeleton Loaders -->
+                  <div *ngIf="isPillLoading(tab, strip, tabIndex)" class="loading-state">
 
-                <!-- Horizontal Scroller Integration -->
-                <sb-uic-horizontal-scroller-v2 [id]="'strip-' + stripIndex + '-tab-' + tabIndex"
-                  [sliderConfig]="strip.sliderConfig" [widgetsLength]="getContentLength(tab, strip, tabIndex)"
-                  [loadStatus]="'done'" [defaultMaxWidgets]="getMaxWidgets(tab, strip, tabIndex)"
-                  [stripConfig]="strip.stripConfig">
+                    <!-- Horizontal Scroller with Skeleton Widgets -->
+                    <sb-uic-horizontal-scroller-v2 [id]="'strip-skeleton-' + stripIndex + '-tab-' + tabIndex"
+                      [sliderConfig]="strip.sliderConfig" [widgetsLength]="getSkeletonWidgets(strip, tabIndex).length"
+                      [loadStatus]="'fetching'" [defaultMaxWidgets]="getMaxWidgets(tab, strip, tabIndex)"
+                      [stripConfig]="strip.stripConfig">
 
-                  <!-- Dynamic Content Rendering -->
-                  <ng-container *ngFor="let widget of getDisplayContent(tab, strip, tabIndex); trackBy: trackWidget">
-                    <ng-container [sbUiResolverWidget]="widget"></ng-container>
-                  </ng-container>
+                      <!-- Skeleton Loader Cards -->
+                      <ng-container *ngFor="let widget of getSkeletonWidgets(strip, tabIndex); trackBy: trackWidget">
+                        <ng-container [sbUiResolverWidget]="widget"></ng-container>
+                      </ng-container>
 
-                </sb-uic-horizontal-scroller-v2>
-              </div>
+                    </sb-uic-horizontal-scroller-v2>
+                  </div>
 
+                  <!-- No Data State -->
+                  <div *ngIf="isPillEmpty(tab, strip, tabIndex)" class="no-data-state">
+                    <ng-template #noDataTemplate>
+                      <div class="w-full flex flex-col items-center justify-center">
+                        <img alt="No data available" class="mt-4 mb-4" src="assets/icons/home/nodataDefault.png">
+                        <div class="mat-subheading-1 text-center">
+                          {{ getSelectedPillData(tab, strip, tabIndex)?.nodataMsg || 'No content available at the
+                          moment.'
+                          }}
+                        </div>
+                      </div>
+                    </ng-template>
+                    <ng-container *ngTemplateOutlet="noDataTemplate"></ng-container>
+                  </div>
+
+                  <!-- Content Grid -->
+                  <div *ngIf="hasContentToShow(tab, strip, tabIndex)" class="content-grid">
+
+                    <!-- Horizontal Scroller Integration -->
+                    <sb-uic-horizontal-scroller-v2 [id]="'strip-' + stripIndex + '-tab-' + tabIndex"
+                      [sliderConfig]="strip.sliderConfig" [widgetsLength]="getContentLength(tab, strip, tabIndex)"
+                      [loadStatus]="'done'" [defaultMaxWidgets]="getMaxWidgets(tab, strip, tabIndex)"
+                      [stripConfig]="strip.stripConfig">
+
+                      <!-- Dynamic Content Rendering -->
+                      <ng-container
+                        *ngFor="let widget of getDisplayContent(tab, strip, tabIndex); trackBy: trackWidget">
+                        <ng-container [sbUiResolverWidget]="widget"></ng-container>
+                      </ng-container>
+
+                    </sb-uic-horizontal-scroller-v2>
+                  </div>
+
+                </div>
+              </ng-container>
             </div>
-          </div>
-        </mat-tab>
+          </mat-tab>
+        </ng-container>
 
       </mat-tab-group>
     </div>
