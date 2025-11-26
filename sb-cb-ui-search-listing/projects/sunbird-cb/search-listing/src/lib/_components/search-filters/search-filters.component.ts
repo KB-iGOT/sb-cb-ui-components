@@ -999,17 +999,25 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
   }
 
-  getSelectedFilter(item: any) {
-    if (Object.keys(this.selectedFilters).length) {
-      return this.filterValueExists(this.selectedFilters, this.formatEventStatusName(item?.name));
+  getSelectedFilter(item: any, categoryType?: string) {
+    if (Object.keys(this.selectedFilters || {}).length) {
+      return this.filterValueExists(this.selectedFilters, this.formatEventStatusName(item?.name, categoryType), categoryType);
     }
+    return false;
   }
 
-  filterValueExists(obj: any, target: any): any {
+  filterValueExists(obj: any, target: any, categoryType?: string): any {
     if (Array.isArray(obj)) {
       return obj.some(item => this.filterValueExists(item, target));
     } else if (obj !== null && typeof obj === "object") {
-      return Object.values(obj).some(value => this.filterValueExists(value, target));
+      if (categoryType) {
+        if (obj.hasOwnProperty(categoryType)) {
+          return this.filterValueExists(obj[categoryType], target);
+        }
+        return false;
+      } else {
+        return Object.values(obj).some(value => this.filterValueExists(value, target));
+      }
     } else {
       return obj === target;
     }
