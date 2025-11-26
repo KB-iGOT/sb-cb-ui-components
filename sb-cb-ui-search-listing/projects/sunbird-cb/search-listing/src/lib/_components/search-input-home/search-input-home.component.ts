@@ -308,6 +308,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   goToSearchItem(query: any) {
     const category = this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
     const nlpSearchQuery = query?.nlp_search_query;
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && category) {
+      const rolesForCategory = this.getRolesForCategory(category);
+      this.setRolesForCategory(category, rolesForCategory);
+    }
     if (category && category === SearchCategory.Courses && nlpSearchQuery) {
       const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
       req.request.query = nlpSearchQuery;
@@ -460,6 +464,11 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }
   }
 
+  getRolesForCategory(category: string): string[] {
+    const categoryObj = this.categories.find(cat => cat.value === category);
+    return categoryObj && categoryObj.roles ? categoryObj.roles : [];
+  }
+
   recentDeleteByUserId() {
     return this.searchListingService.recentDeleteByUser().subscribe((result: any) => {
       if (result && result.responseCode === "OK") {
@@ -551,9 +560,19 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
 
   async selectSearchCategory(category: string, roles?: string[]) {
     if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
-      const userRoles = this.configSvc.userRoles as Set<string> | string[];
+      this.setRolesForCategory(category, roles);
+    }
+    if (this.queryControl.value && this.queryControl.value.length >= this.requiredQueryMinLength) {
+      this.selectedSearchCategory = category;
+      // this.searchFromQuery(this.queryControl.value);
+      this.updateQuery(this.queryControl.value);
+    }
+  }
+
+  setRolesForCategory(category: string, roles?: string[]): void {
+    const userRoles = this.configSvc.userRoles as Set<string> | string[];
     const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
-    if (userRolesArray.length > 1) {
+    if (userRolesArray.length > 1 && category) {
       if (roles && roles.length === 1) {
         if (userRolesArray.includes(roles[0].toLocaleLowerCase())) {
           this.configSvc.userRoles = new Set([roles[0].toLocaleLowerCase()]);
@@ -568,12 +587,6 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           }
         }
       }
-    }
-    }
-    if (this.queryControl.value && this.queryControl.value.length >= this.requiredQueryMinLength) {
-      this.selectedSearchCategory = category;
-      // this.searchFromQuery(this.queryControl.value);
-      this.updateQuery(this.queryControl.value);
     }
   }
 
