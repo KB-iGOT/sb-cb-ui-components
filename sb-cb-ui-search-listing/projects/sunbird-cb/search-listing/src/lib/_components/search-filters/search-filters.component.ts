@@ -79,6 +79,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   searchConfig: SearchListingConfig.Config | null = null;
   selectedDateRange!: DateRange<Date> | null;
   showEventsDateRange = false;
+  showCoursesCreatedDateRange = false;
   displayLabels: Record<string, any> = {};
   selectedDateRangeTimeline!: DateRange<Date> | null;
   maxDateCalendar = new Date();
@@ -211,6 +212,7 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     if(this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
       const filters = this.getFiltersList
       this.showEventsDateRange = filters.some((filter: any) => filter.sectionKey === 'eventDateRange') && this.isFilterFacetsAvailable ? true : false;
+      this.showCoursesCreatedDateRange = filters.some((filter: any) => filter.sectionKey === 'createdDateRange') && this.isFilterFacetsAvailable ? true : false;
     }
 
   }
@@ -997,17 +999,25 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
     this.selectedFilterChips = this.refactorFilterData(this.selectedFilters);
   }
 
-  getSelectedFilter(item: any) {
-    if (Object.keys(this.selectedFilters).length) {
-      return this.filterValueExists(this.selectedFilters, this.formatEventStatusName(item?.name));
+  getSelectedFilter(item: any, categoryType?: string) {
+    if (Object.keys(this.selectedFilters || {}).length) {
+      return this.filterValueExists(this.selectedFilters, this.formatEventStatusName(item?.name, categoryType), categoryType);
     }
+    return false;
   }
 
-  filterValueExists(obj: any, target: any): any {
+  filterValueExists(obj: any, target: any, categoryType?: string): any {
     if (Array.isArray(obj)) {
       return obj.some(item => this.filterValueExists(item, target));
     } else if (obj !== null && typeof obj === "object") {
-      return Object.values(obj).some(value => this.filterValueExists(value, target));
+      if (categoryType) {
+        if (obj.hasOwnProperty(categoryType)) {
+          return this.filterValueExists(obj[categoryType], target);
+        }
+        return false;
+      } else {
+        return Object.values(obj).some(value => this.filterValueExists(value, target));
+      }
     } else {
       return obj === target;
     }
@@ -1212,6 +1222,8 @@ export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
       return "searchfilters.createdOn";
     } else if (this.isTrainingPlanFacetsPresent) {
       return "searchfilters.createdOn";
+    } else if (this.showCoursesCreatedDateRange) {
+      return "searchfilters.createdDate";
     }
     return "";
   }

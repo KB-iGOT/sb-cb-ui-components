@@ -59,6 +59,8 @@ export class Filters {
   sectorId?: string[];
   subSectorId?: string[];
   resourceType?: string[];
+  must?: any;
+  resourceCategory?: string[];
   [key: string]: any;
   constructor() {
     this.contentType = ["Course"];
@@ -516,7 +518,7 @@ export namespace SearchListingConfig {
 
 export const CBPstatusMapping: Record<string, string> = {
   live: 'Live',
-  review: 'Under Publish',
+  review: 'Review',
   reviewed: 'Under Publish',
   inreview: 'Under Review',
   retired: 'Inactive',
