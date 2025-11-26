@@ -1,4 +1,4 @@
-import { Component, Inject, Input } from '@angular/core';
+import { Component, Inject, Input } from '@angular/core'
 
 @Component({
   selector: 'app-top-learners',
@@ -6,9 +6,8 @@ import { Component, Inject, Input } from '@angular/core';
   styleUrls: ['./top-learners.component.scss']
 })
 export class TopLearnersComponent {
-  @Input() isEditable = false;
-  objectData: any;
-  
+  objectData: any
+
   constructor(
     @Inject('sectionData') public data: any,
     @Inject('channelName') public channelName: string,
@@ -17,16 +16,16 @@ export class TopLearnersComponent {
     @Inject('eventCallback') private eventCallback: any,
     @Inject('isEdit') public isEdit: boolean,
   ) {
-    this.objectData = data;
+    this.objectData = data
   }
-  
+
   onEventFromLeaders(event: any) {
     this.eventCallback({
       action: 'top-learners',
       source: 'topLearners',
       id: event.id || 'learner-event',
       data: event
-    });
+    })
   }
 
   onEdit() {
@@ -38,6 +37,6 @@ export class TopLearnersComponent {
         type: 'topLearnersConfig',
         config: this.objectData || {}
       }
-    });
+    })
   }
 }

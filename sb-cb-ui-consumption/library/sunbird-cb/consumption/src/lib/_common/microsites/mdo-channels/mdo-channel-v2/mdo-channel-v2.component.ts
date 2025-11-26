@@ -1209,4 +1209,22 @@ export class MdoChannelV2Component implements OnInit {
         return Array.isArray(value)
     }
 
+    getBackgroundStyle(background: string): any {
+        if (!background) {
+            return {
+                'background': `url('/assets/icons/microsite/MDO-channel-banner.png') center center / cover no-repeat`
+            }
+        }
+
+        // Check if it's a hex color (starts with #)
+        if (background.startsWith('#')) {
+            return { 'background-color': background }
+        }
+
+        // Otherwise, treat it as an image URL - return all background properties
+        return {
+            'background': `url('${background}') center center / cover no-repeat`
+        }
+    }
+
 }

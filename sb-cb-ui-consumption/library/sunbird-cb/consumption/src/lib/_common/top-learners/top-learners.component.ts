@@ -38,18 +38,15 @@ export class TopLearnersComponent implements OnInit {
   ) {
     // Try to access global injector data
     if (window && (window as any).__INJECTOR_DATA) {
-      console.log('Global injector data found:', (window as any).__INJECTOR_DATA)
 
       // Check if isEdit or isEditable is provided in global injector
       const injectorData = (window as any).__INJECTOR_DATA
       if (injectorData.isEditable !== undefined) {
         this.isEditable = injectorData.isEditable
-        console.log('Setting isEditable from global injector:', this.isEditable)
       }
 
       if (injectorData.isEdit !== undefined) {
         this.isEdit = injectorData.isEdit
-        console.log('Setting isEdit from global injector:', this.isEdit)
       }
     }
   }
