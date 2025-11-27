@@ -44,7 +44,7 @@ export class StripAddContentComponent {
     public micrositeV3Service: MicrositeV3Service,
     public configSvc: ConfigurationsService
   ) {
-    if (Object.keys(this.data?.tabData).length > 0) {
+    if (Object.keys(this.data?.tabData || {})?.length > 0) {
       this.tempTitle = this.data?.tabData?.label || 'Add Section Name'
       this.checkAndLoadExistingTabData()
     } else {
@@ -59,7 +59,6 @@ export class StripAddContentComponent {
   checkAndLoadExistingData(): void {
     if (this.data?.sectionData?.strips?.[0]?.request &&
       Object.keys(this.data.sectionData.strips[0].request).length > 0) {
-      console.log('Existing request data found:', this.data.sectionData.strips[0].request)
       const request = this.data.sectionData.strips[0].request
 
       // Set edit mode to true when existing request data is found
@@ -68,32 +67,24 @@ export class StripAddContentComponent {
       // Check playlistRead.type to determine allOrgContent setting
       if (request.playlistRead?.type) {
         const playlistType = request.playlistRead.type
-        console.log('Playlist type:', playlistType)
 
         if (playlistType.includes('ALLCONTENT_TRUE')) {
           this.allOrgContent = true
           this.isAllOrgContentDisabled = true
-          console.log('All Org Content is TRUE and disabled')
         } else if (playlistType.includes('ALLCONTENT_FALSE')) {
           this.allOrgContent = false
           this.isAllOrgContentDisabled = true
-          console.log('All Org Content is FALSE and disabled')
         }
       }
 
       // Check if apiUrl exists in the request
       if (request.apiUrl) {
-        console.log('Loading existing content from:', request.apiUrl)
-
         // Call the API to get existing playlist data
         this.micrositeV3Service.readPlaylistWithURL(request.apiUrl).subscribe(
           (response) => {
-            console.log('Playlist data loaded:', response)
-
             // Handle the response and populate selectedContentItems
             if (response?.result?.content) {
               this.selectedContentItems = response.result.content
-              console.log('Pre-populated selected items:', this.selectedContentItems)
             }
           },
           (error) => {
@@ -106,7 +97,6 @@ export class StripAddContentComponent {
 
   checkAndLoadExistingTabData() {
     if (Object.keys(this.data?.tabData?.request).length > 0) {
-      console.log('Existing request data found:', this.data?.tabData?.request)
       const request = this.data?.tabData?.request
 
       // Set edit mode to true when existing request data is found
@@ -115,32 +105,24 @@ export class StripAddContentComponent {
       // Check playlistRead.type to determine allOrgContent setting
       if (request.playlistRead?.type) {
         const playlistType = request.playlistRead.type
-        console.log('Playlist type:', playlistType)
 
         if (playlistType.includes('ALLCONTENT_TRUE')) {
           this.allOrgContent = true
           this.isAllOrgContentDisabled = true
-          console.log('All Org Content is TRUE and disabled')
         } else if (playlistType.includes('ALLCONTENT_FALSE')) {
           this.allOrgContent = false
           this.isAllOrgContentDisabled = true
-          console.log('All Org Content is FALSE and disabled')
         }
       }
 
       // Check if apiUrl exists in the request
       if (request.apiUrl) {
-        console.log('Loading existing content from:', request.apiUrl)
-
         // Call the API to get existing playlist data
         this.micrositeV3Service.readPlaylistWithURL(request.apiUrl).subscribe(
           (response) => {
-            console.log('Playlist data loaded:', response)
-
             // Handle the response and populate selectedContentItems
             if (response?.result?.content) {
               this.selectedContentItems = response.result.content
-              console.log('Pre-populated selected items:', this.selectedContentItems)
             }
           },
           (error) => {
@@ -206,7 +188,6 @@ export class StripAddContentComponent {
   }
 
   onSearch(): void {
-    console.log('Searching for:', this.searchText, 'in program:', this.selectedContents)
     this.pageIndex = 0
     this.getContentsList()
   }

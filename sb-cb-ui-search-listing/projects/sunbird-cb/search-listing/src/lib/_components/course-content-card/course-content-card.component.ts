@@ -225,7 +225,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges, OnDestroy 
    */
   handleContentClick(content: any, loggedInUserId: string): void {
     // Helpers
-    if (content && content.status && content.status.toLowerCase() === 'failed') {
+    if (content && content.status && (content.status.toLowerCase() === 'failed' || content.status.toLowerCase() === 'retired')) {
       this.openSnackBar('You don\'t have access!');
       return;
     }
@@ -236,28 +236,43 @@ export class CourseContentCardComponent implements OnInit, OnChanges, OnDestroy 
     const isSpvPublisher = hasRole("SPV_PUBLISHER");
     const isProgramCoordinator = hasRole("PROGRAM_COORDINATOR");
     const accessMessage = 'You don\'t have access!'
+    const isCourseReview = content.status && content.status.toLowerCase() === 'review' ? true : false
+    const reviewStatus = content.reviewStatus ? content.reviewStatus.toLowerCase() : ''
     let mode = '';
     if (
-      (isReviewer && content.reviewStatus && (content.reviewStatus.toLowerCase() === 'inreview' || content.reviewStatus.toLowerCase() === 'reviewed') && content.status && content.status.toLowerCase() === 'review')||
-      (isPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus) ||
-      (isSpvPublisher && content.status && content.status.toLowerCase() === 'review' && content.reviewStatus && 
+      (isCreator && content.createdBy !== loggedInUserId && content.status && content.status.toLowerCase() === 'draft') ||
+      (isReviewer && isCourseReview && content.reviewStatus && reviewStatus === 'reviewed' && content.courseCategory !== 'Multilingual Course') || 
+      ((isPublisher || isSpvPublisher) && isCourseReview && reviewStatus === 'inreview') 
+    ) {
+      this.openSnackBar('You don\'t have access!');
+      return;
+    }
+    if (
+      (isReviewer && content.reviewStatus && (reviewStatus === 'inreview' || reviewStatus === 'reviewed') && isCourseReview)||
+      (isPublisher && isCourseReview && content.reviewStatus) ||
+      (isSpvPublisher && isCourseReview && content.reviewStatus && 
         (
-          content.reviewStatus.toLowerCase() === 'inreview' || 
-          content.reviewStatus.toLowerCase() === 'reviewed'
+          reviewStatus === 'inreview' || 
+          reviewStatus === 'reviewed'
         )
       ) ||
       ( isCreator && content.status && 
         (
           content.status.toLowerCase() === 'failed' ||
           content.status.toLowerCase() === 'retired' ||
-          content.status.toLowerCase() === 'draft'
+          content.status.toLowerCase() === 'draft' ||
+          (
+            content.status.toLowerCase() === 'review' && 
+            content.createdBy === loggedInUserId &&
+            content.courseCategory === 'Multilingual Course'
+          )
         )
       )
     ) {
       mode = 'edit';
     }
     if (content && content.identifier) {
-      this.searchListingService.getCourseDetails(content.identifier, mode).subscribe((res: any) => {
+      this.searchListingService.getCourseDetails(content.identifier, mode, content.primaryCategory).subscribe((res: any) => {
         if (res && res.params && res.params.status === 'successful') {
 
           const status = (content && content.status) ? String(content.status).toLocaleLowerCase() : "";
@@ -274,7 +289,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges, OnDestroy 
           };
 
           const goToEditor = () => {
-            if (content.prevStatus && content.prevStatus.toLowerCase() !== 'live' &&
+            if (_.get(content, 'prevStatus', '').toLowerCase() !== 'live' &&
             content.status.toLowerCase() !== 'live' &&
             content.courseCategory === 'Multilingual Course' &&
             this.getBaseLanguageId(content)
@@ -342,7 +357,8 @@ export class CourseContentCardComponent implements OnInit, OnChanges, OnDestroy 
           if (isReviewer) {
             // If reviewer and content.status is 'review' or 'accept' allow editor
             if (status.toLocaleLowerCase() === "review" && reviewStatus.toLocaleLowerCase() === "inreview") {
-              goToReview()
+
+              goToEditor()
               return;
             } else if (status.toLocaleLowerCase() === "review" && reviewStatus.toLocaleLowerCase() === "reviewed") {
               goToEditor();
@@ -360,7 +376,7 @@ export class CourseContentCardComponent implements OnInit, OnChanges, OnDestroy 
             if (content.status && content.status.toLowerCase() === 'live') {
               goToOverviewV2();
               return;
-            } else if (status.toLocaleLowerCase() === "review" && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed') {
+            } else if (status.toLocaleLowerCase() === "review" && content.reviewStatus && reviewStatus === 'reviewed') {
               goToEditor();
               return;
             }

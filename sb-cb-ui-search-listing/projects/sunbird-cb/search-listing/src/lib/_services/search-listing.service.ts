@@ -41,7 +41,8 @@ const API_END_POINTS = {
   SEARCH_TRAINING_PLANS: `/apis/proxies/v8/cbplan/v2/search`,
   BLOCK_USER: '/apis/proxies/v8/user/v1/block',
   UNBLOCK_USER: '/apis/proxies/v8/user/v1/unblock',
-  CONTENT_GET: '/apis/proxies/v8/action/content/v3/hierarchy/'
+  CONTENT_GET: '/apis/proxies/v8/action/content/v3/hierarchy/',
+  CONTENT_READ: '/apis/proxies/v8/action/content/v3/read/',
 };
 
 @Injectable({
@@ -326,8 +327,10 @@ export class SearchListingService {
     return this.http.post<any>(API_END_POINTS.UNBLOCK_USER, request)
   }
 
-  getCourseDetails(contentId: string, mode: string): Observable<any> {
-    if (mode) {
+  getCourseDetails(contentId: string, mode: string, primaryCategory?: string): Observable<any> {
+    if (primaryCategory === 'Learning Resource') {
+      return this.http.get<any>(`${API_END_POINTS.CONTENT_READ}${contentId}`);
+    } else if (mode) {
       return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}?mode=${mode}`);
     }
     return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}`);

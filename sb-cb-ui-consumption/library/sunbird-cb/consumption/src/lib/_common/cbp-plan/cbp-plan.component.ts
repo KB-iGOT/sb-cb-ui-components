@@ -92,7 +92,6 @@ export class CbpPlanComponent implements OnInit, OnChanges {
   }
 
   getFileName(item: any) {
-    console.log(item.downloadUrl)
     return item.downloadUrl.split("/").at(-1)
   }
 
@@ -140,7 +139,6 @@ export class CbpPlanComponent implements OnInit, OnChanges {
    * Emits an event to be handled by parent component (mdo-channel-v3)
    */
   onEdit() {
-    console.log('CbpPlanComponent: onEdit clicked')
     const eventData = {
       source: 'cbpPlan',
       action: 'edit',
@@ -154,14 +152,12 @@ export class CbpPlanComponent implements OnInit, OnChanges {
 
     // Use only the callback from injector which is the most reliable method
     if (this.eventCallback && typeof this.eventCallback === 'function') {
-      console.log('CbpPlanComponent: calling parent eventCallback directly')
       this.eventCallback(eventData)
       return
     }
 
     // Fallback to global injector if direct callback isn't available
     if ((window as any).__INJECTOR_DATA?.eventCallback) {
-      console.log('CbpPlanComponent: calling global injector eventCallback');
       (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }
