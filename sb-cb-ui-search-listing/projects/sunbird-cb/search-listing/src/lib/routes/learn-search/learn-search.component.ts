@@ -25,7 +25,7 @@ import {
   SearchTrainingPlansRequest,
   SearchDesignationRequest
 } from "../../_models/search-listing.model";
-import { forkJoin, Subject } from "rxjs";
+import { forkJoin, Observable, Subject } from "rxjs";
 import moment from "moment";
 import { takeUntil } from "rxjs/operators";
 import { NetworkService } from "../../_services/network.service";
@@ -51,7 +51,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
 
   public screenSizeIsLtMedium = false;
-  isLtMedium$ = this.valueSvc.isLtMedium$;
+  isLtMedium$: Observable<boolean> = this.valueSvc.isLtMedium$;
   statedata:
     | {
         param: any;
@@ -173,7 +173,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       path: "Search"
     };
     const instanceConfig = this.configSvc.instanceConfig;
-    this.defaultSideNavBarOpenedSubscription = this.isLtMedium$.subscribe(isLtMedium => {
+    this.defaultSideNavBarOpenedSubscription = this.isLtMedium$.subscribe((isLtMedium: boolean) => {
       this.sideNavBarOpened = !isLtMedium;
       this.screenSizeIsLtMedium = isLtMedium;
     });
@@ -1444,7 +1444,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private checkIfExploreContentTab(): void {
-    this.activated.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this.activated.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params: any) => {
       this.isExploreContentTab = !!params["tab"];
     });
   }

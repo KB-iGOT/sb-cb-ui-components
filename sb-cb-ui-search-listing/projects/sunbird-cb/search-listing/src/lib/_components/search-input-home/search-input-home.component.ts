@@ -6,6 +6,7 @@ import {
   Inject,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   SimpleChanges,
@@ -49,10 +50,11 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   // tslint:disable-next-line
   encapsulation: ViewEncapsulation.None
 })
-export class SearchInputHomeComponent implements OnInit, OnChanges {
+export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
   @Input() placeHolder = "";
   @Input() ref = "";
   @Input() userRoles: string[] = [];
+  // @Input() userRoleIsFixed = true;
   @Output() closed: EventEmitter<boolean> = new EventEmitter();
   @Output() selectedPillRole: EventEmitter<any> = new EventEmitter();
 
@@ -85,6 +87,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   compentencyKey!: ICompentencyKeys;
 
   applicationName: string = "";
+  rolesSubscription: Subscription | null = null
 
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
   @HostListener("document:click", ["$event"])
@@ -115,7 +118,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
 
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
-    this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
+    this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async (value: string) => {
       if (value && value.length > 100) {
         await this.searchFromQuery(value);
         this.loaderSearching = false;
@@ -147,6 +150,17 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
         this.initialize();
       });
     }
+    this.subscribeToRoleChanges()
+  }
+
+  subscribeToRoleChanges() {
+    if (!this.rolesSubscription) {
+      this.rolesSubscription = this.searchListingService.updatedUserRoles$.subscribe((roles: string[]) => {
+        if (roles && roles.length === 1) {
+          this.selectedPillRole.emit(roles[0].toLocaleLowerCase());
+        }
+      })
+    }
   }
 
   ngOnChanges( changes: SimpleChanges ) {
@@ -156,8 +170,13 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       }
     }
 
-    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && changes['userRoles']) {
-      this.getSearchCategoriesCopyForCBP(_.get(this.searchConfig, 'searchCategories', []))
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if (changes['userRoles']) {
+        this.getSearchCategoriesCopyForCBP(_.get(this.searchConfig, 'searchCategories', []))
+      }
+      // if (changes['userRoleIsFixed']) {
+      //   this.searchListingService.setUserRoleIsFixed(this.userRoleIsFixed)
+      // }
     }
   }
   
@@ -233,7 +252,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   getSearchCategoriesCopyForCBP(searchCategoriesCopy: SearchListingConfig.SearchCategory[]): SearchListingConfig.SearchCategory[] {
-    const userRoles = this.configSvc.userRoles as Set<string> | string[];
+    // const userRoles = (this.userRoleIsFixed ? this.configSvc.userRoles : this.configSvc.userAllRoles) as Set<string> | string[];
+    const userRoles = this.configSvc.userAllRoles as Set<string> | string[];
     const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
     searchCategoriesCopy = searchCategoriesCopy.filter((category: SearchListingConfig.SearchCategory) => {
       if (!category.roles || !Array.isArray(category.roles)) {
@@ -570,7 +590,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   }
 
   setRolesForCategory(category: string, roles?: string[]): void {
-    const userRoles = this.configSvc.userRoles as Set<string> | string[];
+    // const userRoles = (this.userRoleIsFixed ? this.configSvc.userRoles : this.configSvc.userAllRoles) as Set<string> | string[];
+    const userRoles = this.configSvc.userAllRoles as Set<string> | string[];
     const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
     if (userRolesArray.length > 1 && category) {
       if (roles && roles.length === 1) {
@@ -762,6 +783,9 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   ngOnDestroy(): void {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
+    }
+    if (this.rolesSubscription) {
+      this.rolesSubscription.unsubscribe();
     }
   }
 }

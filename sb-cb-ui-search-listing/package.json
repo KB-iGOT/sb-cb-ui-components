@@ -1,6 +1,6 @@
 {
   "name": "sunbird-cb-ui-search-listing",
-  "version": "0.0.1-cbrelease-4.8.31",
+  "version": "0.0.3-cbrelease-4.8.31",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -57,7 +57,7 @@
     "@sunbird-cb/consumption": "0.0.1-cbrelease-4.8.30",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
-    "@sunbird-cb/utils-v2": "0.0.27-ang-13-16",
+    "@sunbird-cb/utils-v2": "0.0.1-cbrelease-4.8.31",
     "moment": "^2.29.1",
     "ngx-image-cropper": "6.3.4",
     "rxjs": "^6.6.6",

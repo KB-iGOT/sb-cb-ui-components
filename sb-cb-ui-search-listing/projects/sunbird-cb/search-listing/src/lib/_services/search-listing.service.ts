@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, of, Subject, throwError } from "rxjs";
+import { BehaviorSubject, Observable, of, Subject, throwError } from "rxjs";
 import { ConfigurationsService } from "@sunbird-cb/utils-v2";
 import {
   ACBPConst,
@@ -58,6 +58,21 @@ export class SearchListingService {
   constructor(@Inject("environment") environment: any, private http: HttpClient, private configSrv: ConfigurationsService) {
     this.environment = environment;
   }
+
+  private rolesSubject = new BehaviorSubject<string[]>([])
+  updatedUserRoles$: Observable<string[]> = this.rolesSubject.asObservable()
+
+  // userRoleIsFixed = new BehaviorSubject<boolean>(false)
+  // userRoleIsFixed$: Observable<boolean> = this.userRoleIsFixed.asObservable()
+
+  setUserRoles(roles: string[]) {
+    this.rolesSubject.next(roles)
+  }
+
+  // setUserRoleIsFixed(fixed: boolean) {
+  //   this.userRoleIsFixed.next(fixed)
+  // }
+  
   handleError(error: ErrorEvent) {
     let errorMessage = "";
     if (error.error instanceof ErrorEvent) {
