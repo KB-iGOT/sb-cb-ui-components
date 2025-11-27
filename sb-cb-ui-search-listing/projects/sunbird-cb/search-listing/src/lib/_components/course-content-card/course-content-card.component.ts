@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Input, OnChanges, OnInit, Output, SimpleChanges } from "@angular/core";
+import { Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from "@angular/core";
 import { ConfigurationsService, EventService, NsContent, WsEvents } from "@sunbird-cb/utils-v2";
 import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { MatSnackBar as MatSnackbarNew } from "@angular/material/snack-bar";
@@ -8,6 +8,7 @@ import { CertificateDialogComponent } from "@sunbird-cb/consumption";
 import { ICompentencyKeys, SearchListingConfig, CBPstatusMapping } from "../../_models/search-listing.model";
 import { SearchListingService } from "../../_services/search-listing.service";
 import * as _ from "lodash";
+// import { Subscription } from "rxjs";
 
 const MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const NEW_CONTENT_THRESHOLD_DAYS = 14;
@@ -16,7 +17,7 @@ const NEW_CONTENT_THRESHOLD_DAYS = 14;
   templateUrl: "./course-content-card.component.html",
   styleUrls: ["./course-content-card.component.scss"]
 })
-export class CourseContentCardComponent implements OnInit, OnChanges {
+export class CourseContentCardComponent implements OnInit, OnChanges, OnDestroy {
   @Input() content: any;
   @Input() enrollment: any[] = [];
   @Input() cbpPlans: any[] = [];
@@ -38,6 +39,8 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     action: string,
   }[] = []
   currentUserRoles: string[] = [];
+  // userRoleIsFixed = true;
+  // roleFixedSubscription: Subscription | undefined = undefined;
   constructor(
     @Inject("environment") environment: any,
     private configSvc: ConfigurationsService,
@@ -53,7 +56,16 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.compentencyKey = this.configSvc.compentency ?this.configSvc.compentency[this.environment.compentencyVersionKey] : undefined;
+    // this.subscribeToUserRoleFixStatus();
   }
+
+  // subscribeToUserRoleFixStatus() {
+  //   if (!this.roleFixedSubscription) {
+  //     this.roleFixedSubscription = this.searchListingService.userRoleIsFixed$.subscribe((isFixed: boolean) => {
+  //       this.userRoleIsFixed = isFixed;
+  //     });
+  //   }
+  // }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["enrollment"] && changes["enrollment"].currentValue) {
@@ -165,7 +177,11 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
       const loggedInUserId = _.get(this.configSvc, 'userProfile.userId', '')
       this.telemetry.emit(content);
       // delegate to a dedicated handler that implements CBPPortal rules
-      this.handleContentClick(content, loggedInUserId);
+      // if (this.userRoleIsFixed) {
+      //   this.handleContentClick(content, loggedInUserId);
+      // } else {
+        this.setUserRoleBasedOnCourseStatus(content)
+      // }
     } else if (content && content?.contentType === "Resource" && content?.identifier) {
       let resourceType;
       if (!content?.resourceType) {
@@ -192,21 +208,6 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     }
     return "";
   }
-
-  // onContentAction(action: string, content: any) {
-  //   switch (action) {
-  //     case 'edit':
-  //       this.router.navigateByUrl(`/author/editor/${content.identifier}`);
-  //       break;
-  //     case 'publish':
-  //       this.router.navigate(['/author/editor/multilingual', 'edit', this.getBaseLanguageId(content)], {
-  //           queryParams: {
-  //             langEditId: content.identifier
-  //           }
-  //         })
-  //       break;
-  //   }
-  // }
 
   getBaseLanguageId(content: any) {
     if (content && content.languageMapV1) {
@@ -416,9 +417,69 @@ export class CourseContentCardComponent implements OnInit, OnChanges {
     }
   }
 
+  setUserRoleBasedOnCourseStatus(content: any): void {
+    if (content && content.status) {
+      const userAllRoles = (this.configSvc as any)?.userAllRoles as Set<string> | string[] | undefined;
+      const userRoles = userAllRoles instanceof Set ? Array.from(userAllRoles).map(role => role.toLowerCase()) : Array.isArray(userAllRoles) ? (userAllRoles as string[]).map(role => role.toLowerCase()) : [];
+      const hasRole = (r: string) => userRoles && userRoles.includes(r.toLowerCase());
+      const isCreator = hasRole("CONTENT_CREATOR") ;
+      const isReviewer = hasRole("CONTENT_REVIEWER");
+      const isPublisher = hasRole("CONTENT_PUBLISHER");
+      const isSpvPublisher = hasRole("SPV_PUBLISHER");
+      const isProgramCoordinator = hasRole("PROGRAM_COORDINATOR");
+      let rolesToSet: string[] = [];
+
+      switch (content.status.toLowerCase()) {
+        case 'draft':
+          if (isCreator) {
+        rolesToSet = ['content_creator'];
+          }
+          break;
+        case 'review':
+          if (isSpvPublisher && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed') {
+        rolesToSet = ['content_publisher'];
+          } else if (isPublisher && content.reviewStatus && content.reviewStatus.toLowerCase() === 'reviewed') {
+        rolesToSet = ['content_publisher'];
+          } else if (isReviewer) {
+        rolesToSet = ['content_reviewer'];
+          } else if (isCreator) {
+        rolesToSet = ['content_creator'];
+          }
+          break;
+        case 'live':
+          if (isSpvPublisher) {
+        rolesToSet = ['spv_publisher'];
+          } else if (isProgramCoordinator) {
+        rolesToSet = ['program_coordinator'];
+          } else if (isPublisher) {
+        rolesToSet = ['content_publisher'];
+          } else if (isReviewer) {
+        rolesToSet = ['content_reviewer'];
+          } else if (isCreator) {
+        rolesToSet = ['content_creator'];
+          }
+          break;
+        default:
+          if (isCreator) {
+        rolesToSet = ['content_creator'];
+          }
+      }
+      this.configSvc.userRoles = new Set(rolesToSet);
+      this.currentUserRoles = rolesToSet;
+      this.searchListingService.setUserRoles(rolesToSet);
+      this.handleContentClick(content, _.get(this.configSvc, 'userProfile.userId', ''));
+    }
+  }
+
   openSnackBar(message: string) {
     this.matSnackbarNew.open(message, 'X', {
       duration: 3000,
     });
+  }
+
+  ngOnDestroy(): void {
+    // if (this.roleFixedSubscription) {
+    //   this.roleFixedSubscription.unsubscribe();
+    // }
   }
 }
