@@ -17,6 +17,18 @@
     align-items: end;
     border-radius: 16px;
   }
+  .taggingClass {
+    // flex: 1;
+    min-width: 0;
+    // max-width: calc(100% - 120px);
+  }
+
+  .course-category-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 70px;
+  }
 
   .main_icon {
     font-size: 16px;
@@ -53,7 +65,7 @@
     box-sizing: border-box;
     box-shadow: 0px 10px 30px #99999933;
     overflow: hidden;
-    // height: 346px;
+    height: 346px;
     margin: 20px 8px 8px;
     .progress-bar {
       // display: block;
@@ -154,7 +166,6 @@
     mat-card-content {
       // margin: 0 -0.25 * $card-padding;
       background: #fff;
-      margin-bottom: 0;
     }
   
     .card-img {
@@ -443,4 +454,64 @@
   font-weight: 700 !important;
   font-size: 12px !important;
   color: #FFFFFFF2 !important;
+}
+.course_widget_tagging {
+  gap: 8px!important;
+  // align-items: center;
+}
+
+.knowledge-level-container {
+  // margin-left: auto;
+  flex-shrink: 0;
+}
+
+.level-badge {
+  display: inline-flex;
+  height: 24px;
+  padding: 2px 8px;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  max-width: 100px;
+  
+  .level-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 76px;
+  }
+}
+
+.level-badge.beginner {
+  border: 1px solid #49C951;
+  background: linear-gradient(0deg, rgba(73, 201, 81, 0.20) 0%, rgba(73, 201, 81, 0.20) 100%), #FFF;
+  color: #2F8132;
+  border-radius: 16px;
+}
+
+.level-badge.intermediate {
+  border: 1px solid #1B4CA1;
+  background: linear-gradient(0deg, rgba(27, 76, 161, 0.20) 0%, rgba(27, 76, 161, 0.20) 100%), #FFF;
+  color: #1B4CA1;
+  border-radius: 16px;
+}
+
+.level-badge.advanced {
+  border: 1px solid #FF8268;
+  background: linear-gradient(0deg, rgba(255, 130, 104, 0.20) 0%, rgba(255, 130, 104, 0.20) 100%), #FFF;
+  color: #FF4B25;
+  border-radius: 16px;
+}
+
+.level-badge svg {
+  flex-shrink: 0;
+}
+.difficulty-main {
+  gap: 5px; 
+  // flex-wrap: wrap;
 }
