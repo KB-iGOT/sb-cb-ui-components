@@ -29,7 +29,7 @@ const API_END_POINTS = {
   CONTENT_SEARCH_V5: `${PROTECTED_SLAG_V8}/content/searchV5`,
   CONTENT_SEARCH_V6: `/apis/proxies/v8/sunbirdigot/search`,
   TRENDING_CONTENT_SEARCH: `apis/proxies/v8/trending/content/search`,
-  MICRO_CONTENT_SEARCH: `apis/proxies/v8/promotionalcontent/assignedto/users`,
+  //MICRO_CONTENT_SEARCH: `apis/proxies/v8/promotionalcontent/v1/assignedto/users`,
   CONTENT_SEARCH_RELATED_CBP_V6: `/apis/proxies/v8/sunbirdigot/search`,
   CONTENT_SEARCH_REGION_RECOMMENDATION: `${PROTECTED_SLAG_V8}/content/searchRegionRecommendation`,
   CONTENT_HISTORY: `${PROTECTED_SLAG_V8}/user/history`,
@@ -472,9 +472,8 @@ export class WidgetContentLibService {
     return this.http.post<any>(API_END_POINTS.TRENDING_CONTENT_SEARCH, req)
   }
 
-  microContentSearch(req: any): Observable<any> {
-    req.query = req.query || ''
-    return this.http.post<any>(API_END_POINTS.MICRO_CONTENT_SEARCH, req)
+  microContentSearch(url: string): Observable<any> {
+    return this.http.get<any>(url)
   }
 
   getKarmaPoitns(limit: number, offset: any) {

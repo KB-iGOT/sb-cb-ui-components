@@ -28,6 +28,7 @@ interface IPillData {
 interface ITabData {
   label: string
   value: string
+  hideTab?: boolean
   pillsData: IPillData[]
 }
 
@@ -142,16 +143,16 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     // Calculate the visible tab index (accounting for hidden tabs)
     let visibleIndex = 0
     for (let i = 0; i < actualTabIndex && i < strip.tabs.length; i++) {
-      if (!this.isTabHidden(strip.tabs[i], i)) {
+      if (!this.isTabHidden(strip.tabs[i])) {
         visibleIndex++
       }
     }
 
     // If the current active tab is hidden, find the next visible tab
-    if (actualTabIndex < strip.tabs.length && this.isTabHidden(strip.tabs[actualTabIndex], actualTabIndex)) {
+    if (actualTabIndex < strip.tabs.length && this.isTabHidden(strip.tabs[actualTabIndex])) {
       // Find next visible tab
       for (let i = actualTabIndex + 1; i < strip.tabs.length; i++) {
-        if (!this.isTabHidden(strip.tabs[i], i)) {
+        if (!this.isTabHidden(strip.tabs[i])) {
           this.activeTabIndices[strip.key] = i
           return this.getActiveTabIndex(strip) // Recalculate
         }
@@ -210,7 +211,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     return !tab.pillsData || tab.pillsData.length === 0
   }
 
-  isTabHidden(tab: ITabData, tabIndex: number): boolean {
+  isTabHidden(tab: ITabData): boolean {
     // Only hide tabs with value "igotSpecializations"
     if (tab.value !== 'igotSpecializations') {
       return false // Don't hide other tabs
@@ -234,7 +235,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
 
   getVisibleTabs(strip: IStripData): ITabData[] {
     if (!strip.tabs) return []
-    const visibleTabs = strip.tabs.filter((tab, index) => !this.isTabHidden(tab, index))
+    const visibleTabs = strip.tabs.filter((tab) => !this.isTabHidden(tab))
     return visibleTabs
   }
 
@@ -349,9 +350,10 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
 
   handleViewMore(strip: IStripData): void {
     if (strip.viewMoreUrl?.path) {
-      const activeTabIndex = this.getActiveTabIndex(strip)
-      const activeTab = strip.tabs[activeTabIndex]
-      const key = `${strip.key}-${activeTabIndex}`
+      // Get the actual tab index (not visible index)
+      const actualTabIndex = this.activeTabIndices[strip.key] || 0
+      const activeTab = strip.tabs[actualTabIndex]
+      const key = `${strip.key}-${actualTabIndex}`
       const activePillIndex = this.activePillIndices[key] || 0
       const activePill = activeTab?.pillsData?.[activePillIndex]
       const queryParams = {
@@ -397,7 +399,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
       pill.fetchStatus = 'empty'
       this.loadingTabs.delete(loadingKey)
       if (!wasUserInitiated) {
-        this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+        this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
       }
     }
 
@@ -405,21 +407,41 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     this.cdr.detectChanges()
   }
 
-  private tryLoadNextTab(strip: IStripData, currentTabIndex: number, wasUserInitiated: boolean = false): void {
+  private tryLoadNextTab(strip: IStripData, currentTabValue: string, wasUserInitiated: boolean = false): void {
     if (wasUserInitiated) {
       return
     }
 
-    const nextTabIndex = currentTabIndex + 1
-    if (nextTabIndex < strip.tabs.length) {
-      const nextTab = strip.tabs[nextTabIndex]
+    // Find current tab index by value
+    const currentTabIndex = strip.tabs.findIndex(t => t.value === currentTabValue)
+    if (currentTabIndex === -1) {
+      return
+    }
+
+    // Look for next non-hidden tab with pills
+    for (let i = currentTabIndex + 1; i < strip.tabs.length; i++) {
+      const nextTab = strip.tabs[i]
+
+      // Skip hidden tabs
+      if (this.isTabHidden(nextTab)) {
+        continue
+      }
+
+      // Check if tab has pills
       if (nextTab?.pillsData?.length > 0) {
+
+        // Calculate the visible index for this actual index
+        let visibleIndex = 0
+        for (let j = 0; j < i; j++) {
+          if (!this.isTabHidden(strip.tabs[j])) {
+            visibleIndex++
+          }
+        }
         setTimeout(() => {
           this.isUserInitiatedTabClick = false
-          this.onTabChange(nextTabIndex, strip, 0, false)
+          this.onTabChange(visibleIndex, strip, 0, false)
         }, 100)
-      } else {
-        this.tryLoadNextTab(strip, nextTabIndex, wasUserInitiated)
+        return
       }
     }
   }
@@ -427,7 +449,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
   private callMicroSearchAPI(pill: IPillData, strip: IStripData, tab: ITabData, tabIndex: number, loadingKey: string, wasUserInitiated: boolean): void {
     let request = pill.request
     if (request?.microSearch) {
-      this.contentSvc.microContentSearch().subscribe(
+      this.contentSvc.microContentSearch(request?.microSearch?.request).subscribe(
         (result) => {
           this.loadingTabs.delete(loadingKey)
           if (result && result.response) {
@@ -448,7 +470,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             if (pill.widgets.length === 0 && !wasUserInitiated) {
               setTimeout(() => {
                 this.cdr.detectChanges()
-                this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+                this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
               }, 50)
             }
           } else {
@@ -459,7 +481,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             if (!wasUserInitiated) {
               setTimeout(() => {
                 this.cdr.detectChanges()
-                this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+                this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
               }, 50)
             }
           }
@@ -474,7 +496,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
           if (!wasUserInitiated) {
             setTimeout(() => {
               this.cdr.detectChanges()
-              this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+              this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
             }, 50)
           }
         }
@@ -530,7 +552,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
               // Force another change detection to update getVisibleTabs
               setTimeout(() => {
                 this.cdr.detectChanges()
-                this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+                this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
               }, 0)
             }
           } else {
@@ -542,7 +564,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
               // Force another change detection to update getVisibleTabs
               setTimeout(() => {
                 this.cdr.detectChanges()
-                this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+                this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
               }, 0)
             }
           }
@@ -558,7 +580,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             // Force another change detection to update getVisibleTabs
             setTimeout(() => {
               this.cdr.detectChanges()
-              this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+              this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
             }, 0)
           }
         }
@@ -583,7 +605,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             if (pill.widgets.length === 0 && !wasUserInitiated) {
               setTimeout(() => {
                 this.cdr.detectChanges()
-                this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+                this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
               }, 0)
             }
           } else {
@@ -594,7 +616,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             if (!wasUserInitiated) {
               setTimeout(() => {
                 this.cdr.detectChanges()
-                this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+                this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
               }, 0)
             }
           }
@@ -609,7 +631,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
           if (!wasUserInitiated) {
             setTimeout(() => {
               this.cdr.detectChanges()
-              this.tryLoadNextTab(strip, tabIndex, wasUserInitiated)
+              this.tryLoadNextTab(strip, tab.value, wasUserInitiated)
             }, 0)
           }
         }
