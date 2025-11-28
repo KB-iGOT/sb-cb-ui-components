@@ -211,8 +211,8 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
   }
 
   isTabHidden(tab: ITabData, tabIndex: number): boolean {
-    // Only hide tabs with value "microCredentials"
-    if (tab.value !== 'microCredentials') {
+    // Only hide tabs with value "igotSpecializations"
+    if (tab.value !== 'igotSpecializations') {
       return false // Don't hide other tabs
     }
 
@@ -222,7 +222,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
       return false // Don't hide if not loaded yet
     }
 
-    // Hide microCredentials tab only if the pill has been loaded and has no widgets
+    // Hide igotSpecializations tab only if the pill has been loaded and has no widgets
     if (firstPill.fetchStatus === 'empty' ||
       firstPill.fetchStatus === 'error' ||
       (firstPill.fetchStatus === 'done' && (!firstPill.widgets || firstPill.widgets.length === 0))) {
@@ -427,17 +427,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
   private callMicroSearchAPI(pill: IPillData, strip: IStripData, tab: ITabData, tabIndex: number, loadingKey: string, wasUserInitiated: boolean): void {
     let request = pill.request
     if (request?.microSearch) {
-      if (request.microSearch &&
-        request.microSearch.request?.filters?.organisation &&
-        request.microSearch.request.filters.organisation.indexOf('<orgID>') >= 0) {
-        let userRootOrgId
-        if (this.configSvc.userProfile) {
-          userRootOrgId = this.configSvc.userProfile.rootOrgId
-        }
-        request.microSearch.request.filters.organisation = userRootOrgId
-      }
-
-      this.contentSvc.microContentSearch(request.microSearch).subscribe(
+      this.contentSvc.microContentSearch().subscribe(
         (result) => {
           this.loadingTabs.delete(loadingKey)
           if (result && result.response) {
