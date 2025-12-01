@@ -250,7 +250,8 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
 
   isPillSelected(pill: IPillData, tab: ITabData, strip: IStripData, pillIndex: number, tabIndex: number): boolean {
     const key = `${strip.key}-${tabIndex}`
-    return this.activePillIndices[key] === pillIndex
+    const isSelected = this.activePillIndices[key] === pillIndex
+    return isSelected
   }
 
   onPillClick(pill: IPillData, tab: ITabData, strip: IStripData, pillIndex: number, tabIndex: number, stripIndex: number): void {
@@ -268,7 +269,8 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     const key = `${strip.key}-${tabIndex}`
     const pillIndex = this.activePillIndices[key] || 0
     const pill = tab.pillsData?.[pillIndex]
-    return pill?.fetchStatus === 'loading'
+    const isLoading = pill?.fetchStatus === 'loading'
+    return isLoading
   }
 
   isPillEmpty(tab: ITabData, strip: IStripData, tabIndex: number): boolean {
@@ -279,15 +281,17 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     if (!pill) {
       return true
     }
-    return pill.fetchStatus === 'empty' ||
+    const isEmpty = pill.fetchStatus === 'empty' ||
       (pill.fetchStatus === 'done' && (!pill.widgets || pill.widgets.length === 0))
+    return isEmpty
   }
 
   hasContentToShow(tab: ITabData, strip: IStripData, tabIndex: number): boolean {
     const key = `${strip.key}-${tabIndex}`
     const pillIndex = this.activePillIndices[key] || 0
     const pill = tab.pillsData?.[pillIndex]
-    return pill ? (pill.fetchStatus === 'done' && pill.widgets && pill.widgets.length > 0) : false
+    const hasContent = pill ? (pill.fetchStatus === 'done' && pill.widgets && pill.widgets.length > 0) : false
+    return hasContent
   }
 
   shouldShowViewMore(tab: ITabData, strip: IStripData, tabIndex: number): boolean {
@@ -448,24 +452,26 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
 
   private callMicroSearchAPI(pill: IPillData, strip: IStripData, tab: ITabData, tabIndex: number, loadingKey: string, wasUserInitiated: boolean): void {
     let request = pill.request
-    if (request?.microSearch) {
-      this.contentSvc.microContentSearch(request?.microSearch?.request).subscribe(
-        (result) => {
+    if (request?.microSearch && request.microSearch.request && request.microSearch.request.url) {
+      this.contentSvc.microContentSearch(request?.microSearch?.request.url).subscribe(
+        (response) => {
           this.loadingTabs.delete(loadingKey)
-          if (result && result.response) {
+          if (response && response.result && response.result.content) {
             let content: any[] = []
-            if (result.response.content) {
-              content = result.response.content
+            if (response.result.content) {
+              content = response.result.content
             } else {
-              const firstArrayKey = Object.keys(result.response).find(key => Array.isArray(result.response[key]))
+              const firstArrayKey = Object.keys(response.result).find(key => Array.isArray(response.result[key]))
               if (firstArrayKey) {
-                content = result.response[firstArrayKey]
+                content = response.result[firstArrayKey]
               }
             }
             pill.widgets = this.transformContentsToWidgets(content, strip, pill)
             pill.fetchStatus = pill.widgets.length > 0 ? 'done' : 'empty'
             this.clearSkeletonCache(strip)
+            this.cdr.markForCheck()
             this.cdr.detectChanges()
+            setTimeout(() => this.cdr.detectChanges(), 0)
 
             if (pill.widgets.length === 0 && !wasUserInitiated) {
               setTimeout(() => {
@@ -492,7 +498,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
           pill.widgets = []
           pill.fetchStatus = 'empty'
           this.clearSkeletonCache(strip)
+          this.cdr.markForCheck()
           this.cdr.detectChanges()
+          setTimeout(() => this.cdr.detectChanges(), 0)
           if (!wasUserInitiated) {
             setTimeout(() => {
               this.cdr.detectChanges()
@@ -547,7 +555,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             pill.widgets = this.transformContentsToWidgets(content, strip, pill)
             pill.fetchStatus = pill.widgets.length > 0 ? 'done' : 'empty'
             this.clearSkeletonCache(strip)
+            this.cdr.markForCheck()
             this.cdr.detectChanges()
+            setTimeout(() => this.cdr.detectChanges(), 0)
             if (pill.widgets.length === 0 && !wasUserInitiated) {
               // Force another change detection to update getVisibleTabs
               setTimeout(() => {
@@ -559,7 +569,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             pill.widgets = []
             pill.fetchStatus = 'empty'
             this.clearSkeletonCache(strip)
+            this.cdr.markForCheck()
             this.cdr.detectChanges()
+            setTimeout(() => this.cdr.detectChanges(), 0)
             if (!wasUserInitiated) {
               // Force another change detection to update getVisibleTabs
               setTimeout(() => {
@@ -575,7 +587,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
           pill.widgets = []
           pill.fetchStatus = 'empty'
           this.clearSkeletonCache(strip)
+          this.cdr.markForCheck()
           this.cdr.detectChanges()
+          setTimeout(() => this.cdr.detectChanges(), 0)
           if (!wasUserInitiated) {
             // Force another change detection to update getVisibleTabs
             setTimeout(() => {
@@ -600,7 +614,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             pill.widgets = this.transformContentsToWidgets(content, strip, pill)
             pill.fetchStatus = pill.widgets.length > 0 ? 'done' : 'empty'
             this.clearSkeletonCache(strip)
+            this.cdr.markForCheck()
             this.cdr.detectChanges()
+            setTimeout(() => this.cdr.detectChanges(), 0)
 
             if (pill.widgets.length === 0 && !wasUserInitiated) {
               setTimeout(() => {
@@ -612,7 +628,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
             pill.widgets = []
             pill.fetchStatus = 'empty'
             this.clearSkeletonCache(strip)
+            this.cdr.markForCheck()
             this.cdr.detectChanges()
+            setTimeout(() => this.cdr.detectChanges(), 0)
             if (!wasUserInitiated) {
               setTimeout(() => {
                 this.cdr.detectChanges()
@@ -627,7 +645,9 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
           pill.widgets = []
           pill.fetchStatus = 'empty'
           this.clearSkeletonCache(strip)
+          this.cdr.markForCheck()
           this.cdr.detectChanges()
+          setTimeout(() => this.cdr.detectChanges(), 0)
           if (!wasUserInitiated) {
             setTimeout(() => {
               this.cdr.detectChanges()
@@ -644,36 +664,42 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
     strip: IStripData,
     pill?: IPillData
   ): any[] {
-    return (contents || []).map((content, idx) => {
-      if (!content) {
+    console.log('Transforming contents to widgets:', strip, pill)
+    return (contents || [])
+      .filter(content => content && Object.keys(content).length > 0)
+      .map((content, idx) => {
         return {
-          widgetType: 'card',
-          widgetSubType: 'cardContent',
+          widgetType: 'cardLib',
+          widgetSubType: 'cardContentLib',
           widgetHostClass: 'mb-2',
-          widgetData: {},
-        }
-      }
-
-      return {
-        widgetType: 'cardLib',
-        widgetSubType: 'cardContentLib',
-        widgetHostClass: 'mb-2',
-        widgetData: {
-          content,
-          ...(content.batch && { batch: content.batch }),
-          cardSubType: strip.stripConfig?.cardSubType || 'card-portrait-lib',
-          cardCustomeClass: '',
-          context: {
-            pageSection: strip.key,
-            position: idx,
-            ...(pill && { pill: pill.value })
+          widgetData: {
+            content: strip.key === 'forYou' && pill?.request?.microSearch ? {
+              ...content,
+              avgRating: 5,
+              duration: 200,
+              name: `Venky kanaka ${idx + 1}`,
+              primaryCategory: "Program",
+              organisation: [
+                "Ministry of data"
+              ],
+              language: ["English", "Hindi"],
+              creatorLogo: "https://portal.dev.karmayogibharat.net/assets/public/content/do_113540258472116224158/artifact/do_113540258472116224158_1652863583172_agilemethodology1652863555492.jpeg"
+            } : content,
+            ...(content?.batches?.[0] && { batch: content.batches[0] }),
+            cardSubType: strip.stripConfig?.cardSubType || 'card-portrait-lib',
+            cardCustomeClass: '',
+            context: {
+              pageSection: strip.key,
+              position: idx,
+              ...(pill && { pill: pill.value })
+            },
+            isiGOTSpecialization: strip.key === 'forYou' && pill?.request?.microSearch ? true : false,
+            intranetMode: strip.stripConfig?.intranetMode || false,
+            deletedMode: strip.stripConfig?.deletedMode || false,
+            contentTags: strip.stripConfig?.contentTags || [],
           },
-          intranetMode: strip.stripConfig?.intranetMode || false,
-          deletedMode: strip.stripConfig?.deletedMode || false,
-          contentTags: strip.stripConfig?.contentTags || [],
-        },
-      }
-    })
+        }
+      })
   }
 
   private transformSkeletonToWidgets(strip: IStripData): any[] {
