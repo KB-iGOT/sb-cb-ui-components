@@ -82,7 +82,7 @@
                 <mat-checkbox
                   [checked]="category?.isChecked || getSelectedFilter(category)"
                   [disabled]="category?.disabled"
-                  (change)="onSelectionFilter($event, category, category?.name)">
+                  (change)="onSelectionFilter($event, category, category?.name, true)">
                   <span class="min-width-adjust">
                     {{ category?.displayName }}
                   </span>

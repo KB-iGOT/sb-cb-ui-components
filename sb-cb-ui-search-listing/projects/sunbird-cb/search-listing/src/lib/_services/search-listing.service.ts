@@ -63,11 +63,20 @@ export class SearchListingService {
   private rolesSubject = new BehaviorSubject<string[]>([])
   updatedUserRoles$: Observable<string[]> = this.rolesSubject.asObservable()
 
+  // Subject to trigger setRolesForCategory from filters components
+  private setRolesForCategorySubject = new Subject<{ category: string, roles?: string[] }>()
+  setRolesForCategory$: Observable<{ category: string, roles?: string[] }> = this.setRolesForCategorySubject.asObservable()
+
   // userRoleIsFixed = new BehaviorSubject<boolean>(false)
   // userRoleIsFixed$: Observable<boolean> = this.userRoleIsFixed.asObservable()
 
   setUserRoles(roles: string[]) {
     this.rolesSubject.next(roles)
+  }
+
+  // Trigger setRolesForCategory in SearchInputHomeComponent
+  triggerSetRolesForCategory(category: string, roles?: string[]) {
+    this.setRolesForCategorySubject.next({ category, roles })
   }
 
   // setUserRoleIsFixed(fixed: boolean) {

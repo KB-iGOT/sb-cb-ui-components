@@ -162,6 +162,13 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
         }
       })
     }
+
+    // Subscribe to setRolesForCategory triggers from service
+    this.searchSubscription.add(
+      this.searchListingService.setRolesForCategory$.subscribe((data: { category: string, roles?: string[] }) => {
+        this.setRolesForCategory(data.category, data.roles);
+      })
+    );
   }
 
   ngOnChanges( changes: SimpleChanges ) {
@@ -269,8 +276,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
       }
       return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
     });
-    if (this.searchConfig && this.searchConfig.currentSearchCategories) {
-      this.searchConfig.currentSearchCategories = searchCategoriesCopy;
+    if (this.searchConfig) {
+      this.searchConfig['currentSearchCategories'] = searchCategoriesCopy;
     }
     this.categories = searchCategoriesCopy || [];
     return searchCategoriesCopy
