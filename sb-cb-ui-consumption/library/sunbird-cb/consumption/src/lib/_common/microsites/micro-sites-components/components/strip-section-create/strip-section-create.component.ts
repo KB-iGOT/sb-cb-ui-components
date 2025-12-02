@@ -44,7 +44,6 @@ export class StripSectionCreateComponent implements OnInit {
   onToggleSectionVisibility(event: any) {
     // Update sectionData.enabled with the new toggle value
     this.sectionData.enabled = !this.tempEnabled
-    console.log('Section visibility toggled:', this.sectionData.enabled)
   }
 
   startEditTitle() {
@@ -135,7 +134,6 @@ export class StripSectionCreateComponent implements OnInit {
 
     // Add tab to array and trigger change detection by reassigning
     this.sectionData.strips[0].tabs = [...this.sectionData.strips[0].tabs, newTab]
-    console.log('Tab added:', title, 'Total tabs:', this.sectionData.strips[0].tabs.length)
 
     // Manually trigger change detection
     this.cdr.detectChanges()
@@ -161,7 +159,6 @@ export class StripSectionCreateComponent implements OnInit {
       if (result) {
         // Create new array without the item at index to trigger change detection
         this.sectionData.strips[0].tabs = this.sectionData.strips[0].tabs.filter((_, i) => i !== index)
-        console.log('Tab removed at index:', index, 'Remaining tabs:', this.sectionData.strips[0].tabs.length)
 
         // Manually trigger change detection
         this.cdr.detectChanges()
@@ -186,7 +183,6 @@ export class StripSectionCreateComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.selectedItems && result.selectedItems.length > 0) {
         // Handle the result from the dialog
-        console.log('Content added:', result.selectedItems)
         const contentIds = []
         result.selectedItems.forEach((item: any) => {
           if (!contentIds.includes(item.identifier)) {
@@ -194,7 +190,6 @@ export class StripSectionCreateComponent implements OnInit {
           }
         })
         this.createPlaylist(contentIds, result.allOrgContent, result?.tabDetails || {})
-        console.log('Updated section data:', this.sectionData)
       }
     })
   }
@@ -215,7 +210,7 @@ export class StripSectionCreateComponent implements OnInit {
     this.microSiteV3Service.createPlaylistApi(requestBody).subscribe(
       (response) => {
         if (response?.result?.status?.toLowerCase() === 'created') {
-          if (tabDetails) {
+          if (Object.keys(tabDetails).length > 0) {
             this.sectionData.strips[0].tabs = this.sectionData.strips[0].tabs.map((tab: any) => {
               if (tab.value === tabDetails.value) {
                 tab.request = {
@@ -242,8 +237,6 @@ export class StripSectionCreateComponent implements OnInit {
             sectionData: this.sectionData,
             response: response
           })
-
-          console.log('Playlist created successfully and emitted to parent')
         }
       },
       (error) => {

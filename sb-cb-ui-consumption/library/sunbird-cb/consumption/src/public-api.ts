@@ -109,3 +109,7 @@ export * from './lib/_common/cards/available-languages/available-languages.compo
 export * from './lib/_common/user-update/user-update.module'
 export * from './lib/_common/user-update/user-update/user-update.component'
 export * from './lib/_common/user-update/add-users-form-meta/add-users-form-meta.component'
+
+export * from './lib/_common/pagination/pagination.model'
+export * from './lib/_common/pagination/pagination.module'
+export * from './lib/_common/pagination/pagination.component'

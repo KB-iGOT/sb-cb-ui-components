@@ -88,7 +88,6 @@ export class EventsComponent implements OnInit {
       currentDate.add(1, 'days').format('YYYY-MM-DD')
       this.daysBetween.push(localObj)
     }
-    console.log("currentDay ", this.currentDay)
   }
 
   getEvents(slectedDate: any) {
@@ -181,7 +180,6 @@ export class EventsComponent implements OnInit {
    * Emits an event to be handled by parent component (mdo-channel-v3)
    */
   onEdit() {
-    console.log('EventsComponent: onEdit clicked')
     const eventData = {
       source: 'events',
       action: 'edit',
@@ -195,14 +193,12 @@ export class EventsComponent implements OnInit {
 
     // Use only the callback from injector which is the most reliable method
     if (this.eventCallback && typeof this.eventCallback === 'function') {
-      console.log('EventsComponent: calling parent eventCallback directly')
       this.eventCallback(eventData)
       return
     }
 
     // Fallback to global injector if direct callback isn't available
     if ((window as any).__INJECTOR_DATA?.eventCallback) {
-      console.log('EventsComponent: calling global injector eventCallback');
       (window as any).__INJECTOR_DATA.eventCallback(eventData)
     }
   }

@@ -82,7 +82,7 @@
                 <mat-checkbox
                   [checked]="category?.isChecked || getSelectedFilter(category)"
                   [disabled]="category?.disabled"
-                  (change)="onSelectionFilter($event, category, category?.name)">
+                  (change)="onSelectionFilter($event, category, category?.name, true)">
                   <span class="min-width-adjust">
                     {{ category?.displayName }}
                   </span>
@@ -103,13 +103,22 @@
       <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ "searchfilters.categoryType" | translate }}</p>
       <div class="mat-full-radius mb-2" *ngIf="formattedFacets['courseCategory']?.length > 4"></div>
 
-      <mat-accordion class="filter-section margin-bottom-m">
+      <span class="min-width-adjust"> {{ "All Contents" }}</span>
+      <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredContents">
+        <mat-checkbox
+          [checked]="options?.isChecked || getSelectedFilter(options)"
+          (change)="onSelectionFilter($event, options, applicationName === 'CBP Portal' ? 'courseCategory' : 'contentType')">
+          <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
+            {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}
+          </span>
+          <span class="min-width-adjust">{{ " (" + options?.count + ")" }}</span>
+        </mat-checkbox>
+      </section>
+      <!-- <mat-accordion class="filter-section margin-bottom-m">
         <mat-expansion-panel [expanded]="true">
           <mat-expansion-panel-header class="padding-remove">
             <mat-panel-title>
-              <mat-checkbox [checked]="isAllContentSelected" (change)="allContentSelection()" (click)="$event.stopPropagation()">
-                <span class="min-width-adjust"> {{ "All Contents" }}</span>
-              </mat-checkbox>
+              <span class="min-width-adjust"> {{ "All Contents" }}</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
 
@@ -126,7 +135,7 @@
             </section>
           </mat-selection-list>
         </mat-expansion-panel>
-      </mat-accordion>
+      </mat-accordion> -->
       <div *ngIf="shouldShowMoreLessContents" class="brand-color underline cursor-pointer" (click)="toggleShowMore('courseCategory')">
         {{ showAllContents ? "See Less" : "See More" }}
       </div>
@@ -670,7 +679,7 @@
       </div>
       <mat-selection-list *ngIf="filteredCompetencyTheme.length; else noResults">
         <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredCompetencyTheme">
-          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, competencyThemeKey)">
+          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options, competencyThemeKey)" (change)="onSelectionFilter($event, options, competencyThemeKey)">
             <!-- <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
                             {{ options?.name + ' (' + options.count + ')'}}
                         </span> -->
@@ -699,7 +708,7 @@
       </div>
       <mat-selection-list *ngIf="filteredSubCompetencyTheme.length; else noResults">
         <section class="mat-body-2 text-capitalize" *ngFor="let options of filteredSubCompetencyTheme">
-          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options)" (change)="onSelectionFilter($event, options, competencySubThemeKey)">
+          <mat-checkbox [checked]="options?.isChecked || getSelectedFilter(options, competencySubThemeKey)" (change)="onSelectionFilter($event, options, competencySubThemeKey)">
             <span class="min-width-adjust" [matTooltip]="capitalizeFirstLetter(options?.name)" [matTooltipPosition]="'right'">
               {{ options?.name ? capitalizeFirstLetter(options?.name) : "" }}</span
             >
@@ -907,7 +916,13 @@
 
   <div
     class="filter-without-search filter-calender"
-    *ngIf="isUserFacetsPresent || isDesignationFacetsPresent || (isEventsFacetsPresent || showEventsDateRange) || isCommunityFacetsPresent || isTrainingPlanFacetsPresent">
+    *ngIf="
+      isUserFacetsPresent || 
+      isDesignationFacetsPresent || 
+      (isEventsFacetsPresent || showEventsDateRange) || 
+      isCommunityFacetsPresent || 
+      isTrainingPlanFacetsPresent ||
+      showCoursesCreatedDateRange">
     <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-0">
       {{ getCalendarLabel() | translate }}
     </p>

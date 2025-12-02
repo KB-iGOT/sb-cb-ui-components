@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, of, Subject, throwError } from "rxjs";
+import { BehaviorSubject, Observable, of, Subject, throwError } from "rxjs";
 import { ConfigurationsService } from "@sunbird-cb/utils-v2";
 import {
   ACBPConst,
@@ -41,7 +41,8 @@ const API_END_POINTS = {
   SEARCH_TRAINING_PLANS: `/apis/proxies/v8/cbplan/v2/search`,
   BLOCK_USER: '/apis/proxies/v8/user/v1/block',
   UNBLOCK_USER: '/apis/proxies/v8/user/v1/unblock',
-  CONTENT_GET: '/apis/proxies/v8/action/content/v3/hierarchy/'
+  CONTENT_GET: '/apis/proxies/v8/action/content/v3/hierarchy/',
+  CONTENT_READ: '/apis/proxies/v8/action/content/v3/read/',
 };
 
 @Injectable({
@@ -58,6 +59,30 @@ export class SearchListingService {
   constructor(@Inject("environment") environment: any, private http: HttpClient, private configSrv: ConfigurationsService) {
     this.environment = environment;
   }
+
+  private rolesSubject = new BehaviorSubject<string[]>([])
+  updatedUserRoles$: Observable<string[]> = this.rolesSubject.asObservable()
+
+  // Subject to trigger setRolesForCategory from filters components
+  private setRolesForCategorySubject = new Subject<{ category: string, roles?: string[] }>()
+  setRolesForCategory$: Observable<{ category: string, roles?: string[] }> = this.setRolesForCategorySubject.asObservable()
+
+  // userRoleIsFixed = new BehaviorSubject<boolean>(false)
+  // userRoleIsFixed$: Observable<boolean> = this.userRoleIsFixed.asObservable()
+
+  setUserRoles(roles: string[]) {
+    this.rolesSubject.next(roles)
+  }
+
+  // Trigger setRolesForCategory in SearchInputHomeComponent
+  triggerSetRolesForCategory(category: string, roles?: string[]) {
+    this.setRolesForCategorySubject.next({ category, roles })
+  }
+
+  // setUserRoleIsFixed(fixed: boolean) {
+  //   this.userRoleIsFixed.next(fixed)
+  // }
+  
   handleError(error: ErrorEvent) {
     let errorMessage = "";
     if (error.error instanceof ErrorEvent) {
@@ -311,8 +336,10 @@ export class SearchListingService {
     return this.http.post<any>(API_END_POINTS.UNBLOCK_USER, request)
   }
 
-  getCourseDetails(contentId: string, mode: string): Observable<any> {
-    if (mode) {
+  getCourseDetails(contentId: string, mode: string, primaryCategory?: string): Observable<any> {
+    if (primaryCategory === 'Learning Resource') {
+      return this.http.get<any>(`${API_END_POINTS.CONTENT_READ}${contentId}`);
+    } else if (mode) {
       return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}?mode=${mode}`);
     }
     return this.http.get<any>(`${API_END_POINTS.CONTENT_GET}${contentId}`);

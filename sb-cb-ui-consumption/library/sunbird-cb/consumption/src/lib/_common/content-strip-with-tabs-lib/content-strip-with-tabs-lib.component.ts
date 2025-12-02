@@ -85,6 +85,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   @Output() telemtryResponse = new EventEmitter<any>()
   @Output() editStripContent = new EventEmitter<any>()
   @Output() toggleSectionVisibility = new EventEmitter<any>()
+  @Output() removeStrip = new EventEmitter<any>()
   @Input() providerId: any = ''
   @Input() emitViewAll: boolean = false
   @Input() channnelName: any = ''
@@ -237,7 +238,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         data.showStrip = false
       }
     }
-    // console.log('data.key', data, data.key, data.widgets);
     return data ? data.showStrip : false
   }
 
@@ -607,7 +607,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       // }
       let originalFilters: any = []
       // tslint:disable:no-console
-      console.log(originalFilters)
       if (strip.request &&
         strip.request.searchV6 &&
         strip.request.searchV6.request &&
@@ -633,29 +632,13 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.searchV6Request(strip, strip.request, calculateParentStatus)
-          // console.log('calling  after - response, ', response)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.result.content) {
               if (strip.key === 'scheduledAssessment') {
-                let searchRequest: any = {
-                  searchV6: {
-                    "request": {
-                      "filters": {
-                        "courseCategory": NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM,
-                        "contentType": [
-                          "Course"
-                        ]
-                      },
-                      "query": "",
-                      "sort_by": {
-                        "lastUpdatedOn": "desc"
-                      }
-                    },
-                    "query": ""
-                  }
+                let requestData: any = {
+                  "courseCategory": "Comprehensive Assessment Program"
                 }
-                const comprehensiveResponse = await this.searchV6Request(strip, searchRequest, calculateParentStatus)
+                const comprehensiveResponse = await this.postRequestMethod(strip, requestData, 'apis/proxies/v8/user/v2/assignedcourses', calculateParentStatus)
                 let comprehensiveContent: any = []
                 let comprehensiveResult: any = []
                 let result: any = []
@@ -849,7 +832,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       // }
       let originalFilters: any = []
       // tslint:disable:no-console
-      console.log(originalFilters)
       if (strip.request &&
         strip.request.trendingSearch &&
         strip.request.trendingSearch.request &&
@@ -1284,7 +1266,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       if (response && response.results && response.results.response) {
         const content = response.results.response[currentTab.value] || []
         const widgets = this.transformContentsToWidgets(content, strip)
-        // console.log('currentTab --- widgets', widgets)
         let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs
@@ -1297,8 +1278,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             tabResults = allTabs
           }
         }
-        // console.log('tabResults -++++***--', tabResults)
-        // console.log('calling  after-- ')
         this.processStrip(
           strip,
           widgets,
@@ -1321,12 +1300,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     currentTab: NsContentStripWithTabs.IContentStripTab,
     calculateParentStatus: boolean
   ) {
-    // tslint:disable:no-console
-    console.log('strip -- ', strip)
-    // tslint:disable:no-console
-    console.log('currentTab -- ', currentTab)
-    // tslint:disable:no-console
-    console.log('calculateParentStatus-- ', calculateParentStatus)
     // TODO: Write logic for individual filter if passed in config
     // add switch case based on config key passed
   }
@@ -1497,9 +1470,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.postRequestMethod(strip, strip.request.topContent, strip.request.apiUrl, calculateParentStatus)
-          // console.log('calling  after - response, ', response)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.result.content && response.results.result.content.length) {
               this.processStrip(
                 strip,
@@ -1537,9 +1508,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
       try {
         const response = await this.postRequestMethod(strip, strip.request.featureContent, strip.request.apiUrl, calculateParentStatus)
-        // console.log('calling  after - response, ', response)
         if (response && response.results) {
-          // console.log('calling  after-- ')
           if (response.results.result.content && response.results.result.content.length) {
             this.processStrip(
               strip,
@@ -1866,9 +1835,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
       try {
         const response = await this.postRequestMethod(strip, strip.request.playlistSearch.request, strip.request.apiUrl, calculateParentStatus)
-        // console.log('calling  after - response, ', response)
         if (response && response.results) {
-          // console.log('calling  after-- ')
           if (response.results.result.data && response.results.result.data.length) {
             let finalPlaylistData: any = []
             let programData: any = response.results.result.data
@@ -1994,6 +1961,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
         if (currentTab.value === 'providers') {
           let featuredProviders: any = JSON.parse(content.featuredProviders || '[]')
           widgets = this.transformAllTabContentsToWidgets(featuredProviders, currentTab)
+          strip['viewMoreUrl']['path'] = "app/learn/browse-by/provider/all-providers"
         } else {
           if (currentTab && currentTab.contentShuffel) {
             content = content.sort(() => Math.random() - 0.5)
@@ -2017,7 +1985,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           widgets,
           'done',
           calculateParentStatus,
-          response.viewMoreUrl,
+          strip.viewMoreUrl,
           tabResults // tabResults as widgets
         )
       } else {
@@ -2077,9 +2045,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       } else {
         try {
           const response = await this.postRequestMethod(strip, strip.request.ciosContent, strip.request.apiUrl, calculateParentStatus)
-          // console.log('calling  after - response, ', response)
           if (response && response.results) {
-            // console.log('calling  after-- ')
             if (response.results.data && response.results.data.length) {
               let extContentData: any = response.results.data
               if (extContentData.length) {
@@ -2118,7 +2084,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise();;
+      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise()
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip)
         let tabResults: any[] = []
@@ -2133,12 +2099,13 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             tabResults = allTabs
           }
         }
+        strip['viewMoreUrl']['path'] = "app/seeAll"
         this.processStrip(
           strip,
           widgets,
           'done',
           calculateParentStatus,
-          response.viewMoreUrl,
+          strip.viewMoreUrl,
           tabResults // tabResults as widgets
         )
       } else {
@@ -2518,6 +2485,14 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       stripKey: stripKey,
       stripSections: this.widgetData,
       enabled: event.checked
+    })
+  }
+
+  removeStripContent(stripKey: string) {
+    // Emit event to parent component to handle the removal
+    this.removeStrip.emit({
+      stripKey: stripKey,
+      stripData: this.widgetData
     })
   }
 

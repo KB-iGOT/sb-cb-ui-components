@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { InsiteDataService } from '../../_services/insite-data.service';
+import { Component, Input, OnInit } from '@angular/core'
+import { InsiteDataService } from '../../_services/insite-data.service'
 
 @Component({
   selector: 'sb-uic-data-points',
@@ -27,7 +27,7 @@ export class DataPointsComponent implements OnInit {
     if (this.fetchDataFromApi) {
       this.isDataLoading = true
       if (this.pageLayout === 'nlw') {
-          this.getStats()
+        this.getStats()
       } else {
         if (this.slwConfig && this.slwConfig.enabled) {
           this.getSwlStats()
@@ -89,7 +89,6 @@ export class DataPointsComponent implements OnInit {
       }
       this.isDataLoading = false
     }, error => {
-      console.log(error)
       this.isDataLoading = false
     })
   }
@@ -101,13 +100,11 @@ export class DataPointsComponent implements OnInit {
       }
     }
     this.insightSvc.fetchSwlStats(request).subscribe((res: any) => {
-      console.log(res, "fetchSwlStats response----")
       if (res && res.result && res.result.data) {
         this.objectData = res.result.data
       }
       this.isDataLoading = false
     }, error => {
-      console.log(error)
       this.isDataLoading = false
     })
   }
@@ -116,13 +113,13 @@ export class DataPointsComponent implements OnInit {
     if (value) {
       let numStr = value.toString()
       let [integerPart, decimalPart] = numStr.split('.')
-      let lastThree = integerPart.slice(-3);
-      let otherNumbers = integerPart.slice(0, -3);
+      let lastThree = integerPart.slice(-3)
+      let otherNumbers = integerPart.slice(0, -3)
       if (otherNumbers !== '') {
-        lastThree = ',' + lastThree;
+        lastThree = ',' + lastThree
       }
-      let formattedIntegerPart = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
-      const result = decimalPart ? `${formattedIntegerPart}.${decimalPart.substr(0, 2)}` : formattedIntegerPart;
+      let formattedIntegerPart = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree
+      const result = decimalPart ? `${formattedIntegerPart}.${decimalPart.substr(0, 2)}` : formattedIntegerPart
       return result
     }
   }

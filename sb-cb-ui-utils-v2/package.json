@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-utils-v2",
-  "version": "0.0.1-cbrelease-4.8.30",
+  "version": "0.0.1-cbrelease-4.8.31",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
@@ -31,7 +31,7 @@
     "@types/lodash": "4.14.168",
     "moment": "^2.29.1",
     "ngx-image-cropper": "^6.3.4",
-    "rxjs": "~6.5.2"
+    "rxjs": "~6.6.6"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.16",

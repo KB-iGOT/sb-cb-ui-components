@@ -33,6 +33,7 @@ export class ConfigurationsService {
   hostPath = (window.location.host).replace(':', '_')
 
   userRoles: Set<string> | null = null
+  userAllRoles: Set<string> | null = null
   userGroups: Set<string> | null = null
   restrictedFeatures: Set<string> | null = null
   restrictedWidgets: Set<string> | null = null
@@ -129,10 +130,10 @@ export class ConfigurationsService {
     this.updatePlatformRating.next(state)
   }
 
- private updateOrgReadData: BehaviorSubject<string> = new BehaviorSubject('')
+  private updateOrgReadData: BehaviorSubject<string> = new BehaviorSubject('')
   updateOrgReadDataObservable = this.updateOrgReadData.asObservable()
   updateOrgData(id: string) {
-      this.updateOrgReadData.next(id)
+    this.updateOrgReadData.next(id)
   }
 
 }
