@@ -284,6 +284,11 @@ export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async updateQuery(query: string) {
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const currentSearchCategorie = this.selectedSearchCategory || this.defaultSearchCategory;
+      const rolesForCategory = this.getRolesForCategory(currentSearchCategorie);
+      this.setRolesForCategory(currentSearchCategorie, rolesForCategory);
+    }
     if (query && query.length) {
       await this.searchInNLP(query)
         .then(() => {
