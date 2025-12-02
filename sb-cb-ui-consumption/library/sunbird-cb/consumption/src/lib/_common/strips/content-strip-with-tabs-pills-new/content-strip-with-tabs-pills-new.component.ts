@@ -673,18 +673,7 @@ export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy 
           widgetSubType: 'cardContentLib',
           widgetHostClass: 'mb-2',
           widgetData: {
-            content: strip.key === 'forYou' && pill?.request?.microSearch ? {
-              ...content,
-              avgRating: 5,
-              duration: 200,
-              name: `Venky kanaka ${idx + 1}`,
-              primaryCategory: "Program",
-              organisation: [
-                "Ministry of data"
-              ],
-              language: ["English", "Hindi"],
-              creatorLogo: "https://portal.dev.karmayogibharat.net/assets/public/content/do_113540258472116224158/artifact/do_113540258472116224158_1652863583172_agilemethodology1652863555492.jpeg"
-            } : content,
+            content,
             ...(content?.batches?.[0] && { batch: content.batches[0] }),
             cardSubType: strip.stripConfig?.cardSubType || 'card-portrait-lib',
             cardCustomeClass: '',
