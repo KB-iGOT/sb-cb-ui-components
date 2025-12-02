@@ -1,21 +1,21 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { ConfigurationsService } from '@sunbird-cb/utils-v2';
-import { Observable, of, EMPTY, BehaviorSubject, Subject } from 'rxjs';
-import { catchError, retry, map, shareReplay } from 'rxjs/operators';
-import { NsContentStripMultiple } from '../_models/content-strip-multiple.model';
-import { NsContent } from '../_models/widget-content.model';
-import { NSSearch } from '../_models/widget-search.model';
+import { HttpClient } from '@angular/common/http'
+import { Injectable } from '@angular/core'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { Observable, of, EMPTY, BehaviorSubject, Subject } from 'rxjs'
+import { catchError, retry, map, shareReplay } from 'rxjs/operators'
+import { NsContentStripMultiple } from '../_models/content-strip-multiple.model'
+import { NsContent } from '../_models/widget-content.model'
+import { NSSearch } from '../_models/widget-search.model'
 // tslint:disable
 import * as _ from 'lodash'
 import { viewerRouteGenerator } from './viewer-route-util'
 import { WidgetUserServiceLib } from './widget-user-lib.service'
-import moment from 'moment';
-import { ContentLanguageService } from './content-language.service';
+import moment from 'moment'
+import { ContentLanguageService } from './content-language.service'
 // tslint:enable
 
 // TODO: move this in some common place
-const PROTECTED_SLAG_V8 = '/apis/protected/v8';
+const PROTECTED_SLAG_V8 = '/apis/protected/v8'
 const PROD_BASE_ENDPOINT = 'https://portal.igotkarmayogi.gov.in'
 const API_END_POINTS = {
   CONTENT: `${PROTECTED_SLAG_V8}/content`,
@@ -29,6 +29,7 @@ const API_END_POINTS = {
   CONTENT_SEARCH_V5: `${PROTECTED_SLAG_V8}/content/searchV5`,
   CONTENT_SEARCH_V6: `/apis/proxies/v8/sunbirdigot/search`,
   TRENDING_CONTENT_SEARCH: `apis/proxies/v8/trending/content/search`,
+  //MICRO_CONTENT_SEARCH: `apis/proxies/v8/promotionalcontent/v1/assignedto/users`,
   CONTENT_SEARCH_RELATED_CBP_V6: `/apis/proxies/v8/sunbirdigot/search`,
   CONTENT_SEARCH_REGION_RECOMMENDATION: `${PROTECTED_SLAG_V8}/content/searchRegionRecommendation`,
   CONTENT_HISTORY: `${PROTECTED_SLAG_V8}/user/history`,
@@ -61,7 +62,7 @@ const API_END_POINTS = {
   FEATURE_SEARCH: '/apis/proxies/v8/featured/content/search',
   SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`,
   CONTENT_SEARCH: `/api/content/v1/search`
-};
+}
 
 @Injectable({
   providedIn: 'root',
@@ -83,9 +84,9 @@ export class WidgetContentLibService {
   public telemetryData$ = this.telemetryData.asObservable()
   telemetryEventData: any = new Subject<any>()
   telemetryEventData$ = this.telemetryEventData.asObservable()
-  currentMetaData!: NsContent.IContent;
-  currentContentReadMetaData!: NsContent.IContent;
-  currentBatchEnrollmentList!: NsContent.ICourse[];
+  currentMetaData!: NsContent.IContent
+  currentContentReadMetaData!: NsContent.IContent
+  currentBatchEnrollmentList!: NsContent.ICourse[]
   programChildCourseResumeData = new BehaviorSubject<any>({});
   programChildCourseResumeData$ = this.programChildCourseResumeData.asObservable();
   releventNotRelevent = new Subject<{ isRelevent: boolean; widgetData: any }>();
@@ -94,11 +95,11 @@ export class WidgetContentLibService {
   feedbackDataForCourse: any = {};
   isTelementrySubscribed = false
   changeTelemetryData(message: string) {
-    this.telemetryData.next(message);
+    this.telemetryData.next(message)
   }
 
   changeTelemetryEventData(data: any) {
-    this.telemetryEventData.next(data);
+    this.telemetryEventData.next(data)
   }
   isResource(primaryCategory: string) {
     if (primaryCategory) {
@@ -106,10 +107,10 @@ export class WidgetContentLibService {
         (primaryCategory === NsContent.EResourcePrimaryCategories.PRACTICE_RESOURCE) ||
         (primaryCategory === NsContent.EResourcePrimaryCategories.FINAL_ASSESSMENT) ||
         (primaryCategory === NsContent.EResourcePrimaryCategories.COMP_ASSESSMENT) ||
-        (primaryCategory === NsContent.EResourcePrimaryCategories.OFFLINE_SESSION);
-      return isResource;
+        (primaryCategory === NsContent.EResourcePrimaryCategories.OFFLINE_SESSION)
+      return isResource
     }
-    return false;
+    return false
   }
 
   fetchMarkAsCompleteMeta(identifier: string): Promise<any> {
@@ -117,11 +118,11 @@ export class WidgetContentLibService {
     const url = API_END_POINTS.MARK_AS_COMPLETE_META(identifier)
     // return this.http.get(url).toPromise()
     if (url) { }
-    return of().toPromise();
+    return of().toPromise()
   }
 
   updateTocConfig(data: any) {
-    this.tocConfigData.next(data);
+    this.tocConfigData.next(data)
   }
 
   fetchContent(
@@ -131,23 +132,23 @@ export class WidgetContentLibService {
     primaryCategory?: string | null,
   ): Observable<NsContent.IContent> {
     // const url = `${API_END_POINTS.CONTENT}/${contentId}?hierarchyType=${hierarchyType}`
-    let url = '';
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true');
+    let url = ''
+    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
     if (primaryCategory && this.isResource(primaryCategory)) {
       if (!forPreview) {
-        url = `/apis/proxies/v8/action/content/v3/read/${contentId}`;
+        url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
       } else {
-        url = `/api/content/v1/read/${contentId}`;
+        url = `/api/content/v1/read/${contentId}`
       }
     } else {
       if (!forPreview) {
-        url = `/apis/proxies/v8/action/content/v3/hierarchy/${contentId}?hierarchyType=${hierarchyType}`;
+        url = `/apis/proxies/v8/action/content/v3/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
       } else {
-        const forcreator = window.location.href.includes('editMode=true');
+        const forcreator = window.location.href.includes('editMode=true')
         if (forcreator) {
-          url = `apis/proxies/v8/action/content/v3/hierarchy/${contentId}?mode=edit`;
+          url = `apis/proxies/v8/action/content/v3/hierarchy/${contentId}?mode=edit`
         } else {
-          url = `/api/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`;
+          url = `/api/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
         }
       }
     }
@@ -156,25 +157,25 @@ export class WidgetContentLibService {
     //   .pipe(retry(1))
     return this.http
       .get<NsContent.IContent>(url)
-      .pipe(shareReplay(1));
+      .pipe(shareReplay(1))
     // if (apiData && apiData.result) {
     //   return apiData.result.content
     // }
   }
   fetchAuthoringContent(contentId: string): Observable<NsContent.IContent> {
-    const forcreator = window.location.href.includes('editMode=true');
-    let url = '';
+    const forcreator = window.location.href.includes('editMode=true')
+    let url = ''
     if (forcreator) {
-      url = `apis/proxies/v8/action/content/v3/hierarchy/${contentId}?mode=edit`;
+      url = `apis/proxies/v8/action/content/v3/hierarchy/${contentId}?mode=edit`
     } else {
-      url = `${API_END_POINTS.AUTHORING_CONTENT}/${contentId}?hierarchyType=detail`;
+      url = `${API_END_POINTS.AUTHORING_CONTENT}/${contentId}?hierarchyType=detail`
     }
-    return this.http.get<NsContent.IContent>(url).pipe(shareReplay(1), r => r);
+    return this.http.get<NsContent.IContent>(url).pipe(shareReplay(1), r => r)
   }
   fetchMultipleContent(ids: string[]): Observable<NsContent.IContent[]> {
     return this.http.get<NsContent.IContent[]>(
       `${API_END_POINTS.MULTIPLE_CONTENT}/${ids.join(',')}`,
-    );
+    )
   }
   fetchCollectionHierarchy(type: string, id: string, pageNumber: number = 0, pageSize: number = 1) {
     return this.http.get<NsContent.ICollectionHierarchyResponse>(
@@ -182,7 +183,7 @@ export class WidgetContentLibService {
         type,
         id,
       )}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-    );
+    )
   }
 
   fetchBlendedCourse() {
@@ -197,14 +198,14 @@ export class WidgetContentLibService {
         map(
           (data: any) => data.result.response
         )
-      );
+      )
   }
 
   // fetch individual batch
   fetchCourseBatch(batchId: string): Observable<NsContent.IContinueLearningData> {
     return this.http.get<NsContent.IContinueLearningData>(
       `${API_END_POINTS.COURSE_BATCH}/${batchId}`,
-    );
+    )
   }
 
   autoAssignBatchApi(identifier: any): Observable<NsContent.IBatchListResponse> {
@@ -214,74 +215,74 @@ export class WidgetContentLibService {
         map(
           (data: any) => data.result.response
         )
-      );
+      )
   }
 
   autoAssignCuratedBatchApi(request: any, programType: any): Observable<NsContent.IBatchListResponse> {
     const url = programType === NsContent.ECourseCategory.MODERATED_PROGRAM ?
-      API_END_POINTS.AUTO_ASSIGN_OPEN_PROGRAM : API_END_POINTS.AUTO_ASSIGN_CURATED_BATCH;
+      API_END_POINTS.AUTO_ASSIGN_OPEN_PROGRAM : API_END_POINTS.AUTO_ASSIGN_CURATED_BATCH
     return this.http.post<NsContent.IBatchListResponse>(`${url}`, request)
       .pipe(
         retry(1),
         map(
           (data: any) => data.result.response
         )
-      );
+      )
   }
 
   enrollUserToBatch(req: any) {
     return this.http
       .post(API_END_POINTS.ENROLL_BATCH, req)
-      .toPromise();
+      .toPromise()
   }
 
   enrollAndUnenrollUserToBatchWF(req: any, type: any) {
-    const url: any = type === 'WITHDRAW' ? API_END_POINTS.WITHDRAW_BATCH_WF : API_END_POINTS.ENROLL_BATCH_WF;
+    const url: any = type === 'WITHDRAW' ? API_END_POINTS.WITHDRAW_BATCH_WF : API_END_POINTS.ENROLL_BATCH_WF
     return this.http
       .post(url, req)
-      .toPromise();
+      .toPromise()
   }
 
   fetchBlendedUserWF(req: any) {
     return this.http
       .post(API_END_POINTS.BLENDED_USER_WF, req)
-      .toPromise();
+      .toPromise()
   }
 
   fetchBlendedUserCOUNT(req: any) {
     return this.http
       .post(API_END_POINTS.BLENDED_USER_COUNT, req)
-      .toPromise();
+      .toPromise()
   }
 
   fetchContentLikes(contentIds: { content_id: string[] }) {
     return this.http
       .post<{ [identifier: string]: number }>(API_END_POINTS.CONTENT_LIKES, contentIds)
-      .toPromise();
+      .toPromise()
   }
   fetchContentRatings(contentIds: { contentIds: string[] }) {
     if (contentIds) { }
     // return this.http
     //   .post(`${API_END_POINTS.CONTENT_RATING}/rating`, contentIds)
     //   .toPromise()
-    return of().toPromise();
+    return of().toPromise()
   }
 
   fetchContentHistory(contentId: string): Observable<NsContent.IContinueLearningData> {
     return this.http.get<NsContent.IContinueLearningData>(
       `${API_END_POINTS.CONTENT_HISTORY}/${contentId}`,
-    );
+    )
   }
 
   fetchContentHistoryV2(req: NsContent.IContinueLearningDataReq): Observable<NsContent.IContinueLearningData> {
-    req.request.fields = ['progressdetails'];
+    req.request.fields = ['progressdetails']
     const data = this.http.post<NsContent.IContinueLearningData>(
       `${API_END_POINTS.CONTENT_HISTORYV2}/${req.request.courseId}`, req
-    );
+    )
     data.subscribe((subscribeData: any) => {
-      this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId });
-    });
-    return data;
+      this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId })
+    })
+    return data
   }
 
   async continueLearning(id: string, collectionId?: string, collectionType?: string): Promise<any> {
@@ -297,23 +298,23 @@ export class WidgetContentLibService {
           }),
           dateAccessed: Date.now(),
           contextType: 'playlist',
-        };
-        await this.saveContinueLearning(reqBody).toPromise().catch().finally(() => {
-          resolve(true);
         }
-        );
+        await this.saveContinueLearning(reqBody).toPromise().catch().finally(() => {
+          resolve(true)
+        }
+        )
       } else {
         const reqBody = {
           contextPathId: collectionId ? collectionId : id,
           resourceId: id,
           data: JSON.stringify({ timestamp: Date.now() }),
           dateAccessed: Date.now(),
-        };
+        }
         await this.saveContinueLearning(reqBody).toPromise().catch().finally(() => {
-          resolve(true);
-        });
+          resolve(true)
+        })
       }
-    });
+    })
   }
   saveContinueLearning(content: NsContent.IViewerContinueLearningRequest): Observable<any> {
     // const url = API_END_POINTS.USER_CONTINUE_LEARNING
@@ -321,7 +322,7 @@ export class WidgetContentLibService {
     if (content) {
 
     }
-    return of() as any;
+    return of() as any
   }
 
   setS3Cookie(
@@ -332,91 +333,91 @@ export class WidgetContentLibService {
     //   .post(API_END_POINTS.SET_S3_COOKIE, { contentId })
     //   .pipe(catchError(_err => of(true)))
 
-    return EMPTY;
+    return EMPTY
   }
 
   setS3ImageCookie(): Observable<any> {
-    return this.http.post(API_END_POINTS.SET_S3_IMAGE_COOKIE, {}).pipe(catchError(_err => of(true)));
+    return this.http.post(API_END_POINTS.SET_S3_IMAGE_COOKIE, {}).pipe(catchError(_err => of(true)))
   }
 
   fetchManifest(url: string): Observable<any> {
-    return this.http.post(API_END_POINTS.FETCH_MANIFEST, { url });
+    return this.http.post(API_END_POINTS.FETCH_MANIFEST, { url })
   }
   fetchWebModuleContent(url: string): Observable<any> {
-    return this.http.get(`${API_END_POINTS.FETCH_WEB_MODULE_FILES}?url=${encodeURIComponent(url)}`);
+    return this.http.get(`${API_END_POINTS.FETCH_WEB_MODULE_FILES}?url=${encodeURIComponent(url)}`)
   }
   search(req: NSSearch.ISearchRequest): Observable<NSSearch.ISearchApiResult> {
-    req.query = req.query || '';
+    req.query = req.query || ''
     return this.http.post<NSSearch.ISearchApiResult>(API_END_POINTS.CONTENT_SEARCH_V5, {
       request: req,
-    });
+    })
   }
   searchRegionRecommendation(
     req: NSSearch.ISearchOrgRegionRecommendationRequest,
   ): Observable<NsContentStripMultiple.IContentStripResponseApi> {
-    req.query = req.query || '';
+    req.query = req.query || ''
     req.preLabelValue =
       (req.preLabelValue || '') +
-      ((this.configSvc.userProfile && this.configSvc.userProfile.country) || '');
+      ((this.configSvc.userProfile && this.configSvc.userProfile.country) || '')
     req.filters = {
       ...req.filters,
       labels: [req.preLabelValue || ''],
-    };
+    }
     return this.http.post<NsContentStripMultiple.IContentStripResponseApi>(
       API_END_POINTS.CONTENT_SEARCH_REGION_RECOMMENDATION,
       { request: req },
-    );
+    )
   }
   searchV6(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
-    const apiPath = _.get(req, 'api.path');
-    req.query = req.query || '';
+    const apiPath = _.get(req, 'api.path')
+    req.query = req.query || ''
     if (apiPath) {
-      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath)
     }
-    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req)
   }
 
   searchRequest(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
-    const apiPath = _.get(req, 'api.path');
-    req.query = req.query || '';
+    const apiPath = _.get(req, 'api.path')
+    req.query = req.query || ''
     if (apiPath) {
-      if(_.get(req, 'api.type') === 'get' ) {
-        return this.http.get<any>(apiPath);
-      } else if(_.get(req, 'api.type') === 'post' ) {
-        return this.http.post<any>(apiPath, req.request || {});
+      if (_.get(req, 'api.type') === 'get') {
+        return this.http.get<any>(apiPath)
+      } else if (_.get(req, 'api.type') === 'post') {
+        return this.http.post<any>(apiPath, req.request || {})
       } else {
-        return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+        return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath)
       }
     }
-    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req);
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_V6, req)
   }
 
   searchContentSearch_PROD(req: NSSearch.ISearchV6Request): Observable<NSSearch.ISearchV6ApiResultV2> {
-    const apiPath = _.get(req, 'api.path');
-    req.query = req.query || '';
+    const apiPath = _.get(req, 'api.path')
+    req.query = req.query || ''
     if (apiPath) {
-      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath);
+      return this.http.get<NSSearch.ISearchV6ApiResultV2>(apiPath)
     }
-    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH, req);
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(PROD_BASE_ENDPOINT + API_END_POINTS.CONTENT_SEARCH, req)
   }
 
   searchRelatedCBPV6(req: NSSearch.ISearchV6RequestV2): Observable<NSSearch.ISearchV6ApiResultV2> {
-    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_RELATED_CBP_V6, req);
+    return this.http.post<NSSearch.ISearchV6ApiResultV2>(API_END_POINTS.CONTENT_SEARCH_RELATED_CBP_V6, req)
   }
 
   fetchContentRating(contentId: string): Observable<{ rating: number }> {
-    return this.http.get<{ rating: number }>(`${API_END_POINTS.CONTENT_RATING}/${contentId}`);
+    return this.http.get<{ rating: number }>(`${API_END_POINTS.CONTENT_RATING}/${contentId}`)
   }
   deleteContentRating(contentId: string): Observable<any> {
-    return this.http.delete(`${API_END_POINTS.CONTENT_RATING}/${contentId}`);
+    return this.http.delete(`${API_END_POINTS.CONTENT_RATING}/${contentId}`)
   }
   addContentRating(contentId: string, data: { rating: number }): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.CONTENT_RATING}/${contentId}`, data);
+    return this.http.post<any>(`${API_END_POINTS.CONTENT_RATING}/${contentId}`, data)
   }
 
   getFirstChildInHierarchy(content: NsContent.IContent): NsContent.IContent {
     if (!(content.children || []).length) {
-      return content;
+      return content
     }
     if (
       (content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM &&
@@ -427,8 +428,8 @@ export class WidgetContentLibService {
       (content.primaryCategory === NsContent.EPrimaryCategory.MODULE &&
         !(content.artifactUrl && content.artifactUrl.length))
     ) {
-      const child = content.children[0];
-      return this.getFirstChildInHierarchy(child);
+      const child = content.children[0]
+      return this.getFirstChildInHierarchy(child)
     }
     if (
       content.primaryCategory === NsContent.EPrimaryCategory.RESOURCE ||
@@ -440,63 +441,67 @@ export class WidgetContentLibService {
       content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
       content.primaryCategory === NsContent.EPrimaryCategory.OFFLINE_SESSION
     ) {
-      return content;
+      return content
     }
-    const firstChild = content.children[0];
-    const resultContent = this.getFirstChildInHierarchy(firstChild);
-    return resultContent;
+    const firstChild = content.children[0]
+    const resultContent = this.getFirstChildInHierarchy(firstChild)
+    return resultContent
   }
 
   getRegistrationStatus(source: string): Promise<{ hasAccess: boolean; registrationUrl?: string }> {
-    return this.http.get<any>(`${API_END_POINTS.REGISTRATION_STATUS}/${source}`).toPromise();
+    return this.http.get<any>(`${API_END_POINTS.REGISTRATION_STATUS}/${source}`).toPromise()
   }
 
   fetchConfig(url: string) {
-    return this.http.get<any>(url);
+    return this.http.get<any>(url)
   }
 
   addCertTemplate(body: any) {
-    return this.http.patch<any>(`${API_END_POINTS.CERT_ADD_TEMPLATE}`, body);
+    return this.http.patch<any>(`${API_END_POINTS.CERT_ADD_TEMPLATE}`, body)
   }
 
   issueCert(body: any) {
-    return this.http.post<any>(`${API_END_POINTS.CERT_ISSUE}`, body);
+    return this.http.post<any>(`${API_END_POINTS.CERT_ISSUE}`, body)
   }
   downloadCert(certId: any) {
-    return this.http.get<any>(`${API_END_POINTS.CERT_DOWNLOAD(certId)}`);
+    return this.http.get<any>(`${API_END_POINTS.CERT_DOWNLOAD(certId)}`)
   }
 
   trendingContentSearch(req: any): Observable<any> {
-    req.query = req.query || '';
-    return this.http.post<any>(API_END_POINTS.TRENDING_CONTENT_SEARCH, req);
+    req.query = req.query || ''
+    return this.http.post<any>(API_END_POINTS.TRENDING_CONTENT_SEARCH, req)
+  }
+
+  microContentSearch(url: string): Observable<any> {
+    return this.http.get<any>(url)
   }
 
   getKarmaPoitns(limit: number, offset: any) {
-    return this.http.post(API_END_POINTS.READ_KARMAPOINTS, { limit, offset }).pipe(catchError(_err => of(true)));
+    return this.http.post(API_END_POINTS.READ_KARMAPOINTS, { limit, offset }).pipe(catchError(_err => of(true)))
   }
   fetchProgramContent(contentId: string[]): Observable<NsContent.IContent[]> {
-    let url = '';
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true');
+    let url = ''
+    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
     if (!forPreview) {
       return this.http.get<NsContent.IContent[]>(
         API_END_POINTS.CONTENT_READ(contentId),
-      );
+      )
     }
-    url = `/api/content/v1/read/${contentId}`;
-    return this.http.get<NsContent.IContent[]>(url);
+    url = `/api/content/v1/read/${contentId}`
+    return this.http.get<NsContent.IContent[]>(url)
     // return this.http.get<NsContent.IContent[]>(API_END_POINTS.CONTENT_READ(contentId))
   }
 
   getCourseKarmaPoints(request: any) {
-    return this.http.post<any>(API_END_POINTS.READ_COURSE_KARMAPOINTS, request);
+    return this.http.post<any>(API_END_POINTS.READ_COURSE_KARMAPOINTS, request)
   }
 
   claimKarmapoints(request: any) {
-    return this.http.post<any>(API_END_POINTS.CLAIM_KARMAPOINTS, request);
+    return this.http.post<any>(API_END_POINTS.CLAIM_KARMAPOINTS, request)
   }
 
   userKarmaPoints() {
-    return this.http.post<any>(API_END_POINTS.USER_KARMA_POINTS, {});
+    return this.http.post<any>(API_END_POINTS.USER_KARMA_POINTS, {})
   }
 
   async getEnrolledData(doId: string) {
@@ -511,61 +516,61 @@ export class WidgetContentLibService {
         }
       }).catch((_err: any) => {
         return []
-      });
+      })
       return responseData || []
     }
     return []
   }
 
-  async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean,  baseContentRead?: any,multilingualId?:string) {
-    if(content && content.publicCard && content.publicCard.baseUrl) {
+  async getResourseLink(content: any, enrollmentList?: any, checkForResume?: boolean, baseContentRead?: any, multilingualId?: string) {
+    if (content && content.publicCard && content.publicCard.baseUrl) {
       window.open(content.publicCard.baseUrl +
-        '/public/toc/' + content?.identifier + '/overview', '_blank') 
+        '/public/toc/' + content?.identifier + '/overview', '_blank')
     }
     if (content && content.content && content.content.category === 'Event') {
       const urlData: any = {
         url: `app/event-hub/home/${content.content.identifier}`,
         queryParams: { batchId: content.batchId },
-      };
+      }
       return urlData
     }
     if (content && content.externalId) {
       const urlData: any = {
         url: `app/toc/ext/${content.contentId}`,
         queryParams: { batchId: content.batchId },
-      };
+      }
       return urlData
     } else {
       if (checkForResume) {
         // const enrolledCourse: any = await this.getEnrolledData(content.identifier);
-        const enrolledCourse: any = enrollmentList;
+        const enrolledCourse: any = enrollmentList
         if (enrolledCourse && enrolledCourse.length) {
-          const enrolledCourseData = enrolledCourse && enrolledCourse?.length && enrolledCourse.find((el: any) => el?.collectionId === baseContentRead ||  content?.identifier)
+          const enrolledCourseData = enrolledCourse && enrolledCourse?.length && enrolledCourse.find((el: any) => el?.collectionId === baseContentRead || content?.identifier)
           if (enrolledCourseData && enrolledCourseData.content && (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
             enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM ||
             enrolledCourseData.content.primaryCategory === NsContent.EPrimaryCategory.PROGRAM)) {
             if (!this.isBatchInProgress(enrolledCourseData.batch)) {
-              return this.gotoTocPage(content);
+              return this.gotoTocPage(content)
             }
-            const data = await this.checkForDataToFormUrl(content, enrolledCourseData);
-            return data;
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData)
+            return data
           } {
-            const data = await this.checkForDataToFormUrl(content, enrolledCourseData,  baseContentRead, multilingualId);
-            return data;
+            const data = await this.checkForDataToFormUrl(content, enrolledCourseData, baseContentRead, multilingualId)
+            return data
           }
         }
       } else {
-        this.oneStepResumeEnable = true;
-        return this.gotoTocPage(content);
+        this.oneStepResumeEnable = true
+        return this.gotoTocPage(content)
       }
     }
   }
-  async checkForDataToFormUrl(content: any, enrollData: any, baseContentRead?: any,multilingualId?:string) {
-    let urlData: any;
+  async checkForDataToFormUrl(content: any, enrollData: any, baseContentRead?: any, multilingualId?: string) {
+    let urlData: any
     if (enrollData?.completionPercentage === 100) {
-      return this.gotoTocPage(enrollData);
+      return this.gotoTocPage(enrollData)
     }
     if (enrollData?.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
       const modifyEnrollData = {
@@ -573,61 +578,61 @@ export class WidgetContentLibService {
         identifier: enrollData.collectionId,
         primaryCategory: enrollData.content.primaryCategory,
         name: enrollData.content.name,
-      };
+      }
       if (modifyEnrollData.lastReadContentId) {
         return this.getResourseDataWithData(modifyEnrollData,
-          enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType,content,  baseContentRead,multilingualId);
+          enrollData.lastReadContentId, enrollData.lrcProgressDetails.mimeType, content, baseContentRead, multilingualId)
       }
       if (modifyEnrollData.firstChildId) {
         return this.getResourseDataWithData(modifyEnrollData,
           enrollData.firstChildId,
-          enrollData.lrcProgressDetails.mimeType, content,  baseContentRead,multilingualId);
+          enrollData.lrcProgressDetails.mimeType, content, baseContentRead, multilingualId)
       }
     }
     if (enrollData.firstChildId || enrollData.lastReadContentId) {
-      const doId = enrollData.firstChildId || enrollData.lastReadContentId;
+      const doId = enrollData.firstChildId || enrollData.lastReadContentId
       const responseData = await this.fetchProgramContent(doId).toPromise().then(async (res: any) => {
         if (res && res.result && res.result.content) {
-          const contentData: any = res.result.content;
+          const contentData: any = res.result.content
           const modifyEnrollData = {
             ...enrollData,
             identifier: enrollData.collectionId,
             primaryCategory: enrollData.content.primaryCategory,
             name: enrollData.content.name,
-          };
-          urlData = this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType,content,  baseContentRead,multilingualId);
+          }
+          urlData = this.getResourseDataWithData(modifyEnrollData, contentData.identifier, contentData.mimeType, content, baseContentRead, multilingualId)
           if (urlData) {
-            return urlData;
+            return urlData
           }
         }
-      });
-      return responseData ? responseData : this.gotoTocPage(content);
+      })
+      return responseData ? responseData : this.gotoTocPage(content)
     }
-    return this.gotoTocPage(content);
+    return this.gotoTocPage(content)
 
   }
 
-  getResourseDataWithData(enrollmentData: any, resourceId: any, mimeType: any,content:any, baseContentRead?: any,multilingualId?:string) {
-        if(enrollmentData && enrollmentData.recent_language) {
-        if(baseContentRead.languageMapV1 && Object.keys(baseContentRead.languageMapV1).length) { 
-          const recent_LANG_DATA = baseContentRead.languageMapV1[enrollmentData.recent_language];
-          if(recent_LANG_DATA && recent_LANG_DATA.id) {
-            return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, enrollmentData.recent_language, recent_LANG_DATA.id ) 
-          }
-        }
-      } 
-      if(enrollmentData) {
-        const BASE_LANG = this.contentLanguageSvc.getBaseLanguage(baseContentRead);
-        if(BASE_LANG && Object.keys(BASE_LANG).length ) {
-          return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, BASE_LANG.langId, BASE_LANG.id ) 
+  getResourseDataWithData(enrollmentData: any, resourceId: any, mimeType: any, content: any, baseContentRead?: any, multilingualId?: string) {
+    if (enrollmentData && enrollmentData.recent_language) {
+      if (baseContentRead.languageMapV1 && Object.keys(baseContentRead.languageMapV1).length) {
+        const recent_LANG_DATA = baseContentRead.languageMapV1[enrollmentData.recent_language]
+        if (recent_LANG_DATA && recent_LANG_DATA.id) {
+          return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, enrollmentData.recent_language, recent_LANG_DATA.id)
         }
       }
-    
-    return this.gotoTocPage(enrollmentData);
+    }
+    if (enrollmentData) {
+      const BASE_LANG = this.contentLanguageSvc.getBaseLanguage(baseContentRead)
+      if (BASE_LANG && Object.keys(BASE_LANG).length) {
+        return this.gotoPlayerPage(enrollmentData, content, baseContentRead?.identifier, resourceId, mimeType, BASE_LANG.langId, BASE_LANG.id)
+      }
+    }
+
+    return this.gotoTocPage(enrollmentData)
   }
 
 
-  gotoPlayerPage(navigationData: any, content:any, baseContentId:string, resourceId:string, mimeType:any, ml?:string, mlId?:string)  {
+  gotoPlayerPage(navigationData: any, content: any, baseContentId: string, resourceId: string, mimeType: any, ml?: string, mlId?: string) {
     if (navigationData) {
       const url = viewerRouteGenerator(
         resourceId,
@@ -640,60 +645,60 @@ export class WidgetContentLibService {
         content.name,
         ml,
         mlId,
-      );
-      return url;
+      )
+      return url
     }
   }
 
   gotoTocPage(content: any) {
     if (content && content.courseCategory && content.courseCategory === NsContent.ECourseCategory.MULTILINGUAL_COURSE) {
-      const baseContentData = this.contentLanguageSvc.getBaseLanguage(content);
-      const selectedLanguage = content && content.language && content.language.length ? 
-        content.language[0].toLowerCase() : '';
-      
+      const baseContentData = this.contentLanguageSvc.getBaseLanguage(content)
+      const selectedLanguage = content && content.language && content.language.length ?
+        content.language[0].toLowerCase() : ''
+
       if (baseContentData && Object.keys(baseContentData).length) {
         return {
           url: `/app/toc/${baseContentData.identifier}/overview`,
-          queryParams: { 
+          queryParams: {
             MLId: content.identifier,
             ML: selectedLanguage,
             ...(content.batchId ? { batchId: content.batchId } : {})
           },
-        };
+        }
       }
     }
-    
+
     const urlData = {
       url: `/app/toc/${content.identifier || content.collectionId}/overview`,
       queryParams: content.batchId ? { batchId: content.batchId } : {} as { [key: string]: any },
-    };
-    if (content.endDate && content?.courseCategory !== NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM) {
-      urlData.queryParams = { ...urlData.queryParams, planType: 'cbPlan', endDate: content.endDate };
     }
-    
-    return urlData;
+    if (content.endDate && content?.courseCategory !== NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM) {
+      urlData.queryParams = { ...urlData.queryParams, planType: 'cbPlan', endDate: content.endDate }
+    }
+
+    return urlData
   }
 
   isBatchInProgress(batchData: any) {
     // if (this.content && this.content['batches']) {
     // const batches = this.content['batches'] as NsContent.IBatch
     if (batchData && batchData.endDate) {
-      const now = moment().format('YYYY-MM-DD');
-      const startDate = moment(batchData.startDate).format('YYYY-MM-DD');
-      const endDate = batchData.endDate ? moment(batchData.endDate).format('YYYY-MM-DD') : now;
+      const now = moment().format('YYYY-MM-DD')
+      const startDate = moment(batchData.startDate).format('YYYY-MM-DD')
+      const endDate = batchData.endDate ? moment(batchData.endDate).format('YYYY-MM-DD') : now
       return (
         // batch.status &&
         moment(startDate).isSameOrBefore(now)
         && moment(endDate).isSameOrAfter(now)
-      );
-    } return true;
+      )
+    } return true
   }
   postApiMethod(apiUrl: any, req: any): Observable<NsContent.IContent> {
-    return this.http.post<NsContent.IContent>(apiUrl, req);
+    return this.http.post<NsContent.IContent>(apiUrl, req)
   }
   getApiMethod(apiUrl: any): Observable<NsContent.IContent> {
     // req.query = req.query || '';
-    return this.http.get<NsContent.IContent>(apiUrl);
+    return this.http.get<NsContent.IContent>(apiUrl)
   }
 
 
@@ -704,7 +709,7 @@ export class WidgetContentLibService {
     }
   }
 
-  setReleventNotReleventData(data: {isRelevent: boolean, widgetData: any}) {
+  setReleventNotReleventData(data: { isRelevent: boolean, widgetData: any }) {
     this.releventNotRelevent.next(data)
   }
 
@@ -718,8 +723,8 @@ export class WidgetContentLibService {
   }
 
   setRecommendedIds(recommendedIds: string, userId: string) {
-    localStorage.getItem('recommendedIds') ? 
-    this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
+    localStorage.getItem('recommendedIds') ?
+      this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
 
     this.storedRecommendedIds[userId] = recommendedIds
 
@@ -727,15 +732,15 @@ export class WidgetContentLibService {
   }
 
   getRecommendedIds(userId: string) {
-    localStorage.getItem('recommendedIds') ? 
+    localStorage.getItem('recommendedIds') ?
       this.storedRecommendedIds = JSON.parse(localStorage.getItem('recommendedIds') || '{}') : {}
     return this.storedRecommendedIds[userId]
   }
 
   setFeedbackData(feedbackDataArray: any[]) {
     feedbackDataArray.forEach(feedbackData => {
-      this.feedbackDataForCourse[feedbackData.course_id] = feedbackData;
-    });
+      this.feedbackDataForCourse[feedbackData.course_id] = feedbackData
+    })
   }
 
   getFeedbackData(courseId: string) {
@@ -744,16 +749,16 @@ export class WidgetContentLibService {
 
   filterCoursesWithNoRating(response: any, courses: any[]) {
     if (!response?.feedbacks?.length) {
-      return courses; 
+      return courses
     }
-    
+
     const coursesWithZeroRating = new Set(
       response.feedbacks
         .filter((feedback: any) => feedback.rating === 0)
         .map((feedback: any) => feedback.course_id)
-    );
-  
-    return courses.filter((course: any) => !coursesWithZeroRating.has(course.identifier));
+    )
+
+    return courses.filter((course: any) => !coursesWithZeroRating.has(course.identifier))
   }
 
   setTelementrySubscription(event: boolean) {

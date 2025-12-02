@@ -83,29 +83,29 @@
       bottom: 0;
       // margin-left: 0;
     }
-  
+
     ::ng-deep .mat-progress-bar {
       height: 8px!important;
     }
-  
+
     .icon_text {
       font-size: 12px;
       line-height: 16px;
       text-transform: uppercase;
     }
-  
+
     .title-text {
       margin: 12px 0;
       position: relative;
       overflow: hidden;
     }
-  
+
     .description-text {
       position: relative;
       overflow: hidden;
       height: 63px;
     }
-  
+
   .course_logo_box {
     width: 38px;
     height: 38px;
@@ -138,7 +138,7 @@
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
   }
-  
+
     .source-div {
       position: relative;
       top: 100px;
@@ -151,7 +151,7 @@
       max-height: 72px;
       display: flex;
       border-radius: 8px;
-  
+
       .source-icon {
         border-radius: 8px;
         margin-right: auto;
@@ -162,12 +162,12 @@
         max-height: -webkit-fill-available;
       }
     }
-  
+
     mat-card-content {
       // margin: 0 -0.25 * $card-padding;
       background: #fff;
     }
-  
+
     .card-img {
       min-width: 245px;
     //   max-width: 250px;
@@ -185,14 +185,14 @@
       font: 600 14px/24px Montserrat;
       /* stylelint-enable */
     }
-  
+
     .complexity {
       padding-top: 70px;
       display: flex;
       font-size: 14px;
       line-height: 21px;
       padding-bottom: 10px;
-  
+
       .mode-tag {
         border-radius: 5px;
         order: 2;
@@ -200,28 +200,28 @@
         color: white;
         font-size: 10px;
       }
-  
+
       .duration {
         display: flex;
         margin-left: auto;
         order: 3;
         font-weight: 700;
       }
-  
+
       .time-text {
         margin: 0px 5px 0px 6px;
         font-weight: 700;
       }
     }
-  
+
     .basic {
       margin: auto 0;
     }
-  
+
     $title-line-count: 2;
     $title-line-height: 24px;
-  
-  
+
+
     .title-text {
       // font-size: 18px;
       // margin: $size-s 0;
@@ -229,7 +229,7 @@
       // overflow: hidden;
       // height: $title-line-count * $title-line-height;
       // line-height: $title-line-height;
-  
+
       word-break: break-word;
       white-space: initial;
       margin: 8px 0;
@@ -241,10 +241,10 @@
       -webkit-box-orient: vertical;
       min-height: $title-line-count * $title-line-height;
     }
-  
+
     $description-line-count: 2;
     $description-line-height: 21px;
-  
+
     .description-text {
       // font-size: 15px;
       position: relative;
@@ -267,9 +267,13 @@
     align-items: center;
     padding: 4px;
     border-radius: 4px;
-  
+
     &.right-corner {
       right: 4px;
+      bottom: 4px;
+    }
+    &.left-corner {
+      left: 4px;
       bottom: 4px;
     }
     .mat-icon {
@@ -285,6 +289,13 @@
       margin: 0;
       padding: 0;
     }
+
+    .approved-icon {
+      height: 14px !important;
+      width: 14px !important;
+      font-size: 7px;
+    }
+
   }
 
   .width-238 {
@@ -316,7 +327,7 @@
       margin-bottom: 0;
     }
   }
-  
+
   .cbpwidth {
     width: 340px;
   }
@@ -357,7 +368,7 @@
     background-color: #d13924 !important;
     color: rgba(255,255,255,1) !important;
     opacity: 1;
-  
+
   }
   .cbp-success {
     border-radius: 2px;
@@ -412,7 +423,7 @@
       box-shadow: 0px 1px 10px 0px $releventBoxshadowHover;
     }
   }
-  
+
   .relevent-normal.relevent-btn::before {
     content: "";
     position: absolute;
@@ -426,7 +437,7 @@
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
   }
-  
+
   .relevent-normal.relevent-btn:hover::before {
     opacity: 1;
   }
