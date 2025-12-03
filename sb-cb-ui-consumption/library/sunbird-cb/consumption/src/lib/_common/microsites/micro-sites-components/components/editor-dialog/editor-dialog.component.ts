@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { MicrositeV3Service } from '../../../../../_services/microsite-v3.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { map, switchMap } from 'rxjs/operators'
 
 interface SliderItem {
   active: boolean
@@ -147,8 +148,8 @@ export class EditorDialogComponent implements OnInit {
   // Methods for CBP plan management
   addCbpPlanItem(): void {
     this.cbpPlanListArray.push(this.fb.group({
-      title: [''],
-      downloaUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]]
+      title: ['', [Validators.required]],
+      downloaUrl: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
     }))
   }
 
@@ -302,8 +303,10 @@ export class EditorDialogComponent implements OnInit {
         break
       case 'color':
         // Treat as banner image field with URL validation
+        const isDefaultBanner = this.data.value === '/assets/images/default_banner.png'
         this.editorForm = this.fb.group({
-          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
+          value: [this.data.value || '', [Validators.required, Validators.pattern(/^https?:\/\/.+|^\/assets\/.+/)]],
+          useDefaultBanner: [isDefaultBanner]
         })
         break
       case 'image':
@@ -418,8 +421,8 @@ export class EditorDialogComponent implements OnInit {
         if (cbpPlanList.length > 0) {
           cbpPlanList.forEach((item: any) => {
             this.cbpPlanListArray.push(this.fb.group({
-              title: [item.title || ''],
-              downloaUrl: [item.downloaUrl || '', [Validators.pattern(/^https?:\/\/.+/)]]
+              title: [item.title || '', [Validators.required]],
+              downloaUrl: [item.downloaUrl || '', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
             }))
           })
         } else {
@@ -802,6 +805,7 @@ export class EditorDialogComponent implements OnInit {
       next: (transformedUrl) => {
         this.isUploading = false
         this.editorForm.get('value')?.setValue(transformedUrl)
+        this.editorForm.get('useDefaultBanner')?.setValue(false)
         this.uploadStatus = 'Upload successful!'
         setTimeout(() => {
           this.uploadStatus = ''
@@ -813,6 +817,15 @@ export class EditorDialogComponent implements OnInit {
         console.error('Upload error:', error)
       }
     })
+  }
+
+  onDefaultBannerToggle(event: any) {
+    const isChecked = event.checked
+    if (isChecked) {
+      this.editorForm.get('value')?.setValue('/assets/images/default_banner.png')
+    } else {
+      this.editorForm.get('value')?.setValue('')
+    }
   }
 
   // General image upload methods
@@ -1268,13 +1281,28 @@ export class EditorDialogComponent implements OnInit {
 
               if (hasChanged) {
                 // Update announcement item
-                const updateReqBody = {
-                  announcementId: item.announcementId,
-                  name: item.name || '',
-                  description: item.description || '',
-                  category: item.category || ''
-                }
-                this.micrositeService.updateAnnouncements(updateReqBody).subscribe({
+
+                this.micrositeService.readAnnouncements(item.announcementId).pipe(
+                  switchMap((existingAnnouncement: any) => {
+                    const tempData = existingAnnouncement?.result?.data || {}
+                    const updateReqBody = {
+                      announcementId: item.announcementId,
+                      name: item.name || '',
+                      description: item.description || '',
+                      category: item.category || '',
+                      createdBy: tempData.createdBy || '',
+                      sourceName: tempData.sourceName || '',
+                      imgUrl: tempData.imgUrl || '',
+                      createdFor: tempData.createdFor || [],
+                      channel: tempData.channel || ''
+                    }
+                    return this.micrositeService.updateAnnouncements(updateReqBody).pipe(
+                      map((updateRes: any) => {
+                        return { existingAnnouncement, updateRes }
+                      })
+                    )
+                  })
+                ).subscribe({
                   next: () => {
                     resolve(true)
                   },
@@ -1283,7 +1311,6 @@ export class EditorDialogComponent implements OnInit {
                     resolve(false)
                   }
                 })
-                resolve(true)
               } else {
                 resolve(true)
               }

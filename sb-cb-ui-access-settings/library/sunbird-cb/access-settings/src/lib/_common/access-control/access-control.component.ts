@@ -942,9 +942,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
           this.applyAccessControlValue(false, false);
           this.updateContentAccessSetting();
-        } else {
-          // this.addUserGroup();
-        }
+        } 
+
+        // For a content not having any user group disable the access control type change
+        if (
+        (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
+        // this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC &&
+        (!this.isCuratedContentWithExternalId)
+        ) {
+        this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
+            type.disabled = true;
+        });
+        this.isSaveFltrBtnDisabled = true;
+      }
         setTimeout(() => {
           this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
           this.setupFormChangeDetection();
@@ -962,7 +972,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const currentValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
       if (this.content?.status === "Live" || this.content?.prevStatus === "Live") {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
-        this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
+
+        if(this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+          this.isAddUserGroupBtnDisabled = currentValue === this.initialUserGroupValue;
+        }
       } else {
         this.isSaveFltrBtnDisabled = currentValue === this.initialUserGroupValue;
       }
@@ -1052,12 +1065,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Calculate count for each user group
       this.calculateUserCountForUserGroup(index);
+
       if (
-        (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
-        (this.config.userConfig.userRoles.has("content_creator") || this.config.userConfig.userRoles.has("spv_publisher") && !this.isCuratedContentWithExternalId)
+        (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
+        // this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC && 
+        (!this.isCuratedContentWithExternalId)
       ) {
         // publisher (cannot edit already added)
-        for (let i = 0; i < this.userGroup.length; i++) {
+        for (let i = 0; i < this.userGroup?.length; i++) {
           const group = this.userGroup.at(i);
           group.get("id")?.disable();
           group.get("name")?.disable();
@@ -1065,7 +1080,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           group.get("conditions")?.disable();
           group.get("isUserGroupDisabled")?.setValue(true);
         }
-
+        this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
+            type.disabled = true;
+        });
         this.isSaveFltrBtnDisabled = true;
       }
 
@@ -1205,17 +1222,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // reviewer(readonly)
       this.accessControlCriteriaSelection.readOnly = true;
       this.isSaveFltrBtnDisabled = true;
-    } else if (
-      (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
-      (this.config.userConfig.userRoles.has("spv_publisher") ||
-        this.config.userConfig.userRoles.has("content_publisher") ||
-        this.config.userConfig.userRoles.has("content_creator")) &&
-      this.content?.courseCategory !== "Comprehensive Assessment Program"
-    ) {
-      // publisher (disabled all)
-      this.accessControlCriteriaSelection.readOnly = true;
-      this.isSaveFltrBtnDisabled = true;
     }
+    //  else if (
+    //   (this.content?.status === "Live" || this.content?.prevStatus === "Live") &&
+    //   this.content?.courseCategory !== "Comprehensive Assessment Program" &&
+    //   (this.config.userConfig.userRoles.has("spv_publisher") || this.config.userConfig.userRoles.has("content_publisher")) &&
+    //   !this.config.userConfig.userRoles.has("content_creator")
+    // ) {
+    //   // publisher (disabled all)
+    //   this.accessControlCriteriaSelection.readOnly = true;
+    //   this.isSaveFltrBtnDisabled = true;
+    // }
   }
 
   async calculateUserCountForUserGroup(userGroupIndex: number, conditionIndex?: number): Promise<void> {

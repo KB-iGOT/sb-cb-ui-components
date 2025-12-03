@@ -16,6 +16,7 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
   @Input() sortingsList!: {
     [key: string]: SearchListingConfig.SortingOptions[];
   };
+  @Input() applicationName: string = '';
   selectedOption: string = SortType.MostRelevent;
   options = SEARCH_SORT_DROPDOWN;
 
@@ -56,6 +57,8 @@ export class SearchSortInputComponent implements AfterViewInit, OnChanges {
     const categorySortings = _.get(this.sortingsList, `${this.category}`, []);
     if (categorySortings.length > 0) {
       this.options = categorySortings;
+    } else if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      this.options = this.options.filter(option => option.value !== SortType.HighestRated);
     }
 
     // const sortType = localStorage.getItem(SearchConstantLocalStorage.SortType);

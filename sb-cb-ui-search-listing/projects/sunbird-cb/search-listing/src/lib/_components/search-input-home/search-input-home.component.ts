@@ -6,9 +6,10 @@ import {
   Inject,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
-  SimpleChange,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation
 } from "@angular/core";
@@ -49,10 +50,13 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   // tslint:disable-next-line
   encapsulation: ViewEncapsulation.None
 })
-export class SearchInputHomeComponent implements OnInit, OnChanges {
+export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
   @Input() placeHolder = "";
   @Input() ref = "";
+  @Input() userRoles: string[] = [];
+  // @Input() userRoleIsFixed = true;
   @Output() closed: EventEmitter<boolean> = new EventEmitter();
+  @Output() selectedPillRole: EventEmitter<any> = new EventEmitter();
 
   queryControl: UntypedFormControl;
   languageSearch: string[] = [];
@@ -81,6 +85,9 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   competencyThemeKey!: string;
   competencySubThemeKey!: string;
   compentencyKey!: ICompentencyKeys;
+
+  applicationName: string = "";
+  rolesSubscription: Subscription | null = null
 
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
   @HostListener("document:click", ["$event"])
@@ -111,7 +118,8 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
 
     this.queryControl = new UntypedFormControl(this.activated.snapshot.queryParams["q"] || "");
 
-    this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async value => {
+    this.queryControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(async (value: string) => {
+      this.hasReadRecentBeenCalled = false;
       if (value && value.length > 100) {
         await this.searchFromQuery(value);
         this.loaderSearching = false;
@@ -143,17 +151,46 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
         this.initialize();
       });
     }
+    this.subscribeToRoleChanges()
   }
 
-  ngOnChanges() {
-    for (const change in SimpleChange) {
+  subscribeToRoleChanges() {
+    if (!this.rolesSubscription) {
+      this.rolesSubscription = this.searchListingService.updatedUserRoles$.subscribe((roles: string[]) => {
+        if (roles && roles.length === 1) {
+          this.selectedPillRole.emit(roles[0].toLocaleLowerCase());
+        }
+      })
+    }
+
+    // Subscribe to setRolesForCategory triggers from service
+    this.searchSubscription.add(
+      this.searchListingService.setRolesForCategory$.subscribe((data: { category: string, roles?: string[] }) => {
+        this.setRolesForCategory(data.category, data.roles);
+      })
+    );
+  }
+
+  ngOnChanges( changes: SimpleChanges ) {
+    for (const change in changes) {
       if (change === "placeHolder") {
         this.placeHolder = this.placeHolder;
       }
     }
+
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      if (changes['userRoles']) {
+        this.getSearchCategoriesCopyForCBP(_.get(this.searchConfig, 'searchCategories', []))
+      }
+      // if (changes['userRoleIsFixed']) {
+      //   this.searchListingService.setUserRoleIsFixed(this.userRoleIsFixed)
+      // }
+    }
   }
+  
 
   initialize() {
+    this.applicationName = _.get(this.searchConfig, 'applicationName', '');
     let isNotMyUser = false;
     let isIgotOrg = false;
     if ( _.get(this.configSvc, 'unMappedUser.profileDetails.profileStatus') ) {
@@ -167,7 +204,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.disableMenu = false;
     }
     let searchCategoriesCopy: SearchListingConfig.SearchCategory[] = _.get(this.searchConfig, 'searchCategories', [])
-    if (this.searchConfig?.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+    if (this.applicationName  === SearchListingConfig.ApplicationNames.MDOPortal) {
       const userRoles = this.configSvc?.userRoles as Set<string>;
       if (searchCategoriesCopy.length) {
         const hasMdoAdmin = userRoles.has("mdo_admin");
@@ -178,22 +215,15 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
           searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value !== SearchCategory.Communities);
         } else if (hasCommunityModerator) {
           searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value === SearchCategory.Communities);
-          this.searchConfig.searchInputConfig.defaultSearchCategory = SearchCategory.Communities;
+          if (this.searchConfig && this.searchConfig.searchInputConfig) {
+            this.searchConfig.searchInputConfig.defaultSearchCategory = SearchCategory.Communities;
+          }
         } else {
           searchCategoriesCopy = searchCategoriesCopy.filter(category => category?.value !== SearchCategory.Communities);
         }
       }
-    } else if (this.searchConfig && _.get(this.searchConfig, 'applicationName') === SearchListingConfig.ApplicationNames.CBPPortal && this.configSvc && this.configSvc.userRoles) {
-      // configSvc.userRoles can be a Set<string> or an array — handle both safely
-      const userRoles = this.configSvc.userRoles as Set<string> | string[];
-      const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
-      searchCategoriesCopy = searchCategoriesCopy.filter((category: SearchListingConfig.SearchCategory) => {
-        if (!category.roles || !Array.isArray(category.roles)) {
-          return false;
-        }
-        return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
-      });
-      this.searchConfig.currentSearchCategories = searchCategoriesCopy;
+    } else if (this.searchConfig && this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && this.configSvc && this.configSvc.userRoles) {
+      searchCategoriesCopy = this.getSearchCategoriesCopyForCBP(searchCategoriesCopy);
     }
 
     this.searchSubscription.add(
@@ -221,7 +251,14 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
           const path = event.url.split("?")[0];
-          if (!path.split("/").includes("globalsearch")) {
+          if (!path.split("/").includes("globalsearch")
+            //  && 
+            // (
+            //   _.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal ||
+            //   this.selectedSearchCategory !== 'courses'
+            // )
+          ) 
+          {
             this.queryControl.reset();
           }
         }
@@ -229,7 +266,29 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     );
   }
 
+  getSearchCategoriesCopyForCBP(searchCategoriesCopy: SearchListingConfig.SearchCategory[]): SearchListingConfig.SearchCategory[] {
+    // const userRoles = (this.userRoleIsFixed ? this.configSvc.userRoles : this.configSvc.userAllRoles) as Set<string> | string[];
+    const userRoles = this.configSvc.userAllRoles as Set<string> | string[];
+    const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
+    searchCategoriesCopy = searchCategoriesCopy.filter((category: SearchListingConfig.SearchCategory) => {
+      if (!category.roles || !Array.isArray(category.roles)) {
+        return false;
+      }
+      return category.roles.some(role => userRolesArray.includes(role.toLocaleLowerCase()));
+    });
+    if (this.searchConfig) {
+      this.searchConfig['currentSearchCategories'] = searchCategoriesCopy;
+    }
+    this.categories = searchCategoriesCopy || [];
+    return searchCategoriesCopy
+  }
+
   async updateQuery(query: string) {
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      const currentSearchCategorie = this.selectedSearchCategory || this.defaultSearchCategory;
+      const rolesForCategory = this.getRolesForCategory(currentSearchCategorie);
+      this.setRolesForCategory(currentSearchCategorie, rolesForCategory);
+    }
     if (query && query.length) {
       await this.searchInNLP(query)
         .then(() => {
@@ -289,6 +348,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   goToSearchItem(query: any) {
     const category = this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory
     const nlpSearchQuery = query?.nlp_search_query;
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal && category) {
+      const rolesForCategory = this.getRolesForCategory(category);
+      this.setRolesForCategory(category, rolesForCategory);
+    }
     if (category && category === SearchCategory.Courses && nlpSearchQuery) {
       const req = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
       req.request.query = nlpSearchQuery;
@@ -441,6 +504,11 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }
   }
 
+  getRolesForCategory(category: string): string[] {
+    const categoryObj = this.categories.find(cat => cat.value === category);
+    return categoryObj && categoryObj.roles ? categoryObj.roles : [];
+  }
+
   recentDeleteByUserId() {
     return this.searchListingService.recentDeleteByUser().subscribe((result: any) => {
       if (result && result.responseCode === "OK") {
@@ -459,8 +527,10 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
 
   processRecentSearchText(query: any) {
     document.getElementById("global-search-input")?.blur();
+    const isCBPPortal = _.get(this.searchConfig, "applicationName") === SearchListingConfig.ApplicationNames.CBPPortal;
+    const searchQuery = isCBPPortal && _.get(query, "search_query", "") ? query.search_query.trim() : _.get(query, "nlp_search_query", "").trim();
     const queryParams = {
-      q: query?.nlp_search_query ? query?.nlp_search_query?.trim() : "",
+      q: searchQuery,
       // search: query && this.responseNlpQuery ? this.responseNlpQuery : null,
       category: this.selectedSearchCategory || this.defaultSearchCategory || this.searchConfig?.searchInputConfig.defaultSearchCategory || null,
       p: null,
@@ -517,7 +587,7 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }, 0);
     this.queryControl.reset();
 
-    if (_.get(this.searchConfig, 'applicationName') !== SearchListingConfig.ApplicationNames.CBPPortal) {
+    if (this.applicationName !== SearchListingConfig.ApplicationNames.CBPPortal) {
       const params = { ...this.activated.snapshot.queryParams };
       params["q"] = "";
       params["search"] = "";
@@ -530,11 +600,36 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
     }
   }
 
-  async selectSearchCategory(category: string) {
+  async selectSearchCategory(category: string, roles?: string[]) {
+    if (this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal) {
+      this.setRolesForCategory(category, roles);
+    }
     if (this.queryControl.value && this.queryControl.value.length >= this.requiredQueryMinLength) {
       this.selectedSearchCategory = category;
       // this.searchFromQuery(this.queryControl.value);
       this.updateQuery(this.queryControl.value);
+    }
+  }
+
+  setRolesForCategory(category: string, roles?: string[]): void {
+    // const userRoles = (this.userRoleIsFixed ? this.configSvc.userRoles : this.configSvc.userAllRoles) as Set<string> | string[];
+    const userRoles = this.configSvc.userAllRoles as Set<string> | string[];
+    const userRolesArray: string[] = userRoles instanceof Set ? Array.from(userRoles) : Array.isArray(userRoles) ? userRoles : [];
+    if (userRolesArray.length > 1 && category) {
+      if (roles && roles.length === 1) {
+        if (userRolesArray.includes(roles[0].toLocaleLowerCase())) {
+          this.configSvc.userRoles = new Set([roles[0].toLocaleLowerCase()]);
+          this.selectedPillRole.emit(roles[0].toLocaleLowerCase());
+        }
+      } else if (roles && roles.length > 1) {
+        for (const role of roles) {
+          if (userRolesArray.includes(role.toLocaleLowerCase())) {
+            this.configSvc.userRoles = new Set([role.toLocaleLowerCase()]);
+            this.selectedPillRole.emit(role.toLocaleLowerCase());
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -710,6 +805,9 @@ export class SearchInputHomeComponent implements OnInit, OnChanges {
   ngOnDestroy(): void {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
+    }
+    if (this.rolesSubscription) {
+      this.rolesSubscription.unsubscribe();
     }
   }
 }

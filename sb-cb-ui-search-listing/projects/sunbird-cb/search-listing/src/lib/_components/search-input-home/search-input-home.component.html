@@ -1,4 +1,4 @@
-<div *ngIf="!disableMenu" class="flex items-center border search-v3 search-border w-full" id="app-search-bar">
+<div *ngIf="!disableMenu" class="flex items-center border search-v3 search-border w-full global-search-content" id="app-search-bar">
   <div [ngClass]="{ 'border-right': languageSearch?.length }" class="flex items-center">
     <button class="lang-btn margin-right-s" *ngIf="languageSearch?.length && languageSearch?.length > 1" mat-button [matMenuTriggerFor]="sortLang">
       <span class="uppercase">
@@ -59,7 +59,7 @@
               [removable]="false"
               [disableRipple]="true"
               [selected]="category.value === selectedSearchCategory"
-              (click)="selectSearchCategory(category.value)"
+              (click)="selectSearchCategory(category.value, category.roles)"
               class="category-chip"
               [ngClass]="{ 'selected-search-category': category.value === selectedSearchCategory }">
               <mat-icon *ngIf="category.icon" [svgIcon]="category.icon" class="mr-1 categories-icon"></mat-icon>

@@ -353,6 +353,28 @@ export class MainContentComponent implements OnInit {
     })
   }
 
+  onRemoveStrip(event: any) {
+    const { stripKey, stripData } = event
+
+    // Remove the strip from stripsArray using stripKey
+    if (this.data?.stripsArray && Array.isArray(this.data.stripsArray)) {
+      this.data.stripsArray = this.data.stripsArray.filter((stripItem: any) => {
+        return stripItem?.strips?.[0]?.key !== stripKey
+      })
+    }
+
+    // Force change detection
+    this.cdr.detectChanges()
+
+    // Notify parent component about the removal
+    this.eventCallback({
+      action: 'strip-removed',
+      source: 'mainContent',
+      id: 'strip-deleted',
+      data: { stripKey, stripData }
+    })
+  }
+
   trackByIndex(index: number, item: any): number {
     return index
   }

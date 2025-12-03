@@ -26,7 +26,7 @@ import {
   SearchTrainingPlansRequest,
   SearchDesignationRequest
 } from "../../_models/search-listing.model";
-import { forkJoin, Subject } from "rxjs";
+import { forkJoin, Observable, Subject } from "rxjs";
 import moment from "moment";
 import { takeUntil } from "rxjs/operators";
 import { NetworkService } from "../../_services/network.service";
@@ -57,7 +57,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
 
   public screenSizeIsLtMedium = false;
-  isLtMedium$ = this.valueSvc.isLtMedium$;
+  isLtMedium$: Observable<boolean> = this.valueSvc.isLtMedium$;
   statedata:
     | {
         param: any;
@@ -180,7 +180,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       path: "Search"
     };
     const instanceConfig = this.configSvc.instanceConfig;
-    this.defaultSideNavBarOpenedSubscription = this.isLtMedium$.subscribe(isLtMedium => {
+    this.defaultSideNavBarOpenedSubscription = this.isLtMedium$.subscribe((isLtMedium: boolean) => {
       this.sideNavBarOpened = !isLtMedium;
       this.screenSizeIsLtMedium = isLtMedium;
     });
@@ -189,7 +189,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || "";
     }
 
-    this.updateNoResultMessage(this.statedata.param);
+    const searchQuery = _.get(this.searchQuery, 'query', this.statedata.param)
+    this.updateNoResultMessage(searchQuery);
     if (this.getCurrentSearchCategories.some(cat => cat.value === SearchCategory.Courses)) {
       this.checkCourseEnrollmentAndCbpPlan();
     }
@@ -253,7 +254,8 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         this.searchContentLoader = false;
       }
 
-      this.updateNoResultMessage(this.statedata.param);
+      const searchQuery = _.get(this.searchQuery, 'query', this.statedata.param)
+      this.updateNoResultMessage(searchQuery);
 
       if (changes["filtersPanel"] && changes["filtersPanel"].currentValue === "show") {
         this.sideNavBarOpened = true;
@@ -362,9 +364,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
                this.applySelectedFilters["status"].length > 0;        
         this.searchRequestCourse.request.filters = this.getContentSearchFilters(this.searchRequestCourse.request.filters)
 
-        if (hasStatus) {
-          this.formatSelectedStatusFilters()
-        }
       }
       this.searchRequestCourse.request.facets = _.get(this.searchRequestCourse, 'request.facets', []).filter((v: string) => v !== null && v !== undefined);
     } else {
@@ -377,7 +376,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (_.get(result, 'result.content')) {
         this.courseSearchResults = result.result.content;
         this.courseSearchTotalCount = result.result?.count;
-        // this.coursesFacets = this.applicationName === SearchListingConfig.ApplicationNames.CBPPortal ? this.formateCoursesFacets(result.result?.facets) : result.result?.facets || [];
         this.coursesFacets = result.result?.facets || [];
         this.combinedFacets = [];
         this.combinedFacets = [...this.combinedFacets, this.coursesFacets || []];
@@ -400,6 +398,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     const userRoles = this.configSvc?.userRoles as Set<string>;
     const userId = _.get(this.configSvc, 'userProfile.userId');
     const userOrgId = _.get(this.configSvc, 'userProfile.rootOrgId');
+    const hasStatus = filters && filters.status && Array.isArray(filters.status) && filters.status.length > 0 ? true : false;
 
     // Get single role (case-insensitive)
     const role = Array.from(userRoles || [])[0]?.toUpperCase();
@@ -414,7 +413,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (!Array.isArray(filters.must.courseCategory)) filters.must.courseCategory = [];
       if (!Array.isArray(filters.must.resourceCategory)) filters.must.resourceCategory = [];
     }
-    if (!Array.isArray(filters.status)) filters.status = [];
+    if (!Array.isArray(filters.status) && !hasStatus) filters.status = [];
 
     delete filters.contentType;
 
@@ -436,11 +435,11 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
-        mergeUnique(filters.status, [
-          "Live", "UnderPublish", "Failed", "Review", "Retired", "InReview", "Reviewed",
-          "UnderReview", "QualityReview", "Draft"
-        ]);
-        filters['reviewStatus'] =["reviewed", "SentToPublish", "inReview"];
+        if (!hasStatus) {
+          mergeUnique(filters.status, [
+            "Live", "Failed", "Review", "Retired", "Draft"
+          ]);
+        }
         filters.createdFor = [userOrgId];
         break;
 
@@ -454,7 +453,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
-        mergeUnique(filters.status, ["Live", "Review", "InReview"]);
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Live", "Review"]);
+        }
         filters.reviewerIDs = [userId];
         break;
 
@@ -462,8 +463,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         mergeUnique(filters.must.courseCategory, [
           "Moderated Course", "Moderated Assessment", "Moderated Program"
         ]);
-        mergeUnique(filters.status, ["Review", "Live"]);
-        filters['reviewStatus'] = ["reviewed", "SentToPublish"];
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Review", "Live"]);
+        }
         filters.publisherIDs = [userId];
         break;
 
@@ -475,7 +477,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
         mergeUnique(filters.must.courseCategory, [
           "Blended Program", "Curated Program", "Moderated Program", "Invite-Only Program", "Invite-Only Assessment"
         ]);
-        mergeUnique(filters.status, ["Live"]);
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Live"]);
+        }
         break;
 
       case "SPV_PUBLISHER":
@@ -488,12 +492,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
           "Events", "Podcasts", "Webinars", "Case study", "Whitepaper", "Article", "Blog",
           "Best Practices", "Policies and Acts", "Karmayogi Talks", "Know Your Ministry", "Others"
         ]);
-        mergeUnique(filters.status, ["Review", "Live"]);
-        filters['reviewStatus'] = ["reviewed", "SentToPublish"];
-        break;
-
-      default:
-        // Unknown role — leave filters untouched
+        if (!hasStatus) {
+          mergeUnique(filters.status, ["Review", "Live"]);
+        }
         break;
     }
 
@@ -502,89 +503,13 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       if (!filters.must[key].length) delete filters.must[key];
     });
     if (!Object.keys(filters.must).length) delete filters.must;
-    if (this.applySelectedFilters && this.applySelectedFilters.resourceCategory) {
-      filters.must.resourceCategory = this.applySelectedFilters.resourceCategory;
+    if (this.applySelectedFilters && this.applySelectedFilters.resourceCategory && this.applySelectedFilters.resourceCategory.length) {
+      filters.must.resourceCategory = JSON.parse(JSON.stringify(this.applySelectedFilters?.resourceCategory || []));
+      filters.must.courseCategory = [];
       filters.must.courseCategory = []
     }
 
     return filters;
-  }
-
-  formatSelectedStatusFilters(): any {
-    const filters: any = this.searchRequestCourse.request.filters
-    if (this.applySelectedFilters["status"]) {
-      filters.status = []
-      filters.reviewStatus = []
-      const userRoles = this.configSvc?.userRoles as Set<string>;
-      const role = Array.from(userRoles || [])[0]?.toUpperCase();
-      this.applySelectedFilters["status"].forEach((statusFilter: string) => {
-        const addReviewStatus = (val: string) => {
-          if (!Array.isArray(filters.reviewStatus)) {
-            filters.reviewStatus = [];
-          }
-          if (!filters.reviewStatus.includes(val)) {
-            filters.reviewStatus.push(val);
-          }
-        };
-
-        const addReviewStatuses = (vals: string[]) => {
-          vals.forEach(v => addReviewStatus(v));
-        };
-
-        const sf = String(statusFilter || "").toLowerCase();
-        if (sf === "inreview" || sf === "reviewed") {
-          addReviewStatus(statusFilter);
-        } else if (sf === "review") {
-          if (role === "CONTENT_PUBLISHER" || role === "SPV_PUBLISHER") {
-            addReviewStatus("reviewed");
-          } else {
-            addReviewStatuses(["inreview", "reviewed"]);
-          }
-          filters.status.push(statusFilter);
-        } else if (sf === "live") {
-          addReviewStatuses(["reviewed", "SentToPublish"]);
-          filters.status.push(statusFilter);
-        } else {
-          if (!Array.isArray(filters.status)) {
-            filters.status = [];
-          }
-          if (!filters.status.includes(statusFilter)) {
-            filters.status.push(statusFilter);
-          }
-        }
-      });
-    }
-    // if (filters.reviewStatus && filters.reviewStatus.length > 0) {
-    //   filters.status.push('review');
-    // }
-  }
-
-  formateCoursesFacets(facets: any) {
-    let formattedFacets: any = [];
-    let statusFacets: any
-    let reviewStatusFacets: any
-    if (facets && facets.length) {
-      formattedFacets = facets
-      formattedFacets.forEach((facet: any) => {
-        if (facet.name === 'status') {
-          statusFacets = facet;
-        } else if (facet.name === 'reviewStatus') {
-          reviewStatusFacets = facet;
-        }
-
-        if (statusFacets && reviewStatusFacets) {
-          // statusFacets.values = statusFacets.filter.values.filter((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
-          const reviewIndex = statusFacets.values.findIndex((statusFacet: any) => statusFacet.name.toLowerCase() === 'review');
-          if (reviewIndex !== -1) {
-            let reviewStatusFacetsValues = reviewStatusFacets.values.filter((reviewStatusFacet: any) => reviewStatusFacet.name.toLowerCase() === 'reviewed' || reviewStatusFacet.name.toLowerCase() === 'inreview');
-            if (reviewStatusFacetsValues.length) {
-              statusFacets.values.splice(reviewIndex, 1, ...reviewStatusFacetsValues)
-            }
-          }
-        }
-      })
-    }
-    return formattedFacets;
   }
 
   //#endregion (get courses methods)
@@ -643,6 +568,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       } else {
         this.searchRequestEvents.request.facets = resolvedEventFacets;
       }
+      this.searchRequestEvents.request.filters["startDate"] = {
+        '>=': this.environment.eventPhaseTwo || '2025-02-18',
+      };
     } else {
       this.searchRequestEvents.request.facets = resolvedEventFacets;
     }
@@ -1525,7 +1453,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private checkIfExploreContentTab(): void {
-    this.activated.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this.activated.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params: any) => {
       this.isExploreContentTab = !!params["tab"];
     });
   }
@@ -1747,6 +1675,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   resetAllSearchParams() {
+    this.applySelectedFilters = {};
     this.searchRequestCourse = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
     this.searchRequestEvents = new SearchV4Request([this.competencyAreaNameKey, this.competencyThemeKey, this.competencySubThemeKey]);
     this.searchRequestPeoples = new SearchPeoplesRequest();
