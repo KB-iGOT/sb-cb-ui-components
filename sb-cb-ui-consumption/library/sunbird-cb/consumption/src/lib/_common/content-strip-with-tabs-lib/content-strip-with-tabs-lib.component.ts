@@ -390,6 +390,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       this.fetchMyEventsData(strip, calculateParentStatus)
     }
     if (_.get(strip, 'request.fetchData', '') === 'events') {
+      this.processStrip(strip, [], 'fetching', false, null)
       this.fetchFromSearchV6Events(strip, calculateParentStatus)
     } else {
       this.processStrip(strip, [], 'fetching', false, null)
@@ -1224,8 +1225,14 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     try {
       const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
+      let resContent: any
       if (response && response.results) {
-        const widgets = this.transformContentsToWidgets(response.results.result.content, strip)
+        if (response.results.result.content) {
+          resContent = response.results.result.content
+        } else if (response.results.result.Event) {
+          resContent = response.results.result.Event
+        }
+        const widgets = this.transformContentsToWidgets(resContent, strip)
         let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs
@@ -2156,7 +2163,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
             const allTabs = this.stripsResultDataMap[strip.key].tabs
             const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
-
             this.getEventsTabDataByNewReqSearchV6(strip, 0, currentTabFromMap, calculateParentStatus)
           }
         }
