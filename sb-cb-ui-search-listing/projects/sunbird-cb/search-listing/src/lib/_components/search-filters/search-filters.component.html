@@ -67,7 +67,7 @@
               <section class="mat-body-2 text-capitalize">
                 <mat-checkbox
                   [checked]="category?.isChecked || getSelectedFilter(category)"
-                  (change)="onSelectionFilter($event, category, category?.name)"
+                  (change)="onSelectionFilter($event, category, category?.name, true)"
                   (click)="$event.stopPropagation()">
                   <span class="min-width-adjust">
                     {{ category?.displayName }}
