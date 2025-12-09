@@ -2,7 +2,7 @@
   <ng-container *ngIf="dialgoData?.iconName || dialgoData?.iconUrl">
     <div class="flex items-center justify-center w-full h-full">
       <ng-container *ngIf="dialgoData?.iconName; else imageUrl">
-        <mat-icon class="type-icon" [ngClass]="{'warning-icon': dialgoData?.type === 'warning'}">{{dialgoData?.iconName}}</mat-icon>
+        <mat-icon class="type-icon" [ngClass]="{'warning-icon': dialgoData?.type === 'warning', 'primary-icon': dialgoData?.type === 'primary'}">{{dialgoData?.iconName}}</mat-icon>
       </ng-container>
       <ng-template #imageUrl>
         <img class="type-icon" [src]="dialgoData?.iconUrl" alt="icon">
@@ -16,6 +16,14 @@
 
   <ng-container *ngIf="dialgoData?.description">
     <div class="dexcription">{{dialgoData?.description}}</div>
+  </ng-container>
+
+  <ng-container *ngIf="dialgoData?.messages">
+    <div class="w-full flex flex-col items-center justify-center gap-2">
+      <ng-container *ngFor="let message of dialgoData?.messages">
+        <div class="message" [ngClass]="message?.classes" >{{message.message}}</div>
+      </ng-container>
+    </div>
   </ng-container>
   
   <div class="flex w-full gap-2" [ngClass]="dialgoData?.buttonsPositionClass">
