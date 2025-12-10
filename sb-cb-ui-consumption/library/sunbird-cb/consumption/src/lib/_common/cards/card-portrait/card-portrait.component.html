@@ -75,8 +75,9 @@
                     <p class="cbp-success apar-flag">APAR</p>
                   </div>
                 </ng-container>
-                <div class="duration-box left-corner" *ngIf="widgetData?.isiGOTSpecialization">
-                  <mat-icon class="mr-1 approved-icon mat-icon main_icon" svgIcon="approved-icon"></mat-icon>
+                <div class="duration-box left-corner"
+                  *ngIf="widgetData?.isiGOTSpecialization && widgetData?.content?.additionalTags?.includes('iGOT Specialization')">
+                  <img class="approved-icon mr-1" src="./assets/icons/approved.svg" alt="approved">
                   <span class=" ws-mat-white-text duration nodtranslate">
                     {{ 'cardcontentv2.iGOTSpecializationProgram' | translate }}
                   </span>
