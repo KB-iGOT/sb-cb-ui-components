@@ -489,7 +489,7 @@
   line-height: 16px;
   white-space: nowrap;
   max-width: 100px;
-  
+
   .level-text {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -523,6 +523,21 @@
   flex-shrink: 0;
 }
 .difficulty-main {
-  gap: 5px; 
+  gap: 5px;
   // flex-wrap: wrap;
+}
+
+.resource-type {
+  max-width: fit-content;
+  color: white;
+  /* background: red; */
+  background: linear-gradient(90deg, #2C77A6 1138.49%, #07446B 9023.87%);
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.resource-type-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
 }
