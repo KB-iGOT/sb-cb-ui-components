@@ -676,6 +676,11 @@ export class WidgetContentLibService {
       urlData.queryParams = { ...urlData.queryParams, planType: 'cbPlan', endDate: content.endDate }
     }
 
+    if (content?.resourceType === 'Samuhik Charcha') {
+      urlData.url = `/app/event-hub/home/${content.identifier}`
+      urlData.queryParams = {}
+    }
+
     return urlData
   }
 
