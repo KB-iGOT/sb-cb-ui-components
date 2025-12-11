@@ -18,7 +18,7 @@ export class ProviderCardComponent implements OnInit {
     '#254092', '#926525', '#4F72DF'
   ];
 
-  constructor(private router: Router, private contSvc: WidgetContentLibService) {}
+  constructor(public router: Router, public contSvc: WidgetContentLibService) {}
 
   ngOnInit() {
     this.setRandomColor()
@@ -37,7 +37,18 @@ export class ProviderCardComponent implements OnInit {
   
 
   redirectTo(content: any) {  
-    this.router.navigate([`/app/learn/browse-by/provider/${content.name}/${content.orgId}/micro-sites`])
+    let url = ''
+    let queryParams = {}
+    if(content.isExternalProvider) {
+      url = `app/seeAll/content`
+      queryParams = {
+        key: content.contentDisplayType || 'extContent',
+        provider: content.id
+      }
+    } else {
+      url = `/app/learn/browse-by/provider/${content.name}/${content.orgId}/micro-sites`
+    }
+    this.router.navigate([url], { queryParams })
     content['typeOfTelemetry'] = this.widgetData.context.pageSection
     this.contSvc.changeTelemetryData(content)
   }

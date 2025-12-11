@@ -93,7 +93,8 @@ import { AvailableLanguagesComponent } from './available-languages/available-lan
         CardKarmaProgramsComponent,
         CardKarmaProgramsV2Component,
         CardPortraitExtComponent,
-        AvailableLanguagesComponent
+        AvailableLanguagesComponent,
+        ProviderCardComponent
     ]
 })
 export class CardsModule { }
