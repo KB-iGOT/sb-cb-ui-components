@@ -21,7 +21,7 @@
 	border: 1px solid rgba(0, 0, 0, .08);
 }
 
-.image-container img { 
+.image-container img {
 	border-radius: 8px;
     opacity: 1;
     background-size: 100%;
@@ -113,8 +113,8 @@ span.start-span {
 	text-align: center;
 	box-sizing: border-box;
 	border-radius: 0 0 8px 8px;
- } 
-.start-btn { 
+ }
+.start-btn {
 	background: #1b4ca1 !important;
 	color: #FFFFFF;
     font-size: 14px;
@@ -125,7 +125,7 @@ span.start-span {
  }
  .dots-container {
 	display: none;
- }  
+ }
  /* .card-wide-img{
 	border-radius: 8px;
     opacity: 1;
@@ -146,12 +146,12 @@ span.start-span {
 	margin-top: 10px;
 	justify-content: space-between;
 	gap: 8px;
-  
+
 	.mat-icon {
 	  vertical-align: middle;
 	  color: $secondary-color !important;
 	}
-  
+
 	.course_v2{
 	  border: 1px solid $secondary-color;
 	  padding: 4px 8px;
@@ -160,14 +160,14 @@ span.start-span {
 	  flex-shrink: 1;
 	  min-width: 0;
 	}
-  
+
 	.main_icon {
 	  font-size: 16px;
 	  width: 16px;
 	  height: 16px;
 	}
   }
-  			
+
 .knowledge-level-container {
 //   margin-left: auto;
   flex-shrink: 0;
@@ -186,7 +186,7 @@ span.start-span {
   line-height: 16px;
   white-space: nowrap;
   max-width: 100px;
-  
+
   .level-text {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -221,6 +221,6 @@ span.start-span {
 }
 
 .difficulty-main {
-  gap: 5px; 
+  gap: 5px;
   // flex-wrap: wrap;
 }
