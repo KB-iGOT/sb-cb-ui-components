@@ -35,6 +35,7 @@ import { CardMdoChannelV1Component } from './card-mdo-channel-v1/card-mdo-channe
 import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.module';
 import { PipePublicURLModule } from '@sunbird-cb/utils-v2';
 import { AvailableLanguagesComponent } from './available-languages/available-languages.component';
+import { KnowledgeLevelModule } from '../knowledge-level/knowledge-level.module';
 
 
 @NgModule({
@@ -71,6 +72,7 @@ import { AvailableLanguagesComponent } from './available-languages/available-lan
         SkeletonLoaderLibModule,
         MatProgressSpinnerModule,
         ContentProgressModule,
+        KnowledgeLevelModule,
         DialogComponentsModule,
         TranslateModule.forRoot({
             loader: {
