@@ -2085,7 +2085,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   async getTabDataByCiosSearch(
-    strip: NsContentStripWithTabs.IContentStripUnit,
+    strip:any,
     tabIndex: number,
     _currentTab: NsContentStripWithTabs.IContentStripTab,
     calculateParentStatus: boolean
@@ -2095,6 +2095,42 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip)
         let tabResults: any[] = []
+        if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+          const allTabs = this.stripsResultDataMap[strip.key].tabs
+          if (allTabs && allTabs.length && allTabs[tabIndex]) {
+            allTabs[tabIndex] = {
+              ...allTabs[tabIndex],
+              widgets,
+              fetchTabStatus: 'done',
+            }
+            tabResults = allTabs
+          }
+        }
+        strip['viewMoreUrl']['path'] = "app/seeAll"
+        this.processStrip(
+          strip,
+          widgets,
+          'done',
+          calculateParentStatus,
+          strip.viewMoreUrl,
+          tabResults // tabResults as widgets
+        )
+      } else if(response && response.result && response.result.data && response.result.data.length){
+        
+        strip.stripConfig.cardSubType = 'card-providers-lib'
+        let data  = response.result.data.map((item: any) => {
+          return {
+            ...item,
+            "name": item?.contentPartnerName || '',
+            "logoUrl": item?.link || '',
+            "description": item?.description || '',
+            "contentDisplayType":_currentTab?.request?.condition || 'extCourse',
+            "isExternalProvider": true
+          }
+        })
+        const widgets = this.transformContentsToWidgets(data, strip)
+        let tabResults: any[] = []
+
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs
           if (allTabs && allTabs.length && allTabs[tabIndex]) {
