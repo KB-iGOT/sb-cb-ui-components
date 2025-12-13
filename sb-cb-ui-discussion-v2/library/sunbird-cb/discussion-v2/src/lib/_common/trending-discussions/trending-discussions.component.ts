@@ -39,7 +39,7 @@ export class TrendingDiscussionsComponent implements OnInit {
         "pageNumber": 0,
         "pageSize": 3,
         "orderBy": "answerPostCount",
-        "orderDirection": "DESC",
+        "orderDirection": "desc",
         "facets": []
     }
     if(this.communityId) {

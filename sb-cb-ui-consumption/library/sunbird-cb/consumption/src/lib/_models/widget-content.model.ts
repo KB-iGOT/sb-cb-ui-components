@@ -534,6 +534,7 @@ export namespace NsContent {
     LEARNING_JOURNEY = 'Learning Journeys',
     BLENDED_PROGRAM = 'BLENDED PROGRAM',
     CURATED_PROGRAM = 'CURATED PROGRAM',
+    SAMUHIK_CHARCHA = 'Samuhik Charcha'
   }
   // for UI
   export enum EFilterCategory {
