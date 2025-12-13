@@ -108,6 +108,10 @@
                     'days'}}
                   </span>
                 </div>
+                <ng-container *ngIf="widgetData?.content?.resourceType === 'Samuhik Charcha'">
+                  <div class="fixed-live">
+                    {{widgetData?.content?.status}}</div>
+                </ng-container>
               </div>
               <div class="padding-m">
                 <!-- dynamically apply this class course_widget_tagging if widgetData.content?.difficultyLevel   -->

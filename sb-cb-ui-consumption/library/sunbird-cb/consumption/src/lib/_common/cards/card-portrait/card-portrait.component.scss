@@ -539,3 +539,31 @@
   height: 14px;
   font-size: 14px;
 }
+
+.blink {
+  animation: blink-animation 1s steps(2, start) infinite;
+}
+
+.live {
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 12px;
+  letter-spacing: 0%;
+  text-align: center;
+  color: rgba(206, 68, 68, 1);
+  text-transform: uppercase;
+}
+
+.fixed-live {
+  position: absolute;
+  top: 40%;
+  left: 35%;
+  background-color: rgb(209, 57, 36);
+  padding: 3px 22px;
+  border-radius: 21px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
