@@ -325,3 +325,41 @@ $secondary-color: #EF951E;
   align-items: center;
   justify-content: center;
 }
+.cert-btn {
+  z-index: 12;
+  position: relative;
+}
+
+.retired-course-card {
+  position: relative;
+  .retired-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    border-radius: inherit;
+    padding: 12px;
+    overflow: hidden;
+  }
+  .retired-badge {
+    background: rgba(209, 57, 36, 1);
+    color: white;
+    padding: 2px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transform: rotate(325deg);
+    position: relative;
+    top: 11px;
+    left: -36px;
+    overflow: hidden;
+    font-family: "Lato-Regular";
+  }
+}
