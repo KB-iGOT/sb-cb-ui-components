@@ -42,8 +42,9 @@ export class ProviderCardComponent implements OnInit {
     if(content.isExternalProvider) {
       url = `app/seeAll/content`
       queryParams = {
-        key: content.contentDisplayType || 'extContent',
-        provider: content.id
+        key: content?.contentDisplayType || 'extContent',
+        provider: content?.id || '',
+        providerName: content?.contentPartnerName || content?.partnerCode || ''
       }
     } else {
       url = `/app/learn/browse-by/provider/${content.name}/${content.orgId}/micro-sites`
