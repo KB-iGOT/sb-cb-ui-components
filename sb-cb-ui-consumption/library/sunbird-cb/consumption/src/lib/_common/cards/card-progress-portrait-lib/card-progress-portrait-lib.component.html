@@ -1,9 +1,9 @@
 <ng-container *ngIf="!isCardLoading">
   <mat-card class="card-portrait card-progress-portrait-lib cursor-pointer mt-4"
-    [ngClass]="[widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : '', widgetData?.retired ? 'retired-course-card' : '']"
+    [ngClass]="[widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : '', widgetData?.content?.status === 'Retired' ? 'retired-course-card' : '']"
     (click)="raiseTelemetry();getRedirectUrlData(widgetData?.content); $event.stopPropagation()">
-    <div *ngIf="widgetData?.retired" class="retired-overlay">
-      <div class="retired-badge">Course Retired</div>
+    <div *ngIf="widgetData?.content?.status === 'Retired'" class="retired-overlay">
+      <div class="retired-badge">Retired</div>
     </div>
     <div class="course_widget portrait_widget flex  margin-bottom-xs"
       [style.gap]="widgetData?.content.difficultyLevel ? '5px' : '0px'"
