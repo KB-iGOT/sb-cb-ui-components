@@ -114,3 +114,5 @@ export * from './lib/_common/user-update/add-users-form-meta/add-users-form-meta
 export * from './lib/_common/pagination/pagination.model'
 export * from './lib/_common/pagination/pagination.module'
 export * from './lib/_common/pagination/pagination.component'
+export * from './lib/_common/horizontal-dynamic-stepper/horizontal-dynamic-stepper.module'
+export * from './lib/_common/horizontal-dynamic-stepper/horizontal-dynamic-stepper.component'
