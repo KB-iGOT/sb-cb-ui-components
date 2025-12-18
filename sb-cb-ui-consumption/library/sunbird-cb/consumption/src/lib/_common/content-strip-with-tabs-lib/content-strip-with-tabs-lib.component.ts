@@ -1737,6 +1737,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     if (this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
+      // Ensure tabSelected is set if not present and tabs exist
+      if (
+        queryParamsData &&
+        !queryParamsData['tabSelected'] &&
+        Array.isArray(_.get(stripData, 'tabs')) &&
+        _.get(stripData, 'tabs.length', 0) > 0
+      ) {
+        queryParamsData['tabSelected'] = _.get(stripData, `tabs[${this.currentTabIndex}].label`, '')
+      }
       this.router.navigate([path], { queryParams: queryParamsData })
     }
   }
@@ -2085,7 +2094,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   async getTabDataByCiosSearch(
-    strip:any,
+    strip: any,
     tabIndex: number,
     _currentTab: NsContentStripWithTabs.IContentStripTab,
     calculateParentStatus: boolean
@@ -2115,16 +2124,16 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           strip.viewMoreUrl,
           tabResults // tabResults as widgets
         )
-      } else if(response && response.result && response.result.data && response.result.data.length){
-        
+      } else if (response && response.result && response.result.data && response.result.data.length) {
+
         strip.stripConfig.cardSubType = 'card-providers-lib'
-        let data  = response.result.data.map((item: any) => {
+        let data = response.result.data.map((item: any) => {
           return {
             ...item,
             "name": item?.contentPartnerName || '',
             "logoUrl": item?.link || '',
             "description": item?.description || '',
-            "contentDisplayType":_currentTab?.request?.condition || 'extCourse',
+            "contentDisplayType": _currentTab?.request?.condition || 'extCourse',
             "isExternalProvider": true
           }
         })
