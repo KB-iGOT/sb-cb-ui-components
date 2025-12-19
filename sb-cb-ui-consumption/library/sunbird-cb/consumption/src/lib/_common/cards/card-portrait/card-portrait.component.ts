@@ -35,6 +35,7 @@ export class CardPortraitComponent implements OnInit {
   SAKSHAMAI_ICON_SUCCESS = '/assets/images/sakshamAI/ai-icon-success.svg'
   SAKSHAMAI_ICON_LOADER = '/assets/images/sakshamAI/saksham_ai_loader.gif'
   isHovered = false
+  showStatus = false
   constructor(
     private snackBar: MatSnackBar,
     private translate: TranslateService,
@@ -62,6 +63,20 @@ export class CardPortraitComponent implements OnInit {
     }
     if (this.widgetData?.sakshamAIGenerated) {
       this.isRelevent = this.contSvc.getFeedbackData(this.widgetData?.content?.identifier) || false
+    }
+
+    if (_.get(this.widgetData, 'content')) {
+
+      const content = this.widgetData.content
+      const startEpoch = _.get(content, 'startDateTimeInEpoch')
+      const endEpoch = _.get(content, 'endDateTimeInEpoch')
+      const now = Date.now()
+
+      if (startEpoch && endEpoch) {
+        this.showStatus = now >= startEpoch && now <= endEpoch
+      } else {
+        this.showStatus = false
+      }
     }
   }
 
