@@ -268,32 +268,31 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   getLength(data: IStripUnitContentData, key: string = '') {
     if (!data.tabs || !data.tabs.length) {
       return data.widgets ? data.widgets.length : 0
-    } {
-      if (key === 'myEvents' && this.userEventsAll && this.userEventsAll.length) {
-        return true
-      }
-      // if tabs are there check if each tab has widgets and get the tab with max widgets
-      const tabWithMaxWidgets = data.tabs.reduce(
-        (prev, current) => {
-          if (!prev.widgets && !current.widgets) {
-            return current
-          }
-          if (prev.widgets && current.widgets) {
-            return (prev.widgets.length > current.widgets.length) ? prev : current
-          }
-          if (current.widgets && !prev.widgets) {
-            return current
-          }
-          if (!current.widgets && prev.widgets) {
-            return prev
-          }
-          return current
-          // return (prev.widgets && current.widgets && (prev.widgets.length > current.widgets.length) ) ? prev : current
-          // tslint:disable-next-line: align
-        }, data.tabs[0])
-      // if tabs has atleast 1 widgets then strip will show or else not
-      return this.isEdit ? true : tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0
     }
+    if (key === 'samuhikCharchaContent' || (key === 'myEvents' && this.userEventsAll && this.userEventsAll.length)) {
+      return true
+    }
+    // if tabs are there check if each tab has widgets and get the tab with max widgets
+    const tabWithMaxWidgets = data.tabs.reduce(
+      (prev, current) => {
+        if (!prev.widgets && !current.widgets) {
+          return current
+        }
+        if (prev.widgets && current.widgets) {
+          return (prev.widgets.length > current.widgets.length) ? prev : current
+        }
+        if (current.widgets && !prev.widgets) {
+          return current
+        }
+        if (!current.widgets && prev.widgets) {
+          return prev
+        }
+        return current
+        // return (prev.widgets && current.widgets && (prev.widgets.length > current.widgets.length) ) ? prev : current
+        // tslint:disable-next-line: align
+      }, data.tabs[0])
+    // if tabs has atleast 1 widgets then strip will show or else not
+    return this.isEdit ? true : tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0
   }
 
   private getFiltersFromArray(v6filters: any) {
@@ -1225,7 +1224,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     try {
       const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
-      let resContent: any
+      debugger
+      let resContent: any = []
       if (response && response.results) {
         if (response.results.result.content) {
           resContent = response.results.result.content
