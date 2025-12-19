@@ -39,7 +39,9 @@ export class ProviderCardComponent implements OnInit {
   redirectTo(content: any) {  
     let url = ''
     let queryParams = {}
-    if(content.isExternalProvider) {
+    if(content?.internalOrgId) {
+       url = `/app/learn/browse-by/provider/${content?.contentPartnerName|| content?.name}/${content?.internalOrgId}/micro-sites`
+    } else if(!content?.internalOrgId && content?.isExternalProvider) {
       url = `app/seeAll/content`
       queryParams = {
         key: content?.contentDisplayType || 'extContent',
@@ -50,7 +52,7 @@ export class ProviderCardComponent implements OnInit {
       url = `/app/learn/browse-by/provider/${content.name}/${content.orgId}/micro-sites`
     }
     this.router.navigate([url], { queryParams })
-    content['typeOfTelemetry'] = this.widgetData.context.pageSection
+    content['typeOfTelemetry'] = this.widgetData?.context?.pageSection
     this.contSvc.changeTelemetryData(content)
   }
 
