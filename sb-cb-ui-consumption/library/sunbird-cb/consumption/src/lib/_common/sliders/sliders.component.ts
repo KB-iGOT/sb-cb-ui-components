@@ -31,7 +31,7 @@ export class SlidersLibComponent extends WidgetBaseComponent
   }
 
   ngOnInit() {
-    this.widgetData = this.widgetData.filter((slide: any) => slide?.active)
+    this.widgetData = this.widgetData && this.widgetData.filter((slide: any) => slide?.active)
     this.reInitiateSlideInterval()
     this.defaultMenuSubscribe = this.isLtMedium$.subscribe((isLtMedium: boolean) => {
       this.isMobile = isLtMedium
