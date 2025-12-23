@@ -182,18 +182,51 @@ export class WidgetUserServiceLib {
     }
   }
 
-  fetchCbpPlanList(userId: string) {
+  fetchCbpPlanList(userId: string, callApi?: boolean) {
+    // If callApi is true, always fetch from API and return full metadata (not reduced)
+    if (callApi) {
+        const result: any = this.http.get(API_END_POINTS.FETCH_CPB_PLANS).pipe(catchError(this.handleError), map(
+          async (data: any) => {
+            if (data.result && data.result.content && data.result.content.length) {
+              let cbpData: any = this.getCbpFormatedData(data.result.content)
+              let cbpContentData: any = cbpData.cbpContentData || []
+              let request = {
+                request: {
+                  courseId: cbpData.contentIds
+                }
+              }
+              const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+                const enrollData: any = {}
+                if (res && res.result && res.result.courses && res.result.courses.length) {
+                  res.result.courses.forEach((data: any) => {
+                    enrollData[data.collectionId] = data
+                  })
+                  return enrollData
+                } else {
+                  return {}
+                }
+              }).catch((_err: any) => {
+                return {}
+              });
+              // ask for full metadata (fullMeta = true)
+              return await this.mapCbpData(cbpContentData, responseData, true)
+            }
+          }
+        ))
+        return result
+    }
+
+    // Default behavior: use cache check and return reduced/minified metadata
     if (this.checkStorageData('cbpService', 'cbpData')) {
       const result: any = this.http.get(API_END_POINTS.FETCH_CPB_PLANS).pipe(catchError(this.handleError), map(
         async (data: any) => {
           if (data.result && data.result.content && data.result.content.length) {
-
             let cbpData: any = this.getCbpFormatedData(data.result.content)
             let cbpDoIds = cbpData.contentIds.join(',')
             let cbpContentData: any = cbpData.cbpContentData || []
             let request = {
-              "request": {
-                "courseId": cbpData.contentIds
+              request: {
+                courseId: cbpData.contentIds
               }
             }
             const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
@@ -210,7 +243,8 @@ export class WidgetUserServiceLib {
             }).catch((_err: any) => {
               return {}
             });
-            return await this.mapCbpData(cbpContentData, responseData)
+            // default: return reduced metadata (fullMeta = false)
+            return await this.mapCbpData(cbpContentData, responseData, false)
           }
         }
       )
@@ -272,7 +306,7 @@ export class WidgetUserServiceLib {
     })
     return { cbpContentData, contentIds }
   }
-  async mapCbpData(cbpContent: any, enrollmentData: any) {
+  async mapCbpData(cbpContent: any, enrollmentData: any, fullMeta: boolean = false) {
     let cbpFilteredContent: any = []
     if (cbpContent && cbpContent.length) {
       if (Object.keys(enrollmentData).length) {
@@ -290,8 +324,8 @@ export class WidgetUserServiceLib {
           if (childEnrollData) {
             cbp['contentStatus'] = childEnrollData.status
           }
-          if (cbp.competencies_v5) {
-            cbp.competencies_v5.forEach((element: any) => {
+          if (cbp[this.environment.compentencyVersionKey] && cbp[this.environment.compentencyVersionKey].length) {
+            cbp[this.environment.compentencyVersionKey].forEach((element: any) => {
               if (!competencyArea.includes(element.competencyArea)) {
                 competencyArea.push(element.competencyArea)
                 competencyAreaId.push(element.competencyAreaId)
@@ -335,14 +369,26 @@ export class WidgetUserServiceLib {
           const uniqueUsersByID = lodash.uniqBy(sortedData, 'identifier')
           const sortedByEndDate = lodash.orderBy(uniqueUsersByID, ['endDate'], ['asc'])
           const sortedByStatus = lodash.orderBy(sortedByEndDate, ['contentStatus'], ['asc'])
+          if (fullMeta) {
+            return sortedByStatus
+          }
           let cbpContentSorted = this.requiredCBPData(sortedByStatus)
           return cbpContentSorted
+        }
+        if (fullMeta) {
+          return cbpFilteredContent
         }
         let cbpContentFiltered = this.requiredCBPData(cbpFilteredContent)
         return cbpContentFiltered
       }
+      if (fullMeta) {
+        return cbpContent
+      }
       let cbpContentAll = this.requiredCBPData(cbpContent)
       return cbpContentAll
+    }
+    if (fullMeta) {
+      return []
     }
     let cbpContentEmpty = this.requiredCBPData([])
     return cbpContentEmpty
@@ -371,15 +417,14 @@ export class WidgetUserServiceLib {
           }
         })
         // competency related fields (already computed in mapCbpData)
-        ;['competencies_v5', 'competencyArea', 'competencyTheme', 'competencyThemeType', 'competencySubTheme', 'competencyAreaId', 'competencyThemeId', 'competencySubThemeId'].forEach((k: string) => {
-          if (cbp[k] !== undefined) {
-            cbpObj[k] = cbp[k]
-          }
-        })
+        // ;['competencies_v5', 'competencyArea', 'competencyTheme', 'competencyThemeType', 'competencySubTheme', 'competencyAreaId', 'competencyThemeId', 'competencySubThemeId'].forEach((k: string) => {
+        //   if (cbp[k] !== undefined) {
+        //     cbpObj[k] = cbp[k]
+        //   }
+        // })
         requiredCbpData.push(cbpObj)
       })
     }
-    console.log('requiredCbpData', requiredCbpData)
     // persist only the reduced metadata to keep localStorage small
     localStorage.setItem('cbpData', JSON.stringify(requiredCbpData))
     return requiredCbpData
