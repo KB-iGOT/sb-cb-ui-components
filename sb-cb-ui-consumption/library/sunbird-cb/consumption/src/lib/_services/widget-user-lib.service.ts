@@ -335,17 +335,54 @@ export class WidgetUserServiceLib {
           const uniqueUsersByID = lodash.uniqBy(sortedData, 'identifier')
           const sortedByEndDate = lodash.orderBy(uniqueUsersByID, ['endDate'], ['asc'])
           const sortedByStatus = lodash.orderBy(sortedByEndDate, ['contentStatus'], ['asc'])
-          localStorage.setItem('cbpData', JSON.stringify(sortedByStatus))
-          return sortedByStatus
+          let cbpContentSorted = this.requiredCBPData(sortedByStatus)
+          return cbpContentSorted
         }
-        localStorage.setItem('cbpData', JSON.stringify(cbpFilteredContent))
-        return cbpFilteredContent
+        let cbpContentFiltered = this.requiredCBPData(cbpFilteredContent)
+        return cbpContentFiltered
       }
-      localStorage.setItem('cbpData', JSON.stringify(cbpContent))
-      return cbpContent
+      let cbpContentAll = this.requiredCBPData(cbpContent)
+      return cbpContentAll
     }
-    localStorage.setItem('cbpData', JSON.stringify([]))
-    return []
+    let cbpContentEmpty = this.requiredCBPData([])
+    return cbpContentEmpty
+  }
+
+  requiredCBPData(cbpData: any) {
+    const requiredCbpData: any[] = []
+    if (cbpData?.length) {
+      cbpData.forEach((cbp: any) => {
+        const cbpObj: any = {}
+        // Always include identifier
+        cbpObj.identifier = cbp.identifier
+        // Common display fields
+        if (cbp.name) {
+          cbpObj.name = cbp.name
+        }
+        // normalize download URL (handle both downloadUrl and downloaUrl)
+        const download = cbp.downloaUrl || cbp.downloadUrl || (cbp.variants && cbp.variants.spine && cbp.variants.spine.ecarUrl) || (cbp.variants && cbp.variants.online && cbp.variants.online.ecarUrl)
+        if (download) {
+          cbpObj.downloaUrl = download
+        }
+        // scheduling / plan fields
+        ;['endDate', 'planDuration','appIcon','difficultyLevel','avgRating','posterImage','duration','primaryCategory','courseCategory','planType', 'contentStatus', 'status', 'isApar'].forEach((k: string) => {
+          if (cbp[k] !== undefined) {
+            cbpObj[k] = cbp[k]
+          }
+        })
+        // competency related fields (already computed in mapCbpData)
+        ;['competencies_v5', 'competencyArea', 'competencyTheme', 'competencyThemeType', 'competencySubTheme', 'competencyAreaId', 'competencyThemeId', 'competencySubThemeId'].forEach((k: string) => {
+          if (cbp[k] !== undefined) {
+            cbpObj[k] = cbp[k]
+          }
+        })
+        requiredCbpData.push(cbpObj)
+      })
+    }
+    console.log('requiredCbpData', requiredCbpData)
+    // persist only the reduced metadata to keep localStorage small
+    localStorage.setItem('cbpData', JSON.stringify(requiredCbpData))
+    return requiredCbpData
   }
   mapEnrollmentData(courseData: any) {
     const enrollData: any = {}
