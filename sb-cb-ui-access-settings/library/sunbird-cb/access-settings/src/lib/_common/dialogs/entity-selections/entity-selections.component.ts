@@ -479,7 +479,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     return (
       (this.groupedEntityData && Object.keys(this.groupedEntityData).length > 0) ||
       (this.selectionType === NsAccessControlConfig.SelectionType.Group && this.dataList.length > 0) ||
-      (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus && this.dataList.length > 0)
+      (this.selectionType === NsAccessControlConfig.SelectionType.VerificationStatus && this.dataList.length > 0) ||
+      (this.selectionType === NsAccessControlConfig.SelectionType.Designation && this.dataList.length > 0)
     );
   }
 

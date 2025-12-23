@@ -55,7 +55,7 @@ interface IStripUnitContentData {
   stripName?: string
   stripLogo?: string
   description?: string
-  stripInfo?: NsContentStripWithTabs.IStripInfo
+  stripInfo?: any
   noDataWidget?: NsWidgetResolver.IRenderConfigWithAnyData
   errorWidget?: NsWidgetResolver.IRenderConfigWithAnyData
   showOnNoData: boolean
@@ -1049,7 +1049,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       showStrip: this.getIfStripHidden(strip.key),
       noDataWidget: strip.noDataWidget,
       errorWidget: strip.errorWidget,
-      stripInfo: strip.info,
+      stripInfo: strip.stripInfo || {},
       stripTitle: strip.title,
       titleClass: strip.titleClass || '',
       stripTitleLink: strip.stripTitleLink,
@@ -2100,7 +2100,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise()
+      const response = await this.contentSvc.postApiMethod(_currentTab.request.apiUrl, _currentTab.request.ciosContent).toPromise()
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip)
         let tabResults: any[] = []
