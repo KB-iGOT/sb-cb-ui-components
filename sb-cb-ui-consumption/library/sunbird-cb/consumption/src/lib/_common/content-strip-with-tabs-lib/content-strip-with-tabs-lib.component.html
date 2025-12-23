@@ -35,9 +35,8 @@
                     {{ translateLabels(stripsResultDataMap[key]?.stripTitle, 'home') }}
                   </span>
                 </p>
-
                 <button *ngIf="stripsResultDataMap[key]?.stripInfo?.icon" type="button" mat-icon-button
-                  (click)="toggleInfo(stripsResultDataMap[key])" i18n-matTooltip matTooltip="info"
+                  [matTooltip]="stripsResultDataMap[key]?.stripInfo?.description" [matTooltipPosition]="stripsResultDataMap[key]?.stripInfo?.icon?.direction || 'above'"
                   class="margin-left-xs">
                   <mat-icon>{{ stripsResultDataMap[key]?.stripInfo?.icon.icon }}</mat-icon>
                 </button>

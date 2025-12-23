@@ -55,7 +55,7 @@ interface IStripUnitContentData {
   stripName?: string
   stripLogo?: string
   description?: string
-  stripInfo?: NsContentStripWithTabs.IStripInfo
+  stripInfo?: any
   noDataWidget?: NsWidgetResolver.IRenderConfigWithAnyData
   errorWidget?: NsWidgetResolver.IRenderConfigWithAnyData
   showOnNoData: boolean
@@ -268,32 +268,31 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   getLength(data: IStripUnitContentData, key: string = '') {
     if (!data.tabs || !data.tabs.length) {
       return data.widgets ? data.widgets.length : 0
-    } {
-      if (key === 'myEvents' && this.userEventsAll && this.userEventsAll.length) {
-        return true
-      }
-      // if tabs are there check if each tab has widgets and get the tab with max widgets
-      const tabWithMaxWidgets = data.tabs.reduce(
-        (prev, current) => {
-          if (!prev.widgets && !current.widgets) {
-            return current
-          }
-          if (prev.widgets && current.widgets) {
-            return (prev.widgets.length > current.widgets.length) ? prev : current
-          }
-          if (current.widgets && !prev.widgets) {
-            return current
-          }
-          if (!current.widgets && prev.widgets) {
-            return prev
-          }
-          return current
-          // return (prev.widgets && current.widgets && (prev.widgets.length > current.widgets.length) ) ? prev : current
-          // tslint:disable-next-line: align
-        }, data.tabs[0])
-      // if tabs has atleast 1 widgets then strip will show or else not
-      return this.isEdit ? true : tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0
     }
+    if (key === 'samuhikCharchaContent' || (key === 'myEvents' && this.userEventsAll && this.userEventsAll.length)) {
+      return true
+    }
+    // if tabs are there check if each tab has widgets and get the tab with max widgets
+    const tabWithMaxWidgets = data.tabs.reduce(
+      (prev, current) => {
+        if (!prev.widgets && !current.widgets) {
+          return current
+        }
+        if (prev.widgets && current.widgets) {
+          return (prev.widgets.length > current.widgets.length) ? prev : current
+        }
+        if (current.widgets && !prev.widgets) {
+          return current
+        }
+        if (!current.widgets && prev.widgets) {
+          return prev
+        }
+        return current
+        // return (prev.widgets && current.widgets && (prev.widgets.length > current.widgets.length) ) ? prev : current
+        // tslint:disable-next-line: align
+      }, data.tabs[0])
+    // if tabs has atleast 1 widgets then strip will show or else not
+    return this.isEdit ? true : tabWithMaxWidgets.widgets ? tabWithMaxWidgets.widgets.length : 0
   }
 
   private getFiltersFromArray(v6filters: any) {
@@ -1050,7 +1049,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       showStrip: this.getIfStripHidden(strip.key),
       noDataWidget: strip.noDataWidget,
       errorWidget: strip.errorWidget,
-      stripInfo: strip.info,
+      stripInfo: strip.stripInfo || {},
       stripTitle: strip.title,
       titleClass: strip.titleClass || '',
       stripTitleLink: strip.stripTitleLink,
@@ -1225,7 +1224,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     try {
       const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
-      let resContent: any
+      debugger
+      let resContent: any = []
       if (response && response.results) {
         if (response.results.result.content) {
           resContent = response.results.result.content
@@ -1737,6 +1737,15 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     if (this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
     } else {
+      // Ensure tabSelected is set if not present and tabs exist
+      if (
+        queryParamsData &&
+        !queryParamsData['tabSelected'] &&
+        Array.isArray(_.get(stripData, 'tabs')) &&
+        _.get(stripData, 'tabs.length', 0) > 0
+      ) {
+        queryParamsData['tabSelected'] = _.get(stripData, `tabs[${this.currentTabIndex}].label`, '')
+      }
       this.router.navigate([path], { queryParams: queryParamsData })
     }
   }
@@ -2085,13 +2094,13 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   }
 
   async getTabDataByCiosSearch(
-    strip:any,
+    strip: any,
     tabIndex: number,
     _currentTab: NsContentStripWithTabs.IContentStripTab,
     calculateParentStatus: boolean
   ) {
     try {
-      const response = await this.contentSvc.postApiMethod(strip.request.apiUrl, strip.request.ciosContent).toPromise()
+      const response = await this.contentSvc.postApiMethod(_currentTab.request.apiUrl, _currentTab.request.ciosContent).toPromise()
       if (response && response.data && response.data.length) {
         const widgets = this.transformContentsToWidgets(response.data, strip)
         let tabResults: any[] = []
@@ -2115,16 +2124,16 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
           strip.viewMoreUrl,
           tabResults // tabResults as widgets
         )
-      } else if(response && response.result && response.result.data && response.result.data.length){
-        
+      } else if (response && response.result && response.result.data && response.result.data.length) {
+
         strip.stripConfig.cardSubType = 'card-providers-lib'
-        let data  = response.result.data.map((item: any) => {
+        let data = response.result.data.map((item: any) => {
           return {
             ...item,
             "name": item?.contentPartnerName || '',
             "logoUrl": item?.link || '',
             "description": item?.description || '',
-            "contentDisplayType":_currentTab?.request?.condition || 'extCourse',
+            "contentDisplayType": _currentTab?.request?.condition || 'extCourse',
             "isExternalProvider": true
           }
         })

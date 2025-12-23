@@ -174,9 +174,9 @@ export class BulkUploadKarmayogiComponent {
     const mobileNumbers: any = [];
     const bothEmailAndMobile: any = {};
     this.contacts = this.contacts.filter((ele: any) => ele.Emailid || ele.Mobilenumber);
-    if (this.contacts.length > 30) {
+    if (this.contacts.length > 50000) {
       this.snackBar.openFromComponent(SnackbarComponent, {
-        data: { message: "More than 30 users are not allowed", type: "error" },
+        data: { message: "More than 50000 users are not allowed", type: "error" },
         duration: 3000,
         panelClass: "course-error-snackbar"
       });
