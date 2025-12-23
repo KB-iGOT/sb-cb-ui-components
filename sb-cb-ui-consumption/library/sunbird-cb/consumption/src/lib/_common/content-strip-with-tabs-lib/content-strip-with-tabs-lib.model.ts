@@ -47,6 +47,7 @@ export namespace NsContentStripWithTabs {
     mode?: 'accordion'
     info?: IStripInfo
     logo?: string
+    stripInfo: any
     preWidgets?: NsWidgetResolver.IRenderConfigWithAnyData[]
     postWidgets?: NsWidgetResolver.IRenderConfigWithAnyData[]
     stripConfig?: IStripConfig
