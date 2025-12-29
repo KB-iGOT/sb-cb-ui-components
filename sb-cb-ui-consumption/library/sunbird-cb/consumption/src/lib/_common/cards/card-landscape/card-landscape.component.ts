@@ -56,6 +56,8 @@ export class CardLandscapeComponent implements OnInit {
       this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
       this.defaultSLogo =  '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
     }
+    this.defaultSLogo =  this.widgetData?.content?.contentPartner?.contentPartnerName ? '/assets/icons/content/provider.svg':this.defaultSLogo
+
     this.cbPlanInterval = setInterval(() => {
       this.getCbPlanData()
     },                                1000)
