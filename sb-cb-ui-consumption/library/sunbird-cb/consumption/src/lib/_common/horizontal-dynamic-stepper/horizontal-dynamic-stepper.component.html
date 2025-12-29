@@ -1,6 +1,6 @@
 <div class="horizontal-stepper">
   <mat-stepper labelPosition="bottom" [selectedIndex]="selectedIndex" (selectionChange)="onSelectionChange($event)"
-    class="mx-10" #stepper>
+    #stepper>
     <ng-container *ngFor="let label of labels; let i = index">
       <mat-step label="{{label}}" [completed]="false">
         <ng-template matStepLabel>{{ label }}</ng-template>
