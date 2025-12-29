@@ -91,5 +91,11 @@ export class CardLandscapeComponent implements OnInit {
     }
   }
 
+  getProviderNames(providers: any[]): string {
+    if (!providers || !providers.length) {
+      return '';
+    }
+    return providers.map(p => p?.name).join(', ');
+  }
 
 }
