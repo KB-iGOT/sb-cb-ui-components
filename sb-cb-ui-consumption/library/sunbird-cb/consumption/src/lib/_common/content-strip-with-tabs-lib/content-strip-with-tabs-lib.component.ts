@@ -1224,7 +1224,6 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   ) {
     try {
       const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
-      debugger
       let resContent: any = []
       if (response && response.results) {
         if (response.results.result.content) {
