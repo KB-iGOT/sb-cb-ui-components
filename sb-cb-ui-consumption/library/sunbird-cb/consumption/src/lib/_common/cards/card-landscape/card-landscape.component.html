@@ -59,7 +59,7 @@
               class="portrait-subheading mat-subheading-2 title-text">
               {{ widgetData?.content?.name }}
            </div>
-           <div class="flex w-full  flex-middle">
+           <div class="flex w-full  flex-middle" *ngIf="!(widgetData?.content?.courseProvider?.length && widgetData.content?.courseProvider[0]?.name)">
               <div class="portrait_course_logo_box margin-right-xs">
                  <img [src]="widgetData?.content?.creatorLogo || widgetData?.content?.contentPartner?.link | pipePublicURL " class="source-icon"  loading="lazy" [wsUtilsDefaultThumbnail]="defaultSLogo"
                  [alt]="(widgetData?.content?.sourceName + '_' + widgetData?.content?.identifier)" />
@@ -67,7 +67,21 @@
               <span class="portrait-org-name font-normal mat-caption">By {{ (widgetData.content.organisation && widgetData.content.organisation[0]) ? widgetData.content.organisation[0] : widgetData?.content?.contentPartner?.contentPartnerName || 'Karmayogi Bharat' }}</span>
               <!-- <span class="portrait-org-name font-normal mat-caption">{{'cardcontentv2.by' | translate}} {{ (widgetData.content.organisation && widgetData.content.organisation[0]) ? widgetData.content.organisation[0] : 'Karmayogi Bharat' }}</span> -->
            </div>
-
+           
+            <div class="flex w-full flex-middle provider-wrapper" *ngIf="widgetData?.content?.courseProvider?.length && widgetData.content?.courseProvider[0]?.name">
+              <div class="portrait_course_logo_box margin-right-xs">
+                 <img [src]="widgetData?.content?.courseProvider[0]?.logoUrl" class="source-icon"  loading="lazy" [wsUtilsDefaultThumbnail]="defaultSLogo"
+                 [alt]="(widgetData?.content?.sourceName + '_' + widgetData?.content?.identifier)" />
+              </div>
+              <span class="font-normal mat-caption">By&nbsp;</span>
+              <span class="provider-name font-normal mat-caption">{{ widgetData.content?.courseProvider[0]?.name }}</span>
+              <span *ngIf="widgetData.content?.courseProvider?.length > 1" 
+                    class="provider-count font-normal mat-caption cursor-pointer"
+                    [matTooltip]="getProviderNames(widgetData.content?.courseProvider)"
+                    matTooltipPosition="above">
+                  &nbsp;+{{ widgetData?.content?.courseProvider?.length - 1 }}
+              </span>
+           </div>
            <div class="flex flex-middle rating-session margin-top-xs">
             <div class="flex flex-middle" *ngIf="widgetData?.content?.avgRating">
               <mat-icon class="mr-1">star</mat-icon>
