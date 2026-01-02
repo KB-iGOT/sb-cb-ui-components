@@ -28,8 +28,7 @@
     <ng-container *ngSwitchCase="displayContentTypeEnum?.WEB_PAGE" i18n>Web Page</ng-container>
     <ng-container *ngSwitchCase="displayContentTypeEnum?.YOUTUBE" i18n>Youtube</ng-container>
     <ng-container *ngSwitchDefault i18n>
-      <span *ngIf="useTranslation" class="nodtranslate"
-        [ngClass]="{'white-text': displayContentType === 'Samuhik Charcha'}">
+      <span *ngIf="useTranslation" class="nodtranslate">
         {{ translateLabels(displayContentType, 'searchfilters') }}
       </span>
       <span *ngIf="!useTranslation" class="nodtranslate">
