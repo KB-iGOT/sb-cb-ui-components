@@ -3,7 +3,9 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router'
 import { Observable, of } from 'rxjs'
 import { NsUser, ConfigurationsService, IResolveResponse } from '@sunbird-cb/utils-v2'
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ProfileResolverService  {
 
   constructor(private configSvc: ConfigurationsService) { }

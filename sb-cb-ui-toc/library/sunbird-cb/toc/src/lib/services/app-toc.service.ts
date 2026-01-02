@@ -61,7 +61,9 @@ const API_END_POINTS = {
   NOTIFY_ASSIGNMENT_SUBMISSION: `apis/proxies/v8/v1/notifyAssignment/submit`,
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppTocService {
   analyticsReplaySubject: Subject<any> = new Subject()
   analyticsFetchStatus: TFetchStatus = 'none'

@@ -1,5 +1,8 @@
-import { Pipe, PipeTransform } from '@angular/core'
+import { Pipe, PipeTransform, Injectable } from '@angular/core'
 import { NsContent } from '../../../_services/widget-content.model'
+@Injectable({
+  providedIn: 'root'
+})
 @Pipe({
   name: 'pipeContentRoute',
 })

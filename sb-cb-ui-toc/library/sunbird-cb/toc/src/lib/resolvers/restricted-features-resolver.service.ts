@@ -3,7 +3,9 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router'
 import { Observable, of } from 'rxjs'
 import { ConfigurationsService, IResolveResponse } from '@sunbird-cb/utils-v2'
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class RestrictedFeaturesResolverService  {
 
   constructor(private configSvc: ConfigurationsService) { }

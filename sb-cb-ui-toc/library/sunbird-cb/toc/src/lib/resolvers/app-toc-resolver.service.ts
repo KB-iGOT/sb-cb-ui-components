@@ -52,7 +52,9 @@ const ADDITIONAL_FIELDS_IN_CONTENT = [
   'certificationList',
   'posterImage',
 ]
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppTocResolverService
    {
   constructor(

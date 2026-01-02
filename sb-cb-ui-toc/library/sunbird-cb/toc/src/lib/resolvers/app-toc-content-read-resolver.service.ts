@@ -8,7 +8,9 @@ import { Observable, of } from 'rxjs'
 import { catchError, map, tap } from 'rxjs/operators'
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppTocContentReadResolverService
    {
   constructor(

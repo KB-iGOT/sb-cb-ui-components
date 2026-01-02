@@ -3,7 +3,7 @@
  */
 
 // Main module
-export * from './lib/app-toc.module'
+export * from './lib/app-toc-lib.module'
 
 // Routing module (OPTIONAL - only import if you want to use pre-configured routes)
 // You can configure routing in your application instead
