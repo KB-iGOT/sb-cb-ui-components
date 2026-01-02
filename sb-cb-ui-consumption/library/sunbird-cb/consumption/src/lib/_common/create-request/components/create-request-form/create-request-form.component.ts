@@ -12,7 +12,7 @@ import { CreateRequestService } from '../../services/create-request.service'
 })
 export class CreateRequestFormComponent implements OnInit {
   //#region (global variable declaration)
-  @Output() popupStatus = new EventEmitter<string>()
+  @Output() requestDetails = new EventEmitter<any>()
   currentStepperIndex = 0
   steppersList = ['Content Details', 'Additional Details']
   isHideData = false
@@ -182,65 +182,8 @@ export class CreateRequestFormComponent implements OnInit {
       return
     }
     const requestBody = this.generateRequestBody()
-    this.popupStatus.emit('progress')
-    this.createRequestSvc.createRequestForm(requestBody).subscribe({
-      next: (response: any) => {
-        if (response) {
-          this.popupStatus.emit('progress-completed')
-          setTimeout(() => {
-            this.popupStatus.emit('') // to close the popup
-            this.router.navigateByUrl('/app/home/request-list')
-            this.snackBar.open('Request submitted successfully ')
-          }, 1000)
-        }
-      },
-      error: (error: any) => {
-        if (error) {
-          this.snackBar.open('Something went wrong, please try again.')
-        }
-      }
-    })
+    this.requestDetails.emit(requestBody)
   }
-
-  showDialogBox(event: any) {
-    const dialogData: any = {}
-    switch (event) {
-      case 'progress':
-        dialogData['type'] = 'progress'
-        dialogData['icon'] = 'vega'
-        dialogData['title'] = 'Processing your request'
-        dialogData['subTitle'] = `Wait a second , your request is processing………`
-        break
-      case 'progress-completed':
-        dialogData['type'] = 'progress-completed'
-        dialogData['icon'] = 'accept_icon'
-        dialogData['title'] = 'Processing your request'
-        dialogData['subTitle'] = `Wait a second , your request is processing………`
-        dialogData['primaryAction'] = 'Successfully created....'
-        break
-    }
-
-    this.openDialoagBox(dialogData)
-  }
-
-  openDialoagBox(dialogData: any) {
-    // this.dialogRefs = this.dialog.open(ConfirmationBoxComponent, {
-    //   disableClose: true,
-    //   data: {
-    //     type: dialogData.type,
-    //     icon: dialogData.icon,
-    //     title: dialogData.title,
-    //     subTitle: dialogData.subTitle,
-    //     primaryAction: dialogData.primaryAction,
-    //     secondaryAction: dialogData.secondaryAction,
-    //   },
-    //   autoFocus: false,
-    // })
-
-    // this.dialogRefs.afterClosed().subscribe(() => {
-    // })
-  }
-
 
   generateRequestBody() {
     if (!this.contentDetailsForm || !this.additionalDetailsForm)
