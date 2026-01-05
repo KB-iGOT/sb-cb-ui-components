@@ -111,7 +111,7 @@ export class CreateRequestFormComponent implements OnInit {
     this.additionalDetailsForm.patchValue({
       courseLanguage: this.requestObjData.courseLanguage ? this.requestObjData.courseLanguage : [],
       availableWithMDO: this.requestObjData.sectoralSubjectMatterExpertAvailable,
-      requiredFromKB: this.requestObjData.courseDigitisationAgencyRequired,
+      requiredFromKB: this.requestObjData.courseDigitisationAgencyRequired ? true : false,
       referenceLink: this.requestObjData.referenceLink ? this.requestObjData.referenceLink : '',
       requestType: this.requestObjData.requestType || '',
       assignee: this.requestObjData.assignedProvider || [],
@@ -235,7 +235,10 @@ export class CreateRequestFormComponent implements OnInit {
 
   get getCourseLanguage(): string[] {
     if (this.additionalDetailsForm && this.additionalDetailsForm.get('courseLanguage')) {
-      return this.additionalDetailsForm.get('courseLanguage')?.value.map((lang: { displayName: string; value: string }) => lang.value)
+      const val = this.additionalDetailsForm.get('courseLanguage').value
+      if (Array.isArray(val)) {
+        return val.map((lang: { displayName: string; value: string }) => lang.value)
+      }
     }
     return []
   }
