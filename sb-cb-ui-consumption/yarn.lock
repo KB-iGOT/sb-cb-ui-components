@@ -3401,10 +3401,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@sunbird-cb/utils-v2@0.1.0-cbrelease-4.8.28":
-  version "0.1.0-cbrelease-4.8.28"
-  resolved "https://registry.yarnpkg.com/@sunbird-cb/utils-v2/-/utils-v2-0.1.0-cbrelease-4.8.28.tgz#8798e6eae90a6e3870cd11ef7216a4ac0c8ddf9a"
-  integrity sha512-Ys2FEciGeYH/lWw33dO/Q7JRFJPj/MKjshZycgOIWg9tYoBZOHLKx5CG1u+ZegIPVw1QqwJML31OrwfTxoKeWg==
+"@sunbird-cb/utils-v2@0.0.2-cbrelease-4.8.31":
+  version "0.0.2-cbrelease-4.8.31"
+  resolved "https://registry.yarnpkg.com/@sunbird-cb/utils-v2/-/utils-v2-0.0.2-cbrelease-4.8.31.tgz#f9acec4ffa97a16c15325be8cdad8201804f48f3"
+  integrity sha512-dRzBLj2Rx6MfJQmfaGhRCCgIyszJhCy4L+zEIwvgMn+Mba8OI8edktTk0YsF7gLGm1hzfCWeFgRxGYM0NAz7kg==
   dependencies:
     tslib "^2.0.0"
 
