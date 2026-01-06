@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import { NsCardContent } from '../../_models/card-content.model'
-import { UtilityService } from '@sunbird-cb/utils-v2'
+import { NsContent, UtilityService } from '@sunbird-cb/utils-v2'
 import { WidgetContentLibService } from '../../_services/widget-content-lib.service'
 import { Router } from '@angular/router'
+import { VIEWER_ROUTE_FROM_MIME } from '../../_services/viewer-route-util'
 
 @Component({
   selector: 'sb-uic-cards',
@@ -51,7 +52,13 @@ export class CardsComponent extends WidgetBaseComponent
     return false
   }
   async getRedirectUrlData(content: any) {
-    if (content.externalId) {
+    if(content?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE){
+      let url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(content?.mimeType)}/${content?.identifier}`
+      let queryParams = {
+        primaryCategory: content?.primaryCategory
+      }
+      this.router.navigate([url], { queryParams })
+    } else if (content.externalId) {
       this.router.navigate(
         [`app/toc/ext/${content.contentId}`])
     } else {
