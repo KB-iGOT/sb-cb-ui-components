@@ -1,7 +1,10 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core'
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core'
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { Subscription } from 'rxjs'
 import { NsAssessment } from '../../service/assessment.model'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { AssessmentService } from '../../service/assessment.service'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 
 @Component({
   selector: 'sb-uic-assessment-basic-info',
@@ -12,10 +15,13 @@ import { NsAssessment } from '../../service/assessment.model'
 export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
   @Input() config: any
+  @Output() saved = new EventEmitter<any>()
+  @Output() updated = new EventEmitter<any>()
+  @Output() cancelled = new EventEmitter<void>()
 
   assessmentForm!: FormGroup
   reAttemptOptions: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-  titleMaxLength = 70
+  nameMaxLength = 70
   instructionsMaxLength = 500
   durationTouched = false
   overallScoreCutoffOptions = [
@@ -32,10 +38,11 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   ]
   isFinalAssessment: boolean = false
   isPracticeAssessment: boolean = false
+  showCoolOffPeriod: boolean = false
   private showTimerSubscription?: Subscription
   private assessmentTypeSubscription?: Subscription
   private questionWeightageTypeSubscription?: Subscription
-  private totalNumberOfSectionsSubscription?: Subscription
+  private noOfSectionSubscription?: Subscription
   assessmentTypeList = [
     {
       name: 'Question Weightage',
@@ -49,22 +56,42 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   difficultyLevels = ['Easy', 'Medium', 'Difficult', 'HOTS']
   selectedSectionIndex = 0
   negativePercentageOptions = ['0%', '25%', '50%', '75%', '100%']
+  assessmentData: any
+  previousQuestionWeightageType: any = null
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private configSvc: ConfigurationsService,
+    private assessmentService: AssessmentService,
+    private snackBar: MatSnackBar,
+  ) {
     this.initForm()
   }
 
   ngOnInit(): void {
+    if (this.config && this.config.identifier) {
+      // Load existing assessment data to populate the form
+      this.assessmentData = this.assessmentService.getAssessmentHierarchyData()
+      if (this.assessmentData) {
+        this.populateForm(this.assessmentData)
+      }
+    }
+
     if (this.config && this.config?.primaryCategory === 'Course Assessment') {
       this.isFinalAssessment = true
     }
     if (this.config && this.config?.primaryCategory === 'Practice Question Set') {
       this.isPracticeAssessment = true
     }
+    // Check if coolOffPeriod should be shown
+    if (this.config && this.config?.contextCategory) {
+      this.showCoolOffPeriod = this.config.contextCategory === 'Preliminiary Assessment' ||
+        this.config.contextCategory === 'Final Milestone Assessment'
+    }
     this.setupShowTimerSubscription()
     this.setupAssessmentTypeSubscription()
     this.setupQuestionWeightageTypeSubscription()
-    this.setupTotalNumberOfSectionsSubscription()
+    this.setupNoOfSectionSubscription()
     this.updateValidators()
   }
 
@@ -72,7 +99,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     this.showTimerSubscription?.unsubscribe()
     this.assessmentTypeSubscription?.unsubscribe()
     this.questionWeightageTypeSubscription?.unsubscribe()
-    this.totalNumberOfSectionsSubscription?.unsubscribe()
+    this.noOfSectionSubscription?.unsubscribe()
   }
 
   setupShowTimerSubscription(): void {
@@ -86,11 +113,15 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       // Reset advanced assessment fields when switching assessment type
       if (value === 'advanced') {
         this.assessmentForm.get('questionWeightageType')?.setValue(NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE, { emitEvent: false })
+        // For practice assessment with advanced type, showTimer should always be true
+        if (this.isPracticeAssessment) {
+          this.assessmentForm.get('showTimer')?.setValue(true, { emitEvent: false })
+        }
       } else {
         this.assessmentForm.get('questionWeightageType')?.setValue(null, { emitEvent: false })
       }
       this.assessmentForm.get('numberOfQuestionsToDisplay')?.setValue(0, { emitEvent: false })
-      this.assessmentForm.get('totalNumberOfSections')?.setValue(1, { emitEvent: false })
+      this.assessmentForm.get('noOfSection')?.setValue(1, { emitEvent: false })
       this.updateSections(1)
       this.selectedSectionIndex = 0
       this.updateValidators()
@@ -98,18 +129,21 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   }
 
   setupQuestionWeightageTypeSubscription(): void {
-    this.questionWeightageTypeSubscription = this.assessmentForm.get('questionWeightageType')?.valueChanges.subscribe(() => {
+    this.questionWeightageTypeSubscription = this.assessmentForm.get('questionWeightageType')?.valueChanges.subscribe((newValue) => {
+
+      this.previousQuestionWeightageType = newValue
       // Reset fields when switching weightage type
       this.assessmentForm.get('numberOfQuestionsToDisplay')?.setValue(0, { emitEvent: false })
-      this.assessmentForm.get('totalNumberOfSections')?.setValue(1, { emitEvent: false })
+      this.assessmentForm.get('noOfSection')?.setValue(1, { emitEvent: false })
       this.updateSections(1)
       this.selectedSectionIndex = 0
       this.updateValidators()
+
     })
   }
 
-  setupTotalNumberOfSectionsSubscription(): void {
-    this.totalNumberOfSectionsSubscription = this.assessmentForm.get('totalNumberOfSections')?.valueChanges.subscribe((value) => {
+  setupNoOfSectionSubscription(): void {
+    this.noOfSectionSubscription = this.assessmentForm.get('noOfSection')?.valueChanges.subscribe((value) => {
       if (value && value >= 1 && value <= 5) {
         this.updateSections(value)
         if (this.selectedSectionIndex >= value) {
@@ -158,7 +192,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   }
 
   get hasMultipleSections(): boolean {
-    return (this.assessmentForm.get('totalNumberOfSections')?.value || 1) > 1
+    return (this.assessmentForm.get('noOfSection')?.value || 1) > 1
   }
 
   getSectionDifficultyLevels(sectionIndex: number): FormArray {
@@ -211,6 +245,106 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     this.selectedSectionIndex = index
   }
 
+  populateForm(data: any): void {
+    // Determine assessment type based on compatibilityLevel
+    const assessmentType = data.compatibilityLevel === NsAssessment.ECompatibilityLevel.ADVANCED ? 'advanced' : 'basic'
+
+    // Basic fields
+    this.assessmentForm.patchValue({
+      assessmentType: assessmentType,
+      name: data.name || '',
+      description: data.description || '',
+      showTimer: data.showTimer !== undefined ? data.showTimer : true,
+      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts || null,
+      scoreCutoffType: data.scoreCutoffType || 'AssessmentLevel',
+      coolOffPeriod: data.coolOffPeriod || null
+    }, { emitEvent: false })
+
+    // Duration - convert from seconds to hours, minutes, seconds
+    if (data.expectedDuration) {
+      const hours = Math.floor(data.expectedDuration / 3600)
+      const minutes = Math.floor((data.expectedDuration % 3600) / 60)
+      const seconds = data.expectedDuration % 60
+
+      this.assessmentForm.patchValue({
+        durationHours: hours,
+        durationMinutes: minutes,
+        durationSeconds: seconds
+      }, { emitEvent: false })
+    }
+
+    // Advanced assessment specific fields
+    if (assessmentType === 'advanced') {
+      this.assessmentForm.patchValue({
+        questionWeightageType: data.assessmentType || null,
+        numberOfQuestionsToDisplay: data.numberOfQuestionsToDisplay || 0,
+        noOfSection: data.noOfSection || 1
+      }, { emitEvent: false })
+
+      // Question Weightage specific fields
+      if (data.assessmentType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+        this.assessmentForm.patchValue({
+          showMarks: data.showMarks || 'No',
+          minimumPassPercentage: data.minimumPassPercentage || 50,
+          negativeMarkingPercentage: data.negativeMarkingPercentage || '0%',
+          sectionalPassPercentage: data.sectionalPassPercentage || 'No',
+          sectionTimeBound: data.sectionTimeBound || 'No'
+        }, { emitEvent: false })
+
+        // Populate sections if available
+        if (data.children && data.children.length > 0) {
+          // Update sections count
+          this.updateSections(data.children.length)
+
+          // Populate each section
+          const sectionsArray = this.assessmentForm.get('sections') as FormArray
+          data.children.forEach((section: any, sectionIndex: number) => {
+            const sectionGroup = sectionsArray.at(sectionIndex) as FormGroup
+            sectionGroup.patchValue({
+              paragraph: section.paragraph || false
+            }, { emitEvent: false })
+
+            // Populate difficulty levels from sectionLevelDefinition
+            if (section.sectionLevelDefinition) {
+              const difficultyLevelsArray = sectionGroup.get('difficultyLevels') as FormArray
+              this.difficultyLevels.forEach((levelName: string, levelIndex: number) => {
+                const levelData = section.sectionLevelDefinition[levelName]
+                const levelGroup = difficultyLevelsArray.at(levelIndex) as FormGroup
+                levelGroup.patchValue({
+                  numberOfQuestions: levelData?.noOfQuestions || 0,
+                  marksPerQuestion: levelData?.marksForQuestion || 0
+                }, { emitEvent: false })
+              })
+            }
+          })
+        }
+      }
+    }
+
+    // Update validators after populating
+    this.updateValidators()
+
+    // Store current questionWeightageType for change detection
+    this.previousQuestionWeightageType = this.assessmentForm.get('questionWeightageType')?.value
+
+    // Disable fields when editing existing assessment
+    this.assessmentForm.get('assessmentType')?.disable()
+    this.assessmentForm.get('scoreCutoffType')?.disable()
+    this.assessmentForm.get('questionWeightageType')?.disable()
+    this.assessmentForm.get('noOfSection')?.disable()
+
+    // Disable all section forms
+    const sectionsArray = this.assessmentForm.get('sections') as FormArray
+    sectionsArray.controls.forEach(sectionControl => {
+      sectionControl.get('paragraph')?.disable()
+      const difficultyLevels = sectionControl.get('difficultyLevels') as FormArray
+      difficultyLevels.controls.forEach(levelControl => {
+        levelControl.get('numberOfQuestions')?.disable()
+        levelControl.get('marksPerQuestion')?.disable()
+      })
+    })
+  }
+
   updateValidators(): void {
     const showTimer = this.assessmentForm.get('showTimer')?.value
     const assessmentType = this.assessmentForm.get('assessmentType')?.value
@@ -218,10 +352,18 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     const durationHours = this.assessmentForm.get('durationHours')
     const durationMinutes = this.assessmentForm.get('durationMinutes')
     const durationSeconds = this.assessmentForm.get('durationSeconds')
-    const numberOfReAttempts = this.assessmentForm.get('numberOfReAttempts')
+    const maxAssessmentRetakeAttempts = this.assessmentForm.get('maxAssessmentRetakeAttempts')
     const scoreCutoffType = this.assessmentForm.get('scoreCutoffType')
     const questionWeightageType = this.assessmentForm.get('questionWeightageType')
     const numberOfQuestionsToDisplay = this.assessmentForm.get('numberOfQuestionsToDisplay')
+    const coolOffPeriod = this.assessmentForm.get('coolOffPeriod')
+
+    // coolOffPeriod validator - only required when contextCategory matches
+    if (this.showCoolOffPeriod) {
+      coolOffPeriod?.setValidators([Validators.required, Validators.min(1), Validators.max(50)])
+    } else {
+      coolOffPeriod?.clearValidators()
+    }
 
     // Duration validators
     if (this.isFinalAssessment || (this.isPracticeAssessment && showTimer)) {
@@ -234,11 +376,11 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       durationSeconds?.setValidators([Validators.min(0), Validators.max(59)])
     }
 
-    // numberOfReAttempts validator - only required for Final Assessment
+    // maxAssessmentRetakeAttempts validator - only required for Final Assessment
     if (this.isFinalAssessment) {
-      numberOfReAttempts?.setValidators([Validators.required])
+      maxAssessmentRetakeAttempts?.setValidators([Validators.required])
     } else {
-      numberOfReAttempts?.clearValidators()
+      maxAssessmentRetakeAttempts?.clearValidators()
     }
 
     // scoreCutoffType validator - only required for Final Assessment with Basic assessment type
@@ -262,56 +404,57 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       numberOfQuestionsToDisplay?.clearValidators()
     }
 
-    // totalNumberOfSections validator - only required for Question Weightage
-    const totalNumberOfSections = this.assessmentForm.get('totalNumberOfSections')
+    // noOfSection validator - only required for Question Weightage
+    const noOfSection = this.assessmentForm.get('noOfSection')
     if (assessmentType === 'advanced' && questionWeightageTypeValue === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
-      totalNumberOfSections?.setValidators([Validators.required, Validators.min(1), Validators.max(5)])
+      noOfSection?.setValidators([Validators.required, Validators.min(1), Validators.max(5)])
     } else {
-      totalNumberOfSections?.clearValidators()
+      noOfSection?.clearValidators()
     }
 
     // Question Weightage specific validators
-    const showMarksQuestion = this.assessmentForm.get('showMarksQuestion')
-    const sectionalPassingPercentage = this.assessmentForm.get('sectionalPassingPercentage')
-    const sectionalTimeBound = this.assessmentForm.get('sectionalTimeBound')
-    const minimumPassingPercentage = this.assessmentForm.get('minimumPassingPercentage')
-    const negativePercentageQuestion = this.assessmentForm.get('negativePercentageQuestion')
+    const showMarks = this.assessmentForm.get('showMarks')
+    const sectionalPassPercentage = this.assessmentForm.get('sectionalPassPercentage')
+    const sectionTimeBound = this.assessmentForm.get('sectionTimeBound')
+    const minimumPassPercentage = this.assessmentForm.get('minimumPassPercentage')
+    const negativeMarkingPercentage = this.assessmentForm.get('negativeMarkingPercentage')
 
     if (assessmentType === 'advanced' && questionWeightageTypeValue === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
-      showMarksQuestion?.setValidators([Validators.required])
-      minimumPassingPercentage?.setValidators([Validators.required, Validators.min(0), Validators.max(100)])
-      negativePercentageQuestion?.setValidators([Validators.required])
+      showMarks?.setValidators([Validators.required])
+      minimumPassPercentage?.setValidators([Validators.required, Validators.min(0), Validators.max(100)])
+      negativeMarkingPercentage?.setValidators([Validators.required])
 
       // Sectional validators only when more than 1 section
-      const totalSections = this.assessmentForm.get('totalNumberOfSections')?.value || 1
+      const totalSections = this.assessmentForm.get('noOfSection')?.value || 1
       if (totalSections > 1) {
-        sectionalPassingPercentage?.setValidators([Validators.required])
-        sectionalTimeBound?.setValidators([Validators.required])
+        sectionalPassPercentage?.setValidators([Validators.required])
+        sectionTimeBound?.setValidators([Validators.required])
       } else {
-        sectionalPassingPercentage?.clearValidators()
-        sectionalTimeBound?.clearValidators()
+        sectionalPassPercentage?.clearValidators()
+        sectionTimeBound?.clearValidators()
       }
     } else {
-      showMarksQuestion?.clearValidators()
-      sectionalPassingPercentage?.clearValidators()
-      sectionalTimeBound?.clearValidators()
-      minimumPassingPercentage?.clearValidators()
-      negativePercentageQuestion?.clearValidators()
+      showMarks?.clearValidators()
+      sectionalPassPercentage?.clearValidators()
+      sectionTimeBound?.clearValidators()
+      minimumPassPercentage?.clearValidators()
+      negativeMarkingPercentage?.clearValidators()
     }
 
     durationHours?.updateValueAndValidity({ emitEvent: false })
     durationMinutes?.updateValueAndValidity({ emitEvent: false })
     durationSeconds?.updateValueAndValidity({ emitEvent: false })
-    numberOfReAttempts?.updateValueAndValidity({ emitEvent: false })
+    coolOffPeriod?.updateValueAndValidity({ emitEvent: false })
+    maxAssessmentRetakeAttempts?.updateValueAndValidity({ emitEvent: false })
     scoreCutoffType?.updateValueAndValidity({ emitEvent: false })
     questionWeightageType?.updateValueAndValidity({ emitEvent: false })
     numberOfQuestionsToDisplay?.updateValueAndValidity({ emitEvent: false })
-    totalNumberOfSections?.updateValueAndValidity({ emitEvent: false })
-    showMarksQuestion?.updateValueAndValidity({ emitEvent: false })
-    sectionalPassingPercentage?.updateValueAndValidity({ emitEvent: false })
-    sectionalTimeBound?.updateValueAndValidity({ emitEvent: false })
-    minimumPassingPercentage?.updateValueAndValidity({ emitEvent: false })
-    negativePercentageQuestion?.updateValueAndValidity({ emitEvent: false })
+    noOfSection?.updateValueAndValidity({ emitEvent: false })
+    showMarks?.updateValueAndValidity({ emitEvent: false })
+    sectionalPassPercentage?.updateValueAndValidity({ emitEvent: false })
+    sectionTimeBound?.updateValueAndValidity({ emitEvent: false })
+    minimumPassPercentage?.updateValueAndValidity({ emitEvent: false })
+    negativeMarkingPercentage?.updateValueAndValidity({ emitEvent: false })
   }
 
   initForm(): void {
@@ -319,31 +462,32 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       assessmentType: ['basic', Validators.required],
       questionWeightageType: [null],
       numberOfQuestionsToDisplay: [0],
-      totalNumberOfSections: [1],
+      noOfSection: [1],
       sections: this.fb.array([this.createSectionGroup()]),
-      title: ['', [Validators.required, Validators.maxLength(this.titleMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
+      name: ['', [Validators.required, Validators.maxLength(this.nameMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
       scoreCutoffType: ['AssessmentLevel', Validators.required],
-      numberOfReAttempts: [null, Validators.required],
+      maxAssessmentRetakeAttempts: [null, Validators.required],
       durationHours: [0, [Validators.min(0), Validators.max(23)]],
       durationMinutes: [0, [Validators.min(0), Validators.max(59)]],
       durationSeconds: [0, [Validators.min(0), Validators.max(59)]],
-      instructions: ['', Validators.maxLength(this.instructionsMaxLength)],
+      coolOffPeriod: [null, [Validators.min(1), Validators.max(50)]],
+      description: ['', Validators.maxLength(this.instructionsMaxLength)],
       showTimer: [true],
       // Question Weightage settings
-      showMarksQuestion: ['no'],
-      sectionalPassingPercentage: ['no'],
-      sectionalTimeBound: ['no'],
-      minimumPassingPercentage: [50, [Validators.min(0), Validators.max(100)]],
-      negativePercentageQuestion: ['0%']
+      showMarks: ['No'],
+      sectionalPassPercentage: ['No'],
+      sectionTimeBound: ['No'],
+      minimumPassPercentage: [50, [Validators.min(0), Validators.max(100)]],
+      negativeMarkingPercentage: ['0%']
     })
   }
 
-  get titleLength(): number {
-    return this.assessmentForm.get('title')?.value?.length || 0
+  get nameLength(): number {
+    return this.assessmentForm.get('name')?.value?.length || 0
   }
 
-  get instructionsLength(): number {
-    return this.assessmentForm.get('instructions')?.value?.length || 0
+  get descriptionLength(): number {
+    return this.assessmentForm.get('description')?.value?.length || 0
   }
 
   get controls() {
@@ -380,12 +524,207 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     this.durationTouched = true
   }
 
-  onSave(): void {
+  onUpdate(): void {
+    if (!this.isFormValid) {
+      return
+    }
 
+    // Get raw form values (includes disabled fields)
+    const formValues = this.assessmentForm.getRawValue()
+    const changedData: any = {}
+
+    // Check name
+    const trimmedName = formValues.name?.trim() || ''
+    if (trimmedName !== this.assessmentData.name) {
+      changedData.name = trimmedName
+    }
+
+    // Check description
+    if (formValues.description !== this.assessmentData.description) {
+      changedData.description = formValues.description
+    }
+
+    // Check duration
+    const durationInSeconds =
+      (formValues.durationHours * 3600) +
+      (formValues.durationMinutes * 60) +
+      formValues.durationSeconds
+
+    if (durationInSeconds !== this.assessmentData.expectedDuration) {
+      changedData.expectedDuration = durationInSeconds
+    }
+
+    // Check maxAssessmentRetakeAttempts (for Final Assessment)
+    if (this.isFinalAssessment && formValues.maxAssessmentRetakeAttempts !== this.assessmentData.maxAssessmentRetakeAttempts) {
+      changedData.maxAssessmentRetakeAttempts = formValues.maxAssessmentRetakeAttempts
+    }
+
+    // Check showTimer (for Practice Assessment)
+    if (this.isPracticeAssessment && formValues.showTimer !== this.assessmentData.showTimer) {
+      changedData.showTimer = formValues.showTimer
+    }
+
+    // Check coolOffPeriod
+    if (this.showCoolOffPeriod && formValues.coolOffPeriod !== this.assessmentData.coolOffPeriod) {
+      changedData.coolOffPeriod = formValues.coolOffPeriod
+    }
+
+    // Check Question Weightage fields
+    if (formValues.questionWeightageType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+      if (formValues.showMarks !== this.assessmentData.showMarks) {
+        changedData.showMarks = formValues.showMarks
+      }
+      if (formValues.minimumPassPercentage !== this.assessmentData.minimumPassPercentage) {
+        changedData.minimumPassPercentage = formValues.minimumPassPercentage
+      }
+      if (formValues.negativeMarkingPercentage !== this.assessmentData.negativeMarkingPercentage) {
+        changedData.negativeMarkingPercentage = formValues.negativeMarkingPercentage
+      }
+      if (formValues.noOfSection > 1) {
+        if (formValues.sectionalPassPercentage !== this.assessmentData.sectionalPassPercentage) {
+          changedData.sectionalPassPercentage = formValues.sectionalPassPercentage
+        }
+        if (formValues.sectionTimeBound !== this.assessmentData.sectionTimeBound) {
+          changedData.sectionTimeBound = formValues.sectionTimeBound
+        }
+      }
+    }
+
+    // Check Option Weightage fields
+    if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
+      if (formValues.numberOfQuestionsToDisplay !== this.assessmentData.numberOfQuestionsToDisplay) {
+        changedData.numberOfQuestionsToDisplay = formValues.numberOfQuestionsToDisplay
+      }
+    }
+
+    // Only emit if there are changes
+    if (Object.keys(changedData).length > 0) {
+      this.updated.emit({ changedData, identifier: this.assessmentData.identifier })
+    } else {
+      // No changes detected
+      this.snackBar.open('No changes detected')
+    }
+  }
+
+  onSave(): void {
+    if (!this.isFormValid) {
+      return
+    }
+
+    // Get raw form values (includes disabled fields)
+    const formValues = this.assessmentForm.getRawValue()
+
+    // Creating new assessment - send all data
+    let randomNumber = ''
+    // tslint:disable-next-line: no-increment-decrement
+    for (let i = 0; i < 16; i++) {
+      randomNumber += Math.floor(Math.random() * 10)
+    }
+
+    const assessmentData: any = {
+      code: randomNumber,
+      assessmentType: formValues.questionWeightageType || '',
+      name: formValues.name?.trim() || '',
+      description: formValues.description,
+      primaryCategory: this.config?.primaryCategory,
+      contextCategory: this.config?.contextCategory,
+      compatibilityLevel: (formValues.assessmentType === 'basic') ? NsAssessment.ECompatibilityLevel.BASIC : NsAssessment.ECompatibilityLevel.ADVANCED,
+      createdBy: this.configSvc.userProfile?.userId || '',
+      createdFor: [this.configSvc.userProfile?.rootOrgId || ''],
+      framework: 'igot',
+      license: 'CC BY 4.0',
+      mimeType: 'application/vnd.sunbird.questionset',
+      language: ['English']
+    }
+
+    // Duration - convert to total seconds
+    const durationInSeconds =
+      (formValues.durationHours * 3600) +
+      (formValues.durationMinutes * 60) +
+      formValues.durationSeconds
+
+    if (this.isDurationRequired && durationInSeconds > 0) {
+      assessmentData.expectedDuration = durationInSeconds
+    }
+
+    // Cool off period - only include if shown
+    // if (this.showCoolOffPeriod && formValues.coolOffPeriod) {
+    //   assessmentData.coolOffPeriod = formValues.coolOffPeriod
+    // }
+
+    // Final Assessment specific fields
+    if (this.isFinalAssessment) {
+      assessmentData.maxAssessmentRetakeAttempts = formValues.maxAssessmentRetakeAttempts
+
+      if (formValues.assessmentType === 'basic') {
+        assessmentData.scoreCutoffType = formValues.scoreCutoffType
+        assessmentData.noOfSection = formValues.noOfSection || 1
+      } else if (formValues.assessmentType === 'advanced') {
+        // For advanced assessments, determine scoreCutoffType based on number of sections
+        if (formValues.questionWeightageType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+          assessmentData.scoreCutoffType = formValues.noOfSection === 1 ? 'AssessmentLevel' : 'SectionLevel'
+        } else {
+          assessmentData.scoreCutoffType = 'AssessmentLevel'
+        }
+      }
+    }
+
+    // Practice Assessment specific fields
+    if (this.isPracticeAssessment) {
+      assessmentData.showTimer = formValues.showTimer
+    }
+
+    // Advanced Assessment specific fields
+    if (formValues.assessmentType === 'advanced') {
+
+      if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
+        assessmentData.numberOfQuestionsToDisplay = formValues.numberOfQuestionsToDisplay
+        assessmentData.noOfSection = 1
+      }
+
+      if (formValues.questionWeightageType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+        assessmentData.noOfSection = formValues.noOfSection
+        assessmentData.showMarks = formValues.showMarks
+        assessmentData.minimumPassPercentage = formValues.minimumPassPercentage
+        assessmentData.negativeMarkingPercentage = formValues.negativeMarkingPercentage
+
+        if (formValues.noOfSection > 1) {
+          assessmentData.sectionalPassPercentage = formValues.sectionalPassPercentage
+          assessmentData.sectionTimeBound = formValues.sectionTimeBound
+        }
+
+        // Include sections data with difficulty levels in sectionLevelDefinition format
+        assessmentData.children = formValues.sections.map((section: any, index: number) => {
+          const sectionLevelDefinition: any = {}
+          section.difficultyLevels.forEach((level: any, levelIndex: number) => {
+            const levelName = this.difficultyLevels[levelIndex]
+            sectionLevelDefinition[levelName] = {
+              noOfQuestions: level.numberOfQuestions,
+              marksForQuestion: level.marksPerQuestion
+            }
+          })
+
+          return {
+            sectionIndex: index,
+            paragraph: section.paragraph,
+            sectionLevelDefinition: sectionLevelDefinition,
+            totalQuestions: this.getSectionTotalQuestions(index),
+            totalMarks: this.getSectionTotalMarks(index)
+          }
+        })
+
+        // Add grand totals
+        assessmentData.totalQuestions = this.getGrandTotalQuestions()
+        assessmentData.totalMarks = this.getGrandTotalMarks()
+        assessmentData.maxQuestions = this.getGrandTotalQuestions()
+      }
+    }
+    // Emit the assessment data
+    this.saved.emit(assessmentData)
   }
 
   onCancel(): void {
-
+    this.cancelled.emit()
   }
 
 }

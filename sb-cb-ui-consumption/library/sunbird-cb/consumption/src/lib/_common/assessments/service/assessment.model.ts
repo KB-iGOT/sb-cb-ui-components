@@ -6,4 +6,9 @@ export namespace NsAssessment {
     QUESTION_OPTION_WEIGHTAGE = 'questionOptionWeightage',
   }
 
+  export enum ECompatibilityLevel {
+    BASIC = 6,
+    ADVANCED = 8,
+  }
+
 }

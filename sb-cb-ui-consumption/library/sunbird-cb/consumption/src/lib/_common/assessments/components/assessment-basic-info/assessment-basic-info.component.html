@@ -9,17 +9,17 @@
       <p class="hint-text">Assessment type cannot be changed once saved.</p>
     </div>
 
-    <!-- Title -->
+    <!-- Name -->
     <div class="form-section mat-full-radius">
       <label class="field-label required">Title</label>
       <mat-form-field appearance="outline" class="full-width">
-        <input matInput formControlName="title" [maxlength]="titleMaxLength" placeholder="Enter title">
+        <input matInput formControlName="name" [maxlength]="nameMaxLength" placeholder="Enter name">
         <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported</mat-hint>
-        <mat-hint align="end">{{ titleLength }} / {{ titleMaxLength }}</mat-hint>
-        <mat-error *ngIf="controls['title'].hasError('required')">Title is required</mat-error>
-        <mat-error *ngIf="controls['title'].hasError('pattern')">Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' !
+        <mat-hint align="end">{{ nameLength }} / {{ nameMaxLength }}</mat-hint>
+        <mat-error *ngIf="controls['name'].hasError('required')">Name is required</mat-error>
+        <mat-error *ngIf="controls['name'].hasError('pattern')">Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' !
           ) characters are supported</mat-error>
-        <mat-error *ngIf="controls['title'].hasError('maxlength')">Title cannot exceed {{ titleMaxLength }}
+        <mat-error *ngIf="controls['name'].hasError('maxlength')">Name cannot exceed {{ nameMaxLength }}
           characters</mat-error>
       </mat-form-field>
     </div>
@@ -72,7 +72,6 @@
     </ng-container>
 
     <!-- Section details (for Question Weightage) -->
-    <!-- Section details (for Question Weightage) -->
     <ng-container *ngIf="assessmentForm.get('questionWeightageType')?.value === 'questionWeightage'">
       <div class="section-detail-container">
         <label class="field-label">Section details</label>
@@ -81,11 +80,11 @@
         <div class="form-section mat-full-radius">
           <label class="field-label required">Total number of sections</label>
           <mat-form-field appearance="outline" class="full-width">
-            <input matInput type="number" formControlName="totalNumberOfSections" min="1" max="5" placeholder="1">
-            <mat-error *ngIf="controls['totalNumberOfSections'].hasError('required')">Total number of sections is
+            <input matInput type="number" formControlName="noOfSection" min="1" max="5" placeholder="1">
+            <mat-error *ngIf="controls['noOfSection'].hasError('required')">Total number of sections is
               required</mat-error>
-            <mat-error *ngIf="controls['totalNumberOfSections'].hasError('min')">Value must be at least 1</mat-error>
-            <mat-error *ngIf="controls['totalNumberOfSections'].hasError('max')">Value must be at most 5</mat-error>
+            <mat-error *ngIf="controls['noOfSection'].hasError('min')">Value must be at least 1</mat-error>
+            <mat-error *ngIf="controls['noOfSection'].hasError('max')">Value must be at most 5</mat-error>
           </mat-form-field>
         </div>
 
@@ -147,10 +146,10 @@
                 <!-- Totals Row -->
                 <div class="totals-row flex flex-middle flex-center gap-4">
                   <div class="total-badge">
-                    Total Questions: <strong>{{ getGrandTotalQuestions() }}</strong>
+                    Total Questions: <strong>{{ getSectionTotalQuestions(selectedSectionIndex) }}</strong>
                   </div>
                   <div class="total-badge">
-                    Total Marks: <strong>{{ getGrandTotalMarks() }}</strong>
+                    Total Marks: <strong>{{ getSectionTotalMarks(selectedSectionIndex) }}</strong>
                   </div>
                 </div>
               </div>
@@ -165,27 +164,27 @@
             <!-- Show Marks/Question -->
             <div class="form-section setting-field">
               <label class="field-label required">Show Marks/Question</label>
-              <mat-radio-group formControlName="showMarksQuestion" class="yes-no-group flex gap-5">
-                <mat-radio-button value="yes">Yes</mat-radio-button>
-                <mat-radio-button value="no">No</mat-radio-button>
+              <mat-radio-group formControlName="showMarks" class="yes-no-group flex gap-5">
+                <mat-radio-button value="Yes">Yes</mat-radio-button>
+                <mat-radio-button value="No">No</mat-radio-button>
               </mat-radio-group>
             </div>
 
             <!-- Sectional Passing Percentage (only if sections > 1) -->
             <div class="form-section setting-field" *ngIf="hasMultipleSections">
               <label class="field-label required">Sectional Passing Percentage</label>
-              <mat-radio-group formControlName="sectionalPassingPercentage" class="yes-no-group flex gap-5">
-                <mat-radio-button value="yes">Yes</mat-radio-button>
-                <mat-radio-button value="no">No</mat-radio-button>
+              <mat-radio-group formControlName="sectionalPassPercentage" class="yes-no-group flex gap-5">
+                <mat-radio-button value="Yes">Yes</mat-radio-button>
+                <mat-radio-button value="No">No</mat-radio-button>
               </mat-radio-group>
             </div>
 
             <!-- Sectional Time Bound (only if sections > 1) -->
             <div class="form-section setting-field" *ngIf="hasMultipleSections">
               <label class="field-label required">Sectional Time Bound</label>
-              <mat-radio-group formControlName="sectionalTimeBound" class="yes-no-group flex gap-5">
-                <mat-radio-button value="yes">Yes</mat-radio-button>
-                <mat-radio-button value="no">No</mat-radio-button>
+              <mat-radio-group formControlName="sectionTimeBound" class="yes-no-group flex gap-5">
+                <mat-radio-button value="Yes">Yes</mat-radio-button>
+                <mat-radio-button value="No">No</mat-radio-button>
               </mat-radio-group>
             </div>
           </div>
@@ -194,13 +193,12 @@
           <div class="form-section mat-full-radius">
             <label class="field-label required">Minimum Passing Percentage</label>
             <mat-form-field appearance="outline" class="full-width">
-              <input matInput type="number" formControlName="minimumPassingPercentage" min="0" max="100"
-                placeholder="50">
-              <mat-error *ngIf="controls['minimumPassingPercentage'].hasError('required')">Minimum passing percentage is
+              <input matInput type="number" formControlName="minimumPassPercentage" min="0" max="100" placeholder="50">
+              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('required')">Minimum passing percentage is
                 required</mat-error>
-              <mat-error *ngIf="controls['minimumPassingPercentage'].hasError('min')">Value must be 0 or
+              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('min')">Value must be 0 or
                 greater</mat-error>
-              <mat-error *ngIf="controls['minimumPassingPercentage'].hasError('max')">Value must be 100 or
+              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('max')">Value must be 100 or
                 less</mat-error>
             </mat-form-field>
           </div>
@@ -209,10 +207,10 @@
           <div class="form-section mat-full-radius">
             <label class="field-label required">Negative Percentage% Question</label>
             <mat-form-field appearance="outline" class="full-width">
-              <mat-select formControlName="negativePercentageQuestion" placeholder="Select">
+              <mat-select formControlName="negativeMarkingPercentage" placeholder="Select">
                 <mat-option *ngFor="let option of negativePercentageOptions" [value]="option">{{ option }}</mat-option>
               </mat-select>
-              <mat-error *ngIf="controls['negativePercentageQuestion'].hasError('required')">Negative percentage is
+              <mat-error *ngIf="controls['negativeMarkingPercentage'].hasError('required')">Negative percentage is
                 required</mat-error>
             </mat-form-field>
           </div>
@@ -232,15 +230,15 @@
                     count by clicking on ‘Re-attempt test’ button given on result page.">info_outline</mat-icon>
           </label>
           <mat-form-field appearance="outline" class="full-width">
-            <mat-select formControlName="numberOfReAttempts" placeholder="Select">
+            <mat-select formControlName="maxAssessmentRetakeAttempts" placeholder="Select">
               <mat-option *ngFor="let option of reAttemptOptions" [value]="option">{{ option }}</mat-option>
             </mat-select>
-            <mat-error *ngIf="controls['numberOfReAttempts'].hasError('required')">Number of re-attempts is
+            <mat-error *ngIf="controls['maxAssessmentRetakeAttempts'].hasError('required')">Number of re-attempts is
               required</mat-error>
           </mat-form-field>
         </div>
       </ng-container>
-      <ng-container *ngIf="isPracticeAssessment">
+      <ng-container *ngIf="isPracticeAssessment && assessmentForm.get('assessmentType')?.value !== 'advanced'">
         <div class="form-section flex-grow">
           <mat-checkbox formControlName="showTimer">Show timer</mat-checkbox>
         </div>
@@ -273,26 +271,44 @@
       </div>
     </div>
 
-    <!-- Instructions -->
+    <!-- Cool off period -->
+    <ng-container *ngIf="showCoolOffPeriod">
+      <div class="form-section mat-full-radius">
+        <label class="field-label required">Cool off period</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="coolOffPeriod" placeholder="Enter cool off period in days" type="number"
+            max="50" min="1">
+          <mat-error *ngIf="controls['coolOffPeriod'].hasError('required')">Cool off period is required</mat-error>
+          <mat-error *ngIf="controls['coolOffPeriod'].hasError('min')">Value must be 1 or greater</mat-error>
+          <mat-error *ngIf="controls['coolOffPeriod'].hasError('max')">Value must be 50 or less</mat-error>
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <!-- Description -->
     <div class="form-section mat-full-radius">
-      <label class="field-label">Instructions</label>
+      <label class="field-label">Description</label>
       <mat-form-field appearance="outline" class="full-width">
-        <textarea matInput formControlName="instructions" [maxlength]="instructionsMaxLength" rows="5"
-          placeholder="Enter instructions"></textarea>
-        <mat-error *ngIf="controls['instructions'].hasError('maxlength')">Instructions cannot exceed {{
+        <textarea matInput formControlName="description" [maxlength]="instructionsMaxLength" rows="5"
+          placeholder="Enter description"></textarea>
+        <mat-error *ngIf="controls['description'].hasError('maxlength')">Description cannot exceed {{
           instructionsMaxLength }} characters</mat-error>
       </mat-form-field>
       <div class="field-footer">
         <span></span>
-        <span class="char-count">{{ instructionsLength }}/{{ instructionsMaxLength }}</span>
+        <span class="char-count">{{ descriptionLength }}/{{ instructionsMaxLength }}</span>
       </div>
     </div>
 
     <!-- Actions Buttons -->
     <div class="form-actions flex flex-middle flex-center gap-5">
-      <button mat-button class="btn-common btn-primary" [ngClass]="{'btn-disable': !isFormValid}" (click)="onSave()"
-        [disabled]="!isFormValid" type="button">
+      <button *ngIf="!assessmentData" mat-button class="btn-common btn-primary"
+        [ngClass]="{'btn-disable': !isFormValid}" (click)="onSave()" [disabled]="!isFormValid" type="button">
         Save and Continue
+      </button>
+      <button *ngIf="assessmentData" mat-button class="btn-common btn-primary" [ngClass]="{'btn-disable': !isFormValid}"
+        (click)="onUpdate()" [disabled]="!isFormValid" type="button">
+        Update
       </button>
       <button mat-button class="btn-common btn-secondary" (click)="onCancel()" type="button">
         Cancel

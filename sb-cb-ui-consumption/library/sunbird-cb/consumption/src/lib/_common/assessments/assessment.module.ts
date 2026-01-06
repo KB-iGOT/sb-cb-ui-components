@@ -13,6 +13,7 @@ import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/mat
 import { MatStepperModule } from '@angular/material/stepper'
 import { AssessmentMainComponent } from './components/assessment-main/assessment-main.component'
 import { AssessmentBasicInfoComponent } from './components/assessment-basic-info/assessment-basic-info.component'
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar'
 
 
 
@@ -33,7 +34,8 @@ import { AssessmentBasicInfoComponent } from './components/assessment-basic-info
     MatSelectModule,
     MatTooltipModule,
     MatCheckboxModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatSnackBarModule
   ],
   exports: [
     AssessmentMainComponent

@@ -10,15 +10,16 @@
       </ng-template>
 
       <div class="step-content">
-        <ng-container *ngIf="stepper.selectedIndex === 0">
-          <sb-uic-assessment-basic-info [config]="config"></sb-uic-assessment-basic-info>
+        <ng-container *ngIf="stepper.selectedIndex === 0 && isAssessmentLoaded">
+          <sb-uic-assessment-basic-info [config]="config" (saved)="saveAssessment($event)"
+            (updated)="updateAssessment($event)"></sb-uic-assessment-basic-info>
         </ng-container>
 
-        <div class="step-actions">
+        <!-- <div class="step-actions">
           <button mat-raised-button color="primary" (click)="enableStepTwo(); stepper.next()">
             Next
           </button>
-        </div>
+        </div> -->
       </div>
     </mat-step>
 
