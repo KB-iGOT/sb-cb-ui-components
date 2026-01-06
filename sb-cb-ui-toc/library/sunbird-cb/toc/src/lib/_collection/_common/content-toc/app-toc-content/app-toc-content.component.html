@@ -1,3 +1,48 @@
+<div>
+    <!-- Milestone / Learning Path UI -->
+    <div class="milestone-wrapper" role="group" aria-label="Learning path milestones">
+        <ng-container *ngIf="content?.children?.length>3; else fallbackMilestones">
+            <ul class="milestone-list">
+                <li *ngFor="let m of content?.children; let i = index" class="milestone-item"
+                    [class.completed]="m?.completed" role="listitem">
+                    <div class="milestone-circle" [attr.aria-label]="m?.name || ('Milestone ' + (i+1))">
+                        <img *ngIf="m?.completed" src="assets/icons/toc/tick-orange.svg" class="milestone-checkmark" alt="Completed" />
+                        <span *ngIf="!m?.completed" class="milestone-index">{{ i + 1 }}</span>
+                    </div>
+                    <div class="milestone-label">{{ m?.name }}</div>
+                </li>
+            </ul>
+        </ng-container>
+        <ng-template #fallbackMilestones>
+            <ul class="milestone-list">
+                <li class="milestone-item completed" role="listitem">
+                    <div class="milestone-circle" aria-label="Pre Assessment">
+                        <img src="assets/icons/toc/tick-orange.svg" class="milestone-checkmark" alt="Completed" />
+                    </div>
+                    <div class="milestone-label">Pre Assessment</div>
+                </li>
+                <li class="milestone-item completed" role="listitem">
+                    <div class="milestone-circle" aria-label="1. Foundation of Workplace Ethics">
+                        <img src="assets/icons/toc/tick-orange.svg" class="milestone-checkmark" alt="Completed" />
+                    </div>
+                    <div class="milestone-label">1. Foundation of Workplace Ethics</div>
+                </li>
+                <li class="milestone-item" role="listitem">
+                    <div class="milestone-circle" aria-label="2. Health and Productivity at Work">
+                        <img src="assets/icons/toc/tick-orange.svg" class="milestone-checkmark" alt="Completed" />
+                    </div>
+                    <div class="milestone-label">2. Health and Productivity at Work</div>
+                </li>
+                <li class="milestone-item" role="listitem">
+                    <div class="milestone-circle" aria-label="3. Health and Productivity at Work">
+                        <span class="milestone-index">4</span>
+                    </div>
+                    <div class="milestone-label">3. Health and Productivity at Work</div>
+                </li>
+            </ul>
+        </ng-template>
+    </div>
+</div>
 <div class="bggrey">
     <div class="py-4 content-container" id="contentContainer" *ngIf="!isPreAssessment">
         <div class="main-container flex flex-col gap-4">

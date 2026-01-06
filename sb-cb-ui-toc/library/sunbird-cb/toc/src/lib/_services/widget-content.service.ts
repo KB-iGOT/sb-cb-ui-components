@@ -52,7 +52,7 @@ const API_END_POINTS = {
   CERT_ISSUE: `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/issue`,
   CERT_DOWNLOAD: (certId: any) => `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/download/${certId}`,
   READ_KARMAPOINTS: `/apis/proxies/v8/karmapoints/read`,
-  CONTENT_READ: (contentId: any) => `/apis/proxies/v8/action/content/v3/read/${contentId}`,
+  CONTENT_READ: (contentId: any) => `/apis/proxies/v8/extended/content/v1/read/${contentId}`,
   READ_COURSE_KARMAPOINTS: '/apis/proxies/v8/karmapoints/user/course/read',
   CLAIM_KARMAPOINTS: '/apis/proxies/v8/claimkarmapoints',
   USER_KARMA_POINTS: '/apis/proxies/v8/user/totalkarmapoints',
@@ -117,10 +117,10 @@ export class WidgetContentService {
     const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
     if (primaryCategory && this.isResource(primaryCategory)) {
       if (!forPreview) {
-        url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
+        url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
       } else {
         if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
-          url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
+          url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
         } else {
             url = `/api/content/v1/read/${contentId}`
         }
@@ -463,7 +463,7 @@ export class WidgetContentService {
       )
     }
     if (window.location.href.includes('editMode=true')) {
-      url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
+      url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
     } else {
         url = `/api/content/v1/read/${contentId}`
     }
@@ -675,7 +675,7 @@ export class WidgetContentService {
       )
     }
     if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
-      url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
+      url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
     } else {
         url = `/api/content/v1/read/${contentId}`
     }

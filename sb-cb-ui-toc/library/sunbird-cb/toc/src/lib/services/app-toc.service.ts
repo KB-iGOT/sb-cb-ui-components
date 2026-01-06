@@ -905,6 +905,7 @@ export class AppTocService {
         completionStatus: hierarchyData.completionStatus,
         progress: hierarchyData.progress,
         primaryCategory: hierarchyData.primaryCategory,
+        courseCategory: hierarchyData.courseCategory || hierarchyData.primaryCategory || '',
         expectedDuration: hierarchyData.expectedDuration || 0,
       }
       if (hierarchyData.primaryCategory === NsContent.EPrimaryCategory.CURATED_PROGRAM &&
@@ -918,6 +919,7 @@ export class AppTocService {
       }
       this.createHirarchyProgressHashmap(hierarchyData)
       this.hashmap = { ...this.hashmap }
+      console.log('this.hashmap--', this.hashmap)
     }
   }
 

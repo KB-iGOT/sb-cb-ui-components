@@ -51,6 +51,7 @@ import { CompletionSurveyFormComponent } from '../completion-survey-form/complet
 import { PublicSurveyFormComponent } from '../public-survey-form/public-survey-form.component'
 import { NsCardContent } from '../../models/card-content.model'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
+import { AppTocV2Service } from '../../services/app-toc-v2.service'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -294,6 +295,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     private matSnackbarNew: MatSnackbarNew,
     private userServiceLib: WidgetUserServiceLib,
     public netCoreService: NetCoreService,
+    public appTocV2Svc: AppTocV2Service,
     @Inject('environment') public environment: any
   ) {
     this.historyData = history.state
@@ -2405,44 +2407,56 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
   private fetchContentHierarchy(identifier: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      if (!identifier) {
-        resolve(false)
-        return
-      }
-
-      // Make sure fetchHierarchyContent returns an Observable
-      const observable = this.contentSvc.fetchHierarchyContent(identifier, 'detail')
-
-      if (!observable) {
-        this.loggerSvc.error('fetchHierarchyContent did not return an Observable')
-        resolve(false)
-        return
-      }
-
-      const subscription = observable.subscribe({
-        next: (response: any) => {
-          if (response?.result?.content) {
-            this.content = response.result.content
-            this.getOrgIdForShare()
-            this.getTocStructure()
-            if (!this.forPreview) {
-              this.userRating = undefined
-              this.getUserRating(false)
-            }
-            resolve(true)
-          } else {
-            resolve(false)
-          }
-          subscription.unsubscribe()
-        },
-        error: (error: any) => {
-          this.loggerSvc.error('Failed to fetch hierarchy content', error)
-          reject(error)
-          subscription.unsubscribe()
-        }
+    if(this.baseContentReadData?.courseCategory === 'Learning Pathway'){
+      return new Promise<boolean>((resolve) => {
+      const content = this.baseContentReadData
+      this.content = this.appTocV2Svc.constructHeirarchyData(content)
+      this.getOrgIdForShare()
+      this.getTocStructure()
+      console.log('content', this.content)
+          resolve(true)
+          return
       })
-    })
+    }else{
+      return new Promise<boolean>((resolve, reject) => {
+        if (!identifier) {
+          resolve(false)
+          return
+        }
+
+        // Make sure fetchHierarchyContent returns an Observable
+        const observable = this.contentSvc.fetchHierarchyContent(identifier, 'detail')
+
+        if (!observable) {
+          this.loggerSvc.error('fetchHierarchyContent did not return an Observable')
+          resolve(false)
+          return
+        }
+
+        const subscription = observable.subscribe({
+          next: (response: any) => {
+            if (response?.result?.content) {
+              this.content = response.result.content
+              this.getOrgIdForShare()
+              this.getTocStructure()
+              if (!this.forPreview) {
+                this.userRating = undefined
+                this.getUserRating(false)
+              }
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+            subscription.unsubscribe()
+          },
+          error: (error: any) => {
+            this.loggerSvc.error('Failed to fetch hierarchy content', error)
+            reject(error)
+            subscription.unsubscribe()
+          }
+        })
+      })
+    }
   }
 
   getTocStructure() {
