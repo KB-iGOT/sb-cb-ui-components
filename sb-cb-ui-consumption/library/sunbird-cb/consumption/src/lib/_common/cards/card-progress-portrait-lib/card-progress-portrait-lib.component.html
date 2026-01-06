@@ -90,13 +90,13 @@
               class="card-image ws-mat-primary-lite-background margin-remove"
               [wsUtilsDefaultThumbnail]="defaultThumbnail" [alt]="widgetData?.content?.name" />
             <!-- to show certificate lock overlay on top of image -->
-            <ng-container *ngIf="widgetData?.content?.surveyCompletionStatus === false">
+            <ng-container  *ngIf="checkSurveyCompletion()">
               <div class="certificate-lock-overlay">
                 <mat-icon class="mat-icon main_icon  ws-mat-white-text margin-right-xs">lock_outline</mat-icon>
               </div>
             </ng-container>
             <!-- to show certificate lock overlay on top and hide the duraiton box when lock is displayed -->
-            <ng-container *ngIf="widgetData?.content?.surveyCompletionStatus !== false">
+            <ng-container *ngIf="!checkSurveyCompletion()">
               <div class="duration-box right-corner-portrait" *ngIf="widgetData?.content?.duration > 0">
                 <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
                 <span class=" ws-mat-white-text duration">
@@ -186,7 +186,7 @@
       *ngIf="widgetData?.content?.completionPercentage === 100 && widgetData?.content?.courseCategory !== 'Case Study'">
       <div class="flex flex-align-end progress-wrapper flex-end mt-1 position-relative">
         <div class="progress-btn">
-          <ng-container *ngIf="widgetData?.content?.surveyCompletionStatus === false; else viewCertificateBtn">
+          <ng-container *ngIf="checkSurveyCompletion(); else viewCertificateBtn">
             <button class="resume-btn flex flex-middle flex-between view-btn takeSurveyBtn"
               (click)="getRedirectUrlData(widgetData?.content)">
               {{'cardcontentv2.takeSurveyToUnlock' | translate }}
