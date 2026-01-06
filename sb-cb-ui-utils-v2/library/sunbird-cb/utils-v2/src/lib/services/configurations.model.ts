@@ -71,7 +71,8 @@ export namespace NsInstanceConfig {
     npsCategory?: string
     compentency?: any  // This is a temporary fix, need to remove this after the competency is implemented in the app
     competency?: ICompetencyKeys,
-    devnagiriMultiLangEnabled?: any
+    devnagiriMultiLangEnabled?: any,
+    completionSurvey: any
   }
 
   export interface ICompetencyKeys {
