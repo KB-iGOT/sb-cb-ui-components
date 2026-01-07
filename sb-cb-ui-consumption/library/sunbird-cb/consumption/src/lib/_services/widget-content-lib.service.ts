@@ -61,7 +61,8 @@ const API_END_POINTS = {
   AGGREGATION_SEARCH: '/apis/proxies/v8/content/aggregation/search',
   FEATURE_SEARCH: '/apis/proxies/v8/featured/content/search',
   SAVE_SAKSHAMAI_RECOMMENDED_FEEDBACK: `/apis/proxies/v8/courseRecommendation/feedback`,
-  CONTENT_SEARCH: `/api/content/v1/search`
+  CONTENT_SEARCH: `/api/content/v1/search`,
+  GetApplicationsById: `apis/proxies/v8/forms/v2/bulkGetApplicationsById`,
 }
 
 @Injectable({
@@ -768,5 +769,9 @@ export class WidgetContentLibService {
 
   setTelementrySubscription(event: boolean) {
     this.isTelementrySubscribed = event
+  }
+
+  getApplicationsById(formBody: any) {
+    return this.http.post<any>(API_END_POINTS.GetApplicationsById, formBody)
   }
 }
