@@ -14,8 +14,8 @@ import {
   WsEvents,
   WidgetEnrollService,
 } from '@sunbird-cb/utils-v2'
-import { Subscription } from 'rxjs'
-import { filter } from 'rxjs/operators'
+import { of, Subscription } from 'rxjs'
+import { catchError, filter, map, mergeMap } from 'rxjs/operators'
 import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service'
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
@@ -1650,7 +1650,64 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       if (this.configSvc.userProfile) {
         userId = this.configSvc.userProfile.userId
       }
-      this.enrollSvc.fetchInternalEnrollmentData(userId, currentPillFromMap.request.payload).subscribe((res: any) => {
+      this.enrollSvc.fetchInternalEnrollmentData(userId, currentPillFromMap.request.payload)
+      .pipe(
+        mergeMap((res: any) => {
+          if (_.get(res, 'result.courses', []).length > 0 && _.get(this.configSvc, 'userProfile.userId') && _.get(currentPillFromMap, 'request.payload.request.status') === 'Completed') {
+            const formContextList: any[] = [];
+            const formRefMap: Record<string, any> = {}; // contextId -> course reference map
+
+            // Build formBody and maintain reference map
+            for (const course of res.result.courses) {
+              const content = course.content;
+              if (content?.completionSurveyLink && content?.identifier) {
+                const sID = content.completionSurveyLink.split('surveys/')
+                const formId = sID[1]
+
+                if (formId) {
+                  formContextList.push({
+                    formId,
+                    contextId: content.identifier,
+                  });
+                  formRefMap[content.identifier] = course; // direct reference to course
+                }
+              }
+            }
+
+            // If formContextList exists, make API call and wait for response
+            if (formContextList.length) {
+              const formBody = {
+                userId: _.get(this.configSvc, 'userProfile.userId'),
+                formContextList
+              };
+
+              return this.contentSvc.getApplicationsById(formBody).pipe(
+                map((response) => {
+                  const statusList = _.get(response, 'result.response', []);
+
+                  // Update course with survey status
+                  for (const status of statusList) {
+                    const course = formRefMap[status.contextId];
+                    if (course) {
+                      course['surveyCompletionStatus'] = status.submitted;
+                    }
+                  }
+
+                  return res; // Return the updated original response
+                }),
+                catchError((error) => {
+                  console.error('Error fetching survey status:', error);
+                  // Return the original response without survey status on error
+                  return of(res);
+                })
+              );
+            }
+          }
+
+          // Return existing response if no formContextList
+          return of(res);
+        })
+      ).subscribe((res: any) => {
         let courses: any = []
         if (res && res.result && res.result.courses && res.result.courses.length) {
           courses = [...courses, ...res.result.courses]
@@ -1744,7 +1801,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         contentTemp.batchId = c.batchId || ''
         contentTemp.content = c.content || c.event || {}
         contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || ''
-        contentTemp.cType = c.event ? 'event' : ''
+        contentTemp.cType = c.event ? 'event' : '';
+        contentTemp.completedOn = c.completedOn || ''
+        if (c.surveyCompletionStatus !== undefined) {
+          contentTemp.surveyCompletionStatus = c.surveyCompletionStatus;
+        }
         return contentTemp
       })
     }
