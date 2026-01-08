@@ -18,6 +18,7 @@ export class AllNotificationsComponent implements OnInit {
   @Input() showMarkAllAsRead: boolean = true
   @Input() fragment: string = ''
 
+  isMobileView: boolean = false
   notifications: any[] = []
   dynamicTabIndex: number = 0
   currentTab: any = 'all'
@@ -36,6 +37,7 @@ export class AllNotificationsComponent implements OnInit {
     private libNotificationService: LibNotificationsService,
     private snackBar: MatSnackBar
   ) {
+    this.checkMobileView()
     this.scrollNotificationsSubject.pipe(debounceTime(500)).subscribe((event: any) => {
       this.pageNumber = this.pageNumber + 1
       console.log("event ", event)
@@ -43,6 +45,12 @@ export class AllNotificationsComponent implements OnInit {
     })
 
   }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkMobileView()
+  }
+
   @HostListener('window:scroll', ['$event'])
 
   onScroll(event: Event): void {
@@ -191,6 +199,10 @@ export class AllNotificationsComponent implements OnInit {
 
   getCount(read: any, unread: any) {
     return (+read || +unread) ? `(${+read + +unread})` : ''
+  }
+
+  checkMobileView() {
+    this.isMobileView = window.innerWidth <= 767
   }
 
   markAllAsRead(event: MouseEvent) {
