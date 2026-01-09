@@ -37,6 +37,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
   @Input() isIntranetAllowedSettings: any
   @Input() isCardLoading: boolean = false
   @Output() contentData = new EventEmitter<any>()
+  @Output() redirectToNewVersion = new EventEmitter<any>()
   @Input() cbPlanMapData: any
   isCardFlipped: boolean = false
   acbpConstants = NsCardContent.ACBPConst
@@ -244,4 +245,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
     }
   }
 
+
+  navigateToNewVersion(contentData: any) {
+    this.redirectToNewVersion.emit(contentData.contentVersionInfo.identifier)
+  }
 }
