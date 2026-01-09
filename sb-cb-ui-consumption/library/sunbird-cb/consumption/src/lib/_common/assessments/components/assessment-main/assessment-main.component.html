@@ -32,20 +32,10 @@
         </div>
       </ng-template>
 
-      <div class="step-content">
-        <h3>Add Questions</h3>
-        <p>Add questions for your assessment.</p>
-        <!-- Add your questions form controls here -->
-
-        <div class="step-actions">
-          <button mat-button (click)="stepper.previous()">
-            Back
-          </button>
-          <button mat-raised-button color="primary">
-            Complete
-          </button>
-        </div>
-      </div>
+      <ng-container *ngIf="stepper.selectedIndex === 1">
+        <sb-uic-assessment-sessions (saved)="saveSectionData($event)" (updated)="updateSectionData($event)"
+          (updateQuestion)="updateQuestionData($event)"></sb-uic-assessment-sessions>
+      </ng-container>
     </mat-step>
   </mat-stepper>
 </div>

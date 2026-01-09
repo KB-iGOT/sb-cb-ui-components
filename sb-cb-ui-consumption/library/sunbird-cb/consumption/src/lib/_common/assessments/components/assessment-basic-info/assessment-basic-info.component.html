@@ -277,10 +277,10 @@
         <label class="field-label required">Cool off period</label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput formControlName="coolOffPeriod" placeholder="Enter cool off period in days" type="number"
-            max="50" min="1">
+            max="7" min="1">
           <mat-error *ngIf="controls['coolOffPeriod'].hasError('required')">Cool off period is required</mat-error>
           <mat-error *ngIf="controls['coolOffPeriod'].hasError('min')">Value must be 1 or greater</mat-error>
-          <mat-error *ngIf="controls['coolOffPeriod'].hasError('max')">Value must be 50 or less</mat-error>
+          <mat-error *ngIf="controls['coolOffPeriod'].hasError('max')">Value must be 7 or less</mat-error>
         </mat-form-field>
       </div>
     </ng-container>

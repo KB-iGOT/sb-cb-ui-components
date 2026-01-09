@@ -360,7 +360,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
     // coolOffPeriod validator - only required when contextCategory matches
     if (this.showCoolOffPeriod) {
-      coolOffPeriod?.setValidators([Validators.required, Validators.min(1), Validators.max(50)])
+      coolOffPeriod?.setValidators([Validators.required, Validators.min(1), Validators.max(7)])
     } else {
       coolOffPeriod?.clearValidators()
     }
@@ -470,7 +470,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       durationHours: [0, [Validators.min(0), Validators.max(23)]],
       durationMinutes: [0, [Validators.min(0), Validators.max(59)]],
       durationSeconds: [0, [Validators.min(0), Validators.max(59)]],
-      coolOffPeriod: [null, [Validators.min(1), Validators.max(50)]],
+      coolOffPeriod: [null, [Validators.min(1), Validators.max(7)]],
       description: ['', Validators.maxLength(this.instructionsMaxLength)],
       showTimer: [true],
       // Question Weightage settings
@@ -648,9 +648,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     }
 
     // Cool off period - only include if shown
-    // if (this.showCoolOffPeriod && formValues.coolOffPeriod) {
-    //   assessmentData.coolOffPeriod = formValues.coolOffPeriod
-    // }
+    if (this.showCoolOffPeriod && formValues.coolOffPeriod) {
+      assessmentData.coolOffPeriod = formValues.coolOffPeriod
+    }
 
     // Final Assessment specific fields
     if (this.isFinalAssessment) {
@@ -683,6 +683,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       }
 
       if (formValues.questionWeightageType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+        assessmentData.questionTagging = 'EMDH' // Default question tagging
         assessmentData.noOfSection = formValues.noOfSection
         assessmentData.showMarks = formValues.showMarks
         assessmentData.minimumPassPercentage = formValues.minimumPassPercentage

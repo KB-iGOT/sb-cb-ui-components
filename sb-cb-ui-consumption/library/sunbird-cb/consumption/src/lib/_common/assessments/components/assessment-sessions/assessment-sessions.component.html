@@ -1,0 +1,100 @@
+<div class="assessment-session-container" *ngIf="isAdvancedAssessmentQuestionWeightage()">
+  <!-- Section Tabs -->
+  <div class="section-tabs flex flex-middle gap-2 mb-5">
+    <ng-container *ngFor="let section of sections.controls; let i = index">
+      <button type="button" class="section-tab" [class.active]="selectedSectionIndex === i" (click)="selectSection(i)">
+        Section - {{ i + 1 }}
+      </button>
+    </ng-container>
+  </div>
+
+  <!-- Section Content -->
+  <div class="section-content" *ngIf="sections.controls[selectedSectionIndex]">
+    <!-- Values Display Section for Current Section -->
+    <div class="values-display">
+      <p class="values-text">
+        Values that are assigned by you in EMDH Based. ({{ getSectionDifficultyLevelSummary(selectedSectionIndex) }})
+      </p>
+    </div>
+
+    <form [formGroup]="currentSectionGroup">
+      <!-- Section Name -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label required">Section Name</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="name" [maxlength]="nameMaxLength" placeholder="Enter section name">
+          <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported</mat-hint>
+          <mat-hint align="end">{{ nameLength }} / {{ nameMaxLength }}</mat-hint>
+          <mat-error
+            *ngIf="currentSectionGroup?.get('name')?.hasError('required') && currentSectionGroup?.get('name')?.touched">
+            Section name is required
+          </mat-error>
+          <mat-error
+            *ngIf="currentSectionGroup?.get('name')?.hasError('pattern') && currentSectionGroup?.get('name')?.touched">
+            Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported
+          </mat-error>
+          <mat-error
+            *ngIf="currentSectionGroup?.get('name')?.hasError('maxlength') && currentSectionGroup?.get('name')?.touched">
+            Section name cannot exceed {{ nameMaxLength }} characters
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Additional Instructions -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label">Additional Instructions</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea matInput formControlName="additionalInstructions"
+            placeholder="Enter additional instructions for this section" rows="4" maxlength="500"></textarea>
+          <mat-hint align="end">
+            {{ currentSectionGroup?.get('additionalInstructions')?.value?.length || 0 }}/500
+          </mat-hint>
+        </mat-form-field>
+      </div>
+    </form>
+
+    <!-- Form Actions -->
+    <div class="form-actions flex flex-middle flex-center">
+      <button *ngIf="!assessmentData || !assessmentData.children" type="button" mat-button
+        class="btn-common btn-primary" (click)="onSave()">
+        Save
+      </button>
+      <button *ngIf="assessmentData && assessmentData.children" type="button" mat-button class="btn-common btn-primary"
+        (click)="onUpdate()">
+        Update
+      </button>
+    </div>
+
+    <!-- add Questions -->
+    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+        <mat-icon>add</mat-icon>
+        Add Questions
+      </button>
+      <button type="button" mat-button class="btn-common btn-secondary">
+        <mat-icon>file_upload</mat-icon>
+        Bulk upload
+      </button>
+    </div>
+  </div>
+
+  <!-- Questions List -->
+  <div class="questions-list mt-5" *ngIf="questionsList && questionsList.length > 0">
+    <h4 class="questions-title">Questions ({{ questionsList.length }})</h4>
+    <div *ngFor="let question of questionsList; let i = index" class="question-item mb-3">
+      <sb-uic-assessment-question-list [questionData]="question" [questionIndex]="i + 1"
+        [isExpanded]="expandedQuestionIndex === i" [sectionLevelDefinition]="getCurrentSectionLevelDefinition()"
+        [assessmentData]="assessmentData" (questionExpanded)="onQuestionExpanded(i)"
+        (questionUpdated)="onQuestionUpdated($event)" (questionDeleted)="onQuestionDeleted($event)">
+      </sb-uic-assessment-question-list>
+    </div>
+  </div>
+</div>
+
+<!-- Message for non-advanced assessments -->
+<div class="assessment-session-container" *ngIf="!isAdvancedAssessmentQuestionWeightage()">
+  <div class="info-message">
+    <mat-icon>info</mat-icon>
+    <p>Assessment sessions are only available for advanced assessments.</p>
+  </div>
+</div>

@@ -10,6 +10,7 @@ const API_END_POINTS = {
   QUESTIONSET_READ_MODE_EDIT: (id: any) => `apis/proxies/v8/questionset/v1/read/${id}?mode=edit`,
   QUESTIONSET_HIERARCHY: (id: any) => `apis/proxies/v8/questionset/v1/hierarchy/${id}`,
   QUESTIONSET_HIERARCHY_MODE_EDIT: (id: any) => `apis/proxies/v8/questionset/v1/hierarchy/${id}?mode=edit`,
+  QUESTION_READ_MODE_EDIT: `apis/proxies/v8/cbp/question/list?editMode=true`,
 }
 
 @Injectable({
@@ -87,15 +88,17 @@ export class AssessmentService {
     nodesModified[identifier] = {
       isNew: false,
       root: isRoot,
-      metadata: changedData
+      metadata: changedData,
+      objectType: 'QuestionSet'
     }
 
     // Create the hierarchy structure using existing hierarchy data
     const hierarchy: any = {}
 
-    if (isRoot && this.assessmentHierarchyData) {
-      // For root node, include name and existing children
-      hierarchy[identifier] = {
+    if (this.assessmentHierarchyData) {
+      // Always include the root assessment in hierarchy
+      const rootIdentifier = this.assessmentHierarchyData.identifier
+      hierarchy[rootIdentifier] = {
         name: this.assessmentHierarchyData.name,
         root: true,
         children: this.assessmentHierarchyData.children?.map((child: any) => child.identifier) || []
@@ -109,12 +112,6 @@ export class AssessmentService {
           }
         })
       }
-    } else {
-      // For children nodes
-      hierarchy[identifier] = {
-        root: false,
-        children: []
-      }
     }
 
     return {
@@ -125,6 +122,14 @@ export class AssessmentService {
         }
       }
     }
+  }
+
+  getQuestionReadDetailsModeEdit(reqBody: any) {
+    return this.http.post<any>(API_END_POINTS.QUESTION_READ_MODE_EDIT, reqBody).pipe(
+      map((response: any) => {
+        return response
+      })
+    )
   }
 
   createAssessmentHierarchyRequest(assessmentData: any, identifier?: string) {
@@ -193,7 +198,97 @@ export class AssessmentService {
     }
   }
 
-  private generateUUID(): string {
+  generateUUID(): string {
     return uuid()
+  }
+
+  buildQuestionHierarchyRequest(questionData: any, sectionIdentifier: string): any {
+    const questionUUID = Object.keys(questionData)[0]
+    const questionInfo = questionData[questionUUID]
+
+    // Get current assessment hierarchy
+    const currentHierarchy = this.getAssessmentHierarchyData()
+
+    // Build hierarchy structure
+    const hierarchy: any = {}
+
+    // Add root assessment node
+    if (currentHierarchy && currentHierarchy.identifier) {
+      const rootId = currentHierarchy.identifier
+      hierarchy[rootId] = {
+        name: currentHierarchy.name,
+        root: true,
+        children: currentHierarchy.children?.map((child: any) => child.identifier) || []
+      }
+
+      // Add all section nodes with their children
+      if (currentHierarchy.children && currentHierarchy.children.length > 0) {
+        currentHierarchy.children.forEach((section: any) => {
+          const sectionId = section.identifier
+          let sectionChildren = section.children?.map((child: any) => child.identifier) || []
+
+          // If this is the target section and the question is new, add it to children
+          if (sectionId === sectionIdentifier && questionInfo.isNew) {
+            if (!sectionChildren.includes(questionUUID)) {
+              sectionChildren = [...sectionChildren, questionUUID]
+            }
+          }
+
+          hierarchy[sectionId] = {
+            children: sectionChildren
+          }
+        })
+      }
+    }
+
+    // Build the complete request structure
+    return {
+      request: {
+        data: {
+          nodesModified: questionData,
+          hierarchy: hierarchy
+        }
+      }
+    }
+  }
+
+  deleteQuestionHierarchyRequest(questionIdentifier: any, sectionIdentifier: string): any {
+    // Get current assessment hierarchy
+    const currentHierarchy = this.getAssessmentHierarchyData()
+
+    // Build hierarchy structure
+    const hierarchy: any = {}
+
+    // Add root assessment node
+    if (currentHierarchy && currentHierarchy.identifier) {
+      const rootId = currentHierarchy.identifier
+      hierarchy[rootId] = {
+        name: currentHierarchy.name,
+        root: true,
+        children: currentHierarchy.children?.map((child: any) => child.identifier) || []
+      }
+
+      // Add all section nodes with their children
+      if (currentHierarchy.children && currentHierarchy.children.length > 0) {
+        currentHierarchy.children.forEach((section: any) => {
+          const sectionId = section.identifier
+          let sectionChildren = section.children?.filter((child: any) => child.identifier !== questionIdentifier) || []
+
+          hierarchy[sectionId] = {
+            children: sectionChildren.map((child: any) => child.identifier) || []
+          }
+        })
+      }
+    }
+
+    // Build the complete request structure
+    return {
+      request: {
+        data: {
+          nodesModified: {},
+          hierarchy: hierarchy
+        }
+      }
+    }
   }
 }
