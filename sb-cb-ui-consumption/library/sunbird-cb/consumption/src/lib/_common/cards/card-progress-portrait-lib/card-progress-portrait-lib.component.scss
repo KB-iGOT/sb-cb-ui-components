@@ -347,6 +347,24 @@ $secondary-color: #EF951E;
     padding: 12px;
     overflow: hidden;
   }
+  .new-version-btn {
+    position: absolute;
+    top: 40%;
+    left: 30%;
+    z-index: 100;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: .5px;
+    text-align: left;
+    line-height: 20px;
+    background: #1a4ca1;
+    border-radius: 63px;
+    padding: 6px 16px;
+    border: none;
+    cursor: pointer;
+  }
   .retired-badge {
     background: rgba(209, 57, 36, 1);
     color: white;

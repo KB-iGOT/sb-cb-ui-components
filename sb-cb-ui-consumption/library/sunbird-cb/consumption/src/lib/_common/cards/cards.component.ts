@@ -52,7 +52,7 @@ export class CardsComponent extends WidgetBaseComponent
     return false
   }
   async getRedirectUrlData(content: any) {
-    if(content?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE){
+    if (content?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE) {
       let url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(content?.mimeType)}/${content?.identifier}`
       let queryParams = {
         primaryCategory: content?.primaryCategory
@@ -94,5 +94,9 @@ export class CardsComponent extends WidgetBaseComponent
 
   raiseCardClick(data: any) {
     this.triggerTelemetry.emit(data)
+  }
+
+  redirectToNewVersion(identifier: any) {
+    this.router.navigate(['app/toc', identifier, 'overview'])
   }
 }
