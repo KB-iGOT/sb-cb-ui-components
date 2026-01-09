@@ -119,8 +119,10 @@ export * from './lib/_common/pagination/pagination.component'
 export * from './lib/_common/horizontal-dynamic-stepper/horizontal-dynamic-stepper.module'
 export * from './lib/_common/horizontal-dynamic-stepper/horizontal-dynamic-stepper.component'
 
-
-
 export * from './lib/_common/assessments/assessment.module'
 export * from './lib/_common/assessments/components/assessment-main/assessment-main.component'
 export * from './lib/_common/assessments/components/assessment-basic-info/assessment-basic-info.component'
+
+export * from './lib/_common/create-request/create-request.module'
+export * from './lib/_common/create-request/components/create-request-form/create-request-form.component'
+export * from './lib/_common/create-request/dialogs/add-authors/add-authors.component'

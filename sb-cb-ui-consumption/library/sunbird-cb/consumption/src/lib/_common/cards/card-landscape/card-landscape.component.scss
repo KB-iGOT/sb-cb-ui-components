@@ -11,6 +11,7 @@ opacity: 1;
 width: 350px;
 min-height: 154px;
 padding: 16px;
+  overflow: hidden;
 .img-block-portrait {
     line-height: 10px;
 }
@@ -21,6 +22,9 @@ padding: 16px;
     width: 147px;
     height: 100px;
 
+}
+.width-1-1 {
+  min-width: 0;
 }
 .portrait-subheading {
     opacity: 1;

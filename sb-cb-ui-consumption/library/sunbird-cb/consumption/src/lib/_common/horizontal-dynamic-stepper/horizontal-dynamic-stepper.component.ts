@@ -23,7 +23,6 @@ export class HorizontalDynamicStepperComponent implements AfterContentInit {
   }
 
   onSelectionChange(event: StepperSelectionEvent) {
-    console.log('Selected index', event.selectedIndex)
     this.stepChange.emit(event.selectedIndex)
   }
 
