@@ -133,8 +133,9 @@
         <span class="round-control-label required">Request Type</span>
         <mat-radio-group formControlName="requestType" class="flex gap-3 flex-wrap">
           <ng-container *ngFor="let type of requestTypeList">
-            <mat-radio-button class="rounded-outline-radio" [value]="type" (change)="selectRequestType(type)">
-              {{ type }}<mat-icon class="info-icon">info_outline</mat-icon>
+            <mat-radio-button class="rounded-outline-radio" [value]="type.type" (change)="selectRequestType(type.type)">
+              {{ type.type }}<mat-icon class="info-icon" [matTooltip]="type.description"
+                matTooltipClass="tooltip-sec">info_outline</mat-icon>
             </mat-radio-button>
           </ng-container>
         </mat-radio-group>
