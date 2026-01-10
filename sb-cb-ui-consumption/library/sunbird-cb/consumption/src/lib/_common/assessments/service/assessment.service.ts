@@ -203,8 +203,8 @@ export class AssessmentService {
   }
 
   buildQuestionHierarchyRequest(questionData: any, sectionIdentifier: string): any {
-    const questionUUID = Object.keys(questionData)[0]
-    const questionInfo = questionData[questionUUID]
+    // Get all question UUIDs from questionData (could be single or multiple)
+    const questionUUIDs = Object.keys(questionData)
 
     // Get current assessment hierarchy
     const currentHierarchy = this.getAssessmentHierarchyData()
@@ -227,11 +227,15 @@ export class AssessmentService {
           const sectionId = section.identifier
           let sectionChildren = section.children?.map((child: any) => child.identifier) || []
 
-          // If this is the target section and the question is new, add it to children
-          if (sectionId === sectionIdentifier && questionInfo.isNew) {
-            if (!sectionChildren.includes(questionUUID)) {
-              sectionChildren = [...sectionChildren, questionUUID]
-            }
+          // If this is the target section, add all new questions to children
+          if (sectionId === sectionIdentifier) {
+            questionUUIDs.forEach(questionUUID => {
+              const questionInfo = questionData[questionUUID]
+              // Add new question to section children if not already present
+              if (questionInfo.isNew && !sectionChildren.includes(questionUUID)) {
+                sectionChildren = [...sectionChildren, questionUUID]
+              }
+            })
           }
 
           hierarchy[sectionId] = {

@@ -61,6 +61,40 @@
           </div>
         </div>
 
+        <!-- Question Status Info (if totalQuestions is set) -->
+        <div class="question-status-info" *ngIf="totalQuestions !== null">
+          <mat-card class="status-card">
+            <div class="status-items">
+              <div class="status-item">
+                <span class="status-label">Already Added:</span>
+                <span class="status-value">{{ existingQuestionsCount }}</span>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Newly Selected:</span>
+                <span class="status-value"
+                  [class.exceeds-limit]="existingQuestionsCount + selectedQuestions.length > totalQuestions">
+                  {{ selectedQuestions.length }}
+                </span>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Total Limit:</span>
+                <span class="status-value">{{ totalQuestions }}</span>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Available Slots:</span>
+                <span class="status-value"
+                  [class.warning]="totalQuestions - existingQuestionsCount < selectedQuestions.length">
+                  {{ totalQuestions - existingQuestionsCount }}
+                </span>
+              </div>
+            </div>
+            <div class="status-warning" *ngIf="existingQuestionsCount + selectedQuestions.length > totalQuestions">
+              <mat-icon>warning</mat-icon>
+              <span>You have selected more questions than available slots!</span>
+            </div>
+          </mat-card>
+        </div>
+
         <!-- Question Tracking -->
         <div class="tracking-info" *ngIf="questionTracking && questionTracking.length > 0">
           <mat-card class="tracking-card">

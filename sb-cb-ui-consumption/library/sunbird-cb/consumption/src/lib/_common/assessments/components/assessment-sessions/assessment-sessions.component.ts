@@ -457,16 +457,33 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       maxWidth: '1200px',
       data: {
         maxFileSize: 400 * 1024 * 1024,
-        questionTracking: this.getCurrentSectionLevelDefinition()
+        questionTracking: this.getCurrentSectionLevelDefinition(),
+        totalQuestions: this.basicAssessmentForm?.get('totalQuestions')?.value || null,
+        compatibilityLevel: this.assessmentData?.compatibilityLevel,
+        assessmentType: this.assessmentData?.assessmentType,
+        existingQuestionsCount: this.questionsList?.length || 0
       },
       autoFocus: false
     })
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.action === 'CREATE') {
-        // Handle the created questions
-        console.log('Questions to create:', result.questions)
-        // Process the questions...
+        // Handle the created questions from bulk upload
+        const questions = result.questions
+        console.log('Questions to create from bulk upload:', questions)
+
+        // For basic assessment, use the first section; for advanced, use selected section
+        const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
+        const sectionIdentifier = this.assessmentData.children?.[sectionIndex]?.identifier || null
+
+        if (sectionIdentifier && questions && questions.length > 0) {
+          // Emit the update event with the array of questions
+          const updateData = {
+            changedData: questions, // Array of questions
+            sectionIdentifier: sectionIdentifier
+          }
+          this.updateQuestion.emit(updateData)
+        }
       }
     })
   }

@@ -178,6 +178,78 @@
   }
 }
 
+.question-status-info {
+  margin-top: 16px;
+
+  .status-card {
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #1B4CA1;
+
+    .status-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 12px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .status-label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .status-value {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+
+        &.exceeds-limit {
+          color: #d32f2f;
+          animation: pulse 1s ease-in-out infinite;
+        }
+
+        &.warning {
+          color: #f57c00;
+        }
+      }
+    }
+
+    .status-warning {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: #fff3e0;
+      border: 1px solid #ffb74d;
+      border-radius: 6px;
+      color: #e65100;
+      font-weight: 500;
+
+      mat-icon {
+        color: #f57c00;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
 .tracking-info {
   .tracking-card {
     padding: 16px;

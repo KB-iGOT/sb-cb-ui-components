@@ -48,6 +48,10 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
   uploadProgress = 0
   assessmentData: any
   isDragOver = false
+  totalQuestions: number | null = null
+  compatibilityLevel: any
+  assessmentType: any
+  existingQuestionsCount: number = 0
 
   columnValidate: ColumnValidation = {
     questionWeightage: {
@@ -77,6 +81,10 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     // Set data from dialog input
     if (data) {
       this.maxFileSize = data.maxFileSize || this.maxFileSize
+      this.totalQuestions = data.totalQuestions || null
+      this.compatibilityLevel = data.compatibilityLevel
+      this.assessmentType = data.assessmentType
+      this.existingQuestionsCount = data.existingQuestionsCount || 0
 
       // Transform questionTracking object to array format
       if (data.questionTracking) {
@@ -159,11 +167,9 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       try {
         const arrayBuffer = e.target.result
         const data = new Uint8Array(arrayBuffer)
-        const arr = []
-        for (let i = 0; i !== data.length; i++) {
-          arr[i] = String.fromCharCode(data[i])
-        }
-        const bstr = arr.join('')
+        // Improved UTF-8 decoding
+        const decoder = new TextDecoder('utf-8')
+        const bstr = decoder.decode(data)
         const workbook = XLSX.read(bstr, { type: 'binary', raw: true })
         const firstSheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[firstSheetName]
@@ -205,13 +211,32 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       return false
     }
 
-    // Check for required columns
-    const requiredColumns = ['QuestionNo', 'QuestionType', 'Question', 'Option1']
     const firstRow = data[0]
+    const isOldTemplate = !('QuestionNo' in firstRow) && !('QuestionType' in firstRow)
+
+    // For old template (basic MCQ), only Question and Option1 are required
+    if (isOldTemplate) {
+      // Check if old template is allowed (only for basic assessments)
+      if (this.compatibilityLevel !== NsAssessment.ECompatibilityLevel.BASIC) {
+        this.snackBar.open('Old template format is only supported for basic assessments. Please use the new template format.', 'Close', { duration: 4000 })
+        return false
+      }
+
+      if (!('Question' in firstRow) || !('Option1' in firstRow)) {
+        this.snackBar.open('Invalid template. Missing required columns: Question, Option1', 'Close', { duration: 3000 })
+        return false
+      }
+
+      // Old template is valid
+      return true
+    }
+
+    // For new template, check for required columns
+    const requiredColumns = ['QuestionNo', 'QuestionType', 'Question', 'Option1']
     const missingColumns = requiredColumns.filter(col => !(col in firstRow))
 
     if (missingColumns.length > 0) {
-      this.snackBar.open(`Invalid template. Missing columns: ${missingColumns.join(', ')}`)
+      this.snackBar.open(`Invalid template. Missing columns: ${missingColumns.join(', ')}`, 'Close', { duration: 3000 })
       return false
     }
 
@@ -294,12 +319,16 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
   }
 
   convertToQuestionFormat(rawData: any[]): void {
-    // Convert MCQ-SCA-W to MCQ-MCA-W
-    rawData.forEach((row: any) => {
-      if (row.QuestionType === 'MCQ-SCA-W') {
-        row.QuestionType = 'MCQ-MCA-W'
-      }
-    })
+    const isOldTemplate = !rawData[0].QuestionType
+
+    // Convert MCQ-SCA-W to MCQ-MCA-W for new template
+    if (!isOldTemplate) {
+      rawData.forEach((row: any) => {
+        if (row.QuestionType === 'MCQ-SCA-W') {
+          row.QuestionType = 'MCQ-MCA-W'
+        }
+      })
+    }
 
     this.validUploadedValues = rawData.map(q => {
       const questionText = q.Question
@@ -309,16 +338,38 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       const isWeightedQuestion = q.QuestionType === 'MCQ-MCA-W'
       const isQuestionOptionWeightage = this.assessmentData?.assessmentType === NsAssessment.EAssessmentType.QUESTION_OPTION_WEIGHTAGE
 
-      // Process options based on question type
+      // Process options based on template type
       let optionIndex = 0
-      for (let i = 1; i <= 10; i++) {
+      const startIndex = 1 // Both old and new templates start from Option1
+      const maxOptions = 10
+
+      for (let i = startIndex; i <= maxOptions; i++) {
         const optionKey = `Option${i}`
         const optionValue = q[optionKey]
 
         if (optionValue !== undefined && optionValue !== null && optionValue !== '') {
           let isCorrect: any = false
 
-          if (isQuestionOptionWeightage) {
+          if (isOldTemplate) {
+            // Old template uses IsOption0Correct, IsOption1Correct format (capital I and S)
+            const correctKey = `IsOption${i}Correct`
+            const correctValue = q[correctKey]
+
+            if (correctValue !== undefined && correctValue !== null) {
+              const correctStr = String(correctValue).trim()
+              // Handle boolean values with spaces or string representations
+              if (correctStr.toLowerCase() === 'true' || correctStr === 'TRUE') {
+                isCorrect = true
+              } else if (correctStr.toLowerCase() === 'false' || correctStr === 'FALSE') {
+                isCorrect = false
+              } else {
+                // Try to parse as boolean
+                isCorrect = correctValue === true || correctValue === 'true'
+              }
+            } else {
+              isCorrect = false
+            }
+          } else if (isQuestionOptionWeightage) {
             // For question-option weightage, use Option1Weight, Option2Weight, etc.
             const weightKey = `Option${i}Weight`
             isCorrect = q[weightKey] !== undefined ? q[weightKey] : 0
@@ -364,15 +415,22 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         }
       }
 
+      // Auto-detect question type for old template
+      let detectedQType = q.QuestionType
+      if (isOldTemplate) {
+        const correctCount = options.filter(o => o.answer === true).length
+        detectedQType = correctCount > 1 ? 'MCQ-MCA' : 'MCQ-SCA'
+      }
+
       // Build question object
       const questionData: QuestionData = {
         identifier: uuidv4(),
         code: 'question',
         objectType: 'Question',
         mimeType: 'application/vnd.sunbird.question',
-        primaryCategory: this.getPrimaryCategory(q.QuestionType),
-        qType: this.getQType(q.QuestionType),
-        answer: this.getAnswerIndex(options, q.QuestionType),
+        primaryCategory: this.getPrimaryCategory(detectedQType),
+        qType: this.getQType(detectedQType),
+        answer: this.getAnswerIndex(options, detectedQType),
         name: questionText,
         body: questionText,
         choices: { options: choicesOptions },
@@ -516,6 +574,20 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       return
     }
 
+    // Check if adding selected questions exceeds the total limit
+    if (this.totalQuestions !== null) {
+      const totalAfterAdding = this.existingQuestionsCount + this.selectedQuestions.length
+      if (totalAfterAdding > this.totalQuestions) {
+        const availableSlots = this.totalQuestions - this.existingQuestionsCount
+        this.snackBar.open(
+          `Cannot add ${this.selectedQuestions.length} questions. You can only add ${availableSlots} more question(s). (${this.existingQuestionsCount} already added, ${this.totalQuestions} total limit)`,
+          'Close',
+          { duration: 5000 }
+        )
+        return
+      }
+    }
+
     // Validate questions before creating
     const validation = this.validateQuestions()
     if (!validation.valid) {
@@ -540,6 +612,15 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         }
       }
 
+      // Check if at least one option has a correct answer
+      const hasCorrectAnswer = question.editorState.options.some((o: any) => o.answer === true)
+      if (!hasCorrectAnswer && question.qType !== 'FTB' && question.qType !== 'MTF' && question.qType !== 'MCQ-MCA-W') {
+        return {
+          valid: false,
+          message: `Question "${question.name.substring(0, 50)}..." must have at least one correct answer.`
+        }
+      }
+
       // Validate based on question type
       if (question.qType === 'MCQ-SCA' || question.qType === 'MCQ-SCA-TF') {
         const correctCount = question.editorState.options.filter((o: any) => o.answer === true).length
@@ -551,10 +632,10 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         }
       } else if (question.qType === 'MCQ-MCA') {
         const correctCount = question.editorState.options.filter((o: any) => o.answer === true).length
-        if (correctCount < 2) {
+        if (correctCount < 1) {
           return {
             valid: false,
-            message: `Multiple choice question must have at least two correct answers.`
+            message: `Multiple choice question must have at least one correct answer.`
           }
         }
       } else if (question.qType === 'MTF') {

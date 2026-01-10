@@ -266,9 +266,27 @@ export class AssessmentMainComponent implements OnInit {
         }
       })
     } else if (event.changedData) {
-      // Handle question create/update
-      const questionData = event.changedData
+      // Handle question create/update (single or bulk)
+      const changedData = event.changedData
       const sectionIdentifier = event.sectionIdentifier
+      let questionData: any
+
+      // Check if changedData is an array (bulk upload) or single question object
+      if (Array.isArray(changedData)) {
+        // Convert array of questions to the expected object format
+        questionData = {}
+        changedData.forEach((question: any) => {
+          const questionUUID = question.identifier
+          questionData[questionUUID] = {
+            ...question,
+            isNew: true // Mark all bulk uploaded questions as new
+          }
+        })
+        console.log(`Processing ${changedData.length} questions from bulk upload`)
+      } else {
+        // Single question update
+        questionData = changedData
+      }
 
       // Use service method to build the hierarchy request
       const questionHierarchyRequest = this.assessmentService.buildQuestionHierarchyRequest(
@@ -289,8 +307,11 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Question updated successfully', resp)
-          this.snackBar.open('Question saved successfully')
+          console.log('Question(s) updated successfully', resp)
+          const message = Array.isArray(changedData)
+            ? `${changedData.length} questions saved successfully`
+            : 'Question saved successfully'
+          this.snackBar.open(message)
           this.callLoader(false)
           // Reload sessions component data to get updated question list with identifiers
           if (this.sessionsComponent) {
@@ -298,8 +319,8 @@ export class AssessmentMainComponent implements OnInit {
           }
         },
         error: (error: any) => {
-          console.error('Error updating question', error)
-          this.snackBar.open('Error saving question. Please try again.')
+          console.error('Error updating question(s)', error)
+          this.snackBar.open('Error saving question(s). Please try again.')
           this.callLoader(false)
         }
       })
