@@ -466,11 +466,14 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       autoFocus: false
     })
 
+
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.action === 'CREATE') {
         // Handle the created questions from bulk upload
         const questions = result.questions
+        const isOldTemplate = result.isOldTemplate || false
         console.log('Questions to create from bulk upload:', questions)
+        console.log('Is old template:', isOldTemplate)
 
         // For basic assessment, use the first section; for advanced, use selected section
         const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
@@ -480,7 +483,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
           // Emit the update event with the array of questions
           const updateData = {
             changedData: questions, // Array of questions
-            sectionIdentifier: sectionIdentifier
+            sectionIdentifier: sectionIdentifier,
+            isOldTemplate: isOldTemplate
           }
           this.updateQuestion.emit(updateData)
         }

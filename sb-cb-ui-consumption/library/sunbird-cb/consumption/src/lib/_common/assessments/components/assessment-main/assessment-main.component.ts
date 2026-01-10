@@ -275,14 +275,24 @@ export class AssessmentMainComponent implements OnInit {
       if (Array.isArray(changedData)) {
         // Convert array of questions to the expected object format
         questionData = {}
+        const isOldTemplate = event.isOldTemplate || false
+
         changedData.forEach((question: any) => {
           const questionUUID = question.identifier
+
+          // For new template, exclude identifier from metadata
+          // For old template, include identifier in metadata
+          const { identifier, ...questionWithoutId } = question
+          const metadata = isOldTemplate ? question : questionWithoutId
+
           questionData[questionUUID] = {
-            ...question,
-            isNew: true // Mark all bulk uploaded questions as new
+            isNew: true,
+            root: false,
+            objectType: 'Question',
+            metadata: metadata
           }
         })
-        console.log(`Processing ${changedData.length} questions from bulk upload`)
+        console.log(`Processing ${changedData.length} questions from bulk upload (${isOldTemplate ? 'old' : 'new'} template)`)
       } else {
         // Single question update
         questionData = changedData

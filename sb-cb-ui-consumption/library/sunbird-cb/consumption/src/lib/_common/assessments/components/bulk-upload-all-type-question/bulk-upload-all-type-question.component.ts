@@ -52,6 +52,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
   compatibilityLevel: any
   assessmentType: any
   existingQuestionsCount: number = 0
+  isOldTemplate: boolean = false
 
   columnValidate: ColumnValidation = {
     questionWeightage: {
@@ -320,6 +321,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
   convertToQuestionFormat(rawData: any[]): void {
     const isOldTemplate = !rawData[0].QuestionType
+    this.isOldTemplate = isOldTemplate // Store for later use
 
     // Convert MCQ-SCA-W to MCQ-MCA-W for new template
     if (!isOldTemplate) {
@@ -472,9 +474,10 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       case 'MCQ-MCA':
       case 'T/F':
       case 'MCQ-MCA-W':
+      case 'MCQ-SCA-TF':
         return 'Multiple Choice Question'
       case 'FTB':
-        return 'Fill in the Blanks'
+        return 'FTB Question'
       case 'MTF':
         return 'MTF Question'
       default:
@@ -598,7 +601,8 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     // Close dialog and return selected questions
     this.dialogRef.close({
       action: 'CREATE',
-      questions: this.selectedQuestions
+      questions: this.selectedQuestions,
+      isOldTemplate: this.isOldTemplate
     })
   }
 
