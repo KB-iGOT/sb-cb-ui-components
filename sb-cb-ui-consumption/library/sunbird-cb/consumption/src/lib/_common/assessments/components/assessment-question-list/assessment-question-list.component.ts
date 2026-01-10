@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnChanges, SimpleChanges } from '@angular/core'
 import { MultipleChoiceQuestionComponent } from '../multiple-choice-question/multiple-choice-question.component'
 import { MatchTheFollowingComponent } from '../match-the-following/match-the-following.component'
+import { FillUpTheBlanksComponent } from '../fill-up-the-blanks/fill-up-the-blanks.component'
 import { AssessmentService } from '../../service/assessment.service'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
@@ -22,6 +23,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
   @ViewChild('mcqComponent') mcqComponent?: MultipleChoiceQuestionComponent
   @ViewChild('mtfComponent') mtfComponent?: MatchTheFollowingComponent
+  @ViewChild('ftbComponent') ftbComponent?: FillUpTheBlanksComponent
 
   difficultyLevels = [
     { name: 'Easy', value: 'easy' },
@@ -37,7 +39,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   questionText: string = ''
   fitbCount: number = 0
   fitbConfig = {
-    maxOptions: 10,
+    maxOptions: 7,
   }
   questionOptions: any[] = []
 
@@ -153,6 +155,34 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
           console.log('Loaded MTF pairs from choices/rhsChoices:', this.questionOptions)
         }
       }
+
+      // Set FTB blanks if available
+      if (this.isFTBQuestion()) {
+        console.log('FTB Question editorState:', this.questionData.editorState)
+        console.log('FTB Question choices:', this.questionData.choices)
+
+        if (this.questionData.editorState?.options && this.questionData.editorState.options.length > 0) {
+          // Load blanks from editorState
+          // The blank assignment is in opt.answer field (e.g., "B1", "B2", "B3", "none")
+          this.questionOptions = this.questionData.editorState.options.map((opt: any, index: number) => ({
+            id: index + 1,
+            text: opt.value?.body || opt.text || '',
+            blankNumber: opt.answer
+          }))
+          console.log('Loaded FTB blanks from editorState:', this.questionOptions)
+        } else if (this.questionData.choices?.options && this.questionData.choices.options.length > 0) {
+          // Alternative structure from choices
+          this.questionOptions = this.questionData.choices.options.map((opt: any, index: number) => ({
+            id: index + 1,
+            text: opt.value?.body || opt.body || '',
+            blankNumber: opt.answer && opt.answer !== 'none' ? opt.answer : null
+          }))
+          console.log('Loaded FTB blanks from choices:', this.questionOptions)
+        }
+
+        // Count blanks in question text
+        this.checkBlankIntext()
+      }
     }
   }
 
@@ -166,6 +196,10 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
   isMTFQuestion(): boolean {
     return this.questionData.qType === 'MTF'
+  }
+
+  isFTBQuestion(): boolean {
+    return this.questionData.qType === 'FTB'
   }
 
   isTrueFalseQuestion(): boolean {
@@ -192,6 +226,12 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
     }
   }
 
+  onAddBlank(): void {
+    if (this.ftbComponent) {
+      this.ftbComponent.addOption()
+    }
+  }
+
   canAddMoreOptions(): boolean {
     if (this.mcqComponent) {
       return this.mcqComponent.canAddMoreOptions()
@@ -202,6 +242,13 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   canAddMorePairs(): boolean {
     if (this.mtfComponent) {
       return this.mtfComponent.canAddMorePairs()
+    }
+    return true
+  }
+
+  canAddMoreBlanks(): boolean {
+    if (this.ftbComponent) {
+      return this.ftbComponent.canAddMoreOptions()
     }
     return true
   }
@@ -218,6 +265,49 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
       pair.question && pair.question.trim().length > 0 &&
       pair.answer && pair.answer.trim().length > 0
     )
+  }
+
+  canSaveFTBQuestion(): boolean {
+    if (!this.questionText || this.questionText.trim().length === 0) {
+      return false
+    }
+    if (this.fitbCount === 0) {
+      return false
+    }
+    if (!this.questionOptions || this.questionOptions.length === 0) {
+      return false
+    }
+    // Check that all blanks have text
+    const allBlanksHaveText = this.questionOptions.every(blank =>
+      blank.text && blank.text.trim().length > 0
+    )
+    if (!allBlanksHaveText) {
+      return false
+    }
+    // Get all unique assigned blank numbers (excluding null/undefined/empty/'none')
+    const assignedBlanks = this.questionOptions
+      .filter(blank => blank.blankNumber && blank.blankNumber !== 'none' && blank.blankNumber !== '')
+      .map(blank => {
+        // Handle both 'B1', 'B2' format and numeric format
+        const blankStr = String(blank.blankNumber)
+        if (blankStr.startsWith('B')) {
+          return Number(blankStr.substring(1))
+        }
+        return Number(blankStr)
+      })
+      .filter(num => !isNaN(num))
+
+    // Get unique blank numbers
+    const uniqueAssignedBlanks = Array.from(new Set(assignedBlanks))
+
+    // Check that all blanks (1 to fitbCount) have at least one assignment
+    for (let i = 1; i <= this.fitbCount; i++) {
+      if (!uniqueAssignedBlanks.includes(i)) {
+        return false
+      }
+    }
+
+    return true
   }
 
   onDifficultyLevelChange(level: string): void {
@@ -390,7 +480,14 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   }
 
   saveQuestion(): void {
-    if (!this.canSaveQuestion() && !this.canSaveMTFQuestion()) {
+    // Check appropriate validation based on question type
+    if (this.isMTFQuestion() && !this.canSaveMTFQuestion()) {
+      return
+    }
+    if (this.isFTBQuestion() && !this.canSaveFTBQuestion()) {
+      return
+    }
+    if (!this.isMTFQuestion() && !this.isFTBQuestion() && !this.canSaveQuestion()) {
       return
     }
 
@@ -456,6 +553,45 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
       // Build rhsChoices with answer texts
       rhsChoices = this.questionOptions.map(pair => pair.answer || '')
+    } else if (this.isFTBQuestion()) {
+      // For FTB, build blank answers structure
+      // Helper function to extract numeric value from blankNumber
+      const getBlankNumericValue = (blankNumber: any): number => {
+        if (!blankNumber) return 0
+        const blankStr = String(blankNumber)
+        if (blankStr.startsWith('B')) {
+          return Number(blankStr.substring(1))
+        }
+        return Number(blankStr)
+      }
+
+      // answer field contains comma-separated correct answers in order
+      const sortedBlanks = [...this.questionOptions].sort((a, b) =>
+        getBlankNumericValue(a.blankNumber) - getBlankNumericValue(b.blankNumber)
+      )
+      answer = sortedBlanks.map(blank => `${blank.id - 1}` || '').join(',')
+
+      // Build editorState options for FTB with blank number as value
+      editorStateOptions = this.questionOptions.map((blank) => {
+        return {
+          answer: blank.blankNumber || '',
+          value: {
+            body: blank.text || '',
+            value: blank.id - 1  // Convert to 0-based index
+          }
+        }
+      })
+
+      // Build choices options for FTB
+      choicesOptions = this.questionOptions.map((blank) => {
+        return {
+          value: {
+            body: blank.text || '',
+            value: blank.id - 1  // Convert to 0-based index
+          }
+        }
+      })
+      debugger
     }
 
     const questionRequest = {
@@ -503,7 +639,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
       case 'MCQ-SCA-TF':
         return 'Multiple Choice Question'
       case 'FTB':
-        return 'Fill in the Blanks'
+        return 'FTB Question'
       case 'MTF':
         return 'MTF Question'
       default:

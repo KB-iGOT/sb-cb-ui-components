@@ -6,6 +6,7 @@ import { NsAssessment } from '../../service/assessment.model'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { SelectQuestionModalComponent } from '../select-question-modal/select-question-modal.component'
+import { BulkUploadAllTypeQuestionComponent } from '../bulk-upload-all-type-question/bulk-upload-all-type-question.component'
 
 @Component({
   selector: 'sb-uic-assessment-sessions',
@@ -18,6 +19,7 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   @Output() updateQuestion = new EventEmitter<any>()
 
   sessionsForm!: FormGroup
+  basicAssessmentForm!: FormGroup
   assessmentData: any = {}
   difficultyLevels = [
     { name: 'Easy', count: 0 },
@@ -60,6 +62,13 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     this.sessionsForm = this.fb.group({
       sections: this.fb.array([this.createSectionGroup()])
     })
+
+    this.basicAssessmentForm = this.fb.group({
+      totalQuestions: [0, [Validators.required, Validators.min(1)]],
+      maxQuestions: [0, [Validators.required, Validators.min(1)]],
+      minPassPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      additionalInstructions: ['', [Validators.maxLength(500)]]
+    })
   }
 
   createSectionGroup(): FormGroup {
@@ -84,6 +93,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     if (this.assessmentData && this.isAdvancedAssessmentQuestionWeightage()) {
       this.populateFormFromAssessmentData()
       this.calculateDifficultyLevelCounts()
+    } else if (this.assessmentData && this.isBasicAssessment()) {
+      this.populateBasicAssessmentForm()
     }
   }
 
@@ -97,6 +108,38 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   isAdvancedAssessmentQuestionWeightage(): boolean {
     return this.assessmentData?.compatibilityLevel === NsAssessment.ECompatibilityLevel.ADVANCED ||
       this.assessmentData?.assessmentType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE
+  }
+
+  isBasicAssessment(): boolean {
+    return this.assessmentData?.compatibilityLevel === NsAssessment.ECompatibilityLevel.BASIC
+  }
+
+  hasBasicAssessmentSection(): boolean {
+    // Check if basic assessment has a created section (with do_ identifier)
+    return this.isBasicAssessment() &&
+      this.assessmentData?.children &&
+      this.assessmentData.children.length > 0 &&
+      this.assessmentData.children[0]?.identifier?.startsWith('do_')
+  }
+
+  populateBasicAssessmentForm(): void {
+    // For basic assessment, if there's existing section data, populate the form
+    if (this.assessmentData.children && this.assessmentData.children.length > 0) {
+      const section = this.assessmentData.children[0] // Basic assessment has only one section
+
+      this.basicAssessmentForm.patchValue({
+        totalQuestions: section.totalQuestions || 0,
+        maxQuestions: section.maxQuestions || 0,
+        minPassPercentage: section.minimumPassPercentage || 0,
+        additionalInstructions: section.additionalInstructions || ''
+      })
+
+      // Store section identifier for updates
+      this.basicAssessmentForm.addControl('sectionIdentifier', this.fb.control(section.identifier))
+
+      // Load questions for basic assessment section
+      this.loadQuestionsForSection(0)
+    }
   }
 
   populateFormFromAssessmentData(): void {
@@ -210,6 +253,17 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
   get nameLength(): number {
     return this.currentSectionGroup?.get('name')?.value?.length || 0
+  }
+
+  onBasicAssessmentSave(): void {
+    if (this.basicAssessmentForm.valid) {
+      const formData = this.basicAssessmentForm.value
+      console.log('Saving Basic Assessment:', formData)
+      this.saved.emit(formData)
+    } else {
+      console.log('Basic assessment form is invalid')
+      this.basicAssessmentForm.markAllAsTouched()
+    }
   }
 
   onSave(): void {
@@ -332,7 +386,9 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   onQuestionUpdated(questionData: any): void {
-    const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier || null
+    // For basic assessment, use the first section; for advanced, use selected section
+    const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
+    const sectionIdentifier = this.assessmentData.children?.[sectionIndex]?.identifier || null
     // Get identifier from questionData directly (not questionData.questionData)
     const questionIdentifier = questionData.identifier || this.assessmentService.generateUUID()
 
@@ -354,14 +410,17 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     const questionData = event.questionData
     const questionIndex = event.questionIndex - 1 // Convert to 0-based index
 
+    // For basic assessment, use the first section; for advanced, use selected section
+    const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
+
     // Check if this is an existing question with do_ identifier
     if (questionData.identifier && questionData.identifier.startsWith('do_')) {
       // This is an existing question - need to call API to remove from section
-      const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier
+      const sectionIdentifier = this.assessmentData.children?.[sectionIndex]?.identifier
 
       if (sectionIdentifier) {
         // Remove the question identifier from section's children array
-        const section = this.assessmentData.children[this.selectedSectionIndex]
+        const section = this.assessmentData.children[sectionIndex]
         if (section.children && Array.isArray(section.children)) {
           section.children = section.children.filter((childId: string) => childId !== questionData.identifier)
         }
@@ -389,5 +448,26 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       return this.assessmentData.children[this.selectedSectionIndex].sectionLevelDefinition || null
     }
     return null
+  }
+
+  openBulkUploadDialog() {
+    debugger
+    const dialogRef = this.dialog.open(BulkUploadAllTypeQuestionComponent, {
+      width: '90vw',
+      maxWidth: '1200px',
+      data: {
+        maxFileSize: 400 * 1024 * 1024,
+        questionTracking: this.getCurrentSectionLevelDefinition()
+      },
+      autoFocus: false
+    })
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.action === 'CREATE') {
+        // Handle the created questions
+        console.log('Questions to create:', result.questions)
+        // Process the questions...
+      }
+    })
   }
 }

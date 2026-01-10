@@ -196,7 +196,7 @@ export class AssessmentRichTextComponent {
       removeFormatAttributes: '',
       removeFormatTags: 'b,strong,em,i,u,span,font',
     }
-    if (this.specificToolBar === 'fitb') {
+    if (this.specificToolBar === 'FTB') {
       this.ckEditorConfig['toolbar'] = [
         // tslint:disable-next-line:max-line-length
         [
@@ -284,7 +284,7 @@ export class AssessmentRichTextComponent {
   }
 
   addBlankBtn() {
-    if (this.specificToolBar === 'fitb' && this.ftbCount < this.ftbMaxCount) {
+    if (this.specificToolBar === 'FTB' && this.ftbCount < this.ftbMaxCount) {
       this.editor.instance.insertHtml(' <input style="border-style:none none solid none"> ')
     }
   }

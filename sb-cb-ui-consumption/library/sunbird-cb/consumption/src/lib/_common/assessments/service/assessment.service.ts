@@ -291,4 +291,78 @@ export class AssessmentService {
       }
     }
   }
+
+  buildSectionHierarchyRequest(sectionData: any, sectionIdentifier?: string): any {
+    // Use provided sectionIdentifier or generate a new UUID
+    const sectionId = sectionIdentifier || this.generateUUID()
+    const isNewSection = !sectionIdentifier
+
+    // Get current assessment hierarchy
+    const currentHierarchy = this.getAssessmentHierarchyData()
+
+    // Build nodes modified
+    const nodesModified: any = {}
+    nodesModified[sectionId] = {
+      isNew: isNewSection,
+      root: false,
+      objectType: 'QuestionSet',
+      metadata: {
+        maxQuestions: sectionData.maxQuestions || 0,
+        mimeType: 'application/vnd.sunbird.questionset',
+        minimumPassPercentage: sectionData.minPassPercentage || 0,
+        name: sectionData.name || 'Section A',
+        primaryCategory: currentHierarchy?.primaryCategory || 'Practice Question Set',
+        totalQuestions: sectionData.totalQuestions || 0,
+        compatibilityLevel: currentHierarchy?.compatibilityLevel,
+        additionalInstructions: sectionData.additionalInstructions || '',
+        sectionType: 'section'
+      }
+    }
+
+    // Build hierarchy structure
+    const hierarchy: any = {}
+
+    // Add root assessment node
+    if (currentHierarchy && currentHierarchy.identifier) {
+      const rootId = currentHierarchy.identifier
+      let rootChildren = currentHierarchy.children?.map((child: any) => child.identifier) || []
+
+      // Add the new section to root children only if it's a new section
+      if (isNewSection && !rootChildren.includes(sectionId)) {
+        rootChildren = [...rootChildren, sectionId]
+      }
+
+      hierarchy[rootId] = {
+        name: currentHierarchy.name,
+        root: true,
+        children: rootChildren
+      }
+
+      // Add all existing section nodes with their children
+      if (currentHierarchy.children && currentHierarchy.children.length > 0) {
+        currentHierarchy.children.forEach((section: any) => {
+          hierarchy[section.identifier] = {
+            children: section.children?.map((child: any) => child.identifier) || []
+          }
+        })
+      }
+
+      // Add the section node with empty children (for new sections or update existing)
+      if (isNewSection) {
+        hierarchy[sectionId] = {
+          children: []
+        }
+      }
+    }
+
+    // Build the complete request structure
+    return {
+      request: {
+        data: {
+          nodesModified: nodesModified,
+          hierarchy: hierarchy
+        }
+      }
+    }
+  }
 }

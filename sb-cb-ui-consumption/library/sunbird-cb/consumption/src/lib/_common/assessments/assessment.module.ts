@@ -12,6 +12,10 @@ import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/
 import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle'
 import { MatStepperModule } from '@angular/material/stepper'
 import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
+import { MatExpansionModule } from '@angular/material/expansion'
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
+import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
 import { AssessmentMainComponent } from './components/assessment-main/assessment-main.component'
 import { AssessmentBasicInfoComponent } from './components/assessment-basic-info/assessment-basic-info.component'
 import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar'
@@ -24,6 +28,7 @@ import { MultipleChoiceQuestionComponent } from './components/multiple-choice-qu
 import { MatchTheFollowingComponent } from './components/match-the-following/match-the-following.component'
 import { FillUpTheBlanksComponent } from './components/fill-up-the-blanks/fill-up-the-blanks.component'
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module'
+import { BulkUploadAllTypeQuestionComponent } from './components/bulk-upload-all-type-question/bulk-upload-all-type-question.component'
 
 
 
@@ -37,7 +42,8 @@ import { DialogComponentsModule } from '../dialog-components/dialog-components.m
     AssessmentRichTextComponent,
     MultipleChoiceQuestionComponent,
     MatchTheFollowingComponent,
-    FillUpTheBlanksComponent
+    FillUpTheBlanksComponent,
+    BulkUploadAllTypeQuestionComponent
   ],
   imports: [
     CommonModule,
@@ -55,6 +61,10 @@ import { DialogComponentsModule } from '../dialog-components/dialog-components.m
     MatSlideToggleModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatCardModule,
     CKEditorModule,
     DialogComponentsModule
   ],

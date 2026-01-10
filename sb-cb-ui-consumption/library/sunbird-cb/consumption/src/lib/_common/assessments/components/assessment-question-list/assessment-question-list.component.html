@@ -20,7 +20,7 @@
 
     <div class="question-content-expanded">
       <sb-uic-assessment-rich-text
-        [specificToolBar]="questionData.qType === 'FTB' ? 'fitb' : (questionData.qType === 'MTF' ? 'mtf' : '')"
+        [specificToolBar]="questionData.qType === 'FTB' ? 'FTB' : (questionData.qType === 'MTF' ? 'mtf' : '')"
         [textToBeShown]="questionText" (getContent)="getQuestionContent($event)"
         [showAudioVideoToolBar]="questionData.qType === 'FTB' ? false : true" [ftbCount]="fitbCount"
         [ftbMaxCount]="fitbConfig?.maxOptions">
@@ -96,6 +96,32 @@
         Maximum 7 pairs allowed
       </div>
     </div>
+
+    <!-- Fill in the Blanks Section -->
+    <div class="ftb-options-section" *ngIf="isFTBQuestion()">
+      <div class="my-5">
+        <label class="font-bold required">Fill in the Blanks Options</label>
+      </div>
+      <sb-uic-fill-up-the-blanks #ftbComponent [options]="questionOptions" [ftbCount]="fitbCount"
+        (optionsUpdated)="onOptionsUpdated($event)">
+      </sb-uic-fill-up-the-blanks>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-middle flex-center gap-5 mt-5">
+        <button mat-button class="btn-common btn-secondary" (click)="onAddBlank()"
+          [ngClass]="{'btn-disable': !canAddMoreBlanks()}" [disabled]="!canAddMoreBlanks()">
+          Add Option
+        </button>
+        <button mat-button class="btn-common btn-primary" (click)="saveQuestion()"
+          [ngClass]="{'btn-disable': !canSaveFTBQuestion()}" [disabled]="!canSaveFTBQuestion()">
+          {{ isUpdateMode() ? 'Update' : 'Save' }}
+        </button>
+      </div>
+      <div *ngIf="!canAddMoreBlanks()" class="max-options-message">
+        Maximum 7 options allowed
+      </div>
+    </div>
+
 
   </div>
 </div>

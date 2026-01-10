@@ -14,6 +14,7 @@ export class AssessmentMainComponent implements OnInit {
 
   @Input() config: any
   @Output() loader = new EventEmitter<any>()
+  @Output() assessmentSaved = new EventEmitter<string>()
   @ViewChild('stepper') stepper!: MatStepper
   @ViewChild(AssessmentSessionsComponent) sessionsComponent!: AssessmentSessionsComponent
 
@@ -90,7 +91,8 @@ export class AssessmentMainComponent implements OnInit {
               })
             )
           } else {
-            return this.assessmentService.getAssessmentReadDetailsModeEdit(createResp.result.identifier).pipe(
+            // For basic assessments (no children initially), still use hierarchy endpoint
+            return this.assessmentService.getAssessmentHierarchyDetailsModeEdit(createResp.result.identifier).pipe(
               map((readResp: any) => {
                 return ({ createResp, readResp })
               })
@@ -102,9 +104,17 @@ export class AssessmentMainComponent implements OnInit {
           console.log('Assessment created successfully', resp)
           this.snackBar.open('Assessment created successfully')
           this.enableStepTwo()
-          if (this.stepper) {
-            this.stepper.next()
-          }
+          setTimeout(() => {
+            if (this.stepper) {
+              this.stepper.next()
+            }
+            // Reload sessions component data to get the created assessment
+            if (this.sessionsComponent) {
+              this.sessionsComponent.reloadAssessmentData()
+            }
+          }, 500)
+          // Emit the assessment identifier to parent
+          this.assessmentSaved.emit(resp.createResp.result.identifier)
           this.callLoader(false)
         },
         error: (error: any) => {
@@ -148,28 +158,22 @@ export class AssessmentMainComponent implements OnInit {
   }
 
   saveSectionData(event: any): void {
-    if (event && event.sectionData) {
-      // Create section save request
-      const sectionCreateRequest = {
-        request: {
-          questionset: {
-            ...event.sectionData,
-            parentId: this.config.identifier, // Link to parent assessment
-            primaryCategory: 'Question Set Section', // or appropriate category
-            mimeType: 'application/vnd.sunbird.questionset'
-          }
-        }
-      }
+    if (event) {
+      // Use service method to build the hierarchy request
+      // Pass sectionIdentifier if it exists (for updates), otherwise undefined (for create)
+      const sectionHierarchyRequest = this.assessmentService.buildSectionHierarchyRequest(
+        event,
+        event.sectionIdentifier
+      )
+
+      console.log('Section Hierarchy Request:', JSON.stringify(sectionHierarchyRequest, null, 2))
 
       this.callLoader(true)
-
-      // Create the new section
-      this.assessmentService.createAssessment(sectionCreateRequest).pipe(
-        switchMap((createResp: any) => {
-          // Reload the assessment hierarchy to get updated data
+      this.assessmentService.updateAssessment(sectionHierarchyRequest).pipe(
+        switchMap((updateResp: any) => {
           return this.assessmentService.getAssessmentHierarchyDetailsModeEdit(this.config.identifier).pipe(
             map((readResp: any) => {
-              return ({ createResp, readResp })
+              return ({ updateResp, readResp })
             })
           )
         })
@@ -178,6 +182,10 @@ export class AssessmentMainComponent implements OnInit {
           console.log('Section saved successfully', resp)
           this.snackBar.open('Section saved successfully')
           this.callLoader(false)
+          // Reload sessions component data to get updated section
+          if (this.sessionsComponent) {
+            this.sessionsComponent.reloadAssessmentData()
+          }
         },
         error: (error: any) => {
           console.error('Error saving section', error)
@@ -186,7 +194,7 @@ export class AssessmentMainComponent implements OnInit {
         }
       })
     } else {
-      console.log('Section save data received:', event)
+      console.log('Invalid section data for save')
       this.snackBar.open('Invalid section data for save')
     }
   }
