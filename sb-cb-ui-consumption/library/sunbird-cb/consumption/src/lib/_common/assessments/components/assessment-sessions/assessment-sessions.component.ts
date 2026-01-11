@@ -65,7 +65,6 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     })
 
     this.basicAssessmentForm = this.fb.group({
-      sections: this.fb.array([this.createBasicSectionGroup()]),
       totalQuestions: [0, [Validators.required, Validators.min(1)]],
       maxQuestions: [0, [Validators.required, Validators.min(1)]],
       minPassPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -89,6 +88,10 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   get basicSections(): FormArray {
+    // Create sections FormArray if it doesn't exist (for basic assessment with sections)
+    if (!this.basicAssessmentForm.get('sections')) {
+      this.basicAssessmentForm.addControl('sections', this.fb.array([]))
+    }
     return this.basicAssessmentForm.get('sections') as FormArray
   }
 
@@ -195,6 +198,10 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   populateBasicAssessmentForm(): void {
     // For basic assessment, populate based on whether sections are supported
     if (this.isBasicAssessmentWithSections()) {
+      // Ensure sections FormArray exists for section level assessments
+      if (!this.basicAssessmentForm.get('sections')) {
+        this.basicAssessmentForm.addControl('sections', this.fb.array([]))
+      }
       // Populate sections FormArray from assessmentData.children
       if (this.assessmentData.children && this.assessmentData.children.length > 0) {
         const sectionsArr = this.basicSections
@@ -374,7 +381,9 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
   onBasicAssessmentSave(): void {
     if (this.basicAssessmentForm.valid) {
-      const formData = this.basicAssessmentForm.value
+      // For basic assessment without sections, exclude the sections array from form value if it exists
+      const formValue = this.basicAssessmentForm.value
+      const { sections, ...formData } = formValue
       this.saved.emit(formData)
     } else {
       this.basicAssessmentForm.markAllAsTouched()

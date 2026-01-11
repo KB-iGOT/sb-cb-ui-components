@@ -46,10 +46,10 @@ export class CompetencySummaryComponent implements OnInit, OnChanges {
     @Inject('environment') environment: any,
   ) {
     this.environment = environment
+    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey]
   }
 
   ngOnInit() {
-    this.compentencyKey = this.configSvc.compentency[this.environment.compentencyVersionKey]
   }
 
   ngOnChanges() {
