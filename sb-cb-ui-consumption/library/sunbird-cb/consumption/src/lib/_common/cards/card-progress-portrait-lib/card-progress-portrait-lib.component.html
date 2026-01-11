@@ -3,7 +3,14 @@
     [ngClass]="[widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : '', widgetData?.content?.status === 'Retired' ? 'retired-course-card' : '']"
     (click)="raiseTelemetry();getRedirectUrlData(widgetData?.content); $event.stopPropagation()">
     <div *ngIf="widgetData?.content?.status === 'Retired'" class="retired-overlay">
-      <div class="retired-badge">Retired</div>
+      <div class="retired-badge">
+        {{'cardcontentv2.retired' | translate }}
+      </div>
+    </div>
+    <div class="new-version-btn" *ngIf="widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage < 100
+      && widgetData?.content?.contentVersionInfo?.identifier" (click)="navigateToNewVersion(widgetData?.content)"
+      (keyup)="navigateToNewVersion(widgetData?.content)">
+      {{'cardcontentv2.newVersion' | translate }}
     </div>
     <div class="course_widget portrait_widget flex  margin-bottom-xs"
       [style.gap]="widgetData?.content.difficultyLevel ? '5px' : '0px'"
@@ -90,7 +97,7 @@
               class="card-image ws-mat-primary-lite-background margin-remove"
               [wsUtilsDefaultThumbnail]="defaultThumbnail" [alt]="widgetData?.content?.name" />
             <!-- to show certificate lock overlay on top of image -->
-            <ng-container  *ngIf="checkSurveyCompletion()">
+            <ng-container *ngIf="checkSurveyCompletion()">
               <div class="certificate-lock-overlay">
                 <mat-icon class="mat-icon main_icon  ws-mat-white-text margin-right-xs">lock_outline</mat-icon>
               </div>
