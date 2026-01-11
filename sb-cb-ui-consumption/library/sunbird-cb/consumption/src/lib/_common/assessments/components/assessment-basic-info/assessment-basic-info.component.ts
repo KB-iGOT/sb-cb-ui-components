@@ -277,7 +277,6 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     if (assessmentType === 'advanced') {
       this.assessmentForm.patchValue({
         questionWeightageType: data.assessmentType || null,
-        numberOfQuestionsToDisplay: data.numberOfQuestionsToDisplay || 0,
         noOfSection: data.noOfSection || 1
       }, { emitEvent: false })
 
@@ -319,6 +318,14 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
           })
         }
       }
+
+      // Option Weightage specific fields
+      if (data.assessmentType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
+        this.assessmentForm.patchValue({
+          numberOfQuestionsToDisplay: data.totalQuestions || 0,
+        }, { emitEvent: false })
+      }
+
     }
 
     // Update validators after populating
@@ -592,8 +599,18 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
     // Check Option Weightage fields
     if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
-      if (formValues.numberOfQuestionsToDisplay !== this.assessmentData.numberOfQuestionsToDisplay) {
-        changedData.numberOfQuestionsToDisplay = formValues.numberOfQuestionsToDisplay
+      if (formValues.numberOfQuestionsToDisplay !== this.assessmentData.totalQuestions) {
+        changedData.totalQuestions = formValues.numberOfQuestionsToDisplay
+        changedData.maxQuestions = formValues.numberOfQuestionsToDisplay
+
+        // If assessment has children (sections), update them as well
+        if (this.assessmentData.children && this.assessmentData.children.length > 0) {
+          changedData.updateChildren = true
+          changedData.childrenUpdates = {
+            totalQuestions: formValues.numberOfQuestionsToDisplay,
+            maxQuestions: formValues.numberOfQuestionsToDisplay
+          }
+        }
       }
     }
 
@@ -678,7 +695,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     if (formValues.assessmentType === 'advanced') {
 
       if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
-        assessmentData.numberOfQuestionsToDisplay = formValues.numberOfQuestionsToDisplay
+        assessmentData.totalQuestions = formValues.numberOfQuestionsToDisplay
+        assessmentData.maxQuestions = formValues.numberOfQuestionsToDisplay
         assessmentData.noOfSection = 1
       }
 

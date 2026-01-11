@@ -92,7 +92,117 @@
 </div>
 
 <!-- Basic Assessment Form -->
-<div class="assessment-session-container" *ngIf="isBasicAssessment()">
+<div class="assessment-session-container" *ngIf="isBasicAssessmentWithSections()">
+  <div class="section-tabs flex flex-middle gap-2 mb-5">
+    <ng-container *ngFor="let section of basicSections.controls; let i = index">
+      <button type="button" class="section-tab" [class.active]="selectedSectionIndex === i"
+        (click)="selectBasicSection(i)">
+        Section - {{ i + 1 }}
+      </button>
+    </ng-container>
+    <button type="button" mat-button class="btn-common btn-secondary ml-auto" (click)="addBasicSection()"
+      [ngClass]="{'btn-disabled': basicSections.length >= 5}" [disabled]="basicSections.length >= 5">
+      <mat-icon>add</mat-icon>
+      Add Section
+    </button>
+  </div>
+
+  <div class="section-content" *ngIf="basicSections.controls[selectedSectionIndex]">
+
+    <form [formGroup]="currentBasicSectionGroup">
+      <!-- Section Name -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label required">Section Name</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="name" [maxlength]="nameMaxLength" placeholder="Enter section name">
+          <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported</mat-hint>
+          <mat-hint align="end">{{ currentBasicSectionGroup?.get('name')?.value?.length || 0 }} / {{ nameMaxLength
+            }}</mat-hint>
+          <mat-error
+            *ngIf="currentBasicSectionGroup?.get('name')?.hasError('required') && currentBasicSectionGroup?.get('name')?.touched">
+            Section name is required
+          </mat-error>
+          <mat-error
+            *ngIf="currentBasicSectionGroup?.get('name')?.hasError('maxlength') && currentBasicSectionGroup?.get('name')?.touched">
+            Section name cannot exceed {{ nameMaxLength }} characters
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Number of questions to add -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label required">What is the number of questions you will be adding?</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput type="number" formControlName="totalQuestions" min="1" placeholder="0">
+        </mat-form-field>
+      </div>
+
+      <!-- Number of questions to display -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label required">What is the number of questions to be displayed for the assessment?</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput type="number" formControlName="maxQuestions" min="1" placeholder="0">
+        </mat-form-field>
+      </div>
+
+      <!-- Minimum pass percentage -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label required">Minimum percentage (%) to pass this assessment?</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput type="number" formControlName="minPassPercentage" min="0" max="100" placeholder="0">
+        </mat-form-field>
+      </div>
+
+      <!-- Additional Instructions -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label">Additional Instructions</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea matInput formControlName="additionalInstructions"
+            placeholder="Enter additional instructions for this section" rows="4" maxlength="500"></textarea>
+          <mat-hint align="end">{{ currentBasicSectionGroup?.get('additionalInstructions')?.value?.length || 0
+            }}/500</mat-hint>
+        </mat-form-field>
+      </div>
+    </form>
+
+    <div class="form-actions flex flex-middle flex-center">
+      <button *ngIf="!hasCurrentBasicSectionIdentifier()" type="button" mat-button class="btn-common btn-primary"
+        (click)="onSaveBasicSection()">
+        Save
+      </button>
+      <button *ngIf="hasCurrentBasicSectionIdentifier()" type="button" mat-button class="btn-common btn-primary"
+        (click)="onUpdateBasicSection()">
+        Update
+      </button>
+    </div>
+
+    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
+      *ngIf="assessmentData?.children?.[selectedSectionIndex]?.identifier">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+        <mat-icon>add</mat-icon>
+        Add Questions
+      </button>
+      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()">
+        <mat-icon>file_upload</mat-icon>
+        Bulk upload
+      </button>
+    </div>
+  </div>
+
+  <div class="questions-list mt-5" *ngIf="questionsList && questionsList.length > 0">
+    <h4 class="questions-title">Questions ({{ questionsList.length }})</h4>
+    <div *ngFor="let question of questionsList; let i = index" class="question-item mb-3">
+      <sb-uic-assessment-question-list [questionData]="question" [questionIndex]="i + 1"
+        [isExpanded]="expandedQuestionIndex === i" [sectionLevelDefinition]="getCurrentSectionLevelDefinition()"
+        [assessmentData]="assessmentData" (questionExpanded)="onQuestionExpanded(i)"
+        (questionUpdated)="onQuestionUpdated($event)" (questionDeleted)="onQuestionDeleted($event)">
+      </sb-uic-assessment-question-list>
+    </div>
+  </div>
+</div>
+
+<!-- Basic Assessment (single section) -->
+<div class="assessment-session-container" *ngIf="isBasicAssessment() && !isBasicAssessmentWithSections()">
   <div class="section-content">
     <form [formGroup]="basicAssessmentForm" class="basic-assessment-form">
       <!-- Number of questions to add -->
@@ -146,9 +256,8 @@
         <mat-form-field appearance="outline" class="full-width">
           <textarea matInput formControlName="additionalInstructions" placeholder="Add instructions" rows="4"
             maxlength="500"></textarea>
-          <mat-hint align="end">
-            {{ basicAssessmentForm?.get('additionalInstructions')?.value?.length || 0 }}/500
-          </mat-hint>
+          <mat-hint align="end">{{ basicAssessmentForm?.get('additionalInstructions')?.value?.length || 0
+            }}/500</mat-hint>
           <mat-error *ngIf="basicAssessmentForm?.get('additionalInstructions')?.hasError('maxlength')">
             Instructions cannot exceed 500 characters
           </mat-error>
@@ -187,8 +296,60 @@
   </div>
 </div>
 
+<!-- Option Weightage Assessment Form -->
+<div class="assessment-session-container" *ngIf="isAdvanceAssessmentOptionWeightage()">
+  <div class="section-content">
+    <form [formGroup]="optionWeightageForm" class="option-weightage-form">
+      <!-- Instructions -->
+      <div class="form-field mat-full-radius">
+        <label class="field-label">Instructions</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea matInput formControlName="additionalInstructions" placeholder="Add instructions" rows="4"
+            maxlength="500"></textarea>
+          <mat-hint align="end">
+            {{ optionWeightageForm?.get('additionalInstructions')?.value?.length || 0 }}/500
+          </mat-hint>
+          <mat-error *ngIf="optionWeightageForm?.get('additionalInstructions')?.hasError('maxlength')">
+            Instructions cannot exceed 500 characters
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+    <div class="form-actions flex flex-middle flex-center">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="onOptionWeightageSave()">
+        Save
+      </button>
+    </div>
+
+    <!-- Add Questions Buttons - Show only when section is created -->
+    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5" *ngIf="hasOptionWeightageSection()">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+        <mat-icon>add</mat-icon>
+        Add Questions
+      </button>
+      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()">
+        <mat-icon>file_upload</mat-icon>
+        Bulk upload
+      </button>
+    </div>
+  </div>
+
+  <!-- Questions List for Option Weightage Assessment -->
+  <div class="questions-list mt-5" *ngIf="hasOptionWeightageSection() && questionsList && questionsList.length > 0">
+    <h4 class="questions-title">Questions ({{ questionsList.length }})</h4>
+    <div *ngFor="let question of questionsList; let i = index" class="question-item mb-3">
+      <sb-uic-assessment-question-list [questionData]="question" [questionIndex]="i + 1"
+        [isExpanded]="expandedQuestionIndex === i" [sectionLevelDefinition]="null" [assessmentData]="assessmentData"
+        (questionExpanded)="onQuestionExpanded(i)" (questionUpdated)="onQuestionUpdated($event)"
+        (questionDeleted)="onQuestionDeleted($event)">
+      </sb-uic-assessment-question-list>
+    </div>
+  </div>
+</div>
+
 <!-- Message for non-basic, non-advanced assessments -->
-<div class="assessment-session-container" *ngIf="!isAdvancedAssessmentQuestionWeightage() && !isBasicAssessment()">
+<div class="assessment-session-container"
+  *ngIf="!isAdvancedAssessmentQuestionWeightage() && !isBasicAssessment() && !isAdvanceAssessmentOptionWeightage()">
   <div class="info-message">
     <mat-icon>info</mat-icon>
     <p>Assessment sessions are only available for advanced assessments.</p>

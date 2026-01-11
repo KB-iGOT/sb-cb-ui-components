@@ -93,7 +93,8 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
             id: index + 1,
             text: opt.value?.body || opt.body || '',
             value: opt.value?.body || opt.body || '',
-            isCorrect: false // Will be set based on answer field below
+            isCorrect: false, // Will be set based on answer field below
+            weight: opt.answer !== undefined && typeof opt.answer === 'number' ? opt.answer : undefined // Load weight for MCQ-MCA-W
           }))
 
           // Set correct answers based on answer field at question level
@@ -114,7 +115,8 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
             id: index + 1,
             text: opt.value?.body || opt.body || '',
             value: opt.value?.body || opt.body || '',
-            isCorrect: false // Will be set based on answer field
+            isCorrect: false, // Will be set based on answer field
+            weight: opt.answer !== undefined && typeof opt.answer === 'number' ? opt.answer : undefined // Load weight for MCQ-MCA-W
           }))
 
           // Set correct answers based on answer field
@@ -334,6 +336,8 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         return 'Single Selection MCQ'
       case 'MCQ-MCA':
         return 'Multiple Selection MCQ'
+      case 'MCQ-MCA-W':
+        return 'Weightage Single Choice'
       case 'FTB':
         return 'Fill in the Blanks'
       case 'MTF':
@@ -353,7 +357,8 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
     this.questionExpanded.emit(this.questionIndex - 1)
 
     // If this is an existing question (has do_ identifier), fetch complete data on expand
-    if (this.questionData.identifier && this.questionData.identifier.startsWith('do_')) {
+    // Only fetch if we're expanding (not collapsing)
+    if (!this.isExpanded && this.questionData.identifier && this.questionData.identifier.startsWith('do_')) {
       const reqBody = {
         request: {
           search: {
@@ -511,16 +516,31 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
           .map((opt, idx) => opt.isCorrect ? String(idx) : null)
           .filter(idx => idx !== null)
         answer = correctIndices.join(',')
+      } else if (this.questionData.qType === 'MCQ-MCA-W') {
+        // For weighted questions, answer contains all option indices
+        answer = this.questionOptions.map((_, idx) => String(idx)).join(',')
       }
 
       // Build editorState options for MCQ
-      editorStateOptions = this.questionOptions.map((opt, idx) => ({
-        answer: opt.isCorrect,
-        value: {
-          body: opt.text || opt.value || '',
-          value: idx
-        }
-      }))
+      if (this.questionData.qType === 'MCQ-MCA-W') {
+        // For weighted questions, answer field contains the weight value
+        editorStateOptions = this.questionOptions.map((opt, idx) => ({
+          answer: opt.weight !== undefined ? opt.weight : 0,
+          value: {
+            body: opt.text || opt.value || '',
+            value: idx
+          }
+        }))
+      } else {
+        // For regular MCQ, answer field contains boolean
+        editorStateOptions = this.questionOptions.map((opt, idx) => ({
+          answer: opt.isCorrect,
+          value: {
+            body: opt.text || opt.value || '',
+            value: idx
+          }
+        }))
+      }
 
       // Build choices options for MCQ
       choicesOptions = this.questionOptions.map((opt, idx) => ({
@@ -591,7 +611,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
           }
         }
       })
-      debugger
     }
 
     const questionRequest = {

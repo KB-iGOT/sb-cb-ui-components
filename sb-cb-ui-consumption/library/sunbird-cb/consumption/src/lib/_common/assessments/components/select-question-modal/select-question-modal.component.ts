@@ -3,6 +3,7 @@ import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALO
 
 export interface QuestionTypeData {
   title?: string
+  isOptionWeightage?: boolean
 }
 
 @Component({
@@ -16,6 +17,10 @@ export class SelectQuestionModalComponent {
     public dialogRef: MatDialogRef<SelectQuestionModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: QuestionTypeData
   ) { }
+
+  get isOptionWeightage(): boolean {
+    return this.data?.isOptionWeightage || false
+  }
 
   onQuestionTypeSelect(questionType: string): void {
     this.dialogRef.close(questionType)

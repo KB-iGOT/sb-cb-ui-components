@@ -20,6 +20,7 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
   sessionsForm!: FormGroup
   basicAssessmentForm!: FormGroup
+  optionWeightageForm!: FormGroup
   assessmentData: any = {}
   difficultyLevels = [
     { name: 'Easy', count: 0 },
@@ -64,9 +65,14 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     })
 
     this.basicAssessmentForm = this.fb.group({
+      sections: this.fb.array([this.createBasicSectionGroup()]),
       totalQuestions: [0, [Validators.required, Validators.min(1)]],
       maxQuestions: [0, [Validators.required, Validators.min(1)]],
       minPassPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      additionalInstructions: ['', [Validators.maxLength(500)]]
+    })
+
+    this.optionWeightageForm = this.fb.group({
       additionalInstructions: ['', [Validators.maxLength(500)]]
     })
   }
@@ -82,6 +88,10 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     return this.sessionsForm.get('sections') as FormArray
   }
 
+  get basicSections(): FormArray {
+    return this.basicAssessmentForm.get('sections') as FormArray
+  }
+
   get currentSectionGroup(): FormGroup {
     return this.sections.at(this.selectedSectionIndex) as FormGroup
   }
@@ -95,6 +105,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       this.calculateDifficultyLevelCounts()
     } else if (this.assessmentData && this.isBasicAssessment()) {
       this.populateBasicAssessmentForm()
+    } else if (this.assessmentData && this.isAdvanceAssessmentOptionWeightage()) {
+      this.populateOptionWeightageForm()
     }
   }
 
@@ -106,12 +118,21 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   isAdvancedAssessmentQuestionWeightage(): boolean {
-    return this.assessmentData?.compatibilityLevel === NsAssessment.ECompatibilityLevel.ADVANCED ||
+    return this.assessmentData?.compatibilityLevel === NsAssessment.ECompatibilityLevel.ADVANCED &&
       this.assessmentData?.assessmentType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE
+  }
+
+  isAdvanceAssessmentOptionWeightage(): boolean {
+    return this.assessmentData?.compatibilityLevel === NsAssessment.ECompatibilityLevel.ADVANCED &&
+      this.assessmentData?.assessmentType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE
   }
 
   isBasicAssessment(): boolean {
     return this.assessmentData?.compatibilityLevel === NsAssessment.ECompatibilityLevel.BASIC
+  }
+
+  isBasicAssessmentWithSections(): boolean {
+    return this.isBasicAssessment() && this.assessmentData?.scoreCutoffType === 'SectionLevel'
   }
 
   hasBasicAssessmentSection(): boolean {
@@ -122,22 +143,119 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       this.assessmentData.children[0]?.identifier?.startsWith('do_')
   }
 
-  populateBasicAssessmentForm(): void {
-    // For basic assessment, if there's existing section data, populate the form
-    if (this.assessmentData.children && this.assessmentData.children.length > 0) {
-      const section = this.assessmentData.children[0] // Basic assessment has only one section
+  hasCurrentBasicSectionIdentifier(): boolean {
+    // Check if the current selected basic section has a do_ identifier
+    return this.assessmentData?.children &&
+      this.assessmentData.children[this.selectedSectionIndex] &&
+      this.assessmentData.children[this.selectedSectionIndex]?.identifier?.startsWith('do_')
+  }
 
-      this.basicAssessmentForm.patchValue({
-        totalQuestions: section.totalQuestions || 0,
-        maxQuestions: section.maxQuestions || 0,
-        minPassPercentage: section.minimumPassPercentage || 0,
-        additionalInstructions: section.additionalInstructions || ''
+  hasOptionWeightageSection(): boolean {
+    // Check if option weightage assessment has a created section (with do_ identifier)
+    return this.isAdvanceAssessmentOptionWeightage() &&
+      this.assessmentData?.children &&
+      this.assessmentData.children.length > 0 &&
+      this.assessmentData.children[0]?.identifier?.startsWith('do_')
+  }
+
+  createBasicSectionGroup(): FormGroup {
+    return this.fb.group({
+      name: ['', [Validators.required, Validators.maxLength(this.nameMaxLength)]],
+      additionalInstructions: ['', [Validators.maxLength(500)]],
+      totalQuestions: [0, [Validators.required, Validators.min(1)]],
+      maxQuestions: [0, [Validators.required, Validators.min(1)]],
+      minPassPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
+    })
+  }
+
+  addBasicSection(): void {
+    const maxSections = 5
+    if (this.basicSections.length >= maxSections) {
+      this.snackBar.open(`Maximum ${maxSections} sections allowed`)
+      return
+    }
+    this.basicSections.push(this.createBasicSectionGroup())
+    this.selectBasicSection(this.basicSections.length - 1)
+  }
+
+  selectBasicSection(index: number): void {
+    if (index >= 0 && index < this.basicSections.length) {
+      this.selectedSectionIndex = index
+      // Load questions for the selected section
+      this.loadQuestionsForSection(index)
+      // Force change detection to update the form
+      this.cdr.detectChanges()
+    }
+  }
+
+  get currentBasicSectionGroup(): FormGroup {
+    return this.basicSections.at(this.selectedSectionIndex) as FormGroup
+  }
+
+  populateBasicAssessmentForm(): void {
+    // For basic assessment, populate based on whether sections are supported
+    if (this.isBasicAssessmentWithSections()) {
+      // Populate sections FormArray from assessmentData.children
+      if (this.assessmentData.children && this.assessmentData.children.length > 0) {
+        const sectionsArr = this.basicSections
+        while (sectionsArr.length) {
+          sectionsArr.removeAt(0)
+        }
+
+        this.assessmentData.children.forEach((section: any, index: number) => {
+          const sg = this.createBasicSectionGroup()
+          sg.patchValue({
+            name: section.name || `Section ${String.fromCharCode(65 + index)}`,
+            additionalInstructions: section.additionalInstructions || section.instructions || '',
+            totalQuestions: section.totalQuestions || 0,
+            maxQuestions: section.maxQuestions || 0,
+            minPassPercentage: section.minimumPassPercentage || 0
+          })
+          sectionsArr.push(sg)
+        })
+
+        if (sectionsArr.length === 0) {
+          sectionsArr.push(this.createBasicSectionGroup())
+        }
+
+        // Load questions for the initially selected basic section
+        this.loadQuestionsForSection(this.selectedSectionIndex)
+      }
+    } else {
+      // Single-section basic assessment (legacy behavior)
+      if (this.assessmentData.children && this.assessmentData.children.length > 0) {
+        const section = this.assessmentData.children[0]
+
+        this.basicAssessmentForm.patchValue({
+          totalQuestions: section.totalQuestions || 0,
+          maxQuestions: section.maxQuestions || 0,
+          minPassPercentage: section.minimumPassPercentage || 0,
+          additionalInstructions: section.additionalInstructions || ''
+        })
+
+        // Store section identifier for updates
+        if (!this.basicAssessmentForm.get('sectionIdentifier')) {
+          this.basicAssessmentForm.addControl('sectionIdentifier', this.fb.control(section.identifier))
+        } else {
+          this.basicAssessmentForm.get('sectionIdentifier')?.setValue(section.identifier)
+        }
+
+        // Load questions for basic assessment section
+        this.loadQuestionsForSection(0)
+      }
+    }
+  }
+
+  populateOptionWeightageForm(): void {
+    // For option weightage assessment, populate form with existing data
+    if (this.assessmentData.children && this.assessmentData.children.length > 0) {
+      const section = this.assessmentData.children[0] // Option weightage has only one section
+
+      this.optionWeightageForm.patchValue({
+        additionalInstructions: section.additionalInstructions || section.instructions || ''
       })
 
-      // Store section identifier for updates
-      this.basicAssessmentForm.addControl('sectionIdentifier', this.fb.control(section.identifier))
-
-      // Load questions for basic assessment section
+      // Load questions for option weightage section
       this.loadQuestionsForSection(0)
     }
   }
@@ -266,6 +384,24 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     }
   }
 
+  onOptionWeightageSave(): void {
+    if (this.optionWeightageForm.valid) {
+      const formData = this.optionWeightageForm.value
+      const sectionIdentifier = this.assessmentData.children?.[0]?.identifier || null
+
+      const saveData = {
+        sectionData: formData,
+        sectionIdentifier: sectionIdentifier
+      }
+
+      console.log('Saving Option Weightage Assessment:', saveData)
+      this.saved.emit(saveData)
+    } else {
+      console.log('Option weightage form is invalid')
+      this.optionWeightageForm.markAllAsTouched()
+    }
+  }
+
   onSave(): void {
     // Validate only the current section
     const currentSection = this.currentSectionGroup
@@ -328,12 +464,68 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     }
   }
 
+  onSaveBasicSection(): void {
+    const currentSection = this.currentBasicSectionGroup
+    if (currentSection.valid) {
+      const currentSectionData = currentSection.value
+      const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier || null
+
+      const saveData = {
+        sectionData: currentSectionData,
+        sectionIdentifier: sectionIdentifier
+      }
+
+      console.log(`Saving Basic Section ${this.selectedSectionIndex + 1}:`, saveData)
+      this.saved.emit(saveData)
+    } else {
+      console.log('Current basic section is invalid')
+      currentSection.markAllAsTouched()
+    }
+  }
+
+  onUpdateBasicSection(): void {
+    const currentSection = this.currentBasicSectionGroup
+    if (currentSection.valid) {
+      const currentSectionData = currentSection.value
+      const originalSectionData = this.assessmentData.children?.[this.selectedSectionIndex]
+
+      const changedData: any = {}
+      const currentName = currentSectionData.name?.trim()
+      const originalName = originalSectionData?.name
+      if (currentName !== originalName) {
+        changedData.name = currentName
+      }
+
+      const currentAdditionalInstructions = currentSectionData.additionalInstructions
+      const originalAdditionalInstructions = originalSectionData?.additionalInstructions || originalSectionData?.instructions || ''
+      if (currentAdditionalInstructions !== originalAdditionalInstructions) {
+        changedData.additionalInstructions = currentAdditionalInstructions
+      }
+
+      if (Object.keys(changedData).length > 0) {
+        const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier || null
+        const updateData = {
+          changedData: changedData,
+          sectionIdentifier: sectionIdentifier
+        }
+        console.log(`Updating Basic Section ${this.selectedSectionIndex + 1}:`, updateData)
+        this.updated.emit(updateData)
+      } else {
+        this.snackBar.open('No changes detected')
+      }
+    } else {
+      console.log('Current basic section is invalid')
+      currentSection.markAllAsTouched()
+    }
+  }
+
   addQuestions(): void {
     const dialogRef = this.dialog.open(SelectQuestionModalComponent, {
       width: '800px',
       maxWidth: '90vw',
       data: {
-        title: 'Select the questions type'
+        title: 'Select the questions type',
+        isOptionWeightage: this.isAdvanceAssessmentOptionWeightage()
       }
     })
 
@@ -386,8 +578,9 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   onQuestionUpdated(questionData: any): void {
-    // For basic assessment, use the first section; for advanced, use selected section
-    const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
+    // For basic assessment with sections OR advanced assessment, use selected section
+    // For basic assessment without sections (single section), always use index 0
+    const sectionIndex = this.isBasicAssessmentWithSections() || !this.isBasicAssessment() ? this.selectedSectionIndex : 0
     const sectionIdentifier = this.assessmentData.children?.[sectionIndex]?.identifier || null
     // Get identifier from questionData directly (not questionData.questionData)
     const questionIdentifier = questionData.identifier || this.assessmentService.generateUUID()
@@ -410,8 +603,9 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     const questionData = event.questionData
     const questionIndex = event.questionIndex - 1 // Convert to 0-based index
 
-    // For basic assessment, use the first section; for advanced, use selected section
-    const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
+    // For basic assessment with sections OR advanced assessment, use selected section
+    // For basic assessment without sections (single section), always use index 0
+    const sectionIndex = this.isBasicAssessmentWithSections() || !this.isBasicAssessment() ? this.selectedSectionIndex : 0
 
     // Check if this is an existing question with do_ identifier
     if (questionData.identifier && questionData.identifier.startsWith('do_')) {
@@ -475,8 +669,9 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         console.log('Questions to create from bulk upload:', questions)
         console.log('Is old template:', isOldTemplate)
 
-        // For basic assessment, use the first section; for advanced, use selected section
-        const sectionIndex = this.isBasicAssessment() ? 0 : this.selectedSectionIndex
+        // For basic assessment with sections OR advanced assessment, use selected section
+        // For basic assessment without sections (single section), always use index 0
+        const sectionIndex = this.isBasicAssessmentWithSections() || !this.isBasicAssessment() ? this.selectedSectionIndex : 0
         const sectionIdentifier = this.assessmentData.children?.[sectionIndex]?.identifier || null
 
         if (sectionIdentifier && questions && questions.length > 0) {

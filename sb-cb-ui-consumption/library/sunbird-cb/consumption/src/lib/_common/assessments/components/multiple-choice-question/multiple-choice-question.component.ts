@@ -132,6 +132,10 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
     return this.questionType === 'MCQ-MCA'
   }
 
+  isMCQWeighted(): boolean {
+    return this.questionType === 'MCQ-MCA-W'
+  }
+
   isMCQTrueFalse(): boolean {
     return this.questionType === 'MCQ-SCA-TF'
   }
@@ -153,6 +157,13 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
   onCorrectAnswerToggle(option: any): void {
     // For multiple select (MCQ-MCA)
     option.isCorrect = !option.isCorrect
+    this.emitOptionsUpdate()
+  }
+
+  onWeightChange(option: any, weight: any): void {
+    // For weighted questions (MCQ-MCA-W)
+    const weightValue = Number(weight)
+    option.weight = isNaN(weightValue) ? 0 : weightValue
     this.emitOptionsUpdate()
   }
 

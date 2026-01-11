@@ -159,11 +159,15 @@ export class AssessmentMainComponent implements OnInit {
 
   saveSectionData(event: any): void {
     if (event) {
+      // Extract sectionData and sectionIdentifier from event
+      const sectionData = event.sectionData || event
+      const sectionIdentifier = event.sectionIdentifier
+
       // Use service method to build the hierarchy request
       // Pass sectionIdentifier if it exists (for updates), otherwise undefined (for create)
       const sectionHierarchyRequest = this.assessmentService.buildSectionHierarchyRequest(
-        event,
-        event.sectionIdentifier
+        sectionData,
+        sectionIdentifier
       )
 
       console.log('Section Hierarchy Request:', JSON.stringify(sectionHierarchyRequest, null, 2))

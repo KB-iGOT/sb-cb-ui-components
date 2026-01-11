@@ -142,8 +142,8 @@
                 <!-- Options -->
                 <div class="options-list">
                   <div class="option-item" *ngFor="let option of question.editorState?.options; let optIndex = index"
-                    [class.correct-option]="option.answer === true"
-                    [class.incorrect-option]="option.answer === false && question.qType !== 'MTF' && question.qType !== 'FTB'">
+                    [class.correct-option]="option.answer === true || (question.qType === 'MCQ-MCA-W' && option.answer >= 0)"
+                    [class.incorrect-option]="option.answer === false && question.qType !== 'MTF' && question.qType !== 'FTB' && question.qType !== 'MCQ-MCA-W'">
                     <div class="option-indicator">
                       <mat-icon *ngIf="option.answer === true" class="correct-icon">check_circle</mat-icon>
                       <mat-icon *ngIf="option.answer === false && question.qType !== 'MTF' && question.qType !== 'FTB'"
@@ -160,6 +160,9 @@
                       <span class="option-blank"
                         *ngIf="question.qType === 'FTB' && option.answer && option.answer !== 'none'">
                         ({{ option.answer }})
+                      </span>
+                      <span class="option-weight" *ngIf="question.qType === 'MCQ-MCA-W' && option.answer >= 0">
+                        → {{ option.answer }}
                       </span>
                     </div>
                   </div>

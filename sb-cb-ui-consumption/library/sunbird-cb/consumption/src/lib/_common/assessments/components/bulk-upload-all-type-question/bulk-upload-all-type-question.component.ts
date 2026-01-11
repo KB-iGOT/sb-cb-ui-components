@@ -215,6 +215,12 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     const firstRow = data[0]
     const isOldTemplate = !('QuestionNo' in firstRow) && !('QuestionType' in firstRow)
 
+    // If it's a NEW template (advanced) and assessment is BASIC, reject it
+    if (!isOldTemplate && this.compatibilityLevel === NsAssessment.ECompatibilityLevel.BASIC) {
+      this.snackBar.open('Advanced template format is not supported for basic assessments. Please use the basic MCQ template.', 'Close', { duration: 4000 })
+      return false
+    }
+
     // For old template (basic MCQ), only Question and Option1 are required
     if (isOldTemplate) {
       // Check if old template is allowed (only for basic assessments)

@@ -92,6 +92,24 @@ export class AssessmentService {
       objectType: 'QuestionSet'
     }
 
+    // If updateChildren flag is present, update all children with the specified updates
+    if (changedData.updateChildren && changedData.childrenUpdates) {
+      if (this.assessmentHierarchyData.children && this.assessmentHierarchyData.children.length > 0) {
+        this.assessmentHierarchyData.children.forEach((child: any) => {
+          nodesModified[child.identifier] = {
+            isNew: false,
+            root: false,
+            metadata: changedData.childrenUpdates,
+            objectType: 'QuestionSet'
+          }
+        })
+      }
+
+      // Remove the updateChildren flag from the root metadata as it's not a valid API field
+      delete nodesModified[identifier].metadata.updateChildren
+      delete nodesModified[identifier].metadata.childrenUpdates
+    }
+
     // Create the hierarchy structure using existing hierarchy data
     const hierarchy: any = {}
 
@@ -311,15 +329,16 @@ export class AssessmentService {
       root: false,
       objectType: 'QuestionSet',
       metadata: {
-        maxQuestions: sectionData.maxQuestions || 0,
+        maxQuestions: sectionData.maxQuestions || currentHierarchy.totalQuestions,
         mimeType: 'application/vnd.sunbird.questionset',
         minimumPassPercentage: sectionData.minPassPercentage || 0,
         name: sectionData.name || 'Section A',
         primaryCategory: currentHierarchy?.primaryCategory || 'Practice Question Set',
-        totalQuestions: sectionData.totalQuestions || 0,
+        totalQuestions: sectionData.totalQuestions || currentHierarchy.totalQuestions,
         compatibilityLevel: currentHierarchy?.compatibilityLevel,
         additionalInstructions: sectionData.additionalInstructions || '',
-        sectionType: 'section'
+        sectionType: 'section',
+        expectedDuration: sectionData.expectedDuration || currentHierarchy.expectedDuration,
       }
     }
 
