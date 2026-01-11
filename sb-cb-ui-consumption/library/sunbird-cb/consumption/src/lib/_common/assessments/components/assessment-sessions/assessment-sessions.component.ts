@@ -330,7 +330,6 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         })
       }
     }
-    console.log('Loaded questions for section', sectionIndex, ':', this.questionsList)
   }
 
   getDifficultyLevelSummary(): string {
@@ -376,10 +375,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   onBasicAssessmentSave(): void {
     if (this.basicAssessmentForm.valid) {
       const formData = this.basicAssessmentForm.value
-      console.log('Saving Basic Assessment:', formData)
       this.saved.emit(formData)
     } else {
-      console.log('Basic assessment form is invalid')
       this.basicAssessmentForm.markAllAsTouched()
     }
   }
@@ -393,11 +390,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         sectionData: formData,
         sectionIdentifier: sectionIdentifier
       }
-
-      console.log('Saving Option Weightage Assessment:', saveData)
       this.saved.emit(saveData)
     } else {
-      console.log('Option weightage form is invalid')
       this.optionWeightageForm.markAllAsTouched()
     }
   }
@@ -413,11 +407,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         sectionData: currentSectionData,
         sectionIdentifier: sectionIdentifier
       }
-
-      console.log(`Saving Section ${this.selectedSectionIndex + 1}:`, saveData)
       this.saved.emit(saveData)
     } else {
-      console.log('Current section is invalid')
       currentSection.markAllAsTouched()
     }
   }
@@ -453,13 +444,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
           changedData: changedData,
           sectionIdentifier: sectionIdentifier
         }
-        console.log(`Updating Section ${this.selectedSectionIndex + 1}:`, updateData)
         this.updated.emit(updateData)
       } else {
         this.snackBar.open('No changes detected')
       }
     } else {
-      console.log('Current section is invalid')
       currentSection.markAllAsTouched()
     }
   }
@@ -475,10 +464,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         sectionIdentifier: sectionIdentifier
       }
 
-      console.log(`Saving Basic Section ${this.selectedSectionIndex + 1}:`, saveData)
       this.saved.emit(saveData)
     } else {
-      console.log('Current basic section is invalid')
       currentSection.markAllAsTouched()
     }
   }
@@ -508,13 +495,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
           changedData: changedData,
           sectionIdentifier: sectionIdentifier
         }
-        console.log(`Updating Basic Section ${this.selectedSectionIndex + 1}:`, updateData)
         this.updated.emit(updateData)
       } else {
         this.snackBar.open('No changes detected')
       }
     } else {
-      console.log('Current basic section is invalid')
       currentSection.markAllAsTouched()
     }
   }
@@ -531,9 +516,6 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Selected question type:', result)
-        // Handle the selected question type
-        // You can emit an event or navigate to question creation based on type
         this.handleQuestionTypeSelection(result)
       }
     })
@@ -549,9 +531,6 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
     // Add to questions list
     this.questionsList.push(questionData)
-
-    console.log('Created question:', questionData)
-    console.log('Current questions list:', this.questionsList)
   }
 
   private mapQuestionType(questionType: string): string {
@@ -627,13 +606,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         }
 
         this.updateQuestion.emit(deleteData)
-        console.log('Deleting existing question from hierarchy:', questionData.identifier)
       }
     } else {
       // This is a new unsaved question - just remove from local list
       this.questionsList.splice(questionIndex, 1)
       this.snackBar.open('Question removed')
-      console.log('Removed new question from local list at index:', questionIndex)
     }
   }
 
@@ -645,7 +622,6 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   openBulkUploadDialog() {
-    debugger
     const dialogRef = this.dialog.open(BulkUploadAllTypeQuestionComponent, {
       width: '90vw',
       maxWidth: '1200px',
@@ -666,8 +642,6 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         // Handle the created questions from bulk upload
         const questions = result.questions
         const isOldTemplate = result.isOldTemplate || false
-        console.log('Questions to create from bulk upload:', questions)
-        console.log('Is old template:', isOldTemplate)
 
         // For basic assessment with sections OR advanced assessment, use selected section
         // For basic assessment without sections (single section), always use index 0

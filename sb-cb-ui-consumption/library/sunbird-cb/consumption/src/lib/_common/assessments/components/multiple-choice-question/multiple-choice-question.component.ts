@@ -31,19 +31,11 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
     if (this.options && this.options.length > 0) {
       this.optionsList = this.options
 
-      console.log('MCQ Component - Loading options:', this.optionsList)
-      console.log('Question Type:', this.questionType)
-
       // Set correctAnswer for single choice questions based on isCorrect flag
       if (this.isMCQSCA() || this.isMCQTrueFalse()) {
         const correctOption = this.optionsList.find(opt => opt.isCorrect)
-        console.log('Looking for correct option, found:', correctOption)
         if (correctOption) {
           this.correctAnswer = correctOption.id
-          console.log('Set correctAnswer to ID:', this.correctAnswer, 'type:', typeof this.correctAnswer)
-          console.log('Option details:', correctOption)
-        } else {
-          console.log('No correct option found. All options:', this.optionsList)
         }
       }
 
@@ -55,12 +47,10 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
             this.correctAnswers[opt.id] = true
           }
         })
-        console.log('Set correctAnswers to:', this.correctAnswers)
       }
 
       // Force change detection
       setTimeout(() => {
-        console.log('After timeout - correctAnswer:', this.correctAnswer)
       }, 0)
     } else if (this.questionType === 'MCQ-SCA-TF') {
       // True/False question - only 2 options (default initialization for new questions)
@@ -71,19 +61,11 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
     } else if (this.options && this.options.length > 0) {
       this.optionsList = this.options
 
-      console.log('MCQ Component - Loading options:', this.optionsList)
-      console.log('Question Type:', this.questionType)
-
       // Set correctAnswer for single choice questions based on isCorrect flag
       if (this.isMCQSCA() || this.isMCQTrueFalse()) {
         const correctOption = this.optionsList.find(opt => opt.isCorrect)
-        console.log('Looking for correct option, found:', correctOption)
         if (correctOption) {
           this.correctAnswer = correctOption.id
-          console.log('Set correctAnswer to ID:', this.correctAnswer, 'type:', typeof this.correctAnswer)
-          console.log('Option details:', correctOption)
-        } else {
-          console.log('No correct option found. All options:', this.optionsList)
         }
       }
 
@@ -95,12 +77,10 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
             this.correctAnswers[opt.id] = true
           }
         })
-        console.log('Set correctAnswers to:', this.correctAnswers)
       }
 
       // Force change detection
       setTimeout(() => {
-        console.log('After timeout - correctAnswer:', this.correctAnswer)
       }, 0)
     } else if (this.questionType === 'MCQ-SCA') {
       // Initialize with 2 empty options for MCQ-SCA

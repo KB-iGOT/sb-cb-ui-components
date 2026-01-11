@@ -27,7 +27,6 @@ export class MatchTheFollowingComponent implements OnInit, OnChanges {
   initializePairs(): void {
     if (this.options && this.options.length > 0) {
       this.pairsList = this.options
-      console.log('MTF Component - Loading pairs:', this.pairsList)
     } else {
       // Initialize with 2 empty pairs
       this.pairsList = [
@@ -60,13 +59,9 @@ export class MatchTheFollowingComponent implements OnInit, OnChanges {
   }
 
   removePair(index: number): void {
-    console.log('Remove pair called for index:', index, 'Current length:', this.pairsList.length, 'Min:', this.minOptions)
     if (this.pairsList.length > this.minOptions) {
       this.pairsList.splice(index, 1)
-      console.log('Pair removed. New length:', this.pairsList.length)
       this.emitOptionsUpdate()
-    } else {
-      console.log('Cannot remove - at minimum pairs')
     }
   }
 

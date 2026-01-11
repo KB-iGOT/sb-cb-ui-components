@@ -59,15 +59,12 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   }
 
   initializeQuestionData(): void {
-    console.log('Initializing question data:', this.questionData)
     // For initial load, just use whatever data we have
     // Complete data will be fetched when question is expanded
     this.populateQuestionForm()
   }
 
   populateQuestionForm(): void {
-    console.log('Populating form with question data:', this.questionData)
-
     // Populate existing question data if available
     if (this.questionData) {
       // Set question text
@@ -84,10 +81,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
       // Set MCQ options if available - check multiple possible data structures
       if (this.isMCQQuestion()) {
-        console.log('Question editorState:', this.questionData.editorState)
-        console.log('Question choices:', this.questionData.choices)
-        console.log('Question answer:', this.questionData.answer)
-
         if (this.questionData.editorState?.options && this.questionData.editorState.options.length > 0) {
           this.questionOptions = this.questionData.editorState.options.map((opt: any, index: number) => ({
             id: index + 1,
@@ -107,8 +100,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
               }
             })
           }
-
-          console.log('Loaded options from editorState:', this.questionOptions)
         } else if (this.questionData.choices?.options && this.questionData.choices.options.length > 0) {
           // Try alternative structure from choices
           this.questionOptions = this.questionData.choices.options.map((opt: any, index: number) => ({
@@ -129,16 +120,11 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
               }
             })
           }
-          console.log('Loaded options from choices:', this.questionOptions)
         }
       }
 
       // Set MTF pairs if available
       if (this.isMTFQuestion()) {
-        console.log('MTF Question editorState:', this.questionData.editorState)
-        console.log('MTF Question choices:', this.questionData.choices)
-        console.log('MTF Question rhsChoices:', this.questionData.rhsChoices)
-
         if (this.questionData.editorState?.options && this.questionData.editorState.options.length > 0) {
           // Load pairs from editorState where each option has question (value.body) and answer (answer field)
           this.questionOptions = this.questionData.editorState.options.map((opt: any, index: number) => ({
@@ -146,7 +132,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
             question: opt.value?.body || '',
             answer: opt.answer || ''
           }))
-          console.log('Loaded MTF pairs from editorState:', this.questionOptions)
         } else if (this.questionData.choices?.options && this.questionData.rhsChoices) {
           // Alternative structure with choices.options (questions) and rhsChoices (answers)
           this.questionOptions = this.questionData.choices.options.map((opt: any, index: number) => ({
@@ -154,15 +139,11 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
             question: opt.value?.body || opt.body || '',
             answer: this.questionData.rhsChoices[index] || ''
           }))
-          console.log('Loaded MTF pairs from choices/rhsChoices:', this.questionOptions)
         }
       }
 
       // Set FTB blanks if available
       if (this.isFTBQuestion()) {
-        console.log('FTB Question editorState:', this.questionData.editorState)
-        console.log('FTB Question choices:', this.questionData.choices)
-
         if (this.questionData.editorState?.options && this.questionData.editorState.options.length > 0) {
           // Load blanks from editorState
           // The blank assignment is in opt.answer field (e.g., "B1", "B2", "B3", "none")
@@ -171,7 +152,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
             text: opt.value?.body || opt.text || '',
             blankNumber: opt.answer
           }))
-          console.log('Loaded FTB blanks from editorState:', this.questionOptions)
         } else if (this.questionData.choices?.options && this.questionData.choices.options.length > 0) {
           // Alternative structure from choices
           this.questionOptions = this.questionData.choices.options.map((opt: any, index: number) => ({
@@ -179,7 +159,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
             text: opt.value?.body || opt.body || '',
             blankNumber: opt.answer && opt.answer !== 'none' ? opt.answer : null
           }))
-          console.log('Loaded FTB blanks from choices:', this.questionOptions)
         }
 
         // Count blanks in question text
@@ -371,7 +350,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         next: (response: any) => {
           if (response?.result?.questions && response.result.questions.length > 0) {
             const completeQuestionData = response.result.questions[0]
-            console.log('Fetched complete question data on expand:', completeQuestionData)
             // Merge complete data with existing questionData
             this.questionData = { ...this.questionData, ...completeQuestionData }
             // Now populate the form with complete data
@@ -639,8 +617,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
       },
       objectType: 'Question'
     }
-
-    console.log('Question Request:', JSON.stringify(questionRequest, null, 2))
 
     const updatedQuestion = {
       ...this.questionData,

@@ -272,7 +272,7 @@ export class AssessmentRichTextComponent {
   /* tslint:disable */
   onLoad(event: any) {
     /* tslint:disable */
-    console.log('event', event)
+    // console.log('event', event)
   }
 
   onChange(event: any) {

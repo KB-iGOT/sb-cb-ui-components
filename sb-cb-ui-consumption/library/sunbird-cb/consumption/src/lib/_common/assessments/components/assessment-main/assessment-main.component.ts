@@ -101,7 +101,6 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Assessment created successfully', resp)
           this.snackBar.open('Assessment created successfully')
           this.enableStepTwo()
           setTimeout(() => {
@@ -140,7 +139,6 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Assessment updated successfully', resp)
           this.snackBar.open('Assessment updated successfully')
           this.enableStepTwo()
           if (this.stepper) {
@@ -170,8 +168,6 @@ export class AssessmentMainComponent implements OnInit {
         sectionIdentifier
       )
 
-      console.log('Section Hierarchy Request:', JSON.stringify(sectionHierarchyRequest, null, 2))
-
       this.callLoader(true)
       this.assessmentService.updateAssessment(sectionHierarchyRequest).pipe(
         switchMap((updateResp: any) => {
@@ -183,7 +179,6 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Section saved successfully', resp)
           this.snackBar.open('Section saved successfully')
           this.callLoader(false)
           // Reload sessions component data to get updated section
@@ -192,13 +187,11 @@ export class AssessmentMainComponent implements OnInit {
           }
         },
         error: (error: any) => {
-          console.error('Error saving section', error)
           this.snackBar.open('Error saving section. Please try again.')
           this.callLoader(false)
         }
       })
     } else {
-      console.log('Invalid section data for save')
       this.snackBar.open('Invalid section data for save')
     }
   }
@@ -217,12 +210,10 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Section updated successfully', resp)
           this.snackBar.open('Section updated successfully')
           this.callLoader(false)
         },
         error: (error: any) => {
-          console.error('Error updating section', error)
           this.snackBar.open('Error updating section. Please try again.')
           this.callLoader(false)
         }
@@ -255,7 +246,6 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Question deleted successfully', resp)
           this.snackBar.open('Question deleted successfully')
           this.callLoader(false)
           // Reload sessions component data to get updated question list
@@ -296,7 +286,6 @@ export class AssessmentMainComponent implements OnInit {
             metadata: metadata
           }
         })
-        console.log(`Processing ${changedData.length} questions from bulk upload (${isOldTemplate ? 'old' : 'new'} template)`)
       } else {
         // Single question update
         questionData = changedData
@@ -307,8 +296,6 @@ export class AssessmentMainComponent implements OnInit {
         questionData,
         sectionIdentifier
       )
-
-      console.log('Question Hierarchy Request:', JSON.stringify(questionHierarchyRequest, null, 2))
 
       this.callLoader(true)
       this.assessmentService.updateAssessment(questionHierarchyRequest).pipe(
@@ -321,7 +308,6 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          console.log('Question(s) updated successfully', resp)
           const message = Array.isArray(changedData)
             ? `${changedData.length} questions saved successfully`
             : 'Question saved successfully'
