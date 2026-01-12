@@ -9,6 +9,7 @@ import { AnnouncementsModule } from './_common/announcements/announcements.modul
 import { TopLearnersModule } from './_common/top-learners/top-learners.module'
 import { CbpPlanModule } from './_common/cbp-plan/cbp-plan.module'
 import { CompetencySummaryModule } from './_common/competency-summary/competency-summary.module'
+import { AssessmentModule } from './_common/assessments/assessment.module'
 
 @NgModule({
   declarations: [ConsumptionComponent],
@@ -25,7 +26,8 @@ import { CompetencySummaryModule } from './_common/competency-summary/competency
     AnnouncementsModule,
     TopLearnersModule,
     CbpPlanModule,
-    CompetencySummaryModule
+    CompetencySummaryModule,
+    AssessmentModule
   ],
 })
 export class ConsumptionModule { }
