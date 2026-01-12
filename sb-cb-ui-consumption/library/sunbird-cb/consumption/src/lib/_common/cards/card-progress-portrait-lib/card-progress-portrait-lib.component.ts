@@ -37,6 +37,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
   @Input() isIntranetAllowedSettings: any
   @Input() isCardLoading: boolean = false
   @Output() contentData = new EventEmitter<any>()
+  @Output() redirectToNewVersion = new EventEmitter<any>()
   @Input() cbPlanMapData: any
   isCardFlipped: boolean = false
   acbpConstants = NsCardContent.ACBPConst
@@ -89,7 +90,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
     }
   }
   getRedirectUrlData(contentData: any) {
-    if (!this.widgetData?.retired) {
+    if (contentData.status !== 'Retired') {
       // for telemetry
       if (this.widgetData && this.widgetData.context && this.widgetData.context.pageSection) {
         contentData['typeOfTelemetry'] = this.widgetData.context.pageSection
@@ -235,9 +236,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
 
   checkSurveyCompletion() {
     // check if completion survey is enabled and user has completed the course before 23rd DEC 2023 (release date of completion survey)
-    if(this.configSvc.completionSurvey && this.configSvc.completionSurvey.enabled && this.widgetData?.content?.completedOn) {
-      if( this.widgetData?.content?.completedOn > this.configSvc.completionSurvey.startDate && this.widgetData?.content?.surveyCompletionStatus === false)
-      {
+    if (this.configSvc.completionSurvey && this.configSvc.completionSurvey.enabled && this.widgetData?.content?.completedOn) {
+      if (this.widgetData?.content?.completedOn > this.configSvc.completionSurvey.startDate && this.widgetData?.content?.surveyCompletionStatus === false) {
         return true
       } else {
         return false
@@ -245,4 +245,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
     }
   }
 
+
+  navigateToNewVersion(contentData: any) {
+    this.redirectToNewVersion.emit(contentData.contentVersionInfo.identifier)
+  }
 }

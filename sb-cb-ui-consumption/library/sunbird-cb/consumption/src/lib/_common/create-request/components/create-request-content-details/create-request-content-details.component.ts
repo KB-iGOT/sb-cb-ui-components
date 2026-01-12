@@ -14,17 +14,54 @@ export class CreateRequestContentDetailsComponent implements OnInit {
   @Input() viewMode: string = ''
 
   userTypeOptions = [
-    { displayName: 'Initiator', value: 'Initiator', isChecked: false },
-    { displayName: 'Reviewer', value: 'Reviewer', isChecked: false },
-    { displayName: 'Decision Maker', value: 'Decision Maker', isChecked: false },
-    { displayName: 'Strategic', value: 'Strategic', isChecked: false },
-    { displayName: 'Policy Maker', value: 'Policy Maker', isChecked: false }
+    {
+      displayName: 'Initiator',
+      value: 'Initiator',
+      isChecked: false,
+      description: 'For users who raise or initiate a request, idea, or proposal for further review or action.'
+    },
+    {
+      displayName: 'Reviewer',
+      value: 'Reviewer',
+      isChecked: false,
+      description: 'For users responsible for examining, validating, or providing feedback before a decision is made.'
+    },
+    {
+      displayName: 'Decision Maker',
+      value: 'Decision Maker',
+      isChecked: false,
+      description: 'For users who have the authority to approve, reject, or finalize the request.'
+    },
+    {
+      displayName: 'Strategic',
+      value: 'Strategic',
+      isChecked: false,
+      description: 'For users involved in long-term planning, alignment, or strategic direction setting.'
+    },
+    {
+      displayName: 'Policy Maker',
+      value: 'Policy Maker',
+      isChecked: false,
+      description: 'For users responsible for defining, interpreting, or enforcing policies, guidelines, or regulatory frameworks.'
+    }
   ];
 
   proficiencyLevels = [
-    { displayName: 'Beginner', value: 'Beginner' },
-    { displayName: 'Intermediate', value: 'Intermediate' },
-    { displayName: 'Advanced', value: 'Advanced' }
+    {
+      displayName: 'Beginner',
+      value: 'Beginner',
+      description: 'For users with little or no prior knowledge who require foundational understanding and guidance.'
+    },
+    {
+      displayName: 'Intermediate',
+      value: 'Intermediate',
+      description: 'For users with basic familiarity who can understand concepts with moderate complexity.'
+    },
+    {
+      displayName: 'Advanced',
+      value: 'Advanced',
+      description: 'For users with strong expertise who can engage with detailed, technical, or specialized content.'
+    }
   ];
 
   selectedUserTypes: string[] = [];

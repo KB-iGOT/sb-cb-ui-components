@@ -29,7 +29,10 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
   filteredLanguages: any[] = []
   searchText: string = ''
   addedAuthersList: Auther[] = []
-  requestTypeList = ['Single', 'Broadcast']
+  requestTypeList = [
+    { type: 'Single', description: 'For requests directed to a specific individual or a limited set of users.' },
+    { type: 'Broadcast', description: 'For requests intended to be shared with a broader audience or multiple stakeholders at once.' }
+  ]
   yesNoOptions = [
     { displayName: 'Yes', value: true },
     { displayName: 'No', value: false }

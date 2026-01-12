@@ -225,8 +225,8 @@ export class CreateRequestFormComponent implements OnInit {
     const assigneeControl = this.additionalDetailsForm.get('assignee')
     if (assigneeControl && assigneeControl.value) {
       const assignee = {
-        providerId: assigneeControl.value.id,
-        providerName: assigneeControl.value.orgName
+        providerId: assigneeControl.value.id || assigneeControl.value.providerId,
+        providerName: assigneeControl.value.orgName || assigneeControl.value.providerName
       }
       return assignee
     }
