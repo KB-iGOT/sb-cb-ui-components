@@ -18,31 +18,31 @@ export class CreateRequestContentDetailsComponent implements OnInit {
       displayName: 'Initiator',
       value: 'Initiator',
       isChecked: false,
-      description: 'For users who raise or initiate a request, idea, or proposal for further review or action.'
+      description: 'For officials responsible for preparing and initiating files, drafts, proposals, and notes using ground-level data and established rules.'
     },
     {
       displayName: 'Reviewer',
       value: 'Reviewer',
       isChecked: false,
-      description: 'For users responsible for examining, validating, or providing feedback before a decision is made.'
+      description: 'For officials who review, refine, validate, and ensure compliance of drafts before they are submitted for approval or decision.'
     },
     {
       displayName: 'Decision Maker',
       value: 'Decision Maker',
       isChecked: false,
-      description: 'For users who have the authority to approve, reject, or finalize the request.'
+      description: 'For officials who take case-specific administrative decisions based on reviewed proposals, balancing policy intent with feasibility and field realities.'
     },
     {
       displayName: 'Strategic',
       value: 'Strategic',
       isChecked: false,
-      description: 'For users involved in long-term planning, alignment, or strategic direction setting.'
+      description: 'For officials who guide implementation through coordination, direction-setting, and inter and intra departmental alignment to drive program outcomes.'
     },
     {
       displayName: 'Policy Maker',
       value: 'Policy Maker',
       isChecked: false,
-      description: 'For users responsible for defining, interpreting, or enforcing policies, guidelines, or regulatory frameworks.'
+      description: 'For senior leaders who provide policy direction, institutional guidance, and long-term administrative vision to enable reforms and governance coherence.'
     }
   ];
 
@@ -50,17 +50,17 @@ export class CreateRequestContentDetailsComponent implements OnInit {
     {
       displayName: 'Beginner',
       value: 'Beginner',
-      description: 'For users with little or no prior knowledge who require foundational understanding and guidance.'
+      description: 'Designed for learners new to the subject, focusing on foundational concepts, key terms, and standard procedures.'
     },
     {
       displayName: 'Intermediate',
       value: 'Intermediate',
-      description: 'For users with basic familiarity who can understand concepts with moderate complexity.'
+      description: 'Designed for learners who apply concepts in practice, integrating skills to handle moderately complex tasks and real-world situations.'
     },
     {
       displayName: 'Advanced',
       value: 'Advanced',
-      description: 'For users with strong expertise who can engage with detailed, technical, or specialized content.'
+      description: 'Designed for experienced learners and leaders, focusing on systems-level mastery, strategic decision-making, and solving complex and ambiguous problems.'
     }
   ];
 
