@@ -30,8 +30,8 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
   searchText: string = ''
   addedAuthersList: Auther[] = []
   requestTypeList = [
-    { type: 'Single', description: 'For requests directed to a specific individual or a limited set of users.' },
-    { type: 'Broadcast', description: 'For requests intended to be shared with a broader audience or multiple stakeholders at once.' }
+    { type: 'Single', description: 'Request raised for a specific individual course requirement or a focused learning need.' },
+    { type: 'Broadcast', description: 'Request raised for multiple stakeholders or departments to meet common learning requirements at scale.' }
   ]
   yesNoOptions = [
     { displayName: 'Yes', value: true },
