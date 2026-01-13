@@ -4,6 +4,7 @@ import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALO
 export interface QuestionTypeData {
   title?: string
   isOptionWeightage?: boolean
+  isBasicAssessment?: boolean
 }
 
 @Component({
@@ -20,6 +21,10 @@ export class SelectQuestionModalComponent {
 
   get isOptionWeightage(): boolean {
     return this.data?.isOptionWeightage || false
+  }
+
+  get isBasicAssessment(): boolean {
+    return this.data?.isBasicAssessment || false
   }
 
   onQuestionTypeSelect(questionType: string): void {
