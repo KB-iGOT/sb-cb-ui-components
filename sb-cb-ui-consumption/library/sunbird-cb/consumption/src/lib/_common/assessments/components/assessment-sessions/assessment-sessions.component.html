@@ -101,7 +101,7 @@
       </button>
     </ng-container>
     <button type="button" mat-button class="btn-common btn-secondary ml-auto" (click)="addBasicSection()"
-      [ngClass]="{'btn-disabled': basicSections.length >= 5}" [disabled]="basicSections.length >= 5">
+      [ngClass]="{'btn-disable': basicSections.length >= 5}" [disabled]="basicSections.length >= 5">
       <mat-icon>add</mat-icon>
       Add Section
     </button>
@@ -149,7 +149,16 @@
       <div class="form-field mat-full-radius">
         <label class="field-label required">Minimum percentage (%) to pass this assessment?</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput type="number" formControlName="minPassPercentage" min="0" max="100" placeholder="0">
+          <input matInput type="number" formControlName="minPassPercentage" min="50" max="100" placeholder="50">
+          <mat-error *ngIf="currentBasicSectionGroup?.get('minPassPercentage')?.hasError('required')">
+            This field is required
+          </mat-error>
+          <mat-error *ngIf="currentBasicSectionGroup?.get('minPassPercentage')?.hasError('min')">
+            Value must be 50 or greater
+          </mat-error>
+          <mat-error *ngIf="currentBasicSectionGroup?.get('minPassPercentage')?.hasError('max')">
+            Value must be 100 or less
+          </mat-error>
         </mat-form-field>
       </div>
 
@@ -178,11 +187,13 @@
 
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
       *ngIf="assessmentData?.children?.[selectedSectionIndex]?.identifier">
-      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>add</mat-icon>
         Add Questions
       </button>
-      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()">
+      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>file_upload</mat-icon>
         Bulk upload
       </button>
@@ -237,12 +248,12 @@
       <div class="form-field mat-full-radius">
         <label class="field-label required">Minimum percentage (%) to pass this assessment?</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput type="number" formControlName="minPassPercentage" min="0" max="100" placeholder="0">
+          <input matInput type="number" formControlName="minPassPercentage" min="50" max="100" placeholder="50">
           <mat-error *ngIf="basicAssessmentForm?.get('minPassPercentage')?.hasError('required')">
             This field is required
           </mat-error>
           <mat-error *ngIf="basicAssessmentForm?.get('minPassPercentage')?.hasError('min')">
-            Value must be 0 or greater
+            Value must be 50 or greater
           </mat-error>
           <mat-error *ngIf="basicAssessmentForm?.get('minPassPercentage')?.hasError('max')">
             Value must be 100 or less
@@ -272,11 +283,13 @@
 
     <!-- Add Questions Buttons - Show only when section is created -->
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5" *ngIf="hasBasicAssessmentSection()">
-      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>add</mat-icon>
         Add Questions
       </button>
-      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()">
+      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>file_upload</mat-icon>
         Bulk upload
       </button>

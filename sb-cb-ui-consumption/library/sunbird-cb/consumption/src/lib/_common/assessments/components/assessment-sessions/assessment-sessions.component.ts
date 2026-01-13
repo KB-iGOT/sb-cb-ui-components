@@ -67,7 +67,7 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     this.basicAssessmentForm = this.fb.group({
       totalQuestions: [0, [Validators.required, Validators.min(1)]],
       maxQuestions: [0, [Validators.required, Validators.min(1)]],
-      minPassPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      minPassPercentage: [50, [Validators.required, Validators.min(50), Validators.max(100)]],
       additionalInstructions: ['', [Validators.maxLength(500)]]
     })
 
@@ -167,7 +167,7 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       additionalInstructions: ['', [Validators.maxLength(500)]],
       totalQuestions: [0, [Validators.required, Validators.min(1)]],
       maxQuestions: [0, [Validators.required, Validators.min(1)]],
-      minPassPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
+      minPassPercentage: [50, [Validators.required, Validators.min(50), Validators.max(100)]]
     })
   }
 
@@ -628,6 +628,25 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       return this.assessmentData.children[this.selectedSectionIndex].sectionLevelDefinition || null
     }
     return null
+  }
+
+  isQuestionLimitReached(): boolean {
+    // For basic assessment (single section)
+    if (this.isBasicAssessment() && !this.isBasicAssessmentWithSections()) {
+      const totalQuestions = this.basicAssessmentForm?.get('totalQuestions')?.value || 0
+      const currentQuestionsCount = this.questionsList?.length || 0
+      return currentQuestionsCount >= totalQuestions
+    }
+
+    // For basic assessment with sections
+    if (this.isBasicAssessmentWithSections()) {
+      const currentSection = this.currentBasicSectionGroup
+      const totalQuestions = currentSection?.get('totalQuestions')?.value || 0
+      const currentQuestionsCount = this.questionsList?.length || 0
+      return currentQuestionsCount >= totalQuestions
+    }
+
+    return false
   }
 
   openBulkUploadDialog() {
