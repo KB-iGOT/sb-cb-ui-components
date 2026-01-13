@@ -519,7 +519,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       maxWidth: '90vw',
       data: {
         title: 'Select the questions type',
-        isOptionWeightage: this.isAdvanceAssessmentOptionWeightage()
+        isOptionWeightage: this.isAdvanceAssessmentOptionWeightage(),
+        isBasicAssessment: this.isBasicAssessment()
       }
     })
 
