@@ -1,0 +1,22 @@
+{
+  "name": "@sunbird-cb/toc",
+  "version": "0.0.1",
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@angular/common": "^16.2.12",
+    "@angular/core": "^16.2.12",
+    "@angular/forms": "^16.2.12",
+    "@angular/router": "^16.2.12",
+    "@angular/material": "^16.2.14",
+    "@ngx-translate/core": "^15.0.0",
+    "@sunbird-cb/design-system": "0.0.3",
+    "@sunbird-cb/utils-v2": "0.1.0-cbrelease-4.8.28",
+    "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
+    "@sunbird-cb/consumption": "*",
+    "@sunbird-cb/collection": "*",
+    "@sunbird-cb/discussions-ui-v8": "*",
+    "@sunbird-cb/discussion-v2": "*"
+  }
+}
