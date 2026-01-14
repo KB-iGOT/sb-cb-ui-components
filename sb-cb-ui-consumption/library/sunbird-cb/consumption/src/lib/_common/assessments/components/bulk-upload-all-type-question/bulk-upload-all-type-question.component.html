@@ -5,7 +5,8 @@
       <span>Bulk Upload Questions</span>
     </h2>
     <div class="bulk-upload-header margin-left-auto gap-5">
-      <button mat-button class="btn-common btn-secondary" (click)="downloadReadMe()" type="button">
+      <button *ngIf="compatibilityLevel === 8" mat-button class="btn-common btn-secondary" (click)="downloadReadMe()"
+        type="button">
         <mat-icon>info</mat-icon>
         <span>Read me</span>
       </button>

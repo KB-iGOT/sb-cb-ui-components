@@ -285,13 +285,13 @@
       </div>
     </ng-container>
 
-    <!-- Description -->
+    <!-- Instructions -->
     <div class="form-section mat-full-radius">
-      <label class="field-label">Description</label>
+      <label class="field-label">Instructions</label>
       <mat-form-field appearance="outline" class="full-width">
         <textarea matInput formControlName="description" [maxlength]="instructionsMaxLength" rows="5"
-          placeholder="Enter description"></textarea>
-        <mat-error *ngIf="controls['description'].hasError('maxlength')">Description cannot exceed {{
+          placeholder="Enter instructions"></textarea>
+        <mat-error *ngIf="controls['description'].hasError('maxlength')">Instructions cannot exceed {{
           instructionsMaxLength }} characters</mat-error>
       </mat-form-field>
       <div class="field-footer">
