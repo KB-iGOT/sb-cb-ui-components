@@ -10,6 +10,7 @@ export * from './lib/app-toc-lib.module'
 
 // Services
 export * from './lib/services/app-toc.service'
+export * from './lib/services/app-toc-v2.service'
 export * from './lib/services/action.service'
 export * from './lib/services/load-check.service'
 export * from './lib/services/reset-ratings.service'
@@ -62,3 +63,19 @@ export * from './lib/routes/app-toc-home/app-toc-home.component'
 // Share TOC module
 export * from './lib/share-toc/share-toc.module'
 export * from './lib/share-toc/share-toc/share-toc.component'
+
+// Content TOC modules
+export * from './lib/_collection/_common/content-toc/content-toc.module'
+export * from './lib/_collection/_common/content-toc/content-toc.component'
+export * from './lib/_collection/_common/content-toc/reviews-content/reviews-content.component'
+export * from './lib/_collection/_common/content-toc/app-toc-about/app-toc-about.component'
+export * from './lib/_collection/_common/content-toc/app-toc-content/app-toc-content.component'
+export * from './lib/_collection/_common/content-toc/app-toc-teachers-notes/app-toc-teachers-notes.component'
+export * from './lib/_collection/_common/content-toc/app-toc-batch-assignments/app-toc-batch-assignments.component'
+
+// Karma Points module
+export * from './lib/_collection/_common/content-toc/karma-points/karma-points.module'
+export * from './lib/_collection/_common/content-toc/karma-points/karma-points.component'
+export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.module'
+export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.component'
+

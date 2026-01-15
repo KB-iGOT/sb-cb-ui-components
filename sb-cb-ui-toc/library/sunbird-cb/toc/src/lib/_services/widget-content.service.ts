@@ -61,6 +61,7 @@ const API_END_POINTS = {
   EXT_CONTENT_EROLL: `/apis/proxies/v8/cios-enroll/v1/create`,
   EXT_PUBLIC_CONTENT: (partent: any, contentId: any) => `/apis/proxies/v8/ciosIntegration/v1/read/content/${partent}/${contentId}`,
   ENROLL_CONTENT_DATA: (userId: string,) => `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`,
+  LEARNER_PATHWAY_ENROLL: (contentId: string) => `/apis/proxies/v8/learningpathway/v1/enrol/${contentId}`,
 }
 
 @Injectable({
@@ -205,6 +206,17 @@ export class WidgetContentService {
         )
       )
   }
+
+  autoEnrollLP(identifier: any): Observable<NsContent.IBatchListResponse> {
+    return this.http.get<NsContent.IBatchListResponse>(`${API_END_POINTS.LEARNER_PATHWAY_ENROLL(identifier)}`)
+      .pipe(
+        retry(1),
+        map(
+          (data: any) => data.result.response
+        )
+      )
+  }
+
 
   autoAssignCuratedBatchApi(request: any, programType: any): Observable<NsContent.IBatchListResponse> {
     const url = programType === NsContent.ECourseCategory.MODERATED_PROGRAM ?

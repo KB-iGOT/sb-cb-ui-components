@@ -37,7 +37,7 @@
                     mat-icon-button class="" [matMenuTriggerFor]="buttonMenu">
                     <mat-icon>more_vertical</mat-icon>
                 </button> -->
-                <ng-container *ngIf="isEnrolled">
+                <ng-container *ngIf="isEnrolled  && !isMilestoneLocked && !isParentMilestoneLocked">
                     <ng-container
                         *ngIf="!forPreview &&  content?.identifier && getCompletionPercentage(content?.identifier) ; else elseBlock">
 
@@ -80,10 +80,10 @@
             </div>
             <!-- deactivated as per NIC CEO requirement to access course wthout login -->
             <a class="width-expand"
-                [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked) ? true : null"
+                [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked) ? true : null"
                 [ngClass]="{'ml-3': isEnrolled}"
-                [routerLink]="(isAllowed && !forPreview && isEnabled) ? resourceLink.url : null"
-                [queryParams]="(isAllowed && !forPreview && isEnabled)  ? resourceLink.queryParams : null">
+                [routerLink]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked) ? resourceLink.url : null"
+                [queryParams]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked)  ? resourceLink.queryParams : null">
                 <div [ngClass]="{'resource-active': pathSet?.has(content?.identifier) && isEnrolled}"></div>
                 <div class="text-truncate " [ngClass]="{'cursor-pointer': !isEnabled && isEnrolled}"
                     (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
@@ -227,7 +227,8 @@
                     <div class="text-truncate" [ngClass]="{'cursor-pointer': !isEnabled}"
                         (click)="content.viewChildren = !content.viewChildren">
                         <div class="flex items-center justify-center mb-1 sm:flex-row">
-                            <ng-container *ngIf="isModule && isEnrolled">
+                            <ng-container
+                                *ngIf="isModule && isEnrolled && !isMilestoneLocked && !isParentMilestoneLocked">
                                 <ng-container
                                     *ngIf="!forPreview && content?.identifier && getCompletionPercentage(content?.identifier) ; else elseBlock">
 
@@ -268,9 +269,16 @@
                             <div
                                 [ngClass]="{'collection-active-class': pathSet?.has(content?.identifier) && isEnrolled}">
                             </div>
+                            <img *ngIf="isMilestoneLocked" src="assets/icons/hubs/lock.svg" alt="Locked"
+                                class="lock-icon mr-2 margin-bottom-xxs">
                             <p class="margin-remove text-truncate mat-subheading-1 flex-auto font-bold nodtranslate"
                                 [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}">
-                                {{index}}. {{ content?.name | truncate:50 }}
+                                <span>{{isMilestone ? index -1 : index}}. </span>{{ content?.name | truncate:50 }}
+                                <ng-container *ngIf="isMilestone">
+                                    <span *ngIf="isMilestoneLocked" class="locked-text ml-2">Locked</span>
+                                </ng-container>
+                                <span *ngIf="content?.isMandatory"
+                                    class="mandatory-text mat-caption ml-2">Mandatory</span>
                             </p>
                             <div class="type-container resource mt-2 sm:mt-0" *ngIf="content?.category === 'Resource'">
                                 <mat-icon class="mr-1 custom-icon rotate-90">call_to_action</mat-icon>
@@ -285,6 +293,14 @@
                                 <span class="nodtranslate">Course</span>
                             </div>
                         </div>
+                        <!-- Milestone Badge -->
+                        <div *ngIf="isMilestone" class="milestone-badge mt-2">
+                            <span class="milestone-badge-text nodtranslate">Milestone {{index - 1}}</span>
+                        </div>
+                        <!-- Milestone Description (3 lines with ellipsis) -->
+                        <p *ngIf="isMilestone && content?.description" class="milestone-description mt-2 nodtranslate">
+                            {{ content?.description }}
+                        </p>
                         <div class="flex flex-row gap-3 items-center content-key-values">
                             <mat-icon *ngIf="!isModule" alt="course"
                                 class="time-icon icon-color">video_library</mat-icon>
@@ -311,9 +327,14 @@
                                     'item'}}</div>
                             </ng-container>
                         </div>
+                        <!-- Milestone Completion Progress -->
+                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2">
+                            <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of
+                                {{content?.leafNodesCount || 0}} completed</span>
+                        </div>
                     </div>
                     <!-- For course progress to be shown -->
-                    <ng-container *ngIf="isEnrolled">
+                    <ng-container *ngIf="isEnrolled && !isMilestoneLocked && !isParentMilestoneLocked">
                         <ng-container
                             *ngIf="!forPreview && content?.identifier && getCompletionPercentage(content?.identifier) && content.primaryCategory === 'Course'">
                             <ng-container *ngIf="getCompletionStatus(content?.identifier) == 2">
@@ -411,7 +432,7 @@
                     [content]="child" [expandAll]="expandAll" [rootId]="rootId" [batchId]="batchId"
                     [rootContentType]="rootContentType" [index]="j+1" [baseContentReadData]="baseContentReadData"
                     [pathSet]="pathSet" [hierarchyMapData]="hierarchyMapData" [batchData]="batchData"
-                    [mlCourse]="mlCourse"
+                    [mlCourse]="mlCourse" [parentMilestoneLocked]="isMilestoneLocked || isParentMilestoneLocked"
                     *ngFor="let child of content?.children; trackBy: contentTrackBy; let j= index;let isFirst = first"
                     [ngClass]="{'moduleCard': checkIsModule(child), 'resourceCard': !checkIsModule(child), 'first': isFirst}">
                 </ws-widget-app-toc-content-card-v2>
