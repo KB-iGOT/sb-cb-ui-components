@@ -749,11 +749,22 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           moderatedBatchData = this.batchData && this.batchData.content && this.batchData.content[0]
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
+      } else if (this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+        this.autoEnrollLearningPathway()
       } else {
         this.autoAssignEnroll()
       }
     }
     this.contentViewEventForNetCore('enroll')
+  }
+
+  autoEnrollLearningPathway() {
+    this.contentSvc.autoEnrollLP(this.content?.identifier).subscribe((res: any) => {
+      console.log('autoEnrollLearningPathway', res)
+      if (res) {
+        this.navigateToPlayerPage(res)
+      }
+    })
   }
 
   public autoEnrollCuratedProgram(programType: any, batchData: any) {
@@ -2407,17 +2418,25 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
   private fetchContentHierarchy(identifier: string): Promise<boolean> {
-    if(this.baseContentReadData?.courseCategory === 'Learning Pathway'){
+    if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
       return new Promise<boolean>((resolve) => {
-      const content = this.baseContentReadData
-      this.content = this.appTocV2Svc.constructHeirarchyData(content)
-      this.getOrgIdForShare()
-      this.getTocStructure()
-      console.log('content', this.content)
-          resolve(true)
-          return
+        const content = this.baseContentReadData
+        this.content = this.appTocV2Svc.constructHeirarchyData(content)
+        this.appTocV2Svc.mapContentHierarchyProgressUpdate(this.content, this.userEnrollmentList)
+        // Create hashmap and compute milestone locking after progress is updated
+        this.tocSvc.callHirarchyProgressHashmap(this.content)
+        // Compute milestone locking status with updated progress data
+        this.tocSvc.computeMilestoneLockingStatus()
+        // Sync content tree's isLocked with computed values
+        this.syncMilestoneLockStatus()
+        this.getOrgIdForShare()
+        this.getTocStructure()
+        console.log('content after locking sync', this.content)
+        console.log('hashmap after locking', this.tocSvc.hashmap)
+        resolve(true)
+        return
       })
-    }else{
+    } else {
       return new Promise<boolean>((resolve, reject) => {
         if (!identifier) {
           resolve(false)
@@ -2479,6 +2498,24 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.assignPathAndUpdateBanner(this.router.url)
       this.getLearningUrls()
     }
+  }
+
+  /**
+   * Sync milestone isLocked property with computed locking status from hashmap
+   * This ensures the content tree reflects the actual lock status
+   */
+  syncMilestoneLockStatus() {
+    if (!this.content || !this.content.children) return
+
+    this.content.children.forEach((child: any) => {
+      if (child.primaryCategory === 'Milestone' && child.identifier) {
+        const hashData = this.tocSvc.hashmap[child.identifier]
+        if (hashData && hashData.computedIsLocked !== undefined) {
+          child.isLocked = hashData.computedIsLocked
+          console.log(`Synced milestone ${child.identifier} (${child.name}) isLocked: ${child.isLocked}`)
+        }
+      }
+    })
   }
 
   onLanguageSelect(lang: any) {
@@ -3040,20 +3077,24 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   checkForCompletionSurveyTrigger() {
     if (this.content && this.contentReadData) {
       console.log('checkForSurveyTrigger this.content', this.contentReadData)
-      if ((this.content.completionStatus === 2 || this.content.completionPercentage === 100) && this.contentReadData.completionSurveyLink) {
-        const sID = this.contentReadData.completionSurveyLink.split('surveys/')
-        const surveyId = sID[1]
-        const courseId = this.contentReadData.identifier
-        // Call API to see if survey is submitted or not
-        this.tocSvc.getApllicationsById(surveyId, courseId).subscribe((res) => {
-          console.log('response of getApllicationsById', res)
-          if (res.result.response && Object.keys(res.result.response).length > 0) {
-            this.lockCertificate = false
-          } else {
-            this.lockCertificate = true
-            this.openCompletionSurveyFormPopup()
-          }
-        })
+      // check if completion survey is enabled and user has completed the course before 23rd DEC 2023 (release date of completion survey)
+      if (this.configSvc.instanceConfig && this.configSvc.instanceConfig.completionSurvey && this.configSvc.instanceConfig.completionSurvey.enabled &&
+        this.enrolledCourseData && this.enrolledCourseData && this.enrolledCourseData.completedOn >= this.configSvc.instanceConfig.completionSurvey.startDate) {
+        if ((this.content.completionStatus === 2 || this.content.completionPercentage === 100) && this.contentReadData.completionSurveyLink) {
+          const sID = this.contentReadData.completionSurveyLink.split('surveys/')
+          const surveyId = sID[1]
+          const courseId = this.contentReadData.identifier
+          // Call API to see if survey is submitted or not
+          this.tocSvc.getApllicationsById(surveyId, courseId).subscribe((res) => {
+            console.log('response of getApllicationsById', res)
+            if (res.result.response && Object.keys(res.result.response).length > 0) {
+              this.lockCertificate = false
+            } else {
+              this.lockCertificate = true
+              this.openCompletionSurveyFormPopup()
+            }
+          })
+        }
       }
     }
   }
