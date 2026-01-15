@@ -463,6 +463,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   private transformContentsToWidgets(
     contents: NsContent.IContent[],
     strip: NsContentStripWithTabsAndPills.IContentStripUnit,
+    tabCardSubType?: string,
   ) {
     return (contents || []).map((content, idx) => (
       content ? {
@@ -472,7 +473,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         widgetData: {
           content,
           ...(content.batch && { batch: content.batch }),
-          cardSubType: strip.stripConfig && strip.stripConfig.cardSubType,
+          cardSubType: tabCardSubType || (strip.stripConfig && strip.stripConfig.cardSubType),
           cardCustomeClass: strip.customeClass ? strip.customeClass : '',
           context: { pageSection: strip.key, position: idx },
 
@@ -712,7 +713,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
             const allPills = this.stripsResultDataMap[strip.key].tabs[0].pillsData
             const currentPillsFromMap = (allPills && allPills.length && allPills[0]) as NsContentStripWithTabsAndPills.IContentStripTab
-            if(pillData?.request?.searchV6) {
+            if (pillData?.request?.searchV6) {
               this.getTabDataByNewReqSearchV6(strip, 0, 0, currentPillsFromMap, true)
             } else {
               this.getTabDataByNewReqTrending(strip, 0, 0, currentPillsFromMap, calculateParentStatus)
@@ -886,8 +887,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ) {
     try {
       const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
+      const tabCardSubType = _.get(strip, `tabs[${tabIndex}].pillsData[${pillIndex}].cardSubType`, null)
       if (response && response.results) {
-        const widgets = this.transformContentsToWidgets(response.results.result.content, strip)
+        const widgets = this.transformContentsToWidgets(response.results.result.content, strip, tabCardSubType)
         let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs
@@ -1426,6 +1428,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       let tabResults: any[] = []
       let userId = this.configSvc.userProfile.userId
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise()
+      const tabCardSubType = _.get(strip, `tabs[${this.tabEventG}].cardSubType`, null)
 
       if (Array.isArray(response) && response.length > 0) {
         courses = response
@@ -1449,7 +1452,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           }
           await this.processStrip(
             strip,
-            this.transformContentsToWidgets(courses, strip),
+            this.transformContentsToWidgets(courses, strip, tabCardSubType),
             'done',
             calculateParentStatus,
             '',
@@ -1458,7 +1461,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         } else {
           this.processStrip(
             strip,
-            this.transformContentsToWidgets(courses, strip),
+            this.transformContentsToWidgets(courses, strip, tabCardSubType),
             'done',
             calculateParentStatus,
             'viewMoreUrl',
@@ -1475,7 +1478,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         // this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
         this.processStrip(
           strip,
-          this.transformContentsToWidgets(courses, strip),
+          this.transformContentsToWidgets(courses, strip, tabCardSubType),
           'done',
           calculateParentStatus,
           '',
