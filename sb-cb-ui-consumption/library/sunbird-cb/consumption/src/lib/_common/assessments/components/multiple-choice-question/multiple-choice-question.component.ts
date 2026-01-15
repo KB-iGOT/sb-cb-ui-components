@@ -134,9 +134,9 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
     this.emitOptionsUpdate()
   }
 
-  onCorrectAnswerToggle(option: any): void {
+  onCorrectAnswerToggle(_option: any): void {
     // For multiple select (MCQ-MCA)
-    option.isCorrect = !option.isCorrect
+    // Note: ngModel already handles the toggle, we just need to emit the update
     this.emitOptionsUpdate()
   }
 

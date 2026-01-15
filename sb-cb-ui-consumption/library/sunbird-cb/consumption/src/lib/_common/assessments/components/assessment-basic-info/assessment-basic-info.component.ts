@@ -255,9 +255,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       name: data.name || '',
       description: data.description || '',
       showTimer: data.showTimer !== undefined ? data.showTimer : true,
-      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts || null,
+      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null ? data.maxAssessmentRetakeAttempts : null,
       scoreCutoffType: data.scoreCutoffType || 'AssessmentLevel',
-      coolOffPeriod: data.coolOffPeriod || null
+      coolOffPeriod: data.coolOffPeriod !== undefined && data.coolOffPeriod !== null ? data.coolOffPeriod : null
     }, { emitEvent: false })
 
     // Duration - convert from seconds to hours, minutes, seconds
