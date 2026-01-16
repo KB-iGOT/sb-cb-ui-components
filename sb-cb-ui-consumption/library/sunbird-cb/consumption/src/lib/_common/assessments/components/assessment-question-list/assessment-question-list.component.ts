@@ -650,4 +650,8 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         return 'Multiple Choice Question'
     }
   }
+
+  get isReadOnly(): boolean {
+    return this.assessemntService.getReadOnly()
+  }
 }

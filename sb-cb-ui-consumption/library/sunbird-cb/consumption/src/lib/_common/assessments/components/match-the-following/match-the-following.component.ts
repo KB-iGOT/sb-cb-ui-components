@@ -7,6 +7,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
 })
 export class MatchTheFollowingComponent implements OnInit, OnChanges {
   @Input() options: any[] = []
+  @Input() isReadOnly: boolean = false
   @Output() optionsUpdated = new EventEmitter<any[]>()
   @Output() addOptionRequest = new EventEmitter<void>()
 

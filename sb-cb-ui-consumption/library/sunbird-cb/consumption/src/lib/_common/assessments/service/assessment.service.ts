@@ -19,6 +19,7 @@ const API_END_POINTS = {
 export class AssessmentService {
 
   private assessmentHierarchyData: any = {}
+  readOnly: boolean = false
 
   constructor(
     private http: HttpClient
@@ -387,5 +388,13 @@ export class AssessmentService {
         }
       }
     }
+  }
+
+  getReadOnly() {
+    return this.readOnly
+  }
+
+  setReadOnly(readOnly: boolean) {
+    this.readOnly = readOnly
   }
 }
