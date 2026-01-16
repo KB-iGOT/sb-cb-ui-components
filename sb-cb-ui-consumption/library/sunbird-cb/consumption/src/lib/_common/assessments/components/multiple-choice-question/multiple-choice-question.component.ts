@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
 export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
   @Input() questionType: string = 'MCQ-SCA'; // MCQ-SCA, MCQ-MCA, MCQ-SCA-TF
   @Input() options: any[] = [];
+  @Input() isReadOnly: boolean = false;
   @Output() optionsUpdated = new EventEmitter<any[]>();
   @Output() addOptionRequest = new EventEmitter<void>();
 

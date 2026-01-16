@@ -6,7 +6,7 @@
         <label class="mtf-label">Question {{ i + 1 }}</label>
         <div class="editor-wrapper">
           <sb-uic-assessment-rich-text [textToBeShown]="pair.question" (getContent)="onQuestionTextChange(pair, $event)"
-            [showAudioVideoToolBar]="false">
+            [showAudioVideoToolBar]="false" [readOnly]="isReadOnly">
           </sb-uic-assessment-rich-text>
         </div>
       </div>
@@ -16,13 +16,13 @@
         <label class="mtf-label">Answer {{ i + 1 }}</label>
         <div class="editor-wrapper">
           <sb-uic-assessment-rich-text [textToBeShown]="pair.answer" (getContent)="onAnswerTextChange(pair, $event)"
-            [showAudioVideoToolBar]="false">
+            [showAudioVideoToolBar]="false" [readOnly]="isReadOnly">
           </sb-uic-assessment-rich-text>
         </div>
       </div>
 
       <!-- Remove Button -->
-      <ng-container *ngIf="pairsList.length > minOptions">
+      <ng-container *ngIf="pairsList.length > minOptions && !isReadOnly">
         <div class="mtf-actions">
           <button mat-icon-button (click)="removePair(i)" class="remove-btn" matTooltip="Remove Pair">
             <mat-icon>delete</mat-icon>

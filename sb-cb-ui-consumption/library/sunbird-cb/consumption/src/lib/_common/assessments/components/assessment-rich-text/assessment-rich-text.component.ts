@@ -18,6 +18,7 @@ export class AssessmentRichTextComponent {
   @Input() showAudioVideoToolBar: any = false
   @Input() ftbCount = 0
   @Input() ftbMaxCount = 0
+  @Input() readOnly: boolean = false
   // @Input() showAudioVideoToolBar!: any
   @Output() getContent = new EventEmitter()
   @Output() onTouched = new EventEmitter<void>()
@@ -111,6 +112,11 @@ export class AssessmentRichTextComponent {
     setTimeout(() => {
       const editorInstance = this.editor?.instance
       if (editorInstance?.on) {
+        // Set readOnly state
+        if (this.readOnly && editorInstance.setReadOnly) {
+          editorInstance.setReadOnly(true)
+        }
+
         // Blur event - mark as touched
         editorInstance.on('blur', () => {
           this.onTouched.emit()
@@ -195,6 +201,7 @@ export class AssessmentRichTextComponent {
       pasteFilter: 'plain-text',
       removeFormatAttributes: '',
       removeFormatTags: 'b,strong,em,i,u,span,font',
+      readOnly: this.readOnly,
     }
     if (this.specificToolBar === 'FTB') {
       this.ckEditorConfig['toolbar'] = [

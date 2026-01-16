@@ -5,7 +5,7 @@
       <span class="question-number">Q{{ questionIndex }}</span>
       <span class="question-type">{{ getQuestionTypeName() }}</span>
     </div>
-    <div class="question-actions" (click)="$event.stopPropagation()">
+    <div class="question-actions" (click)="$event.stopPropagation()" *ngIf="!isReadOnly">
       <button mat-icon-button (click)="onEditQuestion()" class="edit-btn" matTooltip="Edit Question">
         <mat-icon>edit</mat-icon>
       </button>
@@ -23,7 +23,7 @@
         [specificToolBar]="questionData.qType === 'FTB' ? 'FTB' : (questionData.qType === 'MTF' ? 'mtf' : '')"
         [textToBeShown]="questionText" (getContent)="getQuestionContent($event)"
         [showAudioVideoToolBar]="questionData.qType === 'FTB' ? false : true" [ftbCount]="fitbCount"
-        [ftbMaxCount]="fitbConfig?.maxOptions">
+        [ftbMaxCount]="fitbConfig?.maxOptions" [readOnly]="isReadOnly">
       </sb-uic-assessment-rich-text>
     </div>
 
@@ -32,7 +32,8 @@
       <div class="radio-group">
         <label class="radio-option" *ngFor="let level of difficultyLevels">
           <input type="radio" [name]="'difficulty-' + questionIndex" [value]="level.value"
-            [(ngModel)]="selectedDifficultyLevel" (change)="onDifficultyLevelChange(level.value)">
+            [(ngModel)]="selectedDifficultyLevel" (change)="onDifficultyLevelChange(level.value)"
+            [disabled]="isReadOnly">
           <span class="radio-label">{{ level.name }}</span>
         </label>
       </div>
@@ -52,11 +53,11 @@
         <label class="font-bold required">Answers</label>
       </div>
       <sb-uic-multiple-choice-question #mcqComponent [questionType]="questionData.qType" [options]="questionOptions"
-        (optionsUpdated)="onOptionsUpdated($event)">
+        [isReadOnly]="isReadOnly" (optionsUpdated)="onOptionsUpdated($event)">
       </sb-uic-multiple-choice-question>
 
       <!-- Action Buttons -->
-      <div class="flex flex-middle flex-center gap-5">
+      <div class="flex flex-middle flex-center gap-5" *ngIf="!isReadOnly">
         <ng-container *ngIf="!isTrueFalseQuestion()">
           <button mat-button class="btn-common btn-secondary" (click)="onAddOption()"
             [ngClass]="{'btn-disable': !canAddMoreOptions()}" [disabled]="!canAddMoreOptions()">
@@ -78,11 +79,12 @@
       <div class="my-5">
         <label class="font-bold required">Question-Answer Pairs</label>
       </div>
-      <sb-uic-match-the-following #mtfComponent [options]="questionOptions" (optionsUpdated)="onOptionsUpdated($event)">
+      <sb-uic-match-the-following #mtfComponent [options]="questionOptions" [isReadOnly]="isReadOnly"
+        (optionsUpdated)="onOptionsUpdated($event)">
       </sb-uic-match-the-following>
 
       <!-- Action Buttons -->
-      <div class="flex flex-middle flex-center gap-5 mt-5">
+      <div class="flex flex-middle flex-center gap-5 mt-5" *ngIf="!isReadOnly">
         <button mat-button class="btn-common btn-secondary" (click)="onAddPair()"
           [ngClass]="{'btn-disable': !canAddMorePairs()}" [disabled]="!canAddMorePairs()">
           Add Option
@@ -103,11 +105,11 @@
         <label class="font-bold required">Fill in the Blanks Options</label>
       </div>
       <sb-uic-fill-up-the-blanks #ftbComponent [options]="questionOptions" [ftbCount]="fitbCount"
-        (optionsUpdated)="onOptionsUpdated($event)">
+        [isReadOnly]="isReadOnly" (optionsUpdated)="onOptionsUpdated($event)">
       </sb-uic-fill-up-the-blanks>
 
       <!-- Action Buttons -->
-      <div class="flex flex-middle flex-center gap-5 mt-5">
+      <div class="flex flex-middle flex-center gap-5 mt-5" *ngIf="!isReadOnly">
         <button mat-button class="btn-common btn-secondary" (click)="onAddBlank()"
           [ngClass]="{'btn-disable': !canAddMoreBlanks()}" [disabled]="!canAddMoreBlanks()">
           Add Option

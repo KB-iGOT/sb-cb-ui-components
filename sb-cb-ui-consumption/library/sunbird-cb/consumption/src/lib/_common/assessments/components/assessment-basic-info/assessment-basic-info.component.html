@@ -301,7 +301,7 @@
     </div>
 
     <!-- Actions Buttons -->
-    <div class="form-actions flex flex-middle flex-center gap-5">
+    <div class="form-actions flex flex-middle flex-center gap-5" *ngIf="!isReadOnly">
       <button *ngIf="!assessmentData" mat-button class="btn-common btn-primary"
         [ngClass]="{'btn-disable': !isFormValid}" (click)="onSave()" [disabled]="!isFormValid" type="button">
         Save and Continue
