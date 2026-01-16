@@ -146,12 +146,12 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     const fileName = file.name.replace(/[^A-Za-z0-9_.]/g, '')
 
     if (!fileName.toLowerCase().endsWith('.csv')) {
-      this.snackBar.open('Invalid file format. Please upload a CSV file.', 'Close', { duration: 3000 })
+      this.snackBar.open('Invalid file format. Please upload a CSV file.')
       return
     }
 
     if (file.size > this.maxFileSize) {
-      this.snackBar.open('File size exceeds maximum limit of 400 MB.', 'Close', { duration: 3000 })
+      this.snackBar.open('File size exceeds maximum limit of 400 MB.')
       return
     }
 
@@ -197,7 +197,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         this.isProcessing = false
       } catch (error) {
         console.error('Error parsing CSV:', error)
-        this.snackBar.open('Error parsing CSV file. Please check the file format.', 'Close', { duration: 3000 })
+        this.snackBar.open('Error parsing CSV file. Please check the file format.')
         this.file = null
         this.isProcessing = false
       }
@@ -208,7 +208,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
   validateTemplate(data: any[]): boolean {
     if (!data || data.length === 0) {
-      this.snackBar.open('No valid questions found in the uploaded file.', 'Close', { duration: 3000 })
+      this.snackBar.open('No valid questions found in the uploaded file.')
       return false
     }
 
@@ -230,7 +230,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       }
 
       if (!('Question' in firstRow) || !('Option1' in firstRow)) {
-        this.snackBar.open('Invalid template. Missing required columns: Question, Option1', 'Close', { duration: 3000 })
+        this.snackBar.open('Invalid template. Missing required columns: Question, Option1')
         return false
       }
 
@@ -243,7 +243,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     const missingColumns = requiredColumns.filter(col => !(col in firstRow))
 
     if (missingColumns.length > 0) {
-      this.snackBar.open(`Invalid template. Missing columns: ${missingColumns.join(', ')}`, 'Close', { duration: 3000 })
+      this.snackBar.open(`Invalid template. Missing columns: ${missingColumns.join(', ')}`)
       return false
     }
 
@@ -302,7 +302,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       })
 
       if (invalidRows.length > 0) {
-        this.snackBar.open('Invalid template uploaded. Please download and use the correct template.', 'Close', { duration: 3000 })
+        this.snackBar.open('Invalid template uploaded. Please download and use the correct template.')
         return false
       }
     }
@@ -385,7 +385,9 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
             // For FTB, check if option is assigned to a blank
             const correctKey = `isOption${i}Correct`
             const correctValue = q[correctKey]
+            debugger
             isCorrect = correctValue && correctValue.toLowerCase() !== 'none' ? correctValue : 'none'
+            isCorrect = isCorrect.toLowerCase().split('blank').join('B')
           } else if (q.QuestionType === 'MTF') {
             // For MTF, the correct answer is the matching pair
             isCorrect = q[`isOption${i}Correct`] || ''
@@ -579,7 +581,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
   onCreateQuestions(): void {
     if (this.selectedQuestions.length === 0) {
-      this.snackBar.open('Please select at least one question.', 'Close', { duration: 3000 })
+      this.snackBar.open('Please select at least one question.')
       return
     }
 
