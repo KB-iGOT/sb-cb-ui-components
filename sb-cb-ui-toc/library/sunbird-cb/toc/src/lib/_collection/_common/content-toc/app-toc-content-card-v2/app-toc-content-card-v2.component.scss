@@ -649,3 +649,51 @@ span.optional-span {
     border: 1px solid #fff;
   }
 }
+
+// Milestone-specific styles
+.milestone-badge {
+  display: inline-block;
+  background-color: #E8F4FD;
+  border: 1px solid #EF951E;
+  border-radius: 16px;
+  padding: 2px 12px;
+}
+
+.milestone-badge-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #212121;
+}
+
+.milestone-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.milestone-progress {
+  display: flex;
+  align-items: center;
+}
+
+.milestone-progress-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.locked-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #F3962F;
+}
+
+.mandatory-text {
+  color: #D13924 !important;
+}

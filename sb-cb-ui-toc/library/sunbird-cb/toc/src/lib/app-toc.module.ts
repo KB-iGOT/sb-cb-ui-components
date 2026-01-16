@@ -87,6 +87,7 @@ import { EnrollQuestionnaireComponent } from './components/enroll-questionnaire/
 
 // Services
 import { AppTocService } from './services/app-toc.service'
+import { AppTocV2Service } from './services/app-toc-v2.service'
 import { ProfileResolverService } from './resolvers/profile-resolver.service'
 // import { CertificationApiService } from './routes/app-toc-certification/apis/certification-api.service' // TODO: Copy certification files if needed
 import { ActionService } from './services/action.service'
@@ -267,6 +268,7 @@ import { NonReleventFeedbackDialogComponent } from './components/non-relevent-fe
     AppTocContentReadResolverService,
     // AppPublicTocResolverService, // TODO: Provide from consuming application
     AppTocService,
+    AppTocV2Service,
     PipeContentRoutePipe,
     // CertificationApiService, // TODO: Copy certification files if needed
     // CertificationMetaResolver, // TODO: Copy certification files if needed
