@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core'
 
 @Component({
-  selector: 'sb-uic-skeleton-loader',
-  templateUrl: './skeleton-loader-lib.component.html',
-  styleUrls: ['./skeleton-loader-lib.component.scss'],
+    selector: 'sb-uic-skeleton-loader',
+    templateUrl: './skeleton-loader-lib.component.html',
+    styleUrls: ['./skeleton-loader-lib.component.scss'],
+    standalone: false
 })
 export class SkeletonLoaderLibComponent implements OnInit {
 

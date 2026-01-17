@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
-  name: 'pipePartialContent',
+    name: 'pipePartialContent',
+    standalone: false
 })
 export class PipePartialContentPipe implements PipeTransform {
 

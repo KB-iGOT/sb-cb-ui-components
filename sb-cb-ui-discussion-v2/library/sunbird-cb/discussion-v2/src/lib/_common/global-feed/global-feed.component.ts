@@ -7,9 +7,10 @@ import _ from 'lodash'
 import { map } from 'rxjs/operators';
 
 @Component({
-  selector: 'd-v2-global-feed',
-  templateUrl: './global-feed.component.html',
-  styleUrls: ['./global-feed.component.scss']
+    selector: 'd-v2-global-feed',
+    templateUrl: './global-feed.component.html',
+    styleUrls: ['./global-feed.component.scss'],
+    standalone: false
 })
 export class GlobalFeedComponent implements OnInit, OnChanges{
   @Input() widgetData: any = []

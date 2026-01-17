@@ -17,7 +17,8 @@ const customBreakPoints = {
 }
 
 @Directive({
-  selector: '[wsUtilsImageResponsive]',
+    selector: '[wsUtilsImageResponsive]',
+    standalone: false
 })
 export class ImageResponsiveDirective implements OnChanges, OnDestroy {
 

@@ -12,9 +12,10 @@ import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm
 
 
 @Component({
-  selector: 'd-v2-comment-card',
-  templateUrl: './comment-card.component.html',
-  styleUrls: ['./comment-card.component.scss'],
+    selector: 'd-v2-comment-card',
+    templateUrl: './comment-card.component.html',
+    styleUrls: ['./comment-card.component.scss'],
+    standalone: false
 })
 export class CommentCardComponent implements OnInit, OnChanges {
   @Input() cardType = 'topLevel'

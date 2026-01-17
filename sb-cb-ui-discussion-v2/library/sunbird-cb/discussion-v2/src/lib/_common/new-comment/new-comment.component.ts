@@ -5,9 +5,10 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { CommentsService } from '../../_services/comments.service'
 
 @Component({
-  selector: 'd-v2-new-comment',
-  templateUrl: './new-comment.component.html',
-  styleUrls: ['./new-comment.component.scss'],
+    selector: 'd-v2-new-comment',
+    templateUrl: './new-comment.component.html',
+    styleUrls: ['./new-comment.component.scss'],
+    standalone: false
 })
 export class NewCommentComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewCommentConfig

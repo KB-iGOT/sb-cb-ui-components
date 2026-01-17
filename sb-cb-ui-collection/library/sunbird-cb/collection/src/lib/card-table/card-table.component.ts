@@ -13,19 +13,20 @@ import {
   // SimpleChange,
   ViewChild,
 } from '@angular/core'
-import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator'
+import { MatPaginator } from '@angular/material/paginator'
 import { MatSort } from '@angular/material/sort'
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatTableDataSource } from '@angular/material/table'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { IColums, ITable } from './card-table.model'
 /* tslint:disable */
 import _ from 'lodash'
-import { NsContent } from '../_services/widget-content.model';
+import { NsContent } from '../_services/widget-content.model'
 /* tslint:enable */
 @Component({
-  selector: 'ws-widget-table-card-content',
-  templateUrl: './card-table.component.html',
-  styleUrls: ['./card-table.component.scss'],
+    selector: 'ws-widget-table-card-content',
+    templateUrl: './card-table.component.html',
+    styleUrls: ['./card-table.component.scss'],
+    standalone: false
 })
 export class CardTableComponent extends WidgetBaseComponent
   implements OnInit, OnDestroy, AfterViewInit, OnChanges, NsWidgetResolver.IWidgetData<ITable> {

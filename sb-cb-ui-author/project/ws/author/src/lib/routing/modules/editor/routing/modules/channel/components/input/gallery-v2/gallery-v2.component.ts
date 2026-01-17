@@ -12,9 +12,10 @@ import { WIDGET_LIBRARY } from '../../../constants/widet'
 import { FILE_MAX_SIZE } from './../../../../../../../../../constants/upload'
 
 @Component({
-  selector: 'ws-auth-gallery-v2',
-  templateUrl: './gallery-v2.component.html',
-  styleUrls: ['./gallery-v2.component.scss'],
+    selector: 'ws-auth-gallery-v2',
+    templateUrl: './gallery-v2.component.html',
+    styleUrls: ['./gallery-v2.component.scss'],
+    standalone: false
 })
 export class GalleryV2Component implements OnInit {
   @Output() data = new EventEmitter<{

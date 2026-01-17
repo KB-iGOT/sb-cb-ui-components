@@ -10,9 +10,10 @@ import { EventService } from '../../services/event.service'
 import { WsEvents } from '../../services/event.model'
 
 @Component({
-  selector: 'ws-utils-horizontal-scroller-v2',
-  templateUrl: './horizontal-scroller-v2.component.html',
-  styleUrls: ['./horizontal-scroller-v2.component.scss'],
+    selector: 'ws-utils-horizontal-scroller-v2',
+    templateUrl: './horizontal-scroller-v2.component.html',
+    styleUrls: ['./horizontal-scroller-v2.component.scss'],
+    standalone: false
 })
 
 export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestroy {

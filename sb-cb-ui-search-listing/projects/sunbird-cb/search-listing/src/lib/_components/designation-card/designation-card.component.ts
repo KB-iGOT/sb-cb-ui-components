@@ -4,9 +4,10 @@ import { SearchListingService } from "../../_services/search-listing.service";
 import { SearchListingConfig } from "../../_models/search-listing.model";
 
 @Component({
-  selector: "sb-cb-search-designation-card",
-  templateUrl: "./designation-card.component.html",
-  styleUrls: ["./designation-card.component.scss"]
+    selector: "sb-cb-search-designation-card",
+    templateUrl: "./designation-card.component.html",
+    styleUrls: ["./designation-card.component.scss"],
+    standalone: false
 })
 export class DesignationCardComponent {
   @Input() designation!: any;

@@ -7,9 +7,10 @@ import { SearchListingService } from "../../_services/search-listing.service";
 import * as _ from "lodash";
 
 @Component({
-  selector: "ws-app-global-search",
-  templateUrl: "./global-search.component.html",
-  styleUrls: ["./global-search.component.scss"]
+    selector: "ws-app-global-search",
+    templateUrl: "./global-search.component.html",
+    styleUrls: ["./global-search.component.scss"],
+    standalone: false
 })
 export class GlobalSearchComponent implements OnInit, OnDestroy {
   searchParam = { query: "", nlp: "", searchCategory: "" };

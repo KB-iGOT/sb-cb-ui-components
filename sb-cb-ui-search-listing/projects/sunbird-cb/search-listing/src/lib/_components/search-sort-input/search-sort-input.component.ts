@@ -5,9 +5,10 @@ import { SearchListingService } from "../../_services/search-listing.service";
 import * as _ from "lodash";
 
 @Component({
-  selector: "ws-app-search-sort-input",
-  templateUrl: "./search-sort-input.component.html",
-  styleUrls: ["./search-sort-input.component.scss"]
+    selector: "ws-app-search-sort-input",
+    templateUrl: "./search-sort-input.component.html",
+    styleUrls: ["./search-sort-input.component.scss"],
+    standalone: false
 })
 export class SearchSortInputComponent implements AfterViewInit, OnChanges {
   @Output() searchSorter = new EventEmitter();

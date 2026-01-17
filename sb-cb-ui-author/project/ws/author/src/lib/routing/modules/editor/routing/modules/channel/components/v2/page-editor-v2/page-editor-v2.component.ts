@@ -4,9 +4,10 @@ import { MatDrawer } from '@angular/material'
 import { EditorContentService } from '../../../../../../services/editor-content.service'
 
 @Component({
-  selector: 'ws-auth-page-editor-v2',
-  templateUrl: './page-editor-v2.component.html',
-  styleUrls: ['./page-editor-v2.component.scss'],
+    selector: 'ws-auth-page-editor-v2',
+    templateUrl: './page-editor-v2.component.html',
+    styleUrls: ['./page-editor-v2.component.scss'],
+    standalone: false
 })
 export class PageEditorV2Component implements OnInit {
   @Input() isSubmitPressed = false
@@ -16,7 +17,7 @@ export class PageEditorV2Component implements OnInit {
   @Output() data = new EventEmitter<string>()
   @Input() canShowMode = false
   columnSize: 1 | 2 | 3 | 4 = 1
-  @ViewChild(MatDrawer, { static: false }) drawer!: MatDrawer
+  @ViewChild(MatDrawer) drawer!: MatDrawer
 
   constructor(private store: ChannelStoreService, private contentService: EditorContentService) { }
 

@@ -5,9 +5,10 @@ import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 import _ from 'lodash'
 import { Router } from '@angular/router';
 @Component({
-  selector: 'd-v2-trending-discussions',
-  templateUrl: './trending-discussions.component.html',
-  styleUrls: ['./trending-discussions.component.scss']
+    selector: 'd-v2-trending-discussions',
+    templateUrl: './trending-discussions.component.html',
+    styleUrls: ['./trending-discussions.component.scss'],
+    standalone: false
 })
 export class TrendingDiscussionsComponent implements OnInit {
  @Input() data: any = [] 

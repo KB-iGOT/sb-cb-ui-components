@@ -4,9 +4,10 @@ import { IWidgetWrapperMedia } from '@ws-widget/collection/lib/video-wrapper/vid
 import { ConfirmDialogComponent } from '@ws-widget/collection/lib/_common/mark-as-complete/confirm-dialog/confirm-dialog.component'
 
 @Component({
-  selector: 'ws-auth-media-wrapper',
-  templateUrl: './media-wrapper.component.html',
-  styleUrls: ['./media-wrapper.component.scss'],
+    selector: 'ws-auth-media-wrapper',
+    templateUrl: './media-wrapper.component.html',
+    styleUrls: ['./media-wrapper.component.scss'],
+    standalone: false
 })
 export class MediaWrapperComponent implements OnInit, OnChanges {
   @Input() identifier = ''

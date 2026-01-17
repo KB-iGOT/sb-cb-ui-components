@@ -5,45 +5,46 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 import { MultilingualTranslationsService, EventService, WsEvents, ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { TranslateService } from '@ngx-translate/core'
 
-import { MatLegacyAutocomplete as MatAutocomplete, MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/legacy-autocomplete'
-import { MatLegacyChipInputEvent as MatChipInputEvent } from '@angular/material/legacy-chips'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
+import { MatChipInputEvent } from '@angular/material/chips'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { CommonService } from '../../_services/common.service'
 @Component({
-  selector: 'd-v2-share-discussion',
-  templateUrl: './share-discussion.component.html',
-  styleUrls: ['./share-discussion.component.scss'],
+    selector: 'd-v2-share-discussion',
+    templateUrl: './share-discussion.component.html',
+    styleUrls: ['./share-discussion.component.scss'],
+    standalone: false
 })
 export class ShareDiscussionComponent implements OnInit {
-   shareForm: UntypedFormGroup | undefined
-   selectable = true
-   removable = true
-   addOnBlur = true
-   separatorKeysCodes: number[] = [ENTER]
-   userCtrl = new UntypedFormControl('')
-   filteredUsers: any []| undefined
-   users: any[] = []
-   allUsers: any[] = []
-   apiResponse: any
-   courseDetails: any
-   userProfile: any
-   maxEmailsLimit = 30
-   showLoader = false
-   shareUrl: any
-   @Input() shareType: String = 'share'
-   @Input() rootOrgId: any
-   @Input() content: any
-   @Input() contentLink: any = ''
-   @ViewChild('userInput') userInput: ElementRef<HTMLInputElement> | undefined
-   @ViewChild('auto') matAutocomplete: MatAutocomplete | undefined
-   @Output() resetEnableShare: any = new EventEmitter()
+  shareForm: UntypedFormGroup | undefined
+  selectable = true
+  removable = true
+  addOnBlur = true
+  separatorKeysCodes: number[] = [ENTER]
+  userCtrl = new UntypedFormControl('')
+  filteredUsers: any[] | undefined
+  users: any[] = []
+  allUsers: any[] = []
+  apiResponse: any
+  courseDetails: any
+  userProfile: any
+  maxEmailsLimit = 30
+  showLoader = false
+  shareUrl: any
+  @Input() shareType: String = 'share'
+  @Input() rootOrgId: any
+  @Input() content: any
+  @Input() contentLink: any = ''
+  @ViewChild('userInput') userInput: ElementRef<HTMLInputElement> | undefined
+  @ViewChild('auto') matAutocomplete: MatAutocomplete | undefined
+  @Output() resetEnableShare: any = new EventEmitter()
   constructor(private commonSvc: CommonService,
-              private langtranslations: MultilingualTranslationsService,
-              private translate: TranslateService,
-              private snackBar: MatSnackBar,
-              public configSvc: ConfigurationsService,
-              private events: EventService) {
-                this.shareUrl = window.location.href
+    private langtranslations: MultilingualTranslationsService,
+    private translate: TranslateService,
+    private snackBar: MatSnackBar,
+    public configSvc: ConfigurationsService,
+    private events: EventService) {
+    this.shareUrl = window.location.href
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
         this.translate.setDefaultLang('en')
@@ -133,7 +134,7 @@ export class ShareDiscussionComponent implements OnInit {
         if (el != null) {
           setTimeout(() => {
             el[0].scrollTop = el[0].scrollHeight
-          },         200)
+          }, 200)
         }
       } else {
         this.openSnackbar(this.translateLabels('invalidEmail', 'contentSharing', ''))
@@ -168,7 +169,7 @@ export class ShareDiscussionComponent implements OnInit {
     if (el != null) {
       setTimeout(() => {
         el[0].scrollTop = el[0].scrollHeight
-      },         200)
+      }, 200)
     }
   }
 
@@ -188,12 +189,12 @@ export class ShareDiscussionComponent implements OnInit {
     let primaryCategory = ''
     let courseLink = ''
     if (this.content) {
-        courseProvider = this.content.communityTagId 
-        courseId = this.content.communityId || this.content.communityId,
+      courseProvider = this.content.communityTagId
+      courseId = this.content.communityId || this.content.communityId,
         courseName = this.content.communityName,
         coursePosterImageUrl = this.content.posterImage ||
-         this.content.appIcon ||  'assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg',
-        primaryCategory = this.content.communityAccessLevel ||  '',
+        this.content.appIcon || 'assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg',
+        primaryCategory = this.content.communityAccessLevel || '',
         courseLink = window.location.href || this.contentLink || ''
     }
     const obj = {
@@ -232,7 +233,7 @@ export class ShareDiscussionComponent implements OnInit {
       }, error => {
         // tslint:disable
         console.error(error)
-        this.openSnackbar(this.translateLabels('error','contentSharing',''))
+        this.openSnackbar(this.translateLabels('error', 'contentSharing', ''))
       })
     }
   }
@@ -253,7 +254,7 @@ export class ShareDiscussionComponent implements OnInit {
     textArea.select()
     document.execCommand('copy')
     document.body.removeChild(textArea)
-    this.openSnackbar(this.translateLabels('linkCopied','contentSharing',''))
+    this.openSnackbar(this.translateLabels('linkCopied', 'contentSharing', ''))
     this.raiseTelemetry('copyToClipboard')
   }
 
@@ -281,12 +282,12 @@ export class ShareDiscussionComponent implements OnInit {
   }
 
   resetEnableShareFlag() {
-    this.resetEnableShare.emit(false);
+    this.resetEnableShare.emit(false)
   }
 
 
- 
-  onButtonClick()
-{}}
+
+  onButtonClick() { }
+}
 
 

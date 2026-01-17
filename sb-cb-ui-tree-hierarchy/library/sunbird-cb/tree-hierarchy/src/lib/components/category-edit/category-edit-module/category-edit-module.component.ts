@@ -1,15 +1,16 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
+import { Component, Inject, OnInit } from '@angular/core'
+import { FormBuilder, FormGroup, Validators } from '@angular/forms'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 
 @Component({
-  selector: 'sb-cb-tree-category-edit-module',
-  templateUrl: './category-edit-module.component.html',
-  styleUrls: ['./category-edit-module.component.scss']
+    selector: 'sb-cb-tree-category-edit-module',
+    templateUrl: './category-edit-module.component.html',
+    styleUrls: ['./category-edit-module.component.scss'],
+    standalone: false
 })
 export class CategoryEditModuleComponent implements OnInit {
 
-  categoryForm!: FormGroup;
+  categoryForm!: FormGroup
 
   constructor(
     private fb: FormBuilder,
@@ -21,18 +22,18 @@ export class CategoryEditModuleComponent implements OnInit {
     this.initForm()
   }
 
-  initForm() {    
+  initForm() {
     this.categoryForm = this.fb.group({
       categoryName: [this.data?.columnInfo?.name || '', Validators.required],
       categoryDescription: [this.data?.columnInfo?.description || '', Validators.maxLength(500)]
-    });
+    })
   }
 
   /**
    * Close the dialog without saving changes
    */
   closeDialog() {
-    this.dialogRef.close();
+    this.dialogRef.close()
   }
 
   /**
@@ -46,12 +47,12 @@ export class CategoryEditModuleComponent implements OnInit {
           categotyDescription: this.categoryForm.get('categoryDescription')?.value || ''
         },
         columnData: this.data.columnInfo
-      };
-      
+      }
+
       this.dialogRef.close({
         updated: true,
         column: updatedCategory
-      });
+      })
     }
   }
 

@@ -3,9 +3,10 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { WidgetContentService } from '../../_services/widget-content.service'
 
 @Component({
-  selector: 'ws-widget-user-content-rating',
-  templateUrl: './user-content-rating.component.html',
-  styleUrls: ['./user-content-rating.component.scss'],
+    selector: 'ws-widget-user-content-rating',
+    templateUrl: './user-content-rating.component.html',
+    styleUrls: ['./user-content-rating.component.scss'],
+    standalone: false
 })
 export class UserContentRatingComponent implements OnInit {
   @Input() contentId!: string

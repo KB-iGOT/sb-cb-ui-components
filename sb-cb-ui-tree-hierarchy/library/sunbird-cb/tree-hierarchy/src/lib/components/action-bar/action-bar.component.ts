@@ -2,9 +2,10 @@ import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { labels } from '../../labels/strings';
 
 @Component({
-  selector: 'lib-action-bar',
-  templateUrl: './action-bar.component.html',
-  styleUrls: ['./action-bar.component.scss']
+    selector: 'lib-action-bar',
+    templateUrl: './action-bar.component.html',
+    styleUrls: ['./action-bar.component.scss'],
+    standalone: false
 })
 export class ActionBarComponent implements OnInit {
   @Input() actionType:any;

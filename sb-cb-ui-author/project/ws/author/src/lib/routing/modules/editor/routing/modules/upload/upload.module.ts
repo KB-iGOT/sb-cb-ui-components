@@ -11,10 +11,9 @@ import { SharedModule } from '../../../../../../modules/shared/shared.module'
 import { AuthViewerModule } from '../../../../../../modules/viewer/viewer.module'
 
 @NgModule({
-  declarations: [UploadComponent, FileUploadComponent, ProfanityPopUpComponent],
-  exports: [FileUploadComponent, ProfanityPopUpComponent],
-  imports: [CommonModule, SharedModule, EditorSharedModule, UploadRoutingModule, AuthViewerModule, MatProgressBarModule],
-  entryComponents: [ProfanityPopUpComponent],
-  providers: [ProfanityService],
+    declarations: [UploadComponent, FileUploadComponent, ProfanityPopUpComponent],
+    exports: [FileUploadComponent, ProfanityPopUpComponent],
+    imports: [CommonModule, SharedModule, EditorSharedModule, UploadRoutingModule, AuthViewerModule, MatProgressBarModule],
+    providers: [ProfanityService]
 })
 export class UploadModule { }

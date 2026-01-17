@@ -1,8 +1,9 @@
 import { ErrorParserComponent } from './../error-parser/error-parser.component'
 import { Component, OnInit, Inject } from '@angular/core'
-import { FormGroup, FormBuilder, Validators } from '@angular/forms'
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
-import { MatDialog, MatSnackBar } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { ValueService } from '@ws-widget/utils'
 import { HttpHeaders } from '@angular/common/http'
 import { mergeMap, catchError } from 'rxjs/operators'
@@ -17,12 +18,13 @@ import { AccessControlService } from '../../services/access-control.service'
 import { ApiService } from '../../services/api.service'
 
 @Component({
-  selector: 'ws-auth-draft-dialog',
-  templateUrl: './draft-dialog.component.html',
-  styleUrls: ['./draft-dialog.component.scss'],
+    selector: 'ws-auth-draft-dialog',
+    templateUrl: './draft-dialog.component.html',
+    styleUrls: ['./draft-dialog.component.scss'],
+    standalone: false
 })
 export class DraftDialogComponent implements OnInit {
-  commentsForm!: FormGroup
+  commentsForm!: UntypedFormGroup
   contentMeta!: ISearchContent
   isSubmitPressed = false
   onAction = false
@@ -30,7 +32,7 @@ export class DraftDialogComponent implements OnInit {
   isNew = 'No'
   isMobile = false
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     public dialogRef: MatDialogRef<DraftDialogComponent>,

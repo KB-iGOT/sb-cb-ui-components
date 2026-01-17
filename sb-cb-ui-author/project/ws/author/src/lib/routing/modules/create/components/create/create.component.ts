@@ -14,9 +14,10 @@ import { LoaderService } from '../../../../../services/loader.service'
 import { CreateService } from './create.service'
 
 @Component({
-  selector: 'ws-auth-generic',
-  templateUrl: './create.component.html',
-  styleUrls: ['./create.component.scss'],
+    selector: 'ws-auth-generic',
+    templateUrl: './create.component.html',
+    styleUrls: ['./create.component.scss'],
+    standalone: false
 })
 export class CreateComponent implements OnInit, OnDestroy {
   entity: ICreateEntity[] = []

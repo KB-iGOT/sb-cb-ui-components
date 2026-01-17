@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'numberShortener'
+    name: 'numberShortener',
+    standalone: false
 })
 export class NumberShortenerPipe implements PipeTransform { // This pipe shortens large numbers into a more readable format using suffixes like K, M, B, T.
   private readonly SUFFIXES = ['', 'K', 'M', 'B', 'T'];

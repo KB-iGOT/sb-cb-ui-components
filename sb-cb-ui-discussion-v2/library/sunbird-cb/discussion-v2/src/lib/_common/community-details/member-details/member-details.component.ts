@@ -2,9 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { DiscussionV2Service } from '../../../_services/discussion-v2.service';
 
 @Component({
-  selector: 'd-v2-member-details',
-  templateUrl: './member-details.component.html',
-  styleUrls: ['./member-details.component.scss']
+    selector: 'd-v2-member-details',
+    templateUrl: './member-details.component.html',
+    styleUrls: ['./member-details.component.scss'],
+    standalone: false
 })
 export class MemberDetailsComponent implements OnInit{
   @Input() communityId = '';

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ContentStripInputComponent } from './content-strip-input.component'
 
@@ -6,7 +6,7 @@ describe('ContentStripInputComponent', () => {
   let component: ContentStripInputComponent
   let fixture: ComponentFixture<ContentStripInputComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ContentStripInputComponent],
     })

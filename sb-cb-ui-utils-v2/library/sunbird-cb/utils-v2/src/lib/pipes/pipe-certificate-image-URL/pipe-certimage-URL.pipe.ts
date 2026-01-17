@@ -1,7 +1,8 @@
 import { Inject, Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
-  name: 'pipeCertImageURL',
+    name: 'pipeCertImageURL',
+    standalone: false
 })
 export class PipeCertificateImageURL implements PipeTransform {
   environment: any

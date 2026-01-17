@@ -6,7 +6,7 @@ describe('FrameworkService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: FrameworkService = TestBed.get(FrameworkService);
+    const service: FrameworkService = TestBed.inject(FrameworkService);
     expect(service).toBeTruthy();
   });
 });

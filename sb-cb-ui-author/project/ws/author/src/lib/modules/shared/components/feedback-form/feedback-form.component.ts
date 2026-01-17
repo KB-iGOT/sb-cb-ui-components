@@ -6,7 +6,7 @@ import {
   MatAutocompleteSelectedEvent,
   MatChipInputEvent,
 } from '@angular/material'
-import { FormControl } from '@angular/forms'
+import { UntypedFormControl } from '@angular/forms'
 import {
   NsAutoComplete, UserAutocompleteService,
   EFeedbackType,
@@ -27,19 +27,20 @@ import { NotificationComponent } from '../notification/notification.component'
 const NOTIFICATION_TIME = 5
 
 @Component({
-  selector: 'ws-auth-shared-feedback',
-  templateUrl: './feedback-form.component.html',
-  styleUrls: ['./feedback-form.component.scss'],
+    selector: 'ws-auth-shared-feedback',
+    templateUrl: './feedback-form.component.html',
+    styleUrls: ['./feedback-form.component.scss'],
+    standalone: false
 })
 export class FeedbackFormComponent implements OnInit {
   forSelf = true
   selectedUsersDetails: any[] = []
   employeeList: any[] = []
-  publisherDetailsCtrl!: FormControl
+  publisherDetailsCtrl!: UntypedFormControl
   userMessage = ''
   fetchTagsStatus: 'done' | 'fetching' | null = null
   hasError = false
-  @ViewChild('publisherDetailsView', { static: false }) publisherDetailsView!: ElementRef
+  @ViewChild('publisherDetailsView') publisherDetailsView!: ElementRef
   onAction = false
 
   constructor(
@@ -52,7 +53,7 @@ export class FeedbackFormComponent implements OnInit {
 
   ngOnInit() {
     this.userMessage = `Grant me the ${this.data} role`
-    this.publisherDetailsCtrl = new FormControl()
+    this.publisherDetailsCtrl = new UntypedFormControl()
     this.publisherDetailsCtrl.valueChanges
       .pipe(
         debounceTime(500),

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 import { MatDialog, MatSnackBar } from '@angular/material'
 import { Router } from '@angular/router'
 import { of } from 'rxjs'
@@ -24,12 +24,13 @@ import { LoaderService } from '../../../../../../../../services/loader.service'
 import { AccessControlService } from '../../../../../../../../modules/shared/services/access-control.service'
 
 @Component({
-  selector: 'ws-auth-curate',
-  templateUrl: './curate.component.html',
-  styleUrls: ['./curate.component.scss'],
-  providers: [{
-    provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false },
-  }],
+    selector: 'ws-auth-curate',
+    templateUrl: './curate.component.html',
+    styleUrls: ['./curate.component.scss'],
+    providers: [{
+            provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false },
+        }],
+    standalone: false
 })
 export class CurateComponent implements OnInit, OnDestroy {
   contents: NSContent.IContentMeta[] = []
@@ -43,7 +44,7 @@ export class CurateComponent implements OnInit, OnDestroy {
   isChanged = false
   mimeTypeRoute = ''
 
-  @ViewChild(UrlUploadComponent, { static: false }) urlComponent!: UrlUploadComponent
+  @ViewChild(UrlUploadComponent) urlComponent!: UrlUploadComponent
   constructor(
     private contentService: EditorContentService,
     private snackBar: MatSnackBar,
@@ -247,13 +248,13 @@ export class CurateComponent implements OnInit, OnDestroy {
         data: this.contentService.getOriginalMeta(this.currentContent),
       })
 
-      dialogRef.afterClosed().subscribe((commentsForm: FormGroup) => {
+      dialogRef.afterClosed().subscribe((commentsForm: UntypedFormGroup) => {
         this.finalCall(commentsForm)
       })
     }
   }
 
-  finalCall(commentsForm: FormGroup) {
+  finalCall(commentsForm: UntypedFormGroup) {
     if (commentsForm) {
       const body: NSApiRequest.IForwardBackwardActionGeneral = {
         comment: commentsForm.controls.comments.value,

@@ -4,9 +4,10 @@ import { LibNotificationsService } from '../../_services/lib-notifications.servi
 import * as _ from 'lodash'
 
 @Component({
-  selector: 'sb-uin-view-content',
-  templateUrl: './view-content.component.html',
-  styleUrls: ['./view-content.component.scss']
+    selector: 'sb-uin-view-content',
+    templateUrl: './view-content.component.html',
+    styleUrls: ['./view-content.component.scss'],
+    standalone: false
 })
 export class ViewContentComponent implements OnInit {
   @Input() notification: any

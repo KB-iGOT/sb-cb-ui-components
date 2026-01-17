@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { AuthLanguageSelectBarComponent } from './auth-language-select-bar.component'
 
@@ -6,7 +6,7 @@ describe('AuthLanguageSelectBarComponent', () => {
   let component: AuthLanguageSelectBarComponent
   let fixture: ComponentFixture<AuthLanguageSelectBarComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AuthLanguageSelectBarComponent],
     })

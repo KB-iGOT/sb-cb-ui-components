@@ -1,20 +1,21 @@
 import { Component, OnInit, Inject, ViewChild, ElementRef } from '@angular/core'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { ENTER, COMMA } from '@angular/cdk/keycodes'
-import { FormGroup, FormBuilder } from '@angular/forms'
-import { MatChipInputEvent } from '@angular/material'
+import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms'
+import { MatChipInputEvent } from '@angular/material/chips'
 export interface IDialogData {
   animal: string
   name: string
   data: any
 }
 @Component({
-  selector: 'ws-auth-profanity-popup',
-  templateUrl: './profanity-popup.html',
-  styleUrls: ['./profanity-popup.scss'],
+    selector: 'ws-auth-profanity-popup',
+    templateUrl: './profanity-popup.html',
+    styleUrls: ['./profanity-popup.scss'],
+    standalone: false
 })
 export class ProfanityPopUpComponent implements OnInit {
-  startForm!: FormGroup
+  startForm!: UntypedFormGroup
   separatorKeysCodes: number[] = [ENTER, COMMA]
   postTagsArray: string[] = []
   uploadSaveData = false
@@ -33,7 +34,7 @@ export class ProfanityPopUpComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<ProfanityPopUpComponent>,
     @Inject(MAT_DIALOG_DATA) public data: IDialogData,
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
   ) {
   }
 

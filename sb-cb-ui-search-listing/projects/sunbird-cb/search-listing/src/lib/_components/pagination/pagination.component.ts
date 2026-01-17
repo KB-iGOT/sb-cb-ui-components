@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from "@angular/core";
 import { PageChangeEmitter } from "../../_models/search-listing.model";
 @Component({
-  selector: "ws-app-pagination",
-  templateUrl: "./pagination.component.html",
-  styleUrls: ["./pagination.component.scss"]
+    selector: "ws-app-pagination",
+    templateUrl: "./pagination.component.html",
+    styleUrls: ["./pagination.component.scss"],
+    standalone: false
 })
 export class PaginationComponent implements OnInit, OnChanges {
   private _currentPage: number = 1;

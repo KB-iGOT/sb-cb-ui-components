@@ -32,9 +32,10 @@ import { NOTIFICATION_TIME } from '../../../../../../constants/constant'
 declare const CKEDITOR: any
 
 @Component({
-  selector: 'ws-auth-plain-ckeditor',
-  templateUrl: './plain-ckeditor.component.html',
-  styleUrls: ['./plain-ckeditor.component.scss'],
+    selector: 'ws-auth-plain-ckeditor',
+    templateUrl: './plain-ckeditor.component.html',
+    styleUrls: ['./plain-ckeditor.component.scss'],
+    standalone: false
 })
 export class PlainCKEditorComponent implements AfterViewInit, OnInit, OnDestroy {
   downloadRegex = new RegExp(`(https://.*?/content-store/.*?)(\\\)?\\\\?['"])`, 'gm')
@@ -67,12 +68,12 @@ export class PlainCKEditorComponent implements AfterViewInit, OnInit, OnDestroy 
     | typeof CONTENT_BASE_WEBHOST_ASSETS = CONTENT_BASE_WEBHOST_ASSETS
   @Output() value = new EventEmitter<string>()
   config: any
-  @ViewChild('editor', { static: false }) editor!: any
-  @ViewChild('uploadImage', { static: false }) image!: ElementRef
+  @ViewChild('editor') editor!: any
+  @ViewChild('uploadImage') image!: ElementRef
   imageName = 'Insert Image'
-  @ViewChild('uploadFile', { static: false }) file!: ElementRef
+  @ViewChild('uploadFile') file!: ElementRef
   fileName = 'Upload File'
-  @ViewChild('addBlank', { static: false }) blank!: ElementRef
+  @ViewChild('addBlank') blank!: ElementRef
   blankName = 'Add Blank'
   timer: any
   subscription!: Subscription

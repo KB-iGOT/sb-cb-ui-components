@@ -1,7 +1,7 @@
-// @import 'ws-vars';
-@import '~@ws-widget/design-system/src/styles/_ws-vars.scss';
-@import '~@ws-widget/design-system/src/styles/_ws-mixins.scss';
-@import '~@ws-widget/design-system/src/styles/_ws-common.scss';
+// @use '@ws-widget/design-system/src/styles/_ws-vars.scss';
+@use '@ws-widget/design-system/src/styles/_ws-common.scss';
+@use '@ws-widget/design-system/src/styles/_ws-vars.scss';
+@use '@ws-widget/design-system/src/styles/_ws-mixins.scss' as *;
 // @import 'ws-mixins';
 
 // Colours -----------------------------------------

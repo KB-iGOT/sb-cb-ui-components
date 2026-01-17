@@ -4,7 +4,8 @@ import { NsWidgetResolver } from './sb-ui-resolver.model'
 import { SbUiResolverService } from './sb-ui-resolver.service'
 
 @Directive({
-  selector: '[sbUiResolverWidget]',
+    selector: '[sbUiResolverWidget]',
+    standalone: false
 })
 export class SbUiResolverDirective implements OnChanges {
   @Input() sbUiResolverWidget: NsWidgetResolver.IRenderConfigWithAnyData | null = null

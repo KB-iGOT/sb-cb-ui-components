@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'd-v2-trending-tags',
-  templateUrl: './trending-tags.component.html',
-  styleUrls: ['./trending-tags.component.scss']
+    selector: 'd-v2-trending-tags',
+    templateUrl: './trending-tags.component.html',
+    styleUrls: ['./trending-tags.component.scss'],
+    standalone: false
 })
 export class TrendingTagsComponent {
   @Input() trendingTags: string[] = [];

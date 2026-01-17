@@ -8,9 +8,10 @@ import { FilterComponent } from '../../_common/filter/filter.component';
 import { UtilityService } from '@sunbird-cb/utils-v2';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 @Component({
-  selector: 'd-v2-widget-community-search',
-  templateUrl: './widget-community-search.component.html',
-  styleUrls: ['./widget-community-search.component.scss']
+    selector: 'd-v2-widget-community-search',
+    templateUrl: './widget-community-search.component.html',
+    styleUrls: ['./widget-community-search.component.scss'],
+    standalone: false
 })
 export class WidgetCommunitySearchComponent  implements OnInit{
 

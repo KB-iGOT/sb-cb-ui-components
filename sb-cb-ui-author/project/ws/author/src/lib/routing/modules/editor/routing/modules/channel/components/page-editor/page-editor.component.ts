@@ -4,9 +4,10 @@ import { ChannelStoreService } from './../../services/store.service'
 import { MatDrawer } from '@angular/material'
 
 @Component({
-  selector: 'ws-auth-page-editor',
-  templateUrl: './page-editor.component.html',
-  styleUrls: ['./page-editor.component.scss'],
+    selector: 'ws-auth-page-editor',
+    templateUrl: './page-editor.component.html',
+    styleUrls: ['./page-editor.component.scss'],
+    standalone: false
 })
 export class PageEditorComponent implements OnInit {
   @Input() isSubmitPressed = false
@@ -14,7 +15,7 @@ export class PageEditorComponent implements OnInit {
   @Input() canShowMode = false
   @Input() mode: 'Basic' | 'Advanced' = 'Basic'
   @Output() data = new EventEmitter<string>()
-  @ViewChild(MatDrawer, { static: false }) drawer!: MatDrawer
+  @ViewChild(MatDrawer) drawer!: MatDrawer
 
   constructor(private store: ChannelStoreService, private contentService: EditorContentService) { }
 

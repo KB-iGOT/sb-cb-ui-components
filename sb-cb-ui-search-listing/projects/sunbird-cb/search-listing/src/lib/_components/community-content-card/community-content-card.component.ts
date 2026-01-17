@@ -4,9 +4,10 @@ import { SearchListingConfig } from "../../_models/search-listing.model";
 import { SearchListingService } from "../../_services/search-listing.service";
 
 @Component({
-  selector: "ws-app-community-content-card",
-  templateUrl: "./community-content-card.component.html",
-  styleUrls: ["./community-content-card.component.scss"]
+    selector: "ws-app-community-content-card",
+    templateUrl: "./community-content-card.component.html",
+    styleUrls: ["./community-content-card.component.scss"],
+    standalone: false
 })
 export class CommunityContentCardComponent {
   @Input() community: any;

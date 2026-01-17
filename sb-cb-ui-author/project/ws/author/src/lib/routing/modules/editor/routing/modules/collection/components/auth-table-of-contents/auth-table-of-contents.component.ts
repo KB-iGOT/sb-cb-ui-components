@@ -16,9 +16,10 @@ import { NotificationComponent } from '../../../../../../../../modules/shared/co
 import { AuthInitService } from '../../../../../../../../services/init.service'
 import { LoaderService } from '../../../../../../../../services/loader.service'
 @Component({
-  selector: 'ws-auth-table-of-contents',
-  templateUrl: './auth-table-of-contents.component.html',
-  styleUrls: ['./auth-table-of-contents.component.scss'],
+    selector: 'ws-auth-table-of-contents',
+    templateUrl: './auth-table-of-contents.component.html',
+    styleUrls: ['./auth-table-of-contents.component.scss'],
+    standalone: false
 })
 export class AuthTableOfContentsComponent implements OnInit, OnDestroy {
   @Output() action = new EventEmitter<{ type: string; identifier: string }>()

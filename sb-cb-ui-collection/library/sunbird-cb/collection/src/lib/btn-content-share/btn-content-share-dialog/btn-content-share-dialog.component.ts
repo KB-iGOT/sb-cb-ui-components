@@ -1,7 +1,7 @@
 import { COMMA, ENTER, SEMICOLON } from '@angular/cdk/keycodes'
 import { Component, Inject, OnInit } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { NsAutoComplete } from '../../_common/user-autocomplete/user-autocomplete.model'
 import { WidgetContentShareService } from '../../_services/widget-content-share.service'
@@ -15,9 +15,10 @@ export interface IContentShareData {
 }
 
 @Component({
-  selector: 'ws-widget-btn-content-share-dialog',
-  templateUrl: './btn-content-share-dialog.component.html',
-  styleUrls: ['./btn-content-share-dialog.component.scss'],
+    selector: 'ws-widget-btn-content-share-dialog',
+    templateUrl: './btn-content-share-dialog.component.html',
+    styleUrls: ['./btn-content-share-dialog.component.scss'],
+    standalone: false
 })
 export class BtnContentShareDialogComponent implements OnInit {
   readonly separatorKeysCodes: number[] = [ENTER, COMMA, SEMICOLON]

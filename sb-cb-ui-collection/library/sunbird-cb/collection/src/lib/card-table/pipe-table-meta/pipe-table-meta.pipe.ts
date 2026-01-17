@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
-  name: 'metaPipe',
+    name: 'metaPipe',
+    standalone: false
 })
 export class PipeMetaPipe implements PipeTransform {
   transform(val: any, pipes: any[]) {

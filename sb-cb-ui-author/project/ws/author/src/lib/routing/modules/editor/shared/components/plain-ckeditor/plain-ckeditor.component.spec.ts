@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { PlainCKEditorComponent } from './plain-ckeditor.component'
 
@@ -6,7 +6,7 @@ describe('PlainCKEditorComponent', () => {
   let component: PlainCKEditorComponent
   let fixture: ComponentFixture<PlainCKEditorComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PlainCKEditorComponent],
     })

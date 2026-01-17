@@ -7,9 +7,10 @@ import { NetworkService } from "../../_services/network.service";
 
 const SNACKBAR_DURATION = 3000;
 @Component({
-  selector: "ws-app-people-connection-card",
-  templateUrl: "./people-connection-card.component.html",
-  styleUrls: ["./people-connection-card.component.scss"]
+    selector: "ws-app-people-connection-card",
+    templateUrl: "./people-connection-card.component.html",
+    styleUrls: ["./people-connection-card.component.scss"],
+    standalone: false
 })
 export class PeopleConnectionCardComponent {
   @Input() user!: any;

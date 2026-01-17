@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'd-v2-sort-by',
-  templateUrl: './sort-by.component.html',
-  styleUrls: ['./sort-by.component.scss']
+    selector: 'd-v2-sort-by',
+    templateUrl: './sort-by.component.html',
+    styleUrls: ['./sort-by.component.scss'],
+    standalone: false
 })
 export class SortByComponent {
   @Input() sortData: any

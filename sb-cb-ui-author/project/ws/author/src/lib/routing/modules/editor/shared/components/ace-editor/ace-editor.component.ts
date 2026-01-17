@@ -6,9 +6,10 @@ import 'brace/snippets/json'
 import 'brace/theme/textmate'
 
 @Component({
-  selector: 'ws-auth-ace-editor',
-  templateUrl: './ace-editor.component.html',
-  styleUrls: ['./ace-editor.component.scss'],
+    selector: 'ws-auth-ace-editor',
+    templateUrl: './ace-editor.component.html',
+    styleUrls: ['./ace-editor.component.scss'],
+    standalone: false
 })
 export class AceEditorComponent implements OnInit {
 
@@ -29,7 +30,7 @@ export class AceEditorComponent implements OnInit {
     showGutter: true,
     showLineNumbers: false,
   }
-  @ViewChild('editor', { static: false }) editor!: any
+  @ViewChild('editor') editor!: any
 
   constructor() { }
 

@@ -3,9 +3,10 @@ import { labels } from '../../labels/strings'
 declare var LeaderLine: any;
 
 @Component({
-  selector: 'lib-categories-preview',
-  templateUrl: './categories-preview.component.html',
-  styleUrls: ['./categories-preview.component.scss']
+    selector: 'lib-categories-preview',
+    templateUrl: './categories-preview.component.html',
+    styleUrls: ['./categories-preview.component.scss'],
+    standalone: false
 })
 export class CategoriesPreviewComponent implements OnChanges, OnInit { 
 

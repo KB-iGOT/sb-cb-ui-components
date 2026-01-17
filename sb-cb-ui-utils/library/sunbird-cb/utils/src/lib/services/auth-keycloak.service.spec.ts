@@ -6,7 +6,7 @@ describe('AuthKeycloakService', () => {
   beforeEach(() => TestBed.configureTestingModule({}))
 
   it('should be created', () => {
-    const service: AuthKeycloakService = TestBed.get(AuthKeycloakService)
+    const service: AuthKeycloakService = TestBed.inject(AuthKeycloakService)
     expect(service).toBeTruthy()
   })
 })

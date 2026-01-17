@@ -1,6 +1,7 @@
 import { Inject, Pipe, PipeTransform } from '@angular/core'
 @Pipe({
-  name: 'PipeNicRelative',
+    name: 'PipeNicRelative',
+    standalone: false
 })
 export class PipeNicRelativePipe implements PipeTransform {
   environment: any

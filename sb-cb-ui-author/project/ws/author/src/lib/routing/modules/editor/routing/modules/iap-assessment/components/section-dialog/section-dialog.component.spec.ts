@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { SectionDialogComponent } from './section-dialog.component'
 
 describe('SectionDialogComponent', () => {
   let component: SectionDialogComponent
   let fixture: ComponentFixture<SectionDialogComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [SectionDialogComponent],
     }).compileComponents()

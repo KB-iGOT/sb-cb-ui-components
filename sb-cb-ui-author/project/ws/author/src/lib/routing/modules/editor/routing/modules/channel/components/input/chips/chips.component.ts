@@ -13,16 +13,17 @@ import {
 } from '@angular/core'
 import { MatChipInputEvent } from '@angular/material/chips'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
-import { MatSnackBar } from '@angular/material'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { NOTIFICATION_TIME } from '../../../../../../../../../constants/constant'
 import { Notify } from '../../../../../../../../../constants/notificationMessage'
 import { NotificationComponent } from '../../../../../../../../../modules/shared/components/notification/notification.component'
 import { ISortEvent } from '../../../../../../../../../modules/shared/directives/draggable/sortable-list.directive'
 
 @Component({
-  selector: 'ws-auth-chips',
-  templateUrl: './chips.component.html',
-  styleUrls: ['./chips.component.scss'],
+    selector: 'ws-auth-chips',
+    templateUrl: './chips.component.html',
+    styleUrls: ['./chips.component.scss'],
+    standalone: false
 })
 export class ChipsComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('copyText', { static: true }) copyText!: ElementRef<any>

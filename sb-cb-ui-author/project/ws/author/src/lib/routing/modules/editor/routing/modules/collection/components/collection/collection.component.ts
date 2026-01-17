@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 import { MatDialog, MatSnackBar } from '@angular/material'
 import { ActivatedRoute, Router } from '@angular/router'
 import { of, Subscription } from 'rxjs'
@@ -38,10 +38,11 @@ import { AccessControlService } from '../../../../../../../../modules/shared/ser
  */
 
 @Component({
-  selector: 'ws-auth-collection',
-  templateUrl: './collection.component.html',
-  styleUrls: ['./collection.component.scss'],
-  providers: [CollectionStoreService, CollectionResolverService],
+    selector: 'ws-auth-collection',
+    templateUrl: './collection.component.html',
+    styleUrls: ['./collection.component.scss'],
+    providers: [CollectionStoreService, CollectionResolverService],
+    standalone: false
 })
 export class CollectionComponent implements OnInit, OnDestroy {
   contents: NSContent.IContentMeta[] = []
@@ -278,13 +279,13 @@ export class CollectionComponent implements OnInit, OnDestroy {
         data: this.contentService.getOriginalMeta(this.currentParentId),
       })
 
-      dialogRef.afterClosed().subscribe((commentsForm: FormGroup) => {
+      dialogRef.afterClosed().subscribe((commentsForm: UntypedFormGroup) => {
         this.finalCall(commentsForm)
       })
     }
   }
 
-  finalCall(commentsForm: FormGroup) {
+  finalCall(commentsForm: UntypedFormGroup) {
     if (commentsForm) {
       const body: NSApiRequest.IForwardBackwardActionGeneral = {
         comment: commentsForm.controls.comments.value,

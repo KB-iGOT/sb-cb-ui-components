@@ -3,9 +3,10 @@ import { MatDialogRef } from '@angular/material/dialog'
 import { MAT_DIALOG_DATA } from '@angular/material/dialog'
 
 @Component({
-  selector: 'd-v2-community-guide-lines',
-  templateUrl: './community-guide-lines.component.html',
-  styleUrls: ['./community-guide-lines.component.scss']
+    selector: 'd-v2-community-guide-lines',
+    templateUrl: './community-guide-lines.component.html',
+    styleUrls: ['./community-guide-lines.component.scss'],
+    standalone: false
 })
 export class CommunityGuideLinesComponent {
   selectedFlags: any = []

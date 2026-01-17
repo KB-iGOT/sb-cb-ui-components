@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
-import { MatSnackBar } from '@angular/material'
+import { MatSnackBar } from '@angular/material/snack-bar'
 // import { AuthInitService } from '../../../../../../../../services/init.service'
 import { IAudioObj } from '../../interface/page-interface'
 import { UploadService } from '../../../../../shared/services/upload.service'
@@ -17,9 +17,10 @@ export interface IUsersData {
   languages: any[]
 }
 @Component({
-  selector: 'ws-auth-upload-audio',
-  templateUrl: './upload-audio.component.html',
-  styleUrls: ['./upload-audio.component.scss'],
+    selector: 'ws-auth-upload-audio',
+    templateUrl: './upload-audio.component.html',
+    styleUrls: ['./upload-audio.component.scss'],
+    standalone: false
 })
 
 export class UploadAudioComponent implements OnInit {

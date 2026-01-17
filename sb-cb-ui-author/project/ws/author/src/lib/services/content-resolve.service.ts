@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Resolve, ActivatedRouteSnapshot, Router } from '@angular/router'
+import { ActivatedRouteSnapshot, Router } from '@angular/router'
 import { Observable, of } from 'rxjs'
 import { ApiService } from '../modules/shared/services/api.service'
 import { NSContent } from '../interface/content'
@@ -8,7 +8,7 @@ import { catchError } from 'rxjs/operators'
 import { AccessControlService } from '../modules/shared/services/access-control.service'
 
 @Injectable()
-export class ContentTOCResolver implements Resolve<NSContent.IContentMeta> {
+export class ContentTOCResolver  {
 
   constructor(
     private apiService: ApiService,

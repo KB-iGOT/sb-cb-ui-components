@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { IapAssessmentComponent } from './iap-assessment.component'
 
 describe('IapAssessmentComponent', () => {
   let component: IapAssessmentComponent
   let fixture: ComponentFixture<IapAssessmentComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [IapAssessmentComponent],
     }).compileComponents()

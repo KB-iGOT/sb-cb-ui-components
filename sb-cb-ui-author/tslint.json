@@ -18,6 +18,9 @@
       "ws",
       "camelCase"
     ],
+    "deprecation": {
+      "severity": "warning"
+    },
     "semicolon": [
       true,
       "never"

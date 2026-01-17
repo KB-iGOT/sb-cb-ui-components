@@ -22,7 +22,8 @@ import { NsContent } from '../../../../services/widget-content.model'
     // tslint:disable-next-line
     encapsulation: ViewEncapsulation.None,
     // tslint:disable-next-line
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class MultipleChoiseQuesComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy, AfterContentChecked {
     @Input() question: NSPractice.IQuestion = {

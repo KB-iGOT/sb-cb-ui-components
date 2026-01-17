@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 import { MatDialog, MatSnackBar } from '@angular/material'
 import { Router } from '@angular/router'
 import { of } from 'rxjs'
@@ -23,12 +23,13 @@ import { LoaderService } from '../../../../../../../../services/loader.service'
 import { AccessControlService } from '../../../../../../../../modules/shared/services/access-control.service'
 
 @Component({
-  selector: 'ws-auth-upload',
-  templateUrl: './upload.component.html',
-  styleUrls: ['./upload.component.scss'],
-  providers: [{
-    provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false },
-  }],
+    selector: 'ws-auth-upload',
+    templateUrl: './upload.component.html',
+    styleUrls: ['./upload.component.scss'],
+    providers: [{
+            provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false },
+        }],
+    standalone: false
 })
 export class UploadComponent implements OnInit, OnDestroy {
   contents: NSContent.IContentMeta[] = []
@@ -262,13 +263,13 @@ export class UploadComponent implements OnInit, OnDestroy {
         data: this.contentService.getOriginalMeta(this.currentContent),
       })
 
-      dialogRef.afterClosed().subscribe((commentsForm: FormGroup) => {
+      dialogRef.afterClosed().subscribe((commentsForm: UntypedFormGroup) => {
         this.finalCall(commentsForm)
       })
     }
   }
 
-  finalCall(commentsForm: FormGroup) {
+  finalCall(commentsForm: UntypedFormGroup) {
     if (commentsForm) {
       const body: NSApiRequest.IForwardBackwardActionGeneral = {
         comment: commentsForm.controls.comments.value,

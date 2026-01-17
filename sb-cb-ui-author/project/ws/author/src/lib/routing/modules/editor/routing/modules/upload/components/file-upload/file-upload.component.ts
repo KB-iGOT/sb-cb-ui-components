@@ -8,8 +8,8 @@ import {
   ViewChild,
   TemplateRef,
 } from '@angular/core'
-import { FormBuilder, FormGroup } from '@angular/forms'
-import { MatSnackBar } from '@angular/material'
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { MatDialog } from '@angular/material/dialog'
 
 import { of } from 'rxjs'
@@ -32,16 +32,17 @@ import { AccessControlService } from '../../../../../../../../modules/shared/ser
 // import { ProfanityService } from '../../services/profanity.service'
 
 @Component({
-  selector: 'ws-auth-file-upload',
-  templateUrl: './file-upload.component.html',
-  styleUrls: ['./file-upload.component.scss'],
+    selector: 'ws-auth-file-upload',
+    templateUrl: './file-upload.component.html',
+    styleUrls: ['./file-upload.component.scss'],
+    standalone: false
 })
 export class FileUploadComponent implements OnInit {
-  @ViewChild('guideline', { static: false }) guideline!: TemplateRef<HTMLElement>
-  @ViewChild('errorFile', { static: false }) errorFile!: TemplateRef<HTMLElement>
-  @ViewChild('selectFile', { static: false }) selectFile!: TemplateRef<HTMLElement>
+  @ViewChild('guideline') guideline!: TemplateRef<HTMLElement>
+  @ViewChild('errorFile') errorFile!: TemplateRef<HTMLElement>
+  @ViewChild('selectFile') selectFile!: TemplateRef<HTMLElement>
 
-  fileUploadForm!: FormGroup
+  fileUploadForm!: UntypedFormGroup
   iprAccepted = false
   file!: File | null
   mimeType = ''
@@ -68,7 +69,7 @@ export class FileUploadComponent implements OnInit {
   @Output() data = new EventEmitter<any>()
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private contentService: EditorContentService,

@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'd-v2-no-data',
-  templateUrl: './no-data.component.html',
-  styleUrls: ['./no-data.component.scss']
+    selector: 'd-v2-no-data',
+    templateUrl: './no-data.component.html',
+    styleUrls: ['./no-data.component.scss'],
+    standalone: false
 })
 export class NoDataComponent {
   @Input() iconName: any = 'forum'

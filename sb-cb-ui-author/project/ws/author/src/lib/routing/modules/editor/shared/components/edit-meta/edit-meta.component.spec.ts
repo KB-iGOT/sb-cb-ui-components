@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { EditMetaComponent } from './edit-meta.component'
 
@@ -6,7 +6,7 @@ describe('EditMetaComponent', () => {
   let component: EditMetaComponent
   let fixture: ComponentFixture<EditMetaComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [EditMetaComponent],
     })

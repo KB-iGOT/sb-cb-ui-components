@@ -1,6 +1,6 @@
 import { ZipJSResolverService } from './zip-js-resolve.service'
 import { Injectable } from '@angular/core'
-import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router'
+import { ActivatedRouteSnapshot, Router } from '@angular/router'
 import { ConfigurationsService } from '@ws-widget/utils'
 import { forkJoin, Observable, of } from 'rxjs'
 import { catchError, tap } from 'rxjs/operators'
@@ -16,7 +16,7 @@ import { AuthInitService } from './init.service'
 import { ICreateEntity } from '../interface/create-entity'
 
 @Injectable()
-export class InitResolver implements Resolve<NSContent.IContentMeta> {
+export class InitResolver  {
   constructor(
     private apiService: ApiService,
     private router: Router,

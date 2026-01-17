@@ -24,6 +24,7 @@ import { NsContent } from '../../../../services/widget-content.model'
     // tslint:disable-next-line
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SingleChoiseQuesComponent implements OnInit, OnDestroy, AfterContentChecked {
     @Input() question: NSPractice.IQuestion = {

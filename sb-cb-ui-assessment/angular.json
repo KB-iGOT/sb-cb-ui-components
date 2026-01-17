@@ -10,23 +10,33 @@
       "prefix": "",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "tsConfig": "library/sunbird-cb/assessment/tsconfig.lib.json",
             "project": "library/sunbird-cb/assessment/ng-package.json"
-          }
-        ,          "configurations": {
+          },
+          "configurations": {
             "production": {
               "tsConfig": "library/sunbird-cb/assessment/tsconfig.lib.prod.json"
             }
           }
-},
+        },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "main": "library/sunbird-cb/assessment/src/test.ts",
             "tsConfig": "library/sunbird-cb/assessment/tsconfig.spec.json",
             "karmaConfig": "library/sunbird-cb/assessment/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "library/sunbird-cb/assessment/**/*.ts",
+              "library/sunbird-cb/assessment/**/*.html"
+            ],
+            "eslintConfig": "library/sunbird-cb/assessment/eslint.config.js"
           }
         }
       }
@@ -34,10 +44,35 @@
   },
   "schematics": {
     "@schematics/angular:component": {
-      "style": "scss"
+      "style": "scss",
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": [
+      "angular-eslint"
+    ]
   }
 }

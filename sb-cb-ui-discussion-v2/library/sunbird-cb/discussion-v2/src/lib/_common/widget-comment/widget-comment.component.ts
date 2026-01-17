@@ -2,15 +2,16 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { CommentsService } from '../../_services/comments.service'
 import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 // tslint:disable-next-line
 import _ from 'lodash'
 
 @Component({
-  selector: 'd-v2-widget-comment',
-  templateUrl: './widget-comment.component.html',
-  styleUrls: ['./widget-comment.component.scss'],
+    selector: 'd-v2-widget-comment',
+    templateUrl: './widget-comment.component.html',
+    styleUrls: ['./widget-comment.component.scss'],
+    standalone: false
 })
 export class WidgetCommentComponent implements OnInit, OnDestroy {
   commentData!: any

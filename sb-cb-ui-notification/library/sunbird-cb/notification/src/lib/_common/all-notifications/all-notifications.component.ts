@@ -6,9 +6,10 @@ import { debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
-  selector: 'sb-uin-all-notifications',
-  templateUrl: './all-notifications.component.html',
-  styleUrls: ['./all-notifications.component.scss']
+    selector: 'sb-uin-all-notifications',
+    templateUrl: './all-notifications.component.html',
+    styleUrls: ['./all-notifications.component.scss'],
+    standalone: false
 })
 export class AllNotificationsComponent implements OnInit {
 

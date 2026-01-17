@@ -1,5 +1,5 @@
 import { Component, Input, Self, Optional, ElementRef, SimpleChanges, OnChanges, DoCheck, OnDestroy } from '@angular/core'
-import { NgControl, NgForm, FormGroupDirective, FormControl } from '@angular/forms'
+import { NgControl, NgForm, FormGroupDirective, UntypedFormControl } from '@angular/forms'
 import { ErrorStateMatcher, CanUpdateErrorState } from '@angular/material/core'
 import { MatFormFieldControl } from '@angular/material/form-field'
 import { Subject } from 'rxjs'
@@ -9,14 +9,15 @@ const nextUniqueId = 0
 // on hold
 
 @Component({
-  selector: 'ws-auth-root-live-html-editor',
-  template: '',
-  providers: [
-    {
-      provide: MatFormFieldControl,
-      useExisting: LiveHtmlEditorComponent,
-    },
-  ],
+    selector: 'ws-auth-root-live-html-editor',
+    template: '',
+    providers: [
+        {
+            provide: MatFormFieldControl,
+            useExisting: LiveHtmlEditorComponent,
+        },
+    ],
+    standalone: false
 })
 
 export class LiveHtmlEditorComponent extends QuillComponent implements
@@ -140,7 +141,7 @@ export class LiveHtmlEditorComponent extends QuillComponent implements
     const oldState = this.errorState
     const parent = this._parentFormGroup || this._parentForm
     const matcher = this.errorStateMatcher || this._defaultErrorStateMatcher
-    const control = this.ngControl ? <FormControl>this.ngControl.control : null
+    const control = this.ngControl ? <UntypedFormControl>this.ngControl.control : null
     const newState = matcher.isErrorState(control, parent)
 
     if (newState !== oldState) {

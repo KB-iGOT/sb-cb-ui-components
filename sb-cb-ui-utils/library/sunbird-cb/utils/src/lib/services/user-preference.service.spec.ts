@@ -6,7 +6,7 @@ describe('UserPreferenceService', () => {
   beforeEach(() => TestBed.configureTestingModule({}))
 
   it('should be created', () => {
-    const service: UserPreferenceService = TestBed.get(UserPreferenceService)
+    const service: UserPreferenceService = TestBed.inject(UserPreferenceService)
     expect(service).toBeTruthy()
   })
 })

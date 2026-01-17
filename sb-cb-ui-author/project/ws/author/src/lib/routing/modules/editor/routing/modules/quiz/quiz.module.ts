@@ -17,29 +17,26 @@ import { EditorSharedModule } from '../../../shared/shared.module'
 import { AuthViewerModule } from '../../../../../../modules/viewer/viewer.module'
 
 @NgModule({
-  declarations: [
-    QuizComponent,
-    QuizQusetionsComponent,
-    QuestionEditorComponent,
-    MatchTheFollowingComponent,
-    MultipleChoiceQuestionComponent,
-    FillUpsEditorComponent,
-    QuestionEditorSidenavComponent,
-    OpenPlainCkEditorComponent,
-    RomanConvertPipe,
-
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    EditorSharedModule,
-    DragDropModule,
-    QuizRoutingModule,
-    AuthViewerModule,
-
-  ],
-  providers: [QuizStoreService],
-  entryComponents: [OpenPlainCkEditorComponent],
-  exports: [QuizComponent, QuizQusetionsComponent],
+    declarations: [
+        QuizComponent,
+        QuizQusetionsComponent,
+        QuestionEditorComponent,
+        MatchTheFollowingComponent,
+        MultipleChoiceQuestionComponent,
+        FillUpsEditorComponent,
+        QuestionEditorSidenavComponent,
+        OpenPlainCkEditorComponent,
+        RomanConvertPipe,
+    ],
+    imports: [
+        CommonModule,
+        SharedModule,
+        EditorSharedModule,
+        DragDropModule,
+        QuizRoutingModule,
+        AuthViewerModule,
+    ],
+    providers: [QuizStoreService],
+    exports: [QuizComponent, QuizQusetionsComponent]
 })
 export class QuizModule { }

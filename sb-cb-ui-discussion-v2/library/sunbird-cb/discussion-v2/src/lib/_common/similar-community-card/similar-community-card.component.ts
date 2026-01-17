@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { UserEnrollCommunityService } from '../../_services/user-enroll-community.service';
 
 @Component({
-  selector: 'd-v2-similar-community-card',
-  templateUrl: './similar-community-card.component.html',
-  styleUrls: ['./similar-community-card.component.scss']
+    selector: 'd-v2-similar-community-card',
+    templateUrl: './similar-community-card.component.html',
+    styleUrls: ['./similar-community-card.component.scss'],
+    standalone: false
 })
 export class SimilarCommunityCardComponent implements OnInit {
   hideCardBody:boolean | undefined

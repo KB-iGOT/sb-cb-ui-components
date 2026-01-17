@@ -18,10 +18,11 @@ import * as _ from 'lodash';
 const MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const NEW_CONTENT_THRESHOLD_DAYS = 14;
 @Component({
-  selector: 'ws-app-search-event-card',
-  templateUrl: './search-event-card.component.html',
-  styleUrls: ['./search-event-card.component.scss'],
-  providers: [DatePipe],
+    selector: 'ws-app-search-event-card',
+    templateUrl: './search-event-card.component.html',
+    styleUrls: ['./search-event-card.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class SearchEventCardComponent implements OnInit, OnChanges {
   @Input() content: any;

@@ -3,16 +3,17 @@ import { UserAutocompleteService } from './user-autocomplete.service'
 import { ENTER, COMMA } from '@angular/cdk/keycodes'
 import { UntypedFormControl } from '@angular/forms'
 import { TFetchStatus, ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/legacy-autocomplete'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators'
 import { NsAutoComplete } from './user-autocomplete.model'
 import { of } from 'rxjs'
 
 @Component({
-  selector: 'ws-widget-user-autocomplete',
-  templateUrl: './user-autocomplete.component.html',
-  styleUrls: ['./user-autocomplete.component.scss'],
+    selector: 'ws-widget-user-autocomplete',
+    templateUrl: './user-autocomplete.component.html',
+    styleUrls: ['./user-autocomplete.component.scss'],
+    standalone: false
 })
 export class UserAutocompleteComponent implements OnInit {
 
@@ -56,8 +57,8 @@ export class UserAutocompleteComponent implements OnInit {
             }
             if (this.autocompleteByDepartment) {
               // if (this.configSvc.userProfile) {
-                // const deptName = this.configSvc.userProfile.departmentName || 'ias'
-                return this.userAutocompleteSvc.fetchAutoCompleteByDept(value, this.departments).pipe(catchError(_ => of([])))
+              // const deptName = this.configSvc.userProfile.departmentName || 'ias'
+              return this.userAutocompleteSvc.fetchAutoCompleteByDept(value, this.departments).pipe(catchError(_ => of([])))
               // }
             }
           }

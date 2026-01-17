@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { AuthTableTreeLabelComponent } from './auth-table-tree-label.component'
 
 describe('AuthTableTreeLabelComponent', () => {
   let component: AuthTableTreeLabelComponent
   let fixture: ComponentFixture<AuthTableTreeLabelComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AuthTableTreeLabelComponent],
     }).compileComponents()
