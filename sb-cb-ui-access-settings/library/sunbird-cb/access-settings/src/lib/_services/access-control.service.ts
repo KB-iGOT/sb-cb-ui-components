@@ -76,9 +76,9 @@ export class AccessControlService {
           status: 1,
           isMdo: true,
         },
-        sort_by: {
-          channel: "asc",
-        },
+        // sort_by: {
+        //   channel: "asc", 
+        // },
         fields: ["channel", "identifier", "iscca"],
         query: query,
         limit: pagination.limit,
@@ -116,7 +116,7 @@ export class AccessControlService {
       requestedFields: ["designation", "id"],
       pageSize: pagination.pageSize || this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       pageNumber: pagination.pageNumber || 0,
-      orderDirection: "ASC",
+      // orderDirection: "ASC",
       orderBy: "designation",
     };
     if (selectedData?.length) {
