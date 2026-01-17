@@ -1,38 +1,39 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NsCardUser } from '../../../_models/card-users.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
-import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2';
-import * as _ from "lodash";
-import { TranslateService } from '@ngx-translate/core';
-import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { NsCardUser } from '../../../_models/card-users.model'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2'
+import * as _ from "lodash"
+import { TranslateService } from '@ngx-translate/core'
+import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
 
 @Component({
-  selector: 'sb-uic-card-user',
-  templateUrl: './card-user.component.html',
-  styleUrls: ['./card-user.component.scss']
+    selector: 'sb-uic-card-user',
+    templateUrl: './card-user.component.html',
+    styleUrls: ['./card-user.component.scss'],
+    standalone: false
 })
 export class CardUserComponent implements OnInit {
-  @Input() widgetData!: NsCardUser.ICard;
+  @Input() widgetData!: NsCardUser.ICard
   @Output() userData = new EventEmitter<any>()
   defaultThumbnail: any
   sourceLogos: any
   defaultSLogo: any
   widgetType: any = 'df'
-  widgetSubType: any ='sdf'
+  widgetSubType: any = 'sdf'
   constructor(
     private snackBar: MatSnackBar,
     private events: EventService,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    private configSvc: ConfigurationsService,) { 
-      this.langtranslations.languageSelectedObservable.subscribe(() => {
-        if (localStorage.getItem('websiteLanguage')) {
-          this.translate.setDefaultLang('en')
-          const lang = localStorage.getItem('websiteLanguage')!
-          this.translate.use(lang)
-        }
-      })
-    }
+    private configSvc: ConfigurationsService,) {
+    this.langtranslations.languageSelectedObservable.subscribe(() => {
+      if (localStorage.getItem('websiteLanguage')) {
+        this.translate.setDefaultLang('en')
+        const lang = localStorage.getItem('websiteLanguage')!
+        this.translate.use(lang)
+      }
+    })
+  }
 
   ngOnInit() {
     const instanceConfig = this.configSvc.instanceConfig
@@ -43,7 +44,7 @@ export class CardUserComponent implements OnInit {
     }
   }
 
-  getRedirectUrlData(userData: any){
+  getRedirectUrlData(userData: any) {
     this.userData.emit(userData)
   }
   raiseTelemetry() {

@@ -2,9 +2,10 @@ import { Component, Input, OnInit } from '@angular/core'
 import { InsiteDataService } from '../../_services/insite-data.service'
 
 @Component({
-  selector: 'sb-uic-data-points',
-  templateUrl: './data-points.component.html',
-  styleUrls: ['./data-points.component.css']
+    selector: 'sb-uic-data-points',
+    templateUrl: './data-points.component.html',
+    styleUrls: ['./data-points.component.css'],
+    standalone: false
 })
 export class DataPointsComponent implements OnInit {
   @Input() objectData: any

@@ -1,9 +1,10 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core'
 
 @Component({
-  selector: 'sb-uic-match-the-following',
-  templateUrl: './match-the-following.component.html',
-  styleUrls: ['./match-the-following.component.scss']
+    selector: 'sb-uic-match-the-following',
+    templateUrl: './match-the-following.component.html',
+    styleUrls: ['./match-the-following.component.scss'],
+    standalone: false
 })
 export class MatchTheFollowingComponent implements OnInit, OnChanges {
   @Input() options: any[] = []

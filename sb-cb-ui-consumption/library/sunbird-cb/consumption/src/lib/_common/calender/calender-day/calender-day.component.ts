@@ -2,9 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'sb-uic-calender-day',
-  templateUrl: './calender-day.component.html',
-  styleUrls: ['./calender-day.component.scss']
+    selector: 'sb-uic-calender-day',
+    templateUrl: './calender-day.component.html',
+    styleUrls: ['./calender-day.component.scss'],
+    standalone: false
 })
 export class CalenderDayComponent implements OnInit {
 

@@ -3,15 +3,16 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { AssessmentService } from '../../service/assessment.service'
 import { Subscription } from 'rxjs'
 import { NsAssessment } from '../../service/assessment.model'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { MatDialog } from '@angular/material/dialog'
 import { SelectQuestionModalComponent } from '../select-question-modal/select-question-modal.component'
 import { BulkUploadAllTypeQuestionComponent } from '../bulk-upload-all-type-question/bulk-upload-all-type-question.component'
 
 @Component({
-  selector: 'sb-uic-assessment-sessions',
-  templateUrl: './assessment-sessions.component.html',
-  styleUrls: ['./assessment-sessions.component.scss']
+    selector: 'sb-uic-assessment-sessions',
+    templateUrl: './assessment-sessions.component.html',
+    styleUrls: ['./assessment-sessions.component.scss'],
+    standalone: false
 })
 export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges {
   @Output() saved = new EventEmitter<any>()

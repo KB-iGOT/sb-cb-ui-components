@@ -4,9 +4,10 @@ import { EventService, WsEvents } from '@sunbird-cb/utils-v2';
 
 
 @Component({
-  selector: 'ws-app-community-suggestions',
-  templateUrl: './community-suggestions.component.html',
-  styleUrls: ['./community-suggestions.component.scss']
+    selector: 'ws-app-community-suggestions',
+    templateUrl: './community-suggestions.component.html',
+    styleUrls: ['./community-suggestions.component.scss'],
+    standalone: false
 })
 export class CommunitySuggestionsComponent {
   //#region (global variables)

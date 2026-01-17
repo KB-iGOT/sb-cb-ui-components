@@ -8,9 +8,10 @@ import {
 import { InsiteDataService } from '../../_services/insite-data.service';
 
 @Component({
-  selector: 'sb-uic-calender',
-  templateUrl: './calender.component.html',
-  styleUrls: ['./calender.component.scss']
+    selector: 'sb-uic-calender',
+    templateUrl: './calender.component.html',
+    styleUrls: ['./calender.component.scss'],
+    standalone: false
 })
 export class CalenderComponent implements OnInit {
 

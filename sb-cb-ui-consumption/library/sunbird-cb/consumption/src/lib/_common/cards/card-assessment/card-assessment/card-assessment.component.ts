@@ -4,9 +4,10 @@ import { ConfigurationsService, NsContent } from '@sunbird-cb/utils-v2';
 import { WidgetContentLibService } from '../../../../_services/widget-content-lib.service';
 
 @Component({
-  selector: 'sb-uic-card-assessment',
-  templateUrl: './card-assessment.component.html',
-  styleUrls: ['./card-assessment.component.scss']
+    selector: 'sb-uic-card-assessment',
+    templateUrl: './card-assessment.component.html',
+    styleUrls: ['./card-assessment.component.scss'],
+    standalone: false
 })
 
 // @Directive({

@@ -5,9 +5,10 @@ import { ConfigurationsService, EventService, MultilingualTranslationsService, N
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'sb-uic-card-karma-programs-v2',
-  templateUrl: './card-karma-programs-v2.component.html',
-  styleUrls: ['./card-karma-programs-v2.component.scss']
+    selector: 'sb-uic-card-karma-programs-v2',
+    templateUrl: './card-karma-programs-v2.component.html',
+    styleUrls: ['./card-karma-programs-v2.component.scss'],
+    standalone: false
 })
 export class CardKarmaProgramsV2Component implements OnInit {
 

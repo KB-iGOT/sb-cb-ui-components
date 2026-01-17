@@ -5,9 +5,10 @@ import { Subscription, interval } from 'rxjs'
 import { EventService, WsEvents, ValueService } from '@sunbird-cb/utils-v2'
 
 @Component({
-  selector: 'sb-uic-sliders',
-  templateUrl: './sliders.component.html',
-  styleUrls: ['./sliders.component.scss'],
+    selector: 'sb-uic-sliders',
+    templateUrl: './sliders.component.html',
+    styleUrls: ['./sliders.component.scss'],
+    standalone: false
 })
 export class SlidersLibComponent extends WidgetBaseComponent
   implements OnInit, OnDestroy, NsWidgetResolver.IWidgetData<ICarousel[]> {

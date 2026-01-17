@@ -1,9 +1,10 @@
 import { Component, Inject, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-competency',
-  templateUrl: './competency.component.html',
-  styleUrls: ['./competency.component.scss']
+    selector: 'app-competency',
+    templateUrl: './competency.component.html',
+    styleUrls: ['./competency.component.scss'],
+    standalone: false
 })
 export class CompetencyComponent {
   @Input() competency: any;

@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 import { ConfirmationDialogComponent } from '../../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 
 @Component({
-  selector: 'app-action-items',
-  templateUrl: './action-items.component.html',
-  styleUrls: ['./action-items.component.scss']
+    selector: 'app-action-items',
+    templateUrl: './action-items.component.html',
+    styleUrls: ['./action-items.component.scss'],
+    standalone: false
 })
 export class ActionItemsComponent implements OnInit {
   @Input() isEdit: boolean = false;

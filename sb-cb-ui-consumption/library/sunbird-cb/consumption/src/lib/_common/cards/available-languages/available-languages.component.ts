@@ -1,18 +1,19 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { NsCardContent } from '../../../_models/card-content.model';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
-import { TOCMultiLingualDialogComponent } from '../../toc-multi-lingual-dialog/toc-multi-lingual-dialog.component';
-import { ContentLanguageService } from '../../../_services/content-language.service';
+import { Component, Input, OnInit } from '@angular/core'
+import { NsCardContent } from '../../../_models/card-content.model'
+import { MatDialog } from '@angular/material/dialog'
+import { TOCMultiLingualDialogComponent } from '../../toc-multi-lingual-dialog/toc-multi-lingual-dialog.component'
+import { ContentLanguageService } from '../../../_services/content-language.service'
 
 @Component({
-  selector: 'sb-uic-available-languages',
-  templateUrl: './available-languages.component.html',
-  styleUrls: ['./available-languages.component.scss']
+    selector: 'sb-uic-available-languages',
+    templateUrl: './available-languages.component.html',
+    styleUrls: ['./available-languages.component.scss'],
+    standalone: false
 })
 export class AvailableLanguagesComponent implements OnInit {
-  @Input() content!: NsCardContent.ICard;
+  @Input() content!: NsCardContent.ICard
 
-  languageList:any[] = [];
+  languageList: any[] = [];
 
   constructor(
     private dialog: MatDialog,
@@ -37,7 +38,7 @@ export class AvailableLanguagesComponent implements OnInit {
         languageList: this.languageList
 
       } // optional, if you need to pass data
-    });
+    })
   }
 
 }

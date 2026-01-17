@@ -1,9 +1,10 @@
 import { Component, Inject } from '@angular/core';
 
 @Component({
-  selector: 'app-support-section',
-  templateUrl: './support-section.component.html',
-  styleUrls: ['./support-section.component.scss']
+    selector: 'app-support-section',
+    templateUrl: './support-section.component.html',
+    styleUrls: ['./support-section.component.scss'],
+    standalone: false
 })
 export class SupportSectionComponent {
   constructor(

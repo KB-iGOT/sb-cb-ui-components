@@ -9,9 +9,10 @@ import { WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service'
 
 @Component({
-  selector: 'ws-widget-event-card-v2',
-  templateUrl: './event-card-v2.component.html',
-  styleUrls: ['./event-card-v2.component.scss'],
+    selector: 'ws-widget-event-card-v2',
+    templateUrl: './event-card-v2.component.html',
+    styleUrls: ['./event-card-v2.component.scss'],
+    standalone: false
 })
 export class EventCardV2Component extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<NsCardContent.ICard> {

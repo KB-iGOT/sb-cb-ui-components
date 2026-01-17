@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'sb-uic-video-conference',
-  templateUrl: './video-conference.component.html',
-  styleUrls: ['./video-conference.component.scss']
+    selector: 'sb-uic-video-conference',
+    templateUrl: './video-conference.component.html',
+    styleUrls: ['./video-conference.component.scss'],
+    standalone: false
 })
 export class VideoConferenceComponent {
   @Input() videoConf: any;

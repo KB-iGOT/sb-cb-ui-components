@@ -4,9 +4,10 @@ declare var CKEDITOR: any
 import * as _ from 'lodash'
 
 @Component({
-  selector: 'sb-uic-assessment-rich-text',
-  templateUrl: './assessment-rich-text.component.html',
-  styleUrls: ['./assessment-rich-text.component.scss']
+    selector: 'sb-uic-assessment-rich-text',
+    templateUrl: './assessment-rich-text.component.html',
+    styleUrls: ['./assessment-rich-text.component.scss'],
+    standalone: false
 })
 export class AssessmentRichTextComponent {
 

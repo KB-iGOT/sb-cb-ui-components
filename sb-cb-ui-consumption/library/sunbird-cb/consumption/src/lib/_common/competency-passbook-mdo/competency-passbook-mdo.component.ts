@@ -5,9 +5,10 @@ import { CompetencyPassbookMdoService } from './competency-passbook-mdo.service'
 import { Router } from '@angular/router';
 import { NsCompentency } from '../../_models/compentencies.model';
 @Component({
-  selector: 'sb-uic-competency-passbook-mdo',
-  templateUrl: './competency-passbook-mdo.component.html',
-  styleUrls: ['./competency-passbook-mdo.component.scss']
+    selector: 'sb-uic-competency-passbook-mdo',
+    templateUrl: './competency-passbook-mdo.component.html',
+    styleUrls: ['./competency-passbook-mdo.component.scss'],
+    standalone: false
 })
 export class CompetencyPassbookMdoComponent implements OnInit {
 

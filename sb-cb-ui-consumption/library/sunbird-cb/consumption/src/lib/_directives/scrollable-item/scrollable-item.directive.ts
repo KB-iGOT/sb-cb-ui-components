@@ -1,7 +1,8 @@
 import { Directive, Input, ElementRef } from '@angular/core';
 
 @Directive({
-  selector: '[sbUicScrollableItem]'
+    selector: '[sbUicScrollableItem]',
+    standalone: false
 })
 export class ScrollableItemDirective {
 

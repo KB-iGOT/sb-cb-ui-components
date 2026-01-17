@@ -7,9 +7,10 @@ import { Router } from '@angular/router'
 import { VIEWER_ROUTE_FROM_MIME } from '../../_services/viewer-route-util'
 
 @Component({
-  selector: 'sb-uic-cards',
-  templateUrl: './cards.component.html',
-  styleUrls: ['./cards.component.scss']
+    selector: 'sb-uic-cards',
+    templateUrl: './cards.component.html',
+    styleUrls: ['./cards.component.scss'],
+    standalone: false
 })
 export class CardsComponent extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<NsCardContent.ICard> {

@@ -1,9 +1,10 @@
 import { Component, Inject, Input } from '@angular/core'
 
 @Component({
-  selector: 'app-top-learners',
-  templateUrl: './top-learners.component.html',
-  styleUrls: ['./top-learners.component.scss']
+    selector: 'app-top-learners',
+    templateUrl: './top-learners.component.html',
+    styleUrls: ['./top-learners.component.scss'],
+    standalone: false
 })
 export class TopLearnersComponent {
   objectData: any

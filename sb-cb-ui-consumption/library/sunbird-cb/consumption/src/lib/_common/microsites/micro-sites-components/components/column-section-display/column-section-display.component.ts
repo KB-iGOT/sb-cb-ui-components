@@ -1,9 +1,10 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-column-section-display',
-  templateUrl: './column-section-display.component.html',
-  styleUrls: ['./column-section-display.component.scss']
+    selector: 'app-column-section-display',
+    templateUrl: './column-section-display.component.html',
+    styleUrls: ['./column-section-display.component.scss'],
+    standalone: false
 })
 export class ColumnSectionDisplayComponent implements OnInit {
   @Input() data: any[] = [];

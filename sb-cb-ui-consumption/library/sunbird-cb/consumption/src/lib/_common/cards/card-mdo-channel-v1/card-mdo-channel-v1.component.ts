@@ -7,9 +7,10 @@ import { Router } from '@angular/router';
 
 
 @Component({
-  selector: 'sb-uic-card-mdo-channel-v1',
-  templateUrl: './card-mdo-channel-v1.component.html',
-  styleUrls: ['./card-mdo-channel-v1.component.scss']
+    selector: 'sb-uic-card-mdo-channel-v1',
+    templateUrl: './card-mdo-channel-v1.component.html',
+    styleUrls: ['./card-mdo-channel-v1.component.scss'],
+    standalone: false
 })
 export class CardMdoChannelV1Component implements OnInit {
   @Input() widgetData!: NsContent.IContent;

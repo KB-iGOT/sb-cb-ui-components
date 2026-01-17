@@ -2,12 +2,13 @@ import { Component, Input, OnInit } from '@angular/core'
 import { FormGroup } from '@angular/forms'
 
 @Component({
-  selector: 'sb-uic-create-request-content-details',
-  templateUrl: './create-request-content-details.component.html',
-  styleUrls: [
-    './create-request-content-details.component.scss',
-    '../../../../styles/round-controls.scss'
-  ]
+    selector: 'sb-uic-create-request-content-details',
+    templateUrl: './create-request-content-details.component.html',
+    styleUrls: [
+        './create-request-content-details.component.scss',
+        '../../../../styles/round-controls.scss'
+    ],
+    standalone: false
 })
 export class CreateRequestContentDetailsComponent implements OnInit {
   @Input() contentDetailsForm!: FormGroup

@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
-import { MatLegacyCheckboxChange as MatCheckboxChange } from '@angular/material/legacy-checkbox'
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { MatCheckboxChange } from '@angular/material/checkbox'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import * as XLSX from 'xlsx'
 import { v4 as uuidv4 } from 'uuid'
 import { AssessmentService } from '../../service/assessment.service'
@@ -33,9 +33,10 @@ interface ColumnValidation {
 }
 
 @Component({
-  selector: 'sb-uic-bulk-upload-all-type-question',
-  templateUrl: './bulk-upload-all-type-question.component.html',
-  styleUrls: ['./bulk-upload-all-type-question.component.scss']
+    selector: 'sb-uic-bulk-upload-all-type-question',
+    templateUrl: './bulk-upload-all-type-question.component.html',
+    styleUrls: ['./bulk-upload-all-type-question.component.scss'],
+    standalone: false
 })
 export class BulkUploadAllTypeQuestionComponent implements OnInit {
   maxFileSize: number = 400 * 1024 * 1024 // 400 MB

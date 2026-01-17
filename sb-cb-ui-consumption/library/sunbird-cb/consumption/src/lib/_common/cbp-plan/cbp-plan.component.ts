@@ -5,9 +5,10 @@ import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service'
 
 @Component({
-  selector: 'sb-uic-cbp-plan',
-  templateUrl: './cbp-plan.component.html',
-  styleUrls: ['./cbp-plan.component.scss']
+    selector: 'sb-uic-cbp-plan',
+    templateUrl: './cbp-plan.component.html',
+    styleUrls: ['./cbp-plan.component.scss'],
+    standalone: false
 })
 export class CbpPlanComponent implements OnInit, OnChanges {
 

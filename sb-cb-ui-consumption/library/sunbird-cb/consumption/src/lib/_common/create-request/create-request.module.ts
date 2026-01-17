@@ -4,53 +4,47 @@ import { CreateRequestFormComponent } from './components/create-request-form/cre
 import { CreateRequestContentDetailsComponent } from './components/create-request-content-details/create-request-content-details.component'
 import { CreateRequestAdditionalDetailsComponent } from './components/create-request-additional-details/create-request-additional-details.component'
 import { AddAuthorsComponent } from './dialogs/add-authors/add-authors.component'
-import { HttpClientModule } from '@angular/common/http'
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { ReactiveFormsModule, FormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
-import { MatLegacyButtonModule } from '@angular/material/legacy-button'
-import { MatLegacyCardModule } from '@angular/material/legacy-card'
-import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox'
-import { MatLegacyChipsModule } from '@angular/material/legacy-chips'
-import { MatLegacyOptionModule } from '@angular/material/legacy-core'
-import { MatLegacyDialogModule } from '@angular/material/legacy-dialog'
-import { MatLegacyFormFieldModule } from '@angular/material/legacy-form-field'
-import { MatLegacyInputModule } from '@angular/material/legacy-input'
-import { MatLegacyRadioModule } from '@angular/material/legacy-radio'
-import { MatLegacySelectModule } from '@angular/material/legacy-select'
-import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatButtonModule } from '@angular/material/button'
+import { MatCardModule } from '@angular/material/card'
+import { MatCheckboxModule } from '@angular/material/checkbox'
+import { MatChipsModule } from '@angular/material/chips'
+import { MatOptionModule } from '@angular/material/core'
+import { MatDialogModule } from '@angular/material/dialog'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { MatRadioModule } from '@angular/material/radio'
+import { MatSelectModule } from '@angular/material/select'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/horizontal-dynamic-stepper.module'
 
 
 
-@NgModule({
-  declarations: [
-    CreateRequestFormComponent,
-    CreateRequestContentDetailsComponent,
-    CreateRequestAdditionalDetailsComponent,
-    AddAuthorsComponent
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatLegacyFormFieldModule,
-    MatIconModule,
-    MatLegacyChipsModule,
-    MatLegacyOptionModule,
-    MatLegacySelectModule,
-    MatLegacyInputModule,
-    MatLegacyButtonModule,
-    MatLegacyCheckboxModule,
-    MatLegacyDialogModule,
-    MatLegacyCardModule,
-    MatLegacyRadioModule,
-    MatLegacyTooltipModule,
-    HttpClientModule,
-    HorizontalDynamicStepperModule,
-  ],
-  exports: [
-    CreateRequestFormComponent,
-    AddAuthorsComponent
-  ]
-})
+@NgModule({ declarations: [
+        CreateRequestFormComponent,
+        CreateRequestContentDetailsComponent,
+        CreateRequestAdditionalDetailsComponent,
+        AddAuthorsComponent
+    ],
+    exports: [
+        CreateRequestFormComponent,
+        AddAuthorsComponent
+    ], imports: [CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatChipsModule,
+        MatOptionModule,
+        MatSelectModule,
+        MatInputModule,
+        MatButtonModule,
+        MatCheckboxModule,
+        MatDialogModule,
+        MatCardModule,
+        MatRadioModule,
+        MatTooltipModule,
+        HorizontalDynamicStepperModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class CreateRequestModule { }

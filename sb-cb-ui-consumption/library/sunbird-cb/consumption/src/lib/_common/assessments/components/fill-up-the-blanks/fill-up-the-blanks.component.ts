@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 interface BlankOption {
   id: number
@@ -8,9 +8,10 @@ interface BlankOption {
 }
 
 @Component({
-  selector: 'sb-uic-fill-up-the-blanks',
-  templateUrl: './fill-up-the-blanks.component.html',
-  styleUrls: ['./fill-up-the-blanks.component.scss']
+    selector: 'sb-uic-fill-up-the-blanks',
+    templateUrl: './fill-up-the-blanks.component.html',
+    styleUrls: ['./fill-up-the-blanks.component.scss'],
+    standalone: false
 })
 export class FillUpTheBlanksComponent implements OnInit, OnChanges {
   @Input() options: BlankOption[] = []

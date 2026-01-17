@@ -3,9 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { NsUser } from '@sunbird-cb/utils-v2';
 
 @Component({
-  selector: 'sb-uic-connection-name',
-  templateUrl: './connection-name.component.html',
-  styleUrls: ['./connection-name.component.scss']
+    selector: 'sb-uic-connection-name',
+    templateUrl: './connection-name.component.html',
+    styleUrls: ['./connection-name.component.scss'],
+    standalone: false
 })
 export class ConnectionNameComponent implements OnInit, OnChanges {
   @Input() hoverUser!: any

@@ -2,9 +2,10 @@ import { Component, Input, OnInit, QueryList, ViewChildren, Output, EventEmitter
 import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrollable-item.directive'
 
 @Component({
-  selector: 'sb-uic-highlights-of-week',
-  templateUrl: './highlights-of-week.component.html',
-  styleUrls: ['./highlights-of-week.component.scss']
+    selector: 'sb-uic-highlights-of-week',
+    templateUrl: './highlights-of-week.component.html',
+    styleUrls: ['./highlights-of-week.component.scss'],
+    standalone: false
 })
 export class HighlightsOfWeekComponent implements OnInit, OnChanges {
 

@@ -7,9 +7,10 @@ import { Router } from '@angular/router';
 import { NsCompentency } from '../../_models/compentencies.model'
 
 @Component({
-  selector: 'sb-uic-competency-passbook',
-  templateUrl: './competency-passbook.component.html',
-  styleUrls: ['./competency-passbook.component.scss']
+    selector: 'sb-uic-competency-passbook',
+    templateUrl: './competency-passbook.component.html',
+    styleUrls: ['./competency-passbook.component.scss'],
+    standalone: false
 })
 export class CompetencyPassbookComponent implements OnInit {
 

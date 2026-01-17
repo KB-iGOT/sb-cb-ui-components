@@ -4,9 +4,10 @@ import moment from 'moment'
 
 
 @Component({
-  selector: 'sb-uic-events',
-  templateUrl: './events.component.html',
-  styleUrls: ['./events.component.scss']
+    selector: 'sb-uic-events',
+    templateUrl: './events.component.html',
+    styleUrls: ['./events.component.scss'],
+    standalone: false
 })
 export class EventsComponent implements OnInit {
 

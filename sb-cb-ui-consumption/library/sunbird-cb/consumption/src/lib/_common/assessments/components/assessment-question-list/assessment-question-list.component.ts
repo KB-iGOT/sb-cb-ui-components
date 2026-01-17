@@ -3,13 +3,14 @@ import { MultipleChoiceQuestionComponent } from '../multiple-choice-question/mul
 import { MatchTheFollowingComponent } from '../match-the-following/match-the-following.component'
 import { FillUpTheBlanksComponent } from '../fill-up-the-blanks/fill-up-the-blanks.component'
 import { AssessmentService } from '../../service/assessment.service'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 
 @Component({
-  selector: 'sb-uic-assessment-question-list',
-  templateUrl: './assessment-question-list.component.html',
-  styleUrls: ['./assessment-question-list.component.scss']
+    selector: 'sb-uic-assessment-question-list',
+    templateUrl: './assessment-question-list.component.html',
+    styleUrls: ['./assessment-question-list.component.scss'],
+    standalone: false
 })
 export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   @Input() questionData: any = { qType: '', identifier: '' }

@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren
 import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrollable-item.directive'
 
 @Component({
-  selector: 'sb-uic-key-highlights',
-  templateUrl: './key-highlights.component.html',
-  styleUrls: ['./key-highlights.component.scss']
+    selector: 'sb-uic-key-highlights',
+    templateUrl: './key-highlights.component.html',
+    styleUrls: ['./key-highlights.component.scss'],
+    standalone: false
 })
 export class KeyHighlightsComponent implements OnInit {
   currentIndex: any = 0

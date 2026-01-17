@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 
 export interface QuestionTypeData {
   title?: string
@@ -8,9 +8,10 @@ export interface QuestionTypeData {
 }
 
 @Component({
-  selector: 'sb-uic-select-question-modal',
-  templateUrl: './select-question-modal.component.html',
-  styleUrls: ['./select-question-modal.component.scss']
+    selector: 'sb-uic-select-question-modal',
+    templateUrl: './select-question-modal.component.html',
+    styleUrls: ['./select-question-modal.component.scss'],
+    standalone: false
 })
 export class SelectQuestionModalComponent {
 

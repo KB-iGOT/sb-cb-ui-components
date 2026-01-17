@@ -1,5 +1,5 @@
 import { Component, HostListener, Input, OnInit } from '@angular/core'
-import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs'
+import { MatTabChangeEvent } from '@angular/material/tabs'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
 /* tslint:disable */
@@ -11,7 +11,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'
 @Component({
     selector: 'sb-uic-mdo-channel-v2',
     templateUrl: './mdo-channel-v2.component.html',
-    styleUrls: ['./mdo-channel-v2.component.scss']
+    styleUrls: ['./mdo-channel-v2.component.scss'],
+    standalone: false
 })
 export class MdoChannelV2Component implements OnInit {
     @Input() sectionList: any = []

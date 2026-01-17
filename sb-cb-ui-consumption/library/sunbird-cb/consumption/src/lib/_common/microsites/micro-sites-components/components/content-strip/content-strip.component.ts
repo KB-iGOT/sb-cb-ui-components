@@ -1,9 +1,10 @@
 import { Component, Inject, Input, Output, EventEmitter } from '@angular/core'
 
 @Component({
-  selector: 'app-content-strip',
-  templateUrl: './content-strip.component.html',
-  styleUrls: ['./content-strip.component.scss']
+    selector: 'app-content-strip',
+    templateUrl: './content-strip.component.html',
+    styleUrls: ['./content-strip.component.scss'],
+    standalone: false
 })
 export class ContentStripComponent {
   @Input() data: any

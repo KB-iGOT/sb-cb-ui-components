@@ -10,9 +10,10 @@ export interface ICompentencyKeys {
 }
 
 @Component({
-  selector: 'sb-uic-competency-summary',
-  templateUrl: './competency-summary.component.html',
-  styleUrls: ['./competency-summary.component.scss']
+    selector: 'sb-uic-competency-summary',
+    templateUrl: './competency-summary.component.html',
+    styleUrls: ['./competency-summary.component.scss'],
+    standalone: false
 })
 export class CompetencySummaryComponent implements OnInit, OnChanges {
   @Input() contentData: any

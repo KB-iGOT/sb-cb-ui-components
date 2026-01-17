@@ -17,9 +17,10 @@ interface SLWConfiguration {
 }
 
 @Component({
-  selector: 'app-slw-config-dialog',
-  templateUrl: './slw-config-dialog.component.html',
-  styleUrls: ['./slw-config-dialog.component.scss']
+    selector: 'app-slw-config-dialog',
+    templateUrl: './slw-config-dialog.component.html',
+    styleUrls: ['./slw-config-dialog.component.scss'],
+    standalone: false
 })
 export class SlwConfigDialogComponent implements OnInit {
   slwForm: FormGroup;

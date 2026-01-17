@@ -26,10 +26,11 @@ import { MicrositeV3Service } from '../../../../_services/microsite-v3.service'
 import { map, switchMap } from 'rxjs/operators'
 
 @Component({
-  selector: 'sb-uic-mdo-channel-v3',
-  templateUrl: './mdo-channel-v3.component.html',
-  styleUrls: ['./mdo-channel-v3.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'sb-uic-mdo-channel-v3',
+    templateUrl: './mdo-channel-v3.component.html',
+    styleUrls: ['./mdo-channel-v3.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class MdoChannelV3Component implements OnInit, OnChanges {
   @Input() sectionList: any[] = [];

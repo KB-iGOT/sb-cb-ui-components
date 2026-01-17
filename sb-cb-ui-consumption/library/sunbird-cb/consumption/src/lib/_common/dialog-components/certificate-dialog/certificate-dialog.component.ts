@@ -1,16 +1,16 @@
 import { Component, Inject, OnInit } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { TranslateService } from '@ngx-translate/core'
 import { EventService, MultilingualTranslationsService, WsEvents } from '@sunbird-cb/utils-v2'
 import { jsPDF } from 'jspdf'
 
 @Component({
-  selector: 'sb-uic-certificate-dialog',
-  templateUrl: './certificate-dialog.component.html',
-  styleUrls: ['./certificate-dialog.component.scss'],
-  /* tslint:disable */
-  host: { class: 'certificate-inner-dialog-panel' },
-  /* tslint:enable */
+    selector: 'sb-uic-certificate-dialog',
+    templateUrl: './certificate-dialog.component.html',
+    styleUrls: ['./certificate-dialog.component.scss'],
+    /* tslint:disable */
+    host: { class: 'certificate-inner-dialog-panel' },
+    standalone: false
 })
 export class CertificateDialogComponent implements OnInit {
   url!: string

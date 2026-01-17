@@ -2,9 +2,10 @@ import { Component, OnInit, Inject } from '@angular/core'
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser'
 
 @Component({
-  selector: 'app-top-section',
-  templateUrl: './top-section.component.html',
-  styleUrls: ['./top-section.component.scss']
+    selector: 'app-top-section',
+    templateUrl: './top-section.component.html',
+    styleUrls: ['./top-section.component.scss'],
+    standalone: false
 })
 export class TopSectionComponent implements OnInit {
   descriptionMaxLength = 500;
