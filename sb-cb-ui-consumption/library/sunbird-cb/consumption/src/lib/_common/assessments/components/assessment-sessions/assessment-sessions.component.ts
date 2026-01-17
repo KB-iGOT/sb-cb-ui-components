@@ -252,6 +252,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         this.loadQuestionsForSection(0)
       }
     }
+
+    // Disable form if read-only mode
+    if (this.isReadOnly) {
+      this.basicAssessmentForm.disable()
+    }
   }
 
   populateOptionWeightageForm(): void {
@@ -265,6 +270,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
       // Load questions for option weightage section
       this.loadQuestionsForSection(0)
+    }
+
+    // Disable form if read-only mode
+    if (this.isReadOnly) {
+      this.optionWeightageForm.disable()
     }
   }
 
@@ -290,6 +300,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
       // Load questions for the initially selected section
       this.loadQuestionsForSection(this.selectedSectionIndex)
+    }
+
+    // Disable form if read-only mode
+    if (this.isReadOnly) {
+      this.sessionsForm.disable()
     }
   }
 
@@ -673,6 +688,20 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         const questions = result.questions
         const isOldTemplate = result.isOldTemplate || false
 
+        // Process FTB questions to update body and editorState.question
+        if (questions && questions.length > 0) {
+          questions.forEach((question: any) => {
+            if (question.qType === 'FTB') {
+              // Update body and editorState.question using getFtbQuestion
+              const formattedQuestion = this.getFtbQuestion(question.body)
+              question.body = formattedQuestion
+              question.name = formattedQuestion
+              if (question.editorState) {
+                question.editorState.question = formattedQuestion
+              }
+            }
+          })
+        }
         // For basic assessment with sections OR advanced assessment, use selected section
         // For basic assessment without sections (single section), always use index 0
         const sectionIndex = this.isBasicAssessmentWithSections() || !this.isBasicAssessment() ? this.selectedSectionIndex : 0
@@ -689,5 +718,14 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         }
       }
     })
+  }
+
+  getFtbQuestion(q: string) {
+    const tempData = q.split('<blank>').join('<input style=\"border-style:none none solid none\" />')
+    return `<p>${tempData}</p>`
+  }
+
+  get isReadOnly(): boolean {
+    return this.assessmentService.getReadOnly()
   }
 }

@@ -31,6 +31,7 @@ export class AssessmentMainComponent implements OnInit {
     if (this.config && this.config.identifier === '' && this.config?.primaryCategory === '') {
       this.config.primaryCategory = 'Course Assessment'
     }
+    this.assessmentService.setReadOnly(this.config?.isReadOnly)
     if (this.config && this.config.identifier !== '') {
       this.callLoader(true)
       this.assessmentService.getAssessmentHierarchyDetailsModeEdit(this.config.identifier).subscribe({

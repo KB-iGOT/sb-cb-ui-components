@@ -16,6 +16,7 @@ interface BlankOption {
 export class FillUpTheBlanksComponent implements OnInit, OnChanges {
   @Input() options: BlankOption[] = []
   @Input() ftbCount: number = 0
+  @Input() isReadOnly: boolean = false
   @Output() optionsUpdated = new EventEmitter<BlankOption[]>()
 
   blankList: any[] = []

@@ -399,6 +399,7 @@ export namespace NsContent {
     MODERATED_COURSE = 'Moderated Course',
     STANDALONE_ASSESSMENT = 'Standalone Assessment',
     MODERATED_ASSESSEMENT = 'Moderated Assessment',
+    LEARNING_PATHWAY = 'Learning Pathway',
     CASE_STUDY = 'Case Study',
   }
 

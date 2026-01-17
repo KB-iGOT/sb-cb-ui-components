@@ -453,10 +453,19 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         }
       }
 
-      // Check if at least one correct answer is selected
-      const hasCorrectAnswer = this.questionOptions.some(opt => opt.isCorrect)
-      if (!hasCorrectAnswer) {
-        return false
+      // Check if correct answers are selected based on question type
+      if (this.questionData.qType === 'MCQ-MCA') {
+        // For MCQ-MCA, require at least 2 correct answers
+        const correctAnswersCount = this.questionOptions.filter(opt => opt.isCorrect).length
+        if (correctAnswersCount < 2) {
+          return false
+        }
+      } else {
+        // For MCQ-SCA and MCQ-SCA-TF, require at least 1 correct answer
+        const hasCorrectAnswer = this.questionOptions.some(opt => opt.isCorrect)
+        if (!hasCorrectAnswer) {
+          return false
+        }
       }
     }
 
@@ -641,5 +650,9 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
       default:
         return 'Multiple Choice Question'
     }
+  }
+
+  get isReadOnly(): boolean {
+    return this.assessemntService.getReadOnly()
   }
 }

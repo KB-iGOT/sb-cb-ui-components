@@ -193,7 +193,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   }
 
   get hasMultipleSections(): boolean {
-    return (this.assessmentForm.get('noOfSection')?.value || 1) > 1
+    const rawValue = this.assessmentForm.getRawValue()
+    return (rawValue.noOfSection || 1) > 1
   }
 
   getSectionDifficultyLevels(sectionIndex: number): FormArray {
@@ -256,9 +257,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       name: data.name || '',
       description: data.description || '',
       showTimer: data.showTimer !== undefined ? data.showTimer : true,
-      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts || null,
+      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null ? data.maxAssessmentRetakeAttempts : null,
       scoreCutoffType: data.scoreCutoffType || 'AssessmentLevel',
-      coolOffPeriod: data.coolOffPeriod || null
+      coolOffPeriod: data.coolOffPeriod !== undefined && data.coolOffPeriod !== null ? data.coolOffPeriod : null
     }, { emitEvent: false })
 
     // Duration - convert from seconds to hours, minutes, seconds
@@ -351,6 +352,11 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
         levelControl.get('marksPerQuestion')?.disable()
       })
     })
+
+    // If read-only mode, disable the entire form (after populating values)
+    if (this.isReadOnly) {
+      this.assessmentForm.disable()
+    }
   }
 
   updateValidators(): void {
@@ -433,7 +439,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       negativeMarkingPercentage?.setValidators([Validators.required])
 
       // Sectional validators only when more than 1 section
-      const totalSections = this.assessmentForm.get('noOfSection')?.value || 1
+      const rawValue = this.assessmentForm.getRawValue()
+      const totalSections = rawValue.noOfSection || 1
       if (totalSections > 1) {
         sectionalPassPercentage?.setValidators([Validators.required])
         sectionTimeBound?.setValidators([Validators.required])
@@ -526,6 +533,10 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       return false
     }
     return true
+  }
+
+  get isReadOnly(): boolean {
+    return this.assessmentService.getReadOnly()
   }
 
   onDurationBlur(): void {
