@@ -13,9 +13,10 @@ import { MatCheckboxChange } from "@angular/material/checkbox";
 import { CadreMappingService } from "../../../_services/cadre-mapping.service";
 
 @Component({
-  selector: "sb-uic-entity-selections",
-  templateUrl: "./entity-selections.component.html",
-  styleUrls: ["./entity-selections.component.scss"],
+    selector: "sb-uic-entity-selections",
+    templateUrl: "./entity-selections.component.html",
+    styleUrls: ["./entity-selections.component.scss"],
+    standalone: false
 })
 export class EntitySelectionsComponent implements OnInit, OnDestroy {
   @ViewChild("tabGroup", { read: ElementRef }) tabGroupRef!: ElementRef;

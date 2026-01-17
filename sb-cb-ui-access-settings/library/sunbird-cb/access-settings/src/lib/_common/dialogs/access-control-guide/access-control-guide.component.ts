@@ -4,9 +4,10 @@ import { AccessControlService } from "../../../_services/access-control.service"
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 
 @Component({
-  selector: "sb-uic-access-control-guide",
-  templateUrl: "./access-control-guide.component.html",
-  styleUrls: ["./access-control-guide.component.scss"]
+    selector: "sb-uic-access-control-guide",
+    templateUrl: "./access-control-guide.component.html",
+    styleUrls: ["./access-control-guide.component.scss"],
+    standalone: false
 })
 export class AccessControlGuideComponent implements OnInit {
   accessControlGuideConfig: NsAccessControlConfig.IAccessControlGuide;

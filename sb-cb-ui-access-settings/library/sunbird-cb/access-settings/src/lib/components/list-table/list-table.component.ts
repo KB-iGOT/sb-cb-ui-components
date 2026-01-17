@@ -7,9 +7,10 @@ import { LiveAnnouncer } from "@angular/cdk/a11y";
 import * as _ from "lodash";
 
 @Component({
-  selector: "sb-uic-list-table",
-  templateUrl: "./list-table.component.html",
-  styleUrls: ["./list-table.component.scss"]
+    selector: "sb-uic-list-table",
+    templateUrl: "./list-table.component.html",
+    styleUrls: ["./list-table.component.scss"],
+    standalone: false
 })
 export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() data: any[] = [];
