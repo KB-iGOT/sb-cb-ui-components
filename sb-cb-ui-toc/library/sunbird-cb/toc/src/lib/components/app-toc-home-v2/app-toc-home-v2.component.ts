@@ -103,6 +103,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   cbPlanDuration: any
   enrolledCourseData: any
   @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/')
+  @Input() inputContent: any
   // forPreview = window.location.href.includes('/author/')
   analytics = this.route.snapshot.data?.pageData?.data?.analytics
   errorWidgetData: NsWidgetResolver.IRenderConfigWithTypedData<any> = {
@@ -2032,6 +2033,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.routeSubscription = this.route.data.subscribe(async (data: Data) => {
         if (data?.content?.data?.identifier) {
           queryParamstemp = await this.processRouteData(data)
+        } else {
+          const tempData = {
+            content: {
+              data: this.inputContent
+            }
+          }
+          queryParamstemp = await this.processRouteData(tempData)
         }
       })
     }
@@ -2195,10 +2203,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private loadBannerAndTocConfig(data: Data) {
-    this.banners = data.pageData.data.banners
-    this.tocSvc.subtitleOnBanners = data.pageData.data.subtitleOnBanners || false
-    this.tocSvc.showDescription = data.pageData.data.showDescription || false
-    this.tocConfig = data.pageData.data
+    this.banners = data?.pageData?.data?.banners || []
+    this.tocSvc.subtitleOnBanners = data?.pageData?.data?.subtitleOnBanners || false
+    this.tocSvc.showDescription = data?.pageData?.data?.showDescription || false
+    this.tocConfig = data?.pageData?.data || {}
     this.kparray = this.tocConfig.karmaPoints
   }
 
