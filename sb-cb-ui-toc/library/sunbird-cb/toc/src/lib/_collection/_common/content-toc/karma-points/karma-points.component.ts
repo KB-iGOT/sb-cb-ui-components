@@ -50,21 +50,21 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
       if (!this.condition.isPostAssessment && (this.condition.content && this.condition.content.hasOwnProperty('completionPercentage')
         && !this.condition.content.completionPercentage
         || (this.condition.content && this.condition.content.completionPercentage < 100))
-         && !this.condition.certData) {
-           if (this.condition.isAcbpClaim) {
-             this.getKPData('ACBP')
-           }
+        && !this.condition.certData) {
+        if (this.condition.isAcbpClaim) {
+          this.getKPData('ACBP')
+        }
 
-           if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
-             if (!this.condition.isAcbpClaim && !this.condition.monthlyCapExceed) {
-               this.getKPData('Resume')
-             }
-           }
-       }
+        if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
+          if (!this.condition.isAcbpClaim && !this.condition.monthlyCapExceed) {
+            this.getKPData('Resume')
+          }
+        }
+      }
 
-       if (this.condition && !this.condition.isPostAssessment
+      if (this.condition && !this.condition.isPostAssessment
         && ((this.condition.content && this.condition.content.completionPercentage === 100)
-        || this.condition.certData)) {
+          || this.condition.certData)) {
         if (this.condition.isAcbpCourse && this.condition.isAcbpClaim && !this.condition.isClaimed) {
           this.getKPData('ACBP CLAIM')
           this.btnCategory = 'claim'
@@ -102,51 +102,51 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
 
       if (this.condition && !this.condition.isPostAssessment
         && (this.condition.content && this.condition.content.hasOwnProperty('completionPercentage')
-      && !this.condition.content.completionPercentage
-      || (this.condition.content && this.condition.content.completionPercentage < 100))) {
+          && !this.condition.content.completionPercentage
+          || (this.condition.content && this.condition.content.completionPercentage < 100))) {
 
-          if (this.condition.isAcbpClaim) {
-            this.getKPData('ACBP')
-          }
-
-          if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
-            if (!this.condition.isAcbpClaim && !this.condition.monthlyCapExceed) {
-              this.getKPData('Resume')
-            }
-          }
+        if (this.condition.isAcbpClaim) {
+          this.getKPData('ACBP')
         }
 
-        if (this.condition && !this.condition.isPostAssessment
-          && (this.condition.content && this.condition.content.completionPercentage === 100)) {
-          if (this.condition.isAcbpCourse && this.condition.isAcbpClaim && !this.condition.isClaimed) {
-            this.getKPData('ACBP CLAIM')
-            this.btnCategory = 'claim'
-          }
-
-          if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
-            if (!this.condition.isAcbpCourse && !this.condition.monthlyCapExceed) {
-              this.getKPData('Start again')
-            }
-
-            if (!this.condition.isAcbpCourse && this.condition.monthlyCapExceed && !this.condition.isCompletedThisMonth) {
-              this.getKPData('Start again')
-            }
+        if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
+          if (!this.condition.isAcbpClaim && !this.condition.monthlyCapExceed) {
+            this.getKPData('Resume')
           }
         }
-        if (this.condition && this.condition.isPostAssessment && this.condition.showTakeAssessment
-          && this.condition.showTakeAssessment.post_assessment) {
-          this.getKPData('Take Assessment')
+      }
+
+      if (this.condition && !this.condition.isPostAssessment
+        && (this.condition.content && this.condition.content.completionPercentage === 100)) {
+        if (this.condition.isAcbpCourse && this.condition.isAcbpClaim && !this.condition.isClaimed) {
+          this.getKPData('ACBP CLAIM')
+          this.btnCategory = 'claim'
         }
 
-        if (this.condition && this.condition.resumeData) {
-          if (!this.condition.userRating) {
-            this.getKPData('Rate this course')
+        if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
+          if (!this.condition.isAcbpCourse && !this.condition.monthlyCapExceed) {
+            this.getKPData('Start again')
           }
 
-          if (this.condition.userRating) {
-            this.getKPData('Edit rating')
+          if (!this.condition.isAcbpCourse && this.condition.monthlyCapExceed && !this.condition.isCompletedThisMonth) {
+            this.getKPData('Start again')
           }
         }
+      }
+      if (this.condition && this.condition.isPostAssessment && this.condition.showTakeAssessment
+        && this.condition.showTakeAssessment.post_assessment) {
+        this.getKPData('Take Assessment')
+      }
+
+      if (this.condition && this.condition.resumeData) {
+        if (!this.condition.userRating) {
+          this.getKPData('Rate this course')
+        }
+
+        if (this.condition.userRating) {
+          this.getKPData('Edit rating')
+        }
+      }
     } else {
       // For event karma points
       if (this.condition && !this.condition.completedAfterExpiry) {
@@ -175,10 +175,10 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
   }
 
   getKPData(btnType: string): void {
-    this.data.forEach((item: any) => {
+    this.data?.forEach((item: any) => {
       if (item.displayButton === btnType && item.displayButton !== 'ACBP CLAIM') {
         this.kpData = item
-        if (this.kpArray.findIndex((_obj: any) => _obj.displayButton ===  item.displayButton) === -1) {
+        if (this.kpArray.findIndex((_obj: any) => _obj.displayButton === item.displayButton) === -1) {
           this.kpArray.push(this.kpData)
         }
       }
