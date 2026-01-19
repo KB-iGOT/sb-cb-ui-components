@@ -56,8 +56,11 @@ export class AppTocV2Service {
         milestone.courses.forEach((mileStoneCourse: any) => {
           // Set parent reference for courses inside milestone
           mileStoneCourse.parent = milestone.id
-          leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
-          mileStoneData['leafNodes'] = [...mileStoneData?.leafNodes, ...mileStoneCourse.leafNodes]
+          if (mileStoneCourse && mileStoneCourse?.leafNodes && mileStoneCourse?.leafNodes?.length) {
+            leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
+            mileStoneData['leafNodes'] = [...mileStoneData?.leafNodes, ...mileStoneCourse.leafNodes]
+
+          }
           this.tocSvc.checkModuleWiseData(mileStoneCourse)
         })
       }
@@ -93,7 +96,6 @@ export class AppTocV2Service {
           // For pre-assessment and other root-level content
           const enrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
           this.updateNodeProgress(child, enrollment)
-          console.log(`Pre-assessment progress updated: ${child.identifier} (${child.name}), Status: ${child.completionStatus}, Percentage: ${child.completionPercentage}`)
           const isCompleted = child.status === 2 || child.completionStatus === 2 || child.completionPercentage === 100
           totalLeafNodes += child.leafNodesCount || 1
           totalCompletedLeafNodes += isCompleted ? (child.leafNodesCount || 1) : 0
@@ -118,10 +120,6 @@ export class AppTocV2Service {
       milestone.children.forEach((child: any) => {
         if (child.primaryCategory === 'Course') {
           totalCourses += 1
-          debugger
-          if (child?.identifier === "do_114482311476740096154") {
-            debugger
-          }
           this.updateCourseProgress(child, parentContentIdentifier, enrollmentListData)
           // Check both status and completionStatus for completion
           if (child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100) {
@@ -136,7 +134,6 @@ export class AppTocV2Service {
             enrollment = this.findEnrollment(enrollmentListData, milestone?.identifier)
           }
           this.updateNodeProgress(child, enrollment)
-          console.log(`Assessment/Other progress updated: ${child.identifier} (${child.name}), Status: ${child.completionStatus}, Percentage: ${child.completionPercentage}`)
         }
 
         const leafNodes = child.leafNodesCount || 1
@@ -158,8 +155,6 @@ export class AppTocV2Service {
       milestone.completionStatus = milestone.completionPercentage === 100 ? 2 : 1
       milestone.status = milestone.completionPercentage === 100 ? 2 : 1
     }
-
-    console.log(`Milestone ${milestone.identifier} (${milestone.name}) progress updated: ${totalCompletedLeafNodes}/${totalLeafNodes} = ${milestone.completionPercentage}%, status: ${milestone.status}, completionStatus: ${milestone.completionStatus}`)
   }
 
   private updateNodeProgress(node: any, enrollment: any) {
@@ -178,23 +173,19 @@ export class AppTocV2Service {
   }
 
   private updateCourseProgress(course: any, parentContentIdentifier, enrollmentListData: any) {
-    console.log(`Updating course progress for ${course.identifier} (${course.name})`)
     const enrollment = this.findEnrollment(enrollmentListData, course?.identifier)
-    console.log(`Course ${course.identifier} enrollment:`, enrollment)
 
     if (enrollment?.completionPercentage === 100) {
       // Enrollment shows 100% - mark course as complete
       course.completionPercentage = 100
       course.completionStatus = 2
       course.status = 2
-      console.log(`Course ${course.identifier} marked 100% complete from enrollment`)
       this.tocSvc.mapCompletionChildPercentageProgram(course)
     } else if (enrollment && enrollment.completionPercentage > 0) {
       // Enrollment has partial progress
       course.completionPercentage = enrollment.completionPercentage || 0
       course.completionStatus = 1
       course.status = 1
-      console.log(`Course ${course.identifier} has partial progress: ${course.completionPercentage}%`)
       // Also update children
       if (course.children && course.children.length > 0) {
         course.children.forEach((child: any) => {
@@ -226,7 +217,6 @@ export class AppTocV2Service {
         }
       }
     }
-    console.log(`Course ${course.identifier} final: completionPercentage=${course.completionPercentage}, completionStatus=${course.completionStatus}, status=${course.status}`)
   }
 
   private findEnrollment(enrollmentList: any, identifier: string) {
