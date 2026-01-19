@@ -63,6 +63,11 @@
   .banner-details {
     padding: 36px 0px;
 
+    @media screen and (max-width: 576px) {
+      padding-top: 10px;
+      padding-bottom: 20px;
+    }
+
     .due-tag {
       padding: 4px;
       color: #FFF;

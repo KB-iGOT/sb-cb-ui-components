@@ -3,6 +3,7 @@ import {
   HostListener, ElementRef, ViewChild, ViewEncapsulation, Input,
   Inject, Optional,
 } from '@angular/core'
+import { Location } from '@angular/common'
 import { SafeHtml, DomSanitizer, SafeStyle } from '@angular/platform-browser'
 import { ActivatedRoute, Event, Data, Router, NavigationEnd } from '@angular/router'
 import { UntypedFormControl, Validators } from '@angular/forms'
@@ -104,7 +105,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   enrolledCourseData: any
   @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/')
   // forPreview = window.location.href.includes('/author/')
-  analytics = this.route.snapshot.data.pageData.data?.analytics
+  analytics = this.route.snapshot.data?.pageData?.data?.analytics
   errorWidgetData: NsWidgetResolver.IRenderConfigWithTypedData<any> = {
     widgetType: 'errorResolver',
     widgetSubType: 'errorResolver',
@@ -296,6 +297,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     private userServiceLib: WidgetUserServiceLib,
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
+    private location: Location,
     @Inject('environment') public environment: any
   ) {
     this.historyData = history.state
@@ -445,23 +447,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   onClickOfClaim(event: any) {
-    // tslint:disable:no-console
-    console.log(event)
     const request = {
       userId: this.configSvc.unMappedUser.identifier,
       courseId: this.courseID,
     }
     this.raiseTelemetry()
     this.contentSvc.claimKarmapoints(request).subscribe((res: any) => {
-      // tslint:disable:no-console
-      console.log(res)
       this.isClaimed = true
       this.openSnackbar('Karma points are successfully claimed.')
       // this.getUserEnrollmentList()
       this.checkIfUserEnrolled()
     }, (error: any) => {
-      // tslint:disable:no-console
-      console.log(error)
       this.openSnackbar('something went wrong.')
     })
   }
@@ -760,7 +756,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   autoEnrollLearningPathway() {
     this.contentSvc.autoEnrollLP(this.content?.identifier).subscribe((res: any) => {
-      console.log('autoEnrollLearningPathway', res)
       if (res) {
         this.navigateToPlayerPage(res)
       }
@@ -1463,7 +1458,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       {
         module: 'Landing Page',
       })
-    console.log('raiseTelemetryForPublic $event', $event)
 
     if (shouldPreventNavigation) {
       // Prepare navigation details
@@ -2431,8 +2425,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         this.syncMilestoneLockStatus()
         this.getOrgIdForShare()
         this.getTocStructure()
-        console.log('content after locking sync', this.content)
-        console.log('hashmap after locking', this.tocSvc.hashmap)
         resolve(true)
         return
       })
@@ -2512,7 +2504,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         const hashData = this.tocSvc.hashmap[child.identifier]
         if (hashData && hashData.computedIsLocked !== undefined) {
           child.isLocked = hashData.computedIsLocked
-          console.log(`Synced milestone ${child.identifier} (${child.name}) isLocked: ${child.isLocked}`)
         }
       }
     })
@@ -2521,7 +2512,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   onLanguageSelect(lang: any) {
     // Check if the selected language is already set
     if (this.selectedLanguage && this.selectedLanguage.identifier === lang.identifier) {
-      console.log('Language is already selected:', lang.name)
       return // Exit the function if the language is the same
     }
 
@@ -2572,7 +2562,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     const dialogRef = this.dialog.open(TOCMultiLingualDialogComponent, data)
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        console.log('confirmed')
         this.processLanguageSelection(lang)
       }
     })
@@ -2606,7 +2595,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   processLanguageSelection(lang: any) {
     this.selectedLanguage = lang
-    console.log('Selected language:', lang)
 
     // Set skeleton loader to show loading state
     this.skeletonLoader = true
@@ -3036,7 +3024,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     dialogRef.afterClosed().subscribe((selectedLang) => {
       if (selectedLang) {
         this.selectedLanguage = selectedLang
-        console.log('this.selectedLanguage', this.selectedLanguage)
         this.handleAutoBatchAssign()
       }
     })
@@ -3076,7 +3063,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   checkForCompletionSurveyTrigger() {
     if (this.content && this.contentReadData) {
-      console.log('checkForSurveyTrigger this.content', this.contentReadData)
       // check if completion survey is enabled and user has completed the course before 23rd DEC 2023 (release date of completion survey)
       if (this.configSvc.instanceConfig && this.configSvc.instanceConfig.completionSurvey && this.configSvc.instanceConfig.completionSurvey.enabled &&
         this.enrolledCourseData && this.enrolledCourseData && this.enrolledCourseData.completedOn >= this.configSvc.instanceConfig.completionSurvey.startDate) {
@@ -3086,7 +3072,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           const courseId = this.contentReadData.identifier
           // Call API to see if survey is submitted or not
           this.tocSvc.getApllicationsById(surveyId, courseId).subscribe((res) => {
-            console.log('response of getApllicationsById', res)
             if (res.result.response && Object.keys(res.result.response).length > 0) {
               this.lockCertificate = false
             } else {
@@ -3145,5 +3130,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     const navigationUrl = (this.resumeData && !this.certData) ? this.resumeDataLink?.url : this.firstResourceLink?.url
     const queryParams = (this.resumeData && !this.certData) ? this.generateQuery('RESUME') : this.generateQuery('START')
     this.router.navigate([navigationUrl], { queryParams: queryParams })
+  }
+
+  /**
+   * Check if user can enroll in the course
+   * Returns true when enrollment is allowed
+   */
+  canEnroll(): boolean {
+    return !this.disableEnrollBtn
+  }
+
+  goBack() {
+    this.location.back()
   }
 }
