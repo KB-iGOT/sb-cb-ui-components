@@ -12,7 +12,7 @@
         </mat-form-field>
       </div>
 
-      <div class="blank-dropdown-wrapper">
+      <div class="blank-dropdown-wrapper" *ngIf="!isBasicAssessment()">
         <mat-form-field appearance="outline" class="blank-dropdown-field">
           <mat-select [(ngModel)]="option.blankNumber" (selectionChange)="onBlankSelectionChange(i, option.blankNumber)"
             placeholder="Select Blank" [disabled]="isReadOnly">
@@ -23,7 +23,7 @@
         </mat-form-field>
       </div>
 
-      <div class="blank-actions" *ngIf="options.length > minOptions && !isReadOnly">
+      <div class="blank-actions" *ngIf="options.length > minOptions && !isReadOnly && !isBasicAssessment()">
         <button mat-icon-button (click)="removeOption(i)" matTooltip="Delete this option" class="remove-btn"
           type="button">
           <mat-icon>close</mat-icon>

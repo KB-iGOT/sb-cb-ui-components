@@ -265,6 +265,13 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
     if (!allBlanksHaveText) {
       return false
     }
+
+    // For basic assessments, blank assignment is automatic, so skip blank validation
+    if (this.isBasicAssessment()) {
+      return true
+    }
+
+    // For advanced assessments, validate blank assignments
     // Get all unique assigned blank numbers (excluding null/undefined/empty/'none')
     const assignedBlanks = this.questionOptions
       .filter(blank => blank.blankNumber && blank.blankNumber !== 'none' && blank.blankNumber !== '')
@@ -424,7 +431,9 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   }
 
   checkBlankIntext() {
-    this.fitbCount = this.questionText.split('input').length - 1
+    // Count occurrences of <input tags in the HTML
+    const inputMatches = (this.questionText.match(/<input[^>]*>/gi) || [])
+    this.fitbCount = inputMatches.length
   }
 
   canSaveQuestion(): boolean {
@@ -581,7 +590,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
       // Build editorState options for FTB with blank number as value
       editorStateOptions = this.questionOptions.map((blank) => {
         return {
-          answer: blank.blankNumber || '',
+          answer: (this.isBasicAssessment()) ? true : blank.blankNumber || '',
           value: {
             body: blank.text || '',
             value: blank.id - 1  // Convert to 0-based index
@@ -653,5 +662,9 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
   get isReadOnly(): boolean {
     return this.assessemntService.getReadOnly()
+  }
+
+  isBasicAssessment(): boolean {
+    return this.assessmentData?.compatibilityLevel === 6
   }
 }

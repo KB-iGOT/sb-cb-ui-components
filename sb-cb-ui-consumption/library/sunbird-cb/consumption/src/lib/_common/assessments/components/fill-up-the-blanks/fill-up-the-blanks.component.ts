@@ -16,11 +16,12 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
   @Input() options: BlankOption[] = []
   @Input() ftbCount: number = 0
   @Input() isReadOnly: boolean = false
+  @Input() compatibilityLevel: number | undefined
   @Output() optionsUpdated = new EventEmitter<BlankOption[]>()
 
   blankList: any[] = []
   maxOptions: number = 7
-  minOptions: number = 2
+  minOptions: number = 1
 
   constructor(
     private snackBar: MatSnackBar,
@@ -30,12 +31,19 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
     this.initializeBlankList()
     if (this.options.length === 0) {
       this.addInitialOptions()
+    } else if (this.isBasicAssessment() && this.ftbCount > 0) {
+      // For basic assessments with existing options, ensure blank numbers are assigned
+      this.adjustOptionsForBasicAssessment()
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['ftbCount']) {
       this.initializeBlankList()
+      // For basic assessments, auto-adjust options to match blank count
+      if (this.isBasicAssessment() && this.ftbCount > 0) {
+        this.adjustOptionsForBasicAssessment()
+      }
     }
     // Also reinitialize if options change and we have ftbCount
     if (changes['options'] && this.ftbCount > 0) {
@@ -53,18 +61,26 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
   }
 
   addInitialOptions(): void {
-    // Add minimum required options
-    for (let i = 0; i < this.minOptions; i++) {
-      this.addOption()
+    // For basic assessments, add options based on ftbCount if available
+    if (this.isBasicAssessment() && this.ftbCount > 0) {
+      for (let i = 0; i < this.ftbCount; i++) {
+        this.addOption(true, `B${i + 1}`)
+      }
+    } else {
+      this.minOptions = 2
+      // Add minimum required options for advanced assessments
+      for (let i = 0; i < this.minOptions; i++) {
+        this.addOption()
+      }
     }
   }
 
-  addOption(): void {
+  addOption(autoAssign: boolean = false, blankNumber: string | null = null): void {
     if (this.options.length < this.maxOptions) {
       const newOption: BlankOption = {
         id: this.options.length + 1,
         text: '',
-        blankNumber: null
+        blankNumber: autoAssign ? blankNumber : null
       }
       this.options.push(newOption)
       this.emitUpdatedOptions()
@@ -122,5 +138,36 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
       6: 'vi', 7: 'vii', 8: 'viii', 9: 'ix', 10: 'x'
     }
     return romanNumerals[num] || num.toString()
+  }
+
+  isBasicAssessment(): boolean {
+    return this.compatibilityLevel === 6
+  }
+
+  adjustOptionsForBasicAssessment(): void {
+    if (!this.isBasicAssessment()) {
+      return
+    }
+
+    const targetCount = this.ftbCount
+    const currentCount = this.options.length
+
+    if (targetCount > currentCount) {
+      // Add more options to match ftbCount
+      for (let i = currentCount; i < targetCount && i < this.maxOptions; i++) {
+        this.addOption(true, `B${i + 1}`)
+      }
+    } else if (targetCount < currentCount && targetCount > 0) {
+      // Remove extra options
+      this.options = this.options.slice(0, targetCount)
+    }
+
+    // Always update IDs and blank numbers for all options
+    this.options.forEach((opt, idx) => {
+      opt.id = idx + 1
+      opt.blankNumber = `B${idx + 1}`
+    })
+
+    this.emitUpdatedOptions()
   }
 }
