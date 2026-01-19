@@ -3,6 +3,7 @@ import {
   HostListener, ElementRef, ViewChild, ViewEncapsulation, Input,
   Inject, Optional,
 } from '@angular/core'
+import { Location } from '@angular/common'
 import { SafeHtml, DomSanitizer, SafeStyle } from '@angular/platform-browser'
 import { ActivatedRoute, Event, Data, Router, NavigationEnd } from '@angular/router'
 import { UntypedFormControl, Validators } from '@angular/forms'
@@ -296,6 +297,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     private userServiceLib: WidgetUserServiceLib,
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
+    private location: Location,
     @Inject('environment') public environment: any
   ) {
     this.historyData = history.state
@@ -3136,5 +3138,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
    */
   canEnroll(): boolean {
     return !this.disableEnrollBtn
+  }
+
+  goBack() {
+    this.location.back()
   }
 }
