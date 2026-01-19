@@ -1,4 +1,4 @@
-<div>
+<div *ngIf="content?.courseCategory === nsContent?.ECourseCategory?.LEARNING_PATH">
     <!-- Milestone / Learning Path UI -->
     <div class="milestone-wrapper" role="group" aria-label="Learning path milestones">
         <ng-container *ngIf="content?.children?.length; else fallbackMilestones">
