@@ -117,7 +117,6 @@ export class AccessControlService {
       pageSize: pagination.pageSize || this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       pageNumber: pagination.pageNumber || 0,
       // orderDirection: "ASC",
-      orderBy: "designation",
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
@@ -128,6 +127,9 @@ export class AccessControlService {
     }
     if (characterSearch && characterSearch !== '#' && !query) {
       payload.startsWith = characterSearch;
+    }
+    if (!query) {
+      payload.orderBy = "designation";
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
@@ -143,9 +145,7 @@ export class AccessControlService {
         },
         fields: ["identifier", "name"],
         query: query,
-        sort_by: {
-          name: "asc",
-        },
+        sort_by: { name: "asc" },
         facets: [],
         limit: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
         offset: paginationOffset,
