@@ -1,6 +1,11 @@
-<div *ngIf="content?.courseCategory === nsContent?.ECourseCategory?.LEARNING_PATH">
+<div *ngIf="content?.courseCategory === 'Learning Pathway' &&  componentName !== 'viewer'">
     <!-- Milestone / Learning Path UI -->
     <div class="milestone-wrapper" role="group" aria-label="Learning path milestones">
+        <!-- Learning Path Header -->
+        <div class="learning-path-header">
+            <h3 class="learning-path-title">Learning Path</h3>
+            <p class="learning-path-subtitle">Complete {{content?.children?.length || 3}} key milestones</p>
+        </div>
         <ng-container *ngIf="content?.children?.length; else fallbackMilestones">
             <ul class="milestone-list">
                 <li *ngFor="let m of content?.children; let i = index" class="milestone-item"
@@ -8,7 +13,7 @@
                     <div class="milestone-circle" [attr.aria-label]="m?.name || ('Milestone ' + (i+1))">
                         <img *ngIf="m?.completionStatus === 2" src="assets/icons/toc/tick-orange.svg"
                             class="milestone-checkmark" alt="Completed" />
-                        <span *ngIf="m?.completionStatus !== 2" class="milestone-index">{{ i + 1 }}</span>
+                        <span *ngIf="m?.completionStatus !== 2" class="milestone-index"></span>
                     </div>
                     <div class="milestone-label">{{ m?.name }}</div>
                 </li>

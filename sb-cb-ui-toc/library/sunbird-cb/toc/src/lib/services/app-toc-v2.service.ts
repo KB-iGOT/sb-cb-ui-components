@@ -78,6 +78,7 @@ export class AppTocV2Service {
       milestoneIndex++
     })
     contentHeirarchy['leafNodes'] = [...leafNodes]
+    console.log('content Heirarchy', contentHeirarchy)
     return contentHeirarchy
   }
 
@@ -103,8 +104,9 @@ export class AppTocV2Service {
       })
 
       if (totalLeafNodes > 0) {
-        contentHeirarchyData.completionPercentage = Math.round((totalCompletedLeafNodes / totalLeafNodes) * 100)
-        contentHeirarchyData.completionStatus = contentHeirarchyData.completionPercentage === 100 ? 2 : 1
+        const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
+        contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
+        contentHeirarchyData.completionStatus = contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0)
       }
     }
     return contentHeirarchyData
@@ -151,9 +153,10 @@ export class AppTocV2Service {
     milestone.completedCourses = completedCourses
 
     if (totalLeafNodes > 0) {
-      milestone.completionPercentage = Math.round((totalCompletedLeafNodes / totalLeafNodes) * 100)
-      milestone.completionStatus = milestone.completionPercentage === 100 ? 2 : 1
-      milestone.status = milestone.completionPercentage === 100 ? 2 : 1
+      const calculatedPercentage = Math.round((totalCompletedLeafNodes / totalLeafNodes) * 100)
+      milestone.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
+      milestone.completionStatus = milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0)
+      milestone.status = milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0)
     }
   }
 
@@ -210,7 +213,8 @@ export class AppTocV2Service {
             totalLeafNodes = course.children.reduce((acc: number, curr: any) => acc + (curr.leafNodesCount || 1), 0)
           }
           if (totalLeafNodes > 0) {
-            course.completionPercentage = Math.round((totalCompleted / totalLeafNodes) * 100)
+            const calculatedPercentage = Math.round((totalCompleted / totalLeafNodes) * 100)
+            course.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
             course.completionStatus = course.completionPercentage === 100 ? 2 : (course.completionPercentage > 0 ? 1 : 0)
             course.status = course.completionStatus
           }

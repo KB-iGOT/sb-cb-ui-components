@@ -70,6 +70,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   environment: any
   ODCSMasterFramework: any
   applyNewServiceSelections = true
+  canLoadMasterDesignation = false
   constructor(
       public dialogRef: MatDialogRef<EntitySelectionsComponent>,
       private accessControlService: AccessControlService,
@@ -153,8 +154,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
         if (this.activeTab === 0) {
-          this.getOrganisationsList("", [], "A");
           this.selectedCharacterRange = "A";
+          this.getOrganisationsList("", [], this.selectedCharacterRange);
         } else {
           this.getOrganisationsList("", this.selectedData, undefined);
           this.alphabet = [];
@@ -162,13 +163,28 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Designation:
+        
+        // For isCCA = false , fetch designations within their orgs only
+        if (!this.isCCA && this.application === NsAccessControlConfig.Application.MDO) {
+          this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
+        } else {
+          this.orgSelectionIds = this.data?.rule?.conditions?.find(
+            (c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations
+          )?.selections;
+        }
+
+        if(this.orgSelectionIds?.length) {
+          this.alphabet = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+          this.selectedCharacterRange = "#";
+        } else this.selectedCharacterRange = "A";
+
         if (this.activeTab === 0) {
-          this.getDesignationsList(this.paginationOffset, "", [], "A");
-          this.selectedCharacterRange = "A";
+          this.getDesignationsList(this.paginationOffset, "", [], this.selectedCharacterRange);
         } else {
           this.getDesignationsList(this.paginationOffset, "", this.selectedData, undefined);
           this.alphabet = [];
         }
+
         this.radioSelections = this.accessControlCriteriaSelection?.designationRadioSelection;
         break;
       case NsAccessControlConfig.SelectionType.Service:
@@ -263,17 +279,21 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations) {
       if (this.activeTab === 0) {
-        this.getOrganisationsList("", [], "A");
         this.selectedCharacterRange = "A";
+        this.getOrganisationsList("", [], this.selectedCharacterRange);
       } else {
         this.getOrganisationsList("", this.selectedData, undefined);
       }
     }
 
     if (this.selectionType === NsAccessControlConfig.SelectionType.Designation) {
+      if (this.orgSelectionIds?.length) {
+          this.alphabet = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+          this.selectedCharacterRange = "#";
+      } else this.selectedCharacterRange = "A"; 
+
       if (this.activeTab === 0) {
-        this.getDesignationsList(this.paginationOffset, "", [], "A");
-        this.selectedCharacterRange = "A";
+        this.getDesignationsList(this.paginationOffset, "", [], this.selectedCharacterRange);
       } else {
         this.getDesignationsList(this.paginationOffset, "", this.selectedData, undefined);
       }
@@ -470,7 +490,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.filterValue === "all" &&
       !this.searchControl.value
     ) {
-      this.alphabet = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "#"];
+      if( this.selectionType === NsAccessControlConfig.SelectionType.Designation && this.orgSelectionIds?.length) {
+        this.alphabet = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+        this.selectedCharacterRange = "#";
+      } else {
+        this.alphabet = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "#"];
+      }
     } else {
       this.alphabet = sorted;
     }
@@ -556,13 +581,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.isLoading = true;
     }
 
-    // For isCCA = false , fetch designations within their orgs only
-    if(!this.isCCA && this.application === NsAccessControlConfig.Application.MDO) {
-      this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
-    } else {
-      this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
-    }
-    if (this.orgSelectionIds?.length) {
+    // // For isCCA = false , fetch designations within their orgs only
+    // if(!this.isCCA && this.application === NsAccessControlConfig.Application.MDO) {
+    //   this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
+    // } else {
+    //   this.orgSelectionIds = this.data?.rule?.conditions?.find((c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations)?.selections;
+    // }
+    if (this.orgSelectionIds?.length && !this.canLoadMasterDesignation) {
       const categories = this.orgSelectionIds.map((ele: string) => `${ele}_${this.ODCSMasterFramework ? this.ODCSMasterFramework : 'odcs'}_designation`);
       this.accessControlService
         .fetchDesignationsWithOrg(paginationOffset, categories, query, query ? [] : selectedData, character)
@@ -580,11 +605,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
               if (query) this.searchedDesignationFlagWithQuery = true;
               if (this.filterValue === "selected" || query) this.updateAlphabet();
               this.getFilteredEntityGrouped();
+
             } else {
               this.dataList = [];
               this.dataListDup = [];
               this.groupedEntityData = {};
               if (query) this.alphabet = [];
+
+              if(!query && selectedData?.length) {
+                this.loadMoreDesignation();
+              }
             }
           },
           complete: () => {
@@ -609,10 +639,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
               this.dataList = append ? [...this.dataList, ...newData] : newData;
               this.dataListDup = _.uniqWith([...this.dataListDup, ...newData], _.isEqual);
               this.totalItemsCount = response?.result?.result?.totalCount;
+
               if (query) this.searchedDesignationFlagWithQuery = true;
               else this.searchedDesignationFlagWithQuery = false;
+              
               if (this.filterValue === "selected" || query) this.updateAlphabet();
               this.getFilteredEntityGrouped();
+
+              if(!query && selectedData?.length && this.orgSelectionIds?.length) {
+                this.canLoadMasterDesignation = true;
+              }
             } else {
               this.dataList = [];
               this.dataListDup = [];
@@ -938,5 +974,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
-  
+
+  loadMoreDesignation(): void {
+    this.canLoadMasterDesignation = true;
+    this.getDesignationsList(this.paginationOffset, '', [], 'A', false);
+  }
+
 }

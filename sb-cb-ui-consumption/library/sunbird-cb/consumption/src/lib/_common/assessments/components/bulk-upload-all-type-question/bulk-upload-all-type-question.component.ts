@@ -386,7 +386,6 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
             // For FTB, check if option is assigned to a blank
             const correctKey = `isOption${i}Correct`
             const correctValue = q[correctKey]
-            debugger
             isCorrect = correctValue && correctValue.toLowerCase() !== 'none' ? correctValue : 'none'
             isCorrect = isCorrect.toLowerCase().split('blank').join('B')
           } else if (q.QuestionType === 'MTF') {

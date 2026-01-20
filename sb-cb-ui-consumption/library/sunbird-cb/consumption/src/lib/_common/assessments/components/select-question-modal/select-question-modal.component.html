@@ -5,7 +5,7 @@
     <div class="question-types-grid">
       <!-- For Option Weightage: Show only Weightage Single Choice -->
       <ng-container *ngIf="isOptionWeightage; else allQuestionTypes">
-        <div class="question-type-card" (click)="onQuestionTypeSelect('OPTION_WEIGHTAGE_SCA')">
+        <div class="question-type-card" (click)="onQuestionTypeSelect('MCQ-MCA-W')">
           <h3 class="question-type-title">Weightage Single Choice</h3>
           <p class="question-type-description">
             Add a question where learners can select multiple correct options with weighted scores for each choice.

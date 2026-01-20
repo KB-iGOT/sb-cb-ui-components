@@ -104,6 +104,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   cbPlanDuration: any
   enrolledCourseData: any
   @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/')
+  @Input() inputContent: any
   // forPreview = window.location.href.includes('/author/')
   analytics = this.route.snapshot.data?.pageData?.data?.analytics
   errorWidgetData: NsWidgetResolver.IRenderConfigWithTypedData<any> = {
@@ -746,7 +747,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
       } else if (this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
-        this.autoEnrollLearningPathway()
+        this.autoEnrollLearningPathway(batchData)
       } else {
         this.autoAssignEnroll()
       }
@@ -754,12 +755,22 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.contentViewEventForNetCore('enroll')
   }
 
-  autoEnrollLearningPathway() {
-    this.contentSvc.autoEnrollLP(this.content?.identifier).subscribe((res: any) => {
-      if (res) {
-        this.navigateToPlayerPage(res)
-      }
-    })
+  public autoEnrollLearningPathway(batchData: any) {
+    let batchId = batchData?.batchId
+    if (batchId) {
+      this.contentSvc.autoEnrollLP(this.content?.identifier).subscribe((res: any) => {
+        if (res) {
+          this.navigateToPlayerPage(batchId)
+          this.enrollBtnLoading = false
+        }
+      }, () => {
+        this.snackBar.open('Something went wrong')
+        this.enrollBtnLoading = false
+      })
+    } else {
+      this.snackBar.open('No bacthes found')
+      this.enrollBtnLoading = false
+    }
   }
 
   public autoEnrollCuratedProgram(programType: any, batchData: any) {
@@ -1546,7 +1557,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           this.tocSvc.mapModuleCount(this.content)
           this.checkForCompletionSurveyTrigger()
         } else {
-          if (this.contentReadData && this.contentReadData.cumulativeTracking) {
+          if (this.contentReadData && this.contentReadData.cumulativeTracking && this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY) {
             await this.tocSvc.mapCompletionPercentageProgram(this.content, this.userEnrollmentList)
             this.checkForCompletionSurveyTrigger()
             this.resumeDataSubscription = this.tocSvc.resumeData.subscribe((res: any) => {
@@ -2034,6 +2045,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.routeSubscription = this.route.data.subscribe(async (data: Data) => {
         if (data?.content?.data?.identifier) {
           queryParamstemp = await this.processRouteData(data)
+        } else {
+          const tempData = {
+            content: {
+              data: this.inputContent
+            }
+          }
+          queryParamstemp = await this.processRouteData(tempData)
         }
       })
     }
@@ -2197,10 +2215,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private loadBannerAndTocConfig(data: Data) {
-    this.banners = data.pageData.data.banners
-    this.tocSvc.subtitleOnBanners = data.pageData.data.subtitleOnBanners || false
-    this.tocSvc.showDescription = data.pageData.data.showDescription || false
-    this.tocConfig = data.pageData.data
+    this.banners = data?.pageData?.data?.banners || []
+    this.tocSvc.subtitleOnBanners = data?.pageData?.data?.subtitleOnBanners || false
+    this.tocSvc.showDescription = data?.pageData?.data?.showDescription || false
+    this.tocConfig = data?.pageData?.data || {}
     this.kparray = this.tocConfig.karmaPoints
   }
 
@@ -2419,6 +2437,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         this.appTocV2Svc.mapContentHierarchyProgressUpdate(this.content, this.userEnrollmentList)
         // Create hashmap and compute milestone locking after progress is updated
         this.tocSvc.callHirarchyProgressHashmap(this.content)
+        console.log('hashmap', this.tocSvc.hashmap)
         // Compute milestone locking status with updated progress data
         this.tocSvc.computeMilestoneLockingStatus()
         // Sync content tree's isLocked with computed values

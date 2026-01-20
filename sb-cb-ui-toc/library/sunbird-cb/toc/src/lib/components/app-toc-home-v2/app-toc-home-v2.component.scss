@@ -149,6 +149,26 @@
   border-radius: 64px;
 }
 
+.mobile-back-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  padding: 0px;
+  margin-bottom: 8px;
+  color: white !important;
+
+  mat-icon {
+    font-size: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  @media screen and (min-width: 577px) {
+    display: none !important;
+  }
+}
+
 .tag-div {
   border: 1px solid $colorOrange;
   background-color: rgba($color: #000000, $alpha: 0.5);

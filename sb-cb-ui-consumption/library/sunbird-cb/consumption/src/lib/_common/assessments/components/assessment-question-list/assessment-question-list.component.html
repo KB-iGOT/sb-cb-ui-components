@@ -105,12 +105,13 @@
         <label class="font-bold required">Fill in the Blanks Options</label>
       </div>
       <sb-uic-fill-up-the-blanks #ftbComponent [options]="questionOptions" [ftbCount]="fitbCount"
-        [isReadOnly]="isReadOnly" (optionsUpdated)="onOptionsUpdated($event)">
+        [isReadOnly]="isReadOnly" [compatibilityLevel]="assessmentData?.compatibilityLevel"
+        (optionsUpdated)="onOptionsUpdated($event)">
       </sb-uic-fill-up-the-blanks>
 
       <!-- Action Buttons -->
       <div class="flex flex-middle flex-center gap-5 mt-5" *ngIf="!isReadOnly">
-        <button mat-button class="btn-common btn-secondary" (click)="onAddBlank()"
+        <button mat-button class="btn-common btn-secondary" (click)="onAddBlank()" *ngIf="!isBasicAssessment()"
           [ngClass]="{'btn-disable': !canAddMoreBlanks()}" [disabled]="!canAddMoreBlanks()">
           Add Option
         </button>
@@ -119,8 +120,11 @@
           {{ isUpdateMode() ? 'Update' : 'Save' }}
         </button>
       </div>
-      <div *ngIf="!canAddMoreBlanks()" class="max-options-message">
+      <div *ngIf="!canAddMoreBlanks() && !isBasicAssessment()" class="max-options-message">
         Maximum 7 options allowed
+      </div>
+      <div *ngIf="isBasicAssessment() && fitbCount > 0" class="max-options-message">
+        Options are automatically managed based on blanks ({{ fitbCount }} blank{{ fitbCount > 1 ? 's' : '' }})
       </div>
     </div>
 

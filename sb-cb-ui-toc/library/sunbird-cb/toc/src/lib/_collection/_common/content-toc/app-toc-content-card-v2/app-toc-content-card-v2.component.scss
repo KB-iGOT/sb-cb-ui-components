@@ -653,7 +653,7 @@ span.optional-span {
 // Milestone-specific styles
 .milestone-badge {
   display: inline-block;
-  background-color: #E8F4FD;
+  background-color: #FEFAF4;
   border: 1px solid #EF951E;
   border-radius: 16px;
   padding: 2px 12px;
@@ -696,4 +696,39 @@ span.optional-span {
 
 .mandatory-text {
   color: #D13924 !important;
+}
+
+// View Achievement button styles
+.view-achievement-container {
+  display: flex;
+  align-items: center;
+}
+
+.view-achievement-btn {
+  background-color: transparent;
+  border: 1.5px solid #1a4ca1;
+  color: #1a4ca1;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #1a4ca1;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .inline-spinner {
+    display: inline-block;
+  }
 }

@@ -756,8 +756,9 @@ export class AppTocService {
       }
       // const parentContent = enrolmentList.find((el: any) => el.collectionId === content.identifier)
       // if (!parentContent.completionPercentage) {
-      content.completionPercentage = Math.floor((totalCount / leafnodeCount) * 100)
-      content.completionStatus = content.completionPercentage <= 100 ? 1 : 2
+      const calculatedPct = Math.floor((totalCount / leafnodeCount) * 100)
+      content.completionPercentage = isNaN(calculatedPct) ? 0 : calculatedPct
+      content.completionStatus = content.completionPercentage >= 100 ? 2 : (content.completionPercentage > 0 ? 1 : 0)
       if (content.completionPercentage === 100 && inprogressDataCheck && inprogressDataCheck.length === 0 && !firstUncompleteCourse) {
         const firstChildData = this.widgetSvc.getFirstChildInHierarchy(content)
         const childEnrollmentData = enrolmentList.find((el: any) =>
@@ -926,11 +927,14 @@ export class AppTocService {
           leafNodes: child.leafNodes || [],
           completionPercentage: child.completionPercentage || child.progress,
           completionStatus: child.completionStatus,
+          status: child.status || child.completionStatus || 0,
           progress: child.progress,
           primaryCategory: child.primaryCategory,
           courseCategory: child.courseCategory || child.primaryCategory || '',
           duration: child.duration || 0,
           expectedDuration: child.expectedDuration || 0,
+          // Mark as pre-assessment for milestone locking logic
+          isPreAssessment: child.isPreAssessment || true,
         }
         this.hashmap[child.identifier] = localMap
       })
@@ -1455,6 +1459,26 @@ export class AppTocService {
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Generate milestone achievement
+   * @param userId User ID
+   * @param courseId Course identifier
+   * @param batchId Batch ID
+   * @param milestoneId Milestone identifier (e.g., 'm1', 'm2')
+   */
+  generateMilestoneAchievement(userId: string, courseId: string, batchId: string, milestoneId: string): Observable<any> {
+    const apiUrl = '/apis/proxies/v8/achievement/dynamic/v1/generate'
+    const request = {
+      request: {
+        userId,
+        courseId,
+        batchId,
+        milestoneId
+      }
+    }
+    return this.http.post(apiUrl, request)
   }
 
 }
