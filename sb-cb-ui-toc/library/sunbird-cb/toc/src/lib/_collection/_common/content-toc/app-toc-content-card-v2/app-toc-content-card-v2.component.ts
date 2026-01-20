@@ -2,9 +2,10 @@ import { Component, Input, OnInit, Renderer2, SimpleChanges } from '@angular/cor
 import { NsContent } from '../../../../_services/widget-content.model'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
-import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { EventService, WsEvents, ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { animate, style, transition, trigger } from '@angular/animations'
 /* tslint:disable*/
 import _ from 'lodash'
@@ -50,6 +51,7 @@ export class AppTocContentCardV2Component implements OnInit {
   @Input() parentMilestoneLocked = false // Passed from parent when inside a locked milestone
   hasContentStructure = false
   downloadCertificateLoading = false
+  achievementLoading = false
   enumContentTypes = NsContent.EDisplayContentTypes
   contentStructure: NsAppToc.ITocStructure = {
     assessment: 0,
@@ -95,7 +97,9 @@ export class AppTocContentCardV2Component implements OnInit {
     private certificateService: CertificateService,
     private appTocSvc: AppTocService,
     private contentLangSvc: ContentLanguageService,
-    private resourceDownloadHelperSvc: ResourceDownloadHelperService
+    private resourceDownloadHelperSvc: ResourceDownloadHelperService,
+    private configSvc: ConfigurationsService,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
@@ -130,17 +134,17 @@ export class AppTocContentCardV2Component implements OnInit {
 
     // Use hashmap data if available for pre-computed values
     if (hashData) {
-      this._cachedIsCollection = hashData.isCollection !== undefined ? 
+      this._cachedIsCollection = hashData.isCollection !== undefined ?
         hashData.isCollection : this.content.mimeType === NsContent.EMimeTypes.COLLECTION
-      this._cachedIsModule = hashData.isModule !== undefined ? 
+      this._cachedIsModule = hashData.isModule !== undefined ?
         hashData.isModule : this.content.primaryCategory === NsContent.EPrimaryCategory.MODULE
-      this._cachedIsResource = hashData.isResource !== undefined ? 
+      this._cachedIsResource = hashData.isResource !== undefined ?
         hashData.isResource : this.computeIsResource()
-      this._cachedIsMilestone = hashData.isMilestone !== undefined ? 
+      this._cachedIsMilestone = hashData.isMilestone !== undefined ?
         hashData.isMilestone : this.computeIsMilestone()
-      this._cachedIsMilestoneLocked = hashData.computedIsLocked !== undefined ? 
+      this._cachedIsMilestoneLocked = hashData.computedIsLocked !== undefined ?
         hashData.computedIsLocked : this.computeIsMilestoneLocked()
-      this._cachedIsParentMilestoneLocked = hashData.isParentMilestoneLocked !== undefined ? 
+      this._cachedIsParentMilestoneLocked = hashData.isParentMilestoneLocked !== undefined ?
         hashData.isParentMilestoneLocked : this.computeIsParentMilestoneLocked()
     } else {
       // Fallback to direct computation if hashmap not available
@@ -255,7 +259,7 @@ export class AppTocContentCardV2Component implements OnInit {
       computedIsLocked: hashData?.computedIsLocked,
       contentIsLocked: this.content.isLocked
     })
-    
+
     if (hashData && hashData.computedIsLocked !== undefined) {
       return hashData.computedIsLocked
     }
@@ -297,8 +301,8 @@ export class AppTocContentCardV2Component implements OnInit {
     while (currentParentId && depth < maxDepth) {
       const parentData = this.hierarchyMapData[currentParentId]
       if (parentData) {
-        if ((parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') && 
-            (parentData.computedIsLocked || parentData.isLocked)) {
+        if ((parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') &&
+          (parentData.computedIsLocked || parentData.isLocked)) {
           return true
         }
         currentParentId = parentData.parent
@@ -359,9 +363,9 @@ export class AppTocContentCardV2Component implements OnInit {
       }
 
       // Recompute cache when critical inputs change
-      if (property === 'content' || property === 'baseContentReadData' || 
-          property === 'batchId' || property === 'forPreview' || 
-          property === 'parentMilestoneLocked' || property === 'mlCourse') {
+      if (property === 'content' || property === 'baseContentReadData' ||
+        property === 'batchId' || property === 'forPreview' ||
+        property === 'parentMilestoneLocked' || property === 'mlCourse') {
         shouldRecomputeCache = true
       }
     }
@@ -930,6 +934,74 @@ export class AppTocContentCardV2Component implements OnInit {
     this.resourceDownloadHelperSvc.downloadPDF(content, pageId)
     console.log('content', content)
     console.log('baseContent', this.baseContentReadData)
+  }
+
+  /**
+   * View milestone achievement - calls the achievement API and shows the result
+   */
+  viewMilestoneAchievement(event?: MouseEvent) {
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    if (!this.content || !this.batchId || this.achievementLoading) {
+      return
+    }
+
+    // Get user ID from ConfigurationsService
+    const userId = this.configSvc?.userProfile?.userId
+    if (!userId) {
+      console.error('User ID not found')
+      return
+    }
+
+    // Extract milestone ID (e.g., "m1", "m2") from the content name or index
+    // Try to get milestone number from the index or extract from content
+    let milestoneId = 'm' + (this.index - 1) // index is typically 1-based, milestones are 0-based
+
+    // If content name contains milestone number, extract it
+    if (this.content.name) {
+      const match = this.content.name.match(/milestone\s*(\d+)/i)
+      if (match) {
+        milestoneId = 'm' + match[1]
+      }
+    }
+
+    const courseId = this.baseContentReadData?.identifier || this.rootId
+
+    this.achievementLoading = true
+
+    this.appTocSvc.generateMilestoneAchievement(userId, courseId, this.batchId, milestoneId).subscribe({
+      next: (response: any) => {
+        this.achievementLoading = false
+        console.log('Achievement generated successfully:', response)
+        // Show achievement dialog or handle response
+        if (response && response.result) {
+          // Open a dialog to show the achievement
+          this.dialog.open(CertificateDialogComponent, {
+            width: '1300px',
+            data: {
+              cet: response.result.printUri || response.result.svgData,
+              certId: response.result.identifier,
+              isAchievement: true
+            },
+          })
+        }
+      },
+      error: (error: any) => {
+        this.achievementLoading = false
+        // Show error message in snackbar
+        const errorMessage = error?.error?.result?.message || error?.message || 'Failed to generate achievement'
+        this.snackBar.open(errorMessage, 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        })
+        console.error('Error generating achievement:', error)
+      }
+    })
   }
 
 }
