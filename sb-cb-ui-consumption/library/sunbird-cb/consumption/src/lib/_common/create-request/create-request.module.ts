@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CreateRequestFormComponent } from './components/create-request-form/create-request-form.component'
 import { CreateRequestContentDetailsComponent } from './components/create-request-content-details/create-request-content-details.component'
@@ -22,7 +22,8 @@ import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/ho
 
 
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         CreateRequestFormComponent,
         CreateRequestContentDetailsComponent,
         CreateRequestAdditionalDetailsComponent,
@@ -31,7 +32,7 @@ import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/ho
     exports: [
         CreateRequestFormComponent,
         AddAuthorsComponent
-    ], imports: [CommonModule,
+    ], schemas: [CUSTOM_ELEMENTS_SCHEMA], imports: [CommonModule,
         ReactiveFormsModule,
         FormsModule,
         MatFormFieldModule,
@@ -46,5 +47,7 @@ import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/ho
         MatCardModule,
         MatRadioModule,
         MatTooltipModule,
-        HorizontalDynamicStepperModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        HorizontalDynamicStepperModule], providers: [provideHttpClient(withInterceptorsFromDi())]
+})
+
 export class CreateRequestModule { }

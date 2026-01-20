@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core'
-import { MatDialogRef, MAT_LEGACY_DIALOG_DATA } from '@angular/material/dialog'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 
 type DialogData = {
   title?: string // title of the dialog
@@ -21,17 +21,17 @@ type DialogData = {
 }
 
 @Component({
-    selector: 'ws-widget-confirmation-dialog',
-    templateUrl: './confirmation-dialog.component.html',
-    styleUrls: ['./confirmation-dialog.component.scss'],
-    standalone: false
+  selector: 'ws-widget-confirmation-dialog',
+  templateUrl: './confirmation-dialog.component.html',
+  styleUrls: ['./confirmation-dialog.component.scss'],
+  standalone: false
 })
 export class ConfirmationDialogComponent {
   dialgoData: DialogData = {};
 
   constructor(
     private dialogRef: MatDialogRef<ConfirmationDialogComponent>,
-    @Inject(MAT_LEGACY_DIALOG_DATA) public data: DialogData,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
   ) {
     this.dialgoData = data
   }

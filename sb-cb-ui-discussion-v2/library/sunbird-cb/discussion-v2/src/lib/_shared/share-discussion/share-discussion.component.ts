@@ -10,10 +10,10 @@ import { MatChipInputEvent } from '@angular/material/chips'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { CommonService } from '../../_services/common.service'
 @Component({
-    selector: 'd-v2-share-discussion',
-    templateUrl: './share-discussion.component.html',
-    styleUrls: ['./share-discussion.component.scss'],
-    standalone: false
+  selector: 'd-v2-share-discussion',
+  templateUrl: './share-discussion.component.html',
+  styleUrls: ['./share-discussion.component.scss'],
+  standalone: false
 })
 export class ShareDiscussionComponent implements OnInit {
   shareForm: UntypedFormGroup | undefined

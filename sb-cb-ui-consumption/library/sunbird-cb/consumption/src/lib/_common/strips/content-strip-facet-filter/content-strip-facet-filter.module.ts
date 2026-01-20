@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { HorizontalScrollerV2Module } from '../../horizontal-scroller-v2/horizontal-scroller-v2.module'
@@ -75,6 +75,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
             },
         }),
     ],
-    exports: [ContentStripFacetFilterComponent]
+    exports: [ContentStripFacetFilterComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ContentStripFacetFilterModule { }

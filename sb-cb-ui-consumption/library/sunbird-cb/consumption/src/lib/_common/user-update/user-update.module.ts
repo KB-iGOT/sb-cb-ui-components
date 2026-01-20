@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { UserUpdateComponent } from './user-update/user-update.component'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
@@ -53,6 +53,7 @@ import { AddUsersFormMetaComponent } from './add-users-form-meta/add-users-form-
   exports: [
     UserUpdateComponent,
     AddUsersFormMetaComponent
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class UserUpdateModule { }

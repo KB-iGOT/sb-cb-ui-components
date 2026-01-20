@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ShareDiscussionComponent } from './share-discussion.component'
 import { TranslateModule } from '@ngx-translate/core'
@@ -7,7 +7,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
 import { MatCheckboxModule } from '@angular/material/checkbox'
-import { MatChipsModule } from '@angular/material/chips'
+
 import { MatNativeDateModule } from '@angular/material/core'
 import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatDialogModule } from '@angular/material/dialog'
@@ -26,6 +26,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatTabsModule } from '@angular/material/tabs'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { CommonService } from '../../_services/common.service'
+import { MatChipsModule } from '@angular/material/chips'
 
 @NgModule({
   declarations: [ShareDiscussionComponent],
@@ -37,7 +38,6 @@ import { CommonService } from '../../_services/common.service'
     MatCardModule,
     MatTooltipModule,
     MatTabsModule,
-    MatChipsModule,
     MatDividerModule,
     MatProgressBarModule,
     MatListModule,
@@ -56,9 +56,11 @@ import { CommonService } from '../../_services/common.service'
     TranslateModule,
     FormsModule,
     ReactiveFormsModule,
+    MatChipsModule
 
   ],
   providers: [CommonService],
   exports: [ShareDiscussionComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ShareDiscussionModule { }

@@ -7,12 +7,11 @@ import { FrameworkService } from '../../services/framework.service'
 import _ from 'lodash'
 import { MatSelect } from '@angular/material/select'
 import { MatSnackBar } from '@angular/material/snack-bar'
-
 @Component({
-    selector: 'sb-cb-tree-org-hierarchy-add-modal',
-    templateUrl: './org-hierarchy-add-modal.component.html',
-    styleUrls: ['./org-hierarchy-add-modal.component.scss'],
-    standalone: false
+  selector: 'sb-cb-tree-org-hierarchy-add-modal',
+  templateUrl: './org-hierarchy-add-modal.component.html',
+  styleUrls: ['./org-hierarchy-add-modal.component.scss'],
+  standalone: false
 })
 export class OrgHierarchyAddModalComponent implements OnInit, OnDestroy {
   searchControl = new FormControl('');

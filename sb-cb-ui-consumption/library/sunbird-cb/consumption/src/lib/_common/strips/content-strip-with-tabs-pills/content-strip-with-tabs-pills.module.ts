@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { HorizontalScrollerV2Module } from '../../horizontal-scroller-v2/horizontal-scroller-v2.module'
@@ -76,6 +76,7 @@ export function HttpLoaderFactory1(http: HttpClient) {
             },
         }),
     ],
-    exports: [ContentStripWithTabsPillsComponent]
+    exports: [ContentStripWithTabsPillsComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ContentStripWithTabsPillsModule { }
