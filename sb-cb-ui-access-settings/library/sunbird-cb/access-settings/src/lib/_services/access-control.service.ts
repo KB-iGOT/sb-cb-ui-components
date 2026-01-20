@@ -90,7 +90,7 @@ export class AccessControlService {
       characterSearch = "";
     }
 
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
@@ -126,7 +126,7 @@ export class AccessControlService {
     if (query) {
       payload.searchString = query;
     }
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       payload.startsWith = characterSearch;
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
@@ -154,7 +154,7 @@ export class AccessControlService {
     if (selectedData?.length) {
       payload.request.filters.name = selectedData;
     }
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       if (!payload.request.filters.name || typeof payload.request.filters.name !== "object") {
         payload.request.filters.name = {};
       }
