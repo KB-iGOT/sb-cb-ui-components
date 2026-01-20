@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/toc",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "dependencies": {
     "tslib": "^2.0.0"
   },
@@ -15,8 +15,6 @@
     "@sunbird-cb/utils-v2": "0.0.2-cbrelease-4.8.31",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@sunbird-cb/consumption": "0.0.9-cbrelease-4.8.32",
-    "@sunbird-cb/collection": "*",
-    "@sunbird-cb/discussions-ui-v8": "*",
-    "@sunbird-cb/discussion-v2": "*"
+    "@sunbird-cb/discussion-v2": "0.0.8-cbrelease-4.8.28"
   }
 }
