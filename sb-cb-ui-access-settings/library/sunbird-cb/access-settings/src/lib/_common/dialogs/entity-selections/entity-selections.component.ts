@@ -416,6 +416,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // For Designation with search query, don't group by letter
+    if (this.selectionType === this.selectionTypeEnum.Designation && this.searchControl.value) {
+      const grouped: { [key: string]: any[][] } = {};
+      grouped["All"] = this.chunkArray(filtered, 8);
+      this.groupedEntityData = grouped;
+      this.isLoading = false;
+      this.alphabet = [];
+      return;
+    }
+
     // For all other types, group by letter and chunk each group
     const grouped: { [key: string]: any[][] } = {};
     const temp: { [key: string]: any[] } = {};
@@ -977,7 +987,11 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   loadMoreDesignation(): void {
     this.canLoadMasterDesignation = true;
-    this.getDesignationsList(this.paginationOffset, '', [], 'A', false);
+    if(this.filterValue === "all") {
+      this.getDesignationsList(this.paginationOffset, '', [], 'A', false);
+    } else {
+      this.getDesignationsList(this.paginationOffset, '', this.selectedData, '', false);
+    }
   }
 
 }
