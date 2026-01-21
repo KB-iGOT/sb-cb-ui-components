@@ -415,8 +415,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // For Designation with search query, don't group by letter
-    if (this.selectionType === this.selectionTypeEnum.Designation && this.searchControl.value) {
+    // For Designation or organizations with search query, don't group by letter
+    if ((this.selectionType === this.selectionTypeEnum.Designation || this.selectionType === this.selectionTypeEnum.Organizations) && this.searchControl.value) {
       const grouped: { [key: string]: any[][] } = {};
       grouped["All"] = this.chunkArray(filtered, 8);
       this.groupedEntityData = grouped;
