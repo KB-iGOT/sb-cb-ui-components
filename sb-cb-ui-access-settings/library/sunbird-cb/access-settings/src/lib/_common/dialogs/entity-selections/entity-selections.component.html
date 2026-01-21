@@ -131,6 +131,15 @@
                     <div class="no-data p-4 flex flex-column items-center justify-center">
                       <img src="/assets/icons/no-events.png" alt="no-data" />
                       <span class="font-bold">No information to display yet</span>
+
+                      <ng-container *ngIf="selectionType === selectionTypeEnum.Designation && orgSelectionIds?.length && !searchControl.value">
+                        <ng-container *ngIf="selectedCharacterRange === '#' && application !== APPLICATION_ENUM.MDO">
+                          <div class="lato-normal-text-line text-center mt-2 mb-2">Designations are not available for the selected organizations.</div>
+                          <button (click)="loadMoreDesignation()" mat-flat-button class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2">
+                            Load Master Designations
+                          </button>
+                        </ng-container>
+                      </ng-container>
                     </div>
                   </ng-template>
                 </ng-container>

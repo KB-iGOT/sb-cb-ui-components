@@ -90,7 +90,7 @@ export class AccessControlService {
       characterSearch = "";
     }
 
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
@@ -117,7 +117,6 @@ export class AccessControlService {
       pageSize: pagination.pageSize || this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       pageNumber: pagination.pageNumber || 0,
       // orderDirection: "ASC",
-      orderBy: "designation",
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
@@ -126,8 +125,11 @@ export class AccessControlService {
     if (query) {
       payload.searchString = query;
     }
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       payload.startsWith = characterSearch;
+    }
+    if (!query) {
+      payload.orderBy = "designation";
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
@@ -143,9 +145,7 @@ export class AccessControlService {
         },
         fields: ["identifier", "name"],
         query: query,
-        sort_by: {
-          name: "asc",
-        },
+        sort_by: { name: "asc" },
         facets: [],
         limit: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
         offset: paginationOffset,
@@ -154,7 +154,7 @@ export class AccessControlService {
     if (selectedData?.length) {
       payload.request.filters.name = selectedData;
     }
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       if (!payload.request.filters.name || typeof payload.request.filters.name !== "object") {
         payload.request.filters.name = {};
       }
