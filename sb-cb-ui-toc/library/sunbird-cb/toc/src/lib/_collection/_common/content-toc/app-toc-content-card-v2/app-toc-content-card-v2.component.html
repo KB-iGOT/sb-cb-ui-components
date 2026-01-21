@@ -14,6 +14,7 @@
         [ngClass]="pathSet?.has(content?.identifier) && isEnrolled ? 'content-active-resource': 'content-not-active-resource'">
         <div class="resource flex  sm:flex-row flex-start width-expand w-100 sm:pr-4 sm:w-auto"
             [ngClass]="{'activeResource': pathSet?.has(content?.identifier) && isEnrolled}">
+            <!-- Lock message for curated programs only (shown above content) -->
             <ng-container *ngIf="content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT && checkForCuratedProgram &&
             !isContentUnlocked">
                 <div class="content-locking flex w-full flex-middle mb-2 gap-3">
@@ -80,10 +81,12 @@
             </div>
             <!-- deactivated as per NIC CEO requirement to access course wthout login -->
             <a class="width-expand"
-                [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked) ? true : null"
+                [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked || isMilestoneAssessmentLocked) ? true : null"
                 [ngClass]="{'ml-3': isEnrolled}"
-                [routerLink]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked) ? resourceLink.url : null"
-                [queryParams]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked)  ? resourceLink.queryParams : null">
+                [routerLink]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked && !isMilestoneAssessmentLocked) ? resourceLink.url : null"
+                [queryParams]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked && !isMilestoneAssessmentLocked)  ? resourceLink.queryParams : null"
+                [matTooltip]="isParentMilestoneLocked ? 'This content is locked. Complete previous milestone to view this content.' : (isMilestoneAssessmentLocked ? 'This content is locked. Complete all mandatory items to unlock the assessment.' : '')"
+                matTooltipPosition="above">
                 <div [ngClass]="{'resource-active': pathSet?.has(content?.identifier) && isEnrolled}"></div>
                 <div class="text-truncate " [ngClass]="{'cursor-pointer': !isEnabled && isEnrolled}"
                     (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
@@ -200,6 +203,26 @@
                     </ng-container>
                 </div>
             </a>
+            
+            <!-- Lock messages shown below content name (outside anchor tag) -->
+            <!-- Lock message for resources in locked milestones -->
+            <ng-container *ngIf="isParentMilestoneLocked && isEnrolled">
+                <div class="content-locking flex w-full flex-middle mt-2 gap-3">
+                    <mat-icon class="lock-icon">lock</mat-icon>
+                    <span class="lock-message mat-body-2">
+                        This content is locked. Complete previous milestone to view this content.
+                    </span>
+                </div>
+            </ng-container>
+            <!-- Lock message for milestone assessments when mandatory content not completed -->
+            <ng-container *ngIf="isMilestoneAssessmentLocked && isEnrolled && !isParentMilestoneLocked">
+                <div class="content-locking flex w-full flex-middle mt-2 gap-3">
+                    <mat-icon class="lock-icon">lock</mat-icon>
+                    <span class="lock-message mat-body-2">
+                        This content is locked. Complete all mandatory items to unlock the assessment.
+                    </span>
+                </div>
+            </ng-container>
         </div>
     </div>
 </ng-container>
@@ -331,6 +354,12 @@
                         <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2">
                             <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of
                                 {{content?.leafNodesCount || 0}} completed</span>
+                        </div>
+                        <!-- Unlock Criteria Message for Locked Milestones -->
+                        <div *ngIf="isMilestone && isEnrolled && isMilestoneLocked" class="milestone-locked-message mt-2">
+                            <span class="locked-criteria-text mat-caption">
+                                {{ getMilestoneUnlockMessage() }}
+                            </span>
                         </div>
                         <!-- View Achievement Button for completed milestones -->
                         <div *ngIf="isMilestone && isEnrolled && (getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2)"

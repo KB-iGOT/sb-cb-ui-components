@@ -86,8 +86,6 @@ export class ViewerUtilService {
       }
       return 0
     } catch (e) {
-      // tslint:disable-next-line: no-console
-      console.log('Error in calculating percentage', e)
       return 0
     }
   }
@@ -119,8 +117,6 @@ export class ViewerUtilService {
       }
       return 1
     } catch (e) {
-      // tslint:disable-next-line: no-console
-      console.log('Error in getting completion status', e)
       return 1
     }
   }
@@ -170,6 +166,9 @@ export class ViewerUtilService {
         this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
         this.tocSvc.hashmap[contentId]['completionStatus'] = req.request.contents[0].status
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+        
+        // Trigger milestone lock recomputation for Learning Pathways
+        this.tocSvc.triggerMilestoneLockUpdate()
       }
     } else {
       req = {}
@@ -301,6 +300,9 @@ export class ViewerUtilService {
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
           this.tocSvc.hashmap[contentId]['completionStatus'] = req.request.contents[0].status
           this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+          
+          // Trigger milestone lock recomputation for Learning Pathways
+          this.tocSvc.triggerMilestoneLockUpdate()
         }
       }
     } else {

@@ -2,10 +2,9 @@ import { Component, Input, OnInit, Renderer2, SimpleChanges } from '@angular/cor
 import { NsContent } from '../../../../_services/widget-content.model'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
-import { EventService, WsEvents, ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { animate, style, transition, trigger } from '@angular/animations'
 /* tslint:disable*/
 import _ from 'lodash'
@@ -51,7 +50,6 @@ export class AppTocContentCardV2Component implements OnInit {
   @Input() parentMilestoneLocked = false // Passed from parent when inside a locked milestone
   hasContentStructure = false
   downloadCertificateLoading = false
-  achievementLoading = false
   enumContentTypes = NsContent.EDisplayContentTypes
   contentStructure: NsAppToc.ITocStructure = {
     assessment: 0,
@@ -87,6 +85,8 @@ export class AppTocContentCardV2Component implements OnInit {
   private _cachedIsParentMilestoneLocked: boolean = false
   private _cachedIsContentUnlocked: boolean = true
   private _cachedCheckForCuratedProgram: boolean = false
+  private _cachedIsMilestoneAssessment: boolean = false
+  private _cachedIsMilestoneAssessmentLocked: boolean = false
   private _cachedResourceLink: { url: string; queryParams: { [key: string]: any } } = { url: '', queryParams: {} }
   private _cacheInitialized: boolean = false
 
@@ -97,9 +97,7 @@ export class AppTocContentCardV2Component implements OnInit {
     private certificateService: CertificateService,
     private appTocSvc: AppTocService,
     private contentLangSvc: ContentLanguageService,
-    private resourceDownloadHelperSvc: ResourceDownloadHelperService,
-    private configSvc: ConfigurationsService,
-    private snackBar: MatSnackBar
+    private resourceDownloadHelperSvc: ResourceDownloadHelperService
   ) { }
 
   ngOnInit() {
@@ -134,17 +132,17 @@ export class AppTocContentCardV2Component implements OnInit {
 
     // Use hashmap data if available for pre-computed values
     if (hashData) {
-      this._cachedIsCollection = hashData.isCollection !== undefined ?
+      this._cachedIsCollection = hashData.isCollection !== undefined ? 
         hashData.isCollection : this.content.mimeType === NsContent.EMimeTypes.COLLECTION
-      this._cachedIsModule = hashData.isModule !== undefined ?
+      this._cachedIsModule = hashData.isModule !== undefined ? 
         hashData.isModule : this.content.primaryCategory === NsContent.EPrimaryCategory.MODULE
-      this._cachedIsResource = hashData.isResource !== undefined ?
+      this._cachedIsResource = hashData.isResource !== undefined ? 
         hashData.isResource : this.computeIsResource()
-      this._cachedIsMilestone = hashData.isMilestone !== undefined ?
+      this._cachedIsMilestone = hashData.isMilestone !== undefined ? 
         hashData.isMilestone : this.computeIsMilestone()
-      this._cachedIsMilestoneLocked = hashData.computedIsLocked !== undefined ?
+      this._cachedIsMilestoneLocked = hashData.computedIsLocked !== undefined ? 
         hashData.computedIsLocked : this.computeIsMilestoneLocked()
-      this._cachedIsParentMilestoneLocked = hashData.isParentMilestoneLocked !== undefined ?
+      this._cachedIsParentMilestoneLocked = hashData.isParentMilestoneLocked !== undefined ? 
         hashData.isParentMilestoneLocked : this.computeIsParentMilestoneLocked()
     } else {
       // Fallback to direct computation if hashmap not available
@@ -158,6 +156,8 @@ export class AppTocContentCardV2Component implements OnInit {
 
     this._cachedCheckForCuratedProgram = this.computeCheckForCuratedProgram()
     this._cachedIsContentUnlocked = this.computeIsContentUnlocked()
+    this._cachedIsMilestoneAssessment = this.computeIsMilestoneAssessment()
+    this._cachedIsMilestoneAssessmentLocked = this.computeIsMilestoneAssessmentLocked()
     this._cachedResourceLink = this.computeResourceLink()
     this._cacheInitialized = true
   }
@@ -259,7 +259,7 @@ export class AppTocContentCardV2Component implements OnInit {
       computedIsLocked: hashData?.computedIsLocked,
       contentIsLocked: this.content.isLocked
     })
-
+    
     if (hashData && hashData.computedIsLocked !== undefined) {
       return hashData.computedIsLocked
     }
@@ -301,8 +301,8 @@ export class AppTocContentCardV2Component implements OnInit {
     while (currentParentId && depth < maxDepth) {
       const parentData = this.hierarchyMapData[currentParentId]
       if (parentData) {
-        if ((parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') &&
-          (parentData.computedIsLocked || parentData.isLocked)) {
+        if ((parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') && 
+            (parentData.computedIsLocked || parentData.isLocked)) {
           return true
         }
         currentParentId = parentData.parent
@@ -313,6 +313,135 @@ export class AppTocContentCardV2Component implements OnInit {
     }
     return false
   }
+
+  /**
+   * Check if current content is a milestone assessment (Course Assessment or Final Assessment inside a Milestone)
+   */
+  private computeIsMilestoneAssessment(): boolean {
+    if (!this.baseContentReadData || this.baseContentReadData.courseCategory !== 'Learning Pathway') {
+      return false
+    }
+
+    if (!this.content || !this.hierarchyMapData) {
+      return false
+    }
+
+    // Check if this is an assessment
+    const isAssessment = 
+      this.content.primaryCategory === 'Course Assessment' ||
+      this.content.courseCategory === 'Course Assessment' ||
+      (this.content.name && this.content.name.toLowerCase().includes('assessment'))
+
+    if (!isAssessment) {
+      return false
+    }
+
+    // Check if the parent or grandparent is a milestone (since assessments can be inside courses inside milestones)
+    if (this.content.parent && this.hierarchyMapData[this.content.parent]) {
+      const parentData = this.hierarchyMapData[this.content.parent]
+      
+      // Check if direct parent is a milestone
+      if (parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') {
+        return true
+      }
+      
+      // Check if grandparent is a milestone (for assessments inside courses inside milestones)
+      if (parentData.parent && this.hierarchyMapData[parentData.parent]) {
+        const grandparentData = this.hierarchyMapData[parentData.parent]
+        return grandparentData.isMilestone || grandparentData.primaryCategory === 'Milestone' || grandparentData.courseCategory === 'Milestone'
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Check if milestone assessment should be locked
+   * Assessment is locked if:
+   * 1. The parent milestone is unlocked (otherwise handled by parent milestone lock)
+   * 2. NOT all mandatory content in the milestone is completed
+   */
+  private computeIsMilestoneAssessmentLocked(): boolean {
+    if (!this._cachedIsMilestoneAssessment && !this.computeIsMilestoneAssessment()) {
+      return false
+    }
+
+    // If already completed, don't lock
+    if (this.content && (this.content.completionStatus === 2 || 
+        (this.content.completionPercentage && this.content.completionPercentage >= 100))) {
+      return false
+    }
+
+    // Find the milestone ID (could be parent or grandparent)
+    let milestoneId: string | undefined
+    let milestone: any
+
+    // Check if direct parent is milestone
+    if (this.content?.parent && this.hierarchyMapData && this.hierarchyMapData[this.content.parent]) {
+      const parentData = this.hierarchyMapData[this.content.parent]
+      if (parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') {
+        milestoneId = this.content.parent
+        milestone = parentData
+      } else if (parentData.parent && this.hierarchyMapData[parentData.parent]) {
+        // Check if grandparent is milestone
+        const grandparentData = this.hierarchyMapData[parentData.parent]
+        if (grandparentData.isMilestone || grandparentData.primaryCategory === 'Milestone' || grandparentData.courseCategory === 'Milestone') {
+          milestoneId = parentData.parent
+          milestone = grandparentData
+        }
+      }
+    }
+
+    if (!milestoneId || !milestone) {
+      return false
+    }
+    
+    // If the parent milestone itself is locked, don't add additional locking
+    // (the parent lock will handle it)
+    if (milestone.computedIsLocked || milestone.isLocked) {
+      return false
+    }
+
+    // Check if all mandatory content in the milestone is completed
+    let mandatoryCount = 0
+    let completedMandatoryCount = 0
+
+    // Check all items in hashmap that are direct children of this milestone
+    for (const key of Object.keys(this.hierarchyMapData)) {
+      const item = this.hierarchyMapData[key]
+
+      // Check if this item is a direct child of the milestone
+      if (item.parent !== milestoneId) continue
+
+      // Skip assessments - we're checking if other content is complete
+      const isItemAssessment =
+        item.primaryCategory === 'Course Assessment' ||
+        item.primaryCategory === 'Final Assessment' ||
+        item.courseCategory === 'Course Assessment' ||
+        (item.name && item.name.toLowerCase().includes('assessment'))
+      if (isItemAssessment) continue
+
+      // Check if this content is mandatory
+      if (item.isMandatory) {
+        mandatoryCount++
+        const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                           item.completionPercentage >= 100 || item.progress >= 100
+        if (isCompleted) {
+          completedMandatoryCount++
+        }
+      }
+    }
+
+    // If there are no mandatory items, assessment is unlocked
+    if (mandatoryCount === 0) {
+      return false
+    }
+
+    // Lock assessment if not all mandatory items are completed
+    const allMandatoryComplete = completedMandatoryCount >= mandatoryCount
+    return !allMandatoryComplete
+  }
+
   // FOR RIGHT SIDE RESOURCE SCROLL ON TOC PAGE
   resourceScroll() {
     this.pageScrollSubscription = this.appTocSvc.updatePageScroll.subscribe((value: boolean) => {
@@ -363,9 +492,9 @@ export class AppTocContentCardV2Component implements OnInit {
       }
 
       // Recompute cache when critical inputs change
-      if (property === 'content' || property === 'baseContentReadData' ||
-        property === 'batchId' || property === 'forPreview' ||
-        property === 'parentMilestoneLocked' || property === 'mlCourse') {
+      if (property === 'content' || property === 'baseContentReadData' || 
+          property === 'batchId' || property === 'forPreview' || 
+          property === 'parentMilestoneLocked' || property === 'mlCourse') {
         shouldRecomputeCache = true
       }
     }
@@ -745,6 +874,20 @@ export class AppTocContentCardV2Component implements OnInit {
     return this.computeIsMilestoneLocked()
   }
 
+  get isMilestoneAssessment(): boolean {
+    if (this._cacheInitialized) {
+      return this._cachedIsMilestoneAssessment
+    }
+    return this.computeIsMilestoneAssessment()
+  }
+
+  get isMilestoneAssessmentLocked(): boolean {
+    if (this._cacheInitialized) {
+      return this._cachedIsMilestoneAssessmentLocked
+    }
+    return this.computeIsMilestoneAssessmentLocked()
+  }
+
   /**
    * Check if a milestone's mandatory courses and assessment are completed.
    * Looks at the content hierarchy to find children of the milestone.
@@ -891,6 +1034,30 @@ export class AppTocContentCardV2Component implements OnInit {
     return completedCount
   }
 
+  /**
+   * Get unlock criteria message for locked milestones
+   */
+  getMilestoneUnlockMessage(): string {
+    if (!this.content || !this.hierarchyMapData) {
+      return ''
+    }
+
+    const milestoneData = this.hierarchyMapData[this.content.identifier]
+    if (!milestoneData) {
+      return ''
+    }
+
+    const milestoneIndex = milestoneData.milestoneIndex
+
+    // Milestone 1 requires pre-assessment completion
+    if (milestoneIndex === 0) {
+      return 'Complete the preliminary assessment to unlock this milestone'
+    }
+
+    // Other milestones require previous milestone completion
+    return `Complete all mandatory content and assessment in Milestone ${milestoneIndex} to unlock this milestone`
+  }
+
   shouldShowDownloadButton(content: NsContent.IContent | null): boolean {
     if (!content) {
       return false
@@ -934,74 +1101,6 @@ export class AppTocContentCardV2Component implements OnInit {
     this.resourceDownloadHelperSvc.downloadPDF(content, pageId)
     console.log('content', content)
     console.log('baseContent', this.baseContentReadData)
-  }
-
-  /**
-   * View milestone achievement - calls the achievement API and shows the result
-   */
-  viewMilestoneAchievement(event?: MouseEvent) {
-    if (event) {
-      event.preventDefault()
-      event.stopPropagation()
-    }
-
-    if (!this.content || !this.batchId || this.achievementLoading) {
-      return
-    }
-
-    // Get user ID from ConfigurationsService
-    const userId = this.configSvc?.userProfile?.userId
-    if (!userId) {
-      console.error('User ID not found')
-      return
-    }
-
-    // Extract milestone ID (e.g., "m1", "m2") from the content name or index
-    // Try to get milestone number from the index or extract from content
-    let milestoneId = 'm' + (this.index - 1) // index is typically 1-based, milestones are 0-based
-
-    // If content name contains milestone number, extract it
-    if (this.content.name) {
-      const match = this.content.name.match(/milestone\s*(\d+)/i)
-      if (match) {
-        milestoneId = 'm' + match[1]
-      }
-    }
-
-    const courseId = this.baseContentReadData?.identifier || this.rootId
-
-    this.achievementLoading = true
-
-    this.appTocSvc.generateMilestoneAchievement(userId, courseId, this.batchId, milestoneId).subscribe({
-      next: (response: any) => {
-        this.achievementLoading = false
-        console.log('Achievement generated successfully:', response)
-        // Show achievement dialog or handle response
-        if (response && response.result) {
-          // Open a dialog to show the achievement
-          this.dialog.open(CertificateDialogComponent, {
-            width: '1300px',
-            data: {
-              cet: response.result.printUri || response.result.svgData,
-              certId: response.result.identifier,
-              isAchievement: true
-            },
-          })
-        }
-      },
-      error: (error: any) => {
-        this.achievementLoading = false
-        // Show error message in snackbar
-        const errorMessage = error?.error?.result?.message || error?.message || 'Failed to generate achievement'
-        this.snackBar.open(errorMessage, 'Close', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-          panelClass: ['error-snackbar']
-        })
-        console.error('Error generating achievement:', error)
-      }
-    })
   }
 
 }
