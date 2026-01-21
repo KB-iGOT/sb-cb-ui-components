@@ -70,13 +70,15 @@ span.optional-span {
 
 .resource-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-direction: column;
   // border-radius: 8px;
   // margin-bottom: 8px;
 
   .resource {
     padding: 16px;
     padding-left: 0;
+    width: 100%;
   }
 
   .card-thumbnail {
@@ -612,10 +614,29 @@ span.optional-span {
   background: #FFF4EC;
   color: #D13924;
   padding: 10px;
+  border-radius: 4px;
+  display: block !important;
+  width: 100%;
+}
+
+.content-locking {
+  padding: 8px 12px;
+  margin-top: 8px;
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 4px;
+  background: #FFF4EC;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .lock-icon {
   color: #F3962F;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .unlock-message {
@@ -686,6 +707,22 @@ span.optional-span {
   font-size: 14px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.6);
+}
+
+.milestone-locked-message {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(243, 150, 47, 0.1);
+  border-left: 3px solid #F3962F;
+  border-radius: 4px;
+}
+
+.locked-criteria-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
 }
 
 .locked-text {

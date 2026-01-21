@@ -1,7 +1,7 @@
 import {
   Component, OnDestroy, OnInit, AfterViewInit, AfterViewChecked,
   HostListener, ElementRef, ViewChild, ViewEncapsulation, Input,
-  Inject, Optional,
+  Inject,
 } from '@angular/core'
 import { Location } from '@angular/common'
 import { SafeHtml, DomSanitizer, SafeStyle } from '@angular/platform-browser'
@@ -145,6 +145,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   batchDataSubscription: Subscription | null = null
   resumeDataSubscription: Subscription | null = null
   translationSubscription: Subscription | null = null
+  hashmapUpdatedSubscription: Subscription | null = null
   @ViewChild('stickyMenu', { static: true }) menuElement!: ElementRef
   batchControl = new UntypedFormControl('', Validators.required)
   contentProgress = 0
@@ -237,6 +238,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   languageMapProgress: any
   preAssessmentRequiredFlag: any = false
   lockCertificate = false
+  private lastProgressRefreshTime: number = 0
+  private isRefreshingProgress: boolean = false
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
     const windowScroll = window.pageYOffset
@@ -1446,6 +1449,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     if (this.timerUnsubscribe) {
       this.timerUnsubscribe.unsubscribe()
     }
+    if (this.hashmapUpdatedSubscription) {
+      this.hashmapUpdatedSubscription.unsubscribe()
+    }
   }
 
   programEnrollCall(batchData: any) {
@@ -1603,6 +1609,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           this.fetchBatchDetails()
         }
         this.tocSvc.callHirarchyProgressHashmap(this.content)
+        // For Learning Pathways, compute milestone locking when not enrolled (all locked)
+        if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+          console.log('User not enrolled - computing milestone locks')
+          this.tocSvc.computeMilestoneLockingStatus(false)
+          this.syncMilestoneLockStatus()
+        }
         this.enrollBtnLoading = false
         this.tocSvc.contentLoader.next(false)
       }
@@ -1916,6 +1928,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.checkRegistrationStatus()
     this.setupRouterEventSubscription()
     this.getContentCreatorData()
+    this.setupHashmapUpdateSubscription()
   }
 
   private initData(data: Data) {
@@ -2287,10 +2300,33 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.routerParamSubscription = this.router.events.subscribe((routerEvent: Event) => {
       if (routerEvent instanceof NavigationEnd) {
         this.assignPathAndUpdateBanner(routerEvent.url)
+        
+        // Check if we're on the TOC/overview page for a Learning Pathway
+        const isTocPage = routerEvent.url.includes('/app/toc') || 
+                         routerEvent.url.includes('/overview') ||
+                         routerEvent.url.includes('/content')
+        
+        
       }
     })
   }
 
+  
+
+  /**
+   * Subscribe to hashmap updates to recompute milestone lock status in real-time
+   * This ensures that when progress changes, milestone locks update immediately without page refresh
+   */
+  private setupHashmapUpdateSubscription() {
+    this.hashmapUpdatedSubscription = this.tocSvc.hashmapUpdated$.subscribe((update) => {
+      if (update && this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+        const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
+        console.log('Hashmap updated at:', update.timestamp, 'Enrolled:', isEnrolled, 'Syncing milestone lock status...')
+        // Sync content tree's isLocked with the updated hashmap values
+        this.syncMilestoneLockStatus()
+      }
+    })
+  }
 
 
   fetchUserEnrollmentDataV2() {
@@ -2434,12 +2470,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       return new Promise<boolean>((resolve) => {
         const content = this.baseContentReadData
         this.content = this.appTocV2Svc.constructHeirarchyData(content)
+        // Update progress with latest enrollment data
         this.appTocV2Svc.mapContentHierarchyProgressUpdate(this.content, this.userEnrollmentList)
         // Create hashmap and compute milestone locking after progress is updated
         this.tocSvc.callHirarchyProgressHashmap(this.content)
-        console.log('hashmap', this.tocSvc.hashmap)
-        // Compute milestone locking status with updated progress data
-        this.tocSvc.computeMilestoneLockingStatus()
+        console.log('Learning Pathway hashmap updated:', this.tocSvc.hashmap)
+        // Check if user is enrolled
+        const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
+        // Compute milestone locking status with enrollment status and updated progress data
+        this.tocSvc.computeMilestoneLockingStatus(isEnrolled)
+        console.log('Milestone locking recomputed. Enrolled:', isEnrolled)
         // Sync content tree's isLocked with computed values
         this.syncMilestoneLockStatus()
         this.getOrgIdForShare()
@@ -2518,11 +2558,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   syncMilestoneLockStatus() {
     if (!this.content || !this.content.children) return
 
+    let hasChanges = false
     this.content.children.forEach((child: any) => {
       if (child.primaryCategory === 'Milestone' && child.identifier) {
         const hashData = this.tocSvc.hashmap[child.identifier]
         if (hashData && hashData.computedIsLocked !== undefined) {
+          const oldLocked = child.isLocked
           child.isLocked = hashData.computedIsLocked
+          if (oldLocked !== child.isLocked) {
+            hasChanges = true
+          }
+          console.log(`Synced lock status for ${child.name} (${child.identifier}): isLocked=${child.isLocked}`)
         }
       }
     })
@@ -2811,10 +2857,22 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               this.tocSvc.mapCompletionPercentage(this.content, this.resumeData)
             }
             this.tocSvc.callHirarchyProgressHashmap(this.content)
+            // Recompute milestone locking status after progress update
+            if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+              const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
+              this.tocSvc.computeMilestoneLockingStatus(isEnrolled)
+              this.syncMilestoneLockStatus()
+            }
             this.tocSvc.contentLoader.next(false)
           } else {
             this.resumeData = null
             this.tocSvc.callHirarchyProgressHashmap(this.content)
+            // Recompute milestone locking status even with no progress data
+            if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+              const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
+              this.tocSvc.computeMilestoneLockingStatus(isEnrolled)
+              this.syncMilestoneLockStatus()
+            }
             this.tocSvc.contentLoader.next(false)
           }
 

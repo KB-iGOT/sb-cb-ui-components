@@ -84,6 +84,10 @@ export class AppTocV2Service {
 
 
   mapContentHierarchyProgressUpdate(contentHeirarchyData: any, enrollmentListData: any) {
+    console.log('=== mapContentHierarchyProgressUpdate ===')
+    console.log('Content hierarchy:', contentHeirarchyData?.name, contentHeirarchyData?.identifier)
+    console.log('Enrollment list data:', enrollmentListData)
+    
     if (contentHeirarchyData && contentHeirarchyData.children) {
       let totalLeafNodes = 0
       let totalCompletedLeafNodes = 0
@@ -162,17 +166,37 @@ export class AppTocV2Service {
 
   private updateNodeProgress(node: any, enrollment: any) {
 
-    const nodeEnrollData = enrollment?.contentList?.find((ele: any) => ele?.contentId === node.identifier)
+    // Try both contentId and collectionId as the API response may use either field
+    const nodeEnrollData = enrollment?.contentList?.find((ele: any) => 
+      ele?.contentId === node.identifier || ele?.collectionId === node.identifier
+    )
+    console.log(`Updating node progress for ${node.identifier} (${node.name}):`, {
+      hasEnrollment: !!enrollment,
+      hasNodeEnrollData: !!nodeEnrollData,
+      nodeEnrollData,
+      currentCompletionStatus: node.completionStatus,
+      currentCompletionPercentage: node.completionPercentage
+    })
+    
     if (enrollment && nodeEnrollData && nodeEnrollData.status < 2) {
       node.completionPercentage = nodeEnrollData.completionPercentage || nodeEnrollData.progress || 0
       node.completionStatus = nodeEnrollData.status
+      node.status = nodeEnrollData.status
     } else if (enrollment && nodeEnrollData && nodeEnrollData.status === 2) {
       node.completionPercentage = 100
       node.completionStatus = 2
+      node.status = 2
     } else {
       node.completionPercentage = 0
       node.completionStatus = 0
+      node.status = 0
     }
+    
+    console.log(`Updated node progress for ${node.identifier}:`, {
+      completionStatus: node.completionStatus,
+      completionPercentage: node.completionPercentage,
+      status: node.status
+    })
   }
 
   private updateCourseProgress(course: any, parentContentIdentifier, enrollmentListData: any) {
