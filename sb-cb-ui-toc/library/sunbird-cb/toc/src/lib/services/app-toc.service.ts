@@ -85,6 +85,8 @@ export class AppTocService {
   public getPageScroll = new BehaviorSubject(true)
   updatePageScroll = this.getPageScroll.asObservable()
   public hashmap: any = {}
+  private hashmapUpdated = new BehaviorSubject<any>(null)
+  hashmapUpdated$ = this.hashmapUpdated.asObservable()
   private transriptionDataSubject = new BehaviorSubject<any>(null); // Start with null
   transcriptionData$ = this.transriptionDataSubject.asObservable();
   public transriptionActiveLanguageDataObject = new BehaviorSubject<any>(null);
@@ -933,8 +935,8 @@ export class AppTocService {
           courseCategory: child.courseCategory || child.primaryCategory || '',
           duration: child.duration || 0,
           expectedDuration: child.expectedDuration || 0,
-          // Mark as pre-assessment for milestone locking logic
-          isPreAssessment: child.isPreAssessment || true,
+          // Mark as pre-assessment ONLY if explicitly set - do NOT default to true
+          isPreAssessment: child.isPreAssessment || false,
         }
         this.hashmap[child.identifier] = localMap
       })
@@ -990,13 +992,24 @@ export class AppTocService {
    * This avoids expensive calculations in component getters
    * 
    * Locking Rules:
+   * 0. If user is not enrolled, ALL milestones are locked
    * 1. All milestones are locked by default
    * 2. Milestone 1 (M1) unlocks when pre-assessment is completed
    * 3. Milestone N (N > 1) unlocks when:
    *    - All mandatory learning items in Milestone N-1 are completed
    *    - The assessment of Milestone N-1 is completed
    */
-  public computeMilestoneLockingStatus() {
+  public computeMilestoneLockingStatus(isEnrolled: boolean = true) {
+    if (!this.hashmap || Object.keys(this.hashmap).length === 0) {
+      return
+    }
+    
+    console.log('=== computeMilestoneLockingStatus ===')
+    console.log('User enrolled:', isEnrolled)
+    
+    // Capture initial state to detect changes
+    const initialHashmapSnapshot = JSON.stringify(this.hashmap)
+    
     // Get all milestone entries from hashmap sorted by their index or number
     const milestoneEntries = Object.keys(this.hashmap)
       .filter(key => {
@@ -1014,6 +1027,24 @@ export class AppTocService {
         const numB = parseInt(b.replace(/\D/g, '')) || 0
         return numA - numB
       })
+
+    // If user is NOT enrolled, lock ALL milestones
+    if (!isEnrolled) {
+      console.log('User not enrolled - locking ALL milestones')
+      milestoneEntries.forEach(milestoneId => {
+        this.hashmap[milestoneId].computedIsLocked = true
+      })
+      // Also lock all children
+      Object.keys(this.hashmap).forEach(key => {
+        const item = this.hashmap[key]
+        if (!item.isMilestone) {
+          this.hashmap[key].isParentMilestoneLocked = true
+        }
+      })
+      this.hashmap = { ...this.hashmap }
+      this.hashmapUpdated.next({ timestamp: Date.now(), hashmap: this.hashmap })
+      return
+    }
 
     // Check if pre-assessment is completed (required to unlock M1)
     const isPreAssessmentCompleted = this.checkPreAssessmentCompletion()
@@ -1094,6 +1125,30 @@ export class AppTocService {
 
     // Create new hashmap reference to trigger Angular change detection
     this.hashmap = { ...this.hashmap }
+    
+    // Emit update event if hashmap changed (milestone lock status updated)
+    const finalHashmapSnapshot = JSON.stringify(this.hashmap)
+    if (initialHashmapSnapshot !== finalHashmapSnapshot) {
+      this.hashmapUpdated.next({ timestamp: Date.now(), hashmap: this.hashmap })
+    }
+  }
+
+  /**
+   * Trigger milestone lock update when hashmap progress is updated externally
+   * Called from viewer-util.service.ts after progress updates
+   */
+  public triggerMilestoneLockUpdate() {
+    // Check if we have a Learning Pathway in the hashmap
+    const hasLearningPathway = Object.keys(this.hashmap).some(key => {
+      const item = this.hashmap[key]
+      return item.isLearningPathway && item.courseCategory === 'Learning Pathway'
+    })
+    
+    if (hasLearningPathway) {
+      console.log('🔄 Triggering milestone lock recomputation after progress update')
+      // Assume enrolled since progress was just updated
+      this.computeMilestoneLockingStatus(true)
+    }
   }
 
   /**
@@ -1111,11 +1166,27 @@ export class AppTocService {
       }
     }
 
+    console.log('Checking pre-assessment completion. Learning Pathway ID:', learningPathwayId)
+
     // PRIORITY 1: Look for items explicitly marked as pre-assessment
     for (const key of Object.keys(this.hashmap)) {
       const item = this.hashmap[key]
       if (item.isPreAssessment === true) {
-        const isCompleted = item.completionStatus === 2 || item.status === 2 || item.completionPercentage >= 100 || item.progress >= 100
+        // Must check for actual completion - not just any value
+        const isCompleted = (item.completionStatus === 2 || item.status === 2 || 
+                            (item.completionPercentage !== undefined && item.completionPercentage >= 100) || 
+                            (item.progress !== undefined && item.progress >= 100))
+        console.log(`✅ Pre-assessment found (isPreAssessment flag): ${key}`, {
+          name: item.name,
+          completionStatus: item.completionStatus,
+          status: item.status,
+          completionPercentage: item.completionPercentage,
+          progress: item.progress,
+          isCompleted,
+          // Show ALL fields to debug what's available
+          allData: JSON.stringify(item, null, 2)
+        })
+        // Pre-assessment exists - return its completion status (true/false)
         return isCompleted
       }
     }
@@ -1132,11 +1203,42 @@ export class AppTocService {
       if (item.isMilestone) continue
 
       // This is a non-milestone direct child - it's the pre-assessment
-      const isCompleted = item.completionStatus === 2 || item.status === 2 || item.completionPercentage >= 100 || item.progress >= 100
+      // Must check for actual completion - not just any value
+      const isCompleted = (item.completionStatus === 2 || item.status === 2 || 
+                          (item.completionPercentage !== undefined && item.completionPercentage >= 100) || 
+                          (item.progress !== undefined && item.progress >= 100))
+      console.log(`✅ Pre-assessment found (first non-milestone child): ${key}`, {
+        name: item.name,
+        completionStatus: item.completionStatus,
+        status: item.status,
+        completionPercentage: item.completionPercentage,
+        progress: item.progress,
+        isCompleted,
+        // Show ALL fields to debug what's available
+        allData: JSON.stringify(item, null, 2)
+      })
+      // Pre-assessment exists - return its completion status (true/false)
       return isCompleted
     }
 
-    // If no pre-assessment found, consider M1 can be unlocked (no pre-assessment requirement)
+    // CRITICAL: If we reach here, no pre-assessment was found in the hashmap
+    // This could mean either:
+    // 1. There IS no pre-assessment (unlock M1 by default)
+    // 2. The hashmap hasn't been populated yet (should lock M1 until data is ready)
+    
+    // To be safe, check if ANY children exist at all
+    const hasAnyChildren = Object.keys(this.hashmap).some(key => 
+      this.hashmap[key].parent === learningPathwayId
+    )
+    
+    if (!hasAnyChildren) {
+      // Hashmap not populated yet - lock M1 until data is ready
+      console.log('⚠️ No children found in hashmap yet - locking M1 until data is ready')
+      return false
+    }
+    
+    // Hashmap is populated but no pre-assessment found - allow M1 to unlock
+    console.log('No pre-assessment found in fully populated hashmap - allowing M1 to be unlocked by default')
     return true
   }
 
