@@ -483,6 +483,14 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         if (correctAnswersCount < 2) {
           return false
         }
+      } else if (this.questionData.qType === 'MCQ-MCA-W') {
+        // For MCQ-MCA-W (weighted), check that all options have valid weight values
+        const allOptionsHaveWeights = this.questionOptions.every(opt =>
+          opt.weight !== undefined && opt.weight !== null && opt.weight !== ''
+        )
+        if (!allOptionsHaveWeights) {
+          return false
+        }
       } else {
         // For MCQ-SCA and MCQ-SCA-TF, require at least 1 correct answer
         const hasCorrectAnswer = this.questionOptions.some(opt => opt.isCorrect)
