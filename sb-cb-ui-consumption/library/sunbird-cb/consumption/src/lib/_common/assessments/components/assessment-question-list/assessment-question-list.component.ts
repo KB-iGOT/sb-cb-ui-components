@@ -433,7 +433,22 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   checkBlankIntext() {
     // Count occurrences of <input tags in the HTML
     const inputMatches = (this.questionText.match(/<input[^>]*>/gi) || [])
+    const previousCount = this.fitbCount
     this.fitbCount = inputMatches.length
+
+    // Reset options if all blanks are deleted
+    if (this.fitbCount === 0 && previousCount > 0) {
+      // Initialize with minimum required options based on assessment type
+      const minOptions = this.isBasicAssessment() ? 1 : 2
+      this.questionOptions = []
+      for (let i = 0; i < minOptions; i++) {
+        this.questionOptions.push({
+          id: i + 1,
+          text: '',
+          blankNumber: null
+        })
+      }
+    }
   }
 
   canSaveQuestion(): boolean {
