@@ -688,17 +688,55 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     this.telemtryResponse.emit(stripData)
   }
 
-  redirectViewAll(stripData: any, path: string, queryParamsData: any) {
+  redirectViewAll(stripData: any, path: string, queryParamsData: any, tabIndex?: number) {
+    // Check if we have a specific pill-level view more URL
+    const selectedPill = this.getSelectedPill(stripData, tabIndex)
+    
+    if (selectedPill?.viewMoreUrl) {
+      this.navigateToSelectedPillUrl(selectedPill, path)
+      return
+    }
+
+    // Handle emission or navigation based on configuration
     if (this.emitViewAll) {
       this.viewAllResponse.emit(stripData)
-    } else {
-      if (queryParamsData && queryParamsData.tabSelected && queryParamsData.tabSelected === 'designation') {
-        delete queryParamsData.key
-        this.router.navigate(['/page/recommended-learnings'], { queryParams: queryParamsData })
-      } else {
-        this.router.navigate([path], { queryParams: queryParamsData })
-      }
+      return
+    }
 
+    // Navigate to the appropriate route
+    this.navigateToRoute(path, queryParamsData)
+  }
+
+  private getSelectedPill(stripData: any, tabIndex?: number): any {
+    if (tabIndex === undefined || tabIndex < 0 || !stripData?.tabs?.[tabIndex]) {
+      return null
+    }
+
+    const selectedPillIndex = this.getSelectedPillIndex(stripData.tabs[tabIndex], tabIndex)
+    if (selectedPillIndex < 0) {
+      return null
+    }
+
+    return stripData.tabs[tabIndex].pillsData?.[selectedPillIndex]
+  }
+
+  private navigateToSelectedPillUrl(selectedPill: any, defaultPath: string): void {
+    const path = selectedPill.viewMoreUrl.path || defaultPath
+    const filters = selectedPill.viewMoreUrl.f || {}
+    const queryParams = {
+      f: JSON.stringify(filters),
+      ...selectedPill.viewMoreUrl.queryParams
+    }
+    
+    this.router.navigate([path], { queryParams })
+  }
+
+  private navigateToRoute(path: string, queryParamsData: any): void {
+    if (queryParamsData?.tabSelected === 'designation') {
+      delete queryParamsData.key
+      this.router.navigate(['/page/recommended-learnings'], { queryParams: queryParamsData })
+    } else {
+      this.router.navigate([path], { queryParams: queryParamsData })
     }
   }
 
@@ -889,6 +927,12 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       const response = await this.searchV6Request(strip, currentTab.request, calculateParentStatus)
       const tabCardSubType = _.get(strip, `tabs[${tabIndex}].pillsData[${pillIndex}].cardSubType`, null)
       if (response && response.results) {
+        // if dot array needed to be handled and need to reset card subtype
+        // if(tabCardSubType) {
+        //   // this.stripsResultDataMap[strip.key].stripConfig.cardSubType = tabCardSubType
+        // }
+        
+
         const widgets = this.transformContentsToWidgets(response.results.result.content, strip, tabCardSubType)
         let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {

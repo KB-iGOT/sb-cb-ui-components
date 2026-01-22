@@ -75,10 +75,14 @@ $secondary-color: #EF951E;
 
 .card-wide-v2 {
     border-radius: 12px 12px;
-    max-width: 95%;
-    width: 784px;
     display: flex;
-    // max-height: 172px;
+        border-radius: 12px;
+    width: 784px;
+    max-width: 100%;
+    display: flex;
+    background-color: #fff;
+    /* min-width: 100%; */
+    margin-right: 0 !important;
 
     $title-line-count: 2;
     $title-line-height: 20px;
@@ -287,7 +291,7 @@ $secondary-color: #EF951E;
       min-width: auto;
       display: flex;
       flex-direction: column;
-      min-width: calc(100vw - 32px);
+      min-width: calc(100vw - 64px);
       .imageholder{
         width: 100%;
       }
@@ -302,7 +306,7 @@ $secondary-color: #EF951E;
       min-width: auto;
       display: flex;
       flex-direction: column;
-      min-width: calc(100vw - 32px);
+      min-width: calc(100vw - 64px);
       .imageholder{
         width: 100%;
       }
@@ -424,8 +428,12 @@ $secondary-color: #EF951E;
       min-width: 325px;
       overflow: hidden;
     }
-  }
 
+.card-wide-v2 {
+  width: 95%;
+  
+  }
+  }
 
 @media screen and (min-width: 390px) and (max-width: 844px) {
   .min-width-763 {
