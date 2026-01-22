@@ -513,6 +513,27 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         changedData.additionalInstructions = currentAdditionalInstructions
       }
 
+      // Check totalQuestions
+      const currentTotalQuestions = currentSectionData.totalQuestions
+      const originalTotalQuestions = originalSectionData?.totalQuestions || 0
+      if (currentTotalQuestions !== originalTotalQuestions) {
+        changedData.totalQuestions = currentTotalQuestions
+      }
+
+      // Check maxQuestions
+      const currentMaxQuestions = currentSectionData.maxQuestions
+      const originalMaxQuestions = originalSectionData?.maxQuestions || 0
+      if (currentMaxQuestions !== originalMaxQuestions) {
+        changedData.maxQuestions = currentMaxQuestions
+      }
+
+      // Check minPassPercentage
+      const currentMinPassPercentage = currentSectionData.minPassPercentage
+      const originalMinPassPercentage = originalSectionData?.minimumPassPercentage || 0
+      if (currentMinPassPercentage !== originalMinPassPercentage) {
+        changedData.minimumPassPercentage = currentMinPassPercentage
+      }
+
       if (Object.keys(changedData).length > 0) {
         const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier || null
         const updateData = {
@@ -666,13 +687,23 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   }
 
   openBulkUploadDialog() {
+    // Get totalQuestions based on assessment type
+    let totalQuestions = null
+    if (this.isBasicAssessmentWithSections()) {
+      // For basic assessment with multiple sections, get totalQuestions from current section
+      totalQuestions = this.currentBasicSectionGroup?.get('totalQuestions')?.value || null
+    } else if (this.isBasicAssessment()) {
+      // For basic assessment without sections, get totalQuestions from basicAssessmentForm
+      totalQuestions = this.basicAssessmentForm?.get('totalQuestions')?.value || null
+    }
+
     const dialogRef = this.dialog.open(BulkUploadAllTypeQuestionComponent, {
       width: '90vw',
       maxWidth: '1200px',
       data: {
         maxFileSize: 400 * 1024 * 1024,
         questionTracking: this.getCurrentSectionLevelDefinition(),
-        totalQuestions: this.basicAssessmentForm?.get('totalQuestions')?.value || null,
+        totalQuestions: totalQuestions,
         compatibilityLevel: this.assessmentData?.compatibilityLevel,
         assessmentType: this.assessmentData?.assessmentType,
         existingQuestionsCount: this.questionsList?.length || 0
