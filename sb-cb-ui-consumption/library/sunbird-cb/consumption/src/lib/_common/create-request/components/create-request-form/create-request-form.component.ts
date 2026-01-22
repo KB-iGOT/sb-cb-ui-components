@@ -64,7 +64,8 @@ export class CreateRequestFormComponent implements OnInit {
       assigneeText: [''],
       providers: [''],
       preferredProvider: [''],
-      providerText: ['']
+      providerText: [''],
+      competencies_v6: ['', [Validators.required]]
     })
 
     this.routeSubscription()

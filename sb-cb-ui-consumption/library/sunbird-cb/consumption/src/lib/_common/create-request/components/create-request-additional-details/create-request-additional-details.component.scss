@@ -105,3 +105,37 @@
 ::ng-deep .theme-igot.day-mode .mat-option {
     color: rgba(0, 0, 0, 0.87) !important;
 }
+
+.compbutton {
+  border-radius: 25px;
+}
+
+.complabels {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  margin: 4px 8px 4px 0;
+  border-radius: 16px;
+  background-color: rgb(224, 224, 224);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.87);
+  white-space: nowrap;
+}
+
+.complabels.active {
+  background: #ffffff;
+  color: #555 !important;
+  border: 1px solid #000;
+}
+
+.compt-table {
+  border-collapse: collapse;
+}
+
+.compt-table tr {
+  border: 1px solid rgba(0, 0, 0, 0.16);
+}
+
+.font-bold {
+  font-weight: 700;
+}

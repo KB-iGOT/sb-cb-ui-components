@@ -5,6 +5,7 @@ import * as _ from 'lodash'
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators'
 import { CreateRequestService } from '../../services/create-request.service'
 import { AddAuthorsComponent } from '../../dialogs/add-authors/add-authors.component'
+import { CompetencyPassbookService } from '../../../competency-passbook/competency-passbook.service'
 
 type Auther = {
   name: string,
@@ -43,11 +44,31 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
   requestTypeData: any[] = []
   requestObjData: any
   environment!: any
+  // competencies
+  allCompetencies: any[] = []
+  filteredallCompetencies: any[] = []
+  allCompetencyTheme: any[] = []
+  filteredallCompetencyTheme: any[] = []
+  allCompetencySubtheme: any[] = []
+  filteredallCompetencySubtheme: any[] = []
+  enableCompetencyAdd = false
+  seletedCompetencyArea: any
+  seletedCompetencyTheme: any
+  seletedCompetencySubTheme: any
+  queryThemeControl = new UntypedFormControl('')
+  querySubThemeControl = new UntypedFormControl('')
+  isTableExpanded = true
+  listView = true
+  allThemeData: any
+  allSubThemeData: any
   //#endregion (global variable declaration)
+
+
 
   constructor(
     private dialog: MatLegacyDialog,
     private createRequestSvc: CreateRequestService,
+    private competencySvc: CompetencyPassbookService,
     @Inject('environment') environment: any,
   ) {
     this.environment = environment
@@ -66,6 +87,7 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
     if (autherControl && autherControl.value && autherControl.value.length > 0) {
       this.addedAuthersList = autherControl.value
     }
+    this.initializeCompetenciesSection()
   }
 
   getLanguagesList(): void {
@@ -390,5 +412,255 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
     }
     return false
   }
+
+  // region: competencies UI helpers
+
+  get competenciesValue(): any[] {
+    const control = this.additionalDetailsForm?.get('competencies_v6') as UntypedFormControl | null
+    return (control && control.value) || []
+  }
+
+  initializeCompetenciesSection() {
+    if (!this.additionalDetailsForm.get('competencies_v6')) {
+      this.additionalDetailsForm.addControl('competencies_v6', new UntypedFormControl([]))
+    }
+
+    this.loadCompetencyMaster()
+
+    this.queryThemeControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(value => {
+        this.filteredallCompetencyTheme = this.filterValues(value || '', this.allCompetencyTheme)
+      })
+
+    this.querySubThemeControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(value => {
+        this.filteredallCompetencySubtheme = this.filterValues(value || '', this.allCompetencySubtheme)
+      })
+  }
+
+  loadCompetencyMaster() {
+    this.competencySvc.fetchCompetencyV6().subscribe(response => {
+      if (response && response.params && response.params.status && response.params.status.toLowerCase() === 'successful') {
+        this.allCompetencies = response.result.framework.categories.filter((v: any) => v.code === 'competencyarea')[0].terms
+        this.allThemeData = response.result.framework.categories.filter((v: any) => v.code === 'theme')[0].terms
+        this.allSubThemeData = response.result.framework.categories.filter((v: any) => v.code === 'subtheme')[0].terms
+        this.filteredallCompetencies = this.allCompetencies
+      } else {
+        this.allCompetencies = []
+        this.filteredallCompetencies = []
+      }
+    })
+  }
+
+  filterValues(searchValue: string, array: any[]) {
+    if (!searchValue) {
+      return array
+    }
+    const lower = searchValue.toLowerCase()
+    return array.filter((value: any) =>
+      (value.name || '').toLowerCase().includes(lower),
+    )
+  }
+
+  compAreaSelected(option: any) {
+    this.resetCompSubfields()
+    this.allCompetencies.forEach((val: any) => {
+      if (option.identifier === val.identifier) {
+        this.seletedCompetencyArea = val
+        this.allCompetencyTheme = val.associations
+        this.filteredallCompetencyTheme = this.allCompetencyTheme
+      }
+    })
+  }
+
+  compThemeSelected(option: any) {
+    this.enableCompetencyAdd = false
+    this.allCompetencyTheme.forEach((val: any) => {
+      debugger
+      if (option.identifier === val.identifier) {
+        this.seletedCompetencyTheme = val
+        this.allCompetencySubtheme = this.allThemeData.filter((v: any) => v.identifier === val.identifier)[0].associations
+        this.filteredallCompetencySubtheme = this.allCompetencySubtheme
+      }
+    })
+  }
+
+  compSubThemeSelected(option: any) {
+    this.seletedCompetencySubTheme = option
+    this.enableCompetencyAdd = true
+  }
+
+  resetCompfields() {
+    this.enableCompetencyAdd = false
+    this.seletedCompetencyArea = null
+    this.seletedCompetencyTheme = null
+    this.seletedCompetencySubTheme = null
+    this.allCompetencyTheme = []
+    this.allCompetencySubtheme = []
+    this.filteredallCompetencyTheme = []
+    this.filteredallCompetencySubtheme = []
+    this.queryThemeControl.setValue('')
+    this.querySubThemeControl.setValue('')
+  }
+
+  resetCompSubfields() {
+    this.enableCompetencyAdd = false
+    this.seletedCompetencyTheme = null
+    this.seletedCompetencySubTheme = null
+    this.allCompetencySubtheme = []
+    this.filteredallCompetencySubtheme = []
+    this.queryThemeControl.setValue('')
+    this.querySubThemeControl.setValue('')
+  }
+
+  canPush(arr: any[], obj: any) {
+    return !arr.some(item =>
+      item.competencyAreaIdentifier === obj.competencyAreaIdentifier &&
+      item.competencyThemeIdentifier === obj.competencyThemeIdentifier &&
+      item.competencySubThemeIdentifier === obj.competencySubThemeIdentifier,
+    )
+  }
+
+  addCompetency() {
+    if (!this.seletedCompetencyArea || !this.seletedCompetencyTheme || !this.seletedCompetencySubTheme) {
+      return
+    }
+
+    const area = this.seletedCompetencyArea
+    const theme = this.seletedCompetencyTheme
+    const subTheme = this.seletedCompetencySubTheme
+
+    const obj = {
+      // Area
+      competencyAreaIdentifier: area.identifier || area.id || area.name,
+      competencyAreaRefId: area.code || area.identifier || '',
+      competencyAreaName: area.name,
+      competencyAreaDescription: area.description || '',
+
+      // Theme
+      competencyThemeIdentifier: theme.identifier || theme.id || theme.name,
+      competencyThemeRefId: theme.code || theme.identifier || '',
+      competencyThemeName: theme.name,
+      competencyThemeType: theme.category || 'theme',
+      competencyThemeDescription: theme.description || '',
+      competencyThemeAdditionalProperties: theme.additionalProperties || {},
+
+      // Sub-theme
+      competencySubThemeIdentifier: subTheme.identifier || subTheme.id || subTheme.name,
+      competencySubThemeRefId: subTheme.code || subTheme.identifier || '',
+      competencySubThemeName: subTheme.name,
+      competencySubThemeDescription: subTheme.description || '',
+      competencySubThemeAdditionalProperties: subTheme.additionalProperties || {},
+    }
+
+    const control = this.additionalDetailsForm.get('competencies_v6') as UntypedFormControl
+    const value = control.value || []
+    if (this.canPush(value, obj)) {
+      value.push(obj)
+      control.setValue(value)
+      control.markAsDirty()
+      control.markAsTouched()
+    }
+    console.log('Added competencies:', this.additionalDetailsForm.get('competencies_v6')?.value)
+  }
+
+  get uniqueAreas(): string[] {
+    if (!this.competenciesValue || !this.competenciesValue.length) {
+      return []
+    }
+
+    return Array.from(new Set(
+      this.competenciesValue.map((comp: any) => comp.competencyAreaName),
+    ))
+  }
+
+  getUniqueThemesForArea(areaName: string): string[] {
+    if (!this.competenciesValue || !this.competenciesValue.length) {
+      return []
+    }
+
+    const themesForArea = this.competenciesValue
+      .filter((comp: any) => comp.competencyAreaName === areaName)
+      .map((comp: any) => comp.competencyThemeName)
+
+    return Array.from(new Set(themesForArea))
+  }
+
+  getSubthemesForAreaAndTheme(areaName: string, themeName: string): string[] {
+    if (!this.competenciesValue || !this.competenciesValue.length) {
+      return []
+    }
+
+    return this.competenciesValue
+      .filter((comp: any) =>
+        comp.competencyAreaName === areaName &&
+        comp.competencyThemeName === themeName,
+      )
+      .map((comp: any) => comp.competencySubThemeName)
+  }
+
+  getTotalRowsForArea(areaName: string): number {
+    let totalRows = 0
+    for (const theme of this.getUniqueThemesForArea(areaName)) {
+      totalRows += this.getSubthemesForAreaAndTheme(areaName, theme).length
+    }
+    return totalRows
+  }
+
+  removeCompetencyV2(area: string, theme: string, subtheme: string): void {
+    const control = this.additionalDetailsForm.get('competencies_v6') as UntypedFormControl | null
+    if (!control || !control.value) {
+      return
+    }
+
+    const competenciesValue = control.value
+    const index = competenciesValue.findIndex((comp: any) =>
+      comp.competencyAreaName === area &&
+      comp.competencyThemeName === theme &&
+      comp.competencySubThemeName === subtheme,
+    )
+
+    if (index !== -1) {
+      const updatedCompetencies = [
+        ...competenciesValue.slice(0, index),
+        ...competenciesValue.slice(index + 1),
+      ]
+      control.setValue(updatedCompetencies)
+      control.markAsDirty()
+      control.markAsTouched()
+    }
+  }
+
+  updateQuery(key: string, field: 'theme' | 'subtheme') {
+    if (field === 'theme') {
+      this.filteredallCompetencyTheme = this.filterValues(key, this.allCompetencyTheme)
+    } else {
+      this.filteredallCompetencySubtheme = this.filterValues(key, this.allCompetencySubtheme)
+    }
+  }
+
+  resetSearch(field: 'theme' | 'subtheme') {
+    if (field === 'theme') {
+      this.queryThemeControl.setValue('')
+      this.filteredallCompetencyTheme = this.allCompetencyTheme
+      if (!this.seletedCompetencySubTheme) {
+        this.filteredallCompetencySubtheme = []
+        this.querySubThemeControl.setValue('')
+      } else {
+        this.querySubThemeControl.setValue('')
+      }
+    } else {
+      this.querySubThemeControl.setValue('')
+      this.filteredallCompetencySubtheme = this.allCompetencySubtheme
+    }
+  }
+
+  toggleTable() {
+    this.isTableExpanded = !this.isTableExpanded
+  }
+
+  // endregion
 
 }
