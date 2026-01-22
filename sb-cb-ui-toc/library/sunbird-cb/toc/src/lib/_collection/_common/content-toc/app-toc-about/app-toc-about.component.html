@@ -370,7 +370,7 @@
         </ng-container>
     </div>
 
-    <div class="flex flex-col" *ngIf="contentReadData?.instructions">
+    <div class="flex flex-col" *ngIf="contentReadData?.instructions || contentReadData?.purpose">
         <ng-container *ngIf="skeletonLoader">
             <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
                 [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
@@ -389,7 +389,7 @@
                 [ngClass]="{'mob-desc-ellipsis': description.ellipsis && isMobile, 'desc-ellipsis': description.ellipsis && !isMobile}"
                 #descElem>
 
-                <div [innerHTML]="contentReadData?.instructions | replaceNbsp"
+                <div [innerHTML]="contentReadData?.instructions || contentReadData?.purpose | replaceNbsp"
                     class="mob-text break-words nodtranslate"></div>
                 <div class="ws-mat-default-text font-bold cursor-pointer text-sm" *ngIf="description.viewLess"
                     (click)="description.ellipsis = !description.ellipsis; description.viewLess = !description.viewLess">
