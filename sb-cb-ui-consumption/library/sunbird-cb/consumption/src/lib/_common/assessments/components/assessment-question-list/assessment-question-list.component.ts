@@ -433,7 +433,22 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   checkBlankIntext() {
     // Count occurrences of <input tags in the HTML
     const inputMatches = (this.questionText.match(/<input[^>]*>/gi) || [])
+    const previousCount = this.fitbCount
     this.fitbCount = inputMatches.length
+
+    // Reset options if all blanks are deleted
+    if (this.fitbCount === 0 && previousCount > 0) {
+      // Initialize with minimum required options based on assessment type
+      const minOptions = this.isBasicAssessment() ? 1 : 2
+      this.questionOptions = []
+      for (let i = 0; i < minOptions; i++) {
+        this.questionOptions.push({
+          id: i + 1,
+          text: '',
+          blankNumber: null
+        })
+      }
+    }
   }
 
   canSaveQuestion(): boolean {
@@ -466,6 +481,14 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         // For MCQ-MCA, require at least 2 correct answers
         const correctAnswersCount = this.questionOptions.filter(opt => opt.isCorrect).length
         if (correctAnswersCount < 2) {
+          return false
+        }
+      } else if (this.questionData.qType === 'MCQ-MCA-W') {
+        // For MCQ-MCA-W (weighted), check that all options have valid weight values
+        const allOptionsHaveWeights = this.questionOptions.every(opt =>
+          opt.weight !== undefined && opt.weight !== null && opt.weight !== ''
+        )
+        if (!allOptionsHaveWeights) {
           return false
         }
       } else {

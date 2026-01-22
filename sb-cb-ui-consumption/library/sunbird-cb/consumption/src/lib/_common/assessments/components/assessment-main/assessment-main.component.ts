@@ -49,7 +49,7 @@ export class AssessmentMainComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('Error loading assessment', error)
-          this.snackBar.open('Error loading assessment. Please try again.', 'Close', { duration: 5000 })
+          this.snackBar.open('Error loading assessment. Please try again.', '', { duration: 5000 })
           this.callLoader(false)
           this.isAssessmentLoaded = true
         }
