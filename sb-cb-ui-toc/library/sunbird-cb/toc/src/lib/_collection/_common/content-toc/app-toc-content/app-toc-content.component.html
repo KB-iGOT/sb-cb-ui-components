@@ -4,7 +4,7 @@
         <!-- Learning Path Header -->
         <div class="learning-path-header">
             <h3 class="learning-path-title">Learning Path</h3>
-            <p class="learning-path-subtitle">Complete {{content?.children?.length || 3}} key milestones</p>
+            <p class="learning-path-subtitle">Complete {{content?.children?.length - 1 || 3}} key milestones</p>
         </div>
         <ng-container *ngIf="content?.children?.length; else fallbackMilestones">
             <ul class="milestone-list">

@@ -16,7 +16,7 @@ export * from './lib/services/load-check.service'
 export * from './lib/services/reset-ratings.service'
 export * from './lib/services/timer.service'
 export * from './lib/services/title-tag.service'
-
+export * from './lib/services/viewer-util.service'
 // Models
 export * from './lib/models/app-toc.model'
 export * from './lib/models/app-toc-analytics.model'

@@ -85,7 +85,7 @@ export class AppTocService {
   public getPageScroll = new BehaviorSubject(true)
   updatePageScroll = this.getPageScroll.asObservable()
   public hashmap: any = {}
-  private hashmapUpdated = new BehaviorSubject<any>(null)
+  public hashmapUpdated = new BehaviorSubject<any>(null)
   hashmapUpdated$ = this.hashmapUpdated.asObservable()
   private transriptionDataSubject = new BehaviorSubject<any>(null); // Start with null
   transcriptionData$ = this.transriptionDataSubject.asObservable();
