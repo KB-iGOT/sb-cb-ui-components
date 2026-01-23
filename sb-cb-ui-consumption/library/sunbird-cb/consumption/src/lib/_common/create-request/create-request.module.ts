@@ -19,6 +19,7 @@ import { MatLegacyRadioModule } from '@angular/material/legacy-radio'
 import { MatLegacySelectModule } from '@angular/material/legacy-select'
 import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip'
 import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/horizontal-dynamic-stepper.module'
+import { OrderByPipeModule } from '../../_pipes/order-by/order-by.pipe.module'
 
 
 
@@ -47,6 +48,7 @@ import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/ho
     MatLegacyTooltipModule,
     HttpClientModule,
     HorizontalDynamicStepperModule,
+    OrderByPipeModule,
   ],
   exports: [
     CreateRequestFormComponent,

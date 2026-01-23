@@ -117,7 +117,8 @@ export class CreateRequestFormComponent implements OnInit {
       requestType: this.requestObjData.requestType || '',
       assignee: this.requestObjData.assignedProvider || [],
       providers: this.requestObjData.preferredProvider || [],
-      authors: this.requestObjData.sectoralSubjectMatterExpertDetails || []
+      authors: this.requestObjData.sectoralSubjectMatterExpertDetails || [],
+      competencies_v6: this.requestObjData.competencies_v6 || []
     })
     if (this.requestObjData.courseDigitisationAgencyRequired === false) {
       const requestTypeControl = this.additionalDetailsForm.get('requestType')
@@ -203,6 +204,7 @@ export class CreateRequestFormComponent implements OnInit {
       sectoralSubjectMatterExpertAvailable: this.additionalDetailsForm.get('availableWithMDO')?.value,
       sectoralSubjectMatterExpertDetails: this.additionalDetailsForm.get('authors')?.value || [],
       courseDigitisationAgencyRequired: this.additionalDetailsForm.get('requiredFromKB')?.value,
+      competencies_v6: this.additionalDetailsForm.get('competencies_v6')?.value || []
     }
   }
 

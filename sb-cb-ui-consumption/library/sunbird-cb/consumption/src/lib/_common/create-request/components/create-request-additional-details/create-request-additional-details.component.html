@@ -223,13 +223,13 @@
       </mat-form-field>
     </div>
     <div class="flex flex-col gap-1 round-control">
-      <span class="round-control-label">Competencies</span>
+      <span class="round-control-label required">Competencies</span>
       <div class="flex-1">
         <div class="margin-bottom-m mt-2">
           <p class="mat-subheading-2">Competency Area</p>
           <mat-radio-group name="competencyArea" class="flex flex-row tgl-group margin-top-s flex-wrap">
             <mat-radio-button *ngFor="let option of filteredallCompetencies" [value]="option.name" (change)="compAreaSelected(option)"
-              class="flex flex-row itm-center ws-mat-accent-border margin-right-s">
+              class="flex flex-row itm-center ws-mat-accent-border margin-right-s" [disabled]="viewMode.toLowerCase() === 'view'">
               <span class="mat-body-2">{{ option.name }}</span>
             </mat-radio-button>
           </mat-radio-group>
@@ -250,7 +250,7 @@
           <div class="mt-4">
             <span class="display-inline-block complabels mat-caption cursor-pointer"
               [ngClass]="{active: (seletedCompetencyTheme && option.name === seletedCompetencyTheme.name)}" (click)="compThemeSelected(option)"
-              (keyup)="compThemeSelected(option)" *ngFor="let option of filteredallCompetencyTheme">
+              (keyup)="compThemeSelected(option)" *ngFor="let option of filteredallCompetencyTheme | orderBy: 'name'">
               {{ option.name }}
             </span>
           </div>
@@ -271,7 +271,8 @@
           <div class="mt-4">
             <span class="display-inline-block complabels mat-caption cursor-pointer"
               [ngClass]="{active: (seletedCompetencySubTheme && option.name === seletedCompetencySubTheme.name)}"
-              (click)="compSubThemeSelected(option)" (keyup)="compSubThemeSelected(option)" *ngFor="let option of filteredallCompetencySubtheme">
+              (click)="compSubThemeSelected(option)" (keyup)="compSubThemeSelected(option)"
+              *ngFor="let option of filteredallCompetencySubtheme | orderBy: 'name'">
               {{ option.name }}
             </span>
           </div>
@@ -280,7 +281,7 @@
         <div class="margin-bottom-l">
           <button mat-raised-button type="button" class="ws-mat-default-text compbutton"
             [ngClass]="!enableCompetencyAdd ? '' : 'ws-mat-accent-border-active'" [disabled]="!enableCompetencyAdd" (click)="addCompetency()">
-            <span class="mat-subheading-2 padding-xs" style="vertical-align: unset;">Add</span>
+            <span class="mat-subheading-2 padding-xs">Add</span>
           </button>
         </div>
 
@@ -317,7 +318,8 @@
                             {{ subtheme }}
                           </td>
                           <td class="actions-column">
-                            <button mat-icon-button type="button" (click)="removeCompetencyV2(area, theme, subtheme)" aria-label="Remove competency">
+                            <button mat-icon-button type="button" (click)="removeCompetencyV2(area, theme, subtheme)" aria-label="Remove competency"
+                              *ngIf="viewMode.toLowerCase() !== 'view'">
                               <mat-icon>close</mat-icon>
                             </button>
                           </td>
