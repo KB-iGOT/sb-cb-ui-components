@@ -214,4 +214,28 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
       this.routeQuerySubscription.unsubscribe()
     }
   }
+
+    getMilestoneCompletedOrNot(identifier: string): boolean {
+    if (!this.content || !this.hierarchyMapData) {
+      return false
+    }
+    const milestoneData = this.hierarchyMapData[identifier]
+    if(milestoneData && milestoneData?.primaryCategory === NsContent.EPrimaryCategory.FINAL_ASSESSMENT) {
+      return milestoneData?.completionStatus === 2
+    }
+    if (!milestoneData || !milestoneData.leafNodes) {
+      return false
+    }
+    let completedCount = 0
+    milestoneData.leafNodes.forEach((leafId: string) => {
+      const leafData = this.hierarchyMapData[leafId]
+      if (leafData && leafData.completionStatus === 2) {
+        completedCount++
+      }
+    })
+    if( completedCount === milestoneData?.leafNodes.length) {
+      return true
+    }
+    return false
+  }
 }

@@ -80,23 +80,17 @@
                 </ng-container>
             </div>
             <!-- deactivated as per NIC CEO requirement to access course wthout login -->
-            <a class="width-expand"
-                [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked || isMilestoneAssessmentLocked) ? true : null"
-                [ngClass]="{'ml-3': isEnrolled}"
-                [routerLink]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked && !isMilestoneAssessmentLocked) ? resourceLink.url : null"
-                [queryParams]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked && !isMilestoneAssessmentLocked)  ? resourceLink.queryParams : null"
-                [matTooltip]="isParentMilestoneLocked ? 'This content is locked. Complete previous milestone to view this content.' : (isMilestoneAssessmentLocked ? 'This content is locked. Complete all mandatory items to unlock the assessment.' : '')"
-                matTooltipPosition="above">
-                <div [ngClass]="{'resource-active': pathSet?.has(content?.identifier) && isEnrolled}"></div>
-                <div class="text-truncate " [ngClass]="{'cursor-pointer': !isEnabled && isEnrolled}"
-                    (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
+            <!-- For locked assessments: show content but make it non-clickable -->
+            <div class="width-expand" *ngIf="isMilestoneAssessmentLocked && isEnrolled; else clickableContent"
+                [ngClass]="{'ml-3': isEnrolled}">
+                <div class="text-truncate opacity-60">
                     <div class="flex flex-col sm:flex-row flex-wrap">
-                        <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
-                            [ngClass]="{'text-active': pathSet?.has(content?.identifier) && isEnrolled}">
-                            <!-- <mat-icon class="margin-right-xs radiobtn time-icon">radio_button_unchecked </mat-icon> -->
-                            {{ content?.name | truncate:50 }}
-
-                        </p>
+                        <div class="flex items-center gap-2 w-full">
+                            <mat-icon class="text-gray-500">lock</mat-icon>
+                            <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate text-gray-600">
+                                {{ content?.name | truncate:50 }}
+                            </p>
+                        </div>
                         <span class="content-type optional-span nodtranslate" *ngIf="content?.optionalReading">{{
                             'playerbrief.optional' | translate | titlecase}} </span>
                     </div>
@@ -110,8 +104,6 @@
                                 class="float-left margin-right-xs" *ngIf="content?.mimeType === 'audio/mpeg'">
                             <img src="/assets/icons/content/grey/pdf.svg" alt="PDF" class="float-left margin-right-xs"
                                 *ngIf="content?.mimeType === 'application/pdf'">
-                            <!-- <img src="/assets/icons/content/grey/resource.svg" alt="Survey" class="float-left margin-right-xs"
-                    *ngIf="content?.mimeType === 'application/survey'"> -->
                             <img src="/assets/icons/content/grey/link.svg" alt="InteractiveContent"
                                 class="float-left margin-right-xs"
                                 *ngIf="content?.mimeType === 'application/vnd.ekstep.html-archive' || content?.mimeType === 'text/x-url'">
@@ -130,7 +122,6 @@
                             content.primaryCategory === primaryCategory.COMP_ASSESSMENT ||
                             content.primaryCategory === primaryCategory.STANDALONE_ASSESSMENT ||
                             content.primaryCategory === primaryCategory.PRACTICE_RESOURCE">
-
                                 <span class="resourceDuration ws-mat-black60-text nodtranslate">{{ content?.maxQuestions
                                     }} {{ 'playerbrief.questions' | translate | titlecase}}</span>
                             </ng-container>
@@ -146,6 +137,80 @@
                             </ng-container>
                         </div>
                     </ng-container>
+                </div>
+                
+                <!-- Lock message displayed BELOW assessment details when locked -->
+                <div class="content-locking flex w-full flex-middle mt-2 gap-2 px-2 py-1 bg-orange-50 border-l-4 border-orange-400">
+                    <mat-icon class="lock-icon text-orange-600" style="font-size: 18px; width: 18px; height: 18px;">lock</mat-icon>
+                    <span class="lock-message mat-body-2 text-orange-800" style="font-size: 13px;">
+                        This content is locked. Complete all mandatory items to unlock the assessment.
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Clickable content template (when NOT locked) -->
+            <ng-template #clickableContent>
+                <a class="width-expand"
+                    [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked) ? true : null"
+                    [ngClass]="{'ml-3': isEnrolled}"
+                    [routerLink]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked) ? resourceLink.url : null"
+                    [queryParams]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked)  ? resourceLink.queryParams : null"
+                    [matTooltip]="isParentMilestoneLocked ? 'This content is locked. Complete previous milestone to view this content.' : ''"
+                    matTooltipPosition="above">
+                    <div [ngClass]="{'resource-active': pathSet?.has(content?.identifier) && isEnrolled}"></div>
+                    <div class="text-truncate " [ngClass]="{'cursor-pointer': !isEnabled && isEnrolled}"
+                        (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
+                        <div class="flex flex-col sm:flex-row flex-wrap">
+                            <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
+                                [ngClass]="{'text-active': pathSet?.has(content?.identifier) && isEnrolled}">
+                                {{ content?.name | truncate:50 }}
+                            </p>
+                            <span class="content-type optional-span nodtranslate" *ngIf="content?.optionalReading">{{
+                                'playerbrief.optional' | translate | titlecase}} </span>
+                        </div>
+                        <!-- for default grey icons -->
+                        <ng-container *ngIf="!pathSet?.has(content?.identifier) || !isEnrolled">
+                            <div class="resicons ws-mat-black60-text">
+                                <img src="/assets/icons/content/grey/video.svg" alt="Video"
+                                    class="float-left margin-right-xs" *ngIf="content?.mimeType === 'video/mp4' || content?.mimeType === 'video/x-youtube' ||
+                          content?.mimeType ==='application/x-mpegURL'">
+                                <img src="/assets/icons/content/grey/audio.svg" alt="Audio"
+                                    class="float-left margin-right-xs" *ngIf="content?.mimeType === 'audio/mpeg'">
+                                <img src="/assets/icons/content/grey/pdf.svg" alt="PDF" class="float-left margin-right-xs"
+                                    *ngIf="content?.mimeType === 'application/pdf'">
+                                <img src="/assets/icons/content/grey/link.svg" alt="InteractiveContent"
+                                    class="float-left margin-right-xs"
+                                    *ngIf="content?.mimeType === 'application/vnd.ekstep.html-archive' || content?.mimeType === 'text/x-url'">
+                                <img src="/assets/icons/content/grey/assessment.svg" alt="Assessment"
+                                    class="float-left margin-right-xs"
+                                    *ngIf="content?.mimeType === 'application/json' || content?.mimeType === 'application/quiz' || content?.mimeType === 'application/vnd.sunbird.questionset'">
+                                <img src="/assets/icons/content/grey/image.svg" alt="Image"
+                                    class="float-left margin-right-xs"
+                                    *ngIf="content?.mimeType === 'image/png' || content?.mimeType === 'image/jpeg'">
+                                <img src="/assets/icons/content/grey/content_copy.svg" class="contenticon" alt="Course"
+                                    *ngIf="content.mimeType === 'application/vnd.ekstep.content-collection' || content?.mimeType === 'application/survey'">
+                                <img src="/assets/icons/content/grey/module.svg" class="float-left margin-right-xs"
+                                    alt="offline sessions" *ngIf="content.mimeType === 'application/offline'">
+
+                                <ng-container *ngIf="content.primaryCategory === primaryCategory.FINAL_ASSESSMENT ||
+                                content.primaryCategory === primaryCategory.COMP_ASSESSMENT ||
+                                content.primaryCategory === primaryCategory.STANDALONE_ASSESSMENT ||
+                                content.primaryCategory === primaryCategory.PRACTICE_RESOURCE">
+                                    <span class="resourceDuration ws-mat-black60-text nodtranslate">{{ content?.maxQuestions
+                                        }} {{ 'playerbrief.questions' | translate | titlecase}}</span>
+                                </ng-container>
+                                <ng-container *ngIf="!(content.primaryCategory === primaryCategory.FINAL_ASSESSMENT ||
+                                content.primaryCategory === primaryCategory.COMP_ASSESSMENT ||
+                                content.primaryCategory === primaryCategory.STANDALONE_ASSESSMENT ||
+                                content.primaryCategory === primaryCategory.PRACTICE_RESOURCE)">
+                                    <span class="resourceDuration ws-mat-black60-text nodtranslate">{{ (content?.duration||
+                                        hierarchyMapData[content?.identifier]?.expectedDuration || 0)|
+                                        pipeDurationTransform:
+                                        'hms'
+                                        }}</span>
+                                </ng-container>
+                            </div>
+                        </ng-container>
 
                     <!-- for white icons when content highlighted -->
                     <ng-container *ngIf="pathSet?.has(content?.identifier) && isEnrolled">
@@ -157,8 +222,6 @@
                                 class="float-left margin-right-xs" *ngIf="content?.mimeType === 'audio/mpeg'">
                             <img src="/assets/icons/content/white/pdf.svg" alt="PDF" class="float-left margin-right-xs"
                                 *ngIf="content?.mimeType === 'application/pdf'">
-                            <!-- <img src="/assets/icons/content/white/resource.svg" alt="Survey" class="float-left margin-right-xs"
-                    *ngIf="content?.mimeType === 'application/survey'"> -->
                             <img src="/assets/icons/content/white/link.svg" alt="InteractiveContent"
                                 class="float-left margin-right-xs"
                                 *ngIf="content?.mimeType === 'application/vnd.ekstep.html-archive' || content?.mimeType === 'text/x-url'">
@@ -203,26 +266,7 @@
                     </ng-container>
                 </div>
             </a>
-            
-            <!-- Lock messages shown below content name (outside anchor tag) -->
-            <!-- Lock message for resources in locked milestones -->
-            <ng-container *ngIf="isParentMilestoneLocked && isEnrolled">
-                <div class="content-locking flex w-full flex-middle mt-2 gap-3">
-                    <mat-icon class="lock-icon">lock</mat-icon>
-                    <span class="lock-message mat-body-2">
-                        This content is locked. Complete previous milestone to view this content.
-                    </span>
-                </div>
-            </ng-container>
-            <!-- Lock message for milestone assessments when mandatory content not completed -->
-            <ng-container *ngIf="isMilestoneAssessmentLocked && isEnrolled && !isParentMilestoneLocked">
-                <div class="content-locking flex w-full flex-middle mt-2 gap-3">
-                    <mat-icon class="lock-icon">lock</mat-icon>
-                    <span class="lock-message mat-body-2">
-                        This content is locked. Complete all mandatory items to unlock the assessment.
-                    </span>
-                </div>
-            </ng-container>
+            </ng-template>
         </div>
     </div>
 </ng-container>
@@ -303,6 +347,7 @@
                                 <span *ngIf="content?.isMandatory"
                                     class="mandatory-text mat-caption ml-2">Mandatory</span>
                             </p>
+                            
                             <div class="type-container resource mt-2 sm:mt-0" *ngIf="content?.category === 'Resource'">
                                 <mat-icon class="mr-1 custom-icon rotate-90">call_to_action</mat-icon>
                                 <span class="nodtranslate">Resource</span>
@@ -351,9 +396,21 @@
                             </ng-container>
                         </div>
                         <!-- Milestone Completion Progress -->
-                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2">
-                            <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of
+                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2  flex items-center justify-between">
+                            <div>
+                                <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of
                                 {{content?.leafNodesCount || 0}} completed</span>
+                            </div>
+                            <!-- View Achievement Button for completed milestones - Outside clickable area -->
+                            <div *ngIf="isMilestone && isEnrolled && (getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2)"
+                                class="view-achievement-container mt-2">
+                                <button type="button" class="view-achievement-btn" [disabled]="achievementLoading"
+                                    (click)="viewMilestoneAchievement($event)">
+                                    <span *ngIf="!achievementLoading">View Achievement</span>
+                                    <mat-spinner *ngIf="achievementLoading" [diameter]="16" 
+                                        [strokeWidth]="2" color="primary" class="inline-spinner"></mat-spinner>
+                                </button>
+                            </div>
                         </div>
                         <!-- Unlock Criteria Message for Locked Milestones -->
                         <div *ngIf="isMilestone && isEnrolled && isMilestoneLocked" class="milestone-locked-message mt-2">
@@ -361,16 +418,7 @@
                                 {{ getMilestoneUnlockMessage() }}
                             </span>
                         </div>
-                        <!-- View Achievement Button for completed milestones -->
-                        <div *ngIf="isMilestone && isEnrolled && (getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2)"
-                            class="view-achievement-container mt-2">
-                            <button type="button" class="view-achievement-btn" [disabled]="achievementLoading"
-                                (click)="viewMilestoneAchievement($event)">
-                                <span *ngIf="!achievementLoading">View Achievement</span>
-                                <mat-spinner *ngIf="achievementLoading" [diameter]="16"
-                                    class="inline-spinner"></mat-spinner>
-                            </button>
-                        </div>
+                        
                     </div>
                     <!-- For course progress to be shown -->
                     <ng-container *ngIf="isEnrolled && !isMilestoneLocked && !isParentMilestoneLocked">
