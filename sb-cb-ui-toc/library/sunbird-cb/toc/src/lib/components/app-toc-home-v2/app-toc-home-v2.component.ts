@@ -1452,6 +1452,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     if (this.hashmapUpdatedSubscription) {
       this.hashmapUpdatedSubscription.unsubscribe()
     }
+    
+    // Clear content data to prevent stale data when navigating between contents
+    this.tocSvc.resetContentData()
   }
 
   programEnrollCall(batchData: any) {

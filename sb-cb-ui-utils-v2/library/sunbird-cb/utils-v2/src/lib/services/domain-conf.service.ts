@@ -87,7 +87,7 @@ environment: any;
   }
 
   getDomainSitePath(): string {
-    debugger
+
     // Handle missing configuration
     if (!this.configSvc?.instanceConfig) {
       return this.environment?.sitePath;

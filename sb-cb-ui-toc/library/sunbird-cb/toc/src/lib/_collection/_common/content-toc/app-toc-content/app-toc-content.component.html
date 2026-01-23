@@ -9,13 +9,13 @@
         <ng-container *ngIf="content?.children?.length; else fallbackMilestones">
             <ul class="milestone-list">
                 <li *ngFor="let m of content?.children; let i = index" class="milestone-item"
-                    [class.completed]="m?.completionStatus === 2" role="listitem">
+                    [class.completed]="m?.completionStatus === 2 || getMilestoneCompletedOrNot(m?.identifier)" role="listitem">
                     <div class="milestone-circle" [attr.aria-label]="m?.name || ('Milestone ' + (i+1))">
-                        <img *ngIf="m?.completionStatus === 2" src="assets/icons/toc/tick-orange.svg"
+                        <img *ngIf="m?.completionStatus === 2 || getMilestoneCompletedOrNot(m?.identifier)" src="assets/icons/toc/tick-orange.svg"
                             class="milestone-checkmark" alt="Completed" />
-                        <span *ngIf="m?.completionStatus !== 2" class="milestone-index"></span>
+                        <span *ngIf="m?.completionStatus !== 2 || getMilestoneCompletedOrNot(m?.identifier)" class="milestone-index"></span>
                     </div>
-                    <div class="milestone-label">{{ m?.name }}</div>
+                    <div class="milestone-label">{{ m?.name }} {{getMilestoneCompletedOrNot(m?.identifier)}}</div>
                 </li>
             </ul>
         </ng-container>

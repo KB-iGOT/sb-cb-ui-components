@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AppTocService } from './app-toc.service';
+import { NsContent } from '@sunbird-cb/utils-v2';
 @Injectable({
   providedIn: 'root'
 })
@@ -51,11 +52,13 @@ export class AppTocV2Service {
         "isLearningPathway": false,
         "parent": contentHeirarchy.identifier
       }
+
       mileStoneData['children'] = []
       if (milestone?.courses && milestone?.courses?.length) {
         milestone.courses.forEach((mileStoneCourse: any) => {
           // Set parent reference for courses inside milestone
           mileStoneCourse.parent = milestone.id
+          this.tocSvc.mapModuleCount(mileStoneCourse)
           if (mileStoneCourse && mileStoneCourse?.leafNodes && mileStoneCourse?.leafNodes?.length) {
             leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
             mileStoneData['leafNodes'] = [...mileStoneData?.leafNodes, ...mileStoneCourse.leafNodes]
@@ -63,6 +66,7 @@ export class AppTocV2Service {
           }
           this.tocSvc.checkModuleWiseData(mileStoneCourse)
         })
+
       }
       if (milestone?.assessmentDetail) {
         // Set parent reference for assessment inside milestone
@@ -73,6 +77,7 @@ export class AppTocV2Service {
       }
       mileStoneData['children'] = [...milestone['courses'], ...mileStoneData['children']]
       mileStoneData['leafNodesCount'] = mileStoneData['leafNodes'].length
+        this.mapModuleCount(mileStoneData)
       contentHeirarchy['children'] = contentHeirarchy['children'] ? [...contentHeirarchy['children'], mileStoneData] : [mileStoneData]
 
       milestoneIndex++
@@ -81,6 +86,19 @@ export class AppTocV2Service {
     console.log('content Heirarchy', contentHeirarchy)
     return contentHeirarchy
   }
+
+   mapModuleCount(content: NsContent.IContent) {
+      if (content && content.children) {
+        content.children.map(child => {
+          if (child.primaryCategory === NsContent.EPrimaryCategory.COURSE) {
+            if(child?.moduleCount) {
+            content['moduleCount'] = content['moduleCount'] ? content['moduleCount'] + child?.moduleCount : 
+            child?.moduleCount
+            }
+          }
+        })
+      }
+    }
 
 
   mapContentHierarchyProgressUpdate(contentHeirarchyData: any, enrollmentListData: any) {
@@ -92,6 +110,7 @@ export class AppTocV2Service {
       let totalLeafNodes = 0
       let totalCompletedLeafNodes = 0
 
+      // First pass: Update progress for all content
       contentHeirarchyData.children.forEach((child: any) => {
         if (child.primaryCategory === 'Milestone') {
           this.updateMilestoneProgress(child, contentHeirarchyData?.identifier, enrollmentListData)
@@ -99,9 +118,13 @@ export class AppTocV2Service {
           totalCompletedLeafNodes += child.completedLeafNodesCount || 0
         } else {
           // For pre-assessment and other root-level content
-          const enrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
+          // Try to find enrollment with parent identifier first, then with child's own identifier
+          let enrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
+          if (!enrollment) {
+            enrollment = this.findEnrollment(enrollmentListData, child?.identifier)
+          }
           this.updateNodeProgress(child, enrollment)
-          const isCompleted = child.status === 2 || child.completionStatus === 2 || child.completionPercentage === 100
+          const isCompleted = child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100
           totalLeafNodes += child.leafNodesCount || 1
           totalCompletedLeafNodes += isCompleted ? (child.leafNodesCount || 1) : 0
         }
@@ -112,6 +135,12 @@ export class AppTocV2Service {
         contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
         contentHeirarchyData.completionStatus = contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0)
       }
+
+      // NOTE: Milestone locking is computed AFTER hashmap is built
+      // See app-toc-home-v2.component.ts -> fetchContentHierarchy() flow:
+      // 1. mapContentHierarchyProgressUpdate (this method) - updates progress on content tree
+      // 2. callHirarchyProgressHashmap() - builds hashmap from content tree
+      // 3. computeMilestoneLockingStatus() - computes locks using hashmap
     }
     return contentHeirarchyData
   }
@@ -165,11 +194,49 @@ export class AppTocV2Service {
   }
 
   private updateNodeProgress(node: any, enrollment: any) {
+    if (!enrollment) {
+      // If no enrollment data, preserve existing completion data from content hierarchy
+      // This is important for assessments that may have completion data but no enrollment entry
+      if (node.completionPercentage === undefined && node.completionStatus === undefined && node.status === undefined) {
+        node.completionPercentage = 0
+        node.completionStatus = 0
+        node.status = 0
+      }
+      // Otherwise, keep the existing values from content hierarchy
+      return
+    }
+
+    // Check if the node itself is the enrolled content (direct enrollment)
+    // This happens for pre-assessments and standalone content
+    const isDirectEnrollment = enrollment.collectionId === node.identifier || 
+                                enrollment.contentId === node.identifier
+    
+    if (isDirectEnrollment) {
+      // Use enrollment's direct progress
+      const progress = enrollment.completionPercentage || enrollment.progress || 0
+      const status = enrollment.status || 0
+      
+      node.completionPercentage = progress
+      node.completionStatus = status
+      node.status = status
+      
+      console.log(`Direct enrollment found for ${node.identifier}:`, {
+        completionPercentage: progress,
+        completionStatus: status,
+        enrollmentData: { 
+          progress: enrollment.progress, 
+          completionPercentage: enrollment.completionPercentage,
+          status: enrollment.status 
+        }
+      })
+      return
+    }
 
     // Try both contentId and collectionId as the API response may use either field
     const nodeEnrollData = enrollment?.contentList?.find((ele: any) => 
       ele?.contentId === node.identifier || ele?.collectionId === node.identifier
     )
+    
     console.log(`Updating node progress for ${node.identifier} (${node.name}):`, {
       hasEnrollment: !!enrollment,
       hasNodeEnrollData: !!nodeEnrollData,
@@ -186,7 +253,18 @@ export class AppTocV2Service {
       node.completionPercentage = 100
       node.completionStatus = 2
       node.status = 2
+    } else if (enrollment && !nodeEnrollData) {
+      // Enrollment exists but this node is not in contentList
+      // This can happen for completed assessments - preserve their completion data from content hierarchy
+      // Only reset to 0 if there's no completion data at all
+      if (node.completionPercentage === undefined && node.completionStatus === undefined && node.status === undefined) {
+        node.completionPercentage = 0
+        node.completionStatus = 0
+        node.status = 0
+      }
+      // Otherwise keep existing values from content hierarchy
     } else {
+      // No enrollment at all - reset to 0
       node.completionPercentage = 0
       node.completionStatus = 0
       node.status = 0
