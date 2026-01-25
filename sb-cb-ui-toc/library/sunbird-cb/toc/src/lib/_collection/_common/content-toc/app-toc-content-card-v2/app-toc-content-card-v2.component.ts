@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Renderer2, SimpleChanges } from '@angular/core'
+import { Component, Input, OnInit, OnDestroy, Renderer2, SimpleChanges } from '@angular/core'
 import { NsContent } from '../../../../_services/widget-content.model'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
@@ -32,7 +32,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
     ])
   ]
 })
-export class AppTocContentCardV2Component implements OnInit {
+export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   @Input() content: NsContent.IContent | null = null
   @Input() expandAll = false
   @Input() rootId!: string
@@ -76,6 +76,7 @@ export class AppTocContentCardV2Component implements OnInit {
   viewChildren = false
   primaryCategory = NsContent.EPrimaryCategory
   pageScrollSubscription: Subscription | null = null
+  hashmapUpdatedSubscription: Subscription | null = null
   achievementLoading: boolean = false
   // Cached computed properties for performance optimization
   private _cachedIsCollection: boolean = false
@@ -111,6 +112,14 @@ export class AppTocContentCardV2Component implements OnInit {
     //   }
     // )
     this.resourceScroll()
+    
+    // Subscribe to hashmap updates to recompute cached properties when progress changes
+    this.hashmapUpdatedSubscription = this.appTocSvc.hashmapUpdated$.subscribe((update) => {
+      if (update && update.hashmap) {
+        console.log('🔄 Hashmap updated, recomputing cached properties for:', this.content?.identifier)
+        this.computeAllCachedProperties()
+      }
+    })
   }
 
   /**
@@ -869,6 +878,9 @@ export class AppTocContentCardV2Component implements OnInit {
     }
   }
   ngOnDestroy() {
+    if (this.hashmapUpdatedSubscription) {
+      this.hashmapUpdatedSubscription.unsubscribe()
+    }
     if (this.pageScrollSubscription) {
       this.pageScrollSubscription.unsubscribe()
     }

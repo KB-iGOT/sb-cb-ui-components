@@ -188,6 +188,7 @@ export class ViewerUtilService {
       courseId,
       batchId,
     }
+    debugger
     const tempContentData = this.contentSvc.currentMetaData
     const tempContentReadData = this.contentSvc.currentContentReadMetaData
     const enrollmentList = this.contentSvc.currentBatchEnrollmentList
@@ -478,6 +479,13 @@ export class ViewerUtilService {
       this.tocSvc.hashmap[contentId]['completionPercentage'] = contentProgress.completionPercentage
       this.tocSvc.hashmap[contentId]['completionStatus'] = contentProgress.status
       this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+      // Notify UI components about hashmap changes
+this.tocSvc.hashmapUpdated.next(this.tocSvc.hashmap)
+
+// Trigger milestone lock recomputation for Learning Pathways
+if (this.tocSvc.triggerMilestoneLockUpdate) {
+  this.tocSvc.triggerMilestoneLockUpdate()
+}
     }
   }
 
