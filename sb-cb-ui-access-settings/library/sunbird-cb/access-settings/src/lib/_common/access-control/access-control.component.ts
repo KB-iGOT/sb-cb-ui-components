@@ -459,6 +459,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
              this.accessControlService.enableDeputation(false)
           }
         });
+       if (this.accessControlCriteriaSelection?.optionsEntity?.filter(ele => ele.value === NsAccessControlConfig.SelectionType.CentralDeputation)?.length) {
+        this.accessControlService.enableDeputation(false)
+       }
       }
     }
   }
