@@ -414,12 +414,19 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
    * 3. NOT all mandatory courses in the same milestone are completed
    */
   private computeIsMilestoneAssessmentLocked(): boolean {
+    // CRITICAL: Only apply milestone assessment locking for Learning Pathway content
+    // Regular courses should NEVER have their assessments locked by milestone logic
+    if (!this.baseContentReadData || this.baseContentReadData.courseCategory !== 'Learning Pathway') {
+      return false
+    }
+
     // Only apply to assessments that are DIRECT children of milestones
     const isMilestoneAssessment = this._cachedIsMilestoneAssessment || this.computeIsMilestoneAssessment()
     
     console.log(`🔒 computeIsMilestoneAssessmentLocked for "${this.content?.name}":`, {
       isMilestoneAssessment,
       _cachedIsMilestoneAssessment: this._cachedIsMilestoneAssessment,
+      courseCategory: this.baseContentReadData?.courseCategory,
     })
     
     if (!isMilestoneAssessment) {
@@ -1275,5 +1282,22 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
       }
     })
   }
+ /**
+   * Check if text is truncated (has ellipsis) - for single line text
+   * @param element The HTMLElement to check
+   * @returns true if text is truncated, false otherwise
+   */
+  isTextTruncated(element: HTMLElement): boolean {
+    if (!element) return false
+    return element.offsetWidth < element.scrollWidth
+  }
 
+  /**
+   * @param element The HTMLElement to check
+   * @returns true if text is truncated, false otherwise
+   */
+  isMultiLineTruncated(element: HTMLElement): boolean {
+    if (!element) return false
+    return element.scrollHeight > element.clientHeight
+  }
 }

@@ -15,7 +15,18 @@
                             class="milestone-checkmark" alt="Completed" />
                         <span *ngIf="m?.completionStatus !== 2 || getMilestoneCompletedOrNot(m?.identifier)" class="milestone-index"></span>
                     </div>
-                    <div class="milestone-label">{{ m?.name }} {{getMilestoneCompletedOrNot(m?.identifier)}}</div>
+                    <div class="milestone-label">
+                        <p class="mb-0 leading-none">
+                            <span *ngIf="m?.contextCategory">{{m?.contextCategory}}</span>
+                            <span *ngIf="m?.courseCategory">{{m?.courseCategory}} {{ i}}</span>
+                        </p>
+                        <p #milestoneNameRef class="milestone-name-text leading-none"
+                            [matTooltip]="isMultiLineTruncated(milestoneNameRef) ? m?.name : ''"
+                            matTooltipPosition="above"
+                            matTooltipClass="multiline-tooltip">
+                            {{ m?.name }}
+                        </p>
+                    </div>
                 </li>
             </ul>
         </ng-container>
