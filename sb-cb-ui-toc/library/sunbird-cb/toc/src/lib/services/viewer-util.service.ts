@@ -165,7 +165,7 @@ export class ViewerUtilService {
       this.http
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
-        debugger
+      
       if (this.tocSvc.hashmap[contentId] &&
         (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
         this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
@@ -188,7 +188,7 @@ export class ViewerUtilService {
       courseId,
       batchId,
     }
-    debugger
+    
     const tempContentData = this.contentSvc.currentMetaData
     const tempContentReadData = this.contentSvc.currentContentReadMetaData
     const enrollmentList = this.contentSvc.currentBatchEnrollmentList
@@ -381,7 +381,7 @@ export class ViewerUtilService {
       this.http
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
-        debugger
+        
       if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
         if (this.tocSvc.hashmap[contentId] &&
           (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
@@ -475,7 +475,7 @@ export class ViewerUtilService {
   }
 
   updateContentHashMapForAssesstent(contentId: string, contentProgress: any) {
-    debugger
+    
     if (this.tocSvc.hashmap[contentId] &&
       (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
       this.tocSvc.hashmap[contentId]['completionPercentage'] = contentProgress.completionPercentage
@@ -562,7 +562,7 @@ export class ViewerUtilService {
           .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
           .subscribe(noop, noop)
       }
-      debugger
+      
       if (this.tocSvc.hashmap[contentId] &&
         (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
         this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
@@ -615,7 +615,7 @@ export class ViewerUtilService {
           .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
           .subscribe(noop, noop)
       }
-      debugger
+      
       if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
         // Update hashmap if status changed
         if (this.tocSvc.hashmap[contentId] &&
