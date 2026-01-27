@@ -33,6 +33,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   // errorCode: NsAppToc.EWsTocErrorCode | null = null
   private routeSubscription: Subscription | null = null
   private routeQuerySubscription: Subscription | null = null
+  private hashmapUpdatedSubscription: Subscription | null = null
   contentParents: NsContent.IContentMinimal[] = []
   expandAll = false
   expandPartOf = false
@@ -95,6 +96,14 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
     this.tocSvc.contentLoader$.subscribe((val: any) => {
       this.contentLoader = val
     })
+    
+    // Subscribe to hashmap updates for real-time progress synchronization
+    this.hashmapUpdatedSubscription = this.tocSvc.hashmapUpdated$.subscribe((update) => {
+      if (update && update.hashmap) {
+        // Update hierarchyMapData with the latest hashmap from the service
+        this.hierarchyMapData = update.hashmap
+      }
+    })
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || ''
@@ -153,7 +162,9 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   get isEnrolled(): boolean {
-    return this.batchId ? true : false
+    // Check both batchId and batchData.enrolled to support Learning Pathways
+    // where batchId might not be directly set but user is enrolled in courses within the pathway
+    return this.batchId ? true : (this.batchData?.enrolled || false)
   }
 
   // private processCollectionForTree() {
@@ -212,6 +223,9 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
     }
     if (this.routeQuerySubscription) {
       this.routeQuerySubscription.unsubscribe()
+    }
+    if (this.hashmapUpdatedSubscription) {
+      this.hashmapUpdatedSubscription.unsubscribe()
     }
   }
 

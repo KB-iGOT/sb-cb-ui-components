@@ -42,7 +42,9 @@ export class AppTocV2Service {
         "contentType": "Course",
         "isLocked": shouldBeLocked,
         "milestoneIndex": milestoneIndex,
-        "status": "Live",
+        "status": 0,
+        "completionStatus": 0,
+        "completionPercentage": 0,
         "leafNodes": [],
         // Pre-computed flags for performance optimization
         "isMilestone": true,
@@ -58,6 +60,7 @@ export class AppTocV2Service {
         milestone.courses.forEach((mileStoneCourse: any) => {
           // Set parent reference for courses inside milestone
           mileStoneCourse.parent = milestone.id
+          mileStoneCourse['moduleCount'] = 0
           this.tocSvc.mapModuleCount(mileStoneCourse)
           if (mileStoneCourse && mileStoneCourse?.leafNodes && mileStoneCourse?.leafNodes?.length) {
             leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
@@ -133,7 +136,7 @@ export class AppTocV2Service {
       if (totalLeafNodes > 0) {
         const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
         contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-        contentHeirarchyData.completionStatus = contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0)
+        contentHeirarchyData.completionStatus = Number(contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0))
       }
 
       // NOTE: Milestone locking is computed AFTER hashmap is built
@@ -188,8 +191,8 @@ export class AppTocV2Service {
     if (totalLeafNodes > 0) {
       const calculatedPercentage = Math.round((totalCompletedLeafNodes / totalLeafNodes) * 100)
       milestone.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-      milestone.completionStatus = milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0)
-      milestone.status = milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0)
+      milestone.completionStatus = Number(milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0))
+      milestone.status = Number(milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0))
     }
   }
 
@@ -212,9 +215,10 @@ export class AppTocV2Service {
                                 enrollment.contentId === node.identifier
     
     if (isDirectEnrollment) {
+      
       // Use enrollment's direct progress
       const progress = enrollment.completionPercentage || enrollment.progress || 0
-      const status = enrollment.status || 0
+      const status = Number(enrollment.status) || 0
       
       node.completionPercentage = progress
       node.completionStatus = status
@@ -247,8 +251,8 @@ export class AppTocV2Service {
     
     if (enrollment && nodeEnrollData && nodeEnrollData.status < 2) {
       node.completionPercentage = nodeEnrollData.completionPercentage || nodeEnrollData.progress || 0
-      node.completionStatus = nodeEnrollData.status
-      node.status = nodeEnrollData.status
+      node.completionStatus = Number(nodeEnrollData.status) || 0
+      node.status = Number(nodeEnrollData.status) || 0
     } else if (enrollment && nodeEnrollData && nodeEnrollData.status === 2) {
       node.completionPercentage = 100
       node.completionStatus = 2
@@ -284,17 +288,24 @@ export class AppTocV2Service {
       // Enrollment shows 100% - mark course as complete
       course.completionPercentage = 100
       course.completionStatus = 2
-      course.status = 2
       this.tocSvc.mapCompletionChildPercentageProgram(course)
     } else if (enrollment && enrollment.completionPercentage > 0) {
       // Enrollment has partial progress
       course.completionPercentage = enrollment.completionPercentage || 0
       course.completionStatus = 1
-      course.status = 1
       // Also update children
       if (course.children && course.children.length > 0) {
         course.children.forEach((child: any) => {
+          
+
+          // If child is a module, update its children (resources) as well
+          if (child.primaryCategory === NsContent.EPrimaryCategory.MODULE && child.children && child.children.length > 0) {
+            child.children.forEach((resource: any) => {
+              this.updateNodeProgress(resource, enrollment)
+            })
+          } else {
           this.updateNodeProgress(child, enrollment)
+          }
         })
       }
     } else {
@@ -303,8 +314,20 @@ export class AppTocV2Service {
         let totalCompleted = 0
 
         course.children.forEach((child: any) => {
+          
+          // If child is a module, update its children (resources) as well
+          if (child.primaryCategory === NsContent.EPrimaryCategory.MODULE && child.children && child.children.length > 0) {
+            child.children.forEach((resource: any) => {
+              this.updateNodeProgress(resource, enrollment)
+              if (resource.completionStatus === 2 || resource.completionPercentage === 100) {
+                totalCompleted += resource.leafNodesCount || 1
+              }
+            })
+          } else {
           this.updateNodeProgress(child, enrollment)
-          if (child.status === 2 || child.completionStatus === 2 || child.completionPercentage === 100) {
+
+          }
+          if (child.completionStatus === 2 || child.completionPercentage === 100) {
             totalCompleted += child.leafNodesCount || 1
           }
         })
@@ -317,8 +340,8 @@ export class AppTocV2Service {
           if (totalLeafNodes > 0) {
             const calculatedPercentage = Math.round((totalCompleted / totalLeafNodes) * 100)
             course.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-            course.completionStatus = course.completionPercentage === 100 ? 2 : (course.completionPercentage > 0 ? 1 : 0)
-            course.status = course.completionStatus
+            course.completionStatus = Number(course.completionPercentage === 100 ? 2 : (course.completionPercentage > 0 ? 1 : 0))
+
           }
         }
       }

@@ -338,15 +338,18 @@
                             </div>
                             <img *ngIf="isMilestoneLocked" src="assets/icons/hubs/lock.svg" alt="Locked"
                                 class="lock-icon mr-2 margin-bottom-xxs">
-                            <p class="margin-remove text-truncate mat-subheading-1 flex-auto font-bold nodtranslate"
-                                [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}">
-                                <span>{{isMilestone ? index -1 : index}}. </span>{{ content?.name | truncate:50 }}
-                                <ng-container *ngIf="isMilestone">
-                                    <span *ngIf="isMilestoneLocked" class="locked-text ml-2">Locked</span>
-                                </ng-container>
-                                <span *ngIf="content?.isMandatory"
-                                    class="mandatory-text mat-caption ml-2">Mandatory</span>
-                            </p>
+                            <div class="flex-auto flex flex-col" style="min-width: 0;">
+                                <p class="margin-remove text-truncate mat-subheading-1 font-bold nodtranslate"
+                                    [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}">
+                                    <span>{{isMilestone ? index -1 : index}}. </span>{{ content?.name | truncate:50 }}
+                                </p>
+                                <div class="mt-1" *ngIf="isMilestone && isMilestoneLocked">
+                                    <span class="locked-text">Locked</span>
+                                </div>
+                                <div class="mt-1" *ngIf="content?.isMandatory">
+                                    <span class="mandatory-text mat-caption">Mandatory</span>
+                                </div>
+                            </div>
                             
                             <div class="type-container resource mt-2 sm:mt-0" *ngIf="content?.category === 'Resource'">
                                 <mat-icon class="mr-1 custom-icon rotate-90">call_to_action</mat-icon>
