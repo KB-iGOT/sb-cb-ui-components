@@ -6,6 +6,7 @@ const API_POINTS = {
     COMPETENCY_LIST: `apis/proxies/v8/competency/v4/search`,
     COMPETENCY_LIST_V2: `apis/proxies/v8/searchBy/v2/competency`,
     CERTIFICATE_URL: `apis/protected/v8/cohorts/course/batch/cert/download/`,
+    COMPETENCY_V6: `/apis/proxies/v8/framework/v1/read/kcmfinal_fw`,
 }
 
 @Injectable({ providedIn: 'root' })
@@ -22,5 +23,9 @@ export class CompetencyPassbookService {
 
     fetchCertificate(certId: string): Observable<any> {
         return this.http.get(API_POINTS.CERTIFICATE_URL + certId)
+    }
+
+    fetchCompetencyV6(): Observable<any> {
+        return this.http.get(API_POINTS.COMPETENCY_V6)
     }
 }
