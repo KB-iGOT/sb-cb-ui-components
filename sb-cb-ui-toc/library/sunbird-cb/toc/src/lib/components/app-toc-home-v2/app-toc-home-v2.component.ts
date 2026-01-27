@@ -1588,6 +1588,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             // this.tocSvc.contentLoader.next(false)
           }
         }
+           if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+          console.log('User enrolled in LP - computing milestone locks with isEnrolled=true')
+          this.tocSvc.callHirarchyProgressHashmap(this.content)
+          this.tocSvc.computeMilestoneLockingStatus(true)
+          this.syncMilestoneLockStatus()
+        }
         this.batchData = {
           content: [enrolledCourse.batch],
           enrolled: true,
@@ -2575,6 +2581,36 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         }
       }
     })
+  }
+
+  /**
+   * Refresh milestone locking status from the already-updated hashmap
+   * This method should be called after progress updates to sync UI with computed lock status
+   * Note: Does NOT fetch enrollment data - uses existing hashmap which is already updated
+   */
+  private refreshEnrollmentAndProgress() {
+    if (!this.content) {
+      return
+    }
+
+    try {
+      console.log('🔄 Refreshing milestone locks from hashmap...')
+      
+      // Check if user is enrolled
+      const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
+      
+      // Recompute milestone locking status from existing hashmap
+      // The hashmap is already updated with latest progress via hashmap update subscription
+      this.tocSvc.computeMilestoneLockingStatus(isEnrolled)
+      console.log('🔓 Milestone locking recomputed from hashmap. Enrolled:', isEnrolled)
+      
+      // Sync lock status from hashmap to content tree
+      this.syncMilestoneLockStatus()
+      
+      console.log('✅ Milestone locks refreshed from hashmap')
+    } catch (error) {
+      console.error('❌ Error in refreshEnrollmentAndProgress:', error)
+    }
   }
 
   onLanguageSelect(lang: any) {

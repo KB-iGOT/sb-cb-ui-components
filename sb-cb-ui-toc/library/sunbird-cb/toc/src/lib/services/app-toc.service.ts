@@ -70,6 +70,18 @@ export class AppTocService {
   batchReplaySubject: Subject<any> = new Subject()
   setBatchDataSubject: Subject<any> = new Subject()
   getSelectedBatch: Subject<any> = new Subject()
+
+  /**
+   * Helper function to ensure completionStatus is always a number
+   * Converts string values to 0 and ensures valid number range (0, 1, 2)
+   */
+  private safeCompletionStatus(value: any): number {
+    const numValue = Number(value)
+    if (isNaN(numValue) || typeof value === 'string') {
+      return 0
+    }
+    return numValue
+  }
   setWFDataSubject: Subject<any> = new Subject()
   resumeData: Subject<NsContent.IContinueLearningData | null> = new Subject<any>()
   private showSubtitleOnBanners = false
@@ -169,7 +181,7 @@ export class AppTocService {
           const foundContent = resumeDataPass.find((el: any) => el.contentId === sd.sessionId)
           if (foundContent) {
             sd.completionPercentage = foundContent.completionPercentage
-            sd.completionStatus = foundContent.status
+            sd.completionStatus = this.safeCompletionStatus(foundContent.status)
             sd.lastCompletedTime = foundContent.lastCompletedTime
           }
         })
@@ -244,7 +256,7 @@ export class AppTocService {
         const foundContent = dataResult.find((el: any) => el.contentId === child.identifier)
         if (foundContent) {
           child.completionPercentage = foundContent.completionPercentage || foundContent.progress
-          child.completionStatus = foundContent.status
+          child.completionStatus = this.safeCompletionStatus(foundContent.status)
         } else {
           this.mapCompletionPercentage(child, dataResult)
         }
@@ -862,11 +874,13 @@ export class AppTocService {
     }
   }
 
-  public createHirarchyProgressHashmap(hierarchyData: NsContent.IContent, rootCourseCategory?: string) {
+  public createHirarchyProgressHashmap(hierarchyData: NsContent.IContent, rootCourseCategory?: string, parentId?: string) {
     if (hierarchyData && hierarchyData.children) {
       hierarchyData.children.forEach((child: NsContent.IContent) => {
+        // IMPORTANT: Pass the current hierarchyData's identifier as the parent for children
+        // This ensures correct parent-child relationships in the hashmap
         if (child && child.children) {
-          this.createHirarchyProgressHashmap(child, rootCourseCategory)
+          this.createHirarchyProgressHashmap(child, rootCourseCategory, hierarchyData.identifier)
         }
         const primaryCat = child.primaryCategory as string
         const courseCat = (child.courseCategory || child.primaryCategory || '') as string
@@ -882,14 +896,18 @@ export class AppTocService {
         // Check if content is mandatory (isMandatory flag or mandatory property)
         const isMandatory = child.isMandatory === true || (child as any).mandatory === true
 
+        // Use passed parentId (from iteration context) or fallback to child?.parent (from API)
+        // This ensures nested children (e.g., assessments inside courses) have correct parent references
+        const correctParentId = hierarchyData.identifier || child?.parent
+
         let localMap: any = {
-          parent: child?.parent,
+          parent: correctParentId,
           identifier: child.identifier,
           leafNodesCount: child.leafNodesCount || null,
           leafNodes: child.leafNodes || [],
           completionPercentage: child.completionPercentage || child.progress || 0,
-          completionStatus: child.completionStatus || child.status || 0,
-          status: child.status || child.completionStatus || 0,
+          completionStatus: this.safeCompletionStatus(child.completionStatus || child.status),
+          status: this.safeCompletionStatus(child.status || child.completionStatus),
           progress: child.progress,
           primaryCategory: child.primaryCategory,
           courseCategory: courseCat,
@@ -920,6 +938,24 @@ export class AppTocService {
           // Progress tracked for milestone
         }
 
+        // Debug logging for assessment parent-child relationships
+        // Note: FINAL_ASSESSMENT maps to 'Course Assessment' in the enum, not 'Final Assessment'
+        const isAssessment = 
+          child.primaryCategory === 'Course Assessment' ||
+          child.primaryCategory === 'Standalone Assessment' ||
+          child.mimeType === 'application/vnd.sunbird.questionset'
+        
+        if (isAssessment) {
+          console.log(`📋 Adding assessment to hashmap: "${child.name}"`, {
+            identifier: child.identifier,
+            primaryCategory: child.primaryCategory,
+            parent: correctParentId,
+            originalParent: child?.parent,
+            parentName: hierarchyData.name,
+            parentCategory: hierarchyData.primaryCategory
+          })
+        }
+
         this.hashmap[child.identifier] = localMap
       })
     }
@@ -938,8 +974,8 @@ export class AppTocService {
           leafNodesCount: child.leafNodesCount || null,
           leafNodes: child.leafNodes || [],
           completionPercentage: child.completionPercentage || child.progress,
-          completionStatus: child.completionStatus,
-          status: child.status || child.completionStatus || 0,
+          completionStatus: this.safeCompletionStatus(child.completionStatus),
+          status: this.safeCompletionStatus(child.status || child.completionStatus),
           progress: child.progress,
           primaryCategory: child.primaryCategory,
           courseCategory: child.courseCategory || child.primaryCategory || '',
@@ -964,7 +1000,7 @@ export class AppTocService {
         leafNodesCount: hierarchyData.leafNodesCount || null,
         leafNodes: hierarchyData.leafNodes || [],
         completionPercentage: hierarchyData.completionPercentage || hierarchyData.progress || 0,
-        completionStatus: hierarchyData.completionStatus || 0,
+        completionStatus: this.safeCompletionStatus(hierarchyData.completionStatus),
         progress: hierarchyData.progress,
         primaryCategory: hierarchyData.primaryCategory,
         courseCategory: rootCourseCategory,
@@ -1488,6 +1524,7 @@ export class AppTocService {
 
     if (assessmentCompleted) {
       this.hashmap[assessmentId].isAssessmentLocked = false
+      this.hashmap[assessmentId].milestoneAssessmentLocked = false
       this.hashmap[assessmentId].assessmentLockMessage = ''
       console.log(`Assessment ${assessmentId} is completed - unlocking`)
       return
@@ -1550,13 +1587,15 @@ export class AppTocService {
     const allMandatoryComplete = mandatoryCount === 0 || completedMandatoryCount >= mandatoryCount
     
     this.hashmap[assessmentId].isAssessmentLocked = !allMandatoryComplete
+    this.hashmap[assessmentId].milestoneAssessmentLocked = !allMandatoryComplete
     this.hashmap[assessmentId].assessmentLockMessage = !allMandatoryComplete ?
       'This content is locked. Complete all mandatory items to unlock the assessment.' : ''
 
     console.log(`Assessment ${assessmentId} locking:`, {
       mandatoryCount,
       completedMandatoryCount,
-      isLocked: !allMandatoryComplete
+      isLocked: !allMandatoryComplete,
+      milestoneAssessmentLocked: !allMandatoryComplete
     })
   }
 

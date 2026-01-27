@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Renderer2, SimpleChanges } from '@angular/core'
+import { Component, Input, OnInit, OnDestroy, Renderer2, SimpleChanges } from '@angular/core'
 import { NsContent } from '../../../../_services/widget-content.model'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
@@ -32,7 +32,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
     ])
   ]
 })
-export class AppTocContentCardV2Component implements OnInit {
+export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   @Input() content: NsContent.IContent | null = null
   @Input() expandAll = false
   @Input() rootId!: string
@@ -76,6 +76,7 @@ export class AppTocContentCardV2Component implements OnInit {
   viewChildren = false
   primaryCategory = NsContent.EPrimaryCategory
   pageScrollSubscription: Subscription | null = null
+  hashmapUpdatedSubscription: Subscription | null = null
   achievementLoading: boolean = false
   // Cached computed properties for performance optimization
   private _cachedIsCollection: boolean = false
@@ -111,6 +112,17 @@ export class AppTocContentCardV2Component implements OnInit {
     //   }
     // )
     this.resourceScroll()
+    
+    // Subscribe to hashmap updates to recompute cached properties when progress changes
+    this.hashmapUpdatedSubscription = this.appTocSvc.hashmapUpdated$.subscribe((update) => {
+      if (update && update.hashmap) {
+        console.log('🔄 Hashmap updated, recomputing cached properties for:', this.content?.identifier)
+        // IMPORTANT: Update hierarchyMapData with the latest hashmap from the service
+        // This ensures the component uses the updated data, not the stale @Input reference
+        this.hierarchyMapData = update.hashmap
+        this.computeAllCachedProperties()
+      }
+    })
   }
 
   /**
@@ -318,7 +330,9 @@ export class AppTocContentCardV2Component implements OnInit {
   }
 
   /**
-   * Check if current content is a milestone assessment (Course Assessment or Final Assessment inside a Milestone)
+   * Check if current content is a MILESTONE assessment (DIRECT child of a Milestone)
+   * IMPORTANT: This should NOT return true for course assessments inside courses within milestones
+   * Only assessments that are direct children of milestones should be locked by milestone logic
    */
   private computeIsMilestoneAssessment(): boolean {
     if (!this.baseContentReadData || this.baseContentReadData.courseCategory !== 'Learning Pathway') {
@@ -329,30 +343,64 @@ export class AppTocContentCardV2Component implements OnInit {
       return false
     }
 
-    // Check if this is an assessment
+    // Check if this is an assessment type
+    // Note: FINAL_ASSESSMENT maps to 'Course Assessment' in the enum, not 'Final Assessment'
     const isAssessment = 
       this.content.primaryCategory === 'Course Assessment' ||
-      this.content.courseCategory === 'Course Assessment' ||
-      (this.content.name && this.content.name.toLowerCase().includes('assessment'))
+      this.content.primaryCategory === 'Standalone Assessment' ||
+      this.content.mimeType === 'application/vnd.sunbird.questionset' ||
+      this.content.mimeType === 'application/quiz'
 
     if (!isAssessment) {
       return false
     }
 
-    // Check if the parent or grandparent is a milestone (since assessments can be inside courses inside milestones)
-    if (this.content.parent && this.hierarchyMapData[this.content.parent]) {
-      const parentData = this.hierarchyMapData[this.content.parent]
+    // IMPORTANT: Only return true if the DIRECT parent is a milestone
+    // Assessments inside courses (grandchildren of milestones) should NOT be locked by milestone logic
+    // They follow their own course's locking rules
+    
+    // Get the parent from hashmap (which we fixed to track correct parent-child relationships)
+    // or fallback to content.parent if hashmap entry doesn't exist
+    const contentHashData = this.hierarchyMapData[this.content.identifier]
+    const parentId = contentHashData?.parent || this.content.parent
+    
+    console.log(`🔍 computeIsMilestoneAssessment for "${this.content.name}" (${this.content.identifier}):`, {
+      contentId: this.content.identifier,
+      primaryCategory: this.content.primaryCategory,
+      mimeType: this.content.mimeType,
+      contentParent: this.content.parent,
+      hashmapParent: contentHashData?.parent,
+      resolvedParentId: parentId,
+      hasParentData: !!this.hierarchyMapData[parentId]
+    })
+    
+    if (parentId && this.hierarchyMapData[parentId]) {
+      const parentData = this.hierarchyMapData[parentId]
       
-      // Check if direct parent is a milestone
-      if (parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') {
+      console.log(`   Parent details:`, {
+        parentId: parentId,
+        parentName: parentData?.name,
+        parentPrimaryCategory: parentData?.primaryCategory,
+        parentIsMilestone: parentData?.isMilestone,
+        parentCourseCategory: parentData?.courseCategory,
+      })
+      
+      // Check if DIRECT parent is a milestone - ONLY this case
+      const isParentMilestone = parentData.isMilestone || 
+                                parentData.primaryCategory === 'Milestone' || 
+                                parentData.courseCategory === 'Milestone'
+      
+      if (isParentMilestone) {
+        console.log(`   ✅ Result: IS a milestone assessment (direct child of milestone)`)
         return true
       }
       
-      // Check if grandparent is a milestone (for assessments inside courses inside milestones)
-      if (parentData.parent && this.hierarchyMapData[parentData.parent]) {
-        const grandparentData = this.hierarchyMapData[parentData.parent]
-        return grandparentData.isMilestone || grandparentData.primaryCategory === 'Milestone' || grandparentData.courseCategory === 'Milestone'
-      }
+      console.log(`   ❌ Result: NOT a milestone assessment (parent is ${parentData.primaryCategory}, not a Milestone)`)
+      // DO NOT check grandparent - course assessments inside courses within milestones
+      // should NOT be treated as milestone assessments
+      return false
+    } else {
+      console.log(`   ⚠️  No parent data found for ${parentId}`)
     }
 
     return false
@@ -361,13 +409,21 @@ export class AppTocContentCardV2Component implements OnInit {
   /**
    * Check if milestone assessment should be locked
    * Assessment is locked if:
-   * 1. It's an assessment within a milestone
+   * 1. It's an assessment that is a DIRECT child of a milestone
    * 2. The parent milestone is unlocked (otherwise handled by parent milestone lock)
-   * 3. NOT all mandatory content in the same milestone is completed
+   * 3. NOT all mandatory courses in the same milestone are completed
    */
   private computeIsMilestoneAssessmentLocked(): boolean {
-    // Only apply to assessments within milestones
-    if (!this._cachedIsMilestoneAssessment && !this.computeIsMilestoneAssessment()) {
+    // Only apply to assessments that are DIRECT children of milestones
+    const isMilestoneAssessment = this._cachedIsMilestoneAssessment || this.computeIsMilestoneAssessment()
+    
+    console.log(`🔒 computeIsMilestoneAssessmentLocked for "${this.content?.name}":`, {
+      isMilestoneAssessment,
+      _cachedIsMilestoneAssessment: this._cachedIsMilestoneAssessment,
+    })
+    
+    if (!isMilestoneAssessment) {
+      console.log(`🔓 "${this.content?.name}" NOT locked - not a milestone assessment`)
       return false
     }
 
@@ -383,27 +439,18 @@ export class AppTocContentCardV2Component implements OnInit {
       return false
     }
 
-    // Find the milestone ID (could be parent or grandparent)
-    let milestoneId: string | undefined
-    let milestone: any
-
-    // Check if direct parent is milestone
-    if (this.content?.parent && this.hierarchyMapData && this.hierarchyMapData[this.content.parent]) {
-      const parentData = this.hierarchyMapData[this.content.parent]
-      if (parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') {
-        milestoneId = this.content.parent
-        milestone = parentData
-      } else if (parentData.parent && this.hierarchyMapData[parentData.parent]) {
-        // Check if grandparent is milestone
-        const grandparentData = this.hierarchyMapData[parentData.parent]
-        if (grandparentData.isMilestone || grandparentData.primaryCategory === 'Milestone' || grandparentData.courseCategory === 'Milestone') {
-          milestoneId = parentData.parent
-          milestone = grandparentData
-        }
-      }
+    // For milestone assessments, the parent IS the milestone (verified by computeIsMilestoneAssessment)
+    // Use hashmap's parent which has correct parent-child relationships
+    const contentHashData = this.hierarchyMapData && this.hierarchyMapData[this.content?.identifier || '']
+    const milestoneId = contentHashData?.parent || this.content?.parent
+    
+    if (!milestoneId || !this.hierarchyMapData) {
+      return false
     }
-
-    if (!milestoneId || !milestone) {
+    
+    const milestone = this.hierarchyMapData[milestoneId]
+    
+    if (!milestone) {
       return false
     }
     
@@ -413,44 +460,30 @@ export class AppTocContentCardV2Component implements OnInit {
       return false
     }
 
-    // Check if all mandatory content in the milestone is completed
+    // Check if all mandatory COURSES in the milestone are completed
+    // Note: Only checking courses that are direct children of the milestone
     let mandatoryCount = 0
     let completedMandatoryCount = 0
 
-    // Check all items in hashmap that belong to this milestone
     for (const key of Object.keys(this.hierarchyMapData)) {
       const item = this.hierarchyMapData[key]
 
-      // Check if this item belongs to the milestone (direct child or nested)
-      // Most content will be under courses that are under milestone
-      let itemBelongsToMilestone = false
-      if (item.parent === milestoneId) {
-        itemBelongsToMilestone = true
-      } else if (item.parent && this.hierarchyMapData[item.parent]) {
-        // Check if parent is a course under this milestone
-        const parentItem = this.hierarchyMapData[item.parent]
-        if (parentItem.parent === milestoneId && parentItem.primaryCategory === 'Course') {
-          itemBelongsToMilestone = true
-        }
-      }
+      // Only check items that are direct children of this milestone
+      if (item.parent !== milestoneId) continue
 
-      if (!itemBelongsToMilestone) continue
-
-      // Skip assessments - we're checking if learning content is complete
+      // Only count courses (not assessments, not other types)
+      if (item.primaryCategory !== 'Course' && !item.isCollection) continue
+      
+      // Skip if this is an assessment
       const isItemAssessment =
         item.primaryCategory === 'Course Assessment' ||
         item.primaryCategory === 'Final Assessment' ||
         item.primaryCategory === 'Standalone Assessment' ||
-        item.courseCategory === 'Course Assessment' ||
-        item.mimeType === 'application/vnd.sunbird.questionset' ||
-        item.mimeType === 'application/quiz' ||
-        (item.name && item.name.toLowerCase().includes('assessment'))
+        item.mimeType === 'application/vnd.sunbird.questionset'
       if (isItemAssessment) continue
 
-      // Check if this content is mandatory (courses and non-optional content)
-      // By default, courses are mandatory unless explicitly marked otherwise
-      if (item.isMandatory !== false && (item.primaryCategory === 'Course' || item.isMandatory === true)) {
-        // Count all courses and mandatory items as they need to be completed
+      // By default, courses are mandatory unless explicitly marked as optional
+      if (item.isMandatory !== false) {
         mandatoryCount++
         const isCompleted = item.completionStatus === 2 || item.status === 2 || 
                            item.completionPercentage >= 100 || item.progress >= 100
@@ -460,12 +493,12 @@ export class AppTocContentCardV2Component implements OnInit {
       }
     }
 
-    // If there are no mandatory items, assessment is unlocked
+    // If there are no mandatory courses, assessment is unlocked
     if (mandatoryCount === 0) {
       return false
     }
 
-    // Lock assessment if not all mandatory items are completed
+    // Lock assessment if not all mandatory courses are completed
     const allMandatoryComplete = completedMandatoryCount >= mandatoryCount
     return !allMandatoryComplete
   }
@@ -744,7 +777,9 @@ export class AppTocContentCardV2Component implements OnInit {
   }
 
   get isEnrolled(): boolean {
-    return this.batchId ? true : false
+    // Check both batchId and batchData.enrolled to support Learning Pathways
+    // where batchId might not be directly set but user is enrolled in courses within the pathway
+    return this.batchId ? true : (this.batchData?.enrolled || false)
   }
 
   updateChildParentMap(identifier: string) {
@@ -869,6 +904,9 @@ export class AppTocContentCardV2Component implements OnInit {
     }
   }
   ngOnDestroy() {
+    if (this.hashmapUpdatedSubscription) {
+      this.hashmapUpdatedSubscription.unsubscribe()
+    }
     if (this.pageScrollSubscription) {
       this.pageScrollSubscription.unsubscribe()
     }
