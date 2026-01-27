@@ -478,7 +478,6 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
   compThemeSelected(option: any) {
     this.enableCompetencyAdd = false
     this.allCompetencyTheme.forEach((val: any) => {
-      debugger
       if (option.identifier === val.identifier) {
         this.seletedCompetencyTheme = val
         this.allCompetencySubtheme = this.allThemeData.filter((v: any) => v.identifier === val.identifier)[0].associations
@@ -563,7 +562,6 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
       control.markAsDirty()
       control.markAsTouched()
     }
-    console.log('Added competencies:', this.additionalDetailsForm.get('competencies_v6')?.value)
   }
 
   get uniqueAreas(): string[] {
