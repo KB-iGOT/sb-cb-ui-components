@@ -34,7 +34,7 @@ export class AppTocV2Service {
         "identifier": milestone.id,
         "description": milestone.description,
         "mimeType": "application/vnd.ekstep.content-collection",
-        "duration": "3600",
+        "duration": "0",
         "primaryCategory": "Milestone",
         "courseCategory": "Milestone",
         "createdBy": "25311a4f-fa42-4cf7-882a-5e79198edfcb",
@@ -61,6 +61,7 @@ export class AppTocV2Service {
           // Set parent reference for courses inside milestone
           mileStoneCourse.parent = milestone.id
           mileStoneCourse['moduleCount'] = 0
+          mileStoneData['duration'] = String(Number(mileStoneData['duration']) + Number(mileStoneCourse?.duration || 0))
           this.tocSvc.mapModuleCount(mileStoneCourse)
           if (mileStoneCourse && mileStoneCourse?.leafNodes && mileStoneCourse?.leafNodes?.length) {
             leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
