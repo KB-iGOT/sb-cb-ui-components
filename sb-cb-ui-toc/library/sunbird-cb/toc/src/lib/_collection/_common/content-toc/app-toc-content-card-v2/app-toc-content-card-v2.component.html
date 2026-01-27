@@ -87,8 +87,10 @@
                     <div class="flex flex-col sm:flex-row flex-wrap">
                         <div class="flex items-center gap-2 w-full">
                             <mat-icon class="text-gray-500">lock</mat-icon>
-                            <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate text-gray-600">
-                                {{ content?.name | truncate:50 }}
+                            <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate text-gray-600"
+                                [matTooltip]="(content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')).length > 50 ? (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')) : ''"
+                                matTooltipPosition="above">
+                                {{ (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT )? ' - ' + content?.contextCategory : '')) | truncate:50 }}
                             </p>
                         </div>
                         <span class="content-type optional-span nodtranslate" *ngIf="content?.optionalReading">{{
@@ -162,8 +164,10 @@
                         (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
                         <div class="flex flex-col sm:flex-row flex-wrap">
                             <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
-                                [ngClass]="{'text-active': pathSet?.has(content?.identifier) && isEnrolled}">
-                                {{ content?.name | truncate:50 }}
+                                [ngClass]="{'text-active': pathSet?.has(content?.identifier) && isEnrolled}"
+                                [matTooltip]="(content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')).length > 50 ? (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')) : ''"
+                                matTooltipPosition="above">
+                                {{ (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT)? ' - ' + content?.contextCategory : '')) | truncate:50 }}
                             </p>
                             <span class="content-type optional-span nodtranslate" *ngIf="content?.optionalReading">{{
                                 'playerbrief.optional' | translate | titlecase}} </span>
@@ -340,7 +344,9 @@
                                 class="lock-icon mr-2 margin-bottom-xxs">
                             <div class="flex-auto flex flex-col" style="min-width: 0;">
                                 <p class="margin-remove text-truncate mat-subheading-1 font-bold nodtranslate"
-                                    [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}">
+                                    [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}"
+                                    [matTooltip]="content?.name?.length > 50 ? content?.name : ''"
+                                    matTooltipPosition="above">
                                     <span>{{isMilestone ? index -1 : index}}. </span>{{ content?.name | truncate:50 }}
                                 </p>
                                 <div class="mt-1" *ngIf="isMilestone && isMilestoneLocked">
@@ -368,8 +374,11 @@
                         <div *ngIf="isMilestone" class="milestone-badge mt-2 mb-2">
                             <span class="milestone-badge-text nodtranslate">Milestone {{index - 1}}</span>
                         </div>
-                        <!-- Milestone Description (3 lines with ellipsis) -->
-                        <p *ngIf="isMilestone && content?.description" class="milestone-description mt-2  nodtranslate">
+                        <!-- Milestone Description (2 lines with ellipsis) -->
+                        <p #milestoneDescRef *ngIf="isMilestone && content?.description" class="milestone-description mt-2 nodtranslate"
+                            [matTooltip]="isMultiLineTruncated(milestoneDescRef) ? content?.description : ''"
+                            matTooltipPosition="above"
+                            matTooltipClass="multiline-tooltip">
                             {{ content?.description }}
                         </p>
                         <div class="flex flex-row gap-3 items-center content-key-values mt-2">
@@ -596,7 +605,9 @@
                                 (click)="raiseTelemetry(); changeResource()">
                                 <div class="flex flex-col sm:flex-row flex-wrap">
                                     <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
-                                        [ngClass]="{'text-active': pathSet?.has(content?.identifier)}">
+                                        [ngClass]="{'text-active': pathSet?.has(content?.identifier)}"
+                                        [matTooltip]="content?.name?.length > 50 ? content?.name : ''"
+                                        matTooltipPosition="above">
                                         <!-- <mat-icon class="margin-right-xs radiobtn time-icon">radio_button_unchecked </mat-icon> -->
                                         {{index}}. {{ content?.name | truncate:50 }}
 

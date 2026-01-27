@@ -2371,7 +2371,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           this.dataTransferSvc.setEnrollData(this.userEnrollmentList)
           // in case of back from player we need to check recent language and load
           if (!this.contentLibSvc?.oneStepResumeEnable && this.baseContentReadData?.identifier === this.contentReadData?.identifier) {
-            let lang = this.baseContentReadData?.language.length ? this.baseContentReadData?.language[0] : ''
+            let lang = this.baseContentReadData?.language?.length ? this.baseContentReadData?.language[0] : ''
             let baseContentFromEnrollData = this.userEnrollmentList.find((el: any) => el.collectionId === this.baseContentReadData?.identifier)
             if (lang && baseContentFromEnrollData && baseContentFromEnrollData?.recent_language?.toLowerCase() !== lang) {
               let localLang = this.contentLangSvc.getRequiredLanguageDetails(this.baseContentReadData, baseContentFromEnrollData?.recent_language)
