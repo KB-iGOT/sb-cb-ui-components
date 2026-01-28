@@ -34,7 +34,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   selectedDifficultyLevel: string = 'easy'
 
   htmlTasRemovalRegex = /<\/?[^>]+>|&nbsp;|<br\s*\/?>|<\/br>|&#39;|&quot;/gi
-  assessmentNoSpecialChar = new RegExp(/^[a-zA-Z0-9\u0900-\u097F._\-\s$":/?,।()\[\]'! ]+$/)
+  assessmentNoSpecialChar = new RegExp(/^[a-zA-Z0-9\u0900-\u097F._\-\s$":/?,।()\[\]'!]+$/)
   isRegexPassed: boolean = true
   questionText: string = ''
   fitbCount: number = 0
@@ -414,7 +414,12 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   }
 
   getQuestionContent(event: any) {
-    const plainText = (event || '').replace(this.htmlTasRemovalRegex, ' ').trim()
+    // First remove invisible Unicode characters from the event itself
+    const cleanedEvent = (event || '').replace(/\u200B|\u200C|\u200D|\uFEFF/g, '')
+
+    // Then get plain text by removing HTML tags and entities
+    const plainText = cleanedEvent.replace(this.htmlTasRemovalRegex, ' ').replace(/\s+/g, ' ').trim()
+
     if (!plainText) {
       this.isRegexPassed = true
       this.questionText = ''
@@ -422,7 +427,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
       const isValid = this.assessmentNoSpecialChar.test(plainText)
       this.isRegexPassed = isValid
       if (isValid) {
-        this.questionText = event
+        this.questionText = cleanedEvent
       }
     }
     if (this.questionData.qType === 'FTB') {
