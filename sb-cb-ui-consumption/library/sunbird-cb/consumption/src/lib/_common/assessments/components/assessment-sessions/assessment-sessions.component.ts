@@ -399,7 +399,18 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       // For basic assessment without sections, exclude the sections array from form value if it exists
       const formValue = this.basicAssessmentForm.value
       const { sections, ...formData } = formValue
-      this.saved.emit(formData)
+
+      // For single section basic assessment, parent totals match the section values
+      const parentChanges = {
+        totalQuestions: formData.totalQuestions || 0,
+        maxQuestions: formData.maxQuestions || 0
+      }
+
+      const saveData = {
+        ...formData,
+        parentChanges: parentChanges
+      }
+      this.saved.emit(saveData)
     } else {
       this.basicAssessmentForm.markAllAsTouched()
     }
@@ -483,15 +494,47 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       const currentSectionData = currentSection.value
       const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier || null
 
+      // Calculate parent totals if multiple sections exist
+      let parentChanges: any = null
+      if (this.isBasicAssessmentWithSections()) {
+        parentChanges = this.calculateParentTotalsForSave(currentSectionData)
+      }
+
       const saveData = {
         sectionData: currentSectionData,
-        sectionIdentifier: sectionIdentifier
+        sectionIdentifier: sectionIdentifier,
+        parentChanges: parentChanges
       }
 
       this.saved.emit(saveData)
     } else {
       currentSection.markAllAsTouched()
     }
+  }
+
+  private calculateParentTotalsForSave(currentSectionData: any): any {
+    const parentChanges: any = {}
+
+    let totalQuestionsSum = 0
+    let maxQuestionsSum = 0
+
+    this.basicSections.controls.forEach((section, index) => {
+      if (index === this.selectedSectionIndex) {
+        // Use the new values for current section being saved
+        totalQuestionsSum += currentSectionData.totalQuestions || 0
+        maxQuestionsSum += currentSectionData.maxQuestions || 0
+      } else {
+        // Use existing values for other sections
+        const sectionData = this.assessmentData.children?.[index]
+        totalQuestionsSum += sectionData?.totalQuestions || 0
+        maxQuestionsSum += sectionData?.maxQuestions || 0
+      }
+    })
+
+    parentChanges.totalQuestions = totalQuestionsSum
+    parentChanges.maxQuestions = maxQuestionsSum
+
+    return parentChanges
   }
 
   onUpdateBasicSection(): void {
@@ -516,15 +559,19 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       // Check totalQuestions
       const currentTotalQuestions = currentSectionData.totalQuestions
       const originalTotalQuestions = originalSectionData?.totalQuestions || 0
+      let totalQuestionsChanged = false
       if (currentTotalQuestions !== originalTotalQuestions) {
         changedData.totalQuestions = currentTotalQuestions
+        totalQuestionsChanged = true
       }
 
       // Check maxQuestions
       const currentMaxQuestions = currentSectionData.maxQuestions
       const originalMaxQuestions = originalSectionData?.maxQuestions || 0
+      let maxQuestionsChanged = false
       if (currentMaxQuestions !== originalMaxQuestions) {
         changedData.maxQuestions = currentMaxQuestions
+        maxQuestionsChanged = true
       }
 
       // Check minPassPercentage
@@ -536,9 +583,17 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
       if (Object.keys(changedData).length > 0) {
         const sectionIdentifier = this.assessmentData.children?.[this.selectedSectionIndex]?.identifier || null
+
+        // Calculate parent totals if totalQuestions or maxQuestions changed
+        let parentChanges: any = null
+        if ((totalQuestionsChanged || maxQuestionsChanged) && this.isBasicAssessmentWithSections()) {
+          parentChanges = this.calculateParentTotals(currentSectionData, totalQuestionsChanged, maxQuestionsChanged)
+        }
+
         const updateData = {
           changedData: changedData,
-          sectionIdentifier: sectionIdentifier
+          sectionIdentifier: sectionIdentifier,
+          parentChanges: parentChanges
         }
         this.updated.emit(updateData)
       } else {
@@ -547,6 +602,42 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     } else {
       currentSection.markAllAsTouched()
     }
+  }
+
+  private calculateParentTotals(currentSectionData: any, totalQuestionsChanged: boolean, maxQuestionsChanged: boolean): any {
+    const parentChanges: any = {}
+
+    if (totalQuestionsChanged) {
+      let totalQuestionsSum = 0
+      this.basicSections.controls.forEach((section, index) => {
+        if (index === this.selectedSectionIndex) {
+          // Use the updated value for current section
+          totalQuestionsSum += currentSectionData.totalQuestions || 0
+        } else {
+          // Use existing values for other sections
+          const sectionData = this.assessmentData.children?.[index]
+          totalQuestionsSum += sectionData?.totalQuestions || 0
+        }
+      })
+      parentChanges.totalQuestions = totalQuestionsSum
+    }
+
+    if (maxQuestionsChanged) {
+      let maxQuestionsSum = 0
+      this.basicSections.controls.forEach((section, index) => {
+        if (index === this.selectedSectionIndex) {
+          // Use the updated value for current section
+          maxQuestionsSum += currentSectionData.maxQuestions || 0
+        } else {
+          // Use existing values for other sections
+          const sectionData = this.assessmentData.children?.[index]
+          maxQuestionsSum += sectionData?.maxQuestions || 0
+        }
+      })
+      parentChanges.maxQuestions = maxQuestionsSum
+    }
+
+    return Object.keys(parentChanges).length > 0 ? parentChanges : null
   }
 
   addQuestions(): void {

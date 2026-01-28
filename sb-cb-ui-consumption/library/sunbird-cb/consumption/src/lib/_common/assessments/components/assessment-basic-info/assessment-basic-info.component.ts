@@ -611,6 +611,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     // Check Option Weightage fields
     if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
       if (formValues.numberOfQuestionsToDisplay !== this.assessmentData.totalQuestions) {
+        // Update root assessment totals
         changedData.totalQuestions = formValues.numberOfQuestionsToDisplay
         changedData.maxQuestions = formValues.numberOfQuestionsToDisplay
 
@@ -627,7 +628,18 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
     // Only emit if there are changes
     if (Object.keys(changedData).length > 0) {
-      this.updated.emit({ changedData, identifier: this.assessmentData.identifier })
+      // For option weightage with sections, ensure parent changes are included
+      const emitData: any = { changedData, identifier: this.assessmentData.identifier }
+
+      if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE &&
+        changedData.totalQuestions !== undefined && changedData.maxQuestions !== undefined) {
+        emitData.parentChanges = {
+          totalQuestions: changedData.totalQuestions,
+          maxQuestions: changedData.maxQuestions
+        }
+      }
+
+      this.updated.emit(emitData)
     } else {
       // No changes detected
       this.snackBar.open('No changes detected')

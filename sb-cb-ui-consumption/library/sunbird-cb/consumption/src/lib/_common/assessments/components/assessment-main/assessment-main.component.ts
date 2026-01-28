@@ -128,7 +128,7 @@ export class AssessmentMainComponent implements OnInit {
 
   updateAssessment(event: any) {
     if (event && event.identifier) {
-      const getAssessmentHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.identifier)
+      const getAssessmentHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.identifier, event.parentChanges)
       this.callLoader(true)
       this.assessmentService.updateAssessment(getAssessmentHierarchy).pipe(
         switchMap((updateResp: any) => {
@@ -159,9 +159,15 @@ export class AssessmentMainComponent implements OnInit {
   saveSectionData(event: any): void {
     if (event) {
       // Extract sectionData and sectionIdentifier from event
-      const sectionData = event.sectionData || event
+      let sectionData = event.sectionData || event
       const sectionIdentifier = event.sectionIdentifier
 
+      if (event.parentChanges && !sectionData.parentChanges) {
+        sectionData = {
+          ...sectionData,
+          parentChanges: event.parentChanges
+        }
+      }
       // Use service method to build the hierarchy request
       // Pass sectionIdentifier if it exists (for updates), otherwise undefined (for create)
       const sectionHierarchyRequest = this.assessmentService.buildSectionHierarchyRequest(
@@ -199,7 +205,7 @@ export class AssessmentMainComponent implements OnInit {
 
   updateSectionData(event: any): void {
     if (event && event.sectionIdentifier && event.changedData) {
-      const getSectionHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.sectionIdentifier)
+      const getSectionHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.sectionIdentifier, event.parentChanges)
       this.callLoader(true)
       this.assessmentService.updateAssessment(getSectionHierarchy).pipe(
         switchMap((updateResp: any) => {
