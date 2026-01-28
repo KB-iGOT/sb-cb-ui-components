@@ -87,7 +87,7 @@ export class AppTocV2Service {
       milestoneIndex++
     })
     contentHeirarchy['leafNodes'] = [...leafNodes]
-    console.log('content Heirarchy', contentHeirarchy)
+    contentHeirarchy['leafNodesCount'] = leafNodes.length
     return contentHeirarchy
   }
 
@@ -106,10 +106,6 @@ export class AppTocV2Service {
 
 
   mapContentHierarchyProgressUpdate(contentHeirarchyData: any, enrollmentListData: any) {
-    console.log('=== mapContentHierarchyProgressUpdate ===')
-    console.log('Content hierarchy:', contentHeirarchyData?.name, contentHeirarchyData?.identifier)
-    console.log('Enrollment list data:', enrollmentListData)
-    
     if (contentHeirarchyData && contentHeirarchyData.children) {
       let totalLeafNodes = 0
       let totalCompletedLeafNodes = 0
@@ -241,14 +237,6 @@ export class AppTocV2Service {
     const nodeEnrollData = enrollment?.contentList?.find((ele: any) => 
       ele?.contentId === node.identifier || ele?.collectionId === node.identifier
     )
-    
-    console.log(`Updating node progress for ${node.identifier} (${node.name}):`, {
-      hasEnrollment: !!enrollment,
-      hasNodeEnrollData: !!nodeEnrollData,
-      nodeEnrollData,
-      currentCompletionStatus: node.completionStatus,
-      currentCompletionPercentage: node.completionPercentage
-    })
     
     if (enrollment && nodeEnrollData && nodeEnrollData.status < 2) {
       node.completionPercentage = nodeEnrollData.completionPercentage || nodeEnrollData.progress || 0
