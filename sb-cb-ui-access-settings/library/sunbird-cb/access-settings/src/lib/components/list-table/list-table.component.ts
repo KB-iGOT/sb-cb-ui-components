@@ -165,7 +165,7 @@ export class ListTableComponent implements OnInit, OnChanges, AfterViewInit {
 
   onSortChange(sortState: Sort): void {
     if (sortState.direction) {
-      if (sortState.active === "ministry") sortState.active = "channel";
+      if (sortState.active === "ministry") sortState.active = "rootOrgName";
       if (sortState.active === "mobile") sortState.active = "phone";
       if (this.tableConfig?.type === "selectedUsers") {
         this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
