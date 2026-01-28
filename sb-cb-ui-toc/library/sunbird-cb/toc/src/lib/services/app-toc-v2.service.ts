@@ -17,8 +17,19 @@ export class AppTocV2Service {
       contentHeirarchy['preliminaryAssessmentDetail'].parent = contentHeirarchy.identifier
       // Mark this as the pre-assessment for milestone locking logic
       contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment = true
+      
+      console.log('🔍 [CONSTRUCT HIERARCHY] Setting isPreAssessment=true on preliminaryAssessmentDetail:', {
+        id: contentHeirarchy['preliminaryAssessmentDetail'].identifier,
+        name: contentHeirarchy['preliminaryAssessmentDetail'].name,
+        isPreAssessment: contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment,
+        parent: contentHeirarchy['preliminaryAssessmentDetail'].parent,
+        primaryCategory: contentHeirarchy['preliminaryAssessmentDetail'].primaryCategory
+      })
+      
       contentHeirarchy['children'].push(contentHeirarchy['preliminaryAssessmentDetail'])
       leafNodes.push(contentReadData?.preliminaryAssessment || contentReadData?.preliminaryAssessmentDetail?.identifier)
+    } else {
+      console.log('⚠️ [CONSTRUCT HIERARCHY] No preliminaryAssessmentDetail found in contentReadData')
     }
 
     // Track milestone index for proper locking logic

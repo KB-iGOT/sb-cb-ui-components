@@ -2022,6 +2022,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
     this.tocSvc.getSelectedBatchData(this.batchData)
     this.tocSvc.mapSessionCompletionPercentage(this.batchData)
+    
+    // CRITICAL: For Learning Pathways, compute milestone locking status after enrollment
+    // This ensures milestones are properly locked until pre-assessment is completed
+    if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+      console.log('🔐 [ENROLLMENT] Computing milestone locking for Learning Pathway after enrollment')
+      this.tocSvc.callHirarchyProgressHashmap(this.content)
+      this.tocSvc.computeMilestoneLockingStatus(true)
+      this.syncMilestoneLockStatus()
+    }
+    
     this.routerChangeHandler(true)
     this.openSnackbar('Enrolled Successfully!')
     this.disableEnrollBtn = false

@@ -475,20 +475,50 @@ export class ViewerUtilService {
   }
 
   updateContentHashMapForAssesstent(contentId: string, contentProgress: any) {
+    console.log('📊 [UPDATE HASHMAP] Updating assessment in hashmap:', {
+      contentId,
+      incomingProgress: contentProgress,
+      currentHashmapData: this.tocSvc.hashmap[contentId] ? {
+        completionPercentage: this.tocSvc.hashmap[contentId]['completionPercentage'],
+        completionStatus: this.tocSvc.hashmap[contentId]['completionStatus'],
+        status: this.tocSvc.hashmap[contentId]['status']
+      } : 'not found'
+    })
     
-    if (this.tocSvc.hashmap[contentId] &&
-      (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
-      this.tocSvc.hashmap[contentId]['completionPercentage'] = contentProgress.completionPercentage
-      this.tocSvc.hashmap[contentId]['completionStatus'] = Number(contentProgress.status) || 0
-      this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+    if (this.tocSvc.hashmap[contentId]) {
+      const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus'] || 0
+      const newStatus = Number(contentProgress.status) || 0
       
-      // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
-      if (this.tocSvc.triggerMilestoneLockUpdate) {
-        this.tocSvc.triggerMilestoneLockUpdate()
+      // Update if not complete or if new status is higher
+      if (currentStatus < 2 || newStatus >= currentStatus) {
+        this.tocSvc.hashmap[contentId]['completionPercentage'] = contentProgress.completionPercentage
+        this.tocSvc.hashmap[contentId]['completionStatus'] = newStatus
+        this.tocSvc.hashmap[contentId]['status'] = newStatus
+        
+        console.log('✅ [UPDATE HASHMAP] Updated assessment:', {
+          contentId,
+          name: this.tocSvc.hashmap[contentId]['name'],
+          completionPercentage: contentProgress.completionPercentage,
+          completionStatus: newStatus,
+          status: newStatus
+        })
+        
+        // Create new hashmap reference for Angular change detection
+        this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+        
+        // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
+        if (this.tocSvc.triggerMilestoneLockUpdate) {
+          console.log('🔄 [UPDATE HASHMAP] Triggering milestone lock update after assessment update')
+          this.tocSvc.triggerMilestoneLockUpdate()
+        }
+        
+        // Emit to trigger viewer component refresh for Learning Pathways
+        this.markAsCompleteSubject.next(true)
+      } else {
+        console.log('ℹ️ [UPDATE HASHMAP] Skipping update - already complete or lower status')
       }
-      
-      // Emit to trigger viewer component refresh for Learning Pathways
-      this.markAsCompleteSubject.next(true)
+    } else {
+      console.log('⚠️ [UPDATE HASHMAP] Content not found in hashmap:', contentId)
     }
   }
 
@@ -616,17 +646,35 @@ export class ViewerUtilService {
           .subscribe(noop, noop)
       }
       
-      if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
-        // Update hashmap if status changed
-        if (this.tocSvc.hashmap[contentId] &&
-          (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
+      console.log('🎯 [PRE-ASSESSMENT QUIZ] Updating progress for:', contentId)
+      console.log('   Status:', status, 'Completion:', req.request.contents[0].completionPercentage)
+      
+      // Update hashmap - create entry if it doesn't exist
+      if (this.tocSvc.hashmap) {
+        if (!this.tocSvc.hashmap[contentId]) {
+          // Create new entry for pre-assessment if it doesn't exist
+          console.log('   Creating new hashmap entry for pre-assessment')
+          this.tocSvc.hashmap[contentId] = {
+            identifier: contentId,
+            completionPercentage: req.request.contents[0].completionPercentage,
+            completionStatus: Number(req.request.contents[0].status) || 0,
+            status: Number(req.request.contents[0].status) || 0,
+            isPreAssessment: true
+          }
+        } else {
+          // Update existing entry
+          console.log('   Updating existing hashmap entry')
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
           this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
-          this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+          this.tocSvc.hashmap[contentId]['status'] = Number(req.request.contents[0].status) || 0
         }
+        
+        console.log('   Hashmap entry after update:', this.tocSvc.hashmap[contentId])
+        this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
         
         // ALWAYS trigger milestone lock recomputation when pre-assessment completes
         // This ensures milestone 1 unlocks immediately after pre-assessment completion
+        console.log('🔄 [PRE-ASSESSMENT QUIZ] Triggering milestone lock update')
         if (this.tocSvc.triggerMilestoneLockUpdate) {
           this.tocSvc.triggerMilestoneLockUpdate()
         }
