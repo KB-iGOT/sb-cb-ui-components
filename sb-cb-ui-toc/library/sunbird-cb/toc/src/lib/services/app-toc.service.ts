@@ -893,7 +893,13 @@ export class AppTocService {
         const isLearningPathway = rootCourseCategory === 'Learning Pathway'
 
         // Check if content is mandatory (isMandatory flag or mandatory property)
-        const isMandatory = child.isMandatory === true || (child as any).mandatory === true
+        // By default, courses are mandatory unless isMandatory is explicitly false
+        let isMandatory = true
+        if (typeof child.isMandatory !== 'undefined') {
+          isMandatory = child.isMandatory !== false
+        } else if (typeof (child as any).mandatory !== 'undefined') {
+          isMandatory = (child as any).mandatory !== false
+        }
 
         // Use passed parentId (from iteration context) or fallback to child?.parent (from API)
         // This ensures nested children (e.g., assessments inside courses) have correct parent references
@@ -1337,88 +1343,31 @@ export class AppTocService {
       }
     }
 
-    console.log('🔍 [PRE-ASSESSMENT] Learning Pathway ID:', learningPathwayId)
-
-    // PRIORITY 1: Look for items explicitly marked as pre-assessment
+    // 1. Look for items explicitly marked as pre-assessment
     for (const key of Object.keys(this.hashmap)) {
       const item = this.hashmap[key]
       if (item.isPreAssessment === true) {
-        // Must check for actual completion - not just any value
         const isCompleted = (item.completionStatus === 2 || item.status === 2 || 
                             (item.completionPercentage !== undefined && item.completionPercentage >= 100) || 
                             (item.progress !== undefined && item.progress >= 100))
-        console.log(`✅ [PRE-ASSESSMENT] Found (isPreAssessment flag): ${item.name}`, {
-          id: key,
-          completionStatus: item.completionStatus,
-          status: item.status,
-          completionPercentage: item.completionPercentage,
-          progress: item.progress,
-          isCompleted: isCompleted ? '✅ COMPLETE' : '❌ INCOMPLETE'
-        })
-        // Pre-assessment exists - return its completion status (true/false)
         return isCompleted
       }
     }
 
-    console.log('🔍 [PRE-ASSESSMENT] No item with isPreAssessment flag found, checking for first non-milestone child')
-
-    // PRIORITY 2: Find pre-assessment in hashmap - direct child of Learning Pathway that is NOT a milestone
-    // Check for first non-milestone child of Learning Pathway
+    // 2. Find pre-assessment in hashmap - direct child of Learning Pathway that is NOT a milestone
     for (const key of Object.keys(this.hashmap)) {
       const item = this.hashmap[key]
-
-      // Check if this is a direct child of the Learning Pathway
       if (item.parent !== learningPathwayId) continue
-
-      // Skip milestones
       if (item.isMilestone || item.primaryCategory === 'Milestone') continue
-
-      console.log(`🔍 [PRE-ASSESSMENT] Checking potential pre-assessment: ${item.name}`, {
-        id: key,
-        parent: item.parent,
-        primaryCategory: item.primaryCategory,
-        courseCategory: item.courseCategory,
-        isMilestone: item.isMilestone
-      })
-
-      // This is a non-milestone direct child - it's the pre-assessment
-      // Must check for actual completion - not just any value
       const isCompleted = (item.completionStatus === 2 || item.status === 2 || 
                           (item.completionPercentage !== undefined && item.completionPercentage >= 100) || 
                           (item.progress !== undefined && item.progress >= 100))
-      console.log(`✅ [PRE-ASSESSMENT] Found (first non-milestone child): ${item.name}`, {
-        id: key,
-        completionStatus: item.completionStatus,
-        status: item.status,
-        completionPercentage: item.completionPercentage,
-        progress: item.progress,
-        isCompleted: isCompleted ? '✅ COMPLETE' : '❌ INCOMPLETE'
-      })
-      // Pre-assessment exists - return its completion status (true/false)
       return isCompleted
     }
 
-    console.log('🔍 [PRE-ASSESSMENT] No pre-assessment found yet')
-
-    // CRITICAL: If we reach here, no pre-assessment was found in the hashmap
-    // This could mean either:
-    // 1. There IS no pre-assessment (unlock M1 by default)
-    // 2. The hashmap hasn't been populated yet (should lock M1 until data is ready)
-    
-    // To be safe, check if ANY children exist at all
-    const hasAnyChildren = Object.keys(this.hashmap).some(key => 
-      this.hashmap[key].parent === learningPathwayId
-    )
-    
-    if (!hasAnyChildren) {
-      // Hashmap not populated yet - lock M1 until data is ready
-      console.log('⚠️ [PRE-ASSESSMENT] No children found in hashmap yet - LOCKING M1 until data is ready')
-      return false
-    }
-    
-    // Hashmap is populated but no pre-assessment found - allow M1 to unlock
-    console.log('ℹ️ [PRE-ASSESSMENT] No pre-assessment found in fully populated hashmap - allowing M1 to be unlocked by default')
-    return true
+    // 3. If we reach here, enforce: M1 is always locked until pre-assessment is completed
+    // This prevents accidental unlocking if pre-assessment node is missing or not flagged
+    return false;
   }
 
   /**

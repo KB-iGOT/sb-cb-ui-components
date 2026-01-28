@@ -408,20 +408,17 @@
                             </ng-container>
                         </div>
                         <!-- Milestone Completion Progress -->
-                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2  flex items-center justify-between">
-                            <div>
-                                <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of
-                                {{content?.leafNodesCount || 0}} completed</span>
-                            </div>
-                            <!-- View Achievement Button for completed milestones - Outside clickable area -->
-                            <div *ngIf="isMilestone && isEnrolled && (getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2)"
-                                class="view-achievement-container mt-2">
-                                <button type="button" class="view-achievement-btn" [disabled]="achievementLoading"
-                                    (click)="viewMilestoneAchievement($event)">
-                                    <span *ngIf="!achievementLoading">View Achievement</span>
-                                    <mat-spinner *ngIf="achievementLoading" [diameter]="16" 
-                                        [strokeWidth]="2" color="primary" class="inline-spinner"></mat-spinner>
-                                </button>
+                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2 flex flex-col gap-2">
+                            <div class="flex items-center justify-start gap-4 w-100">
+                                <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of {{content?.leafNodesCount || 0}} completed</span>
+                                <!-- View Achievement Button for completed milestones - Always visible when completed -->
+                                <ng-container *ngIf="getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2">
+                                    <button type="button" class="view-achievement-btn ml-4" [disabled]="achievementLoading"
+                                        (click)="viewMilestoneAchievement($event)">
+                                        <span *ngIf="!achievementLoading">View Achievement</span>
+                                        <mat-spinner *ngIf="achievementLoading" [diameter]="16" [strokeWidth]="2" color="primary" class="inline-spinner"></mat-spinner>
+                                    </button>
+                                </ng-container>
                             </div>
                         </div>
                         <!-- Unlock Criteria Message for Locked Milestones -->
