@@ -118,10 +118,10 @@ export class WidgetContentService {
     const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
     if (primaryCategory && this.isResource(primaryCategory)) {
       if (!forPreview) {
-        url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
+        url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
       } else {
         if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
-          url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
+          url = `/apis/proxies/v8/action/content/v3/read/${contentId}`
         } else {
             url = `/api/content/v1/read/${contentId}`
         }

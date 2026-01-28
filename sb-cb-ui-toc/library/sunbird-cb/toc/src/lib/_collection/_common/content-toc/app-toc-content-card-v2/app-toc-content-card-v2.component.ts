@@ -90,6 +90,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   private _cachedIsMilestoneAssessment: boolean = false
   private _cachedIsMilestoneAssessmentLocked: boolean = false
   private _cachedResourceLink: { url: string; queryParams: { [key: string]: any } } = { url: '', queryParams: {} }
+  private _cachedMilestoneCompletedCount: number = 0
   private _cacheInitialized: boolean = false
 
   constructor(
@@ -116,7 +117,6 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     // Subscribe to hashmap updates to recompute cached properties when progress changes
     this.hashmapUpdatedSubscription = this.appTocSvc.hashmapUpdated$.subscribe((update) => {
       if (update && update.hashmap) {
-        console.log('🔄 Hashmap updated, recomputing cached properties for:', this.content?.identifier)
         // IMPORTANT: Update hierarchyMapData with the latest hashmap from the service
         // This ensures the component uses the updated data, not the stale @Input reference
         this.hierarchyMapData = update.hashmap
@@ -174,6 +174,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     this._cachedIsMilestoneAssessment = this.computeIsMilestoneAssessment()
     this._cachedIsMilestoneAssessmentLocked = this.computeIsMilestoneAssessmentLocked()
     this._cachedResourceLink = this.computeResourceLink()
+    this._cachedMilestoneCompletedCount = this.computeMilestoneCompletedCount()
     this._cacheInitialized = true
   }
 
@@ -1090,6 +1091,13 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   }
 
   getMilestoneCompletedCount(): number {
+    if (this._cacheInitialized) {
+      return this._cachedMilestoneCompletedCount
+    }
+    return this.computeMilestoneCompletedCount()
+  }
+
+  private computeMilestoneCompletedCount(): number {
     if (!this.content || !this.hierarchyMapData) {
       return 0
     }
@@ -1097,13 +1105,25 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     if (!milestoneData || !milestoneData.leafNodes) {
       return 0
     }
+    
     let completedCount = 0
+    
     milestoneData.leafNodes.forEach((leafId: string) => {
       const leafData = this.hierarchyMapData[leafId]
-      if (leafData && leafData.completionStatus === 2) {
-        completedCount++
+      if (leafData) {
+        // CRITICAL: Check multiple completion indicators
+        const isCompleted = 
+          leafData.completionStatus === 2 || 
+          leafData.status === 2 || 
+          (leafData.completionPercentage && leafData.completionPercentage >= 100) ||
+          (leafData.progress && leafData.progress >= 100)
+        
+        if (isCompleted) {
+          completedCount++
+        }
       }
     })
+    
     return completedCount
   }
 

@@ -1589,7 +1589,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           }
         }
            if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
-          console.log('User enrolled in LP - computing milestone locks with isEnrolled=true')
           this.tocSvc.callHirarchyProgressHashmap(this.content)
           this.tocSvc.computeMilestoneLockingStatus(true)
           this.syncMilestoneLockStatus()
@@ -1620,7 +1619,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         this.tocSvc.callHirarchyProgressHashmap(this.content)
         // For Learning Pathways, compute milestone locking when not enrolled (all locked)
         if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
-          console.log('User not enrolled - computing milestone locks')
           this.tocSvc.computeMilestoneLockingStatus(false)
           this.syncMilestoneLockStatus()
         }
@@ -2330,7 +2328,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.hashmapUpdatedSubscription = this.tocSvc.hashmapUpdated$.subscribe((update) => {
       if (update && this.baseContentReadData?.courseCategory === 'Learning Pathway') {
         const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
-        console.log('Hashmap updated at:', update.timestamp, 'Enrolled:', isEnrolled, 'Syncing milestone lock status...')
         // Sync content tree's isLocked with the updated hashmap values
         this.syncMilestoneLockStatus()
       }
@@ -2478,19 +2475,26 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
       return new Promise<boolean>((resolve) => {
         const content = this.baseContentReadData
+        
+        
+        // STEP 1: Construct hierarchy structure
         this.content = this.appTocV2Svc.constructHeirarchyData(content)
-        // Update progress with latest enrollment data
+        
+        // STEP 2: Update progress with latest enrollment data
         this.appTocV2Svc.mapContentHierarchyProgressUpdate(this.content, this.userEnrollmentList)
-        // Create hashmap and compute milestone locking after progress is updated
+        
+        // STEP 3: Create hashmap from updated hierarchy (this should preserve completion status)
         this.tocSvc.callHirarchyProgressHashmap(this.content)
-        console.log('Learning Pathway hashmap updated:', this.tocSvc.hashmap)
+        
         // Check if user is enrolled
         const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
-        // Compute milestone locking status with enrollment status and updated progress data
+        
+        // STEP 4: Compute milestone locking status with enrollment status and updated progress data
         this.tocSvc.computeMilestoneLockingStatus(isEnrolled)
-        console.log('Milestone locking recomputed. Enrolled:', isEnrolled)
-        // Sync content tree's isLocked with computed values
+        
+        // STEP 5: Sync content tree's isLocked with computed values
         this.syncMilestoneLockStatus()
+        
         this.getOrgIdForShare()
         this.getTocStructure()
         resolve(true)
@@ -2577,7 +2581,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           if (oldLocked !== child.isLocked) {
             hasChanges = true
           }
-          console.log(`Synced lock status for ${child.name} (${child.identifier}): isLocked=${child.isLocked}`)
         }
       }
     })
@@ -2594,7 +2597,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
 
     try {
-      console.log('🔄 Refreshing milestone locks from hashmap...')
       
       // Check if user is enrolled
       const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
