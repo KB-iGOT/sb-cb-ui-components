@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, Renderer2, SimpleChanges } from '@angular/core'
+import { Component, Input, OnInit, OnDestroy, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core'
 import { NsContent } from '../../../../_services/widget-content.model'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
@@ -83,7 +83,8 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   private _cachedIsModule: boolean = false
   private _cachedIsResource: boolean = false
   private _cachedIsMilestone: boolean = false
-  private _cachedIsMilestoneLocked: boolean = false
+  // IMPORTANT: Default to TRUE (locked) - milestones should be locked until explicitly unlocked
+  private _cachedIsMilestoneLocked: boolean = true
   private _cachedIsParentMilestoneLocked: boolean = false
   private _cachedIsContentUnlocked: boolean = true
   private _cachedCheckForCuratedProgram: boolean = false
@@ -102,7 +103,8 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     private contentLangSvc: ContentLanguageService,
     private resourceDownloadHelperSvc: ResourceDownloadHelperService,    
     private configSvc: ConfigurationsService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -117,10 +119,20 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     // Subscribe to hashmap updates to recompute cached properties when progress changes
     this.hashmapUpdatedSubscription = this.appTocSvc.hashmapUpdated$.subscribe((update) => {
       if (update && update.hashmap) {
+        console.log('📡 [CONTENT CARD] Received hashmap update for:', this.content?.identifier, this.content?.name)
         // IMPORTANT: Update hierarchyMapData with the latest hashmap from the service
         // This ensures the component uses the updated data, not the stale @Input reference
         this.hierarchyMapData = update.hashmap
+        const prevLockState = this._cachedIsMilestoneLocked
         this.computeAllCachedProperties()
+        console.log('📡 [CONTENT CARD] Lock state change:', {
+          id: this.content?.identifier,
+          previousLockState: prevLockState,
+          newLockState: this._cachedIsMilestoneLocked,
+          isMilestone: this._cachedIsMilestone
+        })
+        // Force Angular change detection to update the view
+        this.cdr.detectChanges()
       }
     })
   }
@@ -270,23 +282,24 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
 
     // Check if hashmap has pre-computed locking status (preferred - computed by service)
     const hashData = this.hierarchyMapData && this.hierarchyMapData[this.content.identifier]
-    console.log(`computeIsMilestoneLocked for ${this.content.identifier} (${this.content.name}):`, {
-      hashData,
+    console.log(`🔒 [MILESTONE LOCK CHECK] ${this.content.identifier} (${this.content.name}):`, {
+      hasHashData: !!hashData,
       computedIsLocked: hashData?.computedIsLocked,
+      hasComputedIsLocked: hashData?.computedIsLocked !== undefined,
       contentIsLocked: this.content.isLocked
     })
     
+    // CRITICAL: Only use computedIsLocked from hashmap - this is the SINGLE SOURCE OF TRUTH
+    // The service computes this value based on pre-assessment/milestone completion
     if (hashData && hashData.computedIsLocked !== undefined) {
+      console.log(`   ✅ Using hashmap computedIsLocked: ${hashData.computedIsLocked}`)
       return hashData.computedIsLocked
     }
 
-    // If milestone has isLocked flag explicitly set to false, it's unlocked
-    if (this.content.isLocked === false) {
-      return false
-    }
-
-    // Fallback: All milestones are locked by default until computed otherwise
-    // This ensures proper locking until the hashmap is updated with progress
+    // IMPORTANT: If no computedIsLocked value exists, default to LOCKED
+    // This ensures milestones stay locked until the service explicitly unlocks them
+    // DO NOT use this.content.isLocked as it may be false by default from API
+    console.log(`   ⚠️ No computedIsLocked in hashmap - defaulting to LOCKED`)
     return true
   }
 
@@ -303,7 +316,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
       return false
     }
 
-    // Check hashmap for pre-computed value
+    // Check hashmap for pre-computed value (set by computeMilestoneLockingStatus)
     const hashData = this.hierarchyMapData[this.content.identifier]
     if (hashData && hashData.isParentMilestoneLocked !== undefined) {
       return hashData.isParentMilestoneLocked
@@ -317,8 +330,10 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     while (currentParentId && depth < maxDepth) {
       const parentData = this.hierarchyMapData[currentParentId]
       if (parentData) {
+        // CRITICAL: Only check computedIsLocked (computed by service), NOT isLocked (API default)
+        // isLocked from API may be false even when milestone should be locked
         if ((parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') && 
-            (parentData.computedIsLocked || parentData.isLocked)) {
+            parentData.computedIsLocked === true) {
           return true
         }
         currentParentId = parentData.parent
