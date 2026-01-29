@@ -315,13 +315,23 @@ export class ViewerUtilService {
     let languageFound = false
     const tempContentData = this.contentSvc.currentMetaData
     if (!this.forPreview) {
-      tempContentData.children?.forEach(async (childList: NsContent.IContent) => {
+      tempContentData.children?.forEach(async (childList:any) => {
         if (childList.primaryCategory === NsContent.EPrimaryCategory.COURSE) {
           // tslint:disable-next-line: max-line-length
           if (childList.leafNodes && childList.leafNodes.indexOf(resourceId) !== -1) {
             tempLanguage = this.contentLangSvc.getContentLanguage(childList)
             languageFound = true
           }
+        } else if (childList?.primaryCategory === 'Milestone') {
+          childList.children?.forEach(async (child:any) => {
+            if (child.primaryCategory === NsContent.EPrimaryCategory.COURSE) {
+              // tslint:disable-next-line: max-line-length
+              if (child.leafNodes && child.leafNodes.indexOf(resourceId) !== -1) {
+                tempLanguage = this.contentLangSvc.getContentLanguage(child)
+                languageFound = true
+              }
+            } 
+          })
         }
       }
       )

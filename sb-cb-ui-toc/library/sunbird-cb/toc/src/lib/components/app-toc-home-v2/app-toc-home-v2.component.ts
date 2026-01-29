@@ -1941,7 +1941,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   private initData(data: Data) {
     const initData: any = this.tocSvc.initData(data, true)
     this.setErrorCode(initData.errorCode)
-    this.initializeTocStructure()
     this.setupBatchControlSubscription()
     this.tocSvc.contentLoader.next(false)
   }

@@ -5,6 +5,9 @@
 // Main module
 export * from './lib/app-toc-lib.module'
 
+export * from './lib/registration-toc-lib.config'
+export * from './lib/collection.config'
+
 // Routing module (OPTIONAL - only import if you want to use pre-configured routes)
 // You can configure routing in your application instead
 
