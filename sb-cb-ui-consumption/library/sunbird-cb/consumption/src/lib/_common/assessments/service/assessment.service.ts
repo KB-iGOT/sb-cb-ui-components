@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { map } from 'rxjs/operators'
 import { v4 as uuid } from 'uuid'
+import { NsAssessment } from './assessment.model'
 
 const API_END_POINTS = {
   CREARE_ASSESSMENT: 'apis/proxies/v8/questionset/v1/create',
@@ -354,7 +355,7 @@ export class AssessmentService {
         mimeType: 'application/vnd.sunbird.questionset',
         minimumPassPercentage: sectionData.minPassPercentage || 0,
         name: sectionData.name || 'Section A',
-        primaryCategory: currentHierarchy?.primaryCategory || 'Practice Question Set',
+        primaryCategory: currentHierarchy?.primaryCategory || NsAssessment.EAssessmentPrimaryCategory.PRACTICE_QUESTION_SET,
         totalQuestions: sectionData.totalQuestions || currentHierarchy.totalQuestions,
         compatibilityLevel: currentHierarchy?.compatibilityLevel,
         additionalInstructions: sectionData.additionalInstructions || '',
