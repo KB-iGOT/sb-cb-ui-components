@@ -79,7 +79,8 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
   createSectionGroup(): FormGroup {
     return this.fb.group({
       name: ['Section A', [Validators.required, Validators.maxLength(this.nameMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
-      additionalInstructions: ['']
+      additionalInstructions: [''],
+      questionParagraph: ['']
     })
   }
 
@@ -286,9 +287,14 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
       // Add sections from assessment data
       this.assessmentData.children.forEach((section: any, index: number) => {
+        const isParagraphSection = section.sectionType === 'paragraph'
         const sectionGroup = this.fb.group({
           name: [section.name || `Section ${String.fromCharCode(65 + index)}`, [Validators.required, Validators.maxLength(this.nameMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
-          additionalInstructions: [section.additionalInstructions || section.instructions || section.paragraph || '']
+          additionalInstructions: [isParagraphSection ? '' : (section.additionalInstructions || section.instructions || '')],
+          questionParagraph: [
+            isParagraphSection ? (section.questionParagraph || section.paragraph || '') : '',
+            isParagraphSection ? [Validators.required] : []
+          ]
         })
         this.sections.push(sectionGroup)
       })
@@ -465,11 +471,20 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
         changedData.name = currentName
       }
 
-      // Check additional instructions
-      const currentAdditionalInstructions = currentSectionData.additionalInstructions
-      const originalAdditionalInstructions = originalSectionData?.additionalInstructions || originalSectionData?.instructions || originalSectionData?.paragraph || ''
-      if (currentAdditionalInstructions !== originalAdditionalInstructions) {
-        changedData.additionalInstructions = currentAdditionalInstructions
+      // Check additional instructions or question paragraph based on section type
+      const isParagraphSection = originalSectionData?.sectionType === 'paragraph'
+      if (isParagraphSection) {
+        const currentQuestionParagraph = currentSectionData.questionParagraph
+        const originalQuestionParagraph = originalSectionData?.questionParagraph || originalSectionData?.paragraph || ''
+        if (currentQuestionParagraph !== originalQuestionParagraph) {
+          changedData.questionParagraph = currentQuestionParagraph
+        }
+      } else {
+        const currentAdditionalInstructions = currentSectionData.additionalInstructions
+        const originalAdditionalInstructions = originalSectionData?.additionalInstructions || originalSectionData?.instructions || ''
+        if (currentAdditionalInstructions !== originalAdditionalInstructions) {
+          changedData.additionalInstructions = currentAdditionalInstructions
+        }
       }
 
       if (Object.keys(changedData).length > 0) {
@@ -756,6 +771,13 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       return this.assessmentData.children[this.selectedSectionIndex].sectionLevelDefinition || null
     }
     return null
+  }
+
+  isCurrentSectionParagraphType(): boolean {
+    if (this.assessmentData?.children && this.assessmentData.children[this.selectedSectionIndex]) {
+      return this.assessmentData.children[this.selectedSectionIndex].sectionType === 'paragraph'
+    }
+    return false
   }
 
   isQuestionLimitReached(): boolean {
