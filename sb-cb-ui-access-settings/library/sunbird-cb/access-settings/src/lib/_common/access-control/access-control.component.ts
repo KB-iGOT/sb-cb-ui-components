@@ -421,6 +421,67 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const selectedEntity = condition?.get("entity")?.value;
     const previousEntity = condition?.value?.entity;
 
+    // Check if we need to show confirmation dialog before making changes
+    const shouldShowConfirmation = this.shouldShowEntityChangeConfirmation(userGroupIndex, conditionIndex);
+
+    if (shouldShowConfirmation) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "470px",
+        data: { type: "confirm-reset-fields" }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+          this.processEntityChange(userGroupIndex, conditionIndex, selectedEntity, previousEntity);
+        } else {
+          // Reset the dropdown to previous value if user cancels
+          condition?.get("entity")?.setValue(previousEntity);
+        }
+      });
+    } else {
+      this.processEntityChange(userGroupIndex, conditionIndex, selectedEntity, previousEntity);
+    }
+  }
+
+  private shouldShowEntityChangeConfirmation(userGroupIndex: number, conditionIndex: number): boolean {
+    // Check if this is a content that's not live or if it's MDO application or has contentId
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION || this.content?.contentId) {
+      const conditions = this.ruleConditions(userGroupIndex);
+      const condition = conditions.at(conditionIndex);
+      
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+        // Use the same logic as checkForResetFilter to determine if we should show confirmation
+        const conditionValue = condition?.getRawValue();
+        const ruleValue = this.userGroup.at(userGroupIndex).getRawValue();
+        return this.checkForResetFilter(conditionValue, ruleValue, userGroupIndex);
+      } else if (this.config.application === this.MDO_APPLICATION || this.content?.contentId) {
+        // For MDO applications, check if the user group is in initial state
+        const currentGroup = this.userGroup.at(userGroupIndex);
+        const isInInitialState = (() => {
+          if (this.config?.mdoContent?.status === 'Live' || this.content?.status === 'live') {
+            const initialUserGroups = this.getInitialState();
+            if (initialUserGroups) {
+              return initialUserGroups.some(group => group.userGroupName === currentGroup.get('name')?.value);
+            }
+          }
+          return false;
+        })();
+
+        // Only show confirmation if not in initial state
+        if (!isInInitialState) {
+          const conditionValue = condition?.getRawValue();
+          const ruleValue = this.userGroup.at(userGroupIndex).getRawValue();
+          return this.checkForResetFilter(conditionValue, ruleValue, userGroupIndex);
+        }
+      }
+    }
+    return false;
+  }
+
+  private processEntityChange(userGroupIndex: number, conditionIndex: number, selectedEntity: string, previousEntity: string): void {
+    const conditions = this.ruleConditions(userGroupIndex);
+    const condition = conditions.at(conditionIndex);
+
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
       this.processDisableAddConditionOnClose(userGroupIndex);
@@ -443,6 +504,26 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.accessControlService.enableDeputation(false);
       }
     }
+
+    // Reset subsequent conditions if needed (similar to resetActiveUserGroupFields)
+    if (this.shouldResetSubsequentConditions(userGroupIndex, conditionIndex)) {
+      this.resetActiveUserGroupFields(condition?.getRawValue(), this.userGroup.at(userGroupIndex).getRawValue(), userGroupIndex);
+    }
+  }
+
+  private shouldResetSubsequentConditions(userGroupIndex: number, conditionIndex: number): boolean {
+    const accessControlFormData = this.accessControlForm.getRawValue();
+    const activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
+    
+    if (activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1) {
+      // Check if there are subsequent conditions with selections that need to be reset
+      for (let i = conditionIndex + 1; i < activeManageSelection.conditions.length; i++) {
+        if (activeManageSelection.conditions[i]?.selections?.length > 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   onOpeningEntityChange(event: boolean, userGroupIndex: number, conditionIndex: number): void {
