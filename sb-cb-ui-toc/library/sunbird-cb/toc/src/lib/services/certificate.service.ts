@@ -66,4 +66,8 @@ export class CertificateService {
   consentSubmit(request: any): Observable<any> {
     return this.http.post(`${this.PROXY_SLAG_V8}/consent/v1/submit`, request)
   }
+
+   downloadCertificate_v3(certId: string): Observable<any> {
+    return this.http.get(`/apis/protected/v8/cohorts/course/batch/cert/download/${certId}`)
+  }
 }

@@ -914,7 +914,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     if (certificateData) {
       this.downloadCertificateLoading = true
       let certData: any = certificateData
-      this.certificateService.downloadCertificate_v2(certData).subscribe((res: any) => {
+      this.certificateService.downloadCertificate_v3(certData).subscribe((res: any) => {
         this.downloadCertificateLoading = false
         const cet = res.result.printUri
         this.dialog.open(CertificateDialogComponent, {
