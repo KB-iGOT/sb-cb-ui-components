@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, Renderer2, SimpleChanges } from '@angular/core'
+import { Component, Input, OnInit, OnDestroy, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core'
 import { NsContent } from '../../../../_services/widget-content.model'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
@@ -83,13 +83,15 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   private _cachedIsModule: boolean = false
   private _cachedIsResource: boolean = false
   private _cachedIsMilestone: boolean = false
-  private _cachedIsMilestoneLocked: boolean = false
+  // IMPORTANT: Default to TRUE (locked) - milestones should be locked until explicitly unlocked
+  private _cachedIsMilestoneLocked: boolean = true
   private _cachedIsParentMilestoneLocked: boolean = false
   private _cachedIsContentUnlocked: boolean = true
   private _cachedCheckForCuratedProgram: boolean = false
   private _cachedIsMilestoneAssessment: boolean = false
   private _cachedIsMilestoneAssessmentLocked: boolean = false
   private _cachedResourceLink: { url: string; queryParams: { [key: string]: any } } = { url: '', queryParams: {} }
+  private _cachedMilestoneCompletedCount: number = 0
   private _cacheInitialized: boolean = false
 
   constructor(
@@ -101,7 +103,8 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     private contentLangSvc: ContentLanguageService,
     private resourceDownloadHelperSvc: ResourceDownloadHelperService,    
     private configSvc: ConfigurationsService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -116,11 +119,20 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     // Subscribe to hashmap updates to recompute cached properties when progress changes
     this.hashmapUpdatedSubscription = this.appTocSvc.hashmapUpdated$.subscribe((update) => {
       if (update && update.hashmap) {
-        console.log('🔄 Hashmap updated, recomputing cached properties for:', this.content?.identifier)
+        console.log('📡 [CONTENT CARD] Received hashmap update for:', this.content?.identifier, this.content?.name)
         // IMPORTANT: Update hierarchyMapData with the latest hashmap from the service
         // This ensures the component uses the updated data, not the stale @Input reference
         this.hierarchyMapData = update.hashmap
+        const prevLockState = this._cachedIsMilestoneLocked
         this.computeAllCachedProperties()
+        console.log('📡 [CONTENT CARD] Lock state change:', {
+          id: this.content?.identifier,
+          previousLockState: prevLockState,
+          newLockState: this._cachedIsMilestoneLocked,
+          isMilestone: this._cachedIsMilestone
+        })
+        // Force Angular change detection to update the view
+        this.cdr.detectChanges()
       }
     })
   }
@@ -174,6 +186,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     this._cachedIsMilestoneAssessment = this.computeIsMilestoneAssessment()
     this._cachedIsMilestoneAssessmentLocked = this.computeIsMilestoneAssessmentLocked()
     this._cachedResourceLink = this.computeResourceLink()
+    this._cachedMilestoneCompletedCount = this.computeMilestoneCompletedCount()
     this._cacheInitialized = true
   }
 
@@ -269,23 +282,24 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
 
     // Check if hashmap has pre-computed locking status (preferred - computed by service)
     const hashData = this.hierarchyMapData && this.hierarchyMapData[this.content.identifier]
-    console.log(`computeIsMilestoneLocked for ${this.content.identifier} (${this.content.name}):`, {
-      hashData,
+    console.log(`🔒 [MILESTONE LOCK CHECK] ${this.content.identifier} (${this.content.name}):`, {
+      hasHashData: !!hashData,
       computedIsLocked: hashData?.computedIsLocked,
+      hasComputedIsLocked: hashData?.computedIsLocked !== undefined,
       contentIsLocked: this.content.isLocked
     })
     
+    // CRITICAL: Only use computedIsLocked from hashmap - this is the SINGLE SOURCE OF TRUTH
+    // The service computes this value based on pre-assessment/milestone completion
     if (hashData && hashData.computedIsLocked !== undefined) {
+      console.log(`   ✅ Using hashmap computedIsLocked: ${hashData.computedIsLocked}`)
       return hashData.computedIsLocked
     }
 
-    // If milestone has isLocked flag explicitly set to false, it's unlocked
-    if (this.content.isLocked === false) {
-      return false
-    }
-
-    // Fallback: All milestones are locked by default until computed otherwise
-    // This ensures proper locking until the hashmap is updated with progress
+    // IMPORTANT: If no computedIsLocked value exists, default to LOCKED
+    // This ensures milestones stay locked until the service explicitly unlocks them
+    // DO NOT use this.content.isLocked as it may be false by default from API
+    console.log(`   ⚠️ No computedIsLocked in hashmap - defaulting to LOCKED`)
     return true
   }
 
@@ -302,7 +316,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
       return false
     }
 
-    // Check hashmap for pre-computed value
+    // Check hashmap for pre-computed value (set by computeMilestoneLockingStatus)
     const hashData = this.hierarchyMapData[this.content.identifier]
     if (hashData && hashData.isParentMilestoneLocked !== undefined) {
       return hashData.isParentMilestoneLocked
@@ -316,8 +330,10 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     while (currentParentId && depth < maxDepth) {
       const parentData = this.hierarchyMapData[currentParentId]
       if (parentData) {
+        // CRITICAL: Only check computedIsLocked (computed by service), NOT isLocked (API default)
+        // isLocked from API may be false even when milestone should be locked
         if ((parentData.isMilestone || parentData.primaryCategory === 'Milestone' || parentData.courseCategory === 'Milestone') && 
-            (parentData.computedIsLocked || parentData.isLocked)) {
+            parentData.computedIsLocked === true) {
           return true
         }
         currentParentId = parentData.parent
@@ -414,12 +430,19 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
    * 3. NOT all mandatory courses in the same milestone are completed
    */
   private computeIsMilestoneAssessmentLocked(): boolean {
+    // CRITICAL: Only apply milestone assessment locking for Learning Pathway content
+    // Regular courses should NEVER have their assessments locked by milestone logic
+    if (!this.baseContentReadData || this.baseContentReadData.courseCategory !== 'Learning Pathway') {
+      return false
+    }
+
     // Only apply to assessments that are DIRECT children of milestones
     const isMilestoneAssessment = this._cachedIsMilestoneAssessment || this.computeIsMilestoneAssessment()
     
     console.log(`🔒 computeIsMilestoneAssessmentLocked for "${this.content?.name}":`, {
       isMilestoneAssessment,
       _cachedIsMilestoneAssessment: this._cachedIsMilestoneAssessment,
+      courseCategory: this.baseContentReadData?.courseCategory,
     })
     
     if (!isMilestoneAssessment) {
@@ -891,7 +914,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     if (certificateData) {
       this.downloadCertificateLoading = true
       let certData: any = certificateData
-      this.certificateService.downloadCertificate_v2(certData).subscribe((res: any) => {
+      this.certificateService.downloadCertificate_v3(certData).subscribe((res: any) => {
         this.downloadCertificateLoading = false
         const cet = res.result.printUri
         this.dialog.open(CertificateDialogComponent, {
@@ -1083,6 +1106,13 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   }
 
   getMilestoneCompletedCount(): number {
+    if (this._cacheInitialized) {
+      return this._cachedMilestoneCompletedCount
+    }
+    return this.computeMilestoneCompletedCount()
+  }
+
+  private computeMilestoneCompletedCount(): number {
     if (!this.content || !this.hierarchyMapData) {
       return 0
     }
@@ -1090,13 +1120,25 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     if (!milestoneData || !milestoneData.leafNodes) {
       return 0
     }
+    
     let completedCount = 0
+    
     milestoneData.leafNodes.forEach((leafId: string) => {
       const leafData = this.hierarchyMapData[leafId]
-      if (leafData && leafData.completionStatus === 2) {
-        completedCount++
+      if (leafData) {
+        // CRITICAL: Check multiple completion indicators
+        const isCompleted = 
+          leafData.completionStatus === 2 || 
+          leafData.status === 2 || 
+          (leafData.completionPercentage && leafData.completionPercentage >= 100) ||
+          (leafData.progress && leafData.progress >= 100)
+        
+        if (isCompleted) {
+          completedCount++
+        }
       }
     })
+    
     return completedCount
   }
 
@@ -1275,5 +1317,22 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
       }
     })
   }
+ /**
+   * Check if text is truncated (has ellipsis) - for single line text
+   * @param element The HTMLElement to check
+   * @returns true if text is truncated, false otherwise
+   */
+  isTextTruncated(element: HTMLElement): boolean {
+    if (!element) return false
+    return element.offsetWidth < element.scrollWidth
+  }
 
+  /**
+   * @param element The HTMLElement to check
+   * @returns true if text is truncated, false otherwise
+   */
+  isMultiLineTruncated(element: HTMLElement): boolean {
+    if (!element) return false
+    return element.scrollHeight > element.clientHeight
+  }
 }

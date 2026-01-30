@@ -100,7 +100,8 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
 
   onBlankSelectionChange(index: number, selectedBlank: any): void {
     // Check if this blank is already assigned to another option
-    if (selectedBlank !== null) {
+    // Allow multiple options to have "None" selected
+    if (selectedBlank !== null && selectedBlank !== 'none' && selectedBlank !== '') {
       const alreadyAssigned = this.options.find(
         (opt, idx) => idx !== index && opt.blankNumber === selectedBlank
       )

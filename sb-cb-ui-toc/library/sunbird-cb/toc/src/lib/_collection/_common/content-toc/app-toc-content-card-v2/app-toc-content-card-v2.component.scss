@@ -203,6 +203,14 @@ span.optional-span {
         color: white !important;
       }
     }
+
+  .milestone-description {
+
+    color: #fff;
+  }
+  .milestone-progress-text {
+    color: #fff;
+  }
   }
 }
 
@@ -691,11 +699,14 @@ span.optional-span {
   line-height: 1.5;
   color: rgba(0, 0, 0, 0.7);
   margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  max-width: 100% !important;
 }
 
 .milestone-progress {
@@ -769,4 +780,12 @@ span.optional-span {
   .inline-spinner {
     display: inline-block;
   }
+}
+
+// Multiline tooltip for long descriptions
+::ng-deep .multiline-tooltip {
+  white-space: pre-wrap !important;
+  max-width: 400px !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
 }

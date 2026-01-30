@@ -398,4 +398,8 @@ export namespace NsContent {
     CASE_STUDY = 'Case Study',
     COMPREHENSIVE_ASSESSMENT_PROGRAM='Comprehensive Assessment Program'
   }
+
+   export enum EContextTypes {
+    FINAL_MILESTONE_ASSESSMENT = 'Final Milestone Assessment',
+  }
 }
