@@ -14,6 +14,8 @@ export namespace NsAssessment {
   export enum EAssessmentContextCategory {
     PRELIMINARY_ASSESSMENT = 'Preliminary Assessment',
     FINAL_MILESTONE_ASSESSMENT = 'Final Milestone Assessment',
+    FINAL_PROGRAM_ASSESSMENT = 'Final Program Assessment',
+    PRE_ENROLMENT_ASSESSMENT = 'Pre Enrolment Assessment',
   }
 
   export enum EAssessmentPrimaryCategory {
