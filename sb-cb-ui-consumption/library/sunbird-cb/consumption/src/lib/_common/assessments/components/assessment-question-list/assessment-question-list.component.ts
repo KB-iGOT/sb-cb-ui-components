@@ -426,8 +426,9 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
     } else {
       const isValid = this.assessmentNoSpecialChar.test(plainText)
       this.isRegexPassed = isValid
+      this.questionText = cleanedEvent
       if (isValid) {
-        this.questionText = cleanedEvent
+
       }
     }
     if (this.questionData.qType === 'FTB') {
