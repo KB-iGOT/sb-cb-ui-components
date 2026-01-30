@@ -252,4 +252,14 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
     }
     return false
   }
+
+  /**
+   * Check if multi-line text is truncated (has ellipsis)
+   * @param element The HTMLElement to check
+   * @returns true if text is truncated, false otherwise
+   */
+  isMultiLineTruncated(element: HTMLElement): boolean {
+    if (!element) return false
+    return element.scrollHeight > element.clientHeight
+  }
 }
