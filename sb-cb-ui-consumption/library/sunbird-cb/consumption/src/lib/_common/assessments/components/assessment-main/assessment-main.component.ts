@@ -4,6 +4,7 @@ import { AssessmentService } from '../../service/assessment.service'
 import { map, switchMap } from 'rxjs/operators'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { AssessmentSessionsComponent } from '../assessment-sessions/assessment-sessions.component'
+import { NsAssessment } from '../../service/assessment.model'
 
 @Component({
   selector: 'sb-uic-assessment-main',
@@ -28,7 +29,7 @@ export class AssessmentMainComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.config && this.config.identifier === '' && this.config?.primaryCategory === '') {
-      this.config.primaryCategory = 'Course Assessment'
+      this.config.primaryCategory = NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT
     }
     this.assessmentService.setReadOnly(this.config?.isReadOnly)
     if (this.config && this.config.identifier !== '') {
@@ -38,7 +39,7 @@ export class AssessmentMainComponent implements OnInit {
           this.enableStepTwo()
           this.callLoader(false)
           this.isAssessmentLoaded = true
-          this.config.primaryCategory = data.primaryCategory || 'Course Assessment'
+          this.config.primaryCategory = data.primaryCategory || NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT
           this.config.contextCategory = data.contextCategory || ''
           // Use setTimeout to ensure ViewChild is available
           setTimeout(() => {

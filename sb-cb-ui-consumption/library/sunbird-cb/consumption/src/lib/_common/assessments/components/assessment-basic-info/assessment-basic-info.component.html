@@ -193,10 +193,10 @@
           <div class="form-section mat-full-radius">
             <label class="field-label required">Minimum Passing Percentage</label>
             <mat-form-field appearance="outline" class="full-width">
-              <input matInput type="number" formControlName="minimumPassPercentage" min="0" max="100" placeholder="50">
+              <input matInput type="number" formControlName="minimumPassPercentage" min="50" max="100" placeholder="50">
               <mat-error *ngIf="controls['minimumPassPercentage'].hasError('required')">Minimum passing percentage is
                 required</mat-error>
-              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('min')">Value must be 0 or
+              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('min')">Value must be 50 or
                 greater</mat-error>
               <mat-error *ngIf="controls['minimumPassPercentage'].hasError('max')">Value must be 100 or
                 less</mat-error>

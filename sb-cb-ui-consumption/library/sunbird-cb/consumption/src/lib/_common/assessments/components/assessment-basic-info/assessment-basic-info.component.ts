@@ -77,16 +77,16 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.config && this.config?.primaryCategory === 'Course Assessment') {
+    if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT) {
       this.isFinalAssessment = true
     }
-    if (this.config && this.config?.primaryCategory === 'Practice Question Set') {
+    if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.PRACTICE_QUESTION_SET) {
       this.isPracticeAssessment = true
     }
     // Check if coolOffPeriod should be shown
     if (this.config && this.config?.contextCategory) {
-      this.showCoolOffPeriod = this.config.contextCategory === 'Preliminiary Assessment' ||
-        this.config.contextCategory === 'Final Milestone Assessment'
+      this.showCoolOffPeriod = this.config.contextCategory === NsAssessment.EAssessmentContextCategory.PRELIMINARY_ASSESSMENT ||
+        this.config.contextCategory === NsAssessment.EAssessmentContextCategory.FINAL_MILESTONE_ASSESSMENT
     }
     this.setupShowTimerSubscription()
     this.setupAssessmentTypeSubscription()
