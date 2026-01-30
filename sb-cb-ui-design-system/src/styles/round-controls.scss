@@ -18,7 +18,7 @@
   }
 
   .mat-form-field-appearance-outline .mat-form-field-suffix {
-    top: 0px !important;
+    top: 8px !important;
   }
 
   .mat-mdc-icon-button svg {
@@ -122,5 +122,9 @@
   .mat-form-field-label-wrapper {
     top: -7px !important;
     left: 5px !important;
+  }
+
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    border-radius: 30px !important;
   }
 }
