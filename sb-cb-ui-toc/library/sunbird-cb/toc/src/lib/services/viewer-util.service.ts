@@ -166,16 +166,29 @@ export class ViewerUtilService {
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
       
-      if (this.tocSvc.hashmap[contentId] &&
-        (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
-        this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
-        this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
-        this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+      console.log(`🔄 [PROGRESS UPDATE] realTimeProgressUpdate called for ${contentId}`)
+      console.log(`   Status: ${req.request.contents[0].status}, Percentage: ${req.request.contents[0].completionPercentage}`)
+      console.log(`   Hashmap has contentId: ${!!this.tocSvc.hashmap[contentId]}`)
+      
+      if (this.tocSvc.hashmap[contentId]) {
+        const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus']
+        console.log(`   Current completionStatus in hashmap: ${currentStatus}`)
         
-        // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
-        this.tocSvc.triggerMilestoneLockUpdate()
+        if (!currentStatus || currentStatus < 2) {
+          console.log(`   ✅ Updating hashmap for ${contentId}`)
+          this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
+          this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
+          this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+          
+          // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
+          this.tocSvc.triggerMilestoneLockUpdate()
           // Emit to trigger viewer component refresh for Learning Pathways
           this.markAsCompleteSubject.next(true)
+        } else {
+          console.log(`   ⏭️ Skipping update - content already completed (status=${currentStatus})`)
+        }
+      } else {
+        console.log(`   ⚠️ ContentId ${contentId} not found in hashmap - cannot update progress`)
       }
     } else {
       req = {}
@@ -392,9 +405,16 @@ export class ViewerUtilService {
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
         
+      console.log(`🔄 [PROGRESS UPDATE QUIZ] realTimeProgressUpdateQuiz called for ${contentId}`)
+      console.log(`   Status: ${req.request.contents[0].status}, Percentage: ${req.request.contents[0].completionPercentage}`)
+      console.log(`   Hashmap exists: ${!!this.tocSvc.hashmap}, Hashmap has contentId: ${!!(this.tocSvc.hashmap && this.tocSvc.hashmap[contentId])}`)
+      
       if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
-        if (this.tocSvc.hashmap[contentId] &&
-          (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
+        const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus']
+        console.log(`   Current completionStatus in hashmap: ${currentStatus}`)
+        
+        if (!currentStatus || currentStatus < 2) {
+          console.log(`   ✅ Updating hashmap for ${contentId}`)
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
           this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
           this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
@@ -406,7 +426,11 @@ export class ViewerUtilService {
           
           // Emit to trigger viewer component refresh for Learning Pathways
           this.markAsCompleteSubject.next(true)
+        } else {
+          console.log(`   ⏭️ Skipping update - content already completed (status=${currentStatus})`)
         }
+      } else {
+        console.log(`   ⚠️ Cannot update hashmap - hashmap or contentId missing`)
       }
     } else {
       req = {}

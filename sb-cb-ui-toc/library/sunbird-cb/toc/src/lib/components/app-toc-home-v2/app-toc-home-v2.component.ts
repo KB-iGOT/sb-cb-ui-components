@@ -1936,6 +1936,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setupRouterEventSubscription()
     this.getContentCreatorData()
     this.setupHashmapUpdateSubscription()
+    
+    this.userId = this.configSvc?.userProfile?.userId || ''
   }
 
   private initData(data: Data) {
