@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.0.1-cbrelease-4.8.33",
+  "version": "0.0.2-cbrelease-4.8.33",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -53,7 +53,7 @@
     "@angular/router": "^16.2.12",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "4.0.0",
-    "@sunbird-cb/design-system": "0.0.3",
+    "@sunbird-cb/design-system": "0.0.4",
     "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@sunbird-cb/utils-v2": "0.0.2-cbrelease-4.8.31",
     "dayjs": "^1.10.7",

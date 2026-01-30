@@ -126,3 +126,7 @@ export * from './lib/_common/assessments/components/assessment-basic-info/assess
 export * from './lib/_common/create-request/create-request.module'
 export * from './lib/_common/create-request/components/create-request-form/create-request-form.component'
 export * from './lib/_common/create-request/dialogs/add-authors/add-authors.component'
+
+export * from './lib/_common/filters/filters.module'
+export * from './lib/_common/filters/filter-by/filter-by.component'
+export * from './lib/_common/filters/search-sort-input/search-sort-input.component'
