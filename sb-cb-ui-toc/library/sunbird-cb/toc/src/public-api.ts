@@ -84,3 +84,6 @@ export * from './lib/_collection/_common/content-toc/karma-points/karma-points.c
 export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.module'
 export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.component'
 
+//collection common modules
+export * from './lib/_collection/_common/card-competency/card-competency.component'
+export * from './lib/_collection/_common/card-competency/card-competency.module'
