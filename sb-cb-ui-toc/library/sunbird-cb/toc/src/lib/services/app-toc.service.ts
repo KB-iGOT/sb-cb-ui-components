@@ -97,6 +97,7 @@ export class AppTocService {
   public getPageScroll = new BehaviorSubject(true)
   updatePageScroll = this.getPageScroll.asObservable()
   public hashmap: any = {}
+  private currentRootContentId: string | null = null // Track current content to avoid unnecessary hashmap clearing
   public hashmapUpdated = new BehaviorSubject<any>(null)
   hashmapUpdated$ = this.hashmapUpdated.asObservable()
   private transriptionDataSubject = new BehaviorSubject<any>(null); // Start with null
@@ -503,6 +504,7 @@ export class AppTocService {
    */
   resetContentData() {
     this.hashmap = {}
+    this.currentRootContentId = null
     this.hashmapUpdated.next(null)
   }
 
@@ -1006,6 +1008,20 @@ export class AppTocService {
       const rootCourseCategory = hierarchyData.courseCategory || hierarchyData.primaryCategory || ''
       const isLearningPathway = rootCourseCategory === 'Learning Pathway'
 
+      // CRITICAL: Only clear hashmap when navigating to DIFFERENT content
+      // This prevents loss of real-time progress updates when content is being actively consumed
+      // Clear when:
+      // 1. Different Learning Pathways (which may have milestones with same generic IDs like M1, M2)
+      // 2. Learning Pathway to regular Course (prevents stale milestone data)
+      // 3. Regular Course to Learning Pathway
+      // 4. Different regular Course
+      const isNewContent = this.currentRootContentId !== hierarchyData.identifier
+      if (isNewContent) {
+        console.log(`🧹 [HASHMAP] Clearing hashmap - navigating from ${this.currentRootContentId} to ${hierarchyData.identifier}`)
+        this.hashmap = {}
+        this.currentRootContentId = hierarchyData.identifier
+      }
+
       this.hashmap[hierarchyData.identifier] = {
         parent: hierarchyData.parent,
         identifier: hierarchyData.identifier,
@@ -1343,6 +1359,8 @@ export class AppTocService {
    * Called from viewer-util.service.ts after progress updates
    */
   public triggerMilestoneLockUpdate() {
+    console.log('🔔 [TRIGGER] triggerMilestoneLockUpdate called')
+    
     // Check if we have a Learning Pathway in the hashmap
     const hasLearningPathway = Object.keys(this.hashmap).some(key => {
       const item = this.hashmap[key]
@@ -1350,12 +1368,20 @@ export class AppTocService {
       return item.isLearningPathway === true || item.courseCategory === 'Learning Pathway'
     })
     
+    console.log(`   Is Learning Pathway: ${hasLearningPathway}`)
+    
     if (hasLearningPathway) {
       console.log('🔄 [TRIGGER] Triggering milestone lock recomputation after progress update')
       // Assume enrolled since progress was just updated
       this.computeMilestoneLockingStatus(true)
     } else {
-      console.log('⚠️ [TRIGGER] No Learning Pathway found in hashmap - skipping milestone lock update')
+      console.log('🔄 [TRIGGER] Regular content - emitting hashmap update for top-bar refresh')
+      // For regular content (non-Learning Pathway), just emit the hashmap update
+      // so the top-bar component can recalculate the completion count
+      this.hashmap = { ...this.hashmap }
+      console.log('📡 [TRIGGER] Broadcasting hashmap update event')
+      this.hashmapUpdated.next({ timestamp: Date.now(), hashmap: this.hashmap })
+      console.log('✅ [TRIGGER] Hashmap update broadcasted')
     }
   }
 

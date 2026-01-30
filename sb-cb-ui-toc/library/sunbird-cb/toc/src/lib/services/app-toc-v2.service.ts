@@ -288,6 +288,12 @@ export class AppTocV2Service {
       // Enrollment shows 100% - mark course as complete
       course.completionPercentage = 100
       course.completionStatus = 2
+      if (enrollment.issuedCertificates.length > 0) {
+                  const certificate: any = enrollment.issuedCertificates.sort((a: any, b: any) =>
+                    new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
+                  const certId: any = certificate[0].identifier
+                  course.issuedCertificatesId = certId
+                }
       this.tocSvc.mapCompletionChildPercentageProgram(course)
     } else if (enrollment && enrollment.completionPercentage > 0) {
       // Enrollment has partial progress
