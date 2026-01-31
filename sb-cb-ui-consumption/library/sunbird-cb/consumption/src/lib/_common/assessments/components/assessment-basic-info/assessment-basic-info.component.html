@@ -126,14 +126,20 @@
                     [formGroupName]="levelIndex">
                     <div class="label-col">{{ difficultyLevels[levelIndex] }}-</div>
                     <div class="input-col mat-full-radius">
-                      <mat-form-field appearance="outline" class="full-width">
+                      <mat-form-field appearance="outline" class="full-width"
+                        [class.mat-form-field-invalid]="isDifficultyLevelQuestionsInvalid(selectedSectionIndex, levelIndex)">
                         <input matInput type="number" formControlName="numberOfQuestions" min="0" placeholder="0">
+                        <mat-error *ngIf="isDifficultyLevelQuestionsInvalid(selectedSectionIndex, levelIndex)">Questions
+                          required when marks are added</mat-error>
                       </mat-form-field>
                     </div>
                     <div class="multiply-col">*</div>
                     <div class="input-col mat-full-radius">
-                      <mat-form-field appearance="outline" class="full-width">
+                      <mat-form-field appearance="outline" class="full-width"
+                        [class.mat-form-field-invalid]="isDifficultyLevelMarksInvalid(selectedSectionIndex, levelIndex)">
                         <input matInput type="number" formControlName="marksPerQuestion" min="0" placeholder="0">
+                        <mat-error *ngIf="isDifficultyLevelMarksInvalid(selectedSectionIndex, levelIndex)">Marks
+                          required when questions are added</mat-error>
                       </mat-form-field>
                     </div>
                     <div class="equals-col">=</div>
@@ -274,7 +280,7 @@
     <!-- Cool off period -->
     <ng-container *ngIf="showCoolOffPeriod">
       <div class="form-section mat-full-radius">
-        <label class="field-label required">Cool off period</label>
+        <label class="field-label required">Cool off period (in days)</label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput formControlName="coolOffPeriod" placeholder="Enter cool off period in days" type="number"
             max="7" min="1">
