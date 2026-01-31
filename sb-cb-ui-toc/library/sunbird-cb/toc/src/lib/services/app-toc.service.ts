@@ -381,7 +381,9 @@ export class AppTocService {
           // }
           break
         case NsContent.EMimeTypes.PRACTICE_RESOURCE:
-          if (content.primaryCategory === this.primaryCategory.PRACTICE_RESOURCE) {
+           if(content.contextCategory === NsContent.EAssessmentContextCategory.PRELIMINARY_ASSESSMENT) {
+            tocStructure['preEnrollmentAssessment'] += 1 
+          }else if (content.primaryCategory === this.primaryCategory.PRACTICE_RESOURCE) {
             tocStructure.practiceTest += 1
           } else if (content.primaryCategory === this.primaryCategory.FINAL_ASSESSMENT) {
             tocStructure.finalTest += 1

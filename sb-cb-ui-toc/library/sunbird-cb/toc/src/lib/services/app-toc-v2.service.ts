@@ -120,6 +120,7 @@ export class AppTocV2Service {
     if (contentHeirarchyData && contentHeirarchyData.children) {
       let totalLeafNodes = 0
       let totalCompletedLeafNodes = 0
+      let LPenrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
 
       // First pass: Update progress for all content
       contentHeirarchyData.children.forEach((child: any) => {
@@ -140,11 +141,15 @@ export class AppTocV2Service {
           totalCompletedLeafNodes += isCompleted ? (child.leafNodesCount || 1) : 0
         }
       })
-
-      if (totalLeafNodes > 0) {
-        const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
-        contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-        contentHeirarchyData.completionStatus = Number(contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0))
+      if(LPenrollment && LPenrollment.completionPercentage === 100) {
+        contentHeirarchyData.completionPercentage = 100
+        contentHeirarchyData.completionStatus = 2
+      } else {
+        if (totalLeafNodes > 0) {
+          const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
+          contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
+          contentHeirarchyData.completionStatus = Number(contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0))
+        }
       }
 
       // NOTE: Milestone locking is computed AFTER hashmap is built

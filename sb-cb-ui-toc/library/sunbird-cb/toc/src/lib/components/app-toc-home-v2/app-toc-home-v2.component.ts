@@ -766,12 +766,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           this.navigateToPlayerPage(batchId)
           this.enrollBtnLoading = false
         }
-      }, () => {
-        this.snackBar.open('Something went wrong')
+      }, (err:any) => {
+        let errMsg = err?.error?.params?.errmsg || err?.params?.errmsg || 'Something went wrong'
+        if(errMsg?.includes('course.') && this.content?.courseCategory) {
+          errMsg = errMsg.replace('course.', this.content?.courseCategory) + '.';
+        }
+        this.snackBar.open(errMsg)
         this.enrollBtnLoading = false
       })
     } else {
-      this.snackBar.open('No bacthes found')
+      this.snackBar.open('No batches found')
       this.enrollBtnLoading = false
     }
   }
@@ -1580,15 +1584,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             this.enrollBtnLoading = false
             // this.tocSvc.contentLoader.next(false)
           } else {
-            let contentLag = this.contentLangSvc.getContentLanguage(this.contentReadData)
-            this.getContinueLearningData(this.baseContentReadData.identifier, enrolledCourse.batchId, contentLag)
-            this.content['completionPercentage'] = enrolledCourse.completionPercentage
+            if(this.contentReadData && this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY) {
+              let contentLag = this.contentLangSvc.getContentLanguage(this.contentReadData)
+              this.getContinueLearningData(this.baseContentReadData.identifier, enrolledCourse.batchId, contentLag)
+              this.content['completionPercentage'] = enrolledCourse.completionPercentage
+              this.tocSvc.mapModuleCount(this.content)
+            }
             this.enrollBtnLoading = false
-            this.tocSvc.mapModuleCount(this.content)
             // this.tocSvc.contentLoader.next(false)
           }
         }
-           if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+           if (this.baseContentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
           this.tocSvc.callHirarchyProgressHashmap(this.content)
           this.tocSvc.computeMilestoneLockingStatus(true)
           this.syncMilestoneLockStatus()
@@ -1984,6 +1990,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       youtube: 0,
       interactivecontent: 0,
       offlineSession: 0,
+      preEnrollmentAssessment: 0,
     }
   }
 
@@ -2092,7 +2099,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   private async processRouteData(data: Data) {
     this.courseID = data.content.data.identifier
     const initData = this.tocSvc.initData(data, true)
-
     // Get query parameters
     const queryParamsDataTemp = await this.getQueryParams()
     // Handle multilingual content if mlId is present in query parameters
@@ -2102,12 +2108,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // Fetch the multilingual content
       try {
+        if(this.baseContentReadData.identifier === queryParamsDataTemp.MLId){
+          this.contentReadData = initData.content
+        } else {
         const success = await this.fetchContentRead(queryParamsDataTemp.MLId)
         if (!success) {
           // If multilingual content fetch fails, fall back to the original content
           this.contentReadData = initData.content
           this.loggerSvc.warn('Failed to load multilingual content, using original content instead')
         }
+      }
       } catch (error) {
         // On error, use the original content
         this.contentReadData = initData.content
@@ -2250,7 +2260,21 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.tocSvc.subtitleOnBanners = data?.pageData?.data?.subtitleOnBanners || false
     this.tocSvc.showDescription = data?.pageData?.data?.showDescription || false
     this.tocConfig = data?.pageData?.data || {}
-    this.kparray = this.tocConfig.karmaPoints
+    if(this.contentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+      this.kparray = this.tocConfig.karmaPointsLP || [
+        {
+          "displayButton": "Resume",
+          "textBeforeIcon": "earn",
+          "points": "25",
+          "textAfterPoints": "karmaPoints",
+          "textAfterIcon": "byCompletingLP",
+          "toolTipText": "lpCompleteTip"
+        }
+      ]
+    } else {
+    this.kparray = this.tocConfig.karmaPoints || []
+
+    }
   }
 
   private fetchPostAssessmentStatusIfNeeded() {
@@ -2377,23 +2401,28 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             this.contentViewEventForNetCore('complete')
           }
           this.dataTransferSvc.setEnrollData(this.userEnrollmentList)
-          // in case of back from player we need to check recent language and load
-          if (!this.contentLibSvc?.oneStepResumeEnable && this.baseContentReadData?.identifier === this.contentReadData?.identifier) {
-            let lang = this.baseContentReadData?.language?.length ? this.baseContentReadData?.language[0] : ''
-            let baseContentFromEnrollData = this.userEnrollmentList.find((el: any) => el.collectionId === this.baseContentReadData?.identifier)
-            if (lang && baseContentFromEnrollData && baseContentFromEnrollData?.recent_language?.toLowerCase() !== lang) {
-              let localLang = this.contentLangSvc.getRequiredLanguageDetails(this.baseContentReadData, baseContentFromEnrollData?.recent_language)
-              if (localLang && Object.keys(localLang).length) {
-                this.processLanguageSelection(this.contentLangSvc.getRequiredLanguageDetails(this.baseContentReadData, baseContentFromEnrollData?.recent_language))
-              } else {
-                this.processLanguageSelection(this.contentLangSvc.getSelectedLanguage(this.contentReadData))
+          if(this.isMultilingual) {
+            // in case of back from player we need to check recent language and load
+            if (!this.contentLibSvc?.oneStepResumeEnable && this.baseContentReadData?.identifier === this.contentReadData?.identifier) {
+              let lang = this.baseContentReadData?.language?.length ? this.baseContentReadData?.language[0] : ''
+              let baseContentFromEnrollData = this.userEnrollmentList.find((el: any) => el.collectionId === this.baseContentReadData?.identifier)
+              if (lang && baseContentFromEnrollData && baseContentFromEnrollData?.recent_language?.toLowerCase() !== lang) {
+                let localLang = this.contentLangSvc.getRequiredLanguageDetails(this.baseContentReadData, baseContentFromEnrollData?.recent_language)
+                if (localLang && Object.keys(localLang).length) {
+                  this.processLanguageSelection(this.contentLangSvc.getRequiredLanguageDetails(this.baseContentReadData, baseContentFromEnrollData?.recent_language))
+                } else {
+                  this.processLanguageSelection(this.contentLangSvc.getSelectedLanguage(this.contentReadData))
+                }
               }
+              return of(false)
+            } else {
+              // Always call fetchContentHierarchy first
+              return from(this.fetchContentHierarchy(this.contentReadData?.identifier || ''))
             }
-            return of(false)
-          } else {
-            // Always call fetchContentHierarchy first
-            return from(this.fetchContentHierarchy(this.contentReadData?.identifier || ''))
-          }
+          }else {
+              // Always call fetchContentHierarchy first
+              return from(this.fetchContentHierarchy(this.contentReadData?.identifier || ''))
+            }
 
         } else {
           this.userEnrollmentList = []
@@ -2489,14 +2518,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         
         
         // STEP 1: Construct hierarchy structure
-        this.content = this.appTocV2Svc.constructHeirarchyData(content)
+        let contentHeirarchyData = this.appTocV2Svc.constructHeirarchyData(content)
         
         // STEP 2: Update progress with latest enrollment data
-        this.appTocV2Svc.mapContentHierarchyProgressUpdate(this.content, this.userEnrollmentList)
+        this.appTocV2Svc.mapContentHierarchyProgressUpdate(contentHeirarchyData, this.userEnrollmentList)
         
         // STEP 3: Create hashmap from updated hierarchy (this should preserve completion status)
-        this.tocSvc.callHirarchyProgressHashmap(this.content)
-        
+        this.tocSvc.callHirarchyProgressHashmap(contentHeirarchyData)
+        this.content = contentHeirarchyData
         // Check if user is enrolled
         const isEnrolled = this.userEnrollmentList && this.userEnrollmentList.length > 0
         

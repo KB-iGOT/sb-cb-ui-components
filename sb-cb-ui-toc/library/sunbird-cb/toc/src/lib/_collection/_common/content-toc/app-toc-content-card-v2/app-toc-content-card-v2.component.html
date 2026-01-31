@@ -431,7 +431,7 @@
                         </div>
                         <!-- Unlock Criteria Message for Locked Milestones -->
                         <div *ngIf="isMilestone && isEnrolled && isMilestoneLocked" class="milestone-locked-message mt-2">
-                            <span class="locked-criteria-text mat-caption">
+                            <span class="locked-criteria-text mat-caption" style="white-space: normal; word-wrap: break-word; display: inline-block; max-width: 100%;">
                                 {{ getMilestoneUnlockMessage() }}
                             </span>
                         </div>
