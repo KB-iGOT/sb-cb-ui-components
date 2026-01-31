@@ -16,6 +16,16 @@
                                     <!-- <div class="text-xs font-light" *ngIf="content?.completedOn">{{ 'apptocsinglepage.completedCourse' | translate }} {{ content?.completedOn ?
                                         (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div> -->
                                     <div class="text-xs font-light" *ngIf="content?.completedOn">
+                                        <div *ngIf="content?.courseCategory;else primaryCategoryCheck">
+                                            {{ 'apptocsinglepage.completedOn' | translate }} {{content?.courseCategory}} {{
+                                                'apptocsinglepage.on' | translate 
+                                            }} {{
+                                            content?.completedOn
+                                            ?
+                                            (content?.completedOn | date: 'd MMM, y') : 'NA' }}
+
+                                        </div>
+                                        <ng-template #primaryCategoryCheck>
                                         <div *ngIf="content?.primaryCategory === 'Standalone Assessment'">
                                             {{ 'apptocsinglepage.completedAssessment' | translate }} {{
                                             content?.completedOn
@@ -31,6 +41,7 @@
                                             {{ 'apptocsinglepage.completedCourse' | translate }} {{ content?.completedOn
                                             ?
                                             (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
+                                        </ng-template>
                                     </div>
 
                                 </ng-container>
