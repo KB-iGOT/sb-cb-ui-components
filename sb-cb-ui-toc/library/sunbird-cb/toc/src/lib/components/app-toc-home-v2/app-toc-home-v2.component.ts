@@ -105,6 +105,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   enrolledCourseData: any
   @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/')
   @Input() inputContent: any
+  @Input() displayViewBtn: any = true
   // forPreview = window.location.href.includes('/author/')
   analytics = this.route.snapshot.data?.pageData?.data?.analytics
   errorWidgetData: NsWidgetResolver.IRenderConfigWithTypedData<any> = {
