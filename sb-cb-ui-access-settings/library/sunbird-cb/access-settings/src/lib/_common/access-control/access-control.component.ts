@@ -507,7 +507,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Reset subsequent conditions if needed (similar to resetActiveUserGroupFields)
     if (this.shouldResetSubsequentConditions(userGroupIndex, conditionIndex)) {
-      this.resetActiveUserGroupFields(condition?.getRawValue(), this.userGroup.at(userGroupIndex).getRawValue(), userGroupIndex);
+      this.resetActiveUserGroupFieldsByIndex(userGroupIndex, conditionIndex);
     }
   }
 
@@ -1667,6 +1667,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       const condition = conditionGroup;
       condition.get("entity")?.setValue("");
       condition.get("selections")?.setValue([]);
+    }
+
+    this.calculateUserCountForUserGroup(userGroupIndex);
+  }
+
+  resetActiveUserGroupFieldsByIndex(userGroupIndex: number, conditionIndex: number) {
+    const userGroupArray = this.accessControlForm.get("userGroup") as FormArray;
+    const userGroup = userGroupArray.at(userGroupIndex) as FormGroup;
+    const conditionsArray = userGroup.get("conditions") as FormArray;
+    const conditionsLength = conditionsArray.length;
+    
+    // Reset all conditions after the current condition index
+    for (let i = conditionIndex + 1; i < conditionsLength; i++) {
+      const conditionGroup = conditionsArray.at(i) as FormGroup;
+      conditionGroup.get("entity")?.setValue("");
+      conditionGroup.get("selections")?.setValue([]);
     }
 
     this.calculateUserCountForUserGroup(userGroupIndex);
