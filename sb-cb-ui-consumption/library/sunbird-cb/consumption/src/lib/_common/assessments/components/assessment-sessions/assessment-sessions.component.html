@@ -51,10 +51,26 @@
           </mat-hint>
         </mat-form-field>
       </div>
+
+      <!-- Question Paragraph -->
+      <div class="form-field mat-full-radius" *ngIf="isCurrentSectionParagraphType()">
+        <label class="field-label required">Question Paragraph</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea matInput formControlName="questionParagraph" placeholder="Enter question paragraph for this section"
+            rows="4" maxlength="500"></textarea>
+          <mat-hint align="end">
+            {{ currentSectionGroup?.get('questionParagraph')?.value?.length || 0 }}/500
+          </mat-hint>
+          <mat-error
+            *ngIf="currentSectionGroup?.get('questionParagraph')?.hasError('required') && currentSectionGroup?.get('questionParagraph')?.touched">
+            Question paragraph is required
+          </mat-error>
+        </mat-form-field>
+      </div>
     </form>
 
     <!-- Form Actions -->
-    <div class="form-actions flex flex-middle flex-center">
+    <div class="form-actions flex flex-middle flex-center" *ngIf="!isReadOnly">
       <button *ngIf="!assessmentData || !assessmentData.children" type="button" mat-button
         class="btn-common btn-primary" (click)="onSave()">
         Save
@@ -66,7 +82,7 @@
     </div>
 
     <!-- add Questions -->
-    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5">
+    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5" *ngIf="!isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
         <mat-icon>add</mat-icon>
         Add Questions
@@ -100,8 +116,9 @@
         Section - {{ i + 1 }}
       </button>
     </ng-container>
-    <button type="button" mat-button class="btn-common btn-secondary ml-auto" (click)="addBasicSection()"
-      [ngClass]="{'btn-disabled': basicSections.length >= 5}" [disabled]="basicSections.length >= 5">
+    <button *ngIf="!isReadOnly" type="button" mat-button class="btn-common btn-secondary ml-auto"
+      (click)="addBasicSection()" [ngClass]="{'btn-disable': basicSections.length >= 5}"
+      [disabled]="basicSections.length >= 5">
       <mat-icon>add</mat-icon>
       Add Section
     </button>
@@ -149,7 +166,16 @@
       <div class="form-field mat-full-radius">
         <label class="field-label required">Minimum percentage (%) to pass this assessment?</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput type="number" formControlName="minPassPercentage" min="0" max="100" placeholder="0">
+          <input matInput type="number" formControlName="minPassPercentage" min="50" max="100" placeholder="50">
+          <mat-error *ngIf="currentBasicSectionGroup?.get('minPassPercentage')?.hasError('required')">
+            This field is required
+          </mat-error>
+          <mat-error *ngIf="currentBasicSectionGroup?.get('minPassPercentage')?.hasError('min')">
+            Value must be 50 or greater
+          </mat-error>
+          <mat-error *ngIf="currentBasicSectionGroup?.get('minPassPercentage')?.hasError('max')">
+            Value must be 100 or less
+          </mat-error>
         </mat-form-field>
       </div>
 
@@ -165,7 +191,7 @@
       </div>
     </form>
 
-    <div class="form-actions flex flex-middle flex-center">
+    <div class="form-actions flex flex-middle flex-center" *ngIf="!isReadOnly">
       <button *ngIf="!hasCurrentBasicSectionIdentifier()" type="button" mat-button class="btn-common btn-primary"
         (click)="onSaveBasicSection()">
         Save
@@ -177,12 +203,14 @@
     </div>
 
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
-      *ngIf="assessmentData?.children?.[selectedSectionIndex]?.identifier">
-      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+      *ngIf="assessmentData?.children?.[selectedSectionIndex]?.identifier && !isReadOnly">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>add</mat-icon>
         Add Questions
       </button>
-      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()">
+      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>file_upload</mat-icon>
         Bulk upload
       </button>
@@ -237,12 +265,12 @@
       <div class="form-field mat-full-radius">
         <label class="field-label required">Minimum percentage (%) to pass this assessment?</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput type="number" formControlName="minPassPercentage" min="0" max="100" placeholder="0">
+          <input matInput type="number" formControlName="minPassPercentage" min="50" max="100" placeholder="50">
           <mat-error *ngIf="basicAssessmentForm?.get('minPassPercentage')?.hasError('required')">
             This field is required
           </mat-error>
           <mat-error *ngIf="basicAssessmentForm?.get('minPassPercentage')?.hasError('min')">
-            Value must be 0 or greater
+            Value must be 50 or greater
           </mat-error>
           <mat-error *ngIf="basicAssessmentForm?.get('minPassPercentage')?.hasError('max')">
             Value must be 100 or less
@@ -264,19 +292,22 @@
         </mat-form-field>
       </div>
     </form>
-    <div class="form-actions flex flex-middle flex-center">
+    <div class="form-actions flex flex-middle flex-center" *ngIf="!isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="onBasicAssessmentSave()">
         Save
       </button>
     </div>
 
     <!-- Add Questions Buttons - Show only when section is created -->
-    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5" *ngIf="hasBasicAssessmentSection()">
-      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
+    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
+      *ngIf="hasBasicAssessmentSection() && !isReadOnly">
+      <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>add</mat-icon>
         Add Questions
       </button>
-      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()">
+      <button type="button" mat-button class="btn-common btn-secondary" (click)="openBulkUploadDialog()"
+        [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
         <mat-icon>file_upload</mat-icon>
         Bulk upload
       </button>
@@ -315,14 +346,15 @@
         </mat-form-field>
       </div>
     </form>
-    <div class="form-actions flex flex-middle flex-center">
+    <div class="form-actions flex flex-middle flex-center" *ngIf="!isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="onOptionWeightageSave()">
         Save
       </button>
     </div>
 
     <!-- Add Questions Buttons - Show only when section is created -->
-    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5" *ngIf="hasOptionWeightageSection()">
+    <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
+      *ngIf="hasOptionWeightageSection() && !isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
         <mat-icon>add</mat-icon>
         Add Questions

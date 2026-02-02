@@ -126,14 +126,20 @@
                     [formGroupName]="levelIndex">
                     <div class="label-col">{{ difficultyLevels[levelIndex] }}-</div>
                     <div class="input-col mat-full-radius">
-                      <mat-form-field appearance="outline" class="full-width">
+                      <mat-form-field appearance="outline" class="full-width"
+                        [class.mat-form-field-invalid]="isDifficultyLevelQuestionsInvalid(selectedSectionIndex, levelIndex)">
                         <input matInput type="number" formControlName="numberOfQuestions" min="0" placeholder="0">
+                        <mat-error *ngIf="isDifficultyLevelQuestionsInvalid(selectedSectionIndex, levelIndex)">Questions
+                          required when marks are added</mat-error>
                       </mat-form-field>
                     </div>
                     <div class="multiply-col">*</div>
                     <div class="input-col mat-full-radius">
-                      <mat-form-field appearance="outline" class="full-width">
+                      <mat-form-field appearance="outline" class="full-width"
+                        [class.mat-form-field-invalid]="isDifficultyLevelMarksInvalid(selectedSectionIndex, levelIndex)">
                         <input matInput type="number" formControlName="marksPerQuestion" min="0" placeholder="0">
+                        <mat-error *ngIf="isDifficultyLevelMarksInvalid(selectedSectionIndex, levelIndex)">Marks
+                          required when questions are added</mat-error>
                       </mat-form-field>
                     </div>
                     <div class="equals-col">=</div>
@@ -193,10 +199,10 @@
           <div class="form-section mat-full-radius">
             <label class="field-label required">Minimum Passing Percentage</label>
             <mat-form-field appearance="outline" class="full-width">
-              <input matInput type="number" formControlName="minimumPassPercentage" min="0" max="100" placeholder="50">
+              <input matInput type="number" formControlName="minimumPassPercentage" min="50" max="100" placeholder="50">
               <mat-error *ngIf="controls['minimumPassPercentage'].hasError('required')">Minimum passing percentage is
                 required</mat-error>
-              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('min')">Value must be 0 or
+              <mat-error *ngIf="controls['minimumPassPercentage'].hasError('min')">Value must be 50 or
                 greater</mat-error>
               <mat-error *ngIf="controls['minimumPassPercentage'].hasError('max')">Value must be 100 or
                 less</mat-error>
@@ -274,7 +280,7 @@
     <!-- Cool off period -->
     <ng-container *ngIf="showCoolOffPeriod">
       <div class="form-section mat-full-radius">
-        <label class="field-label required">Cool off period</label>
+        <label class="field-label required">Cool off period (in days)</label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput formControlName="coolOffPeriod" placeholder="Enter cool off period in days" type="number"
             max="7" min="1">
@@ -285,13 +291,13 @@
       </div>
     </ng-container>
 
-    <!-- Description -->
+    <!-- Instructions -->
     <div class="form-section mat-full-radius">
-      <label class="field-label">Description</label>
+      <label class="field-label">Instructions</label>
       <mat-form-field appearance="outline" class="full-width">
         <textarea matInput formControlName="description" [maxlength]="instructionsMaxLength" rows="5"
-          placeholder="Enter description"></textarea>
-        <mat-error *ngIf="controls['description'].hasError('maxlength')">Description cannot exceed {{
+          placeholder="Enter instructions"></textarea>
+        <mat-error *ngIf="controls['description'].hasError('maxlength')">Instructions cannot exceed {{
           instructionsMaxLength }} characters</mat-error>
       </mat-form-field>
       <div class="field-footer">
@@ -301,7 +307,7 @@
     </div>
 
     <!-- Actions Buttons -->
-    <div class="form-actions flex flex-middle flex-center gap-5">
+    <div class="form-actions flex flex-middle flex-center gap-5" *ngIf="!isReadOnly">
       <button *ngIf="!assessmentData" mat-button class="btn-common btn-primary"
         [ngClass]="{'btn-disable': !isFormValid}" (click)="onSave()" [disabled]="!isFormValid" type="button">
         Save and Continue

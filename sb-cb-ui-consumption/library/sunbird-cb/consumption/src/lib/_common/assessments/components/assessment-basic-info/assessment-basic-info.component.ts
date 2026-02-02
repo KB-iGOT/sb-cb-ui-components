@@ -77,16 +77,16 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.config && this.config?.primaryCategory === 'Course Assessment') {
+    if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT) {
       this.isFinalAssessment = true
     }
-    if (this.config && this.config?.primaryCategory === 'Practice Question Set') {
+    if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.PRACTICE_QUESTION_SET) {
       this.isPracticeAssessment = true
     }
     // Check if coolOffPeriod should be shown
     if (this.config && this.config?.contextCategory) {
-      this.showCoolOffPeriod = this.config.contextCategory === 'Preliminiary Assessment' ||
-        this.config.contextCategory === 'Final Milestone Assessment'
+      this.showCoolOffPeriod = this.config.contextCategory === NsAssessment.EAssessmentContextCategory.PRELIMINARY_ASSESSMENT ||
+        this.config.contextCategory === NsAssessment.EAssessmentContextCategory.FINAL_MILESTONE_ASSESSMENT
     }
     this.setupShowTimerSubscription()
     this.setupAssessmentTypeSubscription()
@@ -192,7 +192,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   }
 
   get hasMultipleSections(): boolean {
-    return (this.assessmentForm.get('noOfSection')?.value || 1) > 1
+    const rawValue = this.assessmentForm.getRawValue()
+    return (rawValue.noOfSection || 1) > 1
   }
 
   getSectionDifficultyLevels(sectionIndex: number): FormArray {
@@ -255,9 +256,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       name: data.name || '',
       description: data.description || '',
       showTimer: data.showTimer !== undefined ? data.showTimer : true,
-      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts || null,
+      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null ? data.maxAssessmentRetakeAttempts : null,
       scoreCutoffType: data.scoreCutoffType || 'AssessmentLevel',
-      coolOffPeriod: data.coolOffPeriod || null
+      coolOffPeriod: data.coolOffPeriod !== undefined && data.coolOffPeriod !== null ? data.coolOffPeriod : null
     }, { emitEvent: false })
 
     // Duration - convert from seconds to hours, minutes, seconds
@@ -299,8 +300,10 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
           const sectionsArray = this.assessmentForm.get('sections') as FormArray
           data.children.forEach((section: any, sectionIndex: number) => {
             const sectionGroup = sectionsArray.at(sectionIndex) as FormGroup
+            // Check sectionType field to determine if it's a paragraph section
+            const isParagraph = section.sectionType === 'paragraph' || false
             sectionGroup.patchValue({
-              paragraph: section.paragraph || false
+              paragraph: isParagraph
             }, { emitEvent: false })
 
             // Populate difficulty levels from sectionLevelDefinition
@@ -350,6 +353,11 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
         levelControl.get('marksPerQuestion')?.disable()
       })
     })
+
+    // If read-only mode, disable the entire form (after populating values)
+    if (this.isReadOnly) {
+      this.assessmentForm.disable()
+    }
   }
 
   updateValidators(): void {
@@ -432,7 +440,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       negativeMarkingPercentage?.setValidators([Validators.required])
 
       // Sectional validators only when more than 1 section
-      const totalSections = this.assessmentForm.get('noOfSection')?.value || 1
+      const rawValue = this.assessmentForm.getRawValue()
+      const totalSections = rawValue.noOfSection || 1
       if (totalSections > 1) {
         sectionalPassPercentage?.setValidators([Validators.required])
         sectionTimeBound?.setValidators([Validators.required])
@@ -524,7 +533,71 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     if (this.isDurationRequired && this.totalDuration <= 0) {
       return false
     }
+    // For Question Weightage: validate that if questions > 0, marks must also be > 0
+    if (this.assessmentForm.get('questionWeightageType')?.value === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+      if (!this.areSectionDifficultyLevelsValid()) {
+        return false
+      }
+    }
     return true
+  }
+
+  /**
+   * Validates that for each difficulty level, questions and marks must be consistent
+   * (both > 0 or both = 0)
+   */
+  areSectionDifficultyLevelsValid(): boolean {
+    const sectionsArray = this.assessmentForm.get('sections') as FormArray
+    for (let sectionIndex = 0; sectionIndex < sectionsArray.length; sectionIndex++) {
+      const section = sectionsArray.at(sectionIndex)
+      const difficultyLevels = section.get('difficultyLevels') as FormArray
+      for (let levelIndex = 0; levelIndex < difficultyLevels.length; levelIndex++) {
+        const level = difficultyLevels.at(levelIndex)
+        const numberOfQuestions = level.get('numberOfQuestions')?.value || 0
+        const marksPerQuestion = level.get('marksPerQuestion')?.value || 0
+        // If questions are added but no marks assigned, it's invalid
+        if (numberOfQuestions > 0 && marksPerQuestion <= 0) {
+          return false
+        }
+        // If marks are added but no questions assigned, it's invalid
+        if (marksPerQuestion > 0 && numberOfQuestions <= 0) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
+  /**
+   * Checks if a specific difficulty level has questions but no marks assigned
+   */
+  isDifficultyLevelMarksInvalid(sectionIndex: number, levelIndex: number): boolean {
+    const section = this.sections.at(sectionIndex)
+    if (!section) return false
+    const difficultyLevels = section.get('difficultyLevels') as FormArray
+    const level = difficultyLevels.at(levelIndex)
+    if (!level) return false
+    const numberOfQuestions = level.get('numberOfQuestions')?.value || 0
+    const marksPerQuestion = level.get('marksPerQuestion')?.value || 0
+    return numberOfQuestions > 0 && marksPerQuestion <= 0
+  }
+
+  /**
+   * Checks if a specific difficulty level has marks but no questions assigned
+   */
+  isDifficultyLevelQuestionsInvalid(sectionIndex: number, levelIndex: number): boolean {
+    const section = this.sections.at(sectionIndex)
+    if (!section) return false
+    const difficultyLevels = section.get('difficultyLevels') as FormArray
+    const level = difficultyLevels.at(levelIndex)
+    if (!level) return false
+    const numberOfQuestions = level.get('numberOfQuestions')?.value || 0
+    const marksPerQuestion = level.get('marksPerQuestion')?.value || 0
+    return marksPerQuestion > 0 && numberOfQuestions <= 0
+  }
+
+  get isReadOnly(): boolean {
+    return this.assessmentService.getReadOnly()
   }
 
   onDurationBlur(): void {
@@ -600,6 +673,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     // Check Option Weightage fields
     if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
       if (formValues.numberOfQuestionsToDisplay !== this.assessmentData.totalQuestions) {
+        // Update root assessment totals
         changedData.totalQuestions = formValues.numberOfQuestionsToDisplay
         changedData.maxQuestions = formValues.numberOfQuestionsToDisplay
 
@@ -616,7 +690,18 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
     // Only emit if there are changes
     if (Object.keys(changedData).length > 0) {
-      this.updated.emit({ changedData, identifier: this.assessmentData.identifier })
+      // For option weightage with sections, ensure parent changes are included
+      const emitData: any = { changedData, identifier: this.assessmentData.identifier }
+
+      if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE &&
+        changedData.totalQuestions !== undefined && changedData.maxQuestions !== undefined) {
+        emitData.parentChanges = {
+          totalQuestions: changedData.totalQuestions,
+          maxQuestions: changedData.maxQuestions
+        }
+      }
+
+      this.updated.emit(emitData)
     } else {
       // No changes detected
       this.snackBar.open('No changes detected')

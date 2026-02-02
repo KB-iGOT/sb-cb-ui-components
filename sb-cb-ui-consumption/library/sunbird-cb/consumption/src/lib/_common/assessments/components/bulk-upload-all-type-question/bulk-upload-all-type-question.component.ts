@@ -146,12 +146,12 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     const fileName = file.name.replace(/[^A-Za-z0-9_.]/g, '')
 
     if (!fileName.toLowerCase().endsWith('.csv')) {
-      this.snackBar.open('Invalid file format. Please upload a CSV file.', 'Close', { duration: 3000 })
+      this.snackBar.open('Invalid file format. Please upload a CSV file.')
       return
     }
 
     if (file.size > this.maxFileSize) {
-      this.snackBar.open('File size exceeds maximum limit of 400 MB.', 'Close', { duration: 3000 })
+      this.snackBar.open('File size exceeds maximum limit of 400 MB.')
       return
     }
 
@@ -197,7 +197,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         this.isProcessing = false
       } catch (error) {
         console.error('Error parsing CSV:', error)
-        this.snackBar.open('Error parsing CSV file. Please check the file format.', 'Close', { duration: 3000 })
+        this.snackBar.open('Error parsing CSV file. Please check the file format.')
         this.file = null
         this.isProcessing = false
       }
@@ -208,7 +208,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
   validateTemplate(data: any[]): boolean {
     if (!data || data.length === 0) {
-      this.snackBar.open('No valid questions found in the uploaded file.', 'Close', { duration: 3000 })
+      this.snackBar.open('No valid questions found in the uploaded file.')
       return false
     }
 
@@ -217,7 +217,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
     // If it's a NEW template (advanced) and assessment is BASIC, reject it
     if (!isOldTemplate && this.compatibilityLevel === NsAssessment.ECompatibilityLevel.BASIC) {
-      this.snackBar.open('Advanced template format is not supported for basic assessments. Please use the basic MCQ template.', 'Close', { duration: 4000 })
+      this.snackBar.open('Advanced template format is not supported for basic assessments. Please use the basic MCQ template.', '', { duration: 4000 })
       return false
     }
 
@@ -225,12 +225,12 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     if (isOldTemplate) {
       // Check if old template is allowed (only for basic assessments)
       if (this.compatibilityLevel !== NsAssessment.ECompatibilityLevel.BASIC) {
-        this.snackBar.open('Old template format is only supported for basic assessments. Please use the new template format.', 'Close', { duration: 4000 })
+        this.snackBar.open('Old template format is only supported for basic assessments. Please use the new template format.', '', { duration: 4000 })
         return false
       }
 
       if (!('Question' in firstRow) || !('Option1' in firstRow)) {
-        this.snackBar.open('Invalid template. Missing required columns: Question, Option1', 'Close', { duration: 3000 })
+        this.snackBar.open('Invalid template. Missing required columns: Question, Option1')
         return false
       }
 
@@ -243,7 +243,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     const missingColumns = requiredColumns.filter(col => !(col in firstRow))
 
     if (missingColumns.length > 0) {
-      this.snackBar.open(`Invalid template. Missing columns: ${missingColumns.join(', ')}`, 'Close', { duration: 3000 })
+      this.snackBar.open(`Invalid template. Missing columns: ${missingColumns.join(', ')}`)
       return false
     }
 
@@ -258,7 +258,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     if (invalidTypes.length > 0) {
       this.snackBar.open(
         'Invalid question type found. Supported types: MCQ-SCA, MCQ-MCA, T/F, FTB, MTF, MCQ-MCA-W',
-        'Close',
+        '',
         { duration: 3000 }
       )
       return false
@@ -269,7 +269,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       if (!this.checkValidQuestionTagging(data)) {
         this.snackBar.open(
           'Invalid question tagging. Please upload with valid question tagging.',
-          'Close',
+          '',
           { duration: 3000 }
         )
         return false
@@ -302,7 +302,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       })
 
       if (invalidRows.length > 0) {
-        this.snackBar.open('Invalid template uploaded. Please download and use the correct template.', 'Close', { duration: 3000 })
+        this.snackBar.open('Invalid template uploaded. Please download and use the correct template.')
         return false
       }
     }
@@ -386,6 +386,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
             const correctKey = `isOption${i}Correct`
             const correctValue = q[correctKey]
             isCorrect = correctValue && correctValue.toLowerCase() !== 'none' ? correctValue : 'none'
+            isCorrect = isCorrect.toLowerCase().split('blank').join('B')
           } else if (q.QuestionType === 'MTF') {
             // For MTF, the correct answer is the matching pair
             isCorrect = q[`isOption${i}Correct`] || ''
@@ -579,7 +580,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
   onCreateQuestions(): void {
     if (this.selectedQuestions.length === 0) {
-      this.snackBar.open('Please select at least one question.', 'Close', { duration: 3000 })
+      this.snackBar.open('Please select at least one question.')
       return
     }
 
@@ -590,7 +591,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         const availableSlots = this.totalQuestions - this.existingQuestionsCount
         this.snackBar.open(
           `Cannot add ${this.selectedQuestions.length} questions. You can only add ${availableSlots} more question(s). (${this.existingQuestionsCount} already added, ${this.totalQuestions} total limit)`,
-          'Close',
+          '',
           { duration: 5000 }
         )
         return
@@ -600,7 +601,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     // Validate questions before creating
     const validation = this.validateQuestions()
     if (!validation.valid) {
-      this.snackBar.open(validation.message, 'Close', { duration: 4000 })
+      this.snackBar.open(validation.message, '', { duration: 4000 })
       return
     }
 

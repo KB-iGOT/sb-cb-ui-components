@@ -4,6 +4,7 @@ import { AssessmentService } from '../../service/assessment.service'
 import { map, switchMap } from 'rxjs/operators'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { AssessmentSessionsComponent } from '../assessment-sessions/assessment-sessions.component'
+import { NsAssessment } from '../../service/assessment.model'
 
 @Component({
   selector: 'sb-uic-assessment-main',
@@ -28,8 +29,9 @@ export class AssessmentMainComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.config && this.config.identifier === '' && this.config?.primaryCategory === '') {
-      this.config.primaryCategory = 'Course Assessment'
+      this.config.primaryCategory = NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT
     }
+    this.assessmentService.setReadOnly(this.config?.isReadOnly)
     if (this.config && this.config.identifier !== '') {
       this.callLoader(true)
       this.assessmentService.getAssessmentHierarchyDetailsModeEdit(this.config.identifier).subscribe({
@@ -37,7 +39,7 @@ export class AssessmentMainComponent implements OnInit {
           this.enableStepTwo()
           this.callLoader(false)
           this.isAssessmentLoaded = true
-          this.config.primaryCategory = data.primaryCategory || 'Course Assessment'
+          this.config.primaryCategory = data.primaryCategory || NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT
           this.config.contextCategory = data.contextCategory || ''
           // Use setTimeout to ensure ViewChild is available
           setTimeout(() => {
@@ -48,7 +50,7 @@ export class AssessmentMainComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('Error loading assessment', error)
-          this.snackBar.open('Error loading assessment. Please try again.', 'Close', { duration: 5000 })
+          this.snackBar.open('Error loading assessment. Please try again.', '', { duration: 5000 })
           this.callLoader(false)
           this.isAssessmentLoaded = true
         }
@@ -127,7 +129,7 @@ export class AssessmentMainComponent implements OnInit {
 
   updateAssessment(event: any) {
     if (event && event.identifier) {
-      const getAssessmentHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.identifier)
+      const getAssessmentHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.identifier, event.parentChanges)
       this.callLoader(true)
       this.assessmentService.updateAssessment(getAssessmentHierarchy).pipe(
         switchMap((updateResp: any) => {
@@ -158,9 +160,15 @@ export class AssessmentMainComponent implements OnInit {
   saveSectionData(event: any): void {
     if (event) {
       // Extract sectionData and sectionIdentifier from event
-      const sectionData = event.sectionData || event
+      let sectionData = event.sectionData || event
       const sectionIdentifier = event.sectionIdentifier
 
+      if (event.parentChanges && !sectionData.parentChanges) {
+        sectionData = {
+          ...sectionData,
+          parentChanges: event.parentChanges
+        }
+      }
       // Use service method to build the hierarchy request
       // Pass sectionIdentifier if it exists (for updates), otherwise undefined (for create)
       const sectionHierarchyRequest = this.assessmentService.buildSectionHierarchyRequest(
@@ -198,7 +206,7 @@ export class AssessmentMainComponent implements OnInit {
 
   updateSectionData(event: any): void {
     if (event && event.sectionIdentifier && event.changedData) {
-      const getSectionHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.sectionIdentifier)
+      const getSectionHierarchy = this.assessmentService.updateAssessmentHierarchyRequest(event.changedData, event.sectionIdentifier, event.parentChanges)
       this.callLoader(true)
       this.assessmentService.updateAssessment(getSectionHierarchy).pipe(
         switchMap((updateResp: any) => {

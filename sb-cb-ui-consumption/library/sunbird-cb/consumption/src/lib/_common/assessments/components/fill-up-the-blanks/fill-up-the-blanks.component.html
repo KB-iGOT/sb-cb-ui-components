@@ -8,14 +8,14 @@
       <div class="blank-input-wrapper">
         <mat-form-field appearance="outline" class="blank-input-field">
           <input matInput [(ngModel)]="option.text" (ngModelChange)="onTextChange(i, $event)" placeholder="Enter answer"
-            maxlength="50" />
+            maxlength="50" [disabled]="isReadOnly" />
         </mat-form-field>
       </div>
 
-      <div class="blank-dropdown-wrapper">
+      <div class="blank-dropdown-wrapper" *ngIf="!isBasicAssessment()">
         <mat-form-field appearance="outline" class="blank-dropdown-field">
           <mat-select [(ngModel)]="option.blankNumber" (selectionChange)="onBlankSelectionChange(i, option.blankNumber)"
-            placeholder="Select Blank">
+            placeholder="Select Blank" [disabled]="isReadOnly">
             <mat-option *ngFor="let blank of blankList" [value]="blank.id">
               {{ blank.name }}
             </mat-option>
@@ -23,7 +23,7 @@
         </mat-form-field>
       </div>
 
-      <div class="blank-actions" *ngIf="options.length > minOptions">
+      <div class="blank-actions" *ngIf="options.length > minOptions && !isReadOnly && !isBasicAssessment()">
         <button mat-icon-button (click)="removeOption(i)" matTooltip="Delete this option" class="remove-btn"
           type="button">
           <mat-icon>close</mat-icon>

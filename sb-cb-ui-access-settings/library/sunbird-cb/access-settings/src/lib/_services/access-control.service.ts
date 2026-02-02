@@ -76,9 +76,9 @@ export class AccessControlService {
           status: 1,
           isMdo: true,
         },
-        sort_by: {
-          channel: "asc",
-        },
+        // sort_by: {
+        //   channel: "asc", 
+        // },
         fields: ["channel", "identifier", "iscca"],
         query: query,
         limit: pagination.limit,
@@ -90,7 +90,7 @@ export class AccessControlService {
       characterSearch = "";
     }
 
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
@@ -116,8 +116,7 @@ export class AccessControlService {
       requestedFields: ["designation", "id"],
       pageSize: pagination.pageSize || this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
       pageNumber: pagination.pageNumber || 0,
-      orderDirection: "ASC",
-      orderBy: "designation",
+      // orderDirection: "ASC",
     };
     if (selectedData?.length) {
       payload.filterCriteriaMap.designation = selectedData;
@@ -126,8 +125,11 @@ export class AccessControlService {
     if (query) {
       payload.searchString = query;
     }
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       payload.startsWith = characterSearch;
+    }
+    if (!query) {
+      payload.orderBy = "designation";
     }
     return this.http.post<any>(ENDPOINTS.DESIGNATION_LIST, payload);
   }
@@ -143,9 +145,7 @@ export class AccessControlService {
         },
         fields: ["identifier", "name"],
         query: query,
-        sort_by: {
-          name: "asc",
-        },
+        sort_by: { name: "asc" },
         facets: [],
         limit: this.accessControlConfig()?.accessControlCriteriaSelection?.paginationLimit || PAGINATION_LIMIT,
         offset: paginationOffset,
@@ -154,7 +154,7 @@ export class AccessControlService {
     if (selectedData?.length) {
       payload.request.filters.name = selectedData;
     }
-    if (characterSearch || !query) {
+    if (characterSearch && characterSearch !== '#' && !query) {
       if (!payload.request.filters.name || typeof payload.request.filters.name !== "object") {
         payload.request.filters.name = {};
       }
@@ -230,27 +230,6 @@ export class AccessControlService {
     return {
       request: {
         content: {
-          appIcon: apiResponse.appIcon || "",
-          posterImage: apiResponse.posterImage || "",
-          code: apiResponse.code || "",
-          contentType: apiResponse.contentType || "",
-          createdBy: apiResponse.createdBy || "",
-          creatorContacts: apiResponse.creatorContacts || [],
-          creatorIDs: apiResponse.creatorIDs || [],
-          createdFor: apiResponse.createdFor || [],
-          creator: apiResponse.creator || "",
-          framework: apiResponse.framework || "",
-          mimeType: apiResponse.mimeType || "",
-          name: apiResponse.name || "",
-          organisation: apiResponse.organisation || [],
-          isExternal: apiResponse.isExternal || false,
-          primaryCategory: apiResponse.primaryCategory || "",
-          courseCategory: apiResponse.courseCategory || "",
-          license: apiResponse.license || "",
-          ownershipType: apiResponse.ownershipType || [],
-          cumulativeTracking: apiResponse.cumulativeTracking || false,
-          language: apiResponse.language || [],
-          accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
           accessSettingsEnabled: accessSettingsEnabled || false,
         },
@@ -262,27 +241,6 @@ export class AccessControlService {
     return {
       request: {
         content: {
-          appIcon: apiResponse.appIcon || "",
-          posterImage: apiResponse.posterImage || "",
-          code: apiResponse.code || "",
-          contentType: apiResponse.contentType || "",
-          createdBy: apiResponse.createdBy || "",
-          creatorContacts: apiResponse.creatorContacts || [],
-          creatorIDs: apiResponse.creatorIDs || [],
-          createdFor: apiResponse.createdFor || [],
-          creator: apiResponse.creator || "",
-          framework: apiResponse.framework || "",
-          mimeType: apiResponse.mimeType || "",
-          name: apiResponse.name || "",
-          organisation: apiResponse.organisation || [],
-          isExternal: apiResponse.isExternal || false,
-          primaryCategory: apiResponse.primaryCategory || "",
-          courseCategory: apiResponse.courseCategory || "",
-          license: apiResponse.license || "",
-          ownershipType: apiResponse.ownershipType || [],
-          cumulativeTracking: apiResponse.cumulativeTracking || false,
-          language: apiResponse.language || [],
-          accessSetting: apiResponse.accessSetting || "",
           versionKey: apiResponse.versionKey || "",
           accessSettingsEnabled: accessSettingsEnabled || false,
           secureSettings: secureSettings || null,

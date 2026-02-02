@@ -505,7 +505,6 @@ export class FrameworkService {
   }
 
   private getSelectedStateOrg(_orgData?: any): Observable<any> {
-    debugger
     const requestBody = {
         request: {
           filters: {

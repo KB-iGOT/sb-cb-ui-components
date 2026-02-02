@@ -10,7 +10,8 @@ const API_ENDPOINT = {
   PUBLISH_FRAMEWORK: `/apis/proxies/v8/framework/v1/publish/`,
   RETIRE_TREM: `/apis/proxies/v8/framework/v1/term/retire`,
   UPDATE_CATEGORY: `/apis/proxies/v8/framework/v1/category/update/`,
-  USERS_SEARCH: `apis/proxies/v8/user/v1/search`
+  USERS_SEARCH: `apis/proxies/v8/user/v1/search`,
+  ORG_CONTENT_UPDATE: `/apis/proxies/v8/org/ext/v2/update`
 }
 @Injectable({
   providedIn: 'root'
@@ -48,6 +49,10 @@ export class TreeHierarchyService {
 
   retireTerm(requestBody: any, frameworkObj:any): Observable<any> {
     return this.http.post(`${API_ENDPOINT.RETIRE_TREM}?framework=${frameworkObj.id}&category=${frameworkObj.category}`, requestBody);
+  }
+
+  orgContentUpdate(requestBody: any): Observable<any> {
+    return this.http.patch(`${API_ENDPOINT.ORG_CONTENT_UPDATE}`, requestBody);
   }
 
   updateCategory(requestBody: any, frameworkObj:any): Observable<any> {

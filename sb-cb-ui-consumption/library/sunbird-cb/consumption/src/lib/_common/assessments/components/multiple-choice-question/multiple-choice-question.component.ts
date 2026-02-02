@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
 export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
   @Input() questionType: string = 'MCQ-SCA'; // MCQ-SCA, MCQ-MCA, MCQ-SCA-TF
   @Input() options: any[] = [];
+  @Input() isReadOnly: boolean = false;
   @Output() optionsUpdated = new EventEmitter<any[]>();
   @Output() addOptionRequest = new EventEmitter<void>();
 
@@ -134,9 +135,9 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
     this.emitOptionsUpdate()
   }
 
-  onCorrectAnswerToggle(option: any): void {
+  onCorrectAnswerToggle(_option: any): void {
     // For multiple select (MCQ-MCA)
-    option.isCorrect = !option.isCorrect
+    // Note: ngModel already handles the toggle, we just need to emit the update
     this.emitOptionsUpdate()
   }
 
