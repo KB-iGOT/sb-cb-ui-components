@@ -419,10 +419,10 @@
                         <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2 flex flex-col gap-2">
                             <div class="flex items-center justify-start gap-4 w-100">
                                 <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of {{content?.leafNodesCount || 0}} completed</span>
-                                <!-- View Achievement Button for completed milestones - Always visible when completed -->
-                                <ng-container *ngIf="getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2">
+                                <!-- View Achievement Button - Shown only when all mandatory content AND milestone assessment are completed -->
+                                <ng-container *ngIf="isMilestoneComplete(content?.identifier)">
                                     <button type="button" class="view-achievement-btn ml-4" [disabled]="achievementLoading"
-                                        (click)="viewMilestoneAchievement($event)">
+                                        (click)="viewMilestoneAchievement($event, content)">
                                         <span *ngIf="!achievementLoading">View Achievement</span>
                                         <mat-spinner *ngIf="achievementLoading" [diameter]="16" [strokeWidth]="2" color="primary" class="inline-spinner"></mat-spinner>
                                     </button>

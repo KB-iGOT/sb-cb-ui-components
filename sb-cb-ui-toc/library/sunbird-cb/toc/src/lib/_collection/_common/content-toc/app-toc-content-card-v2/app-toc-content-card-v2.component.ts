@@ -864,6 +864,74 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     return this.hierarchyMapData && this.hierarchyMapData[identifier] && this.hierarchyMapData[identifier].completionStatus
   }
 
+  /**
+   * Check if milestone is complete based on mandatory content and assessment completion
+   * Returns true only when:
+   * 1. All mandatory content is completed (or no mandatory content exists)
+   * 2. Milestone assessment is completed (or no assessment exists)
+   */
+  isMilestoneComplete(identifier: string): boolean {
+    if (!this.hierarchyMapData) {
+      return false
+    }
+    const milestoneData = this.hierarchyMapData[identifier]
+    if (!milestoneData) {
+      return false
+    }
+
+    // Check if all mandatory content AND milestone assessment are completed
+    let hasMandatoryContent = false
+    let allMandatoryComplete = true
+    let hasMilestoneAssessment = false
+    let milestoneAssessmentComplete = false
+
+    // Check all direct children of the milestone
+    for (const key of Object.keys(this.hierarchyMapData)) {
+      const item = this.hierarchyMapData[key]
+
+      // Only check direct children
+      if (item.parent !== identifier) continue
+
+      // Check if this is the milestone assessment
+      const isAssessment = 
+        item.primaryCategory === 'Course Assessment' ||
+        item.primaryCategory === 'Final Assessment' ||
+        item.primaryCategory === 'Standalone Assessment'
+
+      if (isAssessment) {
+        hasMilestoneAssessment = true
+        const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                           item.completionPercentage >= 100 || item.progress >= 100
+        if (isCompleted) {
+          milestoneAssessmentComplete = true
+        }
+        continue // Skip to next item
+      }
+
+      // Check if this is mandatory content (courses/collections)
+      if (item.primaryCategory === 'Course' || item.isCollection) {
+        const isMandatory = item.isMandatory !== false // Default is mandatory
+        
+        if (isMandatory) {
+          hasMandatoryContent = true
+          const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                             item.completionPercentage >= 100 || item.progress >= 100
+          if (!isCompleted) {
+            allMandatoryComplete = false
+          }
+        }
+      }
+    }
+
+    // Milestone is complete when:
+    // 1. All mandatory content is completed (or no mandatory content exists)
+    // 2. Milestone assessment is completed (or no assessment exists)
+    const mandatoryCheck = !hasMandatoryContent || allMandatoryComplete
+    const assessmentCheck = !hasMilestoneAssessment || milestoneAssessmentComplete
+
+    return mandatoryCheck && assessmentCheck
+  }
+
   openCertificateDialog(certData: any) {
     const cet = certData
     this.dialog.open(CertificateDialogComponent, {
@@ -1253,7 +1321,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   /**
    * View milestone achievement - calls the achievement API and shows the result
    */
-  viewMilestoneAchievement(event?: MouseEvent) {
+  viewMilestoneAchievement(event: MouseEvent, mileStoneData: any) {
     if (event) {
       event.preventDefault()
       event.stopPropagation()
@@ -1276,10 +1344,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
 
     // If content name contains milestone number, extract it
     if (this.content.name) {
-      const match = this.content.name.match(/milestone\s*(\d+)/i)
-      if (match) {
-        milestoneId = 'm' + match[1]
-      }
+        milestoneId = mileStoneData?.identifier
     }
 
     const courseId = this.baseContentReadData?.identifier || this.rootId
@@ -1297,7 +1362,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
             width: '1300px',
             data: {
               cet: response.result.printUri || response.result.svgData,
-              certId: response.result.identifier,
+              certId: response?.result?.identifier || milestoneId,
               isAchievement: true
             },
           })
