@@ -2035,7 +2035,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     // CRITICAL: For Learning Pathways, compute milestone locking status after enrollment
     // This ensures milestones are properly locked until pre-assessment is completed
     if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
-      console.log('🔐 [ENROLLMENT] Computing milestone locking for Learning Pathway after enrollment')
       this.tocSvc.callHirarchyProgressHashmap(this.content)
       this.tocSvc.computeMilestoneLockingStatus(true)
       this.syncMilestoneLockStatus()
@@ -2645,12 +2644,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       // Recompute milestone locking status from existing hashmap
       // The hashmap is already updated with latest progress via hashmap update subscription
       this.tocSvc.computeMilestoneLockingStatus(isEnrolled)
-      console.log('🔓 Milestone locking recomputed from hashmap. Enrolled:', isEnrolled)
       
       // Sync lock status from hashmap to content tree
       this.syncMilestoneLockStatus()
       
-      console.log('✅ Milestone locks refreshed from hashmap')
     } catch (error) {
       console.error('❌ Error in refreshEnrollmentAndProgress:', error)
     }
