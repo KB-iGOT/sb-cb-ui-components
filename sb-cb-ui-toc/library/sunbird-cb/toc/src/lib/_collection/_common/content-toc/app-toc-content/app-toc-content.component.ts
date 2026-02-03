@@ -237,20 +237,61 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
     if(milestoneData && milestoneData?.primaryCategory === NsContent.EPrimaryCategory.FINAL_ASSESSMENT) {
       return milestoneData?.completionStatus === 2
     }
-    if (!milestoneData || !milestoneData.leafNodes) {
+    if (!milestoneData) {
       return false
     }
-    let completedCount = 0
-    milestoneData.leafNodes.forEach((leafId: string) => {
-      const leafData = this.hierarchyMapData[leafId]
-      if (leafData && leafData.completionStatus === 2) {
-        completedCount++
+
+    // Check if all mandatory content AND milestone assessment are completed
+    let hasMandatoryContent = false
+    let allMandatoryComplete = true
+    let hasMilestoneAssessment = false
+    let milestoneAssessmentComplete = false
+
+    // Check all direct children of the milestone
+    for (const key of Object.keys(this.hierarchyMapData)) {
+      const item = this.hierarchyMapData[key]
+
+      // Only check direct children
+      if (item.parent !== identifier) continue
+
+      // Check if this is the milestone assessment
+      const isAssessment = 
+        item.primaryCategory === 'Course Assessment' ||
+        item.primaryCategory === 'Final Assessment' ||
+        item.primaryCategory === 'Standalone Assessment'
+
+      if (isAssessment) {
+        hasMilestoneAssessment = true
+        const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                           item.completionPercentage >= 100 || item.progress >= 100
+        if (isCompleted) {
+          milestoneAssessmentComplete = true
+        }
+        continue // Skip to next item
       }
-    })
-    if( completedCount === milestoneData?.leafNodes.length) {
-      return true
+
+      // Check if this is mandatory content (courses/collections)
+      if (item.primaryCategory === 'Course' || item.isCollection) {
+        const isMandatory = item.isMandatory !== false // Default is mandatory
+        
+        if (isMandatory) {
+          hasMandatoryContent = true
+          const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                             item.completionPercentage >= 100 || item.progress >= 100
+          if (!isCompleted) {
+            allMandatoryComplete = false
+          }
+        }
+      }
     }
-    return false
+
+    // Milestone is complete when:
+    // 1. All mandatory content is completed (or no mandatory content exists)
+    // 2. Milestone assessment is completed (or no assessment exists)
+    const mandatoryCheck = !hasMandatoryContent || allMandatoryComplete
+    const assessmentCheck = !hasMilestoneAssessment || milestoneAssessmentComplete
+
+    return mandatoryCheck && assessmentCheck
   }
 
   /**
