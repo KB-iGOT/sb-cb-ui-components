@@ -8,7 +8,7 @@ import { NsAccessControlConfig } from "../../../_models/access-control.model";
   styleUrls: ["./confirm-dialog.component.scss"]
 })
 export class ConfirmDialogComponent {
-  public readonly data = inject<{ additionalData: string; type: "delete" | "confirm-access-type" }>(MAT_DIALOG_DATA);
+  public readonly data = inject<{ additionalData: string; type: "delete" | "confirm-access-type" | "confirm-reset-fields" }>(MAT_DIALOG_DATA);
   constructor(public dialogRef: MatDialogRef<ConfirmDialogComponent>) {}
 
   confirmNo(): void {
