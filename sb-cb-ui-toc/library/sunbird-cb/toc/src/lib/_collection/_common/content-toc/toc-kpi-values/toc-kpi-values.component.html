@@ -69,6 +69,14 @@
             </div>
         </div>
     
+        <div class="flex flex-col kpi-values items-center gap-2" *ngIf="tocStructure?.preEnrollmentAssessment > 0">
+            <img src="/assets/icons/toc/assessment.svg" width="20px" alt="assessment image" />
+            <div class="text-xs" >{{ tocStructure?.preEnrollmentAssessment }} 
+                <span *ngIf="tocStructure?.preEnrollmentAssessment === 1">{{ 'apptochome.preEnrollmentAssessment' | translate }}</span>
+                <span *ngIf="tocStructure?.preEnrollmentAssessment > 1">{{ 'apptochome.preEnrollmentAssessments' | translate }}</span>
+            </div>
+        </div>
+
         <div class="flex flex-col kpi-values items-center gap-2" *ngIf="tocStructure?.finalTest > 0">
             <img src="/assets/icons/toc/assessment.svg" width="20px" alt="assessment image" />
             <div class="text-xs" >{{ tocStructure?.finalTest }} 

@@ -988,12 +988,14 @@
 <ng-template #authView>{{'apptochome.view' | translate}}</ng-template>
 
 <ng-template #authViewBtn i18n>
-  <a (click)="raiseTelemetryForPublic($event)"
+  <ng-container *ngIf="displayViewBtn">
+    <a (click)="raiseTelemetryForPublic($event)"
     [routerLink]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url)"
     [queryParams]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START'))"
     class="flex action-button justify-center">
     {{'apptochome.view' | translate}}
   </a>
+  </ng-container>
 </ng-template>
 <ng-template #authViewForInviteOnlyAssessment>
   <ng-container *ngIf="forPreview && contentReadData?.courseCategory === 'Invite-Only Assessment'">

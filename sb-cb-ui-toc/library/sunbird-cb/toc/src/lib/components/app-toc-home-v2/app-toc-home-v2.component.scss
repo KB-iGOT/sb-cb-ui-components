@@ -204,7 +204,12 @@
   max-width: 792px;
   width: 100%;
 }
-
+/* Windows display scaling ~150% */
+@media (min-resolution: 1.5dppx) {
+  .toc-content {
+    max-width: 735px;
+  }
+}
 .right-container {
   .image-div {
     height: 220px;

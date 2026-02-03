@@ -13,7 +13,7 @@
                     <div class="milestone-circle" [attr.aria-label]="m?.name || ('Milestone ' + (i+1))">
                         <img *ngIf="m?.completionStatus === 2 || getMilestoneCompletedOrNot(m?.identifier)" src="assets/icons/toc/tick-orange.svg"
                             class="milestone-checkmark" alt="Completed" />
-                        <span *ngIf="m?.completionStatus !== 2 || getMilestoneCompletedOrNot(m?.identifier)" class="milestone-index"></span>
+                        <span *ngIf="m?.completionStatus !== 2 && !getMilestoneCompletedOrNot(m?.identifier)" class="milestone-index"></span>
                     </div>
                     <div class="milestone-label">
                         <p class="mb-0 leading-none">
