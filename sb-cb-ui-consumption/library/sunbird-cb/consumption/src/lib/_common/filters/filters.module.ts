@@ -15,6 +15,8 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core'
 import { HttpLoaderFactory } from '../../../public-api'
 import { HttpClient } from '@angular/common/http'
 import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatLegacyRadioModule } from '@angular/material/legacy-radio'
+import { MatLegacyListModule } from '@angular/material/legacy-list'
 
 
 
@@ -36,6 +38,8 @@ import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip'
     MatLegacyCheckboxModule,
     MatLegacyButtonModule,
     MatLegacyTooltipModule,
+    MatLegacyRadioModule,
+    MatLegacyListModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
