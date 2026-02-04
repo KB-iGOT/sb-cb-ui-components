@@ -14,6 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar'
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core'
 import { HttpLoaderFactory } from '../../../public-api'
 import { HttpClient } from '@angular/common/http'
+import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip'
 
 
 
@@ -34,6 +35,7 @@ import { HttpClient } from '@angular/common/http'
     MatIconModule,
     MatLegacyCheckboxModule,
     MatLegacyButtonModule,
+    MatLegacyTooltipModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
