@@ -280,7 +280,10 @@
     <!-- Cool off period -->
     <ng-container *ngIf="showCoolOffPeriod">
       <div class="form-section mat-full-radius">
-        <label class="field-label required">Cool off period (in days)</label>
+        <label class="field-label required">Cool off period (in days)
+          <mat-icon class="info-icon"
+            matTooltip="Once all re-attempts are exhausted, the user must wait for a predefined cool-off period before they can attempt again. During this time, no further attempts are allowed. Access is automatically restored after the cool-off period ends.">info_outline</mat-icon>
+        </label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput formControlName="coolOffPeriod" placeholder="Enter cool off period in days" type="number"
             max="7" min="1">
