@@ -17,8 +17,19 @@ export class AppTocV2Service {
       contentHeirarchy['preliminaryAssessmentDetail'].parent = contentHeirarchy.identifier
       // Mark this as the pre-assessment for milestone locking logic
       contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment = true
+      
+      console.log('🔍 [CONSTRUCT HIERARCHY] Setting isPreAssessment=true on preliminaryAssessmentDetail:', {
+        id: contentHeirarchy['preliminaryAssessmentDetail'].identifier,
+        name: contentHeirarchy['preliminaryAssessmentDetail'].name,
+        isPreAssessment: contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment,
+        parent: contentHeirarchy['preliminaryAssessmentDetail'].parent,
+        primaryCategory: contentHeirarchy['preliminaryAssessmentDetail'].primaryCategory
+      })
+      
       contentHeirarchy['children'].push(contentHeirarchy['preliminaryAssessmentDetail'])
       leafNodes.push(contentReadData?.preliminaryAssessment || contentReadData?.preliminaryAssessmentDetail?.identifier)
+    } else {
+      console.log('⚠️ [CONSTRUCT HIERARCHY] No preliminaryAssessmentDetail found in contentReadData')
     }
 
     // Track milestone index for proper locking logic
@@ -34,7 +45,7 @@ export class AppTocV2Service {
         "identifier": milestone.id,
         "description": milestone.description,
         "mimeType": "application/vnd.ekstep.content-collection",
-        "duration": "3600",
+        "duration": "0",
         "primaryCategory": "Milestone",
         "courseCategory": "Milestone",
         "createdBy": "25311a4f-fa42-4cf7-882a-5e79198edfcb",
@@ -61,6 +72,7 @@ export class AppTocV2Service {
           // Set parent reference for courses inside milestone
           mileStoneCourse.parent = milestone.id
           mileStoneCourse['moduleCount'] = 0
+          mileStoneData['duration'] = String(Number(mileStoneData['duration']) + Number(mileStoneCourse?.duration || 0))
           this.tocSvc.mapModuleCount(mileStoneCourse)
           if (mileStoneCourse && mileStoneCourse?.leafNodes && mileStoneCourse?.leafNodes?.length) {
             leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
@@ -86,7 +98,7 @@ export class AppTocV2Service {
       milestoneIndex++
     })
     contentHeirarchy['leafNodes'] = [...leafNodes]
-    console.log('content Heirarchy', contentHeirarchy)
+    contentHeirarchy['leafNodesCount'] = leafNodes.length
     return contentHeirarchy
   }
 
@@ -105,13 +117,10 @@ export class AppTocV2Service {
 
 
   mapContentHierarchyProgressUpdate(contentHeirarchyData: any, enrollmentListData: any) {
-    console.log('=== mapContentHierarchyProgressUpdate ===')
-    console.log('Content hierarchy:', contentHeirarchyData?.name, contentHeirarchyData?.identifier)
-    console.log('Enrollment list data:', enrollmentListData)
-    
     if (contentHeirarchyData && contentHeirarchyData.children) {
       let totalLeafNodes = 0
       let totalCompletedLeafNodes = 0
+      let LPenrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
 
       // First pass: Update progress for all content
       contentHeirarchyData.children.forEach((child: any) => {
@@ -132,11 +141,15 @@ export class AppTocV2Service {
           totalCompletedLeafNodes += isCompleted ? (child.leafNodesCount || 1) : 0
         }
       })
-
-      if (totalLeafNodes > 0) {
-        const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
-        contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-        contentHeirarchyData.completionStatus = Number(contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0))
+      if(LPenrollment && LPenrollment.completionPercentage === 100) {
+        contentHeirarchyData.completionPercentage = 100
+        contentHeirarchyData.completionStatus = 2
+      } else {
+        if (totalLeafNodes > 0) {
+          const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
+          contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
+          contentHeirarchyData.completionStatus = Number(contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0))
+        }
       }
 
       // NOTE: Milestone locking is computed AFTER hashmap is built
@@ -241,14 +254,6 @@ export class AppTocV2Service {
       ele?.contentId === node.identifier || ele?.collectionId === node.identifier
     )
     
-    console.log(`Updating node progress for ${node.identifier} (${node.name}):`, {
-      hasEnrollment: !!enrollment,
-      hasNodeEnrollData: !!nodeEnrollData,
-      nodeEnrollData,
-      currentCompletionStatus: node.completionStatus,
-      currentCompletionPercentage: node.completionPercentage
-    })
-    
     if (enrollment && nodeEnrollData && nodeEnrollData.status < 2) {
       node.completionPercentage = nodeEnrollData.completionPercentage || nodeEnrollData.progress || 0
       node.completionStatus = Number(nodeEnrollData.status) || 0
@@ -288,6 +293,12 @@ export class AppTocV2Service {
       // Enrollment shows 100% - mark course as complete
       course.completionPercentage = 100
       course.completionStatus = 2
+      if (enrollment.issuedCertificates.length > 0) {
+                  const certificate: any = enrollment.issuedCertificates.sort((a: any, b: any) =>
+                    new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
+                  const certId: any = certificate[0].identifier
+                  course.issuedCertificatesId = certId
+                }
       this.tocSvc.mapCompletionChildPercentageProgram(course)
     } else if (enrollment && enrollment.completionPercentage > 0) {
       // Enrollment has partial progress

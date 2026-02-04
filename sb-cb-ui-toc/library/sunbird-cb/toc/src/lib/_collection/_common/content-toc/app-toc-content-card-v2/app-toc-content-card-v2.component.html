@@ -24,7 +24,7 @@
                     </span>
                 </div>
             </ng-container>
-            <ng-container *ngIf="content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT && checkForCuratedProgram &&
+            <!-- <ng-container *ngIf="content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT && checkForCuratedProgram &&
             isContentUnlocked">
                 <div class="content-locking flex w-full flex-middle mb-2 gap-3">
                     <mat-icon class="unlock-icon">lock_open_right</mat-icon>
@@ -32,7 +32,7 @@
                         This content is unlocked.
                     </span>
                 </div>
-            </ng-container>
+            </ng-container> -->
             <div class="flex flex-wrap items-start justify-start sm:justify-end">
                 <!-- <button *ngIf="!forPreview && content?.artifactUrl && !isXSmall && isAllowed && isEnabled" type="button"
                     mat-icon-button class="" [matMenuTriggerFor]="buttonMenu">
@@ -87,8 +87,10 @@
                     <div class="flex flex-col sm:flex-row flex-wrap">
                         <div class="flex items-center gap-2 w-full">
                             <mat-icon class="text-gray-500">lock</mat-icon>
-                            <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate text-gray-600">
-                                {{ content?.name | truncate:50 }}
+                            <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate text-gray-600"
+                                [matTooltip]="(content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')).length > 50 ? (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')) : ''"
+                                matTooltipPosition="above">
+                                {{ (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT )? ' - ' + content?.contextCategory : '')) | truncate:50 }}
                             </p>
                         </div>
                         <span class="content-type optional-span nodtranslate" *ngIf="content?.optionalReading">{{
@@ -162,8 +164,10 @@
                         (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
                         <div class="flex flex-col sm:flex-row flex-wrap">
                             <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
-                                [ngClass]="{'text-active': pathSet?.has(content?.identifier) && isEnrolled}">
-                                {{ content?.name | truncate:50 }}
+                                [ngClass]="{'text-active': pathSet?.has(content?.identifier) && isEnrolled}"
+                                [matTooltip]="(content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')).length > 50 ? (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT) ? ' - ' + content?.contextCategory : '')) : ''"
+                                matTooltipPosition="above">
+                                {{ (content?.name + (content?.contextCategory && (content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT)? ' - ' + content?.contextCategory : '')) | truncate:50 }}
                             </p>
                             <span class="content-type optional-span nodtranslate" *ngIf="content?.optionalReading">{{
                                 'playerbrief.optional' | translate | titlecase}} </span>
@@ -254,7 +258,15 @@
                             </ng-container>
                         </div>
                     </ng-container>
-
+                    <ng-container *ngIf="content?.primaryCategory === primaryCategory.FINAL_ASSESSMENT && checkForCuratedProgram &&
+                        isContentUnlocked">
+                        <div class="content-locking flex w-full flex-middle mb-2 gap-3">
+                            <mat-icon class="unlock-icon">lock_open_right</mat-icon>
+                            <span class="unlock-message mat-body-2">
+                                This content is unlocked.
+                            </span>
+                        </div>
+                    </ng-container>
                     <!-- Download button for pdf resources -->
                     <ng-container *ngIf="shouldShowDownloadButton(content)">
                         <div class="download-btn mat-body-2 mt-2 sm:mt-1" (click)="downloadContent(content, $event)"
@@ -340,7 +352,9 @@
                                 class="lock-icon mr-2 margin-bottom-xxs">
                             <div class="flex-auto flex flex-col" style="min-width: 0;">
                                 <p class="margin-remove text-truncate mat-subheading-1 font-bold nodtranslate"
-                                    [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}">
+                                    [ngClass]="{'text-active': pathSet?.has(content.identifier) && isEnrolled}"
+                                    [matTooltip]="content?.name?.length > 50 ? content?.name : ''"
+                                    matTooltipPosition="above">
                                     <span>{{isMilestone ? index -1 : index}}. </span>{{ content?.name | truncate:50 }}
                                 </p>
                                 <div class="mt-1" *ngIf="isMilestone && isMilestoneLocked">
@@ -368,8 +382,11 @@
                         <div *ngIf="isMilestone" class="milestone-badge mt-2 mb-2">
                             <span class="milestone-badge-text nodtranslate">Milestone {{index - 1}}</span>
                         </div>
-                        <!-- Milestone Description (3 lines with ellipsis) -->
-                        <p *ngIf="isMilestone && content?.description" class="milestone-description mt-2  nodtranslate">
+                        <!-- Milestone Description (2 lines with ellipsis) -->
+                        <p #milestoneDescRef *ngIf="isMilestone && content?.description" class="milestone-description mt-2 nodtranslate"
+                            [matTooltip]="isMultiLineTruncated(milestoneDescRef) ? content?.description : ''"
+                            matTooltipPosition="above"
+                            matTooltipClass="multiline-tooltip">
                             {{ content?.description }}
                         </p>
                         <div class="flex flex-row gap-3 items-center content-key-values mt-2">
@@ -399,25 +416,22 @@
                             </ng-container>
                         </div>
                         <!-- Milestone Completion Progress -->
-                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2  flex items-center justify-between">
-                            <div>
-                                <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of
-                                {{content?.leafNodesCount || 0}} completed</span>
-                            </div>
-                            <!-- View Achievement Button for completed milestones - Outside clickable area -->
-                            <div *ngIf="isMilestone && isEnrolled && (getCompletionPercentage(content?.identifier) >= 100 || getCompletionStatus(content?.identifier) === 2)"
-                                class="view-achievement-container mt-2">
-                                <button type="button" class="view-achievement-btn" [disabled]="achievementLoading"
-                                    (click)="viewMilestoneAchievement($event)">
-                                    <span *ngIf="!achievementLoading">View Achievement</span>
-                                    <mat-spinner *ngIf="achievementLoading" [diameter]="16" 
-                                        [strokeWidth]="2" color="primary" class="inline-spinner"></mat-spinner>
-                                </button>
+                        <div *ngIf="isMilestone && isEnrolled && !isMilestoneLocked" class="milestone-progress mt-2 flex flex-col gap-2">
+                            <div class="flex items-center justify-start gap-4 w-100">
+                                <span class="milestone-progress-text nodtranslate">{{getMilestoneCompletedCount()}} of {{content?.leafNodesCount || 0}} completed</span>
+                                <!-- View Achievement Button - Shown only when all mandatory content AND milestone assessment are completed -->
+                                <ng-container *ngIf="isMilestoneComplete(content?.identifier)">
+                                    <button type="button" class="view-achievement-btn ml-4" [disabled]="achievementLoading"
+                                        (click)="viewMilestoneAchievement($event, content)">
+                                        <span *ngIf="!achievementLoading">View Achievement</span>
+                                        <mat-spinner *ngIf="achievementLoading" [diameter]="16" [strokeWidth]="2" color="primary" class="inline-spinner"></mat-spinner>
+                                    </button>
+                                </ng-container>
                             </div>
                         </div>
                         <!-- Unlock Criteria Message for Locked Milestones -->
                         <div *ngIf="isMilestone && isEnrolled && isMilestoneLocked" class="milestone-locked-message mt-2">
-                            <span class="locked-criteria-text mat-caption">
+                            <span class="locked-criteria-text mat-caption" style="white-space: normal; word-wrap: break-word; display: inline-block; max-width: 100%;">
                                 {{ getMilestoneUnlockMessage() }}
                             </span>
                         </div>
@@ -596,7 +610,9 @@
                                 (click)="raiseTelemetry(); changeResource()">
                                 <div class="flex flex-col sm:flex-row flex-wrap">
                                     <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
-                                        [ngClass]="{'text-active': pathSet?.has(content?.identifier)}">
+                                        [ngClass]="{'text-active': pathSet?.has(content?.identifier)}"
+                                        [matTooltip]="content?.name?.length > 50 ? content?.name : ''"
+                                        matTooltipPosition="above">
                                         <!-- <mat-icon class="margin-right-xs radiobtn time-icon">radio_button_unchecked </mat-icon> -->
                                         {{index}}. {{ content?.name | truncate:50 }}
 

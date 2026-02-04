@@ -5,6 +5,9 @@
 // Main module
 export * from './lib/app-toc-lib.module'
 
+export * from './lib/registration-toc-lib.config'
+export * from './lib/collection.config'
+
 // Routing module (OPTIONAL - only import if you want to use pre-configured routes)
 // You can configure routing in your application instead
 
@@ -81,3 +84,6 @@ export * from './lib/_collection/_common/content-toc/karma-points/karma-points.c
 export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.module'
 export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.component'
 
+//collection common modules
+export * from './lib/_collection/_common/card-competency/card-competency.component'
+export * from './lib/_collection/_common/card-competency/card-competency.module'

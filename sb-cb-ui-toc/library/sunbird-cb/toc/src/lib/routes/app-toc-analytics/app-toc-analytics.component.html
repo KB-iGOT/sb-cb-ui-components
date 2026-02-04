@@ -2,7 +2,7 @@
   <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
 </div>
 
-<ng-container *ngIf="fetchStatus === 'error'" [wsResolverWidget]="errorWidget"></ng-container>
+<ng-container *ngIf="fetchStatus === 'error'" [sbUiResolverWidget]="errorWidget"></ng-container>
 <div *ngIf="fetchStatus === 'done' && uniqueUsers === 0" class="text-center my-8">
   <h2 >We are gathering the data to provide insights! Coming soon ...</h2>
 </div>
@@ -33,7 +33,7 @@
             </div>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="onsiteOffshoreData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="onsiteOffshoreData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -51,7 +51,7 @@
             </button>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartUnitData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartUnitData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -69,7 +69,7 @@
             </button>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartPuData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartPuData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -87,7 +87,7 @@
             </button>
           </div>
           <div class="m-4">
-            <ng-container [wsResolverWidget]="barChartJLData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartJLData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -106,7 +106,7 @@
             </button>
           </div>
           <div class="m-4">
-            <ng-container [wsResolverWidget]="barChartLocationData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartLocationData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -125,7 +125,7 @@
             </button>
           </div>
           <div class="m-4">
-            <ng-container [wsResolverWidget]="barChartAccountData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartAccountData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -137,7 +137,7 @@
       <mat-icon class="mr-1">arrow_back</mat-icon>
       Back
     </button>
-    <ng-container [wsResolverWidget]="barChartOnExpandData"> </ng-container>
+    <ng-container [sbUiResolverWidget]="barChartOnExpandData"> </ng-container>
   </div>
 </div>
 <div *ngIf="fetchStatus === 'done' && uniqueUsers > 0 && apiLinkAccess?.courseAnalyticsClient" class="mt-4">
@@ -158,7 +158,7 @@
             <p class="description" >How many unique users visited the contents of this page on each day?</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartDailyUsersData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartDailyUsersData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -180,7 +180,7 @@
               view is recorded every time a user accesses a content</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartDailyHitsData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartDailyHitsData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -201,7 +201,7 @@
             <p class="description" >This chart displays # of unique users by job profiles</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartDeptData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartDeptData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -220,7 +220,7 @@
             <p class="description" >This chart displays # of views by job profiles</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartDeptHitsData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartDeptHitsData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -241,7 +241,7 @@
             <p class="description" >This chart displays # of unique users by countries</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartCountryData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartCountryData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -260,7 +260,7 @@
             <p class="description" >This chart displays # of views by countries</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="barChartCountryHitsData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="barChartCountryHitsData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -275,7 +275,7 @@
             <p class="description" >This chart displays # of unique users from device type</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="pieChartDeviceData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="pieChartDeviceData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -288,7 +288,7 @@
             <p class="description" >This chart displays # of views by device type</p>
           </div>
           <div class="margin-m">
-            <ng-container [wsResolverWidget]="pieChartDeviceHitsData"> </ng-container>
+            <ng-container [sbUiResolverWidget]="pieChartDeviceHitsData"> </ng-container>
           </div>
         </mat-card>
       </ng-container>
@@ -300,6 +300,6 @@
       <mat-icon class="mr-1">arrow_back</mat-icon>
       Back
     </button>
-    <ng-container [wsResolverWidget]="barChartExpandClientData"> </ng-container>
+    <ng-container [sbUiResolverWidget]="barChartExpandClientData"> </ng-container>
   </div>
 </div>

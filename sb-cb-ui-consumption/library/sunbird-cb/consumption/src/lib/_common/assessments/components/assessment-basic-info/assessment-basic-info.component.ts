@@ -77,16 +77,16 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.config && this.config?.primaryCategory === 'Course Assessment') {
+    if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.FINAL_ASSESSMENT) {
       this.isFinalAssessment = true
     }
-    if (this.config && this.config?.primaryCategory === 'Practice Question Set') {
+    if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.PRACTICE_QUESTION_SET) {
       this.isPracticeAssessment = true
     }
     // Check if coolOffPeriod should be shown
     if (this.config && this.config?.contextCategory) {
-      this.showCoolOffPeriod = this.config.contextCategory === 'Preliminiary Assessment' ||
-        this.config.contextCategory === 'Final Milestone Assessment'
+      this.showCoolOffPeriod = this.config.contextCategory === NsAssessment.EAssessmentContextCategory.PRELIMINARY_ASSESSMENT ||
+        this.config.contextCategory === NsAssessment.EAssessmentContextCategory.FINAL_MILESTONE_ASSESSMENT
     }
     this.setupShowTimerSubscription()
     this.setupAssessmentTypeSubscription()
@@ -300,8 +300,10 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
           const sectionsArray = this.assessmentForm.get('sections') as FormArray
           data.children.forEach((section: any, sectionIndex: number) => {
             const sectionGroup = sectionsArray.at(sectionIndex) as FormGroup
+            // Check sectionType field to determine if it's a paragraph section
+            const isParagraph = section.sectionType === 'paragraph' || false
             sectionGroup.patchValue({
-              paragraph: section.paragraph || false
+              paragraph: isParagraph
             }, { emitEvent: false })
 
             // Populate difficulty levels from sectionLevelDefinition
@@ -531,7 +533,67 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     if (this.isDurationRequired && this.totalDuration <= 0) {
       return false
     }
+    // For Question Weightage: validate that if questions > 0, marks must also be > 0
+    if (this.assessmentForm.get('questionWeightageType')?.value === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
+      if (!this.areSectionDifficultyLevelsValid()) {
+        return false
+      }
+    }
     return true
+  }
+
+  /**
+   * Validates that for each difficulty level, questions and marks must be consistent
+   * (both > 0 or both = 0)
+   */
+  areSectionDifficultyLevelsValid(): boolean {
+    const sectionsArray = this.assessmentForm.get('sections') as FormArray
+    for (let sectionIndex = 0; sectionIndex < sectionsArray.length; sectionIndex++) {
+      const section = sectionsArray.at(sectionIndex)
+      const difficultyLevels = section.get('difficultyLevels') as FormArray
+      for (let levelIndex = 0; levelIndex < difficultyLevels.length; levelIndex++) {
+        const level = difficultyLevels.at(levelIndex)
+        const numberOfQuestions = level.get('numberOfQuestions')?.value || 0
+        const marksPerQuestion = level.get('marksPerQuestion')?.value || 0
+        // If questions are added but no marks assigned, it's invalid
+        if (numberOfQuestions > 0 && marksPerQuestion <= 0) {
+          return false
+        }
+        // If marks are added but no questions assigned, it's invalid
+        if (marksPerQuestion > 0 && numberOfQuestions <= 0) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
+  /**
+   * Checks if a specific difficulty level has questions but no marks assigned
+   */
+  isDifficultyLevelMarksInvalid(sectionIndex: number, levelIndex: number): boolean {
+    const section = this.sections.at(sectionIndex)
+    if (!section) return false
+    const difficultyLevels = section.get('difficultyLevels') as FormArray
+    const level = difficultyLevels.at(levelIndex)
+    if (!level) return false
+    const numberOfQuestions = level.get('numberOfQuestions')?.value || 0
+    const marksPerQuestion = level.get('marksPerQuestion')?.value || 0
+    return numberOfQuestions > 0 && marksPerQuestion <= 0
+  }
+
+  /**
+   * Checks if a specific difficulty level has marks but no questions assigned
+   */
+  isDifficultyLevelQuestionsInvalid(sectionIndex: number, levelIndex: number): boolean {
+    const section = this.sections.at(sectionIndex)
+    if (!section) return false
+    const difficultyLevels = section.get('difficultyLevels') as FormArray
+    const level = difficultyLevels.at(levelIndex)
+    if (!level) return false
+    const numberOfQuestions = level.get('numberOfQuestions')?.value || 0
+    const marksPerQuestion = level.get('marksPerQuestion')?.value || 0
+    return marksPerQuestion > 0 && numberOfQuestions <= 0
   }
 
   get isReadOnly(): boolean {
@@ -611,6 +673,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     // Check Option Weightage fields
     if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE) {
       if (formValues.numberOfQuestionsToDisplay !== this.assessmentData.totalQuestions) {
+        // Update root assessment totals
         changedData.totalQuestions = formValues.numberOfQuestionsToDisplay
         changedData.maxQuestions = formValues.numberOfQuestionsToDisplay
 
@@ -627,7 +690,18 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
     // Only emit if there are changes
     if (Object.keys(changedData).length > 0) {
-      this.updated.emit({ changedData, identifier: this.assessmentData.identifier })
+      // For option weightage with sections, ensure parent changes are included
+      const emitData: any = { changedData, identifier: this.assessmentData.identifier }
+
+      if (formValues.questionWeightageType === NsAssessment.EAssessmentType.OPTION_WEIGHTAGE &&
+        changedData.totalQuestions !== undefined && changedData.maxQuestions !== undefined) {
+        emitData.parentChanges = {
+          totalQuestions: changedData.totalQuestions,
+          maxQuestions: changedData.maxQuestions
+        }
+      }
+
+      this.updated.emit(emitData)
     } else {
       // No changes detected
       this.snackBar.open('No changes detected')
