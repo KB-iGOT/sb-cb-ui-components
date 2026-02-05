@@ -5,7 +5,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
 import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service'
-import { ConfigurationsService, EventService, WidgetContentService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import * as _ from "lodash"
 import { CertificateService } from '../../../_services/certificate.service'
 import { CertificateDialogComponent } from '../../dialog-components/certificate-dialog/certificate-dialog.component'
@@ -48,6 +48,8 @@ export class CardProgressPortraitLibComponent implements OnInit {
   widgetType: any = 'df'
   widgetSubType: any = 'sdf'
   downloadCertificateLoading: boolean = false
+  showRitered = false
+  retiredLabel = 'cardcontentv2.retired'
 
   constructor(
     private snackBar: MatSnackBar,
@@ -58,7 +60,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
     private contSvc: WidgetContentLibService,
     private certificateService: CertificateService,
     private dialog: MatDialog,
-    private contentSvcUtils: WidgetContentService,
+    // private contentSvcUtils: WidgetContentService,
 
   ) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
@@ -80,17 +82,34 @@ export class CardProgressPortraitLibComponent implements OnInit {
       this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
       this.defaultSLogo = '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
     }
+
+    if (
+      _.get(this.widgetData, 'content.status') === 'Retired'
+      || (
+        _.get(this.widgetData, 'content.contentId', '').startsWith('ext_')
+        && (_.get(this.widgetData, 'content.isActive') === false || _.get(this.widgetData, 'content.contentPartner.isActive') === false)
+      )
+    ) {
+      this.showRitered = true
+      if (_.get(this.widgetData, 'content.status') === 'Retired') {
+        this.retiredLabel = 'cardcontentv2.retired'
+      } else {
+        this.retiredLabel = 'cardcontentv2.retired'
+      }
+    }
   }
 
-  showSnackbar() {
-    if (this.showIntranetContent) {
+  showSnackbar(message = '', duration: number = 2000) {
+    if (message) {
+      this.snackBar.open(message, 'X', { duration })
+    } else if (this.showIntranetContent) {
       this.snackBar.open('Content is only available in intranet', 'X', { duration: 2000 })
     } else if (!this.isLiveOrMarkForDeletion) {
       this.snackBar.open('Content may be expired or deleted', 'X', { duration: 2000 })
     }
   }
   getRedirectUrlData(contentData: any) {
-    if (contentData.status !== 'Retired') {
+    if (!this.showRitered) {
       // for telemetry
       if (this.widgetData && this.widgetData.context && this.widgetData.context.pageSection) {
         contentData['typeOfTelemetry'] = this.widgetData.context.pageSection
@@ -98,6 +117,12 @@ export class CardProgressPortraitLibComponent implements OnInit {
       this.contSvc.changeTelemetryData(contentData)
       // for redirection
       this.contentData.emit(contentData)
+    } else {
+      if (_.get(this.widgetData, 'content.contentPartner.isActive') === false) {
+        this.snackBar.open(this.translateLabels('externalCourseProviderRetiredMessage', 'cardcontentv2'), 'X', { duration: 10000 })
+      } else if (_.get(this.widgetData, 'content.isActive') === false) {
+        this.snackBar.open(this.translateLabels('externalCourseRetiredMessage', 'cardcontentv2'), 'X', { duration: 10000 })
+      }
     }
   }
 
@@ -244,7 +269,6 @@ export class CardProgressPortraitLibComponent implements OnInit {
       }
     }
   }
-
 
   navigateToNewVersion(contentData: any) {
     this.redirectToNewVersion.emit(contentData.contentVersionInfo.identifier)
