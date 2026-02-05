@@ -18,18 +18,9 @@ export class AppTocV2Service {
       // Mark this as the pre-assessment for milestone locking logic
       contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment = true
       
-      console.log('🔍 [CONSTRUCT HIERARCHY] Setting isPreAssessment=true on preliminaryAssessmentDetail:', {
-        id: contentHeirarchy['preliminaryAssessmentDetail'].identifier,
-        name: contentHeirarchy['preliminaryAssessmentDetail'].name,
-        isPreAssessment: contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment,
-        parent: contentHeirarchy['preliminaryAssessmentDetail'].parent,
-        primaryCategory: contentHeirarchy['preliminaryAssessmentDetail'].primaryCategory
-      })
-      
+     
       contentHeirarchy['children'].push(contentHeirarchy['preliminaryAssessmentDetail'])
       leafNodes.push(contentReadData?.preliminaryAssessment || contentReadData?.preliminaryAssessmentDetail?.identifier)
-    } else {
-      console.log('⚠️ [CONSTRUCT HIERARCHY] No preliminaryAssessmentDetail found in contentReadData')
     }
 
     // Track milestone index for proper locking logic
@@ -237,15 +228,7 @@ export class AppTocV2Service {
       node.completionStatus = status
       node.status = status
       
-      console.log(`Direct enrollment found for ${node.identifier}:`, {
-        completionPercentage: progress,
-        completionStatus: status,
-        enrollmentData: { 
-          progress: enrollment.progress, 
-          completionPercentage: enrollment.completionPercentage,
-          status: enrollment.status 
-        }
-      })
+      
       return
     }
 
@@ -279,11 +262,7 @@ export class AppTocV2Service {
       node.status = 0
     }
     
-    console.log(`Updated node progress for ${node.identifier}:`, {
-      completionStatus: node.completionStatus,
-      completionPercentage: node.completionPercentage,
-      status: node.status
-    })
+    
   }
 
   private updateCourseProgress(course: any, parentContentIdentifier, enrollmentListData: any) {

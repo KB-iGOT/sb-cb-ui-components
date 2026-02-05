@@ -960,17 +960,7 @@ export class AppTocService {
 
         }
 
-        // Debug: Log when adding item with isPreAssessment flag to hashmap
-        if ((child as any).isPreAssessment === true) {
-          console.log('🔍 [HASHMAP BUILD] Adding pre-assessment to hashmap:', {
-            id: child.identifier,
-            name: child.name,
-            isPreAssessment: localMap.isPreAssessment,
-            parent: localMap.parent,
-            completionStatus: localMap.completionStatus,
-            status: localMap.status
-          })
-        }
+        
 
         this.hashmap[child.identifier] = localMap
       })
@@ -1019,7 +1009,6 @@ export class AppTocService {
       // 4. Different regular Course
       const isNewContent = this.currentRootContentId !== hierarchyData.identifier
       if (isNewContent) {
-        console.log(`🧹 [HASHMAP] Clearing hashmap - navigating from ${this.currentRootContentId} to ${hierarchyData.identifier}`)
         this.hashmap = {}
         this.currentRootContentId = hierarchyData.identifier
       }
@@ -1063,64 +1052,9 @@ export class AppTocService {
     }
   }
 
-  /**
-   * Pre-compute milestone locking status for all milestones in Learning Pathway
-   * This avoids expensive calculations in component getters
-   * 
-   * Locking Rules:
-   * 0. If user is not enrolled, ALL milestones are locked
-   * 1. All milestones are locked by default
-   * 2. Milestone 1 (M1) unlocks when pre-assessment is completed
-   * 3. Milestone N (N > 1) unlocks when:
-   *    - All mandatory learning items in Milestone N-1 are completed
-   *    - The assessment of Milestone N-1 is completed
-   */
-  /**
-   * ═══════════════════════════════════════════════════════════════════════════
-   * LEARNING PATHWAY MILESTONE LOCKING SYSTEM - SINGLE SOURCE OF TRUTH
-   * ═══════════════════════════════════════════════════════════════════════════
-   * 
-   * This method is the SINGLE SOURCE OF TRUTH for all milestone and assessment locking.
-   * All locking logic is computed here and stored in the hashmap.
-   * Components READ ONLY from the hashmap - they do NOT compute locks themselves.
-   * 
-   * LOCKING RULES:
-   * ───────────────────────────────────────────────────────────────────────────
-   * 1. DEFAULT STATE: All milestones are LOCKED by default
-   * 
-   * 2. MILESTONE 1 UNLOCKING:
-   *    - Unlocks when: Pre-assessment is 100% complete
-   *    - Lock message: "Complete the preliminary assessment to unlock this milestone"
-   * 
-   * 3. MILESTONE N (N >= 2) UNLOCKING:
-   *    - Unlocks when: Previous milestone is 100% complete
-   *    - Previous milestone is complete when:
-   *      a) All MANDATORY courses are 100% complete
-   *      b) Milestone assessment is 100% complete
-   *    - Lock message: "Complete all mandatory content and assessment in Milestone N-1"
-   * 
-   * 4. ASSESSMENT LOCKING (within unlocked milestones):
-   *    - Assessment locked until: All MANDATORY courses in SAME milestone complete
-   *    - Optional courses do NOT affect assessment locking
-   *    - Assessment lock message: "Complete all mandatory items to unlock the assessment"
-   *    - Once assessment is completed, it stays unlocked
-   * 
-   * 5. PARENT MILESTONE LOCKING:
-   *    - All content inside locked milestone gets isParentMilestoneLocked = true
-   *    - This includes courses, assessments, nested resources
-   * 
-   * 6. MANDATORY vs OPTIONAL:
-   *    - By default, ALL courses are mandatory (unless isMandatory: false)
-   *    - Optional courses do NOT block progression
-   * 
-   * ═══════════════════════════════════════════════════════════════════════════
-   */
   public computeMilestoneLockingStatus(isEnrolled: boolean = true) {
-    console.log('🚀 [MILESTONE LOCK] computeMilestoneLockingStatus CALLED with isEnrolled:', isEnrolled)
-    console.log('🚀 [MILESTONE LOCK] Hashmap size:', Object.keys(this.hashmap).length)
     
     if (!this.hashmap || Object.keys(this.hashmap).length === 0) {
-      console.warn('⚠️  Hashmap is empty - cannot compute milestone locking')
       return
     }
     
@@ -1146,13 +1080,9 @@ export class AppTocService {
       return
     }
     
-    milestoneEntries.forEach((id, i) => {
-      console.log(`   M${i + 1}: ${this.hashmap[id].name || id}`)
-    })
 
     // STEP 2: If user NOT enrolled, lock ALL milestones and children
     if (!isEnrolled) {
-      console.log('\n⚠️  User NOT enrolled - locking ALL milestones and children')
       milestoneEntries.forEach(milestoneId => {
         this.hashmap[milestoneId].computedIsLocked = true
         this.hashmap[milestoneId].unlockMessage = 'Enroll in this course to access milestones'
@@ -1170,7 +1100,6 @@ export class AppTocService {
 
     // STEP 3: Check pre-assessment completion
     const isPreAssessmentCompleted = this.checkPreAssessmentCompletion()
-    console.log('🔍 [MILESTONE LOCK] Pre-assessment completed:', isPreAssessmentCompleted ? '✅ YES' : '❌ NO')
 
     // STEP 4: Compute locking for each milestone
     
@@ -1187,17 +1116,12 @@ export class AppTocService {
         this.hashmap[milestoneId].unlockMessage = isLocked ?
           'Complete the preliminary assessment to unlock this milestone' : ''
         
-        console.log(`📌 [MILESTONE 1] ${milestone.name}:`, {
-          isPreAssessmentCompleted,
-          isLocked: isLocked ? '🔒 LOCKED' : '🔓 UNLOCKED',
-          unlockMessage: this.hashmap[milestoneId].unlockMessage
-        })
+        
         
         // For unlocked M1, check assessment locking
         if (!isLocked) {
           this.computeAssessmentLockingInMilestone(milestoneId)
         } else {
-          console.log(`   ⨯ Milestone locked - marking all children as parent-locked`)
           this.markMilestoneChildrenAsParentLocked(milestoneId, true)
         }
         return
@@ -1215,14 +1139,7 @@ export class AppTocService {
         const prevCompletedLeafNodes = Number(previousMilestone.completedLeafNodesCount) || 0
         const prevLeafNodesCount = Number(previousMilestone.leafNodesCount) || 0
 
-        console.log(`🔍 [MILESTONE ${milestoneNum}] Checking if previous M${index} is complete:`, {
-          previousMilestoneName: previousMilestone.name,
-          completionPercentage: prevCompletionPct,
-          completionStatus: prevCompletionStatus,
-          status: prevStatus,
-          completedLeafNodes: prevCompletedLeafNodes,
-          leafNodesCount: prevLeafNodesCount
-        })
+        
 
         let previousMilestoneComplete =
           prevCompletionPct >= 100 ||
@@ -1230,15 +1147,12 @@ export class AppTocService {
           prevStatus === 2 ||
           (prevLeafNodesCount > 0 && prevCompletedLeafNodes >= prevLeafNodesCount)
 
-        console.log(`   Primary check result: ${previousMilestoneComplete ? '✅ COMPLETE' : '❌ INCOMPLETE'}`)
 
         // Fallback: Check individual items
         if (!previousMilestoneComplete) {
-          console.log(`   Running fallback check (mandatory content + assessment)...`)
           const isPreviousMilestoneAssessmentComplete = this.checkMilestoneAssessmentComplete(previousMilestoneId)
           const isPreviousMilestoneMandatoryComplete = this.checkMilestoneMandatoryContentComplete(previousMilestoneId)
           previousMilestoneComplete = isPreviousMilestoneAssessmentComplete && isPreviousMilestoneMandatoryComplete
-          console.log(`   Fallback check: mandatory=${isPreviousMilestoneMandatoryComplete}, assessment=${isPreviousMilestoneAssessmentComplete}, result=${previousMilestoneComplete}`)
         }
 
         const isLocked = !previousMilestoneComplete
@@ -1246,39 +1160,27 @@ export class AppTocService {
         this.hashmap[milestoneId].unlockMessage = isLocked ?
           `Complete all mandatory content and assessment in Milestone ${index} to unlock this milestone` : ''
         
-        console.log(`   📊 [MILESTONE ${milestoneNum}] ${milestone.name}:`, {
-          previousMilestoneComplete: previousMilestoneComplete ? '✅ YES' : '❌ NO',
-          isLocked: isLocked ? '🔒 LOCKED' : '🔓 UNLOCKED',
-          unlockMessage: this.hashmap[milestoneId].unlockMessage
-        })
+        
         
         // For unlocked milestones, check assessment locking
         if (!isLocked) {
           this.computeAssessmentLockingInMilestone(milestoneId)
         } else {
-          console.log(`   ⨯ Milestone locked - marking all children as parent-locked`)
           this.markMilestoneChildrenAsParentLocked(milestoneId, true)
         }
       } else {
         this.hashmap[milestoneId].computedIsLocked = true
         this.hashmap[milestoneId].unlockMessage = 'Previous milestone not found'
-        console.log(`   🔒 LOCKED (previous milestone not found)`)
       }
     })
 
     // STEP 4.5: Debug log milestone leaf nodes and their completion status
-    console.log('\n📊 Milestone Leaf Nodes Completion Status:')
     milestoneEntries.forEach((milestoneId, index) => {
       const milestone = this.hashmap[milestoneId]
       if (!milestone) return
       
-      console.log(`   Leaf Nodes Array:`, milestone.leafNodes)
-      console.log(`   Leaf Nodes Count: ${milestone.leafNodesCount}`)
-      console.log(`   Completed Leaf Nodes Count: ${milestone.completedLeafNodesCount || 0}`)
-      console.log(`   Completion %: ${milestone.completionPercentage}%`)
       
       if (milestone.leafNodes && milestone.leafNodes.length > 0) {
-        console.log(`   Individual Leaf Node Status:`)
         milestone.leafNodes.forEach((leafId: string, i: number) => {
           const leafData = this.hashmap[leafId]
           if (leafData) {
@@ -1287,25 +1189,13 @@ export class AppTocService {
               leafData.status === 2 || 
               (leafData.completionPercentage && leafData.completionPercentage >= 100) ||
               (leafData.progress && leafData.progress >= 100)
-            console.log(`      ${i + 1}. ${leafData.name || leafId} [${leafData.primaryCategory}]:`, {
-              id: leafId,
-              completionStatus: leafData.completionStatus,
-              status: leafData.status,
-              completionPercentage: leafData.completionPercentage,
-              progress: leafData.progress,
-              isComplete: isComplete ? '✅' : '❌'
-            })
-          } else {
-            console.log(`      ${i + 1}. ⚠️ Leaf node ${leafId} NOT FOUND in hashmap`)
+            
           }
         })
-      } else {
-        console.log(`   ⚠️ No leaf nodes defined for this milestone`)
       }
     })
     
     // STEP 5: Compute parent milestone lock status for ALL children
-    console.log('\n🔗 Computing parent milestone locks for all children...')
     Object.keys(this.hashmap).forEach(key => {
       const item = this.hashmap[key]
       if (item.isMilestone) return // Skip milestones themselves
@@ -1336,8 +1226,6 @@ export class AppTocService {
       }
     })
 
-    // STEP 6: Trigger hashmap update
-    console.log('✅ Milestone locking computation COMPLETE')
     
     // Debug: Log final lock status for all milestones
     const milestonesFinal = Object.keys(this.hashmap).filter(key => 
@@ -1345,14 +1233,9 @@ export class AppTocService {
       this.hashmap[key].primaryCategory === 'Milestone' || 
       this.hashmap[key].courseCategory === 'Milestone'
     )
-    console.log('📊 [FINAL LOCK STATUS] All milestones:')
-    milestonesFinal.forEach((id, i) => {
-      const m = this.hashmap[id]
-      console.log(`   ${i + 1}. ${m.name}: computedIsLocked=${m.computedIsLocked}, unlockMessage="${m.unlockMessage || 'N/A'}"`)
-    })
+  
     
     this.hashmap = { ...this.hashmap }
-    console.log('📡 [SERVICE] Broadcasting hashmap update with computedIsLocked values')
     this.hashmapUpdated.next({ timestamp: Date.now(), hashmap: this.hashmap })
   }
 
@@ -1361,7 +1244,6 @@ export class AppTocService {
    * Called from viewer-util.service.ts after progress updates
    */
   public triggerMilestoneLockUpdate() {
-    console.log('🔔 [TRIGGER] triggerMilestoneLockUpdate called')
     
     // Check if we have a Learning Pathway in the hashmap
     const hasLearningPathway = Object.keys(this.hashmap).some(key => {
@@ -1370,20 +1252,14 @@ export class AppTocService {
       return item.isLearningPathway === true || item.courseCategory === 'Learning Pathway'
     })
     
-    console.log(`   Is Learning Pathway: ${hasLearningPathway}`)
-    
     if (hasLearningPathway) {
-      console.log('🔄 [TRIGGER] Triggering milestone lock recomputation after progress update')
       // Assume enrolled since progress was just updated
       this.computeMilestoneLockingStatus(true)
     } else {
-      console.log('🔄 [TRIGGER] Regular content - emitting hashmap update for top-bar refresh')
       // For regular content (non-Learning Pathway), just emit the hashmap update
       // so the top-bar component can recalculate the completion count
       this.hashmap = { ...this.hashmap }
-      console.log('📡 [TRIGGER] Broadcasting hashmap update event')
       this.hashmapUpdated.next({ timestamp: Date.now(), hashmap: this.hashmap })
-      console.log('✅ [TRIGGER] Hashmap update broadcasted')
     }
   }
 
@@ -1392,8 +1268,6 @@ export class AppTocService {
    * Pre-assessment is typically a Course Assessment at the root level of Learning Pathway (before milestones)
    */
   private checkPreAssessmentCompletion(): boolean {
-    console.log('🔍 [PRE-ASSESSMENT] Starting pre-assessment completion check')
-    console.log('🔍 [PRE-ASSESSMENT] Hashmap keys:', Object.keys(this.hashmap).length)
     
     // Find the Learning Pathway root - check multiple conditions
     let learningPathwayId: string | null = null
@@ -1404,39 +1278,21 @@ export class AppTocService {
           item.isLearningPathway === true ||
           (item.primaryCategory === 'Blended Program' && item.courseCategory === 'Learning Pathway')) {
         learningPathwayId = key
-        console.log('🔍 [PRE-ASSESSMENT] Found Learning Pathway root:', key, item.name)
         break
       }
     }
 
     if (!learningPathwayId) {
-      console.log('⚠️ [PRE-ASSESSMENT] Learning Pathway root NOT FOUND - returning false to keep milestones locked')
       return false
     }
 
-    // Step 1: Look for items explicitly marked as pre-assessment (isPreAssessment flag)
-    console.log('🔍 [PRE-ASSESSMENT] Step 1: Looking for items with isPreAssessment=true flag...')
-    console.log('🔍 [PRE-ASSESSMENT] Dumping all hashmap items for debugging:')
-    for (const key of Object.keys(this.hashmap)) {
-      const item = this.hashmap[key]
-      if (item.isPreAssessment || item.primaryCategory === 'Course Assessment' || item.primaryCategory === 'Standalone Assessment') {
-        console.log(`   📄 ${key}: isPreAssessment=${item.isPreAssessment}, primaryCategory=${item.primaryCategory}, parent=${item.parent}, completionStatus=${item.completionStatus}, status=${item.status}, completionPercentage=${item.completionPercentage}`)
-      }
-    }
+    
     
     let foundPreAssessmentFlag = false
     for (const key of Object.keys(this.hashmap)) {
       const item = this.hashmap[key]
       if (item.isPreAssessment === true) {
         foundPreAssessmentFlag = true
-        console.log('🔍 [PRE-ASSESSMENT] Found item with isPreAssessment=true:', {
-          id: key,
-          name: item.name,
-          completionStatus: item.completionStatus,
-          status: item.status,
-          completionPercentage: item.completionPercentage,
-          progress: item.progress
-        })
         // STRICT CHECK: Only return true if completionStatus is EXACTLY 2 (not undefined, null, or 0)
         // completionPercentage check must be >= 100 AND be a number
         const completionStatus = Number(item.completionStatus)
@@ -1447,22 +1303,14 @@ export class AppTocService {
         const isCompleted = (completionStatus === 2 || status === 2 || 
                             (completionPercentage >= 100 && !isNaN(completionPercentage)) || 
                             (progress >= 100 && !isNaN(progress)))
-        console.log('🔍 [PRE-ASSESSMENT] Pre-assessment completion result:', isCompleted ? '✅ COMPLETED' : '❌ NOT COMPLETED', {
-          completionStatusCheck: completionStatus === 2,
-          statusCheck: status === 2,
-          completionPercentageCheck: completionPercentage >= 100,
-          progressCheck: progress >= 100
-        })
+        
         return isCompleted
       }
     }
     
-    if (!foundPreAssessmentFlag) {
-      console.log('⚠️ [PRE-ASSESSMENT] No item with isPreAssessment=true found in hashmap')
-    }
+    
 
     // Step 2: Fallback - Look for Course Assessment that is a direct child of Learning Pathway (not a milestone child)
-    console.log('🔍 [PRE-ASSESSMENT] Step 2: Looking for Course Assessment direct child of Learning Pathway...')
     for (const key of Object.keys(this.hashmap)) {
       const item = this.hashmap[key]
       // Must be a direct child of the Learning Pathway
@@ -1472,14 +1320,7 @@ export class AppTocService {
       // Must be a Course Assessment or Standalone Assessment
       if (item.primaryCategory !== 'Course Assessment' && item.primaryCategory !== 'Standalone Assessment') continue
       
-      console.log('🔍 [PRE-ASSESSMENT] Found Course Assessment child of Learning Pathway:', {
-        id: key,
-        name: item.name,
-        primaryCategory: item.primaryCategory,
-        completionStatus: item.completionStatus,
-        status: item.status,
-        completionPercentage: item.completionPercentage
-      })
+      
       
       // STRICT CHECK: Only return true if completionStatus is EXACTLY 2
       const completionStatus = Number(item.completionStatus)
@@ -1490,17 +1331,11 @@ export class AppTocService {
       const isCompleted = (completionStatus === 2 || status === 2 || 
                           (completionPercentage >= 100 && !isNaN(completionPercentage)) || 
                           (progress >= 100 && !isNaN(progress)))
-      console.log('🔍 [PRE-ASSESSMENT] Course Assessment completion result:', isCompleted ? '✅ COMPLETED' : '❌ NOT COMPLETED', {
-        completionStatusCheck: completionStatus === 2,
-        statusCheck: status === 2,
-        completionPercentageCheck: completionPercentage >= 100,
-        progressCheck: progress >= 100
-      })
+      
       return isCompleted
     }
 
     // Step 3: If no pre-assessment found at all, keep milestones LOCKED (fail-safe)
-    console.log('⚠️ [PRE-ASSESSMENT] No pre-assessment found in hashmap - returning FALSE to keep milestones LOCKED')
     return false
   }
 
@@ -1515,7 +1350,6 @@ export class AppTocService {
     let foundMilestoneAssessment = false
     let isMilestoneAssessmentComplete = false
 
-    console.log(`🔍 Checking milestone assessment for: ${milestoneId}`)
 
     // Check all items in hashmap that are DIRECT children of this milestone
     for (const key of Object.keys(this.hashmap)) {
@@ -1536,14 +1370,7 @@ export class AppTocService {
       foundMilestoneAssessment = true
       const isCompleted = item.completionStatus === 2 || item.status === 2 || item.completionPercentage >= 100 || item.progress >= 100
       
-      console.log(`📋 Found milestone assessment (direct child): ${item.name || key}`, {
-        milestoneId,
-        assessmentId: key,
-        completionStatus: item.completionStatus,
-        status: item.status,
-        completionPercentage: item.completionPercentage,
-        isCompleted
-      })
+      
       
       if (isCompleted) {
         isMilestoneAssessmentComplete = true
@@ -1556,11 +1383,9 @@ export class AppTocService {
     // - If NO milestone assessment found → consider complete (no assessment requirement)
     // - If milestone assessment found → it must be completed
     if (!foundMilestoneAssessment) {
-      console.log(`ℹ️ No milestone assessment (direct child) found for ${milestoneId} - considering as complete`)
       return true
     }
     
-    console.log(`${isMilestoneAssessmentComplete ? '✅' : '❌'} Milestone ${milestoneId} assessment: ${isMilestoneAssessmentComplete ? 'COMPLETE' : 'INCOMPLETE'}`)
     return isMilestoneAssessmentComplete
   }
 
@@ -1574,7 +1399,7 @@ export class AppTocService {
     let mandatoryCount = 0
     let completedMandatoryCount = 0
 
-    console.log(`🔍 Checking mandatory content for milestone: ${milestoneId}`)
+
 
     // Check all items in hashmap that are direct children of this milestone (courses)
     for (const key of Object.keys(this.hashmap)) {
@@ -1603,18 +1428,7 @@ export class AppTocService {
         mandatoryCount++
         const isCompleted = item.completionStatus === 2 || item.status === 2 || item.completionPercentage >= 100 || item.progress >= 100
         
-        console.log(`   📝 Mandatory item: ${item.name || key}`, {
-          isMandatory: item.isMandatory,
-          completionStatus: item.completionStatus,
-          status: item.status,
-          completionPercentage: item.completionPercentage,
-          progress: item.progress,
-          isCompleted,
-          hasCompletionStatus: item.completionStatus !== undefined,
-          hasStatus: item.status !== undefined,
-          hasCompletionPercentage: item.completionPercentage !== undefined,
-          hasProgress: item.progress !== undefined
-        })
+        
         
         if (isCompleted) {
           completedMandatoryCount++
@@ -1623,7 +1437,6 @@ export class AppTocService {
     }
 
     const allComplete = mandatoryCount === 0 || completedMandatoryCount >= mandatoryCount
-    console.log(`📊 Milestone ${milestoneId} mandatory status: ${completedMandatoryCount}/${mandatoryCount} complete = ${allComplete ? '✅ ALL COMPLETE' : '❌ INCOMPLETE'}`)
     return allComplete
   }
 
@@ -1653,7 +1466,6 @@ export class AppTocService {
     const milestone = this.hashmap[milestoneId]
     if (!milestone) return
 
-    console.log(`Computing assessment locking for milestone: ${milestoneId}`)
 
     // Find assessment in this milestone
     let assessmentId: string | null = null
@@ -1675,13 +1487,11 @@ export class AppTocService {
       if (isAssessment) {
         assessmentId = key
         assessment = item
-        console.log(`✅ Found milestone assessment: ${item.name} (${key})`)
         break
       }
     }
 
     if (!assessmentId || !assessment) {
-      console.log(`No assessment found in milestone ${milestoneId}`)
       return
     }
 
@@ -1697,7 +1507,6 @@ export class AppTocService {
     let mandatoryCount = 0
     let completedMandatoryCount = 0
     
-    console.log(`[ASSESSMENT LOCK CHECK] Checking mandatory courses for milestone: ${milestoneId}`)
     
     for (const key of Object.keys(this.hashmap)) {
       const item = this.hashmap[key]
@@ -1730,14 +1539,7 @@ export class AppTocService {
           item.completionPercentage >= 100 ||
           item.progress >= 100
         
-        console.log(`  Course: ${item.name}`, {
-          isMandatory,
-          completionStatus: item.completionStatus,
-          status: item.status,
-          completionPercentage: item.completionPercentage,
-          progress: item.progress,
-          isCompleted
-        })
+        
         
         if (isCompleted) {
           completedMandatoryCount++
@@ -1747,19 +1549,12 @@ export class AppTocService {
     
     const allMandatoryComplete = mandatoryCount === 0 || completedMandatoryCount >= mandatoryCount
     
-    console.log(`[ASSESSMENT LOCK CHECK] Summary:`, {
-      mandatoryCount,
-      completedMandatoryCount,
-      allMandatoryComplete,
-      assessmentCompleted,
-      willUnlock: assessmentCompleted || allMandatoryComplete
-    })
+    
     
     if (assessmentCompleted || allMandatoryComplete) {
       this.hashmap[assessmentId].isAssessmentLocked = false
       this.hashmap[assessmentId].milestoneAssessmentLocked = false
       this.hashmap[assessmentId].assessmentLockMessage = ''
-      console.log(`✅ Assessment ${assessmentId} is UNLOCKED (completed or all mandatory done)`)
       return
     }
 
@@ -1768,12 +1563,7 @@ export class AppTocService {
     this.hashmap[assessmentId].milestoneAssessmentLocked = true
     this.hashmap[assessmentId].assessmentLockMessage = 'This content is locked. Complete all mandatory items to unlock the assessment.'
 
-    console.log(`🔒 Assessment ${assessmentId} is LOCKED:`, {
-      mandatoryCount,
-      completedMandatoryCount,
-      isLocked: true,
-      milestoneAssessmentLocked: true
-    })
+    
   }
 
   /**
@@ -1912,7 +1702,6 @@ export class AppTocService {
   }
 
   setTranscriptionData(data: any) {
-    //  console.log('data--', data)
     this.transriptionDataSubject.next(data);
   }
 

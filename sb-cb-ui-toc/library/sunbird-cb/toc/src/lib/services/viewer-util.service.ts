@@ -165,17 +165,10 @@ export class ViewerUtilService {
       this.http
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
-      
-      console.log(`🔄 [PROGRESS UPDATE] realTimeProgressUpdate called for ${contentId}`)
-      console.log(`   Status: ${req.request.contents[0].status}, Percentage: ${req.request.contents[0].completionPercentage}`)
-      console.log(`   Hashmap has contentId: ${!!this.tocSvc.hashmap[contentId]}`)
-      
       if (this.tocSvc.hashmap[contentId]) {
         const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus']
-        console.log(`   Current completionStatus in hashmap: ${currentStatus}`)
         
         if (!currentStatus || currentStatus < 2) {
-          console.log(`   ✅ Updating hashmap for ${contentId}`)
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
           this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
           this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
@@ -184,11 +177,7 @@ export class ViewerUtilService {
           this.tocSvc.triggerMilestoneLockUpdate()
           // Emit to trigger viewer component refresh for Learning Pathways
           this.markAsCompleteSubject.next(true)
-        } else {
-          console.log(`   ⏭️ Skipping update - content already completed (status=${currentStatus})`)
         }
-      } else {
-        console.log(`   ⚠️ ContentId ${contentId} not found in hashmap - cannot update progress`)
       }
     } else {
       req = {}
@@ -404,17 +393,10 @@ export class ViewerUtilService {
       this.http
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
-        
-      console.log(`🔄 [PROGRESS UPDATE QUIZ] realTimeProgressUpdateQuiz called for ${contentId}`)
-      console.log(`   Status: ${req.request.contents[0].status}, Percentage: ${req.request.contents[0].completionPercentage}`)
-      console.log(`   Hashmap exists: ${!!this.tocSvc.hashmap}, Hashmap has contentId: ${!!(this.tocSvc.hashmap && this.tocSvc.hashmap[contentId])}`)
-      
       if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
         const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus']
-        console.log(`   Current completionStatus in hashmap: ${currentStatus}`)
         
         if (!currentStatus || currentStatus < 2) {
-          console.log(`   ✅ Updating hashmap for ${contentId}`)
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
           this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
           this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
@@ -426,11 +408,7 @@ export class ViewerUtilService {
           
           // Emit to trigger viewer component refresh for Learning Pathways
           this.markAsCompleteSubject.next(true)
-        } else {
-          console.log(`   ⏭️ Skipping update - content already completed (status=${currentStatus})`)
         }
-      } else {
-        console.log(`   ⚠️ Cannot update hashmap - hashmap or contentId missing`)
       }
     } else {
       req = {}
@@ -509,15 +487,7 @@ export class ViewerUtilService {
   }
 
   updateContentHashMapForAssesstent(contentId: string, contentProgress: any) {
-    console.log('📊 [UPDATE HASHMAP] Updating assessment in hashmap:', {
-      contentId,
-      incomingProgress: contentProgress,
-      currentHashmapData: this.tocSvc.hashmap[contentId] ? {
-        completionPercentage: this.tocSvc.hashmap[contentId]['completionPercentage'],
-        completionStatus: this.tocSvc.hashmap[contentId]['completionStatus'],
-        status: this.tocSvc.hashmap[contentId]['status']
-      } : 'not found'
-    })
+    
     
     if (this.tocSvc.hashmap[contentId]) {
       const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus'] || 0
@@ -529,30 +499,18 @@ export class ViewerUtilService {
         this.tocSvc.hashmap[contentId]['completionStatus'] = newStatus
         this.tocSvc.hashmap[contentId]['status'] = newStatus
         
-        console.log('✅ [UPDATE HASHMAP] Updated assessment:', {
-          contentId,
-          name: this.tocSvc.hashmap[contentId]['name'],
-          completionPercentage: contentProgress.completionPercentage,
-          completionStatus: newStatus,
-          status: newStatus
-        })
         
         // Create new hashmap reference for Angular change detection
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
         
         // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
         if (this.tocSvc.triggerMilestoneLockUpdate) {
-          console.log('🔄 [UPDATE HASHMAP] Triggering milestone lock update after assessment update')
           this.tocSvc.triggerMilestoneLockUpdate()
         }
         
         // Emit to trigger viewer component refresh for Learning Pathways
         this.markAsCompleteSubject.next(true)
-      } else {
-        console.log('ℹ️ [UPDATE HASHMAP] Skipping update - already complete or lower status')
       }
-    } else {
-      console.log('⚠️ [UPDATE HASHMAP] Content not found in hashmap:', contentId)
     }
   }
 
@@ -642,10 +600,6 @@ export class ViewerUtilService {
           // Emit to trigger viewer component refresh for Learning Pathways
           this.markAsCompleteSubject.next(true)
       }
-
-      // console.log('Updated hashmap:', this.tocSvc.hashmap)
-
-      // console.log('this.tocSvc.hashmap---', this.tocSvc.hashmap)
     } else {
       req = {}
       // do nothing
@@ -680,14 +634,10 @@ export class ViewerUtilService {
           .subscribe(noop, noop)
       }
       
-      console.log('🎯 [PRE-ASSESSMENT QUIZ] Updating progress for:', contentId)
-      console.log('   Status:', status, 'Completion:', req.request.contents[0].completionPercentage)
-      
       // Update hashmap - create entry if it doesn't exist
       if (this.tocSvc.hashmap) {
         if (!this.tocSvc.hashmap[contentId]) {
           // Create new entry for pre-assessment if it doesn't exist
-          console.log('   Creating new hashmap entry for pre-assessment')
           this.tocSvc.hashmap[contentId] = {
             identifier: contentId,
             completionPercentage: req.request.contents[0].completionPercentage,
@@ -697,18 +647,15 @@ export class ViewerUtilService {
           }
         } else {
           // Update existing entry
-          console.log('   Updating existing hashmap entry')
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
           this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
           this.tocSvc.hashmap[contentId]['status'] = Number(req.request.contents[0].status) || 0
         }
         
-        console.log('   Hashmap entry after update:', this.tocSvc.hashmap[contentId])
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
         
         // ALWAYS trigger milestone lock recomputation when pre-assessment completes
         // This ensures milestone 1 unlocks immediately after pre-assessment completion
-        console.log('🔄 [PRE-ASSESSMENT QUIZ] Triggering milestone lock update')
         if (this.tocSvc.triggerMilestoneLockUpdate) {
           this.tocSvc.triggerMilestoneLockUpdate()
         }

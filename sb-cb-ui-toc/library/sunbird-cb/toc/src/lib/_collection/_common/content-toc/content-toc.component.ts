@@ -110,22 +110,18 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
   ngOnInit() {
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.all) {
-      // console.log('this.contentReadData--', this.route.snapshot.data)
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.route.snapshot?.data?.content?.data?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
       // this.enableAITutorFlag = true
     } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.forOrg && this.configService.iGOTAIConfig.aiTutor?.forOrg?.length &&
       this.configService.iGOTAIConfig?.aiTutor?.forOrg.includes(this.configService.userProfile?.rootOrgId)
     ) {
-      // console.log('this.contentReadData--', this.route.snapshot.data)
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.route.snapshot?.data?.content?.data?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
       // this.enableAITutorFlag = true
     } else {
       this.enableAITutorFlag = false
     }
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription?.all) {
-      // console.log('in')
       // this.resourceIdentifier$ = this.tocSvc.transriptionIdentifier.subscribe((value:any)=>{
-      //   //  console.log('resource identifier', value)
       //   if(value &&  value?.identifier) {
       //     this.resourceIdentifier = value?.identifier //value?.identifier // do_1138891198489067521147
       //     this.parseVTT()
@@ -134,7 +130,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       // })
 
       this.subTitles$ = this.tocSvc.transcriptionData$.subscribe((value: any) => {
-        //  console.log('value', value)
         this.keywordToHighlight = value
       })
 
@@ -143,7 +138,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
           tap((langvalue: any) => console.log('tap langvalue:', langvalue))
         )
         .subscribe((langvalue: any) => {
-          // console.log('langValue', langvalue);
           if (langvalue) {
             // this.renderSelectedLanguageTranscription();
           }
@@ -153,9 +147,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription && this.configService.iGOTAIConfig?.transcription?.forOrg && this.configService.iGOTAIConfig?.transcription?.forOrg?.length &&
       this.configService.iGOTAIConfig?.transcription?.forOrg?.includes(this.configService.userProfile?.rootOrgId)
     ) {
-      // console.log('in')
       // this.resourceIdentifier$ = this.tocSvc.transriptionIdentifier.subscribe((value:any)=>{
-      //   //  console.log('resource identifier', value)
       //   if(value &&  value?.identifier) {
       //     this.resourceIdentifier = value?.identifier //value?.identifier // do_1138891198489067521147
       //     this.parseVTT()
@@ -164,7 +156,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       // })
 
       this.subTitles$ = this.tocSvc.transcriptionData$.subscribe((value: any) => {
-        //  console.log('value', value)
         this.keywordToHighlight = value
       })
 
@@ -173,7 +164,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
           tap((langvalue: any) => console.log('tap langvalue:', langvalue))
         )
         .subscribe((langvalue: any) => {
-          // console.log('langValue', langvalue);
           if (langvalue) {
             // this.renderSelectedLanguageTranscription();
           }
@@ -251,7 +241,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     }
 
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig.aiTutor?.all) {
-      // console.log('this.contentReadData--', this.route.snapshot.data)
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.content?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
       // this.enableAITutorFlag = true
     } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.forOrg && this.configService.iGOTAIConfig?.aiTutor?.forOrg?.length
@@ -278,7 +267,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     if (this.config && this.config.discussWidgetData) {
       this.discussWidgetData = this.config.discussWidgetData
       if (this.baseContentReadData && this.baseContentReadData.identifier) {
-        // console.log('this.content.identifier', this.content.identifier)
         if (!this.discussWidgetData.newCommentSection.commentTreeData.entityId) {
           this.discussWidgetData.newCommentSection.commentTreeData.entityId = this.baseContentReadData.identifier
         }
@@ -413,8 +401,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     this.tabChangeValue = event.tab
     this.selectedTabIndex = event.index
     this.loadCheckService.componentLoaded(true)
-    // console.log('event', event)
-    // console.log('this.content', this.viewerDataSvc?.resourceId)
     if (event && event.tab.textLabel === 'AI Tutor') {
       this.showAITutorPopup = true
     }
@@ -490,8 +476,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
         this.content.name,
       )
       this.actionSVC.setUpdateCompGroupO = this.resumeDataLink
-      // console.log('this.resumeDataLink',this.resumeDataLink)
-      // console.log('this.actionSVC', this.actionSVC)
       this.router.navigate([this.resumeDataLink.url], {
         queryParams: {
           ...this.resumeDataLink.queryParams,
@@ -608,10 +592,8 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
         this.enableTranscriptionFlag = true
         // let url =  data[0]['transcription_urls'][0]['uri']
-        //  console.log('this.vttLangArr--',this.vttLangArr)
         this.transcriptionActiveLanguage = this.vttLangArr && this.vttLangArr.length && this.vttLangArr[0] && this.vttLangArr[0]['default_lang'] ? 'en' : 'en'
         this.defaultTranscriptLanguage = this.vttLangArr && this.vttLangArr.length && this.vttLangArr[0] && this.vttLangArr[0]['default_lang'] ? 'en' : 'en'
-        //  console.log('this.transcriptionActiveLanguage--', this.transcriptionActiveLanguage)
         let selectedTranscriptionStyle = this.vttLangArr.filter((item: any) => {
           return item?.label === this.transcriptionActiveLanguage
         })
@@ -620,7 +602,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
         } else {
           this.selectedTranscriptionStyle = this.vttLangArr[0]
         }
-        // console.log('this.selectedTranscriptionStyle--', this.selectedTranscriptionStyle)
         const filteredArr = this.vttLangArr.filter(
           (item: any) => item.label === this.transcriptionActiveLanguage
         )
@@ -632,12 +613,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
           this.subTitles = blocks
         }
-        // console.log('this.vttLangArr--',this.vttLangArr)
-        // if(this.vttLangArr && this.vttLangArr.length) {
-        //   this.transcriptionActiveLanguage = this.vttLangArr[0]['label']
-        // } else {
-        //   this.transcriptionActiveLanguage  = this.vttLangArr[0]['default_lang']
-        // }
         this.tocSvc.changeTranscriptionLanguageEvent.next({ activeLang: this.transcriptionActiveLanguage, langData: this.vttLangArr, loadPlayer: true })
 
 
@@ -705,8 +680,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
     for (let i = 0; i < data?.length; i++) {
       if (data[i] && data[i]['children'] && data[i]['children'].length) {
-        // this.totalResource = this.totalResource + 1
-        // console.log('in children')
         this.onlyscormAssessmentExists(data[i]?.children, key, value)
       } else {
 
