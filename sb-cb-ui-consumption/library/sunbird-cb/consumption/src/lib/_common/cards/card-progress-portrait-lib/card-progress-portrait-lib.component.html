@@ -1,10 +1,10 @@
 <ng-container *ngIf="!isCardLoading">
   <mat-card class="card-portrait card-progress-portrait-lib cursor-pointer mt-4"
-    [ngClass]="[widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : '', widgetData?.content?.status === 'Retired' ? 'retired-course-card' : '']"
+    [ngClass]="[widgetData?.cardCustomeClass ? widgetData?.cardCustomeClass : '', showRitered ? 'retired-course-card' : '']"
     (click)="raiseTelemetry();getRedirectUrlData(widgetData?.content); $event.stopPropagation()">
-    <div *ngIf="widgetData?.content?.status === 'Retired'" class="retired-overlay">
+    <div *ngIf="showRitered" class="retired-overlay">
       <div class="retired-badge">
-        {{'cardcontentv2.retired' | translate }}
+        {{retiredLabel | translate }}
       </div>
     </div>
     <div class="new-version-btn" *ngIf="widgetData?.content?.status === 'Retired' && widgetData?.content?.completionPercentage < 100
