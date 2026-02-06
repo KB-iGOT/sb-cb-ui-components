@@ -1561,7 +1561,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           }
         }
         // if enrolled course is completed then to make all languages courses as well as all content as completed
-        if (enrolledCourse.status === 2) {
+        if (  this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY && enrolledCourse.status === 2) {
           this.content['completionPercentage'] = 100
           this.content['completionStatus'] = 2
           await this.tocSvc.mapCompletionChildPercentageProgram(this.content)
@@ -1595,10 +1595,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             // this.tocSvc.contentLoader.next(false)
           }
         }
-           if (this.baseContentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+        if (this.baseContentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+          // this.appTocV2Svc.mapContentHierarchyProgressUpdate(this.content,this.userEnrollmentList)
+          console.log('mapping progress for learning pathway', this.content)
           this.tocSvc.callHirarchyProgressHashmap(this.content)
+          console.log('mapped progress for learning pathway', this.tocSvc.hashmap)
           this.tocSvc.computeMilestoneLockingStatus(true)
           this.syncMilestoneLockStatus()
+          
         }
         this.batchData = {
           content: [enrolledCourse.batch],
@@ -1625,15 +1629,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         }
         this.tocSvc.callHirarchyProgressHashmap(this.content)
         // For Learning Pathways, compute milestone locking when not enrolled (all locked)
-        if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {
+        if (this.baseContentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
           this.tocSvc.computeMilestoneLockingStatus(false)
           this.syncMilestoneLockStatus()
         }
         this.enrollBtnLoading = false
         this.tocSvc.contentLoader.next(false)
       }
-
-
     }
 
     this.skeletonLoader = false
