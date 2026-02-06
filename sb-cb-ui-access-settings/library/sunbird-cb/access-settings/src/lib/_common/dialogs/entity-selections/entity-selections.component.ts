@@ -938,16 +938,31 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     const value = event.source.value;
 
     if (!checked) {
-      this.selectedDataTemp = [];
+      const currentItems = this.dataList.map((item) => this.getSelectionValue(item));
+      this.selectedDataTemp = this.selectedDataTemp.filter(item => !currentItems.includes(item));
       return;
     }
 
     switch (value) {
       case "selectAll":
-        this.selectedDataTemp = this.dataList.map((item) => this.getSelectionValue(item));
+        const newSelections = this.dataList.map((item) => this.getSelectionValue(item));
+        const merged = [...this.selectedDataTemp];
+        newSelections.forEach(item => {
+          if (!merged.includes(item)) {
+            merged.push(item);
+          }
+        });
+        this.selectedDataTemp = merged;
         break;
       case "isCCA":
-        this.selectedDataTemp = this.dataList.filter((item) => item?.iscca === true).map((item) => this.getSelectionValue(item));
+        const ccaItems = this.dataList.filter((item) => item?.iscca === true).map((item) => this.getSelectionValue(item));
+        const mergedCca = [...this.selectedDataTemp];
+        ccaItems.forEach(item => {
+          if (!mergedCca.includes(item)) {
+            mergedCca.push(item);
+          }
+        });
+        this.selectedDataTemp = mergedCca;
         break;
     }
 
@@ -972,6 +987,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     switch (value) {
       case "selectAll":
         return this.areAllSelected();
+      case "isCCA":
+        if (!this.dataList.length) return false;
+        const ccaItems = this.dataList.filter(item => item?.iscca === true).map(item => this.getSelectionValue(item));
+        return ccaItems.length > 0 && ccaItems.every(item => this.selectedDataTemp.includes(item));
       default:
         return false;
     }
