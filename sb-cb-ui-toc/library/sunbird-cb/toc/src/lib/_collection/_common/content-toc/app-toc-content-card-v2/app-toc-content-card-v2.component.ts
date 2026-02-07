@@ -924,6 +924,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   }
 
   downloadCertificate(certificateData: any) {
+    debugger
     this.events.raiseInteractTelemetry(
       {
         type: WsEvents.EnumInteractTypes.CLICK,
@@ -936,13 +937,13 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
       })
     if (certificateData) {
       this.downloadCertificateLoading = true
-      let certData: any = certificateData
+      let certData: any = certificateData || certificateData.identifier
       this.certificateService.downloadCertificate_v3(certData).subscribe((res: any) => {
         this.downloadCertificateLoading = false
         const cet = res.result.printUri
         this.dialog.open(CertificateDialogComponent, {
           width: '1300px',
-          data: { cet, certId: certData.identifier },
+          data: { cet, certId: certData },
         })
       })
     } else {
@@ -1267,6 +1268,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
    * View milestone achievement - calls the achievement API and shows the result
    */
   viewMilestoneAchievement(event: MouseEvent, mileStoneData: any) {
+    debugger
     if (event) {
       event.preventDefault()
       event.stopPropagation()
