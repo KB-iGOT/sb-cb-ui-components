@@ -69,8 +69,7 @@ import { BulkUploadAllTypeQuestionComponent } from './components/bulk-upload-all
     DialogComponentsModule
   ],
   exports: [
-    AssessmentMainComponent,
-    CKEditorModule
+    AssessmentMainComponent
   ]
 })
 export class AssessmentModule { }
