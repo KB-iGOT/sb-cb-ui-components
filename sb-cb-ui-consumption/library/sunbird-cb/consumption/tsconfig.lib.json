@@ -14,9 +14,10 @@
     ]
   },
   "angularCompilerOptions": {
-    "compilationMode": "partial",
-    "strictInjectionParameters": true,
-    "enableIvy": true
+    "skipTemplateCodegen": true,
+    "strictMetadataEmit": true,
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
   },
   "exclude": [
     "src/test.ts",
