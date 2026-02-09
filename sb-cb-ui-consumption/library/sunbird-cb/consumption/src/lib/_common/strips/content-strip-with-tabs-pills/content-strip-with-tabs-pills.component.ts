@@ -1042,15 +1042,17 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     })
   }
 
-  public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
+  public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string, tabValue:string) {
     let tabEventIndex
-    if (tabEvent === 1 && stripMap.tabs[tabEvent].hideTab) {
-      this.activeTabIndex = 2
-      tabEventIndex = 2
-    } else {
-      this.activeTabIndex = tabEvent
-      tabEventIndex = tabEvent
+    if(stripKey === 'cbpPlan') {
+      stripMap.tabs.forEach((tab, index) => {        
+          if(tab?.hideTab && tabEvent >= 1) {
+            tabEventIndex = tabEvent + 1
+            this.activeTabIndex = tabEvent + 1
+          }
+        })
     }
+    
     if (stripMap && stripMap.tabs && stripMap.tabs[tabEventIndex]) {
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress'
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].tabLoading = true
