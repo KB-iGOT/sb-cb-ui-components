@@ -691,7 +691,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   redirectViewAll(stripData: any, path: string, queryParamsData: any, tabIndex?: number) {
     // Check if we have a specific pill-level view more URL
     const selectedPill = this.getSelectedPill(stripData, tabIndex)
-    
+
     if (selectedPill?.viewMoreUrl) {
       this.navigateToSelectedPillUrl(selectedPill, path)
       return
@@ -727,7 +727,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       f: JSON.stringify(filters),
       ...selectedPill.viewMoreUrl.queryParams
     }
-    
+
     this.router.navigate([path], { queryParams })
   }
 
@@ -931,7 +931,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         // if(tabCardSubType) {
         //   // this.stripsResultDataMap[strip.key].stripConfig.cardSubType = tabCardSubType
         // }
-        
+
 
         const widgets = this.transformContentsToWidgets(response.results.result.content, strip, tabCardSubType)
         let tabResults: any[] = []
@@ -1044,13 +1044,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
     let tabEventIndex
-    if (tabEvent === 1 && stripMap.tabs[tabEvent].hideTab) {
-      this.activeTabIndex = 2
-      tabEventIndex = 2
-    } else {
-      this.activeTabIndex = tabEvent
-      tabEventIndex = tabEvent
+    if (stripKey === 'cbpPlan') {
+      stripMap.tabs.forEach((tab, index) => {
+        if (tab?.hideTab && tabEvent >= 1) {
+          tabEventIndex = tabEvent + 1
+          this.activeTabIndex = tabEvent + 1
+        }
+      })
     }
+
     if (stripMap && stripMap.tabs && stripMap.tabs[tabEventIndex]) {
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress'
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].tabLoading = true
