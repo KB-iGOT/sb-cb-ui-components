@@ -72,7 +72,7 @@
     "@angular/cli": "^16.2.16",
     "@angular/compiler-cli": "^16.2.12",
     "@angular/language-service": "^16.2.12",
-    "@types/ckeditor": "^4.9.10",
+    "@types/ckeditor": "4.9.10",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.6",
     "@types/jest": "^29.5.14",
