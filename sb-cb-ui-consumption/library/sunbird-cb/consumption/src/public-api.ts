@@ -123,6 +123,9 @@ export * from './lib/_common/assessments/assessment.module'
 export * from './lib/_common/assessments/components/assessment-main/assessment-main.component'
 export * from './lib/_common/assessments/components/assessment-basic-info/assessment-basic-info.component'
 
+export * from './lib/_common/peer-validation/peer-validation-lib.module'
+export * from './lib/_common/peer-validation/component/pv-dashboard/pv-dashboard.component'
+
 export * from './lib/_common/create-request/create-request.module'
 export * from './lib/_common/create-request/components/create-request-form/create-request-form.component'
 export * from './lib/_common/create-request/dialogs/add-authors/add-authors.component'
