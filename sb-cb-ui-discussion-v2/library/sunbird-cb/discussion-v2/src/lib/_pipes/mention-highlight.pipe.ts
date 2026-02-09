@@ -17,6 +17,7 @@ export class MentionHighlightPipe implements PipeTransform {
     const mentionRegex = /(@\w+)/g
 
     // Replace mentions with span elements
+    // Input is already escaped by getCommentMsg, so we can safely add HTML spans here
     const transformedText = value.replace(
       mentionRegex,
       '<span class="mention" data-mention="$1">$1 </span>'
