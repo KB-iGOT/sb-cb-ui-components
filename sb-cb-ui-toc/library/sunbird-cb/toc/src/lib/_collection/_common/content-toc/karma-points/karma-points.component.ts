@@ -43,7 +43,6 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     this.condition = changes.condition && changes.condition.currentValue || null
-
     if (!this.condition) { return }
     if (this.condition && !this.condition.event) {
       // For TOC karma points
@@ -58,6 +57,9 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
         if (this.condition.content.primaryCategory === this.condition.primaryCategory.COURSE) {
           if (!this.condition.isAcbpClaim && !this.condition.monthlyCapExceed) {
             this.getKPData('Resume')
+          } else if ( this.content.courseCategory === 'Learning Pathway' ) {
+            this.getKPData('Resume')
+          
           }
         }
       }

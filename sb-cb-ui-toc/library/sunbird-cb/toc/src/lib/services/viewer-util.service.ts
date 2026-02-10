@@ -165,17 +165,19 @@ export class ViewerUtilService {
       this.http
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
-      if (this.tocSvc.hashmap[contentId] &&
-        (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
-        this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
-        this.tocSvc.hashmap[contentId]['completionStatus'] = req.request.contents[0].status
-        this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+      if (this.tocSvc.hashmap[contentId]) {
+        const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus']
         
-        // Notify UI components about hashmap changes
-        this.tocSvc.hashmapUpdated.next(this.tocSvc.hashmap)
-        
-        // Trigger milestone lock recomputation for Learning Pathways
-        this.tocSvc.triggerMilestoneLockUpdate()
+        if (!currentStatus || currentStatus < 2) {
+          this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
+          this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
+          this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+          
+          // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
+          this.tocSvc.triggerMilestoneLockUpdate()
+          // Emit to trigger viewer component refresh for Learning Pathways
+          this.markAsCompleteSubject.next(true)
+        }
       }
     } else {
       req = {}
@@ -188,7 +190,7 @@ export class ViewerUtilService {
       courseId,
       batchId,
     }
-    debugger
+    
     const tempContentData = this.contentSvc.currentMetaData
     const tempContentReadData = this.contentSvc.currentContentReadMetaData
     const enrollmentList = this.contentSvc.currentBatchEnrollmentList
@@ -315,13 +317,23 @@ export class ViewerUtilService {
     let languageFound = false
     const tempContentData = this.contentSvc.currentMetaData
     if (!this.forPreview) {
-      tempContentData.children?.forEach(async (childList: NsContent.IContent) => {
+      tempContentData.children?.forEach(async (childList:any) => {
         if (childList.primaryCategory === NsContent.EPrimaryCategory.COURSE) {
           // tslint:disable-next-line: max-line-length
           if (childList.leafNodes && childList.leafNodes.indexOf(resourceId) !== -1) {
             tempLanguage = this.contentLangSvc.getContentLanguage(childList)
             languageFound = true
           }
+        } else if (childList?.primaryCategory === 'Milestone') {
+          childList.children?.forEach(async (child:any) => {
+            if (child.primaryCategory === NsContent.EPrimaryCategory.COURSE) {
+              // tslint:disable-next-line: max-line-length
+              if (child.leafNodes && child.leafNodes.indexOf(resourceId) !== -1) {
+                tempLanguage = this.contentLangSvc.getContentLanguage(child)
+                languageFound = true
+              }
+            } 
+          })
         }
       }
       )
@@ -382,19 +394,20 @@ export class ViewerUtilService {
         .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
         .subscribe(noop, noop)
       if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
-        if (this.tocSvc.hashmap[contentId] &&
-          (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
+        const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus']
+        
+        if (!currentStatus || currentStatus < 2) {
           this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
-          this.tocSvc.hashmap[contentId]['completionStatus'] = req.request.contents[0].status
+          this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
           this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
           
-          // Notify UI components about hashmap changes
-          this.tocSvc.hashmapUpdated.next(this.tocSvc.hashmap)
-          
-          // Trigger milestone lock recomputation for Learning Pathways
+          // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
           if (this.tocSvc.triggerMilestoneLockUpdate) {
             this.tocSvc.triggerMilestoneLockUpdate()
           }
+          
+          // Emit to trigger viewer component refresh for Learning Pathways
+          this.markAsCompleteSubject.next(true)
         }
       }
     } else {
@@ -474,18 +487,30 @@ export class ViewerUtilService {
   }
 
   updateContentHashMapForAssesstent(contentId: string, contentProgress: any) {
-    if (this.tocSvc.hashmap[contentId] &&
-      (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
-      this.tocSvc.hashmap[contentId]['completionPercentage'] = contentProgress.completionPercentage
-      this.tocSvc.hashmap[contentId]['completionStatus'] = contentProgress.status
-      this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-      // Notify UI components about hashmap changes
-this.tocSvc.hashmapUpdated.next(this.tocSvc.hashmap)
-
-// Trigger milestone lock recomputation for Learning Pathways
-if (this.tocSvc.triggerMilestoneLockUpdate) {
-  this.tocSvc.triggerMilestoneLockUpdate()
-}
+    
+    
+    if (this.tocSvc.hashmap[contentId]) {
+      const currentStatus = this.tocSvc.hashmap[contentId]['completionStatus'] || 0
+      const newStatus = Number(contentProgress.status) || 0
+      
+      // Update if not complete or if new status is higher
+      if (currentStatus < 2 || newStatus >= currentStatus) {
+        this.tocSvc.hashmap[contentId]['completionPercentage'] = contentProgress.completionPercentage
+        this.tocSvc.hashmap[contentId]['completionStatus'] = newStatus
+        this.tocSvc.hashmap[contentId]['status'] = newStatus
+        
+        
+        // Create new hashmap reference for Angular change detection
+        this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+        
+        // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
+        if (this.tocSvc.triggerMilestoneLockUpdate) {
+          this.tocSvc.triggerMilestoneLockUpdate()
+        }
+        
+        // Emit to trigger viewer component refresh for Learning Pathways
+        this.markAsCompleteSubject.next(true)
+      }
     }
   }
 
@@ -559,26 +584,22 @@ if (this.tocSvc.triggerMilestoneLockUpdate) {
           .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
           .subscribe(noop, noop)
       }
+      
       if (this.tocSvc.hashmap[contentId] &&
         (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
         this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
-        this.tocSvc.hashmap[contentId]['completionStatus'] = req.request.contents[0].status
+        this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
         this.tocSvc.hashmap[contentId]['parent'] = req.request.contents[0].courseId
         this.tocSvc.hashmap[contentId]['progress'] = req.request.contents[0].progressdetails
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
         
-        // Notify UI components about hashmap changes
-        this.tocSvc.hashmapUpdated.next(this.tocSvc.hashmap)
-        
-        // Trigger milestone lock recomputation for Learning Pathways
+        // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
         if (this.tocSvc.triggerMilestoneLockUpdate) {
           this.tocSvc.triggerMilestoneLockUpdate()
         }
+          // Emit to trigger viewer component refresh for Learning Pathways
+          this.markAsCompleteSubject.next(true)
       }
-
-      // console.log('Updated hashmap:', this.tocSvc.hashmap)
-
-      // console.log('this.tocSvc.hashmap---', this.tocSvc.hashmap)
     } else {
       req = {}
       // do nothing
@@ -612,21 +633,36 @@ if (this.tocSvc.triggerMilestoneLockUpdate) {
           .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
           .subscribe(noop, noop)
       }
-      if (this.tocSvc.hashmap && this.tocSvc.hashmap[contentId] && req.request.contents[0]) {
-        if (this.tocSvc.hashmap[contentId] &&
-          (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
-          this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
-          this.tocSvc.hashmap[contentId]['completionStatus'] = req.request.contents[0].status
-          this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-          
-          // Notify UI components about hashmap changes
-          this.tocSvc.hashmapUpdated.next(this.tocSvc.hashmap)
-          
-          // Trigger milestone lock recomputation for Learning Pathways
-          if (this.tocSvc.triggerMilestoneLockUpdate) {
-            this.tocSvc.triggerMilestoneLockUpdate()
+      
+      // Update hashmap - create entry if it doesn't exist
+      if (this.tocSvc.hashmap) {
+        if (!this.tocSvc.hashmap[contentId]) {
+          // Create new entry for pre-assessment if it doesn't exist
+          this.tocSvc.hashmap[contentId] = {
+            identifier: contentId,
+            completionPercentage: req.request.contents[0].completionPercentage,
+            completionStatus: Number(req.request.contents[0].status) || 0,
+            status: Number(req.request.contents[0].status) || 0,
+            isPreAssessment: true
           }
+        } else {
+          // Update existing entry
+          this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
+          this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
+          this.tocSvc.hashmap[contentId]['status'] = Number(req.request.contents[0].status) || 0
         }
+        
+        this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
+        
+        // ALWAYS trigger milestone lock recomputation when pre-assessment completes
+        // This ensures milestone 1 unlocks immediately after pre-assessment completion
+        if (this.tocSvc.triggerMilestoneLockUpdate) {
+          this.tocSvc.triggerMilestoneLockUpdate()
+        }
+        
+        // Emit markAsCompleteSubject to trigger viewer component to refresh enrollment and progress
+        // This is critical for Learning Pathways to unlock milestones immediately
+        this.markAsCompleteSubject.next(true)
       }
     } else {
       req = {}

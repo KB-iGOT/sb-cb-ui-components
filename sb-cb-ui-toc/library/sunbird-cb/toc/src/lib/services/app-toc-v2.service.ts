@@ -17,6 +17,8 @@ export class AppTocV2Service {
       contentHeirarchy['preliminaryAssessmentDetail'].parent = contentHeirarchy.identifier
       // Mark this as the pre-assessment for milestone locking logic
       contentHeirarchy['preliminaryAssessmentDetail'].isPreAssessment = true
+      
+     
       contentHeirarchy['children'].push(contentHeirarchy['preliminaryAssessmentDetail'])
       leafNodes.push(contentReadData?.preliminaryAssessment || contentReadData?.preliminaryAssessmentDetail?.identifier)
     }
@@ -34,7 +36,7 @@ export class AppTocV2Service {
         "identifier": milestone.id,
         "description": milestone.description,
         "mimeType": "application/vnd.ekstep.content-collection",
-        "duration": "3600",
+        "duration": "0",
         "primaryCategory": "Milestone",
         "courseCategory": "Milestone",
         "createdBy": "25311a4f-fa42-4cf7-882a-5e79198edfcb",
@@ -42,7 +44,9 @@ export class AppTocV2Service {
         "contentType": "Course",
         "isLocked": shouldBeLocked,
         "milestoneIndex": milestoneIndex,
-        "status": "Live",
+        "status": 0,
+        "completionStatus": 0,
+        "completionPercentage": 0,
         "leafNodes": [],
         // Pre-computed flags for performance optimization
         "isMilestone": true,
@@ -58,6 +62,8 @@ export class AppTocV2Service {
         milestone.courses.forEach((mileStoneCourse: any) => {
           // Set parent reference for courses inside milestone
           mileStoneCourse.parent = milestone.id
+          mileStoneCourse['moduleCount'] = 0
+          mileStoneData['duration'] = String(Number(mileStoneData['duration']) + Number(mileStoneCourse?.duration || 0))
           this.tocSvc.mapModuleCount(mileStoneCourse)
           if (mileStoneCourse && mileStoneCourse?.leafNodes && mileStoneCourse?.leafNodes?.length) {
             leafNodes = [...leafNodes, ...mileStoneCourse.leafNodes]
@@ -83,7 +89,7 @@ export class AppTocV2Service {
       milestoneIndex++
     })
     contentHeirarchy['leafNodes'] = [...leafNodes]
-    console.log('content Heirarchy', contentHeirarchy)
+    contentHeirarchy['leafNodesCount'] = leafNodes.length
     return contentHeirarchy
   }
 
@@ -102,22 +108,20 @@ export class AppTocV2Service {
 
 
   mapContentHierarchyProgressUpdate(contentHeirarchyData: any, enrollmentListData: any) {
-    console.log('=== mapContentHierarchyProgressUpdate ===')
-    console.log('Content hierarchy:', contentHeirarchyData?.name, contentHeirarchyData?.identifier)
-    console.log('Enrollment list data:', enrollmentListData)
-    
     if (contentHeirarchyData && contentHeirarchyData.children) {
       let totalLeafNodes = 0
       let totalCompletedLeafNodes = 0
+      let LPenrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
 
       // First pass: Update progress for all content
       contentHeirarchyData.children.forEach((child: any) => {
         if (child.primaryCategory === 'Milestone') {
           this.updateMilestoneProgress(child, contentHeirarchyData?.identifier, enrollmentListData)
-          totalLeafNodes += child.leafNodesCount || 0
-          totalCompletedLeafNodes += child.completedLeafNodesCount || 0
+          // Only count mandatory course resources and milestone assessments
+          totalLeafNodes += child.mandatoryLeafNodesCount || 0
+          totalCompletedLeafNodes += child.mandatoryCompletedLeafNodesCount || 0
         } else {
-          // For pre-assessment and other root-level content
+          // For pre-assessment and other root-level content (always count these)
           // Try to find enrollment with parent identifier first, then with child's own identifier
           let enrollment = this.findEnrollment(enrollmentListData, contentHeirarchyData?.identifier)
           if (!enrollment) {
@@ -129,18 +133,16 @@ export class AppTocV2Service {
           totalCompletedLeafNodes += isCompleted ? (child.leafNodesCount || 1) : 0
         }
       })
-
-      if (totalLeafNodes > 0) {
-        const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
-        contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-        contentHeirarchyData.completionStatus = contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0)
+      if(LPenrollment && LPenrollment.completionPercentage === 100) {
+        contentHeirarchyData.completionPercentage = 100
+        contentHeirarchyData.completionStatus = 2
+      } else {
+        if (totalLeafNodes > 0) {
+          const calculatedPercentage = Math.round((Number(totalCompletedLeafNodes) / Number(totalLeafNodes)) * 100)
+          contentHeirarchyData.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
+          contentHeirarchyData.completionStatus = Number(contentHeirarchyData.completionPercentage === 100 ? 2 : (contentHeirarchyData.completionPercentage > 0 ? 1 : 0))
+        }
       }
-
-      // NOTE: Milestone locking is computed AFTER hashmap is built
-      // See app-toc-home-v2.component.ts -> fetchContentHierarchy() flow:
-      // 1. mapContentHierarchyProgressUpdate (this method) - updates progress on content tree
-      // 2. callHirarchyProgressHashmap() - builds hashmap from content tree
-      // 3. computeMilestoneLockingStatus() - computes locks using hashmap
     }
     return contentHeirarchyData
   }
@@ -148,6 +150,8 @@ export class AppTocV2Service {
   private updateMilestoneProgress(milestone: any, parentContentIdentifier: string, enrollmentListData: any) {
     let totalLeafNodes = 0
     let totalCompletedLeafNodes = 0
+    let mandatoryLeafNodes = 0
+    let mandatoryCompletedLeafNodes = 0
     let completedCourses = 0
     let totalCourses = 0
 
@@ -156,40 +160,59 @@ export class AppTocV2Service {
         if (child.primaryCategory === 'Course') {
           totalCourses += 1
           this.updateCourseProgress(child, parentContentIdentifier, enrollmentListData)
-          // Check both status and completionStatus for completion
-          if (child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100) {
+          
+          const childLeafNodes = child.leafNodesCount || 1
+          const isCompleted = child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100
+          
+          // Count all course leaf nodes for overall tracking
+          totalLeafNodes += childLeafNodes
+          if (isCompleted) {
             completedCourses += 1
+            totalCompletedLeafNodes += childLeafNodes
+          }
+          
+          // Only count mandatory courses for LP completion percentage
+          if (child.isMandatory === true || child.mandatory === true) {
+            mandatoryLeafNodes += childLeafNodes
+            // Count individual completed resources within mandatory courses
+            const completedCount = this.getCompletedLeafNodesCount(child)
+            mandatoryCompletedLeafNodes += completedCount
           }
         } else {
-          // For assessments and other content, try multiple enrollment sources
-          // First try parent Learning Pathway enrollment
+          // For assessments - always count them as mandatory
+          // Try multiple enrollment sources
           let enrollment = this.findEnrollment(enrollmentListData, parentContentIdentifier)
           if (!enrollment) {
-            // Try milestone enrollment
             enrollment = this.findEnrollment(enrollmentListData, milestone?.identifier)
           }
           this.updateNodeProgress(child, enrollment)
-        }
-
-        const leafNodes = child.leafNodesCount || 1
-        totalLeafNodes += leafNodes
-        // Check both status and completionStatus for completion
-        if (child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100) {
-          totalCompletedLeafNodes += leafNodes
+          
+          const leafNodes = child.leafNodesCount || 1
+          const isCompleted = child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100
+          
+          // Count assessments in both total and mandatory
+          totalLeafNodes += leafNodes
+          mandatoryLeafNodes += leafNodes
+          if (isCompleted) {
+            totalCompletedLeafNodes += leafNodes
+            mandatoryCompletedLeafNodes += leafNodes
+          }
         }
       })
     }
 
     milestone.leafNodesCount = totalLeafNodes
     milestone.completedLeafNodesCount = totalCompletedLeafNodes
+    milestone.mandatoryLeafNodesCount = mandatoryLeafNodes
+    milestone.mandatoryCompletedLeafNodesCount = mandatoryCompletedLeafNodes
     milestone.totalCourses = totalCourses
     milestone.completedCourses = completedCourses
 
     if (totalLeafNodes > 0) {
       const calculatedPercentage = Math.round((totalCompletedLeafNodes / totalLeafNodes) * 100)
       milestone.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-      milestone.completionStatus = milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0)
-      milestone.status = milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0)
+      milestone.completionStatus = Number(milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0))
+      milestone.status = Number(milestone.completionPercentage === 100 ? 2 : (milestone.completionPercentage > 0 ? 1 : 0))
     }
   }
 
@@ -212,69 +235,56 @@ export class AppTocV2Service {
                                 enrollment.contentId === node.identifier
     
     if (isDirectEnrollment) {
+      
       // Use enrollment's direct progress
       const progress = enrollment.completionPercentage || enrollment.progress || 0
-      const status = enrollment.status || 0
+      const status = Number(enrollment.status) || 0
       
       node.completionPercentage = progress
       node.completionStatus = status
       node.status = status
       
-      console.log(`Direct enrollment found for ${node.identifier}:`, {
-        completionPercentage: progress,
-        completionStatus: status,
-        enrollmentData: { 
-          progress: enrollment.progress, 
-          completionPercentage: enrollment.completionPercentage,
-          status: enrollment.status 
-        }
-      })
+      
       return
     }
-
-    // Try both contentId and collectionId as the API response may use either field
-    const nodeEnrollData = enrollment?.contentList?.find((ele: any) => 
-      ele?.contentId === node.identifier || ele?.collectionId === node.identifier
-    )
-    
-    console.log(`Updating node progress for ${node.identifier} (${node.name}):`, {
-      hasEnrollment: !!enrollment,
-      hasNodeEnrollData: !!nodeEnrollData,
-      nodeEnrollData,
-      currentCompletionStatus: node.completionStatus,
-      currentCompletionPercentage: node.completionPercentage
-    })
-    
-    if (enrollment && nodeEnrollData && nodeEnrollData.status < 2) {
-      node.completionPercentage = nodeEnrollData.completionPercentage || nodeEnrollData.progress || 0
-      node.completionStatus = nodeEnrollData.status
-      node.status = nodeEnrollData.status
-    } else if (enrollment && nodeEnrollData && nodeEnrollData.status === 2) {
+    if(enrollment?.status === 2) {
       node.completionPercentage = 100
       node.completionStatus = 2
       node.status = 2
-    } else if (enrollment && !nodeEnrollData) {
-      // Enrollment exists but this node is not in contentList
-      // This can happen for completed assessments - preserve their completion data from content hierarchy
-      // Only reset to 0 if there's no completion data at all
-      if (node.completionPercentage === undefined && node.completionStatus === undefined && node.status === undefined) {
+    } else {
+      // Try both contentId and collectionId as the API response may use either field
+      const nodeEnrollData = enrollment?.contentList?.find((ele: any) => 
+        ele?.contentId === node.identifier || ele?.collectionId === node.identifier
+      )
+      
+      if (enrollment && nodeEnrollData && nodeEnrollData.status < 2) {
+        node.completionPercentage = nodeEnrollData.completionPercentage || nodeEnrollData.progress || 0
+        node.completionStatus = Number(nodeEnrollData.status) || 0
+        node.status = Number(nodeEnrollData.status) || 0
+      }else if (enrollment && nodeEnrollData && nodeEnrollData.status === 2) {
+        node.completionPercentage = 100
+        node.completionStatus = 2
+        node.status = 2
+      } else if (enrollment && !nodeEnrollData) {
+        // Enrollment exists but this node is not in contentList
+        // This can happen for completed assessments - preserve their completion data from content hierarchy
+        // Only reset to 0 if there's no completion data at all
+        if (node.completionPercentage === undefined && node.completionStatus === undefined && node.status === undefined) {
+          node.completionPercentage = 0
+          node.completionStatus = 0
+          node.status = 0
+        }
+        // Otherwise keep existing values from content hierarchy
+      } else {
+        // No enrollment at all - reset to 0
         node.completionPercentage = 0
         node.completionStatus = 0
         node.status = 0
       }
-      // Otherwise keep existing values from content hierarchy
-    } else {
-      // No enrollment at all - reset to 0
-      node.completionPercentage = 0
-      node.completionStatus = 0
-      node.status = 0
     }
     
-    console.log(`Updated node progress for ${node.identifier}:`, {
-      completionStatus: node.completionStatus,
-      completionPercentage: node.completionPercentage,
-      status: node.status
-    })
+    
+    
   }
 
   private updateCourseProgress(course: any, parentContentIdentifier, enrollmentListData: any) {
@@ -284,17 +294,30 @@ export class AppTocV2Service {
       // Enrollment shows 100% - mark course as complete
       course.completionPercentage = 100
       course.completionStatus = 2
-      course.status = 2
-      this.tocSvc.mapCompletionChildPercentageProgram(course)
+      if (enrollment.issuedCertificates.length > 0) {
+                  const certificate: any = enrollment.issuedCertificates.sort((a: any, b: any) =>
+                    new Date(a.lastIssuedOn).getTime() - new Date(b.lastIssuedOn).getTime())
+                  const certId: any = certificate[0].identifier
+                  course.issuedCertificatesId = certId
+                }
+        this.tocSvc.mapCompletionChildPercentageProgram(course)
     } else if (enrollment && enrollment.completionPercentage > 0) {
       // Enrollment has partial progress
       course.completionPercentage = enrollment.completionPercentage || 0
       course.completionStatus = 1
-      course.status = 1
       // Also update children
       if (course.children && course.children.length > 0) {
         course.children.forEach((child: any) => {
+          
+
+          // If child is a module, update its children (resources) as well
+          if (child.primaryCategory === NsContent.EPrimaryCategory.MODULE && child.children && child.children.length > 0) {
+            child.children.forEach((resource: any) => {
+              this.updateNodeProgress(resource, enrollment)
+            })
+          } else {
           this.updateNodeProgress(child, enrollment)
+          }
         })
       }
     } else {
@@ -303,8 +326,20 @@ export class AppTocV2Service {
         let totalCompleted = 0
 
         course.children.forEach((child: any) => {
+          
+          // If child is a module, update its children (resources) as well
+          if (child.primaryCategory === NsContent.EPrimaryCategory.MODULE && child.children && child.children.length > 0) {
+            child.children.forEach((resource: any) => {
+              this.updateNodeProgress(resource, enrollment)
+              if (resource.completionStatus === 2 || resource.completionPercentage === 100) {
+                totalCompleted += resource.leafNodesCount || 1
+              }
+            })
+          } else {
           this.updateNodeProgress(child, enrollment)
-          if (child.status === 2 || child.completionStatus === 2 || child.completionPercentage === 100) {
+
+          }
+          if (child.completionStatus === 2 || child.completionPercentage === 100) {
             totalCompleted += child.leafNodesCount || 1
           }
         })
@@ -317,12 +352,41 @@ export class AppTocV2Service {
           if (totalLeafNodes > 0) {
             const calculatedPercentage = Math.round((totalCompleted / totalLeafNodes) * 100)
             course.completionPercentage = isNaN(calculatedPercentage) ? 0 : calculatedPercentage
-            course.completionStatus = course.completionPercentage === 100 ? 2 : (course.completionPercentage > 0 ? 1 : 0)
-            course.status = course.completionStatus
+            course.completionStatus = Number(course.completionPercentage === 100 ? 2 : (course.completionPercentage > 0 ? 1 : 0))
+
           }
         }
       }
     }
+  }
+
+  private getCompletedLeafNodesCount(node: any): number {
+    let completedCount = 0
+    
+    // If it's a leaf node (resource)
+    if (!node.children || node.children.length === 0) {
+      const isCompleted = node.status === 2 || node.completionStatus === 2 || node.completionPercentage >= 100
+      return isCompleted ? (node.leafNodesCount || 1) : 0
+    }
+    
+    // If it has children, recursively count completed leaf nodes
+    node.children.forEach((child: any) => {
+      if (child.primaryCategory === NsContent.EPrimaryCategory.MODULE && child.children) {
+        // Module - recurse through its children
+        completedCount += this.getCompletedLeafNodesCount(child)
+      } else if (!child.children || child.children.length === 0) {
+        // Resource (leaf node)
+        const isCompleted = child.status === 2 || child.completionStatus === 2 || child.completionPercentage >= 100
+        if (isCompleted) {
+          completedCount += child.leafNodesCount || 1
+        }
+      } else {
+        // Other collection type - recurse
+        completedCount += this.getCompletedLeafNodesCount(child)
+      }
+    })
+    
+    return completedCount
   }
 
   private findEnrollment(enrollmentList: any, identifier: string) {
