@@ -121,6 +121,9 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     } else {
       this.enableAITutorFlag = false
     }
+     if(this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+      this.enableAITutorFlag = false
+    }
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription?.all) {
       // this.resourceIdentifier$ = this.tocSvc.transriptionIdentifier.subscribe((value:any)=>{
       //   if(value &&  value?.identifier) {
@@ -421,6 +424,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   showAiTutorConfirmPopup() {
+    debugger
     this.raiseAIPopupStartTelemetry()
     if (this.isEnrolled) {
       this.fromAITutor = true
@@ -446,7 +450,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       const dialogRef = this.dialog.open(AiTutorConfirmPopupComponent, dialogConfig)
 
       dialogRef.afterClosed().subscribe((response: any) => {
-
         if (response === 'enroll') {
           this.fromAITutor = true
           this.generateResumeDataLinkNew()
