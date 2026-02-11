@@ -162,5 +162,6 @@ export namespace NsContentStripWithTabs {
     customeClass?: string
     disableTranslate?: boolean
     contentShuffel?: boolean
+    hideTab?: boolean
   }
 }
