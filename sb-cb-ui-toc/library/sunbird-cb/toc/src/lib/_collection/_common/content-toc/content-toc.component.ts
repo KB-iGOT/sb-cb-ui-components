@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, HostListener, Inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { ConfigurationsService, EventService, NsContent, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 
 import { LoadCheckService } from '../../../services/load-check.service'
@@ -17,6 +17,7 @@ import { ViewerDataService } from '../../../services/viewer-data.service'
 import { MatTab } from '@angular/material/tabs'
 import { SamuhikCharchaService } from '../../../_services/samuhik-charcha.service'
 import * as _ from 'lodash'
+import { NsContent } from '../../../_collection-api'
 @Component({
   selector: 'ws-widget-content-toc',
   templateUrl: './content-toc.component.html',
@@ -248,6 +249,10 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     ) {
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.content?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
     } else {
+      this.enableAITutorFlag = false
+    }
+
+    if(this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
       this.enableAITutorFlag = false
     }
 

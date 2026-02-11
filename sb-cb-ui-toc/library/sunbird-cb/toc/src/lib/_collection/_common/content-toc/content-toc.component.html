@@ -290,8 +290,8 @@
             <ng-template matTabContent>
                 <ng-container *ngIf="showAITutorPopup">
                     <div>
-                        <viewer-ai-tutor [content]="content?.identifier"
-                            (closeAIPopup)="closeAIPopup($event)"></viewer-ai-tutor>
+                        <ws-widget-ai-tutor [content]="content?.identifier"
+                            (closeAIPopup)="closeAIPopup($event)"></ws-widget-ai-tutor>
                     </div>
                 </ng-container>
             </ng-template>
