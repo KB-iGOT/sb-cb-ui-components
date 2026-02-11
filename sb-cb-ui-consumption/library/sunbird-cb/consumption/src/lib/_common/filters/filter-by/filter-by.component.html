@@ -59,6 +59,10 @@
             </mat-checkbox>
           </section>
         </mat-selection-list>
+        <!-- No results message -->
+        <div *ngIf="hasNoSearchResults(config)" class="no-results-message mat-body-2 text-muted py-2">
+          No results found
+        </div>
       </ng-container>
 
       <!-- Radio Selection -->
@@ -78,13 +82,17 @@
             </mat-radio-button>
           </section>
         </mat-radio-group>
+        <!-- No results message -->
+        <div *ngIf="hasNoSearchResults(config)" class="no-results-message mat-body-2 text-muted py-2">
+          No results found
+        </div>
       </ng-container>
 
       <!-- See More / See Less -->
-      <button *ngIf="hasMoreOptions(config) && config.showSeeMore !== false"
-        class="brand-color underline cursor-pointer see-more-link" (click)="toggleShowMore(config.key)">
+      <a *ngIf="hasMoreOptions(config) && config.showSeeMore !== false" class="see-more-link"
+        (click)="toggleShowMore(config.key)">
         {{ showAllMap[config.key] ? 'See Less' : 'See More' }}
-      </button>
+      </a>
     </div>
   </ng-container>
 </div>
