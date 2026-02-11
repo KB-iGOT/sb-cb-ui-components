@@ -443,8 +443,31 @@ export class FilterByComponent implements OnInit, OnDestroy, OnChanges {
 
   hasMoreOptions(config: FilterConfig): boolean {
     const limit = config.seeMoreLimit || 5
-    const optionsLength = _.get(config, 'options.length', 0) as number
-    return optionsLength > limit
+    const filteredOptionsCount = this.getFilteredOptionsCount(config)
+    return filteredOptionsCount > limit
+  }
+
+  getFilteredOptionsCount(config: FilterConfig): number {
+    let options = config.options || []
+    const searchQuery = this.searchQueries[config.key]?.toLowerCase() || ''
+
+    // Apply search filter
+    if (searchQuery && searchQuery.trim() !== '') {
+      options = options.filter(opt => {
+        const displayName = opt.displayName || opt.name || ''
+        return displayName.toLowerCase().includes(searchQuery)
+      })
+    }
+
+    return options.length
+  }
+
+  hasNoSearchResults(config: FilterConfig): boolean {
+    const searchQuery = this.searchQueries[config.key]?.toLowerCase() || ''
+    if (!searchQuery || searchQuery.trim() === '') {
+      return false
+    }
+    return this.getFilteredOptionsCount(config) === 0
   }
 
   capitalizeFirstLetter(str: string): string {
