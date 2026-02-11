@@ -1043,15 +1043,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   }
 
   public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
-    let tabEventIndex
-    if (stripKey === 'cbpPlan') {
-      stripMap.tabs.forEach((tab, index) => {
-        if (tab?.hideTab && tabEvent >= 1) {
-          tabEventIndex = tabEvent + 1
-          this.activeTabIndex = tabEvent + 1
-        }
-      })
-    }
+    let tabEventIndex = tabEvent
+   
 
     if (stripMap && stripMap.tabs && stripMap.tabs[tabEventIndex]) {
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress'
@@ -1520,8 +1513,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         strip.showOnLoader = false
         strip.tabs[0].pillsData[0].tabLoading = false
         strip.tabs[0].hideTab = true
-        // this.fetchDesignationBasedCourses(strip, 1, true)
-        // this.generateCourseRecommendation(strip, 1, true, this.localRecommended)
+        // get index of first tab which does not have hideTab / hideTab is false
+        const firstVisibleTabIndex = strip.tabs.findIndex((tab: any) => !tab.hideTab)
+        if (firstVisibleTabIndex !== -1) {
+          this.tabClicked(firstVisibleTabIndex, 0, strip, strip.key)
+        }
         this.processStrip(
           strip,
           this.transformContentsToWidgets(courses, strip, tabCardSubType),
