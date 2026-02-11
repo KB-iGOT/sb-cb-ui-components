@@ -1,0 +1,137 @@
+<div class="config-container">
+  <h2 class="config-title">Survey Configuration</h2>
+
+  <form [formGroup]="configForm" class="config-form">
+    <!-- Select Course -->
+    <div class="form-field mat-full-radius">
+      <label class="field-label">Select Course</label>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Search Course by Name, Organisation" formControlName="course"
+          (input)="onCourseSearch($event)">
+        <mat-hint align="start">Only the live courses or program will be searchable here</mat-hint>
+        <mat-hint align="end">{{courseCharCount}}/70</mat-hint>
+      </mat-form-field>
+
+      <!-- Selected Course Chip -->
+      <div class="selected-course-container" *ngIf="selectedCourse">
+        <span class="selected-label">Selected items -</span>
+        <div class="chip-wrapper">
+          <div class="custom-chip">
+            <span class="chip-text">{{ selectedCourse.name | slice:0:30 }}{{ selectedCourse.name.length > 30 ? '...' :
+              '' }}</span>
+            <span class="chip-remove" (click)="removeSelectedCourse()">✕</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Course Cards -->
+      <div class="course-list-container" *ngIf="courseSearchResults.length > 0">
+        <div class="course-grid">
+          <div class="course-card" *ngFor="let course of paginatedCourses" [class.selected]="isCourseSelected(course)"
+            (click)="selectCourse(course)">
+            <div class="card-image-container">
+              <img [src]="getCorrectUrl(course.posterImage || course.appIcon)" [alt]="course.name" class="course-image"
+                onerror="this.src='/assets/images/default.png'">
+            </div>
+            <div class="card-content">
+              <span class="course-badge">{{ course.courseCategory || 'Course' }}</span>
+              <h4 class="course-title">{{ course.name }}</h4>
+              <p class="course-date" *ngIf="course.lastPublishedOn">Published on: {{ course.lastPublishedOn |
+                date:'d/MMM/yy' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" *ngIf="totalPages > 1">
+          <button mat-icon-button [disabled]="currentPage === 1" (click)="goToFirstPage()" title="First page">
+            <mat-icon>first_page</mat-icon>
+          </button>
+          <button mat-icon-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)"
+            title="Previous page">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button mat-button *ngFor="let page of visiblePages" [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          <span *ngIf="shouldShowEllipsis()">...</span>
+          <button mat-button *ngIf="shouldShowLastPageButton()" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+          <button mat-icon-button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)"
+            title="Next page">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button mat-icon-button [disabled]="currentPage === totalPages" (click)="goToLastPage()" title="Last page">
+            <mat-icon>last_page</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div class="loading-container" *ngIf="isSearching">
+        <p>Searching courses...</p>
+      </div>
+
+      <!-- No results state -->
+      <div class="no-results-container" *ngIf="!isSearching && courseSearchResults.length === 0 && currentSearchQuery">
+        <p>No courses found</p>
+      </div>
+    </div>
+
+    <!-- Survey Trigger Timing -->
+    <div class="form-field-row mat-full-radius">
+      <div class="form-field flex-field">
+        <label class="field-label">
+          Survey Trigger Timing
+          <mat-icon class="info-icon"
+            matTooltip="Time after course completion to trigger survey">info_outline</mat-icon>
+        </label>
+        <div class="field-group">
+          <mat-form-field appearance="outline" class="trigger-number">
+            <mat-select formControlName="triggerValue">
+              <mat-option *ngFor="let num of triggerNumbers" [value]="num">{{num}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="configForm.get('triggerValue')?.hasError('required')">
+              Required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="trigger-unit">
+            <mat-select formControlName="triggerUnit">
+              <mat-option value="Days">Days</mat-option>
+              <!-- <mat-option value="Weeks">Weeks</mat-option>
+              <mat-option value="Months">Months</mat-option> -->
+            </mat-select>
+            <mat-error *ngIf="configForm.get('triggerUnit')?.hasError('required')">
+              Required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Survey End Date -->
+      <div class="form-field flex-field mat-full-radius">
+        <label class="field-label required">
+          Survey End Date
+          <mat-icon class="info-icon" matTooltip="Last date to submit survey responses">info_outline</mat-icon>
+        </label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput [matDatepicker]="picker" placeholder="DD-MM-YY" formControlName="endDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="configForm.get('endDate')?.hasError('required')">
+            End date is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Checkbox -->
+    <div class="form-field checkbox-field">
+      <mat-checkbox formControlName="sendToCompletedLearners">
+        Do you want to send survey to learners who completed this course/program before the creation of this survey?
+      </mat-checkbox>
+    </div>
+  </form>
+</div>
