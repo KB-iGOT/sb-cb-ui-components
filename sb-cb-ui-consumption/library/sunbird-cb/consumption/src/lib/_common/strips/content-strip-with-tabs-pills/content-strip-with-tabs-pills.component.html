@@ -80,27 +80,28 @@
             <!-- IF no errors then proceed to show tabs or non tabs strip -->
             <ng-container *ngIf="!stripsResultDataMap[key]?.showOnNoData && !stripsResultDataMap[key]?.showOnError">
               <ng-container *ngIf="stripsResultDataMap[key].tabs && stripsResultDataMap[key].tabs.length">
-                <mat-tab-group animationDuration="0ms" [selectedIndex]="getSelectedIndex(stripsResultDataMap[key], key)"
-                  class="mat-tab-labels w-full strips-tabgroup padding-bottom-tabs" dynamicHeight
-                  (selectedIndexChange)="tabClicked($event, 0, stripsResultDataMap[key], key)">
+                <mat-tab-group animationDuration="0ms" 
+                  class="mat-tab-labels w-full strips-tabgroup padding-bottom-tabs" dynamicHeight>
                   <ng-container *ngFor="let tab of stripsResultDataMap[key].tabs; let last = last;let tabIndex = index">
                     <mat-tab *ngIf="!tab?.hideTab">
                       <ng-template mat-tab-label>
-                        <ng-container *ngIf="tab?.value !== sakshamAIEnum.SakshamAI">
-                          <span>{{ translateLabels(tab?.label, 'home') }} &nbsp;</span>
-                          <span *ngIf="tab?.showTabDataCount && tab?.widgets?.length">({{tab?.widgets?.length}})</span>
-                        </ng-container>
-                        <ng-container *ngIf="tab?.value === sakshamAIEnum.SakshamAI">
-                          <div class="flex items-center">
-                            <img src="/assets/images/sakshamAI/ai-icon.svg" alt="loader" width="16" height="16"
-                              class="mr-2">
+                        <div (click)="tabClicked(tabIndex, 0, stripsResultDataMap[key], key)">
+                          <ng-container *ngIf="tab?.value !== sakshamAIEnum.SakshamAI">
                             <span>{{ translateLabels(tab?.label, 'home') }} &nbsp;</span>
-                            <mat-icon svgIcon="info-outline"
-                              class="margin-remove w-16-px cursor-pointer request-id-toolTip m-px"
-                              [matTooltip]="'home.sakshamAITooltip' | translate" [matTooltipPosition]="'above'"
-                              matTooltipClass="request-id-toolTip"></mat-icon>
-                          </div>
-                        </ng-container>
+                            <span *ngIf="tab?.showTabDataCount && tab?.widgets?.length">({{tab?.widgets?.length}})</span>
+                          </ng-container>
+                          <ng-container *ngIf="tab?.value === sakshamAIEnum.SakshamAI">
+                            <div class="flex items-center">
+                              <img src="/assets/images/sakshamAI/ai-icon.svg" alt="loader" width="16" height="16"
+                                class="mr-2">
+                              <span>{{ translateLabels(tab?.label, 'home') }} &nbsp;</span>
+                              <mat-icon svgIcon="info-outline"
+                                class="margin-remove w-16-px cursor-pointer request-id-toolTip m-px"
+                                [matTooltip]="'home.sakshamAITooltip' | translate" [matTooltipPosition]="'above'"
+                                matTooltipClass="request-id-toolTip"></mat-icon>
+                            </div>
+                          </ng-container>
+                        </div>
                       </ng-template>
                       <div class="wfull wrapper-saksham"
                         *ngIf="tab?.pillsData && tab?.pillsData?.length && !tab?.hideTab"

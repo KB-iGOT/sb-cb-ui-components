@@ -176,12 +176,25 @@
 }
 
 .see-more-link {
-  /* stylelint-disable */
-  font-family: Lato;
-  /* stylelint-enable */
-  font-size: 13px;
+  /* stylelint-disable-next-line */
+  font: 400 14px Lato;
   margin-top: 8px;
   display: inline-block;
+  color: #1b4ca1;
+  cursor: pointer;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+
+  &:hover,
+  &:focus,
+  &:active,
+  &:visited {
+    text-decoration: none;
+    color: #1b4ca1;
+    outline: none;
+  }
 }
 
 .brand-color {
