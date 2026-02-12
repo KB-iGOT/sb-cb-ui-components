@@ -28,11 +28,11 @@
       (stepChange)="onStepChanged($event)">
       <ng-template>
         <!-- Configuration Step Content -->
-        <sb-uic-pv-config-step></sb-uic-pv-config-step>
+        <sb-uic-pv-config-step *ngIf="currentStepperIndex === 0"></sb-uic-pv-config-step>
       </ng-template>
       <ng-template>
         <!-- Questions Step Content -->
-        <div>Questions Content</div>
+        <sb-uic-pv-question-step *ngIf="currentStepperIndex === 1"></sb-uic-pv-question-step>
       </ng-template>
     </sb-uic-horizontal-dynamic-stepper>
   </div>

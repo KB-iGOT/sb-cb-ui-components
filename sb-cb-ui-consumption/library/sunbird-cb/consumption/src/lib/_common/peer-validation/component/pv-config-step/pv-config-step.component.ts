@@ -14,7 +14,7 @@ import { PeerValidationService } from '../../../peer-validation/service/peer-val
 export class PvConfigStepComponent implements OnInit, OnDestroy {
   configForm!: FormGroup
   courseCharCount = 0
-  triggerNumbers = Array.from({ length: 90 }, (_, i) => i + 1)
+  triggerNumbers = Array.from({ length: 7 }, (_, i) => 30 + (i * 5))
   courseSearchSubject = new Subject<string>()
   private destroy$ = new Subject<void>()
   courseSearchResults: any[] = []
@@ -28,6 +28,7 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   currentPage = 1
   cardsPerPage = 5
   environment: any
+  minDate = new Date()
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +42,8 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeForm()
     this.setupCourseSearch()
+    this.updateMinDate()
+    this.setupTriggerValueListener()
   }
 
   ngOnDestroy(): void {
@@ -57,6 +60,37 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       endDate: ['', Validators.required],
       sendToCompletedLearners: [false]
     })
+  }
+
+  setupTriggerValueListener(): void {
+    this.configForm.get('triggerValue')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.updateMinDate()
+      })
+
+    this.configForm.get('triggerUnit')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.updateMinDate()
+      })
+  }
+
+  updateMinDate(): void {
+    const triggerValue = this.configForm.get('triggerValue')?.value || 30
+    const triggerUnit = this.configForm.get('triggerUnit')?.value || 'Days'
+
+    const today = new Date()
+    let daysToAdd = triggerValue
+
+    // If other units are added in future, convert to days
+    // if (triggerUnit === 'Weeks') {
+    //   daysToAdd = triggerValue * 7
+    // } else if (triggerUnit === 'Months') {
+    //   daysToAdd = triggerValue * 30
+    // }
+
+    this.minDate = new Date(today.getTime() + (daysToAdd * 24 * 60 * 60 * 1000))
   }
 
   setupCourseSearch(): void {
@@ -214,6 +248,7 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
 
   selectCourse(course: any): void {
     this.selectedCourse = course
+    this.peerValidationService.setSelectedCourse(course)
     this.configForm.patchValue({
       selectedCourseDetails: course
     })
@@ -221,6 +256,7 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
 
   removeSelectedCourse(): void {
     this.selectedCourse = null
+    this.peerValidationService.setSelectedCourse(null)
     this.configForm.patchValue({
       selectedCourseDetails: null
     })

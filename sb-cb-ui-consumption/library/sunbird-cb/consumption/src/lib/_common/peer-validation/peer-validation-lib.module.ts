@@ -14,6 +14,8 @@ import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/materia
 import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
 import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
 import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
+import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
+import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle'
 import { PvDashboardComponent } from './component/pv-dashboard/pv-dashboard.component'
 import { PvCreateComponent } from './component/pv-create/pv-create.component'
 import { PvQuestionStepComponent } from './component/pv-question-step/pv-question-step.component'
@@ -46,6 +48,8 @@ import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/ho
     MatMenuModule,
     MatTooltipModule,
     MatCheckboxModule,
+    MatRadioModule,
+    MatSlideToggleModule,
     HorizontalDynamicStepperModule
   ],
   exports: [

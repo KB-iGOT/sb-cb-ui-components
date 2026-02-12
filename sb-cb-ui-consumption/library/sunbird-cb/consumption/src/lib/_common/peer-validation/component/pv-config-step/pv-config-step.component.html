@@ -117,7 +117,7 @@
           <mat-icon class="info-icon" matTooltip="Last date to submit survey responses">info_outline</mat-icon>
         </label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput [matDatepicker]="picker" placeholder="DD-MM-YY" formControlName="endDate">
+          <input matInput [matDatepicker]="picker" [min]="minDate" placeholder="DD-MM-YY" formControlName="endDate">
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
           <mat-error *ngIf="configForm.get('endDate')?.hasError('required')">

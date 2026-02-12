@@ -73,9 +73,9 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
       // First, allow the navigation to happen
       this.currentStepperIndex = index
       // Then validate and revert if needed
-      if (!this.validateConfigurationStep()) {
-        return
-      }
+      // if (!this.validateConfigurationStep()) {
+      //   return
+      // }
     } else {
       // For all other navigation, just update the index
       this.currentStepperIndex = index

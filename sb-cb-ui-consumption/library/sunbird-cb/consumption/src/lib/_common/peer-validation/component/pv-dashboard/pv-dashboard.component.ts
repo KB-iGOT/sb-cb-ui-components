@@ -7,6 +7,7 @@ import { Router, ActivatedRoute } from '@angular/router'
 interface Survey {
   id: string
   courseName: string
+  organisation?: string
   status: 'DRAFT' | 'ACTIVE' | 'END'
   startDate: string
   endDate: string
@@ -26,14 +27,18 @@ export class PvDashboardComponent implements OnInit {
   filterForm!: FormGroup
   displayedColumns: string[] = ['courseName', 'status', 'startDate', 'endDate', 'submissionRate', 'actions']
   dataSource = new MatTableDataSource<Survey>([])
+  allSurveys: Survey[] = []
   selectedTabIndex = 0
+  selectedTab: 'all' | 'active' | 'ended' | 'draft' = 'all'
   totalCount = 42
   allCount = 100
   activeCount = 25
   endedCount = 50
   draftCount = 25
+  isSPVRoute = false
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended']
+  mdoOptions = ['All MDO', 'Governor Secretariat, Uttar Pradesh', 'PM Commissionerate of Health and Family Welfare Telangana', 'Karmayogi Bharat (SPV)']
 
   constructor(
     private fb: FormBuilder,
@@ -42,6 +47,14 @@ export class PvDashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Check if URL contains spv/peer-validation
+    this.isSPVRoute = this.router.url.includes('spv/peer-validation')
+
+    // Update displayed columns if SPV route
+    if (this.isSPVRoute) {
+      this.displayedColumns = ['courseName', 'organisation', 'startDate', 'endDate', 'submissionRate', 'actions']
+    }
+
     this.initializeForm()
     this.loadSurveys()
 
@@ -54,18 +67,26 @@ export class PvDashboardComponent implements OnInit {
           'ended': 2,
           'draft': 3
         }
+        this.selectedTab = params['tab'] as 'all' | 'active' | 'ended' | 'draft' || 'all'
         this.selectedTabIndex = tabMap[params['tab']] || 0
+        this.filterByTab()
       }
     })
   }
 
   initializeForm(): void {
-    this.filterForm = this.fb.group({
+    const formConfig: any = {
       searchText: [''],
       startDate: [''],
       endDate: [''],
       status: ['All Status']
-    })
+    }
+
+    if (this.isSPVRoute) {
+      formConfig.mdo = ['All MDO']
+    }
+
+    this.filterForm = this.fb.group(formConfig)
   }
 
   loadSurveys(): void {
@@ -74,6 +95,7 @@ export class PvDashboardComponent implements OnInit {
       {
         id: '1',
         courseName: 'Peer Feedback - Q4 2024',
+        organisation: 'Governor Secretariat, Uttar PradeshState',
         status: 'DRAFT',
         startDate: 'Nov 20, 2023',
         endDate: 'Nov 20, 2023',
@@ -84,6 +106,7 @@ export class PvDashboardComponent implements OnInit {
       {
         id: '2',
         courseName: 'Peer Feedback - Q4 2024',
+        organisation: 'PM Commissionerate of Health and Family Welfare TelanganaState',
         status: 'ACTIVE',
         startDate: 'Nov 20, 2023',
         endDate: 'Nov 20, 2023',
@@ -94,6 +117,7 @@ export class PvDashboardComponent implements OnInit {
       {
         id: '3',
         courseName: 'Peer Feedback - Q4 2024',
+        organisation: 'Governor Secretariat, Uttar PradeshState',
         status: 'END',
         startDate: 'Nov 20, 2023',
         endDate: 'Nov 20, 2023',
@@ -104,6 +128,7 @@ export class PvDashboardComponent implements OnInit {
       {
         id: '4',
         courseName: 'Peer Feedback - Q4 2024',
+        organisation: 'Karmayogi Bharat (SPV)',
         status: 'DRAFT',
         startDate: 'Nov 20, 2023',
         endDate: 'Nov 20, 2023',
@@ -114,6 +139,7 @@ export class PvDashboardComponent implements OnInit {
       {
         id: '5',
         courseName: 'Peer Feedback - Q4 2024',
+        organisation: 'Governor Secretariat, Uttar PradeshState',
         status: 'ACTIVE',
         startDate: 'Nov 20, 2023',
         endDate: 'Nov 20, 2023',
@@ -123,29 +149,55 @@ export class PvDashboardComponent implements OnInit {
       }
     ]
 
+    this.allSurveys = mockData
     this.dataSource = new MatTableDataSource(mockData)
     this.dataSource.paginator = this.paginator
+    this.filterByTab()
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator
   }
 
+  filterByTab(): void {
+    let filteredData: Survey[]
+
+    switch (this.selectedTabIndex) {
+      case 0: // All
+        filteredData = this.allSurveys
+        break
+      case 1: // Active
+        filteredData = this.allSurveys.filter(s => s.status === 'ACTIVE')
+        break
+      case 2: // Ended
+        filteredData = this.allSurveys.filter(s => s.status === 'END')
+        break
+      case 3: // Draft
+        filteredData = this.allSurveys.filter(s => s.status === 'DRAFT')
+        break
+      default:
+        filteredData = this.allSurveys
+    }
+
+    this.dataSource.data = filteredData
+    this.totalCount = filteredData.length
+  }
+
   onTabChange(index: number): void {
     this.selectedTabIndex = index
 
     // Map index to tab name and update query params
-    const tabNames = ['all', 'active', 'ended', 'draft']
-    const tabName = tabNames[index] || 'all'
+    const tabNames: Array<'all' | 'active' | 'ended' | 'draft'> = ['all', 'active', 'ended', 'draft']
+    this.selectedTab = tabNames[index] || 'all'
 
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tab: tabName },
+      queryParams: { tab: this.selectedTab },
       queryParamsHandling: 'merge'
     })
 
     // Filter data based on tab
-    // Implement filtering logic here
+    this.filterByTab()
   }
 
   onSearch(): void {
@@ -164,6 +216,12 @@ export class PvDashboardComponent implements OnInit {
   deleteSurvey(survey: Survey): void {
     // Implement delete logic
     console.log('Delete survey:', survey.id)
+  }
+
+  downloadExcel(survey: Survey): void {
+    // Implement Excel download logic
+    console.log('Download Excel for survey:', survey.id)
+    // Example: this.surveyService.downloadExcel(survey.id).subscribe(...)
   }
 
   getStatusClass(status: string): string {
