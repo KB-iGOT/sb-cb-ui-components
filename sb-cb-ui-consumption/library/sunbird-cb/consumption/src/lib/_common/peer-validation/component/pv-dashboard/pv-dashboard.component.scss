@@ -1,0 +1,291 @@
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as *;
+
+.dashboard-container {
+  padding: 24px;
+  background: #FAFAFA;
+  min-height: 100vh;
+}
+
+// Header Section
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  background: white;
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .header-content {
+    .title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 14px;
+      color: #666;
+    }
+  }
+}
+
+// Tabs Section
+:host ::ng-deep .tabs {
+  background: white;
+  margin-bottom: 1px;
+  padding: 0 24px;
+
+  .mat-mdc-tab {
+    height: 48px;
+    min-width: 100px;
+    padding: 0 16px;
+
+    .mdc-tab__text-label {
+      .tab-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+
+        .tab-count {
+          color: #999;
+        }
+      }
+    }
+
+    &.mdc-tab--active {
+      .mdc-tab__text-label .tab-label {
+        font-weight: 700;
+        color: #1B4CA1;
+
+        .tab-count {
+          color: #1B4CA1;
+        }
+      }
+    }
+  }
+
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid #E5E5E5;
+  }
+
+  .mdc-tab-indicator__content--underline {
+    border-color: #1B4CA1;
+    border-top-width: 3px;
+  }
+}
+
+// Filters Section
+.filters {
+  background: white;
+  padding: 24px;
+  margin-bottom: 1px;
+
+  .filter-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-end;
+
+    .filter-item {
+      flex: 1;
+
+      .filter-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .filter-field {
+        width: 100%;
+      }
+    }
+
+    .search-filter {
+      flex: 2;
+    }
+  }
+}
+
+:host ::ng-deep .filter-field {
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mdc-notched-outline {
+    .mdc-notched-outline__leading {
+      border-radius: 999px 0 0 999px;
+      width: 28px;
+    }
+
+    .mdc-notched-outline__trailing {
+      border-radius: 0 999px 999px 0;
+    }
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    min-height: auto;
+  }
+
+  .mat-mdc-form-field-icon-prefix {
+    padding-right: 8px;
+
+    mat-icon {
+      color: #999;
+    }
+  }
+
+  .mat-mdc-form-field-icon-suffix {
+    .mat-datepicker-toggle {
+      mat-icon,
+      button {
+        vertical-align: middle;
+      }
+    }
+  }
+
+  input,
+  .mat-mdc-select {
+    font-size: 14px;
+  }
+
+  .mat-mdc-select-arrow-wrapper {
+    height: 100%;
+  }
+}
+
+// Table Section
+.table-container {
+  background: white;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .survey-table {
+    width: 100%;
+    background: white;
+
+    .mat-mdc-header-cell {
+      background-color: #F5F5F5;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      padding: 16px;
+      border-bottom: 1px solid #E5E5E5;
+    }
+
+    .mat-mdc-cell {
+      font-size: 14px;
+      color: #666;
+      padding: 16px;
+      border-bottom: 1px solid #F0F0F0;
+    }
+
+    .mat-mdc-row:hover {
+      background-color: #FAFAFA;
+    }
+
+    .info-icon {
+      font-size: 16px;
+      height: 16px;
+      width: 16px;
+      margin-left: 4px;
+      vertical-align: middle;
+      color: #999;
+      cursor: pointer;
+    }
+  }
+}
+
+// Status Badges
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &.status-active {
+    background-color: #D1FAE5;
+    color: #065F46;
+  }
+
+  &.status-draft {
+    background-color: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.status-end {
+    background-color: #FEE2E2;
+    color: #991B1B;
+  }
+}
+
+// Paginator
+.paginator-container {
+  border-top: 1px solid #E5E5E5;
+  padding: 8px 16px;
+
+  :host ::ng-deep .mat-mdc-paginator {
+    background: transparent;
+
+    .mat-mdc-paginator-container {
+      justify-content: flex-end;
+      padding: 0;
+    }
+
+    .mat-mdc-paginator-page-size-label,
+    .mat-mdc-paginator-range-label {
+      font-size: 14px;
+      color: #666;
+    }
+  }
+}
+
+// Menu Styling
+:host ::ng-deep .mat-mdc-menu-content {
+  .mat-mdc-menu-item {
+    .mat-icon {
+      margin-right: 8px;
+      color: #666;
+      vertical-align: middle;
+    }
+
+    span {
+      vertical-align: middle;
+    }
+  }
+}
+
+// Responsive Design
+@include breakpoint-xs {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .filters {
+    .filter-row {
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+
+    .survey-table {
+      min-width: 800px;
+    }
+  }
+}

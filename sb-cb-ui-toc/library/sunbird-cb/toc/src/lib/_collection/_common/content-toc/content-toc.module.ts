@@ -50,6 +50,7 @@ import { AssignmentViewerComponent } from './app-toc-assignment-viewer/app-toc-a
 import { ContentStripWithTabsLibModule, ContentStripWithTabsPillsModule, DialogComponentsModule } from '@sunbird-cb/consumption'
 import { AssignmentViewerV2Component } from './app-toc-assignment-viewerV2/app-toc-assignment-viewerV2.component'
 import { SamuhikCharchaContentComponent } from './samuhik-charcha-content/samuhik-charcha-content/samuhik-charcha-content.component'
+import { AiTutorComponent } from '../ai-tutor/ai-tutor.component'
 
 @NgModule({
   declarations: [
@@ -71,6 +72,8 @@ import { SamuhikCharchaContentComponent } from './samuhik-charcha-content/samuhi
     AssignmentViewerComponent,
     AssignmentViewerV2Component,
     SamuhikCharchaContentComponent,
+    AiTutorComponent,
+    AiTutorConfirmPopupComponent
   ],
   imports: [
     CommonModule,

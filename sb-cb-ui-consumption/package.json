@@ -68,8 +68,8 @@
     "xlsx": "^0.16.1"
   },
   "devDependencies": {
-    "@angular/build": "^20.3.14",
-    "@angular/cli": "^20.3.14",
+    "@angular/build": "^20.3.15",
+    "@angular/cli": "^20.3.15",
     "@angular/compiler-cli": "^20.3.16",
     "@angular/language-service": "^20.3.16",
     "@types/ckeditor": "^4.9.10",

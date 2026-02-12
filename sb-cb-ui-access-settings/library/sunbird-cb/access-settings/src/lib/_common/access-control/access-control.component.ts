@@ -1544,8 +1544,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       } 
       else {
+        if (!request.orgCustomFields) {
+          request.orgCustomFields = {};
+        }
           const customFieldSelections = selections.map((sel: any) => sel?.fieldValue || sel);
-          request[`${entity}`] = customFieldSelections;
+          request.orgCustomFields[`${entity}`] = customFieldSelections;
         }
     }
 
@@ -1695,8 +1698,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .fetchCustomsField({
         organisationId: this.config.userConfig.rootOrgId,
         isEnabled: true,
-        type: "masterList"
-        // isMandatory: true,
+        type: "masterList",
+        isMandatory: true,
       })
       .subscribe({
         next: (data) => {
@@ -1718,7 +1721,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
                       
                     return {
                       disabled: false,
-                      value: firstField?.attributeName || "",
+                      value: firstField?.name || "",
                       label: firstField?.name || "",
                       isCustomField: true,
                       reversedOrderCustomFieldData: filteredAndUniqueData
@@ -1736,7 +1739,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
                       return {
                         disabled: false,
-                        value: lastField?.attributeName || "",
+                        value: lastField?.name || "",
                         label: lastField?.name || "",
                         isCustomField: true,
                         reversedOrderCustomFieldData: filteredAndUniqueData

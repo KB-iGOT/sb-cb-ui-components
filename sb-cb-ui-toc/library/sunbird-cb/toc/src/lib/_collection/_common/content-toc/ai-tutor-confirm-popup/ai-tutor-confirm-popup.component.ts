@@ -15,8 +15,8 @@ export class AiTutorConfirmPopupComponent {
     this.dialogRef.close()
   }
 
-  enrollNow(enroll?: boolean) {
-    if(this.data.enroll || enroll) {
+  enrollNow(_enroll?: boolean) {
+    if(this.data.enroll) {
       this.dialogRef.close('enroll')
     } else {
       this.dialogRef.close('needToEnroll')

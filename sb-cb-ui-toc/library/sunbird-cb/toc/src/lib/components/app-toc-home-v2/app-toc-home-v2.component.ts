@@ -2099,7 +2099,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private async processRouteData(data: Data) {
-    this.courseID = data.content.data.identifier
+    this.courseID =  data?.content?.data?.status === 'Retired' ? '' : data.content.data?.identifier
     const initData = this.tocSvc.initData(data, true)
     // Get query parameters
     const queryParamsDataTemp = await this.getQueryParams()
