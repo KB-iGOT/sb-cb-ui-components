@@ -153,7 +153,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
      if (this.tempAccessControl) {
       this.processTempAccessControl(this.tempAccessControl);
     } else {
-      this.addUserGroup();
+      // Don't create a default user group yet - wait for API data to load
+      // If no data is loaded, the component using this will call addUserGroup
       setTimeout(() => {
         this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
         this.setupFormChangeDetection();
@@ -248,6 +249,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     });
 
     this.userGroup.push(ruleGroup);
+    
+    // Update Central Deputation availability based on current AIS status
+    const hasAIS = this.hasAllIndiaServicesInAnyGroup();
+    if (!hasAIS) {
+      this.accessControlService.enableDeputation(false);
+    }
   }
 
   addCondition(userGroupIndex: number) {
@@ -290,6 +297,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     conditions.push(this.createConditionGroup(uuidv4(), userGroupIndex));
+    
+    // Update Central Deputation availability based on current AIS status
+    const hasAIS = this.hasAllIndiaServicesInAnyGroup();
+    if (!hasAIS) {
+      this.accessControlService.enableDeputation(false);
+    }
   }
 
   createConditionGroup(id: number, userGroupIndex: number): FormGroup {
@@ -304,6 +317,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         ele.disabled = ele.value !== entity;
       });
     } else {
+      // Don't modify optionsEntity here - it will be handled in onOpeningEntityChange
+      // Just reset to default state
       this.accessControlCriteriaSelection.optionsEntity.forEach((ele: NsAccessControlConfig.IOptionsEntity) => {
         ele.disabled = false;
       });
@@ -319,16 +334,197 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
+  /**
+   * Check if any user group has All India Services selected
+   */
+  private hasAllIndiaServicesInAnyGroup(): boolean {
+    const isAllIndiaService = (serviceName: string): boolean => {
+      if (!serviceName) return false;
+      const lower = serviceName.toLowerCase();
+      return lower.includes("all india service") ||
+             lower.includes("indian administrative service") ||
+             lower.includes("(ias)") ||
+             lower.includes("indian police service") ||
+             lower.includes("(ips)") ||
+             lower.includes("indian forest service") ||
+             lower.includes("(ifs)");
+    };
+    
+    for (let i = 0; i < this.userGroup.length; i++) {
+      const conditions = this.ruleConditions(i);
+      for (let j = 0; j < conditions.length; j++) {
+        const condition = conditions.at(j);
+        const entity = condition?.get("entity")?.value;
+        const selections = condition?.get("selections")?.value || [];
+        
+        if (entity === NsAccessControlConfig.SelectionType.Service && selections.length > 0) {
+          // Check raw selections
+          if (selections.some((s: string) => isAllIndiaService(s))) {
+            return true;
+          }
+          
+          // Also check through service mapping
+          const serviceNames = this.cadreMappingService.getServicesByNames(selections);
+          if (serviceNames.some((service) => isAllIndiaService(service.name))) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check if a specific user group has All India Services selected
+   */
+  private hasAllIndiaServicesInUserGroup(userGroupIndex: number): boolean {
+    if (userGroupIndex < 0 || userGroupIndex >= this.userGroup.length) {
+      return false;
+    }
+    
+    const isAllIndiaService = (serviceName: string): boolean => {
+      if (!serviceName) return false;
+      const lower = serviceName.toLowerCase();
+      return lower.includes("all india service") ||
+             lower.includes("indian administrative service") ||
+             lower.includes("(ias)") ||
+             lower.includes("indian police service") ||
+             lower.includes("(ips)") ||
+             lower.includes("indian forest service") ||
+             lower.includes("(ifs)");
+    };
+    
+    const conditions = this.ruleConditions(userGroupIndex);
+    for (let j = 0; j < conditions.length; j++) {
+      const condition = conditions.at(j);
+      const entity = condition?.get("entity")?.value;
+      const selections = condition?.get("selections")?.value || [];
+      
+      if (entity === NsAccessControlConfig.SelectionType.Service && selections.length > 0) {
+        // Check raw selections
+        if (selections.some((s: string) => isAllIndiaService(s))) {
+          return true;
+        }
+        
+        // Also check through service mapping
+        const serviceNames = this.cadreMappingService.getServicesByNames(selections);
+        if (serviceNames.some((service) => isAllIndiaService(service.name))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   onEntityChange(userGroupIndex: number, conditionIndex: number): void {
     const conditions = this.ruleConditions(userGroupIndex);
     const condition = conditions.at(conditionIndex);
     const selectedEntity = condition?.get("entity")?.value;
+    const previousEntity = condition?.value?.entity;
+
+    // Check if we need to show confirmation dialog before making changes
+    const shouldShowConfirmation = this.shouldShowEntityChangeConfirmation(userGroupIndex, conditionIndex);
+
+    if (shouldShowConfirmation) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "470px",
+        data: { type: "confirm-reset-fields" }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+          this.processEntityChange(userGroupIndex, conditionIndex, selectedEntity, previousEntity);
+        } else {
+          // Reset the dropdown to previous value if user cancels
+          condition?.get("entity")?.setValue(previousEntity);
+        }
+      });
+    } else {
+      this.processEntityChange(userGroupIndex, conditionIndex, selectedEntity, previousEntity);
+    }
+  }
+
+  private shouldShowEntityChangeConfirmation(userGroupIndex: number, conditionIndex: number): boolean {
+    // Check if this is a content that's not live or if it's MDO application or has contentId
+    if (!(this.content?.status === "Live" || this.content?.prevStatus === "Live" || this.content?.status === "Review") || this.config.application === this.MDO_APPLICATION || this.content?.contentId) {
+      const conditions = this.ruleConditions(userGroupIndex);
+      const condition = conditions.at(conditionIndex);
+      
+      if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS) {
+        // Use the same logic as checkForResetFilter to determine if we should show confirmation
+        const conditionValue = condition?.getRawValue();
+        const ruleValue = this.userGroup.at(userGroupIndex).getRawValue();
+        return this.checkForResetFilter(conditionValue, ruleValue, userGroupIndex);
+      } else if (this.config.application === this.MDO_APPLICATION || this.content?.contentId) {
+        // For MDO applications, check if the user group is in initial state
+        const currentGroup = this.userGroup.at(userGroupIndex);
+        const isInInitialState = (() => {
+          if (this.config?.mdoContent?.status === 'Live' || this.content?.status === 'live') {
+            const initialUserGroups = this.getInitialState();
+            if (initialUserGroups) {
+              return initialUserGroups.some(group => group.userGroupName === currentGroup.get('name')?.value);
+            }
+          }
+          return false;
+        })();
+
+        // Only show confirmation if not in initial state
+        if (!isInInitialState) {
+          const conditionValue = condition?.getRawValue();
+          const ruleValue = this.userGroup.at(userGroupIndex).getRawValue();
+          return this.checkForResetFilter(conditionValue, ruleValue, userGroupIndex);
+        }
+      }
+    }
+    return false;
+  }
+
+  private processEntityChange(userGroupIndex: number, conditionIndex: number, selectedEntity: string, previousEntity: string): void {
+    const conditions = this.ruleConditions(userGroupIndex);
+    const condition = conditions.at(conditionIndex);
 
     if (condition?.value?.selections?.length) {
       condition.get("selections")?.setValue([]);
       this.processDisableAddConditionOnClose(userGroupIndex);
       this.calculateUserCountForUserGroup(userGroupIndex, conditionIndex);
     }
+
+    // If entity type changed from Service to something else, clear Central Deputation conditions
+    if (previousEntity === NsAccessControlConfig.SelectionType.Service && selectedEntity !== NsAccessControlConfig.SelectionType.Service) {
+      // Remove all Central Deputation conditions after this index in this user group
+      for (let i = conditions.length - 1; i >= conditionIndex + 1; i--) {
+        const cond = conditions.at(i);
+        if (cond?.get("entity")?.value === NsAccessControlConfig.SelectionType.CentralDeputation) {
+          conditions.removeAt(i);
+        }
+      }
+      
+      // Check if any other user group still has AIS
+      const hasAIS = this.hasAllIndiaServicesInAnyGroup();
+      if (!hasAIS) {
+        this.accessControlService.enableDeputation(false);
+      }
+    }
+
+    // Reset subsequent conditions if needed (similar to resetActiveUserGroupFields)
+    if (this.shouldResetSubsequentConditions(userGroupIndex, conditionIndex)) {
+      this.resetActiveUserGroupFieldsByIndex(userGroupIndex, conditionIndex);
+    }
+  }
+
+  private shouldResetSubsequentConditions(userGroupIndex: number, conditionIndex: number): boolean {
+    const accessControlFormData = this.accessControlForm.getRawValue();
+    const activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
+    
+    if (activeManageSelection && activeManageSelection?.conditions && activeManageSelection?.conditions?.length > 1) {
+      // Check if there are subsequent conditions with selections that need to be reset
+      for (let i = conditionIndex + 1; i < activeManageSelection.conditions.length; i++) {
+        if (activeManageSelection.conditions[i]?.selections?.length > 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   onOpeningEntityChange(event: boolean, userGroupIndex: number, conditionIndex: number): void {
@@ -364,9 +560,16 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       }
 
+      // Check if Central Deputation should be available (only if All India Services exists in THIS user group)
+      const hasAISInThisGroup = this.hasAllIndiaServicesInUserGroup(userGroupIndex);
+      const disableCentralDeputation = !hasAISInThisGroup;
+
       const updatedOptions = this.accessControlCriteriaSelection.optionsEntity.map(option => {
         if (option.value === NsAccessControlConfig.SelectionType.Cadre) {
           return { ...option, disabled: disableCadre };
+        }
+        if (option.value === NsAccessControlConfig.SelectionType.CentralDeputation) {
+          return { ...option, disabled: disableCentralDeputation };
         }
         return option;
       });
@@ -397,6 +600,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.resetUserGroup(i);
           }
           this.reindexUserCount();
+          
+          // Check if any remaining user group has AIS
+          const hasAIS = this.hasAllIndiaServicesInAnyGroup();
+          if (!hasAIS) {
+            this.accessControlService.enableDeputation(false);
+          }
+          
           this.applyAccessControlValue(true);
           this.calculateUserCountForUserGroup(index);
         } else {
@@ -406,6 +616,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.resetUserGroup(i);
           }
           this.reindexUserCount();
+          
+          // Check if any remaining user group has AIS
+          const hasAIS = this.hasAllIndiaServicesInAnyGroup();
+          if (!hasAIS) {
+            this.accessControlService.enableDeputation(false);
+          }
         }
       }
     });
@@ -460,6 +676,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
              this.accessControlService.enableDeputation(false)
           }
         });
+       if (this.accessControlCriteriaSelection?.optionsEntity?.filter(ele => ele.value === NsAccessControlConfig.SelectionType.CentralDeputation)?.length) {
+        this.accessControlService.enableDeputation(false)
+       }
       }
     }
   }
@@ -485,10 +704,20 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const conditions = this.ruleConditions(userGroupIndex);
     const condition = conditions.at(conditionIndex);
     if (condition) {
+      const wasServiceCondition = condition.get("entity")?.value === NsAccessControlConfig.SelectionType.Service;
+      
       this.checkServicesAndResetReleated(userGroupIndex, conditionIndex);
 
       const id = condition.get("id")?.value || uuidv4();
       conditions.setControl(conditionIndex, this.createConditionGroup(id, userGroupIndex));
+
+      // If it was a service condition, check if any user group still has AIS
+      if (wasServiceCondition) {
+        const hasAIS = this.hasAllIndiaServicesInAnyGroup();
+        if (!hasAIS) {
+          this.accessControlService.enableDeputation(false);
+        }
+      }
 
       this.calculateUserCountForUserGroup(userGroupIndex, conditionIndex);
       this.processDisableAddConditionOnClose(userGroupIndex);
@@ -601,9 +830,21 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             // Enable Deputation if Service is selected 'All India Services'
             if (condition.entity === NsAccessControlConfig.SelectionType.Service) {
               this.checkServicesAndResetReleated(ruleIndex, conditionIndex);
-              const serviceNames = this.cadreMappingService.getServicesByNames(result.selected || []);
-              const selections = serviceNames.map((service) => service.name);
-              if (selections.includes("All India Services")) {
+              
+              const isAllIndiaService = (serviceName: string): boolean => {
+                if (!serviceName) return false;
+                const lower = serviceName.toLowerCase();
+                return lower.includes("all india service") ||
+                       lower.includes("indian administrative service") ||
+                       lower.includes("(ias)") ||
+                       lower.includes("indian police service") ||
+                       lower.includes("(ips)") ||
+                       lower.includes("indian forest service") ||
+                       lower.includes("(ifs)");
+              };
+              
+              const hasAIS = result.selected.some((s: string) => isAllIndiaService(s));
+              if (hasAIS) {
                 this.accessControlService.enableDeputation(true);
               } else {
                 this.accessControlService.enableDeputation(false);
@@ -1002,20 +1243,40 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.saveInitialState(accessControl?.userGroups);
     }
 
-    accessControl.userGroups.forEach((group: any, index: number) => {
-      const conditions = this.fb.array([]) as any;
-
-      //Check and Enable Deputation if Service is selected 'All India Services'
-      const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service)
+    // Check if ANY user group has All India Services BEFORE processing
+    const isAllIndiaService = (serviceName: string): boolean => {
+      if (!serviceName) return false;
+      const lower = serviceName.toLowerCase();
+      return lower.includes("all india service") ||
+             lower.includes("indian administrative service") ||
+             lower.includes("(ias)") ||
+             lower.includes("indian police service") ||
+             lower.includes("(ips)") ||
+             lower.includes("indian forest service") ||
+             lower.includes("(ifs)");
+    };
+    
+    let hasAISInAnyGroup = false;
+    accessControl.userGroups.forEach((group: any) => {
+      const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service);
       if (isContainsService?.criteriaKey === NsAccessControlConfig.SelectionType.Service) {
-        const serviceNames = this.cadreMappingService.getServicesByNames(isContainsService.criteriaValue || []);
-        const selections = serviceNames.map((service) => service.name);
-        if (selections.includes("All India Services")) {
-          this.accessControlService.enableDeputation(true);
-        } else {
-          this.accessControlService.enableDeputation(false);
+        const criteriaValues = isContainsService.criteriaValue || [];
+        // Check if any service is an All India Service
+        if (criteriaValues.some((val: string) => isAllIndiaService(val))) {
+          hasAISInAnyGroup = true;
         }
       }
+    });
+    
+    // Enable/disable deputation based on whether ANY group has AIS
+    if (hasAISInAnyGroup) {
+      this.accessControlService.enableDeputation(true);
+    } else {
+      this.accessControlService.enableDeputation(false);
+    }
+
+    accessControl.userGroups.forEach((group: any, index: number) => {
+      const conditions = this.fb.array([]) as any;
 
       group.userGroupCriteriaList.forEach((criteria: any) => {
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
@@ -1029,7 +1290,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           profilestatus: NsAccessControlConfig.SelectionType.VerificationStatus,
           Cadre: NsAccessControlConfig.SelectionType.Cadre,
           service: NsAccessControlConfig.SelectionType.Service,
-          batch: NsAccessControlConfig.SelectionType.Batch
+          batch: NsAccessControlConfig.SelectionType.Batch,
+          isOnCentralDeputation: NsAccessControlConfig.SelectionType.CentralDeputation
         };
 
         // Set the form values
@@ -1411,6 +1673,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.calculateUserCountForUserGroup(userGroupIndex);
   }
 
+  resetActiveUserGroupFieldsByIndex(userGroupIndex: number, conditionIndex: number) {
+    const userGroupArray = this.accessControlForm.get("userGroup") as FormArray;
+    const userGroup = userGroupArray.at(userGroupIndex) as FormGroup;
+    const conditionsArray = userGroup.get("conditions") as FormArray;
+    const conditionsLength = conditionsArray.length;
+    
+    // Reset all conditions after the current condition index
+    for (let i = conditionIndex + 1; i < conditionsLength; i++) {
+      const conditionGroup = conditionsArray.at(i) as FormGroup;
+      conditionGroup.get("entity")?.setValue("");
+      conditionGroup.get("selections")?.setValue([]);
+    }
+
+    this.calculateUserCountForUserGroup(userGroupIndex);
+  }
+
   // Customs Field Logics
   getCustomsField() {
     this.accessControlService
@@ -1541,24 +1819,56 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.userGroup.removeAt(0);
     }
 
+    // If no user groups in the data, add a default one
+    if (!tempAccessControl?.userGroups || tempAccessControl.userGroups.length === 0) {
+      this.addUserGroup();
+      setTimeout(() => {
+        this.initialUserGroupValue = JSON.stringify(this.accessControlForm.getRawValue().userGroup);
+        this.setupFormChangeDetection();
+      }, 0);
+      return;
+    }
+
     // Save initial state if not already saved for live content
     if (!this.getInitialState()) {
       this.saveInitialState(tempAccessControl.userGroups);
     }
 
-    tempAccessControl.userGroups.forEach((group: any, index: number) => {
-      //Check and Enable Deputation if Service is selected 'All India Services'
-      const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service)
-      if (this.config?.application === NsAccessControlConfig.Application.MDO && isContainsService?.criteriaKey === NsAccessControlConfig.SelectionType.Service) {
-        const serviceNames = this.cadreMappingService.getServicesByNames(isContainsService.criteriaValue || []);
-        const selections = serviceNames.map((service) => service.name);
-        if (selections.includes("All India Services")) {
-          this.accessControlService.enableDeputation(true);
-        } else {
-          this.accessControlService.enableDeputation(false);
+    // Check if ANY user group has All India Services BEFORE processing
+    const isAllIndiaService = (serviceName: string): boolean => {
+      if (!serviceName) return false;
+      const lower = serviceName.toLowerCase();
+      return lower.includes("all india service") ||
+             lower.includes("indian administrative service") ||
+             lower.includes("(ias)") ||
+             lower.includes("indian police service") ||
+             lower.includes("(ips)") ||
+             lower.includes("indian forest service") ||
+             lower.includes("(ifs)");
+    };
+    
+    let hasAISInAnyGroup = false;
+    if (this.config?.application === NsAccessControlConfig.Application.MDO) {
+      tempAccessControl.userGroups.forEach((group: any) => {
+        const isContainsService = group.userGroupCriteriaList.find((criteria: any) => criteria.criteriaKey === NsAccessControlConfig.SelectionType.Service);
+        if (isContainsService?.criteriaKey === NsAccessControlConfig.SelectionType.Service) {
+          const criteriaValues = isContainsService.criteriaValue || [];
+          // Check if any service is an All India Service
+          if (criteriaValues.some((val: string) => isAllIndiaService(val))) {
+            hasAISInAnyGroup = true;
+          }
         }
+      });
+      
+      // Enable/disable deputation based on whether ANY group has AIS
+      if (hasAISInAnyGroup) {
+        this.accessControlService.enableDeputation(true);
+      } else {
+        this.accessControlService.enableDeputation(false);
       }
+    }
 
+    tempAccessControl.userGroups.forEach((group: any, index: number) => {
       // Process patching.
       const conditions = this.fb.array([]) as any;
 

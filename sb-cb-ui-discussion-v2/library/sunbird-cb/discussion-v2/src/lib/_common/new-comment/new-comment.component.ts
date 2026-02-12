@@ -3,6 +3,7 @@ import { UntypedFormControl } from '@angular/forms'
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { CommentsService } from '../../_services/comments.service'
+import { sanitizeTextInput } from '../../_utils/sanitization.util'
 
 @Component({
     selector: 'd-v2-new-comment',
@@ -54,7 +55,8 @@ export class NewCommentComponent implements OnInit, OnDestroy {
 
   submitComment() {
 
-    const req = this.createReq(this.searchControl.value, [])
+    const sanitizedComment = sanitizeTextInput(this.searchControl.value)
+    const req = this.createReq(sanitizedComment, [])
     if (!this.addNewCommentBool) {
       this.addNewCommentBool = true
       if (this.config.commentTreeData && this.config.commentTreeData.isFirstComment) {

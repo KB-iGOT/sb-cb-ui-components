@@ -70,13 +70,15 @@ span.optional-span {
 
 .resource-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-direction: column;
   // border-radius: 8px;
   // margin-bottom: 8px;
 
   .resource {
     padding: 16px;
     padding-left: 0;
+    width: 100%;
   }
 
   .card-thumbnail {
@@ -201,6 +203,14 @@ span.optional-span {
         color: white !important;
       }
     }
+
+  .milestone-description {
+
+    color: #fff;
+  }
+  .milestone-progress-text {
+    color: #fff;
+  }
   }
 }
 
@@ -612,10 +622,29 @@ span.optional-span {
   background: #FFF4EC;
   color: #D13924;
   padding: 10px;
+  border-radius: 4px;
+  display: block !important;
+  width: 100%;
+}
+
+.content-locking {
+  padding: 8px 12px;
+  margin-top: 8px;
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 4px;
+  background: #FFF4EC;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .lock-icon {
   color: #F3962F;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .unlock-message {
@@ -670,11 +699,14 @@ span.optional-span {
   line-height: 1.5;
   color: rgba(0, 0, 0, 0.7);
   margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  max-width: 100% !important;
 }
 
 .milestone-progress {
@@ -686,6 +718,22 @@ span.optional-span {
   font-size: 14px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.6);
+}
+
+.milestone-locked-message {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(243, 150, 47, 0.1);
+  border-left: 3px solid #F3962F;
+  border-radius: 4px;
+}
+
+.locked-criteria-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
 }
 
 .locked-text {
@@ -717,6 +765,7 @@ span.optional-span {
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;
+  min-width: 150px;
 
   &:hover:not(:disabled) {
     background-color: #1a4ca1;
@@ -731,4 +780,12 @@ span.optional-span {
   .inline-spinner {
     display: inline-block;
   }
+}
+
+// Multiline tooltip for long descriptions
+::ng-deep .multiline-tooltip {
+  white-space: pre-wrap !important;
+  max-width: 400px !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
 }

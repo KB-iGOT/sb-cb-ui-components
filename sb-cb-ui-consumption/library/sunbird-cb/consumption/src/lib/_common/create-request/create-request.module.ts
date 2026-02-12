@@ -4,7 +4,7 @@ import { CreateRequestFormComponent } from './components/create-request-form/cre
 import { CreateRequestContentDetailsComponent } from './components/create-request-content-details/create-request-content-details.component'
 import { CreateRequestAdditionalDetailsComponent } from './components/create-request-additional-details/create-request-additional-details.component'
 import { AddAuthorsComponent } from './dialogs/add-authors/add-authors.component'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { HttpClientModule, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { ReactiveFormsModule, FormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
@@ -19,35 +19,42 @@ import { MatRadioModule } from '@angular/material/radio'
 import { MatSelectModule } from '@angular/material/select'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { HorizontalDynamicStepperModule } from '../horizontal-dynamic-stepper/horizontal-dynamic-stepper.module'
+import { OrderByPipeModule } from '../../_pipes/order-by/order-by.pipe.module'
 
 
 
 @NgModule({
-    declarations: [
-        CreateRequestFormComponent,
-        CreateRequestContentDetailsComponent,
-        CreateRequestAdditionalDetailsComponent,
-        AddAuthorsComponent
-    ],
-    exports: [
-        CreateRequestFormComponent,
-        AddAuthorsComponent
-    ], schemas: [CUSTOM_ELEMENTS_SCHEMA], imports: [CommonModule,
-        ReactiveFormsModule,
-        FormsModule,
-        MatFormFieldModule,
-        MatIconModule,
-        MatChipsModule,
-        MatOptionModule,
-        MatSelectModule,
-        MatInputModule,
-        MatButtonModule,
-        MatCheckboxModule,
-        MatDialogModule,
-        MatCardModule,
-        MatRadioModule,
-        MatTooltipModule,
-        HorizontalDynamicStepperModule], providers: [provideHttpClient(withInterceptorsFromDi())]
+  declarations: [
+    CreateRequestFormComponent,
+    CreateRequestContentDetailsComponent,
+    CreateRequestAdditionalDetailsComponent,
+    AddAuthorsComponent
+  ],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatChipsModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatCardModule,
+    MatRadioModule,
+    MatTooltipModule,
+    HttpClientModule,
+    HorizontalDynamicStepperModule,
+    OrderByPipeModule,
+  ],
+  exports: [
+    CreateRequestFormComponent,
+    AddAuthorsComponent
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
 export class CreateRequestModule { }

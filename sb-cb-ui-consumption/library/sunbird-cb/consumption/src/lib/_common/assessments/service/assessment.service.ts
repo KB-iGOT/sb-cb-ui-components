@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { map } from 'rxjs/operators'
 import { v4 as uuid } from 'uuid'
+import { NsAssessment } from './assessment.model'
 
 const API_END_POINTS = {
   CREARE_ASSESSMENT: 'apis/proxies/v8/questionset/v1/create',
@@ -79,7 +80,7 @@ export class AssessmentService {
     )
   }
 
-  updateAssessmentHierarchyRequest(changedData: any, identifier: string) {
+  updateAssessmentHierarchyRequest(changedData: any, identifier: string, parentChanges?: any) {
     const nodesModified: any = {}
 
     // Determine if the identifier is root by comparing with assessmentHierarchyData
@@ -91,6 +92,17 @@ export class AssessmentService {
       root: isRoot,
       metadata: changedData,
       objectType: 'QuestionSet'
+    }
+
+    // If parentChanges are provided and this is not the root, add parent update
+    if (parentChanges && !isRoot && this.assessmentHierarchyData && this.assessmentHierarchyData.identifier) {
+      const rootId = this.assessmentHierarchyData.identifier
+      nodesModified[rootId] = {
+        isNew: false,
+        root: true,
+        metadata: parentChanges,
+        objectType: 'QuestionSet'
+      }
     }
 
     // If updateChildren flag is present, update all children with the specified updates
@@ -121,6 +133,15 @@ export class AssessmentService {
         name: this.assessmentHierarchyData.name,
         root: true,
         children: this.assessmentHierarchyData.children?.map((child: any) => child.identifier) || []
+      }
+
+      if (parentChanges) {
+        nodesModified[rootIdentifier] = {
+          isNew: false,
+          root: true,
+          metadata: parentChanges,
+          objectType: 'QuestionSet'
+        }
       }
 
       // Add all existing children to hierarchy with their children arrays
@@ -334,12 +355,23 @@ export class AssessmentService {
         mimeType: 'application/vnd.sunbird.questionset',
         minimumPassPercentage: sectionData.minPassPercentage || 0,
         name: sectionData.name || 'Section A',
-        primaryCategory: currentHierarchy?.primaryCategory || 'Practice Question Set',
+        primaryCategory: currentHierarchy?.primaryCategory || NsAssessment.EAssessmentPrimaryCategory.PRACTICE_QUESTION_SET,
         totalQuestions: sectionData.totalQuestions || currentHierarchy.totalQuestions,
         compatibilityLevel: currentHierarchy?.compatibilityLevel,
         additionalInstructions: sectionData.additionalInstructions || '',
         sectionType: 'section',
         expectedDuration: sectionData.expectedDuration || currentHierarchy.expectedDuration,
+      }
+    }
+
+    // If parentChanges exist, add root node update
+    if (sectionData.parentChanges && currentHierarchy && currentHierarchy.identifier) {
+      const rootId = currentHierarchy.identifier
+      nodesModified[rootId] = {
+        isNew: false,
+        root: true,
+        metadata: sectionData.parentChanges,
+        objectType: 'QuestionSet'
       }
     }
 

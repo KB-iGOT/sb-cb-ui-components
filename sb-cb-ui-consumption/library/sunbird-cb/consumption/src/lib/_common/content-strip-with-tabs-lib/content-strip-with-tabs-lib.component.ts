@@ -384,8 +384,20 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     strip: NsContentStripWithTabs.IContentStripUnit,
     calculateParentStatus = true,
   ) {
+
     // setting initial values
     strip.loaderWidgets = this.transformSkeletonToWidgets(strip)
+
+    // Check if strip has tabs list and filter out inactive tabs
+    if (strip.tabs && Array.isArray(strip.tabs)) {
+      strip.tabs = strip.tabs.filter(tab => {
+        if (!('hideTab' in tab) || tab.hideTab !== true) {
+          return true
+        }
+        return false
+      })
+    }
+
     if (strip.request.myEvents) {
       this.fetchMyEventsData(strip, calculateParentStatus)
     }

@@ -218,7 +218,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
 
     // If it's a NEW template (advanced) and assessment is BASIC, reject it
     if (!isOldTemplate && this.compatibilityLevel === NsAssessment.ECompatibilityLevel.BASIC) {
-      this.snackBar.open('Advanced template format is not supported for basic assessments. Please use the basic MCQ template.', 'Close', { duration: 4000 })
+      this.snackBar.open('Advanced template format is not supported for basic assessments. Please use the basic MCQ template.', '', { duration: 4000 })
       return false
     }
 
@@ -226,7 +226,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     if (isOldTemplate) {
       // Check if old template is allowed (only for basic assessments)
       if (this.compatibilityLevel !== NsAssessment.ECompatibilityLevel.BASIC) {
-        this.snackBar.open('Old template format is only supported for basic assessments. Please use the new template format.', 'Close', { duration: 4000 })
+        this.snackBar.open('Old template format is only supported for basic assessments. Please use the new template format.', '', { duration: 4000 })
         return false
       }
 
@@ -259,7 +259,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     if (invalidTypes.length > 0) {
       this.snackBar.open(
         'Invalid question type found. Supported types: MCQ-SCA, MCQ-MCA, T/F, FTB, MTF, MCQ-MCA-W',
-        'Close',
+        '',
         { duration: 3000 }
       )
       return false
@@ -270,7 +270,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
       if (!this.checkValidQuestionTagging(data)) {
         this.snackBar.open(
           'Invalid question tagging. Please upload with valid question tagging.',
-          'Close',
+          '',
           { duration: 3000 }
         )
         return false
@@ -592,7 +592,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
         const availableSlots = this.totalQuestions - this.existingQuestionsCount
         this.snackBar.open(
           `Cannot add ${this.selectedQuestions.length} questions. You can only add ${availableSlots} more question(s). (${this.existingQuestionsCount} already added, ${this.totalQuestions} total limit)`,
-          'Close',
+          '',
           { duration: 5000 }
         )
         return
@@ -602,7 +602,7 @@ export class BulkUploadAllTypeQuestionComponent implements OnInit {
     // Validate questions before creating
     const validation = this.validateQuestions()
     if (!validation.valid) {
-      this.snackBar.open(validation.message, 'Close', { duration: 4000 })
+      this.snackBar.open(validation.message, '', { duration: 4000 })
       return
     }
 

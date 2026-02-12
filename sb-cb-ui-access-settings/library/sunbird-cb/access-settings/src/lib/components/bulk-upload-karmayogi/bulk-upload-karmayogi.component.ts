@@ -228,6 +228,37 @@ export class BulkUploadKarmayogiComponent {
           }
         }
       });
+
+      // Check for duplicate email IDs
+      const duplicateEmails = emailIds.filter((item: any, index: number) => emailIds.indexOf(item) !== index);
+      if (duplicateEmails.length > 0) {
+        this.fileUploading = false;
+        this.snackBar.openFromComponent(SnackbarComponent, {
+          data: {
+            message: "Duplicate email IDs found in the uploaded file. Please remove duplicates and try again.",
+            type: "error"
+          },
+          duration: 3000,
+          panelClass: "course-error-snackbar"
+        });
+        return;
+      }
+
+      // Check for duplicate mobile numbers
+      const duplicateMobiles = mobileNumbers.filter((item: any, index: number) => mobileNumbers.indexOf(item) !== index);
+      if (duplicateMobiles.length > 0) {
+        this.fileUploading = false;
+        this.snackBar.openFromComponent(SnackbarComponent, {
+          data: {
+            message: "Duplicate mobile numbers found in the uploaded file. Please remove duplicates and try again.",
+            type: "error"
+          },
+          duration: 3000,
+          panelClass: "course-error-snackbar"
+        });
+        return;
+      }
+      
       this.flag = true;
       const emailResponseData = await this.callUserCheckApi(emailIds, "primaryEmail");
       const mobileResponseData = await this.callUserCheckApi(mobileNumbers, "mobile");

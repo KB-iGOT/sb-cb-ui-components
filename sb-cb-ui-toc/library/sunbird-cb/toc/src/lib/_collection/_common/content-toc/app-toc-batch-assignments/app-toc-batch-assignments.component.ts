@@ -1,11 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { MatDialog } from '@angular/material/dialog'
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
+import { MatLegacySnackBar } from '@angular/material/snack-bar'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { AppTocService } from '../../../../services/app-toc.service'
 import { ConfirmationDialogComponent } from '@sunbird-cb/consumption'
-import { MatLegacyDialog } from '@angular/material/legacy-dialog'
+import { MatLegacyDialog } from '@angular/material/dialog'
 import * as _ from 'lodash'
 import { AssignmentViewerV2Component } from '../app-toc-assignment-viewerV2/app-toc-assignment-viewerV2.component'
 

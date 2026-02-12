@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnChange
 import { NsDiscussionV2 } from '../../_model/discussion-v2.model'
 import { CommentsService } from '../../_services/comments.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { escapeHtml } from '../../_utils/sanitization.util'
 
 // tslint:disable-next-line
 import _ from 'lodash'
@@ -74,7 +75,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
     private configSvc: ConfigurationsService,
     private _snackBar: MatSnackBar,
     private ref: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {
     if (this.configSvc
       && this.configSvc.userProfile
@@ -410,7 +411,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
         this.loading = false
       })
   }
-  getCommentMsg(taggedUsers: any, commentText: any) {
+  getCommentMsg(taggedUsers: any, commentText: any): string {
     let users: any = ''
     let replayData = ``
     if (taggedUsers && taggedUsers.length) {
@@ -419,10 +420,16 @@ export class CommentCardComponent implements OnInit, OnChanges {
         if (firstName) users = users + firstName
       })
     }
+    
+    // Sanitize both users and commentText to prevent XSS
+    const sanitizedUsers = escapeHtml(users)
+    const sanitizedCommentText = escapeHtml(commentText)
+    
     if (users) {
-      replayData = `<span class="mr-2 font-semibold ws-mat-default-text">Replying to ${users}</span>`
+      replayData = `<span class="mr-2 font-semibold ws-mat-default-text">Replying to ${sanitizedUsers}</span>`
     }
-    return replayData + commentText
+    
+    return replayData + sanitizedCommentText
   }
   emptySearch() {
     this.commentSvc.emptyCommentSearch().subscribe((_res: any) => { })

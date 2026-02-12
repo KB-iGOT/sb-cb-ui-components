@@ -68,7 +68,7 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
         this.addOption(true, `B${i + 1}`)
       }
     } else {
-      this.minOptions = 2
+      this.minOptions = this.isBasicAssessment() && this.ftbCount === 0 ? 1 : 2
       // Add minimum required options for advanced assessments
       for (let i = 0; i < this.minOptions; i++) {
         this.addOption()
@@ -101,7 +101,8 @@ export class FillUpTheBlanksComponent implements OnInit, OnChanges {
 
   onBlankSelectionChange(index: number, selectedBlank: any): void {
     // Check if this blank is already assigned to another option
-    if (selectedBlank !== null) {
+    // Allow multiple options to have "None" selected
+    if (selectedBlank !== null && selectedBlank !== 'none' && selectedBlank !== '') {
       const alreadyAssigned = this.options.find(
         (opt, idx) => idx !== index && opt.blankNumber === selectedBlank
       )

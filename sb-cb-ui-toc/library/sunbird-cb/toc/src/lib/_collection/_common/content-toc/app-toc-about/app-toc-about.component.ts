@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, Inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatLegacyDialog as MatDialog } from '@angular/material/dialog'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
 
@@ -98,7 +98,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   @ViewChild('tagsElem') tagsElem !: ElementRef
   @ViewChild('searchTagElem') searchTagElem !: ElementRef
   disableCertificate = false
-
+  isExternalContent = false
   primaryCategory = NsContent.EPrimaryCategory
   stripsResultDataMap!: { [key: string]: IStripUnitContentData }
   summary = {
@@ -429,6 +429,9 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       }
     }
     this.forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+     if (changes.content) {
+      this.isExternalContent = _.get(changes, 'content.currentValue.contentId', '').toString().includes('ext_')
+    }
   }
 
   getSubThemes(): any[] {

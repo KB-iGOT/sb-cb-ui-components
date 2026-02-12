@@ -5,6 +5,9 @@
 // Main module
 export * from './lib/app-toc-lib.module'
 
+export * from './lib/registration-toc-lib.config'
+export * from './lib/collection.config'
+
 // Routing module (OPTIONAL - only import if you want to use pre-configured routes)
 // You can configure routing in your application instead
 
@@ -16,7 +19,7 @@ export * from './lib/services/load-check.service'
 export * from './lib/services/reset-ratings.service'
 export * from './lib/services/timer.service'
 export * from './lib/services/title-tag.service'
-
+export * from './lib/services/viewer-util.service'
 // Models
 export * from './lib/models/app-toc.model'
 export * from './lib/models/app-toc-analytics.model'
@@ -72,6 +75,8 @@ export * from './lib/_collection/_common/content-toc/app-toc-about/app-toc-about
 export * from './lib/_collection/_common/content-toc/app-toc-content/app-toc-content.component'
 export * from './lib/_collection/_common/content-toc/app-toc-teachers-notes/app-toc-teachers-notes.component'
 export * from './lib/_collection/_common/content-toc/app-toc-batch-assignments/app-toc-batch-assignments.component'
+export * from './lib/_services/widget-content.service'
+export * from './lib/models/discussion-forum.model'
 
 // Karma Points module
 export * from './lib/_collection/_common/content-toc/karma-points/karma-points.module'
@@ -79,3 +84,6 @@ export * from './lib/_collection/_common/content-toc/karma-points/karma-points.c
 export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.module'
 export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.component'
 
+//collection common modules
+export * from './lib/_collection/_common/card-competency/card-competency.component'
+export * from './lib/_collection/_common/card-competency/card-competency.module'

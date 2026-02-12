@@ -1,8 +1,8 @@
 // app-toc-assignment-viewerV2.component.ts
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
-import { MatLegacyDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
+import { MatLegacyDialog } from '@angular/material/dialog'
+import { MatLegacySnackBar } from '@angular/material/snack-bar'
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'
 import { Router } from '@angular/router'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'

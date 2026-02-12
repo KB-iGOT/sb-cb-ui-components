@@ -231,6 +231,7 @@ export class HorizontalScrollerV2Component implements OnInit, OnChanges, OnDestr
 
   getBottomDotsArray() {
     if (this.horizontalScrollElem) {
+    this.cardSubType = this.stripConfig && this.stripConfig.cardSubType ? this.stripConfig.cardSubType : 'standard';
       this.bottomDotsArray = [];
       let cardWidth;
       let arrLength;

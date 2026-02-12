@@ -33,6 +33,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   // errorCode: NsAppToc.EWsTocErrorCode | null = null
   private routeSubscription: Subscription | null = null
   private routeQuerySubscription: Subscription | null = null
+  private hashmapUpdatedSubscription: Subscription | null = null
   contentParents: NsContent.IContentMinimal[] = []
   expandAll = false
   expandPartOf = false
@@ -42,7 +43,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
 
   typesOfContent: any
   selectedTabType: any = 'content'
-  nsContent: any = NsContent
+  nsContent: any =  NsContent
   otherResourse = 0
 
   constructor(
@@ -62,15 +63,18 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
       // console.log('qParamsMap--', qParamsMap)
       // console.log('this.content--', this.content)
       // console.log('this.hierarchyMapData', this.hierarchyMapData)
-      if (this.content && this.content?.preEnrolmentResources && typeof this.content?.preEnrolmentResources === 'string') {
-        this.content['preEnrolmentResources'] = JSON.parse(this.content?.preEnrolmentResources)
+      
+      // Parse preEnrolmentResources if it exists as a string
+      // Note: This is separate from preliminary assessment which is in children array with isPreAssessment flag
+      if(this.content && this.content?.preEnrolmentResources && typeof this.content?.preEnrolmentResources === 'string') {
+        this.content['preEnrolmentResources'] =  JSON.parse(this.content?.preEnrolmentResources)
       }
       const contextId = qParamsMap.get('contextId')
       const contextPath = qParamsMap.get('contextPath')
       const batchId = qParamsMap.get('batchId')
       const primaryCategory = qParamsMap.get('primaryCategory')
       const preAssessment = qParamsMap.get('preAssessment')
-      if (preAssessment === 'true') {
+      if(preAssessment === 'true') {
         this.isPreAssessment = true
       }
       if (contextId && contextPath) {
@@ -80,7 +84,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
       if (batchId) {
         this.batchId = batchId
       }
-      if (primaryCategory) {
+      if(primaryCategory ) {
         this.selectedTabType = primaryCategory === this.nsContent.EPrimaryCategory.OFFLINE_SESSION ? 'session' : 'content'
       }
     })
@@ -91,6 +95,14 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
     }
     this.tocSvc.contentLoader$.subscribe((val: any) => {
       this.contentLoader = val
+    })
+    
+    // Subscribe to hashmap updates for real-time progress synchronization
+    this.hashmapUpdatedSubscription = this.tocSvc.hashmapUpdated$.subscribe((update) => {
+      if (update && update.hashmap) {
+        // Update hierarchyMapData with the latest hashmap from the service
+        this.hierarchyMapData = update.hashmap
+      }
     })
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
@@ -121,9 +133,9 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
         setTimeout(() => {
           this.selectedTabType = 'session'
           this.typesOfContent[0].disabled = true
-        }, 1000)
+        },         1000)
       } else {
-        this.typesOfContent[1].disabled = this.tocStructure['offlineSession'] ? false : true
+        this.typesOfContent[1].disabled =  this.tocStructure['offlineSession'] ? false : true
       }
     }
   }
@@ -150,7 +162,9 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   get isEnrolled(): boolean {
-    return this.batchId ? true : false
+    // Check both batchId and batchData.enrolled to support Learning Pathways
+    // where batchId might not be directly set but user is enrolled in courses within the pathway
+    return this.batchId ? true : (this.batchData?.enrolled || false)
   }
 
   // private processCollectionForTree() {
@@ -210,5 +224,83 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
     if (this.routeQuerySubscription) {
       this.routeQuerySubscription.unsubscribe()
     }
+    if (this.hashmapUpdatedSubscription) {
+      this.hashmapUpdatedSubscription.unsubscribe()
+    }
+  }
+
+    getMilestoneCompletedOrNot(identifier: string): boolean {
+    if (!this.content || !this.hierarchyMapData) {
+      return false
+    }
+    const milestoneData = this.hierarchyMapData[identifier]
+    if(milestoneData && milestoneData?.primaryCategory === NsContent.EPrimaryCategory.FINAL_ASSESSMENT) {
+      return milestoneData?.completionStatus === 2
+    }
+    if (!milestoneData) {
+      return false
+    }
+
+    // Check if all mandatory content AND milestone assessment are completed
+    let hasMandatoryContent = false
+    let allMandatoryComplete = true
+    let hasMilestoneAssessment = false
+    let milestoneAssessmentComplete = false
+
+    // Check all direct children of the milestone
+    for (const key of Object.keys(this.hierarchyMapData)) {
+      const item = this.hierarchyMapData[key]
+
+      // Only check direct children
+      if (item.parent !== identifier) continue
+
+      // Check if this is the milestone assessment
+      const isAssessment = 
+        item.primaryCategory === 'Course Assessment' ||
+        item.primaryCategory === 'Final Assessment' ||
+        item.primaryCategory === 'Standalone Assessment'
+
+      if (isAssessment) {
+        hasMilestoneAssessment = true
+        const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                           item.completionPercentage >= 100 || item.progress >= 100
+        if (isCompleted) {
+          milestoneAssessmentComplete = true
+        }
+        continue // Skip to next item
+      }
+
+      // Check if this is mandatory content (courses/collections)
+      if (item.primaryCategory === 'Course' || item.isCollection) {
+        const isMandatory = item.isMandatory !== false // Default is mandatory
+        
+        if (isMandatory) {
+          hasMandatoryContent = true
+          const isCompleted = item.completionStatus === 2 || item.status === 2 || 
+                             item.completionPercentage >= 100 || item.progress >= 100
+          if (!isCompleted) {
+            allMandatoryComplete = false
+          }
+        }
+      }
+    }
+
+    // Milestone is complete when:
+    // 1. All mandatory content is completed (or no mandatory content exists)
+    // 2. Milestone assessment is completed (or no assessment exists)
+    const mandatoryCheck = !hasMandatoryContent || allMandatoryComplete
+    const assessmentCheck = !hasMilestoneAssessment || milestoneAssessmentComplete
+
+    return mandatoryCheck && assessmentCheck
+  }
+
+  /**
+   * Check if multi-line text is truncated (has ellipsis)
+   * @param element The HTMLElement to check
+   * @returns true if text is truncated, false otherwise
+   */
+  isMultiLineTruncated(element: HTMLElement): boolean {
+    if (!element) return false
+    return element.scrollHeight > element.clientHeight
   }
 }

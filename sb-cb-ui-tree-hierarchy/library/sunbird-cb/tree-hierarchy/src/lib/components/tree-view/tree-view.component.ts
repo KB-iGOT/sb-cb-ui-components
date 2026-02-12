@@ -748,6 +748,42 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         this._snackBar.open(`Failed to remove connection.`, 'cancel')
       })
       if (retireRes && retireRes.params && retireRes.params.status?.toLowerCase() === 'successful') {
+        // Find orgId from data structure by matching code with ele.ids
+        let orgId = null;
+        const findOrgId = (children: any[], targetCode: string): string | null => {
+          for (const child of children) {
+            if (child?.code === targetCode) {
+              return child?.additionalProperties?.orgId || null;
+            }
+            if (child?.children && child?.children?.length > 0) {
+              const found = findOrgId(child?.children, targetCode);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+        
+        // Search for orgId using the first id from ele.ids
+        if (ele.ids && ele.ids.length > 0) {
+          const completeData = _.cloneDeep(this.frameworkService?.completeResponse);
+          if (completeData && completeData?.categories) {
+            for (const category of completeData?.categories) {
+              if (category?.terms) {
+                orgId = findOrgId(category?.terms, ele?.ids[0]);
+                if (orgId) break;
+              }
+            }
+          }
+        }
+        
+        // Call orgContentUpdate API after each successful retire
+        const orgUpdateBody = {
+          orgId: orgId,
+          parentPathId: ""
+        }
+        await this.treeHierarchySvc.orgContentUpdate(orgUpdateBody).toPromise().catch((_err: any) => {
+          console.log('Error in org content update', _err)
+        })
         count += 1
       } else {
         this.treeHierarchySvc.setLoaderState(false)

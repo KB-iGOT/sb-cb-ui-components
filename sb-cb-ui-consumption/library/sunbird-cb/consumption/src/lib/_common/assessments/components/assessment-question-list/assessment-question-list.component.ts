@@ -35,7 +35,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   selectedDifficultyLevel: string = 'easy'
 
   htmlTasRemovalRegex = /<\/?[^>]+>|&nbsp;|<br\s*\/?>|<\/br>|&#39;|&quot;/gi
-  assessmentNoSpecialChar = new RegExp(/^[a-zA-Z0-9\u0900-\u097F._\-\s$":/?,।()\[\]'! ]+$/)
+  assessmentNoSpecialChar = new RegExp(/^[a-zA-Z0-9\u0900-\u097F._\-\s$":/?,।()\[\]'!]+$/)
   isRegexPassed: boolean = true
   questionText: string = ''
   fitbCount: number = 0
@@ -415,15 +415,21 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   }
 
   getQuestionContent(event: any) {
-    const plainText = (event || '').replace(this.htmlTasRemovalRegex, ' ').trim()
+    // First remove invisible Unicode characters from the event itself
+    const cleanedEvent = (event || '').replace(/\u200B|\u200C|\u200D|\uFEFF/g, '')
+
+    // Then get plain text by removing HTML tags and entities
+    const plainText = cleanedEvent.replace(this.htmlTasRemovalRegex, ' ').replace(/\s+/g, ' ').trim()
+
     if (!plainText) {
       this.isRegexPassed = true
       this.questionText = ''
     } else {
       const isValid = this.assessmentNoSpecialChar.test(plainText)
       this.isRegexPassed = isValid
+      this.questionText = cleanedEvent
       if (isValid) {
-        this.questionText = event
+
       }
     }
     if (this.questionData.qType === 'FTB') {
@@ -434,7 +440,22 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   checkBlankIntext() {
     // Count occurrences of <input tags in the HTML
     const inputMatches = (this.questionText.match(/<input[^>]*>/gi) || [])
+    const previousCount = this.fitbCount
     this.fitbCount = inputMatches.length
+
+    // Reset options if all blanks are deleted
+    if (this.fitbCount === 0 && previousCount > 0) {
+      // Initialize with minimum required options based on assessment type
+      const minOptions = this.isBasicAssessment() ? 1 : 2
+      this.questionOptions = []
+      for (let i = 0; i < minOptions; i++) {
+        this.questionOptions.push({
+          id: i + 1,
+          text: '',
+          blankNumber: null
+        })
+      }
+    }
   }
 
   canSaveQuestion(): boolean {
@@ -467,6 +488,14 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
         // For MCQ-MCA, require at least 2 correct answers
         const correctAnswersCount = this.questionOptions.filter(opt => opt.isCorrect).length
         if (correctAnswersCount < 2) {
+          return false
+        }
+      } else if (this.questionData.qType === 'MCQ-MCA-W') {
+        // For MCQ-MCA-W (weighted), check that all options have valid weight values
+        const allOptionsHaveWeights = this.questionOptions.every(opt =>
+          opt.weight !== undefined && opt.weight !== null && opt.weight !== ''
+        )
+        if (!allOptionsHaveWeights) {
           return false
         }
       } else {
