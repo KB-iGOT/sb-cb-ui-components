@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, ViewEncapsulation } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { Subject } from 'rxjs'
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators'
 import { PeerValidationService } from '../../../peer-validation/service/peer-validation.service'
@@ -9,7 +9,8 @@ import { PeerValidationService } from '../../../peer-validation/service/peer-val
   selector: 'sb-uic-pv-config-step',
   templateUrl: './pv-config-step.component.html',
   styleUrls: ['./pv-config-step.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class PvConfigStepComponent implements OnInit, OnDestroy {
   configForm!: FormGroup

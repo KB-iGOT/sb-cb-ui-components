@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
 import { FormBuilder, FormGroup } from '@angular/forms'
-import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator'
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatPaginator } from '@angular/material/paginator'
+import { MatTableDataSource } from '@angular/material/table'
 import { Router, ActivatedRoute } from '@angular/router'
 
 interface Survey {
@@ -19,7 +19,8 @@ interface Survey {
 @Component({
   selector: 'sb-uic-pv-dashboard',
   templateUrl: './pv-dashboard.component.html',
-  styleUrls: ['./pv-dashboard.component.scss']
+  styleUrls: ['./pv-dashboard.component.scss'],
+  standalone: false
 })
 export class PvDashboardComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator
@@ -206,11 +207,13 @@ export class PvDashboardComponent implements OnInit {
   }
 
   createNewSurvey(): void {
-    this.router.navigate(['/app/home/peer-validation/new'])
+    const route = this.isSPVRoute ? '/app/home/spv/peer-validation/new' : '/app/home/peer-validation/new'
+    this.router.navigate([route])
   }
 
   editSurvey(survey: Survey): void {
-    this.router.navigate(['/app/home/peer-validation/edit', survey.id])
+    const basePath = this.isSPVRoute ? '/app/home/spv/peer-validation/edit' : '/app/home/peer-validation/edit'
+    this.router.navigate([basePath, survey.id])
   }
 
   deleteSurvey(survey: Survey): void {

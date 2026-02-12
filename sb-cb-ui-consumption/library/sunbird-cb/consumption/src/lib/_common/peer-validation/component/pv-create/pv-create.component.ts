@@ -5,13 +5,15 @@ import { PvConfigStepComponent } from '../pv-config-step/pv-config-step.componen
 @Component({
   selector: 'sb-uic-pv-create',
   templateUrl: './pv-create.component.html',
-  styleUrls: ['./pv-create.component.scss']
+  styleUrls: ['./pv-create.component.scss'],
+  standalone: false
 })
 export class PvCreateComponent implements OnInit, AfterViewInit {
   @ViewChild(PvConfigStepComponent) configStepComponent!: PvConfigStepComponent
 
   stepsLabels = ['Configuration', 'Questions']
   currentStepperIndex = 0
+  isSPVRoute = false
 
   constructor(
     private router: Router,
@@ -19,6 +21,8 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
+    // Check if URL contains spv/peer-validation
+    this.isSPVRoute = this.router.url.includes('spv/peer-validation')
     // Initialize component
     console.log('Peer Validation Create Component Initialized')
   }
@@ -29,14 +33,16 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
   backToDashboard() {
     // Navigate back to survey dashboard
-    this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'all' } })
+    const route = this.isSPVRoute ? '/app/home/spv/peer-validation' : '/app/home/peer-validation'
+    this.router.navigate([route], { queryParams: { tab: 'all' } })
   }
 
   saveDraftAndExit() {
     // Save draft and exit
     console.log('Save Draft & Exit')
     // Navigate to peer validation dashboard with draft tab selected
-    this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+    const route = this.isSPVRoute ? '/app/home/spv/peer-validation' : '/app/home/peer-validation'
+    this.router.navigate([route], { queryParams: { tab: 'draft' } })
   }
 
   onNext() {
@@ -119,7 +125,8 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     // Publish the survey
     console.log('Survey Published')
     // Navigate to peer validation dashboard with active tab selected
-    this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+    const route = this.isSPVRoute ? '/app/home/spv/peer-validation' : '/app/home/peer-validation'
+    this.router.navigate([route], { queryParams: { tab: 'active' } })
   }
 
 }

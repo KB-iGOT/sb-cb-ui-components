@@ -38,7 +38,7 @@
   <!-- Filters -->
   <form [formGroup]="filterForm" class="filters">
     <div class="filter-row">
-      <div class="filter-item search-filter mat-full-radius">
+      <div class="filter-item search-filter">
         <label class="filter-label">Search Surveys</label>
         <mat-form-field appearance="outline" class="filter-field">
           <mat-icon matPrefix>search</mat-icon>
@@ -46,7 +46,7 @@
         </mat-form-field>
       </div>
 
-      <div class="filter-item date-filter mat-full-radius">
+      <div class="filter-item date-filter">
         <label class="filter-label">Date Range</label>
         <mat-form-field appearance="outline" class="filter-field">
           <input matInput [matDatepicker]="picker" placeholder="DD-MM-YY - DD-MM-YY" formControlName="startDate">
@@ -55,7 +55,7 @@
         </mat-form-field>
       </div>
 
-      <div class="filter-item status-filter mat-full-radius" *ngIf="selectedTab === 'all'">
+      <div class="filter-item status-filter" *ngIf="selectedTab === 'all'">
         <label class="filter-label">Status</label>
         <mat-form-field appearance="outline" class="filter-field">
           <mat-select formControlName="status">
@@ -66,7 +66,7 @@
         </mat-form-field>
       </div>
 
-      <div class="filter-item mdo-filter mat-full-radius" *ngIf="isSPVRoute">
+      <div class="filter-item mdo-filter" *ngIf="isSPVRoute">
         <label class="filter-label">MDO</label>
         <mat-form-field appearance="outline" class="filter-field">
           <mat-select formControlName="mdo">
