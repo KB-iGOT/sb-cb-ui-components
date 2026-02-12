@@ -150,15 +150,7 @@
     <ng-container *ngIf="!forPreview">
 
         <div *ngIf="isMobile">
-            <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length ===  0
-            && userExtCourseEnroll?.progress <= 100">
-                <div class="no-certificate-found mt-6 mb-4 mx-2">
-                    <div>
-                        <span>Progress and certificates for {{ extContentReadData?.contentPartner?.contentPartnerName }}
-                            courses are visible only after you complete the course and pass the assessment.</span>
-                    </div>
-                </div>
-            </ng-container>
+             <ng-container [ngTemplateOutlet]="inProgressInfo" ></ng-container>
             <div class="flex flex-col gap-4 p-5 border-bottom position-bottom">
                 <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}'">
                     <div class="flex flex-row justify-end w-full ws-mat-black-text">
@@ -201,6 +193,8 @@
                     </button>
                 </ng-container>  -->
             </div>
+
+             <ng-container [ngTemplateOutlet]="inProgressInfo" ></ng-container>
             <div>
                 <div class="flex flex-col px-8 py-4 gap-2" *ngIf="extContentReadData?.duration > 0">
                     <img src="/assets/icons/toc/timer.svg" width="20px" alt="web image" />
@@ -352,6 +346,8 @@
                     </ng-container>  -->
                     </div>
                 </ng-container>
+
+             <ng-container [ngTemplateOutlet]="inProgressInfo" ></ng-container>
                 <div>
                     <div class="flex flex-col kpi-values items-center gap-2" *ngIf="extContentReadData?.duration > 0">
                         <img src="/assets/icons/toc/timer.svg" width="20px" alt="web image" />
@@ -377,3 +373,15 @@
 
 <ws-app-share-toc *ngIf="enableShare" [contentLink]="contentLink" [rootOrgId]="rootOrgId" [content]="extContentReadData"
     (resetEnableShare)="resetEnableShare($event)"></ws-app-share-toc>
+
+<ng-template #inProgressInfo>
+        <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length ===  0
+            && userExtCourseEnroll?.progress <= 100">
+                <div class="no-certificate-found mt-6 mb-4 mx-2 p-2">
+                    <div>
+                        <span>Progress and certificates for {{ extContentReadData?.contentPartner?.contentPartnerName }}
+                            courses are visible only after you complete the course and pass the assessment.</span>
+                    </div>
+                </div>
+            </ng-container>
+</ng-template>
