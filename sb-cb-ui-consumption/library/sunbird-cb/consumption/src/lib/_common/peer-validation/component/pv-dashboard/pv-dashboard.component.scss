@@ -251,6 +251,21 @@
   }
 }
 
+// Menu Styling
+:host ::ng-deep .mat-mdc-menu-content {
+  .mat-mdc-menu-item {
+    .mat-icon {
+      margin-right: 8px;
+      color: #666;
+      vertical-align: middle;
+    }
+
+    span {
+      vertical-align: middle;
+    }
+  }
+}
+
 // Responsive Design
 @include breakpoint-xs {
   .header {
