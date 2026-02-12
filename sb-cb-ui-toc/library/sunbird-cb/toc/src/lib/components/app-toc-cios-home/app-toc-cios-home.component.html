@@ -150,7 +150,6 @@
     <ng-container *ngIf="!forPreview">
 
         <div *ngIf="isMobile">
-             <ng-container [ngTemplateOutlet]="inProgressInfo" ></ng-container>
             <div class="flex flex-col gap-4 p-5 border-bottom position-bottom">
                 <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}'">
                     <div class="flex flex-row justify-end w-full ws-mat-black-text">
@@ -377,11 +376,22 @@
 <ng-template #inProgressInfo>
         <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length ===  0
             && userExtCourseEnroll?.progress <= 100">
+            <ng-container *ngIf="config?.partnersInfo?.[extContentReadData?.contentPartner?.contentPartnerName]; else defaultMsg">
+                <ng-container *ngIf="config?.partnersInfo?.[extContentReadData?.contentPartner?.contentPartnerName]?.display">
+                    <div class="no-certificate-found mt-6 mb-4 mx-2 p-2" >
+                        <div class="{{config?.partnersInfo?.[extContentReadData?.contentPartner?.contentPartnerName]?.info?.length > 1 ? 'mb-2' : ''}}" *ngFor="let info of config?.partnersInfo[extContentReadData?.contentPartner?.contentPartnerName]?.info">
+                            <span >{{info}}</span>
+                        </div>
+                    </div>
+                </ng-container>
+            </ng-container>
+            <ng-template #defaultMsg>
                 <div class="no-certificate-found mt-6 mb-4 mx-2 p-2">
                     <div>
                         <span>Progress and certificates for {{ extContentReadData?.contentPartner?.contentPartnerName }}
                             courses are visible only after you complete the course and pass the assessment.</span>
                     </div>
                 </div>
+            </ng-template>
             </ng-container>
 </ng-template>
