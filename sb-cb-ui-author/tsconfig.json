@@ -4,13 +4,15 @@
     "alwaysStrict": true,
     "baseUrl": "./",
     "declaration": false,
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "importHelpers": true,
-    "lib": ["es2018", "dom"],
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -20,8 +22,12 @@
     "noUnusedParameters": true,
     "outDir": "./dist/out-tsc",
     "paths": {
-      "@ws-widget/author": ["project/ws/author"],
-      "@ws-widget/author/*": ["project/ws/author/*"],
+      "@ws-widget/author": [
+        "project/ws/author"
+      ],
+      "@ws-widget/author/*": [
+        "project/ws/author/*"
+      ]
     },
     "removeComments": true,
     "sourceMap": true,
@@ -30,9 +36,13 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "target": "es2015",
-    "typeRoots": ["node_modules/@types", "./custom_typings"],
-    "plugins": [{
+    "target": "ES2022",
+    "typeRoots": [
+      "node_modules/@types",
+      "./custom_typings"
+    ],
+    "plugins": [
+      {
         "name": "@angular/language-service"
       },
       {
@@ -42,7 +52,8 @@
         "configFile": "./tslint.json",
         "suppressWhileTypeErrorsPresent": false
       }
-    ]
+    ],
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
   "strictMetadataEmit": true

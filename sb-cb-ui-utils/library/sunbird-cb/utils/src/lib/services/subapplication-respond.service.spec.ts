@@ -5,7 +5,7 @@ describe('SubapplicationRespondService', () => {
   beforeEach(() => TestBed.configureTestingModule({}))
 
   it('should be created', () => {
-    const service: SubapplicationRespondService = TestBed.get(SubapplicationRespondService)
+    const service: SubapplicationRespondService = TestBed.inject(SubapplicationRespondService)
     expect(service).toBeTruthy()
   })
 })

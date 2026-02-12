@@ -3,7 +3,7 @@ import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar'
 import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout'
 import { map, mergeMap, tap, catchError } from 'rxjs/operators'
 import { forkJoin, of, Observable, Subscription } from 'rxjs'
-import { MatDialog } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
 import { ActivatedRoute, Router } from '@angular/router'
 import { QuizStoreService } from '../../services/store.service'
 import { QuizResolverService } from '../../services/resolver.service'
@@ -13,7 +13,7 @@ import { QuizResolverService } from '../../services/resolver.service'
 //   MatchQuiz,
 //   McqQuiz,
 // } from '@ws/author/src/lib/routing/modules/editor/routing/modules/quiz/components/quiz-class'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper'
 import { NSContent } from '../../../../../../../../interface/content'
 import { NotificationComponent } from '../../../../../../../../modules/shared/components/notification/notification.component'
@@ -36,12 +36,13 @@ import { EditorService } from '../../../../../services/editor.service'
 import { AccessControlService } from '../../../../../../../../modules/shared/services/access-control.service'
 
 @Component({
-  selector: 'ws-auth-quiz',
-  templateUrl: './quiz.component.html',
-  styleUrls: ['./quiz.component.scss'],
-  providers: [QuizResolverService, {
-    provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false },
-  }],
+    selector: 'ws-auth-quiz',
+    templateUrl: './quiz.component.html',
+    styleUrls: ['./quiz.component.scss'],
+    providers: [QuizResolverService, {
+            provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false },
+        }],
+    standalone: false
 })
 export class QuizComponent implements OnInit, OnDestroy {
 
@@ -578,7 +579,7 @@ export class QuizComponent implements OnInit, OnDestroy {
             height: '450px',
             data: this.metaContentService.getOriginalMeta(this.currentId),
           })
-          dialogRef.afterClosed().subscribe((commentsForm: FormGroup) => {
+          dialogRef.afterClosed().subscribe((commentsForm: UntypedFormGroup) => {
             this.finalCall(commentsForm)
           })
         }
@@ -602,7 +603,7 @@ export class QuizComponent implements OnInit, OnDestroy {
     )
   }
 
-  finalCall(commentsForm: FormGroup) {
+  finalCall(commentsForm: UntypedFormGroup) {
     if (commentsForm) {
       const body: NSApiRequest.IForwardBackwardActionGeneral = {
         comment: commentsForm.controls.comments.value,

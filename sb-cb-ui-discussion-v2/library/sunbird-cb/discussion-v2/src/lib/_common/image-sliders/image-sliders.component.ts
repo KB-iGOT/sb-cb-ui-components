@@ -4,9 +4,10 @@ import { Subscription, interval } from 'rxjs'
 import { EventService, WsEvents, ValueService } from '@sunbird-cb/utils-v2'
 
 @Component({
-  selector: 'd-v2-image-sliders',
-  templateUrl: './image-sliders.component.html',
-  styleUrls: ['./image-sliders.component.scss'],
+    selector: 'd-v2-image-sliders',
+    templateUrl: './image-sliders.component.html',
+    styleUrls: ['./image-sliders.component.scss'],
+    standalone: false
 })
 export class ImageSlidersComponent implements OnInit, OnDestroy{
   @Input() styleData!: IImageCarouselStyle

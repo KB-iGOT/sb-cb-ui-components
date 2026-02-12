@@ -20,7 +20,8 @@ import { NsContent } from '../../../../services/widget-content.model'
     templateUrl: './fitb.component.html',
     styleUrls: ['./fitb.component.scss'],
     // tslint:disable-next-line
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class FillInTheBlankComponent implements OnInit, OnChanges, AfterViewChecked, OnDestroy {
     @Input() question: NSPractice.IQuestion = {

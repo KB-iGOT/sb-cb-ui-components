@@ -5,9 +5,10 @@ import { NsDiscussionV2 } from '../../../_model/discussion-v2.model';
 import { ConfigurationsService } from '@sunbird-cb/utils-v2';
 
 @Component({
-  selector: 'd-v2-post-preview',
-  templateUrl: './post-preview.component.html',
-  styleUrls: ['./post-preview.component.scss']
+    selector: 'd-v2-post-preview',
+    templateUrl: './post-preview.component.html',
+    styleUrls: ['./post-preview.component.scss'],
+    standalone: false
 })
 export class PostPreviewComponent {
   @Input() cardType = 'topLevel'

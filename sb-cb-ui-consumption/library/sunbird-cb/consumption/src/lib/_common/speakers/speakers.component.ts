@@ -3,9 +3,10 @@ import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrol
 import { Router } from '@angular/router'
 
 @Component({
-  selector: 'sb-uic-speakers',
-  templateUrl: './speakers.component.html',
-  styleUrls: ['./speakers.component.scss']
+    selector: 'sb-uic-speakers',
+    templateUrl: './speakers.component.html',
+    styleUrls: ['./speakers.component.scss'],
+    standalone: false
 })
 export class SpeakersComponent implements OnInit {
   @Input() objectData: any

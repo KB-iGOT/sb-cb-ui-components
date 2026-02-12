@@ -6,7 +6,7 @@ describe('WidgetContentLibService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: WidgetContentLibService = TestBed.get(WidgetContentLibService);
+    const service: WidgetContentLibService = TestBed.inject(WidgetContentLibService);
     expect(service).toBeTruthy();
   });
 });

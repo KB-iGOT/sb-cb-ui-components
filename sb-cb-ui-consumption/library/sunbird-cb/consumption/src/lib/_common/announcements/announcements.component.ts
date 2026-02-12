@@ -3,9 +3,10 @@ import { InsiteDataService } from '../../_services/insite-data.service'
 import { MultilingualTranslationsService } from '../../_services/multilingual-translations.service'
 
 @Component({
-  selector: 'sb-uic-announcements',
-  templateUrl: './announcements.component.html',
-  styleUrls: ['./announcements.component.scss']
+    selector: 'sb-uic-announcements',
+    templateUrl: './announcements.component.html',
+    styleUrls: ['./announcements.component.scss'],
+    standalone: false
 })
 export class AnnouncementsComponent implements OnInit {
 

@@ -2,9 +2,10 @@ import { Component, OnInit, Inject } from '@angular/core'
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'
 
 @Component({
-  selector: 'app-looker-section',
-  templateUrl: './looker-section.component.html',
-  styleUrls: ['./looker-section.component.scss']
+    selector: 'app-looker-section',
+    templateUrl: './looker-section.component.html',
+    styleUrls: ['./looker-section.component.scss'],
+    standalone: false
 })
 export class LookerSectionComponent implements OnInit {
   lookerUrl: SafeResourceUrl

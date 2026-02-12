@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
 import * as _ from 'lodash'
 @Component({
-  selector: 'sb-uin-notification-dropdown',
-  templateUrl: './notification-dropdown.component.html',
-  styleUrls: ['./notification-dropdown.component.scss']
+    selector: 'sb-uin-notification-dropdown',
+    templateUrl: './notification-dropdown.component.html',
+    styleUrls: ['./notification-dropdown.component.scss'],
+    standalone: false
 })
 export class NotificationDropdownComponent implements OnInit {
   @Input() childData: any;

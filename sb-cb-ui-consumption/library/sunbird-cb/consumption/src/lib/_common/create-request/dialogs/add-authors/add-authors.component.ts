@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { MatLegacyDialogRef } from '@angular/material/legacy-dialog'
+import { MatDialogRef } from '@angular/material/dialog'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import * as _ from 'lodash'
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators'
@@ -13,11 +13,12 @@ type Auther = {
 }
 
 @Component({
-  selector: 'sb-uic-add-authors',
-  templateUrl: './add-authors.component.html',
-  styleUrls: ['./add-authors.component.scss',
-    '../../../../styles/round-controls.scss'
-  ]
+    selector: 'sb-uic-add-authors',
+    templateUrl: './add-authors.component.html',
+    styleUrls: ['./add-authors.component.scss',
+        '../../../../styles/round-controls.scss'
+    ],
+    standalone: false
 })
 export class AddAuthorsComponent implements OnInit {
 
@@ -38,7 +39,7 @@ export class AddAuthorsComponent implements OnInit {
 
 
   constructor(
-    private dialogRef: MatLegacyDialogRef<AddAuthorsComponent>,
+    private dialogRef: MatDialogRef<AddAuthorsComponent>,
     private fb: UntypedFormBuilder,
     private configSvc: ConfigurationsService,
     private createRequestSvc: CreateRequestService,

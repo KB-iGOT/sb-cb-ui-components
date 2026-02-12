@@ -20,7 +20,7 @@ const routes: Routes = [
   },
   {
     path: 'editor',
-    loadChildren: './routing/modules/editor/editor.module#EditorModule#EditorModule',
+    loadChildren: () => import('./routing/modules/editor/editor.module').then(m => m.EditorModule),
     // loadChildren: () => import('./routing/modules/editor/editor.module').then(u => u.EditorModule),
     data: {
       load: ['ordinals', 'ckeditor', 'meta'],
@@ -31,7 +31,7 @@ const routes: Routes = [
   },
   {
     path: 'editor/:id',
-    loadChildren: './routing/modules/editor/editor.module#EditorModule',
+    loadChildren: () => import('./routing/modules/editor/editor.module').then(m => m.EditorModule),
     // loadChildren: () => import('./routing/modules/editor/editor.module').then(u => u.EditorModule),
     data: { load: ['ordinals', 'ckeditor', 'meta'] },
     resolve: {
@@ -43,7 +43,7 @@ const routes: Routes = [
     path: 'my-content',
     // loadChildren: () =>
     //   import('./routing/modules/my-content/my-content.module').then(u => u.MyContentModule),
-    loadChildren: './routing/modules/editor/editor.module#MyContentModule',
+    loadChildren: () => import('./routing/modules/editor/editor.module').then(m => m.MyContentModule),
     data: { load: ['ordinals', 'meta'] },
     resolve: {
       script: InitResolver,

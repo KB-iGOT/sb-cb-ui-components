@@ -1,15 +1,16 @@
 import { Component, Inject, OnInit } from '@angular/core'
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
+import { MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { WidgetContentService } from './services/widget-content.service'
 @Component({
-  selector: 'lib-common-assessment-viewer',
-  templateUrl: './common-assessment-viewer.component.html',
-  styleUrls: ['./common-assessment-viewer.component.scss'],
+    selector: 'lib-common-assessment-viewer',
+    templateUrl: './common-assessment-viewer.component.html',
+    styleUrls: ['./common-assessment-viewer.component.scss'],
+    standalone: false
 })
 export class CommonAssessmentViewerComponent implements OnInit {
   environment!: any
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, @Inject('environment') environment: any,
-              private widgetContentService: WidgetContentService) {
+    private widgetContentService: WidgetContentService) {
     this.environment = environment
   }
 

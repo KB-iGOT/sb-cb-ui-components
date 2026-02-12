@@ -10,9 +10,10 @@ import { MatDialog } from '@angular/material/dialog'
 import _ from 'lodash'
 
 @Component({
-  selector: 'd-v2-new-post',
-  templateUrl: './new-post.component.html',
-  styleUrls: ['./new-post.component.scss']
+    selector: 'd-v2-new-post',
+    templateUrl: './new-post.component.html',
+    styleUrls: ['./new-post.component.scss'],
+    standalone: false
 })
 export class NewPostComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewPostConfig

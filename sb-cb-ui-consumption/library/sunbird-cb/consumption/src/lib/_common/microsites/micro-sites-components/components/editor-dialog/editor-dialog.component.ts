@@ -28,9 +28,10 @@ interface SliderData {
 }
 
 @Component({
-  selector: 'app-editor-dialog',
-  templateUrl: './editor-dialog.component.html',
-  styleUrls: ['./editor-dialog.component.scss']
+    selector: 'app-editor-dialog',
+    templateUrl: './editor-dialog.component.html',
+    styleUrls: ['./editor-dialog.component.scss'],
+    standalone: false
 })
 export class EditorDialogComponent implements OnInit {
   editorForm: FormGroup

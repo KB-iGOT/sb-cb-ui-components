@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog'
+import { MatDialogRef } from '@angular/material/dialog'
 import { AuthKeycloakService } from '../../services/auth-keycloak.service'
 import { ConfigurationsService } from '../../services/configurations.service'
 import { UtilityService } from '../../services/utility.service'
 import { TranslateService } from '@ngx-translate/core'
 
 @Component({
-  selector: 'ws-utils-logout',
-  templateUrl: './logout.component.html',
-  styleUrls: ['./logout.component.scss'],
+    selector: 'ws-utils-logout',
+    templateUrl: './logout.component.html',
+    styleUrls: ['./logout.component.scss'],
+    standalone: false
 })
 export class LogoutComponent implements OnInit {
 

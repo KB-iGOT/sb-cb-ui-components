@@ -34,9 +34,10 @@ import { SearchListingService } from "../../_services/search-listing.service";
 //#endregion (imports)
 
 @Component({
-  selector: "ws-app-learn-search",
-  templateUrl: "./learn-search.component.html",
-  styleUrls: ["./learn-search.component.scss"]
+    selector: "ws-app-learn-search",
+    templateUrl: "./learn-search.component.html",
+    styleUrls: ["./learn-search.component.scss"],
+    standalone: false
 })
 export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
   // #region (properties)

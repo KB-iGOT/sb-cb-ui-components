@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import { MAT_LEGACY_SNACK_BAR_DATA as MAT_SNACK_BAR_DATA, MatLegacySnackBarRef as MatSnackBarRef } from "@angular/material/legacy-snack-bar";
+import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from "@angular/material/snack-bar";
 
 @Component({
-  selector: "sb-uic-snackbar",
-  templateUrl: "./snackbar.component.html",
-  styleUrls: ["./snackbar.component.scss"],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: "sb-uic-snackbar",
+    templateUrl: "./snackbar.component.html",
+    styleUrls: ["./snackbar.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SnackbarComponent {
   public readonly data = inject<{ message: string; type: "success | error" }>(MAT_SNACK_BAR_DATA);

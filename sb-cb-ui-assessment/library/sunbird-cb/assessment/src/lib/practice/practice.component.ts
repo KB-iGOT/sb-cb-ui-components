@@ -10,9 +10,9 @@ import {
   ViewChild, ViewChildren,
   Renderer2,
 } from '@angular/core'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 import { MatSidenav } from '@angular/material/sidenav'
-import { MatLegacySnackBar as MatSnackBar, MatLegacySnackBarConfig as MatSnackBarConfig } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar'
 import { Subscription, interval } from 'rxjs'
 import { filter, map } from 'rxjs/operators'
 import { NSPractice } from './practice.model'
@@ -41,6 +41,7 @@ export type FetchStatus = 'hasMore' | 'fetching' | 'done' | 'error' | 'none'
   selector: 'viewer-plugin-practice',
   templateUrl: './practice.component.html',
   styleUrls: ['./practice.component.scss'],
+  standalone: false
 })
 // ComponentCanDeactivate
 export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
@@ -240,7 +241,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
     this.quizSvc.checkAlreadySubmitAssessment.subscribe(result => {
       if (result) {
         this.isSubmitted = true
-        this.viewState = 'answer' || 'review'
+        this.viewState = this.viewState === 'answer' ? 'review' : 'answer'
       }
     })
   }
@@ -1012,7 +1013,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
     // status = 1 indicates started
     // status = 2 indicates completed
     const resData = this.viewerSvc.getBatchIdAndCourseId(this.activatedRoute.snapshot.queryParams.collectionId,
-                                                         this.activatedRoute.snapshot.queryParams.batchId, this.identifier)
+      this.activatedRoute.snapshot.queryParams.batchId, this.identifier)
     const collectionId = (resData && resData.courseId) ? resData.courseId : ''
     const batchId = (resData && resData.batchId) ? resData.batchId : ''
     // const collectionId = this.activatedRoute.snapshot.queryParams.collectionId ?

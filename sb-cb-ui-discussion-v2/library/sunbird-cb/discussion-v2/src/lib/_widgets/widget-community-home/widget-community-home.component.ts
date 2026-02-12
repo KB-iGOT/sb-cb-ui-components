@@ -12,9 +12,10 @@ import { CommunityGuideLinesComponent } from '../../_shared/community-guide-line
 import { ActivatedRoute } from '@angular/router'
 
 @Component({
-  selector: 'd-v2-widget-community-home',
-  templateUrl: './widget-community-home.component.html',
-  styleUrls: ['./widget-community-home.component.scss']
+    selector: 'd-v2-widget-community-home',
+    templateUrl: './widget-community-home.component.html',
+    styleUrls: ['./widget-community-home.component.scss'],
+    standalone: false
 })
 export class WidgetCommunityHomeComponent implements OnInit, OnChanges {
   @Input() communityId!: string

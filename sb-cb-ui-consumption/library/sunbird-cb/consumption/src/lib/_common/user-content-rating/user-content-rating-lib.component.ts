@@ -4,9 +4,10 @@ import { ScrollableItemDirective } from './../../_directives/scrollable-item/scr
 import { UserContentRatingLibService } from './user-content-rating-lib.service';
 
 @Component({
-  selector: 'sb-uic-user-content-rating',
-  templateUrl: './user-content-rating-lib.component.html',
-  styleUrls: ['./user-content-rating-lib.component.scss']
+    selector: 'sb-uic-user-content-rating',
+    templateUrl: './user-content-rating-lib.component.html',
+    styleUrls: ['./user-content-rating-lib.component.scss'],
+    standalone: false
 })
 export class UserContentRatingLibComponent implements OnInit {
   currentIndex: any =0

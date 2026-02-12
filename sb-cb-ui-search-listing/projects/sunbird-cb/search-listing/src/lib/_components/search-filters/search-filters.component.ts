@@ -13,9 +13,10 @@ import { SearchListingService } from "../../_services/search-listing.service";
 import { DateRange, DefaultMatCalendarRangeStrategy, MatRangeDateSelectionModel } from "@angular/material/datepicker";
 
 @Component({
-  selector: "ws-app-search-filters",
-  templateUrl: "./search-filters.component.html",
-  styleUrls: ["./search-filters.component.scss"]
+    selector: "ws-app-search-filters",
+    templateUrl: "./search-filters.component.html",
+    styleUrls: ["./search-filters.component.scss"],
+    standalone: false
 })
 export class SearchFiltersComponent implements OnInit, OnDestroy, OnChanges {
   @Input() newfacets!: any;

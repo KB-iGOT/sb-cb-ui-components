@@ -1,20 +1,22 @@
 import { Component, OnInit, Inject, ViewChild, ElementRef } from '@angular/core'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { ENTER, COMMA } from '@angular/cdk/keycodes'
-import { FormGroup, FormBuilder } from '@angular/forms'
-import { MatChipInputEvent, MatSnackBar } from '@angular/material'
+import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms'
+import { MatChipInputEvent } from '@angular/material/chips'
+import { MatSnackBar } from '@angular/material/snack-bar'
 // import { InterestService } from '../../../../../../../../../app/src/lib/routes/profile/routes/interest/services/interest.service'
 export interface IDialogData {
   animal: string
   name: string
 }
 @Component({
-  selector: 'ws-auth-competency-add-popup',
-  templateUrl: './competency-add-popup.html',
-  styleUrls: ['./competency-add-popup.scss'],
+    selector: 'ws-auth-competency-add-popup',
+    templateUrl: './competency-add-popup.html',
+    styleUrls: ['./competency-add-popup.scss'],
+    standalone: false
 })
 export class CompetencyAddPopUpComponent implements OnInit {
-  startForm!: FormGroup
+  startForm!: UntypedFormGroup
   separatorKeysCodes: number[] = [ENTER, COMMA]
   postTagsArray: string[] = []
   uploadSaveData = false
@@ -27,7 +29,7 @@ export class CompetencyAddPopUpComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<CompetencyAddPopUpComponent>,
     @Inject(MAT_DIALOG_DATA) public data: IDialogData,
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     // private interestService: InterestService,
     private snackBar: MatSnackBar,
   ) {

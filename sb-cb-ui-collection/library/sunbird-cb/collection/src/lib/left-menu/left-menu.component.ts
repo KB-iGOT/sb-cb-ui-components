@@ -5,9 +5,10 @@ import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { ILeftMenu, IMenu } from './left-menu.model'
 // import { defaultImg } from './base64.json'
 @Component({
-  selector: 'ws-widget-left-menu',
-  templateUrl: './left-menu.component.html',
-  styleUrls: ['./left-menu.component.scss'],
+    selector: 'ws-widget-left-menu',
+    templateUrl: './left-menu.component.html',
+    styleUrls: ['./left-menu.component.scss'],
+    standalone: false
 })
 export class LeftMenuComponent extends WidgetBaseComponent
   implements OnInit, OnDestroy, NsWidgetResolver.IWidgetData<ILeftMenu>  {

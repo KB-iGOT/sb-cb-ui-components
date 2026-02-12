@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core'
 
 @Component({
-  selector: 'sb-uic-avatar-photo',
-  templateUrl: './avatar-photo-lib.component.html',
-  styleUrls: ['./avatar-photo-lib.component.scss'],
+    selector: 'sb-uic-avatar-photo',
+    templateUrl: './avatar-photo-lib.component.html',
+    styleUrls: ['./avatar-photo-lib.component.scss'],
+    standalone: false
 })
 export class AvatarPhotoLibComponent implements OnInit, OnChanges {
   @Input() datalen: any

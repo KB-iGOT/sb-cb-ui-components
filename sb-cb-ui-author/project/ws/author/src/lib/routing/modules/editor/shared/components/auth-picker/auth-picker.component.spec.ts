@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { AuthPickerComponent } from './auth-picker.component'
 
 describe('AuthPickerComponent', () => {
   let component: AuthPickerComponent
   let fixture: ComponentFixture<AuthPickerComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AuthPickerComponent],
     }).compileComponents()

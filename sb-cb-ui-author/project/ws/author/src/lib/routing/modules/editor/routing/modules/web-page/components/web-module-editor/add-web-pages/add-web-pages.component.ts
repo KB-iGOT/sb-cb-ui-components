@@ -8,7 +8,7 @@ import { PlainCKEditorComponent } from '../../../../../../shared/components/plai
 import { of, Observable, Subscription, forkJoin } from 'rxjs'
 import { map, mergeMap, tap, catchError } from 'rxjs/operators'
 import { Page, ModuleObj, WebModuleData } from '../../web-module.class'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 // import {
 //   CONTENT_BASE_WEBHOST_ASSETS,
 //   CONTENT_BASE_WEBHOST,
@@ -36,9 +36,10 @@ import { LoaderService } from '../../../../../../../../../services/loader.servic
 import { EditorService } from '../../../../../../services/editor.service'
 import { AccessControlService } from '../../../../../../../../../modules/shared/services/access-control.service'
 @Component({
-  selector: 'ws-auth-add-web-pages',
-  templateUrl: './add-web-pages.component.html',
-  styleUrls: ['./add-web-pages.component.scss'],
+    selector: 'ws-auth-add-web-pages',
+    templateUrl: './add-web-pages.component.html',
+    styleUrls: ['./add-web-pages.component.scss'],
+    standalone: false
 })
 export class AddWebPagesComponent implements OnInit, OnDestroy {
   @Output() data = new EventEmitter<string>()
@@ -67,7 +68,7 @@ export class AddWebPagesComponent implements OnInit, OnDestroy {
   showAudioCard = false
   imagesUrlbase = ''
 
-  @ViewChild(PlainCKEditorComponent, { static: false }) ckEditor!: PlainCKEditorComponent
+  @ViewChild(PlainCKEditorComponent) ckEditor!: PlainCKEditorComponent
 
   constructor(
     public dialog: MatDialog,
@@ -529,7 +530,7 @@ export class AddWebPagesComponent implements OnInit, OnDestroy {
     )
   }
 
-  finalCall(commentsForm: FormGroup) {
+  finalCall(commentsForm: UntypedFormGroup) {
     if (commentsForm) {
       const body: NSApiRequest.IForwardBackwardActionGeneral = {
         comment: commentsForm.controls.comments.value,
@@ -682,7 +683,7 @@ export class AddWebPagesComponent implements OnInit, OnDestroy {
           height: '450px',
           data: this.metaContentService.getOriginalMeta(this.currentId),
         })
-        dialogRef.afterClosed().subscribe((commentsForm: FormGroup) => {
+        dialogRef.afterClosed().subscribe((commentsForm: UntypedFormGroup) => {
           this.finalCall(commentsForm)
         })
       }

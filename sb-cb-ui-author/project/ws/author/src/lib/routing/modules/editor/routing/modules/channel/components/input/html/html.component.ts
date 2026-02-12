@@ -11,9 +11,10 @@ import { UploadService } from '../../../../../../shared/services/upload.service'
 import { LoaderService } from '../../../../../../../../../services/loader.service'
 
 @Component({
-  selector: 'ws-auth-html',
-  templateUrl: './html.component.html',
-  styleUrls: ['./html.component.scss'],
+    selector: 'ws-auth-html',
+    templateUrl: './html.component.html',
+    styleUrls: ['./html.component.scss'],
+    standalone: false
 })
 export class HtmlComponent implements OnInit {
 

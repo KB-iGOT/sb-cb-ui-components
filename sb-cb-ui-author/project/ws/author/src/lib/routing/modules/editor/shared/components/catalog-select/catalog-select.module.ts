@@ -5,20 +5,20 @@ import { MatTreeModule } from '@angular/material/tree'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatIconModule } from '@angular/material/icon'
-import { MatButtonModule, MatDialogModule } from '@angular/material'
+import { MatButtonModule } from '@angular/material/button'
+import { MatDialogModule } from '@angular/material/dialog'
 
 @NgModule({
-  declarations: [CatalogSelectComponent],
-  imports: [
-    CommonModule,
-    MatTreeModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatButtonModule,
-    MatDialogModule,
-  ],
-  exports: [CatalogSelectComponent],
-  entryComponents: [CatalogSelectComponent],
+    declarations: [CatalogSelectComponent],
+    imports: [
+        CommonModule,
+        MatTreeModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatButtonModule,
+        MatDialogModule,
+    ],
+    exports: [CatalogSelectComponent]
 })
 export class CatalogSelectModule { }

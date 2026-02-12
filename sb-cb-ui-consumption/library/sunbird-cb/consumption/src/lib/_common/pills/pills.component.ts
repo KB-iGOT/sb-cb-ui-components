@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
-  selector: 'sb-uic-pills',
-  templateUrl: './pills.component.html',
-  styleUrls: ['./pills.component.scss']
+    selector: 'sb-uic-pills',
+    templateUrl: './pills.component.html',
+    styleUrls: ['./pills.component.scss'],
+    standalone: false
 })
 export class PillsComponent implements OnInit {
 

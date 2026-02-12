@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { UnpublishDialogComponent } from './unpublish-dialog.component'
 
@@ -6,7 +6,7 @@ describe('UnpublishDialogComponent', () => {
   let component: UnpublishDialogComponent
   let fixture: ComponentFixture<UnpublishDialogComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [UnpublishDialogComponent],
     }).compileComponents()

@@ -1,45 +1,46 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NsCardContent } from '../../../_models/card-content.model';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
-import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2';
-import * as _ from "lodash";
-import { TranslateService } from '@ngx-translate/core';
-import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { NsCardContent } from '../../../_models/card-content.model'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2'
+import * as _ from "lodash"
+import { TranslateService } from '@ngx-translate/core'
+import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
 
 @Component({
-  selector: 'sb-uic-card-wide',
-  templateUrl: './card-wide.component.html',
-  styleUrls: ['./card-wide.component.scss']
+    selector: 'sb-uic-card-wide',
+    templateUrl: './card-wide.component.html',
+    styleUrls: ['./card-wide.component.scss'],
+    standalone: false
 })
 export class CardWideComponent implements OnInit {
-  @Input() widgetData!: NsCardContent.ICard;
+  @Input() widgetData!: NsCardContent.ICard
   @Input() isLiveOrMarkForDeletion: any
   @Input() showIntranetContent: any
   @Input() isIntranetAllowedSettings: any
   @Input() isCardLoading: boolean = false
   @Output() contentData = new EventEmitter<any>()
-  isCardFlipped:boolean = false
+  isCardFlipped: boolean = false
   defaultThumbnail: any
   sourceLogos: any
   defaultSLogo: any
   showFlip = false
   widgetType: any = 'df'
-  widgetSubType: any ='sdf'
+  widgetSubType: any = 'sdf'
   constructor(
     private snackBar: MatSnackBar,
     private events: EventService,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    private configSvc: ConfigurationsService,) { 
-      this.langtranslations.languageSelectedObservable.subscribe(() => {
-        if (localStorage.getItem('websiteLanguage')) {
-          this.translate.setDefaultLang('en')
-          const lang = localStorage.getItem('websiteLanguage')!
-          this.translate.use(lang)
-        }
-      })
-    }
-    
+    private configSvc: ConfigurationsService,) {
+    this.langtranslations.languageSelectedObservable.subscribe(() => {
+      if (localStorage.getItem('websiteLanguage')) {
+        this.translate.setDefaultLang('en')
+        const lang = localStorage.getItem('websiteLanguage')!
+        this.translate.use(lang)
+      }
+    })
+  }
+
   ngOnInit() {
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
@@ -48,11 +49,11 @@ export class CardWideComponent implements OnInit {
       this.defaultSLogo = instanceConfig.logos.defaultSourceLogo || '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
     } else {
       this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
-      this.defaultSLogo =  '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
+      this.defaultSLogo = '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
     }
   }
 
-  getRedirectUrlData(contentData: any){
+  getRedirectUrlData(contentData: any) {
     this.contentData.emit(contentData)
   }
   raiseTelemetry() {

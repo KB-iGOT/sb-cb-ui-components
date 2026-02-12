@@ -6,11 +6,12 @@ import { ActivatedRoute } from '@angular/router'
 import { ViewerHeaderSideBarToggleService } from './../../../services/viewer-header-side-bar-toggle.service'
 import { PracticeService } from '../../practice.service'
 import { FinalAssessmentPopupComponent } from './../final-assessment-popup/final-assessment-popup.component'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 @Component({
-  selector: 'viewer-overview',
-  templateUrl: './overview.component.html',
-  styleUrls: ['./overview.component.scss'],
+    selector: 'viewer-overview',
+    templateUrl: './overview.component.html',
+    styleUrls: ['./overview.component.scss'],
+    standalone: false
 })
 export class OverviewComponent implements OnInit, OnChanges, OnDestroy {
   @Input() learningObjective = ''

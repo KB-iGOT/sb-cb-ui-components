@@ -5,9 +5,10 @@ import { labels } from '../../labels/strings'
 
 
 @Component({
-  selector: 'lib-create-categories',
-  templateUrl: './create-categories.component.html',
-  styleUrls: ['./create-categories.component.scss']
+    selector: 'lib-create-categories',
+    templateUrl: './create-categories.component.html',
+    styleUrls: ['./create-categories.component.scss'],
+    standalone: false
 })
 export class CreateCategoriesComponent implements OnInit {
   @Input() taxonomyInfo:any

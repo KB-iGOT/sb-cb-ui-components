@@ -4,8 +4,9 @@ import { NsWidgetResolver } from './sb-ui-resolver.model'
 type TWidgetBase = Omit<NsWidgetResolver.IWidgetData<any>, 'widgetData'>
 
 @Component({
-  selector: 'sb-ui-resolver-base',
-  template: 'Base Component',
+    selector: 'sb-ui-resolver-base',
+    template: 'Base Component',
+    standalone: false
 })
 export class WidgetBaseComponent implements TWidgetBase, AfterViewInit {
   @Input() widgetType = ''

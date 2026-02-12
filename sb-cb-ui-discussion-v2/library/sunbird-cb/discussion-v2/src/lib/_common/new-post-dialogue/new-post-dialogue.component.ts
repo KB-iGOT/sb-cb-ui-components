@@ -59,9 +59,10 @@ interface ExtendedMentionFeed extends MentionFeed {
 }
 
 @Component({
-  selector: 'd-v2-new-post-dialogue',
-  templateUrl: './new-post-dialogue.component.html',
-  styleUrls: ['./new-post-dialogue.component.scss']
+    selector: 'd-v2-new-post-dialogue',
+    templateUrl: './new-post-dialogue.component.html',
+    styleUrls: ['./new-post-dialogue.component.scss'],
+    standalone: false
 })
 export class NewPostDialogueComponent implements OnInit, OnDestroy {
   widgetData!: any

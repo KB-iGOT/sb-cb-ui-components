@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { AuthEditorOptionsComponent } from './auth-editor-options.component'
 
 describe('AuthEditorOptionsComponent', () => {
   let component: AuthEditorOptionsComponent
   let fixture: ComponentFixture<AuthEditorOptionsComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AuthEditorOptionsComponent],
     }).compileComponents()

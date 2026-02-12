@@ -3,9 +3,10 @@ import { UserEnrollCommunityService } from '../../_services/user-enroll-communit
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
 @Component({
-  selector: 'd-v2-widget-discussionv2-landing-page',
-  templateUrl: './widget-discussionv2-landing-page.component.html',
-  styleUrls: ['./widget-discussionv2-landing-page.component.scss']
+    selector: 'd-v2-widget-discussionv2-landing-page',
+    templateUrl: './widget-discussionv2-landing-page.component.html',
+    styleUrls: ['./widget-discussionv2-landing-page.component.scss'],
+    standalone: false
 })
 export class WidgetDiscussionv2LandingPageComponent implements OnInit {
   @Input() feedWidgetData: any | undefined

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { AuthExpiryDateConfirmComponent } from './auth-expiry-date-confirm.component'
 
@@ -6,7 +6,7 @@ describe('AuthExpiryDateConfirmComponent', () => {
   let component: AuthExpiryDateConfirmComponent
   let fixture: ComponentFixture<AuthExpiryDateConfirmComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AuthExpiryDateConfirmComponent],
     }).compileComponents()

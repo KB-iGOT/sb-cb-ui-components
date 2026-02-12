@@ -4,9 +4,10 @@ import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bott
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
 @Component({
-  selector: 'd-v2-filter',
-  templateUrl: './filter.component.html',
-  styleUrls: ['./filter.component.scss']
+    selector: 'd-v2-filter',
+    templateUrl: './filter.component.html',
+    styleUrls: ['./filter.component.scss'],
+    standalone: false
 })
 export class FilterComponent {
   @Input() filterObjectList: any = {}

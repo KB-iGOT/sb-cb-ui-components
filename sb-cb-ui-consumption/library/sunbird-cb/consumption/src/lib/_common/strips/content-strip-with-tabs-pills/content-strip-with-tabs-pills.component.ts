@@ -73,10 +73,11 @@ interface IStripUnitContentData {
 const SNACKBAR_DURATION = 3000
 
 @Component({
-  selector: 'sb-uic-content-strip-with-tabs-pills',
-  templateUrl: './content-strip-with-tabs-pills.component.html',
-  styleUrls: ['./content-strip-with-tabs-pills.component.scss'],
-  animations: [fadeAnimation]
+    selector: 'sb-uic-content-strip-with-tabs-pills',
+    templateUrl: './content-strip-with-tabs-pills.component.html',
+    styleUrls: ['./content-strip-with-tabs-pills.component.scss'],
+    animations: [fadeAnimation],
+    standalone: false
 })
 export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   implements

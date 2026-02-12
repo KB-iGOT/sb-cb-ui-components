@@ -13,24 +13,22 @@ import { EditorSharedModule } from '../../../shared/shared.module'
 import { AuthViewerModule } from '../../../../../../modules/viewer/viewer.module'
 
 @NgModule({
-  declarations: [
-    WebModuleEditorComponent,
-    UploadAudioComponent,
-    AudioStripsComponent,
-    AddWebPagesComponent,
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    EditorSharedModule,
-    DragDropModule,
-    AuthViewerModule,
-    WebPageRoutingModule,
-    HorizontalScrollerModule,
-  ],
-  providers: [WebStoreService],
-  entryComponents: [UploadAudioComponent],
-  exports: [AddWebPagesComponent],
-
+    declarations: [
+        WebModuleEditorComponent,
+        UploadAudioComponent,
+        AudioStripsComponent,
+        AddWebPagesComponent,
+    ],
+    imports: [
+        CommonModule,
+        SharedModule,
+        EditorSharedModule,
+        DragDropModule,
+        AuthViewerModule,
+        WebPageRoutingModule,
+        HorizontalScrollerModule,
+    ],
+    providers: [WebStoreService],
+    exports: [AddWebPagesComponent]
 })
 export class WebPageModule { }

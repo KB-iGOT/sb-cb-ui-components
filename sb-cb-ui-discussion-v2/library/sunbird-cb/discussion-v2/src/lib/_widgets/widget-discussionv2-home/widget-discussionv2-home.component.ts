@@ -12,10 +12,11 @@ export interface Community {
 }
 
 @Component({
-  selector: 'd-v2-widget-discussionv2-home',
-  templateUrl: './widget-discussionv2-home.component.html',
-  styleUrls: ['./widget-discussionv2-home.component.scss'],
-    encapsulation: ViewEncapsulation.None
+    selector: 'd-v2-widget-discussionv2-home',
+    templateUrl: './widget-discussionv2-home.component.html',
+    styleUrls: ['./widget-discussionv2-home.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class WidgetDiscussionv2HomeComponent implements OnInit {
   @Output() searchText = new EventEmitter<any>();

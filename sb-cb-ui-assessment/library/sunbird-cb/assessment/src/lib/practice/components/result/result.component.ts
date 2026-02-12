@@ -3,12 +3,13 @@ import { NsContent } from '../../../services/widget-content.model'
 // import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 import { NSPractice } from '../../practice.model'
 import { MatAccordion } from '@angular/material/expansion'
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatTableDataSource } from '@angular/material/table'
 import * as _ from 'lodash'
 @Component({
-  selector: 'viewer-result',
-  templateUrl: './result.component.html',
-  styleUrls: ['./result.component.scss'],
+    selector: 'viewer-result',
+    templateUrl: './result.component.html',
+    styleUrls: ['./result.component.scss'],
+    standalone: false
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() percentage = 0

@@ -8,9 +8,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogueComponent } from '../../_shared/confirm-dialogue/confirm-dialogue.component';
 
 @Component({
-  selector: 'd-v2-community-card',
-  templateUrl: './community-card.component.html',
-  styleUrls: ['./community-card.component.scss']
+    selector: 'd-v2-community-card',
+    templateUrl: './community-card.component.html',
+    styleUrls: ['./community-card.component.scss'],
+    standalone: false
 })
 export class CommunityCardComponent implements OnInit {
   @Input() community: any;

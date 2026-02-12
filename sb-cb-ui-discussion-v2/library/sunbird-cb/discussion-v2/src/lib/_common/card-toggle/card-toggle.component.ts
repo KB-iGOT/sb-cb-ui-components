@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'd-v2-card-toggle',
-  templateUrl: './card-toggle.component.html',
-  styleUrls: ['./card-toggle.component.scss']
+    selector: 'd-v2-card-toggle',
+    templateUrl: './card-toggle.component.html',
+    styleUrls: ['./card-toggle.component.scss'],
+    standalone: false
 })
 export class CardToggleComponent {
   @Input() toggleViewBoolean: boolean = false;

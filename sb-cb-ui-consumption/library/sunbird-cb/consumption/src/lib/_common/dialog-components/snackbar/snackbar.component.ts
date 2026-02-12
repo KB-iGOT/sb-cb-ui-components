@@ -4,9 +4,10 @@ import {
   MatSnackBarRef,
 } from "@angular/material/snack-bar";
 @Component({
-  selector: "sb-uic-snackbar",
-  templateUrl: "./snackbar.component.html",
-  styleUrls: ["./snackbar.component.scss"],
+    selector: "sb-uic-snackbar",
+    templateUrl: "./snackbar.component.html",
+    styleUrls: ["./snackbar.component.scss"],
+    standalone: false
 })
 export class SnackbarComponent {
   constructor(

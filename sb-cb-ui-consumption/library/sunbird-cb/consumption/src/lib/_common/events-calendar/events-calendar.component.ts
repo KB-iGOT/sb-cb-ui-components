@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common'
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import * as _ from 'lodash'
 import { ConfigurationsService, WsEvents } from '@sunbird-cb/utils-v2'
 import { Router } from '@angular/router'
@@ -12,9 +12,10 @@ import { EventsService } from '../../_services/events.service'
 
 
 @Component({
-  selector: 'ws-app-events-calendar',
-  templateUrl: './events-calendar.component.html',
-  styleUrls: ['./events-calendar.component.scss']
+    selector: 'ws-app-events-calendar',
+    templateUrl: './events-calendar.component.html',
+    styleUrls: ['./events-calendar.component.scss'],
+    standalone: false
 })
 export class EventsCalendarComponent implements OnInit {
   @Input() eventCalendarDetails: any
@@ -40,7 +41,7 @@ export class EventsCalendarComponent implements OnInit {
   constructor(
     private datePipe: DatePipe,
     private eventsService: EventsService,
-    private matSnackBar: MatLegacySnackBar,
+    private matSnackBar: MatSnackBar,
     private configSvc: ConfigurationsService,
     private router: Router,
     private bottomSheetRef: MatBottomSheetRef<any>,

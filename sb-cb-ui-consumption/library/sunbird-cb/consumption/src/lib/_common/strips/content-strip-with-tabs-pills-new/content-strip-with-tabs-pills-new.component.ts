@@ -82,9 +82,10 @@ interface IWidgetData {
 }
 
 @Component({
-  selector: 'sb-uic-content-strip-with-tabs-pills-new',
-  templateUrl: './content-strip-with-tabs-pills-new.component.html',
-  styleUrls: ['./content-strip-with-tabs-pills-new.component.scss'],
+    selector: 'sb-uic-content-strip-with-tabs-pills-new',
+    templateUrl: './content-strip-with-tabs-pills-new.component.html',
+    styleUrls: ['./content-strip-with-tabs-pills-new.component.scss'],
+    standalone: false
 })
 export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy {
 

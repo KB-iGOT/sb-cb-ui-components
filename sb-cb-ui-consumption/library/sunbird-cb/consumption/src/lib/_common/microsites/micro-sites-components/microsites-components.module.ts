@@ -1,9 +1,9 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
+import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
-import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs'
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatTabsModule } from '@angular/material/tabs'
+import { MatTooltipModule } from '@angular/material/tooltip'
 
 import {
   AnnouncementsModule,
@@ -41,24 +41,24 @@ import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
 import { EditorDialogComponent } from './components/editor-dialog/editor-dialog.component'
 import { MatDialogModule } from '@angular/material/dialog' // Updated to non-legacy module
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field'
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
-import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle'
-import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select'
-import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator'
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
-import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox'
-import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { MatButtonModule } from '@angular/material/button'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'
+import { MatSelectModule } from '@angular/material/select'
+import { MatPaginatorModule } from '@angular/material/paginator'
+import { MatCardModule } from '@angular/material/card'
+import { MatCheckboxModule } from '@angular/material/checkbox'
+import { MatRadioModule } from '@angular/material/radio'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { SlwConfigDialogComponent } from './components/slw-config-dialog/slw-config-dialog.component'
 import { ActionItemsComponent } from './components/action-items/action-items.component'
 import { MatDatepickerModule } from '@angular/material/datepicker'
-import { MatLegacyNativeDateModule as MatNativeDateModule } from '@angular/material/legacy-core' // or MatMomentDateModule if you use moment.js
+import { MatNativeDateModule } from '@angular/material/core' // or MatMomentDateModule if you use moment.js
 import { SkeletonLoaderLibModule } from '../../skeleton-loader-lib/skeleton-loader-lib.module'
 import { OrderByPipeModule } from '../../../_pipes/order-by/order-by.pipe.module'
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core'
-import { HttpClient, HttpClientModule } from '@angular/common/http'
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { SafeUrlPipeModule } from '../../../_pipes/safe-url/safe-url.module'
 import { VideoConferenceModule } from '../../video-conference/video-conference.module'
 import { StripSectionCreateComponent } from './components/strip-section-create/strip-section-create.component'
@@ -67,100 +67,92 @@ import { AddTabDialogComponent } from './components/add-tab-dialog/add-tab-dialo
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component'
 import { EventsCalendarModule } from '../../events-calendar/events-calendar.module'
 
-@NgModule({
-  declarations: [
-    TopSectionComponent,
-    LookerSectionComponent,
-    TopLearnersComponent,
-    MainContentComponent,
-    SupportSectionComponent,
-    CompetencyComponent,
-    ContentStripComponent,
-    ColumnSectionDisplayComponent,
-    MobileSectionsComponent,
-    EditorDialogComponent,
-    SlwConfigDialogComponent,
-    ActionItemsComponent,
-    StripSectionCreateComponent,
-    StripAddContentComponent,
-    AddTabDialogComponent,
-    ConfirmDialogComponent
-  ],
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule,
-    SkeletonLoaderLibModule,
-    AnnouncementsModule,
-    TopLearnersModule,
-    CbpPlanModule,
-    CardsModule,
-
-
-    CommonStripModule,
-    CompetencyPassbookModule,
-    CompetencyPassbookMdoModule,
-    ContentStripWithTabsLibModule,
-    DataPointsModule,
-    SlidersLibModule,
-    HighlightsOfWeekModule,
-    UserProgressModule,
-    EventsModule,
-    SpeakersModule,
-    MdoLeaderboardModule,
-    KeyHighlightsModule,
-    MatTabsModule,
-    OrderByPipeModule,
-    SafeUrlPipeModule,
-    VideoConferenceModule,
-    SbUiResolverModule,
-    FormsModule,
-    ReactiveFormsModule,
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSlideToggleModule,
-    MatSelectModule,
-    MatPaginatorModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatRadioModule,
-    DragDropModule,
-    HttpClientModule,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    EventsCalendarModule
-  ],
-  exports: [
-    TopSectionComponent,
-    LookerSectionComponent,
-    TopLearnersComponent,
-    MainContentComponent,
-    SupportSectionComponent,
-    CompetencyComponent,
-    ContentStripComponent,
-    ColumnSectionDisplayComponent,
-    MobileSectionsComponent,
-    EditorDialogComponent,
-    SlwConfigDialogComponent,
-    ActionItemsComponent,
-    StripAddContentComponent
-  ],
-  providers: [
-    CommonMethodsService
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
-})
+@NgModule({ declarations: [
+        TopSectionComponent,
+        LookerSectionComponent,
+        TopLearnersComponent,
+        MainContentComponent,
+        SupportSectionComponent,
+        CompetencyComponent,
+        ContentStripComponent,
+        ColumnSectionDisplayComponent,
+        MobileSectionsComponent,
+        EditorDialogComponent,
+        SlwConfigDialogComponent,
+        ActionItemsComponent,
+        StripSectionCreateComponent,
+        StripAddContentComponent,
+        AddTabDialogComponent,
+        ConfirmDialogComponent
+    ],
+    exports: [
+        TopSectionComponent,
+        LookerSectionComponent,
+        TopLearnersComponent,
+        MainContentComponent,
+        SupportSectionComponent,
+        CompetencyComponent,
+        ContentStripComponent,
+        ColumnSectionDisplayComponent,
+        MobileSectionsComponent,
+        EditorDialogComponent,
+        SlwConfigDialogComponent,
+        ActionItemsComponent,
+        StripAddContentComponent
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA], imports: [CommonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatTooltipModule,
+        SkeletonLoaderLibModule,
+        AnnouncementsModule,
+        TopLearnersModule,
+        CbpPlanModule,
+        CardsModule,
+        CommonStripModule,
+        CompetencyPassbookModule,
+        CompetencyPassbookMdoModule,
+        ContentStripWithTabsLibModule,
+        DataPointsModule,
+        SlidersLibModule,
+        HighlightsOfWeekModule,
+        UserProgressModule,
+        EventsModule,
+        SpeakersModule,
+        MdoLeaderboardModule,
+        KeyHighlightsModule,
+        MatTabsModule,
+        OrderByPipeModule,
+        SafeUrlPipeModule,
+        VideoConferenceModule,
+        SbUiResolverModule,
+        FormsModule,
+        ReactiveFormsModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient],
+            },
+        }),
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSlideToggleModule,
+        MatSelectModule,
+        MatPaginatorModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatRadioModule,
+        DragDropModule,
+        MatIconModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        EventsCalendarModule], providers: [
+        CommonMethodsService,
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class MicrositesComponentsModule { }
 
 

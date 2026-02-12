@@ -1,9 +1,10 @@
 import { ErrorParserComponent } from './../error-parser/error-parser.component'
 import { Component, OnInit, Inject } from '@angular/core'
-import { FormGroup, FormBuilder, Validators } from '@angular/forms'
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { CONTENT_RESTORE } from '../../../../constants/apiEndpoints'
-import { MatDialog, MatSnackBar } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { ValueService } from '@ws-widget/utils'
 import { mergeMap, catchError } from 'rxjs/operators'
 import { of } from 'rxjs'
@@ -16,12 +17,13 @@ import { AccessControlService } from '../../services/access-control.service'
 import { ApiService } from '../../services/api.service'
 
 @Component({
-  selector: 'ws-auth-restore-dialog',
-  templateUrl: './restore-dialog.component.html',
-  styleUrls: ['./restore-dialog.component.scss'],
+    selector: 'ws-auth-restore-dialog',
+    templateUrl: './restore-dialog.component.html',
+    styleUrls: ['./restore-dialog.component.scss'],
+    standalone: false
 })
 export class RestoreDialogComponent implements OnInit {
-  commentsForm!: FormGroup
+  commentsForm!: UntypedFormGroup
   contentMeta!: ISearchContent
   isSubmitPressed = false
   onAction = false
@@ -29,7 +31,7 @@ export class RestoreDialogComponent implements OnInit {
   isNew = 'No'
   isMobile = false
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     public dialogRef: MatDialogRef<RestoreDialogComponent>,

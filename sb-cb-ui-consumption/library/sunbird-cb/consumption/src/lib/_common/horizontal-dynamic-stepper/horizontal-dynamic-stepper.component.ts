@@ -2,9 +2,10 @@ import { StepperSelectionEvent } from '@angular/cdk/stepper'
 import { AfterContentInit, Component, ContentChildren, EventEmitter, Input, Output, QueryList, TemplateRef } from '@angular/core'
 
 @Component({
-  selector: 'sb-uic-horizontal-dynamic-stepper',
-  templateUrl: './horizontal-dynamic-stepper.component.html',
-  styleUrls: ['./horizontal-dynamic-stepper.component.scss']
+    selector: 'sb-uic-horizontal-dynamic-stepper',
+    templateUrl: './horizontal-dynamic-stepper.component.html',
+    styleUrls: ['./horizontal-dynamic-stepper.component.scss'],
+    standalone: false
 })
 export class HorizontalDynamicStepperComponent implements AfterContentInit {
 

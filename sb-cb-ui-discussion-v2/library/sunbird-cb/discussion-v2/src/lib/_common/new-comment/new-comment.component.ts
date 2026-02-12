@@ -6,9 +6,10 @@ import { CommentsService } from '../../_services/comments.service'
 import { sanitizeTextInput } from '../../_utils/sanitization.util'
 
 @Component({
-  selector: 'd-v2-new-comment',
-  templateUrl: './new-comment.component.html',
-  styleUrls: ['./new-comment.component.scss'],
+    selector: 'd-v2-new-comment',
+    templateUrl: './new-comment.component.html',
+    styleUrls: ['./new-comment.component.scss'],
+    standalone: false
 })
 export class NewCommentComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewCommentConfig

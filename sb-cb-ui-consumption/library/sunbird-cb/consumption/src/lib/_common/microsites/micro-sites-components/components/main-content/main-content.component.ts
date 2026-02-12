@@ -9,9 +9,10 @@ import { AddTabDialogComponent } from '../add-tab-dialog/add-tab-dialog.componen
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component'
 
 @Component({
-  selector: 'app-main-content',
-  templateUrl: './main-content.component.html',
-  styleUrls: ['./main-content.component.scss']
+    selector: 'app-main-content',
+    templateUrl: './main-content.component.html',
+    styleUrls: ['./main-content.component.scss'],
+    standalone: false
 })
 export class MainContentComponent implements OnInit {
   selectedIndex = 0;

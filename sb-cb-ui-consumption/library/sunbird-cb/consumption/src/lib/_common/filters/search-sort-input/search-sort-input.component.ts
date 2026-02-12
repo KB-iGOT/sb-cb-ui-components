@@ -3,7 +3,8 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, O
 @Component({
   selector: 'sb-uic-search-sort-input',
   templateUrl: './search-sort-input.component.html',
-  styleUrls: ['./search-sort-input.component.scss']
+  styleUrls: ['./search-sort-input.component.scss'],
+  standalone: false
 })
 export class SearchSortInputComponent implements AfterViewInit, OnChanges {
   @Output() searchSorter = new EventEmitter();

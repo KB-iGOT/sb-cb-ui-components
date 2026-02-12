@@ -2,11 +2,6 @@
   "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../../dist/ws/author",
   "lib": {
-    "entryFile": "src/public-api.ts",
-    "umdModuleIds": {
-      "@ws-widget/resolver": "@ws-widget/resolver",
-      "@ws-widget/collection": "@ws-widget/collection",
-      "@ws-widget/utils": "@ws-widget/utils"
-    }
+    "entryFile": "src/public-api.ts"
   }
 }

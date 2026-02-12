@@ -7,9 +7,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import _ from 'lodash'
 
 @Component({
-  selector: 'd-v2-widget-discussionv2',
-  templateUrl: './widget-discussionv2.component.html',
-  styleUrls: ['./widget-discussionv2.component.scss']
+    selector: 'd-v2-widget-discussionv2',
+    templateUrl: './widget-discussionv2.component.html',
+    styleUrls: ['./widget-discussionv2.component.scss'],
+    standalone: false
 })
 export class WidgetDiscussionv2Component implements OnInit, OnDestroy {
   @Input() widgetData!: NsDiscussionV2.IDiscussV2WidgetData | null

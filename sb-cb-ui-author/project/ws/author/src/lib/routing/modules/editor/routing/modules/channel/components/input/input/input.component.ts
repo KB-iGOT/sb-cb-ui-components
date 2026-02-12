@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core'
-import { MatSnackBar } from '@angular/material'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { CONTENT_BASE_WEBHOST_ASSETS, AUTHORING_CONTENT_BASE } from '../../../../../../../../../constants/apiEndpoints'
 import { NOTIFICATION_TIME } from '../../../../../../../../../constants/constant'
@@ -11,9 +11,10 @@ import { FILE_MAX_SIZE } from './../../../../../../../../../constants/upload'
 import { IWidgetAuthor } from './../../../interface/widget'
 
 @Component({
-  selector: 'ws-auth-input',
-  templateUrl: './input.component.html',
-  styleUrls: ['./input.component.scss'],
+    selector: 'ws-auth-input',
+    templateUrl: './input.component.html',
+    styleUrls: ['./input.component.scss'],
+    standalone: false
 })
 export class InputComponent implements OnInit {
   widget: IWidgetAuthor

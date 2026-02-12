@@ -1,9 +1,10 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-mobile-sections',
-  templateUrl: './mobile-sections.component.html',
-  styleUrls: ['./mobile-sections.component.scss']
+    selector: 'app-mobile-sections',
+    templateUrl: './mobile-sections.component.html',
+    styleUrls: ['./mobile-sections.component.scss'],
+    standalone: false
 })
 export class MobileSectionsComponent {
   @Input() myProgressData: any;

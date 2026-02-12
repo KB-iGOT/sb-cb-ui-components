@@ -3,7 +3,7 @@ import { DashBoardService } from './dashboard.service'
 import { Component, OnInit } from '@angular/core'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { Observable } from 'rxjs'
-import { FormControl } from '@angular/forms'
+import { UntypedFormControl } from '@angular/forms'
 import { map, startWith } from 'rxjs/operators'
 import { NotificationComponent } from '../../../../../modules/shared/components/notification/notification.component'
 import { Notify } from '../../../../../constants/notificationMessage'
@@ -13,9 +13,10 @@ import { LoaderService } from '../../../../../services/loader.service'
 import { AccessControlService } from '../../../../../modules/shared/services/access-control.service'
 
 @Component({
-  selector: 'ws-auth-root-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
+    selector: 'ws-auth-root-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    standalone: false
 })
 export class DashboardComponent implements OnInit {
   public options = [
@@ -26,7 +27,7 @@ export class DashboardComponent implements OnInit {
     'Create content',
     // 'Create page',
   ]
-  createControl = new FormControl()
+  createControl = new UntypedFormControl()
   filteredOptions: Observable<string[]> = this.createControl.valueChanges.pipe(
     startWith(''),
     map(value => this.filter(value)),

@@ -5,9 +5,10 @@ import { EventService, UtilityService } from '@sunbird-cb/utils-v2';
 import * as _ from 'lodash'
 
 @Component({
-  selector: 'sb-uic-national-learning',
-  templateUrl: './national-learning.component.html',
-  styleUrls: ['./national-learning.component.scss']
+    selector: 'sb-uic-national-learning',
+    templateUrl: './national-learning.component.html',
+    styleUrls: ['./national-learning.component.scss'],
+    standalone: false
 })
 export class NationalLearningComponent implements OnInit {
   @Input() sectionList:any = []

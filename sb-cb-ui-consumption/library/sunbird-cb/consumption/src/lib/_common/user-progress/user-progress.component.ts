@@ -4,9 +4,10 @@ import { ScrollableItemDirective } from '../../_directives/scrollable-item/scrol
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 @Component({
-  selector: 'sb-uic-user-progress',
-  templateUrl: './user-progress.component.html',
-  styleUrls: ['./user-progress.component.scss']
+    selector: 'sb-uic-user-progress',
+    templateUrl: './user-progress.component.html',
+    styleUrls: ['./user-progress.component.scss'],
+    standalone: false
 })
 export class UserProgressComponent implements OnInit {
 

@@ -4,9 +4,10 @@ import { UtilityService } from '@sunbird-cb/utils-v2';
 
 
 @Component({
-  selector: 'd-v2-discover',
-  templateUrl: './discover.component.html',
-  styleUrls: ['./discover.component.scss']
+    selector: 'd-v2-discover',
+    templateUrl: './discover.component.html',
+    styleUrls: ['./discover.component.scss'],
+    standalone: false
 })
 export class DiscoverComponent implements OnInit, OnChanges {
   @Output() showAllByTopic = new EventEmitter<any>();

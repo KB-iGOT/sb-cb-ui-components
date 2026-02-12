@@ -4,9 +4,10 @@ import { Router } from '@angular/router';
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
 
 @Component({
-  selector: 'sb-uic-provider-card',
-  templateUrl: './provider-card.component.html',
-  styleUrls: ['./provider-card.component.scss']
+    selector: 'sb-uic-provider-card',
+    templateUrl: './provider-card.component.html',
+    styleUrls: ['./provider-card.component.scss'],
+    standalone: false
 })
 export class ProviderCardComponent implements OnInit {
   @Input() widgetData!: NsCardContent.ICard;

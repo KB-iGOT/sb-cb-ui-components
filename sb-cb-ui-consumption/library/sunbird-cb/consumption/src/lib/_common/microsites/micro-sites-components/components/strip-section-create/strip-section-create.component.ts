@@ -8,9 +8,10 @@ import { MicrositeV3Service } from '../../../../../_services/microsite-v3.servic
 import { v4 as uuid } from 'uuid'
 
 @Component({
-  selector: 'sb-uic-strip-section-create',
-  templateUrl: './strip-section-create.component.html',
-  styleUrls: ['./strip-section-create.component.scss']
+    selector: 'sb-uic-strip-section-create',
+    templateUrl: './strip-section-create.component.html',
+    styleUrls: ['./strip-section-create.component.scss'],
+    standalone: false
 })
 export class StripSectionCreateComponent implements OnInit {
   @Input() sectionData: any

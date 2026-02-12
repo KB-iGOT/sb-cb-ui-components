@@ -1,19 +1,20 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
-import { LocalConnectionService } from '../../services/local-connection.service';
-import { IConnectionType } from '../../models/connection-type.model';
-import { labels } from '../../labels/strings';
+import { Component, Inject, OnInit } from '@angular/core'
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { LocalConnectionService } from '../../services/local-connection.service'
+import { IConnectionType } from '../../models/connection-type.model'
+import { labels } from '../../labels/strings'
 
 
 @Component({
-  selector: 'lib-connector',
-  templateUrl: './connector.component.html',
-  styleUrls: ['./connector.component.scss']
+    selector: 'lib-connector',
+    templateUrl: './connector.component.html',
+    styleUrls: ['./connector.component.scss'],
+    standalone: false
 })
 
 export class ConnectorComponent implements OnInit {
-  connectorForm!: UntypedFormGroup;
+  connectorForm!: UntypedFormGroup
   app_strings: any = labels;
   constructor(
     public dialogRef: MatDialogRef<ConnectorComponent>,
@@ -29,7 +30,7 @@ export class ConnectorComponent implements OnInit {
     //         status: "Draft"
     //     }
     // }
-    // } 
+    // }
     // this.frameWorkService.readTerms(this.data.frameworkId, this.data.categoryId, requestBody).subscribe(data => {
     //    this.termLists = data.terms
     // })
@@ -58,7 +59,7 @@ export class ConnectorComponent implements OnInit {
     this.dialogRef.close({ source: 'online', data: {} } as IConnectionType)
   }
   loadDefault() {
-    this.dialogRef.close({ source: 'offline', data: {}} as IConnectionType)
+    this.dialogRef.close({ source: 'offline', data: {} } as IConnectionType)
   }
 
 }

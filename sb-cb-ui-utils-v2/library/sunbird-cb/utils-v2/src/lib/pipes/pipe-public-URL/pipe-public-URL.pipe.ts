@@ -1,7 +1,8 @@
 import { Inject, Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
-  name: 'pipePublicURL',
+    name: 'pipePublicURL',
+    standalone: false
 })
 export class PipePublicURL implements PipeTransform {
   environment: any

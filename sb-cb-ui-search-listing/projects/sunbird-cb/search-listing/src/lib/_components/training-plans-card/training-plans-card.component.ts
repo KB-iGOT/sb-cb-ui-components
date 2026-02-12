@@ -3,9 +3,10 @@ import { Router } from "@angular/router";
 import { ConfigurationsService, NsUser } from "@sunbird-cb/utils-v2";
 
 @Component({
-  selector: "sb-cb-search-training-plans-card",
-  templateUrl: "./training-plans-card.component.html",
-  styleUrls: ["./training-plans-card.component.scss"]
+    selector: "sb-cb-search-training-plans-card",
+    templateUrl: "./training-plans-card.component.html",
+    styleUrls: ["./training-plans-card.component.scss"],
+    standalone: false
 })
 export class TrainingPlansCardComponent implements OnInit {
   @Input() plan!: any;

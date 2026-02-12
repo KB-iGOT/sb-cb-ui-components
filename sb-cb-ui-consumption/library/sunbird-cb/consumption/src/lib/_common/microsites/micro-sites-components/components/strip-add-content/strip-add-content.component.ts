@@ -5,9 +5,10 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { v4 as uuid } from 'uuid'
 
 @Component({
-  selector: 'sb-uic-strip-add-content',
-  templateUrl: './strip-add-content.component.html',
-  styleUrls: ['./strip-add-content.component.scss']
+    selector: 'sb-uic-strip-add-content',
+    templateUrl: './strip-add-content.component.html',
+    styleUrls: ['./strip-add-content.component.scss'],
+    standalone: false
 })
 export class StripAddContentComponent {
   searchText = '';

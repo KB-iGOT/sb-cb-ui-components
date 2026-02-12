@@ -4,9 +4,10 @@ import { MatDialogRef } from "@angular/material/dialog";
 import { debounceTime } from "rxjs/operators";
 
 @Component({
-  selector: "sb-uic-add-competency-popup",
-  templateUrl: "./add-competency-popup.component.html",
-  styleUrls: ["./add-competency-popup.component.scss"],
+    selector: "sb-uic-add-competency-popup",
+    templateUrl: "./add-competency-popup.component.html",
+    styleUrls: ["./add-competency-popup.component.scss"],
+    standalone: false
 })
 export class AddCompetencyPopupComponent implements OnInit {
   searchTextCtrl!: FormControl;

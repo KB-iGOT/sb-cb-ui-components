@@ -1,9 +1,10 @@
 import { ErrorParserComponent } from './../error-parser/error-parser.component'
 import { Component, OnInit, Inject } from '@angular/core'
-import { FormGroup, FormBuilder, Validators } from '@angular/forms'
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { EXPIRY_DATE_ACTION } from '../../../../constants/apiEndpoints'
-import { MatDialog, MatSnackBar } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { ValueService } from '@ws-widget/utils'
 import { mergeMap, catchError } from 'rxjs/operators'
 import { of } from 'rxjs'
@@ -16,12 +17,13 @@ import { Notify } from '../../../../constants/notificationMessage'
 import { NOTIFICATION_TIME } from '../../../../constants/constant'
 
 @Component({
-  selector: 'ws-auth-expiry-date-confirm',
-  templateUrl: './auth-expiry-date-confirm.component.html',
-  styleUrls: ['./auth-expiry-date-confirm.component.scss'],
+    selector: 'ws-auth-expiry-date-confirm',
+    templateUrl: './auth-expiry-date-confirm.component.html',
+    styleUrls: ['./auth-expiry-date-confirm.component.scss'],
+    standalone: false
 })
 export class AuthExpiryDateConfirmComponent implements OnInit {
-  userActionForm!: FormGroup
+  userActionForm!: UntypedFormGroup
   isSubmitPressed = false
   minDate = new Date()
   onAction = false
@@ -29,7 +31,7 @@ export class AuthExpiryDateConfirmComponent implements OnInit {
 
   constructor(
     private accessService: AccessControlService,
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     public dialogRef: MatDialogRef<AuthExpiryDateConfirmComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ISearchContent,
     private snackBar: MatSnackBar,

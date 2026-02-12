@@ -6,7 +6,7 @@ describe('AuthMicrosoftService', () => {
   beforeEach(() => TestBed.configureTestingModule({}))
 
   it('should be created', () => {
-    const service: AuthMicrosoftService = TestBed.get(AuthMicrosoftService)
+    const service: AuthMicrosoftService = TestBed.inject(AuthMicrosoftService)
     expect(service).toBeTruthy()
   })
 })

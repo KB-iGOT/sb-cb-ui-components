@@ -1,9 +1,9 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips';
-import { MatIconModule } from '@angular/material/icon';
-import { PillsComponent } from './pills.component';
-import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { MatChipsModule } from '@angular/material/chips'
+import { MatIconModule } from '@angular/material/icon'
+import { PillsComponent } from './pills.component'
+import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module'
 
 
 
@@ -15,6 +15,7 @@ import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-
     MatChipsModule,
     SkeletonLoaderLibModule
   ],
-  exports: [PillsComponent]
+  exports: [PillsComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class PillsModule { }

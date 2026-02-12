@@ -6,7 +6,7 @@ describe('UserContentRatingLibService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: UserContentRatingLibService = TestBed.get(UserContentRatingLibService);
+    const service: UserContentRatingLibService = TestBed.inject(UserContentRatingLibService);
     expect(service).toBeTruthy();
   });
 });

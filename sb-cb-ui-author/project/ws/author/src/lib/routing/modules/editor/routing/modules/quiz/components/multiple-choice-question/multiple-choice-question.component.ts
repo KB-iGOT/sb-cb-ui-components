@@ -1,12 +1,12 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, OnDestroy } from '@angular/core'
-import { MatDialog } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
 import {
-  FormGroup,
-  FormBuilder,
+  UntypedFormGroup,
+  UntypedFormBuilder,
   Validators,
-  FormArray,
+  UntypedFormArray,
   AbstractControl,
-  FormControl,
+  UntypedFormControl,
 } from '@angular/forms'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar'
@@ -22,9 +22,10 @@ import { Notify } from '../../../../../../../../constants/notificationMessage'
 import { ConfirmDialogComponent } from '@ws-widget/collection/lib/_common/mark-as-complete/confirm-dialog/confirm-dialog.component'
 
 @Component({
-  selector: 'ws-auth-multiple-choice-question',
-  templateUrl: './multiple-choice-question.component.html',
-  styleUrls: ['./multiple-choice-question.component.scss'],
+    selector: 'ws-auth-multiple-choice-question',
+    templateUrl: './multiple-choice-question.component.html',
+    styleUrls: ['./multiple-choice-question.component.scss'],
+    standalone: false
 })
 export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDestroy {
   @Output() value = new EventEmitter<any>()
@@ -33,7 +34,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
   @Input() showHint!: boolean
   selectedCount = 0
   selectedQuiz?: McqQuiz
-  quizForm!: FormGroup
+  quizForm!: UntypedFormGroup
   mcqOptions: any = {}
   snackbarRef?: MatSnackBarRef<NotificationComponent>
   contentLoaded = false
@@ -48,7 +49,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
   isSmallScreen = false
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private quizStoreSvc: QuizStoreService,
@@ -63,7 +64,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
 
   openCkEditor(index: number) {
     const hint =
-      (((this.quizForm.controls.options as FormArray).at(index).get('hint') as FormControl) || {})
+      (((this.quizForm.controls.options as UntypedFormArray).at(index).get('hint') as UntypedFormControl) || {})
         .value || ''
     const dialogRef = this.dialog.open(OpenPlainCkEditorComponent, {
       width: '800px',
@@ -77,7 +78,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
     })
     dialogRef.afterClosed().subscribe(res => {
       if (res !== undefined) {
-        const optionsArr = this.quizForm.controls['options'] as FormArray
+        const optionsArr = this.quizForm.controls['options'] as UntypedFormArray
         if (optionsArr && optionsArr.at(index) && optionsArr.at(index).get('hint')) {
           (optionsArr.at(index).get('hint') as AbstractControl).setValue(res)
         }
@@ -133,7 +134,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
     const optionsArr = this.quizForm.controls['options'].value
     moveItemInArray(optionsArr, event.previousIndex, event.currentIndex)
     for (let i = 0; i < optionsArr.length; i = i + 1) {
-      (this.quizForm.controls['options'] as FormArray).at(i).setValue(optionsArr[i])
+      (this.quizForm.controls['options'] as UntypedFormArray).at(i).setValue(optionsArr[i])
     }
   }
 
@@ -162,7 +163,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
     })
     confirmDelete.afterClosed().subscribe(confirm => {
       if (confirm && this.selectedQuiz && this.selectedQuiz.options.length) {
-        const optionsArr = this.quizForm.controls['options'] as FormArray
+        const optionsArr = this.quizForm.controls['options'] as UntypedFormArray
         optionsArr.removeAt(optionIndex)
         this.selectedQuiz.options.splice(optionIndex, 1)
         if (this.selectedQuiz.options.length < this.mcqOptions.minOptions) {
@@ -199,7 +200,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
       isCorrect: [optionObj.isCorrect || false],
       hint: [optionObj.hint || ''],
     })
-    const optionsArr = this.quizForm.controls['options'] as FormArray
+    const optionsArr = this.quizForm.controls['options'] as UntypedFormArray
     optionsArr.push(newControl)
   }
 
@@ -208,7 +209,7 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDes
     if (newData && newData.isInValid) {
       // this.quizForm.markAllAsTouched()
       Object.keys(this.quizForm.controls).map(v => {
-        const optionsArr = this.quizForm.controls[v] as FormArray
+        const optionsArr = this.quizForm.controls[v] as UntypedFormArray
         optionsArr.controls.map((d: any) => {
           Object.keys(d.controls).map(e => {
             if (e === 'text') {

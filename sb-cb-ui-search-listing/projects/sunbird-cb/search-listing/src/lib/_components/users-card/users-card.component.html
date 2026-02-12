@@ -19,7 +19,7 @@
         <ng-container *ngIf="applicationName === 'CBP Portal'">
           <div class="users-info flex justify-center mt-2">
             <mat-slide-toggle 
-              [(ngModel)]="!user.isDeleted" 
+              [ngModel]="!user.isDeleted" (ngModelChange)="user.isDeleted = $event" 
               (change)="onUserActivationToggle($event, user)"
               [color]="'primary'"
               class="activation-toggle">

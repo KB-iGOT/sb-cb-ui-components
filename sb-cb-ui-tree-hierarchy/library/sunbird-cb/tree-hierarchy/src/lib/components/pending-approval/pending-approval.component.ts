@@ -6,9 +6,10 @@ import * as IApp from '../../models/approval.model';
 import { labels } from '../../labels/strings';
 
 @Component({
-  selector: 'lib-pending-approval',
-  templateUrl: './pending-approval.component.html',
-  styleUrls: ['./pending-approval.component.scss']
+    selector: 'lib-pending-approval',
+    templateUrl: './pending-approval.component.html',
+    styleUrls: ['./pending-approval.component.scss'],
+    standalone: false
 })
 export class PendingApprovalComponent implements OnInit {
   pendingList = [];

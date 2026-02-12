@@ -5,9 +5,10 @@ import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import * as _ from 'lodash'
 
 @Component({
-  selector: 'sb-uic-providers-v2',
-  templateUrl: './providers-v2.component.html',
-  styleUrls: ['./providers-v2.component.scss']
+    selector: 'sb-uic-providers-v2',
+    templateUrl: './providers-v2.component.html',
+    styleUrls: ['./providers-v2.component.scss'],
+    standalone: false
 })
 export class ProvidersV2Component implements OnInit  {
 

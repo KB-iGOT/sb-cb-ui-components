@@ -5,9 +5,10 @@ import { EditorContentService } from '../../../services/editor-content.service'
 import { NsContent } from '@ws-widget/utils'
 
 @Component({
-  selector: 'ws-auth-options',
-  templateUrl: './options.component.html',
-  styleUrls: ['./options.component.scss'],
+    selector: 'ws-auth-options',
+    templateUrl: './options.component.html',
+    styleUrls: ['./options.component.scss'],
+    standalone: false
 })
 export class OptionsComponent implements OnInit, OnDestroy, AfterViewInit {
   contents: NSContent.IContentMeta[] = []

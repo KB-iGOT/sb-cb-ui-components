@@ -3,9 +3,10 @@ import { FrameworkService } from '../../services/framework.service';
 declare var LeaderLine: any;
 
 @Component({
-  selector: 'lib-config-framework',
-  templateUrl: './config-framework.component.html',
-  styleUrls: ['./config-framework.component.scss']
+    selector: 'lib-config-framework',
+    templateUrl: './config-framework.component.html',
+    styleUrls: ['./config-framework.component.scss'],
+    standalone: false
 })
 export class ConfigFrameworkComponent implements OnInit {
   frameworkCategories: any;

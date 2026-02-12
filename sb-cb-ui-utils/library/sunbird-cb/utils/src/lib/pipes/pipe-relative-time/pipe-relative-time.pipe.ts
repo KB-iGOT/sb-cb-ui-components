@@ -1,9 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core'
-import * as _moment from 'moment'
-const moment = _moment
+import moment from 'moment'
+// const moment = _moment
 
 @Pipe({
   name: 'pipeRelativeTime',
+  standalone: false
 })
 export class PipeRelativeTimePipe implements PipeTransform {
   transform(value: number): string {

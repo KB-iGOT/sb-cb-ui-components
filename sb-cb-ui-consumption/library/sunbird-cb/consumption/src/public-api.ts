@@ -133,6 +133,9 @@ export * from './lib/_common/create-request/create-request.module'
 export * from './lib/_common/create-request/components/create-request-form/create-request-form.component'
 export * from './lib/_common/create-request/dialogs/add-authors/add-authors.component'
 
+export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
+
+export * from './lib/_common/strips/content-strip-with-tabs-pills/content-strip-with-tabs-pills.model'
 export * from './lib/_common/filters/filters.module'
 export * from './lib/_common/filters/filter-by/filter-by.component'
 export * from './lib/_common/filters/search-sort-input/search-sort-input.component'

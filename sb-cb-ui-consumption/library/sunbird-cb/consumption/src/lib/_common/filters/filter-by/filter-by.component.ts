@@ -158,7 +158,8 @@ const DEFAULT_FILTER_META: FilterMetaConfig = {
 @Component({
   selector: 'sb-uic-filter-by',
   templateUrl: './filter-by.component.html',
-  styleUrls: ['./filter-by.component.scss']
+  styleUrls: ['./filter-by.component.scss'],
+  standalone: false
 })
 export class FilterByComponent implements OnInit, OnDestroy, OnChanges {
   @Input() filterConfig: FilterConfig[] = []

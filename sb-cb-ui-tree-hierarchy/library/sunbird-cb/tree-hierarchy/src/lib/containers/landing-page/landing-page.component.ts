@@ -3,9 +3,10 @@ import { FrameworkService } from '../../services/framework.service';
 import { labels } from '../../labels/strings';
 
 @Component({
-  selector: 'lib-landing-page',
-  templateUrl: './landing-page.component.html',
-  styleUrls: ['./landing-page.component.scss']
+    selector: 'lib-landing-page',
+    templateUrl: './landing-page.component.html',
+    styleUrls: ['./landing-page.component.scss'],
+    standalone: false
 })
 export class LandingPageComponent implements OnInit {
   frameworkCategories: any;

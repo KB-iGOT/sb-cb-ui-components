@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
-import { MatDialog } from '@angular/material'
+import { MatDialog } from '@angular/material/dialog'
 import { ValueService } from '@ws-widget/utils'
 import { StatusTrackComponent } from '../../../../../modules/shared/components/status-track/status-track.component'
 import { EditorContentV2Service } from '../../services/editor-content-v2.service'
@@ -15,10 +15,11 @@ import { Notify } from '../../../../../constants/notificationMessage'
 import { NOTIFICATION_TIME } from '../../../../../constants/constant'
 
 @Component({
-  selector: 'ws-auth-root-editor',
-  templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.scss'],
-  providers: [EditorContentService, EditorContentV2Service],
+    selector: 'ws-auth-root-editor',
+    templateUrl: './editor.component.html',
+    styleUrls: ['./editor.component.scss'],
+    providers: [EditorContentService, EditorContentV2Service],
+    standalone: false
 })
 export class EditorComponent implements OnInit, OnDestroy {
   routerSubscription!: Subscription

@@ -26,9 +26,10 @@ import { ICatalog, ITodoItemFlatNode, TodoItemNode } from './models/catalog-mode
 // }
 
 @Component({
-  selector: 'ws-auth-catalog-select',
-  templateUrl: './catalog-select.component.html',
-  styleUrls: ['./catalog-select.component.scss'],
+    selector: 'ws-auth-catalog-select',
+    templateUrl: './catalog-select.component.html',
+    styleUrls: ['./catalog-select.component.scss'],
+    standalone: false
 })
 export class CatalogSelectComponent implements OnInit {
   status: TFetchStatus = 'none'
@@ -138,14 +139,14 @@ export class CatalogSelectComponent implements OnInit {
       existingNode && existingNode.name === node.name
         ? existingNode
         : {
-            name: '',
-            level: 0,
-            expandable: false,
-            identifier: '',
-            path: '',
-            nodeId: '',
-            checkable: true,
-          }
+          name: '',
+          level: 0,
+          expandable: false,
+          identifier: '',
+          path: '',
+          nodeId: '',
+          checkable: true,
+        }
     flatNode.name = node.name
     const currentNode = this.flatCatalogData.find(r => {
       return r.name === flatNode.name

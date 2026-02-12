@@ -10,9 +10,10 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 declare var LeaderLine: any;
 @Component({
-  selector: 'lib-tree-column-view',
-  templateUrl: './tree-column-view.component.html',
-  styleUrls: ['./tree-column-view.component.scss']
+    selector: 'lib-tree-column-view',
+    templateUrl: './tree-column-view.component.html',
+    styleUrls: ['./tree-column-view.component.scss'],
+    standalone: false
 })
 export class TreeColumnViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() column: any;

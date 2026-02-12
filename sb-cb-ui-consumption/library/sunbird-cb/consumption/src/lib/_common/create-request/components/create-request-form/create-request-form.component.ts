@@ -1,14 +1,15 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core'
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms'
-import { MatLegacyDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { Router, ActivatedRoute } from '@angular/router'
 import { CreateRequestService } from '../../services/create-request.service'
 
 @Component({
-  selector: 'sb-uic-create-request-form',
-  templateUrl: './create-request-form.component.html',
-  styleUrls: ['./create-request-form.component.scss']
+    selector: 'sb-uic-create-request-form',
+    templateUrl: './create-request-form.component.html',
+    styleUrls: ['./create-request-form.component.scss'],
+    standalone: false
 })
 export class CreateRequestFormComponent implements OnInit {
   //#region (global variable declaration)
@@ -29,8 +30,8 @@ export class CreateRequestFormComponent implements OnInit {
     private router: Router,
     private fb: UntypedFormBuilder,
     private createRequestSvc: CreateRequestService,
-    public dialog: MatLegacyDialog,
-    private snackBar: MatLegacySnackBar,
+    public dialog: MatDialog,
+    private snackBar: MatSnackBar,
     private activatedRoute: ActivatedRoute,
   ) { }
 

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ExpiryDateDisplayComponent } from './expiry-date-display.component'
 
@@ -6,7 +6,7 @@ describe('ExpiryDateDisplayComponent', () => {
   let component: ExpiryDateDisplayComponent
   let fixture: ComponentFixture<ExpiryDateDisplayComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ExpiryDateDisplayComponent],
     }).compileComponents()

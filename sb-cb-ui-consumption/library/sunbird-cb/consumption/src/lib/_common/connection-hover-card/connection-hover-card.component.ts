@@ -4,10 +4,11 @@ import { NsUser } from '@sunbird-cb/utils-v2'
 import * as _ from 'lodash'
 
 @Component({
-  selector: 'sb-uic-connection-hover-card',
-  templateUrl: './connection-hover-card.component.html',
-  styleUrls: ['./connection-hover-card.component.scss'],
-  host: { class: 'flex flex-1' },
+    selector: 'sb-uic-connection-hover-card',
+    templateUrl: './connection-hover-card.component.html',
+    styleUrls: ['./connection-hover-card.component.scss'],
+    host: { class: 'flex flex-1' },
+    standalone: false
 })
 export class ConnectionHoverCardComponent implements OnInit, OnChanges {
   @Input() hoverUser!: any

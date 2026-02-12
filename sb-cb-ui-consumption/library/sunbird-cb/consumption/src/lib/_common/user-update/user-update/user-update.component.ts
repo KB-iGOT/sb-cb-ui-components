@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import * as _ from 'lodash'
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators'
 import { UserService } from '../user.service'
-import { MatLegacyDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 import { ConfirmationDialogComponent } from '../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 import { DatePipe } from '@angular/common'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
@@ -14,10 +14,11 @@ import { forkJoin, Observable, of } from 'rxjs'
 const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a-zA-Z0-9]*[a-zA-Z0-9]+)?(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/
 
 @Component({
-  selector: 'ws-app-user-update',
-  templateUrl: './user-update.component.html',
-  styleUrls: ['./user-update.component.scss'],
-  providers: [DatePipe]
+    selector: 'ws-app-user-update',
+    templateUrl: './user-update.component.html',
+    styleUrls: ['./user-update.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class UserUpdateComponent implements OnInit {
   //#region (variables)
@@ -92,8 +93,8 @@ export class UserUpdateComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private dialog: MatLegacyDialog,
-    private snackBar: MatLegacySnackBar,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
     private datePipe: DatePipe,
     private configSvc: ConfigurationsService
   ) {
@@ -138,7 +139,7 @@ export class UserUpdateComponent implements OnInit {
 
   async initialization() {
     this.mergeApiCalls()
-    
+
     this.valueChanges()
   }
 
@@ -196,29 +197,29 @@ export class UserUpdateComponent implements OnInit {
     }
     this.userService.getApprovalsList(formBody).subscribe((res: any) => {
       const currentUserInfo = _.get(res, 'result.data', []).filter((user: any) => _.get(user, 'userInfo.id') === this.userId)
-      if(currentUserInfo && currentUserInfo.length > 0) {
+      if (currentUserInfo && currentUserInfo.length > 0) {
         this.setApprovalsStatus(currentUserInfo[0].wfInfo, currentUserInfo[0].userInfo)
       }
     })
   }
 
   setApprovalsStatus(wfInfo: any, userInfo: any) {
-    if(wfInfo && wfInfo.length > 0) {
+    if (wfInfo && wfInfo.length > 0) {
       wfInfo.forEach((item: any) => {
-        if(item.currentStatus === 'SEND_FOR_APPROVAL') {
+        if (item.currentStatus === 'SEND_FOR_APPROVAL') {
           item['formatedUpdateFieldValues'] = JSON.parse(item.updateFieldValues)
           item['wid'] = _.get(userInfo, 'wid', '')
-          if(item.requestType === 'DESIGNATION_CHANGE') {
+          if (item.requestType === 'DESIGNATION_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.designation', '')
-            if(this.userForm.get('approveDesignation')) {
+            if (this.userForm.get('approveDesignation')) {
               this.userForm.get('approveDesignation').setValue(item['toValue'])
             } else {
               this.addControl(this.userForm, 'approveDesignation', item['toValue'], [Validators.required])
             }
             this.designationApprovalField = item
-          } else if(item.requestType === 'GROUP_CHANGE') {
+          } else if (item.requestType === 'GROUP_CHANGE') {
             item['toValue'] = _.get(item, 'formatedUpdateFieldValues[0].toValue.group', '')
-            if(this.userForm.get('approveGroup')) {
+            if (this.userForm.get('approveGroup')) {
               this.userForm.get('approveGroup').setValue(item['toValue'])
             } else {
               this.addControl(this.userForm, 'approveGroup', item['toValue'], [Validators.required])
@@ -231,11 +232,11 @@ export class UserUpdateComponent implements OnInit {
   }
 
   addControl(group: FormGroup, controlName: string, value: any = '', validatorsList: any[] = []) {
-    const controlExists = group ? group.get(controlName) : null;
-  
+    const controlExists = group ? group.get(controlName) : null
+
     if (!controlExists) {
       // Add control if condition is true and control doesn't exist
-      group.addControl(controlName, this.fb.control(value, validatorsList));
+      group.addControl(controlName, this.fb.control(value, validatorsList))
     }
   }
 
@@ -354,7 +355,7 @@ export class UserUpdateComponent implements OnInit {
         }
       }
       const usrRoles = _.get(user, 'organisations[0].roles', [])
-      
+
       if (this.isMdoLeader) {
         // For MDO leaders, add all unique roles except MENTOR
         this.uniqueRoles.forEach((role: any) => {
@@ -668,19 +669,19 @@ export class UserUpdateComponent implements OnInit {
   }
 
   onAssignMentorChange(isMentor: boolean) {
-    if(isMentor) {
+    if (isMentor) {
       if (this.userForm.get('roles')) {
-        const userRoles = this.userForm.get('roles')?.value || [];
+        const userRoles = this.userForm.get('roles')?.value || []
         if (!userRoles.includes('MENTOR')) {
-          this.userForm.get('roles')?.setValue([...userRoles, 'MENTOR']);
-          this.userRoles.add('MENTOR');
+          this.userForm.get('roles')?.setValue([...userRoles, 'MENTOR'])
+          this.userRoles.add('MENTOR')
         }
       }
     } else {
       if (this.userForm.get('roles')) {
-        const userRoles = this.userForm.get('roles').value || [];
-        this.userForm.get('roles').setValue(userRoles.filter((r: string) => r !== 'MENTOR'));
-        this.userRoles.delete('MENTOR');
+        const userRoles = this.userForm.get('roles').value || []
+        this.userForm.get('roles').setValue(userRoles.filter((r: string) => r !== 'MENTOR'))
+        this.userRoles.delete('MENTOR')
       }
     }
   }
@@ -715,14 +716,14 @@ export class UserUpdateComponent implements OnInit {
       switch (popuType) {
         case 'updateDetails':
           dialogData.planeDescription = 'Are you sure you want to update?'
-          break;
+          break
         case 'VERIFIED':
           dialogData.planeDescription = 'Are you sure you want to update?'
-          break;
+          break
         case 'NOT-MY-USER':
           dialogData.planeDescription = 'Are you sure you want to update?'
           dialogData.description = 'You are about to remove this user from your organization. The user will lose all learning access and be moved out of your organization in 48 hours unless you reverse the action from the "Not My Users" tab.'
-          break;
+          break
       }
       const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
         data: dialogData,
@@ -741,17 +742,17 @@ export class UserUpdateComponent implements OnInit {
           switch (popuType) {
             case 'updateDetails':
               this.cancel()
-              break;
+              break
             case 'VERIFIED':
               if (this.userForm.get('isMyUser')) {
                 this.userForm.get('isMyUser').setValue(false)
               }
-              break;
+              break
             case 'NOT-MY-USER':
               if (this.userForm.get('isMyUser')) {
                 this.userForm.get('isMyUser').setValue(true)
               }
-              break;
+              break
           }
         }
       })
@@ -931,10 +932,10 @@ export class UserUpdateComponent implements OnInit {
     this.showeditText = true
   }
 
-  get showApprovalButtons() : boolean {
-    if(this.designationApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
+  get showApprovalButtons(): boolean {
+    if (this.designationApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.designationApprovalField.wfId) > -1)) {
       return false
-    } else if(this.groupApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
+    } else if (this.groupApprovalField && !(this.actionList && this.actionList.findIndex(x => x.wfId === this.groupApprovalField.wfId) > -1)) {
       return false
     }
     return true

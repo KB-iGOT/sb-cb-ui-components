@@ -1,7 +1,7 @@
 //#region (imports)
 import { Component, Inject, OnInit } from '@angular/core'
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar'
-import { MAT_LEGACY_DIALOG_DATA, MatLegacyDialogRef } from '@angular/material/legacy-dialog'
+import { MatLegacySnackBar } from '@angular/material/snack-bar'
+import { MAT_LEGACY_DIALOG_DATA, MatLegacyDialogRef } from '@angular/material/dialog'
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import * as _ from 'lodash'
 import { AppTocService } from '../../services/app-toc.service'

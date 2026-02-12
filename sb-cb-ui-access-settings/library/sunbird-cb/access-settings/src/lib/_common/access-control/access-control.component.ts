@@ -8,7 +8,7 @@ import { EntitySelectionsComponent } from "../dialogs/entity-selections/entity-s
 import { v4 as uuidv4 } from "uuid";
 import { CadreMappingService } from "../../_services/cadre-mapping.service";
 import { SnackbarComponent } from "../../components/snackbar/snackbar.component";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { ConfirmDialogComponent } from "../dialogs/confirm-dialog/confirm-dialog.component";
 import { AccessControlGuideComponent } from "../dialogs/access-control-guide/access-control-guide.component";
 import { Subject } from "rxjs";
@@ -17,9 +17,10 @@ import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
 
 @Component({
-  selector: "sb-uic-access-control",
-  templateUrl: "./access-control.component.html",
-  styleUrls: ["./access-control.component.scss"],
+    selector: "sb-uic-access-control",
+    templateUrl: "./access-control.component.html",
+    styleUrls: ["./access-control.component.scss"],
+    standalone: false
 })
 export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() config!: NsAccessControlConfig.IAccessControlConfig;

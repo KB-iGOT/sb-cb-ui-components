@@ -9,9 +9,10 @@ import { UserEnrollCommunityService } from '../../_services/user-enroll-communit
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'd-v2-widget-postdetails',
-  templateUrl: './widget-postdetails.component.html',
-  styleUrls: ['./widget-postdetails.component.scss']
+    selector: 'd-v2-widget-postdetails',
+    templateUrl: './widget-postdetails.component.html',
+    styleUrls: ['./widget-postdetails.component.scss'],
+    standalone: false
 })
 export class WidgetPostdetailsComponent implements OnInit, OnDestroy, OnChanges {
   @Input() widgetData!: NsDiscussionV2.IPostDetailsWidget | null

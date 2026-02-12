@@ -1,9 +1,10 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core'
 
 @Component({
-  selector: 'sb-uic-multiple-choice-question',
-  templateUrl: './multiple-choice-question.component.html',
-  styleUrls: ['./multiple-choice-question.component.scss']
+    selector: 'sb-uic-multiple-choice-question',
+    templateUrl: './multiple-choice-question.component.html',
+    styleUrls: ['./multiple-choice-question.component.scss'],
+    standalone: false
 })
 export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
   @Input() questionType: string = 'MCQ-SCA'; // MCQ-SCA, MCQ-MCA, MCQ-SCA-TF

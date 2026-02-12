@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 
 @Pipe({
-  name: 'mentionHighlight'
+    name: 'mentionHighlight',
+    standalone: false
 })
 export class MentionHighlightPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) { }

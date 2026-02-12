@@ -16,9 +16,10 @@ import { Notify } from '../../../../../../../../../constants/notificationMessage
 import { NOTIFICATION_TIME } from '../../../../../../../../../constants/constant'
 
 @Component({
-  selector: 'ws-auth-renderer',
-  templateUrl: './renderer.component.html',
-  styleUrls: ['./renderer.component.scss'],
+    selector: 'ws-auth-renderer',
+    templateUrl: './renderer.component.html',
+    styleUrls: ['./renderer.component.scss'],
+    standalone: false
 })
 export class RendererComponent implements OnInit, OnChanges {
 
@@ -26,7 +27,7 @@ export class RendererComponent implements OnInit, OnChanges {
   @Input() isSubmitPressed = false
   event = false
   widgetData!: IWidgetAuthor
-  @ViewChild('parent', { static: false }) parent!: ElementRef
+  @ViewChild('parent') parent!: ElementRef
   width = '0px'
   top = '0px'
   widget!: any

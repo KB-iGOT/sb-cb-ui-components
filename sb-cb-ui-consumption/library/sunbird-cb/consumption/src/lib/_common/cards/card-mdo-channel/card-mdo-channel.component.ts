@@ -6,9 +6,10 @@ import { WidgetContentLibService } from '../../../_services/widget-content-lib.s
 import { Router } from '@angular/router'
 
 @Component({
-  selector: 'sb-uic-card-mdo-channel',
-  templateUrl: './card-mdo-channel.component.html',
-  styleUrls: ['./card-mdo-channel.component.scss']
+    selector: 'sb-uic-card-mdo-channel',
+    templateUrl: './card-mdo-channel.component.html',
+    styleUrls: ['./card-mdo-channel.component.scss'],
+    standalone: false
 })
 export class CardMDOChannelComponent implements OnInit {
   @Input() widgetData!: NsContent.IContent

@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { StatusContentDisplayComponent } from './status-content-display.component'
 
 describe('StatusContentDisplayComponent', () => {
   let component: StatusContentDisplayComponent
   let fixture: ComponentFixture<StatusContentDisplayComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [StatusContentDisplayComponent],
     }).compileComponents()

@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { ErrorParserComponent } from './error-parser.component'
 
 describe('ErrorParserComponent', () => {
   let component: ErrorParserComponent
   let fixture: ComponentFixture<ErrorParserComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorParserComponent],
     }).compileComponents()

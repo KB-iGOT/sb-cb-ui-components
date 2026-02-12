@@ -10,7 +10,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core'
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
+import { AbstractControl, UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms'
 import { MatSnackBar } from '@angular/material'
 import { IWidgetImageMap, IWidgetMapMeta } from '@ws-widget/collection'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
@@ -23,19 +23,20 @@ import { UploadService } from '../../../../../../shared/services/upload.service'
 import { FILE_MAX_SIZE } from './../../../../../../../../../constants/upload'
 
 @Component({
-  selector: 'ws-auth-image-map',
-  templateUrl: './image-map.component.html',
-  styleUrls: ['./image-map.component.scss'],
+    selector: 'ws-auth-image-map',
+    templateUrl: './image-map.component.html',
+    styleUrls: ['./image-map.component.scss'],
+    standalone: false
 })
 export class ImageMapComponent implements OnInit, AfterViewInit {
-  @ViewChild('canvas', { static: false }) canvas!: ElementRef
-  @ViewChild('image', { static: false }) image!: ElementRef
+  @ViewChild('canvas') canvas!: ElementRef
+  @ViewChild('image') image!: ElementRef
   @ViewChildren('title') title!: QueryList<ElementRef>
   @Input() identifier = ''
   @Input() content!: IWidgetImageMap
   @Input() isSubmitPressed = false
   @Output() data = new EventEmitter<{ content: IWidgetImageMap; isValid: boolean }>()
-  form!: FormGroup
+  form!: UntypedFormGroup
   startX1 = 0
   startY1 = 0
   startX2 = 0
@@ -56,7 +57,7 @@ export class ImageMapComponent implements OnInit, AfterViewInit {
   constructor(
     private uploadService: UploadService,
     private snackBar: MatSnackBar,
-    public formBuilder: FormBuilder,
+    public formBuilder: UntypedFormBuilder,
     private loader: LoaderService,
   ) { }
 
@@ -112,8 +113,8 @@ export class ImageMapComponent implements OnInit, AfterViewInit {
     link.setValue(`./page/${this.identifier.replace('.img', '')}#${value}`)
   }
 
-  get paths(): FormArray {
-    return this.form.get('map') as FormArray
+  get paths(): UntypedFormArray {
+    return this.form.get('map') as UntypedFormArray
   }
 
   selectionChange(event: any, index: number) {
@@ -128,10 +129,10 @@ export class ImageMapComponent implements OnInit, AfterViewInit {
     this.paths.push(
       this.formBuilder.group({
         coords: this.formBuilder.array([
-          new FormControl(data && data.coords ? data.coords[0] || 0 : 0),
-          new FormControl(data && data.coords ? data.coords[1] || 0 : 0),
-          new FormControl(data && data.coords ? data.coords[2] || 0 : 0),
-          new FormControl(data && data.coords ? data.coords[3] || 0 : 0),
+          new UntypedFormControl(data && data.coords ? data.coords[0] || 0 : 0),
+          new UntypedFormControl(data && data.coords ? data.coords[1] || 0 : 0),
+          new UntypedFormControl(data && data.coords ? data.coords[2] || 0 : 0),
+          new UntypedFormControl(data && data.coords ? data.coords[3] || 0 : 0),
         ]),
         alt: [data ? data.alt || '' : ''],
         title: [data ? data.title || '' : ''],

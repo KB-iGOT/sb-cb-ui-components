@@ -258,7 +258,7 @@ mat-hint {
 
 // Dialog width and max dimensions
 :host ::ng-deep .mat-mdc-dialog-container {
-  --mdc-dialog-container-shape: 8px;
+  --mat-dialog-container-shape: 8px;
   
   .mat-mdc-dialog-surface {
     border-radius: 8px;

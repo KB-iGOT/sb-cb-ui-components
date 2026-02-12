@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { PageChangeEmitter } from "./pagination.model";
 
 @Component({
-  selector: "ws-widget-pagination",
-  templateUrl: "./pagination.component.html",
-  styleUrls: ["./pagination.component.scss"]
+    selector: "ws-widget-pagination",
+    templateUrl: "./pagination.component.html",
+    styleUrls: ["./pagination.component.scss"],
+    standalone: false
 })
 export class PaginationComponent implements OnInit, OnChanges {
   private _currentPage: number = 1;

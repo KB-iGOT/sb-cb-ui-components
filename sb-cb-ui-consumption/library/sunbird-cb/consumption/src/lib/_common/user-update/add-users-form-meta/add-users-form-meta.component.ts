@@ -1,7 +1,7 @@
 
 import { Component, OnDestroy, OnInit, AfterViewInit, Output, EventEmitter, ViewChild, ElementRef, Input, ChangeDetectorRef, Inject } from '@angular/core'
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 /* tslint:disable */
@@ -13,9 +13,10 @@ import { UserService } from '../user.service'
 /* tslint:enable */
 
 @Component({
-  selector: 'ws-auth-add-users-form-meta',
-  templateUrl: './add-users-form-meta.component.html',
-  styleUrls: ['./add-users-form-meta.component.scss'],
+    selector: 'ws-auth-add-users-form-meta',
+    templateUrl: './add-users-form-meta.component.html',
+    styleUrls: ['./add-users-form-meta.component.scss'],
+    standalone: false
 })
 export class AddUsersFormMetaComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -30,7 +31,7 @@ export class AddUsersFormMetaComponent implements OnInit, OnDestroy, AfterViewIn
   emailLengthVal = false
   phoneNumberPattern = '^((\\+91-?)|0)?[0-9]{10}$'
   disableCreateButton = false
-  environment!: any;
+  environment!: any
 
   constructor(
     private formBuilder: UntypedFormBuilder,
@@ -40,7 +41,7 @@ export class AddUsersFormMetaComponent implements OnInit, OnDestroy, AfterViewIn
     private changeDetector: ChangeDetectorRef,
     @Inject("environment") private environmentConfig: any
   ) {
-    this.environment = environmentConfig;
+    this.environment = environmentConfig
   }
 
   ngOnDestroy() {

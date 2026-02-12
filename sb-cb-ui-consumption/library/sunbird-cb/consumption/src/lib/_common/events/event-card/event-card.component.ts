@@ -3,9 +3,10 @@ import { Router } from '@angular/router'
 import moment from 'moment'
 
 @Component({
-  selector: 'sb-uic-event-card',
-  templateUrl: './event-card.component.html',
-  styleUrls: ['./event-card.component.scss']
+    selector: 'sb-uic-event-card',
+    templateUrl: './event-card.component.html',
+    styleUrls: ['./event-card.component.scss'],
+    standalone: false
 })
 export class EventCardComponent {
 

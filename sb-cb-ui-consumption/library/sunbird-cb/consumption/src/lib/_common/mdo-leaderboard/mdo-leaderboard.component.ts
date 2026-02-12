@@ -2,9 +2,10 @@ import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, 
 import { InsiteDataService } from '../../_services/insite-data.service'
 
 @Component({
-  selector: 'sb-uic-mdo-leaderboard',
-  templateUrl: './mdo-leaderboard.component.html',
-  styleUrls: ['./mdo-leaderboard.component.scss']
+    selector: 'sb-uic-mdo-leaderboard',
+    templateUrl: './mdo-leaderboard.component.html',
+    styleUrls: ['./mdo-leaderboard.component.scss'],
+    standalone: false
 })
 export class MdoLeaderboardComponent implements OnInit {
 

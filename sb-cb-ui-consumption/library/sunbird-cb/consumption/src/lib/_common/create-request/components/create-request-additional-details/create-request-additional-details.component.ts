@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, Inject } from '@angular/core'
 import { UntypedFormGroup, FormControl, Validators, UntypedFormControl } from '@angular/forms'
-import { MatLegacyDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 import * as _ from 'lodash'
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators'
 import { CreateRequestService } from '../../services/create-request.service'
@@ -14,11 +14,12 @@ type Auther = {
 }
 
 @Component({
-  selector: 'sb-uic-create-request-additional-details',
-  templateUrl: './create-request-additional-details.component.html',
-  styleUrls: ['./create-request-additional-details.component.scss',
-    '../../../../styles/round-controls.scss'
-  ]
+    selector: 'sb-uic-create-request-additional-details',
+    templateUrl: './create-request-additional-details.component.html',
+    styleUrls: ['./create-request-additional-details.component.scss',
+        '../../../../styles/round-controls.scss'
+    ],
+    standalone: false
 })
 export class CreateRequestAdditionalDetailsComponent implements OnInit {
   //#region (global variable declaration)
@@ -66,7 +67,7 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
 
 
   constructor(
-    private dialog: MatLegacyDialog,
+    private dialog: MatDialog,
     private createRequestSvc: CreateRequestService,
     private competencySvc: CompetencyPassbookService,
     @Inject('environment') environment: any,

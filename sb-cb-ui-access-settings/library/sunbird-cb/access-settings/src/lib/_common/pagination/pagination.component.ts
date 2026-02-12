@@ -9,9 +9,10 @@ import {
 } from "@angular/core";
 import { PageChangeEmitter } from "../../_models/pagination.model";
 @Component({
-  selector: "sb-uic-pagination",
-  templateUrl: "./pagination.component.html",
-  styleUrls: ["./pagination.component.scss"],
+    selector: "sb-uic-pagination",
+    templateUrl: "./pagination.component.html",
+    styleUrls: ["./pagination.component.scss"],
+    standalone: false
 })
 export class PaginationComponent implements OnInit, OnChanges {
   private _currentPage: number = 1;

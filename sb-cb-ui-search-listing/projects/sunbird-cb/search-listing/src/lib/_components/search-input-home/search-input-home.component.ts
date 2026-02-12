@@ -44,11 +44,12 @@ import * as _ from "lodash";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
-  selector: "ws-app-search-input-lib-home",
-  templateUrl: "./search-input-home.component.html",
-  styleUrls: ["./search-input-home.component.scss"],
-  // tslint:disable-next-line
-  encapsulation: ViewEncapsulation.None
+    selector: "ws-app-search-input-lib-home",
+    templateUrl: "./search-input-home.component.html",
+    styleUrls: ["./search-input-home.component.scss"],
+    // tslint:disable-next-line
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SearchInputHomeComponent implements OnInit, OnChanges, OnDestroy {
   @Input() placeHolder = "";

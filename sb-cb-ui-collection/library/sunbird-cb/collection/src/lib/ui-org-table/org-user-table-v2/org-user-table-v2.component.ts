@@ -1,15 +1,16 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges, SimpleChanges, AfterViewChecked, ChangeDetectorRef } from '@angular/core'
 import { SelectionModel } from '@angular/cdk/collections'
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
-import { MatLegacyPaginator as MatPaginator, LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator'
+import { MatTableDataSource } from '@angular/material/table'
+import { MatPaginator, PageEvent } from '@angular/material/paginator'
 import { MatSort } from '@angular/material/sort'
 import * as _ from 'lodash'
 import { ITableData, IColums } from '../interface/interfaces'
 
 @Component({
-  selector: 'ws-widget-org-user-table-v2',
-  templateUrl: './org-user-table-v2.component.html',
-  styleUrls: ['./org-user-table-v2.component.scss'],
+    selector: 'ws-widget-org-user-table-v2',
+    templateUrl: './org-user-table-v2.component.html',
+    styleUrls: ['./org-user-table-v2.component.scss'],
+    standalone: false
 })
 export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges, AfterViewChecked {
   @Input() tableData!: ITableData | undefined
@@ -40,8 +41,8 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
   pageSizeOptions = [20, 50, 100]
   searchValue: string = ''
   moreThanTwoChar = false
-  @Input()totalRecords?: any
-  @Input()tabChangeIndex?: any
+  @Input() totalRecords?: any
+  @Input() tabChangeIndex?: any
   // @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator
   @ViewChild(MatPaginator) paginator!: MatPaginator
   @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
@@ -61,7 +62,7 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
 
   constructor(
     private changeDetector: ChangeDetectorRef
-    ) {
+  ) {
     this.dataSource = new MatTableDataSource<any>()
     this.actionsClick = new EventEmitter()
     this.clicked = new EventEmitter()
@@ -183,7 +184,7 @@ export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges
     }
     if (event?.target?.value === '') {
       this.searchByEnterKey.emit('')
-    } else if (event?.target?.value?.length > 2){
+    } else if (event?.target?.value?.length > 2) {
       this.searchByEnterKey.emit(event?.target?.value)
     }
   }

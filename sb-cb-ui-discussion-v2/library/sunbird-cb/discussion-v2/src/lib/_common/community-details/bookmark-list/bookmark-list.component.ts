@@ -6,9 +6,10 @@ import { map } from 'rxjs/operators';
 import _ from 'lodash'
 
 @Component({
-  selector: 'd-v2-bookmark-list',
-  templateUrl: './bookmark-list.component.html',
-  styleUrls: ['./bookmark-list.component.scss']
+    selector: 'd-v2-bookmark-list',
+    templateUrl: './bookmark-list.component.html',
+    styleUrls: ['./bookmark-list.component.scss'],
+    standalone: false
 })
 export class BookmarkListComponent implements OnInit{
   @Input() communityData: any

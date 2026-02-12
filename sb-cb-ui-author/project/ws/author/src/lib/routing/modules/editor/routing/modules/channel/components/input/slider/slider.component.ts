@@ -1,6 +1,6 @@
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core'
-import { FormGroup, FormBuilder, Validators, FormArray, AbstractControl } from '@angular/forms'
+import { UntypedFormGroup, UntypedFormBuilder, Validators, UntypedFormArray, AbstractControl } from '@angular/forms'
 import { MatSnackBar } from '@angular/material'
 import { CONTENT_BASE_WEBHOST_ASSETS, AUTHORING_CONTENT_BASE } from '../../../../../../../../../constants/apiEndpoints'
 import { NOTIFICATION_TIME } from '../../../../../../../../../constants/constant'
@@ -12,9 +12,10 @@ import { LoaderService } from '../../../../../../../../../services/loader.servic
 // import { ICarousel } from '@ws-widget/collection'
 
 @Component({
-  selector: 'ws-auth-slider',
-  templateUrl: './slider.component.html',
-  styleUrls: ['./slider.component.scss'],
+    selector: 'ws-auth-slider',
+    templateUrl: './slider.component.html',
+    styleUrls: ['./slider.component.scss'],
+    standalone: false
 })
 export class SliderComponent implements OnInit {
 
@@ -22,12 +23,12 @@ export class SliderComponent implements OnInit {
   @Input() content!: any[] // ICarousel[]
   @Input() isSubmitPressed = false
   @Output() data = new EventEmitter<{ content: any/*ICarousel*/, isValid: Boolean }>()
-  form!: FormGroup
+  form!: UntypedFormGroup
 
   constructor(
     private uploadService: UploadService,
     private snackBar: MatSnackBar,
-    public formBuilder: FormBuilder,
+    public formBuilder: UntypedFormBuilder,
     public loader: LoaderService,
   ) { }
 
@@ -54,7 +55,7 @@ export class SliderComponent implements OnInit {
   }
 
   get paths(): any {
-    return this.form.get('iCarousel') as FormArray
+    return this.form.get('iCarousel') as UntypedFormArray
   }
 
   addImageDetailsToForm(data?: any) {
@@ -77,7 +78,7 @@ export class SliderComponent implements OnInit {
   }
 
   upload(file: File, index: number, type: string) {
-    const formControl = (this.paths.at(index).get('banners') as FormGroup).get(type) as AbstractControl
+    const formControl = (this.paths.at(index).get('banners') as UntypedFormGroup).get(type) as AbstractControl
     const formdata = new FormData()
     const fileName = file.name.replace(/[^A-Za-z0-9.]/g, '')
     if (!(file.type.indexOf('image/') > -1)) {

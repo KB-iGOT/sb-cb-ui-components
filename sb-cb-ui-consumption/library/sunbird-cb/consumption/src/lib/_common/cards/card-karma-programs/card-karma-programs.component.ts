@@ -6,9 +6,10 @@ import { Router } from '@angular/router';
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service';
 
 @Component({
-  selector: 'sb-uic-card-karma-programs',
-  templateUrl: './card-karma-programs.component.html',
-  styleUrls: ['./card-karma-programs.component.scss']
+    selector: 'sb-uic-card-karma-programs',
+    templateUrl: './card-karma-programs.component.html',
+    styleUrls: ['./card-karma-programs.component.scss'],
+    standalone: false
 })
 export class CardKarmaProgramsComponent implements OnInit {
 

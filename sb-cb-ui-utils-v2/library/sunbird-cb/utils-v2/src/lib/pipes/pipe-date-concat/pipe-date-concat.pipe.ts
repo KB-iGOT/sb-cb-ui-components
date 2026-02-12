@@ -8,7 +8,8 @@ interface ICertificationDate {
 }
 
 @Pipe({
-  name: 'pipeDateConcat',
+    name: 'pipeDateConcat',
+    standalone: false
 })
 export class PipeDateConcatPipe implements PipeTransform {
   private readonly months: string[]

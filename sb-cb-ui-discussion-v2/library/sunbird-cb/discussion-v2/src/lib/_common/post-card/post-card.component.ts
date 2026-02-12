@@ -13,9 +13,10 @@ import { UserEnrollCommunityService } from '../../_services/user-enroll-communit
 import { map } from 'rxjs/operators';
 
 @Component({
-  selector: 'd-v2-post-card',
-  templateUrl: './post-card.component.html',
-  styleUrls: ['./post-card.component.scss']
+    selector: 'd-v2-post-card',
+    templateUrl: './post-card.component.html',
+    styleUrls: ['./post-card.component.scss'],
+    standalone: false
 })
 export class PostCardComponent implements OnInit{
   @Input() cardType = 'topLevel'

@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { AuthEditorActionButtonsComponent } from './auth-editor-action-buttons.component'
 
 describe('AuthEditorActionButtonsComponent', () => {
   let component: AuthEditorActionButtonsComponent
   let fixture: ComponentFixture<AuthEditorActionButtonsComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AuthEditorActionButtonsComponent],
     }).compileComponents()

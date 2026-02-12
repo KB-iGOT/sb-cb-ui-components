@@ -2,9 +2,10 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { DiscussionV2Service } from '../../_services/discussion-v2.service';
 
 @Component({
-  selector: 'd-v2-widget-topics-all',
-  templateUrl: './widget-topics-all.component.html',
-  styleUrls: ['./widget-topics-all.component.scss']
+    selector: 'd-v2-widget-topics-all',
+    templateUrl: './widget-topics-all.component.html',
+    styleUrls: ['./widget-topics-all.component.scss'],
+    standalone: false
 })
 export class WidgetTopicsAllComponent {
   localSearchTextValue: any = ''
