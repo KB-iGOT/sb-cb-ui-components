@@ -87,3 +87,6 @@ export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.component
 //collection common modules
 export * from './lib/_collection/_common/card-competency/card-competency.component'
 export * from './lib/_collection/_common/card-competency/card-competency.module'
+
+
+export * from './lib/services/access-control.service'
