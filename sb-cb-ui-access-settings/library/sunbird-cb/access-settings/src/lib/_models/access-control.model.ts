@@ -85,6 +85,7 @@ export namespace NsAccessControlConfig {
     CentralDeputation = "isOnCentralDeputation",
   }
 
+  export const SelectionTypeValues = Object.values(SelectionType);
   export interface ISelectionOption {
     value: string;
     label: string;

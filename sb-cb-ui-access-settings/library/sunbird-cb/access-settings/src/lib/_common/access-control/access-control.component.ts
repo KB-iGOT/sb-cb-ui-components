@@ -350,7 +350,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       id: [id],
       entity: [{ value: entity, disabled: isEntityDisabled }, Validators.required],
       conditionType: [{ value: "is", disabled: true }, Validators.required],
-      selections: [[]]
+      selections: [[]],
+      disabledMessage: [""]
     });
   }
 
@@ -1747,103 +1748,108 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   // Customs Field Logics
-  getCustomsField() {
-    this.accessControlService
-      .fetchCustomsField({
-        organisationId: this.config.userConfig.rootOrgId,
-        isEnabled: true,
-        type: "masterList",
-        isMandatory: true,
-      })
-      .subscribe({
-        next: (data) => {
-          if (data && data?.result && data.result.searchResults?.data) {
-            const results = data.result.searchResults.data;
-            if (Array.isArray(results) && results.length) {
-
-              const mappedFields = _.chain(results)
-                .map(field => {
-                  if (field?.originalCustomFieldData?.length === 1) {
-                     const firstField = _.first(field.originalCustomFieldData) as { 
-                      attributeName?: string; 
-                      name?: string; 
-                    };
-                    const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
-                      .filter((item: any) => item?.fieldAttribute === firstField?.attributeName)
-                      .uniqBy('fieldValue')  
-                      .value();
-                      
-                    return {
-                      disabled: false,
-                      value: firstField?.name || "",
-                      label: firstField?.name || "",
-                      isCustomField: true,
-                      reversedOrderCustomFieldData: filteredAndUniqueData
-                    };
-                  } else if (field?.originalCustomFieldData?.length > 1) {
-                    const lastField = _.last(field.originalCustomFieldData) as { 
-                      attributeName?: string; 
-                      name?: string; 
-                    };
-                    if (lastField) {
+  async getCustomsField(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.accessControlService
+        .fetchCustomsField({
+          organisationId: this.config.userConfig.rootOrgId,
+          isEnabled: true,
+          type: "masterList",
+          isMandatory: true
+        })
+        .subscribe({
+          next: data => {
+            if (data && data?.result && data.result.searchResults?.data) {
+              const results = data.result.searchResults.data;
+              if (Array.isArray(results) && results.length) {
+                const mappedFields = _.chain(results)
+                  .map(field => {
+                    if (field?.originalCustomFieldData?.length === 1) {
+                      const firstField = _.first(field.originalCustomFieldData) as {
+                        attributeName?: string;
+                        name?: string;
+                      };
                       const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
-                        .filter((item: any) => item?.fieldAttribute === lastField?.attributeName)
-                        .uniqBy('fieldValue') 
+                        .filter((item: any) => item?.fieldAttribute === firstField?.attributeName)
+                        .uniqBy("fieldValue")
                         .value();
 
                       return {
                         disabled: false,
-                        value: lastField?.name || "",
-                        label: lastField?.name || "",
+                        value: firstField?.name || "",
+                        label: firstField?.name || "",
                         isCustomField: true,
                         reversedOrderCustomFieldData: filteredAndUniqueData
                       };
+                    } else if (field?.originalCustomFieldData?.length > 1) {
+                      const lastField = _.last(field.originalCustomFieldData) as {
+                        attributeName?: string;
+                        name?: string;
+                      };
+                      if (lastField) {
+                        const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                          .filter((item: any) => item?.fieldAttribute === lastField?.attributeName)
+                          .uniqBy("fieldValue")
+                          .value();
+
+                        return {
+                          disabled: false,
+                          value: lastField?.name || "",
+                          label: lastField?.name || "",
+                          isCustomField: true,
+                          reversedOrderCustomFieldData: filteredAndUniqueData
+                        };
+                      }
                     }
-                  }
-                  return null;
-                })
-                .compact()
-                .value();
+                    return null;
+                  })
+                  .compact()
+                  .value();
 
-              // Update the service with mapped fields
-              this.accessControlService.customesFieldData.set(mappedFields);
+                // Update the service with mapped fields
+                this.accessControlService.customesFieldData.set(mappedFields);
 
-              // Update optionsEntity without duplicates
-              this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
-                [...this.accessControlCriteriaSelection.optionsEntity, ...mappedFields],
-                'value'
-              );
+                // Update optionsEntity without duplicates
+                this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
+                  [...this.accessControlCriteriaSelection.optionsEntity, ...mappedFields],
+                  "value"
+                );
 
-              // Create dynamic fields
-              const dynamicFields = mappedFields.reduce((acc, field) => {
-                acc[field.value] = [
-                  { value: "all", label: `All ${field.label}` },
-                  { value: "selected", label: `Selected ${field.label}` },
-                ];
-                return acc;
-              }, {} as Record<string, Array<{ value: string; label: string }>>);
+                // Create dynamic fields
+                const dynamicFields = mappedFields.reduce((acc, field) => {
+                  acc[field.value] = [
+                    { value: "all", label: `All ${field.label}` },
+                    { value: "selected", label: `Selected ${field.label}` }
+                  ];
+                  return acc;
+                }, {} as Record<string, Array<{ value: string; label: string }>>);
 
-              // Merge configurations
-              this.accessControlCriteriaSelection = {
-                ...this.accessControlCriteriaSelection,
-                ...dynamicFields,
-              };
+                // Merge configurations
+                this.accessControlCriteriaSelection = {
+                  ...this.accessControlCriteriaSelection,
+                  ...dynamicFields
+                };
 
-              // Update the signal with the full updated object
-              this.accessControlService.accessControlConfig.update((prevConfig) => ({
-                ...prevConfig,
-                accessControlCriteriaSelection: this.accessControlCriteriaSelection,
-              }));
-              this.isLoading = false;
-
+                // Update the signal with the full updated object
+                this.accessControlService.accessControlConfig.update(prevConfig => ({
+                  ...prevConfig,
+                  accessControlCriteriaSelection: this.accessControlCriteriaSelection
+                }));
+                this.isLoading = false;
+              } else {
+                this.isLoading = false;
+              }
             } else {
               this.isLoading = false;
             }
-          } else {
+            resolve(); // Resolve the promise when completed
+          },
+          error: error => {
             this.isLoading = false;
+            reject(error); // Reject the promise on error
           }
-        },
-      });
+        });
+    });
   }
 
   // Patch raw accesscontrol to form
@@ -1931,29 +1937,64 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // Process patching.
       const conditions = this.fb.array([]) as any;
 
-      group.userGroupCriteriaList.forEach((criteria: any) => {
+      group.userGroupCriteriaList.forEach(async (criteria: any) => {
 
         if(!this.isCCA && criteria.criteriaKey === NsAccessControlConfig.SelectionType.Organizations) {
           return; // Skip this iteration to not add the organization condition
         }
 
+        let isCustomFieldCrieteriaKeyPresent = false
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
         // Set the form values
-        condition.patchValue({
-            entity: criteria.criteriaKey,
-            selections:
-              criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
-                ? Array.isArray(criteria.criteriaValue)
-                  ? criteria.criteriaValue.map((b: any) => Number(b))
-                  : []
-                : criteria.criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation
-                ? Array.isArray(criteria.criteriaValue)
-                  ? criteria.criteriaValue
-                  : [criteria.criteriaValue]
-                : criteria.criteriaValue,
-          });
+          const { criteriaKey, criteriaValue } = criteria;
+          let selections: any;
 
+          if (criteriaKey === NsAccessControlConfig.SelectionType.Batch) {
+            selections = Array.isArray(criteriaValue) ? criteriaValue.map((b: any) => Number(b)) : [];
+          } 
+          else if (criteriaKey === NsAccessControlConfig.SelectionType.CentralDeputation) {
+            selections = Array.isArray(criteriaValue) ? criteriaValue : [criteriaValue];
+          } 
+          else {
+            // Check if criteriaKey is an custom field or not and check if its present in accessControlCriteriaSelection options
+            if(this.accessControlService.customesFieldData().length === 0) await this.getCustomsField();
+            const configOptions = this.accessControlCriteriaSelection.optionsEntity;
+            const isPresent = configOptions.some((field: any) => field.value === criteriaKey);
+
+            if (!isPresent && this.config.accessControlCriteriaSelection.allowCustomsField) {
+              isCustomFieldCrieteriaKeyPresent = !isPresent;
+              selections = criteriaValue;
+              
+              const dynamicFieldEntry: Record<string, Array<{ value: string; label: string }>> = {
+                [criteriaKey]: [
+                  { value: "all", label: `All ${criteriaKey}` },
+                  { value: "selected", label: `Selected ${criteriaKey}` }
+                ]
+              };
+
+              const newOptionEntity = { disabled: false, value: criteriaKey, label: criteriaKey, isCustomField: true };
+
+              this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
+                [...this.accessControlCriteriaSelection.optionsEntity, newOptionEntity],
+                'value'
+              );
+
+              this.accessControlCriteriaSelection = { ...this.accessControlCriteriaSelection, ...dynamicFieldEntry };
+              this.accessControlService.accessControlConfig.update(prevConfig => ({
+                ...prevConfig,
+                accessControlCriteriaSelection: this.accessControlCriteriaSelection
+              }));
+            } else {
+              selections = criteriaValue;
+            }
+          }
+
+          if(isCustomFieldCrieteriaKeyPresent) {
+            condition.patchValue({ entity: criteriaKey, selections: selections, disabledMessage: "This condition is disabled because it is either disabled or removed from the custom field" });
+          } else {
+            condition.patchValue({ entity: criteriaKey, selections });
+          }
           conditions.push(condition);
         });
 
