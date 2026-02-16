@@ -884,7 +884,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           widgets,
           'done',
           calculateParentStatus,
-          response.viewMoreUrl,
+          null,
           tabResults // tabResults as widgets
         )
         this.statusChangetoDone(strip, tabIndex, pillIndex)
@@ -2209,7 +2209,16 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           let tabResults: any[] = []
           if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
             const allTabs = this.stripsResultDataMap[strip.key].tabs
+            const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
             if (allTabs && allTabs.length && allTabs[tabIndex]) {
+              if (allPills && allPills.length && allPills[pillIndex]) {
+                allPills[pillIndex] = {
+                  ...allPills[pillIndex],
+                  widgets: [],
+                  fetchTabStatus: 'done',
+                  selected: true
+                }
+              }
               allTabs[tabIndex] = {
                 ...allTabs[tabIndex],
                 widgets: [],
@@ -2217,9 +2226,9 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
               }
               tabResults = allTabs
             }
-            this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
+            this.processStrip(strip, [], 'done', calculateParentStatus, null, tabResults)
           } else {
-            this.processStrip(strip, [], 'error', calculateParentStatus, null, tabResults)
+            this.processStrip(strip, [], 'done', calculateParentStatus, null, tabResults)
           }
         }
         
