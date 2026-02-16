@@ -1016,6 +1016,13 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
 
   }
 
+  navigateToNewVersion() {
+    this.router.navigateByUrl('/app/toc', { skipLocationChange: true }).then(() => {
+      this.router.navigate([`app/toc/${this.contentReadData?.contentVersionInfo?.identifier}/overview`])
+    })
+
+  }
+
   ngOnDestroy(): void {
     this.destroySubject$.unsubscribe()
     this.timerUnsubscribe.unsubscribe()

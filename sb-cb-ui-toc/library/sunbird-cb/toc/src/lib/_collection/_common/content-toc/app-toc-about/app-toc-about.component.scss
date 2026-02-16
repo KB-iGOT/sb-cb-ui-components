@@ -77,6 +77,14 @@
         word-wrap: break-word;
         width: 100%;
     }
+
+    .retire-info-icon {
+        font-size: 28px;
+        height: 28px;
+        color: rgb(243, 150, 47);
+        width: 28px;
+        overflow: unset !important;
+    }
 }
 
 .mob-text{
@@ -644,4 +652,19 @@ $mob-title-line-count: 2;
         border: 0px;
         cursor: pointer;
     }
+}
+
+.content-retire-container {
+    background: rgba(253, 234, 213, 1);
+    border-radius: 12px;
+    padding: 16px;
+    gap: 16px;
+
+    .retire-info-icon {
+        font-size: 40px;
+        height: 40px;
+        width: 58px;
+        color: rgba(243, 150, 47, 1);
+    }
+    
 }

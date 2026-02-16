@@ -3294,8 +3294,27 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
    * Check if user can enroll in the course
    * Returns true when enrollment is allowed
    */
-  canEnroll(): boolean {
-    return !this.disableEnrollBtn
+
+
+  navigateToNewVersion() {
+    this.router.navigateByUrl('/app/toc', { skipLocationChange: true }).then(() => {
+      this.router.navigate([`app/toc/${this.contentReadData?.contentVersionInfo?.identifier}/overview`])
+    })
+
+  }
+
+  canEnroll() {
+    if (this.contentReadData && this.contentReadData.lastEnrollmentDate) {
+      const serverTime = dayjs(this.serverDate).format('YYYY-MM-DD')
+      const eDate = dayjs(this.contentReadData.lastEnrollmentDate).format('YYYY-MM-DD')
+      if (dayjs(serverTime).isSameOrBefore(eDate)) {
+        return true
+      } else {
+        return false
+      }
+    } else {
+      return true
+    }
   }
 
   goBack() {
