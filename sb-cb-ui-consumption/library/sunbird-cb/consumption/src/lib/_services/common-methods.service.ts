@@ -87,4 +87,8 @@ export class CommonMethodsService {
       }
     ));
   }
+
+  getCourseUnitIds() {
+    return localStorage.getItem('comprehensiveAssessmentCourseUnits')
+  }
 }
