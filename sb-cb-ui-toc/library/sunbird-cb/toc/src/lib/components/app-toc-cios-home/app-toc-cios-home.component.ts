@@ -42,7 +42,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   rootOrgId: any
   currentLang: any = 'en'
   discussWidgetData!: NsDiscussionV2.ICommentWidgetData
-  providerTips: string[] = []
+  showProviderTips = false
 
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
@@ -83,7 +83,6 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         this.extContentReadData['certificateObj'] = {
           data: {},
         }
-        this.providerTips = _.get(this.extContentReadData, 'contentPartner.providerTips', [])
         this.skeletonLoader = false
 
       } else {
@@ -161,6 +160,10 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         height: 'auto',
         sliderData: _.get(this.extContentReadData, 'contentPartner.providerTips', [])
       }
+      this.showProviderTips = (this.widgetData && this.widgetData.sliderData?.length) &&
+        (Object.keys(this.userExtCourseEnroll).length === 0 ||
+        (this.userExtCourseEnroll?.issued_certificates?.length === 0 &&
+        this.userExtCourseEnroll?.progress <= 100))
 
       if (Object.keys(this.userExtCourseEnroll).length) {
         this.discussWidgetData.enrolledContent = true

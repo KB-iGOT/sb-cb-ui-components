@@ -147,6 +147,7 @@ import { PublicSurveyFormComponent } from './components/public-survey-form/publi
 import { ConsentDialogComponent } from './components/app-toc-cios-home/consent-dialog.component'
 import { WidgetCommentModule } from '@sunbird-cb/discussion-v2'
 import { NonReleventFeedbackDialogComponent } from './components/non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
+import { SlidersDynamicModule } from './_collection/sliders-dynamic/sliders-dynamic.module'
 
 @NgModule({
   declarations: [
@@ -262,6 +263,7 @@ import { NonReleventFeedbackDialogComponent } from './components/non-relevent-fe
     WidgetCommentModule,
     SurveyFormQuestionComponent,
     SurveyFormSectionComponent,
+    SlidersDynamicModule
   ],
   providers: [
     AppTocContentReadResolverService,
