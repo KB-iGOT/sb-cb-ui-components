@@ -643,6 +643,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           if (!hasAIS) {
             this.accessControlService.enableDeputation(false);
           }
+
         }
       }
     });
@@ -1081,7 +1082,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isSaveFltrBtnDisabled = true;
       this.isSaving = false;
 
-      this.isAddUserGroupBtnDisabled = true
+      if(this.userGroup.length === 0) {
+        this.isAddUserGroupBtnDisabled = false
+      }
       return;
     }
 
