@@ -111,10 +111,10 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       };
 
       Object.keys(reducedData).forEach((key: any) => {
-        if (!this.filters.orgCustomFields) {
-           this.filters.orgCustomFields = {};
-        }
         if (!pickEntity.includes(key) && key !== "user") {
+          if (!this.filters.orgCustomFields) {
+             this.filters.orgCustomFields = {};
+          }
           if (Array.isArray(reducedData[key]) && reducedData[key].every((item: any) => item && typeof item === "object")) {
             reducedData[key] = reducedData[key].map((value: any) => value?.fieldValue);
           }
