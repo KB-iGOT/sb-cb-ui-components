@@ -1,0 +1,165 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <h1 class="title">Survey Dashboard</h1>
+      <p class="subtitle">Performance overview and peer validation management.</p>
+    </div>
+    <button mat-button class="btn-common btn-primary" (click)="createNewSurvey()">
+      <mat-icon>add</mat-icon>
+      Create New Survey
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="tabs">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="tab-label">All <span class="tab-count">({{allCount}})</span></span>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="tab-label">Active <span class="tab-count">({{activeCount}})</span></span>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="tab-label">Ended <span class="tab-count">({{endedCount}})</span></span>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="tab-label">Draft <span class="tab-count">({{draftCount}})</span></span>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Filters -->
+  <form [formGroup]="filterForm" class="filters">
+    <div class="filter-row">
+      <div class="filter-item search-filter mat-full-radius">
+        <label class="filter-label">Search Surveys</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Type here to search..." formControlName="searchText">
+        </mat-form-field>
+      </div>
+
+      <div class="filter-item date-filter mat-full-radius">
+        <label class="filter-label">Date Range</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <input matInput [matDatepicker]="picker" placeholder="DD-MM-YY - DD-MM-YY" formControlName="startDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-item status-filter mat-full-radius" *ngIf="selectedTab === 'all'">
+        <label class="filter-label">Status</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let status of statusOptions" [value]="status">
+              {{status}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-item mdo-filter mat-full-radius" *ngIf="isSPVRoute">
+        <label class="filter-label">MDO</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-select formControlName="mdo">
+            <mat-option *ngFor="let mdo of mdoOptions" [value]="mdo">
+              {{mdo}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource" class="survey-table">
+      <!-- Course Name Column -->
+      <ng-container matColumnDef="courseName">
+        <th mat-header-cell *matHeaderCellDef>Course Name</th>
+        <td mat-cell *matCellDef="let row">{{row.courseName}}</td>
+      </ng-container>
+
+      <!-- Organisation Column -->
+      <ng-container matColumnDef="organisation">
+        <th mat-header-cell *matHeaderCellDef>Organisation</th>
+        <td mat-cell *matCellDef="let row">{{row.organisation}}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge" [ngClass]="getStatusClass(row.status)">
+            {{row.status}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Start Date Column -->
+      <ng-container matColumnDef="startDate">
+        <th mat-header-cell *matHeaderCellDef>Start Date</th>
+        <td mat-cell *matCellDef="let row">{{row.startDate}}</td>
+      </ng-container>
+
+      <!-- End Date Column -->
+      <ng-container matColumnDef="endDate">
+        <th mat-header-cell *matHeaderCellDef>End Date</th>
+        <td mat-cell *matCellDef="let row">{{row.endDate}}</td>
+      </ng-container>
+
+      <!-- Submission Rate Column -->
+      <ng-container matColumnDef="submissionRate">
+        <th mat-header-cell *matHeaderCellDef>
+          Submission Rate
+          <mat-icon class="info-icon" matTooltip="Submission rate information">info_outline</mat-icon>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          {{row.submissionCount}}/{{row.totalCount}} ({{row.submissionRate}})
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editSurvey(row)" *ngIf="row.status === 'DRAFT'">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="downloadExcel(row)" *ngIf="row.status === 'ACTIVE' || row.status === 'END'">
+              <mat-icon>download</mat-icon>
+              <span>Download CSV</span>
+            </button>
+            <!-- <button mat-menu-item (click)="deleteSurvey(row)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button> -->
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Paginator -->
+    <div class="paginator-container">
+      <mat-paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 100]" showFirstLastButtons
+        aria-label="Select page">
+      </mat-paginator>
+    </div>
+  </div>
+</div>
