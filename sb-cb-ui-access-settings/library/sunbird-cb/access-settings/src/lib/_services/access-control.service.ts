@@ -249,7 +249,7 @@ export class AccessControlService {
     };
   }
 
-  fetchCustomsField(filterCriteria: any): Observable<any> {
+  fetchCustomsField(filterCriteria: any): Promise<any> {
     const requestPayload = {
       filterCriteriaMap: filterCriteria,
       requestedFields: ["name", "isActive", "createdBy", "createdOn", "isEnabled", "isMandatory", "customFieldData", "originalCustomFieldData", "attributeName", "type", "reversedOrderCustomFieldData"],
@@ -259,7 +259,7 @@ export class AccessControlService {
       orderBy: "createdOn",
       facets: [],
     };
-    return this.http.post<any>(ENDPOINTS.CUSTOMES_FIELD_SEARCH, requestPayload);
+    return this.http.post<any>(ENDPOINTS.CUSTOMES_FIELD_SEARCH, requestPayload).toPromise()
   }
 
   enableDeputation(value: boolean) {

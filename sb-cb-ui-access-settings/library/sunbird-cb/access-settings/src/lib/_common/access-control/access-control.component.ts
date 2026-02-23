@@ -77,6 +77,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.initForm();
 
     if (this.config?.application === NsAccessControlConfig.Application.MDO) {
+      this.isLoading = true
       this.isCCA = this.config?.userConfig?.org?.isCCA ?? false;
       if (!this.isCCA) {
         this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
@@ -147,6 +148,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Add config to signal 
     this.accessControlService.accessControlConfig.set(this.config);
+    if (this.config.accessControlCriteriaSelection.allowCustomsField && !this.isCCA) {
+      await this.getCustomsField();
+    }
 
    if(this.config.application === this.MDO_APPLICATION) {
      if (this.tempAccessControl) {
@@ -191,11 +195,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       this.cadreMappingService.setCadreConfigData(this.cadreConfigData);
 
-      if (this.config.accessControlCriteriaSelection.allowCustomsField && !this.isCCA) {
-        this.getCustomsField();
-      } else {
         this.isLoading = false;
-      }
     
     }
   }
@@ -643,6 +643,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           if (!hasAIS) {
             this.accessControlService.enableDeputation(false);
           }
+
         }
       }
     });
@@ -749,6 +750,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  checkIfAnyConditionContainsDisabledMessage(userGroupIndex: number): boolean {
+    return this.userGroup.at(userGroupIndex).get("conditions").value.some((condition: any) => condition.disabledMessage);
+  }
+
   manageSelections(conditionForm: any, ruleForm: any, userGroupIndex: number, activeTabSelected = 0): void {
     const condition = conditionForm.getRawValue();
     const rule = ruleForm.getRawValue();
@@ -769,9 +774,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           return false;
         })();
 
-        // Only show reset filter flag if not in initial state
+        // Only show reset filter flag if not in initial state and if any condition contains disabled message then dont show the warning
         if (!isInInitialState) {
-          resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+          if (this.checkIfAnyConditionContainsDisabledMessage(userGroupIndex)) {
+            resetFilterFlag = false;
+          } else {
+            resetFilterFlag = this.checkForResetFilter(condition, rule, userGroupIndex);
+          }
         }
       }
       
@@ -1073,7 +1082,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isSaveFltrBtnDisabled = true;
       this.isSaving = false;
 
-      this.isAddUserGroupBtnDisabled = true
+      if(this.userGroup.length === 0) {
+        this.isAddUserGroupBtnDisabled = false
+      }
       return;
     }
 
@@ -1681,21 +1692,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             checkLastIndexHaveSelections = index;
           }
         });
-        // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
-        // console.log('checkLastIndexHaveSelections--', checkLastIndexHaveSelections)
+        
         if (activeManageSelection?.conditions[checkLastIndexHaveSelections]?.entity === condition?.entity && condition?.selections?.length > 0) {
           flag = false;
         }
       }
-
-      // let index = activeManageSelection?.conditions?.findLastIndex((item) =>
-      //   item?.entity === condition?.entity && item?.selections.length > 0
-      // );
-      // if((index + 1) === activeManageSelection?.conditions.length) {
-      //   flag = false
-      // }
-      // console.log('activeManageSelection?.conditions', activeManageSelection?.conditions)
-      // console.log('index', index)
     }
     return flag;
   }
@@ -1749,108 +1750,105 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   // Customs Field Logics
   async getCustomsField(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.accessControlService
+    this.isLoading = true;
+
+    try {
+      const data: any = await this.accessControlService
         .fetchCustomsField({
           organisationId: this.config.userConfig.rootOrgId,
           isEnabled: true,
           type: "masterList",
           isMandatory: true
         })
-        .subscribe({
-          next: data => {
-            if (data && data?.result && data.result.searchResults?.data) {
-              const results = data.result.searchResults.data;
-              if (Array.isArray(results) && results.length) {
-                const mappedFields = _.chain(results)
-                  .map(field => {
-                    if (field?.originalCustomFieldData?.length === 1) {
-                      const firstField = _.first(field.originalCustomFieldData) as {
-                        attributeName?: string;
-                        name?: string;
-                      };
-                      const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
-                        .filter((item: any) => item?.fieldAttribute === firstField?.attributeName)
-                        .uniqBy("fieldValue")
-                        .value();
 
-                      return {
-                        disabled: false,
-                        value: firstField?.name || "",
-                        label: firstField?.name || "",
-                        isCustomField: true,
-                        reversedOrderCustomFieldData: filteredAndUniqueData
-                      };
-                    } else if (field?.originalCustomFieldData?.length > 1) {
-                      const lastField = _.last(field.originalCustomFieldData) as {
-                        attributeName?: string;
-                        name?: string;
-                      };
-                      if (lastField) {
-                        const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
-                          .filter((item: any) => item?.fieldAttribute === lastField?.attributeName)
-                          .uniqBy("fieldValue")
-                          .value();
+      if (data?.result?.searchResults?.data?.length) {
+        const results = data.result.searchResults.data;
 
-                        return {
-                          disabled: false,
-                          value: lastField?.name || "",
-                          label: lastField?.name || "",
-                          isCustomField: true,
-                          reversedOrderCustomFieldData: filteredAndUniqueData
-                        };
-                      }
-                    }
-                    return null;
-                  })
-                  .compact()
-                  .value();
+        const mappedFields = _.chain(results)
+          .map(field => {
+            if (field?.originalCustomFieldData?.length === 1) {
+              const firstField = _.first(field.originalCustomFieldData) as {
+                attributeName?: string;
+                name?: string;
+              };
 
-                // Update the service with mapped fields
-                this.accessControlService.customesFieldData.set(mappedFields);
+              const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                .filter((item: any) => item?.fieldAttribute === firstField?.attributeName)
+                .uniqBy("fieldValue")
+                .value();
 
-                // Update optionsEntity without duplicates
-                this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
-                  [...this.accessControlCriteriaSelection.optionsEntity, ...mappedFields],
-                  "value"
-                );
-
-                // Create dynamic fields
-                const dynamicFields = mappedFields.reduce((acc, field) => {
-                  acc[field.value] = [
-                    { value: "all", label: `All ${field.label}` },
-                    { value: "selected", label: `Selected ${field.label}` }
-                  ];
-                  return acc;
-                }, {} as Record<string, Array<{ value: string; label: string }>>);
-
-                // Merge configurations
-                this.accessControlCriteriaSelection = {
-                  ...this.accessControlCriteriaSelection,
-                  ...dynamicFields
-                };
-
-                // Update the signal with the full updated object
-                this.accessControlService.accessControlConfig.update(prevConfig => ({
-                  ...prevConfig,
-                  accessControlCriteriaSelection: this.accessControlCriteriaSelection
-                }));
-                this.isLoading = false;
-              } else {
-                this.isLoading = false;
-              }
-            } else {
-              this.isLoading = false;
+              return {
+                disabled: false,
+                value: firstField?.name || "",
+                label: firstField?.name || "",
+                isCustomField: true,
+                reversedOrderCustomFieldData: filteredAndUniqueData
+              };
             }
-            resolve(); // Resolve the promise when completed
-          },
-          error: error => {
-            this.isLoading = false;
-            reject(error); // Reject the promise on error
-          }
-        });
-    });
+
+            if (field?.originalCustomFieldData?.length > 1) {
+              const lastField = _.last(field.originalCustomFieldData) as {
+                attributeName?: string;
+                name?: string;
+              };
+
+              if (!lastField) return null;
+
+              const filteredAndUniqueData = _.chain(field?.reversedOrderCustomFieldData)
+                .filter((item: any) => item?.fieldAttribute === lastField?.attributeName)
+                .uniqBy("fieldValue")
+                .value();
+
+              return {
+                disabled: false,
+                value: lastField?.name || "",
+                label: lastField?.name || "",
+                isCustomField: true,
+                reversedOrderCustomFieldData: filteredAndUniqueData
+              };
+            }
+
+            return null;
+          })
+          .compact()
+          .value();
+
+        // Update the service with mapped fields
+        this.accessControlService.customesFieldData.set(mappedFields);
+
+        // Update optionsEntity without duplicates
+        this.accessControlCriteriaSelection.optionsEntity = _.uniqBy(
+          [...this.accessControlCriteriaSelection.optionsEntity, ...mappedFields],
+          "value"
+        );
+
+        // Create dynamic fields
+        const dynamicFields = mappedFields.reduce((acc, field) => {
+          acc[field.value] = [
+            { value: "all", label: `All ${field.label}` },
+            { value: "selected", label: `Selected ${field.label}` }
+          ];
+          return acc;
+        }, {} as Record<string, Array<{ value: string; label: string }>>);
+
+        // Merge configurations
+        this.accessControlCriteriaSelection = {
+          ...this.accessControlCriteriaSelection,
+          ...dynamicFields
+        };
+
+        // Update signal
+        this.accessControlService.accessControlConfig.update(prev => ({
+          ...prev,
+          accessControlCriteriaSelection: this.accessControlCriteriaSelection
+        }));
+        
+      }
+    } catch (error) {} finally {
+      this.isLoading = false;
+    }
   }
+
 
   // Patch raw accesscontrol to form
   private getStorageKey(): string {
@@ -1957,8 +1955,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             selections = Array.isArray(criteriaValue) ? criteriaValue : [criteriaValue];
           } 
           else {
-            // Check if criteriaKey is an custom field or not and check if its present in accessControlCriteriaSelection options
-            if(this.accessControlService.customesFieldData().length === 0) await this.getCustomsField();
+           
             const configOptions = this.accessControlCriteriaSelection.optionsEntity;
             const isPresent = configOptions.some((field: any) => field.value === criteriaKey);
 
@@ -1991,7 +1988,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
 
           if(isCustomFieldCrieteriaKeyPresent) {
-            condition.patchValue({ entity: criteriaKey, selections: selections, disabledMessage: "This condition is disabled because it is either disabled or removed from the custom field" });
+            if(!this.isCCA) {
+              condition.patchValue(
+                { entity: criteriaKey, selections: selections, disabledMessage: "This condition is disabled because it is either disabled or removed from the custom field" }
+              );
+            } else if(this.isCCA && this.mdoContent?.status?.toLowerCase() === "draft") return 
           } else {
             condition.patchValue({ entity: criteriaKey, selections });
           }
@@ -2037,12 +2038,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         
         this.isSaveFltrBtnDisabled = true;
       }
-
+      
         // Check if add condition should be disabled for this user group
         this.processDisableAddConditionOnClose(index);
 
         // Calculate count for each user group
         this.calculateUserCountForUserGroup(index);
+
+        // For NON-CCA to CCA send event so it can be updated correctly on update api 
+        this.applyAccessControlValue(true, false);
     });
 
     setTimeout(() => {
