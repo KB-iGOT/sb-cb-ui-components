@@ -27,8 +27,8 @@
     <a *ngSwitchCase="displayType.matIconButton" [ngClass]="widgetData?.className || ''"
       [name]="widgetData.actionBtnName" [routerLink]="widgetData.actionBtn?.url" mat-icon-button>
       <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{
-          iconType: widgetData.actionBtn.iconType,
-          icon: widgetData.actionBtn.icon
+          iconType: widgetData.actionBtn?.iconType,
+          icon: widgetData.actionBtn?.icon
         }"></ng-container>
     </a>
     <a *ngSwitchCase="displayType.matMiniFabButton" [routerLink]="widgetData.actionBtn?.url" mat-mini-fab>
@@ -102,8 +102,8 @@
     [wsWidgetUrlResolver]="actionBtn.isExternal" [attr.aria-label]="actionBtn.name" role="link"
     routerLinkActive="ws-mat-selected-home-menu" class="flex items-center flex-col px-4 box-sizing-box rem">
     <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{
-              iconType: widgetData.actionBtn.iconType,
-              icon: widgetData.actionBtn.icon
+              iconType: widgetData.actionBtn?.iconType,
+              icon: widgetData.actionBtn?.icon
             }"></ng-container>
   </a>
 </ng-template>
