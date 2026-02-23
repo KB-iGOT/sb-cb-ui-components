@@ -13,6 +13,7 @@ export class UserContentDetailedRatingComponent implements OnInit {
   isRequesting = true
   userRating!: IContentRating
   @Input() forPreview = false
+  @Input() className = ''
   averageRatings = 0
 
   constructor(
