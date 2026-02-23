@@ -145,6 +145,15 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   initializeDiscussData() {
+    if (!_.get(this.extContentReadData, 'contentPartner.isActive', false)) {
+      this.snackBar.open('Courses from this learning partner are temporarily not available on iGOT Karmayogi. Our team is updating partner content. In the meantime, you can continue your journey with courses from other partners.', 'X', {
+        duration: 10000,
+      })
+    } else if (!_.get(this.extContentReadData, 'isActive', false)) {
+      this.snackBar.open('This course is no longer being offered in its current form. We are updating our catalog to bring you improved learning options. Please choose another course with similar topics or browse recommended courses.', 'X', {
+        duration: 10000,
+      })
+    }
     if (this.config && this.config.discussWidgetData) {
       this.discussWidgetData = this.config.discussWidgetData
       if (this.extContentReadData && this.extContentReadData.contentId) {
@@ -499,6 +508,19 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         }
       )
     }
+  }
+
+  get showEnroll(): boolean {
+    return Object.keys(this.userExtCourseEnroll).length === 0 &&
+      !this.enrollValidationLoading &&
+      this.canEnroll &&
+      _.get(this.extContentReadData, 'contentPartner.isActive', false)
+  }
+
+  get showRedirect(): boolean {
+    return Object.keys(this.userExtCourseEnroll).length > 0 &&
+      _.get(this.extContentReadData, 'redirectUrl') &&
+      _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }
 
 }
