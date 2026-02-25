@@ -108,11 +108,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     if (this.content && !this.content?.externalId) {
+      const isComprehensiveCategory = this.content.courseCategory === "Comprehensive Assessment Program";
       const isAllUsers = this.content.accessSetting === NsAccessControlConfig.IAccessSetting.ALL_USERS;
       const isCustomAccess =
         this.content.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
         this.content.accessSetting === NsAccessControlConfig.IAccessSetting.CUSTOME_USER;
-      const isComprehensiveCategory = this.content.courseCategory === "Comprehensive Assessment Program";
 
       const accessTypePublic = _.find(this.accessControlCriteriaSelection?.accessTypes, {
         value: NsAccessControlConfig.IAccessTypes.Public
@@ -163,6 +163,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.setupFormChangeDetection();
       }, 0);
     }
+   }
+
+   if (this.content && this.content?.courseCategory === "Comprehensive Assessment Program") {
+    this.canShowAccessControlTypeRadio = false;
+    this.shouldShowVisibilityToggle = false;
    }
 
   }
