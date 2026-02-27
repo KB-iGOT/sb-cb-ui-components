@@ -161,7 +161,7 @@
                                                 [progressType]="'percentage'" [customClassName]="'viewer-progress'">
                                             </ws-widget-content-progress>
                   </ng-container>   -->
-                <ng-container *ngIf="(userExtCourseEnroll | json) === '{}' && !enrollValidationLoading && canEnroll">
+                <ng-container *ngIf="showEnroll">
                     <button class="flex action-button justify-center flex-middle resume" type="button"
                         (click)="enRollToExtCourse(extContentReadData)">
                         <ng-container>{{ 'apptochome.enroll' | translate }}
@@ -172,7 +172,7 @@
                     <ws-widget-skeleton-loader [width]="'132px'" [height]="'32px'"
                         [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
                 </ng-container>
-                <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && extContentReadData?.redirectUrl">
+                <ng-container *ngIf="showRedirect">
                     <a class="flex action-button justify-center flex-middle resume" target="_blank"
                         [href]="extContentReadData?.redirectUrl" (click)="captureRedirectTelemetry(extContentReadData)">
                         <ng-container>{{ 'apptochome.redirect' | translate }}
@@ -307,8 +307,7 @@
                                                 </ws-widget-content-progress>
                     </ng-container>   -->
 
-                        <ng-container
-                            *ngIf="(userExtCourseEnroll | json) === '{}' && !enrollValidationLoading && canEnroll">
+                        <ng-container *ngIf="showEnroll">
                             <button class="flex action-button justify-center flex-middle resume" type="button"
                                 (click)="enRollToExtCourse(extContentReadData)">
                                 <ng-container>{{ 'apptochome.enroll' | translate }}
@@ -319,7 +318,7 @@
                             <ws-widget-skeleton-loader [width]="'100%'" [height]="'32px'"
                                 [bindingClass]="'rounded '"></ws-widget-skeleton-loader>
                         </ng-container>
-                        <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && extContentReadData?.redirectUrl">
+                        <ng-container *ngIf="showRedirect">
                             <a class="flex action-button justify-center flex-middle resume" target="_blank"
                                 [href]="extContentReadData?.redirectUrl"
                                 (click)="captureRedirectTelemetry(extContentReadData)">
@@ -328,12 +327,6 @@
                                 </ng-container>
                             </a>
                         </ng-container>
-                        <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length ===  0
-                        && userExtCourseEnroll?.progress <= 100 && widgetData && widgetData.sliderData?.length">
-                            <div class="no-certificate-found">
-                                <ws-widget-sliders-dynamic [widgetData]="widgetData"></ws-widget-sliders-dynamic>
-                            </div>
-                        </ng-container> -->
                         <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length > 0
                         && userExtCourseEnroll?.progress === 100">
                         <button class="flex action-button justify-center flex-middle resume" type="button" (click)="downloadCert()">
@@ -376,28 +369,9 @@
     (resetEnableShare)="resetEnableShare($event)"></ws-app-share-toc>
 
 <ng-template #inProgressInfo>
-    <ng-container *ngIf="providerTips?.length">
+    <ng-container *ngIf="showProviderTips">
         <div class="no-certificate-found mt-6 mb-4 mx-2 p-2" >
-            <div class="{{providerTips?.length > 1 ? 'mb-2' : ''}}" *ngFor="let info of providerTips">
-                <span >{{info}}</span>
-            </div>
+            <ws-widget-sliders-dynamic [widgetData]="widgetData"></ws-widget-sliders-dynamic>
         </div>
     </ng-container>
-    <!-- <ng-container *ngIf="config?.partnersInfo?.[extContentReadData?.contentPartner?.contentPartnerName]; else defaultMsg">
-                <ng-container *ngIf="config?.partnersInfo?.[extContentReadData?.contentPartner?.contentPartnerName]?.display">
-                    <div class="no-certificate-found mt-6 mb-4 mx-2 p-2" >
-                        <div class="{{config?.partnersInfo?.[extContentReadData?.contentPartner?.contentPartnerName]?.info?.length > 1 ? 'mb-2' : ''}}" *ngFor="let info of config?.partnersInfo[extContentReadData?.contentPartner?.contentPartnerName]?.info">
-                            <span >{{info}}</span>
-                        </div>
-                    </div>
-                </ng-container>
-            </ng-container>
-            <ng-template #defaultMsg>
-                <div class="no-certificate-found mt-6 mb-4 mx-2 p-2">
-                    <div>
-                        <span>Progress and certificates for {{ extContentReadData?.contentPartner?.contentPartnerName }}
-                            courses are visible only after you complete the course and pass the assessment.</span>
-                    </div>
-                </div>
-            </ng-template> -->
 </ng-template>
