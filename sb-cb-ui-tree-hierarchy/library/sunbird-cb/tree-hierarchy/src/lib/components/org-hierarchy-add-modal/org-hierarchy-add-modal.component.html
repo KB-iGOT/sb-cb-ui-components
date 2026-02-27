@@ -82,13 +82,24 @@
               </mat-select>
             </mat-form-field>
             <ng-container *ngIf="selectedOrgsControl?.value?.length > 0">
-              <mat-chip-row class="org-clip" aria-label="orgSelection">
+              <!-- <mat-chip-row class="org-clip" aria-label="orgSelection">
                 <mat-chip class="clip-option flex flex-middle" *ngFor="let item of selectedOrgsControl.value"
                   [removable]="true" (removed)="removeOrg(item)">
-                  {{getNameOfOrg(item)}}
-                  <mat-icon matChipRemove class="margin-remove">close</mat-icon>
+                  <div class="link-item">
+                    {{getNameOfOrg(item)}}
+                    <mat-icon matChipRemove class="margin-remove">close</mat-icon>
+                  </div>
+
                 </mat-chip>
-              </mat-chip-row>
+              </mat-chip-row> -->
+              <mat-chip-set class="org-clip" aria-label="orgSelection">
+                <mat-chip *ngFor="let item of selectedOrgsControl.value" [removable]="true" (removed)="removeOrg(item)">
+                  <div class="link-item">
+                    {{ getNameOfOrg(item) }}
+                    <mat-icon matChipRemove>close</mat-icon>
+                  </div>
+                </mat-chip>
+              </mat-chip-set>
             </ng-container>
           </div>
         </div>
