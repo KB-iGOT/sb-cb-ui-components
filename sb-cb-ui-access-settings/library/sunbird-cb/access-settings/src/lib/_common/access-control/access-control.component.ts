@@ -1223,6 +1223,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.updateContentAccessSetting();
         } 
 
+        if (this.content && this.content?.courseCategory === "Comprehensive Assessment Program") {
+          this.addUserGroup();
+        }
+        
         // For a content not having any user group disable the access control type change
         if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
