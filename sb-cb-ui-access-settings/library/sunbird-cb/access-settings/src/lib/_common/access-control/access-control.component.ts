@@ -242,39 +242,18 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-   addUserGroup() {
-    if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      const orgCondition = this.createConditionGroup(uuidv4(), 0);
-      orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
-      orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
+  addUserGroup() {
+    const ruleGroup = this.fb.group({
+      id: [uuidv4()],
+      name: [`User Group ${this.userGroup.length + 1}`],
+      description: [`Description for UserGroup ${this.userGroup.length + 1}`],
+      conditions: this.fb.array([this.createConditionGroup(uuidv4(), this.userGroup.length - 1)]),
+      isUserGroupDisabled: [false],
+      isAddConditionDisabled: [false]
+    });
 
-      // Create Verification Status condition with default 'Verified'
-      const verificationCondition = this.createConditionGroup(uuidv4(), 0);
-      verificationCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.VerificationStatus);
-      verificationCondition.get("selections")?.setValue(["VERIFIED"]);
-
-      // Create user group with these two conditions
-      const group = this.fb.group({
-        id: [uuidv4()],
-        name: [`User Group ${this.userGroup.length + 1}`],
-        description: [`Description for UserGroup ${this.userGroup.length + 1}`],
-        conditions: this.fb.array([orgCondition, verificationCondition]),
-
-      });
-      this.userGroup.push(group);
-    } else {
-      const ruleGroup = this.fb.group({
-        id: [uuidv4()],
-        name: [`User Group ${this.userGroup.length + 1}`],
-        description: [`Description for UserGroup ${this.userGroup.length + 1}`],
-        conditions: this.fb.array([this.createConditionGroup(uuidv4(), this.userGroup.length - 1)]),
-        isUserGroupDisabled: [false],
-        isAddConditionDisabled: [false]
-      });
-
-      this.userGroup.push(ruleGroup);
-    }
-
+    this.userGroup.push(ruleGroup);
+    
     // Update Central Deputation availability based on current AIS status
     const hasAIS = this.hasAllIndiaServicesInAnyGroup();
     if (!hasAIS) {
@@ -1217,7 +1196,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.userGroup.push(group);
 
           // Disable add user group btn
-          // this.isAddUserGroupBtnDisabled = true;
+          this.isAddUserGroupBtnDisabled = true;
           this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
           this.applyAccessControlValue(false, false);
           this.updateContentAccessSetting();
@@ -1372,7 +1351,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
-        this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC && 
+        // this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC && 
         (!this.isCuratedContentWithExternalId)
       ) {
         // publisher (cannot edit already added)
@@ -1387,37 +1366,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
             type.disabled = true;
         });
-        this.isSaveFltrBtnDisabled = true;
-      }
-
-      // For MDO_SPECIFIC content that is Live, disable only those user groups which were in live initially
-      if (
-        (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
-        this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC &&
-        (!this.isCuratedContentWithExternalId)
-      ) {
-        // Get initial state from localStorage
-        const initialUserGroups = this.getInitialState();
-
-        if (initialUserGroups) {
-          // Only disable user groups that were in the initial state
-          const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
-
-          for (let i = 0; i < this.userGroup.length; i++) {
-            const group = this.userGroup.at(i);
-            const groupId = group.get("name")?.value;
-
-            // If this group was in the initial state, disable it
-            if (initialGroupIds.includes(groupId)) {
-              group.get("id")?.disable();
-              group.get("name")?.disable();
-              group.get("description")?.disable();
-              group.get("conditions")?.disable();
-              group.get("isUserGroupDisabled")?.setValue(true);
-            }
-          }
-        }
-        
         this.isSaveFltrBtnDisabled = true;
       }
 
@@ -1549,11 +1497,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   processConditionsForContentType(): void {
     if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      // Disable the add user group button only if the user is either a content publisher or a content creator
-      this.isAddUserGroupBtnDisabled = !(
-        this.config?.userConfig?.userRoles?.has("content_publisher") ||
-        this.config?.userConfig?.userRoles?.has("content_creator")
-      );
+      // Disable add user group btn
+      this.isAddUserGroupBtnDisabled = true;
     }
 
     if (this.content?.status === "Review" && this.content?.reviewStatus === "InReview") {
@@ -1866,9 +1811,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private saveInitialState(userGroups: any[]): void {
     if ((this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") || 
-        (this.content?.status === "live" && this.isCuratedContentWithExternalId) || 
-        (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC)
-      ) {
+    (this.content?.status === "live" && this.isCuratedContentWithExternalId)) {
       const state = {
         initialUserGroups: userGroups,
         timestamp: new Date().getTime()
@@ -2122,39 +2065,5 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     } else {
       this.applyAccessControlValue(true, true);
     }
-  }
-
-  
-  isUserGroupFromInitialState(groupName: string): boolean {
-    const initialUserGroups = this.getInitialState();
-    if (initialUserGroups) {
-      const initialGroupNames = initialUserGroups.map(group => group.userGroupName);
-      return initialGroupNames.includes(groupName);
-    }
-    
-    return false;
-  }
-
-  shouldDisabledRemoveUserGroupBtn(groupName: string): boolean {
-    // If it's not MDO specific content, use the original condition
-    if (this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      return this.config?.application !== this.MDO_APPLICATION && 
-             !(this.config?.application === this.MDO_APPLICATION && 
-               this.config?.mdoContent?.status === 'Live' && 
-               this.userGroup?.length > 1);
-    }
-    
-    // New user groups (not in initial state) should have buttons enabled
-    return this.isUserGroupFromInitialState(groupName);
-  }
-
-  shouldDisabledConditionBtn(groupName: string): boolean {
-    // If it's not MDO specific content, return false (not disabled)
-    if (this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
-      return false;
-    }
-    
-    // For MDO specific content, always disable condition buttons
-    return true;
   }
 }
