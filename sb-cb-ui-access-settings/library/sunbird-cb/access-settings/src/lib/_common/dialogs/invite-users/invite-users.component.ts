@@ -91,9 +91,10 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
 
     if (this.data?.rule?.conditions.length) {
       reducedData = this.data?.rule?.conditions.reduce((acc: any, curr: any) => {
-        if (pickEntity.includes(curr.entity)) {
-          acc[curr.entity] = curr.selections;
-        }
+        acc[curr.entity] = curr.selections;
+        // if (pickEntity.includes(curr.entity)) {
+        //   acc[curr.entity] = curr.selections;
+        // }
         return acc;
       }, { ...reducedData });
     }
@@ -109,6 +110,19 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
         "profileDetails.cadreDetails.cadreBatch": reducedData.batch,
         status: 1,
       };
+
+      Object.keys(reducedData).forEach((key: any) => {
+        if (!pickEntity.includes(key) && key !== "user") {
+          if (!this.filters.orgCustomFields) {
+             this.filters.orgCustomFields = {};
+          }
+          if (Array.isArray(reducedData[key]) && reducedData[key].every((item: any) => item && typeof item === "object")) {
+            reducedData[key] = reducedData[key].map((value: any) => value?.fieldValue);
+          }
+          this.filters.orgCustomFields[key] = reducedData[key];
+        }
+      });
+
     }
 
     this.getUsersList(this.searchControl.value, this.pagination.limit, this.pagination.offset, [], this.filters, this.sortState);

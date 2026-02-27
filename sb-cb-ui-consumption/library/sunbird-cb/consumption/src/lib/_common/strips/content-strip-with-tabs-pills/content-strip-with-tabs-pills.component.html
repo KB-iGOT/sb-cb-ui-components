@@ -87,7 +87,10 @@
                       <ng-template mat-tab-label>
                         <div (click)="tabClicked(tabIndex, 0, stripsResultDataMap[key], key)">
                           <ng-container *ngIf="tab?.value !== sakshamAIEnum.SakshamAI">
-                            <span>{{ translateLabels(tab?.label, 'home') }} &nbsp;</span>
+                            <span>
+                              <span *ngIf="tab?.disableTranslate">{{tab?.label}}</span>
+                              <span *ngIf="!tab?.disableTranslate">{{ translateLabels(tab?.label, 'home') }}</span> &nbsp;
+                            </span>
                             <span *ngIf="tab?.showTabDataCount && tab?.widgets?.length">({{tab?.widgets?.length}})</span>
                           </ng-container>
                           <ng-container *ngIf="tab?.value === sakshamAIEnum.SakshamAI">

@@ -20,6 +20,7 @@ export * from './lib/services/reset-ratings.service'
 export * from './lib/services/timer.service'
 export * from './lib/services/title-tag.service'
 export * from './lib/services/viewer-util.service'
+export * from './lib/services/viewer-data.service'
 // Models
 export * from './lib/models/app-toc.model'
 export * from './lib/models/app-toc-analytics.model'
@@ -87,3 +88,6 @@ export * from './lib/_collection/_common/toc-kpi-values/toc-kpi-values.component
 //collection common modules
 export * from './lib/_collection/_common/card-competency/card-competency.component'
 export * from './lib/_collection/_common/card-competency/card-competency.module'
+
+
+export * from './lib/services/access-control.service'

@@ -7,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service'
 import { relevanceAnimation } from '../../_animations/relevance-animation'
+import { CommonMethodsService } from '../../../_services/common-methods.service'
 
 @Component({
     selector: 'sb-uic-card-portrait',
@@ -37,11 +38,13 @@ export class CardPortraitComponent implements OnInit {
   SAKSHAMAI_ICON_LOADER = '/assets/images/sakshamAI/saksham_ai_loader.gif'
   isHovered = false
   showStatus = false
+  CaCourseUnitIds: any = `[]`
   constructor(
     private snackBar: MatSnackBar,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
     private configSvc: ConfigurationsService,
+    private commonSvc: CommonMethodsService,
     private contSvc: WidgetContentLibService,) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
@@ -65,7 +68,7 @@ export class CardPortraitComponent implements OnInit {
     if (this.widgetData?.sakshamAIGenerated) {
       this.isRelevent = this.contSvc.getFeedbackData(this.widgetData?.content?.identifier) || false
     }
-
+    this.CaCourseUnitIds = this.commonSvc.getCourseUnitIds()
     if (_.get(this.widgetData, 'content')) {
 
       const content = this.widgetData.content

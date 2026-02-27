@@ -9,12 +9,16 @@ export interface IViewerTocCard {
   title: string
   duration: number
   type: string
+  mimeType: NsContent.EMimeTypes
   complexity: string
-  primaryCategory?: string
-  mimeType?: NsContent.EMimeTypes
-  optionalReading?: boolean
-  subTitle?: string
-  content?: NsContent.IContent
+  children: null | IViewerTocCard[]
+  primaryCategory: NsContent.EPrimaryCategory
+  collectionId: string | null
+  collectionType: string,
+  batchId: string | number,
+  viewMode: string,
+  optionalReading: boolean,
+  channelId: string
 }
 
 export interface IViewerTocChangeEvent {
