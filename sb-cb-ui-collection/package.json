@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-collection",
-  "version": "0.0.1-cbrelease-4.8.32",
+  "version": "0.0.1-cbrelease-4.8.34",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -26,10 +26,12 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "@sunbird-cb/consumption": "0.0.4-cbrelease-4.8.33",
     "@sunbird-cb/design-system": "0.0.1",
-    "@sunbird-cb/discussion-v2": "^0.0.6-cbrelease-4.8.28",
-    "@sunbird-cb/resolver-v2": "^0.0.7-ang-13-16",
+    "@sunbird-cb/discussion-v2": "0.0.6-cbrelease-4.8.28",
+    "@sunbird-cb/micro-surveys": "2.0.20-ang-13-16",
+    "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
     "@sunbird-cb/utils-v2": "0.0.43-spv-mdo-upgrade",
     "@types/lodash": "4.14.168",
+    "@types/file-saver": "^2.0.1",
     "chart.js": "^2.9.4",
     "dayjs": "^1.11.19",
     "file-saver": "^2.0.5",
