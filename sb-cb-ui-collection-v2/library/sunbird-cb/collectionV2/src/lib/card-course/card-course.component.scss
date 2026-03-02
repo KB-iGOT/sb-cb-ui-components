@@ -1,0 +1,16 @@
+@use '@sunbird-cb/design-system/src/styles/ws-common';
+@use '@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
+
+div {
+  .example-card {
+    $width: 400px;
+    $height: 150px;
+    margin: 12px 12px 12px 0;
+    max-width: $width;
+
+    img {
+      max-height: $height;
+    }
+  }
+}
