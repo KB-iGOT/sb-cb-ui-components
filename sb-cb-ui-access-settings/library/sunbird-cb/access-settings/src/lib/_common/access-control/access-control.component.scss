@@ -280,3 +280,14 @@
   font-weight: 400;
   font-size: 12px;
 }
+
+.disabled-condition {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  .mat-form-field {
+    .mat-form-field-wrapper {
+      pointer-events: none;
+    }
+  }
+}
