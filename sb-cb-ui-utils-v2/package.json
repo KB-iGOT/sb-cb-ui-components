@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-utils-v2",
-  "version": "0.0.2-cbrelease-4.8.31",
+  "version": "0.0.1-cbrelease-4.8.34",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
@@ -27,7 +27,7 @@
     "@angular/router": "^16.2.12",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^4.0.0",
-    "@sunbird-cb/design-system": "0.0.2",
+    "@sunbird-cb/design-system": "^0.0.2",
     "@types/lodash": "4.14.168",
     "moment": "^2.29.1",
     "ngx-image-cropper": "^6.3.4",

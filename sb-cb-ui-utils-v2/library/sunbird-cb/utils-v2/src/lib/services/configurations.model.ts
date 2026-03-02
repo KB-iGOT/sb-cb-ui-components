@@ -325,6 +325,7 @@ export namespace NsUser {
     profileBannerUrl?: string
     mobile?: string
     userRootOrg?: any
+    channel?: string
   }
 
   export interface INodebbUserProfile {
