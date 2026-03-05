@@ -1348,9 +1348,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Calculate count for each user group
       this.calculateUserCountForUserGroup(index);
-
       if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
+        this.content?.courseCategory !== "Comprehensive Assessment Program" &&
         // this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC && 
         (!this.isCuratedContentWithExternalId)
       ) {
@@ -1962,34 +1962,34 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
         this.userGroup.push(ruleGroup);
 
-        if (
-        (this.mdoContent?.status === "Live") &&
-        (this.config.userConfig.userRoles.has("mdo_admin") || this.config.userConfig.userRoles.has("mdo_leader"))
-      ) {
-        // Get initial state from localStorage
-        const initialUserGroups = this.getInitialState();
+      //   if (
+      //   (this.mdoContent?.status === "Live") &&
+      //   (this.config.userConfig.userRoles.has("mdo_admin") || this.config.userConfig.userRoles.has("mdo_leader"))
+      // ) {
+      //   // Get initial state from localStorage
+      //   const initialUserGroups = this.getInitialState();
         
-        if (initialUserGroups) {
-          // Only disable user groups that were in the initial state
-          const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
+      //   if (initialUserGroups) {
+      //     // Only disable user groups that were in the initial state
+      //     const initialGroupIds = initialUserGroups.map(group => group.userGroupName);
           
-          for (let i = 0; i < this.userGroup.length; i++) {
-            const group = this.userGroup.at(i);
-            const groupId = group.get("name")?.value;
+      //     for (let i = 0; i < this.userGroup.length; i++) {
+      //       const group = this.userGroup.at(i);
+      //       const groupId = group.get("name")?.value;
             
-            // If this group was in the initial state, disable it
-            if (initialGroupIds.includes(groupId)) {
-              group.get("id")?.disable();
-              group.get("name")?.disable();
-              group.get("description")?.disable();
-              group.get("conditions")?.disable();
-              group.get("isUserGroupDisabled")?.setValue(true);
-            }
-          }
-        }
+      //       // If this group was in the initial state, disable it
+      //       if (initialGroupIds.includes(groupId)) {
+      //         group.get("id")?.disable();
+      //         group.get("name")?.disable();
+      //         group.get("description")?.disable();
+      //         group.get("conditions")?.disable();
+      //         group.get("isUserGroupDisabled")?.setValue(true);
+      //       }
+      //     }
+      //   }
         
-        this.isSaveFltrBtnDisabled = true;
-      }
+      //   this.isSaveFltrBtnDisabled = true;
+      // }
       
         // Check if add condition should be disabled for this user group
         this.processDisableAddConditionOnClose(index);
@@ -2022,21 +2022,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // For MDO applications with Live status
     if (this.config?.application === this.MDO_APPLICATION && this.config?.mdoContent?.status === "Live") {
-      const initialUserGroups = this.getInitialState();
-      if (!initialUserGroups) {
-        return true;
-      }
+      // const initialUserGroups = this.getInitialState();
+      // if (!initialUserGroups) {
+      //   return true;
+      // }
 
-      // Get current non-disabled user groups
-      const activeUserGroups = this.userGroup.controls.filter(group => 
-        !group.get('isUserGroupDisabled')?.value
-      );
+      // // Get current non-disabled user groups
+      // const activeUserGroups = this.userGroup.controls.filter(group => 
+      //   !group.get('isUserGroupDisabled')?.value
+      // );
 
-      if (activeUserGroups.length === 0) {
-        return true;
-      }
+      // if (activeUserGroups.length === 0) {
+      //   return true;
+      // }
 
-      return false;
+      // return false;
+      return true
     }
 
     return false;
