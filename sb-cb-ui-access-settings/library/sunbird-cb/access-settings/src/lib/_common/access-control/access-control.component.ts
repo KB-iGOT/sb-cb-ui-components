@@ -590,11 +590,27 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.accessControlCriteriaSelection?.optionsEntity.filter(option => !selectedEntities.includes(option.value));
   }
 
+  getDeleteType(): string {
+    const { courseCategory, status, prevStatus } = this.content || {};
+    const mdoStatus = this.mdoContent?.status;
+
+    const isComprehensiveAssessment = courseCategory === 'Comprehensive Assessment Program';
+    const isLiveStatus = status === 'Live' || prevStatus === 'Live' || mdoStatus === 'Live';
+
+    if (isComprehensiveAssessment && isLiveStatus) {
+      return 'delete-live';
+    }
+
+    return 'delete';
+  }
+
   removeUserGroup(index: number) {
+    const type = this.getDeleteType();
+
     const group = this.userGroup.at(index);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: "470px",
-      data: { additionalData: group?.value?.name, type: "delete" }
+      data: { additionalData: group?.value?.name, type: type }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
@@ -690,10 +706,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   removeCondition(userGroupIndex: number, conditionIndex: number) {
+    const type = this.getDeleteType();
     const conditions = this.ruleConditions(userGroupIndex);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: "470px",
-      data: { additionalData: "this condition", type: "delete" }
+      data: { additionalData: "this condition", type: type }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
@@ -2055,7 +2072,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     if (isLiveContent || isMdoLiveContent || isCuratedLiveWithExternalId) {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         width: "520px",
-        data: { type: "confirm-apply-accesscontrol-for-live" }
+        data: { type: "confirm-apply-accesscontrol-for-live", }
       });
 
       dialogRef.afterClosed().subscribe((result: any) => {
