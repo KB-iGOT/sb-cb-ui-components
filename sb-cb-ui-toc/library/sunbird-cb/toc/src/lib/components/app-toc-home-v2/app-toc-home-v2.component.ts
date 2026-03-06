@@ -103,7 +103,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   cbPlanEndDate: any
   cbPlanDuration: any
   enrolledCourseData: any
-  @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/')
+  @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/') || window.location.href.includes('/preview/')
   @Input() inputContent: any
   @Input() displayViewBtn: any = true
   // forPreview = window.location.href.includes('/author/')
@@ -3252,6 +3252,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   openPublicSurveyPopup(navigationUrl?: string, queryParams?: any) {
     // Get survey ID and course ID from environment and content data
+    console.log('this.contentReadData---', this.contentReadData)
     const surveyId = this.environment.publicContentSurveyId || ''
     const courseId = this.contentReadData?.identifier || ''
     const courseName = this.contentReadData?.name || ''
@@ -3264,8 +3265,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       surveyId: surveyId,
       courseId: courseId,
       courseName: courseName,
-      contextOrgId: contextOrgId
+      contextOrgId: contextOrgId,
+      forPreview: this.forPreview
     }
+
+    console.log('data---',data)
     const dialogRef = this.dialog.open(PublicSurveyFormComponent, {
       // disableClose: true,
       width: '750px',
