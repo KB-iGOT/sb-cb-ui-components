@@ -130,7 +130,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
 
       if (isCustomAccess || isComprehensiveCategory) {
-        console.log("Setting access type to Custom due to custom access setting or comprehensive category");
         this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
         if (accessTypePublic) accessTypePublic.disabled = true;
       }
