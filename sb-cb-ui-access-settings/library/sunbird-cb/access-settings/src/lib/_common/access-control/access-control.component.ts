@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { Router } from "@angular/router";
 import { InviteUsersComponent } from "../dialogs/invite-users/invite-users.component";
 import { IUserGroupRequest, NsAccessControlConfig } from "../../_models/access-control.model";
 import { FormBuilder, FormGroup, FormArray, Validators } from "@angular/forms";
@@ -70,7 +71,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     private fb: FormBuilder,
     private accessControlService: AccessControlService,
     private cadreMappingService: CadreMappingService,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -156,6 +158,25 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
      if (this.tempAccessControl) {
       this.processTempAccessControl(this.tempAccessControl);
     } else {
+      // Check if 'create-plan' is in the URL and auto-create organization filter
+      const isCreatePlanUrl = this.router?.url?.includes('create-plan');
+      
+      if (isCreatePlanUrl && this.userGroup?.length === 0) {
+        // Create Organization condition
+        const orgCondition = this.createConditionGroup(uuidv4(), 0);
+        orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
+        orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
+
+       
+        const group = this.fb.group({
+          id: [uuidv4()],
+          name: ["User Group 1"],
+          description: ["Description for UserGroup 1"],
+          conditions: this.fb.array([orgCondition]),
+        });
+        this.userGroup.push(group);
+      }
+      
       // Don't create a default user group yet - wait for API data to load
       // If no data is loaded, the component using this will call addUserGroup
       setTimeout(() => {
@@ -1192,23 +1213,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .toPromise()
       .catch(() => {
         // For Moderated Content Condition if not already added the usergroup autocreate a usergroup with added conditions and save it
-        if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC) {
+        const isComprehensiveCategory = this.content?.courseCategory === "Comprehensive Assessment Program"
+        if (this.content?.accessSetting === NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC || isComprehensiveCategory) {
           // Create Organization condition
           const orgCondition = this.createConditionGroup(uuidv4(), 0);
           orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
           orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
 
-          // Create Verification Status condition with default 'Verified'
-          const verificationCondition = this.createConditionGroup(uuidv4(), 0);
-          verificationCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.VerificationStatus);
-          verificationCondition.get("selections")?.setValue(["VERIFIED"]);
-
-          // Create user group with these two conditions
+          // Create user group with conditions based on category
+          const conditions = [orgCondition];
+          // Only add Verification Status condition if NOT Comprehensive Assessment Program
+          if (!isComprehensiveCategory) {
+            const verificationCondition = this.createConditionGroup(uuidv4(), 0);
+            verificationCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.VerificationStatus);
+            verificationCondition.get("selections")?.setValue(["VERIFIED"]);
+            conditions.push(verificationCondition);
+          }
+// Create user group with these two conditions
           const group = this.fb.group({
             id: [uuidv4()],
             name: ["User Group 1"],
             description: ["Description for UserGroup 1"],
-            conditions: this.fb.array([orgCondition, verificationCondition])
+            conditions: this.fb.array(conditions)
           });
           this.userGroup.push(group);
 
@@ -1217,12 +1243,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           this.accessControlData.emit({ userGroup: this.accessControlForm.value?.userGroup, accessType: this.accessType });
           this.applyAccessControlValue(false, false);
           this.updateContentAccessSetting();
-        } 
-
-        if (this.content && this.content?.courseCategory === "Comprehensive Assessment Program") {
-          this.addUserGroup();
         }
         
+//  if (this.content && this.content?.courseCategory === "Comprehensive Assessment Program") {
+//           this.addUserGroup();
+//         }   
+
         // For a content not having any user group disable the access control type change
         if (
         (this.content?.status === "Live" || this.content?.prevStatus === "Live") && 
@@ -1979,7 +2005,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
         this.userGroup.push(ruleGroup);
 
-      //   if (
+     //   if (
       //   (this.mdoContent?.status === "Live") &&
       //   (this.config.userConfig.userRoles.has("mdo_admin") || this.config.userConfig.userRoles.has("mdo_leader"))
       // ) {
