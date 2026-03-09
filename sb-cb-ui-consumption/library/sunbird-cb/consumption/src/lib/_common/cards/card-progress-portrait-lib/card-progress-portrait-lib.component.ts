@@ -94,7 +94,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
       if (_.get(this.widgetData, 'content.status') === 'Retired') {
         this.retiredLabel = 'cardcontentv2.retired'
       } else {
-        this.retiredLabel = 'cardcontentv2.retired'
+        this.retiredLabel = 'cardcontentv2.inactive'
       }
     }
   }

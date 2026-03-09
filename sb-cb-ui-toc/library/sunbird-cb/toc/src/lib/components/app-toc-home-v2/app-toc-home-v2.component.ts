@@ -103,7 +103,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   cbPlanEndDate: any
   cbPlanDuration: any
   enrolledCourseData: any
-  @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/')
+  @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/') || window.location.href.includes('/preview/')
   @Input() inputContent: any
   @Input() displayViewBtn: any = true
   // forPreview = window.location.href.includes('/author/')
@@ -3252,6 +3252,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   openPublicSurveyPopup(navigationUrl?: string, queryParams?: any) {
     // Get survey ID and course ID from environment and content data
+    console.log('this.contentReadData---', this.contentReadData)
     const surveyId = this.environment.publicContentSurveyId || ''
     const courseId = this.contentReadData?.identifier || ''
     const courseName = this.contentReadData?.name || ''
@@ -3264,8 +3265,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       surveyId: surveyId,
       courseId: courseId,
       courseName: courseName,
-      contextOrgId: contextOrgId
+      contextOrgId: contextOrgId,
+      forPreview: this.forPreview
     }
+
+    console.log('data---',data)
     const dialogRef = this.dialog.open(PublicSurveyFormComponent, {
       // disableClose: true,
       width: '750px',
@@ -3294,8 +3298,27 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
    * Check if user can enroll in the course
    * Returns true when enrollment is allowed
    */
-  canEnroll(): boolean {
-    return !this.disableEnrollBtn
+
+
+  navigateToNewVersion() {
+    this.router.navigateByUrl('/app/toc', { skipLocationChange: true }).then(() => {
+      this.router.navigate([`app/toc/${this.contentReadData?.contentVersionInfo?.identifier}/overview`])
+    })
+
+  }
+
+  canEnroll() {
+    if (this.contentReadData && this.contentReadData.lastEnrollmentDate) {
+      const serverTime = dayjs(this.serverDate).format('YYYY-MM-DD')
+      const eDate = dayjs(this.contentReadData.lastEnrollmentDate).format('YYYY-MM-DD')
+      if (dayjs(serverTime).isSameOrBefore(eDate)) {
+        return true
+      } else {
+        return false
+      }
+    } else {
+      return true
+    }
   }
 
   goBack() {

@@ -8,7 +8,13 @@
       </div>
     </div>
     <div class="light-grey-border p-4 mt-4">
-      <ng-container *ngIf="canShowAccessControlTypeRadio">
+      <ng-container *ngIf="isLoading">
+        <div class="spinner-loader flex items-center justify-center">
+          <mat-spinner></mat-spinner>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="canShowAccessControlTypeRadio && !isLoading">
         <mat-radio-group [(ngModel)]="accessTypeDup" (change)="onAccessTypeChange($event)">
           <div class="radio-container flex gap-5 mb-4">
             <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
@@ -109,8 +115,11 @@
                       <div [formArrayName]="'conditions'">
                         <ng-container *ngFor="let condition of conditionsArray?.controls; let j = index; let conditionlast = last">
                           <div class="condition-selection mt-2" [formGroupName]="j">
-                            <div class="select-condition-text mb-3 mt-4">Select Condition {{ i + 1 + "." + (j + 1) }}</div>
-                            <div class="selections-options grid grid-cols-5 gap-4">
+                            <div class="select-condition-text mb-3 mt-4">
+                              Select Condition {{ i + 1 + "." + (j + 1) }} 
+                              <strong class="text-red-500" *ngIf="condition.get('disabledMessage')?.value">({{ condition.get('disabledMessage')?.value }})</strong>
+                            </div>
+                            <div class="selections-options grid grid-cols-5 gap-4" [ngClass]="{'disabled-condition': condition.get('disabledMessage')?.value}">
                               <div class="mat-full-radius">
                                 <mat-form-field appearance="outline" class="w-full">
                                   <mat-select placeholder="Select" formControlName="entity" (selectionChange)="onEntityChange(i, j)" (openedChange)="onOpeningEntityChange($event, i, j)">
@@ -221,11 +230,6 @@
           </form>
         </ng-container>
 
-        <ng-container *ngIf="isLoading">
-          <div class="spinner-loader flex items-center justify-center">
-            <mat-spinner></mat-spinner>
-          </div>
-        </ng-container>
         <ng-container *ngIf="canAddUserGroup">
           <div class="text-center mb-6 mt-4">
             <button

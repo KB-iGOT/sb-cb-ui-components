@@ -1,0 +1,202 @@
+<div class="example-container margin-top-m">
+    <div class="example-loading-shade"></div>
+
+    <div class="example-table-container">
+        <div class="container">
+            <div class="flex flex-1 custom">
+                <div class="flex-1">
+                    <div class="search" *ngIf="isSearchBar">
+                        <div class=rsearch>
+                            <div class="sinput">
+                                <mat-icon class="material-icons">search</mat-icon>
+                            <input type="Standard" label=""
+                                (input)="applyFilter($event.target.value)" (keydown.enter)="onSearchEnter($event)"
+                                placeholder="Search">
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-2 margin-left-l position-rel" *ngIf="isTrainingPlan && trainingTagList?.length > 0">
+                    <a class="training-tag mat-button margin-right-s" [ngClass]="{'selectTab': item.selected}"
+                        *ngFor="let item of trainingTagList" (click)="tagSelectedItem(item.value)">{{item.name}}</a>
+                    <!-- <button mat-icon-button class="training-filter-btn">
+                        <mat-icon>filter_list</mat-icon>
+                    </button> -->
+                </div>
+                <div class="flex-2 right-align" *ngIf="isDownload || isConsumptionReport || isCreate">
+                    <!-- <button type="button" mat-button class="upload-btn" *ngIf="isUpload"
+                        (click)="onButtonClick('upload', $event)">
+                        <mat-icon>vertical_align_top</mat-icon> File upload
+                    </button> -->
+                    <button type="button" mat-button class="upload-btn" *ngIf="isDownload"
+                        (click)="onButtonClick('download', $event)">
+                        <mat-icon>vertical_align_bottom</mat-icon> Users Report
+                    </button>
+                    <button type="button" mat-button class="upload-btn" *ngIf="isConsumptionReport"
+                        (click)="onButtonClick('consumptionReport', $event)">
+                        <mat-icon>vertical_align_bottom</mat-icon> Consumption Report
+                    </button>
+                    <button type="button" mat-button class="create-btn" *ngIf="isCreate"
+                        (click)="onButtonClick('createUser', $event)">
+                        Create new
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- </mat-form-field> -->
+        <mat-table #table matSort [ngStyle]="{'height': bodyHeight}" [matSortActive]="tableData!.sortColumn"
+            [matSortDirection]="tableData!.sortState" [dataSource]="dataSource"
+            class="example-table table1 responsiveTable" *ngIf="dataSource.filteredData.length > 0">
+
+            <ng-container matColumnDef="{{col.key}}" *ngFor="let col of tableData!.columns">
+                <mat-header-cell *matHeaderCellDef mat-sort-header class=".h-400-r-14-l color-60"> {{col.displayName}}
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element" (click)="onRowClick(element)">
+                    <img *ngIf="col?.imageUrl" src="{{element.posterImage}}" class="pb-image">
+                    <span *ngIf="col?.isList" class="textclass h-400-r-14-l color-87 ">
+                        <div innerHTML="{{element[col.key]}}"></div>
+                    </span>
+                    <span *ngIf="!col?.isList" class="h-400-r-14-l textclass color-87 "
+                        [ngClass]="{'cursor-default': isTrainingPlan}">
+                        {{(col.key === 'dateCreatedOn' || col.key === 'dateUpdatedOn' || col.key === 'requestedon') ?
+                        (element[col.key] | date:'dd MMM yyy h:mm a') : element[col.key]}} {{col?.isList}}
+                    </span>
+
+
+                </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="Actions" *ngIf="tableData!.actions && tableData!.actions.length > 0">
+                <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header"> {{
+                    tableData!.actionColumnName || "Actions"}}
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" class="action-cell">
+                    <div *ngFor="let ac of tableData!.actions">
+                        <div *ngIf="ac.optional">
+                            <ws-widget-app-button *ngIf="row[ac.optional_key] === ac.optional_Value" [type]="ac.type"
+                                [icon]="ac.icon" [disabled]="ac.disabled || false" [label]="ac.label"
+                                (click)="buttonClick(ac.name,row)"></ws-widget-app-button>
+                        </div>
+                        <div *ngIf="!ac.optional">
+                            <ws-widget-app-button [type]="ac.type" [icon]="ac.icon" [label]="ac.label"
+                                [disabled]="ac.disabled || false" (click)="buttonClick(ac.name,row)">
+                            </ws-widget-app-button>
+                        </div>
+                    </div>
+                </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="Menu">
+                <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header">
+                    <!-- {{'Actions'}} -->
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" class="action-cell">
+                    <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
+                        [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{'data':row}" class="action-btn">
+                        <mat-icon>more_horiz</mat-icon>
+                    </button>
+                </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="CBP Menu">
+                <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header">
+                    <!-- {{'Actions'}} -->
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row" class="action-cell">
+                    <button type="button" mat-icon-button i18n-aria-label aria-label="action items"
+                        [matMenuTriggerFor]="cbpPlanCardMenu" [matMenuTriggerData]="{'data':row}" class="action-btn">
+                        <mat-icon>more_horiz</mat-icon>
+                    </button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="getFinalColumns()"></mat-header-row>
+
+            <mat-row *matRowDef="let row; columns: getFinalColumns();" (click)="selection.toggle(row);">
+            </mat-row>
+
+            <!-- <div *ngIf="dataSource.filteredData.length <= 0">
+                <mat-row *matRowDef="let row; columns: getFinalColumns();"
+                    (click)="selection.toggle(row); onRowClick(row)">
+                    ssss
+                </mat-row>
+            </div> -->
+        </mat-table>
+        <div class="no-cbp-data" *ngIf="dataSource.filteredData.length === 0 && isTrainingPlan && !isSearchText">
+            <div><img src="/assets/images/no-content-data.svg"></div>
+            <!-- <div class="mat-subheading-1 margin-remove">No CBP plan created yet</div> -->
+            <div>Start creating a Capacity Building Plan (CBP).</div>
+            <div class="margin-top-m">
+                <button mat-button type="button" class="create-btn"
+                    (click)="onButtonClick('createCbpPlan', $event)">Create CBP</button>
+            </div>
+        </div>
+        <div class="no-cbp-data" *ngIf="dataSource.filteredData.length === 0 && isTrainingPlan && isSearchText">
+            <div><img src="/assets/images/no-content-data-search.svg"></div>
+            <div class="mat-subheading-1 margin-remove">No results found</div>
+            <div>Try adjusting your search to find what you are looking for.</div>
+        </div>
+        <mat-card class="flex-1" role="none" *ngIf="dataSource.filteredData.length === 0 && !isTrainingPlan">
+            <span class="mat-subtitle">No data found</span>
+        </mat-card>
+    </div>
+    <!-- <div *ngIf="dataSource.filteredData.length <= 0" class="h-600-s-20-m color-60 text-center">No result found
+    </div> -->
+    <mat-paginator *ngIf="dataSource.filteredData.length > 0 && isTrainingPlan" [length]="length" [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions">
+    </mat-paginator>
+    <mat-paginator *ngIf="!isTrainingPlan" [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions">
+    </mat-paginator>
+</div>
+
+<mat-menu #cardMenu="matMenu">
+    <ng-template matMenuContent let-rowData="data">
+        <!-- <div > -->
+        <button (click)="buttonClick('editInfo',rowData)" mat-menu-item name="channel-analytics-button"
+            class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics"
+            *ngIf="rowData.allowEditUser && showEditOnCondition">
+            <mat-icon>edit</mat-icon> <span>Edit Info</span>
+        </button>
+        <button (click)="buttonClick('editInfo',rowData)" mat-menu-item name="channel-analytics-button"
+            class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics" *ngIf="!showEditOnCondition">
+            <mat-icon>edit</mat-icon> <span>Edit Info</span>
+        </button>
+        <button (click)="buttonClick('showOnKarma',rowData)" mat-menu-item name="channel-analytics-button"
+            class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
+            <mat-icon>input</mat-icon> <span>Show on Karmayogi</span>
+        </button>
+        <!-- </div> -->
+        <!-- <div mat-menu-item> -->
+        <!-- <button (click)="rowData && rowData.blocked ? buttonClick('unblock',rowData): buttonClick('block',rowData)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>block</mat-icon><span>{{rowData && rowData.blocked ? 'Unblock user':'Block user' }}</span>
+        </button> -->
+        <!-- </div> -->
+        <!-- <div mat-menu-item> -->
+        <button *ngIf="userId != rowData.userId"
+            (click)="rowData && rowData.active ? buttonClick('deactive',rowData): buttonClick('active',rowData)"
+            mat-menu-item name="channel-analytics-button" class="ws-mat-primary-text" i18n-aria-label
+            aria-label="Analytics">
+            <mat-icon>toggle_off_sharp</mat-icon>
+            <span>{{rowData && rowData.active? 'Deactivate user':'Activate user'}}</span>
+        </button>
+        <!-- </div> -->
+        <!-- <div mat-menu-item> -->
+        <!-- <button (click)="buttonClick('delete',rowData)" mat-menu-item name="channel-analytics-button"
+            class="ws-mat-primary-text" i18n-aria-label aria-label="Analytics">
+            <mat-icon>delete</mat-icon><span>Delete User</span>
+        </button> -->
+        <!-- </div> -->
+    </ng-template>
+</mat-menu>
+
+<mat-menu #cbpPlanCardMenu="matMenu">
+    <ng-template matMenuContent let-rowData="data">
+        <div *ngFor="let item of actionMenuItem">
+            <button (click)="buttonClick(item.key,rowData)" mat-menu-item name="channel-analytics-button"
+                class="ws-mat-primary-text" *ngIf="checkIfEnabled(rowData, item)">
+                <mat-icon>{{item.icon}}</mat-icon> <span>{{item.name}}</span>
+            </button>
+        </div>
+    </ng-template>
+</mat-menu>
