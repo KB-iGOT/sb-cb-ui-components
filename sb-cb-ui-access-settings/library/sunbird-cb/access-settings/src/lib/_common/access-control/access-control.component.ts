@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { Router } from "@angular/router";
+// import { Router } from "@angular/router";
 import { InviteUsersComponent } from "../dialogs/invite-users/invite-users.component";
 import { IUserGroupRequest, NsAccessControlConfig } from "../../_models/access-control.model";
 import { FormBuilder, FormGroup, FormArray, Validators } from "@angular/forms";
@@ -72,7 +72,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     private accessControlService: AccessControlService,
     private cadreMappingService: CadreMappingService,
     private snackbar: MatSnackBar,
-    private router: Router
+    // private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -159,23 +159,25 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.processTempAccessControl(this.tempAccessControl);
     } else {
       // Check if 'create-plan' is in the URL and auto-create organization filter
-      const isCreatePlanUrl = this.router?.url?.includes('create-plan');
+      // const isCreatePlanUrl = this.router?.url?.includes('create-plan');
       
-      if (isCreatePlanUrl && this.userGroup?.length === 0) {
-        // Create Organization condition
-        const orgCondition = this.createConditionGroup(uuidv4(), 0);
-        orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
-        orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
+      // Auto-create organization filter for 'create-plan' URL if no user groups exist - IGNORE for now as per discussion, we will revisit this once we have clarity on the flow after plan creation
+      
+      // if (isCreatePlanUrl && this.userGroup?.length === 0) {
+      //   // Create Organization condition
+      //   const orgCondition = this.createConditionGroup(uuidv4(), 0);
+      //   orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
+      //   orgCondition.get("selections").setrouterValue([this.config?.userConfig?.rootOrgId]);
 
        
-        const group = this.fb.group({
-          id: [uuidv4()],
-          name: ["User Group 1"],
-          description: ["Description for UserGroup 1"],
-          conditions: this.fb.array([orgCondition]),
-        });
-        this.userGroup.push(group);
-      }
+      //   const group = this.fb.group({
+      //     id: [uuidv4()],
+      //     name: ["User Group 1"],
+      //     description: ["Description for UserGroup 1"],
+      //     conditions: this.fb.array([orgCondition]),
+      //   });
+      //   this.userGroup.push(group);
+      // }
       
       // Don't create a default user group yet - wait for API data to load
       // If no data is loaded, the component using this will call addUserGroup
