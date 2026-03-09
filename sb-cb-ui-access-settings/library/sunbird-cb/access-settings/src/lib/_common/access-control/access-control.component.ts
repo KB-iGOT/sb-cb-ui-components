@@ -161,7 +161,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       // Check if 'create-plan' is in the URL and auto-create organization filter
       const isCreatePlanUrl = this.router?.url?.includes('create-plan');
       
-      if (isCreatePlanUrl && this.userGroup.length === 0) {
+      if (isCreatePlanUrl && this.userGroup?.length === 0) {
         // Create Organization condition
         const orgCondition = this.createConditionGroup(uuidv4(), 0);
         orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
