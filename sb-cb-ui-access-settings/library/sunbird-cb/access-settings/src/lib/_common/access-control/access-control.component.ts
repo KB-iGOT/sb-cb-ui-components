@@ -1221,6 +1221,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           const orgCondition = this.createConditionGroup(uuidv4(), 0);
           orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
           orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
+          
+          // For Comprehensive Assessment Program, disable the organization field
+      if (isComprehensiveCategory) {
+            orgCondition.get("entity")?.disable();
+            orgCondition.get("selections")?.disable();
+          }
 
           // Create user group with conditions based on category
           const conditions = [orgCondition];
@@ -1236,7 +1242,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             id: [uuidv4()],
             name: ["User Group 1"],
             description: ["Description for UserGroup 1"],
-            conditions: this.fb.array(conditions)
+            conditions: this.fb.array(conditions),
+            isUserGroupDisabled: [isComprehensiveCategory], // Disable user group for comprehensive
+            isAddConditionDisabled: [isComprehensiveCategory] // Disable adding conditions for comprehensive
           });
           this.userGroup.push(group);
 
@@ -1408,6 +1416,38 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           group.get("conditions")?.disable();
           group.get("isUserGroupDisabled")?.setValue(true);
         }
+        this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
+            type.disabled = true;
+        });
+        this.isSaveFltrBtnDisabled = true;
+      }
+
+      // For Comprehensive Assessment Program - ALLOW all operations (removed disable logic)
+   // Users can modify organizations, delete user groups, etc.
+      const isComprehensiveCategory = this.content?.courseCategory === "Comprehensive Assessment Program";
+    if (isComprehensiveCategory) {
+        // Disable organization entity dropdown and selections in all conditions
+        for (let i = 0; i < this.userGroup?.length; i++) {
+          const group = this.userGroup.at(i);
+          const conditions = group.get("conditions") as FormArray;
+          
+          for (let j = 0; j < conditions.length; j++) {
+            const condition = conditions.at(j);
+            // If this is an Organizations condition, disable it
+           if (condition.get("entity")?.value === NsAccessControlConfig.SelectionType.Organizations) {
+              condition.get("entity")?.disable();
+              condition.get("selections")?.disable();
+            }
+          }
+          
+          // Disable user group editing controls
+          group.get("id")?.disable();
+          group.get("name")?.disable();
+          group.get("description")?.disable();
+          group.get("isUserGroupDisabled")?.setValue(true);
+          group.get("isAddConditionDisabled")?.setValue(true);
+        }
+        // Disable access type changes
         this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
             type.disabled = true;
         });
