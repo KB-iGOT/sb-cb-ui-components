@@ -136,3 +136,6 @@ export * from './lib/_common/create-request/dialogs/add-authors/add-authors.comp
 export * from './lib/_common/filters/filters.module'
 export * from './lib/_common/filters/filter-by/filter-by.component'
 export * from './lib/_common/filters/search-sort-input/search-sort-input.component'
+
+export * from './lib/_common/competencies/competencies.module'
+export * from './lib/_common/competencies/competency-list/competency-list.component'
