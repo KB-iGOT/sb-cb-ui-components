@@ -1243,7 +1243,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             name: ["User Group 1"],
             description: ["Description for UserGroup 1"],
             conditions: this.fb.array(conditions),
-            isUserGroupDisabled: [isComprehensiveCategory], // Disable user group for comprehensive
+            // isUserGroupDisabled: [isComprehensiveCategory], // Disable user group for comprehensive
             // After discussing the Vikas and Arjun disabled goup should be enable, user can select and deselect the org, delete buttons should be available
             // isAddConditionDisabled: [isComprehensiveCategory] // Disable adding conditions for comprehensive
           });
