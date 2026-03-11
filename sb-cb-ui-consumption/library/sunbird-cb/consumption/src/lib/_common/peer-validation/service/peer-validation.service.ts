@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 
 const API_END_POINTS = {
-  SEARCH: 'apis/proxies/v8/sunbirdigot/search'
+  SEARCH: 'apis/proxies/v8/sunbirdigot/search',
+  SAVE_DRAFT: 'apis/proxies/v8/forms/mdo/peersurvey'
 }
 @Injectable({
   providedIn: 'root'
@@ -24,5 +25,9 @@ export class PeerValidationService {
 
   getSelectedCourse() {
     return this.selectedCourse
+  }
+
+  saveDraft(payload: any): Observable<any> {
+    return this.http.post(API_END_POINTS.SAVE_DRAFT, payload)
   }
 }

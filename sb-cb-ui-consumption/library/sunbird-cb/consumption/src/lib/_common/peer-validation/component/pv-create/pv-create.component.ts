@@ -1,6 +1,9 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core'
-import { Router } from '@angular/router'
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, Optional, Inject } from '@angular/core'
+import { ActivatedRoute, Router } from '@angular/router'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { PvConfigStepComponent } from '../pv-config-step/pv-config-step.component'
+import { PeerValidationService } from '../../service/peer-validation.service'
+import { LOADER_SERVICE, ILoaderService } from '../../service/loader-service.token'
 
 @Component({
   selector: 'sb-uic-pv-create',
@@ -12,15 +15,28 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
   stepsLabels = ['Configuration', 'Questions']
   currentStepperIndex = 0
+  isNewSurvey = false
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar,
+    private peerValidationService: PeerValidationService,
+    @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) { }
 
   ngOnInit() {
-    // Initialize component
-    console.log('Peer Validation Create Component Initialized')
+    // Detect if this is a new survey from the URL
+    const urlSegments = this.router.url.split('/')
+    this.isNewSurvey = urlSegments.includes('new')
+    // Also check query params
+    this.route.queryParams.subscribe(params => {
+      if (params['mode'] === 'new') {
+        this.isNewSurvey = true
+      }
+    })
+    console.log('Peer Validation Create Component Initialized, isNew:', this.isNewSurvey)
   }
 
   ngAfterViewInit() {
@@ -32,11 +48,92 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'all' } })
   }
 
+  onLoaderChange(value: boolean) {
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(value)
+    }
+  }
+
   saveDraftAndExit() {
-    // Save draft and exit
-    console.log('Save Draft & Exit')
-    // Navigate to peer validation dashboard with draft tab selected
-    this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+    if (this.currentStepperIndex === 0 && this.isNewSurvey) {
+      const selectedCourse = this.configStepComponent?.selectedCourse
+      if (!selectedCourse) {
+        this.snackBar.open('Please select a content to save to draft', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        })
+        return
+      }
+
+      const payload = this.buildDraftPayload()
+      if (this.loaderService) {
+        this.loaderService.changeLoaderState(true)
+      }
+      this.peerValidationService.saveDraft(payload).subscribe({
+        next: () => {
+          if (this.loaderService) {
+            this.loaderService.changeLoaderState(false)
+          }
+          this.snackBar.open('Draft saved successfully', '', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom'
+          })
+          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+        },
+        error: (error) => {
+          if (this.loaderService) {
+            this.loaderService.changeLoaderState(false)
+          }
+          console.error('Error saving draft:', error)
+          this.snackBar.open('Failed to save draft. Please try again.', '', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom'
+          })
+        }
+      })
+    } else {
+      this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+    }
+  }
+
+  buildDraftPayload(): any {
+    const formData = this.configStepComponent.configForm.value
+    const course = this.configStepComponent.selectedCourse
+
+    const endDate = formData.endDate ? new Date(formData.endDate).toISOString() : ''
+
+    const payload: any = {
+      title: course.name || '',
+      endDate: endDate,
+      clientVersion: 1.1,
+      additionalProperties: {
+        identifier: course.identifier || '',
+        triggerAfter: formData.minTriggerDays,
+        completionLookBack: formData.maxTriggerDays,
+        thumbnail: course.posterImage || '',
+        duration: (course.courseCategory === 'Blended Program') ? String(course.programDuration)
+          : (course.duration ? String(course.duration) : '0')
+      }
+    }
+
+    // Remove empty string fields from additionalProperties
+    Object.keys(payload.additionalProperties).forEach(key => {
+      if (payload.additionalProperties[key] === '') {
+        delete payload.additionalProperties[key]
+      }
+    })
+
+    // Remove empty string fields from top-level
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === '') {
+        delete payload[key]
+      }
+    })
+
+    return payload
   }
 
   onNext() {

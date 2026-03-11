@@ -4,6 +4,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
 import { Subject } from 'rxjs'
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators'
 import { PeerValidationService } from '../../../peer-validation/service/peer-validation.service'
+import { LOADER_SERVICE, ILoaderService } from '../../service/loader-service.token'
 
 @Component({
   selector: 'sb-uic-pv-config-step',
@@ -14,14 +15,15 @@ import { PeerValidationService } from '../../../peer-validation/service/peer-val
 export class PvConfigStepComponent implements OnInit, OnDestroy {
   configForm!: FormGroup
   courseCharCount = 0
-  triggerNumbers = Array.from({ length: 7 }, (_, i) => 30 + (i * 5))
+  minTriggerDayOptions = Array.from({ length: 7 }, (_, i) => 30 + i * 5)  // [30, 35, 40, 45, 50, 55, 60]
+  maxTriggerDayOptions = Array.from({ length: 19 }, (_, i) => 90 + i * 5) // [90, 95, ..., 180]
   courseSearchSubject = new Subject<string>()
   private destroy$ = new Subject<void>()
   courseSearchResults: any[] = []
   isSearching = false
   currentSearchQuery = ''
   currentOffset = 0
-  pageSize = 10
+  pageSize = 5
   totalResults = 0
   hasMoreResults = false
   selectedCourse: any = null
@@ -34,7 +36,8 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private peerValidationService: PeerValidationService,
     private snackBar: MatSnackBar,
-    @Inject('environment') env: any
+    @Inject('environment') env: any,
+    @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) {
     this.environment = env
   }
@@ -55,42 +58,42 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     this.configForm = this.fb.group({
       course: ['', [Validators.maxLength(70)]],
       selectedCourseDetails: [null, Validators.required],
-      triggerValue: [30, Validators.required],
-      triggerUnit: ['Days', Validators.required],
-      endDate: ['', Validators.required],
-      sendToCompletedLearners: [false]
+      minTriggerDays: [30, Validators.required],
+      maxTriggerDays: [90, Validators.required],
+      endDate: ['', Validators.required]
     })
   }
 
   setupTriggerValueListener(): void {
-    this.configForm.get('triggerValue')?.valueChanges
+    this.configForm.get('minTriggerDays')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+      .subscribe((minVal: number) => {
+        this.updateMaxTriggerOptions(minVal)
         this.updateMinDate()
       })
 
-    this.configForm.get('triggerUnit')?.valueChanges
+    this.configForm.get('maxTriggerDays')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.updateMinDate()
       })
   }
 
+  updateMaxTriggerOptions(minVal: number): void {
+    const allMaxOptions = Array.from({ length: 19 }, (_, i) => 90 + i * 5)
+    this.maxTriggerDayOptions = allMaxOptions.filter(v => v > minVal)
+
+    const currentMax = this.configForm.get('maxTriggerDays')?.value
+    if (currentMax && currentMax <= minVal) {
+      this.configForm.patchValue({ maxTriggerDays: this.maxTriggerDayOptions[0] || null })
+    }
+  }
+
   updateMinDate(): void {
-    const triggerValue = this.configForm.get('triggerValue')?.value || 30
-    const triggerUnit = this.configForm.get('triggerUnit')?.value || 'Days'
+    const minTriggerDays = this.configForm.get('minTriggerDays')?.value || 30
 
     const today = new Date()
-    let daysToAdd = triggerValue
-
-    // If other units are added in future, convert to days
-    // if (triggerUnit === 'Weeks') {
-    //   daysToAdd = triggerValue * 7
-    // } else if (triggerUnit === 'Months') {
-    //   daysToAdd = triggerValue * 30
-    // }
-
-    this.minDate = new Date(today.getTime() + (daysToAdd * 24 * 60 * 60 * 1000))
+    this.minDate = new Date(today.getTime() + (minTriggerDays * 24 * 60 * 60 * 1000))
   }
 
   setupCourseSearch(): void {
@@ -110,11 +113,12 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     this.courseCharCount = value.length
     // Reset pagination when search query changes
     this.currentOffset = 0
+    this.currentPage = 1
     this.courseSearchResults = []
     this.courseSearchSubject.next(value)
   }
 
-  searchCourses(query: string, offset: number = 0, append: boolean = false): void {
+  searchCourses(query: string, offset: number = 0): void {
     this.currentSearchQuery = query
 
     const payload = {
@@ -145,9 +149,15 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     }
 
     this.isSearching = true
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
     this.peerValidationService.searchContent(payload).subscribe({
       next: (response: any) => {
         this.isSearching = false
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
         if (response?.result?.content) {
           const results = response.result.content
           this.totalResults = response.result.count || 0
@@ -158,21 +168,9 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
             console.log('Course fields:', Object.keys(results[0]))
           }
 
-          if (append) {
-            // Append results for pagination
-            this.courseSearchResults = [...this.courseSearchResults, ...results]
-          } else {
-            // Replace results for new search
-            this.courseSearchResults = results
-          }
-
+          this.courseSearchResults = results
           this.currentOffset = offset
           this.hasMoreResults = (offset + results.length) < this.totalResults
-
-          // Reset to first page when new search
-          if (!append) {
-            this.currentPage = 1
-          }
 
           console.log('Search results:', this.courseSearchResults)
           console.log('Total results:', this.totalResults)
@@ -183,10 +181,11 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isSearching = false
-        console.error('Error searching courses:', error)
-        if (!append) {
-          this.courseSearchResults = []
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
         }
+        console.error('Error searching courses:', error)
+        this.courseSearchResults = []
       }
     })
   }
@@ -194,18 +193,16 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   loadMoreResults(): void {
     if (this.hasMoreResults && !this.isSearching) {
       const nextOffset = this.currentOffset + this.pageSize
-      this.searchCourses(this.currentSearchQuery, nextOffset, true)
+      this.searchCourses(this.currentSearchQuery, nextOffset)
     }
   }
 
   get paginatedCourses(): any[] {
-    const startIndex = (this.currentPage - 1) * this.cardsPerPage
-    const endIndex = startIndex + this.cardsPerPage
-    return this.courseSearchResults.slice(startIndex, endIndex)
+    return this.courseSearchResults
   }
 
   get totalPages(): number {
-    return Math.ceil(this.courseSearchResults.length / this.cardsPerPage)
+    return Math.ceil(this.totalResults / this.cardsPerPage)
   }
 
   get visiblePages(): number[] {
@@ -233,8 +230,10 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page
+      const offset = (page - 1) * this.pageSize
+      this.searchCourses(this.currentSearchQuery, offset)
     }
   }
 
@@ -264,6 +263,36 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
 
   isCourseSelected(course: any): boolean {
     return this.selectedCourse?.identifier === course.identifier
+  }
+
+  getCourseDuration(course: any): string {
+    if (course.courseCategory?.toLowerCase() === 'blended program') {
+      return this.formatProgramDuration(course.programDuration)
+    }
+    return this.formatDuration(course.duration)
+  }
+
+  formatProgramDuration(days: number): string {
+    if (!days) {
+      return ''
+    }
+    return days === 1 ? '1 day' : `${days} days`
+  }
+
+  formatDuration(durationInSeconds: number): string {
+    if (!durationInSeconds) {
+      return ''
+    }
+    const totalMinutes = Math.round(durationInSeconds / 60)
+    if (totalMinutes < 60) {
+      return `${totalMinutes} mins`
+    }
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    if (minutes === 0) {
+      return `${hours} hrs`
+    }
+    return `${hours} hrs ${minutes} mins`
   }
 
   getCorrectUrl(url: string): string {
