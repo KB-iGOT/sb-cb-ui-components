@@ -1244,7 +1244,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             description: ["Description for UserGroup 1"],
             conditions: this.fb.array(conditions),
             isUserGroupDisabled: [isComprehensiveCategory], // Disable user group for comprehensive
-            isAddConditionDisabled: [isComprehensiveCategory] // Disable adding conditions for comprehensive
+            // After discussing the Vikas and Arjun disabled goup should be enable, user can select and deselect the org, delete buttons should be available
+            // isAddConditionDisabled: [isComprehensiveCategory] // Disable adding conditions for comprehensive
           });
           this.userGroup.push(group);
 
@@ -1444,8 +1445,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           group.get("id")?.disable();
           group.get("name")?.disable();
           group.get("description")?.disable();
-          group.get("isUserGroupDisabled")?.setValue(true);
-          group.get("isAddConditionDisabled")?.setValue(true);
+           // After discussing with Vikas and Arjun, disabled group should be enabled, user can select and deselect the org, delete buttons should be available
+          group.get("isUserGroupDisabled")?.setValue(false);
+          group.get("isAddConditionDisabled")?.setValue(false);
         }
         // Disable access type changes
         this.accessControlCriteriaSelection?.accessTypes.forEach((type) => {
