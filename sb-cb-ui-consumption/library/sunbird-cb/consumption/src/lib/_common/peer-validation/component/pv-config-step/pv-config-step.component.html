@@ -5,7 +5,20 @@
     <!-- Select Content -->
     <div class="form-field mat-full-radius">
       <label class="field-label">Select Content</label>
-      <mat-form-field appearance="outline" class="full-width">
+
+      <!-- Selected Course Display (Full Width) -->
+      <div class="selected-course-container" *ngIf="selectedCourse">
+        <span class="selected-label">Selected items -</span>
+        <div class="chip-wrapper">
+          <div class="custom-chip">
+            <span class="chip-text">{{ selectedCourse.name }}</span>
+            <span class="chip-remove" (click)="removeSelectedCourse()">✕</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar (Only show when no course is selected) -->
+      <mat-form-field appearance="outline" class="full-width" *ngIf="!selectedCourse">
         <mat-icon matPrefix>search</mat-icon>
         <input matInput placeholder="Search Content by Name, Organisation" formControlName="course"
           (input)="onCourseSearch($event)">
@@ -13,20 +26,8 @@
         <mat-hint align="end">{{courseCharCount}}/70</mat-hint>
       </mat-form-field>
 
-      <!-- Selected Course Chip -->
-      <div class="selected-course-container" *ngIf="selectedCourse">
-        <span class="selected-label">Selected items -</span>
-        <div class="chip-wrapper">
-          <div class="custom-chip">
-            <span class="chip-text">{{ selectedCourse.name | slice:0:30 }}{{ selectedCourse.name.length > 30 ? '...' :
-              '' }}</span>
-            <span class="chip-remove" (click)="removeSelectedCourse()">✕</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Course Cards -->
-      <div class="course-list-container" *ngIf="courseSearchResults.length > 0">
+      <!-- Course Cards (Only show when no course is selected) -->
+      <div class="course-list-container" *ngIf="!selectedCourse && courseSearchResults.length > 0">
         <div class="course-grid">
           <div class="course-card" *ngFor="let course of paginatedCourses" [class.selected]="isCourseSelected(course)"
             (click)="selectCourse(course)">
@@ -76,13 +77,14 @@
         </div>
       </div>
 
-      <!-- Loading state -->
-      <div class="loading-container" *ngIf="isSearching">
+      <!-- Loading state (Only show when no course is selected) -->
+      <div class="loading-container" *ngIf="!selectedCourse && isSearching">
         <p>Searching courses...</p>
       </div>
 
-      <!-- No results state -->
-      <div class="no-results-container" *ngIf="!isSearching && courseSearchResults.length === 0 && currentSearchQuery">
+      <!-- No results state (Only show when no course is selected) -->
+      <div class="no-results-container"
+        *ngIf="!selectedCourse && !isSearching && courseSearchResults.length === 0 && currentSearchQuery">
         <p>No courses found</p>
       </div>
     </div>
@@ -90,7 +92,7 @@
     <!-- Trigger Days & Survey End Date -->
     <div class="form-field-row mat-full-radius">
       <div class="form-field flex-field">
-        <label class="field-label">
+        <label class="field-label required">
           Minimum trigger days
           <span class="custom-tooltip-wrapper">
             <mat-icon class="info-icon">info_outline</mat-icon>
@@ -112,7 +114,7 @@
       </div>
 
       <div class="form-field flex-field">
-        <label class="field-label">
+        <label class="field-label required">
           Maximum trigger days
           <span class="custom-tooltip-wrapper">
             <mat-icon class="info-icon">info_outline</mat-icon>
@@ -134,7 +136,7 @@
       </div>
 
       <div class="form-field flex-field mat-full-radius">
-        <label class="field-label">
+        <label class="field-label required">
           Survey end date
           <span class="custom-tooltip-wrapper">
             <mat-icon class="info-icon">info_outline</mat-icon>

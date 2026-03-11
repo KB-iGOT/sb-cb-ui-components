@@ -257,8 +257,13 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     this.selectedCourse = null
     this.peerValidationService.setSelectedCourse(null)
     this.configForm.patchValue({
-      selectedCourseDetails: null
+      selectedCourseDetails: null,
+      course: ''
     })
+    // Clear search results and query
+    this.courseSearchResults = []
+    this.currentSearchQuery = ''
+    this.courseCharCount = 0
   }
 
   isCourseSelected(course: any): boolean {
@@ -313,16 +318,25 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     return url
   }
 
-  isFormValid(): boolean {
+  getMissingFields(): string[] {
+    const missing: string[] = []
     if (!this.configForm.get('selectedCourseDetails')?.value) {
-      this.snackBar.open('Please search and select a course', '', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom'
-      })
-      return false
+      missing.push('Content')
     }
-    return this.configForm.valid
+    if (!this.configForm.get('minTriggerDays')?.value) {
+      missing.push('Minimum Trigger Days')
+    }
+    if (!this.configForm.get('maxTriggerDays')?.value) {
+      missing.push('Maximum Trigger Days')
+    }
+    if (!this.configForm.get('endDate')?.value) {
+      missing.push('Survey End Date')
+    }
+    return missing
+  }
+
+  isFormValid(): boolean {
+    return !!this.configForm.get('selectedCourseDetails')?.value && this.configForm.valid
   }
 
   getFormData() {
@@ -330,5 +344,55 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       ...this.configForm.value,
       selectedCourse: this.selectedCourse
     }
+  }
+
+  populateForm(formData: any): void {
+    if (!formData) {
+      return
+    }
+
+    console.log('Populating form with data:', formData)
+
+    // Extract data from the form response
+    const additionalProperties = formData.additionalProperties || {}
+    const identifier = additionalProperties.identifier || ''
+    const minTriggerDays = additionalProperties.triggerAfter || 30
+    const maxTriggerDays = additionalProperties.completionLookBack || 90
+    const endDate = formData.endDate ? new Date(formData.endDate) : ''
+
+    // Create a minimal course object from the form data to display the chip
+    const courseData = {
+      name: formData.title || '',
+      identifier: identifier,
+      posterImage: additionalProperties.thumbnail || '',
+      appIcon: additionalProperties.thumbnail || '',
+      duration: additionalProperties.duration ? parseInt(additionalProperties.duration, 10) : 0,
+      programDuration: additionalProperties.duration ? parseInt(additionalProperties.duration, 10) : 0,
+      courseCategory: additionalProperties.courseCategory || 'Course',
+      lastPublishedOn: null
+    }
+
+    console.log('Created course data object:', courseData)
+
+    // Set the selected course if identifier exists
+    if (identifier) {
+      this.selectedCourse = courseData
+      this.peerValidationService.setSelectedCourse(courseData)
+      console.log('Selected course set:', this.selectedCourse)
+    }
+
+    // Patch the form with the values
+    this.configForm.patchValue({
+      selectedCourseDetails: identifier ? courseData : null,
+      minTriggerDays: minTriggerDays,
+      maxTriggerDays: maxTriggerDays,
+      endDate: endDate
+    })
+
+    // Update max trigger options based on min value
+    this.updateMaxTriggerOptions(minTriggerDays)
+    this.updateMinDate()
+
+    console.log('Form populated successfully')
   }
 }

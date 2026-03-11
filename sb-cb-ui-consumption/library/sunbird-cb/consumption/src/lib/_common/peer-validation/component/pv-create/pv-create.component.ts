@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, Optional, Inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
+import { Location } from '@angular/common'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { PvConfigStepComponent } from '../pv-config-step/pv-config-step.component'
 import { PeerValidationService } from '../../service/peer-validation.service'
@@ -16,10 +17,14 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   stepsLabels = ['Configuration', 'Questions']
   currentStepperIndex = 0
   isNewSurvey = false
+  formId: string | null = null
+  formData: any = null
+  originalSnapshot: any = null
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
+    private location: Location,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private peerValidationService: PeerValidationService,
@@ -27,20 +32,115 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
-    // Detect if this is a new survey from the URL
-    const urlSegments = this.router.url.split('/')
-    this.isNewSurvey = urlSegments.includes('new')
-    // Also check query params
-    this.route.queryParams.subscribe(params => {
-      if (params['mode'] === 'new') {
-        this.isNewSurvey = true
+    // Check for edit route with form id
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.formId = params['id']
+        this.isNewSurvey = false
+        this.loadFormData(this.formId)
+      } else {
+        // Detect if this is a new survey from the URL
+        const urlSegments = this.router.url.split('/')
+        this.isNewSurvey = urlSegments.includes('new')
+        // Also check query params
+        this.route.queryParams.subscribe(queryParams => {
+          if (queryParams['mode'] === 'new') {
+            this.isNewSurvey = true
+          }
+        })
       }
     })
-    console.log('Peer Validation Create Component Initialized, isNew:', this.isNewSurvey)
+    console.log('Peer Validation Create Component Initialized, isNew:', this.isNewSurvey, 'formId:', this.formId)
+  }
+
+  loadFormData(id: string) {
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
+    this.peerValidationService.getFormById(id).subscribe({
+      next: (response) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        // Extract the actual form data from nested response structure
+        const data = response?.result?.response || response
+        if (!data || !data.formId) {
+          this.snackBar.open('No data found.', '', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom'
+          })
+          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          return
+        }
+        this.formData = data
+        console.log('Form data loaded:', this.formData)
+        // If the config step component is already available, populate it
+        if (this.configStepComponent) {
+          this.populateConfigForm()
+        }
+      },
+      error: (error) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        console.error('Error loading form data:', error)
+        this.snackBar.open('No data found.', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        })
+        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+      }
+    })
+  }
+
+  populateConfigForm() {
+    if (this.configStepComponent && this.formData) {
+      // Populate the form with the loaded data
+      this.configStepComponent.populateForm(this.formData)
+      // Capture snapshot after population so we can detect changes later
+      this.captureSnapshot()
+    }
+  }
+
+  captureSnapshot() {
+    const ap = this.formData?.additionalProperties || {}
+    this.originalSnapshot = {
+      identifier: ap.identifier || '',
+      triggerAfter: ap.triggerAfter ?? 30,
+      completionLookBack: ap.completionLookBack ?? 90,
+      endDate: this.formData?.endDate || ''
+    }
+  }
+
+  hasFormChanged(): boolean {
+    if (!this.originalSnapshot) {
+      return true
+    }
+    const formValues = this.configStepComponent?.configForm?.value
+    const course = this.configStepComponent?.selectedCourse
+    if (!formValues || !course) {
+      return false
+    }
+    const currentEndDate = formValues.endDate ? new Date(formValues.endDate).toISOString() : ''
+    const originalEndDate = this.originalSnapshot.endDate
+      ? new Date(this.originalSnapshot.endDate).toISOString()
+      : ''
+    return (
+      course.identifier !== this.originalSnapshot.identifier ||
+      formValues.minTriggerDays !== this.originalSnapshot.triggerAfter ||
+      formValues.maxTriggerDays !== this.originalSnapshot.completionLookBack ||
+      currentEndDate !== originalEndDate
+    )
   }
 
   ngAfterViewInit() {
     console.log('Config Step Component:', this.configStepComponent)
+    // If form data was already loaded before the view initialized, populate the form now
+    if (this.formData && this.configStepComponent) {
+      this.populateConfigForm()
+    }
   }
 
   backToDashboard() {
@@ -55,7 +155,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   }
 
   saveDraftAndExit() {
-    if (this.currentStepperIndex === 0 && this.isNewSurvey) {
+    if (this.currentStepperIndex === 0) {
       const selectedCourse = this.configStepComponent?.selectedCourse
       if (!selectedCourse) {
         this.snackBar.open('Please select a content to save to draft', '', {
@@ -66,34 +166,74 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
         return
       }
 
-      const payload = this.buildDraftPayload()
       if (this.loaderService) {
         this.loaderService.changeLoaderState(true)
       }
-      this.peerValidationService.saveDraft(payload).subscribe({
-        next: () => {
+
+      // Check if it's edit mode (formId exists) or create mode
+      if (this.formId) {
+        // Only update if something has changed
+        if (!this.hasFormChanged()) {
           if (this.loaderService) {
             this.loaderService.changeLoaderState(false)
           }
-          this.snackBar.open('Draft saved successfully', '', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom'
-          })
           this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
-        },
-        error: (error) => {
-          if (this.loaderService) {
-            this.loaderService.changeLoaderState(false)
-          }
-          console.error('Error saving draft:', error)
-          this.snackBar.open('Failed to save draft. Please try again.', '', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom'
-          })
+          return
         }
-      })
+        // Update existing form
+        const payload = this.buildUpdatePayload()
+        this.peerValidationService.updateForm(this.formId, payload).subscribe({
+          next: () => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            this.snackBar.open('Draft updated successfully', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom'
+            })
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          },
+          error: (error) => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            console.error('Error updating draft:', error)
+            this.snackBar.open('Failed to update draft. Please try again.', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom'
+            })
+          }
+        })
+      } else {
+        // Create new draft
+        const payload = this.buildDraftPayload()
+        this.peerValidationService.saveDraft(payload).subscribe({
+          next: () => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            this.snackBar.open('Draft saved successfully', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom'
+            })
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          },
+          error: (error) => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            console.error('Error saving draft:', error)
+            this.snackBar.open('Failed to save draft. Please try again.', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom'
+            })
+          }
+        })
+      }
     } else {
       this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
     }
@@ -136,17 +276,161 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     return payload
   }
 
+  buildUpdatePayload(): any {
+    if (!this.formData) {
+      return this.buildDraftPayload()
+    }
+
+    const formValues = this.configStepComponent.configForm.value
+    const course = this.configStepComponent.selectedCourse
+
+    const endDate = formValues.endDate ? new Date(formValues.endDate).toISOString() : ''
+
+    // Destructure out fields that must not be sent in the update request
+    const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
+
+    // Merge remaining original form data with updated values
+    const payload: any = {
+      ...baseFormData,
+      title: course.name || this.formData.title,
+      endDate: endDate,
+      additionalProperties: {
+        ...this.formData.additionalProperties,
+        identifier: course.identifier || this.formData.additionalProperties?.identifier || '',
+        triggerAfter: formValues.minTriggerDays,
+        completionLookBack: formValues.maxTriggerDays,
+        thumbnail: course.posterImage || this.formData.additionalProperties?.thumbnail || '',
+        duration: (course.courseCategory === 'Blended Program') ? String(course.programDuration)
+          : (course.duration ? String(course.duration) : this.formData.additionalProperties?.duration || '0')
+      }
+    }
+
+    console.log('Update payload built:', payload)
+    return payload
+  }
+
   onNext() {
     // Validate current step before proceeding
     if (this.currentStepperIndex === 0) {
       if (!this.configStepComponent || !this.configStepComponent.isFormValid()) {
-        console.log('Form is invalid. Please fill all required fields.')
-        // Mark all fields as touched to show validation errors
+        // Mark all fields as touched to show inline validation errors
         if (this.configStepComponent && this.configStepComponent.configForm) {
           Object.keys(this.configStepComponent.configForm.controls).forEach(key => {
             this.configStepComponent.configForm.get(key)?.markAsTouched()
           })
         }
+        // Show toaster with missing field names
+        const missingFields = this.configStepComponent?.getMissingFields() || []
+        const message = missingFields.length > 0
+          ? `Please fill in the required fields: ${missingFields.join(', ')}`
+          : 'Please fill in all required fields'
+        this.snackBar.open(message, '', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        })
+        return
+      }
+
+      // If in edit mode, update the form before proceeding
+      if (this.formId) {
+        // Only update if something has changed
+        if (!this.hasFormChanged()) {
+          if (this.currentStepperIndex < this.stepsLabels.length - 1) {
+            this.currentStepperIndex++
+          }
+          return
+        }
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(true)
+        }
+        const payload = this.buildUpdatePayload()
+        this.peerValidationService.updateForm(this.formId, payload).subscribe({
+          next: () => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            console.log('Form updated successfully')
+            // Re-fetch updated form data to keep state in sync, then proceed
+            this.peerValidationService.getFormById(this.formId).subscribe({
+              next: (response) => {
+                this.formData = response?.result?.response || response
+                this.captureSnapshot()
+                console.log('Form data refreshed after update:', this.formData)
+              },
+              error: (err) => console.error('Failed to refresh form data:', err)
+            })
+            // Proceed to next step
+            if (this.currentStepperIndex < this.stepsLabels.length - 1) {
+              this.currentStepperIndex++
+              console.log('Next step:', this.currentStepperIndex)
+            }
+          },
+          error: (error) => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            console.error('Error updating form:', error)
+            this.snackBar.open('Failed to update form. Please try again.', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom'
+            })
+          }
+        })
+        return
+      } else {
+        // New survey — call saveDraft first, then proceed to questions step
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(true)
+        }
+        const payload = this.buildDraftPayload()
+        this.peerValidationService.saveDraft(payload).subscribe({
+          next: (response) => {
+            // Extract formId from create response: result.response.formId
+            const created = response?.result?.response || response
+            const newFormId = created?.formId || created?.id || null
+            if (!newFormId) {
+              if (this.loaderService) { this.loaderService.changeLoaderState(false) }
+              this.snackBar.open('Failed to get form ID after save.', '', {
+                duration: 3000, horizontalPosition: 'center', verticalPosition: 'bottom', panelClass: ['error-snackbar']
+              })
+              return
+            }
+            this.formId = newFormId
+            // Read the full form data with the new formId
+            this.peerValidationService.getFormById(this.formId).subscribe({
+              next: (readResponse) => {
+                if (this.loaderService) { this.loaderService.changeLoaderState(false) }
+                this.formData = readResponse?.result?.response || readResponse
+                this.captureSnapshot()
+                console.log('Draft created and loaded, formId:', this.formId, this.formData)
+                // Silently update URL to edit/:formId without triggering route.params subscription
+                this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
+                this.currentStepperIndex = 1
+              },
+              error: (err) => {
+                if (this.loaderService) { this.loaderService.changeLoaderState(false) }
+                console.error('Failed to read form after create:', err)
+                // Still advance to next step even if read fails
+                this.currentStepperIndex = 1
+              }
+            })
+          },
+          error: (error) => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            console.error('Error creating draft:', error)
+            this.snackBar.open('Failed to save draft. Please try again.', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+              panelClass: ['error-snackbar']
+            })
+          }
+        })
         return
       }
     }
@@ -165,18 +449,13 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   }
 
   onStepChanged(index: number) {
-    // If trying to navigate away from step 0 (Configuration), validate the form first
+    // Navigating forward from configuration step — run the same save/validate logic as Next
     if (this.currentStepperIndex === 0 && index > 0) {
-      // First, allow the navigation to happen
-      this.currentStepperIndex = index
-      // Then validate and revert if needed
-      // if (!this.validateConfigurationStep()) {
-      //   return
-      // }
-    } else {
-      // For all other navigation, just update the index
-      this.currentStepperIndex = index
+      this.onNext()
+      return
     }
+    // Backward navigation or any other step change — just update index directly
+    this.currentStepperIndex = index
     console.log('Step changed to:', this.currentStepperIndex)
   }
 
@@ -212,11 +491,143 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     return true
   }
 
+  onFieldRemoved(fieldName: string): void {
+    if (!this.formId || !this.formData) {
+      return
+    }
+
+    const updatedFields = (this.formData.fields || []).filter((f: any) => f.name !== fieldName)
+    const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
+    const payload = { ...baseFormData, fields: updatedFields }
+
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
+
+    this.peerValidationService.updateForm(this.formId, payload).subscribe({
+      next: () => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        this.snackBar.open('Question removed successfully', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        })
+        this.peerValidationService.getFormById(this.formId).subscribe({
+          next: (response) => {
+            this.formData = response?.result?.response || response
+            console.log('Form data refreshed after removing field:', this.formData)
+          },
+          error: (err) => console.error('Failed to refresh form data:', err)
+        })
+      },
+      error: (error) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        console.error('Error removing question field:', error)
+        this.snackBar.open('Failed to remove question. Please try again.', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        })
+      }
+    })
+  }
+
+  onFieldAdded(field: any): void {
+    if (!this.formId || !this.formData) {
+      return
+    }
+
+    // Append the new field to formData.fields
+    const updatedFields = [...(this.formData.fields || []), field]
+    const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
+    const payload = { ...baseFormData, fields: updatedFields }
+
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
+
+    this.peerValidationService.updateForm(this.formId, payload).subscribe({
+      next: () => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        this.snackBar.open('Question saved successfully', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        })
+        // Re-fetch so formData stays in sync
+        this.peerValidationService.getFormById(this.formId).subscribe({
+          next: (response) => {
+            this.formData = response?.result?.response || response
+            console.log('Form data refreshed after adding field:', this.formData)
+          },
+          error: (err) => console.error('Failed to refresh form data:', err)
+        })
+      },
+      error: (error) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        console.error('Error saving question field:', error)
+        this.snackBar.open('Failed to save question. Please try again.', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        })
+      }
+    })
+  }
+
   onPublish() {
-    // Publish the survey
-    console.log('Survey Published')
-    // Navigate to peer validation dashboard with active tab selected
-    this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+    if (!this.formId || !this.formData) {
+      this.snackBar.open('No form to publish.', '', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['error-snackbar']
+      })
+      return
+    }
+
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
+
+    const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
+    const payload = { ...baseFormData }
+
+    this.peerValidationService.publishForm(this.formId, payload).subscribe({
+      next: () => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        this.snackBar.open('Survey published successfully', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        })
+        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+      },
+      error: (error) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        console.error('Error publishing form:', error)
+        this.snackBar.open('Failed to publish survey. Please try again.', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        })
+      }
+    })
   }
 
 }
