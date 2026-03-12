@@ -1,0 +1,31 @@
+<div class="modal-overlay">
+  <div class="modal-container">
+
+    <button class="close-btn" (click)="closeModal()">✕</button>
+
+    <div class="modal-body">
+
+      <h2 class="modal-title">Congratulations...!!</h2>
+
+      <div class="badge-wrapper">
+        <img [src]="badgeData?.image" class="badge-image" />
+
+        <div class="badge-label">
+          <span class="badge-name">{{ badgeData?.title }}</span>
+          <span class="badge-level">{{ badgeData?.level }}</span>
+        </div>
+      </div>
+
+      <p class="modal-description">
+Great job! You’ve successfully earned the {{badgeData?.title}} badge by completing [Content Name].
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline">Download</button>
+        <button class="btn btn-primary">View Badge</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
