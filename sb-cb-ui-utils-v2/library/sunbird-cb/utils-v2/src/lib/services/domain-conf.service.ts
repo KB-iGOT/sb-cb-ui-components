@@ -74,7 +74,8 @@ export class DomainConfService {
   private _tenantConfigFile: ITenantConfigFile | null = null
   private _currentTenantConfig: ITenantConfig | null = null
   public loaded = false
-
+  defaultLogo = '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg'
+  defaultRedirectPath = '/page/home'
   constructor(
     private configSvc: ConfigurationsService,
     @Inject('environment') environment: any,
@@ -89,7 +90,7 @@ export class DomainConfService {
     return {
       type: 'core',
       layout: 'default',
-      logo: this.environment?.logo || '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg',
+      logo: this.environment?.logo || this.defaultLogo,
       redirectPath: this.environment?.redirectPath || '/page/home',
       cdnContentHost: this.environment?.cdnContentHost || 'https://portal.igotkarmayogi.gov.in/',
       sitePath: this.environment?.sitePath || 'portal.igotkarmayogi.gov.in',
@@ -212,21 +213,21 @@ export class DomainConfService {
   // values, not localhost/environment fallbacks.
 
   getDomainCDNHost(): string {
-    return this.getTenantConfig().cdnContentHost || this.environment?.cdnContentHost || ''
+    return this.getTenantConfig().cdnContentHost || this.environment?.cdnContentHost
   }
 
   getDomainAppLogo(): string {
     const tenantLogo = this.getTenantConfig().logo
     if (tenantLogo) { return tenantLogo }
-    return this.configSvc?.instanceConfig?.logos?.app || ''
+    return this.configSvc?.instanceConfig?.logos?.app || this.defaultLogo
   }
 
   getDomainRedirectPath(): string {
-    return this.getTenantConfig().redirectPath || '/page/home'
+    return this.getTenantConfig().redirectPath || this.environment?.redirectPath|| this.defaultRedirectPath
   }
 
   getDomainSitePath(): string {
-    return this.getTenantConfig().sitePath || this.environment?.sitePath || ''
+    return this.getTenantConfig().sitePath || this.environment?.sitePath 
   }
 
   /** True when the current domain is the main KB portal (not a tenant portal) */
