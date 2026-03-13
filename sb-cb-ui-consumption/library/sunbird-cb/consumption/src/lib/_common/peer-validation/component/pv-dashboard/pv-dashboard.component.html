@@ -84,6 +84,14 @@
           </mat-select>
         </mat-form-field>
       </div>
+
+      <div class="filter-item clear-filter-item" *ngIf="hasActiveFilters">
+        <label class="filter-label">&nbsp;</label>
+        <button mat-button class="btn-common btn-secondary flex flex-center" (click)="clearAllFilters()">
+          <mat-icon>filter_list_off</mat-icon>
+          Clear All Filters
+        </button>
+      </div>
     </div>
   </form>
 
@@ -182,7 +190,7 @@
 
     <!-- Paginator -->
     <div class="paginator-container">
-      <mat-paginator [length]="totalCount" [pageSize]="20" [pageSizeOptions]="[20, 50, 100]" showFirstLastButtons
+      <mat-paginator [length]="totalCount" [pageSize]="15" [pageSizeOptions]="[15, 30, 50]" showFirstLastButtons
         aria-label="Select page">
       </mat-paginator>
     </div>
