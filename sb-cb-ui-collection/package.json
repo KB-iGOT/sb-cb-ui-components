@@ -1,9 +1,9 @@
 {
   "name": "sb-cb-ui-collection",
-  "version": "0.0.3-cbrelease-4.8.34",
+  "version": "0.0.4-cbrelease-4.8.34",
   "scripts": {
     "ng": "ng",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
     "test": "ng test",
     "e2e": "ng e2e",
     "i18n": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng xi18n --output-path locale",
