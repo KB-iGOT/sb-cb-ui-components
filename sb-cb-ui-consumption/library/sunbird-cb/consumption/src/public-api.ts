@@ -128,6 +128,7 @@ export * from './lib/_common/peer-validation/component/pv-dashboard/pv-dashboard
 export * from './lib/_common/peer-validation/component/pv-create/pv-create.component'
 export * from './lib/_common/peer-validation/component/pv-question-step/pv-question-step.component'
 export * from './lib/_common/peer-validation/component/pv-config-step/pv-config-step.component'
+export * from './lib/_common/peer-validation/service/loader-service.token'
 
 export * from './lib/_common/create-request/create-request.module'
 export * from './lib/_common/create-request/components/create-request-form/create-request-form.component'
