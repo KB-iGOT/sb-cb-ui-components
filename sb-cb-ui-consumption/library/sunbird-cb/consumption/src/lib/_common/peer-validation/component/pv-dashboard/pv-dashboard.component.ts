@@ -4,6 +4,7 @@ import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator'
 import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
 import { Router, ActivatedRoute } from '@angular/router'
+import { debounceTime } from 'rxjs/operators'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 import { PeerValidationService } from '../../service/peer-validation.service'
 import { ILoaderService, LOADER_SERVICE } from '../../service/loader-service.token'
@@ -48,6 +49,18 @@ export class PvDashboardComponent implements OnInit {
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended', 'Archived']
   mdoOptions = ['All MDO', 'Governor Secretariat, Uttar Pradesh', 'PM Commissionerate of Health and Family Welfare Telangana', 'Karmayogi Bharat (SPV)']
+
+  hasActiveFilters = false
+
+  private computeHasActiveFilters(): boolean {
+    if (!this.filterForm) return false
+    const v = this.filterForm.value
+    return !!v.searchText ||
+      !!v.startDate ||
+      !!v.endDate ||
+      (v.status && v.status !== 'All Status') ||
+      (v.mdo && v.mdo !== 'All MDO')
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -95,10 +108,31 @@ export class PvDashboardComponent implements OnInit {
 
     this.filterForm = this.fb.group(formConfig)
 
-    // Re-load surveys when any filter value changes this not
-    this.filterForm.valueChanges.subscribe(() => {
+    // Re-load surveys when any filter value changes
+    // debounceTime prevents rapid successive calls; skip during tab transitions
+    this.filterForm.valueChanges.pipe(debounceTime(300)).subscribe((values) => {
+      const hasStart = !!values.startDate
+      const hasEnd = !!values.endDate
+      if (hasStart !== hasEnd) {
+        return // wait until both dates are selected or both are cleared
+      }
+      this.hasActiveFilters = this.computeHasActiveFilters()
+      if (this.paginator) {
+        this.paginator.pageIndex = 0
+      }
       this.loadSurveys()
     })
+  }
+
+  clearAllFilters(): void {
+    this.filterForm.patchValue({
+      searchText: '',
+      startDate: '',
+      endDate: '',
+      status: 'All Status',
+      ...(this.isSPVRoute ? { mdo: 'All MDO' } : {})
+    })
+    this.hasActiveFilters = false
   }
 
   buildSearchPayload(): any {
@@ -109,12 +143,15 @@ export class PvDashboardComponent implements OnInit {
       'archived': 'Archived'
     }
 
+    const pageSize = this.paginator?.pageSize || 15
+    const pageIndex = this.paginator?.pageIndex || 0
+
     const payload: any = {
       query: this.filterForm.value.searchText || '',
       filters: {},
       facets: ['status'],
-      page: 0,
-      size: 20,
+      page: pageIndex,
+      size: pageSize,
       sortBy: 'createdDate',
       sortOrder: 'DESC'
     }
@@ -131,6 +168,16 @@ export class PvDashboardComponent implements OnInit {
       }
     } else if (statusMap[this.selectedTab]) {
       payload.filters['status'] = [statusMap[this.selectedTab]]
+    }
+
+    // Add date range filters (epoch format in milliseconds)
+    const startDate = this.filterForm?.value?.startDate
+    const endDate = this.filterForm?.value?.endDate
+    if (startDate) {
+      payload.filters['startDateFrom'] = new Date(startDate).getTime()
+    }
+    if (endDate) {
+      payload.filters['endDateTo'] = new Date(endDate).getTime()
     }
 
     return payload
@@ -153,8 +200,7 @@ export class PvDashboardComponent implements OnInit {
 
         this.allSurveys = list.map((item: any) => this.mapToSurvey(item))
         this.dataSource = new MatTableDataSource(this.allSurveys)
-        this.dataSource.paginator = this.paginator
-        this.totalCount = this.allSurveys.length
+        this.totalCount = response?.result?.response?.count || response?.result?.count || this.allSurveys.length
         // Load status counts for the facet display not to be removed as it is required to show the count in the tabs.
         this.loadStatusCounts()
       },
@@ -223,7 +269,11 @@ export class PvDashboardComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator
+    if (this.paginator) {
+      this.paginator.page.subscribe(() => {
+        this.loadSurveys()
+      })
+    }
   }
 
   filterByTab(): void {
@@ -248,11 +298,17 @@ export class PvDashboardComponent implements OnInit {
 
     this.updateDisplayedColumns()
 
+    if (this.paginator) {
+      this.paginator.pageIndex = 0
+    }
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab: this.selectedTab },
       queryParamsHandling: 'merge'
     })
+
+    // this.loadSurveys()
   }
 
   onSearch(): void {
