@@ -5,6 +5,7 @@ import { Subject } from 'rxjs'
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators'
 import { PeerValidationService } from '../../../peer-validation/service/peer-validation.service'
 import { LOADER_SERVICE, ILoaderService } from '../../service/loader-service.token'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 @Component({
   selector: 'sb-uic-pv-config-step',
@@ -31,11 +32,22 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   cardsPerPage = 5
   environment: any
   minDate = new Date()
+  courseCategoryList: string[] = [
+    'Course',
+    'Moderated Course',
+    'Multilingual Course',
+    'Curated Program',
+    'Moderated Program',
+    'Invite Only Program',
+    'Blended Program',
+    'Comprehensive Assessment Program'
+  ]
 
   constructor(
     private fb: FormBuilder,
     private peerValidationService: PeerValidationService,
     private snackBar: MatSnackBar,
+    private configSvc: ConfigurationsService,
     @Inject('environment') env: any,
     @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) {
@@ -45,8 +57,11 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeForm()
     this.setupCourseSearch()
+    this.setupCategoryChangeListener()
     this.updateMinDate()
     this.setupTriggerValueListener()
+    // Load initial courses on component load
+    this.searchCourses('')
   }
 
   ngOnDestroy(): void {
@@ -57,6 +72,7 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
   initializeForm(): void {
     this.configForm = this.fb.group({
       course: ['', [Validators.maxLength(70)]],
+      courseCategory: ['Course'],
       selectedCourseDetails: [null, Validators.required],
       minTriggerDays: [30, Validators.required],
       maxTriggerDays: [90, Validators.required],
@@ -93,7 +109,8 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     const minTriggerDays = this.configForm.get('minTriggerDays')?.value || 30
 
     const today = new Date()
-    this.minDate = new Date(today.getTime() + (minTriggerDays * 24 * 60 * 60 * 1000))
+    today.setHours(0, 0, 0, 0)
+    this.minDate = new Date(today.getTime() + ((minTriggerDays + 1) * 24 * 60 * 60 * 1000))
   }
 
   setupCourseSearch(): void {
@@ -108,6 +125,21 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       })
   }
 
+  setupCategoryChangeListener(): void {
+    this.configForm.get('courseCategory')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Clear search text and results, then make a fresh API call
+        this.configForm.get('course')?.setValue('', { emitEvent: false })
+        this.courseCharCount = 0
+        this.currentSearchQuery = ''
+        this.currentOffset = 0
+        this.currentPage = 1
+        this.courseSearchResults = []
+        this.searchCourses('')
+      })
+  }
+
   onCourseSearch(event: any): void {
     const value = event.target.value || ''
     this.courseCharCount = value.length
@@ -118,33 +150,60 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     this.courseSearchSubject.next(value)
   }
 
+  getCourseCategoryValue(): string {
+    const selected = this.configForm.get('courseCategory')?.value || 'Course'
+    if (selected === 'Invite Only Program') {
+      return 'invite-only program'
+    }
+    return selected
+  }
+
   searchCourses(query: string, offset: number = 0): void {
     this.currentSearchQuery = query
-
-    const payload = {
-      request: {
-        secureSettings: false,
-        filters: {
-          accessSettingsEnabled: { "ne": true },
-          must: {
-            courseCategory: [
-              'Course',
-              'Case study',
-              'Multilingual Course',
-              'Curated program',
-              'Blended program',
-              'invite-only program'
+    const categoryValue = this.getCourseCategoryValue()
+    const isModerated = categoryValue === 'Moderated Course' || categoryValue === 'Moderated Program'
+    const userOrgId = this.configSvc?.userProfile?.rootOrgId || ''
+    let payload: any
+    if (isModerated) {
+      payload = {
+        request: {
+          filters: {
+            must: {
+              courseCategory: [categoryValue],
+            },
+            status: ['Live'],
+            'secureSettings.organisation': [
+              userOrgId
             ]
           },
-          status: ['Live']
-        },
-        offset: offset,
-        limit: this.pageSize,
-        query: query,
-        sort_by: {
-          lastUpdatedOn: 'desc'
-        },
-        fields: []
+          offset: offset,
+          limit: this.pageSize,
+          query: query,
+          sort_by: {
+            lastUpdatedOn: 'desc'
+          },
+          fields: []
+        }
+      }
+    } else {
+      payload = {
+        request: {
+          secureSettings: false,
+          filters: {
+            accessSettingsEnabled: { "ne": true },
+            must: {
+              courseCategory: [categoryValue]
+            },
+            status: ['Live']
+          },
+          offset: offset,
+          limit: this.pageSize,
+          query: query,
+          sort_by: {
+            lastUpdatedOn: 'desc'
+          },
+          fields: []
+        }
       }
     }
 
@@ -161,22 +220,9 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
         if (response?.result?.content) {
           const results = response.result.content
           this.totalResults = response.result.count || 0
-
-          // Log individual course data to check field names
-          if (results.length > 0) {
-            console.log('First course data:', results[0])
-            console.log('Course fields:', Object.keys(results[0]))
-          }
-
           this.courseSearchResults = results
           this.currentOffset = offset
           this.hasMoreResults = (offset + results.length) < this.totalResults
-
-          console.log('Search results:', this.courseSearchResults)
-          console.log('Total results:', this.totalResults)
-          console.log('Paginated courses:', this.paginatedCourses)
-          console.log('Current page:', this.currentPage)
-          console.log('Total pages:', this.totalPages)
         }
       },
       error: (error) => {
@@ -351,8 +397,6 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       return
     }
 
-    console.log('Populating form with data:', formData)
-
     // Extract data from the form response
     const additionalProperties = formData.additionalProperties || {}
     const identifier = additionalProperties.identifier || ''
@@ -372,13 +416,10 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       lastPublishedOn: null
     }
 
-    console.log('Created course data object:', courseData)
-
     // Set the selected course if identifier exists
     if (identifier) {
       this.selectedCourse = courseData
       this.peerValidationService.setSelectedCourse(courseData)
-      console.log('Selected course set:', this.selectedCourse)
     }
 
     // Patch the form with the values
@@ -392,7 +433,5 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     // Update max trigger options based on min value
     this.updateMaxTriggerOptions(minTriggerDays)
     this.updateMinDate()
-
-    console.log('Form populated successfully')
   }
 }

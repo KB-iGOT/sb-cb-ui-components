@@ -1,8 +1,11 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, Optional, Inject } from '@angular/core'
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, Inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { Location } from '@angular/common'
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { delay, switchMap } from 'rxjs/operators'
+import { of } from 'rxjs'
 import { PvConfigStepComponent } from '../pv-config-step/pv-config-step.component'
+import { HorizontalDynamicStepperComponent } from '../../../horizontal-dynamic-stepper/horizontal-dynamic-stepper.component'
 import { PeerValidationService } from '../../service/peer-validation.service'
 import { LOADER_SERVICE, ILoaderService } from '../../service/loader-service.token'
 
@@ -13,6 +16,7 @@ import { LOADER_SERVICE, ILoaderService } from '../../service/loader-service.tok
 })
 export class PvCreateComponent implements OnInit, AfterViewInit {
   @ViewChild(PvConfigStepComponent) configStepComponent!: PvConfigStepComponent
+  @ViewChild(HorizontalDynamicStepperComponent) stepperComponent!: HorizontalDynamicStepperComponent
 
   stepsLabels = ['Configuration', 'Questions']
   currentStepperIndex = 0
@@ -50,7 +54,6 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
         })
       }
     })
-    console.log('Peer Validation Create Component Initialized, isNew:', this.isNewSurvey, 'formId:', this.formId)
   }
 
   loadFormData(id: string) {
@@ -74,7 +77,6 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           return
         }
         this.formData = data
-        console.log('Form data loaded:', this.formData)
         // If the config step component is already available, populate it
         if (this.configStepComponent) {
           this.populateConfigForm()
@@ -91,6 +93,23 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           verticalPosition: 'bottom'
         })
         this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+      }
+    })
+  }
+
+  refreshFormData(formId: string | null, callback?: () => void): void {
+    if (!formId) { return }
+    of(null).pipe(
+      switchMap(() => this.peerValidationService.getFormById(formId))
+    ).subscribe({
+      next: (response) => {
+        this.formData = response?.result?.response || response
+        this.captureSnapshot()
+        if (callback) { callback() }
+      },
+      error: (err) => {
+        console.error('Failed to refresh form data:', err)
+        if (callback) { callback() }
       }
     })
   }
@@ -136,7 +155,6 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    console.log('Config Step Component:', this.configStepComponent)
     // If form data was already loaded before the view initialized, populate the form now
     if (this.formData && this.configStepComponent) {
       this.populateConfigForm()
@@ -226,7 +244,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               this.loaderService.changeLoaderState(false)
             }
             console.error('Error saving draft:', error)
-            this.snackBar.open('Failed to save draft. Please try again.', '', {
+            this.snackBar.open(`${error?.error?.params?.errMsg || 'Failed to create draft. Please try again.'}`, '', {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'bottom'
@@ -304,8 +322,6 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           : (course.duration ? String(course.duration) : this.formData.additionalProperties?.duration || '0')
       }
     }
-
-    console.log('Update payload built:', payload)
     return payload
   }
 
@@ -351,20 +367,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
             if (this.loaderService) {
               this.loaderService.changeLoaderState(false)
             }
-            console.log('Form updated successfully')
-            // Re-fetch updated form data to keep state in sync, then proceed
-            this.peerValidationService.getFormById(this.formId).subscribe({
-              next: (response) => {
-                this.formData = response?.result?.response || response
-                this.captureSnapshot()
-                console.log('Form data refreshed after update:', this.formData)
-              },
-              error: (err) => console.error('Failed to refresh form data:', err)
-            })
+            // Re-fetch updated form data to keep state in sync
+            this.refreshFormData(this.formId)
             // Proceed to next step
             if (this.currentStepperIndex < this.stepsLabels.length - 1) {
               this.currentStepperIndex++
-              console.log('Next step:', this.currentStepperIndex)
             }
           },
           error: (error) => {
@@ -399,23 +406,12 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               return
             }
             this.formId = newFormId
-            // Read the full form data with the new formId
-            this.peerValidationService.getFormById(this.formId).subscribe({
-              next: (readResponse) => {
-                if (this.loaderService) { this.loaderService.changeLoaderState(false) }
-                this.formData = readResponse?.result?.response || readResponse
-                this.captureSnapshot()
-                console.log('Draft created and loaded, formId:', this.formId, this.formData)
-                // Silently update URL to edit/:formId without triggering route.params subscription
-                this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
-                this.currentStepperIndex = 1
-              },
-              error: (err) => {
-                if (this.loaderService) { this.loaderService.changeLoaderState(false) }
-                console.error('Failed to read form after create:', err)
-                // Still advance to next step even if read fails
-                this.currentStepperIndex = 1
-              }
+            // Read the full form data with the new formId after a delay
+            this.refreshFormData(this.formId, () => {
+              if (this.loaderService) { this.loaderService.changeLoaderState(false) }
+              // Silently update URL to edit/:formId without triggering route.params subscription
+              this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
+              this.currentStepperIndex = 1
             })
           },
           error: (error) => {
@@ -423,12 +419,17 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               this.loaderService.changeLoaderState(false)
             }
             console.error('Error creating draft:', error)
-            this.snackBar.open('Failed to save draft. Please try again.', '', {
+            this.snackBar.open(`${error?.error?.params?.errMsg || 'Failed to create draft. Please try again.'}`, '', {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'bottom',
               panelClass: ['error-snackbar']
             })
+            this.currentStepperIndex = 0
+            if (this.stepperComponent) {
+              this.stepperComponent.goToStep(0)
+            }
+            this.cdr.detectChanges()
           }
         })
         return
@@ -437,14 +438,12 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
     if (this.currentStepperIndex < this.stepsLabels.length - 1) {
       this.currentStepperIndex++
-      console.log('Next step:', this.currentStepperIndex)
     }
   }
 
   onPreviousStepper() {
     if (this.currentStepperIndex > 0) {
       this.currentStepperIndex--
-      console.log('Previous step:', this.currentStepperIndex)
     }
   }
 
@@ -456,7 +455,6 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     }
     // Backward navigation or any other step change — just update index directly
     this.currentStepperIndex = index
-    console.log('Step changed to:', this.currentStepperIndex)
   }
 
   validateConfigurationStep(): boolean {
@@ -473,7 +471,6 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
     // Check if form is valid
     if (!this.configStepComponent.isFormValid()) {
-      console.log('Cannot proceed. Please complete the configuration step.')
       // Mark all fields as touched to show validation errors
       if (this.configStepComponent.configForm) {
         Object.keys(this.configStepComponent.configForm.controls).forEach(key => {
@@ -514,13 +511,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         })
-        this.peerValidationService.getFormById(this.formId).subscribe({
-          next: (response) => {
-            this.formData = response?.result?.response || response
-            console.log('Form data refreshed after removing field:', this.formData)
-          },
-          error: (err) => console.error('Failed to refresh form data:', err)
-        })
+        this.refreshFormData(this.formId)
       },
       error: (error) => {
         if (this.loaderService) {
@@ -562,13 +553,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           verticalPosition: 'bottom'
         })
         // Re-fetch so formData stays in sync
-        this.peerValidationService.getFormById(this.formId).subscribe({
-          next: (response) => {
-            this.formData = response?.result?.response || response
-            console.log('Form data refreshed after adding field:', this.formData)
-          },
-          error: (err) => console.error('Failed to refresh form data:', err)
-        })
+        this.refreshFormData(this.formId)
       },
       error: (error) => {
         if (this.loaderService) {
@@ -601,19 +586,20 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     }
 
     const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
-    const payload = { ...baseFormData }
 
-    this.peerValidationService.publishForm(this.formId, payload).subscribe({
+    this.peerValidationService.publishForm(this.formId).subscribe({
       next: () => {
-        if (this.loaderService) {
-          this.loaderService.changeLoaderState(false)
-        }
         this.snackBar.open('Survey published successfully', '', {
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         })
-        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+        setTimeout(() => {
+          if (this.loaderService) {
+            this.loaderService.changeLoaderState(false)
+          }
+          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+        }, 2000)
       },
       error: (error) => {
         if (this.loaderService) {

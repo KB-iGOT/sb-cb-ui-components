@@ -70,6 +70,22 @@
   width: 100%;
 }
 
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+
+  .category-dropdown {
+    flex: 0 0 200px;
+    min-width: 200px;
+  }
+
+  .search-field {
+    flex: 1;
+  }
+}
+
 .field-group {
   display: flex;
   gap: 12px;

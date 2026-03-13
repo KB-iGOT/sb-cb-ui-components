@@ -17,14 +17,23 @@
         </div>
       </div>
 
-      <!-- Search Bar (Only show when no course is selected) -->
-      <mat-form-field appearance="outline" class="full-width" *ngIf="!selectedCourse">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput placeholder="Search Content by Name, Organisation" formControlName="course"
-          (input)="onCourseSearch($event)">
-        <mat-hint align="start">Only the live content or program will be searchable here</mat-hint>
-        <mat-hint align="end">{{courseCharCount}}/70</mat-hint>
-      </mat-form-field>
+      <!-- Search Bar with Category Dropdown (Only show when no course is selected) -->
+      <div class="search-row" *ngIf="!selectedCourse">
+        <mat-form-field appearance="outline" class="category-dropdown">
+          <mat-select formControlName="courseCategory">
+            <mat-option *ngFor="let category of courseCategoryList" [value]="category">
+              {{ category }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search Content by Name, Organisation" formControlName="course"
+            (input)="onCourseSearch($event)">
+          <mat-hint align="start">Only the live content or program will be searchable here</mat-hint>
+          <mat-hint align="end">{{courseCharCount}}/70</mat-hint>
+        </mat-form-field>
+      </div>
 
       <!-- Course Cards (Only show when no course is selected) -->
       <div class="course-list-container" *ngIf="!selectedCourse && courseSearchResults.length > 0">
@@ -83,9 +92,8 @@
       </div>
 
       <!-- No results state (Only show when no course is selected) -->
-      <div class="no-results-container"
-        *ngIf="!selectedCourse && !isSearching && courseSearchResults.length === 0 && currentSearchQuery">
-        <p>No courses found</p>
+      <div class="no-results-container" *ngIf="!selectedCourse && !isSearching && courseSearchResults.length === 0">
+        <p>No {{ getCourseCategoryValue() || 'content'}} found</p>
       </div>
     </div>
 
@@ -121,7 +129,7 @@
             <span class="custom-tooltip-box">
               Learners who completed the course within this range will receive the survey.
               <br>
-              <strong>Default: 60 days | Maximum: 180 days</strong>
+              <strong>Default: 90 days | Maximum: 180 days</strong>
             </span>
           </span>
         </label>

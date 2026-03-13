@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 
 const API_END_POINTS = {
-  CONTENT_SEARCH: 'apis/proxies/v8/sunbirdigot/search',
+  CONTENT_SEARCH: 'apis/proxies/v8/sunbirdigot/v4/search',
   SAVE_DRAFT: 'apis/proxies/v8/forms/mdo/peersurvey',
   FORM_READ: (id: any) => `apis/proxies/v8/forms/v2/getFormById?formId=${id}`,
   UPDATE_FORM: (id: any) => `apis/proxies/v8/forms/mdo/update/peersurvey/${id}`,
   PEER_VALIDATION_SEARCH: `apis/proxies/v8/forms/mdo/peersurvey/search`,
-  PUBLISH_FORM: (id: any) => `apis/proxies/v8/forms/mdo/peersurvey/publish/${id}`,
-  ARCHIVE_FORM: (id: any) => `apis/proxies/v8/forms/mdo/peersurvey/archive/${id}`
+  PUBLISH_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/publish/${id}`,
+  ARCHIVE_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/archive/${id}`,
+  END_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/end/${id}`
 }
 @Injectable({
   providedIn: 'root'
@@ -44,12 +45,16 @@ export class PeerValidationService {
     return this.http.put(API_END_POINTS.UPDATE_FORM(id), payload)
   }
 
-  publishForm(id: any, payload: any): Observable<any> {
-    return this.http.put(API_END_POINTS.PUBLISH_FORM(id), payload)
+  publishForm(id: any): Observable<any> {
+    return this.http.put(API_END_POINTS.PUBLISH_FORM(id), {})
   }
 
-  archiveForm(id: any, payload: any): Observable<any> {
-    return this.http.put(API_END_POINTS.ARCHIVE_FORM(id), payload)
+  archiveForm(id: any): Observable<any> {
+    return this.http.put(API_END_POINTS.ARCHIVE_FORM(id), {})
+  }
+
+  endForm(id: any): Observable<any> {
+    return this.http.put(API_END_POINTS.END_FORM(id), {})
   }
 
   searchPeerValidations(payload: any): Observable<any> {

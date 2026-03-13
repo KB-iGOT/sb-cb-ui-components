@@ -235,9 +235,14 @@
     color: #92400E;
   }
 
-  &.status-end {
+  &.status-ended {
     background-color: #FEE2E2;
     color: #991B1B;
+  }
+
+  &.status-archived {
+    background-color: #E5E7EB;
+    color: #374151;
   }
 }
 
