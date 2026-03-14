@@ -199,6 +199,15 @@ export class DomainConfService {
     return config.features.routes[feature] ?? true
   }
 
+  isFeatureByPageEnabled(pageName: string, feature: string): boolean {
+    const config = this.getTenantConfig()
+    const pageFeatures = config?.features?.[pageName]
+    if (!pageFeatures || typeof pageFeatures !== 'object') {
+      return true
+    }
+    return (pageFeatures as { [feature: string]: boolean })[feature] ?? true
+  }
+
   /** Returns all feature flags for the current tenant */
   getFeatures(): ITenantFeatures {
     return this.getTenantConfig().features || {}
