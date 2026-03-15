@@ -1,0 +1,9 @@
+@use '@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
+
+$user-size: 100%;
+
+.content-type-class {
+    color: #5F5F5F;
+    // font: 14px/21px Poppins-Regular;
+}

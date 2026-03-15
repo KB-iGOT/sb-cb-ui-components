@@ -16,6 +16,8 @@ export class NotificationDropdownComponent implements OnInit {
   response: any
   notifications: any[] = []
   alerts: any
+  mandatoryNotifications: any[] = []
+  mandatoryNotificationsCount: number = 0
   isLoading = false
 
   constructor(private libNotificationService: LibNotificationsService,
@@ -25,6 +27,17 @@ export class NotificationDropdownComponent implements OnInit {
 
   ngOnInit() {
     this.getUserNotifications()
+    this.getMandatoryNotifications()
+  }
+
+  getMandatoryNotifications() {
+    this.libNotificationService.getMandatoryNotifications(0, 5).subscribe((res: any) => {
+      let notifications = _.get(res, 'result.notifications', [])
+      this.mandatoryNotifications = notifications
+      this.mandatoryNotificationsCount = notifications.length
+    }, error => {
+      console.error("Error fetching mandatory notifications", error)
+    })
   }
 
   getUserNotifications() {
@@ -42,8 +55,11 @@ export class NotificationDropdownComponent implements OnInit {
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
-    console.log("currentTab", this.currentTab)
-    this.getUserNotifications()
+    if (type === 'MANDATORY') {
+      this.notifications = this.mandatoryNotifications
+    } else {
+      this.getUserNotifications()
+    }
     event.stopPropagation()
   }
 
@@ -53,9 +69,29 @@ export class NotificationDropdownComponent implements OnInit {
 
   redirectToNotification(notification: any) {
     if (!notification.read) {
-      this.markAsRead(notification)
+      if (this.currentTab === 'MANDATORY') {
+        this.markMandatoryAsRead(notification)
+      } else {
+        this.markAsRead(notification)
+      }
     }
     this.viewAllClick.emit(notification)
+  }
+
+  markMandatoryAsRead(notification: any) {
+    let request: any = {
+        request: {
+            id: notification.notification_id,
+            created_at: notification.created_at,
+            type : notification.type
+        }
+    }
+    this.libNotificationService.markMandatoryAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+      }
+    })
   }
 
   markAsRead(notification: any) {

@@ -36,6 +36,7 @@ import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.modul
 import { PipePublicURLModule } from '@sunbird-cb/utils-v2'
 import { AvailableLanguagesComponent } from './available-languages/available-languages.component'
 import { KnowledgeLevelModule } from '../knowledge-level/knowledge-level.module'
+import { BadgeStatsComponent } from './badge-stats/badge-stats.component'
 
 
 @NgModule({
@@ -54,7 +55,8 @@ import { KnowledgeLevelModule } from '../knowledge-level/knowledge-level.module'
         CardAssessmentComponent,
         CardProgressPortraitLibComponent,
         CardMdoChannelV1Component,
-        AvailableLanguagesComponent
+        AvailableLanguagesComponent,
+        BadgeStatsComponent
     ],
     imports: [
         CommonModule,
@@ -96,7 +98,8 @@ import { KnowledgeLevelModule } from '../knowledge-level/knowledge-level.module'
         CardKarmaProgramsV2Component,
         CardPortraitExtComponent,
         AvailableLanguagesComponent,
-        ProviderCardComponent
+        ProviderCardComponent,
+        BadgeStatsComponent
     ]
 })
 export class CardsModule { }

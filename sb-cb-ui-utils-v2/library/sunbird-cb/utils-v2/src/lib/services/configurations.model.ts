@@ -73,6 +73,7 @@ export namespace NsInstanceConfig {
     competency?: ICompetencyKeys,
     devnagiriMultiLangEnabled?: any,
     completionSurvey: any
+    globalConfig: any
   }
 
   export interface ICompetencyKeys {
@@ -325,6 +326,7 @@ export namespace NsUser {
     profileBannerUrl?: string
     mobile?: string
     userRootOrg?: any
+    channel?: string
   }
 
   export interface INodebbUserProfile {

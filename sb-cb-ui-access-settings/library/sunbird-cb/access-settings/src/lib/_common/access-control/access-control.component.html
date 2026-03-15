@@ -89,7 +89,7 @@
                         </div>
                       </mat-panel-title>
                       <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="!shouldDisabledRemoveUserGroupBtn(rule.get('name')?.value)">
+                        <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC && (config?.application !== MDO_APPLICATION || (config?.application === MDO_APPLICATION && config?.mdoContent?.status === 'Live' && userGroup?.length > 1))">
                           <button
                             [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                             mat-icon-button
@@ -158,7 +158,7 @@
                               </div>
                               <div class="action-more-options flex justify-end">
                                 <div class="flex gap-4">
-                                  <ng-container *ngIf="!shouldDisabledConditionBtn(rule.get('name')?.value)">
+                                  <ng-container *ngIf="content?.accessSetting !== MDO_SPECIFIC">
                                     <button
                                       mat-icon-button
                                       aria-label="delete condition"
