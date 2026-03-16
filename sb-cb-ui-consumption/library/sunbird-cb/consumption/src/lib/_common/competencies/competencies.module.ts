@@ -2,11 +2,10 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormsModule } from '@angular/forms'
 
-// Angular Material Legacy imports (following project pattern)
-import { MatLegacyRadioModule } from '@angular/material/legacy-radio'
-import { MatLegacyFormFieldModule } from '@angular/material/legacy-form-field'
-import { MatLegacyInputModule } from '@angular/material/legacy-input'
-import { MatLegacyButtonModule } from '@angular/material/legacy-button'
+import { MatRadioModule } from '@angular/material/radio'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 
 // Local pipe imports
@@ -23,10 +22,10 @@ import { CompetencyListComponent } from './competency-list/competency-list.compo
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatLegacyRadioModule,
-    MatLegacyFormFieldModule,
-    MatLegacyInputModule,
-    MatLegacyButtonModule,
+    MatRadioModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
     MatIconModule,
     OrderByPipeModule
   ],

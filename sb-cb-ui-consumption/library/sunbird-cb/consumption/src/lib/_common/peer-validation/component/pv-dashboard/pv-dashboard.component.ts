@@ -7,6 +7,7 @@ import { debounceTime } from 'rxjs/operators'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 import { PeerValidationService } from '../../service/peer-validation.service'
 import { ILoaderService, LOADER_SERVICE } from '../../service/loader-service.token'
+import { MatDialog } from '@angular/material/dialog'
 
 interface Survey {
   id: string

@@ -79,7 +79,8 @@ export interface CompetencyData {
   styleUrls: [
     './competency-list.component.scss',
     '../../../styles/round-controls.scss'
-  ]
+  ],
+  standalone: false
 })
 export class CompetencyListComponent implements OnInit, OnChanges {
 
