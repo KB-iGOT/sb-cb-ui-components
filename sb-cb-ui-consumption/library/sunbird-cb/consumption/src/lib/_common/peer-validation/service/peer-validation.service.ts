@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
+import { Router } from '@angular/router'
 import { Observable } from 'rxjs'
 
 const API_END_POINTS = {
@@ -10,7 +11,10 @@ const API_END_POINTS = {
   PEER_VALIDATION_SEARCH: `apis/proxies/v8/forms/mdo/peersurvey/search`,
   PUBLISH_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/publish/${id}`,
   ARCHIVE_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/archive/${id}`,
-  END_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/end/${id}`
+  END_FORM: (id: any) => `apis/proxies/v8/forms/peersurvey/end/${id}`,
+  SPV_CREATE_FORM: 'apis/proxies/v8/forms/spv/peersurvey',
+  SPV_UPDATE_FORM: (id: any) => `apis/proxies/v8/forms/spv/update/peersurvey/${id}`,
+  SPV_PEER_VALIDATION_SEARCH: `apis/proxies/v8/forms/spv/peersurvey/search`
 }
 @Injectable({
   providedIn: 'root'
@@ -19,7 +23,11 @@ export class PeerValidationService {
 
   private selectedCourse: any
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
+
+  get isSpvRoute(): boolean {
+    return this.router.url.includes('spv/peer-validation')
+  }
 
   searchContent(payload: any): Observable<any> {
     return this.http.post(API_END_POINTS.CONTENT_SEARCH, payload)
@@ -34,7 +42,8 @@ export class PeerValidationService {
   }
 
   saveDraft(payload: any): Observable<any> {
-    return this.http.post(API_END_POINTS.SAVE_DRAFT, payload)
+    const url = this.isSpvRoute ? API_END_POINTS.SPV_CREATE_FORM : API_END_POINTS.SAVE_DRAFT
+    return this.http.post(url, payload)
   }
 
   getFormById(id: any): Observable<any> {
@@ -42,7 +51,8 @@ export class PeerValidationService {
   }
 
   updateForm(id: any, payload: any): Observable<any> {
-    return this.http.put(API_END_POINTS.UPDATE_FORM(id), payload)
+    const url = this.isSpvRoute ? API_END_POINTS.SPV_UPDATE_FORM(id) : API_END_POINTS.UPDATE_FORM(id)
+    return this.http.put(url, payload)
   }
 
   publishForm(id: any): Observable<any> {
@@ -58,6 +68,7 @@ export class PeerValidationService {
   }
 
   searchPeerValidations(payload: any): Observable<any> {
-    return this.http.post(API_END_POINTS.PEER_VALIDATION_SEARCH, payload)
+    const url = this.isSpvRoute ? API_END_POINTS.SPV_PEER_VALIDATION_SEARCH : API_END_POINTS.PEER_VALIDATION_SEARCH
+    return this.http.post(url, payload)
   }
 }
