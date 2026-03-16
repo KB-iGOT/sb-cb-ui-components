@@ -15,8 +15,11 @@ export class NotificationDropdownComponent implements OnInit {
   response: any
   notifications: any[] = []
   alerts: any
+  mandatoryNotifications: any[] = []
+  mandatoryNotificationsCount: number = 0
   isLoading = false
-
+  peerValidations: any[] = []
+  peerValidationsCount: number = 0
   constructor(private libNotificationService: LibNotificationsService,
   ) {
 
@@ -24,6 +27,29 @@ export class NotificationDropdownComponent implements OnInit {
 
   ngOnInit() {
     this.getUserNotifications()
+    this.getMandatoryNotifications()
+    this.getPeerValidationNotifications()
+  }
+
+  getMandatoryNotifications() {
+    this.libNotificationService.getMandatoryNotifications(0, 5).subscribe((res: any) => {
+      let notifications = _.get(res, 'result.notifications', [])
+      this.mandatoryNotifications = notifications
+      this.mandatoryNotificationsCount = notifications.length
+    }, error => {
+      console.error("Error fetching mandatory notifications", error)
+    })
+  }
+
+  getPeerValidationNotifications() {
+    this.libNotificationService.getNotifications(0, 5, 'PEER_VALIDATION').subscribe((res: any) => {
+      console.log("Peer validation notifications response ", res)
+      const notifications = _.get(res, 'result.notifications', [])
+      this.peerValidations = notifications
+      this.peerValidationsCount = notifications.length
+    }, error => {
+      console.error('Error fetching peer validation notifications', error)
+    })
   }
 
   getUserNotifications() {
@@ -31,7 +57,11 @@ export class NotificationDropdownComponent implements OnInit {
     this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
       this.notifications = _.get(res, 'result.notifications', [])
       const _alerts = _.get(res, 'result.subtypeStats', [])
-      this.alerts = _alerts.find(notification => notification.name === 'ALERT')
+      this.alerts = _alerts.find((notification: any) => notification.name === 'ALERT')
+      const peerValidationEntries = _alerts.filter((item: any) =>
+        item.name && item.name.toUpperCase() === 'PEER_VALIDATION')
+      this.peerValidationsCount = peerValidationEntries.reduce((sum: number, item: any) =>
+        sum + (+item.unread || 0) + (+item.read || 0), 0)
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -41,8 +71,13 @@ export class NotificationDropdownComponent implements OnInit {
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
-    console.log("currentTab", this.currentTab)
-    this.getUserNotifications()
+    if (type === 'MANDATORY') {
+      this.notifications = this.mandatoryNotifications
+    } else if (type === 'PEER_VALIDATION') {
+      this.notifications = this.peerValidations
+    } else {
+      this.getUserNotifications()
+    }
     event.stopPropagation()
   }
 
@@ -52,9 +87,51 @@ export class NotificationDropdownComponent implements OnInit {
 
   redirectToNotification(notification: any) {
     if (!notification.read) {
-      this.markAsRead(notification)
+      if (this.currentTab === 'MANDATORY') {
+        this.markMandatoryAsRead(notification)
+      } else if (this.currentTab === 'PEER_VALIDATION') {
+        this.markPeerValidationAsRead(notification)
+      } else {
+        this.markAsRead(notification)
+      }
     }
     this.viewAllClick.emit(notification)
+  }
+
+  markMandatoryAsRead(notification: any) {
+    let request: any = {
+        request: {
+            id: notification.notification_id,
+            created_at: notification.created_at,
+            type : notification.type
+        }
+    }
+    this.libNotificationService.markMandatoryAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+      }
+    })
+  }
+
+  markPeerValidationAsRead(notification: any) {
+    const request: any = {
+      request: {
+        type: 'individual',
+        ids: [notification.notification_id]
+      }
+    }
+    this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+        const index = this.peerValidations.findIndex((n: any) => n.notification_id === notification.notification_id)
+        if (index !== -1) {
+          this.peerValidations[index].read = true
+        }
+        this.peerValidationsCount = this.peerValidations.filter((n: any) => !n.read).length
+      }
+    })
   }
 
   markAsRead(notification: any) {
@@ -85,6 +162,8 @@ export class NotificationDropdownComponent implements OnInit {
         return 'assets/icons/notifications-engine/event.svg'
       case 'DISCUSSION':
         return 'assets/icons/notifications-engine/discuss.svg'
+      case 'PEER_VALIDATION':
+        return 'assets/icons/notifications-engine/how_to_reg 1.svg'
       default:
         return 'assets/icons/notifications-engine/learn.svg'
     }
