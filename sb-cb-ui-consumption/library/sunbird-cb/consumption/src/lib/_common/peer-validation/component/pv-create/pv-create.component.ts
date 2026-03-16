@@ -8,6 +8,7 @@ import { PvConfigStepComponent } from '../pv-config-step/pv-config-step.componen
 import { HorizontalDynamicStepperComponent } from '../../../horizontal-dynamic-stepper/horizontal-dynamic-stepper.component'
 import { PeerValidationService } from '../../service/peer-validation.service'
 import { LOADER_SERVICE, ILoaderService } from '../../service/loader-service.token'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 @Component({
   selector: 'sb-uic-pv-create',
@@ -34,6 +35,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private peerValidationService: PeerValidationService,
+    private configSvc: ConfigurationsService,
     @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) { }
 
@@ -264,7 +266,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   buildDraftPayload(): any {
     const formData = this.configStepComponent.configForm.value
     const course = this.configStepComponent.selectedCourse
-
+    const userProfile: any = this.configSvc?.userProfile || ''
     const endDate = formData.endDate ? new Date(formData.endDate).toISOString() : ''
 
     const payload: any = {
@@ -294,6 +296,13 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
         delete payload[key]
       }
     })
+
+    if (this.peerValidationService.isSpvRoute) {
+      payload.createdFor = [{
+        orgId: userProfile?.rootOrgId || '',
+        orgName: userProfile?.departmentName || '',
+      }]
+    }
 
     return payload
   }

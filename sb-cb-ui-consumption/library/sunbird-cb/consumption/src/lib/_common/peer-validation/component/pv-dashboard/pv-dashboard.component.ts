@@ -8,6 +8,7 @@ import { ConfirmationDialogComponent } from '../../../dialog-components/confirma
 import { PeerValidationService } from '../../service/peer-validation.service'
 import { ILoaderService, LOADER_SERVICE } from '../../service/loader-service.token'
 import { MatDialog } from '@angular/material/dialog'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 interface Survey {
   id: string
@@ -69,6 +70,7 @@ export class PvDashboardComponent implements OnInit {
     private route: ActivatedRoute,
     private peerValidationService: PeerValidationService,
     private dialog: MatDialog,
+    private configSvc: ConfigurationsService,
     @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) { }
 
@@ -144,6 +146,8 @@ export class PvDashboardComponent implements OnInit {
       'archived': 'Archived'
     }
 
+    const userProfile: any = this.configSvc?.userProfile || ''
+
     const pageSize = this.paginator?.pageSize || 15
     const pageIndex = this.paginator?.pageIndex || 0
 
@@ -179,6 +183,13 @@ export class PvDashboardComponent implements OnInit {
     }
     if (endDate) {
       payload.filters['endDateTo'] = new Date(endDate).getTime()
+    }
+
+    // Add orgIds filter for SPV route
+    if (this.isSPVRoute) {
+      payload.filters['orgIds'] = [
+        userProfile?.rootOrgId || '',
+      ]
     }
 
     return payload
