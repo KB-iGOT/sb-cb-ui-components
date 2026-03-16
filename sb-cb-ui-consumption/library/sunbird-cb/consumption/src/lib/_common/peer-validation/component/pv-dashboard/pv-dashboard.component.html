@@ -141,7 +141,8 @@
       <ng-container matColumnDef="submissionRate">
         <th mat-header-cell *matHeaderCellDef>
           Submission Rate
-          <mat-icon class="info-icon" matTooltip="Submission rate information">info_outline</mat-icon>
+          <mat-icon class="info-icon"
+            matTooltip="(Number of submissions by learner/ number of times user were asked to fill the survey) * 100">info_outline</mat-icon>
         </th>
         <td mat-cell *matCellDef="let row">
           {{row.submissionCount}}/{{row.totalCount}} ({{row.submissionRate}})

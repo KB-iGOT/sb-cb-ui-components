@@ -38,7 +38,9 @@
 
     <!-- Additional Questions Section -->
     <div class="additional-questions-section">
-      <h3 class="additional-title">Additional Question ({{additionalQuestionCount}}/2)</h3>
+      <h3 class="additional-title flex flex-middle gap-1">Additional Question ({{additionalQuestionCount}}/2)
+        <mat-icon class="info-icon pt-1" matTooltip="You may add 2 more questions">info_outline</mat-icon>
+      </h3>
 
       <!-- Saved Additional Questions -->
       <div class="saved-questions" *ngIf="savedAdditionalQuestions.length > 0">
