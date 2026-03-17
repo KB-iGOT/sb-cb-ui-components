@@ -60,6 +60,10 @@ export class PvDashboardComponent implements OnInit {
 
   hasActiveFilters = false
 
+  compareMdo = (a: MDOOption, b: MDOOption): boolean => {
+    return a && b ? a.orgId === b.orgId : a === b
+  }
+
   private computeHasActiveFilters(): boolean {
     if (!this.filterForm) return false
     const v = this.filterForm.value
@@ -200,7 +204,7 @@ export class PvDashboardComponent implements OnInit {
     if (this.isSPVRoute) {
       const selectedMdos = this.filterForm?.value?.mdo || []
       const mdoOrgIds = Array.isArray(selectedMdos) ? selectedMdos.map((mdo: any) => mdo.orgId).filter((id: string) => id) : []
-      
+
       if (mdoOrgIds.length > 0) {
         payload.filters['orgIds'] = mdoOrgIds
       } else {
@@ -282,8 +286,8 @@ export class PvDashboardComponent implements OnInit {
         this.archivedCount = statusFacets['Archived'] || 0
         this.allCount = Object.values(statusFacets as Record<string, number>).reduce((sum: number, val: number) => sum + val, 0) || response?.result?.response?.count || 0
 
-        // Extract MDO list from facets.orgNames for SPV route
-        if (this.isSPVRoute) {
+        // Extract MDO list from facets.orgNames for SPV route (only populate once)
+        if (this.isSPVRoute && this.mdoOptions.length === 0) {
           const orgNamesFacets = response?.result?.response?.facets?.orgNames || []
           if (orgNamesFacets && orgNamesFacets.length > 0) {
             this.mdoOptions = orgNamesFacets.map((org: any) => ({
@@ -291,7 +295,6 @@ export class PvDashboardComponent implements OnInit {
               orgId: org.orgId,
               count: org.count
             } as MDOOption))
-            this.mdoDisplayOptions = this.mdoOptions
           }
         }
       },
