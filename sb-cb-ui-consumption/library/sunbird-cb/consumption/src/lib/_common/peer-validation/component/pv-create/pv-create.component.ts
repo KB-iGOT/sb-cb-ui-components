@@ -78,7 +78,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
             horizontalPosition: 'center',
             verticalPosition: 'bottom'
           })
-          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          if (this.peerValidationService.isSpvRoute) {
+            this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+          } else {
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          }
           return
         }
         this.formData = data
@@ -97,7 +101,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         })
-        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+        if (this.peerValidationService.isSpvRoute) {
+          this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+        } else {
+          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+        }
       }
     })
   }
@@ -178,8 +186,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
   backToDashboard() {
     // Navigate back to survey dashboard
-    const route = this.isSPVRoute ? '/app/home/spv/peer-validation' : '/app/home/peer-validation'
-    this.router.navigate([route], { queryParams: { tab: 'all' } })
+    if (this.peerValidationService.isSpvRoute) {
+      this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'all' } })
+    } else {
+      this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'all' } })
+    }
   }
 
   onLoaderChange(value: boolean) {
@@ -211,7 +222,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           if (this.loaderService) {
             this.loaderService.changeLoaderState(false)
           }
-          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          if (this.peerValidationService.isSpvRoute) {
+            this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+          } else {
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          }
           return
         }
         // Update existing form
@@ -226,7 +241,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               horizontalPosition: 'center',
               verticalPosition: 'bottom'
             })
-            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            if (this.peerValidationService.isSpvRoute) {
+              this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+            } else {
+              this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            }
           },
           error: (error) => {
             if (this.loaderService) {
@@ -253,7 +272,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               horizontalPosition: 'center',
               verticalPosition: 'bottom'
             })
-            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            if (this.peerValidationService.isSpvRoute) {
+              this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+            } else {
+              this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            }
           },
           error: (error) => {
             if (this.loaderService) {
@@ -269,7 +292,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
         })
       }
     } else {
-      this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+      if (this.peerValidationService.isSpvRoute) {
+        this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+      } else {
+        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+      }
     }
   }
 
@@ -434,7 +461,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
             this.refreshFormData(this.formId, () => {
               if (this.loaderService) { this.loaderService.changeLoaderState(false) }
               // Silently update URL to edit/:formId without triggering route.params subscription
-              this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
+              if (this.peerValidationService.isSpvRoute) {
+                this.location.replaceState(`/app/home/spv/peer-validation/edit/${this.formId}`)
+              } else {
+                this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
+              }
               this.currentStepperIndex = 1
             })
           },
@@ -640,7 +671,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           if (this.loaderService) {
             this.loaderService.changeLoaderState(false)
           }
-          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+          if (this.peerValidationService.isSpvRoute) {
+            this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'active' } })
+          } else {
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+          }
         }, 2000)
       },
       error: (error) => {

@@ -171,6 +171,10 @@
   }
 }
 
+::ng-deep .mat-mdc-option .mat-pseudo-checkbox-checked::after {
+  color: black !important;
+}
+
 // Table Section
 .table-container {
   background: white;
@@ -265,17 +269,18 @@
 }
 
 // Menu Styling
-:host ::ng-deep .mat-mdc-menu-content {
+::ng-deep .mat-mdc-menu-content {
   .mat-mdc-menu-item {
+    display: flex;
+    align-items: center;
+
     .mat-icon {
       margin-right: 8px;
       color: #666;
-      vertical-align: middle;
     }
-
-    span {
-      vertical-align: middle;
-    }
+  }
+  .mat-mdc-menu-item-text {
+    height: auto !important;
   }
 }
 
