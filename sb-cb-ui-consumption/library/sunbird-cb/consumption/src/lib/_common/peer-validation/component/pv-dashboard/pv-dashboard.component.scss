@@ -172,6 +172,10 @@
   .mat-select-arrow {
     margin: 0;
   }
+
+  .mat-pseudo-checkbox::after {
+    color: black !important;
+  }
 }
 
 // Table Section
