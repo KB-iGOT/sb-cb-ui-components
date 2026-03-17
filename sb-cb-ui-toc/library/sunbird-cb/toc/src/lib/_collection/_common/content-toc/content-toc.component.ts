@@ -54,6 +54,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() sideNavBarOpened = false
   @Input() languageList = []
   @Input() lockCertificate = false
+  @Input() fromMDO = false
   @Output() playResumeForAI = new EventEmitter()
   @Output() enrollUserToAI = new EventEmitter()
   @Output() trigerCompletionSurveyForm = new EventEmitter<boolean>()

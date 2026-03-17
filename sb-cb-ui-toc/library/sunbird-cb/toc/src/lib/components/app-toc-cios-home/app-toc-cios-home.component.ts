@@ -43,7 +43,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   currentLang: any = 'en'
   discussWidgetData!: NsDiscussionV2.ICommentWidgetData
   showProviderTips = false
-
+  fromMDO = false
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 

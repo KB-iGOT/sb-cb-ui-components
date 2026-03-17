@@ -227,7 +227,8 @@
                                     [baseContentReadData]="extContentReadData"
                                     [showMarketPlaceCertificate]="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length >  0 && userExtCourseEnroll?.progress === 100"
                                     [content]="extContentReadData" [fromMarketPlace]="true"
-                                    [skeletonLoader]="skeletonLoader">
+                                    [skeletonLoader]="skeletonLoader"
+                                    [fromMDO]="fromMDO">
                                 </ws-widget-app-toc-about>
                             </ng-container>
                         </div>

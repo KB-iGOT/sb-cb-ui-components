@@ -56,6 +56,7 @@ export class AnnouncementsComponent implements OnInit {
   }
 
   ngOnInit() {
+    if(!this.objectData) this.objectData = {}
     if (this.fetchDataFromApi) {
       this.isLoading = true
       this.fetchData()
@@ -82,7 +83,7 @@ export class AnnouncementsComponent implements OnInit {
       facets: [
         "channel"
       ],
-      pageSize: this.objectData.pageSize
+      pageSize: this.objectData?.pageSize || 15
     }
     this.insightSvc.fetchAnnouncementsData(request).subscribe((res: any) => {
       if (res && res.result && res.result.data) {

@@ -1,0 +1,21 @@
+@use '@sunbird-cb/design-system/src/styles/ws-common';
+@use '@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
+
+mat-expansion-panel {
+  margin: 36px;
+
+  mat-panel-description {
+    display: flex;
+    flex-grow: 0;
+  }
+}
+.border-margin{
+  border-right: 1px  solid lightgray;
+  min-height: 950px;
+  min-width: 275px;
+}
+.ws-active-left-menu {
+  background-color: #eee !important;
+  font-weight: 700;
+}
