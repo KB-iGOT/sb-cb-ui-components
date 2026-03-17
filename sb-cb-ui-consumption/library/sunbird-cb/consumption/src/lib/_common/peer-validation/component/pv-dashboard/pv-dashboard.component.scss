@@ -161,6 +161,14 @@
   .mat-mdc-select-arrow-wrapper {
     height: 100%;
   }
+
+  .mat-select-arrow {
+    margin: 0;
+  }
+
+  .mat-pseudo-checkbox::after {
+    color: black !important;
+  }
 }
 
 // Table Section
