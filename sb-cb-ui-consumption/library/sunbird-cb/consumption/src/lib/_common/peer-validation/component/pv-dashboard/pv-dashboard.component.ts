@@ -228,6 +228,7 @@ export class PvDashboardComponent implements OnInit {
   }
 
   loadStatusCounts(): void {
+    const userProfile: any = this.configSvc?.userProfile || ''
     const payload: any = {
       query: this.filterForm.value.searchText || '',
       filters: { status: ['Ended', 'Draft', 'Active', 'Archived'] },
@@ -236,6 +237,12 @@ export class PvDashboardComponent implements OnInit {
       size: 0,
       sortBy: 'createdDate',
       sortOrder: 'DESC'
+    }
+
+    if (this.isSPVRoute) {
+      payload.filters['orgIds'] = [
+        userProfile?.rootOrgId || '',
+      ]
     }
 
     if (this.loaderService) {
