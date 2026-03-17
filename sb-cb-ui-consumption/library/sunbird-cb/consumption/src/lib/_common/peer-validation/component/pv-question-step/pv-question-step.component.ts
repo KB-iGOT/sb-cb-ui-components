@@ -87,7 +87,7 @@ export class PvQuestionStepComponent implements OnInit {
         order: f.order || 0,
         name: f.name || '',
         fieldType: f.fieldType || 'textarea',
-        isRequired: f.isRequired || false,
+        isRequired: f.isRequired || true,
         minLabel: f.minLabel || '',
         maxLabel: f.maxLabel || '',
         values: f.values || [],
@@ -108,7 +108,7 @@ export class PvQuestionStepComponent implements OnInit {
         type: f.fieldType === 'checkbox' ? 'multiple-mcq' : f.fieldType === 'radio' ? 'single-mcq' : 'text',
         question: f.name || '',
         selectionType: f.fieldType === 'checkbox' ? 'multiple-mcq' : f.fieldType === 'radio' ? 'single-mcq' : 'text',
-        isRequired: f.isRequired || false,
+        isRequired: f.isRequired || true,
         allowNA: f.notApplicable || false,
         options: (f.values || []).map((v: any) => v.value),
         fieldName: f.name || ''
@@ -135,7 +135,7 @@ export class PvQuestionStepComponent implements OnInit {
         order: f.order || 0,
         name: f.name || '',
         fieldType: f.fieldType || 'textarea',
-        isRequired: f.isRequired || false,
+        isRequired: f.isRequired || true,
         minLabel: f.minLabel || '',
         maxLabel: f.maxLabel || '',
         values: f.values || [],
@@ -174,7 +174,7 @@ export class PvQuestionStepComponent implements OnInit {
     this.mcqEditorForm = this.fb.group({
       question: ['', Validators.required],
       selectionType: ['Multiple selection-MCQs'],
-      isRequired: [false],
+      isRequired: [true],
       allowNA: [false],
       options: this.fb.array([
         this.fb.control('', Validators.required),
