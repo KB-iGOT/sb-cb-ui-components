@@ -474,6 +474,16 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   onStepChanged(index: number) {
     // Navigating forward from configuration step — run the same save/validate logic as Next
     if (this.currentStepperIndex === 0 && index > 0) {
+      // If validation fails, revert the MatStepper back to step 0
+      // (MatStepper visually advances before this event fires)
+      if (!this.configStepComponent || !this.configStepComponent.isFormValid()) {
+        setTimeout(() => {
+          if (this.stepperComponent) {
+            this.stepperComponent.goToStep(0)
+          }
+          this.cdr.detectChanges()
+        }, 0)
+      }
       this.onNext()
       return
     }
