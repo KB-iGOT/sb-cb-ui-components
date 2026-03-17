@@ -104,15 +104,25 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
   refreshFormData(formId: string | null, callback?: () => void): void {
     if (!formId) { return }
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
     of(null).pipe(
+      delay(1000), // Add a slight delay to ensure backend has processed the update before we fetch
       switchMap(() => this.peerValidationService.getFormById(formId))
     ).subscribe({
       next: (response) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
         this.formData = response?.result?.response || response
         this.captureSnapshot()
         if (callback) { callback() }
       },
       error: (err) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
         console.error('Failed to refresh form data:', err)
         if (callback) { callback() }
       }
@@ -134,7 +144,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
       identifier: ap.identifier || '',
       triggerAfter: ap.triggerAfter ?? 30,
       completionLookBack: ap.completionLookBack ?? 90,
-      endDate: this.formData?.endDate || ''
+      endDate: this.formData?.endDate ? new Date(this.formData.endDate).toISOString() : ''
     }
   }
 
@@ -335,6 +345,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           : (course.duration ? String(course.duration) : this.formData.additionalProperties?.duration || '0')
       }
     }
+
     return payload
   }
 
@@ -508,7 +519,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
     const updatedFields = (this.formData.fields || []).filter((f: any) => f.name !== fieldName)
     const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
-    const payload = { ...baseFormData, fields: updatedFields }
+    const payload = {
+      ...baseFormData,
+      fields: updatedFields,
+      endDate: this.formData.endDate ? new Date(this.formData.endDate).toISOString() : undefined
+    }
 
     if (this.loaderService) {
       this.loaderService.changeLoaderState(true)
@@ -549,7 +564,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     // Append the new field to formData.fields
     const updatedFields = [...(this.formData.fields || []), field]
     const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
-    const payload = { ...baseFormData, fields: updatedFields }
+    const payload = {
+      ...baseFormData,
+      fields: updatedFields,
+      endDate: this.formData.endDate ? new Date(this.formData.endDate).toISOString() : undefined
+    }
 
     if (this.loaderService) {
       this.loaderService.changeLoaderState(true)
