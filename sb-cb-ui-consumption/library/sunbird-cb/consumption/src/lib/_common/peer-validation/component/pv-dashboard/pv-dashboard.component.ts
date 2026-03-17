@@ -25,6 +25,12 @@ interface Survey {
   totalCount: number
 }
 
+interface MDOOption {
+  orgName: string
+  orgId: string
+  count: number
+}
+
 @Component({
   selector: 'sb-uic-pv-dashboard',
   templateUrl: './pv-dashboard.component.html',
@@ -50,7 +56,8 @@ export class PvDashboardComponent implements OnInit {
   isLoading = false
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended', 'Archived']
-  mdoOptions = ['All MDO', 'Governor Secretariat, Uttar Pradesh', 'PM Commissionerate of Health and Family Welfare Telangana', 'Karmayogi Bharat (SPV)']
+  mdoOptions: (string | MDOOption)[] = []
+  mdoDisplayOptions: (string | MDOOption)[] = []
 
   hasActiveFilters = false
 
@@ -61,7 +68,7 @@ export class PvDashboardComponent implements OnInit {
       !!v.startDate ||
       !!v.endDate ||
       (v.status && v.status !== 'All Status') ||
-      (v.mdo && v.mdo !== 'All MDO')
+      (v.mdo && Array.isArray(v.mdo) && v.mdo.length > 0)
   }
 
   constructor(
@@ -106,7 +113,7 @@ export class PvDashboardComponent implements OnInit {
     }
 
     if (this.isSPVRoute) {
-      formConfig.mdo = ['All MDO']
+      formConfig.mdo = [[]]
     }
 
     this.filterForm = this.fb.group(formConfig)
@@ -133,7 +140,7 @@ export class PvDashboardComponent implements OnInit {
       startDate: '',
       endDate: '',
       status: 'All Status',
-      ...(this.isSPVRoute ? { mdo: 'All MDO' } : {})
+      ...(this.isSPVRoute ? { mdo: [] } : {})
     })
     this.hasActiveFilters = false
   }
@@ -159,6 +166,11 @@ export class PvDashboardComponent implements OnInit {
       size: pageSize,
       sortBy: 'createdDate',
       sortOrder: 'DESC'
+    }
+
+    // Add orgNames facet for SPV route
+    if (this.isSPVRoute) {
+      payload.facets.push('orgNames')
     }
 
     // Add status filter based on tab
@@ -187,9 +199,16 @@ export class PvDashboardComponent implements OnInit {
 
     // Add orgIds filter for SPV route
     if (this.isSPVRoute) {
-      payload.filters['orgIds'] = [
-        userProfile?.rootOrgId || '',
-      ]
+      const selectedMdos = this.filterForm?.value?.mdo || []
+      const mdoOrgIds = Array.isArray(selectedMdos) ? selectedMdos.map((mdo: any) => mdo.orgId).filter((id: string) => id) : []
+      
+      if (mdoOrgIds.length > 0) {
+        payload.filters['orgIds'] = mdoOrgIds
+      } else {
+        payload.filters['orgIds'] = [
+          userProfile?.rootOrgId || '',
+        ]
+      }
     }
 
     return payload
@@ -244,6 +263,8 @@ export class PvDashboardComponent implements OnInit {
       payload.filters['orgIds'] = [
         userProfile?.rootOrgId || '',
       ]
+      // Add orgNames facet for SPV route to extract MDO list
+      payload.facets.push('orgNames')
     }
 
     if (this.loaderService) {
@@ -266,9 +287,12 @@ export class PvDashboardComponent implements OnInit {
         if (this.isSPVRoute) {
           const orgNamesFacets = response?.result?.response?.facets?.orgNames || []
           if (orgNamesFacets && orgNamesFacets.length > 0) {
-            this.mdoOptions = [
-              ...orgNamesFacets.map((org: any) => org.orgName)
-            ]
+            this.mdoOptions = orgNamesFacets.map((org: any) => ({
+              orgName: org.orgName,
+              orgId: org.orgId,
+              count: org.count
+            } as MDOOption))
+            this.mdoDisplayOptions = this.mdoOptions
           }
         }
       },
