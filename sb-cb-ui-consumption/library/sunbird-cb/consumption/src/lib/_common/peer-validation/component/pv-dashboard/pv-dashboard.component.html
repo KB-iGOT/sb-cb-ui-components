@@ -77,9 +77,15 @@
       <div class="filter-item mdo-filter mat-full-radius" *ngIf="isSPVRoute">
         <label class="filter-label">MDO</label>
         <mat-form-field appearance="outline" class="filter-field">
-          <mat-select formControlName="mdo" placeholder="Select MDO">
+          <mat-select formControlName="mdo" placeholder="Select MDO" multiple>
+            <mat-select-trigger>
+              <span *ngIf="filterForm.value.mdo && filterForm.value.mdo.length === 0">Select MDO</span>
+              <span *ngIf="filterForm.value.mdo && filterForm.value.mdo.length > 0">
+                {{filterForm.value.mdo.length}} MDO selected
+              </span>
+            </mat-select-trigger>
             <mat-option *ngFor="let mdo of mdoOptions" [value]="mdo">
-              {{mdo}}
+              <span *ngIf="mdo.orgName">{{mdo.orgName}} ({{mdo.count}})</span>
             </mat-option>
           </mat-select>
         </mat-form-field>
