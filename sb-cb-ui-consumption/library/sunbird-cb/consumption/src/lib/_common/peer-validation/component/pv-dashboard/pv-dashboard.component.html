@@ -169,11 +169,13 @@
               <mat-icon>edit</mat-icon>
               <span>Edit</span>
             </button>
-            <button mat-menu-item (click)="endSurvey(row)" *ngIf="row.status === 'Active'">
+            <button mat-menu-item (click)="endSurvey(row)"
+              *ngIf="row.status === 'Active' && row.createdBy === loggedInUserId">
               <mat-icon>stop_circle</mat-icon>
               <span>End Survey</span>
             </button>
-            <button mat-menu-item (click)="archiveSurvey(row)" *ngIf="row.status === 'Ended'">
+            <button mat-menu-item (click)="archiveSurvey(row)"
+              *ngIf="row.status === 'Ended' && row.createdBy === loggedInUserId">
               <mat-icon>archive</mat-icon>
               <span>Archive</span>
             </button>
