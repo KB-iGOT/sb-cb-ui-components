@@ -16,6 +16,7 @@ interface Survey {
   courseName: string
   thumbnail: string
   organisation?: string
+  createdBy?: string
   status: 'Draft' | 'Active' | 'Ended' | 'Archived'
   startDate: string
   endDate: string
@@ -54,6 +55,7 @@ export class PvDashboardComponent implements OnInit {
   archivedCount = 0
   isSPVRoute = false
   isLoading = false
+  loggedInUserId = ''
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended', 'Archived']
   mdoOptions: (string | MDOOption)[] = []
@@ -86,6 +88,9 @@ export class PvDashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Store logged-in user ID
+    this.loggedInUserId = this.configSvc?.userProfile?.userId || ''
+
     // Check if URL contains spv/peer-validation
     this.isSPVRoute = this.router.url.includes('spv/peer-validation')
 
@@ -314,6 +319,7 @@ export class PvDashboardComponent implements OnInit {
       courseName: item.title || '',
       thumbnail: item.additionalProperties?.thumbnail || '',
       organisation: item.createdFor?.[0]?.orgName || item.organisation || item.createdByName || '',
+      createdBy: item.createdBy || '',
       status: item.status || 'Draft',
       startDate: item.createdDate ? new Date(item.createdDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       endDate: item.endDate ? new Date(item.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
