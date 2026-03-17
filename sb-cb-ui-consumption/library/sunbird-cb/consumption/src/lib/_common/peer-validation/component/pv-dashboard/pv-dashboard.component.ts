@@ -313,7 +313,7 @@ export class PvDashboardComponent implements OnInit {
       formId: item.formId || '',
       courseName: item.title || '',
       thumbnail: item.additionalProperties?.thumbnail || '',
-      organisation: item.organisation || item.createdByName || '',
+      organisation: item.createdFor?.[0]?.orgName || item.organisation || item.createdByName || '',
       status: item.status || 'Draft',
       startDate: item.createdDate ? new Date(item.createdDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       endDate: item.endDate ? new Date(item.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
