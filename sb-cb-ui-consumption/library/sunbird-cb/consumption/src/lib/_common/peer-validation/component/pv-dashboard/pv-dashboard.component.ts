@@ -260,6 +260,16 @@ export class PvDashboardComponent implements OnInit {
         this.draftCount = statusFacets['Draft'] || 0
         this.archivedCount = statusFacets['Archived'] || 0
         this.allCount = Object.values(statusFacets as Record<string, number>).reduce((sum: number, val: number) => sum + val, 0) || response?.result?.response?.count || 0
+
+        // Extract MDO list from facets.orgNames for SPV route
+        if (this.isSPVRoute) {
+          const orgNamesFacets = response?.result?.response?.facets?.orgNames || []
+          if (orgNamesFacets && orgNamesFacets.length > 0) {
+            this.mdoOptions = [
+              ...orgNamesFacets.map((org: any) => org.orgName)
+            ]
+          }
+        }
       },
       error: () => {
         if (this.loaderService) {
