@@ -137,7 +137,7 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   capitalize(word: string): string {
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    return word.replace(/_/g, ' ').replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
   }
 
   getTimeAgo(dateString: string): string {
@@ -171,6 +171,8 @@ export class AllNotificationsComponent implements OnInit {
         return 'assets/icons/notifications-engine/event.svg'
       case 'DISCUSSION':
         return 'assets/icons/notifications-engine/discuss.svg'
+      case 'PEER_VALIDATION':
+        return 'assets/icons/notifications-engine/how_to_reg 1.svg'
       default:
         return 'assets/icons/notifications-engine/learn.svg'
     }
@@ -234,13 +236,23 @@ export class AllNotificationsComponent implements OnInit {
         isExpanded: this.fragment && this.fragment === notification.notification_id,
         content: []
       }))
-      if (updateTabs) { 
-        const tabs = _.get(res, 'result.subtypeStats', [])
-        tabs.forEach((tab: any) => {
-          this.tabs.push(tab)
-          if (tab.unread) {
-            this.unreadCount += tab.unread
-          }
+          
+      const tabs = _.get(res, 'result.subtypeStats', [])
+      this.tabs = [{ id: "all", name: 'all' }]
+      tabs.forEach((tab: any) => {
+        this.tabs.push(tab)
+        if (tab.unread) {
+          this.unreadCount += tab.unread
+        }
+      })
+      // Update count on each peer validation tab to show total across all peer validation tabs
+      const peerValidationTabs = this.tabs.filter((t: any) => t.name && t.name.toUpperCase() === 'PEER_VALIDATION')
+      if (peerValidationTabs.length > 1) {
+        const totalRead = peerValidationTabs.reduce((s: number, t: any) => s + (+t.read || 0), 0)
+        const totalUnread = peerValidationTabs.reduce((s: number, t: any) => s + (+t.unread || 0), 0)
+        peerValidationTabs.forEach((tab: any) => {
+          tab.read = totalRead
+          tab.unread = totalUnread
         })
       }
       if (this.currentTab) {

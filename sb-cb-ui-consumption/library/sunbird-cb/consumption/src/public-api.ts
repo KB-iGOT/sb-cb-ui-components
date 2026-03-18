@@ -128,6 +128,7 @@ export * from './lib/_common/peer-validation/component/pv-dashboard/pv-dashboard
 export * from './lib/_common/peer-validation/component/pv-create/pv-create.component'
 export * from './lib/_common/peer-validation/component/pv-question-step/pv-question-step.component'
 export * from './lib/_common/peer-validation/component/pv-config-step/pv-config-step.component'
+export * from './lib/_common/peer-validation/service/loader-service.token'
 
 export * from './lib/_common/create-request/create-request.module'
 export * from './lib/_common/create-request/components/create-request-form/create-request-form.component'
@@ -136,3 +137,8 @@ export * from './lib/_common/create-request/dialogs/add-authors/add-authors.comp
 export * from './lib/_common/filters/filters.module'
 export * from './lib/_common/filters/filter-by/filter-by.component'
 export * from './lib/_common/filters/search-sort-input/search-sort-input.component'
+export * from './lib/_common/cards/badge-modal/badge-modal.component'
+export * from './lib/_common/cards/badge-stats/badge-stats.component'
+
+export * from './lib/_common/competencies/competencies.module'
+export * from './lib/_common/competencies/competency-list/competency-list.component'
