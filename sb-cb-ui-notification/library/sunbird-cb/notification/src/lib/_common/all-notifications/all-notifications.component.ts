@@ -93,6 +93,8 @@ export class AllNotificationsComponent implements OnInit {
     if (!notification.read) {
       if (this.currentTab === 'MANDATORY') {
         this.markMandatoryAsRead(notification)
+      } else if (this.currentTab === 'PEER_VALIDATION') {
+        this.markPeerValidationAsRead(notification)
       } else {
         this.markAsRead(notification)
       }
@@ -118,11 +120,29 @@ export class AllNotificationsComponent implements OnInit {
     })
   }
 
+  markPeerValidationAsRead(notification: any) {
+    const request: any = {
+      request: {
+        type: 'individual',
+        ids: [notification.notification_id],
+        created_at: notification.created_at,
+      }
+    }
+    this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+        this.redirectTo.emit(notification)
+      }
+    })
+  }
+
   markAsRead(notification: any) {
     let request: any = {
       request: {
         type: "individual",
-        ids: [notification.notification_id]
+        ids: [notification.notification_id],
+        created_at: notification.created_at
       }
     }
     if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
