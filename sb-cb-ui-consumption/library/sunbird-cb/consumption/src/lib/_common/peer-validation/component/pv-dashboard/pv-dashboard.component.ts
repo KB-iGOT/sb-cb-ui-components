@@ -16,6 +16,7 @@ interface Survey {
   courseName: string
   thumbnail: string
   organisation?: string
+  createdBy?: string
   status: 'Draft' | 'Active' | 'Ended' | 'Archived'
   startDate: string
   endDate: string
@@ -23,6 +24,25 @@ interface Survey {
   submissionRate: string
   submissionCount: number
   totalCount: number
+}
+
+interface MDOOption {
+  orgName: string
+  orgId: string
+  count: number
+}
+
+interface DownloadReport {
+  id: string
+  formid: string
+  formtitle: string
+  orgname: string
+  downloadStatus: 'In Progress' | 'Ready'
+  fileName: string
+  generatedAt: number
+  requestedOn: string
+  fileUrl?: string
+  thumbnail?: string
 }
 
 @Component({
@@ -36,11 +56,16 @@ export class PvDashboardComponent implements OnInit {
 
   filterForm!: FormGroup
   displayedColumns: string[] = ['courseName', 'status', 'startDate', 'endDate', 'submissionRate', 'actions']
+  displayedDownloadColumns: string[] = ['courseName', 'organisation', 'requestedOn', 'downloadStatus', 'actions']
   dataSource = new MatTableDataSource<Survey>([])
   allSurveys: Survey[] = []
+  downloadReports: DownloadReport[] = []
+  paginatedDownloadReports: DownloadReport[] = []
   selectedTabIndex = 0
-  selectedTab: 'all' | 'active' | 'ended' | 'draft' | 'archived' = 'all'
+  selectedTab: 'all' | 'active' | 'ended' | 'draft' | 'archived' | 'download' = 'all'
   totalCount = 0
+  downloadTotalCount = 0
+  readonly downloadDefaultPageSize = 20
   allCount = 0
   activeCount = 0
   endedCount = 0
@@ -48,11 +73,17 @@ export class PvDashboardComponent implements OnInit {
   archivedCount = 0
   isSPVRoute = false
   isLoading = false
+  loggedInUserId = ''
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended', 'Archived']
-  mdoOptions = ['All MDO', 'Governor Secretariat, Uttar Pradesh', 'PM Commissionerate of Health and Family Welfare Telangana', 'Karmayogi Bharat (SPV)']
+  mdoOptions: (string | MDOOption)[] = []
+  mdoDisplayOptions: (string | MDOOption)[] = []
 
   hasActiveFilters = false
+
+  compareMdo = (a: MDOOption, b: MDOOption): boolean => {
+    return a && b ? a.orgId === b.orgId : a === b
+  }
 
   private computeHasActiveFilters(): boolean {
     if (!this.filterForm) return false
@@ -61,7 +92,7 @@ export class PvDashboardComponent implements OnInit {
       !!v.startDate ||
       !!v.endDate ||
       (v.status && v.status !== 'All Status') ||
-      (v.mdo && v.mdo !== 'All MDO')
+      (v.mdo && Array.isArray(v.mdo) && v.mdo.length > 0)
   }
 
   constructor(
@@ -75,6 +106,9 @@ export class PvDashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Store logged-in user ID
+    this.loggedInUserId = this.configSvc?.userProfile?.userId || ''
+
     // Check if URL contains spv/peer-validation
     this.isSPVRoute = this.router.url.includes('spv/peer-validation')
 
@@ -88,12 +122,17 @@ export class PvDashboardComponent implements OnInit {
     // Check for query parameter to select tab, then load
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
-        const tabMap: { [key: string]: number } = { 'all': 0, 'active': 1, 'ended': 2, 'draft': 3, 'archived': 4 }
-        this.selectedTab = params['tab'] as 'all' | 'active' | 'ended' | 'draft' | 'archived' || 'all'
+        const tabMap: { [key: string]: number } = { 'all': 0, 'active': 1, 'ended': 2, 'draft': 3, 'archived': 4, 'download': 5 }
+        this.selectedTab = params['tab'] as 'all' | 'active' | 'ended' | 'draft' | 'archived' | 'download' || 'all'
         this.selectedTabIndex = tabMap[params['tab']] || 0
       }
       this.updateDisplayedColumns()
-      this.loadSurveys()
+      if (this.selectedTab === 'download') {
+        this.loadDownloadReports()
+        this.loadStatusCounts()
+      } else {
+        this.loadSurveys()
+      }
     })
   }
 
@@ -106,7 +145,7 @@ export class PvDashboardComponent implements OnInit {
     }
 
     if (this.isSPVRoute) {
-      formConfig.mdo = ['All MDO']
+      formConfig.mdo = [[]]
     }
 
     this.filterForm = this.fb.group(formConfig)
@@ -133,7 +172,7 @@ export class PvDashboardComponent implements OnInit {
       startDate: '',
       endDate: '',
       status: 'All Status',
-      ...(this.isSPVRoute ? { mdo: 'All MDO' } : {})
+      ...(this.isSPVRoute ? { mdo: [] } : {})
     })
     this.hasActiveFilters = false
   }
@@ -159,6 +198,11 @@ export class PvDashboardComponent implements OnInit {
       size: pageSize,
       sortBy: 'createdDate',
       sortOrder: 'DESC'
+    }
+
+    // Add orgNames facet for SPV route
+    if (this.isSPVRoute) {
+      payload.facets.push('orgNames')
     }
 
     // Add status filter based on tab
@@ -187,15 +231,26 @@ export class PvDashboardComponent implements OnInit {
 
     // Add orgIds filter for SPV route
     if (this.isSPVRoute) {
-      payload.filters['orgIds'] = [
-        userProfile?.rootOrgId || '',
-      ]
+      const selectedMdos = this.filterForm?.value?.mdo || []
+      const mdoOrgIds = Array.isArray(selectedMdos) ? selectedMdos.map((mdo: any) => mdo.orgId).filter((id: string) => id) : []
+
+      if (mdoOrgIds.length > 0) {
+        payload.filters['orgIds'] = mdoOrgIds
+      } else {
+        payload.filters['orgIds'] = [
+          userProfile?.rootOrgId || '',
+        ]
+      }
     }
 
     return payload
   }
 
   loadSurveys(): void {
+    if (this.selectedTab === 'download') {
+      return
+    }
+
     this.isLoading = true
     const payload = this.buildSearchPayload()
     if (this.loaderService) {
@@ -228,7 +283,81 @@ export class PvDashboardComponent implements OnInit {
     })
   }
 
+  loadDownloadReports(): void {
+    this.isLoading = true
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
+
+    this.peerValidationService.downloadList().subscribe({
+      next: (response: any) => {
+        this.isLoading = false
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+
+        const records = response?.result?.response || response?.result?.data || response?.result || response || []
+        const list: any[] = Array.isArray(records) ? records : records?.content || []
+        this.downloadReports = list.map((item: any, index: number) => this.mapToDownloadReport(item, index))
+        this.refreshDownloadReports()
+      },
+      error: (error: any) => {
+        this.isLoading = false
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        console.error('Error loading download reports:', error)
+        this.downloadReports = []
+        this.refreshDownloadReports()
+      }
+    })
+  }
+
+  mapToDownloadReport(item: any, index: number): DownloadReport {
+    const rawStatus = item?.downloadStatus || item?.status || item?.reportStatus || ''
+    const normalizedStatus: 'In Progress' | 'Ready' =
+      ['ready', 'completed', 'success', 'done'].includes(String(rawStatus).toLowerCase()) ? 'Ready' : 'In Progress'
+
+    const generatedAtRaw = item?.generatedAt || item?.createdOn || item?.createdDate || item?.updatedOn
+    const generatedAtParsed = typeof generatedAtRaw === 'number' ? generatedAtRaw : Date.parse(generatedAtRaw)
+    const generatedAt = Number.isNaN(generatedAtParsed) ? 0 : generatedAtParsed
+
+    const requestedOnRaw = item?.dateCreatedOn || item?.createdOn || item?.createdDate
+    let requestedOn = ''
+    if (requestedOnRaw) {
+      const d = new Date(requestedOnRaw)
+      if (!Number.isNaN(d.getTime())) {
+        const day = String(d.getDate()).padStart(2, '0')
+        const month = d.toLocaleString('en-US', { month: 'short' })
+        const year = d.getFullYear()
+        let hours = d.getHours()
+        const minutes = String(d.getMinutes()).padStart(2, '0')
+        const ampm = hours >= 12 ? 'PM' : 'AM'
+        hours = hours % 12 || 12
+        requestedOn = `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`
+      }
+    }
+
+    return {
+      id: String(item?.id || item?.reportId || item?.formid || index),
+      formid: String(item?.formid || item?.id || ''),
+      formtitle: item?.formtitle || item?.formName || item?.title || '',
+      orgname: item?.orgname || item?.orgName || item?.organization || '',
+      downloadStatus: normalizedStatus,
+      fileName: item?.fileName || item?.name || '',
+      generatedAt,
+      requestedOn,
+      fileUrl: item?.fileUrl || item?.downloadUrl || '',
+      thumbnail: item?.thumbnail || item?.courseThumbnail || item?.image || ''
+    }
+  }
+
+  refreshDownloadReports(): void {
+    this.downloadTotalCount = this.downloadReports.length
+  }
+
   loadStatusCounts(): void {
+    const userProfile: any = this.configSvc?.userProfile || ''
     const payload: any = {
       query: this.filterForm.value.searchText || '',
       filters: { status: ['Ended', 'Draft', 'Active', 'Archived'] },
@@ -237,6 +366,14 @@ export class PvDashboardComponent implements OnInit {
       size: 0,
       sortBy: 'createdDate',
       sortOrder: 'DESC'
+    }
+
+    if (this.isSPVRoute) {
+      payload.filters['orgIds'] = [
+        userProfile?.rootOrgId || '',
+      ]
+      // Add orgNames facet for SPV route to extract MDO list
+      payload.facets.push('orgNames')
     }
 
     if (this.loaderService) {
@@ -254,6 +391,18 @@ export class PvDashboardComponent implements OnInit {
         this.draftCount = statusFacets['Draft'] || 0
         this.archivedCount = statusFacets['Archived'] || 0
         this.allCount = Object.values(statusFacets as Record<string, number>).reduce((sum: number, val: number) => sum + val, 0) || response?.result?.response?.count || 0
+
+        // Extract MDO list from facets.orgNames for SPV route (only populate once)
+        if (this.isSPVRoute && this.mdoOptions.length === 0) {
+          const orgNamesFacets = response?.result?.response?.facets?.orgNames || []
+          if (orgNamesFacets && orgNamesFacets.length > 0) {
+            this.mdoOptions = orgNamesFacets.map((org: any) => ({
+              orgName: org.orgName,
+              orgId: org.orgId,
+              count: org.count
+            } as MDOOption))
+          }
+        }
       },
       error: () => {
         if (this.loaderService) {
@@ -269,7 +418,8 @@ export class PvDashboardComponent implements OnInit {
       formId: item.formId || '',
       courseName: item.title || '',
       thumbnail: item.additionalProperties?.thumbnail || '',
-      organisation: item.organisation || item.createdByName || '',
+      organisation: item.createdFor?.[0]?.orgName || item.organisation || item.createdByName || '',
+      createdBy: item.createdBy || '',
       status: item.status || 'Draft',
       startDate: item.createdDate ? new Date(item.createdDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       endDate: item.endDate ? new Date(item.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
@@ -281,11 +431,7 @@ export class PvDashboardComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.paginator) {
-      this.paginator.page.subscribe(() => {
-        this.loadSurveys()
-      })
-    }
+    this.refreshDownloadReports()
   }
 
   filterByTab(): void {
@@ -305,7 +451,7 @@ export class PvDashboardComponent implements OnInit {
   onTabChange(index: number): void {
     this.selectedTabIndex = index
 
-    const tabNames: Array<'all' | 'active' | 'ended' | 'draft' | 'archived'> = ['all', 'active', 'ended', 'draft', 'archived']
+    const tabNames: Array<'all' | 'active' | 'ended' | 'draft' | 'archived' | 'download'> = ['all', 'active', 'ended', 'draft', 'archived', 'download']
     this.selectedTab = tabNames[index] || 'all'
 
     this.updateDisplayedColumns()
@@ -314,13 +460,21 @@ export class PvDashboardComponent implements OnInit {
       this.paginator.pageIndex = 0
     }
 
+    if (this.selectedTab !== 'download') {
+      if (this.paginator) {
+        this.paginator.pageSize = 15
+      }
+    }
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab: this.selectedTab },
       queryParamsHandling: 'merge'
     })
+  }
 
-    // this.loadSurveys()
+  onPaginatorChange(): void {
+    this.loadSurveys()
   }
 
   onSearch(): void {
@@ -415,7 +569,80 @@ export class PvDashboardComponent implements OnInit {
     })
   }
 
-  downloadExcel(_survey: Survey): void {
+  downloadExcel(survey: Survey): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Download CSV',
+        description: 'Your file will be ready to download in the downloadable reports tab. Please wait for some time.',
+        iconName: 'info',
+        type: 'info',
+        buttonsPositionClass: 'justify-center',
+        buttons: [
+          { text: 'OK', classes: 'succes-button', response: true }
+        ]
+      },
+      autoFocus: false
+    })
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(true)
+        }
+
+        this.peerValidationService.initDownloadReport(survey.formId || survey.id).subscribe({
+          next: () => {
+            setTimeout(() => {
+              if (this.loaderService) {
+                this.loaderService.changeLoaderState(false)
+              }
+              this.onTabChange(5)
+            }, 2000)
+          },
+          error: (err: any) => {
+            if (this.loaderService) {
+              this.loaderService.changeLoaderState(false)
+            }
+            console.error('Error initiating download report:', err)
+          }
+        })
+      }
+    })
+  }
+
+  triggerReportDownload(report: DownloadReport): void {
+    if (report.downloadStatus !== 'Ready') {
+      return
+    }
+
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
+
+    this.peerValidationService.downloadReport({ formId: report.formid, fileName: report.fileName }).subscribe({
+      next: (csvData: string) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.setAttribute('href', url)
+        link.setAttribute('download', report.fileName || 'report.csv')
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      },
+      error: (err: any) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
+        console.error('Error downloading report:', err)
+      }
+    })
   }
 
   getStatusClass(status: string): string {
