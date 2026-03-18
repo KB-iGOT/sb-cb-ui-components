@@ -184,6 +184,16 @@
   border-radius: 0 0 4px 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
+  .download-note {
+    margin: 16px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid #F5DFCC;
+    background: #FDF3EA;
+    color: #C36A1D;
+    font-size: 12px;
+  }
+
   .survey-table {
     width: 100%;
     background: white;
@@ -217,6 +227,36 @@
       color: #999;
       cursor: pointer;
     }
+  }
+}
+
+.download-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+
+  &.in-progress {
+    color: #E77A15;
+  }
+
+  &.ready {
+    color: #1B1B1B;
+
+    mat-icon {
+      color: #1F8B3A;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.download-action-btn {
+  color: #1B4CA1;
+
+  &[disabled] {
+    color: #B5B5B5;
   }
 }
 
@@ -311,4 +351,13 @@
     flex: 1;
     line-height: 1.4;
   }
+}
+
+.download-thumbnail-placeholder {
+  width: 85px;
+  height: 50px;
+  border-radius: 4px;
+  border: 1px solid #D8D8D8;
+  background: #F3F3F3;
+  flex-shrink: 0;
 }
