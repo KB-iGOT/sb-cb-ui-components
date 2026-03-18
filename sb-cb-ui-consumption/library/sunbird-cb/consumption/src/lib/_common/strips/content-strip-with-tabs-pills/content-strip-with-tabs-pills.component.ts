@@ -31,6 +31,7 @@ import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.com
 import { fadeAnimation } from '../../_animations/fade-animation'
 import { SakshamAI } from '../../../consumption.config'
 import { NsContentStripWithTabs } from '../../content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
+import { CommonMethodsService } from '../../../_services/common-methods.service'
 
 interface IStripUnitContentData {
   key: string
@@ -126,6 +127,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   firstTimeLoaded = false
   localRecommended: any
   sakshamAIEnum = SakshamAI
+  CaCourseUnitIds: any = `[]`
+
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
     @Inject('environment') environment: any,
@@ -143,6 +146,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     private enrollSvc: WidgetEnrollService,
     private matDialog: MatDialog,
     public snackBar: MatSnackBar,
+    private commonSvc: CommonMethodsService,
+    
   ) {
     super()
     if (localStorage.getItem('websiteLanguage')) {
@@ -1605,6 +1610,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   getTabsList(array: NsContent.IContent[],
     strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
+    this.CaCourseUnitIds = this.commonSvc.getCourseUnitIds()
+
     let all: any[] = []
     let upcoming: any[] = []
     let overdue: any[] = []
@@ -1660,7 +1667,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
     apar = array
       .filter((e: any) => e.isApar)
-      .sort((a: any, b: any) => (b.identifier === targetId ? 1 : 0) - (a.identifier === targetId ? 1 : 0))
+      .sort((a: any, b: any) => {
+        const getPriority = (item: any) => {
+          if (item?.identifier === targetId) return 3;
+          if (this.CaCourseUnitIds.includes(item?.identifier)) return 2;
+          return 1;
+        };
+
+        return getPriority(b) - getPriority(a);
+      });
 
     return [
       { value: 'all', widgets: this.transformContentsToWidgets(all, strip) },
@@ -1853,7 +1868,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus: boolean,
     courseRecommendationId: string
   ) {
-    if (strip.tabs[tabIndex].request.courseRecommendation) {
+    if (strip.tabs[tabIndex]?.request?.courseRecommendation) {
       this.sakshamLoader = true
       let payload = {
         "user_id": this.configSvc.userProfile.userId,
