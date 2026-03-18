@@ -118,7 +118,8 @@ export class NotificationDropdownComponent implements OnInit {
     const request: any = {
       request: {
         type: 'individual',
-        ids: [notification.notification_id]
+        ids: [notification.notification_id],
+        created_at: notification.created_at,
       }
     }
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
@@ -138,7 +139,8 @@ export class NotificationDropdownComponent implements OnInit {
     let request: any = {
       request: {
         type: 'individual',
-        ids: [notification.notification_id]
+        ids: [notification.notification_id],
+        created_at: notification.created_at
       }
     }
     if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
