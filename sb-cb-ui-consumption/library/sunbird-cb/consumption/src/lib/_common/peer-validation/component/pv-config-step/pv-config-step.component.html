@@ -55,6 +55,12 @@
               <h4 class="course-title">{{ course.name }}</h4>
               <p class="course-date" *ngIf="course.lastPublishedOn">Published on: {{ course.lastPublishedOn |
                 date:'d/MMM/yy' }}</p>
+              <div class="course-org" *ngIf="course.organisation?.length">
+                <div class="org-icon-box">
+                  <img [src]="getLogoUrl(course.creatorLogo)" alt="Organisation logo" class="org-logo">
+                </div>
+                <span class="org-name">{{ course.organisation[0] }}</span>
+              </div>
             </div>
           </div>
         </div>
