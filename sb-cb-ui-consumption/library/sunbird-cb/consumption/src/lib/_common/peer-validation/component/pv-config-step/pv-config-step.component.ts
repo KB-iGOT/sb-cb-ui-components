@@ -351,6 +351,12 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       return '/assets/images/default.png'
     }
 
+    // If URL contains content-store/content/, rewrite to use environment base
+    if (url.includes('content-store/content/') && this.environment.karmYogi) {
+      const relativePath = url.substring(url.indexOf('content-store/content/'))
+      return this.environment.karmYogi + '/' + relativePath
+    }
+
     // If URL already has http/https, return as is
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url
@@ -362,6 +368,28 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
     }
 
     return url
+  }
+
+  getLogoUrl(url: string): string {
+    const defaultLogo = 'assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
+    if (!url) {
+      return defaultLogo
+    }
+
+    if (url.includes('content-store/content/') && this.environment.karmYogi) {
+      const relativePath = url.substring(url.indexOf('content-store/content/'))
+      return this.environment.karmYogi + '/' + relativePath
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url
+    }
+
+    if (this.environment.karmYogi) {
+      return this.environment.karmYogi + url
+    }
+
+    return defaultLogo
   }
 
   getMissingFields(): string[] {
