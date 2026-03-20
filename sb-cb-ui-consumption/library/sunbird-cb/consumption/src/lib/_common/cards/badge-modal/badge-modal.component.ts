@@ -8,7 +8,9 @@ import { Component, EventEmitter, Output, Input } from '@angular/core'
 export class BadgeModalComponent {
 
   @Input() badgeData: any
-
+ngOnInit(): void {
+  console.log('badgeData', this.badgeData)
+  }
   @Output() close = new EventEmitter<void>()
 
   closeModal() {
