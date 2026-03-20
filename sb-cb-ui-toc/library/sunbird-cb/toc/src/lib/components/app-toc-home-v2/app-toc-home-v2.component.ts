@@ -23,7 +23,7 @@ import { WidgetContentService } from '../../_services/widget-content.service'
 import { viewerRouteGenerator } from '../../_services/viewer-route-util'
 import { NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import {
-  ConfigurationsService, DataTransferService, EventService,
+  ConfigurationsService, DataTransferService, DomainConfService, EventService,
   LoggerService, MultilingualTranslationsService,
   NsPage, TFetchStatus, TelemetryService,
   UtilityService, WidgetEnrollService, WsEvents,
@@ -303,6 +303,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
+    public domainConfSvc: DomainConfService,
     @Inject('environment') public environment: any
   ) {
     this.historyData = history.state
@@ -1947,6 +1948,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setupHashmapUpdateSubscription()
 
     this.userId = this.configSvc?.userProfile?.userId || ''
+    this.domainConfSvc.initFromConfig(this.configSvc.globalConfig.applicationConfig)
   }
 
   private initData(data: Data) {

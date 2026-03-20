@@ -16,7 +16,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import { NsContent } from '../../../../_services/widget-content.model'
 import { RatingService } from '../../../../_services/rating.service'
-import { LoggerService, ConfigurationsService, WidgetContentService } from '@sunbird-cb/utils-v2'
+import { LoggerService, ConfigurationsService, WidgetContentService, DomainConfService } from '@sunbird-cb/utils-v2'
 import { AppTocService } from '../../../../services/app-toc.service'
 import { TimerService } from '../../../../services/timer.service'
 import { HandleClaimService } from '../content-services/handle-claim.service'
@@ -195,6 +195,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
     private resetRatingsService: ResetRatingsService,
     private contentSvc: WidgetContentService,
     private activatedRoute: ActivatedRoute,
+    public domainConfService: DomainConfService,
     @Inject('environment') environment: any
   ) {
     this.environment = environment

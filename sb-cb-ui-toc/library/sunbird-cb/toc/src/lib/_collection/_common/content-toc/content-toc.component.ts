@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, HostListener, Inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, DomainConfService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 
 import { LoadCheckService } from '../../../services/load-check.service'
@@ -106,6 +106,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     private eventSvc: EventService,
     private viewerDataSvc: ViewerDataService,
     private samuhikCharchaSvc: SamuhikCharchaService,
+    public domainConfService: DomainConfService,
     @Inject('environment') private environment: any
 
   ) { }

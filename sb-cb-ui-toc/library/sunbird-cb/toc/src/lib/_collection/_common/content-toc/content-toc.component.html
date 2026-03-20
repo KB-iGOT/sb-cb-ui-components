@@ -155,7 +155,7 @@
         <!-- About Tab -->
         <mat-tab label="{{ 'apptocsinglepage.about' | translate }}">
             <ng-template matTabContent>
-                <div class="ai-tutor-get-started-mobile my-2 ml-2" *ngIf="!viewerPage && enableAITutorFlag && isMobile">
+                <div class="ai-tutor-get-started-mobile my-2 ml-2" *ngIf="!viewerPage && enableAITutorFlag && isMobile &&   (domainConfService?.isFeatureByPageEnabled('toc','aiTutor'))">
                     <div class="flex flex-row align-items-center w-98">
                         <div class="px-2 py-2">
                             <img src="assets/icons/bot-chat-small.svg" height="48px" width="48px" />
@@ -206,7 +206,7 @@
             </mat-tab>
         </ng-container>
 
-        <ng-container *ngIf="config?.commentsTab && !forPreview">
+        <ng-container *ngIf="config?.commentsTab && !forPreview &&   (domainConfService?.isFeatureByPageEnabled('toc','startDiscussion'))">
             <mat-tab label="{{ 'apptocsinglepage.startDiscussion' | translate }}">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="commentsDiv"
@@ -226,8 +226,9 @@
                 </ng-template>
             </mat-tab>
         </ng-container>
+
         <ng-container
-            *ngIf="config?.samuhikCharchaTab && condition && contentReadData?.eventLinked?.length > 0 && enableSamuhikCharchaTab">
+            *ngIf="config?.samuhikCharchaTab && condition && contentReadData?.eventLinked?.length > 0 && enableSamuhikCharchaTab && (domainConfService?.isFeatureByPageEnabled('toc','samuhikCharcha'))">
             <mat-tab label="{{ 'apptocsinglepage.samuhikCharcha' | translate }}">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="samuhikCharchaDiv">
@@ -265,7 +266,7 @@
             </mat-tab>
         </ng-container>
 
-        <ng-container *ngIf="showAssignmentsTab && !forPreview">
+        <ng-container *ngIf="showAssignmentsTab && !forPreview && (domainConfService?.isFeatureByPageEnabled('toc','assignment'))">
             <mat-tab label="{{ 'apptocsinglepage.assignments' | translate }}">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="takeAssessmentDiv">
@@ -276,7 +277,7 @@
         </ng-container>
 
         <!-- Transcription Tab -->
-        <mat-tab label="AI Tutor" *ngIf="viewerPage && enableAITutorFlag && isMobile">
+        <mat-tab label="AI Tutor" *ngIf="viewerPage && enableAITutorFlag && isMobile && (domainConfService?.isFeatureByPageEnabled('toc','transcription'))">
             <ng-template mat-tab-label>
                 <div class="flex flex-row">
                     <div class="flex">
@@ -297,5 +298,6 @@
                 </ng-container>
             </ng-template>
         </mat-tab>
+
     </mat-tab-group>
 </div>

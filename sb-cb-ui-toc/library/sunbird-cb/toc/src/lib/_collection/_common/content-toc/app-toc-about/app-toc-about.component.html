@@ -657,7 +657,7 @@
         </div>
     </ng-container> -->
 
-    <div class="mobile-karma-points">
+    <div class="mobile-karma-points && (domainConfService?.isFeatureByPageEnabled('toc','karmaPoints'))">
         <ws-widget-karma-points [content]="content" [btnCategory]="" [condition]="condition"
             (clickClaimKarmaPoints)="handleClickOfClaim($event)" [data]="kparray">
         </ws-widget-karma-points>

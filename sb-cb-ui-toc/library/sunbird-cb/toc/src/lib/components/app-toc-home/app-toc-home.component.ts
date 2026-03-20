@@ -21,7 +21,7 @@ import { WidgetContentService } from '../../_services/widget-content.service'
 import { viewerRouteGenerator } from '../../_services/viewer-route-util'
 import { NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import {
-  ConfigurationsService, DataTransferService, EventService,
+  ConfigurationsService, DataTransferService, DomainConfService, EventService,
   LoggerService, MultilingualTranslationsService,
   NsPage, TFetchStatus, TelemetryService,
   UtilityService, WidgetEnrollService, WsEvents,
@@ -311,6 +311,7 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
     private matSnackbarNew: MatSnackbarNew,
     private userServiceLib: WidgetUserServiceLib,
     public netCoreService: NetCoreService,
+    public domainConfService: DomainConfService,
     @Inject('environment') environment: any
   ) {
     this.environment = environment
