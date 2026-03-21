@@ -1670,7 +1670,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       .sort((a: any, b: any) => {
         const getPriority = (item: any) => {
           if (item?.identifier === targetId) return 3;
-          if (this.CaCourseUnitIds.includes(item?.identifier)) return 2;
+          if (this.CaCourseUnitIds?.length && this.CaCourseUnitIds?.includes(item?.identifier)) return 2;
           return 1;
         };
 
