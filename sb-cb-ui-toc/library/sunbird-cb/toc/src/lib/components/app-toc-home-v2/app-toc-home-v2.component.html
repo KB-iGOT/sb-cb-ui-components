@@ -662,7 +662,7 @@
                     </ng-container>
                   </div>
                   <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag"
-                    *ngIf="canShare && !forPreview">
+                    *ngIf="canShare && !forPreview && (domainConfService?.isFeatureByPageEnabled('toc','shareToc'))">
                     <mat-icon class="nodtranslate">share</mat-icon>
                     <div>{{ 'apptocsinglepage.share' | translate }}</div>
                   </div>
@@ -822,7 +822,7 @@
                 </ng-container>
               </div>
 
-              <div class="karma-points-div">
+              <div class="karma-points-div" *ngIf="domainConfService?.isFeatureByPageEnabled('toc','karmaPoints')">
                 <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
                   [content]="content"
                   [baseContentReadData]="baseContentReadData"
