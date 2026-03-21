@@ -18,7 +18,8 @@ export class NotificationDropdownComponent implements OnInit {
   mandatoryNotifications: any[] = []
   mandatoryNotificationsCount: number = 0
   isLoading = false
-
+  peerValidations: any[] = []
+  peerValidationsCount: number = 0
   constructor(private libNotificationService: LibNotificationsService,
   ) {
 
@@ -27,6 +28,7 @@ export class NotificationDropdownComponent implements OnInit {
   ngOnInit() {
     this.getUserNotifications()
     this.getMandatoryNotifications()
+    this.getPeerValidationNotifications()
   }
 
   getMandatoryNotifications() {
@@ -39,12 +41,27 @@ export class NotificationDropdownComponent implements OnInit {
     })
   }
 
+  getPeerValidationNotifications() {
+    this.libNotificationService.getNotifications(0, 5, 'PEER_VALIDATION').subscribe((res: any) => {
+      console.log("Peer validation notifications response ", res)
+      const notifications = _.get(res, 'result.notifications', [])
+      this.peerValidations = notifications
+      this.peerValidationsCount = notifications.length
+    }, error => {
+      console.error('Error fetching peer validation notifications', error)
+    })
+  }
+
   getUserNotifications() {
     this.isLoading = true
     this.libNotificationService.getNotifications(0, 5, this.currentTab).subscribe((res: any) => {
       this.notifications = _.get(res, 'result.notifications', [])
       const _alerts = _.get(res, 'result.subtypeStats', [])
-      this.alerts = _alerts.find(notification => notification.name === 'ALERT')
+      this.alerts = _alerts.find((notification: any) => notification.name === 'ALERT')
+      const peerValidationEntries = _alerts.filter((item: any) =>
+        item.name && item.name.toUpperCase() === 'PEER_VALIDATION')
+      this.peerValidationsCount = peerValidationEntries.reduce((sum: number, item: any) =>
+        sum + (+item.unread || 0) + (+item.read || 0), 0)
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -56,6 +73,8 @@ export class NotificationDropdownComponent implements OnInit {
     this.currentTab = type
     if (type === 'MANDATORY') {
       this.notifications = this.mandatoryNotifications
+    } else if (type === 'PEER_VALIDATION') {
+      this.notifications = this.peerValidations
     } else {
       this.getUserNotifications()
     }
@@ -70,6 +89,8 @@ export class NotificationDropdownComponent implements OnInit {
     if (!notification.read) {
       if (this.currentTab === 'MANDATORY') {
         this.markMandatoryAsRead(notification)
+      } else if (this.currentTab === 'PEER_VALIDATION') {
+        this.markPeerValidationAsRead(notification)
       } else {
         this.markAsRead(notification)
       }
@@ -93,11 +114,33 @@ export class NotificationDropdownComponent implements OnInit {
     })
   }
 
+  markPeerValidationAsRead(notification: any) {
+    const request: any = {
+      request: {
+        type: 'individual',
+        ids: [notification.notification_id],
+        created_at: notification.created_at,
+      }
+    }
+    this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      if (res.responseCode === 'OK') {
+        notification.read = true
+        this.libNotificationService.updateUnreadCount()
+        const index = this.peerValidations.findIndex((n: any) => n.notification_id === notification.notification_id)
+        if (index !== -1) {
+          this.peerValidations[index].read = true
+        }
+        this.peerValidationsCount = this.peerValidations.filter((n: any) => !n.read).length
+      }
+    })
+  }
+
   markAsRead(notification: any) {
     let request: any = {
       request: {
         type: 'individual',
-        ids: [notification.notification_id]
+        ids: [notification.notification_id],
+        created_at: notification.created_at
       }
     }
     if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
@@ -121,6 +164,8 @@ export class NotificationDropdownComponent implements OnInit {
         return 'assets/icons/notifications-engine/event.svg'
       case 'DISCUSSION':
         return 'assets/icons/notifications-engine/discuss.svg'
+      case 'PEER_VALIDATION':
+        return 'assets/icons/notifications-engine/how_to_reg 1.svg'
       default:
         return 'assets/icons/notifications-engine/learn.svg'
     }
