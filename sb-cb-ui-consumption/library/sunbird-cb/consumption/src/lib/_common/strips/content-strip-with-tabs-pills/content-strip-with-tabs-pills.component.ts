@@ -13,6 +13,7 @@ import {
   UtilityService,
   WsEvents,
   WidgetEnrollService,
+  DomainConfService,
 } from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
@@ -147,6 +148,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     private matDialog: MatDialog,
     public snackBar: MatSnackBar,
     private commonSvc: CommonMethodsService,
+    private domainConfService: DomainConfService,
     
   ) {
     super()
@@ -1728,27 +1730,32 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         if (res && res.result && res.result.courses && res.result.courses.length) {
           courses = [...courses, ...res.result.courses]
         }
-        this.enrollSvc.fetchExternalEnrollmentData(currentPillFromMap.request.payload).subscribe((res: any) => {
 
-          if (res && res.result && res.result.courses && res.result.courses.length) {
-            courses = [...courses, ...res.result.courses]
-          }
-          this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
-        }, (_err: any) => {
-          if (courses && courses.length) {
+        if(this.domainConfService.isFeatureByPageEnabled('toc','karmaPoints')) {
+          this.enrollSvc.fetchExternalEnrollmentData(currentPillFromMap.request.payload).subscribe((res: any) => {
+
+            if (res && res.result && res.result.courses && res.result.courses.length) {
+              courses = [...courses, ...res.result.courses]
+            }
             this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
-          } else {
-            this.processStrip(
-              strip,
-              [],
-              'done',
-              calculateParentStatus,
-              {},
-              strip.tabs
-            )
-            this.statusChangetoDone(strip, tabIndex, pillIndex)
-          }
-        })
+          }, (_err: any) => {
+            if (courses && courses.length) {
+              this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
+            } else {
+              this.processStrip(
+                strip,
+                [],
+                'done',
+                calculateParentStatus,
+                {},
+                strip.tabs
+              )
+              this.statusChangetoDone(strip, tabIndex, pillIndex)
+            }
+          })
+        } else {
+          this.formatNewEnrollmentData(strip, tabIndex, pillIndex, courses, calculateParentStatus)
+        }
       }, (_err: any) => {
         let courses: any = []
         this.enrollSvc.fetchExternalEnrollmentData(currentPillFromMap.request.payload).subscribe((res: any) => {

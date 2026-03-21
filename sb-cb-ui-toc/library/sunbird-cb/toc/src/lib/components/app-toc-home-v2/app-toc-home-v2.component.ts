@@ -1929,6 +1929,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   ngOnInit() {
+    this.domainConfSvc.initFromConfig(this.configSvc.globalConfig.applicationConfig)
     this.dataTransferSvc.setEnrollData(null)
     this.getServerDateTime()
     this.mobile1200 = window.innerWidth < 1201
@@ -1948,7 +1949,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setupHashmapUpdateSubscription()
 
     this.userId = this.configSvc?.userProfile?.userId || ''
-    this.domainConfSvc.initFromConfig(this.configSvc.globalConfig.applicationConfig)
   }
 
   private initData(data: Data) {
