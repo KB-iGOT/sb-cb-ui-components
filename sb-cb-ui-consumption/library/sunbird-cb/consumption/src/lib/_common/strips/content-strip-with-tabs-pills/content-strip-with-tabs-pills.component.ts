@@ -1483,15 +1483,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       try {
         const response = await this.userSvc.fetchCbpPlanList(userId).toPromise()
 
-        if (Array.isArray(response) && response.length > 0) {
+        if (Array.isArray(response) && response?.length > 0) {
           courses = response
 
-          if (strip.tabs && strip.tabs.length) {
+          if (strip?.tabs && strip?.tabs?.length) {
             tabResults = this.splitCbpTabsData(courses, strip)
             let countOfWidget = true
-            if (strip && strip.tabs && strip.tabs.length) {
+            if (strip?.tabs && strip?.tabs?.length) {
               strip.tabs.forEach((tab: any) => {
-                if (tab.pillsData && tab.pillsData.length) {
+                if (tab?.pillsData && tab?.pillsData?.length) {
                   tab.pillsData.forEach((pill: any) => {
                     if (pill && pill.widgets && pill.widgets.length) {
                       if (countOfWidget) {
