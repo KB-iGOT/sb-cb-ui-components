@@ -1476,71 +1476,84 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   // cbp plans
   async fetchAllCbpPlans(strip: any, calculateParentStatus = true) {
     if (strip.request && strip.request.cbpList && Object.keys(strip.request.cbpList).length) {
-      let courses: NsContent.IContent[]
+      let courses: NsContent.IContent[] = []
       let tabResults: any[] = []
       let userId = this.configSvc.userProfile.userId
-      const response = await this.userSvc.fetchCbpPlanList(userId).toPromise()
       const tabCardSubType = _.get(strip, `tabs[${this.tabEventG}].cardSubType`, null)
+      try {
+        const response = await this.userSvc.fetchCbpPlanList(userId).toPromise()
 
-      if (Array.isArray(response) && response.length > 0) {
-        courses = response
+        if (Array.isArray(response) && response.length > 0) {
+          courses = response
 
-        if (strip.tabs && strip.tabs.length) {
-          tabResults = this.splitCbpTabsData(courses, strip)
-          let countOfWidget = true
-          if (strip && strip.tabs && strip.tabs.length) {
-            strip.tabs.forEach((tab: any) => {
-              if (tab.pillsData && tab.pillsData.length) {
-                tab.pillsData.forEach((pill: any) => {
-                  if (pill && pill.widgets && pill.widgets.length) {
-                    if (countOfWidget) {
-                      pill.selected = true
-                      countOfWidget = false
+          if (strip.tabs && strip.tabs.length) {
+            tabResults = this.splitCbpTabsData(courses, strip)
+            let countOfWidget = true
+            if (strip && strip.tabs && strip.tabs.length) {
+              strip.tabs.forEach((tab: any) => {
+                if (tab.pillsData && tab.pillsData.length) {
+                  tab.pillsData.forEach((pill: any) => {
+                    if (pill && pill.widgets && pill.widgets.length) {
+                      if (countOfWidget) {
+                        pill.selected = true
+                        countOfWidget = false
+                      }
                     }
-                  }
-                })
-              }
-            })
+                  })
+                }
+              })
+            }
+            await this.processStrip(
+              strip,
+              this.transformContentsToWidgets(courses, strip, tabCardSubType),
+              'done',
+              calculateParentStatus,
+              '',
+              tabResults
+            )
+          } else {
+            this.processStrip(
+              strip,
+              this.transformContentsToWidgets(courses, strip, tabCardSubType),
+              'done',
+              calculateParentStatus,
+              'viewMoreUrl',
+            )
           }
-          await this.processStrip(
+        } else {
+          const firstPill = strip?.tabs?.[0]?.pillsData?.[0]
+          if (firstPill) {
+            firstPill.selected = true
+            firstPill.widgets = []
+            firstPill.fetchTabStatus = 'done'
+            firstPill.tabLoading = false
+          }
+          strip.showOnLoader = false
+          if (strip?.tabs?.[0]) {
+            strip.tabs[0].hideTab = true
+          }
+          // get index of first tab which does not have hideTab / hideTab is false
+          const firstVisibleTabIndex = Array.isArray(strip?.tabs)
+            ? strip.tabs.findIndex((tab: any) => !tab.hideTab)
+            : -1
+          if (firstVisibleTabIndex !== -1) {
+            this.tabClicked(firstVisibleTabIndex, 0, strip, strip.key)
+          }
+          this.processStrip(
             strip,
-            this.transformContentsToWidgets(courses, strip, tabCardSubType),
+            this.transformContentsToWidgets([], strip, tabCardSubType),
             'done',
             calculateParentStatus,
             '',
-            tabResults
-          )
-        } else {
-          this.processStrip(
-            strip,
-            this.transformContentsToWidgets(courses, strip, tabCardSubType),
-            'done',
-            calculateParentStatus,
-            'viewMoreUrl',
+            strip.tabs || []
           )
         }
-      } else {
-        strip.tabs[0].pillsData[0].selected = true
-        strip.tabs[0].pillsData[0].widgets = []
-        strip.tabs[0].pillsData[0].fetchTabStatus = 'done'
+      } catch (_err) {
         strip.showOnLoader = false
-        strip.tabs[0].pillsData[0].tabLoading = false
-        strip.tabs[0].hideTab = true
-        // get index of first tab which does not have hideTab / hideTab is false
-        const firstVisibleTabIndex = strip.tabs.findIndex((tab: any) => !tab.hideTab)
-        if (firstVisibleTabIndex !== -1) {
-          this.tabClicked(firstVisibleTabIndex, 0, strip, strip.key)
-        }
-        this.processStrip(
-          strip,
-          this.transformContentsToWidgets(courses, strip, tabCardSubType),
-          'done',
-          calculateParentStatus,
-          '',
-          strip.tabs
-        )
+        this.processStrip(strip, [], 'done', calculateParentStatus, '', strip.tabs)
+      } finally {
+        clearInterval(this.enrollInterval)
       }
-      clearInterval(this.enrollInterval)
     }
   }
 
