@@ -100,7 +100,7 @@ export class SadhanaSaptahComponent implements OnInit {
   }
   getLookerProUrl() {
     this.sectionList.forEach((ele: any) => {
-      if(ele.column && ele.column.length) {
+      if(ele?.column && ele?.column?.length) {
         ele.column.forEach((colEle: any) => {
           if(colEle.key === 'lookerSection' && colEle.data) {
             colEle.data.sanitizedUrl = this.domSanitizer

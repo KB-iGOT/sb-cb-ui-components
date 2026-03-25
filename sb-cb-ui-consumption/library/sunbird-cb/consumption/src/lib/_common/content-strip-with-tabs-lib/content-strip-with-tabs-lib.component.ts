@@ -2092,7 +2092,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
               } else {
                 this.emptyResponse.emit(true)
               }
-            } else if(response.results.result && response.results.result.data && response.results.result.data.length) {
+            } else if(response && response.results && response.results.result && response.results.result.data && response.results.result.data.length) {
               let data = response.results.result.data.map((item: any) => {
               return {
                   ...item,
