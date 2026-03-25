@@ -440,11 +440,13 @@
                     {{contentReadData?.difficultyLevel}}
                   </span>
                 </div>
-<div class="knowledge-level-container badgediv">
-  <span class="custom-badge">
-    <img class="badge-img bg-transparent" src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt="" srcset="">
-  </span>
-</div>
+                <div class="knowledge-level-container badgediv" *ngIf="(domainConfService?.isFeatureByPageEnabled('toc','badge'))">
+                  <span class="custom-badge">
+                    <img class="badge-img bg-transparent"
+                      src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt=""
+                      srcset="">
+                  </span>
+                </div>
                 <div class="flex items-center" *ngIf="cbPlanEndDate">
                   <div class="flex items-center due-tag text-xs leading-3"
                     [ngClass]="{'due-warning': cbPlanDuration === nsCardContentData.UPCOMING, 'due-overdue': cbPlanDuration === nsCardContentData.OVERDUE, 'due-success': cbPlanDuration === nsCardContentData.SUCCESS}">
@@ -824,8 +826,7 @@
 
               <div class="karma-points-div" *ngIf="domainConfService?.isFeatureByPageEnabled('toc','karmaPoints')">
                 <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
-                  [content]="content"
-                  [baseContentReadData]="baseContentReadData"
+                  [content]="content" [baseContentReadData]="baseContentReadData"
                   [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, isCompletedThisMonth: isCompletedThisMonth, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"></ws-widget-karma-points>
               </div>
             </ng-container>
@@ -995,11 +996,11 @@
 <ng-template #authViewBtn i18n>
   <ng-container *ngIf="displayViewBtn">
     <a (click)="raiseTelemetryForPublic($event)"
-    [routerLink]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url)"
-    [queryParams]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START'))"
-    class="flex action-button justify-center">
-    {{'apptochome.view' | translate}}
-  </a>
+      [routerLink]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url)"
+      [queryParams]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START'))"
+      class="flex action-button justify-center">
+      {{'apptochome.view' | translate}}
+    </a>
   </ng-container>
 </ng-template>
 <ng-template #authViewForInviteOnlyAssessment>
