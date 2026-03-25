@@ -8,21 +8,22 @@
       <h2 class="modal-title">Congratulations...!!</h2>
 
       <div class="badge-wrapper">
-        <img [src]="badgeData?.image" class="badge-image" />
+        <img [src]="badgeData?.image | pipePublicURL" class="badge-image" />
 
         <div class="badge-label">
           <span class="badge-name">{{ badgeData?.title }}</span>
           <span class="badge-level">{{ badgeData?.level }}</span>
+          <span class="badge-coursename">({{ badgeData?.courseName }})</span>
         </div>
       </div>
 
       <p class="modal-description">
-Great job! You’ve successfully earned the {{badgeData?.title}} badge by completing [Content Name].
+           Great job! You’ve successfully earned the {{badgeData?.title}} badge by completing {{badgeData?.courseName}}.
       </p>
 
       <div class="modal-actions">
-        <button class="btn btn-outline">Download</button>
-        <button class="btn btn-primary">View Badge</button>
+        <button class="btn btn-outline" (click)="downloadBadge(badgeData)">Download</button>
+        <!-- <button class="btn btn-primary">View Badge</button> -->
       </div>
 
     </div>

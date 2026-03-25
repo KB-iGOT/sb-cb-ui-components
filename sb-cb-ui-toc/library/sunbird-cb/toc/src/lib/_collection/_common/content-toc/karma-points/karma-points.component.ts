@@ -213,10 +213,10 @@ addBadgeSlide() {
   })
 
   console.log('Badge IST Time:', badgeDateIST)
-
+  const isEligibleslide = this?.content?.completionPercentage == undefined ||  this?.content?.completionPercentage < 100
   const badgeSlide = {
     displayButton: 'Quick Learner Badge',
-    textBeforeIcon: 'By completing this course earn Quick learner Badge',
+    textBeforeIcon: this.content.courseCategory == "Curated Program" ? badge?.criteria == "partialRandomCompletion" ? `By partially completing this program, earn Quick learner Badge (Any ${badge?.requiredCourseCompletions} course needed)` : 'By completing this course earn Quick learner Badge' : 'By completing this course earn Quick learner Badge',
     points: '',
     textAfterPoints: '',
     toolTipText: 'quickLearnerBadgeTip',
@@ -226,8 +226,8 @@ const badgeExists = this.kpArray.find(
   (item: any) => item.displayButton === 'Quick Learner Badge'
 )
 
-  // Check if badge earning time is still valid
-  if (badge?.badgeEarningDateEnabled === true) {
+  if (isEligibleslide) {
+    if (badge?.badgeEarningDateEnabled === true ) {
     if (badgeTime > currentTime) {
       if (!badgeExists) {
         this.kpArray.push(badgeSlide)
@@ -240,6 +240,8 @@ const badgeExists = this.kpArray.find(
       this.constructNudgeData()
     }
   }
+  }
+  
 }
   onClickOfClaim() {
     this.clickClaimKarmaPoints.emit('claim')

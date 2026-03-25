@@ -31,6 +31,7 @@ import { SnackbarComponent } from '../../dialog-components/snackbar/snackbar.com
 import { fadeAnimation } from '../../_animations/fade-animation'
 import { SakshamAI } from '../../../consumption.config'
 import { NsContentStripWithTabs } from '../../content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
+import { CommonMethodsService } from '../../../_services/common-methods.service'
 
 interface IStripUnitContentData {
   key: string
@@ -126,6 +127,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   firstTimeLoaded = false
   localRecommended: any
   sakshamAIEnum = SakshamAI
+  CaCourseUnitIds: any = `[]`
+
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
     @Inject('environment') environment: any,
@@ -143,6 +146,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     private enrollSvc: WidgetEnrollService,
     private matDialog: MatDialog,
     public snackBar: MatSnackBar,
+    private commonSvc: CommonMethodsService,
+    
   ) {
     super()
     if (localStorage.getItem('websiteLanguage')) {
@@ -1047,8 +1052,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
     let tabEventIndex = tabEvent
     this.activeTabIndex = tabEventIndex
-   
-    
+
+
     if (stripMap && stripMap.tabs && stripMap.tabs[tabEventIndex]) {
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].fetchTabStatus = 'inprogress'
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].tabLoading = true
@@ -1071,7 +1076,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     //   }
 
     // );
-    
+
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]
     const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]?.pillsData[pillIndex]
     const currentStrip = this.widgetData.strips.find(s => s.key === stripKey)
@@ -1096,7 +1101,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
           this.fetchEventEnrollmentList(currentStrip, tabEventIndex, pillIndex, true)
         } else if (currentPillFromMap.request.type === 'enrollment') {
           this.fetchFromInternalEnrollmentList(currentStrip, tabEventIndex, pillIndex, true)
-        } else if(currentPillFromMap.request.playlistRead ) {
+        } else if (currentPillFromMap.request.playlistRead) {
           this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabEventIndex, pillIndex, currentPillFromMap, true)
         }
         // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
@@ -1374,7 +1379,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         } else if (currentPillFromMap.request.type === 'eventEnrollment') {
           this.fetchEventEnrollmentList(currentStrip, tabIndex, pillIndex, true)
 
-        } else if(currentPillFromMap.request.playlistRead ) {
+        } else if (currentPillFromMap.request.playlistRead) {
           this.getTabDataByNewReqPlaylistReadContent(currentStrip, tabIndex, pillIndex, currentPillFromMap, true)
         }
         // if (stripMap && stripMap.tabs && stripMap.tabs[tabEvent.index]) {
@@ -1605,6 +1610,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   getTabsList(array: NsContent.IContent[],
     strip: NsContentStripWithTabsAndPills.IContentStripUnit) {
+    this.CaCourseUnitIds = this.commonSvc.getCourseUnitIds()
+
     let all: any[] = []
     let upcoming: any[] = []
     let overdue: any[] = []
@@ -1655,7 +1662,20 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       return data.contentStatus < 2
     })
 
-    apar = array.filter((e: any) => e.isApar === true)
+    // apar = array.filter((e: any) => e.isApar === true)
+    const targetId = 'do_1144773146063912961797'
+
+    apar = array
+      .filter((e: any) => e.isApar)
+      .sort((a: any, b: any) => {
+        const getPriority = (item: any) => {
+          if (item?.identifier === targetId) return 3;
+          if (this.CaCourseUnitIds?.length && this.CaCourseUnitIds?.includes(item?.identifier)) return 2;
+          return 1;
+        };
+
+        return getPriority(b) - getPriority(a);
+      });
 
     return [
       { value: 'all', widgets: this.transformContentsToWidgets(all, strip) },
@@ -1848,7 +1868,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     calculateParentStatus: boolean,
     courseRecommendationId: string
   ) {
-    if (strip.tabs[tabIndex].request.courseRecommendation) {
+    if (strip.tabs[tabIndex]?.request?.courseRecommendation) {
       this.sakshamLoader = true
       let payload = {
         "user_id": this.configSvc.userProfile.userId,
@@ -2086,152 +2106,152 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     return formedUrl
   }
 
-    async fetchPlaylistReadData(strip:any, calculateParentStatus = true) {
-      if (strip?.tabs?.length) {
-        // TODO: Have to extract requestRequired to outer level of tabs config
-        const firstTab = strip.tabs[0]
-        if (firstTab.requestRequired && firstTab.request && firstTab.request.playlistRead && Object.keys(firstTab.request.playlistRead).length) {
-          
-          if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs ) {
-            const allTabs = this.stripsResultDataMap[strip.key].tabs
-            const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
-            this.getTabDataByNewReqPlaylistReadContent(strip, 0, 0, currentTabFromMap, calculateParentStatus)
-          }
-        }
-      } else {
-        if (strip.request && strip.request.playlistRead && Object.keys(strip.request.playlistRead).length) {
-          let originalFilters: any = []
-          if (strip.request &&
-            strip.request.playlistRead &&
-            strip.request.playlistRead.type) {
-            strip.request.apiUrl = this.getFullUrl(strip.request.apiUrl, strip.request.playlistRead.type)
-          }
-          if (strip.tabs && strip.tabs.length) {
-            // TODO: Have to extract requestRequired to outer level of tabs config
-            const firstTab = strip.tabs[0]
-            if (firstTab.requestRequired && firstTab.request && firstTab.request.playlistRead && Object.keys(firstTab.request.playlistRead).length) {
-              if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
-                const allTabs = this.stripsResultDataMap[strip.key].tabs
-                const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
-  
-                this.getTabDataByNewReqPlaylistReadContent(strip, 0, 0, currentTabFromMap, calculateParentStatus)
-              }
-            }
-  
-          }
-        }
-      }
-    }
+  async fetchPlaylistReadData(strip: any, calculateParentStatus = true) {
+    if (strip?.tabs?.length) {
+      // TODO: Have to extract requestRequired to outer level of tabs config
+      const firstTab = strip.tabs[0]
+      if (firstTab.requestRequired && firstTab.request && firstTab.request.playlistRead && Object.keys(firstTab.request.playlistRead).length) {
 
-
-    async getRequestMethod(strip: any,
-      request: NsContentStripWithTabs.IContentStripUnit['request'],
-      apiUrl: string,
-      calculateParentStatus: boolean
-    ): Promise<any> {
-      const originalFilters: any = []
-      return new Promise<any>((resolve, reject) => {
-        if (request && request) {
-          this.contentSvc.getApiMethod(apiUrl).subscribe(results => {
-            let showViewMore: any
-            if (results.result.data) {
-              showViewMore = Boolean(
-                results.result.data && results.result.data.orgList.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
-              )
-            } else if (results.result.content) {
-              let featuredProvider = JSON.parse(results.result.content.featuredProviders || '[]')
-              showViewMore = Boolean(
-                featuredProvider && featuredProvider.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
-              )
-            }
-            const viewMoreUrl = showViewMore
-              ? {
-                path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
-              }
-              : null
-            resolve({ results, viewMoreUrl })
-          }, (error: any) => {
-            this.processStrip(strip, [], 'error', calculateParentStatus, null)
-            reject(error)
-          },
-          )
-        }
-      })
-    }
-      async getTabDataByNewReqPlaylistReadContent(
-        strip: any,
-        tabIndex: number,
-        pillIndex: number,
-        currentTab: NsContentStripWithTabs.IContentStripTab,
-        calculateParentStatus: boolean
-      ) {
-        if (currentTab.request &&
-          currentTab.request.playlistRead &&
-          currentTab.request.playlistRead.type) {
-          currentTab.request.apiUrl = this.getFullUrl(currentTab.request.apiUrl, currentTab.request.playlistRead.type)
-        }
-        try {
-        const response = await this.getRequestMethod(strip, currentTab.request.playlistRead, currentTab.request.apiUrl, calculateParentStatus)
-        const widgets = this.transformContentsToWidgets(response.results.result.content, strip, '')
-        let tabResults: any[] = []
         if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
           const allTabs = this.stripsResultDataMap[strip.key].tabs
-          const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
-          this.resetSelectedPill(allPills)
-          if (allTabs && allTabs.length && allTabs[tabIndex]) {
-            if (allPills && allPills.length && allPills[pillIndex]) {
-              allPills[pillIndex] = {
-                ...allPills[pillIndex],
-                widgets,
-                // fetchTabStatus: 'done',
-                selected: true
-              }
-            }
-            allTabs[tabIndex] = {
-              ...allTabs[tabIndex],
-              widgets,
-              fetchTabStatus: 'done',
-            }
-            tabResults = allTabs
-          }
+          const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
+          this.getTabDataByNewReqPlaylistReadContent(strip, 0, 0, currentTabFromMap, calculateParentStatus)
         }
-        this.processStrip(
-          strip,
-          widgets,
-          'done',
-          calculateParentStatus,
-          null,
-          tabResults // tabResults as widgets
-        )
-        this.statusChangetoDone(strip, tabIndex, pillIndex)
-        } catch (error) {
-          console.error('Error:', error)
-          let tabResults: any[] = []
-          if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
-            const allTabs = this.stripsResultDataMap[strip.key].tabs
-            const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
-            if (allTabs && allTabs.length && allTabs[tabIndex]) {
-              if (allPills && allPills.length && allPills[pillIndex]) {
-                allPills[pillIndex] = {
-                  ...allPills[pillIndex],
-                  widgets: [],
-                  fetchTabStatus: 'done',
-                  selected: true
-                }
-              }
-              allTabs[tabIndex] = {
-                ...allTabs[tabIndex],
-                widgets: [],
-                fetchTabStatus: 'done',
-              }
-              tabResults = allTabs
-            }
-            this.processStrip(strip, [], 'done', calculateParentStatus, null, tabResults)
-          } else {
-            this.processStrip(strip, [], 'done', calculateParentStatus, null, tabResults)
-          }
-        }
-        
       }
+    } else {
+      if (strip.request && strip.request.playlistRead && Object.keys(strip.request.playlistRead).length) {
+        let originalFilters: any = []
+        if (strip.request &&
+          strip.request.playlistRead &&
+          strip.request.playlistRead.type) {
+          strip.request.apiUrl = this.getFullUrl(strip.request.apiUrl, strip.request.playlistRead.type)
+        }
+        if (strip.tabs && strip.tabs.length) {
+          // TODO: Have to extract requestRequired to outer level of tabs config
+          const firstTab = strip.tabs[0]
+          if (firstTab.requestRequired && firstTab.request && firstTab.request.playlistRead && Object.keys(firstTab.request.playlistRead).length) {
+            if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+              const allTabs = this.stripsResultDataMap[strip.key].tabs
+              const currentTabFromMap = (allTabs && allTabs.length && allTabs[0]) as NsContentStripWithTabs.IContentStripTab
+
+              this.getTabDataByNewReqPlaylistReadContent(strip, 0, 0, currentTabFromMap, calculateParentStatus)
+            }
+          }
+
+        }
+      }
+    }
+  }
+
+
+  async getRequestMethod(strip: any,
+    request: NsContentStripWithTabs.IContentStripUnit['request'],
+    apiUrl: string,
+    calculateParentStatus: boolean
+  ): Promise<any> {
+    const originalFilters: any = []
+    return new Promise<any>((resolve, reject) => {
+      if (request && request) {
+        this.contentSvc.getApiMethod(apiUrl).subscribe(results => {
+          let showViewMore: any
+          if (results.result.data) {
+            showViewMore = Boolean(
+              results.result.data && results.result.data.orgList.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+            )
+          } else if (results.result.content) {
+            let featuredProvider = JSON.parse(results.result.content.featuredProviders || '[]')
+            showViewMore = Boolean(
+              featuredProvider && featuredProvider.length > 5 && strip.stripConfig && strip.stripConfig.postCardForSearch,
+            )
+          }
+          const viewMoreUrl = showViewMore
+            ? {
+              path: strip.viewMoreUrl && strip.viewMoreUrl.path || '',
+            }
+            : null
+          resolve({ results, viewMoreUrl })
+        }, (error: any) => {
+          this.processStrip(strip, [], 'error', calculateParentStatus, null)
+          reject(error)
+        },
+        )
+      }
+    })
+  }
+  async getTabDataByNewReqPlaylistReadContent(
+    strip: any,
+    tabIndex: number,
+    pillIndex: number,
+    currentTab: NsContentStripWithTabs.IContentStripTab,
+    calculateParentStatus: boolean
+  ) {
+    if (currentTab.request &&
+      currentTab.request.playlistRead &&
+      currentTab.request.playlistRead.type) {
+      currentTab.request.apiUrl = this.getFullUrl(currentTab.request.apiUrl, currentTab.request.playlistRead.type)
+    }
+    try {
+      const response = await this.getRequestMethod(strip, currentTab.request.playlistRead, currentTab.request.apiUrl, calculateParentStatus)
+      const widgets = this.transformContentsToWidgets(response.results.result.content, strip, '')
+      let tabResults: any[] = []
+      if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs) {
+        const allTabs = this.stripsResultDataMap[strip.key].tabs
+        const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
+        this.resetSelectedPill(allPills)
+        if (allTabs && allTabs.length && allTabs[tabIndex]) {
+          if (allPills && allPills.length && allPills[pillIndex]) {
+            allPills[pillIndex] = {
+              ...allPills[pillIndex],
+              widgets,
+              // fetchTabStatus: 'done',
+              selected: true
+            }
+          }
+          allTabs[tabIndex] = {
+            ...allTabs[tabIndex],
+            widgets,
+            fetchTabStatus: 'done',
+          }
+          tabResults = allTabs
+        }
+      }
+      this.processStrip(
+        strip,
+        widgets,
+        'done',
+        calculateParentStatus,
+        null,
+        tabResults // tabResults as widgets
+      )
+      this.statusChangetoDone(strip, tabIndex, pillIndex)
+    } catch (error) {
+      console.error('Error:', error)
+      let tabResults: any[] = []
+      if (this.stripsResultDataMap[strip.key] && this.stripsResultDataMap[strip.key].tabs && this.stripsResultDataMap[strip.key].tabs.length) {
+        const allTabs = this.stripsResultDataMap[strip.key].tabs
+        const allPills = this.stripsResultDataMap[strip.key].tabs[tabIndex]?.pillsData
+        if (allTabs && allTabs.length && allTabs[tabIndex]) {
+          if (allPills && allPills.length && allPills[pillIndex]) {
+            allPills[pillIndex] = {
+              ...allPills[pillIndex],
+              widgets: [],
+              fetchTabStatus: 'done',
+              selected: true
+            }
+          }
+          allTabs[tabIndex] = {
+            ...allTabs[tabIndex],
+            widgets: [],
+            fetchTabStatus: 'done',
+          }
+          tabResults = allTabs
+        }
+        this.processStrip(strip, [], 'done', calculateParentStatus, null, tabResults)
+      } else {
+        this.processStrip(strip, [], 'done', calculateParentStatus, null, tabResults)
+      }
+    }
+
+  }
 
 }

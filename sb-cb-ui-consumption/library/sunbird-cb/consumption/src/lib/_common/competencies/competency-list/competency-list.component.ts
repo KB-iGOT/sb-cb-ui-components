@@ -117,6 +117,9 @@ export class CompetencyListComponent implements OnInit, OnChanges {
   allThemeData: any
   allSubThemeData: any
 
+  expand: boolean = false
+  selectedAreaValue: string | null = null
+
   // Internal competencies array managed by component
   internalCompetencies: CompetencyData[] = []
 
@@ -224,6 +227,7 @@ export class CompetencyListComponent implements OnInit, OnChanges {
 
   compAreaSelected(option: any) {
     this.resetCompSubfields()
+    this.selectedAreaValue = option.name
     this.allCompetencies.forEach((val: any) => {
       if (option.identifier === val.identifier) {
         this.seletedCompetencyArea = val
@@ -231,6 +235,7 @@ export class CompetencyListComponent implements OnInit, OnChanges {
         this.filteredallCompetencyTheme = this.allCompetencyTheme
       }
     })
+    this.expand = true
   }
 
   compThemeSelected(option: any) {
@@ -271,13 +276,13 @@ export class CompetencyListComponent implements OnInit, OnChanges {
     const competencyData: CompetencyData = {
       // Area
       competencyAreaIdentifier: area.identifier || area.id || area.name,
-      competencyAreaRefId: area.code || area.identifier || '',
+      competencyAreaRefId: area.refId || area.identifier || '',
       competencyAreaName: area.name,
       competencyAreaDescription: area.description || '',
 
       // Theme
       competencyThemeIdentifier: theme.identifier || theme.id || theme.name,
-      competencyThemeRefId: theme.code || theme.identifier || '',
+      competencyThemeRefId: theme.refId || theme.identifier || '',
       competencyThemeName: theme.name,
       competencyThemeType: theme.category || 'theme',
       competencyThemeDescription: theme.description || '',
@@ -285,7 +290,7 @@ export class CompetencyListComponent implements OnInit, OnChanges {
 
       // Sub-theme
       competencySubThemeIdentifier: subTheme.identifier || subTheme.id || subTheme.name,
-      competencySubThemeRefId: subTheme.code || subTheme.identifier || '',
+      competencySubThemeRefId: subTheme.refId || subTheme.identifier || '',
       competencySubThemeName: subTheme.name,
       competencySubThemeDescription: subTheme.description || '',
       competencySubThemeAdditionalProperties: subTheme.additionalProperties || {},
@@ -306,6 +311,10 @@ export class CompetencyListComponent implements OnInit, OnChanges {
       this.selectedCompetency.emit([...this.internalCompetencies])
       this.addTehem.emit(competencyData)
     }
+    this.expand = false
+    this.seletedCompetencyArea = null
+    this.selectedAreaValue = null
+    this.resetCompSubfields()
   }
 
   removeCompetencyV2(area: string, theme: string, subtheme: string): void {

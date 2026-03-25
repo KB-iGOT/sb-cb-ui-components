@@ -75,7 +75,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
             horizontalPosition: 'center',
             verticalPosition: 'bottom'
           })
-          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          if (this.peerValidationService.isSpvRoute) {
+            this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+          } else {
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          }
           return
         }
         this.formData = data
@@ -94,22 +98,36 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           horizontalPosition: 'center',
           verticalPosition: 'bottom'
         })
-        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+        if (this.peerValidationService.isSpvRoute) {
+          this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+        } else {
+          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+        }
       }
     })
   }
 
   refreshFormData(formId: string | null, callback?: () => void): void {
     if (!formId) { return }
+    if (this.loaderService) {
+      this.loaderService.changeLoaderState(true)
+    }
     of(null).pipe(
+      delay(1000), // Add a slight delay to ensure backend has processed the update before we fetch
       switchMap(() => this.peerValidationService.getFormById(formId))
     ).subscribe({
       next: (response) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
         this.formData = response?.result?.response || response
         this.captureSnapshot()
         if (callback) { callback() }
       },
       error: (err) => {
+        if (this.loaderService) {
+          this.loaderService.changeLoaderState(false)
+        }
         console.error('Failed to refresh form data:', err)
         if (callback) { callback() }
       }
@@ -131,7 +149,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
       identifier: ap.identifier || '',
       triggerAfter: ap.triggerAfter ?? 30,
       completionLookBack: ap.completionLookBack ?? 90,
-      endDate: this.formData?.endDate || ''
+      endDate: this.formData?.endDate ? new Date(this.formData.endDate).toISOString() : ''
     }
   }
 
@@ -165,7 +183,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
   backToDashboard() {
     // Navigate back to survey dashboard
-    this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'all' } })
+    if (this.peerValidationService.isSpvRoute) {
+      this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'all' } })
+    } else {
+      this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'all' } })
+    }
   }
 
   onLoaderChange(value: boolean) {
@@ -197,7 +219,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           if (this.loaderService) {
             this.loaderService.changeLoaderState(false)
           }
-          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          if (this.peerValidationService.isSpvRoute) {
+            this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+          } else {
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+          }
           return
         }
         // Update existing form
@@ -212,7 +238,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               horizontalPosition: 'center',
               verticalPosition: 'bottom'
             })
-            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            if (this.peerValidationService.isSpvRoute) {
+              this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+            } else {
+              this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            }
           },
           error: (error) => {
             if (this.loaderService) {
@@ -239,7 +269,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
               horizontalPosition: 'center',
               verticalPosition: 'bottom'
             })
-            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            if (this.peerValidationService.isSpvRoute) {
+              this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+            } else {
+              this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+            }
           },
           error: (error) => {
             if (this.loaderService) {
@@ -255,7 +289,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
         })
       }
     } else {
-      this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+      if (this.peerValidationService.isSpvRoute) {
+        this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'draft' } })
+      } else {
+        this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'draft' } })
+      }
     }
   }
 
@@ -331,6 +369,7 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           : (course.duration ? String(course.duration) : this.formData.additionalProperties?.duration || '0')
       }
     }
+
     return payload
   }
 
@@ -419,7 +458,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
             this.refreshFormData(this.formId, () => {
               if (this.loaderService) { this.loaderService.changeLoaderState(false) }
               // Silently update URL to edit/:formId without triggering route.params subscription
-              this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
+              if (this.peerValidationService.isSpvRoute) {
+                this.location.replaceState(`/app/home/spv/peer-validation/edit/${this.formId}`)
+              } else {
+                this.location.replaceState(`/app/home/peer-validation/edit/${this.formId}`)
+              }
               this.currentStepperIndex = 1
             })
           },
@@ -459,6 +502,16 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
   onStepChanged(index: number) {
     // Navigating forward from configuration step — run the same save/validate logic as Next
     if (this.currentStepperIndex === 0 && index > 0) {
+      // If validation fails, revert the MatStepper back to step 0
+      // (MatStepper visually advances before this event fires)
+      if (!this.configStepComponent || !this.configStepComponent.isFormValid()) {
+        setTimeout(() => {
+          if (this.stepperComponent) {
+            this.stepperComponent.goToStep(0)
+          }
+          this.cdr.detectChanges()
+        }, 0)
+      }
       this.onNext()
       return
     }
@@ -504,7 +557,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
 
     const updatedFields = (this.formData.fields || []).filter((f: any) => f.name !== fieldName)
     const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
-    const payload = { ...baseFormData, fields: updatedFields }
+    const payload = {
+      ...baseFormData,
+      fields: updatedFields,
+      endDate: this.formData.endDate ? new Date(this.formData.endDate).toISOString() : undefined
+    }
 
     if (this.loaderService) {
       this.loaderService.changeLoaderState(true)
@@ -545,7 +602,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
     // Append the new field to formData.fields
     const updatedFields = [...(this.formData.fields || []), field]
     const { updatedBy, updatedDate, mandatoryFields, meta, ...baseFormData } = this.formData
-    const payload = { ...baseFormData, fields: updatedFields }
+    const payload = {
+      ...baseFormData,
+      fields: updatedFields,
+      endDate: this.formData.endDate ? new Date(this.formData.endDate).toISOString() : undefined
+    }
 
     if (this.loaderService) {
       this.loaderService.changeLoaderState(true)
@@ -607,7 +668,11 @@ export class PvCreateComponent implements OnInit, AfterViewInit {
           if (this.loaderService) {
             this.loaderService.changeLoaderState(false)
           }
-          this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+          if (this.peerValidationService.isSpvRoute) {
+            this.router.navigate(['/app/home/spv/peer-validation'], { queryParams: { tab: 'active' } })
+          } else {
+            this.router.navigate(['/app/home/peer-validation'], { queryParams: { tab: 'active' } })
+          }
         }, 2000)
       },
       error: (error) => {

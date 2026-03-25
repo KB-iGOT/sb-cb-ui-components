@@ -2092,6 +2092,24 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
               } else {
                 this.emptyResponse.emit(true)
               }
+            } else if(response && response.results && response.results.result && response.results.result.data && response.results.result.data.length) {
+              let data = response.results.result.data.map((item: any) => {
+              return {
+                  ...item,
+                  "name": item?.contentPartnerName || '',
+                  "logoUrl": item?.link || '',
+                  "description": item?.description || '',
+                  "contentDisplayType":  strip?.request?.condition || 'extCourse',
+                  "isExternalProvider": true
+                }
+              })
+              this.processStrip(
+                strip,
+                this.transformContentsToWidgets(data, strip),
+                'done',
+                calculateParentStatus,
+                response.viewMoreUrl,
+              )
             } else {
               this.processStrip(strip, [], 'error', calculateParentStatus, null)
               this.emptyResponse.emit(true)

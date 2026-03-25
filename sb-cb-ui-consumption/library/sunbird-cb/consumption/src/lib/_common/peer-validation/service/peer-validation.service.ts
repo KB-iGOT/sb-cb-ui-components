@@ -15,8 +15,9 @@ const API_END_POINTS = {
   SPV_CREATE_FORM: 'apis/proxies/v8/forms/spv/peersurvey',
   SPV_UPDATE_FORM: (id: any) => `apis/proxies/v8/forms/spv/update/peersurvey/${id}`,
   SPV_PEER_VALIDATION_SEARCH: `apis/proxies/v8/forms/spv/peersurvey/search`,
-  PV_INIT_DOWNLOAD_REPORT: (id: any) => `apis/proxies/v8/peervalidation/v1/report/init/${id}`,
+  PV_INIT_DOWNLOAD_REPORT: (id: any) => `apis/proxies/v8/peervalidation/v1/report/initiate/${id}`,
   PV_DOWNLOAD_REPORT: `apis/proxies/v8/storage/v1/peervalidation/report/download`,
+  PV_DOWNLOAD_LIST: `apis/proxies/v8/peervalidation/v1/list/report`
 }
 @Injectable({
   providedIn: 'root'
@@ -78,7 +79,11 @@ export class PeerValidationService {
     return this.http.get(API_END_POINTS.PV_INIT_DOWNLOAD_REPORT(id))
   }
 
-  downloadReport(payload: any): Observable<any> {
-    return this.http.post(API_END_POINTS.PV_DOWNLOAD_REPORT, payload)
+  downloadReport(payload: any): Observable<string> {
+    return this.http.post(API_END_POINTS.PV_DOWNLOAD_REPORT, payload, { responseType: 'text' })
+  }
+
+  downloadList(): Observable<any> {
+    return this.http.get(API_END_POINTS.PV_DOWNLOAD_LIST)
   }
 }
