@@ -39,7 +39,8 @@ import { SadhanaSaptahComponent } from './sadhana-saptah/sadhana-saptah.componen
     SpeakersModule,
     UserProgressModule,
     ContentStripFacetFilterModule,
-    PipeSafeSanitizerModule
+    PipeSafeSanitizerModule,
+    
   ],
   exports: [
     KarmayogiSaptahComponent,
