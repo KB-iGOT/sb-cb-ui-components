@@ -11,10 +11,9 @@ import { CbpPlanModule } from './_common/cbp-plan/cbp-plan.module'
 import { CompetencySummaryModule } from './_common/competency-summary/competency-summary.module'
 import { AssessmentModule } from './_common/assessments/assessment.module'
 import { PeerValidationLibModule } from './_common/peer-validation/peer-validation-lib.module';
-import { AiProgramComponent } from './_common/ai-program/ai-program.component'
 
 @NgModule({
-  declarations: [ConsumptionComponent, AiProgramComponent],
+  declarations: [ConsumptionComponent],
   imports: [
     ContentStripWithTabsLibModule,
     SlidersLibModule

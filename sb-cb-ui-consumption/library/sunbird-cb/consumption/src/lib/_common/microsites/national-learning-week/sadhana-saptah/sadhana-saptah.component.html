@@ -16,8 +16,6 @@
                                         [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
                                     <ng-container *ngSwitchCase="'mainContentSection'" [ngTemplateOutlet]="mainContentSection"
                                         [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
-                                    <!-- <ng-container *ngSwitchCase="'contentSection'" [ngTemplateOutlet]="contentSection"
-                                        [ngTemplateOutletContext]="{data: column?.data}"></ng-container> -->
                                         <ng-container *ngSwitchCase="'lookerSection'" [ngTemplateOutlet]="lookerTemplate"
                                             [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
                                 </ng-container>
@@ -181,10 +179,10 @@
             [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
 
 
-            <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            <!-- <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
+            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container> -->
 
-             <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
+            <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
             [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
             
     </ng-container>
@@ -223,16 +221,17 @@
         </sb-uic-speakers>
     </div>
 </ng-template>
-
+<!-- 
 <ng-template #programContent let-data="data">
       <ng-container *ngFor="let stripData of data">
         <ng-container *ngIf="stripData?.enabled">
+            hiiihhihih
             <div class="{{data?.containerClass}}">
-                <sb-uic-ai-program [programData]="data"></sb-uic-ai-program>
+                <sb-uic-ai-program ></sb-uic-ai-program>
             </div>
         </ng-container>
     </ng-container>
-</ng-template>
+</ng-template> -->
 
 <ng-template #events let-data="data">
     <div class="{{data?.containerClass}}">
@@ -260,99 +259,5 @@
          <sb-uic-mdo-leaderboard
             [object]="data?.data"
             (tabClicked)="raiseTabClick($event)"></sb-uic-mdo-leaderboard>
-    </div>
-</ng-template>
-
-<ng-template #contentSection let-data="data">
-    <div class="flex items-center justify-center">
-        <div class="container">
-            <div class="grid grid-cols-12 gap-8 mb-6">
-                <div class="col-span-12 md:col-span-{{data.leftContent.colspan}}">
-                    <div *ngIf="data.leftContent.data.weekHighlights.data">
-                        <sb-uic-highlights-of-week
-                            [objectData]="data.leftContent.data.weekHighlights.data">
-                        </sb-uic-highlights-of-week>
-                    </div>
-                    <div class="hidden md:block">
-                        <div *ngIf="data.leftContent.data.mandatoryCourse.enabled && data?.leftContent?.data?.mandatoryCourse?.column[0]?.data">
-                            <div class="margin-top-l nlw-mandatoryCourse">
-                                <sb-uic-content-strip-with-tabs
-                                    [emitViewAll]="false"
-                                    (viewAllResponse)="''"
-                                    (telemtryResponse)="raiseTelemetryInteratEvent($event)"
-                                    (emptyResponse)="''"
-                                    [providerId]="'123456789'"
-                                    [widgetData]="data?.leftContent?.data?.mandatoryCourse?.column[0]?.data"
-                                    [channnelName]="'channnelName'">
-                                </sb-uic-content-strip-with-tabs>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hidden md:block">
-                        <div *ngIf="data?.leftContent?.data?.exploreLearningContent?.strips[0]">
-                            <!-- <sb-uic-content-strip-facet-filter [widgetData]="data?.leftContent?.data?.exploreLearningContent"></sb-uic-content-strip-facet-filter> -->
-                            <sb-uic-content-strip-with-tabs
-                            [emitViewAll]="false"
-                            (viewAllResponse)="''"
-                            (telemtryResponse)="raiseTelemetryInteratEvent($event)"
-                            (emptyResponse)="''"
-                            [providerId]="environment?.spvorgID"
-                            [widgetData]="data?.leftContent?.data?.exploreLearningContent"
-                            [channnelName]="'channnelName'">
-                        </sb-uic-content-strip-with-tabs>
-                        </div>
-                    </div>
-                    <div class="hidden md:block">
-                        <div *ngIf="data.leftContent.data.events.enabled && data.leftContent.data.events.column[0]">
-                            <sb-uic-events [object]="data.leftContent.data.events.column[0]" [nwlEventsConfig]="nlwConfiguration"></sb-uic-events>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 md:col-span-{{data.rightContent.colspan}}">
-                    <div *ngIf="data.rightContent.data.myprogress">
-                        <sb-uic-user-progress
-                            [objectData]="data.rightContent.data.myprogress.data" [rootOrgId]="configDetails?.unMappedUser?.rootOrgId">
-                        </sb-uic-user-progress>
-                    </div>
-                    <div *ngIf="data.rightContent.data.speakerOftheDay">
-                        <sb-uic-speakers
-                            [objectData]="data.rightContent.data.speakerOftheDay.data">
-                        </sb-uic-speakers>
-                    </div>
-                    <div *ngIf="data.rightContent.data.mdoLeaderboard">
-                        <sb-uic-mdo-leaderboard
-                            [object]="data.rightContent.data.mdoLeaderboard.data"
-                            (tabClicked)="raiseTabClick($event)"></sb-uic-mdo-leaderboard>
-                    </div>
-
-                    <div class="block md:hidden">
-                        <div *ngIf="data.leftContent.data.mandatoryCourse.enabled && data?.leftContent?.data?.mandatoryCourse?.column[0]?.data">
-                            <div class="margin-top-l nlw-mandatoryCourse">
-                                <sb-uic-content-strip-with-tabs
-                                    [emitViewAll]="false"
-                                    (viewAllResponse)="''"
-                                    (telemtryResponse)="raiseTelemetryInteratEvent($event)"
-                                    (emptyResponse)="''"
-                                    [providerId]="'123456789'"
-                                    [widgetData]="data?.leftContent?.data?.mandatoryCourse?.column[0]?.data"
-                                    [channnelName]="'channnelName'">
-                                </sb-uic-content-strip-with-tabs>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="block md:hidden px-4 md-px-0">
-                        <div *ngIf="data?.leftContent?.data?.exploreLearningContent?.strips[0]">
-                            <sb-uic-content-strip-facet-filter [widgetData]="data?.leftContent?.data?.exploreLearningContent"></sb-uic-content-strip-facet-filter>
-                        </div>
-                    </div>
-                    <div class="block md:hidden px-4 md-px-0">
-                        <div *ngIf="data.leftContent.data.events.enabled && data.leftContent.data.events.column[0]">
-                            <sb-uic-events [object]="data.leftContent.data.events.column[0]" [nwlEventsConfig]="nlwConfiguration"></sb-uic-events>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </ng-template>
