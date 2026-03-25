@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-toc",
-  "version": "0.35.2",
+  "version": "0.35.3",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --configuration production",
