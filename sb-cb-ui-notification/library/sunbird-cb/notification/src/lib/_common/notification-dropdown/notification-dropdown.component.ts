@@ -126,11 +126,6 @@ export class NotificationDropdownComponent implements OnInit {
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
-        const index = this.peerValidations.findIndex((n: any) => n.notification_id === notification.notification_id)
-        if (index !== -1) {
-          this.peerValidations[index].read = true
-        }
-        this.peerValidationsCount = this.peerValidations.filter((n: any) => !n.read).length
       }
     })
   }
