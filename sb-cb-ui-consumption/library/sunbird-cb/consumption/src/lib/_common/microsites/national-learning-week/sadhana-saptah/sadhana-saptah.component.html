@@ -179,6 +179,13 @@
 
             <ng-container *ngSwitchCase="'events'" [ngTemplateOutlet]="events"
             [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+
+
+            <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
+            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+
+             <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
+            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
             
     </ng-container>
 </ng-template>
@@ -217,6 +224,16 @@
     </div>
 </ng-template>
 
+<ng-template #programContent let-data="data">
+      <ng-container *ngFor="let stripData of data">
+        <ng-container *ngIf="stripData?.enabled">
+            <div class="{{data?.containerClass}}">
+                <sb-uic-ai-program [programData]="data"></sb-uic-ai-program>
+            </div>
+        </ng-container>
+    </ng-container>
+</ng-template>
+
 <ng-template #events let-data="data">
     <div class="{{data?.containerClass}}">
         <sb-uic-events [object]="data.column[0]" [nwlEventsConfig]="nlwConfiguration" [mode]="'mobile'"></sb-uic-events>
@@ -238,7 +255,13 @@
     </div>
 </ng-template>
 
-
+<ng-template #mdoLeaderboard let-data="data">
+    <div class="{{data?.containerClass}}">
+         <sb-uic-mdo-leaderboard
+            [object]="data?.data"
+            (tabClicked)="raiseTabClick($event)"></sb-uic-mdo-leaderboard>
+    </div>
+</ng-template>
 
 <ng-template #contentSection let-data="data">
     <div class="flex items-center justify-center">
