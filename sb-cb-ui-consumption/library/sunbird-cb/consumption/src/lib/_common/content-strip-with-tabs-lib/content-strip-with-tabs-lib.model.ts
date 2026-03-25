@@ -67,6 +67,7 @@ export namespace NsContentStripWithTabs {
       enrollmentList?: any
       cbpList?: any,
       apiUrl: string
+      condition: string
       searchRegionRecommendation?: NSSearch.ISearchOrgRegionRecommendationRequest
       api?: IStripRequestApi
       networkApi?: INetworkRequestApi
