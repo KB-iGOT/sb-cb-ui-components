@@ -191,3 +191,7 @@
   font-style: italic;
   color: gray;
 }
+::ng-deep .custom-menu-badge-modal {
+  z-index: 9999 !important;
+  background: white !important;
+}

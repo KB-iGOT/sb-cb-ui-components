@@ -21,10 +21,41 @@
            Great job! You’ve successfully earned the {{badgeData?.title}} badge by completing {{badgeData?.courseName}}.
       </p>
 
+      
       <div class="modal-actions">
-        <button class="btn btn-outline" (click)="downloadBadge(badgeData)">Download</button>
-        <!-- <button class="btn btn-primary">View Badge</button> -->
-      </div>
+  
+  <button
+    mat-button
+    [matMenuTriggerFor]="downloadMenu"
+    class="btn btn-outline"
+  >
+    <!-- <mat-icon class="margin-right-xs">cloud_download</mat-icon> -->
+    Download
+  </button>
+
+  <mat-menu #downloadMenu="matMenu" class="custom-menu-badge-modal" panelClass="custom-menu-badge-modal">
+    
+    <!-- PDF -->
+    <button class="!bg-white" mat-menu-item (click)="downloadBadgePdf(badgeData)">
+      <mat-icon>picture_as_pdf</mat-icon>
+      <span>PDF</span>
+    </button>
+
+    <!-- PNG -->
+    <button class="!bg-white" mat-menu-item (click)="downloadBadgePng(badgeData)">
+      <mat-icon>photo</mat-icon>
+      <span>PNG</span>
+    </button>
+
+    <!-- SVG -->
+    <button class="!bg-white" mat-menu-item (click)="downloadBadgeSvg(badgeData)">
+      <mat-icon>photo_size_select_actual</mat-icon>
+      <span>SVG</span>
+    </button>
+
+  </mat-menu>
+
+</div>
 
     </div>
 
