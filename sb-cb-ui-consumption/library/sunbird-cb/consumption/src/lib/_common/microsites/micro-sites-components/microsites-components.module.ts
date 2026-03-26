@@ -67,6 +67,7 @@ import { AddTabDialogComponent } from './components/add-tab-dialog/add-tab-dialo
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component'
 import { EventsCalendarModule } from '../../events-calendar/events-calendar.module'
 import { AiProgramComponent } from './components/ai-program/ai-program.component'
+import { PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
 
 @NgModule({
   declarations: [
@@ -141,7 +142,9 @@ import { AiProgramComponent } from './components/ai-program/ai-program.component
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    EventsCalendarModule
+    EventsCalendarModule,
+
+            PipeDurationTransformModule,
   ],
   exports: [
     TopSectionComponent,
