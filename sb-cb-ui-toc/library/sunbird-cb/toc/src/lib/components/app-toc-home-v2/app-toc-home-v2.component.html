@@ -440,7 +440,7 @@
                     {{contentReadData?.difficultyLevel}}
                   </span>
                 </div>
-                <div *ngIf="baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate" class="knowledge-level-container badgediv">
+                <div *ngIf="showBadgeIcon(baseContentReadData?.badgeDetails_v1)" class="knowledge-level-container badgediv">
                   <span class="custom-badge">
                     <img class="badge-img bg-transparent" src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt="" srcset="">
                   </span>
