@@ -29,7 +29,7 @@ export class ProfileV2Service {
   }
 
   fetchCadre(): Observable<any> {
-    return of({ cadres: [] })
+    return this.http.get<any>('/apis/proxies/v8/data/v2/system/settings/get/cadreConfig')
   }
 
   fetchApprovalDetails(userId?: string): Observable<any> {

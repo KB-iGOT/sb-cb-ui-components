@@ -29,7 +29,7 @@ export class UserProfileService {
   }
 
   getGroups(): Observable<any> {
-    return of({ groups: [] })
+    return this.http.get<any>('/api/user/v1/groups')
   }
 
   handleTranslateTo(key: string): string {

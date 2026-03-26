@@ -615,8 +615,11 @@ export class EnrollProfileFormComponent implements OnInit {
     this.addLoader = this.addLoader + 1
     this.profileV2Svc.fetchCadre().subscribe((response: any) => {
       this.addLoader = this.addLoader - 1
-      this.civilServiceData = response.result.response.value.civilServiceType
-      this.civilServiceTypes = this.civilServiceData.civilServiceTypeList.map((service: any) => service.name)
+      const value = response && response.result && response.result.response && response.result.response.value
+      if (value && value.civilServiceType) {
+        this.civilServiceData = value.civilServiceType
+        this.civilServiceTypes = this.civilServiceData.civilServiceTypeList.map((service: any) => service.name)
+      }
     })
   }
 
@@ -826,7 +829,6 @@ export class EnrollProfileFormComponent implements OnInit {
     if (this.batchDetails.batchAttributes.userProfileFileds &&
       this.batchDetails.batchAttributes.bpEnrolMandatoryProfileFields) {
       let customAttr = this.batchDetails.batchAttributes.bpEnrolMandatoryProfileFields
-      console.log("customAttr ", customAttr)
       if (this.findAttr(customAttr, 'name')) {
         this.canShowName = true
         this.showname = true
