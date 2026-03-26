@@ -306,12 +306,30 @@ export class AiProgramComponent implements OnInit, OnChanges, OnDestroy {
     return item.id;
   }
 
-  /** bar[0] active when enrolled; bar[i>0] active when i courses done */
-  isBarActive(index: number): boolean {
+  /**
+   * Bar state:
+   *  - 'full'  → bar[i] is completely orange (course i already completed, or enrolled and i===0 with completedCourses > 0)
+   *  - 'half'  → bar[i] is 50% orange (the "current" bar — user just reached this step)
+   *  - 'none'  → bar[i] is white/inactive
+   *
+   * Logic:
+   *  bar[0]: full when completedCourses >= 1; half when enrolled but 0 completed; else none
+   *  bar[i>0]: full when completedCourses > i; half when completedCourses === i; else none
+   */
+  getBarState(index: number): 'full' | 'half' | 'none' {
     if (index === 0) {
-      return this.isEnrolled;
+      if (this.completedCourses >= 1) {
+        return 'full';
+      }
+      return this.isEnrolled ? 'half' : 'none';
     }
-    return this.completedCourses >= index;
+    if (this.completedCourses > index) {
+      return 'full';
+    }
+    if (this.completedCourses === index) {
+      return 'half';
+    }
+    return 'none';
   }
 
   /** shield[i] active when course (i+1) is completed */

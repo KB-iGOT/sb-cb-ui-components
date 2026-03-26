@@ -165,25 +165,28 @@
     </div>
 </ng-template>
 <ng-template #contentsDisplay let-widgetKey="widgetKey">
-    <ng-container *ngIf="indivisualSection && indivisualSection[widgetKey]" [ngSwitch]="widgetKey">
+    <ng-container *ngIf="individualSection && individualSection[widgetKey]" [ngSwitch]="widgetKey">
         <ng-container *ngSwitchCase="'contentStrips'" [ngTemplateOutlet]="contentStrips"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
         
         <ng-container *ngSwitchCase="'myprogress'" [ngTemplateOutlet]="myprogress"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'speakerOftheDay'" [ngTemplateOutlet]="speakerOftheDay"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+
+            <ng-container *ngSwitchCase="'webinarOftheDay'" [ngTemplateOutlet]="webinarOftheDay"
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'events'" [ngTemplateOutlet]="events"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
 
             <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
             
     </ng-container>
 </ng-template>
@@ -219,6 +222,14 @@
         <sb-uic-speakers
             [objectData]="data?.data">
         </sb-uic-speakers>
+    </div>
+</ng-template>
+
+<ng-template #webinarOftheDay let-data="data">
+    <div class="{{data?.containerClass}}">
+        <sb-uic-speakers-v2
+            [objectData]="data?.data">
+        </sb-uic-speakers-v2>
     </div>
 </ng-template>
 
