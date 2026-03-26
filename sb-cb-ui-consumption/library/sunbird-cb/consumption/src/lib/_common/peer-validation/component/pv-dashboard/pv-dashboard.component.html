@@ -40,7 +40,7 @@
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
-        <span class="tab-label">Download</span>
+        <span class="tab-label">Downloadable Reports</span>
       </ng-template>
     </mat-tab>
   </mat-tab-group>
@@ -115,7 +115,7 @@
     <table mat-table [dataSource]="dataSource" class="survey-table" *ngIf="selectedTab !== 'download'">
       <!-- Course Name Column -->
       <ng-container matColumnDef="courseName">
-        <th mat-header-cell *matHeaderCellDef>Course Name</th>
+        <th mat-header-cell *matHeaderCellDef>Content Name</th>
         <td mat-cell *matCellDef="let row">
           <div class="course-name-cell">
             <img [src]="row.thumbnail" [alt]="row.courseName" onerror="this.src='/assets/images/default.png'">
