@@ -3342,7 +3342,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
     // If badgeEarningDateEnabled is true, show badge only if badgeEarningDateTime has passed
     if (badge?.badgeEarningDateEnabled && badge?.badgeEarningDateTime) {
-      console.log(badge.badgeEarningDateTime, Date.now())
       return badge.badgeEarningDateTime > Date.now()
     }
     return false
