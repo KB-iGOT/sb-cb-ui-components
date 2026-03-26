@@ -18,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs';
 import { PipeSafeSanitizerModule } from '@sunbird-cb/utils-v2';
 import { SadhanaSaptahComponent } from './sadhana-saptah/sadhana-saptah.component';
+import { MicrositesComponentsModule } from '../micro-sites-components/microsites-components.module';
 
 
 
@@ -40,6 +41,7 @@ import { SadhanaSaptahComponent } from './sadhana-saptah/sadhana-saptah.componen
     UserProgressModule,
     ContentStripFacetFilterModule,
     PipeSafeSanitizerModule,
+    MicrositesComponentsModule
     
   ],
   exports: [

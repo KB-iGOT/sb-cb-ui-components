@@ -179,8 +179,8 @@
             [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
 
 
-            <!-- <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container> -->
+            <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
+            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
             [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
@@ -221,17 +221,16 @@
         </sb-uic-speakers>
     </div>
 </ng-template>
-<!-- 
+
 <ng-template #programContent let-data="data">
       <ng-container *ngFor="let stripData of data">
         <ng-container *ngIf="stripData?.enabled">
-            hiiihhihih
             <div class="{{data?.containerClass}}">
-                <sb-uic-ai-program ></sb-uic-ai-program>
+                <sb-uic-ai-program [programData]="stripData"></sb-uic-ai-program>
             </div>
         </ng-container>
     </ng-container>
-</ng-template> -->
+</ng-template>
 
 <ng-template #events let-data="data">
     <div class="{{data?.containerClass}}">
