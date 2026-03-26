@@ -142,7 +142,7 @@
           </div>
           <span class="portrait-org-name font-normal mat-caption">{{'cardcontentv2.by' | translate}} {{
             (widgetData?.content?.organisation && widgetData?.content?.organisation[0]) ?
-            widgetData?.content?.organisation[0] : 'Karmayogi Bharat' }}</span>
+            widgetData?.content?.organisation[0] : (widgetData?.content?.sourceName ? widgetData?.content?.sourceName : 'Karmayogi Bharat') }}</span>
         </div>
         <div class="mt-2 mb-2">
           <sb-uic-available-languages [content]="widgetData?.content"></sb-uic-available-languages>
