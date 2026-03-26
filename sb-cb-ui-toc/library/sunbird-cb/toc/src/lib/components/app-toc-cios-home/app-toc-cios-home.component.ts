@@ -517,11 +517,13 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     const badge = badgeDetails[0]
     // If badgeEarningDateEnabled is false, don't show badge
     if (!badge.badgeEarningDateEnabled) {
+     console.log("true")
       return true
     }
     // If badgeEarningDateEnabled is true, show badge only if badgeEarningDateTime has passed
     if (badge?.badgeEarningDateEnabled && badge?.badgeEarningDateTime) {
       console.log(badge.badgeEarningDateTime, Date.now())
+      console.log("true", badge.badgeEarningDateTime > Date.now())
       return badge.badgeEarningDateTime > Date.now()
     }
     return false
