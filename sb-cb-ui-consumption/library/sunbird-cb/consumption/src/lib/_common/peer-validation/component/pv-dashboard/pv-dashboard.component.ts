@@ -532,13 +532,13 @@ export class PvDashboardComponent implements OnInit {
       width: '450px',
       data: {
         title: 'Archive Survey',
-        description: `Are you sure you want to archive the survey "${survey.courseName}"? This action cannot be undone.`,
-        iconName: 'archive',
+        description: `Are you sure you want to archive this survey?`,
+        iconName: 'warning',
         type: 'warning',
         buttonsPositionClass: 'justify-center',
         buttons: [
-          { text: 'Cancel', classes: 'btn-out-line', response: false },
-          { text: 'Archive', classes: 'succes-button', response: true }
+          { text: 'No', classes: 'btn-out-line', response: false },
+          { text: 'Yes', classes: 'succes-button', response: true }
         ]
       },
       autoFocus: false
