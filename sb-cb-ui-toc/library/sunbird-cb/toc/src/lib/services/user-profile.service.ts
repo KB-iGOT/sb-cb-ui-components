@@ -6,6 +6,12 @@ import { HttpClient } from '@angular/common/http'
  * User Profile Service stub
  * Handles user profile related operations
  */
+
+const ENDPOINT = {
+  UPDATE_PROFILE: '/apis/proxies/v8/user/profileDetails',
+  SEARCH_PROFILE: '/apis/proxies/v8/user/v1/search',
+  GET_GROUPS: '/api/user/v1/groups'
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -17,11 +23,11 @@ export class UserProfileService {
   }
 
   updateUserProfile(data: any): Observable<any> {
-    return this.http.patch('/apis/proxies/v8/user/profileDetails', data)
+    return this.http.patch(ENDPOINT.UPDATE_PROFILE, data)
   }
 
   searchProfile(data: any): Observable<any> {
-    return this.http.post('/apis/proxies/v8/user/v1/search', data)
+    return this.http.post(ENDPOINT.SEARCH_PROFILE, data)
   }
 
   getWhiteListDomain(): Observable<any> {
@@ -29,7 +35,7 @@ export class UserProfileService {
   }
 
   getGroups(): Observable<any> {
-    return of({ groups: [] })
+    return this.http.get<any>(ENDPOINT.GET_GROUPS)
   }
 
   handleTranslateTo(key: string): string {

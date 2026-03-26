@@ -13,7 +13,7 @@ export class SadhanaSaptahComponent implements OnInit {
   @Input() sectionList:any = []
   @Input() configDetails: any
   @Input() nlwConfiguration: any
-  @Input() indivisualSection: any = {}
+  @Input() individualSection: any = {}
   providerId: string = '123456789'
   providerName: ''
   descriptionMaxLength = 500
