@@ -6,6 +6,10 @@ import { Observable, of } from 'rxjs'
  * Profile V2 Service - Stub implementation
  * Provides profile management functionality
  */
+
+const ENDPOINTS = {
+  CADRE_CONFIG: '/apis/proxies/v8/data/v2/system/settings/get/cadreConfig'
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -29,7 +33,7 @@ export class ProfileV2Service {
   }
 
   fetchCadre(): Observable<any> {
-    return this.http.get<any>('/apis/proxies/v8/data/v2/system/settings/get/cadreConfig')
+    return this.http.get<any>(ENDPOINTS.CADRE_CONFIG)
   }
 
   fetchApprovalDetails(userId?: string): Observable<any> {
