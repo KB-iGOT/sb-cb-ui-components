@@ -120,7 +120,7 @@
         <!-- Duration badge -->
         <div *ngIf="programData.contentData.duration" class="duration-badge">
           <span class="duration-icon"><mat-icon>access_time</mat-icon></span>
-          <span>{{ programData.contentData.duration | pipeDurationTransform: 'hms' }}</span>
+          <span>{{ +programData?.contentData?.duration | pipeDurationTransform: 'hms' }}</span>
         </div>
       </div>
 
