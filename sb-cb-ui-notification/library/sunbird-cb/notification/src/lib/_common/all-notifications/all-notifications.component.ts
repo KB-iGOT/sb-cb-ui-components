@@ -141,7 +141,7 @@ export class AllNotificationsComponent implements OnInit {
       request: {
         type: "individual",
         ids: [notification.notification_id],
-        created_at: notification.created_at
+        // created_at: notification.created_at
       }
     }
     if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
@@ -226,6 +226,9 @@ export class AllNotificationsComponent implements OnInit {
       if (updateTabs) {
         const tabs = _.get(res, 'result.subtypeStats', [])
         tabs.forEach((tab: any) => {
+          if (tab.name && tab.name.toUpperCase() === 'PEER_VALIDATION') {
+            return
+          }
           this.tabs.push(tab)
           if (tab.unread) {
             this.unreadCount += tab.unread
@@ -260,6 +263,9 @@ export class AllNotificationsComponent implements OnInit {
       const tabs = _.get(res, 'result.subtypeStats', [])
       this.tabs = [{ id: "all", name: 'all' }]
       tabs.forEach((tab: any) => {
+        if (tab.name && tab.name.toUpperCase() === 'PEER_VALIDATION') {
+          return
+        }
         this.tabs.push(tab)
         if (tab.unread) {
           this.unreadCount += tab.unread

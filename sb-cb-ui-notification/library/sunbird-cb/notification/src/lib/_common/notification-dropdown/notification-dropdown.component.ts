@@ -137,7 +137,7 @@ export class NotificationDropdownComponent implements OnInit {
       request: {
         type: 'individual',
         ids: [notification.notification_id],
-        created_at: notification.created_at
+        // created_at: notification.created_at
       }
     }
     if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
