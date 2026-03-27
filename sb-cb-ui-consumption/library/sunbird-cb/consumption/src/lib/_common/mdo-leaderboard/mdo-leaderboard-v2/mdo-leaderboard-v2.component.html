@@ -79,8 +79,8 @@
                                 <div class="rank-points flex mt-1 gap-1"
                                     *ngIf="!object?.hideEle?.includes('karma-points-per-capita')">
                                     <img class="nlw-kb" src="assets/icons/home/karma-badge.svg" />
-                                    <div class="points">{{user?.total_points || 0 }} 
-                                        <span> Per Capita Karma Points ( {{user?.per_capita_kp || 0 }} points)</span>
+                                    <div class="points">{{user?.per_capita_kp || 0 }} 
+                                        <span> Per Capita Karma Points ( {{user?.total_points || 0 }} points)</span>
                                     </div>
                                 </div>
                             </div>
