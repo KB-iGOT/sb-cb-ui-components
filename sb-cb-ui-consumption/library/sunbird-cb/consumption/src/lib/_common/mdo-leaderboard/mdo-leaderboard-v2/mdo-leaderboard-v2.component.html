@@ -71,9 +71,17 @@
                             <div>
                                 <div class="rank-name">{{user?.orgName || user?.org_name}}</div>
                                 <div class="rank-points flex mt-1 gap-1"
-                                    *ngIf="!object?.hideEle?.includes('karma-points')">
+                                    *ngIf="!object?.hideEle?.includes('karma-points-only')">
                                     <img class="nlw-kb" src="assets/icons/home/karma-badge.svg" />
-                                    <div class="points">{{user?.total_points || 0 }} points</div>
+                                    <div class="points">{{user?.total_points || 0 }} points
+                                    </div>
+                                </div>
+                                <div class="rank-points flex mt-1 gap-1"
+                                    *ngIf="!object?.hideEle?.includes('karma-points-per-capita')">
+                                    <img class="nlw-kb" src="assets/icons/home/karma-badge.svg" />
+                                    <div class="points">{{user?.total_points || 0 }} 
+                                        <span> Per Capita Karma Points ( {{user?.per_capita_kp || 0 }} points)</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="rank-crown" *ngIf="[1,2,3].includes(user?.row_num)">

@@ -1,6 +1,6 @@
 // ─── Variables ───────────────────────────────────────────────
-$orange: #f57c00;
-$orange-light: #ff9800;
+$orange: #F37400;
+$orange-light: #FEE56E;
 $white: #ffffff;
 $text-dark: #212121;
 $text-secondary: #616161;
@@ -123,23 +123,15 @@ margin: 0;
 }
 
 .shield-path {
-  fill: #d6d6d6;
   transition: fill 0.4s ease;
 }
 
 .shield-fill {
-  fill: #d6d6d6;
   transition: fill 0.4s ease;
 }
 
-// Completed shield → orange
-.shield-node.completed .shield-path {
-  fill: $orange;
-}
-
-.shield-node.completed .shield-fill {
-  fill: $orange;
-}
+// Completed shield → gradient applied via [attr.fill] in template
+// CSS fill removed to avoid overriding the SVG linearGradient url()
 
 .shield-label {
   position: relative;
