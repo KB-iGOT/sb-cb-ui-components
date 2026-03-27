@@ -3332,7 +3332,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   showBadgeIcon(): boolean {
     const badgeDetails = this.baseContentReadData?.badgeDetails_v1
-    console.log('badgeDetails---', badgeDetails?.[0]?.criteria == 'partialRandomCompletion' )
     if (!badgeDetails || !badgeDetails.length || badgeDetails?.[0]?.criteria == 'partialRandomCompletion') {
       return false
     }
