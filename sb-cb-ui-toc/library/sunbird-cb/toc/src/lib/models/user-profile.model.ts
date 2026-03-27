@@ -39,6 +39,7 @@ export namespace NsUserProfileDetails {
   }
 }
 
+
 export interface IUserProfileDetails {
   first_name: string
   last_name: string
