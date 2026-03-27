@@ -137,53 +137,65 @@
 <ng-template #mainContentSection let-data="data">
     <div class="flex items-center justify-center">
         <div class="{{data?.containerClass || 'container'}}">
-            <div class="grid grid-cols-12 gap-4 mb-6">
-                <!-- Desktop Layout -->
-                <ng-container *ngIf="data?.deskTopKeys">
-                    <!-- Left Content -->
-                    <div *ngIf="data?.deskTopKeys?.leftContent?.data?.length"
-                         class="col-span-12 md:col-span-{{data?.deskTopKeys?.leftContent?.colspan || 12}}">
+            <ng-container *ngIf="!isMobile; else mobileView">
+                 <div class="grid grid-cols-12 gap-4 mb-6">
+                    <!-- Desktop Layout -->
+                    <ng-container *ngIf="data?.deskTopKeys">
+                        <!-- Left Content -->
+                        <div *ngIf="data?.deskTopKeys?.leftContent?.data?.length"
+                            class="col-span-12 md:col-span-{{data?.deskTopKeys?.leftContent?.colspan || 12}}">
 
-                        <ng-container *ngFor="let widgetKey of data?.deskTopKeys?.leftContent?.data">
-                            <ng-container [ngTemplateOutlet]="contentsDisplay"
-                                [ngTemplateOutletContext]="{widgetKey: widgetKey}">
+                            <ng-container *ngFor="let widgetKey of data?.deskTopKeys?.leftContent?.data">
+                                <ng-container [ngTemplateOutlet]="contentsDisplay"
+                                    [ngTemplateOutletContext]="{widgetKey: widgetKey}">
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
-                    </div>
-                    <!-- Right Content -->
-                    <div *ngIf="data?.deskTopKeys?.rightContent?.data?.length"
-                         class="col-span-12 md:col-span-{{data?.deskTopKeys?.rightContent?.colspan || 12}}">
-                        <ng-container *ngFor="let widgetKey of data?.deskTopKeys?.rightContent?.data">
-                            <ng-container [ngTemplateOutlet]="contentsDisplay"
-                                [ngTemplateOutletContext]="{widgetKey: widgetKey}">
+                        </div>
+                        <!-- Right Content -->
+                        <div *ngIf="data?.deskTopKeys?.rightContent?.data?.length"
+                            class="col-span-12 md:col-span-{{data?.deskTopKeys?.rightContent?.colspan || 12}}">
+                            <ng-container *ngFor="let widgetKey of data?.deskTopKeys?.rightContent?.data">
+                                <ng-container [ngTemplateOutlet]="contentsDisplay"
+                                    [ngTemplateOutletContext]="{widgetKey: widgetKey}">
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
-                    </div>
+                        </div>
+                    </ng-container>
+                 </div>
+            </ng-container>
+            <ng-template #mobileView>
+                <ng-container *ngFor="let widgetKey of data?.mobileKeys">
+                    <ng-container [ngTemplateOutlet]="contentsDisplay"
+                        [ngTemplateOutletContext]="{widgetKey: widgetKey}">
+                    </ng-container>
                 </ng-container>
-            </div>
+            </ng-template>
         </div>
     </div>
 </ng-template>
 <ng-template #contentsDisplay let-widgetKey="widgetKey">
-    <ng-container *ngIf="indivisualSection && indivisualSection[widgetKey]" [ngSwitch]="widgetKey">
+    <ng-container *ngIf="individualSection && individualSection[widgetKey]" [ngSwitch]="widgetKey">
         <ng-container *ngSwitchCase="'contentStrips'" [ngTemplateOutlet]="contentStrips"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
         
         <ng-container *ngSwitchCase="'myprogress'" [ngTemplateOutlet]="myprogress"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'speakerOftheDay'" [ngTemplateOutlet]="speakerOftheDay"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+
+            <ng-container *ngSwitchCase="'webinarOftheDay'" [ngTemplateOutlet]="webinarOftheDay"
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'events'" [ngTemplateOutlet]="events"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
 
             <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
 
             <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
-            [ngTemplateOutletContext]="{data: indivisualSection[widgetKey]}"></ng-container>
+            [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
             
     </ng-container>
 </ng-template>
@@ -222,6 +234,14 @@
     </div>
 </ng-template>
 
+<ng-template #webinarOftheDay let-data="data">
+    <div class="{{data?.containerClass}}">
+        <sb-uic-speakers-v2
+            [objectData]="data?.data">
+        </sb-uic-speakers-v2>
+    </div>
+</ng-template>
+
 <ng-template #programContent let-data="data">
       <ng-container *ngFor="let stripData of data">
         <ng-container *ngIf="stripData?.enabled">
@@ -247,7 +267,7 @@
                 <p class="featured-description  p-4 md:p-0 text-center">{{data?.header?.description}}</p>
             </div>
             <div class="lookpro" *ngIf="data?.sanitizedUrl">
-                <iframe title="{{data?.header?.headerText}}" width="100%" height="520" [src]="data?.sanitizedUrl" frameborder="0" style="border:0" sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+                <iframe title="{{data?.header?.headerText}}" width="{{isMobile ? data?.iframe?.mWidth : data?.iframe?.width || '100%'}}" height="{{isMobile ? data?.iframe?.mHeight :data?.iframe?.height || 520}}" [src]="data?.sanitizedUrl" frameborder="0" style="border:0" sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
             </div>
         </div>
     </div>

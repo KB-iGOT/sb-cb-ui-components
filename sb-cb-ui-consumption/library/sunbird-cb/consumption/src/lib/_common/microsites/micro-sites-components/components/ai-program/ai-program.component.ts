@@ -22,10 +22,17 @@ export interface StyleData {
   [key: string]: string;       // e.g. { "border-radius": "32px", "background": "..." }
 }
 
+export interface AiProgramMessages {
+  notEnrolled?: string;
+  inProgress?: string;
+  badgeEarned?: string;
+}
+
 export interface AiProgramData {
   enabled: boolean;
   title: string;
   description: string;
+  messages?: AiProgramMessages;
   image: string;
   noOfCoursesToComplete: string;  // e.g. "4"
   badgeImage: string;
@@ -306,12 +313,30 @@ export class AiProgramComponent implements OnInit, OnChanges, OnDestroy {
     return item.id;
   }
 
-  /** bar[0] active when enrolled; bar[i>0] active when i courses done */
-  isBarActive(index: number): boolean {
+  /**
+   * Bar state:
+   *  - 'full'  → bar[i] is completely orange (course i already completed, or enrolled and i===0 with completedCourses > 0)
+   *  - 'half'  → bar[i] is 50% orange (the "current" bar — user just reached this step)
+   *  - 'none'  → bar[i] is white/inactive
+   *
+   * Logic:
+   *  bar[0]: full when completedCourses >= 1; half when enrolled but 0 completed; else none
+   *  bar[i>0]: full when completedCourses > i; half when completedCourses === i; else none
+   */
+  getBarState(index: number): 'full' | 'half' | 'none' {
     if (index === 0) {
-      return this.isEnrolled;
+      if (this.completedCourses >= 1) {
+        return 'full';
+      }
+      return this.isEnrolled ? 'half' : 'none';
     }
-    return this.completedCourses >= index;
+    if (this.completedCourses > index) {
+      return 'full';
+    }
+    if (this.completedCourses === index) {
+      return 'half';
+    }
+    return 'none';
   }
 
   /** shield[i] active when course (i+1) is completed */
@@ -322,6 +347,26 @@ export class AiProgramComponent implements OnInit, OnChanges, OnDestroy {
   /** Badge at full opacity only when ALL courses completed */
   get isBadgeEarned(): boolean {
     return this.completedCourses >= this.totalCourses;
+  }
+
+  /**
+   * Returns the appropriate message based on enrollment/completion state.
+   * Falls back to programData.description if messages object is not provided.
+   */
+  get currentMessage(): string {
+    const msgs = this.programData?.messages;
+    if (msgs) {
+      if (this.isBadgeEarned && msgs.badgeEarned) {
+        return msgs.badgeEarned;
+      }
+      if (this.completedCourses > 0 && msgs.inProgress) {
+        return msgs.inProgress;
+      }
+      if (msgs.notEnrolled) {
+        return msgs.notEnrolled;
+      }
+    }
+    return this.programData?.description || '';
   }
 
   /** Convert 1-based number to Roman numeral string */
