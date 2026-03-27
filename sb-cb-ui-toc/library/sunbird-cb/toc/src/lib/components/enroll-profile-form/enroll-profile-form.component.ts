@@ -791,6 +791,7 @@ export class EnrollProfileFormComponent implements OnInit {
   }
 
   getPendingDetails() {
+    
     this.addLoader = this.addLoader + 1
     this.profileV2Svc.fetchApprovalDetails().subscribe((resp: any) => {
       this.addLoader = this.addLoader - 1
@@ -1343,6 +1344,7 @@ export class EnrollProfileFormComponent implements OnInit {
   }
   onSubmitForm(form: any) {
     /* tslint:disable */
+
     console.log(form)
     let payload = this.generateProfilePayload()
     if ((this.canShowDesignation || this.canShowGroup) && !this.showDoptChanges) {

@@ -428,7 +428,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   showAiTutorConfirmPopup() {
-    debugger
     this.raiseAIPopupStartTelemetry()
     if (this.isEnrolled) {
       this.fromAITutor = true
