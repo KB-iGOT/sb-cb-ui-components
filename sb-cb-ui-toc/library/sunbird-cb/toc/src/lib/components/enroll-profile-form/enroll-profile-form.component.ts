@@ -123,6 +123,8 @@ export class EnrollProfileFormComponent implements OnInit {
   verifyEmail = false
   approvedDomainList: any = []
   contextToken: any
+  verifiedEmailOtp: string = ''
+  verifiedPhoneOtp: string = ''
   currentDate = new Date()
   openDesignationDropdown = false
   openLanguageDropdown = false
@@ -482,6 +484,7 @@ export class EnrollProfileFormComponent implements OnInit {
         this.eVerified = true
         this.emailOtpSent = false
         this.contextToken = _res.result.contextToken
+        this.verifiedEmailOtp = this.emailOtpForm.controls['eOtp'].value
         this.emailOtpForm.reset()
       }, (error: HttpErrorResponse) => {
         if (!error.ok) {
@@ -498,6 +501,7 @@ export class EnrollProfileFormComponent implements OnInit {
         this.verifyMobile = true
         this.mVerified = true
         this.otpSent = false
+        this.verifiedPhoneOtp = this.otpForm.controls['otp'].value
         this.otpForm.reset()
       }, (error: HttpErrorResponse) => {
         if (!error.ok) {
@@ -1393,6 +1397,12 @@ export class EnrollProfileFormComponent implements OnInit {
   }
 
   submitProfile(payload: any) {
+    if (this.eVerified && this.verifiedEmailOtp) {
+      payload['request']['emailOtp'] = this.verifiedEmailOtp
+    }
+    if (this.mVerified && this.verifiedPhoneOtp) {
+      payload['request']['phoneOtp'] = this.verifiedPhoneOtp
+    }
     if (payload && payload['request'] && payload['request']['profileDetails'] && payload['request']['profileDetails']['personalDetails'] && payload['request']['profileDetails']['personalDetails']['dob']) {
       let dobFormat = payload['request']['profileDetails']['personalDetails']['dob'];
       let dob = `${new Date(dobFormat).getDate()}-${new Date(dobFormat).getMonth() + 1}-${new Date(dobFormat).getFullYear()}`
@@ -1400,7 +1410,7 @@ export class EnrollProfileFormComponent implements OnInit {
     }
     if (this.updateProfile) {
       this.addLoader = this.addLoader + 1
-      this.userProfileService.editProfileDetails(payload).subscribe((res: any) => {
+      this.userProfileService.editProfileDetails(payload).subscribe((res: any) => {debugger
         this.addLoader = this.addLoader - 1
         if (res.responseCode === 'OK') {
           this.submitSurevy(true)
@@ -1409,7 +1419,7 @@ export class EnrollProfileFormComponent implements OnInit {
         this.addLoader = this.addLoader - 1
         /* tslint:disable */
         console.log(error)
-        this.snackBar.open("something went wrong!")
+        this.snackBar.open(error?.error?.params?.errmsg || "Something went wrong!")
       })
     }
   }
