@@ -1,59 +1,86 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
-
 const API_ENDPOINTS = {
-  GENERATE_OTP: '/apis/proxies/v8/otp/v1/generate',
-  VERIFY_OTP: '/apis/proxies/v8/otp/v4/verify',
+    sendOtp: '/apis/proxies/v8/otp/v1/generate',
+    ReSendOtp: '/apis/proxies/v8/otp/v1/generate',
+    VerifyOtp: '/apis/proxies/v8/otp/v1/verify',
+    sendEmailOtp: '/apis/proxies/v8/otp/v3/generate',
+    VerifyEmailOtp: '/apis/proxies/v8/otp/v3/verify',
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class OtpService {
-  constructor(private http: HttpClient) {}
+    constructor(
+        private http: HttpClient,
+    ) {
+    }
 
-  generateOtp(mobileNumber: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
-      request: { key: mobileNumber, type: 'phone' },
-    })
-  }
+    sendOtp(mob: number): Observable<any> {
+        const reqObj = {
+            request: {
+                type: 'phone',
+                key: `${mob}`,
+            },
+        }
+        return this.http.post(API_ENDPOINTS.sendOtp, reqObj)
+    }
 
-  verifyOtp(mobileNumber: string, otp: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.VERIFY_OTP, {
-      request: { key: mobileNumber, otp, type: 'phone' },
-    })
-  }
+    resendOtp(mob: number) {
+        const reqObj = {
+            request: {
+                type: 'phone',
+                key: `${mob}`,
+            },
+        }
+        return this.http.post(API_ENDPOINTS.ReSendOtp, reqObj)
 
-  resendOtp(mobileNumber: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
-      request: { key: mobileNumber, type: 'phone' },
-    })
-  }
+    }
 
-  sendOtp(mobileNumber: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
-      request: { key: mobileNumber, type: 'phone' },
-    })
-  }
+    verifyOTP(otp: string, mob: number) {
+        const reqObj = {
+            request: {
+                otp,
+                type: 'phone',
+                key: `${mob}`,
+            },
+        }
+        return this.http.post(API_ENDPOINTS.VerifyOtp, reqObj)
 
-  sendEmailOtp(email: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
-      request: { key: email, type: 'email' },
-    })
-  }
+    }
 
-  // Component calls: verifyEmailOTP(otp, email)
-  verifyEmailOTP(otp: string, email: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.VERIFY_OTP, {
-      request: { key: email, otp, type: 'email' },
-    })
-  }
+    sendEmailOtp(email: string): Observable<any> {
+        const reqObj = {
+            request: {
+                type: 'email',
+                key: `${email}`,
+                contextType: 'extPatch',
+                context: ['profileDetails.personalDetails.primaryEmail'],
+            },
+        }
+        return this.http.post(API_ENDPOINTS.sendEmailOtp, reqObj)
+    }
 
-  // Component calls: verifyOTP(otp, mobile)
-  verifyOTP(otp: string, mobileNumber: string): Observable<any> {
-    return this.http.post<any>(API_ENDPOINTS.VERIFY_OTP, {
-      request: { key: mobileNumber, otp, type: 'phone' },
-    })
-  }
+    reSendEmailOtp(email: string): Observable<any> {
+        const reqObj = {
+            request: {
+                type: 'email',
+                key: `${email}`,
+                contextType: 'extPatch',
+                context: ['profileDetails.personalDetails.primaryEmail'],
+            },
+        }
+        return this.http.post(API_ENDPOINTS.sendEmailOtp, reqObj)
+    }
+
+    verifyEmailOTP(otp: any, email: number) {
+        const reqObj = {
+            request: {
+                otp: otp.toString(),
+                type: 'email',
+                key: `${email}`,
+            },
+        }
+        return this.http.post(API_ENDPOINTS.VerifyEmailOtp, reqObj)
+    }
 }
