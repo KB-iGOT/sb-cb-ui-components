@@ -22,10 +22,17 @@ export interface StyleData {
   [key: string]: string;       // e.g. { "border-radius": "32px", "background": "..." }
 }
 
+export interface AiProgramMessages {
+  notEnrolled?: string;
+  inProgress?: string;
+  badgeEarned?: string;
+}
+
 export interface AiProgramData {
   enabled: boolean;
   title: string;
   description: string;
+  messages?: AiProgramMessages;
   image: string;
   noOfCoursesToComplete: string;  // e.g. "4"
   badgeImage: string;
@@ -340,6 +347,26 @@ export class AiProgramComponent implements OnInit, OnChanges, OnDestroy {
   /** Badge at full opacity only when ALL courses completed */
   get isBadgeEarned(): boolean {
     return this.completedCourses >= this.totalCourses;
+  }
+
+  /**
+   * Returns the appropriate message based on enrollment/completion state.
+   * Falls back to programData.description if messages object is not provided.
+   */
+  get currentMessage(): string {
+    const msgs = this.programData?.messages;
+    if (msgs) {
+      if (this.isBadgeEarned && msgs.badgeEarned) {
+        return msgs.badgeEarned;
+      }
+      if (this.completedCourses > 0 && msgs.inProgress) {
+        return msgs.inProgress;
+      }
+      if (msgs.notEnrolled) {
+        return msgs.notEnrolled;
+      }
+    }
+    return this.programData?.description || '';
   }
 
   /** Convert 1-based number to Roman numeral string */

@@ -16,6 +16,7 @@ export namespace NsContentStripWithTabs {
     disableTranslate?: any
     key: string
     title: string
+    secondaryTitle?: string
     titleClass?: string
     customeClass?: string
     nodataMsg?: string
