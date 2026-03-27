@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, of } from 'rxjs'
+import { Observable } from 'rxjs'
 
-/**
- * OTP Service - Stub implementation
- * Provides OTP generation and verification functionality
- */
+const API_ENDPOINTS = {
+  GENERATE_OTP: '/apis/proxies/v8/otp/v1/generate',
+  VERIFY_OTP: '/apis/proxies/v8/otp/v4/verify',
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -13,30 +14,46 @@ export class OtpService {
   constructor(private http: HttpClient) {}
 
   generateOtp(mobileNumber: string): Observable<any> {
-    return of({ success: true })
+    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
+      request: { key: mobileNumber, type: 'phone' },
+    })
   }
 
   verifyOtp(mobileNumber: string, otp: string): Observable<any> {
-    return of({ verified: true })
+    return this.http.post<any>(API_ENDPOINTS.VERIFY_OTP, {
+      request: { key: mobileNumber, otp, type: 'phone' },
+    })
   }
 
   resendOtp(mobileNumber: string): Observable<any> {
-    return of({ success: true })
+    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
+      request: { key: mobileNumber, type: 'phone' },
+    })
   }
 
   sendOtp(mobileNumber: string): Observable<any> {
-    return of({ success: true })
+    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
+      request: { key: mobileNumber, type: 'phone' },
+    })
   }
 
   sendEmailOtp(email: string): Observable<any> {
-    return of({ success: true })
+    return this.http.post<any>(API_ENDPOINTS.GENERATE_OTP, {
+      request: { key: email, type: 'email' },
+    })
   }
 
-  verifyEmailOTP(email: string, otp: string): Observable<any> {
-    return of({ verified: true })
+  // Component calls: verifyEmailOTP(otp, email)
+  verifyEmailOTP(otp: string, email: string): Observable<any> {
+    return this.http.post<any>(API_ENDPOINTS.VERIFY_OTP, {
+      request: { key: email, otp, type: 'email' },
+    })
   }
 
-  verifyOTP(mobileNumber: string, otp: string): Observable<any> {
-    return of({ verified: true })
+  // Component calls: verifyOTP(otp, mobile)
+  verifyOTP(otp: string, mobileNumber: string): Observable<any> {
+    return this.http.post<any>(API_ENDPOINTS.VERIFY_OTP, {
+      request: { key: mobileNumber, otp, type: 'phone' },
+    })
   }
 }
