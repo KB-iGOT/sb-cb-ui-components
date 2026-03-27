@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-notification",
-  "version": "0.0.7-cbrelease-4.8.35",
+  "version": "0.0.8-cbrelease-4.8.35",
   "scripts": {
     "ng": "ng",
     "prebuild": "npm run lint:fix",
