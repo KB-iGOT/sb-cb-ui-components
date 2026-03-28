@@ -511,7 +511,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
   showBadgeIcon(): boolean {
     const badgeDetails = this.extContentReadData?.badgeDetails_v1
-    if (!badgeDetails || !badgeDetails.length || badgeDetails?.[0]?.criteria == 'partialRandomCompletion') {
+    if (!badgeDetails || !badgeDetails.length) {
       return false
     }
     const badge = badgeDetails[0]
