@@ -795,6 +795,7 @@ export class EnrollProfileFormComponent implements OnInit {
   }
 
   getPendingDetails() {
+    
     this.addLoader = this.addLoader + 1
     this.profileV2Svc.fetchApprovalDetails().subscribe((resp: any) => {
       this.addLoader = this.addLoader - 1
@@ -1347,6 +1348,7 @@ export class EnrollProfileFormComponent implements OnInit {
   }
   onSubmitForm(form: any) {
     /* tslint:disable */
+
     console.log(form)
     let payload = this.generateProfilePayload()
     if ((this.canShowDesignation || this.canShowGroup) && !this.showDoptChanges) {
@@ -1408,7 +1410,7 @@ export class EnrollProfileFormComponent implements OnInit {
     }
     if (this.updateProfile) {
       this.addLoader = this.addLoader + 1
-      this.userProfileService.editProfileDetails(payload).subscribe((res: any) => {debugger
+      this.userProfileService.editProfileDetails(payload).subscribe((res: any) => {
         this.addLoader = this.addLoader - 1
         if (res.responseCode === 'OK') {
           this.submitSurevy(true)
@@ -1419,6 +1421,8 @@ export class EnrollProfileFormComponent implements OnInit {
         console.log(error)
         this.snackBar.open(error?.error?.params?.errmsg || "Something went wrong!")
       })
+    } else {
+          this.submitSurevy(true)
     }
   }
 
@@ -1872,9 +1876,10 @@ export class EnrollProfileFormComponent implements OnInit {
     const searchDesignationControl = this.userDetailsForm.get('designation');
     const currentDesignation = searchDesignationControl ? searchDesignationControl.value : '';
     // Check if current designation exists in the list
+    const designationdata = currentDesignation?.designation ? currentDesignation.designation : currentDesignation
     if (currentDesignation) {
       const designationExists = this.designationsMeta.some(
-        (designation: any) => designation.name.toLowerCase() === currentDesignation.toLowerCase()
+        (designation: any) => designation.name.toLowerCase() === designationdata?.toLowerCase() 
       );
 
       // If designation doesn't exist in the list, add it
