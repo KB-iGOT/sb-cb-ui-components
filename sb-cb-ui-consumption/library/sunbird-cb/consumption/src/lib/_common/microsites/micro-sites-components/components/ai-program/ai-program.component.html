@@ -91,7 +91,7 @@
           >
             <img
               *ngIf="programData?.badgeImage"
-              [src]="programData.badgeImage"
+              [src]="isBadgeEarned?  programData.badgeImage: programData.disableBadgeImage"
               alt="Badge"
               class="badge-img"
             />

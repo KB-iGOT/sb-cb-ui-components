@@ -57,15 +57,15 @@ $shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
 
 /* Heading 2 */
 font-family: Montserrat;
-font-size: 20px;
+font-size: 24px;
 font-style: normal;
-font-weight: 600;
+font-weight: 700;
 line-height: normal;
 margin: 0;
 }
 
 .header-description {
-  font-size: 0.8rem;
+  font-size: 14px;
   line-height: 1.5;
   margin: 0 auto;
   max-width: 540px;
@@ -148,14 +148,14 @@ margin: 0;
 
 // ─── Badge Node ──────────────────────────────────────────────
 .badge-node {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  opacity: 0.35;
+  // opacity: 0.35;
   transition: opacity 0.4s ease;
 
   &.earned {
