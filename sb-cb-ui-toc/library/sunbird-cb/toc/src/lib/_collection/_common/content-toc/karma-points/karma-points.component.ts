@@ -203,7 +203,7 @@ addBadgeSlide() {
     const isEligibleslide = this?.content?.completionPercentage === undefined ||  this?.content?.completionPercentage < 100
     const badgeSlide = {
       displayButton: 'Quick Learner Badge',
-      textBeforeIcon: this.content.courseCategory == "Curated Program" ? (badge?.criteria === "partialRandomCompletion" ? `By partially completing this program, earn Quick Learner Badge (Any ${badge?.requiredCourseCompletions} course needed)` : `By completing this ${this.content?.courseCategory?.toLowerCase() ? this.content.courseCategory.toLowerCase() : 'course'} earn Quick Learner Badge`) : `By completing this ${this.content?.courseCategory?.toLowerCase() ? this.content.courseCategory.toLowerCase() : 'course'} earn Quick Learner Badge`,
+      textBeforeIcon: this.getQuickLearnerBadgeText(badge),
       points: '',
       textAfterPoints: '',
       toolTipText: 'quickLearnerBadgeTip',
@@ -221,7 +221,7 @@ addBadgeSlide() {
     const isEligibleslide = this?.content?.completionPercentage === undefined ||  this?.content?.completionPercentage < 100
     const badgeSlide = {
       displayButton: 'Quick Learner Badge',
-      textBeforeIcon: this.content.courseCategory == "Curated Program" ? (badge?.criteria === "partialRandomCompletion" ? `By partially completing this program, earn Quick Learner Badge (Any ${badge?.requiredCourseCompletions} course needed)` : `By completing this ${this.content?.courseCategory?.toLowerCase() ? this.content.courseCategory.toLowerCase() : 'course'} earn Quick Learner Badge`) : `By completing this ${this.content?.courseCategory?.toLowerCase() ? this.content.courseCategory.toLowerCase() : 'course'} earn Quick Learner Badge`,
+      textBeforeIcon: this.getQuickLearnerBadgeText(badge),
       points: '',
       textAfterPoints: '',
       toolTipText: 'quickLearnerBadgeTip',
@@ -282,4 +282,15 @@ addBadgeSlide() {
     return this.langTranslations.translateLabelWithoutspace(label, type, '')
   }
 
+  private getQuickLearnerBadgeText(badge: any): string {
+    const courseCategory = this.content?.courseCategory?.toLowerCase() || 'course'
+
+    if (this.content?.courseCategory === 'Curated Program') {
+      if (badge?.criteria === 'partialRandomCompletion') {
+        return `Earn the AI Daksh badge by completing any ${badge?.requiredCourseCompletions} courses of this program.`
+      }
+      return `By completing this ${courseCategory} earn Quick Learner Badge`
+    }
+    return `By completing this ${courseCategory} earn Quick Learner Badge`
+  }
 }
