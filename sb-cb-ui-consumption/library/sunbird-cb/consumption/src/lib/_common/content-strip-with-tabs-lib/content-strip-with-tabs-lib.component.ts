@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnDestroy, HostBinding, Inject, EventEmitter, Output } from '@angular/core'
+import { Component, OnInit, Input, OnDestroy, AfterViewInit, HostBinding, Inject, EventEmitter, Output, NgZone, ViewChildren, QueryList } from '@angular/core'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { NsContentStripWithTabs } from './content-strip-with-tabs-lib.model'
 // import { HttpClient } from '@angular/common/http'
@@ -20,7 +20,7 @@ import { WidgetUserServiceLib } from '../../_services/widget-user-lib.service'
 // import { environment } from 'src/environments/environment'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs'
+import { MatLegacyTabChangeEvent as MatTabChangeEvent, MatLegacyTabGroup as MatTabGroup } from '@angular/material/legacy-tabs'
 import { NsCardContent } from '../../_models/card-content-v2.model'
 import { ITodayEvents } from '../../_models/event'
 import { TranslateService } from '@ngx-translate/core'
@@ -35,6 +35,7 @@ interface IStripUnitContentData {
   enabled?: boolean
   widgets?: NsWidgetResolver.IRenderConfigWithAnyData[]
   stripTitle: string
+  stripSecondaryTitle?: string
   titleClass?: string
   stripTitleLink?: {
     link: {
@@ -78,6 +79,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   implements
   OnInit,
   OnDestroy,
+  AfterViewInit,
   NsWidgetResolver.IWidgetData<NsContentStripWithTabs.IContentStripMultiple> {
   @Input() widgetData!: NsContentStripWithTabs.IContentStripMultiple
   @Output() emptyResponse = new EventEmitter<any>()
@@ -112,6 +114,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
   currentTab: any
   moveToNextTab = false
   currentTabIndex = 0
+  @ViewChildren(MatTabGroup) tabGroups!: QueryList<MatTabGroup>
+  private paginationTimers: any[] = []
 
   constructor(
     // private contentStripSvc: ContentStripNewMultipleService,
@@ -127,7 +131,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     private userSvc: WidgetUserServiceLib,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    private enrollSvc: WidgetEnrollService
+    private enrollSvc: WidgetEnrollService,
+    private ngZone: NgZone
   ) {
     super()
     if (localStorage.getItem('websiteLanguage')) {
@@ -162,10 +167,46 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
 
   }
 
+  ngAfterViewInit() {
+    // Force mat-tab-header to recalculate pagination on SPA navigation
+    this.triggerTabPaginationUpdate()
+    // Also re-trigger whenever ViewChildren list changes (new tabs rendered)
+    this.tabGroups.changes.subscribe(() => {
+      this.triggerTabPaginationUpdate()
+    })
+  }
+
   ngOnDestroy() {
     if (this.changeEventSubscription) {
       this.changeEventSubscription.unsubscribe()
     }
+    this.clearPaginationTimers()
+  }
+
+  /**
+   * Directly call updatePagination() on each MatTabGroup to recalculate
+   * whether pagination arrows should be shown. Uses staggered delays
+   * to handle async rendering during SPA navigation.
+   */
+  private triggerTabPaginationUpdate(): void {
+    this.clearPaginationTimers()
+    const delays = [0, 100, 300, 500, 1000, 2000]
+    delays.forEach(delay => {
+      const timer = setTimeout(() => {
+        if (this.tabGroups) {
+          this.tabGroups.forEach(tg => {
+            try { tg.updatePagination() } catch (_e) { /* noop */ }
+            try { tg.realignInkBar() } catch (_e) { /* noop */ }
+          })
+        }
+      }, delay)
+      this.paginationTimers.push(timer)
+    })
+  }
+
+  private clearPaginationTimers(): void {
+    this.paginationTimers.forEach(t => clearTimeout(t))
+    this.paginationTimers = []
   }
 
   showAccordion(key: string) {
@@ -1069,6 +1110,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       errorWidget: strip.errorWidget,
       stripInfo: strip.stripInfo || {},
       stripTitle: strip.title,
+      stripSecondaryTitle: strip?.secondaryTitle || '',
       titleClass: strip.titleClass || '',
       stripTitleLink: strip.stripTitleLink,
       disableTranslate: strip.disableTranslate,
@@ -1123,6 +1165,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       }
     } else {
       this.contentAvailable = true
+    }
+    // After tabs data updates, recalculate mat-tab pagination
+    if (fetchStatus === 'done' && stripData.tabs && stripData.tabs.length) {
+      this.triggerTabPaginationUpdate()
     }
   }
   private checkParentStatus(fetchStatus: TFetchStatus, stripWidgetsCount: number): void {
