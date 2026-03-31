@@ -43,6 +43,7 @@ export interface AiProgramData {
   contentData: ContentData;
   isEnrolled?: boolean;           // whether the user is enrolled in the program
   completedCourses?: number;      // tracks how many courses the user finished
+  disableBadgeImage?: string;
 }
 
 /** Shape of the per-program localStorage cache */
