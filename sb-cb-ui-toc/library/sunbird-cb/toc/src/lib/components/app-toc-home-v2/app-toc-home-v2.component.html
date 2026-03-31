@@ -688,7 +688,7 @@
 
             <div class="flex flex-col gap-4"
               *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
-              <div class="flex flex-row gap-3 justify-around">
+              <div class="flex flex-row gap-3 justify-around" *ngIf="(preAssessmentCompletionStatus ||  !preAssessmentRequiredFlag)">
                 <div class="batch-info">
                   <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize
                     || '0' }}</div>
