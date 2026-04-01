@@ -697,6 +697,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                 let result: any = []
                 if (comprehensiveResponse?.results?.result?.content && comprehensiveResponse?.results?.result?.content?.length) {
                   comprehensiveContent = comprehensiveResponse.results.result.content
+
+                  const comprehensiveAssessmentIdentifiers = comprehensiveContent.map((a: any) => a?.identifier)
+                  localStorage.setItem('comprehensiveAssessmentIdentifiers', JSON.stringify(comprehensiveAssessmentIdentifiers))
+
                   let courseUnits =  []
                   comprehensiveResult = comprehensiveResponse.results.result.content.map((ele: any) => {
                       if(ele?.courseUnits && ele.courseUnits.length) {
