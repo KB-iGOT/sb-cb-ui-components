@@ -26,6 +26,10 @@ import { ITodayEvents } from '../../_models/event'
 import { TranslateService } from '@ngx-translate/core'
 import { Router } from '@angular/router'
 
+const IDB_NAME = 'zoho-form'
+const IDB_STORE = 'enrollment'
+const IDB_HIERARCHY_STORE = 'hierarchy'
+
 interface IStripUnitContentData {
   key: string
   canHideStrip: boolean
@@ -699,7 +703,7 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
                   comprehensiveContent = comprehensiveResponse.results.result.content
 
                   const comprehensiveAssessmentIdentifiers = comprehensiveContent.map((a: any) => a?.identifier)
-                  localStorage.setItem('comprehensiveAssessmentIdentifiers', JSON.stringify(comprehensiveAssessmentIdentifiers))
+                  this.setCaIdentifiers(comprehensiveAssessmentIdentifiers)                  
 
                   let courseUnits =  []
                   comprehensiveResult = comprehensiveResponse.results.result.content.map((ele: any) => {
@@ -2631,5 +2635,41 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
       stripData: this.widgetData
     })
   }
+
+private openEnrollmentCache(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 2);
+
+    req.onupgradeneeded = (e: any) => {
+      const db: IDBDatabase = e.target.result;
+
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+
+      if (!db.objectStoreNames.contains(IDB_HIERARCHY_STORE)) {
+        db.createObjectStore(IDB_HIERARCHY_STORE);
+      }
+    };
+
+    req.onsuccess = (e: any) => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+private setCaIdentifiers(data: any): void {
+  this.openEnrollmentCache()
+    .then(db => {
+      db.transaction(IDB_STORE, 'readwrite')
+        .objectStore(IDB_STORE)
+        .put(
+          { data, timestamp: Date.now() },
+          'comprehensiveAssessmentIdentifiers'
+        );
+    })
+    .catch(() => {
+      /* silently ignore cache write failures */
+    });
+}
 
 }
