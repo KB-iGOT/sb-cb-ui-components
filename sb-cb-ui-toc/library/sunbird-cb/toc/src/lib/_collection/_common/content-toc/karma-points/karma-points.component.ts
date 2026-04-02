@@ -36,7 +36,6 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.constructNudgeData()
-
     if (this.content && this.content.courseCategory === NsContent.ECourseCategory.CASE_STUDY) {
       this.disableKarmaPoints = true
     }
@@ -192,7 +191,6 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
     })
   }
 addBadgeSlide() {
-
   const badgeDetails = this.baseContentReadData?.badgeDetails_v1
 
   if (!badgeDetails || !badgeDetails.length) {
@@ -202,45 +200,52 @@ addBadgeSlide() {
   const badge = badgeDetails[0]
 
   if (!badge.badgeEarningDateEnabled) {
-    return
-  }
+    const isEligibleslide = this?.content?.completionPercentage === undefined ||  this?.content?.completionPercentage < 100
+    const badgeSlide = {
+      displayButton: 'Quick Learner Badge',
+      textBeforeIcon: this.getQuickLearnerBadgeText(badge),
+      points: '',
+      textAfterPoints: '',
+      toolTipText: 'quickLearnerBadgeTip',
+    }
+    const badgeExists = this.kpArray.find(
+      (item: any) => item.displayButton === 'Quick Learner Badge'
+    )
+    if (!badgeExists && isEligibleslide) {
+      this.kpArray.push(badgeSlide)
+      this.constructNudgeData()
+    }
+  } else {
+    const badgeTime = badge.badgeEarningDateTime
+    const currentTime = Date.now()
+    const isEligibleslide = this?.content?.completionPercentage === undefined ||  this?.content?.completionPercentage < 100
+    const badgeSlide = {
+      displayButton: 'Quick Learner Badge',
+      textBeforeIcon: this.getQuickLearnerBadgeText(badge),
+      points: '',
+      textAfterPoints: '',
+      toolTipText: 'quickLearnerBadgeTip',
+    }
+    const badgeExists = this.kpArray.find(
+      (item: any) => item.displayButton === 'Quick Learner Badge'
+    )
 
-  const badgeTime = badge.badgeEarningDateTime
-  const currentTime = Date.now()
-
-  const badgeDateIST = new Date(badgeTime).toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-  })
-
-  console.log('Badge IST Time:', badgeDateIST)
-  const isEligibleslide = this?.content?.completionPercentage == undefined ||  this?.content?.completionPercentage < 100
-  const badgeSlide = {
-    displayButton: 'Quick Learner Badge',
-    textBeforeIcon: this.content.courseCategory == "Curated Program" ? badge?.criteria == "partialRandomCompletion" ? `By partially completing this program, earn Quick learner Badge (Any ${badge?.requiredCourseCompletions} course needed)` : 'By completing this course earn Quick learner Badge' : 'By completing this course earn Quick learner Badge',
-    points: '',
-    textAfterPoints: '',
-    toolTipText: 'quickLearnerBadgeTip',
-  }
-
-const badgeExists = this.kpArray.find(
-  (item: any) => item.displayButton === 'Quick Learner Badge'
-)
-
-  if (isEligibleslide) {
-    if (badge?.badgeEarningDateEnabled === true ) {
-    if (badgeTime > currentTime) {
+    if (isEligibleslide) {
+      if (badge?.badgeEarningDateEnabled === true ) {
+      if (badgeTime > currentTime) {
+        if (!badgeExists) {
+          this.kpArray.push(badgeSlide)
+          this.constructNudgeData()
+        }
+      }
+    } else {
       if (!badgeExists) {
         this.kpArray.push(badgeSlide)
         this.constructNudgeData()
       }
     }
-  } else {
-    if (!badgeExists) {
-      this.kpArray.push(badgeSlide)
-      this.constructNudgeData()
-    }
   }
-  }
+}
   
 }
   onClickOfClaim() {
@@ -277,4 +282,15 @@ const badgeExists = this.kpArray.find(
     return this.langTranslations.translateLabelWithoutspace(label, type, '')
   }
 
+  private getQuickLearnerBadgeText(badge: any): string {
+    const courseCategory = this.content?.courseCategory?.toLowerCase() || 'course'
+
+    if (this.content?.courseCategory === 'Curated Program') {
+      if (badge?.criteria === 'partialRandomCompletion') {
+        return `Earn the AI Daksh badge by completing any ${badge?.requiredCourseCompletions} courses of this program.`
+      }
+      return `By completing this ${courseCategory} earn Quick Learner Badge`
+    }
+    return `By completing this ${courseCategory} earn Quick Learner Badge`
+  }
 }
