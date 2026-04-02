@@ -921,7 +921,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   //           );
   //         }
   //       );
-  //     } else {debugger
+  //     } else {
   //     this.contentSvc.downloadCert(certId).subscribe(
   //       (response) => {
   //         if (this.content) {
