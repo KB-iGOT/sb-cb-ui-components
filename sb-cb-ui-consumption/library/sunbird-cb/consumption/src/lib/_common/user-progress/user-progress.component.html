@@ -9,11 +9,16 @@
         </ng-container>
     </div>
 
-    <div class="flex user-progress-title gap-2 margin-bottom-xs items-center justify-between">
-        <div class="flex gap-2">
+    <div class="flex flex-wrap user-progress-title gap-2 margin-bottom-xs items-center justify-between">
+        <div class="flex w-full gap-2">
             {{objectData?.title}}
-            <div><img [src]="objectData?.infoIcon" alt="" i18n-matTooltip [matTooltip]="objectData?.infoText"></div>
+            <div *ngIf="objectData?.displayInfoIcon">
+                <img [src]="objectData?.infoIcon" alt="" i18n-matTooltip [matTooltip]="objectData?.infoText">
+            </div>
         </div>
+        <p class="{{objectData?.descriptionClass}}" *ngIf="objectData?.description">
+            {{objectData?.description}}
+        </p>
         <div class="block md:hidden">
             <mat-icon (click)="toggleWeekHightlits()">expand_more</mat-icon>
         </div>
