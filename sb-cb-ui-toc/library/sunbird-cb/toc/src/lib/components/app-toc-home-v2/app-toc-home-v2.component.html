@@ -462,7 +462,7 @@
                 <span class="new-version-text nodtranslate">{{ 'apptoc.newVersion' | translate }}</span>
               </div>
             </ng-container>
-            <div class="flex items-center text-white mob-share" *ngIf="canShare">
+            <div class="flex items-center text-white mob-share" *ngIf="canShare && (domainConfService?.isFeatureByPageEnabled('toc','shareToc'))">
               <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
             </div>
           </div>
@@ -972,7 +972,7 @@
     <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
   </div>
 
-  <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content"
+  <ws-app-share-toc *ngIf="enableShare && (domainConfService?.isFeatureByPageEnabled('toc','shareToc'))" [rootOrgId]="rootOrgId" [content]="content"
     (resetEnableShare)="resetEnableShare($event)" [baseContentReadData]="baseContentReadData"></ws-app-share-toc>
 </ng-container>
 <ng-template #noDataFound>
