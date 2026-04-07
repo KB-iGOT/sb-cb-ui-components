@@ -2938,7 +2938,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             if (this.content?.completionPercentage !== 100) {
               this.tocSvc.mapCompletionPercentage(this.content, this.resumeData)
             }
-            this.tocSvc.mapModuleDurationAndProgress(this.content, this.content)
+            // this.tocSvc.mapModuleDurationAndProgress(this.content, this.content)
             this.tocSvc.callHirarchyProgressHashmap(this.content)
             // Recompute milestone locking status after progress update
             if (this.baseContentReadData?.courseCategory === 'Learning Pathway') {

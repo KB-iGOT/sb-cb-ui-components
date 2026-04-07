@@ -802,9 +802,6 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
 
   getCompletionPercentage(identifier: string) {
     // const item = this.updateChildParentMap(identifier)
-    if(this.content?.primaryCategory === NsContent.EPrimaryCategory.MODULE) {
-      return this.roundIfDecimal(this.content?.completionPercentage || 0)
-    }
     let percent = this.hierarchyMapData && this.hierarchyMapData[identifier] && this.hierarchyMapData[identifier].completionPercentage || 0
     return this.roundIfDecimal(percent)
   }
@@ -819,9 +816,6 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
 
   getCompletionStatus(identifier: string) {
     // const item = this.updateChildParentMap(identifier)
-    if(this.content?.primaryCategory === NsContent.EPrimaryCategory.MODULE) {
-      return this.content?.completionStatus || 1
-    }
     return this.hierarchyMapData && this.hierarchyMapData[identifier] && this.hierarchyMapData[identifier].completionStatus
   }
 

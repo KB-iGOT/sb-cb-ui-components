@@ -808,7 +808,7 @@ export class AppTocService {
       //   content.completionPercentage = parentContent.completionPercentage
       // // }
       // })
-      this.mapModuleDurationAndProgress(content, content)
+      // this.mapModuleDurationAndProgress(content, content)
       this.checkModuleWiseData(content)
       this.callHirarchyProgressHashmap(content)
       // Compute milestone locking AFTER progress data is populated
@@ -1603,14 +1603,13 @@ export class AppTocService {
     }
   }
 
-  getCalculationsFromChildren(item: NsContent.IContent) {
-    debugger
+  getCalculationsFromChildren(item: NsContent.IContent) {    
     item['duration'] = item.children.reduce((sum, child) => {
       return sum + Number(child.duration || 0)
     }, 0)
     const completedItems = _.filter(item.children, r => r.completionStatus === 2 || r.completionPercentage === 100)
-    const totalCount = _.toInteger(item?.children?.length) || 1
-    item['completionPercentage'] = Math.min(Number(((completedItems.length / totalCount) * 100).toFixed()), 100)
+    const totalCount = _.toInteger(_.get(item, 'leafNodesCount')) || 1
+    item['completionPercentage'] = Number(((completedItems.length / totalCount) * 100).toFixed())
     item['completionStatus'] = (item.completionPercentage >= 100) ? 2 : 1
     return item
   }
