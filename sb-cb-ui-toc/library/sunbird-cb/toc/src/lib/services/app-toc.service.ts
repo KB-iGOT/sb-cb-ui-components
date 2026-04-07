@@ -783,7 +783,7 @@ export class AppTocService {
       }
       // const parentContent = enrolmentList.find((el: any) => el.collectionId === content.identifier)
       // if (!parentContent.completionPercentage) {
-      const calculatedPct = Math.floor((totalCount / leafnodeCount) * 100)
+      const calculatedPct = Math.min(Math.floor((totalCount / leafnodeCount) * 100), 100)
       content.completionPercentage = isNaN(calculatedPct) ? 0 : calculatedPct
       content.completionStatus = content.completionPercentage >= 100 ? 2 : (content.completionPercentage > 0 ? 1 : 0)
       if (content.completionPercentage === 100 && inprogressDataCheck && inprogressDataCheck.length === 0 && !firstUncompleteCourse) {
@@ -808,9 +808,9 @@ export class AppTocService {
       //   content.completionPercentage = parentContent.completionPercentage
       // // }
       // })
-      // this.mapModuleDurationAndProgress(content, content)
-      this.callHirarchyProgressHashmap(content)
+      this.mapModuleDurationAndProgress(content, content)
       this.checkModuleWiseData(content)
+      this.callHirarchyProgressHashmap(content)
       // Compute milestone locking AFTER progress data is populated
       if (content.courseCategory === 'Learning Pathway') {
         // Check if user is enrolled by checking if enrollment data exists
@@ -1604,12 +1604,13 @@ export class AppTocService {
   }
 
   getCalculationsFromChildren(item: NsContent.IContent) {
+    debugger
     item['duration'] = item.children.reduce((sum, child) => {
       return sum + Number(child.duration || 0)
     }, 0)
     const completedItems = _.filter(item.children, r => r.completionStatus === 2 || r.completionPercentage === 100)
-    const totalCount = _.toInteger(_.get(item, 'leafNodesCount')) || 1
-    item['completionPercentage'] = Number(((completedItems.length / totalCount) * 100).toFixed())
+    const totalCount = _.toInteger(item?.children?.length) || 1
+    item['completionPercentage'] = Math.min(Number(((completedItems.length / totalCount) * 100).toFixed()), 100)
     item['completionStatus'] = (item.completionPercentage >= 100) ? 2 : 1
     return item
   }
