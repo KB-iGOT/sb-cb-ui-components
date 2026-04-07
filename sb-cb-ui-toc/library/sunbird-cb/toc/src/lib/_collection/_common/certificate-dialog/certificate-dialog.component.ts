@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core'
 import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
-import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { DomainConfService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { jsPDF } from 'jspdf'
 
 @Component({
@@ -18,7 +18,8 @@ export class CertificateDialogComponent implements OnInit {
     private events: EventService,
     public dialogRef: MatDialogRef<CertificateDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    @Inject('environment') private environment: any
+    @Inject('environment') private environment: any,
+    public domainConfService: DomainConfService
   ) {
 
   }
