@@ -164,4 +164,18 @@ a.download_btn {
         grid-gap: 0rem; 
         gap: 0rem;
     }
+
+    .certificate-img-box {
+    max-height: 35rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding:30px;
+    // border: 2px solid;
+}
+
+.close-button {
+    position: absolute !important;
+    top: 0px !important;
+    right: 0px !important;
+}
 }
