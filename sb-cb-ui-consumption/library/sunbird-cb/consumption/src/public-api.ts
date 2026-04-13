@@ -67,6 +67,7 @@ export * from './lib/_common/cards/card-karma-programs-v2/card-karma-programs-v2
 export * from './lib/_common/cards/card-portrait-ext/card-portrait-ext.component'
 export * from './lib/_common/cards/provider-card/provider-card.component'
 export * from './lib/_common/dialog-components/certificate-dialog/certificate-dialog.component'
+export * from './lib/_common/dialog-components/nlw-certificate-dialog/nlw-certificate-dialog.component'
 export * from './lib/_common/content-progress/content-progress.component'
 export * from './lib/_common/strips/content-strip-with-tabs-pills/content-strip-with-tabs-pills.component'
 export * from './lib/_common/strips/content-strip-with-tabs-pills-new/content-strip-with-tabs-pills-new.component'
