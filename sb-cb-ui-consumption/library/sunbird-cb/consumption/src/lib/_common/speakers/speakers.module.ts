@@ -5,6 +5,7 @@ import { ScrollableItemModule } from '../../_directives/scrollable-item/scrollab
 import { SlidersNgContentLibModule } from '../sliders-ng-content/sliders-ng-content.module'
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
+import { SpeakersV2Component } from './speakers-v2/speakers-v2.component'
 
 
 

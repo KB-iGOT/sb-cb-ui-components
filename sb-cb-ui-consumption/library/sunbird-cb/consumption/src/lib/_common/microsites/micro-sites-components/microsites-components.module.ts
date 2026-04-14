@@ -86,7 +86,8 @@ import { PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
     StripSectionCreateComponent,
     StripAddContentComponent,
     AddTabDialogComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    AiProgramComponent
   ],
   exports: [
     TopSectionComponent,
@@ -152,7 +153,8 @@ import { PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    EventsCalendarModule], providers: [
+    EventsCalendarModule,
+    PipeDurationTransformModule], providers: [
       CommonMethodsService,
       provideHttpClient(withInterceptorsFromDi())
     ]

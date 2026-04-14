@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, Input, Output, EventEmitter, ChangeDetectorRef, NgZone, ViewChildren, QueryList } from '@angular/core'
-import { MatLegacyTabGroup as MatTabGroup } from '@angular/material/legacy-tabs'
+import { MatTabGroup } from '@angular/material/tabs'
 import { Router } from '@angular/router'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service'
@@ -83,10 +83,10 @@ interface IWidgetData {
 }
 
 @Component({
-    selector: 'sb-uic-content-strip-with-tabs-pills-new',
-    templateUrl: './content-strip-with-tabs-pills-new.component.html',
-    styleUrls: ['./content-strip-with-tabs-pills-new.component.scss'],
-    standalone: false
+  selector: 'sb-uic-content-strip-with-tabs-pills-new',
+  templateUrl: './content-strip-with-tabs-pills-new.component.html',
+  styleUrls: ['./content-strip-with-tabs-pills-new.component.scss'],
+  standalone: false
 })
 export class ContentStripWithTabsPillsNewComponent implements OnInit, OnDestroy, AfterViewInit {
 

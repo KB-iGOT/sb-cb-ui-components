@@ -6,6 +6,7 @@ import { InsiteDataService } from '../../_services/insite-data.service'
 import { FormsModule } from '@angular/forms'
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
+import { MdoLeaderboardV2Component } from './mdo-leaderboard-v2/mdo-leaderboard-v2.component'
 
 
 

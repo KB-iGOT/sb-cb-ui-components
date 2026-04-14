@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser'
 import { TranslateService } from '@ngx-translate/core'
@@ -29,6 +29,7 @@ export interface NlwCertificateDialogData {
   /* tslint:disable */
   host: { class: 'nlw-certificate-inner-dialog-panel' },
   /* tslint:enable */
+  standalone: false
 })
 export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
   isLoading = true
