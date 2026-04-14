@@ -59,10 +59,6 @@ export class NotificationDropdownComponent implements OnInit {
       this.notifications = _.get(res, 'result.notifications', [])
       const _alerts = _.get(res, 'result.subtypeStats', [])
       this.alerts = _alerts.find((notification: any) => notification.name === 'ALERT')
-      const peerValidationEntries = _alerts.filter((item: any) =>
-        item.name && item.name.toUpperCase() === 'PEER_VALIDATION')
-      this.peerValidationsCount = peerValidationEntries.reduce((sum: number, item: any) =>
-        sum + (+item.unread || 0) + (+item.read || 0), 0)
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -74,9 +70,11 @@ export class NotificationDropdownComponent implements OnInit {
     this.currentTab = type
     if (type === 'MANDATORY') {
       this.notifications = this.mandatoryNotifications
-    } else if (type === 'PEER_VALIDATION') {
+    }  
+    else if (type === 'PEER_VALIDATION') {
       this.notifications = this.peerValidations
-    } else {
+    } 
+    else {
       this.getUserNotifications()
     }
     event.stopPropagation()
@@ -127,11 +125,6 @@ export class NotificationDropdownComponent implements OnInit {
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
-        const index = this.peerValidations.findIndex((n: any) => n.notification_id === notification.notification_id)
-        if (index !== -1) {
-          this.peerValidations[index].read = true
-        }
-        this.peerValidationsCount = this.peerValidations.filter((n: any) => !n.read).length
       }
     })
   }

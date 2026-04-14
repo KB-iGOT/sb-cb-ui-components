@@ -17,6 +17,8 @@ import { MatInputModule } from '@angular/material/input'
 import { MatButtonModule } from '@angular/material/button'
 import { SnackbarComponent } from './snackbar/snackbar.component'
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component'
+import { NlwCertificateDialogComponent } from './nlw-certificate-dialog/nlw-certificate-dialog.component'
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 
 
 
@@ -25,7 +27,8 @@ import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-
         CertificateDialogComponent,
         AddCompetencyPopupComponent,
         SnackbarComponent,
-        ConfirmationDialogComponent
+        ConfirmationDialogComponent,
+        NlwCertificateDialogComponent
     ],
     imports: [
         CommonModule,
@@ -45,13 +48,15 @@ import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-
         ReactiveFormsModule,
         MatCheckboxModule,
         MatInputModule,
-        MatButtonModule
+        MatButtonModule,
+        MatProgressSpinnerModule
     ],
     exports: [
         CertificateDialogComponent,
         AddCompetencyPopupComponent,
         SnackbarComponent,
-        ConfirmationDialogComponent
+        ConfirmationDialogComponent,
+        NlwCertificateDialogComponent
     ]
 })
 export class DialogComponentsModule { }
