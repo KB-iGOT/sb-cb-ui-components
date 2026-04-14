@@ -25,7 +25,8 @@ import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-
         CertificateDialogComponent,
         AddCompetencyPopupComponent,
         SnackbarComponent,
-        ConfirmationDialogComponent
+        ConfirmationDialogComponent,
+        NlwCertificateDialogComponent
     ],
     imports: [
         CommonModule,
@@ -45,13 +46,15 @@ import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-
         ReactiveFormsModule,
         MatCheckboxModule,
         MatInputModule,
-        MatButtonModule
+        MatButtonModule,
+        MatProgressSpinnerModule
     ],
     exports: [
         CertificateDialogComponent,
         AddCompetencyPopupComponent,
         SnackbarComponent,
-        ConfirmationDialogComponent
+        ConfirmationDialogComponent,
+        NlwCertificateDialogComponent
     ]
 })
 export class DialogComponentsModule { }

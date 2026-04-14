@@ -10,7 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
 
 
 @NgModule({
-  declarations: [MdoLeaderboardComponent],
+  declarations: [MdoLeaderboardComponent, MdoLeaderboardV2Component],
   imports: [
     CommonModule,
     MatIconModule,
@@ -19,7 +19,8 @@ import { MatTooltipModule } from '@angular/material/tooltip'
     MatTooltipModule
   ],
   exports: [
-    MdoLeaderboardComponent
+    MdoLeaderboardComponent,
+    MdoLeaderboardV2Component
   ],
   providers: [InsiteDataService]
 })

@@ -201,7 +201,7 @@ export class AllNotificationsComponent implements OnInit {
 
   onTabChange(type: number) {
     console.log('type', type)
-    //this.currentTab = type
+    this.currentTab = type
     this.dynamicTabIndex = type
     this.currentTab = this.tabs[this.dynamicTabIndex].name
     console.log('currentTab', this.currentTab)

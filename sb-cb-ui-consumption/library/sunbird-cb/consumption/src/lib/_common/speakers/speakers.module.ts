@@ -9,7 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
 
 
 @NgModule({
-  declarations: [SpeakersComponent],
+  declarations: [SpeakersComponent, SpeakersV2Component],
   imports: [
     CommonModule,
     ScrollableItemModule,
@@ -18,7 +18,8 @@ import { MatTooltipModule } from '@angular/material/tooltip'
     MatIconModule,
   ],
   exports: [
-    SpeakersComponent
+    SpeakersComponent,
+    SpeakersV2Component
   ]
 })
 export class SpeakersModule { }

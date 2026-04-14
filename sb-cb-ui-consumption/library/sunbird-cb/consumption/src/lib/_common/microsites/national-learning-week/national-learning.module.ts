@@ -21,7 +21,7 @@ import { PipeSafeSanitizerModule } from '@sunbird-cb/utils-v2'
 
 
 @NgModule({
-  declarations: [NationalLearningComponent],
+  declarations: [KarmayogiSaptahComponent, SadhanaSaptahComponent],
   imports: [
     CommonModule,
     MatIconModule,
@@ -38,10 +38,13 @@ import { PipeSafeSanitizerModule } from '@sunbird-cb/utils-v2'
     SpeakersModule,
     UserProgressModule,
     ContentStripFacetFilterModule,
-    PipeSafeSanitizerModule
+    PipeSafeSanitizerModule,
+    MicrositesComponentsModule
+
   ],
   exports: [
-    NationalLearningComponent,
+    KarmayogiSaptahComponent,
+    SadhanaSaptahComponent
   ],
   providers: [
     CommonMethodsService

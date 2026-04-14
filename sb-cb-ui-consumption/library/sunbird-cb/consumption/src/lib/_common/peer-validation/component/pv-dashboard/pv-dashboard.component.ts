@@ -74,6 +74,8 @@ export class PvDashboardComponent implements OnInit {
   isSPVRoute = false
   isLoading = false
   loggedInUserId = ''
+  sortBy = 'createdDate'
+  sortOrder: 'ASC' | 'DESC' = 'DESC'
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended', 'Archived']
   mdoOptions: (string | MDOOption)[] = []
@@ -196,8 +198,8 @@ export class PvDashboardComponent implements OnInit {
       facets: ['status'],
       page: pageIndex,
       size: pageSize,
-      sortBy: 'createdDate',
-      sortOrder: 'DESC'
+      sortBy: this.sortBy,
+      sortOrder: this.sortOrder
     }
 
     // Add orgNames facet for SPV route
@@ -424,9 +426,9 @@ export class PvDashboardComponent implements OnInit {
       startDate: item.createdDate ? new Date(item.createdDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       endDate: item.endDate ? new Date(item.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       archiveDate: item.archivedDate ? new Date(item.archivedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
-      submissionRate: item.submissionRate || '0%',
-      submissionCount: item.submissionCount || 0,
-      totalCount: item.totalCount || 0
+      submissionRate: item.additionalProperties?.submissionRate || '0%',
+      submissionCount: item.additionalProperties?.submissionCount || 0,
+      totalCount: item.additionalProperties?.notificationReadCount || 0
     }
   }
 
@@ -435,6 +437,19 @@ export class PvDashboardComponent implements OnInit {
   }
 
   filterByTab(): void {
+    this.loadSurveys()
+  }
+
+  toggleSort(field: string): void {
+    if (this.sortBy === field) {
+      this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC'
+    } else {
+      this.sortBy = field
+      this.sortOrder = 'ASC'
+    }
+    if (this.paginator) {
+      this.paginator.pageIndex = 0
+    }
     this.loadSurveys()
   }
 
@@ -496,13 +511,14 @@ export class PvDashboardComponent implements OnInit {
       width: '450px',
       data: {
         title: 'End Survey',
-        description: `Are you sure you want to end the survey "${survey.courseName}"? This action cannot be undone.`,
-        iconName: 'error_outline',
+        description: `Are you sure you want to end the survey?`,
+        messages: [{ message: `If you end this survey now, learner will not be able to complete the survey.` }],
+        iconName: 'warning',
         type: 'warning',
         buttonsPositionClass: 'justify-center',
         buttons: [
-          { text: 'Cancel', classes: 'btn-out-line', response: false },
-          { text: 'End Survey', classes: 'succes-button', response: true }
+          { text: 'No', classes: 'btn-out-line', response: false },
+          { text: 'Yes', classes: 'succes-button', response: true }
         ]
       },
       autoFocus: false
@@ -535,13 +551,13 @@ export class PvDashboardComponent implements OnInit {
       width: '450px',
       data: {
         title: 'Archive Survey',
-        description: `Are you sure you want to archive the survey "${survey.courseName}"? This action cannot be undone.`,
-        iconName: 'archive',
+        description: `Are you sure you want to archive this survey?`,
+        iconName: 'warning',
         type: 'warning',
         buttonsPositionClass: 'justify-center',
         buttons: [
-          { text: 'Cancel', classes: 'btn-out-line', response: false },
-          { text: 'Archive', classes: 'succes-button', response: true }
+          { text: 'No', classes: 'btn-out-line', response: false },
+          { text: 'Yes', classes: 'succes-button', response: true }
         ]
       },
       autoFocus: false
