@@ -187,11 +187,12 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
         }
       }
     } else {
+      const isCAP = categoryValue === 'Comprehensive Assessment Program'
       payload = {
         request: {
           secureSettings: false,
           filters: {
-            accessSettingsEnabled: { "ne": true },
+            accessSettingsEnabled: { "ne": isCAP ? false : true },
             must: {
               courseCategory: [categoryValue]
             },

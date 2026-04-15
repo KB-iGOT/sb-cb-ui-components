@@ -511,7 +511,7 @@ export class PvDashboardComponent implements OnInit {
       width: '450px',
       data: {
         title: 'End Survey',
-        description: `Are you sure you want to end the survey?`,
+        description: `Are you sure you want to end this survey?`,
         messages: [{ message: `If you end this survey now, learner will not be able to complete the survey.` }],
         iconName: 'warning',
         type: 'warning',
