@@ -27,19 +27,19 @@ export class NotificationDropdownComponent implements OnInit {
 
   ngOnInit() {
     this.getUserNotifications()
-    // this.getMandatoryNotifications()
+    this.getMandatoryNotifications()
     this.getPeerValidationNotifications()
   }
 
-  // getMandatoryNotifications() {
-  //   this.libNotificationService.getMandatoryNotifications(0, 5).subscribe((res: any) => {
-  //     let notifications = _.get(res, 'result.notifications', [])
-  //     this.mandatoryNotifications = notifications
-  //     this.mandatoryNotificationsCount = notifications.length
-  //   }, error => {
-  //     console.error("Error fetching mandatory notifications", error)
-  //   })
-  // }
+  getMandatoryNotifications() {
+    this.libNotificationService.getMandatoryNotifications(0, 5).subscribe((res: any) => {
+      let notifications = _.get(res, 'result.notifications', [])
+      this.mandatoryNotifications = notifications
+      this.mandatoryNotificationsCount = notifications.length
+    }, error => {
+      console.error("Error fetching mandatory notifications", error)
+    })
+  }
 
   getPeerValidationNotifications() {
     this.libNotificationService.getNotifications(0, 5, 'PEER_VALIDATION').subscribe((res: any) => {
@@ -58,10 +58,6 @@ export class NotificationDropdownComponent implements OnInit {
       this.notifications = _.get(res, 'result.notifications', [])
       const _alerts = _.get(res, 'result.subtypeStats', [])
       this.alerts = _alerts.find((notification: any) => notification.name === 'ALERT')
-      const peerValidationEntries = _alerts.filter((item: any) =>
-        item.name && item.name.toUpperCase() === 'PEER_VALIDATION')
-      this.peerValidationsCount = peerValidationEntries.reduce((sum: number, item: any) =>
-        sum + (+item.unread || 0) + (+item.read || 0), 0)
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -71,11 +67,10 @@ export class NotificationDropdownComponent implements OnInit {
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
-    // if (type === 'MANDATORY') {
-    //   this.notifications = this.mandatoryNotifications
-    // } 
-    // else 
-    if (type === 'PEER_VALIDATION') {
+    if (type === 'MANDATORY') {
+      this.notifications = this.mandatoryNotifications
+    }  
+    else if (type === 'PEER_VALIDATION') {
       this.notifications = this.peerValidations
     } 
     else {
