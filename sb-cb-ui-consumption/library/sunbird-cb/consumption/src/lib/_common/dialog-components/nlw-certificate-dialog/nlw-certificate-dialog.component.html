@@ -30,8 +30,21 @@
             [src]="imageUrl | pipeSafeSanitizer: 'url'" alt="NLW Certificate" role="image" />
 
         <!-- PDF content -->
-        <iframe class="pdf-container" *ngIf="pdfUrl && !isLoading && !hasError"
-            [src]="pdfUrl" frameborder="0"></iframe>
+        <ng-container *ngIf="pdfUrl && !isLoading && !hasError">
+            <iframe class="pdf-container" [src]="pdfUrl" frameborder="0"></iframe>
+
+            <!-- Mobile: action buttons below preview -->
+            <div class="mobile-pdf-actions" *ngIf="rawPdfUrl">
+                <button mat-stroked-button color="primary" class="mobile-pdf-btn" (click)="openPdfInBrowser()">
+                    <mat-icon>open_in_new</mat-icon>
+                    <span>Open Full View</span>
+                </button>
+                <button mat-stroked-button color="primary" class="mobile-pdf-btn" (click)="downloadPdfDirect()">
+                    <mat-icon>cloud_download</mat-icon>
+                    <span>{{'certificatedialog.download' | translate}}</span>
+                </button>
+            </div>
+        </ng-container>
     </div>
 
     <!-- Fixed download footer -->
