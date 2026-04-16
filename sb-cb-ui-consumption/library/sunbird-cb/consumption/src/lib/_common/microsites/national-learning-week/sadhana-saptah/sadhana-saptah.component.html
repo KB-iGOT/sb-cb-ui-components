@@ -245,7 +245,7 @@
 <ng-template #programContent let-data="data">
       <ng-container *ngFor="let stripData of data">
         <ng-container *ngIf="stripData?.enabled">
-            <div class="{{data?.containerClass}}">
+            <div class="{{stripData?.containerClass}}">
                 <sb-uic-ai-program [programData]="stripData"></sb-uic-ai-program>
             </div>
         </ng-container>
