@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator'
 import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { Router, ActivatedRoute } from '@angular/router'
 import { debounceTime } from 'rxjs/operators'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
@@ -103,6 +104,7 @@ export class PvDashboardComponent implements OnInit {
     private peerValidationService: PeerValidationService,
     private dialog: MatDialog,
     private configSvc: ConfigurationsService,
+    private snackBar: MatSnackBar,
     @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) { }
 
@@ -617,6 +619,11 @@ export class PvDashboardComponent implements OnInit {
             if (this.loaderService) {
               this.loaderService.changeLoaderState(false)
             }
+            const errMsg = err?.error?.params?.errmsg || 'Error initiating download report'
+            this.snackBar.open(errMsg, '', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            })
             console.error('Error initiating download report:', err)
           }
         })
