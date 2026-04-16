@@ -9,6 +9,7 @@ import { PeerValidationService } from '../../service/peer-validation.service'
 import { ILoaderService, LOADER_SERVICE } from '../../service/loader-service.token'
 import { MatDialog } from '@angular/material/dialog'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 interface Survey {
   id: string
@@ -104,6 +105,7 @@ export class PvDashboardComponent implements OnInit {
     private peerValidationService: PeerValidationService,
     private dialog: MatDialog,
     private configSvc: ConfigurationsService,
+    private snackBar: MatSnackBar,
     @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) { }
 
@@ -620,6 +622,11 @@ export class PvDashboardComponent implements OnInit {
             if (this.loaderService) {
               this.loaderService.changeLoaderState(false)
             }
+            const errMsg = err?.error?.params?.errmsg || 'Error initiating download report'
+            this.snackBar.open(errMsg, '', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            })
             console.error('Error initiating download report:', err)
           }
         })
