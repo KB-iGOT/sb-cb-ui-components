@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms'
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
 import { MatLegacyPaginator as MatPaginator } from '@angular/material/legacy-paginator'
 import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
 import { Router, ActivatedRoute } from '@angular/router'
 import { debounceTime } from 'rxjs/operators'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
@@ -73,6 +74,8 @@ export class PvDashboardComponent implements OnInit {
   isSPVRoute = false
   isLoading = false
   loggedInUserId = ''
+  sortBy = 'createdDate'
+  sortOrder: 'ASC' | 'DESC' = 'DESC'
 
   statusOptions = ['All Status', 'Active', 'Draft', 'Ended', 'Archived']
   mdoOptions: (string | MDOOption)[] = []
@@ -101,6 +104,7 @@ export class PvDashboardComponent implements OnInit {
     private peerValidationService: PeerValidationService,
     private dialog: MatDialog,
     private configSvc: ConfigurationsService,
+    private snackBar: MatSnackBar,
     @Inject(LOADER_SERVICE) private loaderService: ILoaderService
   ) { }
 
@@ -195,8 +199,8 @@ export class PvDashboardComponent implements OnInit {
       facets: ['status'],
       page: pageIndex,
       size: pageSize,
-      sortBy: 'createdDate',
-      sortOrder: 'DESC'
+      sortBy: this.sortBy,
+      sortOrder: this.sortOrder
     }
 
     // Add orgNames facet for SPV route
@@ -423,9 +427,9 @@ export class PvDashboardComponent implements OnInit {
       startDate: item.createdDate ? new Date(item.createdDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       endDate: item.endDate ? new Date(item.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
       archiveDate: item.archivedDate ? new Date(item.archivedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
-      submissionRate: item.submissionRate || '0%',
-      submissionCount: item.submissionCount || 0,
-      totalCount: item.totalCount || 0
+      submissionRate: item.additionalProperties?.submissionRate || '0%',
+      submissionCount: item.additionalProperties?.submissionCount || 0,
+      totalCount: item.additionalProperties?.notificationReadCount || 0
     }
   }
 
@@ -434,6 +438,19 @@ export class PvDashboardComponent implements OnInit {
   }
 
   filterByTab(): void {
+    this.loadSurveys()
+  }
+
+  toggleSort(field: string): void {
+    if (this.sortBy === field) {
+      this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC'
+    } else {
+      this.sortBy = field
+      this.sortOrder = 'ASC'
+    }
+    if (this.paginator) {
+      this.paginator.pageIndex = 0
+    }
     this.loadSurveys()
   }
 
@@ -493,7 +510,7 @@ export class PvDashboardComponent implements OnInit {
       width: '450px',
       data: {
         title: 'End Survey',
-        description: `Are you sure you want to end the survey?`,
+        description: `Are you sure you want to end this survey?`,
         messages: [{ message: `If you end this survey now, learner will not be able to complete the survey.` }],
         iconName: 'warning',
         type: 'warning',
@@ -602,6 +619,11 @@ export class PvDashboardComponent implements OnInit {
             if (this.loaderService) {
               this.loaderService.changeLoaderState(false)
             }
+            const errMsg = err?.error?.params?.errmsg || 'Error initiating download report'
+            this.snackBar.open(errMsg, '', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            })
             console.error('Error initiating download report:', err)
           }
         })
