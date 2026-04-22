@@ -231,7 +231,13 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
 
-    <table mat-table [dataSource]="downloadReports" class="survey-table" *ngIf="selectedTab === 'download'">
+    <div class="no-data-container" *ngIf="selectedTab !== 'download' && dataSource.data.length === 0">
+      <img src="assets/icons/empty_shelf.svg" alt="No data found" class="no-data-image">
+      <p class="no-data-text">No data found</p>
+    </div>
+
+    <table mat-table [dataSource]="downloadReports" class="survey-table"
+      *ngIf="selectedTab === 'download' && downloadReports.length > 0">
       <ng-container matColumnDef="courseName">
         <th mat-header-cell *matHeaderCellDef>Course Name</th>
         <td mat-cell *matCellDef="let row">
@@ -281,6 +287,11 @@
       <tr mat-header-row *matHeaderRowDef="displayedDownloadColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedDownloadColumns;"></tr>
     </table>
+
+    <div class="no-data-container" *ngIf="selectedTab === 'download' && downloadReports.length === 0">
+      <img src="assets/icons/no-data.svg" alt="No data found" class="no-data-image">
+      <p class="no-data-text">No data found</p>
+    </div>
 
     <!-- Paginator -->
     <div class="paginator-container" *ngIf="selectedTab !== 'download'">
