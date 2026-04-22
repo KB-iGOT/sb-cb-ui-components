@@ -11,6 +11,7 @@ export interface NlwCertificateDialogData {
   type: string         // 'API_DOCUMENT' | 'PDF' | 'IMAGE'
   title?: string
   url?: string
+  pdfZoom?: string     // e.g. 'FitH', 'FitV', '100', '75' — appended as #view=<value>
   api?: {
     url: string
     method: string
@@ -89,7 +90,8 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
 
   private loadPdf(url: string): void {
     this.rawPdfUrl = url
-    const pdfUrlWithParams = url.includes('#') ? url : `${url}#view=FitH`
+    const zoom = this.data.pdfZoom || 'FitH'
+    const pdfUrlWithParams = url.includes('#') ? url : `${url}#view=${zoom}`
     this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(pdfUrlWithParams)
     this.isLoading = false
   }
