@@ -302,6 +302,7 @@ export class PvDashboardComponent implements OnInit {
         const records = response?.result?.response || response?.result?.data || response?.result || response || []
         const list: any[] = Array.isArray(records) ? records : records?.content || []
         this.downloadReports = list.map((item: any, index: number) => this.mapToDownloadReport(item, index))
+          .sort((a, b) => b.generatedAt - a.generatedAt)
         this.refreshDownloadReports()
       },
       error: (error: any) => {
@@ -321,7 +322,7 @@ export class PvDashboardComponent implements OnInit {
     const normalizedStatus: 'In Progress' | 'Ready' =
       ['ready', 'completed', 'success', 'done'].includes(String(rawStatus).toLowerCase()) ? 'Ready' : 'In Progress'
 
-    const generatedAtRaw = item?.generatedAt || item?.createdOn || item?.createdDate || item?.updatedOn
+    const generatedAtRaw = item?.dateCreatedOn || item?.generatedAt || item?.createdOn || item?.createdDate || item?.updatedOn
     const generatedAtParsed = typeof generatedAtRaw === 'number' ? generatedAtRaw : Date.parse(generatedAtRaw)
     const generatedAt = Number.isNaN(generatedAtParsed) ? 0 : generatedAtParsed
 
@@ -361,9 +362,14 @@ export class PvDashboardComponent implements OnInit {
 
   loadStatusCounts(): void {
     const userProfile: any = this.configSvc?.userProfile || ''
+    const selectedStatus = this.filterForm?.value?.status
     const payload: any = {
       query: this.filterForm.value.searchText || '',
-      filters: { status: ['Ended', 'Draft', 'Active', 'Archived'] },
+      filters: {
+        status: (selectedStatus && selectedStatus !== 'All Status')
+          ? [selectedStatus]
+          : ['Ended', 'Draft', 'Active', 'Archived']
+      },
       facets: ['status'],
       page: 0,
       size: 0,
@@ -371,10 +377,20 @@ export class PvDashboardComponent implements OnInit {
       sortOrder: 'DESC'
     }
 
+    // Add date range filters
+    const startDate = this.filterForm?.value?.startDate
+    const endDate = this.filterForm?.value?.endDate
+    if (startDate) {
+      payload.filters['startDateFrom'] = new Date(startDate).getTime()
+    }
+    if (endDate) {
+      payload.filters['endDateTo'] = new Date(endDate).getTime()
+    }
+
     if (this.isSPVRoute) {
-      payload.filters['orgIds'] = [
-        userProfile?.rootOrgId || '',
-      ]
+      const selectedMdos = this.filterForm?.value?.mdo || []
+      const mdoOrgIds = Array.isArray(selectedMdos) ? selectedMdos.map((mdo: any) => mdo.orgId).filter((id: string) => id) : []
+      payload.filters['orgIds'] = mdoOrgIds.length > 0 ? mdoOrgIds : [userProfile?.rootOrgId || '']
       // Add orgNames facet for SPV route to extract MDO list
       payload.facets.push('orgNames')
     }
@@ -613,7 +629,7 @@ export class PvDashboardComponent implements OnInit {
                 this.loaderService.changeLoaderState(false)
               }
               this.onTabChange(5)
-            }, 2000)
+            }, 3000)
           },
           error: (err: any) => {
             if (this.loaderService) {
