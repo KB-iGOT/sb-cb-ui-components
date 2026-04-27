@@ -1,12 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
+import { PeerReadOverlayService } from '../../_services/peer-read-overlay.service';
 import * as _ from 'lodash'
 @Component({
   selector: 'sb-uin-notification-dropdown',
   templateUrl: './notification-dropdown.component.html',
   styleUrls: ['./notification-dropdown.component.scss']
 })
-export class NotificationDropdownComponent implements OnInit {
+export class NotificationDropdownComponent implements OnInit, OnDestroy {
   @Input() childData: any;
   @Input() unRead: number = 0
   @Input() showIcon: boolean = false
@@ -20,9 +22,14 @@ export class NotificationDropdownComponent implements OnInit {
   isLoading = false
   peerValidations: any[] = []
   peerValidationsCount: number = 0
-  constructor(private libNotificationService: LibNotificationsService,
-  ) {
+  constructor(
+    private libNotificationService: LibNotificationsService,
+    private snackBar: MatSnackBar,
+    private overlayService: PeerReadOverlayService
+  ) {}
 
+  ngOnDestroy(): void {
+    this.overlayService.hide()
   }
 
   ngOnInit() {
@@ -43,7 +50,6 @@ export class NotificationDropdownComponent implements OnInit {
 
   getPeerValidationNotifications() {
     this.libNotificationService.getNotifications(0, 5, 'PEER_VALIDATION').subscribe((res: any) => {
-      console.log("Peer validation notifications response ", res)
       const notifications = _.get(res, 'result.notifications', [])
       this.peerValidations = notifications
       this.peerValidationsCount = notifications.length
@@ -120,11 +126,16 @@ export class NotificationDropdownComponent implements OnInit {
         created_at: notification.created_at,
       }
     }
+    this.overlayService.show()
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      this.overlayService.hide()
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
       }
+    }, (_error: any) => {
+      this.overlayService.hide()
+      this.snackBar.open('Notification read failed', 'Close', { duration: 3000 })
     })
   }
 

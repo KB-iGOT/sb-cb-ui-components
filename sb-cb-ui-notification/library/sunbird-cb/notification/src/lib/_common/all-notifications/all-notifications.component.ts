@@ -1,16 +1,17 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
 import * as _ from 'lodash'
 import { debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { PeerReadOverlayService } from '../../_services/peer-read-overlay.service';
 @Component({
   selector: 'sb-uin-all-notifications',
   templateUrl: './all-notifications.component.html',
   styleUrls: ['./all-notifications.component.scss']
 })
-export class AllNotificationsComponent implements OnInit {
+export class AllNotificationsComponent implements OnInit, OnDestroy {
 
   @Output() reCountNotifications = new EventEmitter<any>()
   @Output() redirectTo = new EventEmitter<any>()
@@ -35,7 +36,8 @@ export class AllNotificationsComponent implements OnInit {
 
   constructor(readonly route: ActivatedRoute,
     private libNotificationService: LibNotificationsService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private overlayService: PeerReadOverlayService
   ) {
     this.checkMobileView()
     this.scrollNotificationsSubject.pipe(debounceTime(500)).subscribe((event: any) => {
@@ -49,6 +51,10 @@ export class AllNotificationsComponent implements OnInit {
 
   }
 
+  ngOnDestroy(): void {
+    this.overlayService.hide()
+  }
+
   @HostListener('window:resize', ['$event'])
   onResize() {
     this.checkMobileView()
@@ -60,7 +66,6 @@ export class AllNotificationsComponent implements OnInit {
     if (
       window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && this.hasNextPage && !this.loading
     ) {
-      console.log("onScroll event", event)
       // Emit the scroll event to the subject
       this.scrollNotificationsSubject.next(event)
     }
@@ -68,7 +73,6 @@ export class AllNotificationsComponent implements OnInit {
 
   onDebouncedScroll() {
     this.pageNumber = this.pageNumber + 1
-    console.log("pageNumber", this.pageNumber)
     if ( this.currentTab === 'MANDATORY') {
       this.getMandatoryNotifications()
     } else {
@@ -127,12 +131,17 @@ export class AllNotificationsComponent implements OnInit {
         created_at: notification.created_at,
       }
     }
+    this.overlayService.show()
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      this.overlayService.hide()
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
         this.redirectTo.emit(notification)
       }
+    }, (_error: any) => {
+      this.overlayService.hide()
+      this.snackBar.open('Notification read failed', 'Close', { duration: 3000 })
     })
   }
 
@@ -199,11 +208,9 @@ export class AllNotificationsComponent implements OnInit {
   }
 
   onTabChange(type: number) {
-    console.log('type', type)
     this.currentTab = type
     this.dynamicTabIndex = type
     this.currentTab = this.tabs[this.dynamicTabIndex].name
-    console.log('currentTab', this.currentTab)
     this.notifications = []
     this.pageNumber = 0
     this.hasNextPage = false
