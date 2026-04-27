@@ -97,9 +97,10 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
         this.markPeerValidationAsRead(notification)
       } else {
         this.markAsRead(notification)
+        this.viewAllClick.emit(notification)
       }
     }
-    this.viewAllClick.emit(notification)
+   
   }
 
   markMandatoryAsRead(notification: any) {
@@ -110,11 +111,17 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
             type : notification.type
         }
     }
+    this.overlayService.show()
     this.libNotificationService.markMandatoryAsRead(request).subscribe((res: any) => {
+      this.overlayService.hide()
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
+        this.viewAllClick.emit(notification)
       }
+    },(_error: any) => {
+      this.overlayService.hide()
+      this.snackBar.open('Notification read failed', 'Close', { duration: 3000 })
     })
   }
 
@@ -132,6 +139,7 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
+        this.viewAllClick.emit(notification)
       }
     }, (_error: any) => {
       this.overlayService.hide()
