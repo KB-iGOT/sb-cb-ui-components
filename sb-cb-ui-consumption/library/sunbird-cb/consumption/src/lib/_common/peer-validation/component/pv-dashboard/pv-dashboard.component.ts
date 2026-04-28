@@ -129,6 +129,13 @@ export class PvDashboardComponent implements OnInit {
         this.selectedTab = params['tab'] as 'all' | 'active' | 'ended' | 'draft' | 'archived' | 'download' || 'all'
         this.selectedTabIndex = tabMap[params['tab']] || 0
       }
+      if (this.selectedTab === 'ended') {
+        this.sortBy = 'endDate'
+        this.sortOrder = 'DESC'
+      } else {
+        this.sortBy = 'createdDate'
+        this.sortOrder = 'DESC'
+      }
       this.updateDisplayedColumns()
       if (this.selectedTab === 'download') {
         this.loadDownloadReports()
@@ -488,6 +495,14 @@ export class PvDashboardComponent implements OnInit {
 
     this.updateDisplayedColumns()
 
+    if (this.selectedTab === 'ended') {
+      this.sortBy = 'endDate'
+      this.sortOrder = 'DESC'
+    } else {
+      this.sortBy = 'createdDate'
+      this.sortOrder = 'DESC'
+    }
+
     if (this.paginator) {
       this.paginator.pageIndex = 0
     }
@@ -547,7 +562,8 @@ export class PvDashboardComponent implements OnInit {
         this.peerValidationService.endForm(survey.formId || survey.id).subscribe({
           next: () => {
             setTimeout(() => {
-              this.loadSurveys()
+              this.onTabChange(2) // Switch to 'Ended' tab after ending a survey
+              // this.loadSurveys()
             }, 2000)
           },
           error: (err: any) => {
