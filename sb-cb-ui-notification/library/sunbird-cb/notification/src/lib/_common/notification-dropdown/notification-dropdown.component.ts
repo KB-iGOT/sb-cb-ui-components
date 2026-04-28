@@ -12,7 +12,7 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   @Input() childData: any;
   @Input() unRead: number = 0
   @Input() showIcon: boolean = false
-  @Output() viewAllClick = new EventEmitter<string>()
+  @Output() viewAllClick = new EventEmitter<any>()
   currentTab = 'all'
   response: any
   notifications: any[] = []
@@ -89,18 +89,20 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
     this.viewAllClick.emit(this.currentTab)
   }
 
-  redirectToNotification(notification: any) {
+  redirectToNotification(notification: any, event: MouseEvent) {
     if (!notification.read) {
       if (this.currentTab === 'MANDATORY') {
         this.markMandatoryAsRead(notification)
-      } else if (this.currentTab === 'PEER_VALIDATION') {
+      } else if (this.currentTab === 'PEER_VALIDATION' || notification.category === 'PEER_VALIDATION' || notification.sub_type === 'PEER_VALIDATION') {
+        event.stopPropagation()
         this.markPeerValidationAsRead(notification)
       } else {
         this.markAsRead(notification)
         this.viewAllClick.emit(notification)
       }
+    } else {
+      this.viewAllClick.emit(notification)
     }
-   
   }
 
   markMandatoryAsRead(notification: any) {
@@ -111,17 +113,12 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
             type : notification.type
         }
     }
-    this.overlayService.show()
     this.libNotificationService.markMandatoryAsRead(request).subscribe((res: any) => {
-      this.overlayService.hide()
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
         this.viewAllClick.emit(notification)
       }
-    },(_error: any) => {
-      this.overlayService.hide()
-      this.snackBar.open('Notification read failed', 'Close', { duration: 3000 })
     })
   }
 
@@ -139,6 +136,11 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
+
+        const matMenuPanel = document.querySelector('.mat-mdc-menu-panel, .mat-menu-panel') as HTMLElement | null
+        if (matMenuPanel) {
+          matMenuPanel.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+        }
         this.viewAllClick.emit(notification)
       }
     }, (_error: any) => {

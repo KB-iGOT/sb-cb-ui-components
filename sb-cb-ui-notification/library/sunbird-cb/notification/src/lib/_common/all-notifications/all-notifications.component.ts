@@ -96,7 +96,7 @@ export class AllNotificationsComponent implements OnInit, OnDestroy {
     if (!notification.read) {
       if (this.currentTab === 'MANDATORY') {
         this.markMandatoryAsRead(notification)
-      } else if (this.currentTab === 'PEER_VALIDATION') {
+      } else if (this.currentTab === 'PEER_VALIDATION'|| notification.category==='PEER_VALIDATION'||notification.sub_type==='PEER_VALIDATION') {
         this.markPeerValidationAsRead(notification)
       } else {
         this.markAsRead(notification)
