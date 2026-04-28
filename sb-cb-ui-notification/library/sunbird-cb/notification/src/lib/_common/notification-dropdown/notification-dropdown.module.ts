@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs'
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NotificationDropdownComponent } from './notification-dropdown.component';
 import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module';
 
@@ -15,6 +16,7 @@ import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-
     MatIconModule,
     MatTabsModule,
     SkeletonLoaderLibModule,
+    MatSnackBarModule,
   ],
   exports: [NotificationDropdownComponent
   ],
