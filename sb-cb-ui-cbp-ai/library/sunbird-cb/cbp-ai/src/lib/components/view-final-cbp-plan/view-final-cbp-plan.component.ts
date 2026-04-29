@@ -1,0 +1,1043 @@
+import { Component, ChangeDetectorRef, ElementRef, Inject, ViewChild } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import * as XLSX from 'xlsx';
+import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/delete-role-mapping-popup.component';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { SharedService } from '../../modules/shared/services/shared.service';
+@Component({
+  selector: 'app-view-final-cbp-plan',
+  templateUrl: './view-final-cbp-plan.component.html',
+  styleUrls: ['./view-final-cbp-plan.component.scss']
+})
+export class ViewFinalCbpPlanComponent {
+  constructor(
+    public dialogRef: MatDialogRef<ViewFinalCbpPlanComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef,
+    public sharedService: SharedService,
+    private snackBar: MatSnackBar,
+    private fb: FormBuilder
+  ) {
+    this.filterForm = this.fb.group({
+      language: ['en']
+    });
+    this.openedFrom = data?.openedFrom;
+    this.getMappingData()
+  }
+  filterForm!: FormGroup;
+  languages = [{ "code": "en", label: "English" },
+  { "code": "hi", label: "Hindi" },
+  { "code": "te", label: "Telugu" },
+  { "code": "kn", label: "Kannada" },
+  { "code": "mr", label: "Marathi" },
+  { "code": "ta", label: "Tamil" },
+  { "code": "gu", label: "Gujarati" },
+  { "code": "ml", label: "Malayalam" },
+  { "code": "bn", label: "Bengali" },];
+  filteredLanguages = [...this.languages];
+  @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
+  loading = false
+  designationData: any = []
+  totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 }
+  pdfTrigger = false
+  jsonData = []
+  filterdCourses = [];
+  planData: any
+  recommended_course_id = ''
+  expandedCompetencies: any = {};
+  competenciesCount = { total: 0, public_courses: 0, igot: 0 };
+  openedFrom!: string;
+  @ViewChild('dialogContent') dialogContent!: ElementRef;
+  // designationData = [
+  //   {
+  //     designation: "Secretary (WCD)",
+  //     wing: "Ministry Leadership",
+  //     updated: "10/09/2025",
+  //     rolesResponsibilities: [
+  //       "Provide overall supervision of ministry programmes and schemes",
+  //       "Ensure effective coordination with State Governments for scheme implementation",
+  //       "Strategic policy formulation and implementation oversight",
+  //       "Inter-ministerial coordination and liaison",
+  //       "Parliamentary affairs management",
+  //       "Senior leadership governance and oversight",
+  //       "National programme strategic direction",
+  //       "Cabinet note writing and policy briefs"
+  //     ],
+  //     behavioralCompetencies: [
+  //       "Strategic Leadership", "Executive Presence", "Influencing and Negotiation",
+  //       "Relationship Management", "Verbal & Non-Verbal Fluency", "Planning & Prioritization",
+  //       "Accountability", "Conflict Management"
+  //     ],
+  //     functionalCompetencies: [
+  //       "Rules of business (AoB/ToB)", "Cabinet note writing", "Submission of briefs, supply of information",
+  //       "Policy design/ amendment", "Policy implementation", "Policy monitoring & impact assessment",
+  //       "Project Planning", "Project Evaluation & Monitoring", "Creation of M&E Framework",
+  //       "Citizen Partnering & Collaboration", "Public Grievance Handling"
+  //     ],
+  //     domainCompetencies: [
+  //       "Strategic Policy Formulation", "Inter-ministerial & State Government Coordination",
+  //       "Senior Leadership Governance & Oversight", "Legislative & Parliamentary Affairs Management",
+  //       "National Programme Strategic Direction"
+  //     ],
+  //     completionRate: { behavioral: 85, functional: 78, domain: 92 }
+  //   }
+  // ];
+
+  // // Calculate the totals dynamically
+  // private behavioralTotal = this.designationData.reduce((acc, item) => acc + item.behavioralCompetencies.length, 0);
+  // private functionalTotal = this.designationData.reduce((acc, item) => acc + item.functionalCompetencies.length, 0);
+  // private domainTotal = this.designationData.reduce((acc, item) => acc + item.domainCompetencies.length, 0);
+
+  // // Calculate the averages dynamically
+  // private behavioralAvg = Math.round(this.designationData.reduce((acc, item) => acc + item.completionRate.behavioral, 0) / this.designationData.length);
+  // private functionalAvg = Math.round(this.designationData.reduce((acc, item) => acc + item.completionRate.functional, 0) / this.designationData.length);
+  // private domainAvg = Math.round(this.designationData.reduce((acc, item) => acc + item.completionRate.domain, 0) / this.designationData.length);
+
+  // overallKPIs = [
+  //   {
+  //     name: 'Behavioral Competencies',
+  //     total: this.behavioralTotal,
+  //     avgCompletion: this.behavioralAvg,
+  //     color: '#3B82F6',
+  //     bgColor: 'bg-blue-50',
+  //   },
+  //   {
+  //     name: 'Functional Competencies',
+  //     total: this.functionalTotal,
+  //     avgCompletion: this.functionalAvg,
+  //     color: '#10B981',
+  //     bgColor: 'bg-green-50',
+  //   },
+  //   {
+  //     name: 'Domain Competencies',
+  //     total: this.domainTotal,
+  //     avgCompletion: this.domainAvg,
+  //     color: '#8B5CF6',
+  //     bgColor: 'bg-purple-50',
+  //   },
+  //   {
+  //     name: 'Total Competencies',
+  //     total: this.behavioralTotal + this.functionalTotal + this.domainTotal,
+  //     avgCompletion: Math.round((this.behavioralAvg + this.functionalAvg + this.domainAvg) / 3),
+  //     color: '#4B5563',
+  //     bgColor: 'bg-gray-200',
+  //   }
+  // ];
+
+  closeDialog() {
+    this.dialogRef.close()
+  }
+
+  cancelForm() {
+    this.dialogRef.close()
+  }
+
+  saveRoleMapping() {
+
+  }
+
+  ngAfterViewInit() {
+    console.log('this.data', this.data)
+    this.jsonData = this.data?.payload
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.scrollToTop();
+    });
+
+    if (this.dialogContent) {
+      setTimeout(() => {
+        this.dialogContent.nativeElement.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 500)
+
+    }
+  }
+
+  getMappingData() {
+    console.log('haredService?.cbpPlanFinalObj', this.sharedService.getCbpPlansWithSelectedCourses())
+    if (this.sharedService?.cbpPlanFinalObj.ministry.sbOrgType === 'ministry') {
+      this.loading = true
+      let state_center_id = this.sharedService?.cbpPlanFinalObj.ministry.identifier
+
+      if (this.sharedService?.cbpPlanFinalObj.departments?.length) {
+
+        let department_id = this.sharedService?.cbpPlanFinalObj.departments
+        this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe({
+          next: (res) => {
+            this.loading = false
+            this.totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
+            this.designationData = [];
+
+            // ✅ GLOBAL UNIQUE SETS (for overall unique count)
+            const globalTotalSet = new Set<string>();
+            const globalBehavioralSet = new Set<string>();
+            const globalFunctionalSet = new Set<string>();
+            const globalDomainSet = new Set<string>();
+
+            for (let i = 0; i < res.length; i++) {
+
+              // ✅ LOCAL UNIQUE SETS (per designation)
+              const totalSet = new Set<string>();
+              const behavioralSet = new Set<string>();
+              const functionalSet = new Set<string>();
+              const domainSet = new Set<string>();
+
+              let competenciesObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
+
+              res[i]?.competencies?.forEach(c => {
+
+                const theme = (c?.theme || '').trim().toLowerCase();
+                const subTheme = (c?.sub_theme || '').trim().toLowerCase();
+                const type = (c?.type || '').trim().toLowerCase();
+
+                if (!theme && !subTheme) return;
+
+                const key = `${theme}-${subTheme}`;
+
+                // ✅ PER DESIGNATION UNIQUE
+                if (!totalSet.has(key)) {
+                  totalSet.add(key);
+                  competenciesObj.total++;
+                }
+
+                if (type === 'behavioral' && !behavioralSet.has(key)) {
+                  behavioralSet.add(key);
+                  competenciesObj.behavioral++;
+                }
+
+                if (type === 'functional' && !functionalSet.has(key)) {
+                  functionalSet.add(key);
+                  competenciesObj.functional++;
+                }
+
+                if (type === 'domain' && !domainSet.has(key)) {
+                  domainSet.add(key);
+                  competenciesObj.domain++;
+                }
+
+                // ✅ GLOBAL UNIQUE TRACKING
+                globalTotalSet.add(key);
+
+                if (type === 'behavioral') globalBehavioralSet.add(key);
+                if (type === 'functional') globalFunctionalSet.add(key);
+                if (type === 'domain') globalDomainSet.add(key);
+
+              });
+
+              this.designationData.push({
+                designation: res[i].designation_name,
+                wing: res[i].wing_division_section,
+                updated: res[i].updated_at,
+                rolesResponsibilities: res[i].role_responsibilities,
+                activities: res[i].activities,
+                competenciesObj,
+                behavioralCompetencies: [...behavioralSet],
+                functionalCompetencies: [...functionalSet],
+                domainCompetencies: [...domainSet],
+                selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
+              });
+
+            }
+
+            // ✅ SET GLOBAL COUNTS AFTER LOOP
+            this.totalCompetencieObj.total = globalTotalSet.size;
+            this.totalCompetencieObj.behavioral = globalBehavioralSet.size;
+            this.totalCompetencieObj.functional = globalFunctionalSet.size;
+            this.totalCompetencieObj.domain = globalDomainSet.size;
+
+            this.cdr.detectChanges();
+            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.scrollToTop()
+            }, 1000);
+            console.log('this.designationData', this.designationData)
+            console.log('this.totalCompetencieObj', this.totalCompetencieObj)
+          },
+          error: (error) => {
+            this.loading = false
+            this.snackBar.open(error?.error?.detail, 'X', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            });
+          }
+        });
+      } else {
+
+        this.sharedService.getRoleMappingByStateCenter(state_center_id).subscribe({
+          next: (res) => {
+            this.loading = false
+            console.log('res', res)
+            this.totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
+            this.designationData = [];
+
+            // ✅ GLOBAL UNIQUE SETS (for overall unique count)
+            const globalTotalSet = new Set<string>();
+            const globalBehavioralSet = new Set<string>();
+            const globalFunctionalSet = new Set<string>();
+            const globalDomainSet = new Set<string>();
+
+            for (let i = 0; i < res.length; i++) {
+
+              // ✅ LOCAL UNIQUE SETS (per designation)
+              const totalSet = new Set<string>();
+              const behavioralSet = new Set<string>();
+              const functionalSet = new Set<string>();
+              const domainSet = new Set<string>();
+
+              let competenciesObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
+
+              res[i]?.competencies?.forEach(c => {
+
+                const theme = (c?.theme || '').trim().toLowerCase();
+                const subTheme = (c?.sub_theme || '').trim().toLowerCase();
+                const type = (c?.type || '').trim().toLowerCase();
+
+                if (!theme && !subTheme) return;
+
+                const key = `${theme}-${subTheme}`;
+
+                // ✅ PER DESIGNATION UNIQUE
+                if (!totalSet.has(key)) {
+                  totalSet.add(key);
+                  competenciesObj.total++;
+                }
+
+                if (type === 'behavioral' && !behavioralSet.has(key)) {
+                  behavioralSet.add(key);
+                  competenciesObj.behavioral++;
+                }
+
+                if (type === 'functional' && !functionalSet.has(key)) {
+                  functionalSet.add(key);
+                  competenciesObj.functional++;
+                }
+
+                if (type === 'domain' && !domainSet.has(key)) {
+                  domainSet.add(key);
+                  competenciesObj.domain++;
+                }
+
+                // ✅ GLOBAL UNIQUE TRACKING
+                globalTotalSet.add(key);
+
+                if (type === 'behavioral') globalBehavioralSet.add(key);
+                if (type === 'functional') globalFunctionalSet.add(key);
+                if (type === 'domain') globalDomainSet.add(key);
+
+              });
+
+              this.designationData.push({
+                designation: res[i].designation_name,
+                wing: res[i].wing_division_section,
+                updated: res[i].updated_at,
+                rolesResponsibilities: res[i].role_responsibilities,
+                activities: res[i].activities,
+                competenciesObj,
+                behavioralCompetencies: [...behavioralSet],
+                functionalCompetencies: [...functionalSet],
+                domainCompetencies: [...domainSet],
+                selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
+              });
+
+            }
+
+            // ✅ SET GLOBAL COUNTS AFTER LOOP
+            this.totalCompetencieObj.total = globalTotalSet.size;
+            this.totalCompetencieObj.behavioral = globalBehavioralSet.size;
+            this.totalCompetencieObj.functional = globalFunctionalSet.size;
+            this.totalCompetencieObj.domain = globalDomainSet.size;
+
+            this.cdr.detectChanges();
+            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.scrollToTop()
+            }, 1000);
+
+          },
+
+          error: (error) => {
+            this.loading = false
+            this.snackBar.open(error?.error?.detail, 'X', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            });
+          }
+        });
+      }
+
+
+
+    }
+    if (this.sharedService?.cbpPlanFinalObj.ministry.sbOrgType === 'state') {
+      this.loading = true
+      console.log('this.sharedService?.cbpPlanFinalObj', this.sharedService?.cbpPlanFinalObj)
+      let state_center_id = this.sharedService?.cbpPlanFinalObj.ministry.identifier
+      let department_id = this.sharedService?.cbpPlanFinalObj.departments
+      // this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe((res)=>{
+      //   console.log('res', res)
+      //   let behavioralCompetencies =[]
+      //   let functionalCompetencies =[]
+      //   let domainCompetencies =[]
+      //   for(let i=0; i<res.length;i++) {
+      //    behavioralCompetencies = []
+      //    functionalCompetencies =[]
+      //    domainCompetencies =[]
+      //    let competenciesObj = {total:0, behavioral:0, functional:0, domain:0}
+      //   res[i].competencies.forEach(c => {
+      //    competenciesObj.total++;
+      //    this.totalCompetencieObj.total++
+      //     if (c.type.toLowerCase() === 'behavioral') { 
+
+      //      behavioralCompetencies.push(`${c.theme} - ${c.sub_theme}`)
+      //      competenciesObj.behavioral++;
+      //      this.totalCompetencieObj.behavioral++
+      //     }
+      //     if (c.type.toLowerCase() === 'functional') {
+      //      functionalCompetencies.push(`${c.theme} - ${c.sub_theme}`)
+      //      competenciesObj.functional++;
+      //      this.totalCompetencieObj.functional++
+      //     }
+      //     if (c.type.toLowerCase() === 'domain') { 
+      //      domainCompetencies.push(`${c.theme} - ${c.sub_theme}`)
+      //      competenciesObj.domain++;
+      //      this.totalCompetencieObj.domain++
+
+      //     }
+      //   });
+      //    let obj:any =  {
+      //      designation: res[i].designation_name,
+      //      wing: res[i].wing_division_section,
+      //      updated: res[i].updated_at,
+      //      rolesResponsibilities: res[i].role_responsibilities,
+      //      activities:res[i].activities,
+      //      competenciesObj: competenciesObj,
+      //      behavioralCompetencies: behavioralCompetencies,
+      //      functionalCompetencies: functionalCompetencies,
+      //      domainCompetencies: domainCompetencies
+      //      // behavioralCompetencies: [
+      //      //   "Strategic Leadership", "Executive Presence", "Influencing and Negotiation",
+      //      //   "Relationship Management", "Verbal & Non-Verbal Fluency", "Planning & Prioritization",
+      //      //   "Accountability", "Conflict Management"
+      //      // ],
+      //      // functionalCompetencies: [
+      //      //   "Rules of business (AoB/ToB)", "Cabinet note writing", "Submission of briefs, supply of information",
+      //      //   "Policy design/ amendment", "Policy implementation", "Policy monitoring & impact assessment",
+      //      //   "Project Planning", "Project Evaluation & Monitoring", "Creation of M&E Framework",
+      //      //   "Citizen Partnering & Collaboration", "Public Grievance Handling"
+      //      // ],
+      //      // domainCompetencies: [
+      //      //   "Strategic Policy Formulation", "Inter-ministerial & State Government Coordination",
+      //      //   "Senior Leadership Governance & Oversight", "Legislative & Parliamentary Affairs Management",
+      //      //   "National Programme Strategic Direction"
+      //      // ],
+      //      // completionRate: { behavioral: 85, functional: 78, domain: 92 }
+      //    }
+
+
+      //   this.designationData.push(obj)
+      //   }
+      //   this.cdr.detectChanges();
+      //   setTimeout(() => {
+      //    this.scrollToTop()
+      //   }, 1000);
+      //   console.log('this.designationData', this.designationData)
+      //   console.log('this.totalCompetencieObj', this.totalCompetencieObj )
+
+      //  })
+      this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe({
+        next: (res) => {
+          this.loading = false
+          console.log('res', res)
+          this.totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
+          this.designationData = [];
+
+          // ✅ GLOBAL UNIQUE SETS (for overall unique count)
+          const globalTotalSet = new Set<string>();
+          const globalBehavioralSet = new Set<string>();
+          const globalFunctionalSet = new Set<string>();
+          const globalDomainSet = new Set<string>();
+
+          for (let i = 0; i < res.length; i++) {
+
+            // ✅ LOCAL UNIQUE SETS (per designation)
+            const totalSet = new Set<string>();
+            const behavioralSet = new Set<string>();
+            const functionalSet = new Set<string>();
+            const domainSet = new Set<string>();
+
+            let competenciesObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
+
+            res[i]?.competencies?.forEach(c => {
+
+              const theme = (c?.theme || '').trim().toLowerCase();
+              const subTheme = (c?.sub_theme || '').trim().toLowerCase();
+              const type = (c?.type || '').trim().toLowerCase();
+
+              if (!theme && !subTheme) return;
+
+              const key = `${theme}-${subTheme}`;
+
+              // ✅ PER DESIGNATION UNIQUE
+              if (!totalSet.has(key)) {
+                totalSet.add(key);
+                competenciesObj.total++;
+              }
+
+              if (type === 'behavioral' && !behavioralSet.has(key)) {
+                behavioralSet.add(key);
+                competenciesObj.behavioral++;
+              }
+
+              if (type === 'functional' && !functionalSet.has(key)) {
+                functionalSet.add(key);
+                competenciesObj.functional++;
+              }
+
+              if (type === 'domain' && !domainSet.has(key)) {
+                domainSet.add(key);
+                competenciesObj.domain++;
+              }
+
+              // ✅ GLOBAL UNIQUE TRACKING
+              globalTotalSet.add(key);
+
+              if (type === 'behavioral') globalBehavioralSet.add(key);
+              if (type === 'functional') globalFunctionalSet.add(key);
+              if (type === 'domain') globalDomainSet.add(key);
+
+            });
+
+            this.designationData.push({
+              designation: res[i].designation_name,
+              wing: res[i].wing_division_section,
+              updated: res[i].updated_at,
+              rolesResponsibilities: res[i].role_responsibilities,
+              activities: res[i].activities,
+              competenciesObj,
+              behavioralCompetencies: [...behavioralSet],
+              functionalCompetencies: [...functionalSet],
+              domainCompetencies: [...domainSet],
+              selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
+            });
+
+          }
+
+          // ✅ SET GLOBAL COUNTS AFTER LOOP
+          this.totalCompetencieObj.total = globalTotalSet.size;
+          this.totalCompetencieObj.behavioral = globalBehavioralSet.size;
+          this.totalCompetencieObj.functional = globalFunctionalSet.size;
+          this.totalCompetencieObj.domain = globalDomainSet.size;
+
+          this.cdr.detectChanges();
+
+
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.scrollToTop()
+          }, 1000);
+          console.log('this.designationData', this.designationData)
+          console.log('this.totalCompetencieObj', this.totalCompetencieObj)
+        },
+        error: (error) => {
+          this.loading = false
+          this.snackBar.open(error?.error?.detail, 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-error']
+          });
+        }
+      });
+    }
+
+
+
+  }
+  getCompetenciesByType(type: string, course: any): any[] {
+    if (!course) {
+      return [];
+    }
+
+    let competencies: any[] = [];
+
+    // AI Recommended / Public / User Added
+    if (Array.isArray(course.competencies)) {
+      competencies = course.competencies;
+    }
+    // Manually Suggested - iGOT (v6)
+    else if (Array.isArray(course.competencies_v6)) {
+      competencies = course.competencies_v6;
+    }
+
+    if (!competencies.length) {
+      return [];
+    }
+
+    const normalizedType = type.toLowerCase().trim();
+
+    return competencies.filter(c => {
+      if (!c?.competencyAreaName) {
+        return false;
+      }
+
+      const area = c.competencyAreaName.toLowerCase().trim();
+
+      // handle behavioural / behavioral
+      if (normalizedType === 'behavioural' || normalizedType === 'behavioral') {
+        return area === 'behavioural' || area === 'behavioral';
+      }
+
+      return area === normalizedType;
+    });
+  }
+
+  getDisplayedCompetencies(type: string, index: number): any[] {
+    const competencies = this.getCompetenciesByType(type, index);
+    const key = `${index}-${type}`;
+
+    if (this.expandedCompetencies[key]) {
+      return competencies;
+    }
+
+    return competencies.slice(0, 2);
+  }
+
+  toggleCompetencies(type: string, index: number): void {
+    const key = `${index}-${type}`;
+    this.expandedCompetencies[key] = !this.expandedCompetencies[key];
+  }
+
+  isExpanded(type: string, index: number): boolean {
+    const key = `${index}-${type}`;
+    return this.expandedCompetencies[key] || false;
+  }
+
+  hasMoreThanTwo(type: string, index: number): boolean {
+    return this.getCompetenciesByType(type, index).length > 2;
+  }
+  getRemainingCount(type: string, index: number): number {
+    const totalCount = this.getCompetenciesByType(type, index).length;
+    return totalCount - 2;
+  }
+  updateCompetencyCounts() {
+    // const comps = this.competenciesArray.value;
+    this.competenciesCount = { total: 0, public_courses: 0, igot: 0 };
+    this.filterdCourses.forEach(c => {
+      this.competenciesCount.total++;
+      if (c.is_public) this.competenciesCount.public_courses++;
+      if (!c.is_public) this.competenciesCount.igot++;
+    });
+  }
+
+  confirmDeleteCourse(item: any, index: number) {
+    const roleMappingId = this.recommended_course_id;
+    const courseIdentifier =
+      item?.course_identifier || item?.id || item?.identifier;
+
+    if (!roleMappingId || !courseIdentifier) {
+      this.snackBar.open('Unable to delete course', 'X', {
+        duration: 3000,
+        panelClass: ['snackbar-error']
+      });
+      return;
+    }
+
+    this.loading = true;
+
+    this.sharedService
+      .deleteRecommendedCourse(roleMappingId, courseIdentifier)
+      .subscribe({
+        next: () => {
+          // Remove from UI
+          this.filterdCourses.splice(index, 1);
+
+          // Update counts
+          this.updateCompetencyCounts();
+
+          this.loading = false;
+
+          this.snackBar.open('Course deleted successfully', 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+          });
+        },
+        error: (error) => {
+          this.loading = false;
+
+          this.snackBar.open(
+            error?.error?.detail || 'Failed to delete course',
+            'X',
+            {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            }
+          );
+        }
+      });
+  }
+
+  deleteCard(item: any, index: number) {
+    console.log("item, index", item, index)
+    const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
+      width: '600px',
+      data: {
+        planId: this.planData?.id,   // role mapping id
+        course: item,                // course object
+        index: index,
+        from: 'viewCourse'                 // index for UI removal
+      },
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '300px',
+      maxHeight: '90vh',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        this.confirmDeleteCourse(item, index);
+      }
+    });
+  }
+  scrollToTop(): void {
+
+    // if (this.pdfContent && this.pdfContent.nativeElement && this.pdfContent.nativeElement.scrollTop !== undefined) {
+    //   this.pdfContent.nativeElement.scrollTop = 0;
+    // } else {
+    //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    // }
+    // const dialogContainer = document.querySelector('mat-dialog-container');
+    // if (dialogContainer) {
+    //   dialogContainer.scrollTop = 0;
+    // }
+  }
+
+  downloadPDF() {
+    this.pdfTrigger = true
+    this.loading = true;
+    //   const element = this.pdfContent.nativeElement;
+
+    // // Wait for images to load
+    // const images = element.querySelectorAll('img');
+    // const promises = Array.from(images).map((img: HTMLImageElement) => {
+    //   if (img.complete) return Promise.resolve();
+    //   return new Promise(resolve => img.onload = resolve);
+    // });
+
+    // Promise.all(promises).then(() => {
+    //   const options = {
+    //     margin: 0.5,
+    //     filename: 'Final CBP Plan.pdf',
+    //     image: { type: 'jpeg', quality: 0.98 },
+    //     html2canvas: {
+    //       scale: 2,
+    //       useCORS: true,
+    //       scrollY: 0,
+    //     },
+    //     jsPDF: {
+    //       unit: 'in',
+    //       format: 'a4',
+    //       orientation: 'portrait'
+    //     },
+    //     pagebreak: {
+    //       mode: ['css', 'legacy', 'avoid-all']
+    //     }
+    //   };
+
+    //   html2pdf().from(element).set(options).save();
+    // });
+    //const element = this.pdfContent.nativeElement;
+
+    this.loading = true;
+    const element = this.pdfContent.nativeElement;
+    html2canvas(element, {
+      scale: 1.25,
+      useCORS: true,
+      scrollY: 0,
+      logging: true,
+    }).then((canvas) => {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      // Margins
+      const marginLeft = 5;
+      const marginTop = 15;
+      const marginRight = 5;
+      const marginBottom = 15;
+
+      const usableWidth = pdfWidth - marginLeft - marginRight;
+      const usableHeight = pdfHeight - marginTop - marginBottom;
+
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+
+      const ratio = canvasWidth / usableWidth;
+      const pageHeightPx = usableHeight * ratio;
+
+      const totalPages = Math.ceil(canvasHeight / pageHeightPx);
+
+      for (let page = 0; page < totalPages; page++) {
+        const canvasPage = document.createElement('canvas');
+        canvasPage.width = canvasWidth;
+        canvasPage.height = Math.min(pageHeightPx, canvasHeight - page * pageHeightPx);
+
+        const ctx = canvasPage.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvasPage.width, canvasPage.height);
+
+          ctx.drawImage(
+            canvas,
+            0, page * pageHeightPx,
+            canvasWidth, canvasPage.height,
+            0, 0,
+            canvasWidth, canvasPage.height
+          );
+        }
+
+        const imgData = canvasPage.toDataURL('image/png', 1);
+        if (page > 0) pdf.addPage();
+        const imgHeightMM = canvasPage.height / ratio;
+        pdf.addImage(imgData, 'PNG', marginLeft, marginTop, usableWidth, imgHeightMM);
+      }
+
+      pdf.save('Final_CBP.pdf');
+      this.loading = false;
+    }).catch((error) => {
+      console.error('PDF generation error:', error);
+      this.loading = false;
+    });
+
+
+
+
+
+
+
+  }
+
+  downloadPDFNew() {
+    this.loading = true
+    const element = this.pdfContent.nativeElement;
+
+    const opt = {
+      margin: [10, 5, 5, 10], // top, left, bottom, right in mm
+      filename: 'CBP_Plan.pdf',
+      image: { type: 'jpeg', quality: 0.85 },
+      html2canvas: { scale: 1.5, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // avoid cutting text
+    };
+
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
+        // PDF download finished
+        this.loading = false;
+      })
+      .catch(() => {
+        // Handle errors and stop loading
+        this.loading = false;
+      });
+
+    setTimeout(() => {
+      this.loading = false;
+    }, 2000);
+
+
+
+  }
+
+
+
+  generateExcel(jsonArray: any[], filename: string = "final.xlsx") {
+    console.log('jsonArray', jsonArray)
+
+    if (!jsonArray || jsonArray.length === 0) return;
+
+    // -------- MAIN HEADER FROM FIRST OBJECT ---------
+    const firstObj = jsonArray[0];
+    let title = firstObj.state_center_name || "";
+    if (firstObj.department_name) title += " / " + firstObj.department_name;
+
+    // -------- COLUMN HEADERS ---------
+    const headers = [
+      "Designation",
+      "Role & Responsibilities",
+      "Activities",
+      "Behavioral Competencies",
+      "Functional Competencies",
+      "Domain Competencies",
+      'courseDetails'
+    ];
+
+    // -------- DATA ROWS ---------
+    const dataRows = jsonArray.map(json => {
+      const courses =
+        json?.cbp_plans?.length
+          ? json.cbp_plans[json.cbp_plans.length - 1]?.selected_courses || []
+          : [];
+
+      const courseDetails = courses.map((c: any, i: number) => {
+        const competencies = (c.competencies || [])
+          .map((cc: any) =>
+            `${cc.competencyAreaName} → ${cc.competencyThemeName} → ${cc.competencySubThemeName}`
+          )
+          .join(" | ");
+
+        return (
+          `${i + 1}. Course Name: ${c.course}\n` +
+          `   Identifier: ${c.identifier}\n` +
+          `   Duration (mins): ${Math.round(+c.duration / 60)}\n` +
+          `   Relevancy: ${c.relevancy}%\n` +
+          `   Rationale: ${c.rationale}\n` +
+          `   Organisation: ${(c.organisation || []).join(", ")}\n` +
+          `   Competencies: ${competencies}`
+        );
+      }).join("\n\n");
+      return {
+        "Designation": `${json.designation_name} : Wing/Division - ${json.wing_division_section}`,
+        "Role & Responsibilities": (json.role_responsibilities || [])
+          .map((v: string, i: number) => `${i + 1}. ${v}`).join("\n\n"),
+        "Activities": (json.activities || [])
+          .map((v: string, i: number) => `${i + 1}. ${v}`).join("\n\n"),
+        "Behavioral Competencies": (json.competencies || [])
+          .filter((c: any) => c.type === "Behavioral")
+          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
+        "Functional Competencies": (json.competencies || [])
+          .filter((c: any) => c.type === "Functional")
+          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
+        "Domain Competencies": (json.competencies || [])
+          .filter((c: any) => c.type === "Domain")
+          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
+        "Course Details": courseDetails
+      };
+    });
+
+
+    // -------- CREATE WORKSHEET ---------
+    const ws = XLSX.utils.aoa_to_sheet([]);
+
+    // Main header (merged)
+    XLSX.utils.sheet_add_aoa(ws, [[title]], { origin: "A1" });
+    ws['!merges'] = [{
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: headers.length - 1 }
+    }];
+
+    // Column headers at row 2
+    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" });
+
+    // Style column headers
+    headers.forEach((header, index) => {
+      const cellAddress = XLSX.utils.encode_cell({ r: 1, c: index });
+      if (ws[cellAddress]) {
+        ws[cellAddress].s = {
+          font: { bold: true },
+          fill: { patternType: "solid", fgColor: { rgb: "FFFF00" } },
+          alignment: { horizontal: "center", vertical: "center", wrapText: true }
+        };
+      }
+    });
+
+    // Insert data rows starting from row 3
+    XLSX.utils.sheet_add_json(ws, dataRows, { origin: "A3", skipHeader: true });
+
+    // Auto column widths based on longest line in each column
+    const colWidths = headers.map((header, idx) => {
+      const maxLen = Math.max(
+        header.length,
+        ...dataRows.map(row => (row[header] || "").split("\n").reduce((a, b) => Math.max(a, b.length), 0))
+      );
+      return { wch: Math.min(Math.max(maxLen + 5, 20), 80) }; // min 20, max 80
+    });
+    ws['!cols'] = colWidths;
+
+    // Wrap text in data rows
+    dataRows.forEach((row, rowIndex) => {
+      headers.forEach((header, colIndex) => {
+        const cellAddress = XLSX.utils.encode_cell({ r: rowIndex + 2, c: colIndex });
+        if (ws[cellAddress]) {
+          ws[cellAddress].s = { alignment: { wrapText: true, vertical: "top" } };
+        }
+      });
+    });
+
+    // Style main header
+    if (ws["A1"]) {
+      ws["A1"].s = {
+        font: { bold: true, sz: 16 },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+    }
+
+    // -------- CREATE WORKBOOK ---------
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    // Export Excel
+    XLSX.writeFile(wb, filename);
+  }
+
+
+
+
+  downloadCSV() {
+    let fileName = ''
+    if (!this.sharedService?.cbpPlanFinalObj.departments) {
+      fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj.ministry.identifier}_${this.sharedService?.cbpPlanFinalObj.departments}.xlsx`
+    } else {
+      fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj.ministry.identifier}.xlsx`
+    }
+    this.generateExcel(this.jsonData, fileName);
+  }
+
+  downloadPdfFromBE(context: string) {
+    let selectedLanguage = this.filterForm.get('language')?.value || 'en';
+    this.loading = true
+    //  this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier)
+    if (!this.sharedService?.cbpPlanFinalObj.departments) {
+      this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier, context, selectedLanguage)
+    } else {
+      this.sharedService.downloadPdfForDepartment(this.sharedService?.cbpPlanFinalObj.ministry.identifier, this.sharedService?.cbpPlanFinalObj.departments, context, selectedLanguage)
+    }
+
+    setTimeout(() => {
+      this.loading = false
+    }, 5000)
+  }
+  getSelectedCourses(department: any): any[] {
+    if (!department?.cbp_plans?.length) {
+      return [];
+    }
+
+    // take latest CBP plan (or adjust logic if needed)
+    const latestPlan = department.cbp_plans[department.cbp_plans.length - 1];
+
+    return latestPlan?.selected_courses || [];
+  }
+
+  applyFilters() {
+
+  }
+
+  filterList(value: string, type: string) {
+    const search = value.toLowerCase();
+
+    switch (type) {
+
+      case 'language':
+        this.filteredLanguages = this.languages.filter(v => v.label?.toLowerCase().includes(search));
+        break;
+    }
+  }
+
+}
