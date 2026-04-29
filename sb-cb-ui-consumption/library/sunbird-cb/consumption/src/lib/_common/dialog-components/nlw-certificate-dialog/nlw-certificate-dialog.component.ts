@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
+import { Component, Inject, OnInit, OnDestroy, HostListener } from '@angular/core'
 import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser'
@@ -11,6 +11,7 @@ export interface NlwCertificateDialogData {
   type: string         // 'API_DOCUMENT' | 'PDF' | 'IMAGE'
   title?: string
   url?: string
+  pdfZoom?: string     // e.g. 'FitH', 'FitV', '100', '75' — appended as #view=<value>
   api?: {
     url: string
     method: string
@@ -38,6 +39,8 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
   svgContent: SafeHtml | null = null
   pdfUrl: SafeResourceUrl | null = null
   imageUrl: string | null = null
+  isMobile = false
+  rawPdfUrl: string | null = null
 
   // Raw SVG string for download
   private rawSvgString: string | null = null
@@ -54,6 +57,7 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
   ) {
+    this.isMobile = window.innerWidth <= 768
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
         this.translate.setDefaultLang('en')
@@ -61,6 +65,11 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
         this.translate.use(lang)
       }
     })
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.isMobile = window.innerWidth <= 768
   }
 
   ngOnInit(): void {
@@ -79,8 +88,10 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
   }
 
   private loadPdf(url: string): void {
-    const pdfUrlWithZoom = url.includes('#') ? url : `${url}#zoom=20`
-    this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(pdfUrlWithZoom)
+    this.rawPdfUrl = url
+    const zoom = this.data.pdfZoom || 'FitH'
+    const pdfUrlWithParams = url.includes('#') ? url : `${url}#view=${zoom}`
+    this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(pdfUrlWithParams)
     this.isLoading = false
   }
 
@@ -145,7 +156,8 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
         this.isLoading = false
       } else {
         this.objectUrl = URL.createObjectURL(response)
-        this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.objectUrl}#zoom=20`)
+        this.rawPdfUrl = this.objectUrl
+        this.pdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.objectUrl}#view=FitH`)
         this.isLoading = false
       }
     } else if (typeof response === 'string') {
@@ -319,6 +331,25 @@ export class NlwCertificateDialogComponent implements OnInit, OnDestroy {
 
   close(): void {
     this.dialogRef.close()
+  }
+
+  openPdfInBrowser(): void {
+    if (this.rawPdfUrl) {
+      window.open(this.rawPdfUrl, '_blank')
+    }
+  }
+
+  downloadPdfDirect(): void {
+    this.raiseDownloadTelemetry('pdf')
+    if (this.rawPdfUrl) {
+      const a = document.createElement('a')
+      a.href = this.rawPdfUrl
+      a.download = 'NLW-Certificate.pdf'
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    }
   }
 
   ngOnDestroy(): void {
