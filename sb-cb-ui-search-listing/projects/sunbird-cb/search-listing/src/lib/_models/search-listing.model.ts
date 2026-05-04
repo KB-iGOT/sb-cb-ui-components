@@ -51,6 +51,7 @@ export class RequestParams {
 export class Filters {
   contentType: any;
   courseCategory?: any;
+  category?: string;
   status: string[];
   sourceName?: string[];
   avgRating?: { [key: string]: string };
