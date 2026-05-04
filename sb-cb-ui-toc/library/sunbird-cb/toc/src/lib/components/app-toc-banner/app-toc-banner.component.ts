@@ -50,6 +50,7 @@ dayjs.extend(isSameOrAfter)
 })
 
 export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
+  iGOT = 'iGOT'
   show = false
   @Input() banners: NsAppToc.ITocBanner | null = null
   @Input() content: NsContent.IContent | null = null

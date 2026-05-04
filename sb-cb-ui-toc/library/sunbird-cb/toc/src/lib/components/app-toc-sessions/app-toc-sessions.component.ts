@@ -13,7 +13,12 @@ export class AppTocSessionsComponent implements OnInit {
   @Input() content: NsContent.IContent | null = null
   @Input() forPreview = false
   @Input() config = null
+  @Input() contextId?: string
   sessionList: any = []
+
+  contentTrackBy(_index: number, item: any) {
+    return item?.identifier
+  }
 
   constructor() { }
 

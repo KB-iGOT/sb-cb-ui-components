@@ -114,7 +114,7 @@
         (batchData?.workFlow?.wfItem?.currentStatus !== WFBlendedProgramStatus.APPROVED) && batchData?.content?.length">
         <p class="margin-remove-bottom mat-body-1 padding-m bg-white">
           {{batchData?.workFlow?.batch?.name}} - ({{batchData?.workFlow?.batch?.startDate | date: 'dd-MM-yyyy'}} -
-          {{batchData?.workFlow?.batch?.endDate | date: 'dd-MM-yyyy' || 'present'}})
+          {{(batchData?.workFlow?.batch?.endDate | date: 'dd-MM-yyyy') || 'present'}})
         </p>
         <ng-container>
           <button class="withdraw-batch" (click)="!disableWithdrawnBtn && requestToWithdrawDialog()"
@@ -125,7 +125,7 @@
       </ng-container>
       <ng-container *ngIf="batchData && batchData?.enrolled && batchData?.content?.length">
         <h3 class="margin-remove-bottom p-4 bg-white mat-body-1" *ngFor="let batch of batchData.content">
-          {{batch?.name}} ({{batch?.startDate | date: 'dd-MM-yyyy' }} - {{batch?.endDate | date: 'dd-MM-yyyy' ||
+          {{batch?.name}} ({{batch?.startDate | date: 'dd-MM-yyyy' }} - {{(batch?.endDate | date: 'dd-MM-yyyy') ||
           'present'}})
         </h3>
         <ng-container [ngTemplateOutlet]="statusMsg"></ng-container>
@@ -246,7 +246,7 @@
                     <mat-icon matChipRemove *ngIf="removable">close</mat-icon>
                   </mat-chip>
                   <input tabindex="-1" class="inputTextBox"
-                    placeholder="{{users.length === 0 ? translateLabels('placehoderText', 'contentSharing') : ''}}"
+                    placeholder="{{users.length === 0 ? translateLabels('placehoderText', 'contentSharing', '') : ''}}"
                     #userInput formControlName="review" [formControl]="userCtrl" [matAutocomplete]="auto"
                     [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                     [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="add($event)">
@@ -302,7 +302,7 @@
             [disabled]="!handleEnrollmentEndDate(batch) || disableEnrollBtn ">
             <div class="flex flex-row items-center gap-2">
               <div class="flex-1 text-sm batch-timings">
-                {{ batch.name }} ( {{ batch.startDate | date: 'd MMM, yyyy' }} - {{ batch.endDate | date: 'd MMM, yyyy'
+                {{ batch.name }} ( {{ batch.startDate | date: 'd MMM, yyyy' }} - {{ (batch.endDate | date: 'd MMM, yyyy')
                 || 'present' }} )
               </div>
               <div class="expired" *ngIf="!handleEnrollmentEndDate(batch) || disableEnrollBtn">

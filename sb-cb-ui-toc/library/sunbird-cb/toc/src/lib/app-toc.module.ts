@@ -61,7 +61,7 @@ import { AttendanceCardModule } from './_collection/_common/attendance-card/atte
 // Route Components - TODO: These route components exist in the routes folder and need to be copied from sunbird-cb-portal if full functionality is needed
 // import { AppTocAnalyticsComponent } from './routes/app-toc-analytics/app-toc-analytics.component'
 // import { AppTocContentsComponent } from './routes/app-toc-contents/app-toc-contents.component'
-// import { AppTocHomeComponent } from './components/app-toc-home/app-toc-home.component'
+import { AppTocHomeComponent } from './components/app-toc-home/app-toc-home.component'
 import { AppTocHomeComponent as AppTocHomeRootComponent } from './routes/app-toc-home/app-toc-home.component'
 import { AppTocOverviewComponent } from './components/app-toc-overview/app-toc-overview.component'
 import { AppTocBannerComponent } from './components/app-toc-banner/app-toc-banner.component'
@@ -156,7 +156,7 @@ import { UserProfileService } from './services/user-profile.service'
     // AppTocAnalyticsComponent,
     // AppTocContentsComponent,
     AppTocHomeV2Component,
-    // AppTocHomeComponent,
+    AppTocHomeComponent,
     AppTocOverviewComponent,
     AppTocBannerComponent,
     AppTocCohortsComponent,
