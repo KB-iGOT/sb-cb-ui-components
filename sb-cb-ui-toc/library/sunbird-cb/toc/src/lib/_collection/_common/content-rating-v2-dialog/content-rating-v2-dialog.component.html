@@ -15,9 +15,9 @@
             <div class="" (click)="$event.stopPropagation();">
                 <ng-container *ngFor="let start of [1, 2, 3, 4, 5]; let i = index">
                     <button i18n-aria-label aria-label="Rating" aria-labelledby="rate-heading"
-                        name="user-content-rating-star-{{i+1}}" [disabled]="isRequesting || isDisabled"
+                        name="user-content-rating-star-{{i+1}}" [disabled]="isDisabled"
                         class="rating-button mr-2" mat-icon-button (click)="addRating(i); $event.stopPropagation();"
-                        color="primary">
+                        color="color">
                         <mat-icon class="rating-icon ws-mat-black16-text" [ngClass]="{'ws-mat-orange-text':(userRating || -1) > i}">
                             star
                         </mat-icon>
@@ -48,7 +48,7 @@
         </section>
 
         <section class="w-full mb-5" *ngIf="!formDisabled">
-            <mat-checkbox [color]="primary" class="profane-radio-button mat-body-2" formControlName="recommend" >{{'ratingdialog.recommendCourse' | translate}}</mat-checkbox>
+            <mat-checkbox [color]="color" class="profane-radio-button mat-body-2" formControlName="recommend" >{{'ratingdialog.recommendCourse' | translate}}</mat-checkbox>
         </section>
 
         <mat-dialog-actions class="custom margin-remove-bottom no-padding" align="end">

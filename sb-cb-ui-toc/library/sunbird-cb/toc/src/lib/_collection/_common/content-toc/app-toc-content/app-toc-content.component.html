@@ -93,7 +93,7 @@
         <ng-container *ngIf="!contentLoader">
             <ng-container *ngIf="content?.children?.length; else noChildren">
                 <div class="content-card "
-                    *ngFor="let card of content?.children; trackBy: contentTrackBy; let i = index;"
+                    *ngFor="let card of content?.children; let i = index;"
                     [ngClass]="{ 'content-active': pathSet && pathSet.has(card.identifier)  && isEnrolled}">
                     <!-- {{card|json}} -->
                     <ws-widget-app-toc-content-card-v2 [forPreview]="forPreview" [expandAll]="expandAll"
@@ -118,7 +118,7 @@
     </ng-template>
     <div *ngIf="isPreAssessment">
         <div class="content-card "
-            *ngFor="let card of content?.preEnrolmentResources; trackBy: identifier; let i = index;"
+            *ngFor="let card of content?.preEnrolmentResources;  let i = index;"
             [ngClass]="{ 'content-active': pathSet && pathSet.has(card.identifier)  && isEnrolled}">
             <!-- {{card|json}} -->
             <ws-widget-app-toc-content-card-v2 [forPreview]="forPreview" [expandAll]="expandAll"

@@ -10,8 +10,8 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { ProfileV2Service } from '../../services/profile-v2.service'
 import { OtpService } from '../../services/otp.service'
 import { NPSGridService } from '../../services/nps-grid.service'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 /* tslint:disable */
 import _ from 'lodash'
 import { TranslateService } from '@ngx-translate/core'
@@ -25,9 +25,10 @@ const EMP_ID_PATTERN = /^[a-z0-9]+$/i
 const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a-zA-Z0-9]*[a-zA-Z0-9]+)?(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/
 
 @Component({
-  selector: 'ws-app-enroll-profile-form',
-  templateUrl: './enroll-profile-form.component.html',
-  styleUrls: ['./enroll-profile-form.component.scss'],
+    selector: 'ws-app-enroll-profile-form',
+    templateUrl: './enroll-profile-form.component.html',
+    styleUrls: ['./enroll-profile-form.component.scss'],
+    standalone: false
 })
 export class EnrollProfileFormComponent implements OnInit {
   public afterSubmitAction = this.checkAfterSubmit.bind(this)

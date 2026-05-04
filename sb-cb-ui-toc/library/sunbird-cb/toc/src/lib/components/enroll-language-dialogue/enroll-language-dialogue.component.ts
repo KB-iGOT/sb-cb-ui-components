@@ -1,10 +1,11 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 
 @Component({
-  selector: 'ws-app-enroll-language-dialogue',
-  templateUrl: './enroll-language-dialogue.component.html',
-  styleUrls: ['./enroll-language-dialogue.component.scss']
+    selector: 'ws-app-enroll-language-dialogue',
+    templateUrl: './enroll-language-dialogue.component.html',
+    styleUrls: ['./enroll-language-dialogue.component.scss'],
+    standalone: false
 })
 export class EnrollLanguageDialogueComponent implements OnInit {
   selectedLanguage: any

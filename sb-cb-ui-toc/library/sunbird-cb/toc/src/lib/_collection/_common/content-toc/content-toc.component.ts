@@ -4,10 +4,10 @@ import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@
 import { Subscription } from 'rxjs'
 
 import { LoadCheckService } from '../../../services/load-check.service'
-import { MatLegacyTabGroup as MatTabGroup, MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/tabs'
+import { MatTabGroup as MatTabGroup, MatTabChangeEvent as MatTabChangeEvent } from '@angular/material/tabs'
 import { NsDiscussionV2 } from '@sunbird-cb/discussion-v2'
 import { AiTutorConfirmPopupComponent } from './ai-tutor-confirm-popup/ai-tutor-confirm-popup.component'
-import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/dialog'
+import { MatDialog as MatDialog, MatDialogConfig as MatDialogConfig } from '@angular/material/dialog'
 import { viewerRouteGenerator } from '../../../_services/viewer-route-util'
 import { AppTocService } from '../../../services/app-toc.service'
 import { ActionService } from '../../../services/action.service'
@@ -19,9 +19,10 @@ import { SamuhikCharchaService } from '../../../_services/samuhik-charcha.servic
 import * as _ from 'lodash'
 import { NsContent } from '../../../_collection-api'
 @Component({
-  selector: 'ws-widget-content-toc',
-  templateUrl: './content-toc.component.html',
-  styleUrls: ['./content-toc.component.scss'],
+    selector: 'ws-widget-content-toc',
+    templateUrl: './content-toc.component.html',
+    styleUrls: ['./content-toc.component.scss'],
+    standalone: false
 })
 
 export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
@@ -94,6 +95,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   showAssignmentsTab = false
   enableSamuhikCharchaTab = false
   samuhikConfig: any
+  batchId:any
   constructor(
     private route: ActivatedRoute,
     private utilityService: UtilityService,
@@ -181,6 +183,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
     const batchId = this.route.snapshot.queryParams.batchId ?
       this.route.snapshot.queryParams.batchId : ''
+    this.batchId = batchId
     if (batchId) {
       this.selectedTabIndex = 1
     }

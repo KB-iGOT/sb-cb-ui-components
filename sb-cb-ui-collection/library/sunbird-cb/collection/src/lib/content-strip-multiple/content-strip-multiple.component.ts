@@ -13,7 +13,7 @@ import {
 } from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
-import { NSSearch } from '@sunbird-cb/utils-v2/lib/services/widget-search.model'
+
 
 interface IStripUnitContentData {
   key: string
@@ -36,10 +36,10 @@ interface IStripUnitContentData {
   }
 }
 @Component({
-    selector: 'ws-widget-content-strip-multiple',
-    templateUrl: './content-strip-multiple.component.html',
-    styleUrls: ['./content-strip-multiple.component.scss'],
-    standalone: false
+  selector: 'ws-widget-content-strip-multiple',
+  templateUrl: './content-strip-multiple.component.html',
+  styleUrls: ['./content-strip-multiple.component.scss'],
+  standalone: false
 })
 export class ContentStripMultipleComponent extends WidgetBaseComponent
   implements
@@ -145,11 +145,11 @@ export class ContentStripMultipleComponent extends WidgetBaseComponent
       this.fetchStripFromRequestData(stripData, calculateParentStatus)
     }
   }
-  private transformSearchV6Filters(v6filters: NSSearch.ISearchV6Filters[]) {
+  private transformSearchV6Filters(v6filters: any[]) {
     const filters: any = {}
     v6filters.forEach((f => {
       if (f.andFilters) {
-        f.andFilters.forEach(andFilter => {
+        f.andFilters.forEach((andFilter: any) => {
           Object.keys(andFilter).forEach(key => {
             filters[key] = andFilter[key]
           })

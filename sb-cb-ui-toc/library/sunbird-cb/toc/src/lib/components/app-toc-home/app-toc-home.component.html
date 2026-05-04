@@ -750,7 +750,7 @@
     <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
   </div>
 
-  <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content" (resetEnableShare)="resetEnableShare($event)"></ws-app-share-toc>
+  <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content" (resetEnableShare)="resetEnableShare()"></ws-app-share-toc>
 </ng-container>
 
 <!-- Template for when no data is found -->

@@ -1,16 +1,17 @@
 import { Component, OnInit, AfterViewInit, ViewChild, Inject, ElementRef, Output, EventEmitter } from '@angular/core'
 import { fromEvent } from 'rxjs'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 // tslint:disable-next-line
 import _ from 'lodash'
 
 import { ReviewComponentDataService } from '../content-services/review-component-data.service'
 
 @Component({
-  selector: 'ws-widget-reviews-content',
-  templateUrl: './reviews-content.component.html',
-  styleUrls: ['./reviews-content.component.scss'],
+    selector: 'ws-widget-reviews-content',
+    templateUrl: './reviews-content.component.html',
+    styleUrls: ['./reviews-content.component.scss'],
+    standalone: false
 })
 
 export class ReviewsContentComponent implements OnInit, AfterViewInit {

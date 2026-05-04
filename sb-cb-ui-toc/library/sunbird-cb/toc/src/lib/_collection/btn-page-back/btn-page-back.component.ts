@@ -14,23 +14,22 @@ import { TranslateService } from '@ngx-translate/core'
 
 type TUrl = undefined | 'none' | 'back' | string
 @Component({
-  selector: 'ws-widget-btn-page-back',
-  templateUrl: './btn-page-back.component.html',
-  styleUrls: ['./btn-page-back.component.scss'],
-  animations: [
-    trigger(
-      'enterAnimation', [
-      transition(':enter', [
-        style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 }),
-        animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 })),
-      ]),
-      transition(':leave', [
-        style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 }),
-        animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 })),
-      ]),
-    ]
-    ),
-  ],
+    selector: 'ws-widget-btn-page-back',
+    templateUrl: './btn-page-back.component.html',
+    styleUrls: ['./btn-page-back.component.scss'],
+    animations: [
+        trigger('enterAnimation', [
+            transition(':enter', [
+                style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 }),
+                animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 })),
+            ]),
+            transition(':leave', [
+                style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 }),
+                animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 })),
+            ]),
+        ]),
+    ],
+    standalone: false
 })
 export class BtnPageBackComponent extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<{ url: TUrl }> {
@@ -49,7 +48,7 @@ export class BtnPageBackComponent extends WidgetBaseComponent
     private discussUtilitySvc: DiscussUtilsService,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    @Inject('environment') private environment: any
+    @Inject('environment') public environment: any
   ) {
     super()
     if (localStorage.getItem('websiteLanguage')) {

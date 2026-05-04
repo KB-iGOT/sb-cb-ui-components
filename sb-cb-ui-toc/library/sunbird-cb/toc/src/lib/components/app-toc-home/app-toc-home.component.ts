@@ -42,8 +42,8 @@ import { ResetRatingsService } from './../../services/reset-ratings.service'
 import { AppTocDialogIntroVideoComponent } from '../app-toc-dialog-intro-video/app-toc-dialog-intro-video.component'
 import { ContentRatingV2DialogComponent } from '../../_collection/_common/content-rating-v2-dialog/content-rating-v2-dialog.component'
 import { TimerService } from '../../services/timer.service'
-import { MatLegacyDialog as MatDialog } from '@angular/material/dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatDialog as MatDialog } from '@angular/material/dialog'
+import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { MatSnackBar as MatSnackbarNew } from '@angular/material/snack-bar'
 import { NetCoreService } from '../../services/netcore.service'
 import { NsCardContent } from '../../models/card-content.model'
@@ -70,11 +70,12 @@ const flattenItems = (items: any[], key: string | number) => {
 }
 const SNACKBAR_DURATION = 3000
 @Component({
-  selector: 'ws-app-app-toc-home',
-  templateUrl: './app-toc-home.component.html',
-  styleUrls: ['./app-toc-home.component.scss'],
-  // tslint:disable-next-line: use-component-view-encapsulation
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ws-app-app-toc-home',
+    templateUrl: './app-toc-home.component.html',
+    styleUrls: ['./app-toc-home.component.scss'],
+    // tslint:disable-next-line: use-component-view-encapsulation
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 
 export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
@@ -222,6 +223,7 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
   timerUnsubscribe: any
   timer: any
   isReleventBtnHovered = false
+  isRelevent = false
   SAKSHAMAI_ICON_NORMAL = '/assets/images/sakshamAI/ai-icon.svg'
   SAKSHAMAI_ICON_LOADER = '/assets/images/sakshamAI/saksham_ai_loader.gif'
   recommendedCoursesId = ''
@@ -254,6 +256,7 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
     { name: "سنڌي / सिंधी (Sindhi)", value: "Sindhi" },
     { name: "اُردُو (Urdu)", value: "Urdu" }
   ]
+  certData = false
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
     const windowScroll = window.pageYOffset

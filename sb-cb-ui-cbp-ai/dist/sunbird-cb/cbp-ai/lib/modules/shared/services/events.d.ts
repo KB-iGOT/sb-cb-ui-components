@@ -1,0 +1,200 @@
+export declare namespace WsEvents {
+    interface IWsEventsFromWidget {
+        type: 'widget';
+        widgetType: string;
+        widgetSubType: string;
+    }
+    interface IWsEventsFromPage {
+        type: 'page';
+        pageUrl: string;
+        pageType: string;
+    }
+    enum WsEventType {
+        Action = "Action",
+        Telemetry = "Telemetry",
+        PageNavigation = "PageNavigation",
+        AccessRestrictedContentAccessed = "AccessRestrictedContentAccessed",
+        PageSlow = "PageSlow",
+        ErrorOccurred = "ErrorOccurred",
+        WidgetResolveError = "WidgetResolveError"
+    }
+    enum WsEventLogLevel {
+        Warn = "Warn",
+        Error = "Error",
+        Info = "Info",
+        Log = "Log",
+        Trace = "Trace"
+    }
+    enum WsAuditTypes {
+        Created = "Created",
+        Updated = "Updated",
+        Deleted = "Deleted"
+    }
+    enum WsTimeSpentType {
+        Page = "Page",
+        Player = "Player"
+    }
+    enum WsTimeSpentMode {
+        Play = "Play",
+        View = "View"
+    }
+    enum externalTelemetrypdata {
+        RBCP = "rbcp-web-ui"
+    }
+    interface IWsEvents<T> {
+        eventType: WsEventType;
+        eventLogLevel: WsEventLogLevel;
+        from: IWsEventsFromWidget | IWsEventsFromPage | string;
+        to: string;
+        data: T;
+        passThroughData?: any;
+        pageContext?: any;
+    }
+    enum EnumTelemetrySubType {
+        Init = "Init",
+        Interact = "Interact",
+        Loaded = "Loaded",
+        Unloaded = "Unloaded",
+        StateChange = "StateChange",
+        HeartBeat = "HeartBeat",
+        Search = "Search",
+        Feedback = "Feedback",
+        Impression = "Impression",
+        Chatbot = "Chatbot",
+        GetStarted = "Get Started",
+        cardContent = "card-cardContent"
+    }
+    interface ITelemetryPageContext {
+        pageId?: string;
+        module?: string;
+        pageIdExt?: string;
+    }
+    interface ITelemetryEdata {
+        type: string;
+        subType?: string;
+        id?: string;
+        pageid?: string;
+    }
+    interface ITelemetryTabData {
+        label: string;
+        index: number;
+    }
+    interface IWsEventTelemetry {
+        eventSubType: EnumTelemetrySubType;
+        pageContext?: ITelemetryPageContext;
+    }
+    enum EnumTelemetryPdfActivity {
+        PAGE_CHANGED = "PAGE_CHANGED",
+        FULLSCREEN_ACTIVATED = "FULLSCREEN_ACTIVATED",
+        FULLSCREEN_DEACTIVATED = "FULLSCREEN_DEACTIVATED",
+        ZOOM_CHANGE = "ZOOM_CHANGE",
+        NONE = "NONE"
+    }
+    interface IWsEventTelemetryPdfData extends IWsEventTelemetry {
+        activityType: EnumTelemetryPdfActivity;
+        currentPage: number;
+        totalPage: number;
+        activityStartedAt: Date | null;
+        object: any;
+    }
+    interface IWsEventTelemetrySurveyData extends IWsEventTelemetry {
+        object: any;
+    }
+    type WsEventTelemetryPDF = IWsEvents<IWsEventTelemetryPdfData>;
+    type WsEventTelemetrySurvey = IWsEvents<IWsEventTelemetrySurveyData>;
+    interface IWsEventTelemetryInteract extends IWsEventTelemetry {
+        edata: ITelemetryEdata;
+        object: any;
+        pageContext?: ITelemetryPageContext;
+    }
+    interface IWsEventTelemetryFeedback extends IWsEventTelemetry {
+        edata: ITelemetryEdata;
+        object: any;
+        pageContext?: ITelemetryPageContext;
+    }
+    interface IWsEventTelemetryImpression extends IWsEventTelemetry {
+        edata?: ITelemetryEdata;
+        object?: any;
+        pageContext?: ITelemetryPageContext;
+    }
+    interface IWsEventTelemetrySearch extends IWsEventTelemetry {
+        type: string;
+        subType?: string;
+        query?: string;
+        filters?: string;
+        size?: number;
+        locale?: any;
+    }
+    interface IWsEventTelemetryHeartBeat extends IWsEventTelemetry {
+        type: string;
+        id: string;
+    }
+    type WsEventTelemetryInteract = IWsEvents<IWsEventTelemetryInteract>;
+    type WsEventTelemetryFeedback = IWsEvents<IWsEventTelemetryFeedback>;
+    type WsEventTelemetryImpression = IWsEvents<IWsEventTelemetryImpression>;
+    type WsEventTelemetrySearch = IWsEvents<IWsEventTelemetrySearch>;
+    type WsEventTelemetryHeartBeat = IWsEvents<IWsEventTelemetryHeartBeat>;
+    enum EnumTelemetryMediaActivity {
+        PLAYED = "PLAYED",
+        PAUSED = "PAUSED",
+        SEEKED = "SEEKED",
+        ENDED = "ENDED",
+        VOLUME_CHANGE = "VOLUME_CHANGE",
+        MUTE = "MUTE",
+        UNMUTE = "UNMUTE",
+        PLAYBACK_SPEED_CHANGE = "PLAYBACK_SPEED_CHANGE",
+        FULLSCREEN_ACTIVATED = "FULLSCREEN_ACTIVATED",
+        FULLSCREEN_DEACTIVATED = "FULLSCREEN_DEACTIVATED",
+        PICTURE_IN_PICTURE_ACTIVATED = "PICTURE_IN_PICTURE_ACTIVATED",
+        PICTURE_IN_PICTURE_DEACTIVATED = "PICTURE_IN_PICTURE_DEACTIVATED",
+        NONE = "NONE"
+    }
+    enum EnumTelemetryMediaState {
+        PLAYING = "PLAYING",
+        PAUSED = "PAUSED",
+        ENDED = "ENDED",
+        BUFFERING = "BUFFERING",
+        NOT_STARTED = "NOT_STARTED"
+    }
+    interface IWsEventTelemetryMediaData extends IWsEventTelemetry {
+        currentState: EnumTelemetryMediaState;
+        activityType: EnumTelemetryMediaActivity;
+        currentTime: number | null;
+        totalTime: number | null;
+        maxedSeekedTime: number;
+        activityStartedAt?: Date | null;
+    }
+    type WsEventTelemetryMedia = IWsEvents<IWsEventTelemetryMediaData>;
+    enum EnumTelemetrymodules {
+        CONTENT = "content",
+        FEEDBACK = "feedback",
+        COURSE = "course",
+        PROGRAM = "program",
+        EXPLORE = "explore",
+        LEARN = "learn",
+        HOME = "home",
+        DASHBOARD = "dashboard",
+        SEARCH = "search",
+        DISCUSS = "Discuss",
+        COMPETENCY = "competency",
+        EVENTS = "events",
+        CAREER = "career",
+        PROFILE = "profile",
+        NETWORK = "network",
+        SUPPORT = "support"
+    }
+    enum EnumInteractTypes {
+        CLICK = "click"
+    }
+    enum EnumInteractSubTypes {
+        COURSE_TAB = "course-tab",
+        CAREER_TAB = "career-tab",
+        NETWORK_TAB = "network-tab",
+        COMPETENCY_TAB = "competency-tab",
+        PROFILE_EDIT_TAB = "profile-edit-tab",
+        DISCUSS_TAB = "discuss-tab",
+        EVENTS_TAB = "events-tab",
+        SIDE_MENU = "side-menu"
+    }
+}
+//# sourceMappingURL=events.d.ts.map

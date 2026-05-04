@@ -3,34 +3,32 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/input';
-import { MatLegacyCheckboxModule } from '@angular/material/checkbox';
-import { MatLegacyInputModule } from '@angular/material/input';
-import { MatLegacyRadioModule } from '@angular/material/radio';
-import { MatLegacySelectModule } from '@angular/material/select';
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/form-field'
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule as MatFormFieldModule } from '@angular/material/form-field'
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'ws-app-survey-form-question',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatInputModule,
-    MatLegacyRadioModule,
-    MatLegacySelectModule,
-    MatLegacyCheckboxModule,
-    MatLegacyInputModule,
-    MatDatepickerModule,
-    MatIconModule,
-    MatLegacySelectModule,
-    ReactiveFormsModule, 
-    FormsModule,
-    MatFormFieldModule,
-    TranslateModule
-  ],
-  templateUrl: './survey-form-question.component.html',
-  styleUrls: ['./survey-form-question.component.scss']
+    selector: 'ws-app-survey-form-question',
+    imports: [
+        CommonModule,
+        MatInputModule,
+        MatRadioModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatInputModule,
+        MatDatepickerModule,
+        MatIconModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        TranslateModule
+    ],
+    templateUrl: './survey-form-question.component.html',
+    styleUrls: ['./survey-form-question.component.scss']
 })
 export class SurveyFormQuestionComponent implements OnInit {
   @Input() questionForm!: FormGroup;

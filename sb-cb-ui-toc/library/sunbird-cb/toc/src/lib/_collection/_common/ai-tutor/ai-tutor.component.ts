@@ -4,16 +4,16 @@ import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@
 import { RootService } from './../../../services/root.service';
 import { WebSocketService } from './socket.service';
 import { Subscription } from 'rxjs';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
-// import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatDialog } from '@angular/material/dialog'
 import cloneDeep from 'lodash/cloneDeep';
 import { MatSnackBar as MatSnackbarNew } from '@angular/material/snack-bar'
 import { NonReleventFeedbackDialogComponent } from '../../../components/non-relevent-feedback-dialog/non-relevent-feedback-dialog.component';
 
 @Component({
-  selector: 'ws-widget-ai-tutor',
-  templateUrl: './ai-tutor.component.html',
-  styleUrls: ['./ai-tutor.component.scss']
+    selector: 'ws-widget-ai-tutor',
+    templateUrl: './ai-tutor.component.html',
+    styleUrls: ['./ai-tutor.component.scss'],
+    standalone: false
 })
 export class AiTutorComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
   @Input() from = ''

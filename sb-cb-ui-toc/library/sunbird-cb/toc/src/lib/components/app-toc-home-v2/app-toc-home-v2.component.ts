@@ -43,8 +43,8 @@ import { ResetRatingsService } from '../../services/reset-ratings.service'
 import { AppTocDialogIntroVideoComponent } from '../app-toc-dialog-intro-video/app-toc-dialog-intro-video.component'
 import { ContentRatingV2DialogComponent } from '../../_collection/_common/content-rating-v2-dialog/content-rating-v2-dialog.component'
 import { TimerService } from '../../services/timer.service'
-import { MatLegacyDialog as MatDialog } from '@angular/material/dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatDialog as MatDialog } from '@angular/material/dialog'
+import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { MatSnackBar as MatSnackbarNew } from '@angular/material/snack-bar'
 import { NetCoreService } from '../../services/netcore.service'
 import { EnrollLanguageDialogueComponent } from '../enroll-language-dialogue/enroll-language-dialogue.component'
@@ -73,11 +73,12 @@ const flattenItems = (items: any[], key: string | number) => {
 }
 const SNACKBAR_DURATION = 3000
 @Component({
-  selector: 'ws-app-app-toc-home-v2',
-  templateUrl: './app-toc-home-v2.component.html',
-  styleUrls: ['./app-toc-home-v2.component.scss'],
-  // tslint:disable-next-line: use-component-view-encapsulation
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ws-app-app-toc-home-v2',
+    templateUrl: './app-toc-home-v2.component.html',
+    styleUrls: ['./app-toc-home-v2.component.scss'],
+    // tslint:disable-next-line: use-component-view-encapsulation
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   queryParamsData: { [key: string]: string } = {}; // Initialize queryParamsData

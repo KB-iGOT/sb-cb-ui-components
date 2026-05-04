@@ -2,9 +2,10 @@ import { Component, OnInit, Input } from '@angular/core'
 import { NsContent } from '../../../_services/widget-content.model'
 
 @Component({
-  selector: 'ws-widget-toc-kpi-values',
-  templateUrl: './toc-kpi-values.component.html',
-  styleUrls: ['./toc-kpi-values.component.scss'],
+    selector: 'ws-widget-toc-kpi-values',
+    templateUrl: './toc-kpi-values.component.html',
+    styleUrls: ['./toc-kpi-values.component.scss'],
+    standalone: false
 })
 
 export class TocKpiValuesComponent implements OnInit {

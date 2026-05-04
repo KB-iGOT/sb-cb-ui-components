@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { ConfigurationsService, EventService, MultilingualTranslationsService, WidgetContentService, WsEvents } from '@sunbird-cb/utils-v2'
 import { LoaderService } from '../../services/loader.service'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { MatDialog } from '@angular/material/dialog'
 import { CertificateService } from '../../services/certificate.service'
 import { NsDiscussionV2 } from '@sunbird-cb/discussion-v2'
@@ -13,9 +13,10 @@ import { NetCoreService } from '../../services/netcore.service'
 import { ConsentDialogComponent } from './consent-dialog.component'
 
 @Component({
-  selector: 'ws-app-app-toc-cios-home',
-  templateUrl: './app-toc-cios-home.component.html',
-  styleUrls: ['./app-toc-cios-home.component.scss'],
+    selector: 'ws-app-app-toc-cios-home',
+    templateUrl: './app-toc-cios-home.component.html',
+    styleUrls: ['./app-toc-cios-home.component.scss'],
+    standalone: false
 })
 export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   commentId?: string = ''

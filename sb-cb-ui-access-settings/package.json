@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-access-settings",
-  "version": "0.0.2-ang-17-20",
+  "version": "0.0.3-ang-17-20",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -52,8 +52,8 @@
     "@angular/platform-browser-dynamic": "^20.3.16",
     "@angular/router": "^20.3.16",
     "@sunbird-cb/design-system": "0.0.3",
-    "@sunbird-cb/resolver-v2": "0.0.7-ang-13-16",
-    "@sunbird-cb/utils-v2": "0.0.27-ang-13-16",
+    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
+    "@sunbird-cb/utils-v2": "0.0.1-ang-17-20",
     "keycloak-angular": "^6.1.0",
     "moment": "^2.29.1",
     "rxjs": "^6.6.6",

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { FormsModule } from '@angular/forms'
@@ -39,7 +39,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { MatRadioModule } from '@angular/material/radio'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatTabsModule } from '@angular/material/tabs'
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/tooltip'
+import { MatTooltipModule as MatTooltipModule } from '@angular/material/tooltip'
 import { AppTocTeachersNotesComponent } from './app-toc-teachers-notes/app-toc-teachers-notes.component'
 import { AppTocReferenceNotesComponent } from './app-toc-reference-notes/app-toc-reference-notes.component'
 import { AiTutorConfirmPopupComponent } from './ai-tutor-confirm-popup/ai-tutor-confirm-popup.component'
@@ -51,6 +51,7 @@ import { ContentStripWithTabsLibModule, ContentStripWithTabsPillsModule, DialogC
 import { AssignmentViewerV2Component } from './app-toc-assignment-viewerV2/app-toc-assignment-viewerV2.component'
 import { SamuhikCharchaContentComponent } from './samuhik-charcha-content/samuhik-charcha-content/samuhik-charcha-content.component'
 import { AiTutorComponent } from '../ai-tutor/ai-tutor.component'
+
 
 @NgModule({
   declarations: [
@@ -123,6 +124,7 @@ import { AiTutorComponent } from '../ai-tutor/ai-tutor.component'
     AppTocTeachersNotesComponent,
     ReviewsContentComponent,
     AppTocBatchAssignmentsComponent
-  ]
+  ],
+  schemas:[NO_ERRORS_SCHEMA]
 })
 export class ContentTocModule { }

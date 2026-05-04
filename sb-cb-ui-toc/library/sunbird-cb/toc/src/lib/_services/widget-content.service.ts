@@ -9,8 +9,6 @@ import _ from 'lodash'
 import {  viewerRouteGenerator } from './viewer-route-util'
 import moment from 'moment'
 import { ActivatedRoute } from '@angular/router'
-import { NSSearch } from '@sunbird-cb/utils-v2/lib/services/widget-search.model'
-import { NsContentStripMultiple } from '@sunbird-cb/utils-v2/lib/services/content-strip-multiple.model'
 // tslint:enable
 
 // TODO: move this in some common place
@@ -361,15 +359,15 @@ export class WidgetContentService {
   fetchWebModuleContent(url: string): Observable<any> {
     return this.http.get(`${API_END_POINTS.FETCH_WEB_MODULE_FILES}?url=${encodeURIComponent(url)}`)
   }
-  search(req: NSSearch.ISearchRequest): Observable<NSSearch.ISearchApiResult> {
+  search(req: any): Observable<any> {
     req.query = req.query || ''
-    return this.http.post<NSSearch.ISearchApiResult>(API_END_POINTS.CONTENT_SEARCH_V5, {
+    return this.http.post<any>(API_END_POINTS.CONTENT_SEARCH_V5, {
       request: req,
     })
   }
   searchRegionRecommendation(
-    req: NSSearch.ISearchOrgRegionRecommendationRequest,
-  ): Observable<NsContentStripMultiple.IContentStripResponseApi> {
+    req: any,
+  ): Observable<any> {
     req.query = req.query || ''
     req.preLabelValue =
       (req.preLabelValue || '') +
@@ -378,12 +376,12 @@ export class WidgetContentService {
       ...req.filters,
       labels: [req.preLabelValue || ''],
     }
-    return this.http.post<NsContentStripMultiple.IContentStripResponseApi>(
+    return this.http.post<any>(
       API_END_POINTS.CONTENT_SEARCH_REGION_RECOMMENDATION,
       { request: req },
     )
   }
-  searchV6(req: NSSearch.ISearchV6Request): Observable<any> {
+  searchV6(req: any): Observable<any> {
     const apiPath = _.get(req, 'api.path')
     req.query = req.query || ''
     if (apiPath) {

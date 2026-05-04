@@ -1,13 +1,13 @@
-import { NgModule } from '@angular/core'
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { UserAutocompleteComponent } from './user-autocomplete.component'
 import { UserImageModule } from '../user-image/user-image.module'
-import { MatLegacyAutocompleteModule as MatAutocompleteModule } from '@angular/material/autocomplete'
-import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/chips'
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/form-field'
+import { MatAutocompleteModule as MatAutocompleteModule } from '@angular/material/autocomplete'
+import { MatChipsModule as MatChipsModule } from '@angular/material/chips'
+import { MatFormFieldModule as MatFormFieldModule } from '@angular/material/form-field'
 import { MatIconModule } from '@angular/material/icon'
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/input'
+import { MatInputModule as MatInputModule } from '@angular/material/input'
 
 @NgModule({
   declarations: [UserAutocompleteComponent],
@@ -23,5 +23,6 @@ import { MatLegacyInputModule as MatInputModule } from '@angular/material/input'
     UserImageModule,
   ],
   exports: [UserAutocompleteComponent],
+  schemas: [NO_ERRORS_SCHEMA]
 })
 export class UserAutocompleteModule { }

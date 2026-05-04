@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef } from '@angular/material/dialog'
+import { MatDialogRef as MatDialogRef } from '@angular/material/dialog'
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms'
 
 /**
@@ -7,9 +7,10 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
  * Displays a dialog for collecting feedback when content is marked as not relevant
  */
 @Component({
-  selector: 'ws-non-relevent-feedback-dialog',
-  templateUrl: './non-relevent-feedback-dialog.component.html',
-  styleUrls: ['./non-relevent-feedback-dialog.component.scss'],
+    selector: 'ws-non-relevent-feedback-dialog',
+    templateUrl: './non-relevent-feedback-dialog.component.html',
+    styleUrls: ['./non-relevent-feedback-dialog.component.scss'],
+    standalone: false
 })
 export class NonReleventFeedbackDialogComponent implements OnInit {
   feedbackForm: UntypedFormGroup

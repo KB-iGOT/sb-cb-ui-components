@@ -3,9 +3,10 @@ import { NsContent } from '../../../../_services/widget-content.model'
 import moment from 'moment'
 
 @Component({
-  selector: 'ws-widget-app-app-toc-sessions-new',
-  templateUrl: './app-toc-sessions-new.component.html',
-  styleUrls: ['./app-toc-sessions-new.component.scss'],
+    selector: 'ws-widget-app-app-toc-sessions-new',
+    templateUrl: './app-toc-sessions-new.component.html',
+    styleUrls: ['./app-toc-sessions-new.component.scss'],
+    standalone: false
 })
 export class AppTocSessionsNewComponent implements OnInit {
   @Input() batchData: any

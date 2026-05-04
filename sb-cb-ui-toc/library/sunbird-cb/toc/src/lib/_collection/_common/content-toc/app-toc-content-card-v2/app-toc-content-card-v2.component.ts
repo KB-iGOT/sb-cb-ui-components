@@ -4,7 +4,7 @@ import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { NsAppToc } from '../../../../models/app-toc.model'
 import { EventService, WsEvents, ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
-import { MatLegacyDialog as MatDialog } from '@angular/material/dialog'
+import { MatDialog as MatDialog } from '@angular/material/dialog'
 import { animate, style, transition, trigger } from '@angular/animations'
 /* tslint:disable*/
 import _ from 'lodash'
@@ -14,23 +14,24 @@ import { AppTocService } from '../../../../services/app-toc.service'
 import { Subscription } from 'rxjs'
 import { ContentLanguageService } from '@sunbird-cb/consumption'
 import { ResourceDownloadHelperService } from '../../../../services/resource-download-helper.service'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 
 @Component({
-  selector: 'ws-widget-app-toc-content-card-v2',
-  templateUrl: './app-toc-content-card-v2.component.html',
-  styleUrls: ['./app-toc-content-card-v2.component.scss'],
-  animations: [
-    trigger('panelInOut', [
-      transition('void => *', [
-        style({ transform: 'translateY(-10%)', opacity: '0' }),
-        animate(250)
-      ]),
-      transition('* => void', [
-        animate(200, style({ transform: 'translateY(-10%)', opacity: '0' }))
-      ])
-    ])
-  ]
+    selector: 'ws-widget-app-toc-content-card-v2',
+    templateUrl: './app-toc-content-card-v2.component.html',
+    styleUrls: ['./app-toc-content-card-v2.component.scss'],
+    animations: [
+        trigger('panelInOut', [
+            transition('void => *', [
+                style({ transform: 'translateY(-10%)', opacity: '0' }),
+                animate(250)
+            ]),
+            transition('* => void', [
+                animate(200, style({ transform: 'translateY(-10%)', opacity: '0' }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   @Input() content: NsContent.IContent | null = null
@@ -52,6 +53,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   hasContentStructure = false
   downloadCertificateLoading = false
   enumContentTypes = NsContent.EDisplayContentTypes
+  color = 'blue'
   contentStructure: NsAppToc.ITocStructure = {
     assessment: 0,
     finalTest: 0,

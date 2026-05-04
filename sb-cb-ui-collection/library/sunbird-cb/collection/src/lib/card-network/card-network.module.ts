@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { NgModule } from '@angular/core'
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
 import { MatChipsModule } from '@angular/material/chips'
@@ -39,7 +39,8 @@ import { FormsModule } from '@angular/forms'
         MatGridListModule,
         FormsModule,
     ],
-    providers: [CardNetWorkService]
+    providers: [CardNetWorkService],
+    schemas: [NO_ERRORS_SCHEMA]
 })
 export class CardNetworkModule {
 

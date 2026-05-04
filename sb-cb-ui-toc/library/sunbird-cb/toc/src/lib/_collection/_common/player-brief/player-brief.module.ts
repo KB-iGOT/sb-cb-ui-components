@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { PlayerBriefComponent } from './player-brief.component'
 import { PipeCountTransformModule, PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
@@ -8,9 +8,9 @@ import { UserImageModule } from '../user-image/user-image.module'
 // import { BtnMailUserModule } from '../../btn-mail-user/btn-mail-user.module' // Module not available
 import { MarkAsCompleteModule } from '../mark-as-complete/mark-as-complete.module'
 import { TranslateModule } from '@ngx-translate/core'
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/button'
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/card'
-import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/chips'
+import { MatButtonModule as MatButtonModule } from '@angular/material/button'
+import { MatCardModule as MatCardModule } from '@angular/material/card'
+import { MatChipsModule as MatChipsModule } from '@angular/material/chips'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatIconModule } from '@angular/material/icon'
 
@@ -33,5 +33,6 @@ import { MatIconModule } from '@angular/material/icon'
     TranslateModule.forChild(),
   ],
   exports: [PlayerBriefComponent],
+  schemas: [NO_ERRORS_SCHEMA]
 })
 export class PlayerBriefModule { }

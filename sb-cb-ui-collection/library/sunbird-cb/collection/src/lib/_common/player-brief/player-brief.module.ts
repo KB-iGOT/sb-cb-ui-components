@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { PlayerBriefComponent } from './player-brief.component'
 import { PipeCountTransformModule, PipeDurationTransformModule } from '@sunbird-cb/utils-v2'
@@ -31,5 +31,6 @@ import { MatIconModule } from '@angular/material/icon'
     MarkAsCompleteModule,
   ],
   exports: [PlayerBriefComponent],
+  schemas: [NO_ERRORS_SCHEMA]
 })
 export class PlayerBriefModule { }

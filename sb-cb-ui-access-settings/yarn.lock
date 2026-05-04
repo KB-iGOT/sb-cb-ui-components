@@ -2195,17 +2195,17 @@
   resolved "https://registry.yarnpkg.com/@sunbird-cb/design-system/-/design-system-0.0.3.tgz#b23c7f244281a8bad980105424e2c118fb68248c"
   integrity sha512-lgswwwkgbhrcf9qHkbAP8l6y3AYLonU+bKt7HLGSVDMb+q0kTzbzgEOeoiGywOcorThTlV7TQ9g7UO0+Np7A1w==
 
-"@sunbird-cb/resolver-v2@0.0.7-ang-13-16":
-  version "0.0.7-ang-13-16"
-  resolved "https://registry.yarnpkg.com/@sunbird-cb/resolver-v2/-/resolver-v2-0.0.7-ang-13-16.tgz#960f518e6d0f7b96d9bba61f3a530e5036160894"
-  integrity sha512-JHW+spTp3HCu2quZT8FelwM1VGU4OZycB+Skw5fREDdKC6S683UWmXMe93BmvzCOzyKKcoClFKilImTY9pAElw==
+"@sunbird-cb/resolver-v2@0.0.1-ang-17-20":
+  version "0.0.1-ang-17-20"
+  resolved "https://registry.yarnpkg.com/@sunbird-cb/resolver-v2/-/resolver-v2-0.0.1-ang-17-20.tgz#5d01c2959bc3d88755ea2f02791440be16dc0fd7"
+  integrity sha512-jTzMQ/nm6ErwpWHMBjjCrHdb+H76yD6m/Sh6obMSgNxtPQLF80Az40Y8R0o24cDGy5uAsDQ6tSfVNT7ZirdAJg==
   dependencies:
     tslib "^2.0.0"
 
-"@sunbird-cb/utils-v2@0.0.27-ang-13-16":
-  version "0.0.27-ang-13-16"
-  resolved "https://registry.yarnpkg.com/@sunbird-cb/utils-v2/-/utils-v2-0.0.27-ang-13-16.tgz#557af60dbb3439b559fab2777330db9e5acdeb26"
-  integrity sha512-XXhuQi/KRjQgsNZ1GNXp8ZlRhijRvVdbiQJyMVkN8IxGOnSaUL2vyfi8oGnfzhBMo5MosdC5/nn6cM9GexgvuA==
+"@sunbird-cb/utils-v2@0.0.1-ang-17-20":
+  version "0.0.1-ang-17-20"
+  resolved "https://registry.yarnpkg.com/@sunbird-cb/utils-v2/-/utils-v2-0.0.1-ang-17-20.tgz#8d045922f9174ca51f52e61a29424f16438f1d3e"
+  integrity sha512-57vS1Vo1beMuHdcxwpsug61YVT7NF2crp50Zgl05CfGONPn32qLhkxkqk1/eMKcQaQ8vkiZkM9BgElPekGvxrQ==
   dependencies:
     tslib "^2.0.0"
 

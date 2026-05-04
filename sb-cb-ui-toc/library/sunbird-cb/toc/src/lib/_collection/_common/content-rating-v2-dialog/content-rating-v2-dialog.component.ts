@@ -6,13 +6,14 @@ import { switchMap, takeUntil } from 'rxjs/operators'
 import { Subject } from 'rxjs'
 import { NsAppRating } from '../../../models/rating.model'
 import { Router } from '@angular/router'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 @Component({
-  selector: 'ws-widget-content-rating-v2-dialog',
-  templateUrl: './content-rating-v2-dialog.component.html',
-  styleUrls: ['./content-rating-v2-dialog.component.scss'],
+    selector: 'ws-widget-content-rating-v2-dialog',
+    templateUrl: './content-rating-v2-dialog.component.html',
+    styleUrls: ['./content-rating-v2-dialog.component.scss'],
+    standalone: false
 })
 
 export class ContentRatingV2DialogComponent implements OnInit {
@@ -21,6 +22,8 @@ export class ContentRatingV2DialogComponent implements OnInit {
   @Input() rateFromCompletionDialog: any
   @Input()  isEditMode = false
   @Input()  collectionId = ''
+  isDisabled = false
+  color: 'primary' | 'accent' | 'warn' = 'primary';
   content: NsContent.IContent | null = null
   userRating = 0
   feedbackForm: UntypedFormGroup

@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core'
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { AppTocService } from '../../services/app-toc.service'
 import * as _ from 'lodash'
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
@@ -12,9 +12,10 @@ const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a
 const MOBILE_PATTERN = /^[0]?[6789]\d{9}$/
 
 @Component({
-  selector: 'ws-app-enroll-questionnaire',
-  templateUrl: './enroll-questionnaire.component.html',
-  styleUrls: ['./enroll-questionnaire.component.scss'],
+    selector: 'ws-app-enroll-questionnaire',
+    templateUrl: './enroll-questionnaire.component.html',
+    styleUrls: ['./enroll-questionnaire.component.scss'],
+    standalone: false
 })
 
 export class EnrollQuestionnaireComponent implements OnInit {

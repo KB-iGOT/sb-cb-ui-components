@@ -1,0 +1,80 @@
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import { SharedService } from '../../modules/shared/services/shared.service';
+import * as i0 from "@angular/core";
+export declare class ApprovalRequestsComponent {
+    dialog: MatDialog;
+    sharedService: SharedService;
+    snackBar: MatSnackBar;
+    private fb;
+    router: Router;
+    paginator: MatPaginator;
+    dataSource: MatTableDataSource<any, import("@angular/material/table").MatTableDataSourcePaginator>;
+    selectedMinistryType: string;
+    ministryData: any;
+    ministryFullData: any;
+    roleMappingForm: FormGroup;
+    disableBtn: boolean;
+    searchText: string;
+    displayedColumns: string[];
+    cbpFinalObj: any;
+    departmentData: any;
+    approvalRequests: any[];
+    loading: boolean;
+    filteredMinistryData: any;
+    searchControl: FormControl;
+    panelOpen: boolean;
+    departmentPanelOpen: boolean;
+    filteredList: any[];
+    filteredDepartmentList: any[];
+    loginUserOrgIds: any[];
+    originalMinistryData: any[];
+    cbpPlanFinalObj: any;
+    filterForm: FormGroup;
+    status: {
+        code: string;
+        label: string;
+    }[];
+    time: {
+        code: string;
+        label: string;
+    }[];
+    filteredStatus: {
+        code: string;
+        label: string;
+    }[];
+    filteredTime: {
+        code: string;
+        label: string;
+    }[];
+    constructor(dialog: MatDialog, sharedService: SharedService, snackBar: MatSnackBar, fb: FormBuilder, router: Router);
+    ngOnInit(): void;
+    ngAfterViewInit(): void;
+    getApprovalRequests(): void;
+    filteredapprovalRequests(): any[];
+    deleteDocument(docToDelete: any): void;
+    applyFilters(): void;
+    onMinistryTypeChange(event: any): void;
+    onMinistryChange(event: any): void;
+    filterMinistryData(searchText: any): void;
+    getMinistryData(): void;
+    routeToMain(): void;
+    viewSummary(doc: any): void;
+    viewRequest(request: any): void;
+    revokeApprovalRequest(request: any): void;
+    onOpened(opened: boolean): void;
+    onOpenedDepartment(opened: boolean): void;
+    filterData(event: any): void;
+    filterDepartmentData(event: any): void;
+    getUserProfileData(): void;
+    routeToInitial(): void;
+    filterList(value: string, type: string): void;
+    clearSearch(): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ApprovalRequestsComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<ApprovalRequestsComponent, "app-approval-requests", never, {}, {}, never, never, false, never>;
+}
+//# sourceMappingURL=approval-requests.component.d.ts.map

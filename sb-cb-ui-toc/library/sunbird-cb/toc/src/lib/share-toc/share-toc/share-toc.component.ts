@@ -7,14 +7,15 @@ import { TranslateService } from '@ngx-translate/core'
 import { AppTocService } from '../../services/app-toc.service'
 
 
-import { MatLegacyAutocomplete as MatAutocomplete, MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
-import { MatLegacyChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatAutocomplete as MatAutocomplete, MatAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
+import { MatChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
+import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { UserAutocompleteService } from '../../_collection/_common/user-autocomplete/user-autocomplete.service'
 @Component({
-  selector: 'ws-app-share-toc',
-  templateUrl: './share-toc.component.html',
-  styleUrls: ['./share-toc.component.scss'],
+    selector: 'ws-app-share-toc',
+    templateUrl: './share-toc.component.html',
+    styleUrls: ['./share-toc.component.scss'],
+    standalone: false
 })
 export class ShareTocComponent implements OnInit {
    shareForm: UntypedFormGroup | undefined

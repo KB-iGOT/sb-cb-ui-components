@@ -25,14 +25,14 @@ export const typeMap = {
 }
 
 @Component({
-    selector: 'ws-widget-btn-feature',
-    templateUrl: './btn-feature.component.html',
-    styleUrls: ['./btn-feature.component.scss'],
-    standalone: false
+  selector: 'ws-widget-btn-feature',
+  templateUrl: './btn-feature.component.html',
+  styleUrls: ['./btn-feature.component.scss'],
+  standalone: false
 })
 export class BtnFeatureComponent extends WidgetBaseComponent
   implements OnInit, OnDestroy, NsWidgetResolver.IWidgetData<NsPage.INavLink> {
-  @Input() widgetData!: NsPage.INavLink
+  @Input() widgetData!: any
   @Input() showFixedLength = false
   @Input()
   @HostBinding('id')

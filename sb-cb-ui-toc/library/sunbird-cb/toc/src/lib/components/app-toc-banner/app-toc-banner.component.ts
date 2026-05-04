@@ -32,20 +32,21 @@ import { TranslateService } from '@ngx-translate/core'
 import { ENTER } from '@angular/cdk/keycodes'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 import { TimerService } from '../../services/timer.service'
-import { MatLegacyAutocomplete as MatAutocomplete, MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
-import { MatLegacyChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
-import { MatLegacyDialog as MatDialog } from '@angular/material/dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/snack-bar'
+import { MatAutocomplete as MatAutocomplete, MatAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
+import { MatChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
+import { MatDialog as MatDialog } from '@angular/material/dialog'
+import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { EnrollProfileFormComponent } from '../enroll-profile-form/enroll-profile-form.component'
 
 dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 
 @Component({
-  selector: 'ws-app-toc-banner',
-  templateUrl: './app-toc-banner.component.html',
-  styleUrls: ['./app-toc-banner.component.scss'],
-  providers: [AccessControlService, DatePipe],
+    selector: 'ws-app-toc-banner',
+    templateUrl: './app-toc-banner.component.html',
+    styleUrls: ['./app-toc-banner.component.scss'],
+    providers: [AccessControlService, DatePipe],
+    standalone: false
 })
 
 export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {

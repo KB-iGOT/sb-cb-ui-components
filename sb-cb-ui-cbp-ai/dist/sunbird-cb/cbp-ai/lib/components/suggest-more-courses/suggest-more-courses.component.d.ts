@@ -1,0 +1,48 @@
+import { OnInit } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { SharedService } from '../../modules/shared/services/shared.service';
+import * as i0 from "@angular/core";
+export declare class SuggestMoreCoursesComponent implements OnInit {
+    dialogRef: MatDialogRef<SuggestMoreCoursesComponent>;
+    data: any;
+    sharedService: SharedService;
+    snackBar: MatSnackBar;
+    searchText: string;
+    suggestedCourses: any;
+    originalData: any;
+    selectFilterCourses: any;
+    planData: any;
+    loading: boolean;
+    currentPage: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    constructor(dialogRef: MatDialogRef<SuggestMoreCoursesComponent>, data: any, sharedService: SharedService, snackBar: MatSnackBar);
+    ngOnInit(): void;
+    applyFilter(): void;
+    searchData(): void;
+    loadAllCourses(): void;
+    cancel(): void;
+    onPageChange(page: number): void;
+    performSearch(): void;
+    goToFirstPage(): void;
+    goToPreviousPage(): void;
+    goToNextPage(): void;
+    goToLastPage(): void;
+    clearSearch(): void;
+    get hasPreviousPage(): boolean;
+    get hasNextPage(): boolean;
+    get startItem(): number;
+    get endItem(): number;
+    filterData(searchText: string): any[];
+    flattenObjectToString(obj: any): string;
+    addCourses(): void;
+    selectAllCourses(event: any): void;
+    selectedFilterCourses(event: any, item: any): void;
+    checkIfCourseExists(item: any): boolean;
+    onImgError(event: Event): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<SuggestMoreCoursesComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<SuggestMoreCoursesComponent, "app-suggest-more-courses", never, {}, {}, never, never, false, never>;
+}
+//# sourceMappingURL=suggest-more-courses.component.d.ts.map

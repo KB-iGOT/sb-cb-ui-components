@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { NgModule } from '@angular/core'
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button'
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
@@ -44,5 +44,6 @@ import { PickerContentComponent } from './picker-content.component'
     MatRadioModule,
   ],
   exports: [PickerContentComponent],
+  schemas: [NO_ERRORS_SCHEMA]
 })
 export class PickerContentModule { }
