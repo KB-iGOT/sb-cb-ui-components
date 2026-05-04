@@ -1,6 +1,6 @@
-@import '@sunbird-cb/design-system/src/styles/ws-mixins';
-@import '@sunbird-cb/design-system/src/styles/ws-vars';
-@import '../../../../_variables';
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as *;
+@use '@sunbird-cb/design-system/src/styles/ws-vars' as vars;
+@use '../../../../_variables' as *;
 
 .mt60 {
     margin-top: 60px;

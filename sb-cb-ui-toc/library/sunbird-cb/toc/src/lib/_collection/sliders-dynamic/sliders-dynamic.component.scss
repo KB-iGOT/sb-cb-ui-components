@@ -1,3 +1,4 @@
+@use 'sass:math';
 $banner-min-height: 243px;
 $size-xs: 4px;
 $size-s: 8px;
@@ -82,8 +83,8 @@ $size-l: 24px;
 
     .dot.active {
       background-color: #f0f0f0;
-      height: $size-xs + ($size-xs / 4);
-      width: $size-xs + ($size-xs / 4);
+      height: $size-xs + math.div($size-xs, 4);
+      width: $size-xs + math.div($size-xs, 4);
     }
   }
 }
