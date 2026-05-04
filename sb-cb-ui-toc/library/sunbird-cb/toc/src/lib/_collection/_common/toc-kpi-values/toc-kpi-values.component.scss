@@ -1,6 +1,6 @@
-@import '@sunbird-cb/design-system/src/styles/ws-vars';
-@import '@sunbird-cb/design-system/src/styles/ws-mixins';
-@import '../../../_variables';
+@use '@sunbird-cb/design-system/src/styles/ws-vars' as vars;
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as *;
+@use '../../../_variables' as *;
 
 
 

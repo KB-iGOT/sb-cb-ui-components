@@ -1,5 +1,5 @@
-@import '../../_mixins';
-@import '../../_variables';
+@use '../../_mixins' as *;
+@use '../../_variables' as *;
 
 .analytics-loader {
   margin: 24px auto;

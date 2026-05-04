@@ -1,7 +1,8 @@
-@import '@sunbird-cb/design-system/src/styles/ws-vars';
-@import '@sunbird-cb/design-system/src/styles/ws-mixins';
+@use 'sass:math';
+@use '@sunbird-cb/design-system/src/styles/ws-vars' as vars;
+@use '@sunbird-cb/design-system/src/styles/ws-mixins' as *;
 
-@import '../../_variables';
+@use '../../_variables' as *;
 
 
 
@@ -317,7 +318,7 @@
 
     .overview-intro {
         $image-height: 135px;
-        width: (16 / 9) * $image-height;
+        width: math.div(16, 9) * $image-height;
         height: $image-height;
         border: 1px solid;
         box-sizing: border-box;
