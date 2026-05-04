@@ -22,6 +22,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   commentId?: string = ''
   skeletonLoader = true
   extContentReadData: any = {}
+  sourceEllipsis = false
+  content: any = null
   userExtCourseEnroll: any = {}
   downloadCertificateLoading = false
   forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('?editMode=true')

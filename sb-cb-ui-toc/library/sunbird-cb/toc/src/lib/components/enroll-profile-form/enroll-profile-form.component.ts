@@ -146,6 +146,11 @@ export class EnrollProfileFormComponent implements OnInit {
   @ViewChild('dropdown') dropdown!: ElementRef
   @ViewChild('languageTextBox') languageTextBox!: ElementRef
   @ViewChild('languageDropdown') languageDropdown!: ElementRef
+
+  get searchDesignation() {
+    return this.userDetailsForm?.get('searchDesignation')
+  }
+
   constructor(
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EnrollProfileFormComponent>,

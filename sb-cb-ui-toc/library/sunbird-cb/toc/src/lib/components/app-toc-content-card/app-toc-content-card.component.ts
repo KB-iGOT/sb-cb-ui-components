@@ -15,6 +15,7 @@ import { MatDialog as MatDialog } from '@angular/material/dialog'
     standalone: false
 })
 export class AppTocContentCardComponent implements OnInit, OnChanges {
+  isXSmall = false
   @Input() content: NsContent.IContent | null = null
   @Input() expandAll = false
   @Input() rootId!: string
