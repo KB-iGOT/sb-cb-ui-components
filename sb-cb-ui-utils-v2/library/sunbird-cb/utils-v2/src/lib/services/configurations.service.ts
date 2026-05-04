@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
 import { NSProfileDataV3 } from '../models/profile-v3.models'
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs'
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs'
+import { catchError, map, shareReplay, tap } from 'rxjs/operators'
 // import { environment } from '../../../../../../src/environments/environment'
 import { NsPage } from '../resolvers/page.model'
 import { NsAppsConfig, NsInstanceConfig, NsUser } from './configurations.model'
 import { IPortalUrls, IUserPreference } from './user-preference.model'
+import * as _ from 'lodash'
 
 // const instanceConfigPath: string | null = window.location.host
 // const locationHost: string | null = window.location.host
@@ -18,7 +21,7 @@ import { IPortalUrls, IUserPreference } from './user-preference.model'
 })
 export class ConfigurationsService {
   // update as the single source of truth
-  constructor() {
+  constructor(private http: HttpClient) {
     // @Inject('env') env: any
     // if (!env.production && Boolean(env.sitePath)) {
     //   locationHost = env.sitePath
@@ -122,6 +125,11 @@ export class ConfigurationsService {
   orgReadData: any
   spvOrgReadData: any
   menus: any
+  // Stores form read API response for reuse across calls
+  formReadData: any = null
+  // Holds the in-flight Observable so concurrent callers share one HTTP request
+  private formDataRequest$: Observable<any> | null = null
+
   public readonly noSpecialChar = new RegExp(/^[\p{L}\p{M}\p{N}\p{Cf}._\-$/:।()\[\]'! ]+$/u)
   public readonly assessmentNoSpecialChar = new RegExp(/^[\p{L}\p{M}\p{N}\p{Cf}._\-\s$":/?,।()\[\]'! ]+$/u)
   public readonly htmlTasRemovalRegex = /<\/?[^>]+>|&nbsp;|<br\s*\/?>|<\/br>|&#39;|&quot;/gi
@@ -142,6 +150,60 @@ export class ConfigurationsService {
   updateOrgReadDataObservable = this.updateOrgReadData.asObservable()
   updateOrgData(id: string) {
     this.updateOrgReadData.next(id)
+  }
+
+  /**
+   * Parent method — returns filtered form data as an Observable.
+   * Uses cached data if available; otherwise fetches from the form read API.
+   * @param formSubType  Key-value pairs used to filter the form fields
+   */
+  getFormData(formSubType: string): Observable<any> {
+    if (this.formReadData) {
+      return of(this.filterFormData(this.formReadData, formSubType))
+    }
+    if (!this.formDataRequest$) {
+      this.formDataRequest$ = this.fetchAndStoreFormData().pipe(shareReplay(1))
+    }
+    return this.formDataRequest$.pipe(
+      map(() => this.filterFormData(this.formReadData, formSubType))
+    )
+  }
+
+  /**
+   * Fetches form data from the form read API and stores it in formReadData.
+   */
+  private fetchAndStoreFormData(): Observable<any> {
+    const url = '/apis/v1/form/read'
+    const requestData: any = {
+      'request': {
+        'type': 'page',
+        'subType': 'portal-global-config',
+        'action': 'page-configuration',
+        'component': 'portal',
+        'rootOrgId': '*',
+      },
+    }
+    return this.http.post<any>(url, requestData).pipe(
+      tap((data: any) => {
+        this.formReadData = _.get(data, 'result.form.data', null)
+      }),
+      catchError((err: any) => {
+        this.formDataRequest$ = null
+        return throwError(err)
+      })
+    )
+  }
+
+  /**
+   * Filters form data based on the provided params.
+   * If data is an array, returns items where every param key-value matches.
+   * If data is an object, returns it as-is (extend as needed).
+   */
+  private filterFormData(data: any, formSubType: string): any {
+    if (data && typeof data === 'object' && formSubType) {
+      return _.get(data, formSubType, null)
+    }
+    return null
   }
 
 }
