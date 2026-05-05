@@ -521,6 +521,9 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       this.searchRequestEvents.request.filters.status = ["Live"];
     }
     this.searchRequestEvents.request.filters.contentType = "Event";
+    if (this.applicationName === SearchListingConfig.ApplicationNames.MDOPortal) {
+      this.searchRequestEvents.request.filters.category = "Event";
+    }
     this.searchRequestEvents.request.fields = SearchEventFields;
     // Build base facets array and avoid passing null/undefined competency keys
     const baseEventFacets = [
