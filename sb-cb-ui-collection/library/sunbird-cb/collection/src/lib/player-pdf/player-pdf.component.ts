@@ -12,9 +12,9 @@ import { UntypedFormControl } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { EventService, LoggerService, WsEvents, ValueService } from '@sunbird-cb/utils-v2'
-import * as PDFJS from 'pdfjs-dist/webpack'
-(PDFJS as any).GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'
+import * as PDFJS from 'pdfjs-dist'
+  ; (PDFJS as any).GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'
 import { fromEvent, interval, merge, Subject, Subscription } from 'rxjs'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 // import { ViewerUtilService } from '../../../../../../project/ws/viewer/src/lib/viewer-util.service'
@@ -26,10 +26,10 @@ import { IWidgetsPlayerPdfData } from './player-pdf.model'
 // const pdfjsViewer = require('pdfjs-dist/web/pdf_viewer')
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer'
 @Component({
-    selector: 'ws-widget-player-pdf',
-    templateUrl: './player-pdf.component.html',
-    styleUrls: ['./player-pdf.component.scss'],
-    standalone: false
+  selector: 'ws-widget-player-pdf',
+  templateUrl: './player-pdf.component.html',
+  styleUrls: ['./player-pdf.component.scss'],
+  standalone: false
 })
 export class PlayerPdfComponent extends WidgetBaseComponent
   implements OnInit, AfterViewInit, OnDestroy, OnChanges, NsWidgetResolver.IWidgetData<any> {
