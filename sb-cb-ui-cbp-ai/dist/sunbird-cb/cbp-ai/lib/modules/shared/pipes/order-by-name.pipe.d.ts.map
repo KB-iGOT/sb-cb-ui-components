@@ -1,1 +1,0 @@
-{"version":3,"file":"order-by-name.pipe.d.ts","sourceRoot":"","sources":["../../../../../../../library/sunbird-cb/cbp-ai/src/lib/modules/shared/pipes/order-by-name.pipe.ts"],"names":[],"mappings":"AAAA,OAAO,EAAQ,aAAa,EAAE,MAAM,eAAe,CAAC;;AAEpD,qBAGa,eAAgB,YAAW,aAAa;IACnD,SAAS,CAAC,KAAK,EAAE,GAAG,EAAE,EAAE,QAAQ,GAAE,MAAe,GAAG,GAAG,EAAE;yCAD9C,eAAe;uCAAf,eAAe;CAY3B"}

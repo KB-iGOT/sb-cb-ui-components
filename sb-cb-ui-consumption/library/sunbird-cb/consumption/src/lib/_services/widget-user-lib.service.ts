@@ -1,19 +1,18 @@
-import { Inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { IUserGroupDetails } from '../_models/widget-user.model';
-import { NsContent } from '../_models/widget-content.model';
-import 'rxjs/add/observable/of'
-import dayjs from 'dayjs';
+import { Inject, Injectable } from '@angular/core'
+import { HttpClient, HttpHeaders } from '@angular/common/http'
+import { Observable, throwError, of } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
+import { IUserGroupDetails } from '../_models/widget-user.model'
+import { NsContent } from '../_models/widget-content.model'
+import dayjs from 'dayjs'
 // const dayjs = dayjs_
 // import { environment } from 'src/environments/environment'
-import { NsCardContent } from '../_models/card-content-v2.model';
-import * as lodash from 'lodash';
-import { WidgetEnrollService } from '@sunbird-cb/utils-v2';
+import { NsCardContent } from '../_models/card-content-v2.model'
+import * as lodash from 'lodash'
+import { WidgetEnrollService } from '@sunbird-cb/utils-v2'
 
 
-const PROTECTED_SLAG_V8 = '/apis/protected/v8';
+const PROTECTED_SLAG_V8 = '/apis/protected/v8'
 const API_END_POINTS = {
   FETCH_EXTERNAL_ENROLLMENT_LIST: 'apis/proxies/v8/cios-enroll/v1/courselist/byuserid',
   FETCH_EVENTS_ENROLLMENT_LIST: (userId: string) => `apis/proxies/v8/user/events/list/${userId}`,
@@ -33,19 +32,19 @@ const API_END_POINTS = {
   FETCH_DESIGNATION_COURSES: `/apis/proxies/v8/courseRecommend/v1/courses`,
   GET_RECOMMENDED_COURSES_WITH_FEEDBACK: (userId: string) => `/apis/proxies/v8/courseRecommendation/read/${userId}`,
   ORG_READ: '/api/org/v1/read',
-};
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class WidgetUserServiceLib {
-  environment: any;
+  environment: any
   enrollmentDataIds: any = []
   constructor(
     @Inject('environment') environment: any,
     private enrollSvc: WidgetEnrollService,
     private http: HttpClient) {
-    this.environment = environment;
+    this.environment = environment
   }
 
   handleError(error: ErrorEvent) {
@@ -148,11 +147,11 @@ export class WidgetUserServiceLib {
   }
 
   getData(key: any): Observable<any> {
-    return Observable.of(JSON.parse(localStorage.getItem(key) || '{}'))
+    return of(JSON.parse(localStorage.getItem(key) || '{}'))
   }
 
   getCBPData(key: any): Observable<any> {
-    return Observable.of(JSON.parse(localStorage.getItem(key) || '[]'))
+    return of(JSON.parse(localStorage.getItem(key) || '[]'))
   }
   getSavedData(key: any): Observable<any> {
     return JSON.parse(localStorage.getItem(key) || '')
@@ -185,37 +184,37 @@ export class WidgetUserServiceLib {
   fetchCbpPlanList(userId: string, callApi?: boolean) {
     // If callApi is true, always fetch from API and return full metadata (not reduced)
     if (callApi) {
-        const result: any = this.http.get(API_END_POINTS.FETCH_CPB_PLANS).pipe(catchError(this.handleError), map(
-          async (data: any) => {
-            if (data.result && data.result.content && data.result.content.length) {
-              let cbpData: any = this.getCbpFormatedData(data.result.content)
-              let cbpContentData: any = cbpData.cbpContentData || []
-              let request = {
-                request: {
-                  courseId: cbpData.contentIds
-                }
+      const result: any = this.http.get(API_END_POINTS.FETCH_CPB_PLANS).pipe(catchError(this.handleError), map(
+        async (data: any) => {
+          if (data.result && data.result.content && data.result.content.length) {
+            let cbpData: any = this.getCbpFormatedData(data.result.content)
+            let cbpContentData: any = cbpData.cbpContentData || []
+            let request = {
+              request: {
+                courseId: cbpData.contentIds
               }
-              const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
-                const enrollData: any = {}
-                if (res && res.result && res.result.courses && res.result.courses.length) {
-                  res.result.courses.forEach((data: any) => {
-                    enrollData[data.collectionId] = data
-                  })
-                  return enrollData
-                } else {
-                  return {}
-                }
-              }).catch((_err: any) => {
-                return {}
-              });
-              // ask for full metadata (fullMeta = true)
-              return await this.mapCbpData(cbpContentData, responseData, true)
             }
-            // return an empty full-meta list when API response has no content
-            return await this.mapCbpData([], {}, true)
+            const responseData = await this.enrollSvc.fetchEnrollContentData(request).toPromise().then(async (res: any) => {
+              const enrollData: any = {}
+              if (res && res.result && res.result.courses && res.result.courses.length) {
+                res.result.courses.forEach((data: any) => {
+                  enrollData[data.collectionId] = data
+                })
+                return enrollData
+              } else {
+                return {}
+              }
+            }).catch((_err: any) => {
+              return {}
+            })
+            // ask for full metadata (fullMeta = true)
+            return await this.mapCbpData(cbpContentData, responseData, true)
           }
-        ))
-        return result
+          // return an empty full-meta list when API response has no content
+          return await this.mapCbpData([], {}, true)
+        }
+      ))
+      return result
     }
 
     // Default behavior: use cache check and return reduced/minified metadata
@@ -244,7 +243,7 @@ export class WidgetUserServiceLib {
               }
             }).catch((_err: any) => {
               return {}
-            });
+            })
             // default: return reduced metadata (fullMeta = false)
             return await this.mapCbpData(cbpContentData, responseData, false)
           }
@@ -362,7 +361,7 @@ export class WidgetUserServiceLib {
               cbpFilteredContent.push(cbp)
             }
           }
-        });
+        })
         if (cbpFilteredContent.length > 1) {
           const sortedData: any = cbpFilteredContent.sort((a: any, b: any) => {
             const firstDate: any = new Date(a.endDate)
@@ -415,7 +414,7 @@ export class WidgetUserServiceLib {
           cbpObj.downloaUrl = download
         }
         // scheduling / plan fields
-        ;['endDate', 'planDuration','appIcon','difficultyLevel','avgRating','posterImage','duration','primaryCategory','courseCategory','planType', 'contentStatus', 'status', 'isApar'].forEach((k: string) => {
+        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'contentStatus', 'status', 'isApar'].forEach((k: string) => {
           if (cbp[k] !== undefined) {
             cbpObj[k] = cbp[k]
           }
@@ -503,16 +502,16 @@ export class WidgetUserServiceLib {
   }
 
   getOrgReadData(organisationId: string): Observable<any> {
-      const request = {
-          request: {
-            organisationId,
-          },
-      };
-      return this.http.post<any>(API_END_POINTS.ORG_READ, request).pipe(
-          map((res: any) => {
-          return lodash.get(res, 'result.response');
-          })
-      );
+    const request = {
+      request: {
+        organisationId,
+      },
     }
+    return this.http.post<any>(API_END_POINTS.ORG_READ, request).pipe(
+      map((res: any) => {
+        return lodash.get(res, 'result.response')
+      })
+    )
+  }
 
 }
