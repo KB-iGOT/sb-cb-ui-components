@@ -62,6 +62,13 @@ export class CreateRequestAdditionalDetailsComponent implements OnInit {
   listView = true
   allThemeData: any
   allSubThemeData: any
+
+  competencyAreaDescriptions: Record<string, string> = {
+    behavioural: 'Behavioural competencies reflect interpersonal and self-management skills. For example, Effective communication involves the ability to convey ideas clearly and listen actively. Effective collaborators can build trust, delegate tasks, and work seamlessly towards shared goals.',
+    functional: 'Functional competencies are specific technical skills and knowledge required to perform a particular job role efficiently, such as data analysis, software coding, financial modelling, or specialized machine operation. E.g. Data Analytics, Project Management.',
+    domain: 'Domain competency refers to specialized knowledge, skills, and expertise within a specific industry or functional area, such as financial modelling in banking, patient management in healthcare, or digital marketing in tech.',
+  }
+
   //#endregion (global variable declaration)
 
 

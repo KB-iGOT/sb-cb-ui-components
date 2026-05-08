@@ -94,6 +94,7 @@ export class CompetencyListComponent implements OnInit, OnChanges {
   @Input() showTable: boolean = true
   @Input() showCompetencyAdd: boolean = true
   @Input() showRoundControls: boolean = true
+  @Input() showDescriptions: boolean = true
 
   // Outputs
   @Output() selectedCompetency = new EventEmitter<CompetencyData[]>()
@@ -130,6 +131,12 @@ export class CompetencyListComponent implements OnInit, OnChanges {
     themeLabel: 'Competency Theme',
     subThemeLabel: 'Competency Sub theme',
     addButtonLabel: 'Add'
+  }
+
+  competencyAreaDescriptions: Record<string, string> = {
+    behavioural: 'Behavioural competencies reflect interpersonal and self-management skills. For example, Effective communication involves the ability to convey ideas clearly and listen actively. Effective collaborators can build trust, delegate tasks, and work seamlessly towards shared goals.',
+    functional: 'Functional competencies are specific technical skills and knowledge required to perform a particular job role efficiently, such as data analysis, software coding, financial modelling, or specialized machine operation. E.g. Data Analytics, Project Management.',
+    domain: 'Domain competency refers to specialized knowledge, skills, and expertise within a specific industry or functional area, such as financial modelling in banking, patient management in healthcare, or digital marketing in tech.',
   }
 
   constructor(
