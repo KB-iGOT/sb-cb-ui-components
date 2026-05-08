@@ -149,3 +149,5 @@ export * from './lib/_common/cards/badge-stats/badge-stats.component'
 
 export * from './lib/_common/competencies/competencies.module'
 export * from './lib/_common/competencies/competency-list/competency-list.component'
+
+export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'

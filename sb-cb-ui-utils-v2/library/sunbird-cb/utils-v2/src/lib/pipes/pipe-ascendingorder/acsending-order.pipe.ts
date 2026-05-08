@@ -3,6 +3,7 @@ import { orderBy } from 'lodash'
 
 @Pipe({
   name: 'acsendingOrder',
+  standalone: false
 })
 export class AcsendingOrderPipe implements PipeTransform {
 

@@ -3,6 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
   name: 'custumDateSortingPipe',
+  standalone: false
 })
 export class CustumDateSortingPipePipe implements PipeTransform {
 
