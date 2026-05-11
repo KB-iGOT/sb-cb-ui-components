@@ -1,0 +1,356 @@
+/* OUTER WRAPPER */
+.dashboard-wrapper {
+    background: transparent;
+    min-height: 100vh;
+    padding: 24px 10px;
+    margin: 0 30px 0 60px;
+}
+
+/* MAIN CONTAINER */
+.dashboard-container {
+    max-width: auto;
+    margin: 0 auto;
+}
+
+/* SECTION TITLE */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    margin: 20px 0;
+}
+
+/* GRID SYSTEM */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+/* METRIC CARD */
+.metric-card {
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+}
+
+/* CARD CONTENT LAYOUT */
+.card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* TEXT STYLES */
+.card-title {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.metric-card h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 6px;
+}
+
+/* ICON STYLE */
+.icon {
+    font-size: 28px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ICON COLORS */
+.primary {
+    color: #2563eb;
+}
+
+.teal {
+    color: #059669;
+}
+
+.green {
+    color: #16a34a;
+}
+
+.purple {
+    color: #9333ea;
+}
+
+.orange {
+    color: #f97316;
+}
+
+.amber {
+    color: #f59e0b;
+}
+
+.red {
+    color: #dc2626;
+}
+
+/* GAP ANALYSIS SECTION */
+.section-title.warning {
+    color: #dc2626;
+}
+
+.warning-card {
+    background: #fdeaea;
+    border: 1px solid #f5c2c7;
+}
+
+/* FILTER CARD */
+.filters-card {
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: none;
+}
+
+/* FILTER HEADER */
+.filters-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* HORIZONTAL FILTER ROW */
+.filters-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    /* allows responsiveness */
+}
+
+/* CONTROL WIDTH */
+.filters-row mat-form-field {
+    flex: 1;
+    min-width: 220px;
+}
+
+
+
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+    color: #ccc;
+    /* gray */
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: #1B4CA1;
+    /* Material blue */
+    border-color: #1B4CA1 !important;
+}
+
+::ng-deep .select-search-panel .mat-option.mat-selected:not(.mat-option-disabled) {
+    background-color: #1B4CA1 !important;
+    color: #ffffff !important;
+}
+
+
+/* Apply border and rounded corners to the whole form field */
+:host ::ng-deep .mat-form-field-appearance-outline {
+    border-radius: 25px;
+    /* Apply rounded corners to the whole outline */
+    border: 1px solid #ccc;
+    /* Add border to the entire form field */
+}
+
+:host ::ng-deep .mat-form-field-focused .mat-form-field-appearance-outline {
+    border-color: #1B4CA1 !important;
+    /* Blue border when focused */
+}
+
+/* Apply the left border with proper radius to start */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-start {
+    // border-left: 1px solid #ccc;
+    border-radius: 25px 0 0 25px;
+    /* Rounded left corner */
+    border: none !important;
+}
+
+/* Apply the right border with proper radius to end */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-end {
+    border-right: none !important;
+    border: none !important;
+    border-radius: 0 25px 25px 0;
+    /* Rounded right corner */
+}
+
+/* Apply top and bottom borders for consistency */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-gap {
+    // border-top: 1px solid #ccc;
+    // border-bottom: 1px solid #ccc;
+    border: none !important;
+    border-radius: 25px;
+    /* Apply same radius to the gap */
+}
+
+
+
+
+
+:host::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+    background-color: transparent !important;
+}
+
+
+.dashboard-container .mat-card {
+    background-color: #ffffff;
+}
+
+/* GAP TITLE */
+.gap-title {
+    color: #b91c1c;
+    /* dark red */
+}
+
+/* GAP SECTION CONTAINER */
+.gap-section {
+    background-color: #d926621a;
+    /* light pink */
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid #f5c2c7;
+    margin: 16px 0;
+}
+
+/* FIRST CARD LIGHTER PINK */
+.gap-card {
+    background-color: #d926621a;
+    /* softer pink inside */
+    border: 1px solid #f8d7da;
+}
+
+/* Optional: red number emphasis */
+.gap-card h2 {
+    color: #dc2626;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+/* Force search wrapper width to match panel exactly */
+.mat-select-panel .search-wrapper {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: white;
+}
+
+/* Ensure search input fills correctly */
+.search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.mat-select-panel mat-option {
+    padding-top: 10px;
+}
+
+::ng-deep {
+    .mat-select-panel-wrap {
+        overflow: visible !important;
+        /* allow content + scrollbar */
+        padding: 0;
+        margin-top: 42px;
+    }
+
+    .mat-select-panel {
+        border: 1px solid #ccc !important;
+        /* border around dropdown */
+        box-sizing: border-box;
+        max-height: 250px;
+        /* optional */
+    }
+}
+
+::ng-deep .select-with-search.mat-select-panel {
+    padding-top: 0;
+    overflow: auto;
+}
+
+/* Sticky search container */
+::ng-deep .select-with-search .search-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Search input styling */
+::ng-deep .select-with-search .search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Prevent mat-options from overlapping search box */
+::ng-deep .select-with-search mat-option:first-of-type {
+    margin-top: 4px;
+}
+
+::ng-deep .md-drppicker.ltr {
+    min-width: 500px !important;
+}
+
+.sub-heading p {
+    color: #000;
+    font-family: Montserrat;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

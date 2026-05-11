@@ -1,0 +1,237 @@
+<div class="upload-container">
+    <div class="header">
+        <div class="sub-heading mt-10 mb-10 ml-10 cursor-pointer">
+            <p (click)="routeToInitial()"><mat-icon style="vertical-align: middle;">arrow_back</mat-icon><span
+                    class="pl-10">Back to Role Mapping Generation</span></p>
+        </div>
+
+    </div>
+    <mat-card class="mat-card-container mt-20" [formGroup]="roleMappingForm">
+        <div class="header">
+            <div class="sub-heading">
+                <p>Approval Requests</p>
+            </div>
+
+
+        </div>
+        <div class="edit-section mt-4">
+            <div class="select-map-route-container">
+                <div class="select-map-flex-container">
+                    <div class="select-map-flex">
+                        <div class="selected-mapping-route">
+                            <p>{{cbpPlanFinalObj?.ministry?.orgName}} <span *ngIf="cbpPlanFinalObj?.department_name">
+                                    / {{cbpPlanFinalObj?.department_name}}</span>
+                            </p>
+                        </div>
+                        <div class="edit-plan cursor-pointer" (click)="routeToInitial()">
+                            <mat-icon>edit</mat-icon>Edit
+                        </div>
+                        <!--                            <div class="cursor-pointer ml-10">-->
+                        <!--                                <button class="btn-active cursor-pointer" (click)="moveToInitialScreenLayout('add')">-->
+                        <!--                                    <mat-icon>add</mat-icon>-->
+                        <!--                                    Create New CBP-->
+                        <!--                                </button>-->
+                        <!--                            </div>-->
+                    </div>
+                    <!-- <div>
+                        <button [ngClass]="!(cbpPlanFinalObj?.ministry?.orgName) ? 'btn-disable':'btn-active'" mat-raised-button
+                            color="primary" [disabled]="!(cbpPlanFinalObj?.ministry?.orgName)" (click)="openUploadDialog()">
+                            <mat-icon>upload</mat-icon> Upload Document
+                        </button>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </mat-card>
+    <mat-card class="">
+        <form [formGroup]="filterForm">
+            <div class="search flex margin-right-m filter-container">
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-filter h-4 w-4">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                </div>
+                <div>
+                    <b> Filters</b>
+                </div>
+                <div class="mt-10 w-50">
+
+                    <div class="search-container"> 
+                        <div class="rsearch">
+                            <mat-icon
+                                class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
+                            <input class="sinput color-60 w-full"  label="" formControlName="search"
+                                (keyup)="applyFilters()" placeholder="Search by Request ID" type="Standard">
+                          
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+                <div class="search-and-buttons-container">
+                    <div>
+                        <mat-form-field appearance="outline" class="language-select">
+                            <!-- <mat-label style="font-weight: normal;">
+                                {{ filterForm.get('status')?.value ? '' : 'Select Status' }}
+                            </mat-label> -->
+
+                            <mat-select formControlName="status" panelClass="select-search-panel"
+                                (selectionChange)="applyFilters()">
+
+                                <!-- Search box -->
+                                <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
+                                    placeholder="Search Status" (click)="$event.stopPropagation()"
+                                    (keydown)="$event.stopPropagation()"
+                                    (keyup)="filterList($any($event.target).value, 'status')" />
+
+                                <!-- Values -->
+                                <mat-option *ngFor="let r of filteredStatus" [value]="r?.code">
+                                    {{ r?.label }}
+                                </mat-option>
+
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="search-and-buttons-container">
+                    <div>
+                        <mat-form-field appearance="outline" class="language-select">
+                            <!-- <mat-label style="font-weight: normal;">
+                                {{ filterForm.get('time')?.value ? '' : 'Select Time' }}
+                            </mat-label> -->
+
+                            <mat-select formControlName="time" panelClass="select-search-panel"
+                                (selectionChange)="applyFilters()">
+
+                                <!-- Search box -->
+                                <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
+                                    placeholder="Search Time" (click)="$event.stopPropagation()"
+                                    (keydown)="$event.stopPropagation()"
+                                    (keyup)="filterList($any($event.target).value, 'time')" />
+
+                                <!-- Values -->
+                                <mat-option *ngFor="let r of filteredTime" [value]="r?.code">
+                                    {{ r?.label }}
+                                </mat-option>
+
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <p class="mt-10" style="font-family: 'Lato'; font-size: 18px; margin-left: 10px;">
+            {{dataSource.data.length}} Approval Requests</p>
+        <table style="border-radius: 25px 25px 0 0;
+        overflow: hidden;
+        box-shadow: 0 5px 5px rgba(0, 0, 0, 0.12);" mat-table [dataSource]="dataSource"
+            class="mat-elevation-z2 full-width-table mt-10">
+
+            <!-- Document Column -->
+            <ng-container matColumnDef="request_id">
+                <th mat-header-cell *matHeaderCellDef> Request ID </th>
+                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                    <div>
+                        <div class="doc-title" *ngIf="request.request_name">{{ request.request_name }}</div>
+                        <div class="doc-title" *ngIf="!request.request_name">{{ request.request_name }}</div>
+                    </div>
+                </td>
+            </ng-container>
+
+
+
+            <!-- Summary Text Column -->
+            <!-- <ng-container matColumnDef="summary_text">
+                <th mat-header-cell *matHeaderCellDef> Summary </th>
+                <td mat-cell *matCellDef="let doc">
+                    <div class="doc-summary-text" style="width: 80%;">
+                        <markdown [data]="doc?.summary_text | slice : 0 : 200"></markdown>
+                    </div>
+                </td>
+            </ng-container> -->
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef> Date & Time</th>
+                <td mat-cell *matCellDef="let request" style="width: 15%;"> {{ request.created_at | date: 'MMM d, y'}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="designation">
+                <th mat-header-cell *matHeaderCellDef> No of Designation </th>
+                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                    <span>{{request?.designation_count}}</span>
+                </td>
+            </ng-container>
+
+
+            <!-- Summary Status Column -->
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef> Request Status </th>
+                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                     <span *ngIf="request.status === 'completed'" class="success"> {{ request.status | titlecase
+                        }} </span>
+                    <span *ngIf="request.status !== 'completed'" class="in-progress"> {{ request.status |
+                        titlecase }} </span>
+                </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                    <div class="action-flex">
+                        <div>
+                            <button class="btn-active" mat-raised-button color="primary" (click)="viewRequest(request)"
+                                matTooltip="View/Review Request">
+                                View/Review Request
+                            </button>
+                        </div>
+                        <div>
+                            <button style="margin-left: 15px;" *ngIf="request.status === 'COMPLETED'"
+                                mat-icon-button color="warn" (click)="revokeApprovalRequest(request)" matTooltip="Delete">
+                                <mat-icon>delete</mat-icon>
+                                Revoke Request
+                            </button>
+                        </div>
+                    </div>
+
+
+
+
+
+                </td>
+            </ng-container>
+
+            <!-- Header and Row Definitions -->
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            <!-- No Data Message -->
+
+        </table>
+        <div *ngIf="dataSource.data.length === 0" class="no-data-message">
+            No record found
+        </div>
+        <!-- Pagination -->
+        <div class="mt-1">
+            <!-- <mat-paginator class="custom-pagination" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator> -->
+            <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
+        </div>
+
+
+    </mat-card>
+</div>
+
+
+<div class="overlay-loader" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+</div>

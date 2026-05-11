@@ -1,0 +1,210 @@
+<div class="container">
+    <!-- <input class="btn-active" type="button" value="Download as PDF" (click)="downloadPDF()" /> -->
+    <div class="logo-container" *ngIf="login">
+        <div>
+            <span class="ai-loader-icon-medium"><img src="assets/icons/ai-loader.gif"></span>
+        </div>
+        <div>
+            <h2 class="highlight-ai">
+                <span>iGOT AI Driven CBP</span>
+            </h2>
+        </div>
+        <!-- <div class="sub-heading">
+            <p>Build Your Capacity With Customized Role Mapping</p>
+        </div> -->
+    </div>
+    <mat-card *ngIf="login" class="mt-2" [formGroup]="roleMappingForm">
+        <div class="depatment-container">
+<!--            <div class="section-header">-->
+<!--                <div class="sub-heading">-->
+<!--                    <p>Choose Your Department</p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="radio-group mt-4">
+                <mat-radio-group class="radio-btn-group" formControlName="ministryType"
+                    [(ngModel)]="selectedMinistryType" (change)="onMinistryTypeChange($event)">
+
+                    <!-- Left radio button -->
+                    <mat-radio-button value="ministry" class="radio-btn left-radio">
+                        <span class="radio-label">
+                            <!-- <mat-icon class="radio-icon" [ngClass]="selectedMinistryType === 'center'? 'checked-label':''">domain</mat-icon>  -->
+                            <span [ngClass]="selectedMinistryType === 'ministry'? 'checked-label':''">Centre</span>
+                        </span>
+                    </mat-radio-button>
+
+                    <!-- Right radio button -->
+                    <mat-radio-button value="state" class="radio-btn right-radio">
+                        <span class="radio-label">
+                            <!-- <mat-icon class="radio-icon" [ngClass]="selectedMinistryType === 'state'? 'checked-label':''">location_on</mat-icon>  -->
+                            <span [ngClass]="selectedMinistryType === 'state'? 'checked-label':''">State</span>
+                        </span>
+                    </mat-radio-button>
+
+                </mat-radio-group>
+            </div>
+            <div class="mt-4">
+                
+                <label class="label">
+                    <span *ngIf="selectedMinistryType === 'ministry'">Ministry</span>
+                    <span *ngIf="selectedMinistryType === 'state'">State</span>
+                </label>
+                <div class="mt-2 search-box-with-select">
+                    
+                    <mat-form-field appearance="fill"
+                        style="background: white; border-radius: 25px; padding: 0 12px; border: 1px solid #ccc;width: 100%;">
+                        <mat-select
+                        panelClass="select-with-search"
+                            [placeholder]="selectedMinistryType === 'ministry' ? 'Select Ministry/ Department':'Select State'"
+                            (selectionChange)="onMinistryChange($event)" formControlName="ministry"
+                            style="border-radius: 25px; background: white; width:100%" 
+                            (openedChange)="onOpened($event)">
+                            <div class="search-wrapper" *ngIf="panelOpen">
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    (input)="filterData($event)"
+                                    class="search-input"
+                                    (keydown.space)="$event.stopPropagation()"
+                                    (keydown)="$event.stopPropagation()">
+                            </div>
+                            <mat-option [value]="item?.identifier" *ngFor="let item of filteredList" [selected]="selectedMinistryId === item?.identifier">{{item?.orgName}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="mt-4" *ngIf="departmentData?.length">
+                <label class="label">Department</label>
+                <div class="mt-2">
+                    <mat-form-field appearance="fill"
+                        style="background: white; border-radius: 25px; padding: 0 12px;border: 1px solid #ccc;">
+                        <mat-select panelClass="select-with-search" placeholder="Select Department" formControlName="departments"
+                            style="border-radius: 25px; background: white;"  (selectionChange)="onDepartmentChange()" (openedChange)="onOpenedDepartment($event)">
+                            <div class="search-wrapper" *ngIf="departmentPanelOpen">
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    (input)="filterDepartmentData($event)"
+                                    class="search-input"
+                                    (keydown.space)="$event.stopPropagation()"
+                                    (keydown)="$event.stopPropagation()">
+                            </div>
+                            <mat-option [value]="item?.identifier"
+                                *ngFor="let item of filteredDepartmentList">{{item?.orgName}}</mat-option>
+
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+            </div>
+            <!-- <div class="mt-4">
+            <label class="label">Sector</label>
+            <div>
+                <mat-form-field appearance="fill" style="background: white; border-radius: 25px; padding: 0 12px;">
+                    <mat-select placeholder="Select Sector" multiple formControlName="sectors"
+                        style="border-radius: 25px; background: white;">
+                        <mat-option [value]="item?.value"
+                            *ngFor="let item of sectorData">{{item?.value}}</mat-option>
+
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+        </div> -->
+            <!-- *ngIf="roleMappingForm.get('ministryType')?.value === 'state'" -->
+            <div class="mt-4 additional-details">
+                <textarea rows="5" placeholder="Additional details" formControlName="additionalDetails"></textarea>
+            </div>
+             <div class="mt-4">
+                
+                    <button [ngClass]="disableUploadDocument ? 'btn-active-primary-disable':'btn-active-primary'" class=""
+                        [disabled]="disableUploadDocument" mat-raised-button color="primary"
+                        (click)="goToUploadDocument()">
+                        <mat-icon>upload</mat-icon> Manage Documents
+                    </button>
+                </div>
+            <!-- *ngIf="roleMappingForm.get('ministryType')?.value === 'state'" -->
+            <!-- <div class="mt-4 section" >
+                <div class="sub-heading">
+                    <p>Upload Document (PDF)</p>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label for="uploadDoc" class="file-upload-label">
+                        <span class="file-upload-icon">📎</span>
+                        <span *ngIf="!uploadedFile || uploadedFile.length === 0">
+                          Choose up to 3 files (PDF/TXT)
+                        </span>
+                        <div *ngIf="uploadedFile?.length > 0" class="file-list">
+                          <div *ngFor="let file of uploadedFile; let i = index" class="file-item">
+                            {{ file.name }}
+                            <span class="remove-file-icon" (click)="removeFile(i);$event.preventDefault()">
+                              <mat-icon>close</mat-icon>
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                      <input
+                        id="uploadDoc"
+                        type="file"
+                        multiple
+                        (change)="onFileChange($event)"
+                        hidden
+                      />                      
+
+                    <small class="file-upload-hint">Max file size: {{maxFileSizeMB}}MB</small>
+
+                    <input id="uploadDoc" multiple type="file" (change)="onFileChange($event)"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="file-upload-input" />
+
+                    <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
+                </div>
+            </div> -->
+            <!-- *ngIf="roleMappingForm.get('ministryType')?.value === 'state'" -->
+            <!-- <div class="mt-2 section">
+                <div class="disclaimer-text">
+                    <p>Disclaimer: Please do not upload any confidential documents. </p>
+                </div>
+            </div> -->
+            <div class="mt-2" *ngIf="documents?.length < 1 && !(roleMappingForm?.invalid)">
+               <p><span style="font-size: .875rem;font-weight: bold;">Note: </span><span class="error">Please Upload atleast 1 Document.</span></p>
+            </div>
+            <div class="mt-4" >
+                <input [disabled]="roleMappingForm?.invalid || (roleMappingForm.get('ministryType')?.value === 'state' && !roleMappingForm.get('departments')?.value) || loading || documents?.length < 1"
+                    [ngClass]="roleMappingForm?.invalid || (roleMappingForm.get('ministryType')?.value === 'state' && !roleMappingForm.get('departments')?.value) || loading || documents?.length < 1 ? 'btn-disable':'btn-active'" 
+                    type="button" 
+                    [value]="loading ? 'Generating CBP...' : 'Generate CBP'"
+                    (click)="onGenerateRoleMapping()" />
+            </div>
+        </div>
+    </mat-card>
+    
+</div>
+<div *ngIf="!login">
+        <app-login (success)="loginStatus($event)"></app-login>
+    </div>
+
+<div class="overlay-loader" *ngIf="apiLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+</div>
+
+<div class="overlay-loader" *ngIf="loading">
+    <div class="loading-content">
+        <mat-spinner diameter="50"></mat-spinner>
+        <div class="loading-text mt-3">
+            <p class="main-message">{{ currentProcessingStage || 'Preparing CBP Plan generation...' }}</p>
+            <div class="progress-details">
+                <div class="progress-indicator" *ngIf="chunks.length > 0">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" 
+                             [style.width.%]="getDisplayProgressPercentage()">
+                        </div>
+                    </div>
+                    <small class="progress-text">{{ getDisplayProgressPercentage() }}% Complete</small>
+                </div>
+                <small class="time-estimate">
+                    Real-time streaming in progress. This may take 2-3 minutes.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
