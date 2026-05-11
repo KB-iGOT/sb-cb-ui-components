@@ -1,0 +1,338 @@
+<div class="dashboard-wrapper">
+    <div class="header">
+        <div class="sub-heading mt-10 mb-10 cursor-pointer">
+            <p (click)="routeToInitial()"><mat-icon style="vertical-align: middle;">arrow_back</mat-icon><span
+                    class="pl-10">Back to Role Mapping Generation</span></p>
+        </div>
+
+    </div>
+    <div class="dashboard-container">
+
+        <!-- FILTERS SECTION -->
+        <form [formGroup]="filtersForm" class="filters-form">
+
+            <mat-card class="filters-card">
+                <div class="filters-header">
+                    <mat-icon>filter_list</mat-icon>
+                    <span>Filters</span>
+                </div>
+
+                <div class="filters-row">
+                    <div>
+                        <label>Centre / State </label>
+                        <!-- Centre / State -->
+                        <mat-form-field appearance="fill"
+                            style="background: white; border-radius: 25px; padding: 0 12px; border: 1px solid #ccc;width: 100%;">
+
+                            <mat-select formControlName="centreState" [disabled]="!isSuperAdmin"
+                                (selectionChange)="onMinistryTypeChange($event)">
+                                <mat-option value="">Select Center/State</mat-option>
+                                <mat-option value="ministry">Center</mat-option>
+                                <mat-option value="state">State</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <label>Ministry </label>
+                        <!-- Centre / State -->
+                        <mat-form-field appearance="fill"
+                            style="background: white; border-radius: 25px; padding: 0 12px; border: 1px solid #ccc;width: 100%;">
+                            <mat-select panelClass="select-with-search" [disabled]="!isSuperAdmin" multiple
+                                [placeholder]="selectedMinistryType === 'ministry' ? 'Select Ministry/ Department':'Select State'"
+                                (selectionChange)="onMinistryChange($event)" formControlName="ministries"
+                                style="border-radius: 25px; background: white; width:100%"
+                                (openedChange)="onOpened($event)">
+                                <div class="search-wrapper" *ngIf="panelOpen">
+                                    <input type="text" placeholder="Search..." (input)="filterData($event)"
+                                        class="search-input" (keydown.space)="$event.stopPropagation()"
+                                        (keydown)="$event.stopPropagation()">
+                                </div>
+                                <mat-option [value]="item?.identifier" *ngFor="let item of filteredList"
+                                    [selected]="selectedMinistryId === item?.identifier">{{item?.orgName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                        <label>Department</label>
+                        <!-- Centre / State -->
+                        <mat-form-field appearance="fill"
+                            style="background: white; border-radius: 25px; padding: 0 12px;border: 1px solid #ccc;">
+                            <mat-select panelClass="select-with-search" placeholder="Select Department"
+                                [disabled]="!isSuperAdmin" multiple formControlName="departments"
+                                style="border-radius: 25px; background: white;" (selectionChange)="onDepartmentChange()"
+                                (openedChange)="onOpenedDepartment($event)">
+                                <div class="search-wrapper" *ngIf="departmentPanelOpen">
+                                    <input type="text" placeholder="Search..." (input)="filterDepartmentData($event)"
+                                        class="search-input" (keydown.space)="$event.stopPropagation()"
+                                        (keydown)="$event.stopPropagation()">
+                                </div>
+                                <mat-option [value]="item?.identifier"
+                                    *ngFor="let item of filteredDepartmentList">{{item?.orgName}}</mat-option>
+
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div>
+                        <label>Date Range </label>
+                        <mat-form-field appearance="outline">
+
+                            <input matInput ngxDaterangepickerMd formControlName="dateRange" style="margin:10px"
+                                placeholder="Select date range" [autoApply]="true" [linkedCalendars]="true"
+                                [locale]="{ format: 'DD MMM YYYY' }" />
+                        </mat-form-field>
+                    </div>
+
+
+                </div>
+            </mat-card>
+        </form>
+
+        <!-- OVERVIEW METRICS -->
+        <h2 class="section-title">
+            <mat-icon>dashboard</mat-icon>
+            Overview Metrics
+        </h2>
+
+        <div class="card-grid">
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">States/Ministries which generated Role Mapping</p>
+                        <h2>{{this.dashboardData?.ministry_count}}</h2>
+                        <p class="card-subtitle">At least 1 designation/role mapping</p>
+                    </div>
+                    <mat-icon class="icon primary">public</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Departments which generated Role Mapping</p>
+                        <h2>{{this.dashboardData?.department_count}}</h2>
+                        <p class="card-subtitle">At least 1 designation/role mapping</p>
+                    </div>
+                    <mat-icon class="icon teal">apartment</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Total Capacity Building Plans Created</p>
+                        <h2>{{this.dashboardData?.total_cbp_plan_count}}</h2>
+                    </div>
+                    <mat-icon class="icon green">description</mat-icon>
+                </div>
+            </mat-card>
+
+        </div>
+
+        <!-- COMPETENCIES -->
+        <h2 class="section-title">
+            <mat-icon>psychology</mat-icon>
+            Competencies Recommended
+        </h2>
+
+        <div class="card-grid">
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Behavioral Competencies</p>
+                        <h2>{{this.dashboardData?.behavioral_competencies_count}}</h2>
+                    </div>
+                    <mat-icon class="icon purple">psychology</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Functional Competencies</p>
+                        <h2>{{this.dashboardData?.functional_competencies_count}}</h2>
+                    </div>
+                    <mat-icon class="icon teal">settings</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Domain Competencies</p>
+                        <h2>{{this.dashboardData?.domain_competencies_count}}</h2>
+                    </div>
+                    <mat-icon class="icon orange">tune</mat-icon>
+                </div>
+            </mat-card>
+
+        </div>
+
+        <!-- DOCUMENTS -->
+        <h2 class="section-title">
+            <mat-icon>menu_book</mat-icon>
+            Documents & Course Recommendations
+        </h2>
+
+        <div class="card-grid">
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Total Documents Uploaded</p>
+                        <h2>{{this.dashboardData?.total_documents}}</h2>
+                        <p class="card-subtitle">Min 1, Max 10 per role mapping</p>
+                    </div>
+                    <mat-icon class="icon amber">upload_file</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Role Mappings with Course Recommendations</p>
+                        <h2>{{this.dashboardData?.role_mappings_with_recommendations}}</h2>
+                        <p class="card-subtitle">8500 of 50,000 role mappings</p>
+                    </div>
+                    <mat-icon class="icon green">menu_book</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Course Recommendations Saved</p>
+                        <h2>{{this.dashboardData?.saved_recommended_courses_count}}</h2>
+                        <p class="card-subtitle">{{this.dashboardData?.saved_recommended_courses_count}} of 8500
+                            recommendations</p>
+                    </div>
+                    <mat-icon class="icon teal">save</mat-icon>
+                </div>
+            </mat-card>
+
+        </div>
+
+        <!-- GAP ANALYSIS -->
+        <div class="gap-section">
+            <h2 class="section-title warning">
+                <mat-icon>warning</mat-icon>
+                Gap Analysis
+            </h2>
+
+            <div class="card-grid">
+
+                <mat-card class="metric-card warning-bg">
+                    <div class="card-content">
+                        <div>
+                            <p class="card-title">Competencies Without Courses</p>
+                            <h2>{{this.dashboardData?.competencies_without_courses}}</h2>
+                            <p class="card-subtitle">Unique competencies with no identified courses</p>
+                        </div>
+                        <mat-icon class="icon red">cancel</mat-icon>
+                    </div>
+                </mat-card>
+
+                <!-- <mat-card class="metric-card">
+                    <div class="card-content">
+                        <div>
+                            <p class="card-title">Manually Added Courses</p>
+                            <h2>-</h2>
+                            <p class="card-subtitle">Competencies with user-added courses</p>
+                        </div>
+                        <mat-icon class="icon green">add_circle</mat-icon>
+                    </div>
+                </mat-card> -->
+
+            </div>
+
+            <div class="card-grid mt-2">
+
+                <mat-card class="metric-card warning-bg">
+                    <div class="card-content">
+                        <div>
+                            <p class="card-title">Behavioral Competencies Without Courses</p>
+                            <h2>{{this.dashboardData?.behavioral_without_courses}}</h2>
+                        </div>
+                        <mat-icon class="icon red">cancel</mat-icon>
+                    </div>
+                </mat-card>
+
+                <mat-card class="metric-card">
+                    <div class="card-content">
+                        <div>
+                            <p class="card-title">Functional Competencies Without Courses</p>
+                            <h2>{{this.dashboardData?.functional_without_courses}}</h2>
+                        </div>
+                        <mat-icon class="icon red">cancel</mat-icon>
+                    </div>
+                </mat-card>
+
+                <mat-card class="metric-card">
+                    <div class="card-content">
+                        <div>
+                            <p class="card-title">Domain Competencies Without Courses</p>
+                            <h2>{{this.dashboardData?.domain_without_courses}}</h2>
+                        </div>
+                        <mat-icon class="icon red">cancel</mat-icon>
+                    </div>
+                </mat-card>
+
+            </div>
+        </div>
+
+        <!-- OVERVIEW METRICS -->
+        <h2 class="section-title">
+            <mat-icon>dashboard</mat-icon>
+            Users and Role Mapping Metrics
+        </h2>
+
+        <div class="card-grid">
+
+            <mat-card class="metric-card" *ngIf="!isSuperAdmin">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Unique Users (Credentials)</p>
+                        <h2>{{this.dashboardData?.total_users}}</h2>
+                    </div>
+                    <mat-icon class="icon primary">public</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card" *ngIf="!isSuperAdmin">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Unique Users with Role Mappings</p>
+                        <h2>{{this.dashboardData?.users_with_role_mappings}}</h2>
+                        <p class="card-subtitle">Generated atleast 1 role mapping</p>
+                    </div>
+                    <mat-icon class="icon teal">apartment</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Total Designation/Role Mappings Generated</p>
+                        <h2>{{this.dashboardData?.total_role_mappings}}</h2>
+                    </div>
+                    <mat-icon class="icon green">description</mat-icon>
+                </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+                <div class="card-content">
+                    <div>
+                        <p class="card-title">Unique Role Mappings</p>
+                        <h2>{{this.dashboardData?.unique_role_mappings}}</h2>
+                        <p class="card-subtitle">10,000 unique of 50,000 total</p>
+                    </div>
+                    <mat-icon class="icon teal">apartment</mat-icon>
+                </div>
+            </mat-card>
+
+        </div>
+    </div>
+</div>

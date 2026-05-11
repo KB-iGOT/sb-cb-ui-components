@@ -1,0 +1,239 @@
+<div class="review-container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+
+        <div class="left-section">
+            <mat-icon class="back-icon" (click)="backToApprovalRequest()">arrow_back</mat-icon>
+
+            <div>
+                <p class="section-title">Review Request</p>
+                <p class="request-id">{{request?.id}}</p>
+            </div>
+        </div>
+
+        <div class="status-badge">
+            {{request?.status | titlecase}}
+        </div>
+
+    </div>
+
+
+    <!-- REQUEST DETAILS -->
+    <div class="inner-container">
+        <mat-card class="details-card">
+
+            <p class="section-title">Request Details</p>
+
+            <div class="details-grid">
+
+                <div class="detail-box">
+                    <mat-icon>tag</mat-icon>
+                    <div>
+                        <p class="label">Request ID</p>
+                        <p class="value">{{request?.id}}</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <mat-icon>assignment</mat-icon>
+                    <div>
+                        <p class="label">Request Name</p>
+                        <p class="value">{{request?.request_name}}</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <mat-icon>mail</mat-icon>
+                    <div>
+                        <p class="label">Requested By</p>
+                        <p class="value">{{request?.user?.username | titlecase}}</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <mat-icon>event</mat-icon>
+                    <div>
+                        <p class="label">Submitted On</p>
+                        <p class="value">{{request?.created_at | date: 'MMM d, y'}}</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <mat-icon>person</mat-icon>
+                    <div>
+                        <p class="label">No. of Designations</p>
+                        <p class="value">{{request?.designation_count}}</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <mat-divider class="divider"></mat-divider>
+
+            <div class="organization">
+                <p class="label">Organization</p>
+                <p class="org-value">{{request?.state_center_name}}</p>
+            </div>
+
+        </mat-card>
+
+
+        <!-- ROLE MAPPING SECTION -->
+        <div class="role-header">
+
+            <div>
+                <p class="section-title">Role Mappings for Review</p>
+            </div>
+
+
+            <div class="search flex margin-right-m">
+                <div class="mt-2">
+                    <div class="search-container">
+                        <div class="rsearch">
+                            <mat-icon
+                                class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
+                            <input class="sinput color-60 w-full" [(ngModel)]="searchText" label=""
+                                (input)="applyFilter()" placeholder="Search by designation name" type="Standard">
+                            <mat-icon *ngIf="searchText.trim().length > 0"
+                                class="color-60 clear-icon mat-icon notranslate material-icons mat-icon-no-color cursor-pointer"
+                                (click)="clearSearch()">clear</mat-icon>
+                        </div>
+                        <div class="pl-2 mt-2">
+                            <input [disabled]="searchText.trim()?.length === 0"
+                                [ngClass]="searchText.trim()?.length === 0 ? 'btn-disable':'btn-active'" type="button"
+                                value="Search" (click)="applyFilter()" />
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+        <div class="table-class">
+            <ng-container *ngIf="dataSource?.data?.length > 0">
+                <div class="table-container mt-4" style="overflow: auto;">
+                    <table mat-table [dataSource]="dataSource" class="mat-elevation-z1 table-body">
+
+                        <ng-container matColumnDef="designation_name">
+                            <th class="table-header" mat-header-cell *matHeaderCellDef> Designation
+                            </th>
+                            <td class="cursor-pointer" mat-cell *matCellDef="let element"
+                                (click)="viewCBPPlan(element)">
+                                <div
+                                    [ngClass]="activeTab === 'matched'? 'designation-text': 'designation-text-unmatched'">
+                                    <p class="designation">{{ element?.designation_name }} </p>
+                                    <p class="wing-text mt-2">Wing/Division - {{
+                                        element?.wing_division_section }} </p>
+                                </div>
+
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="role_responsibilities">
+                            <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
+                                mat-header-cell *matHeaderCellDef> Role &
+                                Responsibilities </th>
+                            <td mat-cell *matCellDef="let element">
+                                <ul>
+                                    <li class="role-item"
+                                        *ngFor="let role of (isResponisbilityExpanded(element.id) ? element.role_responsibilities : element.role_responsibilities.slice(0, 2)); let i = index">
+                                        {{i+1}}. {{ role }}</li>
+                                    <li *ngIf="element.role_responsibilities.length > 2"
+                                        class="view-more-less cursor-pointer"
+                                        (click)="openFullList(element, 'role_responsibilities')">
+                                        <span style="color: #1B4CA1;font-size: 16px;">
+                                            View More
+                                        </span>
+                                    </li>
+                                </ul>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="activities">
+                            <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
+                                mat-header-cell *matHeaderCellDef> Activities </th>
+                            <td mat-cell *matCellDef="let element">
+                                <ul>
+                                    <li class="role-item"
+                                        *ngFor="let activity of (isActivityExpanded(element.id) ? element.activities : element.activities.slice(0, 2)); let i = index">
+                                        {{i+1}}. {{ activity }}</li>
+                                    <li *ngIf="element.activities.length > 2" class="view-more-less cursor-pointer"
+                                        (click)="openFullList(element, 'activity')">
+                                        <span style="color: #1B4CA1;font-size: 16px;">
+                                            View More
+                                        </span>
+                                    </li>
+                                </ul>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="behavioral">
+                            <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
+                                mat-header-cell *matHeaderCellDef> Behavioral
+                                Competencies </th>
+                            <td mat-cell *matCellDef="let element">
+                                <ul class="competency-list">
+                                    <li class="behavioural-pill"
+                                        *ngFor="let comp of getCompetenciesByType(element.competencies, 'Behavioral')">
+                                        <span class="competency-text-behavioral"> {{ comp.theme }} - {{
+                                            comp.sub_theme }} </span>
+                                    </li>
+                                </ul>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="functional">
+                            <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
+                                mat-header-cell *matHeaderCellDef> Functional
+                                Competencies </th>
+                            <td mat-cell *matCellDef="let element">
+                                <ul class="competency-list">
+                                    <li class="functional-pill"
+                                        *ngFor="let comp of getCompetenciesByType(element.competencies, 'Functional')">
+                                        <span class="competency-text-functional"> {{ comp.theme }} - {{
+                                            comp.sub_theme }}</span>
+                                    </li>
+                                </ul>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="domain">
+                            <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
+                                mat-header-cell *matHeaderCellDef> Domain
+                                Competencies </th>
+                            <td mat-cell *matCellDef="let element">
+                                <ul class="competency-list">
+                                    <li class="domain-pill"
+                                        *ngFor="let comp of getCompetenciesByType(element.competencies, 'Domain')">
+                                        <span class="competency-text-domain"> {{ comp.theme }} - {{
+                                            comp.sub_theme }}</span>
+                                    </li>
+                                </ul>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+                                No Data Found
+                            </td>
+                        </tr>
+                    </table>
+                    <ng-container *ngIf="dataSource?.filteredData?.length || dataSource?.filteredData?.length">
+                        <mat-paginator [length]="dataSource?.data?.length" [pageSize]="5"
+                            [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+                        </mat-paginator>
+                    </ng-container>
+
+                </div>
+
+            </ng-container>
+
+            
+        </div>
+    </div>
+
+</div>
+
+<div class="overlay-loader" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+</div>

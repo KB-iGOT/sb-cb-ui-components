@@ -1,0 +1,1006 @@
+<div class="view-cbp-plan">
+    <div class="popup-container">
+        
+        <!-- Initial Loading Screen (for initial load and regeneration) -->
+        <div class="initial-loading-container" *ngIf="!dataLoaded || isRegeneratingWithProgress">
+            <div class="loading-content">
+                <mat-spinner diameter="50"></mat-spinner>
+                <div class="loading-text mt-3">
+                    <p class="main-message">{{ currentProcessingStage || (isRegeneratingWithProgress ? 'Regenerating course recommendations...' : 'Loading course recommendations...') }}</p>
+                    <div class="progress-details" *ngIf="progressPercentage > 0">
+                        <div class="progress-indicator">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" 
+                                     [style.width.%]="progressPercentage">
+                                </div>
+                            </div>
+                            <small class="progress-text">{{ progressPercentage }}% Complete</small>
+                        </div>
+                        <small class="time-estimate">
+                            Real-time course generation in progress. This may take 1-2 minutes.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" *ngIf="dataLoaded && !isRegeneratingWithProgress">
+        <div class="popup-header">
+            <div class="header-left">
+                <div class="heading">Save Courses (<span>{{sharedService?.cbpPlanFinalObj?.ministry?.orgName}} <span
+                            *ngIf="planData?.designation_name ">/ {{planData?.designation_name}}</span></span>)</div>
+            </div>
+            <div class="header-actions">
+                <button class="regenerate-btn" (click)="regenerateCourseRecommendations()"
+                        [disabled]="isRegenerating"
+                        mat-raised-button color="primary">
+                    <mat-icon *ngIf="!isRegenerating">refresh</mat-icon>
+                    <mat-spinner *ngIf="isRegenerating" diameter="20"></mat-spinner>
+                    <span>{{isRegenerating ? 'Regenerating...' : 'Regenerate Recommendations'}}</span>
+                </button>
+                <div class="cursor-pointer close-btn" (click)="closeDialog()">
+                    <mat-icon>close</mat-icon>
+                </div>
+            </div>
+        </div>
+        <div class="section-container mt-4">
+            <mat-tab-group (selectedTabChange)="onOuterTabChange($event)">
+                <!-- First Main Tab -->
+                <mat-tab label="course recommendation">
+                    <!-- Nested Tabs -->
+                    <!-- <mat-tab-group (selectedTabChange)="onInnerTabChange($event)">
+                        <mat-tab label="all">
+
+                        </mat-tab>
+                        <mat-tab label="behavioural">
+
+                        </mat-tab>
+                        <mat-tab label="functional">
+
+                        </mat-tab>
+                        <mat-tab label="domain">
+
+                        </mat-tab>
+                    </mat-tab-group> -->
+                </mat-tab>
+
+                <!-- Second Main Tab -->
+                <mat-tab label="gap analysis">
+                    <!-- <p>Gap analysis content goes here</p> -->
+                </mat-tab>
+            </mat-tab-group>
+            <form [formGroup]="filterForm" class="filters-container">
+            <div class="role-mapping-container"
+                *ngIf="outerTabActiveIndex === 0 && (innerTabActiveIndex === 0 || innerTabActiveIndex === 1 || innerTabActiveIndex === 2 || innerTabActiveIndex === 3 )">
+                <div class="container">
+                    <div class="section-header-improved mt-3">
+                        <div class="search-and-buttons-container">
+                            <div>
+                                <label>Search Courses</label>
+                            </div>                            
+                            <div class="search-container-compact">
+                                <div class="rsearch">
+                                    <mat-icon class="search-icon">search</mat-icon>
+                                    <input class="sinput-compact" [(ngModel)]="searchText"
+                                           (input)="applyFilter($event.target.value);"
+                                           placeholder="Search Courses" type="text">
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+
+                        <div class="search-and-buttons-container">
+                            <div style="margin-left: 10px;">
+                                <label>Select Competency</label>
+                            </div>   
+                            <div>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>
+                                        {{ filterForm.value.competency?.length ? '' : 'Competency' }}
+                                      </mat-label>
+                                  
+                                    <mat-select
+                                      formControlName="competency"
+                                      multiple
+                                      panelClass="select-search-panel"
+                                      (selectionChange)="applyFilters()">
+                                        
+                                      <!-- Search box -->
+                                        <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                          matInput
+                                          placeholder="Search Competency"
+                                          (click)="$event.stopPropagation()"
+                                          (keydown)="$event.stopPropagation()"
+                                          (keyup)="filterList($any($event.target).value, 'competency')" />
+                                  
+                                      <!-- Values -->
+                                      <mat-option
+                                        *ngFor="let r of filteredCompetency"
+                                        [value]="r">
+                                        {{ r }}
+                                      </mat-option>
+                                  
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>                       
+                            
+                        </div>
+                        <div class="search-and-buttons-container">
+                            <div style="margin-left: 10px;">
+                                <label>Select Rating</label>
+                            </div>                            
+                            <div>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>
+                                        {{ filterForm.value.rating?.length ? '' : 'Rating' }}
+                                      </mat-label>
+                                  
+                                    <mat-select
+                                      formControlName="rating"
+                                      multiple
+                                      panelClass="select-search-panel"
+                                      (selectionChange)="applyFilters()">
+                                  
+                                      <!-- Search box -->
+                                        <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                          matInput
+                                          placeholder="Search Reatings"
+                                          (click)="$event.stopPropagation()"
+                                          (keydown)="$event.stopPropagation()"
+                                          (keyup)="filterList($any($event.target).value, 'rating')" />
+                                  
+                                      <!-- Values -->
+                                      <mat-option
+                                        *ngFor="let r of filteredRatings"
+                                        [value]="r">
+                                        {{ r }}
+                                      </mat-option>
+                                  
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>
+                        </div>
+                       
+                      
+                        
+                        
+                    </div>
+                    <div class="section-header-improved-sec-2 mt-4">
+                        <div class="search-and-buttons-container">
+                            <div style="margin-left: 10px;">
+                                <label>Select Language</label>
+                            </div>                            
+                            <div>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>
+                                        {{ filterForm.value.language?.length ? '' : 'Language' }}
+                                      </mat-label>
+                                  
+                                    <mat-select
+                                      formControlName="language"
+                                      multiple
+                                      panelClass="select-search-panel"
+                                      (selectionChange)="applyFilters()">
+                                  
+                                      <!-- Search box -->
+                                        <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                          matInput
+                                          placeholder="Search Languages"
+                                          (click)="$event.stopPropagation()"
+                                          (keydown)="$event.stopPropagation()"
+                                          (keyup)="filterList($any($event.target).value, 'language')" />
+                                  
+                                      <!-- Values -->
+                                      <mat-option
+                                        *ngFor="let r of filteredLanguages"
+                                        [value]="r">
+                                        {{ r }}
+                                      </mat-option>
+                                  
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="search-and-buttons-container">
+                            <div style="margin-left: 10px;">
+                                <label>Select Duration</label>
+                            </div>                            
+                            <div>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>
+                                        {{ filterForm.value.duration?.length ? '' : 'Duration' }}
+                                      </mat-label>
+                                  
+                                    <mat-select
+                                      formControlName="duration"
+                                      multiple
+                                      panelClass="select-search-panel"
+                                      (selectionChange)="applyFilters()">
+                                  
+                                      <!-- Search box -->
+                                        <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                          matInput
+                                          placeholder="Search Duration"
+                                          (click)="$event.stopPropagation()"
+                                          (keydown)="$event.stopPropagation()"
+                                          (keyup)="filterList($any($event.target).value, 'duration')" />
+                                  
+                                      <!-- Values -->
+                                      <mat-option
+                                        *ngFor="let r of filteredDurations"
+                                        [value]="r">
+                                        {{ r }}
+                                      </mat-option>
+                                  
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="search-and-buttons-container">
+                            <div style="margin-left: 10px;">
+                                <label>Select Provider</label>
+                            </div>                            
+                            <div>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>
+                                        {{ filterForm.value.provider?.length ? '' : 'Provider' }}
+                                      </mat-label>
+                                  
+                                    <mat-select
+                                      formControlName="provider"
+                                      multiple
+                                      panelClass="select-search-panel"
+                                      (selectionChange)="applyFilters()">
+                                  
+                                      <!-- Search box -->
+                                        <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                          matInput
+                                          placeholder="Search Provider"
+                                          (click)="$event.stopPropagation()"
+                                          (keydown)="$event.stopPropagation()"
+                                          (keyup)="filterList($any($event.target).value, 'provider')" />
+                                  
+                                      <!-- Values -->
+                                      <mat-option
+                                        *ngFor="let r of filteredProviders"
+                                        [value]="r">
+                                        {{ r }}
+                                      </mat-option>
+                                  
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>
+                        </div>
+                        <div style="margin-top: 45px;margin-left: 20px;">
+                            <input class="btn-active" type="button" value="Reset All Filters"
+                                (click)="resetFilters()" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div style="font-size:16px;font-weight:bold;color:#000">
+                            Filtered Course Count : {{filterdCourses?.length}}
+                        </div>
+                    </div>
+                    <div class="mt-5 sub-heading select-all-container" *ngIf="filterdCourses?.length">
+                        <div style="margin-left: 16px;">
+                            <mat-checkbox [checked]="false" (change)="selectAllCourses($event)">Select All
+                                Courses</mat-checkbox>
+                        </div>
+                        <div class="btn-group-compact">
+                            <div>
+                                <input class="btn-active" type="button" value="Suggest More Course From iGOT"
+                                    (click)="suggestMoreCourses()" />
+                            </div>
+                            <div class="pl-2">
+                                <input [disabled]="selectFilterCourses?.length > 0 ? false : true"
+                                    [ngClass]="selectFilterCourses?.length > 0 ? 'btn-active' : 'btn-disable'"
+                                    type="button" [value]="mode === 'add' ? 'Save Courses' : 'Update Courses'"
+                                    (click)="saveCourses()" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="disclaimer-container mt-2" *ngIf="filterdCourses?.length">
+                        <div class="disclaimer-message mt-4">
+                            <strong>Disclaimer:</strong> Please verify the public course URL before adding it to the plan.
+                        </div>
+                    </div>
+                    <div class="mt-2">
+
+                        <div class="course-list-container">
+                            <div
+                                [ngClass]="innerTabActiveIndex > 0 ? 'course-list-container-flex':'course-list-container-right-flex' ">
+                                <div *ngIf="innerTabActiveIndex > 0"
+                                    [ngClass]="innerTabActiveIndex > 0 ? 'left-panel':''">
+                                    <ng-container *ngIf="innerTabActiveIndex === 1">
+                                        <div class="sub-heading">
+                                            <p>Competencies in Behavioural</p>
+                                        </div>
+                                        <div class="theme-filter-controls mb-2" *ngIf="selectedThemeFilter">
+                                            <button class="clear-filter-btn" (click)="clearThemeFilter()">
+                                                <mat-icon>clear</mat-icon> Clear Filter
+                                            </button>
+                                        </div>
+                                        <div (click)="filterOnCompetencyTheme(item)"
+                                             class="category-list-item cursor-pointer mt-2"
+                                             [ngClass]="{'selected-theme': isThemeSelected(item)}"
+                                             *ngFor="let item of competencyMatchedByCategory">
+                                            {{item}}
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="innerTabActiveIndex === 2">
+                                        <div class="sub-heading">
+                                            <p>Competencies in Functional</p>
+                                        </div>
+                                        <div class="theme-filter-controls mb-2" *ngIf="selectedThemeFilter">
+                                            <button class="clear-filter-btn" (click)="clearThemeFilter()">
+                                                <mat-icon>clear</mat-icon> Clear Filter
+                                            </button>
+                                        </div>
+                                        <div (click)="filterOnCompetencyTheme(item)"
+                                             class="category-list-item cursor-pointer mt-2"
+                                             [ngClass]="{'selected-theme': isThemeSelected(item)}"
+                                             *ngFor="let item of competencyMatchedByCategory">
+                                            {{item}}
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="innerTabActiveIndex === 3">
+                                        <div class="sub-heading">
+                                            <p>Competencies in Domain</p>
+                                        </div>
+                                        <div class="theme-filter-controls mb-2" *ngIf="selectedThemeFilter">
+                                            <button class="clear-filter-btn" (click)="clearThemeFilter()">
+                                                <mat-icon>clear</mat-icon> Clear Filter
+                                            </button>
+                                        </div>
+                                        <div (click)="filterOnCompetencyTheme(item)"
+                                            class="category-list-item cursor-pointer mt-2"
+                                            [ngClass]="{'selected-theme': isThemeSelected(item)}"
+                                            *ngFor="let item of competencyMatchedByCategory">
+                                            {{item}}
+                                        </div>
+                                    </ng-container>
+                                </div>
+                                <div [ngClass]="innerTabActiveIndex > 0 ? 'right-panel':'right-panel-flex'">
+                                    <!-- No Course Found Message in Right Panel -->
+                                    <div class="no-course-found-container"
+                                        *ngIf="filterdCourses?.length === 0 && selectedThemeFilter">
+                                        <div class="no-course-card">
+                                            <div class="no-course-icon">
+                                                <mat-icon>search_off</mat-icon>
+                                            </div>
+                                            <div class="no-course-content">
+                                                <h4>No Courses Found</h4>
+                                                <p>No courses found for the selected theme:
+                                                    <strong>{{selectedThemeFilter}}</strong></p>
+                                                <p>Would you like to add a course for this competency?</p>
+                                                <button class="suggest-course-btn"
+                                                    (click)="addCourseForSelectedTheme()">
+                                                    <mat-icon>add_circle</mat-icon>
+                                                    Add Course
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Courses List -->
+                                    <div class="course-list-item" *ngFor="let item of filterdCourses;let i=index">
+
+                                        <div class="course-content">
+                                            <div class="course-header">
+                                                <div class="checked-course-container">
+                                                    <div>
+                                                        <mat-checkbox [checked]="checkIfCourseExists(item)"
+                                                            (change)="selectedFilterCourses($event, item)"></mat-checkbox>
+                                                    </div>
+                                                    <div class="ml-2">
+                                                        <div class="course-pill-container">
+                                                            <div class="course-pill">
+                                                                <div class="course-pill-text">
+                                                                    <span><img
+                                                                            src="assets/icons/course.svg"></span>&nbsp;<span>Course</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <!-- <div>
+                                        <div class="ai-recommened-pill">
+                                            <div class="ai-recommened-pill-text">
+                                                <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
+
+                                                <span *ngIf="item?.rationale">AI Recommended
+                                                    <span *ngIf="item?.is_public"> - Public</span>
+                                                    <span *ngIf="!item?.is_public"> - iGOT</span>
+                                                </span>
+                                                <span *ngIf="!item?.rationale">Manually Suggested - iGOT</span>
+
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                                <div *ngIf="item?.rationale && !item?.is_public">
+                                                    <div class="ai-recommened-pill-green">
+                                                        <div class="ai-recommened-pill-green-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+
+                                                            <span>AI Recommended - iGOT </span>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
+                                                        <div class="ai-recommened-pill-orange-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+                                                            <a class="cursor-pointer" [href]="item?.public_link"
+                                                                target="_blank"><span>Platform -
+                                                                    {{item?.platform}}</span></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.organisation?.length">
+                                                        <div class="ai-recommened-pill-orange-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+                                                            <span>Provider - {{item?.organisation[0]}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="item?.rationale && item?.is_public">
+                                                    <div class="ai-recommened-pill-public">
+                                                        <div class="ai-recommened-pill-public-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+
+                                                            <span>AI Recommended - Public </span>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
+                                                        <div class="ai-recommened-pill-orange-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+                                                            <a class="cursor-pointer" [href]="item?.public_link"
+                                                                target="_blank"><span>Platform -
+                                                                    {{item?.platform}}</span></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.organisation?.length">
+                                                        <div class="ai-recommened-pill-orange-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+                                                            <span>Provider - {{item?.organisation[0]}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="!item?.rationale">
+                                                    <div class="ai-recommened-pill-gray">
+                                                        <div class="ai-recommened-pill-gray-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+
+                                                            <span>Manually Suggested - iGOT </span>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
+                                                        <div class="ai-recommened-pill-orange-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+                                                            <a class="cursor-pointer" [href]="item?.public_link"
+                                                                target="_blank"><span>Platform -
+                                                                    {{item?.platform}}</span></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.organisation?.length">
+                                                        <div class="ai-recommened-pill-orange-text">
+                                                            <span class="ai-loader-icon"><img
+                                                                    src="assets/icons/ai-loader.gif"></span>
+                                                            <span>Provider - {{item?.organisation[0]}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="course-title mt-3 cursor-pointer" (click)="redirectToToc(item)">
+                                                <span *ngIf="item?.course">{{item?.course}}</span>
+                                                <!-- <span *ngIf="item?.name">{{item?.name}}****</span> -->
+                                                <span style="margin-left:10px;" (click)="redirectToToc(item)"><img
+                                                        height="18px" width="18px"
+                                                        src="assets/icons/redirect.png" /></span>
+                                            </div>
+                                            <div class="course-desc mt-2">
+                                                <!-- <span *ngIf="item?.rationale">{{item?.rationale}}</span> -->
+                                                <span *ngIf="item?.description">{{item?.description}}</span>
+                                            </div>
+                                            <div class="mt-3" *ngIf="getCompetenciesByType('Behavioural',i)?.length">
+                                                <div class="competency-sub-heading">Behavioural Competencies</div>
+                                                <ul class="competency-list mt-1">
+                                                    <li class="behavioural-pill"
+                                                        *ngFor="let comp of getDisplayedCompetencies('Behavioural',i)">
+                                                        <span class="competency-text"> {{ comp.competencyThemeName }} -
+                                                            {{
+                                                            comp.competencySubThemeName }} </span>
+                                                    </li>
+                                                    <li *ngIf="hasMoreThanTwo('Behavioural',i)"
+                                                        class="show-more-competency">
+                                                        <span class="show-more-link cursor-pointer"
+                                                            (click)="toggleCompetencies('Behavioural',i)">
+                                                            {{ isExpanded('Behavioural',i) ? 'Show Less' : '+' +
+                                                            getRemainingCount('Behavioural',i) + ' More' }}
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="mt-2" *ngIf="getCompetenciesByType('Functional',i)?.length">
+                                                <div class="competency-sub-heading">Functional Competencies</div>
+                                                <ul class="competency-list mt-1">
+                                                    <li class="functional-pill"
+                                                        *ngFor="let comp of getDisplayedCompetencies('Functional',i)">
+                                                        <span class="competency-text"> {{ comp.competencyThemeName }} -
+                                                            {{
+                                                            comp.competencySubThemeName }} </span>
+                                                    </li>
+                                                    <li *ngIf="hasMoreThanTwo('Functional',i)"
+                                                        class="show-more-competency">
+                                                        <span class="show-more-link cursor-pointer"
+                                                            (click)="toggleCompetencies('Functional',i)">
+                                                            {{ isExpanded('Functional',i) ? 'Show Less' : '+' +
+                                                            getRemainingCount('Functional',i) + ' More' }}
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="mt-2" *ngIf="getCompetenciesByType('Domain',i)?.length">
+                                                <div class="competency-sub-heading">Domain Competencies</div>
+                                                <ul class="competency-list mt-1">
+                                                    <li class="domain-pill"
+                                                        *ngFor="let comp of getDisplayedCompetencies('Domain',i)">
+                                                        <span class="competency-text"> {{ comp.competencyThemeName }} -
+                                                            {{
+                                                            comp.competencySubThemeName }} </span>
+                                                    </li>
+                                                    <li *ngIf="hasMoreThanTwo('Domain',i)" class="show-more-competency">
+                                                        <span class="show-more-link cursor-pointer"
+                                                            (click)="toggleCompetencies('Domain',i)">
+                                                            {{ isExpanded('Domain',i) ? 'Show Less' : '+' +
+                                                            getRemainingCount('Domain',i) + ' More' }}
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+
+                                        </div>
+
+                                        <!-- Relevancy and Duration section -->
+                                        <div class="course-footer" *ngIf="item?.relevancy">
+                                            <div class="relevancy-pill-green">
+                                                <div class="relevancy-container">
+                                                    <div class="relevancy">Relevancy</div>
+                                                    <div class="dash">-</div>
+                                                    <div class="percentage">{{item?.relevancy}}%</div>
+                                                </div>
+                                            </div>
+                                            <div class="relevancy-pill-green">
+                                                <div class="relevancy-container">
+                                                    <div class="relevancy">Duration</div>
+                                                    <div class="dash">-</div>
+                                                    <div class="percentage">
+                                                        <span
+                                                            *ngIf="item?.duration">{{getDuration(item?.duration)}}</span>
+                                                        <span *ngIf="!(item?.duration)">N/A</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General No Data Message (only when no theme filter is active) -->
+                    <div class="mt-2 sub-heading" *ngIf="filterdCourses?.length === 0 && !selectedThemeFilter">
+                        <p>No Data Found</p>
+                    </div>
+                </div>
+            </div>
+        </form>
+            <div class="role-mapping-container" *ngIf="outerTabActiveIndex === 1">
+                <div id="gap-analysis-content">
+
+                    <div class="download-pdf mt-4 mb-2">
+                        <div>
+                            <input class="btn-active" type="button" value="Download" (click)="downloadPDF()" />
+                        </div>
+                    </div>
+                    <div>
+                        <!-- <div *ngIf="isPDFDownload">
+                            <div class="pdf-heading">{{sharedService?.cbpPlanFinalObj?.ministry?.name}} <span
+                                    *ngIf="planData?.designation_name ">_{{planData?.designation_name}}_Gap_Analysis</span>
+                            </div>
+                        </div> -->
+                        <div class="d-flex vh-100" [ngClass]="isPDFDownload ? 'mt-4':''">
+                            <!-- Sidebar -->
+                            <div class="d-flex flex-column p-3 bg-light border-end" style="width: 250px;">
+                                <h5 class="mb-4">Analyze by Category</h5>
+                                <button *ngFor="let item of menuItems"
+                                    class="btn btn-outline-primary mb-2 text-start menu-list-item"
+                                    [class.active]="selectedCategory === item.key" (click)="selectCategory(item.key)">
+                                    {{ item.label }}
+                                </button>
+                            </div>
+
+                            <!-- Main Content -->
+                            <div class="flex-grow-1 p-4">
+                                <div class="d-flex justify-content-between gap-3 ">
+                                    <div class="p-3 gray-bg">
+                                        <div class="div-label sub-heading">
+                                            <p>Competencies Covered</p>
+                                        </div>
+                                        <div class="div-count">{{competencyCoveredCount}}</div>
+                                    </div>
+                                    <div class="p-3 gray-bg">
+                                        <div class="div-label sub-heading">
+                                            <p *ngIf="selectedCategory === 'all'">Total Competencies</p>
+                                            <p *ngIf="selectedCategory === 'behavioral'">Total Behavioural Competencies
+                                            </p>
+                                            <p *ngIf="selectedCategory === 'functional'">Total Functional Competencies
+                                            </p>
+                                            <p *ngIf="selectedCategory === 'domain'">Total Domain Competencies</p>
+                                        </div>
+                                        <div class="div-count" *ngIf="selectedCategory === 'all'">
+                                            {{this.planData?.competencies?.length}}</div>
+                                        <div class="div-count" *ngIf="selectedCategory === 'behavioral'">
+                                            {{behavioralTotalCompetencies}}</div>
+                                        <div class="div-count" *ngIf="selectedCategory === 'functional'">
+                                            {{functionalTotalCompetencies}}</div>
+                                        <div class="div-count" *ngIf="selectedCategory === 'domain'">
+                                            {{domainTotalCompetencies}}</div>
+                                    </div>
+                                    <div class="p-3 green-bg">
+                                        <div class="div-green-label" *ngIf="selectedCategory === 'all'">Overall Coverage
+                                        </div>
+                                        <div class="div-green-label" *ngIf="selectedCategory === 'behavioral'">
+                                            Behavioural Coverage</div>
+                                        <div class="div-green-label" *ngIf="selectedCategory === 'functional'">
+                                            Functional Coverage</div>
+                                        <div class="div-green-label" *ngIf="selectedCategory === 'domain'">Domain
+                                            Coverage</div>
+                                        <div class="div-green-count" *ngIf="selectedCategory === 'all'">
+                                            {{overallCoverage}}</div>
+                                        <div class="div-green-count" *ngIf="selectedCategory === 'behavioral'">
+                                            {{behavioralCoverage}}</div>
+                                        <div class="div-green-count" *ngIf="selectedCategory === 'functional'">
+                                            {{functionalCoverage}}</div>
+                                        <div class="div-green-count" *ngIf="selectedCategory === 'domain'">
+                                            {{domainCoverage}}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 all-category-list" [ngSwitch]="selectedCategory">
+                                    <div *ngSwitchCase="'all'">
+                                        <h4>All Categories</h4>
+
+                                        <!-- Show Behavioural section only if there are unmatched behavioural competencies -->
+                                        <div class="mt-4"
+                                            *ngIf="behaviouralNotMatched && behaviouralNotMatched.length > 0">
+                                            <div class="sub-heading">
+                                                <p>Behavioural</p>
+                                            </div>
+                                            <div class="gray-bg-item" *ngFor="let item of behaviouralNotMatched">
+                                                <div class="list-flex">
+                                                    <div><span>{{item | titlecase}}</span></div>
+                                                    <div class="cursor-pointer" (click)="addCourse(item, 'Behavioral')">
+                                                        <span class="add-btn"><mat-icon>add</mat-icon> Add New
+                                                            Course</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Show Functional section only if there are unmatched functional competencies -->
+                                        <div class="mt-4"
+                                            *ngIf="functionalNotMatched && functionalNotMatched.length > 0">
+                                            <div class="sub-heading">
+                                                <p>Functional</p>
+                                            </div>
+                                            <div class="gray-bg-item" *ngFor="let item of functionalNotMatched">
+                                                <div class="list-flex">
+                                                    <div><span>{{item | titlecase}}</span></div>
+                                                    <div class="cursor-pointer" (click)="addCourse(item, 'Functional')">
+                                                        <span class="add-btn"><mat-icon>add</mat-icon> Add New
+                                                            Course</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Show Domain section only if there are unmatched domain competencies -->
+                                        <div class="mt-4" *ngIf="domainNotMatched && domainNotMatched.length > 0">
+                                            <div class="sub-heading">
+                                                <p>Domain</p>
+                                            </div>
+                                            <div class="gray-bg-item" *ngFor="let item of domainNotMatched">
+                                                <div class="list-flex">
+                                                    <div><span>{{item | titlecase}}</span></div>
+                                                    <div class="cursor-pointer" (click)="addCourse(item, 'Domain')">
+                                                        <span class="add-btn"><mat-icon>add</mat-icon> Add New
+                                                            Course</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Show message when all competencies are covered -->
+                                        <div class="mt-4 text-center"
+                                            *ngIf="(!behaviouralNotMatched || behaviouralNotMatched.length === 0) && 
+                                                                           (!functionalNotMatched || functionalNotMatched.length === 0) && 
+                                                                           (!domainNotMatched || domainNotMatched.length === 0)">
+                                            <div class="no-gaps-message">
+                                                <mat-icon class="success-icon">check_circle</mat-icon>
+                                                <h4>Excellent! All competencies are covered</h4>
+                                                <p>All required competencies have been addressed by the selected
+                                                    courses.</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div *ngSwitchCase="'behavioral'">
+                                        <h4>Behavioural</h4>
+                                        <div class="mt-4" *ngIf="behavioralCoverage !== '100%'">
+                                            <!-- <div class="sub-heading">
+                                            <p>Behavioural</p>
+                                        </div> -->
+                                            <div class="gray-bg-item" *ngFor="let item of behaviouralNotMatched">
+                                                <div class="list-flex">
+                                                    <div><span>{{item}}</span></div>
+                                                    <div class="cursor-pointer" (click)="addCourse(item, 'Behavioral')">
+                                                        <span class="add-btn"><mat-icon>add</mat-icon> Add New Course </span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4" *ngIf="behavioralCoverage === '100%'">
+                                            <div class="p-3"
+                                                style="background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px; text-align: center;">
+                                                <div style="color: #2e7d32; font-weight: 600; font-size: 16px;">
+                                                    🎉 Excellent! All behavioral competencies are covered by the
+                                                    selected courses.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngSwitchCase="'functional'">
+                                        <h4>Functional</h4>
+                                        <div class="mt-4" *ngIf="functionalCoverage !== '100%'">
+                                            <!-- <div class="sub-heading">
+                                            <p>Functional</p>
+                                        </div> -->
+                                            <div class="gray-bg-item" *ngFor="let item of functionalNotMatched">
+                                                <div class="list-flex">
+                                                    <div><span>{{item}}</span></div>
+                                                    <div class="cursor-pointer" (click)="addCourse(item, 'Functional')">
+                                                        <span class="add-btn"><mat-icon>add</mat-icon> Add New Course</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4" *ngIf="functionalCoverage === '100%'">
+                                            <div class="p-3"
+                                                style="background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px; text-align: center;">
+                                                <div style="color: #2e7d32; font-weight: 600; font-size: 16px;">
+                                                    🎉 Excellent! All functional competencies are covered by the
+                                                    selected courses.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngSwitchCase="'domain'">
+                                        <h4>Domain</h4>
+                                        <div class="mt-4" *ngIf="domainCoverage !== '100%'">
+                                            <!-- <div class="sub-heading">
+                                            <p>Domain</p>
+                                        </div> -->
+                                            <div class="gray-bg-item" *ngFor="let item of domainNotMatched">
+                                                <div class="list-flex">
+                                                    <div><span>{{item}}</span></div>
+                                                    <div class="cursor-pointer" (click)="addCourse(item, 'Domain')">
+                                                        <span class="add-btn"><mat-icon>add</mat-icon> Add New Course </span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4" *ngIf="domainCoverage === '100%'">
+                                            <div class="p-3"
+                                                style="background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px; text-align: center;">
+                                                <div style="color: #2e7d32; font-weight: 600; font-size: 16px;">
+                                                    🎉 Excellent! All domain competencies are covered by the selected
+                                                    courses.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngSwitchDefault>
+                                        <p>Please select a category.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </div> <!-- Close main-content div -->
+
+    </div>
+</div>
+
+
+<div [hidden]="!isPDFDownload" class="gap-analysis-pdf-container" #pdfContent>
+    <div class="gap-analysis-pdf-header">
+      <img src="assets/icons/karmayogiLogo-min.png" alt="Karmayogi Bharat Logo" class="logo" />
+      <h1><span>
+        <span *ngIf="sharedService?.cbpPlanFinalObj?.ministry?.sbOrgType === 'state'">{{sharedService?.cbpPlanFinalObj?.department_name?.name}}</span> 
+        <span *ngIf="sharedService?.cbpPlanFinalObj?.ministry?.sbOrgType === 'ministry'">{{sharedService?.cbpPlanFinalObj?.ministry?.name}}</span>   
+        <span *ngIf="planData?.designation_name ">/ {{planData?.designation_name}}</span>
+        </span></h1>
+      <p class="subtitle">A detailed breakdown of competencies Gap Analysis</p>
+     
+    </div>
+  
+    <div class="competency-snapshot">
+      <h2>Competency Snapshot</h2>
+      <div class="snapshot-content">
+        <div class="circle-wrapper">
+          <svg class="progress-ring" width="120" height="120">
+            <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+            <circle class="progress-ring-circle" cx="60" cy="60" r="52" />
+          </svg>
+          <div class="percentage-text">{{overallCoverage}}<br /><span>Overall Coverage</span></div>
+        </div>
+  
+        <div class="competency-container">
+            <!-- Total Competencies Box -->
+            <div class="total-box">
+              <div class="title">Total Competencies</div>
+              <div class="count">{{this.planData?.competencies?.length}}</div>
+            </div>
+          
+            <!-- Progress Bars -->
+            <div class="progress-group">
+              <div class="progress-label">
+                <span class="label-text behavioral">Behavioural</span>
+                <span class="covered-text">{{behavioralCompetencyCoveredCount}} / {{behavioralTotalCompetencies}} Covered</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill behavioral" [style.width.%]="(behavioralCompetencyCoveredCount / behavioralTotalCompetencies) * 100"></div>
+              </div>
+            </div>
+          
+            <div class="progress-group">
+              <div class="progress-label">
+                <span class="label-text functional">Functional</span>
+                <span class="covered-text">{{functionalCompetencyCoveredCount}} / {{functionalTotalCompetencies}} Covered</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill functional" [style.width.%]="(functionalCompetencyCoveredCount / functionalTotalCompetencies) * 100"></div>
+              </div>
+            </div>
+          
+            <div class="progress-group">
+              <div class="progress-label">
+                <span class="label-text domain">Domain</span>
+                <span class="covered-text">{{domainCompetencyCoveredCount}} / {{domainTotalCompetencies}} Covered</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill domain" [style.width.%]="(domainCompetencyCoveredCount / domainTotalCompetencies) * 100"></div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  
+    <div class="gap-section mb-4">
+      <h2>Detailed Competency Analysis</h2>
+      <div class="gap-box">
+        Bridge Your Competencies Gap
+        <p class="subtitle">Here are {{this.planData?.competencies?.length - (behavioralCompetencyCoveredCount + functionalCompetencyCoveredCount + domainCompetencyCoveredCount)}} key areas for development.</p>
+    </div>
+    </div>
+    <div class="sub-heading mb-4">
+        <p>Gap to Address <span *ngIf="(this.planData?.competencies?.length - (behavioralCompetencyCoveredCount + functionalCompetencyCoveredCount + domainCompetencyCoveredCount)) > 0">({{this.planData?.competencies?.length - (behavioralCompetencyCoveredCount + functionalCompetencyCoveredCount + domainCompetencyCoveredCount)}})</span></p>
+        
+    </div>
+    <div class="competency-card behavioral" *ngFor="let item of behaviouralNotMatched">
+        <div class="title">{{item | titlecase}}</div>
+        <div class="subtitle">
+          &nbsp; • &nbsp;
+          <span class="tag behavioral">Behavioural</span>
+        </div>
+    </div>
+      
+      <div class="competency-card functional" *ngFor="let item of functionalNotMatched">
+        <div class="title">{{item | titlecase}}</div>
+        <div class="subtitle">
+           &nbsp; • &nbsp;
+          <span class="tag functional">Functional</span>
+        </div>
+      </div>
+      
+      <div class="competency-card domain" *ngFor="let item of domainNotMatched">
+        <div class="title">{{item | titlecase}}</div>
+        <div class="subtitle">
+          <!-- Project Management  -->
+          &nbsp; • &nbsp;
+          <span class="tag domain">Domain</span>
+        </div>
+      </div>
+      <div class="sub-heading mb-4">
+        <p>Covered Competencies <span>({{this.planData?.competencies?.length - (behaviouralNotMatched?.length + functionalNotMatched?.length + domainNotMatched?.length)}})</span></p>        
+     </div>
+     <div class="gap-section mb-4">
+        
+        <div class="green-bg">
+            <div class="div-green-label mb-2">
+                Congratulations!
+            </div>            
+            <p>You have successfully covered </p>
+          <p class="subtitle">{{this.planData?.competencies?.length - (behaviouralNotMatched?.length + functionalNotMatched?.length + domainNotMatched?.length)}} key competencies, forming a strong professional foundation.</p>
+      </div>
+      </div>
+      <div class="competency-card behavioral" *ngFor="let item of behaviouralMatched">
+        <div class="title">{{item?.theme | titlecase}}</div>
+        <div class="subtitle">
+          {{item?.sub_theme}}&nbsp; • &nbsp;
+          <span class="tag behavioral">Behavioural</span>
+        </div>
+    </div>
+      
+      <div class="competency-card functional" *ngFor="let item of functionalMatched">
+        <div class="title">{{item?.theme | titlecase}}</div>
+        <div class="subtitle">
+            {{item?.sub_theme}}&nbsp; • &nbsp;
+          <span class="tag functional">Functional</span>
+        </div>
+      </div>
+      
+      <div class="competency-card domain" *ngFor="let item of domainMatched">
+        <div class="title">{{item?.theme | titlecase}}</div>
+        <div class="subtitle">
+          <!-- Project Management  -->
+          {{item?.sub_theme}}&nbsp; • &nbsp;
+          <span class="tag domain">Domain</span>
+        </div>
+      </div>
+      <div class="gap-section mb-4">
+        <h2>Recommended Courses</h2>
+      </div>
+      <app-gap-analysis-recommended-course [planData]="planData"></app-gap-analysis-recommended-course>
+</div>
+  
+
+
+<div class="overlay-loader" *ngIf="loading && dataLoaded && !isRegeneratingWithProgress">
+    <div class="loading-content">
+        <mat-spinner diameter="50"></mat-spinner>
+        <div class="loading-text mt-3">
+            <p class="main-message">{{ currentProcessingStage || 'Preparing course recommendation generation...' }}</p>
+            <div class="progress-details">
+                <div class="progress-indicator" *ngIf="progressPercentage > 0">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" 
+                             [style.width.%]="progressPercentage">
+                        </div>
+                    </div>
+                    <small class="progress-text">{{ progressPercentage }}% Complete</small>
+                </div>
+                <small class="time-estimate">
+                    Real-time course generation in progress. This may take 1-2 minutes.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,156 @@
+<div class="view-cbp-plan">
+    <div class="popup-container">
+    <div class="popup-header">
+        <div>
+            <div class="heading">View Role Mapping</div>
+        </div>
+        <div  class="cursor-pointer" (click)="closeDialog()">
+            <mat-icon>close</mat-icon>
+        </div>
+    </div>
+    <div class="section-container"  #pdfContent>
+        
+            <div class="section-header mt-4">
+                <div class="designation">{{planData?.designation_name}}</div>
+            </div>
+
+            <div class="competency-container mt-4">
+                <div class="outside-layer-total">
+                    <div class="inside-layer">
+                        Total Competencies
+                    </div>
+                    <div class="count">
+                        {{competenciesCount?.total}}
+                    </div>
+                </div>
+                <div class="outside-layer-behavioral">
+                    <div class="inside-layer">
+                        Behavioral Competencies
+                    </div>
+                    <div class="count">
+                        {{competenciesCount?.behavioral}}
+                    </div>
+                </div>
+                <div class="outside-layer-functional">
+                    <div class="inside-layer">
+                        Functional Competencies
+                    </div>
+                    <div class="count">
+                        {{competenciesCount?.functional}}
+                    </div>
+                </div>
+                <div class="outside-layer-domain">
+                    <div class="inside-layer">
+                        Domain Competencies
+                    </div>
+                    <div class="count">
+                        {{competenciesCount?.domain}}
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 section">
+                <div class="sub-heading">
+                    <p>Wing/Division</p>
+                </div>
+                <div class="mt-2">
+                
+                    <div class="wing-text">{{planData?.wing_division_section}}</div>
+                </div>
+            </div>
+            <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Roles & Responsibilities</p>
+                </div>
+                <div class="mt-2 additional-details">
+                    <p class="responsibility-text" *ngFor="let item of planData?.role_responsibilities;let i=index">
+                       {{i+1}}. {{item}}
+                    </p>
+                </div>
+            </div>
+            <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Activities</p>
+                </div>
+                <div class="mt-2 additional-details">
+                    <p class="responsibility-text" *ngFor="let item of planData?.activities;let i=index">
+                       {{i+1}}. {{item}}
+                    </p>
+                </div>
+            </div>
+            <div class="section mt-2">
+                <div class="sub-heading">
+                    <p>Competency</p>
+                </div>
+               
+                <div class="mt-4">
+                    <div class="competency-sub-heading " *ngIf="getCompetenciesByType(planData?.competencies, 'Behavioral')?.length">Behavioral Competencies</div>
+                    <!-- <ul class="competency-list mt-2">
+                        <li class="behavioural-pill" *ngFor="let comp of getCompetenciesByType(planData?.competencies, 'Behavioral')">
+                           <span class="competency-text-behavioral"> {{ comp.theme }} - {{ comp.sub_theme }}</span>
+                          </li>
+                    </ul> -->
+                    <div class="competency-grid mt-2">
+                        <div class="competency-item behavioural-pill"
+                            *ngFor="let comp of getCompetenciesByType(planData?.competencies, 'Behavioral')">
+                            <span class="competency-text-behavioral">
+                                {{ comp.theme }} - {{ comp.sub_theme }}
+                            </span>
+                            <!-- <span class="cursor-pointer close" (click)="deleteCompetency(comp)">
+                                <mat-icon>close</mat-icon>
+                            </span> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <div class="competency-sub-heading " *ngIf="getCompetenciesByType(planData?.competencies, 'Functional')?.length">Functional Competencies</div>
+                    <!-- <ul class="competency-list mt-2">
+                        <li class="functional-pill" *ngFor="let comp of getCompetenciesByType(planData?.competencies, 'Functional')">
+                            <span class="competency-text-functional"> {{ comp.theme }}- {{ comp.sub_theme }} </span>
+                          </li>
+                    </ul> -->
+                    <div class="competency-grid mt-2">
+                        <div class="competency-item functional-pill"
+                            *ngFor="let comp of getCompetenciesByType(planData?.competencies, 'Functional')">
+                            <span class="competency-text-functional">
+                                {{ comp.theme }} - {{ comp.sub_theme }}
+                            </span>
+                            <!-- <span class="cursor-pointer close" (click)="deleteCompetency(comp)">
+                                <mat-icon>close</mat-icon>
+                            </span> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <div class="competency-sub-heading" *ngIf="getCompetenciesByType(planData?.competencies, 'Domain')?.length">Domain Competencies</div>
+                    <!-- <ul class="competency-list mt-2">
+                        <li class="domain-pill" *ngFor="let comp of getCompetenciesByType(planData?.competencies, 'Domain')">
+                            <span class="competency-text-domain"> {{ comp.theme }} - {{ comp.sub_theme }}</span>
+                          </li>
+                    </ul> -->
+                    <div class="competency-grid mt-2">
+                        <div class="competency-item domain-pill"
+                        *ngFor="let comp of getCompetenciesByType(planData?.competencies, 'Domain')">
+                            <span class="competency-text-domain">
+                                {{ comp.theme }} - {{ comp.sub_theme }}
+                            </span>
+                            <!-- <span class="cursor-pointer close" (click)="deleteCompetency(comp)">
+                                <mat-icon>close</mat-icon>
+                            </span> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    <div class="popup-footer">
+        <div>
+            <input class="btn-active" type="button" value="Generate Course Recommendation" (click)="generateCourseRecommendation()"/>
+        </div>
+        <div>
+            <input class="btn-active" type="button" value="Download" (click)="downloadPDF()"/>
+        </div>
+        <div>
+            <input class="btn-active" type="button" value="Edit" (click)="editCBPPlan()"/>
+        </div>
+    </div>
+</div>
+</div>
