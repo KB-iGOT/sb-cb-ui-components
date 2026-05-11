@@ -186,11 +186,12 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
         }
       }
     } else {
+      const isCAP = categoryValue === 'Comprehensive Assessment Program'
       payload = {
         request: {
           secureSettings: false,
           filters: {
-            accessSettingsEnabled: { "ne": true },
+            accessSettingsEnabled: { "ne": isCAP ? false : true },
             must: {
               courseCategory: [categoryValue]
             },
@@ -306,10 +307,13 @@ export class PvConfigStepComponent implements OnInit, OnDestroy {
       selectedCourseDetails: null,
       course: ''
     })
-    // Clear search results and query
+    // Clear search results and query, then fetch fresh data
     this.courseSearchResults = []
     this.currentSearchQuery = ''
     this.courseCharCount = 0
+    this.currentOffset = 0
+    this.currentPage = 1
+    this.searchCourses('')
   }
 
   isCourseSelected(course: any): boolean {

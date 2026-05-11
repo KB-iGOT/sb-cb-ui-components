@@ -1,16 +1,18 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { LibNotificationsService } from '../../_services/lib-notifications.service';
+import { PeerReadOverlayService } from '../../_services/peer-read-overlay.service';
 import * as _ from 'lodash'
 @Component({
   selector: 'sb-uin-notification-dropdown',
   templateUrl: './notification-dropdown.component.html',
   styleUrls: ['./notification-dropdown.component.scss']
 })
-export class NotificationDropdownComponent implements OnInit {
+export class NotificationDropdownComponent implements OnInit, OnDestroy {
   @Input() childData: any;
   @Input() unRead: number = 0
   @Input() showIcon: boolean = false
-  @Output() viewAllClick = new EventEmitter<string>()
+  @Output() viewAllClick = new EventEmitter<any>()
   currentTab = 'all'
   response: any
   notifications: any[] = []
@@ -20,37 +22,41 @@ export class NotificationDropdownComponent implements OnInit {
   isLoading = false
   peerValidations: any[] = []
   peerValidationsCount: number = 0
-  constructor(private libNotificationService: LibNotificationsService,
-  ) {
+  constructor(
+    private libNotificationService: LibNotificationsService,
+    private snackBar: MatSnackBar,
+    private overlayService: PeerReadOverlayService
+  ) {}
 
+  ngOnDestroy(): void {
+    this.overlayService.hide()
   }
 
   ngOnInit() {
     this.getUserNotifications()
-    // this.getMandatoryNotifications()
-    // this.getPeerValidationNotifications()
+    this.getMandatoryNotifications()
+    this.getPeerValidationNotifications()
   }
 
-  // getMandatoryNotifications() {
-  //   this.libNotificationService.getMandatoryNotifications(0, 5).subscribe((res: any) => {
-  //     let notifications = _.get(res, 'result.notifications', [])
-  //     this.mandatoryNotifications = notifications
-  //     this.mandatoryNotificationsCount = notifications.length
-  //   }, error => {
-  //     console.error("Error fetching mandatory notifications", error)
-  //   })
-  // }
+  getMandatoryNotifications() {
+    this.libNotificationService.getMandatoryNotifications(0, 5).subscribe((res: any) => {
+      let notifications = _.get(res, 'result.notifications', [])
+      this.mandatoryNotifications = notifications
+      this.mandatoryNotificationsCount = notifications.length
+    }, error => {
+      console.error("Error fetching mandatory notifications", error)
+    })
+  }
 
-  // getPeerValidationNotifications() {
-  //   this.libNotificationService.getNotifications(0, 5, 'PEER_VALIDATION').subscribe((res: any) => {
-  //     console.log("Peer validation notifications response ", res)
-  //     const notifications = _.get(res, 'result.notifications', [])
-  //     this.peerValidations = notifications
-  //     this.peerValidationsCount = notifications.length
-  //   }, error => {
-  //     console.error('Error fetching peer validation notifications', error)
-  //   })
-  // }
+  getPeerValidationNotifications() {
+    this.libNotificationService.getNotifications(0, 5, 'PEER_VALIDATION').subscribe((res: any) => {
+      const notifications = _.get(res, 'result.notifications', [])
+      this.peerValidations = notifications
+      this.peerValidationsCount = notifications.length
+    }, error => {
+      console.error('Error fetching peer validation notifications', error)
+    })
+  }
 
   getUserNotifications() {
     this.isLoading = true
@@ -58,10 +64,6 @@ export class NotificationDropdownComponent implements OnInit {
       this.notifications = _.get(res, 'result.notifications', [])
       const _alerts = _.get(res, 'result.subtypeStats', [])
       this.alerts = _alerts.find((notification: any) => notification.name === 'ALERT')
-      // const peerValidationEntries = _alerts.filter((item: any) =>
-      //   item.name && item.name.toUpperCase() === 'PEER_VALIDATION')
-      // this.peerValidationsCount = peerValidationEntries.reduce((sum: number, item: any) =>
-      //   sum + (+item.unread || 0) + (+item.read || 0), 0)
       this.isLoading = false
     }, error => {
       console.error("Error fetching notifications", error)
@@ -71,15 +73,15 @@ export class NotificationDropdownComponent implements OnInit {
 
   loadNotifications(type: string, event: MouseEvent) {
     this.currentTab = type
-    // if (type === 'MANDATORY') {
-    //   this.notifications = this.mandatoryNotifications
-    // } 
-    // else if (type === 'PEER_VALIDATION') {
-    //   this.notifications = this.peerValidations
-    // } 
-    // else {
+    if (type === 'MANDATORY') {
+      this.notifications = this.mandatoryNotifications
+    }  
+    else if (type === 'PEER_VALIDATION') {
+      this.notifications = this.peerValidations
+    } 
+    else {
       this.getUserNotifications()
-    // }
+    }
     event.stopPropagation()
   }
 
@@ -87,17 +89,20 @@ export class NotificationDropdownComponent implements OnInit {
     this.viewAllClick.emit(this.currentTab)
   }
 
-  redirectToNotification(notification: any) {
+  redirectToNotification(notification: any, event: MouseEvent) {
     if (!notification.read) {
       if (this.currentTab === 'MANDATORY') {
         this.markMandatoryAsRead(notification)
-      } else if (this.currentTab === 'PEER_VALIDATION') {
+      } else if (this.currentTab === 'PEER_VALIDATION' || notification.category === 'PEER_VALIDATION' || notification.sub_type === 'PEER_VALIDATION') {
+        event.stopPropagation()
         this.markPeerValidationAsRead(notification)
       } else {
         this.markAsRead(notification)
+        this.viewAllClick.emit(notification)
       }
+    } else {
+      this.viewAllClick.emit(notification)
     }
-    this.viewAllClick.emit(notification)
   }
 
   markMandatoryAsRead(notification: any) {
@@ -112,6 +117,7 @@ export class NotificationDropdownComponent implements OnInit {
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
+        this.viewAllClick.emit(notification)
       }
     })
   }
@@ -124,11 +130,22 @@ export class NotificationDropdownComponent implements OnInit {
         created_at: notification.created_at,
       }
     }
+    this.overlayService.show()
     this.libNotificationService.markAsRead(request).subscribe((res: any) => {
+      this.overlayService.hide()
       if (res.responseCode === 'OK') {
         notification.read = true
         this.libNotificationService.updateUnreadCount()
+
+        const matMenuPanel = document.querySelector('.mat-mdc-menu-panel, .mat-menu-panel') as HTMLElement | null
+        if (matMenuPanel) {
+          matMenuPanel.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+        }
+        this.viewAllClick.emit(notification)
       }
+    }, (_error: any) => {
+      this.overlayService.hide()
+      this.snackBar.open('Notification read failed', 'Close', { duration: 3000 })
     })
   }
 
@@ -137,7 +154,7 @@ export class NotificationDropdownComponent implements OnInit {
       request: {
         type: 'individual',
         ids: [notification.notification_id],
-        // created_at: notification.created_at
+        created_at: notification.created_at
       }
     }
     if (['COURSE_PUBLISHED', 'PROGRAM_PUBLISHED', 'EVENT_PUBLISHED'].includes(notification.sub_category)) {
