@@ -10,9 +10,10 @@ import { interval, of } from 'rxjs';
 import { switchMap, takeWhile, tap, catchError, finalize } from 'rxjs/operators';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-generate-course-recommendation',
-  templateUrl: './generate-course-recommendation.component.html',
-  styleUrls: ['./generate-course-recommendation.component.scss']
+    selector: 'app-generate-course-recommendation',
+    templateUrl: './generate-course-recommendation.component.html',
+    styleUrls: ['./generate-course-recommendation.component.scss'],
+    standalone: false
 })
 export class GenerateCourseRecommendationComponent {
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
@@ -2140,8 +2141,8 @@ export class GenerateCourseRecommendationComponent {
 
 // Confirmation Dialog Component
 @Component({
-  selector: 'regenerate-confirmation-dialog',
-  template: `
+    selector: 'regenerate-confirmation-dialog',
+    template: `
     <div class="confirmation-dialog-container">
       <div class="dialog-header">
         <mat-icon class="warning-icon">refresh</mat-icon>
@@ -2168,7 +2169,7 @@ export class GenerateCourseRecommendationComponent {
       </mat-dialog-actions>
     </div>
   `,
-  styles: [`
+    styles: [`
     .confirmation-dialog-container {
       padding: 0;
     }
@@ -2235,7 +2236,8 @@ export class GenerateCourseRecommendationComponent {
         margin: 0;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class RegenerateConfirmationDialog {
   constructor(

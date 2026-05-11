@@ -14,9 +14,10 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { ApprovalRequestFormComponent } from '../approval-request-form/approval-request-form.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-role-mapping-list',
-  templateUrl: './role-mapping-list.component.html',
-  styleUrls: ['./role-mapping-list.component.scss']
+    selector: 'app-role-mapping-list',
+    templateUrl: './role-mapping-list.component.html',
+    styleUrls: ['./role-mapping-list.component.scss'],
+    standalone: false
 })
 export class RoleMappingListComponent {
   @Input() formData: any = {}
@@ -519,7 +520,7 @@ export class RoleMappingListComponent {
     this.moveToInitialScreen.emit(event)
   }
 
-  openFullList(element: any, type: 'role_responsibilities' | 'activities') {
+  openFullList(element: any, type: any) {
     const listToShow: string[] = element[type] || [];
     const title = type === 'role_responsibilities' ? 'Role & Responsibilities' : 'Activities';
 

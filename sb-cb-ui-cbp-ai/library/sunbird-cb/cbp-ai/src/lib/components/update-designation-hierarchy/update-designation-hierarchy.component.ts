@@ -18,10 +18,11 @@ export interface Designation {
 }
 
 @Component({
-  selector: 'app-update-designation-hierarchy',
-  templateUrl: './update-designation-hierarchy.component.html',
-  styleUrls: ['./update-designation-hierarchy.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-update-designation-hierarchy',
+    templateUrl: './update-designation-hierarchy.component.html',
+    styleUrls: ['./update-designation-hierarchy.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class UpdateDesignationHierarchyComponent implements OnInit {
   openDropdownId: string | null = null;

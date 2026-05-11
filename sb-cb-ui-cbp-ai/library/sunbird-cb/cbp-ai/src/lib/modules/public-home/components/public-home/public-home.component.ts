@@ -7,9 +7,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { SharedService } from '../../../shared/services/shared.service';
 
 @Component({
-  selector: 'app-public-home',
-  templateUrl: './public-home.component.html',
-  styleUrls: ['./public-home.component.scss']
+    selector: 'app-public-home',
+    templateUrl: './public-home.component.html',
+    styleUrls: ['./public-home.component.scss'],
+    standalone: false
 })
 export class PublicHomeComponent implements OnInit {
 

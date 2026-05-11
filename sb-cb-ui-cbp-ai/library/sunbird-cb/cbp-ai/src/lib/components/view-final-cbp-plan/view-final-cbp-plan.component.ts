@@ -9,9 +9,10 @@ import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/de
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-view-final-cbp-plan',
-  templateUrl: './view-final-cbp-plan.component.html',
-  styleUrls: ['./view-final-cbp-plan.component.scss']
+    selector: 'app-view-final-cbp-plan',
+    templateUrl: './view-final-cbp-plan.component.html',
+    styleUrls: ['./view-final-cbp-plan.component.scss'],
+    standalone: false
 })
 export class ViewFinalCbpPlanComponent {
   constructor(
@@ -53,6 +54,7 @@ export class ViewFinalCbpPlanComponent {
   competenciesCount = { total: 0, public_courses: 0, igot: 0 };
   openedFrom!: string;
   @ViewChild('dialogContent') dialogContent!: ElementRef;
+  isPDFDownload = false
   // designationData = [
   //   {
   //     designation: "Secretary (WCD)",

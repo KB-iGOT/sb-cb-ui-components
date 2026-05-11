@@ -4,9 +4,10 @@ import { KARMAYOGI_CORNER } from 'src/app/modules/shared/constant/app.constant';
 import { SharedService } from '../../../shared/services/shared.service';
 
 @Component({
-  selector: 'app-latest-updates',
-  templateUrl: './latest-updates.component.html',
-  styleUrls: ['./latest-updates.component.scss']
+    selector: 'app-latest-updates',
+    templateUrl: './latest-updates.component.html',
+    styleUrls: ['./latest-updates.component.scss'],
+    standalone: false
 })
 export class LatestUpdatesComponent implements OnInit {
   @Input() data : any;

@@ -11,9 +11,10 @@ import { type } from 'os';
 import { element } from 'protractor';
 import { ListPopupComponent } from '../../components/list-popup/list-popup.component';
 @Component({
-  selector: 'app-upload-document-page',
-  templateUrl: './upload-document-page.component.html',
-  styleUrls: ['./upload-document-page.component.scss']
+    selector: 'app-upload-document-page',
+    templateUrl: './upload-document-page.component.html',
+    styleUrls: ['./upload-document-page.component.scss'],
+    standalone: false
 })
 export class UploadDocumentPageComponent {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -401,6 +402,14 @@ export class UploadDocumentPageComponent {
 
     routeToInitial() {
       this.router.navigate(['/ai/initial']);
+    }
+
+    clearSearch() {
+
+    }
+    
+    openFullList(element:any, type:any) {
+      console.log('element, type', element, type)   
     }
 
 }

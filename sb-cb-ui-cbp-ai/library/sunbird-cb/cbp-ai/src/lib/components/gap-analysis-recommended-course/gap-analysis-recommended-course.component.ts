@@ -5,9 +5,10 @@ import { data } from 'jquery';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-gap-analysis-recommended-course',
-  templateUrl: './gap-analysis-recommended-course.component.html',
-  styleUrls: ['./gap-analysis-recommended-course.component.scss']
+    selector: 'app-gap-analysis-recommended-course',
+    templateUrl: './gap-analysis-recommended-course.component.html',
+    styleUrls: ['./gap-analysis-recommended-course.component.scss'],
+    standalone: false
 })
 export class GapAnalysisRecommendedCourseComponent {
 

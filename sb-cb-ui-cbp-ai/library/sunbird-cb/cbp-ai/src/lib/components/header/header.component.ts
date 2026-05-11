@@ -2,9 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss'],
+    standalone: false
 })
 export class HeaderComponent implements OnInit {
   selectedValue: string = 'English';

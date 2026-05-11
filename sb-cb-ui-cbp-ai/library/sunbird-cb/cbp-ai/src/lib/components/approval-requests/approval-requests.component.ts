@@ -12,9 +12,10 @@ import { ListPopupComponent } from '../list-popup/list-popup.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-approval-requests',
-  templateUrl: './approval-requests.component.html',
-  styleUrls: ['./approval-requests.component.scss']
+    selector: 'app-approval-requests',
+    templateUrl: './approval-requests.component.html',
+    styleUrls: ['./approval-requests.component.scss'],
+    standalone: false
 })
 export class ApprovalRequestsComponent {
 

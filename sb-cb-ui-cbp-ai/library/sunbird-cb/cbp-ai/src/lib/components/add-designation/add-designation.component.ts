@@ -7,9 +7,10 @@ import  _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-add-designation',
-  templateUrl: './add-designation.component.html',
-  styleUrls: ['./add-designation.component.scss']
+    selector: 'app-add-designation',
+    templateUrl: './add-designation.component.html',
+    styleUrls: ['./add-designation.component.scss'],
+    standalone: false
 })
 export class AddDesignationComponent {
   designationForm: FormGroup;

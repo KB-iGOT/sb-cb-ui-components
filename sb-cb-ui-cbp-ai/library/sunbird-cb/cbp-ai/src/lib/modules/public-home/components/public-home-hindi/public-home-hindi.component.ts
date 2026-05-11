@@ -3,9 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SharedService } from '../../../shared/services/shared.service';
 
 @Component({
-  selector: 'app-public-home-hindi',
-  templateUrl: './public-home-hindi.component.html',
-  styleUrls: ['./public-home-hindi.component.scss']
+    selector: 'app-public-home-hindi',
+    templateUrl: './public-home-hindi.component.html',
+    styleUrls: ['./public-home-hindi.component.scss'],
+    standalone: false
 })
 export class PublicHomeHindiComponent implements OnInit {
 

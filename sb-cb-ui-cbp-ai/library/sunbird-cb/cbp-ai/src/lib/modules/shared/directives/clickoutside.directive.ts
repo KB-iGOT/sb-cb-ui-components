@@ -10,8 +10,9 @@ import {
   import { take } from "rxjs/operators";
   
   @Directive({
-    selector: "[clickOutside]"
-  })
+    selector: "[clickOutside]",
+    standalone: false
+})
   export class ClickOutsideDirective implements OnInit {
     @Output() clickOutside = new EventEmitter();
   

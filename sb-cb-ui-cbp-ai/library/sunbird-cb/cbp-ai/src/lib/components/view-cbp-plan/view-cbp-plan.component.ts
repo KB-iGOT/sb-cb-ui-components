@@ -4,9 +4,10 @@ import { EditCbpPlanComponent } from '../edit-cbp-plan/edit-cbp-plan.component';
 import { GenerateCourseRecommendationComponent } from '../generate-course-recommendation/generate-course-recommendation.component';
 import html2pdf from 'html2pdf.js';
 @Component({
-  selector: 'app-view-cbp-plan',
-  templateUrl: './view-cbp-plan.component.html',
-  styleUrls: ['./view-cbp-plan.component.scss']
+    selector: 'app-view-cbp-plan',
+    templateUrl: './view-cbp-plan.component.html',
+    styleUrls: ['./view-cbp-plan.component.scss'],
+    standalone: false
 })
 export class ViewCbpPlanComponent {
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;

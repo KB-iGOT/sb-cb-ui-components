@@ -7,9 +7,10 @@ import { finalize } from 'rxjs/operators';
 import  _ from 'lodash'
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-edit-cbp-plan',
-  templateUrl: './edit-cbp-plan.component.html',
-  styleUrls: ['./edit-cbp-plan.component.scss']
+    selector: 'app-edit-cbp-plan',
+    templateUrl: './edit-cbp-plan.component.html',
+    styleUrls: ['./edit-cbp-plan.component.scss'],
+    standalone: false
 })
 export class EditCbpPlanComponent implements OnInit{
 

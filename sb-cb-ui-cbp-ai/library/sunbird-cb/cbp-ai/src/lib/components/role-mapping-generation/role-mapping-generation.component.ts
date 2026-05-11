@@ -13,9 +13,10 @@ import { SharedService } from '../../modules/shared/services/shared.service';
 import { RoleMappingService } from '../../modules/shared/services/role-mapping.service';
 import { EventService } from '../../modules/shared/services/event.service';
 @Component({
-  selector: 'app-role-mapping-generation',
-  templateUrl: './role-mapping-generation.component.html',
-  styleUrls: ['./role-mapping-generation.component.scss']
+    selector: 'app-role-mapping-generation',
+    templateUrl: './role-mapping-generation.component.html',
+    styleUrls: ['./role-mapping-generation.component.scss'],
+    standalone: false
 })
 export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;

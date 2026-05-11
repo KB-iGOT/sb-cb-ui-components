@@ -6,9 +6,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
-  selector: 'app-review-request',
-  templateUrl: './review-request.component.html',
-  styleUrls: ['./review-request.component.scss']
+    selector: 'app-review-request',
+    templateUrl: './review-request.component.html',
+    styleUrls: ['./review-request.component.scss'],
+    standalone: false
 })
 export class ReviewRequestComponent {
   request: any = {
@@ -152,5 +153,12 @@ export class ReviewRequestComponent {
     }
   }
 
+  viewCBPPlan(event:any) {
+    console.log('event', event)
+  }
+
+  openFullList(element:any, role:any) {
+    console.log('event', element, role)
+  }
 
 }

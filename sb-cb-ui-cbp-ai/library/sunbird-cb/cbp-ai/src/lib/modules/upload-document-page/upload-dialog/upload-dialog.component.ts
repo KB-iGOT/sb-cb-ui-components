@@ -7,9 +7,10 @@ import { ProgressDialogComponent } from '../progress-dialog/progress-dialog.comp
 import { interval, forkJoin } from 'rxjs';
 import { map, startWith, switchMap, takeWhile, tap } from 'rxjs/operators';
 @Component({
-  selector: 'app-upload-dialog',
-  templateUrl: './upload-dialog.component.html',
-  styleUrls: ['./upload-dialog.component.scss']
+    selector: 'app-upload-dialog',
+    templateUrl: './upload-dialog.component.html',
+    styleUrls: ['./upload-dialog.component.scss'],
+    standalone: false
 })
 export class UploadDialogComponent {
 

@@ -9,9 +9,10 @@ import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/de
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-view-course-recommendation',
-  templateUrl: './view-course-recommendation.component.html',
-  styleUrls: ['./view-course-recommendation.component.scss']
+    selector: 'app-view-course-recommendation',
+    templateUrl: './view-course-recommendation.component.html',
+    styleUrls: ['./view-course-recommendation.component.scss'],
+    standalone: false
 })
 export class ViewCourseRecommendationComponent {
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;

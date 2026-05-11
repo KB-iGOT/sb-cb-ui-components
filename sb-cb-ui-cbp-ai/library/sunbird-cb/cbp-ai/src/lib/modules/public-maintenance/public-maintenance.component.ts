@@ -2,9 +2,10 @@ import { Component } from "@angular/core";
 import { VIDEO_CONF } from "../shared/constant/app.constant";
 
 @Component({
-  selector: "app-public-maintenance",
-  templateUrl: "./public-maintenance.component.html",
-  styleUrls: ["./public-maintenance.component.scss"],
+    selector: "app-public-maintenance",
+    templateUrl: "./public-maintenance.component.html",
+    styleUrls: ["./public-maintenance.component.scss"],
+    standalone: false
 })
 export class PublicMaintenanceComponent {
   videoConf: any = VIDEO_CONF;

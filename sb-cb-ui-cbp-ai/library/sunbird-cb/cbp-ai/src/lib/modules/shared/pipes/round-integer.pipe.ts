@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
-  name: 'filterRoundInteger',
+    name: 'filterRoundInteger',
+    standalone: false
 })
 export class PipeFilterRoundInteger implements PipeTransform {
 

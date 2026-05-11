@@ -6,9 +6,10 @@ import { HttpClient } from '@angular/common/http';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-add-course',
-  templateUrl: './add-course.component.html',
-  styleUrls: ['./add-course.component.scss']
+    selector: 'app-add-course',
+    templateUrl: './add-course.component.html',
+    styleUrls: ['./add-course.component.scss'],
+    standalone: false
 })
 export class AddCourseComponent implements OnInit {
   courseForm: FormGroup;

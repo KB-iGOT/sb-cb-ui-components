@@ -1,8 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CarouselModule } from 'ngx-owl-carousel-o';
-import { HeaderComponent } from 'src/app/components/header/header.component';
-import { FooterComponent } from 'src/app/components/footer/footer.component';
 import { RouterModule } from '@angular/router';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { PipeDurationTransformModule } from '../components/pipes/pipe-duration-transform/pipe-duration-transform.module';
@@ -28,8 +26,6 @@ export function getPopoverConfig(): PopoverConfig {
 
 @NgModule({
   declarations: [
-    HeaderComponent,
-    FooterComponent,
     PipeFilterByProp,
     PipeFilterRoundInteger,
   ],
@@ -48,8 +44,6 @@ export function getPopoverConfig(): PopoverConfig {
     CommoncomponentsModule
   ],
   exports: [
-    HeaderComponent,
-    FooterComponent,
     PipeFilterByProp,
     PipeFilterRoundInteger,
     SkeletonLoaderModule,

@@ -4,9 +4,10 @@ import { SharedService } from '../../modules/shared/services/shared.service';
 
 
 @Component({
-  selector: 'app-add-personalisation',
-  templateUrl: './add-personalisation.component.html',
-  styleUrls: ['./add-personalisation.component.scss']
+    selector: 'app-add-personalisation',
+    templateUrl: './add-personalisation.component.html',
+    styleUrls: ['./add-personalisation.component.scss'],
+    standalone: false
 })
 export class AddPersonalisationComponent {
 

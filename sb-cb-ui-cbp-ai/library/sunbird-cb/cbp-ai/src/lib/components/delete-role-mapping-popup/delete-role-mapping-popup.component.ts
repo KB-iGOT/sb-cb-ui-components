@@ -3,9 +3,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-delete-role-mapping-popup',
-  templateUrl: './delete-role-mapping-popup.component.html',
-  styleUrls: ['./delete-role-mapping-popup.component.scss']
+    selector: 'app-delete-role-mapping-popup',
+    templateUrl: './delete-role-mapping-popup.component.html',
+    styleUrls: ['./delete-role-mapping-popup.component.scss'],
+    standalone: false
 })
 export class DeleteRoleMappingPopupComponent {
   planData:any;

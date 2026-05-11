@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
+import { MatTableDataSource } from '@angular/material/table'
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HEADER_DATA } from '../shared/constant/app.constant';
 import { EventService } from '../shared/services/event.service';
 import { SharedService } from '../shared/services/shared.service';
 @Component({
-  selector: 'initial-screen',
-  templateUrl: './initial-screen.component.html',
-  styleUrls: ['./initial-screen.component.scss']
+    selector: 'initial-screen',
+    templateUrl: './initial-screen.component.html',
+    styleUrls: ['./initial-screen.component.scss'],
+    standalone: false
 })
 export class InitialScreenComponent {
   headerData = HEADER_DATA;

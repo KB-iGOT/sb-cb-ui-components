@@ -4,9 +4,10 @@ import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@ang
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-list-popup',
-  templateUrl: './list-popup.component.html',
-  styleUrls: ['./list-popup.component.scss']
+    selector: 'app-list-popup',
+    templateUrl: './list-popup.component.html',
+    styleUrls: ['./list-popup.component.scss'],
+    standalone: false
 })
 export class ListPopupComponent {
   listData:any

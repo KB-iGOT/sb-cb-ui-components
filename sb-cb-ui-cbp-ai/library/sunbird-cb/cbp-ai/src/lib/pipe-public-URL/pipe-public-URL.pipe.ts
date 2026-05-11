@@ -2,7 +2,8 @@ import { Pipe,  PipeTransform } from '@angular/core'
 
 import { SharedService } from '../modules/shared/services/shared.service';
 @Pipe({
-  name: 'pipePublicURL',
+    name: 'pipePublicURL',
+    standalone: false
 })
 export class PipePublicURL implements PipeTransform {
   constructor(  private sharedSvc: SharedService, ) {

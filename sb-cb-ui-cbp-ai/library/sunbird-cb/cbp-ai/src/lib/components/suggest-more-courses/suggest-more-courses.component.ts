@@ -4,9 +4,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-suggest-more-courses',
-  templateUrl: './suggest-more-courses.component.html',
-  styleUrls: ['./suggest-more-courses.component.scss']
+    selector: 'app-suggest-more-courses',
+    templateUrl: './suggest-more-courses.component.html',
+    styleUrls: ['./suggest-more-courses.component.scss'],
+    standalone: false
 })
 export class SuggestMoreCoursesComponent implements OnInit{
   searchText = ''

@@ -5,9 +5,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedService } from '../../modules/shared/services/shared.service';
 
 @Component({
-  selector: 'app-delete-role-mapping',
-  templateUrl: './delete-role-mapping.component.html',
-  styleUrls: ['./delete-role-mapping.component.scss']
+    selector: 'app-delete-role-mapping',
+    templateUrl: './delete-role-mapping.component.html',
+    styleUrls: ['./delete-role-mapping.component.scss'],
+    standalone: false
 })
 export class DeleteRoleMappingComponent {
 

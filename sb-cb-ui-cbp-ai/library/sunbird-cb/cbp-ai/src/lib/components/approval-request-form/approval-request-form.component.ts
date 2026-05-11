@@ -7,9 +7,10 @@ import _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-approval-request-form',
-  templateUrl: './approval-request-form.component.html',
-  styleUrls: ['./approval-request-form.component.scss']
+    selector: 'app-approval-request-form',
+    templateUrl: './approval-request-form.component.html',
+    styleUrls: ['./approval-request-form.component.scss'],
+    standalone: false
 })
 export class ApprovalRequestFormComponent {
   approvalRequestForm: FormGroup;
