@@ -424,7 +424,6 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         });
 
         dialogRef.afterClosed().subscribe(result => {
-          alert(result)
           if (result === 'saved') {
             console.log('Changes saved!');
             this.loading = true

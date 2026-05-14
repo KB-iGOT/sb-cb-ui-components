@@ -403,5 +403,9 @@ export class UploadDocumentPageComponent {
       this.router.navigate(['/ai/initial']);
     }
 
+    clearSearch() {
+      
+    }
+
 }
 

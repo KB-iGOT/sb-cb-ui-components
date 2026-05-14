@@ -47,8 +47,9 @@
                                         class="search-input" (keydown.space)="$event.stopPropagation()"
                                         (keydown)="$event.stopPropagation()">
                                 </div>
+                                <!-- [selected]="selectedMinistryId === item?.identifier" -->
                                 <mat-option [value]="item?.identifier" *ngFor="let item of filteredList"
-                                    [selected]="selectedMinistryId === item?.identifier">{{item?.orgName}}</mat-option>
+                                    >{{item?.orgName}}</mat-option>
                             </mat-select>
                         </mat-form-field>
                     </div>

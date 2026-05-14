@@ -69,6 +69,7 @@ import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { CommonModule } from '@angular/common';
 import { AiCbpRoutingModule } from './ai-cbp-routing.module';
+import { DesignationApprovalRequestFormComponent } from './components/designation-approval-request-form/designation-approval-request-form.component';
 
 @NgModule({
   declarations: [
@@ -98,7 +99,8 @@ import { AiCbpRoutingModule } from './ai-cbp-routing.module';
     DeleteRoleMappingComponent,
     ViewFinalCbpPlanComponent,
     RoleMappingGenerationComponent,
-    RoleMappingListComponent
+    RoleMappingListComponent,
+    DesignationApprovalRequestFormComponent
 
     
 
@@ -157,7 +159,8 @@ import { AiCbpRoutingModule } from './ai-cbp-routing.module';
     DeleteRoleMappingComponent,
     ViewFinalCbpPlanComponent,
     RoleMappingGenerationComponent,
-    RoleMappingListComponent
+    RoleMappingListComponent,
+    DesignationApprovalRequestFormComponent
   ],
   providers: [
     RoleMappingService

@@ -59,6 +59,7 @@ const API_END_POINTS = {
   SAVE_APPROVAL_REQUEST:'cbp-tpc-ai/api/v1/approval-requests/send',
   VIEW_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests',
   REVOKE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests',
+  SAVE_DESIGNATION_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/designation-approval/create',
 
 }
 
@@ -89,6 +90,7 @@ export class SharedService {
     private initSvc: InitService,
   ) {
     if (initSvc && this.initSvc.baseUrl && this.initSvc.configDetails) {
+      console.log('this.initSvc', this.initSvc)
       this.baseUrl = this.initSvc.baseUrl
       this.configDetails = this.initSvc.configDetails
     } else {
@@ -288,6 +290,7 @@ export class SharedService {
     this.headers = new HttpHeaders({
       'Authorization': `Bearer ${storageData?.access_token}`
     });
+    console.log('this.baseUrl',this.baseUrl)
     const headers = this.headers
     return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_STATE_CENTER}/?sub_org_type=${sub_org_type}`, { headers })
       .pipe(map((response: any) => {
@@ -467,7 +470,7 @@ export class SharedService {
     console.log('getIGOTSuggestedCourses final request:', JSON.stringify(req, null, 2));
 
     const headers = this.headers
-    return this.http.post<any>(`https://portal.igotkarmayogi.gov.in/api/content/v1/search`, req, { headers })
+    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, req, { headers })
       .pipe(map((response: any) => {
         return response
       }))
@@ -979,6 +982,14 @@ export class SharedService {
   revokeApprovalRequest(reqBody) {
     const headers = this.headers
     return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.REVOKE_APPROVAL_REQUEST}`, reqBody, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+   saveDesignationApprovalRequest(reqBody) {
+    const headers = this.headers
+    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SAVE_DESIGNATION_APPROVAL_REQUEST}`, reqBody, { headers })
       .pipe(map((response: any) => {
         return response
       }))

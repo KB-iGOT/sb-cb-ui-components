@@ -152,5 +152,13 @@ export class ReviewRequestComponent {
     }
   }
 
+  viewCBPPlan(element) {
+    console.log('view cbp plan', element)
+  }
+
+  openFullList(type: string, element: any) {
+    console.log('view cbp plan', type,element)
+  }
+
 
 }

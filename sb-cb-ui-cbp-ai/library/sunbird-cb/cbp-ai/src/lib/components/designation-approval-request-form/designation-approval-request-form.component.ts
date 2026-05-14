@@ -7,11 +7,11 @@ import _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
-  selector: 'app-approval-request-form',
-  templateUrl: './approval-request-form.component.html',
-  styleUrls: ['./approval-request-form.component.scss']
+  selector: 'app-designation-approval-request-form',
+  templateUrl: './designation-approval-request-form.component.html',
+  styleUrls: ['./designation-approval-request-form.component.scss']
 })
-export class ApprovalRequestFormComponent {
+export class DesignationApprovalRequestFormComponent {
   approvalRequestForm: FormGroup;
   cbpPlanFinalObj: any
   loading = false
@@ -28,8 +28,8 @@ export class ApprovalRequestFormComponent {
   mdoInitInProgress = false
   scrollListenerAttached = false
   masterData: any = {}
-  role_mapping_ids = []
-  constructor(public dialogRef: MatDialogRef<ApprovalRequestFormComponent>,
+  role_mapping_ids:any
+  constructor(public dialogRef: MatDialogRef<DesignationApprovalRequestFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
     private cdRef: ChangeDetectorRef,
@@ -45,62 +45,62 @@ export class ApprovalRequestFormComponent {
 
   ngOnInit() {
     this.initializeForm();
-    console.log('this.role_mapping_ids--',this.role_mapping_ids)
+    // console.log('this.role_mapping_ids--',this.role_mapping_ids)
 
-    const searchControl = this.approvalRequestForm.get('searchmdo');
+    // const searchControl = this.approvalRequestForm.get('searchmdo');
 
-    if (searchControl) {
-      searchControl.valueChanges
-        .pipe(
-          debounceTime(100),
-          distinctUntilChanged(),
-          startWith('')
-        )
-        .subscribe(res => {
-          const txt = res?.toString()?.trim() ?? '';
+    // if (searchControl) {
+    //   searchControl.valueChanges
+    //     .pipe(
+    //       debounceTime(100),
+    //       distinctUntilChanged(),
+    //       startWith('')
+    //     )
+    //     .subscribe(res => {
+    //       const txt = res?.toString()?.trim() ?? '';
 
-          if (txt?.length) {
-            this.mdoFilterEnable = true;
-            this.masterData.mdoFiltered =
-              this.masterData.mdoBackup.filter((item: any) =>
-                item.name.toLowerCase().includes(txt.toLowerCase())
-              );
+    //       if (txt?.length) {
+    //         this.mdoFilterEnable = true;
+    //         this.masterData.mdoFiltered =
+    //           this.masterData.mdoBackup.filter((item: any) =>
+    //             item.name.toLowerCase().includes(txt.toLowerCase())
+    //           );
 
-            // show initial page of filtered results
-            this.masterData.mdo = this.masterData.mdoFiltered.slice(0, this.mdoListLoadCount);
+    //         // show initial page of filtered results
+    //         this.masterData.mdo = this.masterData.mdoFiltered.slice(0, this.mdoListLoadCount);
 
-          } else {
-            this.mdoFilterEnable = false;
+    //       } else {
+    //         this.mdoFilterEnable = false;
 
-            // show first page from backup
-            this.masterData.mdo = this.masterData.mdoBackup.slice(0, this.mdoDefaultLoadCount);
-            this.mdoListLoadCount = this.mdoDefaultLoadCount;
-            this.mdoOffset = 0;
-          }
-        });
-    }
+    //         // show first page from backup
+    //         this.masterData.mdo = this.masterData.mdoBackup.slice(0, this.mdoDefaultLoadCount);
+    //         this.mdoListLoadCount = this.mdoDefaultLoadCount;
+    //         this.mdoOffset = 0;
+    //       }
+    //     });
+    // }
 
 
-    console.log(this.masterData['mdoBackup'])
-    if (!this.masterData['mdoBackup'].length) {
-      this.getmdoSafe()
-    }
+    // console.log(this.masterData['mdoBackup'])
+    // if (!this.masterData['mdoBackup'].length) {
+    //   this.getmdoSafe()
+    // }
 
   }
 
-  private getmdoSafe(): void {
-    if (this.mdoInitInProgress || this.isLoadingMoremdos) {
-      return
-    }
-    this.mdoInitInProgress = true
-    this.getmdo()
-  }
+  // private getmdoSafe(): void {
+  //   if (this.mdoInitInProgress || this.isLoadingMoremdos) {
+  //     return
+  //   }
+  //   this.mdoInitInProgress = true
+  //   this.getmdo()
+  // }
 
   initializeForm() {
     this.approvalRequestForm = this.fb.group({
-      mdo_name: ['', Validators.required],
+      division_name: ['', Validators.required],
       request_name: ['', Validators.required],
-      searchmdo: [''],
+    //  searchmdo: [''],
     });
   }
 
@@ -110,44 +110,43 @@ export class ApprovalRequestFormComponent {
     this.dialogRef.close()
   }
 
-  savemdo() {
-    const selectedmdo: string = this.approvalRequestForm.get('mdo_name')?.value;
+  saveDesignation() {
+    const division_name: string = this.approvalRequestForm.get('division_name')?.value;
 
-    if (!selectedmdo) {
-      this.snackBar.open('Please select an mdo leader/admin', 'X', { duration: 3000 });
-      return;
-    }
+    // if (!selectedmdo) {
+    //   this.snackBar.open('Please select an mdo leader/admin', 'X', { duration: 3000 });
+    //   return;
+    // }
 
     this.loading = true;
 
     const baseObj = {
-      state_center_id: this.sharedService.cbpPlanFinalObj.ministry.identifier,
-      // state_center_name: this.sharedService.cbpPlanFinalObj.ministry.orgName,
-      role_mapping_ids: this.role_mapping_ids.map((item: any) => item.id),
-      request_name: this.approvalRequestForm.value.request_name,
+      rolemapping_id: this.role_mapping_ids?.id,
+      designation_name: this.approvalRequestForm.value.request_name,
+      wing_division_section: this.approvalRequestForm.value.division_name,
     };
 
-    if (this.sharedService.cbpPlanFinalObj?.ministry?.sbOrgType === 'state' && this.sharedService.cbpPlanFinalObj.department_name) {
-      baseObj['department_id'] = this.sharedService.cbpPlanFinalObj.departments;
-     // baseObj['department_name'] = this.sharedService.cbpPlanFinalObj.department_name;
-    }
+    // if (this.sharedService.cbpPlanFinalObj?.ministry?.sbOrgType === 'state' && this.sharedService.cbpPlanFinalObj.department_name) {
+    //   baseObj['department_id'] = this.sharedService.cbpPlanFinalObj.departments;
+    //  // baseObj['department_name'] = this.sharedService.cbpPlanFinalObj.department_name;
+    // }
 
-    if (this.sharedService.cbpPlanFinalObj?.ministry?.sbOrgType === 'ministry' && this.sharedService.cbpPlanFinalObj.department_name) {
-      baseObj['department_id'] = this.sharedService.cbpPlanFinalObj.departments;
-     // baseObj['department_name'] = this.sharedService.cbpPlanFinalObj.department_name;
-    }
+    // if (this.sharedService.cbpPlanFinalObj?.ministry?.sbOrgType === 'ministry' && this.sharedService.cbpPlanFinalObj.department_name) {
+    //   baseObj['department_id'] = this.sharedService.cbpPlanFinalObj.departments;
+    //  // baseObj['department_name'] = this.sharedService.cbpPlanFinalObj.department_name;
+    // }
 
     // Create an array of observables, one per mdo
     const req = {
       ...baseObj,
-      mdo_id: selectedmdo
+     // mdo_id: selectedmdo
     };
 
-    this.sharedService.saveApprovalRequest(req)
+    this.sharedService.saveDesignationApprovalRequest(req)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
-          this.snackBar.open('Request sent successfully', 'X', {
+          this.snackBar.open('Designation Request sent successfully', 'X', {
             duration: 3000,
             panelClass: ['snackbar-success']
           });
@@ -198,7 +197,7 @@ export class ApprovalRequestFormComponent {
             "MDO_LEADER",
             "MDO_ADMIN"
           ],
-          "rootOrgId": this.sharedService.cbpPlanFinalObj.departments ? this.sharedService.cbpPlanFinalObj.departments : this.sharedService.cbpPlanFinalObj.ministry.identifier 
+          "rootOrgId": this.sharedService.cbpPlanFinalObj.departments
         },
         "fields": [
           "firstName",
@@ -279,7 +278,7 @@ export class ApprovalRequestFormComponent {
       })
   }
 checkCurrentmdoPresent() {
-  const selectedmdo = this.approvalRequestForm.get('mdo_name')?.value;
+  const selectedmdo = this.approvalRequestForm.get('division_name')?.value;
 
   if (!selectedmdo || !this.masterData?.mdo) return;
 
@@ -301,14 +300,14 @@ checkCurrentmdoPresent() {
 }
   onmdoDropdownClosed(): void {
     // Keep the mdo value but clear the search input
-    const currentmdo = this.approvalRequestForm.get('mdo_name')!.value
+    const currentmdo = this.approvalRequestForm.get('division_name')!.value
     setTimeout(() => {
       if (this.approvalRequestForm.get('searchmdo')) {
         this.approvalRequestForm.get('searchmdo')!.setValue('')
       }
       // Ensure the mdo value remains selected
       if (currentmdo) {
-        const mdoControl = this.approvalRequestForm.get('mdo_name');
+        const mdoControl = this.approvalRequestForm.get('division_name');
         if (mdoControl) {
           mdoControl.setValue(currentmdo)
         }

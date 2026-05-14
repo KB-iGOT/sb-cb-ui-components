@@ -52,6 +52,7 @@ export class ViewFinalCbpPlanComponent {
   expandedCompetencies: any = {};
   competenciesCount = { total: 0, public_courses: 0, igot: 0 };
   openedFrom!: string;
+  isPDFDownload = false;
   @ViewChild('dialogContent') dialogContent!: ElementRef;
   // designationData = [
   //   {
