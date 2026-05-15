@@ -258,7 +258,10 @@ export class PublicSurveyFormComponent implements OnInit {
   updateSurveyFormValidity() { // some times reactive forms not abale to detect value changes and validity in dynamic formArray
     this.surveyFormIsValid = true
     this.questionsArray.controls.forEach((form: any) => {
-      if (!form.controls.answer.valid) {
+      // Field is valid if: answer is valid OR field is marked as N/A
+      const isNA = form.controls.isNA ? form.controls.isNA.value : false
+      const answerValid = form.controls.answer.valid
+      if (!answerValid && !isNA) {
         this.surveyFormIsValid = false
       }
     })
