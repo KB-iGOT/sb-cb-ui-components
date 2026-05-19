@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import  _ from 'lodash'
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-edit-cbp-plan',
   templateUrl: './edit-cbp-plan.component.html',
@@ -50,6 +51,10 @@ export class EditCbpPlanComponent implements OnInit{
   @ViewChild('dialogContent') dialogContent!: ElementRef;
   @ViewChild('designation', { read: ElementRef }) designationRef?: ElementRef
   masterData: any = {}
+  portalData: any
+  activeRowElement: any
+  requestData:any
+  requestRowData:any
   constructor(
     public dialogRef: MatDialogRef<EditCbpPlanComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -57,9 +62,16 @@ export class EditCbpPlanComponent implements OnInit{
     private cdRef: ChangeDetectorRef,
     private sharedService:SharedService,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
+    public route: ActivatedRoute
   ) {
-    this.planData = data
+    if(this.sharedService.fromMdoPortal) {
+      this.planData = data?.element
+      this.requestRowData = data?.requestData
+    } else {
+      this.planData = data
+    }
+    
     console.log('Received data:', data);
     // this.planData.competencies.map((competencies:any)=>{
     //   this.competenciesCount['total'] = this.competenciesCount['total'] + 1 
@@ -80,6 +92,10 @@ export class EditCbpPlanComponent implements OnInit{
     this.loadCompetenciesData();
     this.initializeForm();
     this.updateCompetencyCounts()
+
+    const requestId = this.route.snapshot.paramMap.get('request_id');
+    
+    console.log('requestId', requestId)
   }
 
   loadCompetenciesData() {
@@ -120,7 +136,8 @@ export class EditCbpPlanComponent implements OnInit{
       themeSearch: [''],
       subThemeSearch: [''],
       competencies: this.fb.array(this.planData?.competencies || []), // optional customization,
-      searchDesignation: ['']
+      searchDesignation: [''],
+      igot_designation_id: [this.planData?.igot_designation_id || '']
     });
 
      if (!this.masterData['designationBackup']) {
@@ -181,7 +198,13 @@ export class EditCbpPlanComponent implements OnInit{
       "wing_division_section": formData?.wing_division_section,
       "role_responsibilities":roleResponsibilitiesArray,
       "activities": activities,
-      "competencies": formData.competencies
+      "competencies": formData.competencies,
+      "igot_designation_id": formData?.igot_designation_id || '',
+    }
+
+    if(this.sharedService.fromMdoPortal) {
+      req['request_id'] = this.requestRowData?.demand_id
+      req['item_id'] = this.planData?.id
     }
     let role_mapping_id = this.planData.id
     
@@ -585,7 +608,6 @@ export class EditCbpPlanComponent implements OnInit{
 
     ensureSelectedDesignationExists() {
   const selected = this.planData?.designation_name;
-
   if (!selected) return;
 
   const exists = this.masterData['designationBackup']?.some(
@@ -596,8 +618,8 @@ export class EditCbpPlanComponent implements OnInit{
     const customObj = {
       name: selected,
       status: 'Active',
-      igot_designation_name: "Principal Secretary",
-      igot_designation_id: "DESG-002314",
+      igot_designation_name: this.planData?.designation_name,
+      igot_designation_id: this.planData?.igot_designation_id ||   "DESG-002314",
     };
 
     // ✅ Add at TOP so it's visible immediately

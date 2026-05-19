@@ -167,7 +167,6 @@ export class DesignationApprovalRequestFormComponent {
   }
 
   getmdo(searchText?: string, offset?: number): void {
-
     // clear any previous debug hooks
     if (!searchText || searchText?.length === 0) {
       // noop
@@ -197,7 +196,7 @@ export class DesignationApprovalRequestFormComponent {
             "MDO_LEADER",
             "MDO_ADMIN"
           ],
-          "rootOrgId": this.sharedService.cbpPlanFinalObj.departments
+          "rootOrgId": this.sharedService.cbpPlanFinalObj.departments ? this.sharedService.cbpPlanFinalObj.departments : this.sharedService.cbpPlanFinalObj.ministry.identifier 
         },
         "fields": [
           "firstName",

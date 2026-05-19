@@ -33,4 +33,7 @@ export * from './lib/components/view-course-recommendation/view-course-recommend
 export * from './lib/components/delete-role-mapping/delete-role-mapping.component'
 export * from './lib/components/view-final-cbp-plan/view-final-cbp-plan.component'
 export * from './lib/components/designation-approval-request-form/designation-approval-request-form.component'
+export * from './lib/components/publish-request-form/publish-request-form.component'
+export * from './lib/components/reject-item-request-form/reject-item-request-form.component'
+export * from './lib/components/reject-request-form/reject-request-form.component'
 

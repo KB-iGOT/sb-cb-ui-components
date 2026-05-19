@@ -7,6 +7,7 @@ import { AddPersonalisationComponent } from '../add-personalisation/add-personal
 import html2pdf from 'html2pdf.js';
 import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/delete-role-mapping-popup.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-view-course-recommendation',
@@ -21,7 +22,8 @@ export class ViewCourseRecommendationComponent {
   cbpPlanData:any
   suggestedCourses: any = []
   constructor( public dialogRef: MatDialogRef<ViewCourseRecommendationComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any, private sharedService: SharedService, private dialog: MatDialog, private snackBar: MatSnackBar) {
+    @Inject(MAT_DIALOG_DATA) public data: any, private sharedService: SharedService, private dialog: MatDialog, private snackBar: MatSnackBar,
+  public route: ActivatedRoute) {
       this.planData = data
     }
   searchText = ''
@@ -30,9 +32,17 @@ export class ViewCourseRecommendationComponent {
   competenciesCount = {total:0, public_courses:0, igot:0}
   expandedCompetencies: any = {}; // Track expanded state for each course and competency type
   isPDFDownload = false
+  portalData: any
+  activeRowElement: any
+  requestData:any
+ 
   ngOnInit() {
     this.loading = true
     this.cbpPlanData = this.sharedService.cbpPlanFinalObj
+
+     
+
+   
     // this.sharedService.getRecommendedCourse(this.planData.id).subscribe((res)=>{
     //   this.loading = false
     //   console.log('res', res)
@@ -51,7 +61,49 @@ export class ViewCourseRecommendationComponent {
     //   this.getUserCourse()
     // })
 
-    this.sharedService.getUserRecommendationCourse(this.planData.id).subscribe({
+    if(this.sharedService.fromMdoPortal) {
+      const requestId = this.route.snapshot.paramMap.get('request_id');
+      let res:any 
+      if(this.planData?.cbp_plan_data && this.planData?.cbp_plan_data.length) {
+        res = this.planData?.cbp_plan_data[0]
+        this.recommended_course_id = res.id
+        let allCourses = []
+        if(res && res.selected_courses && res.selected_courses.length) {
+          res.selected_courses.forEach((item)=>{
+            // if(item?.relevancy >= 85) {
+              allCourses.push(item)
+            // }
+          })
+        }
+        this.filterdCourses = allCourses
+        let identifiersArr = []
+        console.log('this.filterdCourses', this.filterdCourses)
+        this.filterdCourses.map((item)=>{
+          identifiersArr.push(item?.identifier)
+        })
+        this.loading = false
+        this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response)=>{
+          if(response && response.result && response.result.content && response.result.content.length) {
+            for(let i=0; i < response.result.content.length;i++) {
+              for(let j=0; j<this.filterdCourses.length;j++) {
+                if(this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier'] ) {
+                  this.filterdCourses[j]['language'] = response.result.content[i]['language']
+                  this.filterdCourses[j]['avgRating'] = response.result.content[i]['avgRating']
+                  this.filterdCourses[j]['course'] = response.result.content[i]['name']
+                  break;
+                }
+              }
+              
+            }
+          }
+          
+        })
+        this.updateCompetencyCounts()
+      }
+        
+      
+    } else {
+      this.sharedService.getUserRecommendationCourse(this.planData.id).subscribe({
       next: (res) => {
         this.loading = false
         console.log('res', res)
@@ -98,6 +150,9 @@ export class ViewCourseRecommendationComponent {
         });
       }
     });
+    }
+
+    
   }
 
   updateCompetencyCounts() {

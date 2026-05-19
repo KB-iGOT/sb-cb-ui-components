@@ -4,6 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { ViewCbpPlanComponent } from '../view-cbp-plan/view-cbp-plan.component';
+import { EditCbpPlanComponent } from '../edit-cbp-plan/edit-cbp-plan.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ViewCourseRecommendationComponent } from '../view-course-recommendation/view-course-recommendation.component';
+import { RejectItemRequestFormComponent } from '../reject-item-request-form/reject-item-request-form.component';
+import { PublishRequestFormComponent } from '../publish-request-form/publish-request-form.component';
+import { RejectRequestFormComponent } from '../reject-request-form/reject-request-form.component';
+import { ListPopupComponent } from '../list-popup/list-popup.component';
 
 @Component({
   selector: 'app-review-request',
@@ -25,27 +33,71 @@ export class ReviewRequestComponent {
     'activities',
     'behavioral',
     'functional',
-    'domain'
+    'domain',
   ];
   dataSource = new MatTableDataSource<any>([]);
-
-  constructor(public sharedService: SharedService, private snackBar: MatSnackBar, private route: ActivatedRoute, private router: Router) {
+  portalData: any
+  activeRowElement: any
+  requestData:any
+  constructor(public sharedService: SharedService, private snackBar: MatSnackBar, private route: ActivatedRoute, private router: Router,
+    private dialog: MatDialog,
+  ) {
 
   }
 
   ngOnInit() {
+    this.portalData = this.route.snapshot.data['parentData']
     const requestId = this.route.snapshot.paramMap.get('request_id');
-
-    if (requestId) {
-      this.getRequestDetails(requestId);
+    
+    if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+     
+      
+    ) {
+      this.sharedService.fromMdoPortal = true
+      this.requestData = this.portalData?.parentAppData.requestRowData
+      this.sharedService.mdoBaseUrl = this.portalData?.configDetails?.mdoPath
+      this.sharedService.mdoConfigDetails = this.portalData?.configDetails
+      this.sharedService.baseUrl = this.portalData?.configDetails?.mdoPath+"/"
+      this.sharedService.configDetails = this.portalData?.configDetails
+      this.getMDORequestDetails(requestId);
+      this.displayedColumns.push('action')
+    } else {
+      if (requestId) {
+        this.getRequestDetails(requestId);
+      }
     }
 
 
   }
 
+
   getRequestDetails(requestId) {
     this.loading = true
     this.sharedService.viewApprovalRequests(requestId).subscribe({
+
+      next: (res: any) => {
+        console.log('res', res)
+        this.request = res
+        this.loading = false
+        this.dataSource = new MatTableDataSource(res?.items);
+        setTimeout(() => {
+          this.dataSource.paginator = this.paginator;
+        }, 100);
+      },
+      error: () => {
+        this.loading = false
+        this.snackBar.open('Failed to load the approval request information.', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+      }
+    });
+  }
+
+  getMDORequestDetails(requestId) {
+    this.loading = true
+    this.sharedService.viewMDOApprovalRequests(requestId).subscribe({
 
       next: (res: any) => {
         console.log('res', res)
@@ -102,7 +154,15 @@ export class ReviewRequestComponent {
   }
 
   backToApprovalRequest() {
-    this.router.navigate(['/ai/approve-requests']);
+     if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+      
+    ) {
+      history.back();
+    } else {
+      this.router.navigate(['/ai/approve-requests']);
+    }
+    
   }
 
   applyFilter() {
@@ -152,12 +212,196 @@ export class ReviewRequestComponent {
     }
   }
 
-  viewCBPPlan(element) {
-    console.log('view cbp plan', element)
+
+  openFullList(element: any, type: any) {
+     const listToShow: string[] = element[type] || [];
+     const title = type === 'role_responsibilities' ? 'Role & Responsibilities' : 'Activities';
+ 
+     const dialogRef = this.dialog.open(ListPopupComponent, {
+       width: '600px',
+       data: { element: element, type: type },
+       disableClose: true,
+       maxHeight: '80vh'
+     });
+ 
+     dialogRef.afterClosed().subscribe(() => {
+       // No need to do anything special here to reset inline expanded state
+       // Because you're using dialog, not inline expand – view remains in initial (collapsed) state
+     });
+   }
+
+  
+
+  editRoleMapping(element: any) {
+    this.activeRowElement = element
+    console.log('Edit Role Mapping clicked', element);
+    // Navigate or open modal
+    console.log('View CBP Plan clicked', element);
+    const dialogRef = this.dialog.open(EditCbpPlanComponent, {
+      width: '1000px',
+      data: { requestData: this.requestData, element: element},
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '300px',          // Set minimum height
+      maxHeight: '80vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // if (result === 'saved') {
+      //   console.log('Changes saved!');
+      //   // Refresh data or show a toast here
+
+      // }
+      const requestId = this.route.snapshot.paramMap.get('request_id');
+      if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+        this.portalData?.parentAppData?.fromPortal === 'mdo'
+      ) {
+        this.getMDORequestDetails(requestId);
+      }
+    });
   }
 
-  openFullList(type: string, element: any) {
-    console.log('view cbp plan', type,element)
+  viewCBPPlan(element: any) {
+    this.activeRowElement = element
+    console.log('View CBP Plan clicked', element);
+    const dialogRef = this.dialog.open(ViewCbpPlanComponent, {
+      width: '1000px',
+      data: element,
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '300px',          // Set minimum height
+      maxHeight: '80vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        console.log('Changes saved!');
+        // Refresh data or show a toast here
+      }
+    });
+  }
+
+  viewCourseRecommendation(element) {
+    console.log('View Course Recommendation clicked', element);
+    this.activeRowElement = element
+    console.log('Edit Role Mapping clicked', element);
+    // Navigate or open modal
+    console.log('View CBP Plan clicked', element);
+    const dialogRef = this.dialog.open(ViewCourseRecommendationComponent, {
+      width: '1000px',
+      data: element,
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '400px',          // Set minimum height
+      maxHeight: '90vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        console.log('Changes saved!');
+        // Refresh data or show a toast here
+        console.log(this.sharedService.cbpPlanFinalObj)
+        const requestId = this.route.snapshot.paramMap.get('request_id');
+        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        ) {
+          this.getMDORequestDetails(requestId);
+        }
+
+      }
+    });
+  }
+
+  approveAndPublish() {
+    console.log('approveAndPublish clicked', this.requestData);
+    const dialogRef = this.dialog.open(PublishRequestFormComponent, {
+      width: '750px',
+      maxWidth: '90vw',
+      data: this.requestData,
+      panelClass: 'publish-request-popup',
+      minHeight: '400px',          // Set minimum height
+      maxHeight: '90vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        console.log('Changes saved!');
+        // Refresh data or show a toast here
+        console.log(this.sharedService.cbpPlanFinalObj)
+        const requestId = this.route.snapshot.paramMap.get('request_id');
+        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        ) {
+          this.getMDORequestDetails(requestId);
+        }
+
+      }
+    });
+
+  }
+
+  rejectRequest() {
+    console.log('approveAndPublish clicked', this.requestData);
+    const dialogRef = this.dialog.open(RejectRequestFormComponent, {
+      width: '750px',
+      maxWidth: '90vw',
+      data: this.requestData,
+      panelClass: 'publish-request-popup',
+      minHeight: '400px',          // Set minimum height
+      maxHeight: '90vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        console.log('Changes saved!');
+        // Refresh data or show a toast here
+        console.log(this.sharedService.cbpPlanFinalObj)
+        const requestId = this.route.snapshot.paramMap.get('request_id');
+        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        ) {
+          this.getMDORequestDetails(requestId);
+        }
+
+      }
+    });
+
+  }
+
+  rejectItemRequest(element) {
+    console.log('approveAndPublish clicked', element);
+    console.log('View Course Recommendation clicked', element);
+    this.activeRowElement = element
+    console.log('Edit Role Mapping clicked', element);
+    // Navigate or open modal
+    console.log('View CBP Plan clicked', element);
+    const dialogRef = this.dialog.open(RejectItemRequestFormComponent, {
+      width: '750px',
+      maxWidth: '90vw',
+      data: { requestData: this.requestData, element: element},
+      panelClass: 'publish-request-popup',
+      minHeight: '400px',          // Set minimum height
+      maxHeight: '90vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        console.log('Changes saved!');
+        // Refresh data or show a toast here
+        console.log(this.sharedService.cbpPlanFinalObj)
+        const requestId = this.route.snapshot.paramMap.get('request_id');
+        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        ) {
+          this.getMDORequestDetails(requestId);
+        }
+
+      }
+    });
+
   }
 
 

@@ -142,7 +142,7 @@
             </div>
     </div>
     <div class="popup-footer">
-        <div>
+        <div *ngIf="!fromMdo">
             <input class="btn-active" type="button" value="Generate Course Recommendation" (click)="generateCourseRecommendation()"/>
         </div>
         <div>

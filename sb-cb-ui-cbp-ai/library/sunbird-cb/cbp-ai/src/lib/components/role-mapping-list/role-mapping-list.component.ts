@@ -14,7 +14,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { ApprovalRequestFormComponent } from '../approval-request-form/approval-request-form.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { DesignationApprovalRequestFormComponent } from '../designation-approval-request-form/designation-approval-request-form.component';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-role-mapping-list',
   templateUrl: './role-mapping-list.component.html',
@@ -51,7 +51,7 @@ export class RoleMappingListComponent {
   unMatchedRoleMapping = 0
   matchedRoleMappingIds = []
   matchedDesignationNames: string[] = [];
-
+  portalData:any = {}
   @Output() moveToInitialScreen = new EventEmitter<any>()
   activeTab: 'matched' | 'unmatched' = 'matched';
 
@@ -61,7 +61,9 @@ export class RoleMappingListComponent {
   constructor(
     public sharedService: SharedService,
     private dialog: MatDialog,
-  private router: Router) {
+  private router: Router,
+  private activatedRoute: ActivatedRoute
+) {
 
   }
 
@@ -71,14 +73,29 @@ export class RoleMappingListComponent {
   }
 
   ngOnInit() {
-    console.log('haredService?.cbpPlanFinalObj', this.sharedService?.cbpPlanFinalObj)
+
+  this.portalData = this.activatedRoute.snapshot.data['parentData']
     this.sharedService.checkRoleMappingFormValidation.next(true)
     this.sharedService.updateDesignationHierarchySubject.subscribe((data) => {
       if (data) {
-        this.loadRoleMappingList()
-      }
+        if(this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal && 
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+    ){ 
+
+    } else {  
+      this.loadRoleMappingList()
+    }
+  }
+      
     })
-    this.loadRoleMappingList()
+    if(this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal && 
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+    ){ 
+
+    } else {
+      this.loadRoleMappingList()
+    }
+    
 
 
   }
@@ -820,6 +837,7 @@ export class RoleMappingListComponent {
         //   // Refresh data or show a toast here
 
         // }
+        this.selection.clear()
         this.refreshRoleMappingData();
       });
     }

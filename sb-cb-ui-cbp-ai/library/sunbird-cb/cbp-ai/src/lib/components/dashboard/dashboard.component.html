@@ -33,7 +33,7 @@
                         </mat-form-field>
                     </div>
                     <div>
-                        <label>Ministry </label>
+                        <label>{{selectedMinistryType === 'ministry' ? 'Ministry':'State'}} </label>
                         <!-- Centre / State -->
                         <mat-form-field appearance="fill"
                             style="background: white; border-radius: 25px; padding: 0 12px; border: 1px solid #ccc;width: 100%;">
@@ -103,7 +103,7 @@
                     <div>
                         <p class="card-title">States/Ministries which generated Role Mapping</p>
                         <h2>{{this.dashboardData?.ministry_count}}</h2>
-                        <p class="card-subtitle">At least 1 designation/role mapping</p>
+                        <!-- <p class="card-subtitle">At least 1 designation/role mapping</p> -->
                     </div>
                     <mat-icon class="icon primary">public</mat-icon>
                 </div>
@@ -114,7 +114,7 @@
                     <div>
                         <p class="card-title">Departments which generated Role Mapping</p>
                         <h2>{{this.dashboardData?.department_count}}</h2>
-                        <p class="card-subtitle">At least 1 designation/role mapping</p>
+                        <!-- <p class="card-subtitle">At least 1 designation/role mapping</p> -->
                     </div>
                     <mat-icon class="icon teal">apartment</mat-icon>
                 </div>
@@ -185,7 +185,7 @@
                     <div>
                         <p class="card-title">Total Documents Uploaded</p>
                         <h2>{{this.dashboardData?.total_documents}}</h2>
-                        <p class="card-subtitle">Min 1, Max 10 per role mapping</p>
+                        <!-- <p class="card-subtitle">Min 1, Max 10 per role mapping</p> -->
                     </div>
                     <mat-icon class="icon amber">upload_file</mat-icon>
                 </div>
@@ -196,7 +196,7 @@
                     <div>
                         <p class="card-title">Role Mappings with Course Recommendations</p>
                         <h2>{{this.dashboardData?.role_mappings_with_recommendations}}</h2>
-                        <p class="card-subtitle">8500 of 50,000 role mappings</p>
+                        <!-- <p class="card-subtitle">8500 of 50,000 role mappings</p> -->
                     </div>
                     <mat-icon class="icon green">menu_book</mat-icon>
                 </div>
@@ -207,8 +207,8 @@
                     <div>
                         <p class="card-title">Course Recommendations Saved</p>
                         <h2>{{this.dashboardData?.saved_recommended_courses_count}}</h2>
-                        <p class="card-subtitle">{{this.dashboardData?.saved_recommended_courses_count}} of 8500
-                            recommendations</p>
+                        <!-- <p class="card-subtitle">{{this.dashboardData?.saved_recommended_courses_count}} of 8500
+                            recommendations</p> -->
                     </div>
                     <mat-icon class="icon teal">save</mat-icon>
                 </div>
@@ -223,7 +223,7 @@
                 Gap Analysis
             </h2>
 
-            <div class="card-grid">
+            <div class="card-grid-alone">
 
                 <mat-card class="metric-card warning-bg">
                     <div class="card-content">
@@ -307,7 +307,7 @@
                     <div>
                         <p class="card-title">Unique Users with Role Mappings</p>
                         <h2>{{this.dashboardData?.users_with_role_mappings}}</h2>
-                        <p class="card-subtitle">Generated atleast 1 role mapping</p>
+                        <!-- <p class="card-subtitle">Generated atleast 1 role mapping</p> -->
                     </div>
                     <mat-icon class="icon teal">apartment</mat-icon>
                 </div>
@@ -328,7 +328,7 @@
                     <div>
                         <p class="card-title">Unique Role Mappings</p>
                         <h2>{{this.dashboardData?.unique_role_mappings}}</h2>
-                        <p class="card-subtitle">10,000 unique of 50,000 total</p>
+                        <!-- <p class="card-subtitle">10,000 unique of 50,000 total</p> -->
                     </div>
                     <mat-icon class="icon teal">apartment</mat-icon>
                 </div>

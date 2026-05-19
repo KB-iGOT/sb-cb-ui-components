@@ -8,6 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AiCbpComponent {
   constructor() {
+    console.log('resolver data---sdfds-  sdfdsfsdsdfds')
   }
 
 }

@@ -70,6 +70,10 @@ import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { CommonModule } from '@angular/common';
 import { AiCbpRoutingModule } from './ai-cbp-routing.module';
 import { DesignationApprovalRequestFormComponent } from './components/designation-approval-request-form/designation-approval-request-form.component';
+import { PublishRequestFormComponent } from './components/publish-request-form/publish-request-form.component';
+import { RejectItemRequestFormComponent } from './components/reject-item-request-form/reject-item-request-form.component';
+import { RejectRequestFormComponent } from './components/reject-request-form/reject-request-form.component';
+
 
 @NgModule({
   declarations: [
@@ -100,7 +104,10 @@ import { DesignationApprovalRequestFormComponent } from './components/designatio
     ViewFinalCbpPlanComponent,
     RoleMappingGenerationComponent,
     RoleMappingListComponent,
-    DesignationApprovalRequestFormComponent
+    DesignationApprovalRequestFormComponent,
+    PublishRequestFormComponent,
+    RejectItemRequestFormComponent,
+    RejectRequestFormComponent
 
     
 
@@ -160,7 +167,10 @@ import { DesignationApprovalRequestFormComponent } from './components/designatio
     ViewFinalCbpPlanComponent,
     RoleMappingGenerationComponent,
     RoleMappingListComponent,
-    DesignationApprovalRequestFormComponent
+    DesignationApprovalRequestFormComponent,
+     PublishRequestFormComponent,
+    RejectItemRequestFormComponent,
+    RejectRequestFormComponent
   ],
   providers: [
     RoleMappingService

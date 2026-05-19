@@ -876,7 +876,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
             panelClass: ['snackbar-success']
           });
 
-          this.router.navigate(['/ai/']);
+          this.router.navigate(['/ai/list']);
         }
       });
   }
