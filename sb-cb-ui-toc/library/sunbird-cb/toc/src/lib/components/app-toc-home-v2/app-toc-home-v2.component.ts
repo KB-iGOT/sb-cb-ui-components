@@ -3254,42 +3254,38 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   openPublicSurveyPopup(navigationUrl?: string, queryParams?: any) {
     // Get survey ID and course ID from environment and content data
 
-    if (this.forPreview) {
-      this.router.navigate([navigationUrl], { queryParams: queryParams })
-    } else {
-      const surveyId = this.environment.publicContentSurveyId || ''
-      const courseId = this.contentReadData?.identifier || ''
-      const courseName = this.contentReadData?.name || ''
-      const contextOrgId = this.contentReadData?.createdFor && this.contentReadData?.createdFor.length > 0 ?
-        this.contentReadData?.createdFor[0] : ''
+    const surveyId = this.environment.publicContentSurveyId || ''
+    const courseId = this.contentReadData?.identifier || ''
+    const courseName = this.contentReadData?.name || ''
+    const contextOrgId = this.contentReadData?.createdFor && this.contentReadData?.createdFor.length > 0 ?
+      this.contentReadData?.createdFor[0] : ''
 
-      this.clearExistingPublicSurveyData(surveyId, courseId)
+    this.clearExistingPublicSurveyData(surveyId, courseId)
 
-      const data = {
-        surveyId: surveyId,
-        courseId: courseId,
-        courseName: courseName,
-        contextOrgId: contextOrgId,
-        forPreview: this.forPreview
-      }
-
-      const dialogRef = this.dialog.open(PublicSurveyFormComponent, {
-        // disableClose: true,
-        width: '750px',
-        maxWidth: '90vw',
-        height: '80vh',
-        data: data,
-        autoFocus: false,
-      })
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          // Navigate to the intended URL only when survey is submitted successfully
-          if (navigationUrl) {
-            this.router.navigate([navigationUrl], { queryParams: queryParams })
-          }
-        }
-      })
+    const data = {
+      surveyId: surveyId,
+      courseId: courseId,
+      courseName: courseName,
+      contextOrgId: contextOrgId,
+      forPreview: this.forPreview
     }
+
+    const dialogRef = this.dialog.open(PublicSurveyFormComponent, {
+      // disableClose: true,
+      width: '750px',
+      maxWidth: '90vw',
+      height: '80vh',
+      data: data,
+      autoFocus: false,
+    })
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Navigate to the intended URL only when survey is submitted successfully
+        if (navigationUrl) {
+          this.router.navigate([navigationUrl], { queryParams: queryParams })
+        }
+      }
+    })
 
 
   }
