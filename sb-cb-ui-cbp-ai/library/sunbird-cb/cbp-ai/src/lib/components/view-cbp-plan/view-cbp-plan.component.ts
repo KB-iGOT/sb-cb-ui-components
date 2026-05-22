@@ -63,10 +63,18 @@ export class ViewCbpPlanComponent {
   }
 
   editCBPPlan() {
+    let editData:any 
+    if(this.fromMdo && this.sharedService.requestData) {
+      editData = {element : this.planData, 
+  requestData: this.sharedService.requestData
+}
+    } else {
+      editData = this.planData
+    }
     this.dialogRef.close();
     const dialogRefNew = this.dialog.open(EditCbpPlanComponent, {
       width: '1000px',
-      data: this.planData,
+      data: editData,
        panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height
       maxHeight: '80vh',           // Prevent it from going beyond viewport

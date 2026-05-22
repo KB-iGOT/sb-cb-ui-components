@@ -98,8 +98,14 @@ export class DesignationApprovalRequestFormComponent {
 
   initializeForm() {
     this.approvalRequestForm = this.fb.group({
-      division_name: ['', Validators.required],
-      request_name: ['', Validators.required],
+      division_name: ['', [
+      Validators.required,
+      Validators.pattern(/^[A-Za-z0-9 _-]+$/)
+    ]],
+      request_name: ['', [
+      Validators.required,
+      Validators.pattern(/^[A-Za-z0-9 _-]+$/)
+    ]],
     //  searchmdo: [''],
     });
   }

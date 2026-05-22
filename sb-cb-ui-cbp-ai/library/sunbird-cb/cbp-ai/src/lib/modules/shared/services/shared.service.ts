@@ -67,7 +67,8 @@ const API_END_POINTS = {
   MDO_DESIGNATION_SEARCH: 'apis/proxies/v8/ai/cbp/v1/designation/search',
   MDO_ADD_USER_COURSE: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
   MDO_SUGGESTED_COURSE_LIST: 'apis/proxies/v8/ai/cbp/v1/course/suggestions',
-  MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update'
+  MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update',
+  REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry'
 
 }
 
@@ -91,6 +92,7 @@ export class SharedService {
   checkRoleMappingFormValidation = new Subject()
   updateDesignationHierarchySubject = new Subject()
   fromMdoPortal = false
+  requestData:any
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.screenWidth = event.target.innerWidth;
@@ -1086,6 +1088,14 @@ export class SharedService {
   saveDesignationApprovalRequest(reqBody) {
     const headers = this.headers
     return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SAVE_DESIGNATION_APPROVAL_REQUEST}`, reqBody, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+   RePublishMDOApprovalRequest(request) {
+    let mdoBaseUrl = 'http://localhost:3000'
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REPUBLISH_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))

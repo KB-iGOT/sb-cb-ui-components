@@ -16,7 +16,7 @@
             {{request?.status | titlecase}}
         </div>
 
-        <div *ngIf="request?.status === 'pending' && portalData?.parentAppData?.fromPortal === 'mdo'">
+        <div *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' ) && portalData?.parentAppData?.fromPortal === 'mdo'">
             <div class="action-btn-wrapper">
 
                 <button mat-raised-button class="approve-btn" (click)="approveAndPublish()">
@@ -147,6 +147,12 @@
                                     <p class="wing-text mt-2">Wing/Division - {{
                                         element?.wing_division_section }} </p>
                                 </div>
+                                <div *ngIf="(element?.status === 'failed' || element?.status === 'FAILED') && portalData?.parentAppData?.fromPortal === 'mdo'">
+                                     <button mat-raised-button class="approve-btn" (click)="rePublish(element)">
+                                        <mat-icon>publish</mat-icon>
+                                        Re-Publish
+                                    </button>
+                                </div>
 
                             </td>
                         </ng-container>
@@ -251,7 +257,7 @@
                                         <span>View Course Recommendation</span>
                                     </button>
 
-                                    <button *ngIf="request?.status === 'pending' " mat-menu-item (click)="rejectItemRequest(element)">
+                                    <button *ngIf="(request?.status === 'pending' || request?.status === 'PENDING')" mat-menu-item (click)="rejectItemRequest(element)">
                                         <mat-icon>send</mat-icon>
                                         <span>Reject Request</span>
                                     </button>

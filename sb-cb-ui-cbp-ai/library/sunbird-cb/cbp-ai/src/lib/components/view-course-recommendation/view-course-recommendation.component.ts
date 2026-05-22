@@ -22,8 +22,8 @@ export class ViewCourseRecommendationComponent {
   cbpPlanData:any
   suggestedCourses: any = []
   constructor( public dialogRef: MatDialogRef<ViewCourseRecommendationComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any, private sharedService: SharedService, private dialog: MatDialog, private snackBar: MatSnackBar,
-  public route: ActivatedRoute) {
+    @Inject(MAT_DIALOG_DATA) public data: any, public sharedService: SharedService, private dialog: MatDialog, private snackBar: MatSnackBar,
+  public route: ActivatedRoute, private cdr: ChangeDetectorRef) {
       this.planData = data
     }
   searchText = ''
@@ -83,7 +83,7 @@ export class ViewCourseRecommendationComponent {
         })
         this.loading = false
         this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response)=>{
-          if(response && response.result && response.result.content && response.result.content.length) {
+          if(response && response.result && response.result.count && response.result.content && response.result.content.length) {
             for(let i=0; i < response.result.content.length;i++) {
               for(let j=0; j<this.filterdCourses.length;j++) {
                 if(this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier'] ) {
@@ -98,7 +98,9 @@ export class ViewCourseRecommendationComponent {
           }
           
         })
+        console.log('this.filterdCourses from mdo' , this.filterdCourses)
         this.updateCompetencyCounts()
+        this.cdr.detectChanges()
       }
         
       

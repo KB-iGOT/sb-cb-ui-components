@@ -60,17 +60,18 @@
     color: #000;
 }
 
-.details-grid{
-  display:grid;
-  grid-template-columns: repeat(5,1fr);
-  gap:30px;
-  margin-bottom:20px;
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 20px;
 }
 
-.detail-box{
-  display:flex;
-  gap:12px;
-  align-items:center;
+.detail-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0; // important for text overflow handling
 }
 
 .detail-box mat-icon{
@@ -92,6 +93,11 @@
 .label{
   font-size:13px;
   color:#6b7280;
+}
+
+.value,
+.org-value {
+  word-break: break-word;
 }
 
 .value{

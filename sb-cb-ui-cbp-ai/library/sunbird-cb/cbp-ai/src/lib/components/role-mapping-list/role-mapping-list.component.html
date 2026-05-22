@@ -391,7 +391,7 @@
                                                     <mat-icon>delete</mat-icon>
                                                     <span>Delete Role Mapping</span>
                                                 </button>
-                                                 <button mat-menu-item (click)="sendForDesignationNameApproval(element)">
+                                                 <button *ngIf="activeTab !== 'matched'" mat-menu-item (click)="sendForDesignationNameApproval(element)">
                                                     <mat-icon>send</mat-icon>
                                                     <span>Send for Designation Name Approval</span>
                                                 </button>

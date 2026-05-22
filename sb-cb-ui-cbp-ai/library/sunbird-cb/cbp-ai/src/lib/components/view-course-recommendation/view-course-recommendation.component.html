@@ -141,12 +141,13 @@
                     </div>
                     <div class="course-title mt-4">
                         <div>
+                           Test {{ item | json }}
                             <div *ngIf="item?.course">{{item?.course}}</div>
-                            <div *ngIf="item?.name && fromMdoPortal">{{item?.name}}</div>
+                            <div *ngIf="item?.name && (sharedService?.fromMdoPortal)">{{item?.name}}</div>
                         </div>
                     </div>
                     <div class="course-desc mt-2">
-                        <div *ngIf="isPDFDownload">
+                        <div *ngIf="isPDFDownload || sharedService?.fromMdoPortal">
                             <div>{{item?.rationale}}</div>
                         </div>
                     </div>
@@ -213,7 +214,7 @@
                             <div class="percentage" *ngIf="item?.relevancy">{{item?.relevancy}}%</div>
                             <div class="percentage" *ngIf="!item?.relevancy">N/A</div>
                         </div>
-                        <div class="delete-button" *ngIf="!fromMdoPortal" >
+                        <div class="delete-button" *ngIf="!(sharedService?.fromMdoPortal)" >
                            <mat-icon matTooltip="Delete Course" matTooltipPosition="above" class="text-danger cursor-pointer" (click)="deleteCard(item, i)" >delete</mat-icon>
                         </div>
                     </div>

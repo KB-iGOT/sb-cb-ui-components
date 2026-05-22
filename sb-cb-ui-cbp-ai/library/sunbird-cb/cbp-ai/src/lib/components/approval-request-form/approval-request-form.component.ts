@@ -99,7 +99,10 @@ export class ApprovalRequestFormComponent {
   initializeForm() {
     this.approvalRequestForm = this.fb.group({
       mdo_name: ['', Validators.required],
-      request_name: ['', Validators.required],
+      request_name: ['', [
+      Validators.required,
+      Validators.pattern(/^[A-Za-z0-9 _-]+$/)
+    ]],
       searchmdo: [''],
     });
   }

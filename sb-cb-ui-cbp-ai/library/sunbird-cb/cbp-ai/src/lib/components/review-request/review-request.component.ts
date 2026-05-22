@@ -12,6 +12,7 @@ import { RejectItemRequestFormComponent } from '../reject-item-request-form/reje
 import { PublishRequestFormComponent } from '../publish-request-form/publish-request-form.component';
 import { RejectRequestFormComponent } from '../reject-request-form/reject-request-form.component';
 import { ListPopupComponent } from '../list-popup/list-popup.component';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-review-request',
@@ -38,7 +39,7 @@ export class ReviewRequestComponent {
   dataSource = new MatTableDataSource<any>([]);
   portalData: any
   activeRowElement: any
-  requestData:any
+  requestData: any
   constructor(public sharedService: SharedService, private snackBar: MatSnackBar, private route: ActivatedRoute, private router: Router,
     private dialog: MatDialog,
   ) {
@@ -48,17 +49,18 @@ export class ReviewRequestComponent {
   ngOnInit() {
     this.portalData = this.route.snapshot.data['parentData']
     const requestId = this.route.snapshot.paramMap.get('request_id');
-    
+
     if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
       this.portalData?.parentAppData?.fromPortal === 'mdo'
-     
-      
+
+
     ) {
       this.sharedService.fromMdoPortal = true
       this.requestData = this.portalData?.parentAppData.requestRowData
+      this.sharedService.requestData = this.portalData?.parentAppData.requestRowData
       this.sharedService.mdoBaseUrl = this.portalData?.configDetails?.mdoPath
       this.sharedService.mdoConfigDetails = this.portalData?.configDetails
-      this.sharedService.baseUrl = this.portalData?.configDetails?.mdoPath+"/"
+      this.sharedService.baseUrl = this.portalData?.configDetails?.mdoPath + "/"
       this.sharedService.configDetails = this.portalData?.configDetails
       this.getMDORequestDetails(requestId);
       this.displayedColumns.push('action')
@@ -154,15 +156,15 @@ export class ReviewRequestComponent {
   }
 
   backToApprovalRequest() {
-     if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+    if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
       this.portalData?.parentAppData?.fromPortal === 'mdo'
-      
+
     ) {
       history.back();
     } else {
       this.router.navigate(['/ai/approve-requests']);
     }
-    
+
   }
 
   applyFilter() {
@@ -214,23 +216,23 @@ export class ReviewRequestComponent {
 
 
   openFullList(element: any, type: any) {
-     const listToShow: string[] = element[type] || [];
-     const title = type === 'role_responsibilities' ? 'Role & Responsibilities' : 'Activities';
- 
-     const dialogRef = this.dialog.open(ListPopupComponent, {
-       width: '600px',
-       data: { element: element, type: type },
-       disableClose: true,
-       maxHeight: '80vh'
-     });
- 
-     dialogRef.afterClosed().subscribe(() => {
-       // No need to do anything special here to reset inline expanded state
-       // Because you're using dialog, not inline expand – view remains in initial (collapsed) state
-     });
-   }
+    const listToShow: string[] = element[type] || [];
+    const title = type === 'role_responsibilities' ? 'Role & Responsibilities' : 'Activities';
 
-  
+    const dialogRef = this.dialog.open(ListPopupComponent, {
+      width: '600px',
+      data: { element: element, type: type },
+      disableClose: true,
+      maxHeight: '80vh'
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      // No need to do anything special here to reset inline expanded state
+      // Because you're using dialog, not inline expand – view remains in initial (collapsed) state
+    });
+  }
+
+
 
   editRoleMapping(element: any) {
     this.activeRowElement = element
@@ -239,7 +241,7 @@ export class ReviewRequestComponent {
     console.log('View CBP Plan clicked', element);
     const dialogRef = this.dialog.open(EditCbpPlanComponent, {
       width: '1000px',
-      data: { requestData: this.requestData, element: element},
+      data: { requestData: this.requestData, element: element },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height
       maxHeight: '80vh',           // Prevent it from going beyond viewport
@@ -380,7 +382,7 @@ export class ReviewRequestComponent {
     const dialogRef = this.dialog.open(RejectItemRequestFormComponent, {
       width: '750px',
       maxWidth: '90vw',
-      data: { requestData: this.requestData, element: element},
+      data: { requestData: this.requestData, element: element },
       panelClass: 'publish-request-popup',
       minHeight: '400px',          // Set minimum height
       maxHeight: '90vh',           // Prevent it from going beyond viewport
@@ -401,6 +403,62 @@ export class ReviewRequestComponent {
 
       }
     });
+
+  }
+
+  rePublish(element) {
+    const requestId = this.route.snapshot.paramMap.get('request_id');
+    this.loading = true;
+    let payload = {
+      "request_id": requestId,
+      "item_id": element?.demand_id
+
+    }
+    this.sharedService.rejectItemMDOApprovalRequests(payload)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('Reject Response =>', res);
+
+          this.snackBar.open(
+            'Request Republished successfully',
+            'X',
+            {
+              duration: 3000,
+              panelClass: ['snackbar-success']
+            }
+          );
+
+          if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+            this.portalData?.parentAppData?.fromPortal === 'mdo'
+          ) {
+            this.getMDORequestDetails(requestId);
+          }
+
+        },
+        error: (err) => {
+          console.error(err);
+
+          this.loading = false
+          const errorMessage =
+            err?.error?.detail ||
+            err?.error?.message ||
+            'Failed to republish request';
+
+          this.snackBar.open(
+            errorMessage,
+            'X',
+            {
+              duration: 5000,
+              panelClass: ['snackbar-error']
+            }
+          );
+        }
+      });
 
   }
 
