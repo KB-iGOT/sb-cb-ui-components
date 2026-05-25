@@ -1,0 +1,47 @@
+// ==============================================
+// BREAKPOINT TOKENS
+// Auto-generated from KB-Design-data — DO NOT EDIT
+// ==============================================
+
+$breakpoint-mobile-min: 320px;
+$breakpoint-mobile-max: 425px;
+$breakpoint-tablet-portrait-min: 426px;
+$breakpoint-tablet-portrait-max: 1023px;
+$breakpoint-tablet-landscape-min: 649px;
+$breakpoint-tablet-landscape-max: 1365px;
+$breakpoint-small-desktop-min: 1024px;
+$breakpoint-small-desktop-max: 1339px;
+$breakpoint-large-desktop-min: 1440px;
+$breakpoint-large-desktop-max: 1919px;
+$breakpoint-xl-desktop-min: 1920px;
+$breakpoint-xl-desktop-max: 99999px;
+
+// Breakpoint map for programmatic access
+$breakpoints: (
+  'mobile': (min: 320px, max: 425px),
+  'tablet-portrait': (min: 426px, max: 1023px),
+  'tablet-landscape': (min: 649px, max: 1365px),
+  'small-desktop': (min: 1024px, max: 1339px),
+  'large-desktop': (min: 1440px, max: 1919px),
+  'xl-desktop': (min: 1920px, max: 99999px),
+);
+
+// Responsive mixins
+@mixin bp-mobile { @media (max-width: 425px) { @content; } }
+@mixin bp-tablet-portrait { @media (min-width: 426px) and (max-width: 1023px) { @content; } }
+@mixin bp-tablet-landscape { @media (min-width: 649px) and (max-width: 1365px) { @content; } }
+@mixin bp-small-desktop { @media (min-width: 1024px) and (max-width: 1339px) { @content; } }
+@mixin bp-large-desktop { @media (min-width: 1440px) and (max-width: 1919px) { @content; } }
+@mixin bp-xl-desktop { @media (min-width: 1920px) { @content; } }
+
+// Utility mixins (min-width approach)
+@mixin bp-up-tablet { @media (min-width: 426px) { @content; } }
+@mixin bp-up-desktop { @media (min-width: 1024px) { @content; } }
+@mixin bp-up-large { @media (min-width: 1440px) { @content; } }
+@mixin bp-up-xl { @media (min-width: 1920px) { @content; } }
+
+// Utility mixins (max-width approach)
+@mixin bp-down-mobile { @media (max-width: 425px) { @content; } }
+@mixin bp-down-tablet { @media (max-width: 1023px) { @content; } }
+@mixin bp-down-desktop { @media (max-width: 1339px) { @content; } }
+@mixin bp-down-large { @media (max-width: 1919px) { @content; } }

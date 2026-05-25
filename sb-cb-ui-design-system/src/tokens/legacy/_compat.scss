@@ -1,0 +1,32 @@
+// ==============================================
+// LEGACY COMPATIBILITY LAYER
+// Maps old SCSS variables to new CSS custom properties
+// Auto-generated — DO NOT EDIT
+// ==============================================
+
+// @deprecated - Use CSS custom properties directly
+// These mappings maintain backward compatibility during migration
+
+$brandAccentColor: var(--color-primary-500-main) !default;
+$brandAccentDarkShade: var(--color-primary-o-16) !default;
+$text-primary: var(--color-primary-500-main) !default;
+$white: #ffffff !default;
+$black: #000000 !default;
+$darkColorText: var(--text-b-and-w-black-heading) !default;
+$darkColor: var(--text-b-and-w-black-body) !default;
+$successText: #1D8923 !default;
+$colorGreen: #5fa800 !default;
+$colorRed: #D13924 !default;
+
+// Font family backward compat
+$font-family-lato: var(--font-family-primary) !default;
+$font-family-montserrat: var(--font-family-heading) !default;
+$font-family-sans: var(--font-family-primary) !default;
+
+// Size backward compat
+$size-xs: var(--space-8) !default;
+$size-s: var(--space-12) !default;
+$size-m: var(--space-16) !default;
+$size-l: var(--space-24) !default;
+$size-xl: var(--space-32) !default;
+$size-xxl: var(--space-40) !default;

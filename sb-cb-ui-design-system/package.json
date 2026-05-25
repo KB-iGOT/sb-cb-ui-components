@@ -1,7 +1,8 @@
 {
   "name": "@sunbird-cb/design-system",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "A repository to illustrate how to share palette and typography through NPM",
+  "main": "src/public-api.ts",
   "license": "MIT",
   "private": false,
   "scripts": {
@@ -12,6 +13,9 @@
     "src/assets/*",
     "src/styles/*",
     "src/themes/*",
+    "src/tokens/**",
+    "src/services/**",
+    "src/public-api.ts",
     "src/styles.scss",
     "src/tailwind-build.scss"
   ],
