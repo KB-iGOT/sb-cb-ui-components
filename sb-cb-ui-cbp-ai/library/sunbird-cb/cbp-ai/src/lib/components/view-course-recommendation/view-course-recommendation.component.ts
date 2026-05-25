@@ -105,7 +105,8 @@ export class ViewCourseRecommendationComponent {
         
       
     } else {
-      this.sharedService.getUserRecommendationCourse(this.planData.id).subscribe({
+      let id = this.planData.source_role_mapping_id ? this.planData.source_role_mapping_id : this.planData.id
+      this.sharedService.getUserRecommendationCourse(id).subscribe({
       next: (res) => {
         this.loading = false
         console.log('res', res)

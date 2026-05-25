@@ -35,6 +35,7 @@ export class ReviewRequestComponent {
     'behavioral',
     'functional',
     'domain',
+    'action'
   ];
   dataSource = new MatTableDataSource<any>([]);
   portalData: any
@@ -63,7 +64,6 @@ export class ReviewRequestComponent {
       this.sharedService.baseUrl = this.portalData?.configDetails?.mdoPath + "/"
       this.sharedService.configDetails = this.portalData?.configDetails
       this.getMDORequestDetails(requestId);
-      this.displayedColumns.push('action')
     } else {
       if (requestId) {
         this.getRequestDetails(requestId);

@@ -63,13 +63,13 @@
                 </div>
                 <div class="mt-10 w-50">
 
-                    <div class="search-container"> 
+                    <div class="search-container">
                         <div class="rsearch">
                             <mat-icon
                                 class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
-                            <input class="sinput color-60 w-full"  label="" formControlName="search"
+                            <input class="sinput color-60 w-full" label="" formControlName="search"
                                 (keyup)="applyFilters()" placeholder="Search by Request ID" type="Standard">
-                          
+
                         </div>
 
                     </div>
@@ -130,7 +130,7 @@
             </div>
         </form>
         <p class="mt-10" style="font-family: 'Lato'; font-size: 18px; margin-left: 10px;">
-            {{dataSource.data.length}} Approval Requests</p>
+            {{totalRecords}} Approval Requests</p>
         <table style="border-radius: 25px 25px 0 0;
         overflow: hidden;
         box-shadow: 0 5px 5px rgba(0, 0, 0, 0.12);" mat-table [dataSource]="dataSource"
@@ -162,7 +162,8 @@
             <!-- Date Column -->
             <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef> Date & Time</th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;"> {{ request.created_at | date: 'MMM d, y'}} </td>
+                <td mat-cell *matCellDef="let request" style="width: 15%;"> {{ request.created_at | date: 'MMM d, y'}}
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="designation">
@@ -177,9 +178,11 @@
             <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef> Request Status </th>
                 <td mat-cell *matCellDef="let request" style="width: 15%;">
-                     <span *ngIf="request.status === 'completed'" class="success"> {{ request.status | titlecase
+                    <span *ngIf="request.status === 'approved' || request.status === 'APPROVED'" class="success"> {{ request.status | titlecase
                         }} </span>
-                    <span *ngIf="request.status !== 'completed'" class="in-progress"> {{ request.status |
+                    <span *ngIf="request.status === 'pending' || request.status === 'PENDING'" class="in-progress"> {{ request.status |
+                        titlecase }} </span>
+                    <span *ngIf="request.status === 'rejected' || request.status === 'REJECTED'" class="rejected"> {{ request.status |
                         titlecase }} </span>
                 </td>
             </ng-container>
@@ -196,8 +199,8 @@
                             </button>
                         </div>
                         <div>
-                            <button style="margin-left: 15px;" *ngIf="request.status === 'COMPLETED'"
-                                mat-icon-button color="warn" (click)="revokeApprovalRequest(request)" matTooltip="Delete">
+                            <button style="margin-left: 15px;" *ngIf="request.status === 'COMPLETED'" mat-icon-button
+                                color="warn" (click)="revokeApprovalRequest(request)" matTooltip="Delete">
                                 <mat-icon>delete</mat-icon>
                                 Revoke Request
                             </button>
@@ -224,7 +227,9 @@
         <!-- Pagination -->
         <div class="mt-1">
             <!-- <mat-paginator class="custom-pagination" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator> -->
-            <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
+            <mat-paginator [length]="totalRecords" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 20]" (page)="onPageChange($event)">
+            </mat-paginator>
         </div>
 
 

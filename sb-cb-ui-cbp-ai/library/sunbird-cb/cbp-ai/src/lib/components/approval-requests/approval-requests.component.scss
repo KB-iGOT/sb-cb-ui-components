@@ -300,6 +300,13 @@ text-underline-position: from-font;
     border-radius: 20px;
 }
 
+.rejected {
+    background: #d32f2f;
+    padding: 4px 6px;
+    color: white;
+    border-radius: 20px;
+}
+
 .filter-container {
       display: flex;
     align-items: center;
@@ -430,3 +437,4 @@ text-underline-position: from-font;
   display: flex;
   gap: 10px;
 }
+

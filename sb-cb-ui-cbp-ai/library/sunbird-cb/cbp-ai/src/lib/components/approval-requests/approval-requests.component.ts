@@ -68,6 +68,9 @@ export class ApprovalRequestsComponent {
   ];
   filteredStatus = [...this.status];
   filteredTime = [...this.time];
+  pageIndex = 0;
+  pageSize = 10;
+  totalRecords = 0;
   constructor(public dialog: MatDialog, public sharedService: SharedService,
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -112,17 +115,17 @@ export class ApprovalRequestsComponent {
     }
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
+  // ngAfterViewInit() {
+  //   this.dataSource.paginator = this.paginator;
+  // }
 
   getApprovalRequests() {
 
     let reqBody = {
       state_center_id: this.cbpPlanFinalObj?.ministry?.identifier,
       include_summary: true,
-      skip: 0,
-      limit: 200
+      skip: this.pageIndex * this.pageSize,
+      limit: this.pageSize
     }
     if (this.cbpPlanFinalObj && this.cbpPlanFinalObj?.departments) {
       reqBody['department_id'] = this.cbpPlanFinalObj?.departments
@@ -135,6 +138,7 @@ export class ApprovalRequestsComponent {
         this.loading = false
         this.approvalRequests = res?.items
         this.dataSource.data = this.approvalRequests;
+         this.totalRecords = res?.total || 0;
         console.log('this.approvalRequests', this.approvalRequests)
       } else {
         this.loading = false
@@ -442,5 +446,12 @@ export class ApprovalRequestsComponent {
     this.searchText = '';
     this.applyFilters();
   }
+
+  onPageChange(event: any) {
+  this.pageIndex = event.pageIndex;
+  this.pageSize = event.pageSize;
+
+  this.getApprovalRequests();
+}
 
 }

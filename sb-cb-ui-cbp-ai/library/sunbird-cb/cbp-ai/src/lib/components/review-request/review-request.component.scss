@@ -35,8 +35,26 @@
 }
 
 .status-badge{
-  background:#fff4e5;
-  color:#c17c00;
+  background:orange;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+}
+
+.status-badge-success {
+background:#16873a;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+}
+
+.status-badge-rejected {
+background:#d32f2f;
+  color:#fff4e5;
   padding:6px 14px;
   border-radius:20px;
   font-size:13px;

@@ -6,6 +6,7 @@ import { catchError, debounceTime, distinctUntilChanged, finalize, startWith } f
 import _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-approval-request-form',
   templateUrl: './approval-request-form.component.html',
@@ -34,7 +35,8 @@ export class ApprovalRequestFormComponent {
     private fb: FormBuilder,
     private cdRef: ChangeDetectorRef,
     private sharedService: SharedService,
-    private snackBar: MatSnackBar) {
+    private snackBar: MatSnackBar,
+  public router: Router) {
       this.role_mapping_ids = data
     this.masterData = {
       mdoBackup: [],
@@ -101,7 +103,8 @@ export class ApprovalRequestFormComponent {
       mdo_name: ['', Validators.required],
       request_name: ['', [
       Validators.required,
-      Validators.pattern(/^[A-Za-z0-9 _-]+$/)
+      Validators.maxLength(100),
+      Validators.pattern(/^(?!\s*$)[A-Za-z0-9]+$/)
     ]],
       searchmdo: [''],
     });
@@ -114,6 +117,14 @@ export class ApprovalRequestFormComponent {
   }
 
   savemdo() {
+    const requestName = this.approvalRequestForm.value.request_name?.trim();
+
+    if (!requestName) {
+      this.snackBar.open('Request name is required', 'X', {
+        duration: 3000
+      });
+      return;
+    }
     const selectedmdo: string = this.approvalRequestForm.get('mdo_name')?.value;
 
     if (!selectedmdo) {
@@ -127,7 +138,7 @@ export class ApprovalRequestFormComponent {
       state_center_id: this.sharedService.cbpPlanFinalObj.ministry.identifier,
       // state_center_name: this.sharedService.cbpPlanFinalObj.ministry.orgName,
       role_mapping_ids: this.role_mapping_ids.map((item: any) => item.id),
-      request_name: this.approvalRequestForm.value.request_name,
+      request_name:requestName,
     };
 
     if (this.sharedService.cbpPlanFinalObj?.ministry?.sbOrgType === 'state' && this.sharedService.cbpPlanFinalObj.department_name) {
@@ -150,11 +161,12 @@ export class ApprovalRequestFormComponent {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
-          this.snackBar.open('Request sent successfully', 'X', {
+          this.snackBar.open('Request successfully submitted for approval.', 'X', {
             duration: 3000,
             panelClass: ['snackbar-success']
           });
           this.dialogRef.close('saved');
+          this.router.navigate(['/ai/approve-requests']);
         },
         error: (error) => {
           console.log('error', error)

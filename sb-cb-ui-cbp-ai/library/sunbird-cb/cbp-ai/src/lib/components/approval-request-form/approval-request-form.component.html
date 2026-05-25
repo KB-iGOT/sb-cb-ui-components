@@ -13,16 +13,34 @@
         <mat-card class="mt-1">
             <div class="mt-2 section">
                 <div class="sub-heading">
-                    <p>Request Name</p>
+                    <p>Request Name <span class="required">*</span></p>
                 </div>
                 <div class="mt-4 additional-details">
                     <input type="text" formControlName="request_name" [value]="" placeholder="Enter a name for this request..."
+                        maxlength="100" 
                         style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width:100%;font-size: 14px;font-family: 'Lato';">
+                      <mat-error
+                        *ngIf="
+                        approvalRequestForm.get('request_name')?.touched &&
+                        approvalRequestForm.get('request_name')?.hasError('required')
+                        "
+                    >
+                        Request name is required
+                    </mat-error>
+
+                    <mat-error
+                        *ngIf="
+                        approvalRequestForm.get('request_name')?.touched &&
+                        approvalRequestForm.get('request_name')?.hasError('pattern')
+                        "
+                    >
+                        Only letters, numbers, spaces are allowed
+                    </mat-error>
                 </div>
             </div>
             <div class="mt-2 section">
                 <div class="sub-heading">
-                    <p>Select MDO Admin/Leader</p>
+                    <p>Select MDO Admin/Leader <span class="required">*</span></p>
                 </div>
                 <div class="section-header mt-4">
                     <!-- <input type="text" formControlName="mdo_name" placeholder="Enter mdo" [value]=""
@@ -57,7 +75,7 @@
                             <!-- No results message -->
                             <mat-option *ngIf="(masterData?.mdo )?.length === 0" disabled>
                                 <!-- No matches found -->
-                                <div class="mat-error txt-size">mdo Not Found.</div>
+                                <div class="mat-error txt-size">No MDO Admin/Leader mapped. Please contact system administrator.</div>
                             </mat-option>
                         </mat-select>
                         <!-- <mat-error class="text-xs"

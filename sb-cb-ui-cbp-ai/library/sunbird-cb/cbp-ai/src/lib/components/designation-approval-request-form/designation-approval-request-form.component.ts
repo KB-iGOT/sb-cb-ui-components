@@ -98,11 +98,11 @@ export class DesignationApprovalRequestFormComponent {
 
   initializeForm() {
     this.approvalRequestForm = this.fb.group({
-      division_name: ['', [
+      division_name: [this.role_mapping_ids?.wing_division_section || '', [
       Validators.required,
       Validators.pattern(/^[A-Za-z0-9 _-]+$/)
     ]],
-      request_name: ['', [
+      request_name: [this.role_mapping_ids?.designation_name || '', [
       Validators.required,
       Validators.pattern(/^[A-Za-z0-9 _-]+$/)
     ]],
