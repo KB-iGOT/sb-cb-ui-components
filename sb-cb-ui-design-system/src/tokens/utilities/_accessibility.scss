@@ -1,0 +1,156 @@
+// ==============================================
+// ACCESSIBILITY UTILITIES
+// Design System — Accessibility-first implementation
+// ==============================================
+
+// --- Focus Visibility ---
+// Uses :focus-visible for keyboard-only focus indication
+// Falls back to :focus for older browsers
+
+@mixin focus-ring($color: var(--border-focus), $offset: 2px, $width: 2px) {
+  &:focus-visible {
+    outline: $width solid $color;
+    outline-offset: $offset;
+  }
+}
+
+@mixin focus-ring-inset($color: var(--border-focus), $width: 2px) {
+  &:focus-visible {
+    outline: $width solid $color;
+    outline-offset: -$width;
+  }
+}
+
+// --- Reduced Motion ---
+@mixin motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+@mixin motion-reduced {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// --- High Contrast ---
+@mixin high-contrast {
+  @media (forced-colors: active) {
+    @content;
+  }
+}
+
+// --- Screen Reader Only ---
+.sr-only,
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// Make SR-only content visible on focus (skip links)
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-within {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+}
+
+// --- Focus Trap Utility ---
+// Applied to modal/dialog containers
+.focus-trap {
+  &:focus {
+    outline: none;
+  }
+}
+
+// --- Skip Link ---
+.skip-link {
+  @extend .sr-only;
+
+  &:focus {
+    position: fixed !important;
+    top: var(--space-8);
+    left: var(--space-8);
+    z-index: 10000;
+    width: auto !important;
+    height: auto !important;
+    padding: var(--space-8) var(--space-16) !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+    background: var(--surface-primary);
+    color: var(--color-primary-500);
+    font-size: var(--font-size-body-1);
+    font-weight: 600;
+    text-decoration: underline;
+    border-radius: var(--radius-8, 8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// --- Contrast Utilities ---
+// Ensure minimum 4.5:1 contrast ratio for normal text (WCAG AA)
+// Ensure minimum 3:1 for large text (>= 18pt or 14pt bold)
+
+.text-high-contrast {
+  color: var(--text-b-and-w-black-display);
+}
+
+.text-medium-contrast {
+  color: var(--text-b-and-w-black-body);
+}
+
+.text-low-contrast {
+  color: var(--text-b-and-w-black-captions);
+}
+
+// --- Motion Preferences ---
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// --- Touch Target Sizes (WCAG 2.5.5) ---
+// Minimum 44x44px interactive target
+@mixin touch-target-min {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+// --- Color independence (don't rely on color alone) ---
+// Use with icons or patterns alongside color changes
+.status-indicator {
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: var(--space-4);
+  }
+
+  &--success::before { background: var(--color-success-green-500-main, #1D8923); }
+  &--error::before { background: var(--color-error-red-500-main, #D13924); }
+  &--warning::before { background: var(--color-warning-yellow-500-main, #E99E38); }
+  &--info::before { background: var(--color-info-blue-500-main, #0A5396); }
+}

@@ -1,0 +1,176 @@
+// ==============================================
+// PRIMITIVE COLOR TOKENS
+// Auto-generated from KB-Design-data — DO NOT EDIT
+// ==============================================
+
+// Primary
+$color-primary-50: #E8EDF6;
+$color-primary-100: #B8C8E2;
+$color-primary-200: #96ADD4;
+$color-primary-300: #6687C0;
+$color-primary-400: #4970B4;
+$color-primary-500: #1B4CA1;
+$color-primary-600: #194593;
+$color-primary-700: #133672;
+$color-primary-800: #0F2A59;
+$color-primary-900: #0B2044;
+
+// Primary_O
+$color-primary-o-8: rgba(27, 76, 161, 0.08);
+$color-primary-o-16: rgba(27, 76, 161, 0.16);
+$color-primary-o-24: rgba(27, 76, 161, 0.24);
+$color-primary-o-32: rgba(27, 76, 161, 0.32);
+$color-primary-o-40: rgba(27, 76, 161, 0.40);
+$color-primary-o-48: rgba(27, 76, 161, 0.48);
+$color-primary-o-56: rgba(27, 76, 161, 0.56);
+$color-primary-o-64: rgba(27, 76, 161, 0.64);
+$color-primary-o-72: rgba(27, 76, 161, 0.72);
+$color-primary-o-80: rgba(27, 76, 161, 0.80);
+$color-primary-o-88: rgba(27, 76, 161, 0.88);
+$color-primary-o-96: rgba(27, 76, 161, 0.96);
+
+// Secondary
+$color-secondary-50: #FEF5EA;
+$color-secondary-100: #FBDEBF;
+$color-secondary-200: #F9CF9F;
+$color-secondary-300: #F7B974;
+$color-secondary-400: #F5AB59;
+$color-secondary-500: #F3962F;
+$color-secondary-600: #DD892B;
+$color-secondary-700: #AD6B21;
+$color-secondary-800: #86531A;
+$color-secondary-900: #663F14;
+
+// Secondary_O
+$color-secondary-o-8: rgba(243, 150, 47, 0.08);
+$color-secondary-o-16: rgba(243, 150, 47, 0.16);
+$color-secondary-o-24: rgba(243, 150, 47, 0.24);
+$color-secondary-o-32: rgba(243, 150, 47, 0.32);
+$color-secondary-o-40: rgba(243, 150, 47, 0.40);
+$color-secondary-o-48: rgba(243, 150, 47, 0.48);
+$color-secondary-o-56: rgba(243, 150, 47, 0.56);
+$color-secondary-o-64: rgba(243, 150, 47, 0.64);
+$color-secondary-o-72: rgba(243, 150, 47, 0.72);
+$color-secondary-o-80: rgba(243, 150, 47, 0.80);
+$color-secondary-o-88: rgba(243, 150, 47, 0.88);
+$color-secondary-o-96: rgba(243, 150, 47, 0.96);
+
+// Tertiary
+$color-tertiary-50: #E8E9EB;
+$color-tertiary-100: #B8BAC0;
+$color-tertiary-200: #9699A1;
+$color-tertiary-300: #666A76;
+$color-tertiary-400: #494D5C;
+$color-tertiary-500: #1B2133;
+$color-tertiary-600: #191E2E;
+$color-tertiary-700: #131724;
+$color-tertiary-800: #0F121C;
+$color-tertiary-900: #0B0E15;
+
+// Tertiary_O
+$color-tertiary-o-8: rgba(27, 33, 51, 0.08);
+$color-tertiary-o-16: rgba(27, 33, 51, 0.16);
+$color-tertiary-o-24: rgba(27, 33, 51, 0.24);
+$color-tertiary-o-32: rgba(27, 33, 51, 0.32);
+$color-tertiary-o-40: rgba(27, 33, 51, 0.40);
+$color-tertiary-o-48: rgba(27, 33, 51, 0.48);
+$color-tertiary-o-56: rgba(27, 33, 51, 0.56);
+$color-tertiary-o-64: rgba(27, 33, 51, 0.64);
+$color-tertiary-o-72: rgba(27, 33, 51, 0.72);
+$color-tertiary-o-80: rgba(27, 33, 51, 0.80);
+$color-tertiary-o-88: rgba(27, 33, 51, 0.88);
+$color-tertiary-o-96: rgba(27, 33, 51, 0.96);
+
+// Black/Opacity
+$color-black-opacity-8: rgba(0, 0, 0, 0.08);
+$color-black-opacity-16: rgba(0, 0, 0, 0.16);
+$color-black-opacity-24: rgba(0, 0, 0, 0.24);
+$color-black-opacity-32: rgba(0, 0, 0, 0.32);
+$color-black-opacity-40: rgba(0, 0, 0, 0.40);
+$color-black-opacity-48: rgba(0, 0, 0, 0.48);
+$color-black-opacity-56: rgba(0, 0, 0, 0.56);
+$color-black-opacity-64: rgba(0, 0, 0, 0.64);
+$color-black-opacity-72: rgba(0, 0, 0, 0.72);
+$color-black-opacity-80: rgba(0, 0, 0, 0.80);
+$color-black-opacity-88: rgba(0, 0, 0, 0.88);
+$color-black-opacity-96: rgba(0, 0, 0, 0.96);
+
+// Black/WO_Opacity
+$color-black-wo-opacity-50: #E6E6E6;
+$color-black-wo-opacity-100: #B0B0B0;
+$color-black-wo-opacity-200: #8A8A8A;
+$color-black-wo-opacity-300: #545454;
+$color-black-wo-opacity-400: #333333;
+$color-black-wo-opacity-500: #000000;
+
+// White/White_O
+$color-white-white-o-8: rgba(255, 255, 255, 0.08);
+$color-white-white-o-16: rgba(255, 255, 255, 0.16);
+$color-white-white-o-24: rgba(255, 255, 255, 0.24);
+$color-white-white-o-32: rgba(255, 255, 255, 0.32);
+$color-white-white-o-40: rgba(255, 255, 255, 0.40);
+$color-white-white-o-48: rgba(255, 255, 255, 0.48);
+$color-white-white-o-56: rgba(255, 255, 255, 0.56);
+$color-white-white-o-64: rgba(255, 255, 255, 0.64);
+$color-white-white-o-72: rgba(255, 255, 255, 0.72);
+$color-white-white-o-80: rgba(255, 255, 255, 0.80);
+$color-white-white-o-88: rgba(255, 255, 255, 0.88);
+$color-white-white-o-96: rgba(255, 255, 255, 0.96);
+
+// White/WO_Opacity
+$color-white-wo-opacity-500: #FFFFFF;
+
+// Accents
+$color-accents-red: #FF383C;
+$color-accents-orange: #FF8D28;
+$color-accents-yellow: #FFCC00;
+$color-accents-green: #34C759;
+$color-accents-mint: #00C8B3;
+$color-accents-teal: #00C3D0;
+$color-accents-cyan: #00C0E8;
+$color-accents-blue: #0088FF;
+$color-accents-indigo: #6155F5;
+$color-accents-purple: #CB30E0;
+$color-accents-pink: #FF2D55;
+$color-accents-brown: #AC7F5E;
+
+// Error/Red
+$color-error-red-500: #D13924;
+
+// Error/Red_O
+$color-error-red-o-16: rgba(209, 57, 36, 0.16);
+$color-error-red-o-24: rgba(209, 57, 36, 0.24);
+$color-error-red-o-32: rgba(209, 57, 36, 0.32);
+$color-error-red-o-40: rgba(209, 57, 36, 0.40);
+$color-error-red-o-48: rgba(209, 57, 36, 0.48);
+
+// Success/Green
+$color-success-green-500: #1D8923;
+
+// Success/Green_O
+$color-success-green-o-16: rgba(29, 137, 35, 0.16);
+$color-success-green-o-24: rgba(29, 137, 35, 0.24);
+$color-success-green-o-32: rgba(29, 137, 35, 0.32);
+$color-success-green-o-40: rgba(29, 137, 35, 0.40);
+$color-success-green-o-48: rgba(29, 137, 35, 0.48);
+
+// Warning/Yellow
+$color-warning-yellow-500: #E99E38;
+
+// Warning/Yellow_O
+$color-warning-yellow-o-16: rgba(233, 158, 56, 0.16);
+$color-warning-yellow-o-24: rgba(233, 158, 56, 0.24);
+$color-warning-yellow-o-32: rgba(233, 158, 56, 0.32);
+$color-warning-yellow-o-40: rgba(233, 158, 56, 0.40);
+$color-warning-yellow-o-48: rgba(233, 158, 56, 0.48);
+
+// Info/Blue
+$color-info-blue-500: #0A5396;
+
+// Info/Blue_O
+$color-info-blue-o-16: rgba(10, 83, 150, 0.16);
+$color-info-blue-o-24: rgba(10, 83, 150, 0.24);
+$color-info-blue-o-32: rgba(10, 83, 150, 0.32);
+$color-info-blue-o-40: rgba(10, 83, 150, 0.40);
+$color-info-blue-o-48: rgba(10, 83, 150, 0.48);
+

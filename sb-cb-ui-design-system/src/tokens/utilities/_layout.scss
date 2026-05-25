@@ -1,0 +1,182 @@
+// ==============================================
+// RESPONSIVE GRID & LAYOUT UTILITIES
+// Auto-generated from KB-Design-data — DO NOT EDIT
+// ==============================================
+
+// --- Container ---
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--grid-grid-margin-l-and-r, 16px);
+  padding-right: var(--grid-grid-margin-l-and-r, 16px);
+}
+
+// --- Grid System ---
+.grid {
+  display: grid;
+  gap: var(--grid-grid-gutter, 16px);
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+
+// Column span utilities
+@for $i from 1 through 12 {
+  .col-span-#{$i} { grid-column: span #{$i}; }
+}
+
+// --- Responsive Grid ---
+// Mobile (320-425px): 4 columns
+@media (max-width: 425px) {
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .grid-responsive { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .grid-cols-md-2 { grid-template-columns: 1fr; }
+  .grid-cols-md-3 { grid-template-columns: 1fr; }
+  .grid-cols-md-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+// Tablet Portrait (426-1023px): 8 columns
+@media (min-width: 426px) and (max-width: 1023px) {
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .grid-responsive { grid-template-columns: repeat(8, 1fr); gap: 16px; }
+  .grid-cols-md-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-md-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-md-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+// Small Desktop (1024-1339px): 12 columns
+@media (min-width: 1024px) and (max-width: 1339px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .grid-responsive { grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .grid-cols-md-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-md-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-cols-md-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+// Large Desktop (1440-1919px): 12 columns
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .grid-responsive { grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .grid-cols-md-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-md-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-cols-md-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+// Extra Large Desktop (1920+): 12 columns
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1680px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .grid-responsive { grid-template-columns: repeat(12, 1fr); gap: 24px; }
+}
+
+// --- Flexbox Utilities ---
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+.items-baseline { align-items: baseline; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+.self-start { align-self: flex-start; }
+.self-center { align-self: center; }
+.self-end { align-self: flex-end; }
+.self-stretch { align-self: stretch; }
+
+.flex-1 { flex: 1 1 0%; }
+.flex-auto { flex: 1 1 auto; }
+.flex-none { flex: none; }
+.grow { flex-grow: 1; }
+.grow-0 { flex-grow: 0; }
+.shrink { flex-shrink: 1; }
+.shrink-0 { flex-shrink: 0; }
+
+// --- Display Utilities ---
+.block { display: block; }
+.inline-block { display: inline-block; }
+.inline { display: inline; }
+.hidden { display: none; }
+.inline-flex { display: inline-flex; }
+
+// --- Responsive visibility ---
+@media (max-width: 425px) {
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 426px) and (max-width: 1023px) {
+  .hide-tablet { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .hide-desktop { display: none !important; }
+}
+@media (max-width: 1023px) {
+  .show-desktop-only { display: none !important; }
+}
+@media (min-width: 426px) {
+  .show-mobile-only { display: none !important; }
+}
+
+// --- Width/Height utilities ---
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.h-full { height: 100%; }
+.h-auto { height: auto; }
+.h-screen { height: 100vh; }
+.min-h-screen { min-height: 100vh; }
+.max-w-full { max-width: 100%; }
+
+// --- Overflow ---
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+// --- Position ---
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+
+// --- Z-index scale ---
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-30 { z-index: 30; }
+.z-40 { z-index: 40; }
+.z-50 { z-index: 50; }
+.z-100 { z-index: 100; }
+.z-overlay { z-index: 1000; }
+.z-modal { z-index: 1100; }
+.z-tooltip { z-index: 1200; }
