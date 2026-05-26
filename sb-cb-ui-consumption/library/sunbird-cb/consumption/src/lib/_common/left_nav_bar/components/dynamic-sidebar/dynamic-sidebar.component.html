@@ -1,0 +1,87 @@
+<div class="sidebar-container" [class.sidebar-open]="isOpen()" [class.sidebar-closed]="!isOpen()" role="complementary" [attr.aria-label]="'Application sidebar' + (isOpen() ? ' expanded' : ' collapsed')">
+  <!-- Sidebar -->
+  <aside class="sidebar fixed top-0 left-0 h-screen bg-white shadow-xl overflow-hidden z-40"
+    [@sidebarAnimation]="isOpen() ? 'open' : 'closed'" role="navigation" aria-label="Main navigation sidebar">
+
+    <!-- Screen reader live region for state changes -->
+    <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isOpen() ? 'Sidebar expanded' : 'Sidebar collapsed' }}
+    </div>
+
+    <!-- Sidebar Content -->
+    <div class="sidebar-content h-full flex flex-col">
+
+      <!-- Header Section -->
+      <div class="sidebar-header p-4 border-b border-gray-200 bg-primary text-white flex items-center justify-between" role="banner" aria-label="Sidebar header">
+        @if (showContent()) {
+        @if (menuBarDetails?.logoUrl) {
+        <div class="logo-container mb-2">
+          <img [src]="menuBarDetails.logoUrl" [alt]="menuBarDetails?.headerText || 'Application logo'" class="logo" loading="lazy" aria-label="Organization logo" />
+        </div>
+        }
+
+        @if (menuBarDetails?.headerText) {
+        <h2 class="text-sm font-semibold text-white text-center" role="heading" aria-level="1" [attr.aria-label]="menuBarDetails.headerText">
+          {{ menuBarDetails.headerText }}
+        </h2>
+        }
+        }
+
+        <!-- Menu Toggle Button -->
+        <button mat-icon-button
+          class="sidebar-toggle-btn mb-2 bg-white shadow-md rounded-lg hover:bg-gray-100 transition-colors"
+          (click)="toggleSidebar()" 
+          [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'" 
+          [attr.aria-expanded]="isOpen()"
+          [attr.aria-controls]="'sidebar-nav'">
+          <mat-icon class="text-gray-800" [attr.aria-hidden]="true">{{ isOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Scrollable Navigation Sections -->
+      <nav id="sidebar-nav" class="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden" [class.p-4]="isOpen()" [class.p-2]="!isOpen()" role="navigation" aria-label="Sidebar navigation sections">
+        @if (menuBarDetails?.navSections && menuBarDetails.navSections.length > 0) {
+        @for (section of menuBarDetails.navSections; track trackByCardType($index, section)) {
+
+        <!-- Render Nav List Section -->
+        @if (section.cardType === SidebarCardType.NAV_LIST) {
+        <app-sidebar-nav-list-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
+          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Navigation menu'" />
+        }
+
+        <!-- Render Stat Cards Section -->
+        @if (section.cardType === SidebarCardType.STAT_CARDS) {
+        <app-sidebar-stat-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
+          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Statistics section'" />
+        }
+
+        <!-- Render Info Cards Section -->
+        @if (section.cardType === SidebarCardType.INFO_CARDS) {
+        <app-sidebar-info-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
+          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Information cards section'" />
+        }
+
+        }
+        } @else {
+        @if (isOpen()) {
+        <div class="text-center text-gray-500 py-8" role="status" aria-label="No navigation items available">
+          <mat-icon class="text-4xl mb-2" aria-hidden="true">info</mat-icon>
+          <p class="text-sm">No navigation items configured</p>
+        </div>
+        }
+        }
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  @if (isOpen()) {
+  <div class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" 
+    (click)="toggleSidebar()"
+    role="button"
+    tabindex="0"
+    (keydown.enter)="toggleSidebar()"
+    (keydown.space)="toggleSidebar()"
+    aria-label="Close sidebar overlay"></div>
+  }
+</div>

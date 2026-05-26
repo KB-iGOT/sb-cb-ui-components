@@ -1,0 +1,144 @@
+/**
+ * Sidebar Stat Cards Section Styles
+ */
+
+.stat-cards-section {
+  margin-bottom: 1rem;
+}
+
+.custom-expansion-panel {
+  box-shadow: none !important;
+  background: transparent !important;
+
+  &::before {
+    display: none;
+  }
+
+  ::ng-deep .mat-expansion-panel-header {
+    padding: 0 0.5rem;
+    height: auto;
+    min-height: 36px;
+
+    &:hover {
+      background: transparent !important;
+    }
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 0;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-title {
+    margin: 0;
+  }
+}
+
+.section-header {
+  user-select: none;
+}
+
+.section-title {
+  user-select: none;
+}
+
+.stat-cards-content {
+  width: 100%;
+}
+
+.stat-card {
+  text-decoration: none;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+  }
+}
+
+.stat-icon {
+  transition: all 0.2s ease;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+  }
+}
+
+.stat-content {
+  overflow: hidden;
+}
+
+.stat-header {
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.stat-value {
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.view-all-btn {
+  text-transform: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .stat-card {
+    padding: 0.875rem;
+  }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .stat-card,
+  .stat-icon,
+  .view-all-btn {
+    transition: none;
+    transform: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

@@ -1,0 +1,257 @@
+<div class="info-cards-section" *ngIf="showContent" role="region" [attr.aria-label]="section.sectionTitle || 'Information cards'">
+  <!-- Collapsible Section -->
+  @if (section.collapsible) {
+  <mat-expansion-panel class="custom-expansion-panel" [expanded]="true" hideToggle="false" [attr.aria-label]="section.sectionTitle">
+
+    <!-- Panel Header -->
+    <mat-expansion-panel-header class="section-header">
+      <mat-panel-title class="text-xs font-semibold text-gray-500 uppercase tracking-wider" role="heading" aria-level="2">
+        {{ section.sectionTitle }}
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <!-- Panel Content -->
+    <div class="info-cards-content space-y-3 pt-2" role="list" [attr.aria-label]="section.sectionTitle + ' information cards'">
+      @for (item of section.items; track trackByTitle($index, item)) {
+
+      <!-- Info Card WITHOUT Children (Group as single card) -->
+      @if (!item.hasChildren) {
+      <a [routerLink]="item.navUrl"
+        class="info-card block bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 border-b-0 last:border-b p-3 transition-all duration-200 hover:bg-blue-100 group rounded-lg"
+        matRipple 
+        [matRippleColor]="'rgba(59, 130, 246, 0.08)'"
+        role="listitem"
+        [attr.aria-label]="item.title + (item.description ? ': ' + item.description : '')">
+
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          @if (item.iconName || item.iconUrl) {
+          <div
+            class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors"
+            aria-hidden="true">
+            @if (item.iconName) {
+            <mat-icon class="text-blue-600 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
+            } @else if (item.iconUrl) {
+            <img [src]="item.iconUrl" [alt]="''" class="w-6 h-6 object-contain" loading="lazy" role="presentation" />
+            }
+          </div>
+          }
+
+          <!-- Content -->
+          <div class="info-content flex-1 min-w-0">
+            <h4 class="info-title text-sm font-semibold text-gray-900 mb-1" id="info-title-{{$index}}">
+              {{ item.title }}
+            </h4>
+            @if (item.description) {
+            <p class="info-description text-xs text-gray-600 line-clamp-2" id="info-desc-{{$index}}" [attr.aria-describedby]="'info-title-' + $index">
+              {{ item.description }}
+            </p>
+            }
+          </div>
+        </div>
+      </a>
+      }
+
+      <!-- Info Card WITH Children (Always expanded, no collapse) -->
+      @if (item.hasChildren && item.children && item.children.length > 0) {
+      <div
+        class="info-card-with-children bg-gradient-to-br from-blue-50 to-indigo-50 border rounded-lg overflow-hidden mt-2 mb-2"
+        role="group"
+        [attr.aria-label]="item.title + ' group'">
+
+        <!-- Parent Card Header (Not clickable, just a label) -->
+        <div class="parent-card-header w-full p-3 border-b" role="heading" aria-level="3">
+          <div class="flex items-start gap-3">
+            <!-- Icon -->
+            @if (item.iconName || item.iconUrl) {
+            <div class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center" aria-hidden="true">
+              @if (item.iconName) {
+              <mat-icon class="text-gray-700 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
+              } @else if (item.iconUrl) {
+              <img [src]="item.iconUrl" [alt]="''" class="w-6 h-6 object-contain" loading="lazy" role="presentation" />
+              }
+            </div>
+            }
+
+            <!-- Content -->
+            <div class="info-content flex-1 min-w-0">
+              <h4 class="info-title text-sm font-semibold text-gray-900">
+                {{ item.title }}
+              </h4>
+              @if (item.description) {
+              <p class="info-description text-xs text-gray-600 mt-0.5">
+                {{ item.description }}
+              </p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Children Cards (Always visible) -->
+        <div class="children-cards" role="list" [attr.aria-label]="item.title + ' items'">
+          @for (child of item.children; track trackByChildTitle($index, child)) {
+          <a [routerLink]="child.navUrl"
+            class="child-card block border-b last:border-b-0 p-3 hover:bg-blue-50 transition-colors" 
+            matRipple
+            [matRippleColor]="'rgba(59, 130, 246, 0.08)'"
+            role="listitem"
+            [attr.aria-label]="child.title + (child.description ? ': ' + child.description : '')">
+
+            <div class="flex items-start gap-2.5">
+              <!-- Child Icon -->
+              @if (child.iconName || child.iconUrl) {
+              <div class="child-icon flex-shrink-0 w-8 h-8 bg-blue-50 rounded flex items-center justify-center" aria-hidden="true">
+                @if (child.iconName) {
+                <mat-icon class="text-blue-600 text-base" aria-hidden="true">{{ child.iconName }}</mat-icon>
+                } @else if (child.iconUrl) {
+                <img [src]="child.iconUrl" [alt]="''" class="w-5 h-5 object-contain" loading="lazy" role="presentation" />
+                }
+              </div>
+              }
+
+              <!-- Child Content -->
+              <div class="child-content flex-1 min-w-0">
+                <h5 class="child-title text-xs font-semibold text-gray-900 mb-0.5" id="child-title-{{$index}}">
+                  {{ child.title }}
+                </h5>
+                @if (child.description) {
+                <p class="child-description text-xs text-gray-600 line-clamp-1" id="child-desc-{{$index}}" [attr.aria-describedby]="'child-title-' + $index">
+                  {{ child.description }}
+                </p>
+                }
+              </div>
+            </div>
+          </a>
+          }
+        </div>
+      </div>
+      }
+      }
+    </div>
+  </mat-expansion-panel>
+  } @else {
+  <!-- Non-Collapsible Section -->
+  <div class="non-collapsible-section">
+    @if (section.sectionTitle) {
+    <h3 class="section-title text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1" role="heading" aria-level="2">
+      {{ section.sectionTitle }}
+    </h3>
+    }
+
+    <div class="info-cards-content" role="list" [attr.aria-label]="section.sectionTitle + ' information cards'">
+      @for (item of section.items; track trackByTitle($index, item)) {
+
+      <!-- Info Card WITHOUT Children (Group as single card) -->
+      @if (!item.hasChildren) {
+      <a [routerLink]="item.navUrl"
+        class="info-card block bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 border-b-0 last:border-b p-3 transition-all duration-200 hover:bg-blue-100 group first:rounded-t-lg last:rounded-b-lg"
+        matRipple 
+        [matRippleColor]="'rgba(59, 130, 246, 0.08)'"
+        role="listitem"
+        [attr.aria-label]="item.title + (item.description ? ': ' + item.description : '')">
+
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          @if (item.iconName || item.iconUrl) {
+          <div
+            class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors"
+            aria-hidden="true">
+            @if (item.iconName) {
+            <mat-icon class="text-blue-600 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
+            } @else if (item.iconUrl) {
+            <img [src]="item.iconUrl" [alt]="''" class="w-6 h-6 object-contain" loading="lazy" role="presentation" />
+            }
+          </div>
+          }
+
+          <!-- Content -->
+          <div class="info-content flex-1 min-w-0">
+            <h4 class="info-title text-sm font-semibold text-gray-900 mb-1" id="info-title-non-{{$index}}">
+              {{ item.title }}
+            </h4>
+            @if (item.description) {
+            <p class="info-description text-xs text-gray-600 line-clamp-2" id="info-desc-non-{{$index}}" [attr.aria-describedby]="'info-title-non-' + $index">
+              {{ item.description }}
+            </p>
+            }
+          </div>
+        </div>
+      </a>
+      }
+
+      <!-- Info Card WITH Children (Always expanded, no collapse) -->
+      @if (item.hasChildren && item.children && item.children.length > 0) {
+      <div class="info-card-with-children border border-gray-200 rounded-lg overflow-hidden mt-2 mb-2" role="group" [attr.aria-label]="item.title + ' group'">
+
+        <!-- Parent Card Header (Not clickable, just a label) -->
+        <div class="parent-card-header w-full bg-gray-100 p-3 border-b border-gray-200" role="heading" aria-level="3">
+          <div class="flex items-start gap-3">
+            <!-- Icon -->
+            @if (item.iconName || item.iconUrl) {
+            <div class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center" aria-hidden="true">
+              @if (item.iconName) {
+              <mat-icon class="text-gray-700 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
+              } @else if (item.iconUrl) {
+              <img [src]="item.iconUrl" [alt]="''" class="w-6 h-6 object-contain" loading="lazy" role="presentation" />
+              }
+            </div>
+            }
+
+            <!-- Content -->
+            <div class="info-content flex-1 min-w-0">
+              <h4 class="info-title text-sm font-semibold text-gray-900">
+                {{ item.title }}
+              </h4>
+              @if (item.description) {
+              <p class="info-description text-xs text-gray-600 mt-0.5">
+                {{ item.description }}
+              </p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Children Cards (Always visible) -->
+        <div class="children-cards bg-white" role="list" [attr.aria-label]="item.title + ' items'">
+          @for (child of item.children; track trackByChildTitle($index, child)) {
+          <a [routerLink]="child.navUrl"
+            class="child-card block bg-white border-b border-gray-200 last:border-b-0 p-3 hover:bg-blue-50 transition-colors"
+            matRipple 
+            [matRippleColor]="'rgba(59, 130, 246, 0.08)'"
+            role="listitem"
+            [attr.aria-label]="child.title + (child.description ? ': ' + child.description : '')">
+
+            <div class="flex items-start gap-2.5">
+              <!-- Child Icon -->
+              @if (child.iconName || child.iconUrl) {
+              <div class="child-icon flex-shrink-0 w-8 h-8 bg-blue-50 rounded flex items-center justify-center" aria-hidden="true">
+                @if (child.iconName) {
+                <mat-icon class="text-blue-600 text-base" aria-hidden="true">{{ child.iconName }}</mat-icon>
+                } @else if (child.iconUrl) {
+                <img [src]="child.iconUrl" [alt]="''" class="w-5 h-5 object-contain" loading="lazy" role="presentation" />
+                }
+              </div>
+              }
+
+              <!-- Child Content -->
+              <div class="child-content flex-1 min-w-0">
+                <h5 class="child-title text-xs font-semibold text-gray-900 mb-0.5" id="child-title-non-{{$index}}">
+                  {{ child.title }}
+                </h5>
+                @if (child.description) {
+                <p class="child-description text-xs text-gray-600 line-clamp-1" id="child-desc-non-{{$index}}" [attr.aria-describedby]="'child-title-non-' + $index">
+                  {{ child.description }}
+                </p>
+                }
+              </div>
+            </div>
+          </a>
+          }
+        </div>
+      </div>
+      }
+      }
+    </div>
+  </div>
+  }
+</div>

@@ -151,3 +151,11 @@ export * from './lib/_common/competencies/competencies.module'
 export * from './lib/_common/competencies/competency-list/competency-list.component'
 
 export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
+
+// Left Navigation Bar - Dynamic Sidebar
+export * from './lib/_common/left_nav_bar/models/sidebar.models'
+export * from './lib/_common/left_nav_bar/constants/sidebar.constants'
+export * from './lib/_common/left_nav_bar/components/dynamic-sidebar/dynamic-sidebar.component'
+export * from './lib/_common/left_nav_bar/components/sidebar-nav-list-section/sidebar-nav-list-section.component'
+export * from './lib/_common/left_nav_bar/components/sidebar-stat-cards-section/sidebar-stat-cards-section.component'
+export * from './lib/_common/left_nav_bar/components/sidebar-info-cards-section/sidebar-info-cards-section.component'
