@@ -27,7 +27,7 @@
                 <div class="section-header mt-4">
                     <mat-form-field appearance="outline" class="full-width custom-date-field">
                         <input matInput [matDatepicker]="picker" formControlName="due_date"
-                            placeholder="Select due date">
+                            placeholder="Select due date" [min]="minDate">
 
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
 

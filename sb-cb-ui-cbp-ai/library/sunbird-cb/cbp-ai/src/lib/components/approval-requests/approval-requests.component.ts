@@ -71,6 +71,8 @@ export class ApprovalRequestsComponent {
   pageIndex = 0;
   pageSize = 10;
   totalRecords = 0;
+  showRejectPopupFlag = false
+  rejectionDetail:any
   constructor(public dialog: MatDialog, public sharedService: SharedService,
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -119,32 +121,65 @@ export class ApprovalRequestsComponent {
   //   this.dataSource.paginator = this.paginator;
   // }
 
-  getApprovalRequests() {
+ getApprovalRequests() {
 
-    let reqBody = {
-      state_center_id: this.cbpPlanFinalObj?.ministry?.identifier,
-      include_summary: true,
-      skip: this.pageIndex * this.pageSize,
-      limit: this.pageSize
-    }
-    if (this.cbpPlanFinalObj && this.cbpPlanFinalObj?.departments) {
-      reqBody['department_id'] = this.cbpPlanFinalObj?.departments
-    }
-    this.loading = true
+  let reqBody: any = {
+    state_center_id: this.cbpPlanFinalObj?.ministry?.identifier,
+    include_summary: true,
+    page: this.pageIndex + 1,
+    page_size: this.pageSize
+  };
 
-    this.sharedService.getApprovalRequests(reqBody).subscribe((res) => {
-      console.log('res--', res)
-      if (res && res?.items && res?.items?.length) {
-        this.loading = false
-        this.approvalRequests = res?.items
-        this.dataSource.data = this.approvalRequests;
-         this.totalRecords = res?.total || 0;
-        console.log('this.approvalRequests', this.approvalRequests)
-      } else {
-        this.loading = false
-      }
-    })
+  const search = this.filterForm.get('search')?.value;
+  const status = this.filterForm.get('status')?.value;
+  const time = this.filterForm.get('time')?.value;
+
+  if (search) {
+    reqBody.search = search;
   }
+
+  if (status) {
+    reqBody.status = status;
+  }
+
+  // Time filter
+  if (time) {
+
+    const today = new Date();
+    let fromDate = new Date();
+
+    if (time === 'last_7_days') {
+      fromDate.setDate(today.getDate() - 7);
+    }
+
+    if (time === 'last_30_days') {
+      fromDate.setDate(today.getDate() - 30);
+    }
+
+    if (time === 'last_90_days') {
+      fromDate.setDate(today.getDate() - 90);
+    }
+
+    reqBody.from_date = fromDate.toISOString().split('T')[0];
+    reqBody.to_date = today.toISOString().split('T')[0];
+  }
+
+  if (this.cbpPlanFinalObj?.departments) {
+    reqBody.department_id = this.cbpPlanFinalObj.departments;
+  }
+
+  this.loading = true;
+
+  this.sharedService.getApprovalRequests(reqBody).subscribe((res) => {
+
+    this.loading = false;
+
+    this.approvalRequests = res?.items || [];
+    this.dataSource.data = this.approvalRequests;
+    this.totalRecords = res?.total || 0;
+
+  });
+}
 
 
 
@@ -452,6 +487,16 @@ export class ApprovalRequestsComponent {
   this.pageSize = event.pageSize;
 
   this.getApprovalRequests();
+}
+
+showRejectPopup(element) {
+  console.log('element', element)
+  this.showRejectPopupFlag = true
+  this.rejectionDetail = element
+}
+
+closeRejectPopup() {
+  this.showRejectPopupFlag = false
 }
 
 }

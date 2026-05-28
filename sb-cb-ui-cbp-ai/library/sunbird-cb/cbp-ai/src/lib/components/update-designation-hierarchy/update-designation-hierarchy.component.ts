@@ -82,7 +82,7 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
       }))
     };
 
-    if (this.department_id) {
+    if (typeof this.department_id === 'string' && this.department_id) {
       payload['department_id'] = this.department_id
     }
     if (this.state_center_id) {

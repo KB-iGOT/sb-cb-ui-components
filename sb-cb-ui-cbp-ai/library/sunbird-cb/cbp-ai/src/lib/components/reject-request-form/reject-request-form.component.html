@@ -3,7 +3,7 @@
         <div class="popup-header">
             <div>
                 <div class="heading">Reject Request</div>
-                <div>Are you sure you want to reject request? Please provide a reason.</div>
+                <div>Are you sure you want to reject {{data?.request_name}} request? Please provide a reason.</div>
             </div>
             <div class="cursor-pointer" (click)="closeDialog()">
                 <mat-icon>close</mat-icon>
@@ -14,7 +14,7 @@
         <mat-card class="mt-1">
             <div class="mt-2 section">
                 <div class="sub-heading">
-                    <p>Reason for Rejection</p>
+                    <p>Reason for Rejection <span class="error">*</span></p>
                 </div>
                 <div class="mt-4 additional-details">
                     <textarea formControlName="rejection_comment" placeholder="Enter reason for rejection" rows="5"

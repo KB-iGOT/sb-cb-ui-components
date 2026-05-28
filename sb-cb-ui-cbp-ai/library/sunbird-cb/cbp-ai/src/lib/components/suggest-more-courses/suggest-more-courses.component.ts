@@ -8,13 +8,13 @@ import { SharedService } from '../../modules/shared/services/shared.service';
   templateUrl: './suggest-more-courses.component.html',
   styleUrls: ['./suggest-more-courses.component.scss']
 })
-export class SuggestMoreCoursesComponent implements OnInit{
+export class SuggestMoreCoursesComponent implements OnInit {
   searchText = ''
-  suggestedCourses:any = []
-  originalData:any = []
-  selectFilterCourses:any = []
-  planData:any = {}
-  loading=false
+  suggestedCourses: any = []
+  originalData: any = []
+  selectFilterCourses: any = []
+  planData: any = {}
+  loading = false
 
   // Pagination properties
   currentPage = 0
@@ -27,7 +27,7 @@ export class SuggestMoreCoursesComponent implements OnInit{
     public sharedService: SharedService,
     public snackBar: MatSnackBar
   ) {
-    this.planData= data
+    this.planData = data
   }
 
 
@@ -261,31 +261,31 @@ export class SuggestMoreCoursesComponent implements OnInit{
 
   addCourses() {
     this.loading = true;
-    
+
     // First, get existing suggested courses to avoid overwriting
     this.sharedService.getSuggestedCourses(this.planData.role_mapping_id).subscribe({
       next: (existingRes) => {
         console.log('Existing suggested courses:', existingRes);
-        
+
         // Extract existing course identifiers
         let existingIdentifiers: string[] = [];
         if (existingRes && Array.isArray(existingRes)) {
           existingIdentifiers = existingRes.map(course => course.identifier).filter(id => id);
         }
-        
+
         // Merge existing identifiers with new selections (avoiding duplicates)
         const allIdentifiers = [...new Set([...existingIdentifiers, ...this.selectFilterCourses])];
-        
+
         console.log('Existing identifiers:', existingIdentifiers);
         console.log('New selections:', this.selectFilterCourses);
         console.log('Combined identifiers:', allIdentifiers);
-        
+
         // Prepare request body with combined identifiers
         let reqBody = {
           "role_mapping_id": this.planData.role_mapping_id,
           "course_identifiers": allIdentifiers
         }
-        
+
         // Save the combined list
         this.sharedService.saveSuggestedCourse(reqBody).subscribe({
           next: (res) => {
@@ -311,17 +311,17 @@ export class SuggestMoreCoursesComponent implements OnInit{
       },
       error: (error) => {
         console.log('Error fetching existing courses:', error);
-        
+
         // If fetching existing courses fails, proceed with just new selections
         // This could happen if no courses exist yet (404) which is normal
         if (error.status === 404) {
           console.log('No existing suggested courses found, proceeding with new selections only');
-          
+
           let reqBody = {
             "role_mapping_id": this.planData.role_mapping_id,
             "course_identifiers": this.selectFilterCourses
           }
-          
+
           this.sharedService.saveSuggestedCourse(reqBody).subscribe({
             next: (res) => {
               console.log('Success:', res);
@@ -356,8 +356,8 @@ export class SuggestMoreCoursesComponent implements OnInit{
   }
 
   selectAllCourses(event) {
-    if(event.checked) {
-      for(let i=0; i<this.suggestedCourses.length;i++) {
+    if (event.checked) {
+      for (let i = 0; i < this.suggestedCourses.length; i++) {
         this.selectFilterCourses.push(this.suggestedCourses[i].identifier)
       }
     } else {
@@ -369,7 +369,7 @@ export class SuggestMoreCoursesComponent implements OnInit{
   selectedFilterCourses(event, item) {
     console.log('event', event)
     console.log('item', item)
-    if(event.checked) {
+    if (event.checked) {
       this.selectFilterCourses.push(item?.identifier)
     } else {
       const index = this.selectFilterCourses.indexOf(item?.identifier);
@@ -383,7 +383,7 @@ export class SuggestMoreCoursesComponent implements OnInit{
 
   checkIfCourseExists(item) {
     let flag = false
-    if(this.selectFilterCourses.indexOf(item?.identifier)> -1) {
+    if (this.selectFilterCourses.indexOf(item?.identifier) > -1) {
       flag = true
     }
     return flag
@@ -392,5 +392,14 @@ export class SuggestMoreCoursesComponent implements OnInit{
   onImgError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
     imgElement.src = 'assets/career/careers1.png'; // replace with your default image path
+  }
+
+  redirectToCoure(item) {
+    if (item?.public_link) {
+      window.open(item?.public_link, '_blank')
+    } else {
+      let url = `https://portal.igotkarmayogi.gov.in/app/toc/${item?.identifier}/overview?`
+      window.open(url, '_blank')
+    }
   }
 }

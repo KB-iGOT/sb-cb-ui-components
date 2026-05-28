@@ -217,7 +217,7 @@ export class DesignationApprovalRequestFormComponent {
       }
     }
     if (searchText?.length) {
-      requestBody['searchString'] = searchText
+      requestBody['request']['query'] = searchText
       // when searching, start from first page
       requestBody.pageNumber = 0
       // allow larger page for search if needed

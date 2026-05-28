@@ -16,33 +16,33 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ViewCourseRecommendationComponent {
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
-  planData:any
-  loading=false
-  recommended_course_id=''
-  cbpPlanData:any
+  planData: any
+  loading = false
+  recommended_course_id = ''
+  cbpPlanData: any
   suggestedCourses: any = []
-  constructor( public dialogRef: MatDialogRef<ViewCourseRecommendationComponent>,
+  constructor(public dialogRef: MatDialogRef<ViewCourseRecommendationComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any, public sharedService: SharedService, private dialog: MatDialog, private snackBar: MatSnackBar,
-  public route: ActivatedRoute, private cdr: ChangeDetectorRef) {
-      this.planData = data
-    }
+    public route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+    this.planData = data
+  }
   searchText = ''
-  filterdCourses :any
-  selectFilterCourses:any = []
-  competenciesCount = {total:0, public_courses:0, igot:0}
+  filterdCourses: any
+  selectFilterCourses: any = []
+  competenciesCount = { total: 0, public_courses: 0, igot: 0 }
   expandedCompetencies: any = {}; // Track expanded state for each course and competency type
   isPDFDownload = false
   portalData: any
   activeRowElement: any
-  requestData:any
- 
+  requestData: any
+
   ngOnInit() {
     this.loading = true
     this.cbpPlanData = this.sharedService.cbpPlanFinalObj
+    console.log('cbpPlanData--', this.cbpPlanData)
 
-     
 
-   
+
     // this.sharedService.getRecommendedCourse(this.planData.id).subscribe((res)=>{
     //   this.loading = false
     //   console.log('res', res)
@@ -61,106 +61,121 @@ export class ViewCourseRecommendationComponent {
     //   this.getUserCourse()
     // })
 
-    if(this.sharedService.fromMdoPortal) {
+    if (this.sharedService.fromMdoPortal) {
       const requestId = this.route.snapshot.paramMap.get('request_id');
-      let res:any 
-      if(this.planData?.cbp_plan_data && this.planData?.cbp_plan_data.length) {
+      let res: any
+      if (this.planData?.cbp_plan_data && this.planData?.cbp_plan_data.length) {
         res = this.planData?.cbp_plan_data[0]
         this.recommended_course_id = res.id
         let allCourses = []
-        if(res && res.selected_courses && res.selected_courses.length) {
-          res.selected_courses.forEach((item)=>{
+        if (res && res.selected_courses && res.selected_courses.length) {
+          res.selected_courses.forEach((item) => {
             // if(item?.relevancy >= 85) {
-              allCourses.push(item)
+            allCourses.push(item)
             // }
           })
         }
         this.filterdCourses = allCourses
         let identifiersArr = []
         console.log('this.filterdCourses', this.filterdCourses)
-        this.filterdCourses.map((item)=>{
+        this.filterdCourses.map((item) => {
           identifiersArr.push(item?.identifier)
         })
         this.loading = false
-        this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response)=>{
-          if(response && response.result && response.result.count && response.result.content && response.result.content.length) {
-            for(let i=0; i < response.result.content.length;i++) {
-              for(let j=0; j<this.filterdCourses.length;j++) {
-                if(this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier'] ) {
-                  this.filterdCourses[j]['language'] = response.result.content[i]['language']
-                  this.filterdCourses[j]['avgRating'] = response.result.content[i]['avgRating']
-                  this.filterdCourses[j]['course'] = response.result.content[i]['name']
-                  break;
+        this.sharedService
+          .getAdditionalParameterforSuggestedCourses(identifiersArr)
+          .subscribe((response) => {
+
+            if (response?.result?.content?.length) {
+
+              const updatedCourses = this.filterdCourses.map(course => {
+
+                const matched = response.result.content.find(
+                  item => item.identifier === course.identifier
+                )
+
+                if (matched) {
+                  return {
+                    ...course,
+                    language: matched.language,
+                    avgRating: matched.avgRating,
+                    course: matched.name
+                  }
                 }
-              }
-              
+
+                return course
+              })
+
+              this.filterdCourses = updatedCourses
+
+              this.updateCompetencyCounts()
+
+              this.cdr.detectChanges()
             }
-          }
-          
-        })
-        console.log('this.filterdCourses from mdo' , this.filterdCourses)
+          })
+        console.log('this.filterdCourses from mdo', this.filterdCourses)
         this.updateCompetencyCounts()
         this.cdr.detectChanges()
       }
-        
-      
+
+
     } else {
       let id = this.planData.source_role_mapping_id ? this.planData.source_role_mapping_id : this.planData.id
       this.sharedService.getUserRecommendationCourse(id).subscribe({
-      next: (res) => {
-        this.loading = false
-        console.log('res', res)
-        this.recommended_course_id = res.id
-        let allCourses = []
-        if(res && res.selected_courses && res.selected_courses.length) {
-          res.selected_courses.forEach((item)=>{
-            // if(item?.relevancy >= 85) {
+        next: (res) => {
+          this.loading = false
+          console.log('res', res)
+          this.recommended_course_id = res.id
+          let allCourses = []
+          if (res && res.selected_courses && res.selected_courses.length) {
+            res.selected_courses.forEach((item) => {
+              // if(item?.relevancy >= 85) {
               allCourses.push(item)
-            // }
-          })
-        }
-        this.filterdCourses = allCourses
-        let identifiersArr = []
-        console.log('this.filterdCourses', this.filterdCourses)
-        this.filterdCourses.map((item)=>{
-          identifiersArr.push(item?.identifier)
-        })
-        this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response)=>{
-          if(response && response.result && response.result.content && response.result.content.length) {
-            for(let i=0; i < response.result.content.length;i++) {
-              for(let j=0; j<this.filterdCourses.length;j++) {
-                if(this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier'] ) {
-                  this.filterdCourses[j]['language'] = response.result.content[i]['language']
-                  this.filterdCourses[j]['avgRating'] = response.result.content[i]['avgRating']
-                  this.filterdCourses[j]['course'] = response.result.content[i]['name']
-                  break;
-                }
-              }
-              
-            }
+              // }
+            })
           }
-          
-        })
-        this.updateCompetencyCounts()
-        // this.getSuggestedCourse()
-        // this.getUserCourse()
-      },
-      error: (error) => {
-        this.loading = false
-        this.snackBar.open(error?.error?.detail, 'X', {
-          duration: 3000,
-          panelClass: ['snackbar-error']
-        });
-      }
-    });
+          this.filterdCourses = allCourses
+          let identifiersArr = []
+          console.log('this.filterdCourses', this.filterdCourses)
+          this.filterdCourses.map((item) => {
+            identifiersArr.push(item?.identifier)
+          })
+          this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response) => {
+            if (response && response.result && response.result.content && response.result.content.length) {
+              for (let i = 0; i < response.result.content.length; i++) {
+                for (let j = 0; j < this.filterdCourses.length; j++) {
+                  if (this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier']) {
+                    this.filterdCourses[j]['language'] = response.result.content[i]['language']
+                    this.filterdCourses[j]['avgRating'] = response.result.content[i]['avgRating']
+                    this.filterdCourses[j]['course'] = response.result.content[i]['name']
+                    break;
+                  }
+                }
+
+              }
+            }
+
+          })
+          this.updateCompetencyCounts()
+          // this.getSuggestedCourse()
+          // this.getUserCourse()
+        },
+        error: (error) => {
+          this.loading = false
+          this.snackBar.open(error?.error?.detail, 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-error']
+          });
+        }
+      });
     }
 
-    
+
   }
 
   updateCompetencyCounts() {
-   // const comps = this.competenciesArray.value;
-    this.competenciesCount = {total: 0, public_courses: 0, igot: 0};
+    // const comps = this.competenciesArray.value;
+    this.competenciesCount = { total: 0, public_courses: 0, igot: 0 };
     this.filterdCourses.forEach(c => {
       this.competenciesCount.total++;
       if (c.is_public) this.competenciesCount.public_courses++;
@@ -175,25 +190,25 @@ export class ViewCourseRecommendationComponent {
   addMoreCourses() {
     this.dialogRef.close();
     console.log('Generate Course Recommendation clicked', this.planData);
-    
+
     console.log('Edit Role Mapping clicked', this.planData);
     // Navigate or open modal
     console.log('View CBP Plan clicked', this.planData);
     const dialogRef = this.dialog.open(GenerateCourseRecommendationComponent, {
       width: '1000px',
       data: this.planData,
-       panelClass: 'view-cbp-plan-popup',
+      panelClass: 'view-cbp-plan-popup',
       minHeight: '400px',          // Set minimum height
       maxHeight: '90vh',           // Prevent it from going beyond viewport
       disableClose: true // Optional: prevent closing with outside click
     });
-  
+
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'saved') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
-       
-        
+
+
       }
     });
   }
@@ -201,25 +216,25 @@ export class ViewCourseRecommendationComponent {
   addPersonilisation() {
     this.dialogRef.close();
     console.log('Generate Course Recommendation clicked', this.planData);
-    
+
     console.log('Edit Role Mapping clicked', this.planData);
     // Navigate or open modal
     console.log('View CBP Plan clicked', this.planData);
     const dialogRef = this.dialog.open(AddPersonalisationComponent, {
       width: '1000px',
       data: this.planData,
-       panelClass: 'view-cbp-plan-popup',
+      panelClass: 'view-cbp-plan-popup',
       minHeight: '400px',          // Set minimum height
       maxHeight: '90vh',           // Prevent it from going beyond viewport
       disableClose: true // Optional: prevent closing with outside click
     });
-  
+
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'saved') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
-       
-        
+
+
       }
     });
   }
@@ -232,18 +247,18 @@ export class ViewCourseRecommendationComponent {
         // Success handling
         this.loading = false
         console.log('getSuggestedCourses res', res)
-        
+
         // Store suggested courses separately
         this.suggestedCourses = [...res];
-        
+
         // Add suggested courses to filtered courses
         for (let i = 0; i < res.length; i++) {
           this.filterdCourses.push(res[i])
         }
-        
+
         // Update competency counts after adding suggested courses
         this.updateCompetencyCounts()
-        
+
         console.log('filterdCourses after adding suggested courses:', this.filterdCourses);
       },
       error: (error) => {
@@ -265,15 +280,15 @@ export class ViewCourseRecommendationComponent {
       next: (res) => {
         // Success handling
         this.loading = false
-        
+
         // Process user-added courses to ensure proper structure
         for (let i = 0; i < res.length; i++) {
           this.filterdCourses.push(res[i])
         }
-        
+
         // Update competency counts after adding user courses
         this.updateCompetencyCounts()
-        
+
         console.log('filterdCourses after adding user courses:', this.filterdCourses);
         //this.successRoleMapping.emit(this.roleMappingForm)
       },
@@ -299,7 +314,7 @@ export class ViewCourseRecommendationComponent {
       console.log(`No course found at index ${index}`);
       return [];
     }
-    
+
     // Handle different competency property names
     // AI Recommended & Public courses use 'competencies'
     // Manually Suggested - iGOT courses use 'competencies_v6'
@@ -320,32 +335,32 @@ export class ViewCourseRecommendationComponent {
         courseKeys: Object.keys(course)
       });
     }
-    
+
     if (competencies.length === 0) {
       console.log(`No competencies found for course ${index} and type ${type}`);
       return [];
     }
-    
+
     // Normalize the type for comparison (case-insensitive + handle spelling variations)
     const normalizedType = type.toLowerCase().trim();
-    
+
     const matchedCompetencies = competencies.filter(c => {
       if (!c || !c.competencyAreaName) {
         console.log(`Invalid competency structure in course ${index}:`, c);
         return false;
       }
-      
+
       const competencyArea = c.competencyAreaName.toLowerCase().trim();
-      
+
       // Handle both "behavioral" and "behavioural" spellings
       if (normalizedType === 'behavioural' || normalizedType === 'behavioral') {
         return competencyArea === 'behavioral' || competencyArea === 'behavioural';
       }
-      
+
       // For other types, do case-insensitive comparison
       return competencyArea === normalizedType;
     });
-    
+
     console.log(`Found ${matchedCompetencies.length} competencies of type ${type} for course ${index}:`, matchedCompetencies);
     return matchedCompetencies;
   }
@@ -385,120 +400,129 @@ export class ViewCourseRecommendationComponent {
     this.isPDFDownload = true
     const element = this.pdfContent.nativeElement;
 
-  // Wait for images to load
-  const images = element.querySelectorAll('img');
-  const promises = Array.from(images).map((img: HTMLImageElement) => {
-    if (img.complete) return Promise.resolve();
-    return new Promise(resolve => img.onload = resolve);
-  });
+    // Wait for images to load
+    const images = element.querySelectorAll('img');
+    const promises = Array.from(images).map((img: HTMLImageElement) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => img.onload = resolve);
+    });
 
-  Promise.all(promises).then(() => {
-    const options = {
-      margin: 0.5,
-      filename: 'Recommended Coureses.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0,
-      },
-      jsPDF: {
-        unit: 'in',
-        format: 'a4',
-        orientation: 'portrait'
-      },
-      pagebreak: {
-        mode: ['css', 'legacy', 'avoid-all']
-      }
-    };
+    Promise.all(promises).then(() => {
+      const options = {
+        margin: 0.5,
+        filename: 'Recommended Coureses.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          scrollY: 0,
+        },
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
+        },
+        pagebreak: {
+          mode: ['css', 'legacy', 'avoid-all']
+        }
+      };
 
-    html2pdf().from(element).set(options).save()
+      html2pdf().from(element).set(options).save()
+      setTimeout(() => {
+        this.loading = false;
+        this.isPDFDownload = false
+      }, 3000);
+    });
+  }
+
+  downloadPdfFromBE() {
+    this.loading = true
+    //  this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier)
+
+    this.sharedService.downloadPdfForCourseRecommendation(this.data?.id)
+
+
     setTimeout(() => {
-      this.loading = false;
-      this.isPDFDownload = false
-    }, 3000); 
-  });
-}
-
-downloadPdfFromBE() {
-  this.loading = true
-//  this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier)
-  
-  this.sharedService.downloadPdfForCourseRecommendation(this.data?.id)  
-  
-  
-  setTimeout(()=>{
-    this.loading = false
-  },5000)
-}
-
-confirmDeleteCourse(item: any, index: number) {
-  const roleMappingId = this.recommended_course_id;
-  const courseIdentifier =
-    item?.course_identifier || item?.id || item?.identifier;
-
-  if (!roleMappingId || !courseIdentifier) {
-    this.snackBar.open('Unable to delete course', 'X', {
-      duration: 3000,
-      panelClass: ['snackbar-error']
-    });
-    return;
+      this.loading = false
+    }, 5000)
   }
 
-  this.loading = true;
+  confirmDeleteCourse(item: any, index: number) {
+    const roleMappingId = this.recommended_course_id;
+    const courseIdentifier =
+      item?.course_identifier || item?.id || item?.identifier;
 
-  this.sharedService
-    .deleteRecommendedCourse(roleMappingId, courseIdentifier)
-    .subscribe({
-      next: () => {
-        // Remove from UI
-        this.filterdCourses.splice(index, 1);
+    if (!roleMappingId || !courseIdentifier) {
+      this.snackBar.open('Unable to delete course', 'X', {
+        duration: 3000,
+        panelClass: ['snackbar-error']
+      });
+      return;
+    }
 
-        // Update counts
-        this.updateCompetencyCounts();
+    this.loading = true;
 
-        this.loading = false;
+    this.sharedService
+      .deleteRecommendedCourse(roleMappingId, courseIdentifier)
+      .subscribe({
+        next: () => {
+          // Remove from UI
+          this.filterdCourses.splice(index, 1);
 
-        this.snackBar.open('Course deleted successfully', 'X', {
-          duration: 3000,
-          panelClass: ['snackbar-success']
-        });
-      },
-      error: (error) => {
-        this.loading = false;
+          // Update counts
+          this.updateCompetencyCounts();
 
-        this.snackBar.open(
-          error?.error?.detail || 'Failed to delete course',
-          'X',
-          {
+          this.loading = false;
+
+          this.snackBar.open('Course deleted successfully', 'X', {
             duration: 3000,
-            panelClass: ['snackbar-error']
-          }
-        );
+            panelClass: ['snackbar-success']
+          });
+        },
+        error: (error) => {
+          this.loading = false;
+
+          this.snackBar.open(
+            error?.error?.detail || 'Failed to delete course',
+            'X',
+            {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            }
+          );
+        }
+      });
+
+  }
+
+  deleteCard(item: any, index: number) {
+    const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
+      width: '600px',
+      data: {
+        planId: this.planData?.id,   // role mapping id
+        course: item,                // course object
+        index: index,
+        from: 'viewCourse'                 // index for UI removal
+      },
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '300px',
+      maxHeight: '90vh',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        this.confirmDeleteCourse(item, index);
       }
     });
-
   }
 
-deleteCard(item: any, index: number) {
-  const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
-    width: '600px',
-    data: {
-      planId: this.planData?.id,   // role mapping id
-      course: item,                // course object
-      index: index,
-      from : 'viewCourse'                 // index for UI removal
-    },
-    panelClass: 'view-cbp-plan-popup',
-    minHeight: '300px',
-    maxHeight: '90vh',
-    disableClose: true
-  });
-
-  dialogRef.afterClosed().subscribe(result => {
-    if (result === 'saved') {
-      this.confirmDeleteCourse(item, index);
+  redirectToCoure(item) {
+    if (item?.public_link) {
+      window.open(item?.public_link, '_blank')
+    } else {
+      let url = `https://portal.igotkarmayogi.gov.in/app/toc/${item?.identifier}/overview?`
+      window.open(url, '_blank')
     }
-  });
-}
+  }
 }

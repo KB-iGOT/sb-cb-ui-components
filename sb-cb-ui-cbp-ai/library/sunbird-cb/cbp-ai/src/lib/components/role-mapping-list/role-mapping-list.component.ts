@@ -241,7 +241,7 @@ export class RoleMappingListComponent {
       //   // Refresh data or show a toast here
 
       // }
-      this.refreshRoleMappingData();
+      this.loadRoleMappingList();
     });
   }
 
@@ -452,7 +452,7 @@ export class RoleMappingListComponent {
       if (result === 'saved') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
-        this.refreshRoleMappingData();
+        this.loadRoleMappingList();
       }
     });
   }
@@ -838,7 +838,7 @@ export class RoleMappingListComponent {
 
         // }
         this.selection.clear()
-        this.refreshRoleMappingData();
+        this.loadRoleMappingList();
       });
     }
 
@@ -865,7 +865,7 @@ export class RoleMappingListComponent {
       //   // Refresh data or show a toast here
 
       // }
-      this.refreshRoleMappingData();
+      this.loadRoleMappingList();
     });
 
   }

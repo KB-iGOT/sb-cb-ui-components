@@ -18,7 +18,7 @@
         <div class="status-badge-success" *ngIf="(request?.status === 'approved' || request?.status === 'APPROVED' )">
             {{request?.status | titlecase}}
         </div>
-        <div class="status-badge-rejected" *ngIf="(request?.status === 'rejected' || request?.status === 'rejected' )">
+        <div class="status-badge-rejected" *ngIf="(request?.status === 'rejected' || request?.status === 'REJECTED' )">
             {{request?.status | titlecase}}
         </div>
 
@@ -72,7 +72,7 @@
                     <mat-icon>mail</mat-icon>
                     <div>
                         <p class="label">Requested By</p>
-                        <p class="value">{{request?.user?.username | titlecase}}</p>
+                        <p class="value">{{request?.user?.email}}</p>
                     </div>
                 </div>
 
@@ -251,33 +251,33 @@
 
                             <td mat-cell *matCellDef="let element">
 
-                                <button mat-icon-button [matMenuTriggerFor]="menu">
+                                <button mat-icon-button [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger">
                                     <mat-icon>more_vert</mat-icon>
                                 </button>
 
                                 <mat-menu #menu="matMenu">
 
-                                    <ng-container *ngIf="!sharedService.fromMdoPortal">
-                                        <button mat-menu-item (click)="viewCourseRecommendation(element)">
+                                    <ng-container>
+                                        <button mat-menu-item (click)="viewCourseRecommendation(element, menuTrigger)">
                                             <mat-icon>preview</mat-icon>
                                             <span>View Course Recommendation</span>
                                         </button>
                                     </ng-container>
 
-                                    <ng-container *ngIf="sharedService.fromMdoPortal">
+                                    
 
-                                        <button mat-menu-item (click)="editRoleMapping(element)">
+                                        <button mat-menu-item (click)="editRoleMapping(element, menuTrigger)">
                                             <mat-icon>edit</mat-icon>
                                             <span>Edit Role Mapping</span>
                                         </button>
 
-                                        <button mat-menu-item (click)="viewCBPPlan(element)">
+                                        <button mat-menu-item (click)="viewCBPPlan(element, menuTrigger)">
                                             <mat-icon>visibility</mat-icon>
                                             <span>View Role Mapping</span>
                                         </button>
-
+                                        <ng-container *ngIf="sharedService.fromMdoPortal">
                                         <button *ngIf="request?.status?.toLowerCase() === 'pending' && sharedService.fromMdoPortal" mat-menu-item
-                                            (click)="rejectItemRequest(element)">
+                                            (click)="rejectItemRequest(element, menuTrigger)">
 
                                             <mat-icon>send</mat-icon>
                                             <span>Reject Request</span>
@@ -292,13 +292,16 @@
                         </ng-container>
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                        <tr class="mat-row" *matNoDataRow>
-                            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
-                                No Data Found
-                            </td>
-                        </tr>
+                       
                     </table>
-                    <ng-container *ngIf="dataSource?.filteredData?.length || dataSource?.filteredData?.length">
+                    <div
+  class="no-data-wrapper"
+  *ngIf="dataSource.filteredData.length === 0">
+
+  No Data Found
+
+</div>
+                    <ng-container *ngIf="dataSource?.filteredData?.length > 0">
                         <mat-paginator [length]="dataSource?.data?.length" [pageSize]="5"
                             [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
                         </mat-paginator>

@@ -131,9 +131,9 @@ resize: none;
 
   .btn-disable {
         border-radius: var(--Radius-Full-Round, 9999999px);
-    opacity: 0.4;
+    opacity: 0.9;
     background: var(--Primary-KB-Primary-Light, #1B4CA1);
-    color: var(--white-kb-white-100, #FFF);
+    color: #444 !important;
 text-align: center;
 
 /* Button */
@@ -991,3 +991,10 @@ border: none;
     font-weight: 600;
     box-shadow: none;
 }
+
+
+  .error {
+    color: #d32f2f;
+    margin-top: 6px;
+    font-size: 0.875rem;
+  }

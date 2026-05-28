@@ -759,6 +759,15 @@ border: none;
     }
   }
 
+  .custom-bullet-list ul {
+  list-style: disc outside !important;
+}
+
+.custom-bullet-list li {
+  list-style-type: disc !important;
+  display: list-item !important;
+}
+
   .vertical-middle {
     vertical-align: middle;
   }

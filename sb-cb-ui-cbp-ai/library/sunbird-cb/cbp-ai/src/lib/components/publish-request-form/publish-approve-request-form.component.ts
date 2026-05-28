@@ -1,70 +1,47 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import _ from 'lodash'
+import { finalize } from 'rxjs/operators';
 import { SharedService } from '../../modules/shared/services/shared.service';
+
 @Component({
-  selector: 'app-publish-request-form',
-  templateUrl: './publish-request-form.component.html',
-  styleUrls: ['./publish-request-form.component.scss']
+  selector: 'app-publish-approve-request-form',
+  templateUrl: './publish-approve-request-form.component.html',
+  styleUrls: ['./publish-approve-request-form.component.scss']
 })
-export class PublishRequestFormComponent {
+export class PublishApproveRequestFormComponent implements OnInit {
+
   approvalRequestForm: FormGroup;
-  cbpPlanFinalObj: any
-  loading = false
-  @ViewChild('mdo', { read: ElementRef }) mdoRef?: ElementRef
-  mdoFilterEnable = false
-  isLoadingMoremdos = false;
-  mdoOffset = 0
-  odcsmdoCount = 0
-  defaultSearchmdoCount = 0
-  mdoListLoadCount = 50
-  mdoDefaultLoadCount = 50
-  noMoreLegacymdos = false
-  mdoSearchText = ''
-  mdoInitInProgress = false
-  scrollListenerAttached = false
-  masterData: any = {}
-  role_mapping_ids: any = []
-  constructor(public dialogRef: MatDialogRef<PublishRequestFormComponent>,
+  loading = false;
+  minDate = new Date()
+  constructor(
+    public dialogRef: MatDialogRef<PublishApproveRequestFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
-    private cdRef: ChangeDetectorRef,
     private sharedService: SharedService,
-    private snackBar: MatSnackBar) {
-    this.role_mapping_ids = data
-    this.masterData = {
-      mdoBackup: [],
-      mdoFiltered: [], // filtered search results
-    };
+    private snackBar: MatSnackBar
+  ) { }
 
-  }
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.initializeForm();
   }
 
-
-
-  initializeForm() {
+  initializeForm(): void {
     this.approvalRequestForm = this.fb.group({
       request_name: ['', Validators.required],
-      due_date: [new Date(), Validators.required]
+      due_date: [null, Validators.required]
     });
   }
 
-
-
-  cancelForm() {
-    this.dialogRef.close()
+  cancelForm(): void {
+    this.dialogRef.close();
   }
 
-  closeDialog() {
-    this.dialogRef.close()
+  closeDialog(): void {
+    this.dialogRef.close();
   }
-
-  approveAndPublish() {
+approveAndPublish() {
 
     if (this.approvalRequestForm.invalid) {
       return;
@@ -75,9 +52,9 @@ export class PublishRequestFormComponent {
     const formValue = this.approvalRequestForm.value;
 
     const payload = {
-      request_id: this.role_mapping_ids?.demand_id || this.data?.demand_id,
+      request_id:  this.data?.demand_id,
       plan_name: formValue.request_name,
-      due_date: new Date(formValue.due_date).toISOString()
+      due_date: formValue.due_date ? new Date(formValue.due_date).toISOString().split('T')[0] : null
     };
 
     console.log('payload', payload);
@@ -119,7 +96,4 @@ export class PublishRequestFormComponent {
         }
       });
   }
-
-
-
 }

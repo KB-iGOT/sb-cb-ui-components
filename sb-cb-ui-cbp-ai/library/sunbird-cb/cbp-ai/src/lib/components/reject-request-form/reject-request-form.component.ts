@@ -29,7 +29,10 @@ export class RejectRequestFormComponent implements OnInit {
 
   initializeForm(): void {
     this.rejectRequestForm = this.fb.group({
-      rejection_comment: ['', Validators.required],
+      rejection_comment: ['', [
+        Validators.required,
+        Validators.pattern(/^(?!\s*$).+/)
+      ]],
     });
   }
 
@@ -50,7 +53,7 @@ export class RejectRequestFormComponent implements OnInit {
 
     const payload = {
       request_id: this.data?.demand_id || this.data?.demand_id,
-      rejection_comment: this.rejectRequestForm.value.rejection_comment
+      rejection_comment: this.rejectRequestForm.value.rejection_comment?.trim()
     };
 
     console.log('Reject Payload =>', payload);

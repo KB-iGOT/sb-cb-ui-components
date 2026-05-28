@@ -58,7 +58,7 @@ const API_END_POINTS = {
   SEARCH_PUBLIC_MDO: 'cbp-tpc-ai/api/v1/approval-requests/mdo-admins',
   SAVE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests/send',
   VIEW_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests',
-  REVOKE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests',
+  REVOKE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests/revoke',
   SAVE_DESIGNATION_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/designation-approval/create',
   VIEW_MDO_APPROVAL_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/read',
   APPROVE_AND_PUBLISH_MDO_APPROVAL_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish',
@@ -400,7 +400,7 @@ export class SharedService {
 
   getRoleMappingByStateCenterAndDepartment(state_center_id, department_id) {
     const headers = this.headers
-    if (department_id) {
+    if (typeof department_id === 'string'){
       return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_BY_STATE_CENTER}/${state_center_id}/department/${department_id}?load_cbp_plans=true`, { headers })
         .pipe(map((response: any) => {
           return response
@@ -1013,13 +1013,55 @@ export class SharedService {
       }))
   }
 
-  getApprovalRequests(reqBody) {
-    const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_APPROVAL_REQUESTS}`, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+
+getApprovalRequests(reqBody: any) {
+
+  const headers = this.headers;
+
+  let params = new HttpParams();
+
+  if (reqBody?.page) {
+    params = params.set('page', reqBody.page);
   }
+
+  if (reqBody?.page_size) {
+    params = params.set('page_size', reqBody.page_size);
+  }
+
+  if (reqBody?.search) {
+    params = params.set('search', reqBody.search);
+  }
+
+  if (reqBody?.status) {
+    params = params.set('status', reqBody.status);
+  }
+
+  if (reqBody?.from_date) {
+    params = params.set('from_date', reqBody.from_date);
+  }
+
+  if (reqBody?.to_date) {
+    params = params.set('to_date', reqBody.to_date);
+  }
+
+  if (reqBody?.state_center_id) {
+    params = params.set('state_center_id', reqBody.state_center_id);
+  }
+
+  if (reqBody?.department_id) {
+    params = params.set('department_id', reqBody.department_id);
+  }
+
+  return this.http.get<any>(
+    `${this.baseUrl}${API_END_POINTS.GET_APPROVAL_REQUESTS}`,
+    {
+      headers,
+      params
+    }
+  ).pipe(
+    map((response: any) => response)
+  );
+}
 
   saveApprovalRequest(reqBody) {
     const headers = this.headers

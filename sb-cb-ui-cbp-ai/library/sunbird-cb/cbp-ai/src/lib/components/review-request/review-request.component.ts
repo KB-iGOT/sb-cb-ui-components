@@ -9,10 +9,11 @@ import { EditCbpPlanComponent } from '../edit-cbp-plan/edit-cbp-plan.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ViewCourseRecommendationComponent } from '../view-course-recommendation/view-course-recommendation.component';
 import { RejectItemRequestFormComponent } from '../reject-item-request-form/reject-item-request-form.component';
-import { PublishRequestFormComponent } from '../publish-request-form/publish-request-form.component';
+import { PublishApproveRequestFormComponent } from '../publish-request-form/publish-approve-request-form.component';
 import { RejectRequestFormComponent } from '../reject-request-form/reject-request-form.component';
 import { ListPopupComponent } from '../list-popup/list-popup.component';
 import { finalize } from 'rxjs/operators';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-review-request',
@@ -83,6 +84,7 @@ export class ReviewRequestComponent {
         this.request = res
         this.loading = false
         this.dataSource = new MatTableDataSource(res?.items);
+        this.initializeTableFilter();
         setTimeout(() => {
           this.dataSource.paginator = this.paginator;
         }, 100);
@@ -106,6 +108,7 @@ export class ReviewRequestComponent {
         this.request = res
         this.loading = false
         this.dataSource = new MatTableDataSource(res?.items);
+        this.initializeTableFilter();
         setTimeout(() => {
           this.dataSource.paginator = this.paginator;
         }, 100);
@@ -167,43 +170,18 @@ export class ReviewRequestComponent {
 
   }
 
-  applyFilter() {
-    const filterValue = this.searchText.trim().toLowerCase();
+ applyFilter(): void {
 
-    this.dataSource.filterPredicate = (data: any, filter: string) => {
+  const filterValue = (this.searchText || '')
+    .trim()
+    .toLowerCase();
 
-      const designation = data.designation_name?.toLowerCase() || '';
-      const wing = data.wing_division_section?.toLowerCase() || '';
+  this.dataSource.filter = filterValue;
 
-      const responsibilities = (data.role_responsibilities || [])
-        .join(' ')
-        .toLowerCase();
-
-      const activities = (data.activities || [])
-        .join(' ')
-        .toLowerCase();
-
-      const competencies = (data.competencies || [])
-        .map(c => `${c.theme} ${c.sub_theme}`)
-        .join(' ')
-        .toLowerCase();
-
-      const combined =
-        designation +
-        wing +
-        responsibilities +
-        activities +
-        competencies;
-
-      return combined.includes(filter);
-    };
-
-    this.dataSource.filter = filterValue;
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  if (this.dataSource.paginator) {
+    this.dataSource.paginator.firstPage();
   }
+}
 
   clearSearch() {
     this.searchText = '';
@@ -213,6 +191,46 @@ export class ReviewRequestComponent {
       this.dataSource.paginator.firstPage();
     }
   }
+
+  initializeTableFilter(): void {
+
+  this.dataSource.filterPredicate = (data: any, filter: string): boolean => {
+
+    const designation =
+      (data?.designation_name || '').toLowerCase();
+
+    const wing =
+      (data?.wing_division_section || '').toLowerCase();
+
+    const responsibilities =
+      (data?.role_responsibilities || [])
+        .join(' ')
+        .toLowerCase();
+
+    const activities =
+      (data?.activities || [])
+        .join(' ')
+        .toLowerCase();
+
+    const competencies =
+      (data?.competencies || [])
+        .map((c: any) =>
+          `${c?.theme || ''} ${c?.sub_theme || ''}`
+        )
+        .join(' ')
+        .toLowerCase();
+
+    const combinedText = `
+      ${designation}
+      ${wing}
+      ${responsibilities}
+      ${activities}
+      ${competencies}
+    `;
+
+    return combinedText.includes(filter);
+  };
+}
 
 
   openFullList(element: any, type: any) {
@@ -234,7 +252,8 @@ export class ReviewRequestComponent {
 
 
 
-  editRoleMapping(element: any) {
+  editRoleMapping(element: any, menuTrigger: MatMenuTrigger) {
+     menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
@@ -263,7 +282,8 @@ export class ReviewRequestComponent {
     });
   }
 
-  viewCBPPlan(element: any) {
+  viewCBPPlan(element: any, menuTrigger: MatMenuTrigger) {
+     menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('View CBP Plan clicked', element);
     const dialogRef = this.dialog.open(ViewCbpPlanComponent, {
@@ -283,8 +303,9 @@ export class ReviewRequestComponent {
     });
   }
 
-  viewCourseRecommendation(element) {
+  viewCourseRecommendation(element, menuTrigger: MatMenuTrigger) {
     console.log('View Course Recommendation clicked', element);
+     menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
@@ -316,7 +337,7 @@ export class ReviewRequestComponent {
 
   approveAndPublish() {
     console.log('approveAndPublish clicked', this.requestData);
-    const dialogRef = this.dialog.open(PublishRequestFormComponent, {
+    const dialogRef = this.dialog.open(PublishApproveRequestFormComponent, {
       width: '750px',
       maxWidth: '90vw',
       data: this.requestData,
@@ -372,9 +393,11 @@ export class ReviewRequestComponent {
 
   }
 
-  rejectItemRequest(element) {
+  rejectItemRequest(element, menuTrigger: MatMenuTrigger) {
     console.log('approveAndPublish clicked', element);
+
     console.log('View Course Recommendation clicked', element);
+     menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal

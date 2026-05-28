@@ -1182,3 +1182,11 @@ cursor: not-allowed;
   background: #ffffff !important;
   opacity: 1 !important;
 }
+
+.no-data-wrapper {
+  padding: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0,0,0,0.6);
+  background: #fff;
+}
