@@ -405,11 +405,7 @@ export class UploadDocumentPageComponent {
     }
 
     clearSearch() {
-
-    }
-    
-    openFullList(element:any, type:any) {
-      console.log('element, type', element, type)   
+      
     }
 
 }

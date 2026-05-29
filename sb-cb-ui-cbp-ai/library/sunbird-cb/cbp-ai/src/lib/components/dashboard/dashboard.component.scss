@@ -30,6 +30,12 @@
     gap: 32px;
 }
 
+.card-grid-alone {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 32px;
+}
+
 /* METRIC CARD */
 .metric-card {
     padding: 24px;

@@ -88,7 +88,7 @@
                             <input class="btn-active" type="button" value="Add More Designation"
                                 (click)="addMoreDesignation()" />
                         </div>
-                        <!-- <div class="ml-2">
+                        <div class="ml-2">
                             <button
                                 [ngClass]="selection.selected.length ? 'btn-active-outline' : 'btn-active-outline-disable'"
                                 (click)="sendForApprovalForm()">
@@ -96,7 +96,7 @@
                                 Send For Approval
                                 <span *ngIf="selection.selected.length">({{selection.selected.length}})</span>
                             </button>
-                        </div> -->
+                        </div>
 
 
                     </div>
@@ -237,7 +237,7 @@
                                 <table mat-table [dataSource]="dataSource" class="mat-elevation-z1"
                                     [ngClass]="activeTab === 'matched'? 'table-body': 'table-body-unmatched'">
                                     <!-- Selection Column -->
-                                    <!-- <ng-container matColumnDef="select">
+                                    <ng-container matColumnDef="select">
                                         <th mat-header-cell *matHeaderCellDef [hidden]="activeTab !== 'matched'">
                                             <mat-checkbox class="radio-style-checkbox" (change)="toggleAllRows($event)"
                                                 [checked]="isAllSelected()" [indeterminate]="isSomeSelected()"
@@ -246,7 +246,7 @@
                                         </th>
 
                                         <td mat-cell *matCellDef="let row" [hidden]="activeTab !== 'matched'">
-                                            <span matTooltip="Please generate plan to request for approval"
+                                            <span matTooltip="Please generate & save course recommendation to select. Course recommendation generation & save is pending."
                                                 [matTooltipDisabled]="row?.cbp_plans?.length > 0">
                                                 <mat-checkbox class="radio-style-checkbox"
                                                     (click)="$event.stopPropagation()" (change)="toggleRow(row)"
@@ -255,7 +255,7 @@
                                                 </mat-checkbox>
                                             </span>
                                         </td>
-                                    </ng-container> -->
+                                    </ng-container>
                                     <!-- Designation Name -->
                                     <ng-container matColumnDef="designation_name">
                                         <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
@@ -390,6 +390,10 @@
                                                 <button mat-menu-item (click)="deleteRoleMapping(element)">
                                                     <mat-icon>delete</mat-icon>
                                                     <span>Delete Role Mapping</span>
+                                                </button>
+                                                 <button *ngIf="activeTab !== 'matched'" mat-menu-item (click)="sendForDesignationNameApproval(element)">
+                                                    <mat-icon>send</mat-icon>
+                                                    <span>Send for Designation Name Approval</span>
                                                 </button>
                                             </mat-menu>
                                         </td>

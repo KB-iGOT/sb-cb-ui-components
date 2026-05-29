@@ -68,6 +68,11 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { AiCbpRoutingModule } from './ai-cbp-routing.module';
+import { DesignationApprovalRequestFormComponent } from './components/designation-approval-request-form/designation-approval-request-form.component';
+import { PublishApproveRequestFormComponent } from './components/publish-request-form/publish-approve-request-form.component';
+import { RejectItemRequestFormComponent } from './components/reject-item-request-form/reject-item-request-form.component';
+import { RejectRequestFormComponent } from './components/reject-request-form/reject-request-form.component';
+
 
 @NgModule({
   declarations: [
@@ -97,7 +102,11 @@ import { AiCbpRoutingModule } from './ai-cbp-routing.module';
     DeleteRoleMappingComponent,
     ViewFinalCbpPlanComponent,
     RoleMappingGenerationComponent,
-    RoleMappingListComponent
+    RoleMappingListComponent,
+    DesignationApprovalRequestFormComponent,
+    PublishApproveRequestFormComponent,
+    RejectItemRequestFormComponent,
+    RejectRequestFormComponent
 
 
 
@@ -156,7 +165,11 @@ import { AiCbpRoutingModule } from './ai-cbp-routing.module';
     DeleteRoleMappingComponent,
     ViewFinalCbpPlanComponent,
     RoleMappingGenerationComponent,
-    RoleMappingListComponent
+    RoleMappingListComponent,
+    DesignationApprovalRequestFormComponent,
+     PublishApproveRequestFormComponent,
+    RejectItemRequestFormComponent,
+    RejectRequestFormComponent
   ],
   providers: [
     RoleMappingService

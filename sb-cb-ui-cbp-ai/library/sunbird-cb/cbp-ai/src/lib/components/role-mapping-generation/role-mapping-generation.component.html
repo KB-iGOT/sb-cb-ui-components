@@ -68,7 +68,8 @@
                                     (keydown.space)="$event.stopPropagation()"
                                     (keydown)="$event.stopPropagation()">
                             </div>
-                            <mat-option [value]="item?.identifier" *ngFor="let item of filteredList" [selected]="selectedMinistryId === item?.identifier">{{item?.orgName}}</mat-option>
+                            <!-- [selected]="selectedMinistryId === item?.identifier" -->
+                            <mat-option [value]="item?.identifier" *ngFor="let item of filteredList">{{item?.orgName}}</mat-option>
                         </mat-select>
                     </mat-form-field>
                 </div>
@@ -179,9 +180,9 @@
     </mat-card>
     
 </div>
-<div *ngIf="!login">
+<!-- <div *ngIf="!login">
         <app-login (success)="loginStatus($event)"></app-login>
-    </div>
+    </div> -->
 
 <div class="overlay-loader" *ngIf="apiLoading">
     <mat-spinner diameter="50"></mat-spinner>

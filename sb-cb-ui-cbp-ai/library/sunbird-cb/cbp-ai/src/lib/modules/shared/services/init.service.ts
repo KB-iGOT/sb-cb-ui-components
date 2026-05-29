@@ -22,9 +22,9 @@ export class InitService {
 
   }
 
-  async init() {
-    await this.setConfiDetails()
-  }
+  async init(): Promise<any> {
+  return await this.setConfiDetails()
+}
 
   private async setConfiDetails(configDetails: any = null): Promise<any> {
     if (configDetails) {

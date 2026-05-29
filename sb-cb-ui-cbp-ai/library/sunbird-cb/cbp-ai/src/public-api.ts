@@ -15,9 +15,9 @@ export * from './lib/components/role-mapping-list/role-mapping-list.component';
 export * from './lib/components/approval-requests/approval-requests.component';
 export * from './lib/components/dashboard/dashboard.component';
 export * from './lib/components/review-request/review-request.component';
-export * from './lib/components/approval-request-form/approval-request-form.component';
-export * from './lib/components/list-popup/list-popup.component';
-export * from './lib/components/add-course/add-course.component';
+export * from './lib/components/approval-request-form/approval-request-form.component'
+export * from './lib/components/list-popup/list-popup.component'
+export * from './lib/components/add-course/add-course.component'
 export * from './lib/components/gap-analysis-recommended-course/gap-analysis-recommended-course.component'
 export * from './lib/modules/shared/pipes/order-by-name.pipe'
 export * from './lib/modules/upload-document-page/progress-dialog/progress-dialog.component'
@@ -28,9 +28,12 @@ export * from './lib/components/add-designation/add-designation.component'
 export * from './lib/components/add-personalisation/add-personalisation.component'
 export * from './lib/components/edit-cbp-plan/edit-cbp-plan.component'
 export * from './lib/components/generate-course-recommendation/generate-course-recommendation.component'
-export * from './lib/components/generate-course-recommendation/generate-course-recommendation.component'
 export * from './lib/components/view-cbp-plan/view-cbp-plan.component'
 export * from './lib/components/view-course-recommendation/view-course-recommendation.component'
 export * from './lib/components/delete-role-mapping/delete-role-mapping.component'
 export * from './lib/components/view-final-cbp-plan/view-final-cbp-plan.component'
+export * from './lib/components/designation-approval-request-form/designation-approval-request-form.component'
+export * from './lib/components/publish-request-form/publish-approve-request-form.component'
+export * from './lib/components/reject-item-request-form/reject-item-request-form.component'
+export * from './lib/components/reject-request-form/reject-request-form.component'
 

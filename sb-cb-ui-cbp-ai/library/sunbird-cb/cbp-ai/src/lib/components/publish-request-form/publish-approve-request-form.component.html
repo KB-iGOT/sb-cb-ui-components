@@ -1,0 +1,78 @@
+<div class="view-cbp-plan">
+    <div class="popup-container">
+        <div class="popup-header">
+            <div>
+                <div class="heading">Approve & Publish Plan</div>
+            </div>
+            <div class="cursor-pointer" (click)="closeDialog()">
+                <mat-icon>close</mat-icon>
+            </div>
+        </div>
+    </div>
+    <div class="section-container" [formGroup]="approvalRequestForm">
+        <mat-card class="mt-1">
+            <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Name of Plan</p>
+                </div>
+                <div class="mt-4 additional-details">
+                    <input type="text" formControlName="request_name" [value]="" placeholder="Enter plan name"
+                        style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width:96%;font-size: 14px;font-family: 'Lato';">
+                </div>
+            </div>
+            <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Timeline (Due Date)</p>
+                </div>
+                <div class="section-header mt-4">
+                    <mat-form-field appearance="outline" class="full-width custom-date-field">
+                        <input matInput [matDatepicker]="picker" formControlName="due_date"
+                            placeholder="Select due date" [min]="minDate">
+
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </div>
+
+
+            <!-- <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Upload Document (PDF/Word/Excel/TXT)</p>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label for="uploadDoc" class="file-upload-label">
+                        <span class="file-upload-icon">📎</span>
+                        <span>{{ uploadedFile?.name || 'Choose a file (PDF, Word, Excel, TXT)' }}</span>
+                    </label>
+
+                    <small class="file-upload-hint">Max file size: 25MB</small>
+
+                    <input id="uploadDoc" type="file" (change)="onFileChange($event)"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="file-upload-input" />
+
+                    <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
+                </div>
+            </div> -->
+
+        </mat-card>
+    </div>
+    <div class="popup-footer">
+        <div>
+            <input class="btn-active" type="button" value="Cancel" (click)="cancelForm()" />
+        </div>
+        <div>
+
+            <button [disabled]="approvalRequestForm?.invalid" mat-raised-button
+                [ngClass]="approvalRequestForm?.invalid ? 'btn-disable':'approve-btn-footer'" (click)="approveAndPublish()">
+
+                <mat-icon>publish</mat-icon>
+                Approve & Publish
+            </button>
+        </div>
+    </div>
+</div>
+<div class="overlay-loader" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+</div>

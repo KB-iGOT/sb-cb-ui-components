@@ -11,7 +11,7 @@
     </div>
     <div class="section-container mt-2" #pdfContent>
         <div class="ministry-heading mt-2">
-           <span *ngIf="!cbpPlanData?.department_name">{{cbpPlanData?.ministry.orgName}}</span> 
+           <span *ngIf="!cbpPlanData?.department_name">{{cbpPlanData?.ministry?.orgName}}</span> 
            <span *ngIf="cbpPlanData?.department_name">{{cbpPlanData?.department_name}}</span> 
             <span *ngIf="planData?.designation_name"> / {{planData?.designation_name}}</span>
         </div>
@@ -140,13 +140,13 @@
                         </div>
                     </div>
                     <div class="course-title mt-4">
-                        <div>
-                            <div *ngIf="item?.course">{{item?.course}}</div>
-                            <!-- <div *ngIf="item?.name">{{item?.name}}</div> -->
+                        <div class="cursor-pointer">
+                            <div *ngIf="item?.course" (click)="redirectToCoure(item)">{{item?.course}}</div>
+                            <div *ngIf="item?.name && (sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">{{item?.name}}</div>
                         </div>
                     </div>
                     <div class="course-desc mt-2">
-                        <div *ngIf="isPDFDownload">
+                        <div *ngIf="isPDFDownload || sharedService?.fromMdoPortal">
                             <div>{{item?.rationale}}</div>
                         </div>
                     </div>
@@ -207,13 +207,13 @@
                         </ul>
                     </div>
                     <div class="mt-2 d-flex justify-content-between item">
-                        <div class="relevancy-container">
+                        <div class="relevancy-container" *ngIf="item?.relevancy">
                             <div class="relevancy">Relevancy</div>
                             <div class="dash">-</div>
                             <div class="percentage" *ngIf="item?.relevancy">{{item?.relevancy}}%</div>
                             <div class="percentage" *ngIf="!item?.relevancy">N/A</div>
                         </div>
-                        <div class="delete-button">
+                        <div class="delete-button" *ngIf="!(sharedService?.fromMdoPortal)" >
                            <mat-icon matTooltip="Delete Course" matTooltipPosition="above" class="text-danger cursor-pointer" (click)="deleteCard(item, i)" >delete</mat-icon>
                         </div>
                     </div>

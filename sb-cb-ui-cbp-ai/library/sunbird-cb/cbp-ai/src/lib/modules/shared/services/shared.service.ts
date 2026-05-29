@@ -56,9 +56,19 @@ const API_END_POINTS = {
   MATCHED_ROLE_MAPPING: 'cbp-tpc-ai/api/v1/role-mapping/match-designations',
   GET_APPROVAL_REQUESTS: 'cbp-tpc-ai/api/v1/approval-requests/list',
   SEARCH_PUBLIC_MDO: 'cbp-tpc-ai/api/v1/approval-requests/mdo-admins',
-  SAVE_APPROVAL_REQUEST:'cbp-tpc-ai/api/v1/approval-requests/send',
+  SAVE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests/send',
   VIEW_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests',
-  REVOKE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests',
+  REVOKE_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/approval-requests/revoke',
+  SAVE_DESIGNATION_APPROVAL_REQUEST: 'cbp-tpc-ai/api/v1/designation-approval/create',
+  VIEW_MDO_APPROVAL_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/read',
+  APPROVE_AND_PUBLISH_MDO_APPROVAL_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish',
+  REJECT_APPROVAL_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/reject',
+  REJECT_ITEM_APPROVAL_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/reject',
+  MDO_DESIGNATION_SEARCH: 'apis/proxies/v8/ai/cbp/v1/designation/search',
+  MDO_ADD_USER_COURSE: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
+  MDO_SUGGESTED_COURSE_LIST: 'apis/proxies/v8/ai/cbp/v1/course/suggestions',
+  MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update',
+  REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry'
 
 }
 
@@ -73,12 +83,16 @@ export class SharedService {
   cbpPlanFinalObj: any = {}
   baseUrl: string
   configDetails: any
+  mdoBaseUrl: any
+  mdoConfigDetails: any
   screenWidth: number;
   headers: any
   summaryTriggerExecuted = new Subject()
   loginSuccess = new Subject()
   checkRoleMappingFormValidation = new Subject()
   updateDesignationHierarchySubject = new Subject()
+  fromMdoPortal = false
+  requestData:any
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.screenWidth = event.target.innerWidth;
@@ -89,6 +103,7 @@ export class SharedService {
     private initSvc: InitService,
   ) {
     if (initSvc && this.initSvc.baseUrl && this.initSvc.configDetails) {
+      console.log('this.initSvc', this.initSvc)
       this.baseUrl = this.initSvc.baseUrl
       this.configDetails = this.initSvc.configDetails
     } else {
@@ -288,6 +303,7 @@ export class SharedService {
     this.headers = new HttpHeaders({
       'Authorization': `Bearer ${storageData?.access_token}`
     });
+    console.log('this.baseUrl', this.baseUrl)
     const headers = this.headers
     return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_STATE_CENTER}/?sub_org_type=${sub_org_type}`, { headers })
       .pipe(map((response: any) => {
@@ -384,18 +400,34 @@ export class SharedService {
 
   getRoleMappingByStateCenterAndDepartment(state_center_id, department_id) {
     const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_BY_STATE_CENTER}/${state_center_id}/department/${department_id}?load_cbp_plans=true`, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+    if (typeof department_id === 'string'){
+      return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_BY_STATE_CENTER}/${state_center_id}/department/${department_id}?load_cbp_plans=true`, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_BY_STATE_CENTER}/${state_center_id}?load_cbp_plans=true`, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
   }
 
   updateRoleMapping(role_mapping_id, reqBody) {
+     if (this.fromMdoPortal) {
+      let mdoBaseUrl = 'http://localhost:3000'
+      return this.http.put<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_ROLE_MAPPING_UPDATE}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
     const headers = this.headers
     return this.http.put<any>(`${this.baseUrl}${API_END_POINTS.UPDATE_ROLE_MAPPING}/${role_mapping_id}`, reqBody, { headers })
       .pipe(map((response: any) => {
         return response
       }))
+    }
   }
 
   deleteRoleMapping(role_mapping_id) {
@@ -467,7 +499,7 @@ export class SharedService {
     console.log('getIGOTSuggestedCourses final request:', JSON.stringify(req, null, 2));
 
     const headers = this.headers
-    return this.http.post<any>(`https://portal.igotkarmayogi.gov.in/api/content/v1/search`, req, { headers })
+    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, req, { headers })
       .pipe(map((response: any) => {
         return response
       }))
@@ -558,11 +590,20 @@ export class SharedService {
   }
 
   addUserCourse(reqBody) {
-    const headers = this.headers
-    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.ADD_USER_COURSES}`, reqBody, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+    if (this.fromMdoPortal) {
+      let mdoBaseUrl = 'http://localhost:3000'
+      return this.http.get<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_ADD_USER_COURSE}`)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      const headers = this.headers
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.ADD_USER_COURSES}`, reqBody, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
   }
 
   getUserCourse(role_mapping_id) {
@@ -574,11 +615,20 @@ export class SharedService {
   }
 
   getCompetencyJson() {
-    const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}/training-pla-ai/assets/jsonfiles/competencies.json`, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+    if (this.fromMdoPortal) {
+      let mdoBaseUrl = 'http://localhost:3000'
+      return this.http.get<any>(`${this.mdoBaseUrl}/assets/jsonfiles/competencies.json`)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      const headers = this.headers
+      return this.http.get<any>(`${this.baseUrl}/training-pla-ai/assets/jsonfiles/competencies.json`, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
     // this.http.get<any[]>('/assets/jsonfiles/competencies.json')
   }
 
@@ -860,7 +910,7 @@ export class SharedService {
   }
 
   getAdditionalParameterforSuggestedCourses(identifiers) {
-    const headers = this.headers
+    
     let reqBody = {
       "request": {
         "filters": {
@@ -882,10 +932,20 @@ export class SharedService {
         "sort_by": {}
       }
     }
-    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, reqBody, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+    if (this.fromMdoPortal) {
+
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      const headers = this.headers
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, reqBody, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
   }
 
   updateDesignationHierarchy(reqBody) {
@@ -897,11 +957,20 @@ export class SharedService {
   }
 
   searchPublicDesignation(reqBody) {
-    const headers = this.headers
-    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_PUBLIC_DESIGNATION}`, reqBody, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+    if (this.fromMdoPortal) {
+      let mdoBaseUrl = 'http://localhost:3000'
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_DESIGNATION_SEARCH}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      const headers = this.headers
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_PUBLIC_DESIGNATION}`, reqBody, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
   }
 
   getDashboardAdmin(reqBody) {
@@ -936,7 +1005,7 @@ export class SharedService {
       }))
   }
 
-   getMatchedRoleMapping(reqBody) {
+  getMatchedRoleMapping(reqBody) {
     const headers = this.headers
     return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.MATCHED_ROLE_MAPPING}`, reqBody, { headers })
       .pipe(map((response: any) => {
@@ -944,13 +1013,55 @@ export class SharedService {
       }))
   }
 
-  getApprovalRequests(reqBody) {
-     const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_APPROVAL_REQUESTS}`,  { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+
+getApprovalRequests(reqBody: any) {
+
+  const headers = this.headers;
+
+  let params = new HttpParams();
+
+  if (reqBody?.page) {
+    params = params.set('page', reqBody.page);
   }
+
+  if (reqBody?.page_size) {
+    params = params.set('page_size', reqBody.page_size);
+  }
+
+  if (reqBody?.search) {
+    params = params.set('search', reqBody.search);
+  }
+
+  if (reqBody?.status) {
+    params = params.set('status', reqBody.status);
+  }
+
+  if (reqBody?.from_date) {
+    params = params.set('from_date', reqBody.from_date);
+  }
+
+  if (reqBody?.to_date) {
+    params = params.set('to_date', reqBody.to_date);
+  }
+
+  if (reqBody?.state_center_id) {
+    params = params.set('state_center_id', reqBody.state_center_id);
+  }
+
+  if (reqBody?.department_id) {
+    params = params.set('department_id', reqBody.department_id);
+  }
+
+  return this.http.get<any>(
+    `${this.baseUrl}${API_END_POINTS.GET_APPROVAL_REQUESTS}`,
+    {
+      headers,
+      params
+    }
+  ).pipe(
+    map((response: any) => response)
+  );
+}
 
   saveApprovalRequest(reqBody) {
     const headers = this.headers
@@ -960,7 +1071,7 @@ export class SharedService {
       }))
   }
 
-   searchPublicmdo(reqBody) {
+  searchPublicmdo(reqBody) {
     const headers = this.headers
     return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_PUBLIC_MDO}`, reqBody, { headers })
       .pipe(map((response: any) => {
@@ -969,8 +1080,40 @@ export class SharedService {
   }
 
   viewApprovalRequests(request_id) {
-     const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.VIEW_APPROVAL_REQUEST}/${request_id}`,  { headers })
+    const headers = this.headers
+    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.VIEW_APPROVAL_REQUEST}/${request_id}`, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  viewMDOApprovalRequests(request_id) {
+    let mdoBaseUrl = 'http://localhost:3000'
+    return this.http.get<any>(`${this.mdoBaseUrl}/${API_END_POINTS.VIEW_MDO_APPROVAL_REQUEST}/${request_id}`)
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  approveAndPublishMDOApprovalRequests(request) {
+    let mdoBaseUrl = 'http://localhost:3000'
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.APPROVE_AND_PUBLISH_MDO_APPROVAL_REQUEST}`, request)
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  rejectMDOApprovalRequests(request) {
+    let mdoBaseUrl = 'http://localhost:3000'
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REJECT_APPROVAL_REQUEST}`, request)
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  rejectItemMDOApprovalRequests(request) {
+    let mdoBaseUrl = 'http://localhost:3000'
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REJECT_ITEM_APPROVAL_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))
@@ -979,6 +1122,22 @@ export class SharedService {
   revokeApprovalRequest(reqBody) {
     const headers = this.headers
     return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.REVOKE_APPROVAL_REQUEST}`, reqBody, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  saveDesignationApprovalRequest(reqBody) {
+    const headers = this.headers
+    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SAVE_DESIGNATION_APPROVAL_REQUEST}`, reqBody, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+   RePublishMDOApprovalRequest(request) {
+    let mdoBaseUrl = 'http://localhost:3000'
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REPUBLISH_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))

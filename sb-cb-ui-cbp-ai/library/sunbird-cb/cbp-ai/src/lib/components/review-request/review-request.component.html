@@ -12,8 +12,33 @@
             </div>
         </div>
 
-        <div class="status-badge">
+        <div class="status-badge" *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' )">
             {{request?.status | titlecase}}
+        </div>
+        <div class="status-badge-success" *ngIf="(request?.status === 'approved' || request?.status === 'APPROVED' )">
+            {{request?.status | titlecase}}
+        </div>
+        <div class="status-badge-rejected" *ngIf="(request?.status === 'rejected' || request?.status === 'REJECTED' )">
+            {{request?.status | titlecase}}
+        </div>
+
+        <div
+            *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' ) && portalData?.parentAppData?.fromPortal === 'mdo'">
+            <div class="action-btn-wrapper">
+
+                <button mat-raised-button class="approve-btn" (click)="approveAndPublish()">
+
+                    <mat-icon>publish</mat-icon>
+                    Approve & Publish
+                </button>
+
+                <button mat-stroked-button class="reject-btn" (click)="rejectRequest()">
+
+                    <mat-icon>close</mat-icon>
+                    Reject Request
+                </button>
+
+            </div>
         </div>
 
     </div>
@@ -47,7 +72,7 @@
                     <mat-icon>mail</mat-icon>
                     <div>
                         <p class="label">Requested By</p>
-                        <p class="value">{{request?.user?.username | titlecase}}</p>
+                        <p class="value">{{request?.user?.email}}</p>
                     </div>
                 </div>
 
@@ -55,7 +80,7 @@
                     <mat-icon>event</mat-icon>
                     <div>
                         <p class="label">Submitted On</p>
-                        <p class="value">{{request?.created_at | date: 'MMM d, y'}}</p>
+                        <p class="value">{{request?.created_at | date: 'MMM d, y hh:mm:s a'}}</p>
                     </div>
                 </div>
 
@@ -73,7 +98,8 @@
 
             <div class="organization">
                 <p class="label">Organization</p>
-                <p class="org-value">{{request?.state_center_name}}</p>
+                <p class="org-value">{{request?.state_center_name}} <span
+                        *ngIf="request?.department_name">{{request?.department_name}}</span></p>
             </div>
 
         </mat-card>
@@ -128,6 +154,13 @@
                                     <p class="designation">{{ element?.designation_name }} </p>
                                     <p class="wing-text mt-2">Wing/Division - {{
                                         element?.wing_division_section }} </p>
+                                </div>
+                                <div
+                                    *ngIf="(element?.status === 'failed' || element?.status === 'FAILED') && portalData?.parentAppData?.fromPortal === 'mdo'">
+                                    <button mat-raised-button class="approve-btn" (click)="rePublish(element)">
+                                        <mat-icon>publish</mat-icon>
+                                        Re-Publish
+                                    </button>
                                 </div>
 
                             </td>
@@ -210,15 +243,65 @@
                                 </ul>
                             </td>
                         </ng-container>
+                        <!-- Actions -->
+                        <ng-container matColumnDef="action">
+                            <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
+                                mat-header-cell *matHeaderCellDef> Action </th>
+                           
+
+                            <td mat-cell *matCellDef="let element">
+
+                                <button mat-icon-button [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger">
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+
+                                <mat-menu #menu="matMenu">
+
+                                    <ng-container>
+                                        <button mat-menu-item (click)="viewCourseRecommendation(element, menuTrigger)">
+                                            <mat-icon>preview</mat-icon>
+                                            <span>View Course Recommendation</span>
+                                        </button>
+                                    </ng-container>
+
+                                    
+
+                                        <button mat-menu-item (click)="editRoleMapping(element, menuTrigger)">
+                                            <mat-icon>edit</mat-icon>
+                                            <span>Edit Role Mapping</span>
+                                        </button>
+
+                                        <button mat-menu-item (click)="viewCBPPlan(element, menuTrigger)">
+                                            <mat-icon>visibility</mat-icon>
+                                            <span>View Role Mapping</span>
+                                        </button>
+                                        <ng-container *ngIf="sharedService.fromMdoPortal">
+                                        <button *ngIf="request?.status?.toLowerCase() === 'pending' && sharedService.fromMdoPortal" mat-menu-item
+                                            (click)="rejectItemRequest(element, menuTrigger)">
+
+                                            <mat-icon>send</mat-icon>
+                                            <span>Reject Request</span>
+
+                                        </button>
+
+                                    </ng-container>
+
+                                </mat-menu>
+
+                            </td>
+                        </ng-container>
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                        <tr class="mat-row" *matNoDataRow>
-                            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
-                                No Data Found
-                            </td>
-                        </tr>
+                       
                     </table>
-                    <ng-container *ngIf="dataSource?.filteredData?.length || dataSource?.filteredData?.length">
+                    <div
+  class="no-data-wrapper"
+  *ngIf="dataSource.filteredData.length === 0">
+
+  No Data Found
+
+</div>
+                    <ng-container *ngIf="dataSource?.filteredData?.length > 0">
                         <mat-paginator [length]="dataSource?.data?.length" [pageSize]="5"
                             [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
                         </mat-paginator>
@@ -228,7 +311,7 @@
 
             </ng-container>
 
-            
+
         </div>
     </div>
 

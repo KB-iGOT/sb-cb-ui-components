@@ -13,6 +13,8 @@ import { AddDesignationComponent } from '../add-designation/add-designation.comp
 import { SelectionModel } from '@angular/cdk/collections';
 import { ApprovalRequestFormComponent } from '../approval-request-form/approval-request-form.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { DesignationApprovalRequestFormComponent } from '../designation-approval-request-form/designation-approval-request-form.component';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
     selector: 'app-role-mapping-list',
     templateUrl: './role-mapping-list.component.html',
@@ -25,6 +27,7 @@ export class RoleMappingListComponent {
   selectedValue = ''
   //'select'
   displayedColumns: string[] = [
+    'select',
     'designation_name',
     'role_responsibilities',
     'activities',
@@ -49,7 +52,7 @@ export class RoleMappingListComponent {
   unMatchedRoleMapping = 0
   matchedRoleMappingIds = []
   matchedDesignationNames: string[] = [];
-
+  portalData:any = {}
   @Output() moveToInitialScreen = new EventEmitter<any>()
   activeTab: 'matched' | 'unmatched' = 'matched';
 
@@ -58,7 +61,10 @@ export class RoleMappingListComponent {
   tabFilteredData: any[] = [];   // after matched/unmatched filter
   constructor(
     public sharedService: SharedService,
-    private dialog: MatDialog) {
+    private dialog: MatDialog,
+  private router: Router,
+  private activatedRoute: ActivatedRoute
+) {
 
   }
 
@@ -68,14 +74,29 @@ export class RoleMappingListComponent {
   }
 
   ngOnInit() {
-    console.log('haredService?.cbpPlanFinalObj', this.sharedService?.cbpPlanFinalObj)
+
+  this.portalData = this.activatedRoute.snapshot.data['parentData']
     this.sharedService.checkRoleMappingFormValidation.next(true)
     this.sharedService.updateDesignationHierarchySubject.subscribe((data) => {
       if (data) {
-        this.loadRoleMappingList()
-      }
+        if(this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal && 
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+    ){ 
+
+    } else {  
+      this.loadRoleMappingList()
+    }
+  }
+      
     })
-    this.loadRoleMappingList()
+    if(this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal && 
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+    ){ 
+
+    } else {
+      this.loadRoleMappingList()
+    }
+    
 
 
   }
@@ -221,7 +242,7 @@ export class RoleMappingListComponent {
       //   // Refresh data or show a toast here
 
       // }
-      this.refreshRoleMappingData();
+      this.loadRoleMappingList();
     });
   }
 
@@ -265,7 +286,7 @@ export class RoleMappingListComponent {
         console.log('Changes saved!');
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
-        
+
         if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.identifier) {
           if (this.sharedService.cbpPlanFinalObj.departments) {
             this.loading = true
@@ -280,7 +301,7 @@ export class RoleMappingListComponent {
             this.sharedService.getRoleMappingByStateCenterAndDepartment(this.sharedService.cbpPlanFinalObj.ministry.identifier, this.sharedService.cbpPlanFinalObj.departments).subscribe((res) => {
               console.log('res', res)
               this.selection.clear();
-             this.loadRoleMappingList()
+              this.loadRoleMappingList()
               console.log('this.dataSource', this.dataSource)
               this.loading = false
             })
@@ -293,7 +314,7 @@ export class RoleMappingListComponent {
             this.sharedService.getRoleMappingByStateCenterAndDepartment(this.sharedService.cbpPlanFinalObj.ministry.identifier, this.sharedService.cbpPlanFinalObj.departments).subscribe((res) => {
               console.log('res', res)
               this.selection.clear();
-             this.loadRoleMappingList()
+              this.loadRoleMappingList()
               console.log('this.dataSource', this.dataSource)
               this.loading = false
             })
@@ -432,7 +453,7 @@ export class RoleMappingListComponent {
       if (result === 'saved') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
-        this.refreshRoleMappingData();
+        this.loadRoleMappingList();
       }
     });
   }
@@ -517,7 +538,10 @@ export class RoleMappingListComponent {
   }
 
   moveToInitialScreenLayout(event) {
-    this.moveToInitialScreen.emit(event)
+   // this.moveToInitialScreen.emit(event)
+    this.router.navigate(['/ai/initial'], {
+                onSameUrlNavigation: 'reload'
+              });
   }
 
   openFullList(element: any, type: any) {
@@ -538,6 +562,7 @@ export class RoleMappingListComponent {
   }
 
   loadRoleMappingList() {
+    
     this.cbpFinalObj = this.sharedService.getCBPPlanLocalStorage()
     this.dataSource = new MatTableDataSource(this.cbpFinalObj?.role_mapping_generation)
     this.originalDataSource = new MatTableDataSource(this.cbpFinalObj?.role_mapping_generation)
@@ -561,10 +586,9 @@ export class RoleMappingListComponent {
     }
     console.log('this.formData', this.formData)
     if (this.formData && this.formData.value && this.formData.value.ministryType === 'ministry') {
-
       let state_center_id = this.formData.value.ministry
       this.loading = true
-      if (this.formData.value.departments) {
+      if (this.formData.value.departments?.length) {
         let department_id = this.formData.value.departments
         if (typeof department_id === 'string') {
           this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe({
@@ -626,7 +650,7 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          if (this.formData.value.departments) {
+          if (this.formData.value.departments?.length) {
             obj['department_id'] = this.formData.value.departments
           }
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
@@ -814,7 +838,8 @@ export class RoleMappingListComponent {
         //   // Refresh data or show a toast here
 
         // }
-        this.refreshRoleMappingData();
+        this.selection.clear()
+        this.loadRoleMappingList();
       });
     }
 
@@ -822,6 +847,28 @@ export class RoleMappingListComponent {
 
   hasSelectableRows() {
     return this.dataSource?.data?.some((row: any) => row?.cbp_plans?.length > 0);
+  }
+
+  sendForDesignationNameApproval(element) {
+    this.activeRowElement = element
+    const dialogRef = this.dialog.open(DesignationApprovalRequestFormComponent, {
+      width: '600px',
+      data: element,
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '300px',          // Set minimum height
+      maxHeight: '80vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // if (result === 'saved') {
+      //   console.log('Changes saved!');
+      //   // Refresh data or show a toast here
+
+      // }
+      this.loadRoleMappingList();
+    });
+
   }
 
 

@@ -425,7 +425,6 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         });
 
         dialogRef.afterClosed().subscribe(result => {
-          alert(result)
           if (result === 'saved') {
             console.log('Changes saved!');
             this.loading = true
@@ -878,7 +877,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
             panelClass: ['snackbar-success']
           });
 
-          this.router.navigate(['/ai/']);
+          this.router.navigate(['/ai/list']);
         }
       });
   }
