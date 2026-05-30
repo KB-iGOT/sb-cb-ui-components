@@ -8,7 +8,8 @@ import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
   selector: 'app-publish-approve-request-form',
   templateUrl: './publish-approve-request-form.component.html',
-  styleUrls: ['./publish-approve-request-form.component.scss']
+  styleUrls: ['./publish-approve-request-form.component.scss'],
+  standalone: false
 })
 export class PublishApproveRequestFormComponent implements OnInit {
 

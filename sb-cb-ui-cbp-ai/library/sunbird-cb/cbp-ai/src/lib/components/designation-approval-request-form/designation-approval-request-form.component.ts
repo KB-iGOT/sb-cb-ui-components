@@ -9,7 +9,8 @@ import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
   selector: 'app-designation-approval-request-form',
   templateUrl: './designation-approval-request-form.component.html',
-  styleUrls: ['./designation-approval-request-form.component.scss']
+  styleUrls: ['./designation-approval-request-form.component.scss'],
+  standalone:false
 })
 export class DesignationApprovalRequestFormComponent {
   approvalRequestForm: FormGroup;
