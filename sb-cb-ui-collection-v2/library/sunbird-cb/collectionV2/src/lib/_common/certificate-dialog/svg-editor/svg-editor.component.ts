@@ -11,11 +11,12 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 
 @Component({
-  selector: 'ws-widget-svg-editor',
-  templateUrl: './svg-editor.component.html',
-  styleUrls: ['./svg-editor.component.scss'],
-  // tslint:disable-next-line
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ws-widget-svg-editor',
+    templateUrl: './svg-editor.component.html',
+    styleUrls: ['./svg-editor.component.scss'],
+    // tslint:disable-next-line
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SvgEditorComponent implements OnChanges {
   @ViewChild('wrapper', { static: true }) wrapper!: ElementRef

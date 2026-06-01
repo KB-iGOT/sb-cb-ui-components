@@ -7,7 +7,7 @@
 
 import { CardContentV2Component } from './card-content-v2.component'
 import { EventService, ConfigurationsService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { Router, ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
 import { WidgetContentService } from '../_services/widget-content.service'
 import { Subject } from 'rxjs'

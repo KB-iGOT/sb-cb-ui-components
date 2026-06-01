@@ -4,9 +4,10 @@ import { UntypedFormGroup, UntypedFormControl } from '@angular/forms'
 import { HttpClient } from '@angular/common/http'
 
 @Component({
-  selector: 'ws-widget-card-rating-comment',
-  templateUrl: './card-rating-comment.component.html',
-  styleUrls: ['./card-rating-comment.component.scss'],
+    selector: 'ws-widget-card-rating-comment',
+    templateUrl: './card-rating-comment.component.html',
+    styleUrls: ['./card-rating-comment.component.scss'],
+    standalone: false
 })
 export class CardRatingCommentComponent implements OnInit {
   @Input() review: any | null = null

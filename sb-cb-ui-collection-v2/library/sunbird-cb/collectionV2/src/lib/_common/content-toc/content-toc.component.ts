@@ -5,15 +5,16 @@ import { ConfigurationsService, UtilityService } from '@sunbird-cb/utils-v2'
 import { Subscription } from 'rxjs'
 
 import { LoadCheckService } from '../../_services/load-check.service'
-import { MatLegacyTabChangeEvent as MatTabChangeEvent, MatLegacyTabGroup as MatTabGroup } from '@angular/material/legacy-tabs'
+import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs'
 import { NsDiscussionV2 } from '@sunbird-cb/discussion-v2'
 // COMMENTED OUT: Missing dependency @ws-widget/utils
 // import { ConfigurationsService as ConfigurationsServiceUtilsV1 } from '@ws-widget/utils'
 
 @Component({
-  selector: 'ws-widget-content-toc',
-  templateUrl: './content-toc.component.html',
-  styleUrls: ['./content-toc.component.scss'],
+    selector: 'ws-widget-content-toc',
+    templateUrl: './content-toc.component.html',
+    styleUrls: ['./content-toc.component.scss'],
+    standalone: false
 })
 
 export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {

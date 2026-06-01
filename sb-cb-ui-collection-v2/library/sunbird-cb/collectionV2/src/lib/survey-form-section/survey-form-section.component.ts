@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { FormArray } from '@angular/forms'
 
 @Component({
-  selector: 'ws-widget-survey-form-section',
-  templateUrl: './survey-form-section.component.html',
-  styleUrls: ['./survey-form-section.component.scss']
+    selector: 'ws-widget-survey-form-section',
+    templateUrl: './survey-form-section.component.html',
+    styleUrls: ['./survey-form-section.component.scss'],
+    standalone: false
 })
 export class SurveyFormSectionComponent {
 

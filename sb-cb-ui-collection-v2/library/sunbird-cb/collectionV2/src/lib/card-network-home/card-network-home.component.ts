@@ -4,9 +4,10 @@ import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 @Component({
-  selector: 'ws-widget-card-home-network',
-  templateUrl: './card-network-home.component.html',
-  styleUrls: ['./card-network-home.component.scss'],
+    selector: 'ws-widget-card-home-network',
+    templateUrl: './card-network-home.component.html',
+    styleUrls: ['./card-network-home.component.scss'],
+    standalone: false
 })
 export class CardNetworkHomeComponent extends WidgetBaseComponent
 

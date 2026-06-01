@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core'
 
 const AUTHORING_CONTENT_BASE = '/apis/authContent/'
 @Pipe({
-  name: 'relativeUrlTable',
+    name: 'relativeUrlTable',
+    standalone: false
 })
 export class RelativeUrlTablePipe implements PipeTransform {
 

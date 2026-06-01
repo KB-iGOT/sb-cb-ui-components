@@ -1,15 +1,16 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewInit, OnChanges, SimpleChanges, AfterViewChecked, ChangeDetectorRef } from '@angular/core'
 import { SelectionModel } from '@angular/cdk/collections'
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table'
-import { MatLegacyPaginator as MatPaginator, LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator'
+import { MatTableDataSource } from '@angular/material/table'
+import { MatPaginator, PageEvent } from '@angular/material/paginator'
 import { MatSort } from '@angular/material/sort'
 import * as _ from 'lodash'
 import { ITableData, IColums } from '../interface/interfaces'
 
 @Component({
-  selector: 'ws-widget-org-user-table-v2',
-  templateUrl: './org-user-table-v2.component.html',
-  styleUrls: ['./org-user-table-v2.component.scss'],
+    selector: 'ws-widget-org-user-table-v2',
+    templateUrl: './org-user-table-v2.component.html',
+    styleUrls: ['./org-user-table-v2.component.scss'],
+    standalone: false
 })
 export class OrgUserTableV2Component implements OnInit, AfterViewInit, OnChanges, AfterViewChecked {
   @Input() tableData!: ITableData | undefined
