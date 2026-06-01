@@ -41,7 +41,6 @@
 // --- Link Text (auto-flips: blue in light, white in dark) ---
 .text-link { color: var(--text-button-text-link); }
 .text-link-disabled { color: var(--text-button-text-link-disabled); }
-.text-ring-progress { color: var(--text-progress-text-ring); }
 
 // --- Button Text ---
 .text-btn-primary { color: var(--text-button-text-primary-white); }
@@ -84,7 +83,6 @@
 // --- Application Backgrounds ---
 .bg-system { background-color: var(--environment-application-backgrounds-system-background-1); }
 .bg-card { background-color: var(--environment-application-backgrounds-card-background); }
-.bg-card-1 { background-color: var(--environment-application-backgrounds-card-background-1); }
 .bg-other { background-color: var(--environment-application-backgrounds-other-background); }
 // --- Primary Fills (theme-aware, shades flip) ---
 .bg-primary-50 { background-color: var(--environment-all-fills-primary-primary-50-900); }
@@ -178,6 +176,15 @@
 .border-default { border-color: var(--border-default); }
 .border-strong { border-color: var(--border-strong); }
 .border-focus { border-color: var(--border-focus); }
+
+// Text color 1B4CA1 TO #F3962F
+.text-ring-progress          { color: var(--color-primary-500); }
+[data-theme="dark"] .text-ring-progress { color: var(--color-secondary-500); }
+
+//  background (light: #ffffff | dark: #0b0e15)
+.bg-card-1           { background-color: var(--color-white-wo-opacity-500); }
+[data-theme="dark"] .bg-card-1 { background-color: var(--color-tertiary-900); }
+
 .border-divider { border-color: var(--environment-border-and-divider-default-1); }
 .border-focused { border-color: var(--environment-border-and-divider-focused); }
 .border-disabled { border-color: var(--environment-border-and-divider-disable); }
