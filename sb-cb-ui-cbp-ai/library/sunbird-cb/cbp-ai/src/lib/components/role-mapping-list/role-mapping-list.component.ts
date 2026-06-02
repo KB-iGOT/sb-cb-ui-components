@@ -58,6 +58,7 @@ export class RoleMappingListComponent {
   matchedDesignationSet = new Set<string>();
   masterData: any[] = [];
   tabFilteredData: any[] = [];   // after matched/unmatched filter
+  matchedRoleMappingData: any[] = [];
   constructor(
     public sharedService: SharedService,
     private dialog: MatDialog,
@@ -441,7 +442,7 @@ export class RoleMappingListComponent {
   addMoreDesignation() {
     const dialogRef = this.dialog.open(AddDesignationComponent, {
       width: '600px',
-      data: { state_center_id: '' },
+      data: { state_center_id: '', matched_role_mappings: this.matchedRoleMappingData },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height
       maxHeight: '90vh',           // Prevent it from going beyond viewport
@@ -605,6 +606,7 @@ export class RoleMappingListComponent {
                 console.log('res', res)
 
                 console.log('matchedRoleMapping', matchedRoleMapping)
+                this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
                 this.matchedRoleMapping = matchedRoleMapping?.matched_count
                 this.matchedDesignationNames =
                   matchedRoleMapping?.matched_details?.map(
@@ -655,6 +657,7 @@ export class RoleMappingListComponent {
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
+            this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
             this.matchedRoleMapping = matchedRoleMapping?.matched_count
             this.matchedDesignationNames =
               matchedRoleMapping?.matched_details?.map(
@@ -703,6 +706,7 @@ export class RoleMappingListComponent {
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
+            this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
             this.matchedRoleMapping = matchedRoleMapping?.matched_count
             this.matchedDesignationNames =
               matchedRoleMapping?.matched_details?.map(

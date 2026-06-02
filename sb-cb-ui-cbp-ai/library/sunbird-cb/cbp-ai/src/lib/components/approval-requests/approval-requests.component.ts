@@ -72,7 +72,9 @@ export class ApprovalRequestsComponent {
   pageSize = 10;
   totalRecords = 0;
   showRejectPopupFlag = false
+  showRevokeRequestPopupFlag = false
   rejectionDetail:any
+  revokeRequestedRequest:any 
   constructor(public dialog: MatDialog, public sharedService: SharedService,
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -381,11 +383,17 @@ export class ApprovalRequestsComponent {
   }
 
   revokeApprovalRequest(request: any): void {
+    this.showRevokeRequestPopupFlag = true
+    this.revokeRequestedRequest = request
     console.log('request--', request)
+   
+  }
+
+  revokeApprovalRequestConfirm() {
     this.loading = true
     let reqBody =
     {
-      "request_id": request?.id
+      "request_id": this.revokeRequestedRequest?.id
     }
 
     this.sharedService.revokeApprovalRequest(reqBody).subscribe({
@@ -405,6 +413,9 @@ export class ApprovalRequestsComponent {
     });
   }
 
+  closeRevokePopup() {
+    this.showRevokeRequestPopupFlag = false
+  }
   onOpened(opened: boolean) {
     this.panelOpen = opened;
   }

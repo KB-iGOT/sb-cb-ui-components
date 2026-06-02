@@ -11,7 +11,7 @@
                 <p class="request-id">{{request?.id}}</p>
             </div>
         </div>
-
+        <div class="right-section">
         <div class="status-badge" *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' )">
             {{request?.status | titlecase}}
         </div>
@@ -23,12 +23,12 @@
         </div>
 
         <div
-            *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' ) && portalData?.parentAppData?.fromPortal === 'mdo'">
+            *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' ) && sharedService.fromMdoPortal">
             <div class="action-btn-wrapper">
 
                 <button mat-raised-button class="approve-btn" (click)="approveAndPublish()">
 
-                    <mat-icon>publish</mat-icon>
+                    
                     Approve & Publish
                 </button>
 
@@ -39,6 +39,7 @@
                 </button>
 
             </div>
+        </div>
         </div>
 
     </div>
@@ -155,11 +156,17 @@
                                     <p class="wing-text mt-2">Wing/Division - {{
                                         element?.wing_division_section }} </p>
                                 </div>
-                                <div
-                                    *ngIf="(element?.status === 'failed' || element?.status === 'FAILED') && portalData?.parentAppData?.fromPortal === 'mdo'">
+                                <div class="mt-20"
+                                    *ngIf="(element?.status === 'failed' || element?.status === 'FAILED') && (sharedService?.fromMdoPortal) === 'mdo'">
                                     <button mat-raised-button class="approve-btn" (click)="rePublish(element)">
                                         <mat-icon>publish</mat-icon>
                                         Re-Publish
+                                    </button>
+                                </div>
+                                <div class="mt-20">
+                                    <button mat-raised-button class="view-course-btn" (click)="viewCourseRecommendation(element)">
+                                        <mat-icon>visibility</mat-icon>
+                                        View Course Recommendation
                                     </button>
                                 </div>
 

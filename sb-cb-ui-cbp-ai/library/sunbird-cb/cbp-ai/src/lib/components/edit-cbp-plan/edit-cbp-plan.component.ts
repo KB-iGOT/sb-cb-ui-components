@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@ang
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
-import _ from 'lodash'
+import * as _ from 'lodash'
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { ActivatedRoute } from '@angular/router';
 @Component({
@@ -72,7 +72,11 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       this.planData = data?.element
       this.requestRowData = data?.requestData
     } else {
-      this.planData = data
+      if(data?.fromLibrary) {
+        this.planData = data?.element
+      } else {  
+        this.planData = data
+      }
     }
 
     console.log('Received data:', data);
@@ -254,10 +258,22 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       "activities": activities,
       "competencies": formData.competencies
     }
+    console.log('masterData?.designation', this.masterData?.designation)
 
     if (formData?.igot_designation_id) {
       req["igot_designation_id"] = formData?.igot_designation_id || '',
         req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+    } else {
+      console.log('masterData?.designation', this.masterData?.designation)
+
+      req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+      const selectedDesignation = this.masterData?.designation?.find(
+        (item: any) =>
+          item?.name?.toLowerCase() === formData?.designation_name?.toLowerCase()
+      );
+
+      req["igot_designation_id"] = selectedDesignation?.igot_designation_id || '';
+
     }
 
     if (this.sharedService.fromMdoPortal) {
@@ -622,6 +638,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
           const mapped = content.map((item: any) => ({
             name: item?.designation || '',
             status: item?.status || 'Active',
+            igot_designation_name: item?.designation || '',
+            igot_designation_id: item?.id || ''
           }));
 
           const total = _.get(
@@ -693,7 +711,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
               this.masterData.designationBackup.some(
                 (item: any) => item?.name === currentValues
               )
-              console.log(this.planData)
+            console.log(this.planData)
             if (!validValues) {
               this.cbpForm.get('designation_name')?.setValue(
                 this.planData?.designation_name || ''
@@ -767,61 +785,63 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   }
 
   checkCurrentDesignationPresent() {
-  const selectedDesignation: string =
-    (this.cbpForm.get('designation_name')?.value || '').toString().trim();
+    const selectedDesignation: string =
+      (this.cbpForm.get('designation_name')?.value || '').toString().trim();
 
-  if (!selectedDesignation) return;
-  if (!this.masterData?.designationBackup) return;
+    if (!selectedDesignation) return;
+    if (!this.masterData?.designationBackup) return;
 
-  const normalize = (v: string) => (v || '').trim().toLowerCase();
+    const normalize = (v: string) => (v || '').trim().toLowerCase();
 
-  const backup = [...this.masterData.designationBackup];
+    const backup = [...this.masterData.designationBackup];
 
-  const existingIndex = backup.findIndex(
-    (item: any) =>
-      normalize(item?.name) === normalize(selectedDesignation)
-  );
+    const existingIndex = backup.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation)
+    );
 
-  let selectedObj: any;
+    let selectedObj: any;
 
-  // If exists → remove it and reuse
-  if (existingIndex > -1) {
-    selectedObj = backup.splice(existingIndex, 1)[0];
-  } 
-  // If not exists → create new
-  else {
-    selectedObj = {
-      name: selectedDesignation,
-      status: 'Active',
-      id: 'custom-' + Date.now() + '-' + Math.random()
-    };
+    // If exists → remove it and reuse
+    if (existingIndex > -1) {
+      selectedObj = backup.splice(existingIndex, 1)[0];
+    }
+    // If not exists → create new
+    else {
+      selectedObj = {
+        name: selectedDesignation,
+        status: 'Active',
+        id: 'custom-' + Date.now() + '-' + Math.random(),
+        igot_designation_name: selectedDesignation,
+        igot_designation_id: 'custom-' + Date.now() + '-' + Math.random(),
+      };
+    }
+
+    // 🔥 Move to top
+    this.masterData.designationBackup = [
+      selectedObj,
+      ...backup
+    ];
+
+    // Also update visible list (same order logic)
+    const visible = [...(this.masterData.designation || [])];
+
+    const visibleIndex = visible.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation)
+    );
+
+    if (visibleIndex > -1) {
+      visible.splice(visibleIndex, 1);
+    }
+
+    this.masterData.designation = [
+      selectedObj,
+      ...visible
+    ];
+
+    this.cdRef.detectChanges();
   }
-
-  // 🔥 Move to top
-  this.masterData.designationBackup = [
-    selectedObj,
-    ...backup
-  ];
-
-  // Also update visible list (same order logic)
-  const visible = [...(this.masterData.designation || [])];
-
-  const visibleIndex = visible.findIndex(
-    (item: any) =>
-      normalize(item?.name) === normalize(selectedDesignation)
-  );
-
-  if (visibleIndex > -1) {
-    visible.splice(visibleIndex, 1);
-  }
-
-  this.masterData.designation = [
-    selectedObj,
-    ...visible
-  ];
-
-  this.cdRef.detectChanges();
-}
   onDesignationDropdownClosed(): void {
     // Keep the designation value but clear the search input
     const currentDesignation = this.cbpForm.get('designation_name')!.value

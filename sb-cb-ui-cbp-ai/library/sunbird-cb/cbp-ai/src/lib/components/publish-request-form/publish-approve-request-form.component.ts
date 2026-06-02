@@ -52,7 +52,7 @@ approveAndPublish() {
     const formValue = this.approvalRequestForm.value;
 
     const payload = {
-      request_id:  this.data?.demand_id,
+      request_id:  this.data?.demand_id || this.data?.id,
       plan_name: formValue.request_name,
       due_date: formValue.due_date ? new Date(formValue.due_date).toISOString().split('T')[0] : null
     };

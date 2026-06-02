@@ -19,9 +19,9 @@ export class InitialScreenComponent {
   dataSource: any
   displayedColumns: string[] = ['RequestId', 'title', 'requestor', 'requestType',
     'requestStatus', 'assignee', 'requestedOn', 'interests', 'action']
-    selectedMinistryType: string = 'center';
-    ministryData:any = []
-  ministryFullData:any = []
+  selectedMinistryType: string = 'center';
+  ministryData: any = []
+  ministryFullData: any = []
   sectorData = [
     {
       value: 'Women and child development'
@@ -46,40 +46,48 @@ export class InitialScreenComponent {
   formData: {}
   nextStep = 'initial'
   loginSuccess = false
-  cbpFinalObj:any = {}
+  cbpFinalObj: any = {}
   userEmail = ''
   constructor(
-    private eventSvc: EventService, 
+    private eventSvc: EventService,
     public sharedService: SharedService,
-  public snackBar: MatSnackBar, 
-  private router: Router) {
+    public snackBar: MatSnackBar,
+    private router: Router) {
     this.dataSource = new MatTableDataSource<any>([])
     this.isMaintenancePage = window.location.href.includes('/maintenance')
   }
 
-  ngOnInit() {    
-    
-   this.sharedService.loginSuccess.subscribe((data)=>{
-   
-    if(!data) {
-      this.nextStep = 'initial'
-      localStorage.clear()
+  ngOnInit() {
+
+    this.sharedService.loginSuccess.subscribe((data) => {
+
+      if (!data) {
+        this.nextStep = 'initial'
+        localStorage.clear()
+      }
+    })
+    this.loginSuccess = this.sharedService.checkIfLogin()
+    if (this.loginSuccess) {
+
+      this.userEmail = localStorage.getItem('userEmail')
     }
-   })
-   this.loginSuccess = this.sharedService.checkIfLogin()
-   if(this.loginSuccess) {
+    this.cbpFinalObj = this.sharedService.getCBPPlanLocalStorage()
+    if (this.cbpFinalObj && this.cbpFinalObj?.ministry && (this.cbpFinalObj?.ministry?.sbOrgType === 'ministry' || this.cbpFinalObj?.ministry?.sbOrgType === 'state') &&
+      this.cbpFinalObj?.role_mapping_generation?.length) {
+      this.nextStep = 'role-mapping'
+    } else {
+      this.nextStep = 'initial'
+    }
+    //  console.log('this.nextStep',this.nextStep)
+    //  console.log('this.sharedService.cb', this.sharedService.cbpPlanFinalObj)
     
-    this.userEmail = localStorage.getItem('userEmail')
-   }
-   this.cbpFinalObj = this.sharedService.getCBPPlanLocalStorage()
-   if(this.cbpFinalObj && this.cbpFinalObj?.ministry && (this.cbpFinalObj?.ministry?.sbOrgType === 'ministry' || this.cbpFinalObj?.ministry?.sbOrgType === 'state') && 
-  this.cbpFinalObj?.role_mapping_generation?.length) {
-    this.nextStep = 'role-mapping'
-   } else {
-    this.nextStep = 'initial'
-   }
-  //  console.log('this.nextStep',this.nextStep)
-  //  console.log('this.sharedService.cb', this.sharedService.cbpPlanFinalObj)
+    if(!localStorage.getItem('userEmail')) {
+      this.snackBar.open('Session expired. Please login again.', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        })
+      this.router.navigate(['/']);
+    }
   }
 
 
@@ -93,17 +101,17 @@ export class InitialScreenComponent {
     this.nextStep = 'role-mapping'
     // console.log('event', event)
     this.formData = event
-   
-    
+
+
   }
 
   moveToInitialScreen(event) {
-    if(event === 'add') {
+    if (event === 'add') {
       this.nextStep = 'initial'
     } else if (event === 'edit') {
       this.nextStep = 'initial'
     }
-    
+
   }
 
   loginSuccessStatus(event) {
@@ -112,15 +120,24 @@ export class InitialScreenComponent {
   }
 
   logout() {
-    this.loginSuccess = false
-    this.nextStep = 'initial'
-    localStorage.clear()    
+    
+    
+ 
+    console.log('Logout successfully')
+    
+   
     this.sharedService.logout().subscribe({
       next: (res) => {
         this.snackBar.open('You are logout successfully', 'X', {
           duration: 3000,
           panelClass: ['snackbar-success']
         });
+         
+        this.router.navigate(['/']);
+        window.location.reload()
+        localStorage.clear()
+        this.loginSuccess = false
+        this.nextStep = 'initial'
       },
       error: (error) => {
         this.snackBar.open(error?.error?.detail, 'X', {
@@ -135,5 +152,5 @@ export class InitialScreenComponent {
     this.router.navigate(['/ai/upload-documents']);
   }
 
-  
+
 }

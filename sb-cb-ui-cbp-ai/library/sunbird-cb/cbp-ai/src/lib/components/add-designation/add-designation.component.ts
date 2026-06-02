@@ -40,6 +40,7 @@ export class AddDesignationComponent {
   scrollListenerAttached = false
   masterData: any = {}
   searchDesignationLoadCount = 50
+  matchedDesignationIds = []
   constructor(public dialogRef: MatDialogRef<AddDesignationComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
@@ -55,6 +56,8 @@ export class AddDesignationComponent {
   }
 
   ngOnInit() {
+    console.log('this.matched_role_mappings', this.data?.matched_role_mappings)
+    this.matchedDesignationIds = this.data?.matched_role_mappings?.map((item: any) => item?.igot_designation_id) || []
     this.initializeForm();
 
    const searchControl = this.designationForm.get('searchDesignation');
@@ -126,6 +129,10 @@ if (searchControl) {
       uploadDoc: [null, []],
       searchDesignation: [''],
     });
+    this.designationForm.get('designation_name')?.valueChanges
+  .subscribe(() => {
+    this.checkCurrentDesignationPresent();
+  });
   }
 
   onFileChange(event: any) {
@@ -323,7 +330,12 @@ if (searchControl) {
 
   const content = _.get(res, 'result.result.data', []);
 
-  const mapped = content.map((item: any) => ({
+  const matchedIds = new Set(this.matchedDesignationIds);
+
+  const mapped = content
+  .filter((item: any) => !matchedIds.has(item?.id))
+  .map((item: any) => ({
+    id: item?.id,
     name: item?.designation || '',
     status: item?.status || 'Active',
   }));
@@ -430,44 +442,43 @@ if (searchControl) {
   }
   // FIX 2: Also inject selected items into designationBackup
 checkCurrentDesignationPresent() {
+
   const selectedDesignations: string[] =
     this.designationForm.get('designation_name')?.value || [];
 
-  if (!selectedDesignations?.length) return;
+  if (!this.masterData?.designation) {
+    return;
+  }
 
-  selectedDesignations.forEach((selectedName: string) => {
-    if (!selectedName?.trim()) return;
+  // Create selected entries
+  const selectedItems = selectedDesignations.map((name: string) => ({
+    name,
+    status: 'Active'
+  }));
 
-    const entry = { name: selectedName, status: 'Active' };
+  // Remove selected items from current lists
+  const remainingVisible = (this.masterData.designation || []).filter(
+    (item: any) =>
+      !selectedDesignations.some(
+        selected => selected.toLowerCase() === item?.name?.toLowerCase()
+      )
+  );
 
-    // ✅ Add to backup so it survives slice replacements on scroll
-    const existsInBackup = this.masterData.designationBackup?.some(
-      (item: any) => item?.name?.toLowerCase() === selectedName.toLowerCase()
-    );
-    if (!existsInBackup) {
-      this.masterData.designationBackup = [
-        entry,
-        ...(this.masterData.designationBackup || [])
-      ];
-    }
+  const remainingBackup = (this.masterData.designationBackup || []).filter(
+    (item: any) =>
+      !selectedDesignations.some(
+        selected => selected.toLowerCase() === item?.name?.toLowerCase()
+      )
+  );
 
-    // Add to visible list too
-    const existsInVisibleList = this.masterData.designation?.some(
-      (item: any) => item?.name?.toLowerCase() === selectedName.toLowerCase()
-    );
-    if (!existsInVisibleList) {
-      this.masterData.designation.unshift(entry);
-    }
-  });
-
+  // Put selected items on top
   this.masterData.designation = _.uniqBy(
-    this.masterData.designation,
+    [...selectedItems, ...remainingVisible],
     (item: any) => item?.name?.toLowerCase()
   );
 
-  // ✅ Dedupe backup too
   this.masterData.designationBackup = _.uniqBy(
-    this.masterData.designationBackup,
+    [...selectedItems, ...remainingBackup],
     (item: any) => item?.name?.toLowerCase()
   );
 }

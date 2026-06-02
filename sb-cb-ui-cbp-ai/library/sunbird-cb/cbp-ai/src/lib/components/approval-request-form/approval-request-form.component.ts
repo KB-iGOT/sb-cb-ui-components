@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } f
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, debounceTime, distinctUntilChanged, finalize, startWith } from 'rxjs/operators';
-import _ from 'lodash'
+import * as _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { Router } from '@angular/router';

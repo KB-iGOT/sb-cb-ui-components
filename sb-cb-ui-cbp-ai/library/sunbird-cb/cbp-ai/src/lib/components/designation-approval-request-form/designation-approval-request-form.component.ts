@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } f
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, debounceTime, distinctUntilChanged, finalize, startWith } from 'rxjs/operators';
-import _ from 'lodash'
+import * as _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
@@ -100,11 +100,11 @@ export class DesignationApprovalRequestFormComponent {
     this.approvalRequestForm = this.fb.group({
       division_name: [this.role_mapping_ids?.wing_division_section || '', [
       Validators.required,
-      Validators.pattern(/^[A-Za-z0-9 _-]+$/)
+      Validators.pattern(/^[A-Za-z0-9 _/-]+$/)
     ]],
       request_name: [this.role_mapping_ids?.designation_name || '', [
       Validators.required,
-      Validators.pattern(/^[A-Za-z0-9 _-]+$/)
+      Validators.pattern(/^[A-Za-z0-9 _/-]+$/)
     ]],
     //  searchmdo: [''],
     });

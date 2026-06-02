@@ -13,7 +13,9 @@
         <div class="ministry-heading mt-2">
            <span *ngIf="!cbpPlanData?.department_name">{{cbpPlanData?.ministry?.orgName}}</span> 
            <span *ngIf="cbpPlanData?.department_name">{{cbpPlanData?.department_name}}</span> 
-            <span *ngIf="planData?.designation_name"> / {{planData?.designation_name}}</span>
+            <span *ngIf="planData?.designation_name"> 
+              <span *ngIf="!(sharedService.fromMdoPortal)">  / </span>
+            {{planData?.designation_name}}</span>
         </div>
         <div class="competency-container mt-4">
             <div class="outside-layer-total">
