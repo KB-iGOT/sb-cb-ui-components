@@ -1,6 +1,6 @@
-// @import 'ws-common';
-@import "../../_scss/ws-vars";
-@import "../../_scss/ws-mixins";
+// @use 'ws-common';
+@use "../../_scss/ws-vars" as *;
+@use "../../_scss/ws-mixins" as *;
 
 .custom-sidenav {
   width: 22.5%;
@@ -57,7 +57,8 @@
       overflow: hidden;
       white-space: nowrap;
     }
-    .mat-card-content {
+    // MDC card content (replaces .mat-card-content)
+    .mat-mdc-card-content {
       margin-left: 36%;
       padding: 8px;
       position: relative;
@@ -203,7 +204,9 @@
   }
 }
 
-.filter-container-search .mat-drawer-inner-container {
+// MDC drawer inner container
+.filter-container-search .mat-drawer-inner-container,
+.filter-container-search .mat-mdc-drawer-inner-container {
   overflow-x: hidden;
 }
 
@@ -226,7 +229,7 @@
     mat-icon {
       font-size: 16px;
     }
-    .mat-icon-button {
+    .mat-mdc-icon-button {
       width: 28px;
       height: 28px;
       line-height: 0;
