@@ -1,4 +1,4 @@
-@import "../../_scss/ws-vars";
+@use "../../_scss/ws-vars" as *;
 
 .plan-name {
   /* stylelint-disable */
