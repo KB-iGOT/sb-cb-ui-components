@@ -1,5 +1,6 @@
-@import "../../_scss/ws-vars";
+@use "../../_scss/ws-vars" as *;
 .filter-section {
+  // MDC expansion panel
   .mat-expansion-panel-spacing {
     margin-bottom: 10px !important;
     box-shadow: none !important;
@@ -19,22 +20,23 @@
   }
 }
 
-::ng-deep.mat-expansion-panel-body {
+::ng-deep .mat-expansion-panel-body {
   padding: 0 16px !important;
 }
 
 :host ::ng-deep {
-  .mat-checkbox-frame {
+  // MDC checkbox (replaces .mat-checkbox-frame / .mat-checkbox-background)
+  .mdc-checkbox .mdc-checkbox__background {
     border: 1px solid $overleyDarkBackground;
   }
 
-  .mat-checkbox-checked.mat-accent .mat-checkbox-background {
+  .mat-mdc-checkbox-checked .mdc-checkbox__background {
     background: #{$brandAccentColor} 0% 0% no-repeat padding-box !important;
+    border-color: #{$brandAccentColor} !important;
     border-radius: 4px;
   }
 
-  .mat-checkbox-checked .mat-checkbox-label {
-    @extend .mat-checkbox-label;
+  .mat-mdc-checkbox-checked .mdc-label {
     font-weight: 700;
     line-height: 100%;
     color: #{$brandAccentColor};
@@ -77,23 +79,31 @@
   .sectorNames-filter .mat-full-radius,
   .filter-section .mat-full-radius {
     position: relative;
-    .mat-form-field-appearance-outline {
-      .mat-form-field-flex {
+
+    // MDC text field wrapper (replaces .mat-form-field-flex)
+    .mat-mdc-text-field-wrapper {
+      height: 40px;
+      align-items: center;
+
+      .mat-mdc-form-field-flex {
         height: 40px;
         align-items: center;
       }
-
-      .mat-form-field-infix {
-        min-height: 40px !important;
-        padding: 6px 0 6px 0;
-      }
     }
 
-    .mat-form-field-wrapper {
+    // MDC infix (replaces .mat-form-field-infix)
+    .mat-mdc-form-field-infix {
+      min-height: 40px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+    }
+
+    // MDC wrapper bottom (replaces .mat-form-field-wrapper)
+    .mat-mdc-text-field-wrapper {
       padding-bottom: 0 !important;
     }
 
-    .mat-form-field {
+    .mat-mdc-form-field {
       font-size: 14px;
     }
   }
@@ -107,7 +117,7 @@
   margin-bottom: 0px !important;
 }
 
-::ng-deep .competency-area-filter .mat-selection-list {
+::ng-deep .competency-area-filter .mat-mdc-selection-list {
   height: 125px;
   overflow-y: auto;
 }
@@ -131,7 +141,7 @@
     mat-icon {
       font-size: 16px;
     }
-    .mat-icon-button {
+    .mat-mdc-icon-button {
       width: 28px;
       height: 28px;
       line-height: 0;

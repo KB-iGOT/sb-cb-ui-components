@@ -6,9 +6,10 @@ import { AppTocService } from '../../../_services/app-toc.service'
 import { Subscription } from 'rxjs'
 
 @Component({
-  selector: 'ws-widget-app-toc-content',
-  templateUrl: './app-toc-content.component.html',
-  styleUrls: ['./app-toc-content.component.scss'],
+    selector: 'ws-widget-app-toc-content',
+    templateUrl: './app-toc-content.component.html',
+    styleUrls: ['./app-toc-content.component.scss'],
+    standalone: false
 })
 
 export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
@@ -65,7 +66,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
       const contextPath = qParamsMap.get('contextPath')
       const batchId = qParamsMap.get('batchId')
       const preAssessment = qParamsMap.get('preAssessment')
-      if ([preAssessment === 'true']) {
+      if (preAssessment === 'true') {
         this.isPreAssessment = true
       }
       if (contextId && contextPath) {

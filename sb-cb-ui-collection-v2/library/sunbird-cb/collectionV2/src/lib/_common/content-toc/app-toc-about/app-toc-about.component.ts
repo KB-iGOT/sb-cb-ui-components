@@ -21,8 +21,8 @@ import { ResetRatingsService } from '../../../_services/reset-ratings.service'
 
 import { ReviewsContentComponent } from '../reviews-content/reviews-content.component'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 interface IStripUnitContentData {
   key: string
@@ -57,9 +57,10 @@ interface IStripUnitContentData {
 }
 
 @Component({
-  selector: 'ws-widget-app-toc-about',
-  templateUrl: './app-toc-about.component.html',
-  styleUrls: ['./app-toc-about.component.scss'],
+    selector: 'ws-widget-app-toc-about',
+    templateUrl: './app-toc-about.component.html',
+    styleUrls: ['./app-toc-about.component.scss'],
+    standalone: false
 })
 
 export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, OnChanges, OnDestroy {

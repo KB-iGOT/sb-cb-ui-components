@@ -18,7 +18,7 @@ import { filter } from 'rxjs/operators'
 import { WidgetUserServiceLib } from '@sunbird-cb/consumption'
 // tslint:disable-next-line
 import * as _ from 'lodash'
-import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs'
+import { MatTabChangeEvent } from '@angular/material/tabs'
 import { NsCardContent } from '../card-content-v2/card-content-v2.model'
 import { ITodayEvents } from '../_services/event.model'
 import { TranslateService } from '@ngx-translate/core'
@@ -59,9 +59,10 @@ interface IStripUnitContentData {
 }
 
 @Component({
-  selector: 'ws-widget-content-strip-with-tabs',
-  templateUrl: './content-strip-with-tabs.component.html',
-  styleUrls: ['./content-strip-with-tabs.component.scss'],
+    selector: 'ws-widget-content-strip-with-tabs',
+    templateUrl: './content-strip-with-tabs.component.html',
+    styleUrls: ['./content-strip-with-tabs.component.scss'],
+    standalone: false
 })
 export class ContentStripWithTabsComponent extends WidgetBaseComponent
   implements
@@ -772,7 +773,7 @@ export class ContentStripWithTabsComponent extends WidgetBaseComponent
   }
 
   private async processStrip(
-    strip: NsContentStripWithTabs.IContentStripUnit,
+    strip: any,
     results: NsWidgetResolver.IRenderConfigWithAnyData[] = [],
     fetchStatus: TFetchStatus,
     calculateParentStatus = true,
@@ -803,12 +804,12 @@ export class ContentStripWithTabsComponent extends WidgetBaseComponent
       widgets:
         fetchStatus === 'done'
           ? [
-            ...(strip.preWidgets || []).map(w => ({
+            ...(strip.preWidgets || []).map((w: { widgetHostClass: any }) => ({
               ...w,
               widgetHostClass: `mb-2 ${w.widgetHostClass}`,
             })),
             ...results,
-            ...(strip.postWidgets || []).map(w => ({
+            ...(strip.postWidgets || []).map((w: { widgetHostClass: any }) => ({
               ...w,
               widgetHostClass: `mb-2 ${w.widgetHostClass}`,
             })),

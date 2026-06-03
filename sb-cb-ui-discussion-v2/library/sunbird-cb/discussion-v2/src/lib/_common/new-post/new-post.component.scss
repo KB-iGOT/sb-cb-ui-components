@@ -79,6 +79,8 @@ input {
 
 .mat-mdc-icon-button.postIcon {
     padding: 0 !important;
+    height: 100% !important;
+    width: auto !important;
 
     &.emoji-icon {
         color: #FF8400 !important;

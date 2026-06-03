@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core'
-import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog'
-import { MatLegacyTabChangeEvent as MatTabChangeEvent } from '@angular/material/legacy-tabs'
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatTabChangeEvent } from '@angular/material/tabs'
 import { HttpErrorResponse } from '@angular/common/http'
 
 import { TFetchStatus, ConfigurationsService } from '@sunbird-cb/utils-v2'
@@ -15,9 +15,10 @@ const TAB_INDEX_ACTIVITY_TYPE_MAPPING: { [key: number]: string } = {
 }
 
 @Component({
-  selector: 'ws-widget-dialog-social-activity-user',
-  templateUrl: './dialog-social-activity-user.component.html',
-  styleUrls: ['./dialog-social-activity-user.component.scss'],
+    selector: 'ws-widget-dialog-social-activity-user',
+    templateUrl: './dialog-social-activity-user.component.html',
+    styleUrls: ['./dialog-social-activity-user.component.scss'],
+    standalone: false
 })
 export class DialogSocialActivityUserComponent implements OnInit {
   commonRequestForActivityUsers = {

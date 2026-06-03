@@ -2,12 +2,10 @@ import { Component, OnInit, Input, HostBinding } from '@angular/core'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { IAuthorData } from './author-card.model'
 @Component({
-  selector: 'ws-widget-author-card',
-  templateUrl: './author-card.component.html',
-  styleUrls: ['./author-card.component.scss'],
-  // /* tslint:disable */
-  // // host: { class: '' }
-  // /* tslint:enable */
+    selector: 'ws-widget-author-card',
+    templateUrl: './author-card.component.html',
+    styleUrls: ['./author-card.component.scss'],
+    standalone: false
 })
 export class AuthorCardComponent extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<IAuthorData> {
