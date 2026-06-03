@@ -7,7 +7,7 @@
           <!-- <a class="flex cursor-pointer simple-hubs-link margin-left-0" (click)="toggleVisibility()"
             href="javascript:void(0)" role="menuitem" accesskey="H" i18n-aria-label i18n-aria-label>
             <mat-icon class="margin-right-xs ws-mat-default-text">apps</mat-icon>
-            <span class="margin-auto ws-mat-default-text mat-subheading-2">HUBS</span>
+            <span class="margin-auto ws-mat-default-text mat-subtitle-1">HUBS</span>
           </a> -->
 
           <ng-container *ngIf="widgetData.titles && widgetData.titles.length>0">
@@ -15,13 +15,13 @@
               <span *ngIf="title.title && title.url && title.url === 'none'" i18n-aria-label i18n-aria-title
                 i18n="page title: {{title.title}}" class="flex margin-left-xs m-auto">
                 <mat-icon class="ws-mat-default-text icon-margin m-t-b" *ngIf="title.icon">{{title.icon}}</mat-icon>
-                <span class="text-capitalize m-t-b mat-body-2 font-bold ws-mat-black60-text">{{title.title}}</span>
+                <span class="text-capitalize m-t-b mat-body-1 font-bold ws-mat-black60-text">{{title.title}}</span>
               </span>
               <a class="flex m-auto ws-mat-default-text" i18n-aria-label *ngIf="title.url && title.url !== 'none'"
                 [routerLink]="title.url" role="menuitem" i18n-aria-label [routerLink]="title.path"
                 [attr.accesskey]="title.accessKey">
                 <mat-icon class="ws-mat-default-text icon-margin" *ngIf="title.icon">{{title.icon}}</mat-icon>
-                <span class="text-uppercase m-t-b mat-body-2 font-bold"> {{title.title}}</span>
+                <span class="text-uppercase m-t-b mat-body-1 font-bold"> {{title.title}}</span>
               </a>
               <mat-icon class="ws-mat-default-text icon-margin">keyboard_arrow_right</mat-icon>
             </div>
@@ -56,7 +56,7 @@
       <mat-icon class="mat-icon1">{{hubs.icon}}</mat-icon>
     </div>
     <div [ngClass]="{'cursor-pointer': enablePeopleSearch}" class="width-expand padding-left-xs">
-      <div class="margin-0 mat-subheading-2">
+      <div class="margin-0 mat-subtitle-1">
         {{hubs.hubname}}
       </div>
       <div class="mat-caption cohorts-desc ws-mat-black60-text">{{hubs.desc}}</div>

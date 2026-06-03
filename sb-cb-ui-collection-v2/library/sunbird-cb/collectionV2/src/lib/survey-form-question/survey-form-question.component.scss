@@ -27,15 +27,15 @@
 }
 
 :host ::ng-deep .question-container {
-  .mat-form-field-wrapper {
+  .mat-mdc-form-field {
     padding: 0px !important;
   }
 
-  .mat-radio-checked {
+  .mat-mdc-radio-checked {
     background-color: white !important;
   }
 
-  .mat-radio-label-content {
+  .mdc-label {
     font-size: 14px !important;
     /* stylelint-disable */
     font-family: Montserrat;

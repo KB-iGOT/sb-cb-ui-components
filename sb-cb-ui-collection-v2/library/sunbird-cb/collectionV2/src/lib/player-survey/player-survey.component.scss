@@ -41,7 +41,7 @@
   overflow-y: hidden;
 }
 
-.mat-toolbar-single-row {
+mat-toolbar {
   padding: 0;
 }
 
@@ -80,14 +80,14 @@
 
 }
 
-::ng-deep.course-survey {
+::ng-deep .course-survey {
   width: 60%;
 
   .main-container {
     border: 1px solid rgba(0, 0, 0, 0.12)
   }
 
-  .mat-divider-horizontal {
+  .mat-divider {
     position: relative !important;
   }
 }

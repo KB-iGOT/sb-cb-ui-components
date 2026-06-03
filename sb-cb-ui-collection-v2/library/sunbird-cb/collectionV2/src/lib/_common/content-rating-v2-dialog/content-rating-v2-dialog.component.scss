@@ -15,11 +15,11 @@
 ::ng-deep .textarea-container {
     width: 100%;
 
-    .mat-form-field-wrapper {
+    .mat-mdc-form-field {
         margin: 0px;
     }
 
-    .mat-form-field-infix {
+    .mat-mdc-form-field-infix {
         padding: 8px 0px;
         border-top: 0px;
 
@@ -40,7 +40,7 @@
     padding: 0 !important
 }
 
-.custom.mat-dialog-actions {
+.custom.mat-mdc-dialog-actions {
     min-height: auto;
 }
 

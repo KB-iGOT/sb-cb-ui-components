@@ -123,7 +123,7 @@
         </mat-table>
         <div class="no-cbp-data" *ngIf="dataSource.filteredData.length === 0 && isTrainingPlan && !isSearchText">
             <div><img src="/assets/images/no-content-data.svg"></div>
-            <!-- <div class="mat-subheading-1 margin-remove">No CBP plan created yet</div> -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <!-- <div class="mat-subtitle-2 margin-remove">No CBP plan created yet</div> -->
             <div>Start creating a Capacity Building Plan (CBP).</div>
             <div class="margin-top-m">
                 <button mat-button type="button" class="create-btn"
@@ -132,7 +132,7 @@
         </div>
         <div class="no-cbp-data" *ngIf="dataSource.filteredData.length === 0 && isTrainingPlan && isSearchText">
             <div><img src="/assets/images/no-content-data-search.svg"></div>
-            <div class="mat-subheading-1 margin-remove">No results found</div>
+            <div class="mat-subtitle-2 margin-remove">No results found</div>
             <div>Try adjusting your search to find what you are looking for.</div>
         </div>
         <mat-card class="flex-1" role="none" *ngIf="dataSource.filteredData.length === 0 && !isTrainingPlan">

@@ -124,32 +124,33 @@
   }
 }
 
-.mat-card {
+mat-card,
+.mat-mdc-card {
   display: flex;
   flex-direction: column;
 }
 
-.mat-card-header {
-  .mat-card-title {
+.mat-mdc-card-header {
+  .mat-mdc-card-title {
     flex-shrink: 4;
     flex-grow: 4;
     height: 116px;
     overflow-y: hidden;
   }
 
-  .mat-card-sub-title {
+  .mat-mdc-card-subtitle {
     flex-shrink: 4;
     flex-grow: 2;
   }
 }
 
-.mat-card-content {
+.mat-mdc-card-content {
   flex-grow: 5;
   overflow: auto;
   height: 50px;
   overflow-y: hidden;
 }
 
-.mat-card-footer {
+.mat-mdc-card-footer {
   padding-bottom: 22px;
 }
