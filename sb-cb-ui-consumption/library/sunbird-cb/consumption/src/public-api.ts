@@ -151,3 +151,13 @@ export * from './lib/_common/competencies/competencies.module'
 export * from './lib/_common/competencies/competency-list/competency-list.component'
 
 export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
+
+export * from './lib/_common/carousel-banner/carousel-banner.module'
+export * from './lib/_common/carousel-banner/carousel-banner.component'
+export * from './lib/_common/carousel-banner/carousel-banner.model'
+
+export * from './lib/_common/spotlight-cards/spotlight-cards.module'
+export * from './lib/_common/spotlight-cards/spotlight-cards.component'
+export * from './lib/_common/spotlight-cards/spotlight-cards.model'
+
+export * from './lib/_common/cards/card-course/card-course.component'
