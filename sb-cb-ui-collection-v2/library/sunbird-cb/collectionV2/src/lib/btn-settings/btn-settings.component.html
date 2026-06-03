@@ -68,63 +68,63 @@
 <mat-menu #languagesMenu="matMenu">
   <mat-nav-list dense role="navigation">
     <a mat-list-item (click)="updateUserLang('')" [disableRipple]="!isLocaleEnabled('')" *ngIf="isLocaleAvailable('')">
-      <mat-icon mat-list-icon>{{ localeIcon('') }}</mat-icon>
-      <h4 mat-line>English</h4>
-      <p mat-line i18n="English language name and its language code (en) in braces">English (en)</p>
+      <mat-icon matListItemIcon>{{ localeIcon('') }}</mat-icon>
+      <h4 matListItemTitle>English</h4>
+      <p matListItemLine i18n="English language name and its language code (en) in braces">English (en)</p>
     </a>
     <a mat-list-item (click)="updateUserLang('de')" [disableRipple]="!isLocaleEnabled('de')"
       *ngIf="isLocaleAvailable('de')">
-      <mat-icon mat-list-icon>{{ localeIcon('de') }}</mat-icon>
-      <h4 mat-line>Deutsch</h4>
-      <p mat-line i18n="German language name and its language code (de) in braces">German (de)</p>
+      <mat-icon matListItemIcon>{{ localeIcon('de') }}</mat-icon>
+      <h4 matListItemTitle>Deutsch</h4>
+      <p matListItemLine i18n="German language name and its language code (de) in braces">German (de)</p>
     </a>
     <a mat-list-item (click)="updateUserLang('ar')" [disableRipple]="!isLocaleEnabled('ar')"
       *ngIf="isLocaleAvailable('ar')">
-      <mat-icon mat-list-icon>{{ localeIcon('ar') }}</mat-icon>
-      <h4 mat-line>عربى</h4>
-      <p mat-line i18n="Arabic language name and its language code (ar) in braces">Arabic (ar)</p>
+      <mat-icon matListItemIcon>{{ localeIcon('ar') }}</mat-icon>
+      <h4 matListItemTitle>عربى</h4>
+      <p matListItemLine i18n="Arabic language name and its language code (ar) in braces">Arabic (ar)</p>
     </a>
     <a mat-list-item (click)="updateUserLang('zh-CN')" [disableRipple]="!isLocaleEnabled('zh-CN')"
       *ngIf="isLocaleAvailable('zh-CN')">
-      <mat-icon mat-list-icon>{{ localeIcon('zh-CN') }}</mat-icon>
-      <h4 mat-line>中文</h4>
-      <p mat-line i18n="Chinese language name and its language code (zh-CN) in braces">
+      <mat-icon matListItemIcon>{{ localeIcon('zh-CN') }}</mat-icon>
+      <h4 matListItemTitle>中文</h4>
+      <p matListItemLine i18n="Chinese language name and its language code (zh-CN) in braces">
         Chinese (zh-CN)
       </p>
     </a>
     <a mat-list-item (click)="updateUserLang('fr')" [disableRipple]="!isLocaleEnabled('fr')"
       *ngIf="isLocaleAvailable('fr')">
-      <mat-icon mat-list-icon>{{ localeIcon('fr') }}</mat-icon>
-      <h4 mat-line>Français</h4>
-      <p mat-line i18n="French language name and its language code (fr) in braces">French (fr)</p>
+      <mat-icon matListItemIcon>{{ localeIcon('fr') }}</mat-icon>
+      <h4 matListItemTitle>Français</h4>
+      <p matListItemLine i18n="French language name and its language code (fr) in braces">French (fr)</p>
     </a>
     <a mat-list-item (click)="updateUserLang('fr-ca')" [disableRipple]="!isLocaleEnabled('fr-ca')"
       *ngIf="isLocaleAvailable('fr-ca')">
-      <mat-icon mat-list-icon>{{ localeIcon('fr-ca') }}</mat-icon>
-      <h4 mat-line>Français-Canada</h4>
-      <p mat-line i18n="French language name and its language code (fr-ca) in braces">
+      <mat-icon matListItemIcon>{{ localeIcon('fr-ca') }}</mat-icon>
+      <h4 matListItemTitle>Français-Canada</h4>
+      <p matListItemLine i18n="French language name and its language code (fr-ca) in braces">
         French Canada (fr-ca)
       </p>
     </a>
     <a mat-list-item (click)="updateUserLang('nl')" [disableRipple]="!isLocaleEnabled('nl')"
       *ngIf="isLocaleAvailable('nl')">
-      <mat-icon mat-list-icon>{{ localeIcon('nl') }}</mat-icon>
-      <h4 mat-line>Dutch</h4>
-      <p mat-line i18n="Dutch language name and its language code (nl) in braces">Dutch (nl)</p>
+      <mat-icon matListItemIcon>{{ localeIcon('nl') }}</mat-icon>
+      <h4 matListItemTitle>Dutch</h4>
+      <p matListItemLine i18n="Dutch language name and its language code (nl) in braces">Dutch (nl)</p>
     </a>
     <a mat-list-item (click)="updateUserLang('ja')" [disableRipple]="!isLocaleEnabled('ja')"
       *ngIf="isLocaleAvailable('ja')">
-      <mat-icon mat-list-icon>{{ localeIcon('ja') }}</mat-icon>
-      <h4 mat-line>日本人</h4>
-      <p mat-line i18n="Japanese language name and its language code (ja) in braces">
+      <mat-icon matListItemIcon>{{ localeIcon('ja') }}</mat-icon>
+      <h4 matListItemTitle>日本人</h4>
+      <p matListItemLine i18n="Japanese language name and its language code (ja) in braces">
         Japanese (ja)
       </p>
     </a>
     <a mat-list-item (click)="updateUserLang('es')" [disableRipple]="!isLocaleEnabled('es')"
       *ngIf="isLocaleAvailable('es')">
-      <mat-icon mat-list-icon>{{ localeIcon('es') }}</mat-icon>
-      <h4 mat-line>Español</h4>
-      <p mat-line i18n="Spanish language name and its language code (es) in braces">Spanish (es)</p>
+      <mat-icon matListItemIcon>{{ localeIcon('es') }}</mat-icon>
+      <h4 matListItemTitle>Español</h4>
+      <p matListItemLine i18n="Spanish language name and its language code (es) in braces">Spanish (es)</p>
     </a>
   </mat-nav-list>
 </mat-menu>

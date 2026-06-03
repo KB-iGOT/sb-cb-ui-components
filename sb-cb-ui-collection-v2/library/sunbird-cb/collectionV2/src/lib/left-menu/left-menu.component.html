@@ -4,7 +4,7 @@
       <div class="logo-cover rounded-full bg-white flex items-center justify-center">
         <img [src]="widgetData.logoPath || defaultImage" [alt]="widgetData.name" class="img rounded-full" (error)="changeToDefaultImg($event)" />
       </div>
-      <span i18n class="mat-subheading-2 margin-top-m">
+      <span i18n class="mat-subtitle-1 margin-top-m">
         {{ widgetData.name }}
       </span>
     </a>

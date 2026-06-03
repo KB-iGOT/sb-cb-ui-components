@@ -31,11 +31,11 @@
   letter-spacing: 0px;
   color: #5F5F5F;
 
-  ::ng-deep.mat-body p {
+  ::ng-deep .mat-body-2 p {
     margin-bottom: 0 !important;
   }
 
-  ::ng-deep.mat-body p {
+  ::ng-deep .mat-body-2 p {
     margin-bottom: 0 !important;
   }
 }
@@ -72,17 +72,17 @@
   color: #5F5F5F;
 }
 
-::ng-deep.ql-container {
+::ng-deep .ql-container {
   border: 1px solid #0074b6;
   border-radius: 8px;
 }
 
-::ng-deep.ql-editor {
+::ng-deep .ql-editor {
   background: #fff;
   border-radius: 8px;
 }
 
-::ng-deep.ql-editor.ql-blank::before {
+::ng-deep .ql-editor.ql-blank::before {
   font-style: normal;
   text-align: left;
   // font: 12px/26px Poppins-regular;

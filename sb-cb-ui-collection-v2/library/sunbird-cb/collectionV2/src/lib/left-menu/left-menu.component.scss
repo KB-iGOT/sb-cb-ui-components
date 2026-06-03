@@ -31,6 +31,11 @@
 .new-pill-ui-active {
   background: #1B4CA1 !important;
   color: white !important;
+  --mdc-list-list-item-label-text-color: #fff;
+
+  .menu-text, span, .mdc-list-item__primary-text {
+    color: white !important;
+  }
 }
 
 .logo-cover {
@@ -79,7 +84,7 @@
     background-color: inherit !important;
     border-radius: 0 !important;
 
-    .mat-list-item-content {
+    .mdc-list-item__content {
       padding: 0 16px 0 32px !important;
     }
   }
@@ -97,7 +102,7 @@
   .mat-expansion-panel-body {
     background-color: #fff;
     padding: 0px !important;
-    .mat-list-base {
+    .mdc-list {
       padding-top: 0 !important ;
     }
   }
@@ -108,6 +113,15 @@
   }
   .mat-expansion-panel-header-description {
     justify-content: flex-end;
+  }
+
+  .ws-active-route-menu,
+  a.ws-active-route-menu.mat-mdc-list-item {
+    span.menu-text,
+    .mdc-list-item__primary-text,
+    span {
+      color: #fff !important;
+    }
   }
 }
 
@@ -122,9 +136,17 @@
 
   .ws-active-route-menu {
     border-radius: 8px;
-    background-color: #1b4ca1;
+    background-color: #1b4ca1 !important;
+    color: #fff !important;
+    --mdc-list-list-item-label-text-color: #fff;
+    --mdc-list-list-item-hover-label-text-color: #fff;
+    --mdc-list-list-item-focus-label-text-color: #fff;
+
+    .mdc-list-item__primary-text,
+    .mdc-list-item__content,
     mat-icon,
-    .menu-text {
+    .menu-text,
+    span {
       color: #fff !important;
     }
 
@@ -132,6 +154,19 @@
     &:focus,
     &:active {
       background-color: #1b4ca1 !important;
+      color: #fff !important;
+    }
+  }
+
+  a.ws-active-route-menu.mat-mdc-list-item,
+  a.ws-active-route-menu.mdc-list-item {
+    color: #fff !important;
+
+    .mdc-list-item__primary-text,
+    .mdc-list-item__content,
+    span.menu-text,
+    span {
+      color: #fff !important;
     }
   }
 

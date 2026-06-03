@@ -47,17 +47,17 @@ section {
         color: #000000 !important;
     }
 }
-::ng-deep.mat-menu-content {
+::ng-deep .mat-mdc-menu-content {
     padding-bottom: 0 !important;
 
-    .mat-menu-item {
+    .mat-mdc-menu-item {
         line-height: 30px;
         height: 38px;
         padding: 0 6px;
         font: 400 14px/21px Lato !important
     }
 }
-::ng-deep.circle-m {
+::ng-deep .circle-m {
     width: 40px !important;
     height: 40px !important;
 
