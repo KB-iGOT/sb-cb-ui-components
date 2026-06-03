@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common'
 import { RatingSummaryComponent } from './rating-summary.component'
 import { PipeCountTransformModule } from '@sunbird-cb/utils-v2'
 import { MatIconModule } from '@angular/material/icon'
-import { MatLegacyProgressBarModule as MatProgressBarModule } from '@angular/material/legacy-progress-bar'
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip'
+import { MatProgressBarModule } from '@angular/material/progress-bar'
+import { MatTooltipModule } from '@angular/material/tooltip'
 
 @NgModule({
   declarations: [RatingSummaryComponent],

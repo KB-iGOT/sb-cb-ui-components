@@ -7,21 +7,21 @@ import { PlayerSurveyComponent } from './player-survey.component'
 import { TranslateModule } from '@ngx-translate/core'
 import { MatIconModule } from '@angular/material/icon'
 import { MatToolbarModule } from '@angular/material/toolbar'
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field'
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
-import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu'
-import { MatLegacySliderModule as MatSliderModule } from '@angular/material/legacy-slider'
+import { MatButtonModule } from '@angular/material/button'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
+import { MatMenuModule } from '@angular/material/menu'
+import { MatSliderModule } from '@angular/material/slider'
 import { SurveyFormQuestionComponent } from '../survey-form-question/survey-form-question.component'
 import { SurveyFormSectionComponent } from '../survey-form-section/survey-form-section.component'
-import { MatLegacyRadioModule } from '@angular/material/legacy-radio'
+import { MatRadioModule } from '@angular/material/radio'
 // REMOVED: MatDatepickerModule causes ng-packagr PickerModule resolution error
 // Consumer applications must import MatDatepickerModule and MatNativeDateModule themselves
 // import { MatDatepickerModule } from '@angular/material/datepicker'
 // import { MatNativeDateModule } from '@angular/material/core'
-import { MatLegacySelectModule } from '@angular/material/legacy-select'
-import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox'
-import { MatLegacyProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
+import { MatSelectModule } from '@angular/material/select'
+import { MatCheckboxModule } from '@angular/material/checkbox'
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 @NgModule({
     declarations: [
         PlayerSurveyComponent,
@@ -41,14 +41,14 @@ import { MatLegacyProgressSpinnerModule } from '@angular/material/legacy-progres
         BtnFullscreenModule,
         MatInputModule,
         // MicroSurveyModule,
-        MatLegacyRadioModule,
+        MatRadioModule,
         // REMOVED: MatDatepickerModule causes ng-packagr build error
         // Consumer apps must import these modules:
         // MatNativeDateModule,
         // MatDatepickerModule,
-        MatLegacySelectModule,
-        MatLegacyCheckboxModule,
-        MatLegacyProgressSpinnerModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatProgressSpinnerModule,
         TranslateModule.forChild(),
     ],
     exports: [PlayerSurveyComponent],

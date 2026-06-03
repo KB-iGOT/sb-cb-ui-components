@@ -1,10 +1,10 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'ws-widget-home-top-card-competency',
-  templateUrl: './card-competency.component.html',
-  styleUrls: ['./card-competency.component.scss'],
-
+    selector: 'ws-widget-home-top-card-competency',
+    templateUrl: './card-competency.component.html',
+    styleUrls: ['./card-competency.component.scss'],
+    standalone: false
 })
 
 export class HomeTopCardCompetencyComponent {

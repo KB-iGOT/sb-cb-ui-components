@@ -1,15 +1,16 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar } from '@angular/material/snack-bar'
 import { DialogSocialActivityUserComponent } from '../../dialog/dialog-social-activity-user/dialog-social-activity-user.component'
 import { WsDiscussionForumService } from '../../ws-discussion-forum.services'
 import { NsDiscussionForum } from '../../ws-discussion-forum.model'
 
 @Component({
-  selector: 'ws-widget-btn-social-vote',
-  templateUrl: './btn-social-vote.component.html',
-  styleUrls: ['./btn-social-vote.component.scss'],
+    selector: 'ws-widget-btn-social-vote',
+    templateUrl: './btn-social-vote.component.html',
+    styleUrls: ['./btn-social-vote.component.scss'],
+    standalone: false
 })
 export class BtnSocialVoteComponent implements OnInit {
   @Input() voteType: 'downVote' | 'upVote' | 'none' = 'none'

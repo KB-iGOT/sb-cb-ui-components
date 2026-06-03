@@ -1,6 +1,6 @@
-@import "../../_scss/ws-common";
-@import "../../_scss/ws-vars";
-@import "../../_scss/ws-mixins";
+@use "../../_scss/ws-common" as *;
+@use "../../_scss/ws-vars" as *;
+@use "../../_scss/ws-mixins" as *;
 
 .card-container {
   height: 175px;
@@ -95,12 +95,13 @@
   font-weight: 500;
 }
 
+// MDC slide toggle (replaces .mat-slide-toggle)
 ::ng-deep .theme-igot.day-mode .cbpUser {
-  .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+  .mat-mdc-slide-toggle-checked .mdc-switch__track::after {
     background-color: #1b4ca18a !important;
   }
 
-  .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+  .mat-mdc-slide-toggle-checked .mdc-switch__handle::after {
     background-color: #1b4ca1;
   }
 }

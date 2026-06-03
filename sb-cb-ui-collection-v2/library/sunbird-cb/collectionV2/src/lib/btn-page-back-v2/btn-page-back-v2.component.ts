@@ -15,23 +15,22 @@ export interface IHomeConfig {
 }
 
 @Component({
-  selector: 'ws-widget-btn-page-back-v2',
-  templateUrl: './btn-page-back-v2.component.html',
-  styleUrls: ['./btn-page-back-v2.component.scss'],
-  animations: [
-    trigger(
-      'enterAnimation', [
-      transition(':enter', [
-        style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 }),
-        animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 })),
-      ]),
-      transition(':leave', [
-        style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 }),
-        animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 })),
-      ]),
-    ]
-    ),
-  ],
+    selector: 'ws-widget-btn-page-back-v2',
+    templateUrl: './btn-page-back-v2.component.html',
+    styleUrls: ['./btn-page-back-v2.component.scss'],
+    animations: [
+        trigger('enterAnimation', [
+            transition(':enter', [
+                style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 }),
+                animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 })),
+            ]),
+            transition(':leave', [
+                style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 1 }),
+                animate('300ms', style({ transition: 'visibility 0s linear 0.23s, opacity 0.33s linear', opacity: 0 })),
+            ]),
+        ]),
+    ],
+    standalone: false
 })
 export class BtnPageBackV2Component extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<{ url: TUrl }> {

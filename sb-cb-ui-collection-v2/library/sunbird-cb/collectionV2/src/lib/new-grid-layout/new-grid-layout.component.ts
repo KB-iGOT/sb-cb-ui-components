@@ -8,9 +8,10 @@ import {
   INewGridLayoutDataMain,
 } from './new-grid-layout.model'
 @Component({
-  selector: 'ws-widget-new-grid-layout',
-  templateUrl: './new-grid-layout.component.html',
-  styleUrls: ['./new-grid-layout.component.scss'],
+    selector: 'ws-widget-new-grid-layout',
+    templateUrl: './new-grid-layout.component.html',
+    styleUrls: ['./new-grid-layout.component.scss'],
+    standalone: false
 })
 export class NewGridLayoutComponent extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<INewGridLayoutDataMain> {

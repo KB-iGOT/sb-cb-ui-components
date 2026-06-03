@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { FormGroup, Validators } from '@angular/forms'
 
 @Component({
-  selector: 'ws-widget-survey-form-question',
-  templateUrl: './survey-form-question.component.html',
-  styleUrls: ['./survey-form-question.component.scss']
+    selector: 'ws-widget-survey-form-question',
+    templateUrl: './survey-form-question.component.html',
+    styleUrls: ['./survey-form-question.component.scss'],
+    standalone: false
 })
 export class SurveyFormQuestionComponent {
   @Input() questionForm!: FormGroup
