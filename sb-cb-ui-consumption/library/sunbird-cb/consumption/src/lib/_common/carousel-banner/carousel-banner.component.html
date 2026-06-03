@@ -77,7 +77,7 @@
 </div>
 }
 
-@if (!loading) {
+@if (!loading && banners && banners.length > 0) {
 <div class="ws-carousel" [ngClass]="hostClasses" role="region" aria-label="Promotional Banners"
   aria-roledescription="carousel">
   <!-- Screen-reader live announcer: fires whenever currentIndex changes -->

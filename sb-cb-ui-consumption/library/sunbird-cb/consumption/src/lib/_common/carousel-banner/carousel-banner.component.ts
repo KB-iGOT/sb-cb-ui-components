@@ -62,10 +62,14 @@ export class WsWidgetCarouselBannerComponent implements OnInit, OnChanges, OnDes
   ) { }
 
   ngOnInit(): void {
+    this.banners = this.banners || []
     this.startAutoPlay()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['banners']) {
+      this.banners = this.banners || []
+    }
     const relevant = changes['autoPlay'] ?? changes['autoPlayInterval'] ?? changes['banners']
     if (relevant && !relevant.isFirstChange()) {
       this.resetAutoPlay()
