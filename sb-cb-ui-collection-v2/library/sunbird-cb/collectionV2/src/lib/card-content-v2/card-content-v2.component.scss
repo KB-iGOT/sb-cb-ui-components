@@ -293,7 +293,7 @@ $secondary-color: #EF951E;
     line-height: $description-line-height;
   }
 
-  .mat-chip-list-wrapper {
+  .mat-mdc-chip-set {
     padding: 8px 0 16px 0 !important;
   }
 
@@ -345,7 +345,7 @@ $secondary-color: #EF951E;
     // margin-left: 0;
   }
 
-  ::ng-deep .mat-progress-bar {
+  ::ng-deep mat-progress-bar {
     height: 8px !important;
   }
 
@@ -445,7 +445,7 @@ $secondary-color: #EF951E;
     border-top-right-radius: 8px;
   }
 
-  .mat-subheading-1 {
+  .mat-subtitle-2 {
     /* stylelint-disable */
     font: 600 14px/24px 'Montserrat';
     /* stylelint-enable */
@@ -1448,8 +1448,8 @@ $title-line-count: 2;
   border-radius: 5px !important;
 }
 
-::ng-deep .course-progress-bar .mat-progress-bar-fill::after {
-  background-color: rgb(239, 149, 30) !important;
+::ng-deep .course-progress-bar mat-progress-bar {
+  --mdc-linear-progress-active-indicator-color: rgb(239, 149, 30) !important;
 }
 
 ::ng-deep .white-spinner {
@@ -1764,7 +1764,7 @@ $title-line-count: 2;
     border-top-right-radius: 8px;
   }
 
-  .mat-subheading-1 {
+  .mat-subtitle-2 {
     /* stylelint-disable */
     font: 600 14px/24px Montserrat;
     /* stylelint-enable */

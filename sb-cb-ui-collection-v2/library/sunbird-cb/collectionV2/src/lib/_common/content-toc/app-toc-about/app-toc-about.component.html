@@ -104,7 +104,7 @@
 </ng-template>
 
 <ng-template #competencyLabel>
-    <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
+    <div class="pt-mweb-4 mat-subtitle-2 flex items-center gap-2">
         Competencies
         <mat-icon
             class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
@@ -271,7 +271,7 @@
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
-            <div class="mat-subheading-1 font-bold">Description</div>
+            <div class="mat-subtitle-2 font-bold">Description</div>
             <div [ngClass]="{'mob-desc-ellipsis': summary.ellipsis && isMobile, 'desc-ellipsis': summary.ellipsis && !isMobile}"
                 #summaryElem>
                 <div class="mob-text" [innerHtml]="handleCapitalize(contentReadData?.description | replaceNbsp)"></div>
@@ -301,7 +301,7 @@
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
-            <div class="mat-subheading-1">Learning Outcome</div>
+            <div class="mat-subtitle-2">Learning Outcome</div>
             <div class="desc"
                 [ngClass]="{'mob-desc-ellipsis': description.ellipsis && isMobile, 'desc-ellipsis': description.ellipsis && !isMobile}"
                 #descElem>
@@ -333,7 +333,7 @@
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
-            <div class="mat-subheading-1 font-bold pt-mweb-8">Objectives</div>
+            <div class="mat-subtitle-2 font-bold pt-mweb-8">Objectives</div>
             <div [ngClass]="{'mob-desc-ellipsis': objectives.ellipsis && isMobile, 'desc-ellipsis': objectives.ellipsis && !isMobile}"
                 #objectivesElem>
                 <span class="mob-text" [innerHtml]="handleCapitalize(content?.objectives)"></span>
@@ -423,7 +423,7 @@
     <ng-container *ngIf="(!skeletonLoader && sectorsList?.length) && (content?.primaryCategory.toLowerCase() === 'learning resource' ||
         content?.resourceCategory?.toLowerCase() === 'case study')">
         <div class="flex flex-col">
-            <div class="mat-subheading-1 nodtranslate">Sectors</div>
+            <div class="mat-subtitle-2 nodtranslate">Sectors</div>
             <div class="flex flex-wrap gap-2">
                 <ng-container *ngFor="let sector of sectorsList; let i = index; let isLast = last">
                     <div class="text-xs mob-text">{{ sector?.sectorName }}</div>
@@ -438,7 +438,7 @@
     <ng-container *ngIf="(!skeletonLoader && subSectorsList?.length) && (content?.primaryCategory.toLowerCase() === 'learning resource' ||
         content?.resourceCategory?.toLowerCase() === 'case study')">
         <div class="flex flex-col">
-            <div class="mat-subheading-1 nodtranslate">Sub Sectors</div>
+            <div class="mat-subtitle-2 nodtranslate">Sub Sectors</div>
             <div class="flex flex-wrap gap-2">
                 <ng-container *ngFor="let sector of subSectorsList; let i = index; let isLast = last">
                     <div class="text-xs mob-text">{{ sector?.subSectorName }}</div>
@@ -452,7 +452,7 @@
 
     <ng-template #tagsList let-tagData="tagData">
         <div class="flex flex-col" *ngIf="tagData?.length">
-            <div class="mat-subheading-1">Tags</div>
+            <div class="mat-subtitle-2">Tags</div>
             <ng-container *ngIf="tagData?.length">
                 <div class="flex flex-wrap gap-2" [ngClass]="{'tags-ellipsis': tagsEllipsis && !viewMoreTags}"
                     #tagsElem>
@@ -476,7 +476,7 @@
 
     <!-- <ng-container *ngIf="!skeletonLoader && content?.searchTags">
         <div class="flex flex-col" *ngIf="content?.searchTags.length">
-            <div class="mat-subheading-1">{{ 'userProfile.tags' | translate }}</div>
+            <div class="mat-subtitle-2">{{ 'userProfile.tags' | translate }}</div>
             <ng-container *ngIf="content?.searchTags.length">
                 <div class="flex flex-wrap gap-2" [ngClass]="{'tags-ellipsis': searchTagsEllipsis && !viewMoreTags}" #searchTagElem>
                     <ng-container *ngFor="let tag of content?.searchTags; let i = index">
@@ -597,7 +597,7 @@
 
             <div class="flex flex-col gap-3">
                 <div class="flex flex-row gap-4">
-                    <div class="flex-1 mat-subheading-1" id="reviewContainer">Top Reviews</div>
+                    <div class="flex-1 mat-subtitle-2" id="reviewContainer">Top Reviews</div>
                     <ng-container *ngIf="ratingSummaryProcessed?.avgRating">
                         <div class="ws-mat-default-text cursor-pointer" (click)="handleOpenReviewModal()">Show all</div>
                     </ng-container>

@@ -1,0 +1,12 @@
+<sb-uic-dynamic-tabs [tabs]="visibleTabs()" [activeTabKey]="defaultTabKey()" [contentTemplate]="tabBody"
+  (activeTabChange)="onTabChange($event)" />
+
+<ng-template #tabBody let-tab>
+  @if (tab?.context; as currentTab) {
+  @if (currentTab.hasPills && currentTab.pills?.length) {
+  <sb-uic-content-strip-with-pills [pills]="currentTab.pills!" [defaultPillKey]="currentTab.defaultPillKey ?? ''" />
+  } @else if (currentTab.contentConfig) {
+  <sb-uic-content-strips [contentConfig]="currentTab.contentConfig!" />
+  }
+  }
+</ng-template>

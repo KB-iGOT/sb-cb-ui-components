@@ -26,27 +26,27 @@
 
         <ng-container matColumnDef="{{col.key}}" *ngFor="let col of widgetData.columns">
           <mat-header-cell *matHeaderCellDef mat-sort-header>
-            <span class="mat-body-2 ws-mat-black60-text">{{col.displayName}}</span>
+            <span class="mat-body-1 ws-mat-black60-text">{{col.displayName}}</span>
           </mat-header-cell>
           <mat-cell *matCellDef="let element">
             <!-- <span *ngIf="col.isList"
                         [matTooltip]="element[col.displayName]">{{filterList(element[col.key],col.prop) }}</span> -->
-            <span *ngIf="col.isList" class="textclass mat-body-2"
+            <span *ngIf="col.isList" class="textclass mat-body-1"
               [matTooltip]="(element[col.key] | listPipe: col.prop).split('<br />').join(', ')">
               <div innerHTML="{{element[col.key] | listPipe: col.prop }}"></div>
             </span>
             <img class="small-list-logo margin-xs" *ngIf="col.image" [src]="element[col.image]"
               (error)="changeToDefaultImg($event)" [alt]="element[col.key]" />
 
-            <span *ngIf="!col.isList && !col.link && !col.pipe" class="textclass mat-body-2">
+            <span *ngIf="!col.isList && !col.link && !col.pipe" class="textclass mat-body-1">
               {{element[col.key]}}
             </span>
-            <span *ngIf="!col.isList && !col.link && col.pipe" class="textclass mat-body-2">
+            <span *ngIf="!col.isList && !col.link && col.pipe" class="textclass mat-body-1">
               {{element[col.key] | metaPipe:[col.pipe] }}
             </span>
 
             <a *ngIf="col.link" [routerLink]="col.link.path+element[col.link.dParams]"
-              routerLinkActive="router-link-active" class="textclass mat-body-2">
+              routerLinkActive="router-link-active" class="textclass mat-body-1">
               {{element[col.key] || col.defaultValue}}
               <!-- {{col.appIcon}} -->
             </a>
@@ -54,11 +54,11 @@
         </ng-container>
 
         <ng-container matColumnDef="Actions" *ngIf="widgetData.actions && widgetData.actions.length > 0">
-          <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header mat-body-2">
-            <span class="mat-body-2 ws-mat-black60-text">{{'Actions'}}</span>
+          <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header mat-body-1">
+            <span class="mat-body-1 ws-mat-black60-text">{{'Actions'}}</span>
 
           </mat-header-cell>
-          <mat-cell *matCellDef="let row" class="action-cell mat-body-2">
+          <mat-cell *matCellDef="let row" class="action-cell mat-body-1">
             <div *ngFor="let ac of widgetData.actions">
               {{ac | json}}
               <!-- <div *ngIf="ac.optional">
@@ -73,7 +73,7 @@
           </mat-cell>
         </ng-container>
         <ng-container matColumnDef="ActionsMenu" *ngIf="widgetData.actionsMenu">
-          <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header mat-body-2 flex-row-reverse">
+          <mat-header-cell *matHeaderCellDef class="clr-darkish-blue action-header mat-body-1 flex-row-reverse">
             <mat-icon *ngIf="widgetData.actionsMenu.headIcon" class="cursor-pointer" (click)="updatedisplay()">
               {{display==='table' ? widgetData.actionsMenu.headIcon: 'list'}}
             </mat-icon>
@@ -104,7 +104,7 @@
 <ng-template #card>
   <mat-card class="example-card padding-0 no-box-shadow">
     <div class="flex flex-1 ws-mat-background-04 padding-m" mat-header-row>
-      <span class="mat-body-2 ws-mat-black60-text">Course name</span>
+      <span class="mat-body-1 ws-mat-black60-text">Course name</span>
       <span class="flex flex-1"></span>
       <mat-icon *ngIf="widgetData?.actionsMenu?.headIcon" class="cursor-pointer" (click)="updatedisplay()">
         {{display === 'table' ? widgetData?.actionsMenu?.headIcon: 'list'}}</mat-icon>
@@ -134,7 +134,7 @@
                                                   cursor: cardData.contentType !== 'Resource'
                                                 }" [routerLink]="['/author/content-detail/' + cardData.identifier]"
                       [title]="cardData.name" aria-label="Content" i18n-aria-label="Content | Click to view">
-                      <span class="mat-subheading-1 text-truncate mb-0 margin-top-s">
+                      <span class="mat-subtitle-2 text-truncate mb-0 margin-top-s">
                         {{ cardData.name || 'Untitled Content' }}
                       </span>
                     </a>
@@ -146,7 +146,7 @@
                   </div>
                 </div>
 
-                <span class="mat-body-2 ws-mat-black60-text">{{cardData.resourceType}}</span>
+                <span class="mat-body-1 ws-mat-black60-text">{{cardData.resourceType}}</span>
                 <!-- <div class="flex">TAG</div> -->
                 <div class="flex flex-1 flex-row">
                   <!-- rating -->
@@ -163,7 +163,7 @@
                     </mat-icon>
                   </div>
                   <span class="flex-1"></span>
-                  <span class="flex items-center my-1 rating mat-subheading-2 ws-mat-black60-text mb-0 margin-top-xs">
+                  <span class="flex items-center my-1 rating mat-subtitle-1 ws-mat-black60-text mb-0 margin-top-xs">
                     {{cardData.duration | pipeDurationTransform: 'hms'}}
                   </span>
                 </div>

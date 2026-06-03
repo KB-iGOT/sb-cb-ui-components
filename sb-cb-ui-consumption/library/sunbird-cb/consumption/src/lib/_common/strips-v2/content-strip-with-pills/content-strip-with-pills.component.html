@@ -1,0 +1,22 @@
+<div class="w-full">
+  <!-- Pills Navigation -->
+  @if (visiblePills()?.length) {
+  <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
+    @for (pill of visiblePills(); track pill.pillKey) {
+    <button type="button"
+      class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 border"
+      [class.bg-blue-600]="isPillActive(pill.pillKey)" [class.text-white]="isPillActive(pill.pillKey)"
+      [class.border-blue-600]="isPillActive(pill.pillKey)" [class.bg-white]="!isPillActive(pill.pillKey)"
+      [class.text-gray-700]="!isPillActive(pill.pillKey)" [class.border-gray-300]="!isPillActive(pill.pillKey)"
+      [class.hover:bg-gray-100]="!isPillActive(pill.pillKey)" (click)="selectPill(pill.pillKey)">
+      {{ pill.pillLabel }}
+    </button>
+    }
+  </div>
+  }
+
+  <!-- Active Pill Content -->
+  @if (activeContentConfig()) {
+  <sb-uic-content-strips [contentConfig]="activeContentConfig()!" />
+  }
+</div>

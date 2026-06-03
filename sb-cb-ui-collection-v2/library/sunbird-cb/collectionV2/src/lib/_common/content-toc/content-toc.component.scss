@@ -1,16 +1,16 @@
 ::ng-deep .content-tabs {
-    .mat-tab-body-content {
+    .mat-mdc-tab-body-content {
         overflow: hidden !important;
         background-color: #eff3f9;
     }
 
-    .mat-tab-body.mat-tab-body-active {
+    .mat-mdc-tab-body.mat-mdc-tab-body-active {
         overflow-y: hidden;
     }
 }
 
 ::ng-deep .sticky-mat-tabs {
-    .mat-tab-header {
+    .mat-mdc-tab-header {
         top: 96px;
         z-index: 1000;
         position: sticky;
@@ -26,7 +26,7 @@
 
 @media screen and (max-width: 768px) {
     ::ng-deep .sticky-mat-tabs {
-        .mat-tab-header {
+        .mat-mdc-tab-header {
             top: 120px;
             position: fixed;
             width: calc(100%);
@@ -42,7 +42,7 @@
 
 
 ::ng-deep .contentSticky {
-    .mat-tab-header {
+    .mat-mdc-tab-header {
         top: 0px !important;
     }
 }

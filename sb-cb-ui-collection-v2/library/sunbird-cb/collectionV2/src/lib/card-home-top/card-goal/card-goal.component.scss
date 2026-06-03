@@ -17,14 +17,15 @@ mat-expansion-panel {
     margin-top: -15px;
   }
 }
-.mat-progress-bar {
+mat-progress-bar,
+.mat-mdc-progress-bar {
   display: block;
   height: 6px;
   overflow: hidden;
   position: relative;
   transition: opacity 250ms linear;
   border-radius: 10px;
-  background-color: red($color: #000000);
+  --mdc-linear-progress-track-color: rgba(0, 0, 0, 0.08);
   width: 100%;
 }
 .days_detail {
