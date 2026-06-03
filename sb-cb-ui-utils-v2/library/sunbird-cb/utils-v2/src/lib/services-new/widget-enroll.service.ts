@@ -34,8 +34,17 @@ export class WidgetEnrollService {
   }
 
 fetchExternalEnrollmentData(payload: any) {
+  console.log('payload', payload)
   return this.http.post(`apis/proxies/v8/cios-enroll/v1/courselist/byuserid`, payload).pipe(map((extRes: any) => {
     if (extRes && extRes?.result && extRes?.result?.courses) {
+     extRes.result.courses = extRes?.result?.courses?.filter((ele: any) => {
+  const completion = ele?.completionPercentage ?? ele?.completionpercentage ?? 0
+  return !(
+    (ele?.content?.contentPartner?.isActive === false ||
+      ele?.content?.isActive === false) &&
+    completion <= 100
+  )
+})
       extRes?.result?.courses?.forEach((ele: any) => {
         ele['completionPercentage'] = ele['completionpercentage']
         if (ele?.content) {
