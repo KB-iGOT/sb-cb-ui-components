@@ -1,0 +1,18 @@
+@if (tabs()?.length) {
+<div class="strips-tabgroup">
+
+  <mat-tab-group [selectedIndex]="activeIndex()" (selectedIndexChange)="onTabChange($event)" animationDuration="0ms"
+    class="mat-tab-labels w-full strips-tabgroup padding-bottom-tabs" dynamicHeight>
+    @for (tab of tabs(); track tab.key) {
+    <mat-tab [label]="tab.label">
+      <ng-template matTabContent>
+        @if (contentTemplate()) {
+        <ng-container [ngTemplateOutlet]="contentTemplate()!"
+          [ngTemplateOutletContext]="{ $implicit: tab }"></ng-container>
+        }
+      </ng-template>
+    </mat-tab>
+    }
+  </mat-tab-group>
+</div>
+}

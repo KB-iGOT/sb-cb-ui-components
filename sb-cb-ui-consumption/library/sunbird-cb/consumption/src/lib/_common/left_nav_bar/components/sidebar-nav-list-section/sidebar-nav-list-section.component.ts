@@ -1,9 +1,12 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core'
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule, Router } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
 import { MatRippleModule } from '@angular/material/core'
+import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { NavListSectionConfig, NavListItem } from '../../models/sidebar.models'
+import { MultilingualTranslationsService } from '../../../../_services/multilingual-translations.service'
+import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-loader-lib.module'
 
 /**
  * Sidebar Nav List Section Component
@@ -27,7 +30,9 @@ import { NavListSectionConfig, NavListItem } from '../../models/sidebar.models'
     CommonModule,
     RouterModule,
     MatIconModule,
-    MatRippleModule
+    MatRippleModule,
+    TranslateModule,
+    SkeletonLoaderLibModule
   ],
   templateUrl: './sidebar-nav-list-section.component.html',
   styleUrls: ['./sidebar-nav-list-section.component.scss'],
@@ -48,13 +53,42 @@ export class SidebarNavListSectionComponent {
    * Content visibility state (with delayed hiding)
    */
   @Input({ required: true }) showContent!: boolean
+  @Input() activeItemCode?: string
 
-  constructor(private router: Router) { }
+  @Output() itemClicked = new EventEmitter<string>()
+
+  constructor(
+    private router: Router,
+    private translate: TranslateService,
+    private langtranslations: MultilingualTranslationsService
+  ) {
+    this.langtranslations.languageSelectedObservable.subscribe(() => {
+      if (localStorage.getItem('websiteLanguage')) {
+        this.translate.setDefaultLang('en')
+        const lang = localStorage.getItem('websiteLanguage')!
+        this.translate.use(lang)
+      }
+    })
+  }
+
+  /**
+   * Translate a label using MultilingualTranslationsService
+   */
+  translateLabels(label: string, type: string): string {
+    return this.langtranslations.translateActualLabel(label, type, '')
+  }
+
+  onItemClick(item: NavListItem): void {
+    if (item?.code) {
+      this.itemClicked.emit(item.code)
+    }
+  }
 
   /**
    * Check if a route is currently active
    */
-  isActiveRoute(navUrl: string): boolean {
+  isActiveRoute(navUrl?: string): boolean {
+    if (!navUrl) return false
     return this.router.isActive(navUrl, {
       paths: 'exact',
       queryParams: 'ignored',

@@ -5,7 +5,10 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatRippleModule } from '@angular/material/core'
+import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { InfoCardsSectionConfig, InfoCardItem } from '../../models/sidebar.models'
+import { MultilingualTranslationsService } from '../../../../_services/multilingual-translations.service'
+import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-loader-lib.module'
 
 /**
  * Sidebar Info Cards Section Component
@@ -32,7 +35,9 @@ import { InfoCardsSectionConfig, InfoCardItem } from '../../models/sidebar.model
     MatIconModule,
     MatButtonModule,
     MatExpansionModule,
-    MatRippleModule
+    MatRippleModule,
+    TranslateModule,
+    SkeletonLoaderLibModule
   ],
   templateUrl: './sidebar-info-cards-section.component.html',
   styleUrls: ['./sidebar-info-cards-section.component.scss'],
@@ -53,6 +58,26 @@ export class SidebarInfoCardsSectionComponent {
    * Content visibility state (with delayed hiding)
    */
   @Input({ required: true }) showContent!: boolean
+
+  constructor(
+    private translate: TranslateService,
+    private langtranslations: MultilingualTranslationsService
+  ) {
+    this.langtranslations.languageSelectedObservable.subscribe(() => {
+      if (localStorage.getItem('websiteLanguage')) {
+        this.translate.setDefaultLang('en')
+        const lang = localStorage.getItem('websiteLanguage')!
+        this.translate.use(lang)
+      }
+    })
+  }
+
+  /**
+   * Translate a label using MultilingualTranslationsService
+   */
+  translateLabels(label: string, type: string): string {
+    return this.langtranslations.translateActualLabel(label, type, '')
+  }
 
   /**
    * Track expanded state of each parent card

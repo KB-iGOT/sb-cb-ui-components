@@ -1,6 +1,4 @@
-/**
- * Dynamic Sidebar Component Styles
- */
+
 
 .sidebar-container {
   position: relative;
@@ -9,16 +7,26 @@
   flex-shrink: 0;
 
   &.sidebar-open {
-    width: 345px;
+    width: 328px;
   }
 
   &.sidebar-closed {
-    width: 88px;
+    width: 72px;
   }
 }
 
 .sidebar-toggle-btn {
+  border: 1px solid var(--environment-border-and-divider-default-1);
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  width: var(--font-size-heading-1) !important;
+  height: var(--font-size-heading-1) !important;
+
+  .menu-icon {
+    font-size: var(--icon-lg);
+    height: var(--icon-lg);
+    width: var(--icon-lg);
+    color: var(--text-bandw-black-display);
+  }
 
   &:hover {
     transform: scale(1.05);

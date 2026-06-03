@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common'
 import { trigger, state, style, transition, animate } from '@angular/animations'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
+import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { SidebarConfig, SidebarCardType, SidebarStateChange } from '../../models/sidebar.models'
 import { SIDEBAR_ANIMATION } from '../../constants/sidebar.constants'
+import { MultilingualTranslationsService } from '../../../../_services/multilingual-translations.service'
 import { SidebarNavListSectionComponent } from '../sidebar-nav-list-section/sidebar-nav-list-section.component'
 import { SidebarStatCardsSectionComponent } from '../sidebar-stat-cards-section/sidebar-stat-cards-section.component'
 import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/sidebar-info-cards-section.component'
@@ -32,6 +34,7 @@ import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/
     CommonModule,
     MatIconModule,
     MatButtonModule,
+    TranslateModule,
     SidebarNavListSectionComponent,
     SidebarStatCardsSectionComponent,
     SidebarInfoCardsSectionComponent
@@ -42,10 +45,10 @@ import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/
   animations: [
     trigger('sidebarAnimation', [
       state('open', style({
-        width: '345px'
+        width: '328px'
       })),
       state('closed', style({
-        width: '88px'
+        width: '72px'
       })),
       transition('open <=> closed', [
         animate(`${SIDEBAR_ANIMATION.DURATION} ${SIDEBAR_ANIMATION.EASING}`)
@@ -64,6 +67,7 @@ export class DynamicSidebarComponent implements OnDestroy {
    * Emits object with isOpen status and current width
    */
   @Output() sidebarStateChange = new EventEmitter<SidebarStateChange>();
+  @Output() navItemClicked = new EventEmitter<string>();
 
   /**
    * Signal to track sidebar open/close state
@@ -79,14 +83,25 @@ export class DynamicSidebarComponent implements OnDestroy {
   /**
    * Timer reference for delayed content hiding
    */
-  private hideContentTimer?: ReturnType<typeof setTimeout>;
+  private hideContentTimer?: ReturnType<typeof setTimeout>
 
   /**
    * Expose SidebarCardType enum to template
    */
   readonly SidebarCardType = SidebarCardType;
 
-  constructor() {
+  constructor(
+    private translate: TranslateService,
+    private langtranslations: MultilingualTranslationsService
+  ) {
+    this.langtranslations.languageSelectedObservable.subscribe(() => {
+      if (localStorage.getItem('websiteLanguage')) {
+        this.translate.setDefaultLang('en')
+        const lang = localStorage.getItem('websiteLanguage')!
+        this.translate.use(lang)
+      }
+    })
+
     // Set initial state based on config when component initializes
     effect(() => {
       if (this.menuBarDetails?.defaultOpen !== undefined) {
@@ -96,24 +111,24 @@ export class DynamicSidebarComponent implements OnDestroy {
 
     // Handle delayed content visibility
     effect(() => {
-      const isOpenState = this.isOpen();
+      const isOpenState = this.isOpen()
 
       // Clear any existing timer
       if (this.hideContentTimer) {
-        clearTimeout(this.hideContentTimer);
-        this.hideContentTimer = undefined;
+        clearTimeout(this.hideContentTimer)
+        this.hideContentTimer = undefined
       }
 
       if (isOpenState) {
         // Show content immediately when opening
-        this.showContent.set(true);
+        this.showContent.set(true)
       } else {
         // Hide content with 300ms delay when closing
         this.hideContentTimer = setTimeout(() => {
-          this.showContent.set(false);
-        }, 300);
+          this.showContent.set(false)
+        }, 300)
       }
-    }, { allowSignalWrites: true });
+    }, { allowSignalWrites: true })
   }
 
   /**
@@ -142,12 +157,23 @@ export class DynamicSidebarComponent implements OnDestroy {
     return `${section.cardType}-${index}`
   }
 
+  onNavItemClicked(code: string) {
+    this.navItemClicked.emit(code)
+  }
+
+  /**
+   * Translate a label using MultilingualTranslationsService
+   */
+  translateLabels(label: string, type: string): string {
+    return this.langtranslations.translateActualLabel(label, type, '')
+  }
+
   /**
    * Clean up timer on component destroy
    */
   ngOnDestroy(): void {
     if (this.hideContentTimer) {
-      clearTimeout(this.hideContentTimer);
+      clearTimeout(this.hideContentTimer)
     }
   }
 }

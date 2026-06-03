@@ -1,8 +1,26 @@
 <div class="nav-list-section" role="region" [attr.aria-label]="section.sectionTitle || 'Navigation menu'">
+
+  <!-- Skeleton Loader -->
+  @if (section?.sectionLoading) {
+  <div class="skeleton-nav-list space-y-1 px-3">
+    @for (i of [1, 2, 3, 4]; track i) {
+    <div class="flex items-center gap-3 py-2.5">
+      <sb-uic-skeleton-loader [bindingClass]="'flex rounded'" [width]="'20px'" [height]="'20px'">
+      </sb-uic-skeleton-loader>
+      @if (showContent) {
+      <sb-uic-skeleton-loader [bindingClass]="'flex rounded'" [width]="'120px'" [height]="'14px'">
+      </sb-uic-skeleton-loader>
+      }
+    </div>
+    }
+  </div>
+  } @else {
+
   <!-- Section Title (only when content visible) -->
   @if (section.sectionTitle && showContent) {
-  <h3 class="section-title text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3" role="heading" aria-level="2">
-    {{ section.sectionTitle }}
+  <h3 class="section-title text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3" role="heading"
+    aria-level="2">
+    {{ section?.disableTranslate ? section.sectionTitle : translateLabels(section.sectionTitle, 'sidebar') }}
   </h3>
   }
 
@@ -10,20 +28,22 @@
   <ul class="nav-list space-y-1" role="menu" [attr.aria-label]="section.sectionTitle || 'Navigation menu items'">
     @for (item of section.items; track trackByNavUrl($index, item)) {
     <li class="nav-item" role="none">
-      <a [routerLink]="item.navUrl" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-        [class]="isOpen ? 'nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 group'"
-        [class.active]="isActiveRoute(item.navUrl)" matRipple [matRippleColor]="'rgba(59, 130, 246, 0.1)'"
-        role="menuitem" 
-        [attr.aria-label]="item.label"
-        [attr.aria-current]="isActiveRoute(item.navUrl) ? 'page' : null"
-        [attr.title]="item.label">
+      <a [routerLink]="item?.navUrl ? [item.navUrl] : null" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [class]="isOpen ? 'nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 group'"
+        [class.active]="isActiveRoute(item?.navUrl) || item?.code === activeItemCode" matRipple
+        [matRippleColor]="'rgba(59, 130, 246, 0.1)'" (click)="onItemClick(item)" role="menuitem"
+        [attr.aria-label]="item?.label"
+        [attr.aria-current]="(isActiveRoute(item?.navUrl) || item?.code === activeItemCode) ? 'page' : null"
+        [attr.title]="item?.label">
 
         <!-- Icon (Material Icon or Custom Image) -->
         <span class="nav-icon flex-shrink-0 w-5 h-5 flex items-center justify-center" aria-hidden="true">
-          @if (item.iconName) {
-          <mat-icon class="text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
-          } @else if (item.iconUrl) {
-          <img [src]="item.iconUrl" [alt]="''" class="w-5 h-5 object-contain" loading="lazy" role="presentation" />
+          @if (item?.iconName) {
+          <mat-icon class="text-xl" aria-hidden="true">{{ item?.iconName }}</mat-icon>
+          } @else if (item?.iconUrl) {
+          <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="w-5 h-5 object-contain"
+            loading="lazy" role="presentation" />
           } @else {
           <mat-icon class="text-xl" aria-hidden="true">label</mat-icon>
           }
@@ -32,13 +52,8 @@
         <!-- Label (only when content visible) -->
         @if (showContent) {
         <span class="nav-label text-sm font-medium flex-1 truncate">
-          {{ item.label }}
+          {{ item?.disableTranslate ? item?.label : translateLabels(item?.label, 'sidebar') }}
         </span>
-
-        <!-- Active indicator -->
-        @if (isActiveRoute(item.navUrl)) {
-        <span class="active-indicator w-1 h-1 rounded-full bg-blue-600 flex-shrink-0" aria-hidden="true"></span>
-        }
         }
       </a>
     </li>
@@ -47,8 +62,11 @@
 
   <!-- Empty state (only when content visible) -->
   @if ((!section.items || section.items.length === 0) && showContent) {
-  <div class="empty-state text-center text-gray-400 py-4 text-sm" role="status" aria-label="No navigation items available">
-    No navigation items available
+  <div class="empty-state text-center text-gray-400 py-4 text-sm" role="status"
+    aria-label="No navigation items available">
+    {{ 'No navigation items available' | translate }}
   </div>
+  }
+
   }
 </div>

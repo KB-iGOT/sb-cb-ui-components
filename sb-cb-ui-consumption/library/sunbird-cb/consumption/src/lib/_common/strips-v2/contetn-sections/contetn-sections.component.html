@@ -1,0 +1,25 @@
+@if (visibleSections()?.length) {
+<div class="flex flex-col gap-6 w-full">
+  @for (section of visibleSections(); track section.sectionKey) {
+  <sb-uic-accordion [header]="section.header" [translateHeader]="section.translateHeader" [expanded]="true">
+    @switch (section.displayType) {
+    @case ('tabs') {
+    @if (section.tabs?.length) {
+    <sb-uic-content-strip-with-tabs-pills [tabs]="section.tabs!" [defaultTabKey]="section.defaultTabKey ?? ''" />
+    }
+    }
+    @case ('pills') {
+    @if (section.pills?.length) {
+    <sb-uic-content-strip-with-pills [pills]="section.pills!" [defaultPillKey]="section.defaultPillKey ?? ''" />
+    }
+    }
+    @case ('cards') {
+    @if (section.contentConfig) {
+    <sb-uic-content-strips [contentConfig]="section.contentConfig!" />
+    }
+    }
+    }
+  </sb-uic-accordion>
+  }
+</div>
+}

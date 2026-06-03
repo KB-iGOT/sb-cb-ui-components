@@ -33,6 +33,8 @@ export interface BaseNavItem {
 export interface NavListItem extends BaseNavItem {
   label: string
   navUrl: string
+  code?: string
+  isActive?: boolean
 }
 
 /**
@@ -41,7 +43,6 @@ export interface NavListItem extends BaseNavItem {
 export interface StatCardItem extends BaseNavItem {
   headerLabel: string
   value: string
-  navUrl: string
 }
 
 /**
@@ -70,6 +71,7 @@ export interface InfoCardChild extends BaseNavItem {
 export interface BaseSectionConfig {
   cardType: SidebarCardType
   sectionTitle: string
+  sectionLoading?: boolean
   disableTranslate?: boolean
   collapsible: boolean
   showViewAll: boolean
@@ -117,5 +119,6 @@ export interface SidebarConfig {
   logoUrl?: string
   headerText?: string
   defaultOpen: boolean
+  activeItemCode?: string
   navSections: SidebarSection[]
 }

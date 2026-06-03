@@ -4,6 +4,11 @@
 
 .stat-cards-section {
   margin-bottom: 1rem;
+
+  .stat-card-logo {
+    height: var(--icon-xxl);
+    width: var(--icon-xxl);
+  }
 }
 
 .custom-expansion-panel {
@@ -25,7 +30,7 @@
   }
 
   ::ng-deep .mat-expansion-panel-body {
-    padding: 0;
+    padding: 0 !important;
   }
 
   ::ng-deep .mat-expansion-panel-header-title {
@@ -43,6 +48,7 @@
 
 .stat-cards-content {
   width: 100%;
+  background-color: var(--color-primary-50);
 }
 
 .stat-card {

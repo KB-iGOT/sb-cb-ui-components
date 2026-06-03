@@ -22,29 +22,43 @@
 
 .nav-link {
   text-decoration: none;
-  color: #4a5568;
+  color: var(--text-bandw-black-body);
   cursor: pointer;
   position: relative;
   overflow: hidden;
 
+  .nav-icon mat-icon {
+    color: var(--text-bandw-black-body);
+  }
+
   &:hover {
-    background-color: #eff6ff;
-    color: #2563eb;
+    background-color: var(--environment-button-primary-filled-primary);
+    color: var(--text-button-text-primary-white);
+    font-size: var(--font-size-sub-heading-2);
 
     .nav-icon mat-icon {
-      color: #2563eb;
+      color: var(--text-button-text-primary-white);
+    }
+
+    .nav-icon img {
+      filter: brightness(0) invert(1);
     }
   }
 
   &.active {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: var(--environment-button-primary-filled-primary);
+    color: var(--text-button-text-primary-white);
+    font-size: var(--font-size-sub-heading-2);
     font-weight: 600;
-    border-left: 3px solid #2563eb;
+    border-left: 3px solid var(--environment-button-primary-filled-primary);
     padding-left: 0.625rem;
 
     .nav-icon mat-icon {
-      color: #1e40af;
+      color: var(--text-button-text-primary-white);
+    }
+
+    .nav-icon img {
+      filter: brightness(0) invert(1);
     }
   }
 
@@ -56,27 +70,41 @@
 
 .nav-link-mini {
   text-decoration: none;
-  color: #4a5568;
+  color: var(--text-bandw-black-body);
   cursor: pointer;
   position: relative;
   overflow: hidden;
 
+  .nav-icon mat-icon {
+    color: var(--text-bandw-black-body);
+  }
+
   &:hover {
-    background-color: #eff6ff;
-    color: #2563eb;
+    background-color: var(--environment-button-primary-filled-primary);
+    color: var(--text-button-text-primary-white);
+    font-size: var(--font-size-sub-heading-2);
 
     .nav-icon mat-icon {
-      color: #2563eb;
+      color: var(--text-button-text-primary-white);
+    }
+
+    .nav-icon img {
+      filter: brightness(0) invert(1);
     }
   }
 
   &.active {
-    background-color: #dbeafe;
-    color: #1e40af;
-    border-left: 3px solid #2563eb;
+    background-color: var(--environment-button-primary-filled-primary);
+    color: var(--text-button-text-primary-white);
+    font-size: var(--font-size-sub-heading-2);
+    border-left: 3px solid var(--environment-button-primary-filled-primary);
 
     .nav-icon mat-icon {
-      color: #1e40af;
+      color: var(--text-button-text-primary-white);
+    }
+
+    .nav-icon img {
+      filter: brightness(0) invert(1);
     }
   }
 
