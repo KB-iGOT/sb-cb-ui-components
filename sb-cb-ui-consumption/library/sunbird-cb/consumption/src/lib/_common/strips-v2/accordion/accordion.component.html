@@ -1,0 +1,24 @@
+<div class="w-full">
+  <!-- Header -->
+  <div class="flex items-center justify-between cursor-pointer px-4 py-3 bg-white rounded-t-lg"
+    (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()" tabindex="0"
+    role="button" [attr.aria-expanded]="isExpanded()">
+    <div class="section-header">{{ header() }}</div>
+    <div class="flex items-center justify-center arrow-icon-container">
+      <mat-icon class="transition-transform duration-300" [class.rotate-180]="isExpanded()">
+        expand_more
+      </mat-icon>
+    </div>
+  </div>
+
+  <!-- Content -->
+  @if (isExpanded()) {
+  <div class="px-4 py-2">
+    @if (contentTemplate()) {
+    <ng-container [ngTemplateOutlet]="contentTemplate()!"></ng-container>
+    } @else {
+    <ng-content></ng-content>
+    }
+  </div>
+  }
+</div>
