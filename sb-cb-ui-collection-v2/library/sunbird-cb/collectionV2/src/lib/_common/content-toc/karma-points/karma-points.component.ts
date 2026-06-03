@@ -5,9 +5,10 @@ import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 import { NsContent } from '../../../_services/widget-content.model'
 
 @Component({
-  selector: 'ws-widget-karma-points',
-  templateUrl: './karma-points.component.html',
-  styleUrls: ['./karma-points.component.scss'],
+    selector: 'ws-widget-karma-points',
+    templateUrl: './karma-points.component.html',
+    styleUrls: ['./karma-points.component.scss'],
+    standalone: false
 })
 
 export class KarmaPointsComponent implements OnInit, OnChanges {

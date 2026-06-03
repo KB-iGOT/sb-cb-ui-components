@@ -50,17 +50,17 @@
   }
 }
 
-::ng-deep.ql-container {
+::ng-deep .ql-container {
   border: 1px solid #0074b6;
   border-radius: 8px;
 }
 
-::ng-deep.ql-editor {
+::ng-deep .ql-editor {
   background: #fff;
   border-radius: 8px;
 }
 
-::ng-deep.ql-editor.ql-blank::before {
+::ng-deep .ql-editor.ql-blank::before {
   font-style: normal;
   text-align: left;
   // font: 12px/14px Poppins-regular;

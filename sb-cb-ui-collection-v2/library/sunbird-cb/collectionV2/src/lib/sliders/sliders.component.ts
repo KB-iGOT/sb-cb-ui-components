@@ -4,9 +4,10 @@ import { ICarousel } from './sliders.model'
 import { Subscription, interval } from 'rxjs'
 
 @Component({
-  selector: 'ws-widget-sliders',
-  templateUrl: './sliders.component.html',
-  styleUrls: ['./sliders.component.scss'],
+    selector: 'ws-widget-sliders',
+    templateUrl: './sliders.component.html',
+    styleUrls: ['./sliders.component.scss'],
+    standalone: false
 })
 export class SlidersComponent extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<ICarousel[]> {

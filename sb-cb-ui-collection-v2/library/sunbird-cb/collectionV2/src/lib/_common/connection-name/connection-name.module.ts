@@ -6,7 +6,7 @@ import { ConnectionNameComponent } from './connection-name.component'
 import { AvatarPhotoModule } from '../avatar-photo/avatar-photo.module'
 import { MatIconModule } from '@angular/material/icon'
 import { ConnectionHoverModule } from '../connection-hover-card/connection-hover.module'
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
+import { MatCardModule } from '@angular/material/card'
 
 @NgModule({
     declarations: [ConnectionNameComponent],

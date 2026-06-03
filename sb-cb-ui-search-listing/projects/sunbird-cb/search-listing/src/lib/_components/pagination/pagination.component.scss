@@ -1,6 +1,6 @@
-@import "../../_scss/ws-common";
-@import "../../_scss/ws-vars";
-@import "../../_scss/ws-mixins";
+@use "../../_scss/ws-common" as *;
+@use "../../_scss/ws-vars" as *;
+@use "../../_scss/ws-mixins" as *;
 
 .ws-pagination-wrapper {
   display: flex;
@@ -52,21 +52,22 @@ ul {
   }
 }
 
-::ng-deep .pagination-size-select.mat-full-radius-select mat-form-field {
+// MDC form field for pagination select
+::ng-deep .pagination-size-select.mat-full-radius-select mat-form-field,
+::ng-deep .pagination-size-select.mat-full-radius-select .mat-mdc-form-field {
   height: 40px !important;
   max-width: 80px !important;
 }
 
 ::ng-deep
   .pagination-size-select.mat-full-radius-select
-  .mat-form-field-appearance-outline
-  .mat-form-field-infix {
+  .mat-mdc-form-field-infix {
   padding: 0px 0 8px 0 !important;
 }
 
 ::ng-deep
   .pagination-size-select.mat-full-radius-select
-  .mat-form-field-wrapper {
+  .mat-mdc-text-field-wrapper {
   padding-bottom: 0 !important;
 }
 

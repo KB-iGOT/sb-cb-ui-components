@@ -11,20 +11,21 @@ import moment from 'moment'
 import { Subscription } from 'rxjs'
 
 @Component({
-  selector: 'ws-widget-app-toc-content-card-v2',
-  templateUrl: './app-toc-content-card-v2.component.html',
-  styleUrls: ['./app-toc-content-card-v2.component.scss'],
-  animations: [
-    trigger('panelInOut', [
-      transition('void => *', [
-        style({ transform: 'translateY(-10%)', opacity: '0' }),
-        animate(250)
-      ]),
-      transition('* => void', [
-        animate(200, style({ transform: 'translateY(-10%)', opacity: '0' }))
-      ])
-    ])
-  ]
+    selector: 'ws-widget-app-toc-content-card-v2',
+    templateUrl: './app-toc-content-card-v2.component.html',
+    styleUrls: ['./app-toc-content-card-v2.component.scss'],
+    animations: [
+        trigger('panelInOut', [
+            transition('void => *', [
+                style({ transform: 'translateY(-10%)', opacity: '0' }),
+                animate(250)
+            ]),
+            transition('* => void', [
+                animate(200, style({ transform: 'translateY(-10%)', opacity: '0' }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class AppTocContentCardV2Component implements OnInit {
   @Input() content: NsContent.IContent | null = null

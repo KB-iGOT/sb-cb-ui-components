@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+::ng-deep.strips-tabgroup .mat-mdc-tab-header {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+}
+
+::ng-deep.strips-tabgroup.padding-bottom-tabs .mat-mdc-tab-body {
+  padding: 0 0 0 0 !important;
+  box-sizing: border-box;
+  overflow-y: initial !important;
+}
+
+::ng-deep.strips-tabgroup .mat-mdc-tab-body-wrapper {
+  overflow: inherit !important;
+}
+
+::ng-deep.strips-tabgroup .mat-mdc-tab-label {
+  border-bottom: 0px solid rgba(0, 0, 0, 0.1);
+  margin-right: 0;
+  opacity: 1;
+
+  .mat-mdc-tab-label-content {
+    text-transform: inherit;
+    font: 400 14px/20px Lato;
+  }
+}
+
+::ng-deep.strips-tabgroup .mat-mdc-tab-label-active {
+  .mat-mdc-tab-label-content {
+    font-weight: 700 !important;
+  }
+}
+
+::ng-deep.strips-tabgroup .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs>.mat-mdc-tab-header .mat-mdc-tab {
+  flex-grow: 0;
+}
+
+// Scoped to :host so the display:none does NOT leak globally
+// and hide pagination arrows on other mat-tab-group instances
+:host ::ng-deep .mat-mdc-tab-header-pagination {
+  display: none !important;
+}

@@ -1,12 +1,12 @@
 <div class="page-container">
-  <!-- <h2 *ngIf="error" class="mat-title text-center" color="warn" i18n>Error Fetching Data</h2>
-  <h2 *ngIf="!error && !catalog?.length" class="mat-title text-center" i18n>Catalog data will appear here</h2> -->
+  <!-- <h2 *ngIf="error" class="mat-headline-5-6 text-center" color="warn" i18n>Error Fetching Data</h2>
+  <h2 *ngIf="!error && !catalog?.length" class="mat-headline-5-6 text-center" i18n>Catalog data will appear here</h2> -->
   <mat-card>
     <mat-tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl" class="tree">
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
         <li class="mat-tree-node">
           <button mat-icon-button disabled></button>
-          <a matRipple class="mat-title tree-node-text text-truncate" [routerLink]="node.url">
+          <a matRipple class="mat-headline-5-6 tree-node-text text-truncate" [routerLink]="node.url">
             {{ node.value }}
           </a>
         </li>
@@ -21,7 +21,7 @@
                   {{ nestedTreeControl.isExpanded(node) ? "expand_more" : "chevron_right" }}
                 </mat-icon>
               </button>
-              <a matRipple class="mat-title tree-node-text text-truncate" [routerLink]="node.url">
+              <a matRipple class="mat-headline-5-6 tree-node-text text-truncate" [routerLink]="node.url">
                 {{ node.value }}
               </a>
             </div>

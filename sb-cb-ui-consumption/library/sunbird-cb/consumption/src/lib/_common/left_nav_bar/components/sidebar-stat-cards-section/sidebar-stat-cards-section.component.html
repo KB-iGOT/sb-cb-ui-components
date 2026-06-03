@@ -1,0 +1,145 @@
+<div class="stat-cards-section" *ngIf="showContent" role="region"
+  [attr.aria-label]="section?.sectionTitle || 'Statistics section'">
+
+  <!-- Skeleton Loader -->
+  @if (section?.sectionLoading) {
+  <div class="skeleton-stat-cards space-y-3 p-3">
+    @for (i of [1, 2, 3]; track i) {
+    <div class="flex items-start gap-3 p-4 rounded-lg border border-blue-100">
+      <sb-uic-skeleton-loader [bindingClass]="'flex rounded'" [width]="'40px'" [height]="'40px'">
+      </sb-uic-skeleton-loader>
+      <div class="flex-1 space-y-2">
+        <sb-uic-skeleton-loader [bindingClass]="'flex rounded mb-2'" [width]="'80px'" [height]="'12px'">
+        </sb-uic-skeleton-loader>
+        <sb-uic-skeleton-loader [bindingClass]="'flex rounded'" [width]="'120px'" [height]="'20px'">
+        </sb-uic-skeleton-loader>
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+
+  <!-- Collapsible Section -->
+  @if (section?.collapsible) {
+  <mat-expansion-panel class="custom-expansion-panel" [expanded]="true" hideToggle="false"
+    [attr.aria-label]="section?.sectionTitle">
+
+    <!-- Panel Header -->
+    <mat-expansion-panel-header class="section-header">
+      <mat-panel-title class="text-xs font-semibold text-gray-500 uppercase tracking-wider" role="heading"
+        aria-level="2">
+        {{ section?.disableTranslate ? section?.sectionTitle : translateLabels(section?.sectionTitle, 'sidebar') }}
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <!-- Panel Content -->
+    <div class="stat-cards-content space-y-3 py-3 bg-gradient-to-br border border-blue-100 rounded-lg" role="list"
+      [attr.aria-label]="section?.sectionTitle + ' statistics'">
+      @for (item of visibleItems(); track trackByIndex($index, item)) {
+      <div class="stat-card block px-4 transition-all duration-200 hover:border-blue-300 group" role="listitem"
+        [attr.aria-label]="item?.headerLabel + ': ' + item?.value">
+
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          <!-- @if (item?.iconName || item?.iconUrl) { -->
+          <div class="stat-icon flex-shrink-0 w-10 h-10 flex items-center justify-center" aria-hidden="true">
+            @if (item?.iconName) {
+            <mat-icon class="text-indigo-600" aria-hidden="true">{{ item?.iconName }}</mat-icon>
+            } @else if (item?.iconUrl) {
+            <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="stat-card-logo object-contain"
+              loading="lazy" role="presentation" />
+            }
+          </div>
+          <!-- } -->
+
+          <!-- Content -->
+          <div class="stat-content flex-1 min-w-0">
+            <p class="stat-header text-xs text-gray-600 mb-1" id="stat-label-{{$index}}">
+              {{ item?.disableTranslate ? item?.headerLabel : translateLabels(item?.headerLabel, 'sidebar') }}
+            </p>
+            <p class="stat-value text-lg font-bold text-indigo-900 truncate"
+              [attr.aria-describedby]="'stat-label-' + $index">
+              {{ item?.value }}
+            </p>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- View All Button -->
+      @if (shouldShowViewAll()) {
+      <button mat-stroked-button color="primary" class="view-all-btn w-full" (click)="toggleViewAll()"
+        [attr.aria-label]="isExpanded() ? 'Show fewer statistics' : 'View all statistics'"
+        [attr.aria-expanded]="isExpanded()">
+        <mat-icon class="mr-1" aria-hidden="true">
+          {{ isExpanded() ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+        {{ isExpanded() ? ('Show Less' | translate) : (section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
+        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar'))) }}
+      </button>
+      }
+    </div>
+  </mat-expansion-panel>
+  } @else {
+  <!-- Non-Collapsible Section -->
+  <div class="non-collapsible-section">
+    @if (section?.sectionTitle) {
+    <h3 class="section-title text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1" role="heading"
+      aria-level="2">
+      {{ section?.disableTranslate ? section?.sectionTitle : translateLabels(section?.sectionTitle, 'sidebar') }}
+    </h3>
+    }
+
+    <div class="stat-cards-content space-y-3" role="list" [attr.aria-label]="section?.sectionTitle + ' statistics'">
+      @for (item of visibleItems(); track trackByIndex($index, item)) {
+      <div
+        class="stat-card block bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 transition-all duration-200 border border-blue-100 group"
+        role="listitem" [attr.aria-label]="item?.headerLabel + ': ' + item?.value">
+
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          @if (item?.iconName || item?.iconUrl) {
+          <div
+            class="stat-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow"
+            aria-hidden="true">
+            @if (item?.iconName) {
+            <mat-icon class="text-indigo-600" aria-hidden="true">{{ item?.iconName }}</mat-icon>
+            } @else if (item?.iconUrl) {
+            <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="stat-card-logo object-contain"
+              loading="lazy" role="presentation" />
+            }
+          </div>
+          }
+
+          <!-- Content -->
+          <div class="stat-content flex-1 min-w-0">
+            <p class="stat-header text-xs text-gray-600 mb-1" id="stat-label-non-{{$index}}">
+              {{ item?.disableTranslate ? item?.headerLabel : translateLabels(item?.headerLabel, 'sidebar') }}
+            </p>
+            <p class="stat-value text-lg font-bold text-indigo-900 truncate"
+              [attr.aria-describedby]="'stat-label-non-' + $index">
+              {{ item?.value }}
+            </p>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- View All Button -->
+      @if (shouldShowViewAll()) {
+      <button mat-stroked-button color="primary" class="view-all-btn w-full" (click)="toggleViewAll()"
+        [attr.aria-label]="isExpanded() ? 'Show fewer statistics' : 'View all statistics'"
+        [attr.aria-expanded]="isExpanded()">
+        <mat-icon class="mr-1" aria-hidden="true">
+          {{ isExpanded() ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+        {{ isExpanded() ? ('Show Less' | translate) : (section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
+        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar'))) }}
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+  }
+</div>

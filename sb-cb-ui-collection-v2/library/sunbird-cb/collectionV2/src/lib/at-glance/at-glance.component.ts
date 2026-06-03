@@ -2,9 +2,10 @@ import { Component, OnInit, Input } from '@angular/core'
 import { IAtGlanceComponentData } from './at-glance.model'
 import { WidgetBaseComponent, NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 @Component({
-  selector: 'ws-widget-at-glance',
-  templateUrl: './at-glance.component.html',
-  styleUrls: ['./at-glance.component.scss'],
+    selector: 'ws-widget-at-glance',
+    templateUrl: './at-glance.component.html',
+    styleUrls: ['./at-glance.component.scss'],
+    standalone: false
 })
 export class AtGlanceComponent extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<IAtGlanceComponentData.IData> {

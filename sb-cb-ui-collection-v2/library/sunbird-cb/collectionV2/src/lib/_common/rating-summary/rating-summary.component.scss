@@ -16,10 +16,12 @@
   border-radius: 4px;
 }
 
+.rating-bar.mat-mdc-progress-bar,
 .rating-bar.mat-progress-bar {
   height: 8px;
   border-radius: 12px;
-  background-color: rgba(0, 0, 0, 0.08);
+  --mdc-linear-progress-track-color: rgba(0, 0, 0, 0.08);
+  --mdc-linear-progress-active-indicator-color: red;
 }
 
 .ratingColor {
@@ -27,16 +29,13 @@
 }
 
 .rating-bar {
-  & .mat-progress-bar-fill::after {
-    background: red;
-  }
-
-  .mat-progress-bar-buffer {
-    background-color: rgba(0, 0, 0, 0.08);
+  mat-progress-bar {
+    --mdc-linear-progress-active-indicator-color: red;
+    --mdc-linear-progress-track-color: rgba(0, 0, 0, 0.08);
   }
 }
 
-::ng-deep.theme-igot.day-mode .rating-bar .mat-progress-bar-fill::after {
-  background: rgba(246, 153, 83, 1);
-  border-radius: 12px;
+:host ::ng-deep .theme-igot.day-mode .rating-bar mat-progress-bar {
+  --mdc-linear-progress-active-indicator-color: rgba(246, 153, 83, 1);
+  --mdc-linear-progress-track-shape: 12px;
 }

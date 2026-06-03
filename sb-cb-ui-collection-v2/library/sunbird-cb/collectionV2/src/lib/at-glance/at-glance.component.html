@@ -1,21 +1,21 @@
 <mat-card class="flex flex-wrap flex-column at-glance ws-mat-accent-border" tabindex="0">
   <div class="flex flex-center cursor-pointer preview-div" *ngIf="widgetData && getPreviewLink">
-    <a class="preview mat-subheading-2 margin-0 ws-mat-primary-background flex-1" *ngIf="!this.widgetData.customLink"
+    <a class="preview mat-subtitle-1 margin-0 ws-mat-primary-background flex-1" *ngIf="!this.widgetData.customLink"
       [routerLink]="getPreviewLink">
       <span class="text-white m-auto"> {{ widgetData.buttonName ? widgetData.buttonName :'Preview CBP'}}</span>
     </a>
-    <a class="preview mat-subheading-2 margin-0 text-white ws-mat-primary-background flex-1"
+    <a class="preview mat-subtitle-1 margin-0 text-white ws-mat-primary-background flex-1"
       *ngIf="this.widgetData.customLink" target="_blank" [href]="getCourseLink">
       <span class="text-white m-auto"> {{ widgetData.buttonName ? widgetData.buttonName :'Start now'}}
       </span>
     </a>
   </div>
   <div class="flex flex-center preview-div" *ngIf="!widgetData || !getPreviewLink">
-    <span class="text-white preview mat-subheading-2 margin-0 ws-mat-primary-background flex-1">
+    <span class="text-white preview mat-subtitle-1 margin-0 ws-mat-primary-background flex-1">
       You are previewing CBP
     </span>
   </div>
-  <span class="mat-subheading-1 margin-top-s">{{widgetData.displayName}}</span>
+  <span class="mat-subtitle-2 margin-top-s">{{widgetData.displayName}}</span>
   <div class="flex flex-1 flex-column" *ngIf="widgetData">
     <span class="flex margin-top-xs margin-bottom-xs">
       <mat-icon class="ws-mat-black40-text margin-right-s">timer</mat-icon>
@@ -80,12 +80,12 @@
   </div>
 
   <div class="flex flex-1 flex-column margin-top-s">
-    <span class="mat-body-2 ws-mat-default-text">Content Type </span>
-    <span class="mat-subheading-2" *ngIf="widgetData && widgetData.contentType">{{widgetData.contentType}}</span>
-    <span class="mat-body-2 ws-mat-default-text">Cost </span>
-    <span class="mat-subheading-2" *ngIf="widgetData && widgetData.cost">{{widgetData.cost}}</span>
+    <span class="mat-body-1 ws-mat-default-text">Content Type </span>
+    <span class="mat-subtitle-1" *ngIf="widgetData && widgetData.contentType">{{widgetData.contentType}}</span>
+    <span class="mat-body-1 ws-mat-default-text">Cost </span>
+    <span class="mat-subtitle-1" *ngIf="widgetData && widgetData.cost">{{widgetData.cost}}</span>
     <span class="flex-1">
-      <span class="mat-subheading-2 ws-mat-black60-text absolute" *ngIf="widgetData && widgetData.lastUpdate">Last
+      <span class="mat-subtitle-1 ws-mat-black60-text absolute" *ngIf="widgetData && widgetData.lastUpdate">Last
         updated on
         {{widgetData.lastUpdate | date}} </span>
     </span>

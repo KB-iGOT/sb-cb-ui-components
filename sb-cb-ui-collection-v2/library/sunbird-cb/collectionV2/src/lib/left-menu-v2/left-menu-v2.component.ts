@@ -5,9 +5,10 @@ import { Router } from '@angular/router'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 @Component({
-  selector: 'ws-widget-left-menu-v2',
-  templateUrl: './left-menu-v2.component.html',
-  styleUrls: ['./left-menu-v2.component.scss'],
+    selector: 'ws-widget-left-menu-v2',
+    templateUrl: './left-menu-v2.component.html',
+    styleUrls: ['./left-menu-v2.component.scss'],
+    standalone: false
 })
 export class LeftMenuV2Component extends WidgetBaseComponent
   implements OnInit, NsWidgetResolver.IWidgetData<ILeftMenu> {

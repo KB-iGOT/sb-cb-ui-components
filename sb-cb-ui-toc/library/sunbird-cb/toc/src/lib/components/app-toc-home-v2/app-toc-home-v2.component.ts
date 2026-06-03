@@ -3280,6 +3280,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     })
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        if (window.location.href.includes('/public/')) {
+          delete queryParams.editMode
+        }
         // Navigate to the intended URL only when survey is submitted successfully
         if (navigationUrl) {
           this.router.navigate([navigationUrl], { queryParams: queryParams })

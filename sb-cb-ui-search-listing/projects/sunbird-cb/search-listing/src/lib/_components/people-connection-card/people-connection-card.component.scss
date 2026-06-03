@@ -1,6 +1,6 @@
-@import "../../_scss/ws-common";
-@import "../../_scss/ws-vars";
-@import "../../_scss/ws-mixins";
+@use "../../_scss/ws-common" as *;
+@use "../../_scss/ws-vars" as *;
+@use "../../_scss/ws-mixins" as *;
 
 .card-container {
   height: 192px;

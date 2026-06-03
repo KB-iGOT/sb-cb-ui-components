@@ -1,0 +1,51 @@
+<section class="carousel-container" role="region" aria-roledescription="carousel" aria-label="Content carousel"
+  (keydown)="onKeydown($event)" tabindex="0">
+  <!-- Viewport -->
+  <div class="carousel-viewport" #viewport>
+    <div class="carousel-track" [style.transform]="'translateX(' + translateX() + 'px)'" [style.gap.px]="gap()">
+      @for (item of items(); track trackByIndex($index)) {
+      <div class="carousel-item" [style.width.px]="cardWidth()" [style.min-width.px]="cardWidth()"
+        (click)="onItemClick(item, $index)" role="group" [attr.aria-roledescription]="'slide'"
+        [attr.aria-label]="'Slide ' + ($index + 1) + ' of ' + items().length">
+        <ng-container [ngTemplateOutlet]="cardTemplate()"
+          [ngTemplateOutletContext]="{ $implicit: item, index: $index }"></ng-container>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Navigation & Dots -->
+  @if (showNavigation() || showDots()) {
+  <div class="carousel-controls">
+    @if (showNavigation()) {
+    <button class="carousel-nav-btn carousel-nav-prev" [class.disabled]="!canGoPrevious()" [disabled]="!canGoPrevious()"
+      (click)="goPrevious()" aria-label="Previous page" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </button>
+    }
+
+    @if (showDots()) {
+    <div class="carousel-dots" role="tablist" aria-label="Carousel pagination">
+      @for (dot of dotsArray(); track dot) {
+      <button class="carousel-dot" [class.active]="dot === currentPage()" (click)="goToPage(dot)" role="tab"
+        [attr.aria-selected]="dot === currentPage()" [attr.aria-label]="'Go to page ' + (dot + 1)"
+        type="button"></button>
+      }
+    </div>
+    }
+
+    @if (showNavigation()) {
+    <button class="carousel-nav-btn carousel-nav-next" [class.disabled]="!canGoNext()" [disabled]="!canGoNext()"
+      (click)="goNext()" aria-label="Next page" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </button>
+    }
+  </div>
+  }
+</section>

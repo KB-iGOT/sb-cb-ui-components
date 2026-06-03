@@ -4,7 +4,7 @@ import { ConfirmDialogComponent } from './confirm-dialog.component'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { TranslateModule } from '@ngx-translate/core'
 import { MatIconModule } from '@angular/material/icon'
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog'
+import { MatDialogModule } from '@angular/material/dialog'
 @NgModule({
     declarations: [ConfirmDialogComponent],
     imports: [
