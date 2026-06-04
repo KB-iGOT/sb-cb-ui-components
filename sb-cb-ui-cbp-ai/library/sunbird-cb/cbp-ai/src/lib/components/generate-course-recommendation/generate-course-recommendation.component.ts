@@ -419,7 +419,7 @@ export class GenerateCourseRecommendationComponent {
   suggestMoreCourses() {
     // this.dialogRef.close()
     const dialogRefNew = this.dialog.open(SuggestMoreCoursesComponent, {
-      width: '1000px',
+      width: '950px',
       data: { recommended_course_id: this.recommended_course_id, role_mapping_id: this.planData.id },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '400px',          // Set minimum height

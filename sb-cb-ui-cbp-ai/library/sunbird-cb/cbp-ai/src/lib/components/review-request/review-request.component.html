@@ -53,7 +53,7 @@
 
             <div class="details-grid">
 
-                <div class="detail-box">
+                <div class="detail-box" *ngIf="!(sharedService.fromMdoPortal)">
                     <mat-icon>tag</mat-icon>
                     <div>
                         <p class="label">Request ID</p>
@@ -264,12 +264,12 @@
 
                                 <mat-menu #menu="matMenu">
 
-                                    <ng-container>
+                                    <!-- <ng-container>
                                         <button mat-menu-item (click)="viewCourseRecommendation(element, menuTrigger)">
                                             <mat-icon>preview</mat-icon>
                                             <span>View Course Recommendation</span>
                                         </button>
-                                    </ng-container>
+                                    </ng-container> -->
 
                                     
 
@@ -282,7 +282,7 @@
                                             <mat-icon>visibility</mat-icon>
                                             <span>View Role Mapping</span>
                                         </button>
-                                        <ng-container *ngIf="sharedService.fromMdoPortal">
+                                        <!-- <ng-container *ngIf="sharedService.fromMdoPortal">
                                         <button *ngIf="request?.status?.toLowerCase() === 'pending' && sharedService.fromMdoPortal" mat-menu-item
                                             (click)="rejectItemRequest(element, menuTrigger)">
 
@@ -291,7 +291,7 @@
 
                                         </button>
 
-                                    </ng-container>
+                                    </ng-container> -->
 
                                 </mat-menu>
 

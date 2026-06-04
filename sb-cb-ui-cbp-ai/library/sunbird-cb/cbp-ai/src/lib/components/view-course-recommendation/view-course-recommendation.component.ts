@@ -8,6 +8,7 @@ import html2pdf from 'html2pdf.js';
 import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/delete-role-mapping-popup.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { ActivatedRoute } from '@angular/router';
+import { SuggestMoreCoursesComponent } from '../suggest-more-courses/suggest-more-courses.component';
 
 @Component({
   selector: 'app-view-course-recommendation',
@@ -35,10 +36,15 @@ export class ViewCourseRecommendationComponent {
   portalData: any
   activeRowElement: any
   requestData: any
-
+  reviewRequestPlanData: any
   ngOnInit() {
     this.loading = true
+    console.log('this.data--', this.data)
     this.cbpPlanData = this.sharedService.cbpPlanFinalObj
+    if(this.data?.cbp_plan_data && this.data.cbp_plan_data.length) {
+      this.reviewRequestPlanData = this.data?.cbp_plan_data[0]
+    }
+    
     console.log('cbpPlanData--', this.cbpPlanData)
 
 
@@ -525,4 +531,27 @@ export class ViewCourseRecommendationComponent {
       window.open(url, '_blank')
     }
   }
+
+  suggestMoreCourses() {
+     // this.dialogRef.close()
+     console.log('cbp_plan_id---', this.cbpPlanData)
+     const dialogRefNew = this.dialog.open(SuggestMoreCoursesComponent, {
+       width: '950px',
+       data: { cbp_plan_id: this.reviewRequestPlanData?.id, recommended_course_id: this.recommended_course_id, role_mapping_id: this.planData.id, fromMdoPortal: this.sharedService.fromMdoPortal },
+       panelClass: 'view-cbp-plan-popup',
+       minHeight: '400px',          // Set minimum height
+       maxHeight: '90vh',           // Prevent it from going beyond viewport
+       disableClose: true // Optional: prevent closing with outside click
+     });
+ 
+     dialogRefNew.afterClosed().subscribe(result => {
+       if (result === 'saved') {
+         console.log('Changes saved!');
+         // Refresh data or show a toast here
+         this.getSuggestedCourse()
+       }  else {
+         this.getSuggestedCourse()
+       }
+     });
+   }
 }

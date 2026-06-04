@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@ang
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
-import * as _ from 'lodash'
+import * as _ from 'lodash-es'
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { ActivatedRoute } from '@angular/router';
 @Component({
@@ -58,6 +58,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   onDesignationSelectScrollBound =
     this.onDesignationSelectScroll.bind(this);
   searchDesignationLoadCount = 50
+  matchedDesignationIds = []
   constructor(
     public dialogRef: MatDialogRef<EditCbpPlanComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -96,6 +97,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    this.matchedDesignationIds = this.data?.matched_role_mappings?.map((item: any) => item?.igot_designation_id) || []
     this.loadCompetenciesData();
     this.initializeForm();
     const searchControl = this.cbpForm.get('searchDesignation');
@@ -277,7 +279,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     }
 
     if (this.sharedService.fromMdoPortal) {
-      req['request_id'] = this.requestRowData?.demand_id
+      req['request_id'] = this.requestRowData?.id
       req['item_id'] = this.planData?.id
     }
     let role_mapping_id = this.planData.id
@@ -590,170 +592,163 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     console.log(this.cbpForm?.get('competencies')?.value);
   }
   getDesignation(searchText?: string, offset?: number): void {
+ 
+     // clear any previous debug hooks
+     if (!searchText || searchText?.length === 0) {
+       // noop
+     }
+ 
+     const reqOffset = (typeof offset === 'number') ? offset : this.designationOffset
+     let reqLimit = this.designationDefaultLoadCount
+     const pageIndex = reqLimit > 0 ? Math.floor(reqOffset / reqLimit) : 0
+     // if we're requesting from first page, clear the no-more-data guard
+     if (pageIndex === 0) {
+       this.noMoreLegacyDesignations = false
+       reqLimit = 50
+     }
+     const requestBody: any = {
+       filterCriteriaMap: {
+         status: 'Active'
+       },
+       requestedFields: [],
+       pageNumber: pageIndex,
+       pageSize: reqLimit,
+     }
+     if (searchText?.length) {
+       requestBody['searchString'] = searchText
+       // when searching, start from first page
+       requestBody.pageNumber = 0
+       // allow larger page for search if needed
+       requestBody.pageSize = pageIndex === 0 ? 50 : this.designationListLoadCount
+       // reset guard when performing a fresh search
+       this.noMoreLegacyDesignations = false
+     }
+ 
+     // indicate loading state so scroll handlers don't trigger parallel calls
+     this.isLoadingMoreDesignations = true
+ 
+     this.sharedService.searchPublicDesignation(requestBody).pipe(finalize(() => {
+       this.isLoadingMoreDesignations = false
+       this.designationInitInProgress = false
+     }))
+       .subscribe({
+         next: (res: any) => {
+ 
+   const content = _.get(res, 'result.result.data', []);
+ 
+   const matchedIds = new Set(this.matchedDesignationIds);
+ 
+   const mapped = content
+   .filter((item: any) => !matchedIds.has(item?.id))
+   .map((item: any) => ({
+     id: item?.id,
+     name: item?.designation || '',
+     status: item?.status || 'Active',
+   }));
+ 
+   const total = _.get(
+     res,
+     'result.result.totalcount',
+     _.get(
+       res,
+       'result.result.data.totalCount',
+       _.get(res, 'result.result.totalCount', 0)
+     )
+   );
+ 
+   this.defaultSearchDesignationCount = total;
+ 
+   // =========================
+   // SEARCH MODE
+   // =========================
+ 
+   if (searchText?.length) {
+ 
+     this.masterData.designationFiltered = mapped;
+ 
+     this.masterData.designation =
+       this.masterData.designationFiltered.slice(
+         0,
+         this.searchDesignationLoadCount
+       );
+ 
+     this.checkCurrentDesignationPresent();
+ 
+     return;
+   }
+ 
+   // =========================
+   // NORMAL MODE
+   // =========================
+ 
+   if (!this.masterData['designationBackup'] || reqOffset === 0) {
+ 
+     this.masterData['designationBackup'] = mapped;
+ 
+   } else {
+ 
+     const combined =
+       (this.masterData['designationBackup'] || []).concat(mapped);
+ 
+     this.masterData['designationBackup'] = _.uniqBy(
+       combined,
+       (it: any) => (it?.name || '').toLowerCase()
+     );
+   }
+ 
+   this.masterData.designation =
+     (this.masterData.designationBackup || []).slice(
+       0,
+       this.designationListLoadCount
+     );
+ 
+   // selected value preserve
+   const designationControl =
+     this.cbpForm.get('designation_name');
+ 
+   if (designationControl) {
+ 
+     const currentValues =
+       designationControl.value || [];
 
-
-    // clear any previous debug hooks
-    if (!searchText || searchText?.length === 0) {
-      // noop
-    }
-
-    const reqOffset = (typeof offset === 'number') ? offset : this.designationOffset
-    let reqLimit = this.designationDefaultLoadCount
-    const pageIndex = reqLimit > 0 ? Math.floor(reqOffset / reqLimit) : 0
-    // if we're requesting from first page, clear the no-more-data guard
-    if (pageIndex === 0) {
-      this.noMoreLegacyDesignations = false
-      reqLimit = 50
-    }
-    const requestBody: any = {
-      filterCriteriaMap: {
-        status: 'Active'
-      },
-      requestedFields: [],
-      pageNumber: pageIndex,
-      pageSize: reqLimit,
-    }
-    if (searchText?.length) {
-      requestBody['searchString'] = searchText
-      // when searching, start from first page
-      requestBody.pageNumber = 0
-      // allow larger page for search if needed
-      requestBody.pageSize = pageIndex === 0 ? 50 : this.designationListLoadCount
-      // reset guard when performing a fresh search
-      this.noMoreLegacyDesignations = false
-    }
-
-    // indicate loading state so scroll handlers don't trigger parallel calls
-    this.isLoadingMoreDesignations = true
-
-    this.sharedService.searchPublicDesignation(requestBody).pipe(finalize(() => {
-      this.isLoadingMoreDesignations = false
-      this.designationInitInProgress = false
-    }))
-      .subscribe({
-        next: (res: any) => {
-
-          const content = _.get(res, 'result.result.data', []);
-
-          const mapped = content.map((item: any) => ({
-            name: item?.designation || '',
-            status: item?.status || 'Active',
-            igot_designation_name: item?.designation || '',
-            igot_designation_id: item?.id || ''
-          }));
-
-          const total = _.get(
-            res,
-            'result.result.totalcount',
-            _.get(
-              res,
-              'result.result.data.totalCount',
-              _.get(res, 'result.result.totalCount', 0)
-            )
-          );
-
-          this.defaultSearchDesignationCount = total;
-
-          // =========================
-          // SEARCH MODE
-          // =========================
-
-          if (searchText?.length) {
-
-            this.masterData.designationFiltered = mapped;
-
-            this.masterData.designation =
-              this.masterData.designationFiltered.slice(
-                0,
-                this.searchDesignationLoadCount
-              );
-
-            this.checkCurrentDesignationPresent();
-
-            return;
-          }
-
-          // =========================
-          // NORMAL MODE
-          // =========================
-
-          if (!this.masterData['designationBackup'] || reqOffset === 0) {
-
-            this.masterData['designationBackup'] = mapped;
-
-          } else {
-
-            const combined =
-              (this.masterData['designationBackup'] || []).concat(mapped);
-
-            this.masterData['designationBackup'] = _.uniqBy(
-              combined,
-              (it: any) => (it?.name || '').toLowerCase()
-            );
-          }
-
-          this.masterData.designation =
-            (this.masterData.designationBackup || []).slice(
-              0,
-              this.designationListLoadCount
-            );
-
-          // selected value preserve
-          const designationControl =
-            this.cbpForm.get('designation_name');
-
-          if (designationControl) {
-
-            const currentValues =
-              designationControl.value || [];
-            console.log('currentValues--', currentValues)
-            const validValues =
-              this.masterData.designationBackup.some(
-                (item: any) => item?.name === currentValues
-              )
-            console.log(this.planData)
-            if (!validValues) {
-              this.cbpForm.get('designation_name')?.setValue(
-                this.planData?.designation_name || ''
-              );
-              console.log('this.cbpForm', this.cbpForm)
-            }
-
-            console.log('currentValues', currentValues)
-            console.log('validValues', validValues)
-
-            // if (validValues.length !== currentValues.length) {
-            //   designationControl.setValue(validValues);
-            // }
-          }
-
-          // no more data
-          if (!mapped || mapped.length === 0) {
-            this.noMoreLegacyDesignations = true;
-          }
-
-          if (
-            this.defaultSearchDesignationCount &&
-            (this.masterData['designationBackup'] || []).length >=
-            this.defaultSearchDesignationCount
-          ) {
-            this.noMoreLegacyDesignations = true;
-          }
-
-          this.checkCurrentDesignationPresent();
-        },
-        error: () => {
-          // Stop further automatic calls on repeated errors to avoid tight loops
-          // loading flag cleared in finalize()
-          this.noMoreLegacyDesignations = true
-          // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
-        }
-      })
-
-
-
-
-  }
+      console.log('currentValues', currentValues)
+    
+     const validValues = currentValues
+         this.masterData.designationBackup.some(
+           (item: any) => item?.name === currentValues
+         )
+     
+     console.log(validValues)
+     console.log( this.masterData.designationBackup)
+ 
+    //  if (validValues.length !== currentValues.length) {
+       designationControl.setValue(validValues);
+    //  }
+   }
+ 
+   // no more data
+   if (!mapped || mapped.length === 0) {
+     this.noMoreLegacyDesignations = true;
+   }
+ 
+   if (
+     this.defaultSearchDesignationCount &&
+     (this.masterData['designationBackup'] || []).length >=
+     this.defaultSearchDesignationCount
+   ) {
+     this.noMoreLegacyDesignations = true;
+   }
+ 
+   this.checkCurrentDesignationPresent();
+ },
+         error: () => {
+           // Stop further automatic calls on repeated errors to avoid tight loops
+           // loading flag cleared in finalize()
+           this.noMoreLegacyDesignations = true
+           // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
+         }
+       })
+   }
 
   ensureSelectedDesignationExists() {
     const selected = this.planData?.designation_name;

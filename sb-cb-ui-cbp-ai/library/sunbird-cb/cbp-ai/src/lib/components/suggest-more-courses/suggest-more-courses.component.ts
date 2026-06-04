@@ -286,28 +286,67 @@ export class SuggestMoreCoursesComponent implements OnInit {
           "course_identifiers": allIdentifiers
         }
 
-        // Save the combined list
-        this.sharedService.saveSuggestedCourse(reqBody).subscribe({
-          next: (res) => {
-            // Success handling
-            console.log('Success:', res);
-            this.loading = false
-            this.dialogRef.close('saved')
-            this.snackBar.open('Courses Added Successfully', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-success']
+        if (this.planData.fromMdoPortal) {
+          let reqBodyNew = {
+      "role_mapping_id": this.planData.id,
+      "recommended_course_id": this.planData.recommended_course_id,
+      "course_identifiers": allIdentifiers
+    }
+          if (this.planData.cbp_plan_id) {
+            this.sharedService.updateCourse(reqBodyNew, this.planData.cbp_plan_id).subscribe({
+              next: (res) => {
+                // Success handling
+                console.log('Success:', res);
+                this.loading = false
+                this.dialogRef.close('saved')
+                this.snackBar.open('Courses Updated Successfully', 'X', {
+                  duration: 3000,
+                  panelClass: ['snackbar-success']
+                });
+                //this.successRoleMapping.emit(this.roleMappingForm)
+              },
+              error: (error) => {
+                console.log('error', error)
+                this.dialogRef.close()
+                // Handle 409 Conflict here
+                // alert('Conflict detected: The resource already exists or action conflicts.');
+                //this.get
+                // Or you can set a UI error message variable
+                this.snackBar.open(error?.error?.detail, 'X', {
+                  duration: 3000,
+                  panelClass: ['snackbar-error']
+                });
+                this.loading = false
+                //this.alreadyAvailableRoleMapping.emit(this.roleMappingForm)
+              }
             });
-          },
-          error: (error) => {
-            console.log('Save error', error)
-            this.dialogRef.close()
-            this.snackBar.open(error?.error?.detail || 'Failed to save courses', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-error']
-            });
-            this.loading = false
           }
-        });
+        } else {
+          // Save the combined list
+          this.sharedService.saveSuggestedCourse(reqBody).subscribe({
+            next: (res) => {
+              // Success handling
+              console.log('Success:', res);
+              this.loading = false
+              this.dialogRef.close('saved')
+              this.snackBar.open('Courses Added Successfully', 'X', {
+                duration: 3000,
+                panelClass: ['snackbar-success']
+              });
+            },
+            error: (error) => {
+              console.log('Save error', error)
+              this.dialogRef.close()
+              this.snackBar.open(error?.error?.detail || 'Failed to save courses', 'X', {
+                duration: 3000,
+                panelClass: ['snackbar-error']
+              });
+              this.loading = false
+            }
+          });
+        }
+
+
       },
       error: (error) => {
         console.log('Error fetching existing courses:', error);
