@@ -1,0 +1,782 @@
+// ==============================================
+// CSS CUSTOM PROPERTIES — DESIGN TOKENS
+// Auto-generated from KB-Design-data — DO NOT EDIT
+// ==============================================
+
+:root,
+[data-theme="light"] {
+  // --- Foundation Colors ---
+  --color-primary-50: #E8EDF6;
+  --color-primary-100: #B8C8E2;
+  --color-primary-200: #96ADD4;
+  --color-primary-300: #6687C0;
+  --color-primary-400: #4970B4;
+  --color-primary-500: #1B4CA1;
+  --color-primary-600: #194593;
+  --color-primary-700: #133672;
+  --color-primary-800: #0F2A59;
+  --color-primary-900: #0B2044;
+  --color-primary-o-8: rgba(27, 76, 161, 0.08);
+  --color-primary-o-16: rgba(27, 76, 161, 0.16);
+  --color-primary-o-24: rgba(27, 76, 161, 0.24);
+  --color-primary-o-32: rgba(27, 76, 161, 0.32);
+  --color-primary-o-40: rgba(27, 76, 161, 0.40);
+  --color-primary-o-48: rgba(27, 76, 161, 0.48);
+  --color-primary-o-56: rgba(27, 76, 161, 0.56);
+  --color-primary-o-64: rgba(27, 76, 161, 0.64);
+  --color-primary-o-72: rgba(27, 76, 161, 0.72);
+  --color-primary-o-80: rgba(27, 76, 161, 0.80);
+  --color-primary-o-88: rgba(27, 76, 161, 0.88);
+  --color-primary-o-96: rgba(27, 76, 161, 0.96);
+  --color-secondary-50: #FEF5EA;
+  --color-secondary-100: #FBDEBF;
+  --color-secondary-200: #F9CF9F;
+  --color-secondary-300: #F7B974;
+  --color-secondary-400: #F5AB59;
+  --color-secondary-500: #F3962F;
+  --color-secondary-600: #DD892B;
+  --color-secondary-700: #AD6B21;
+  --color-secondary-800: #86531A;
+  --color-secondary-900: #663F14;
+  --color-secondary-o-8: rgba(243, 150, 47, 0.08);
+  --color-secondary-o-16: rgba(243, 150, 47, 0.16);
+  --color-secondary-o-24: rgba(243, 150, 47, 0.24);
+  --color-secondary-o-32: rgba(243, 150, 47, 0.32);
+  --color-secondary-o-40: rgba(243, 150, 47, 0.40);
+  --color-secondary-o-48: rgba(243, 150, 47, 0.48);
+  --color-secondary-o-56: rgba(243, 150, 47, 0.56);
+  --color-secondary-o-64: rgba(243, 150, 47, 0.64);
+  --color-secondary-o-72: rgba(243, 150, 47, 0.72);
+  --color-secondary-o-80: rgba(243, 150, 47, 0.80);
+  --color-secondary-o-88: rgba(243, 150, 47, 0.88);
+  --color-secondary-o-96: rgba(243, 150, 47, 0.96);
+  --color-tertiary-50: #E8E9EB;
+  --color-tertiary-100: #B8BAC0;
+  --color-tertiary-200: #9699A1;
+  --color-tertiary-300: #666A76;
+  --color-tertiary-400: #494D5C;
+  --color-tertiary-500: #1B2133;
+  --color-tertiary-600: #191E2E;
+  --color-tertiary-700: #131724;
+  --color-tertiary-800: #0F121C;
+  --color-tertiary-900: #0B0E15;
+  --color-tertiary-o-8: rgba(27, 33, 51, 0.08);
+  --color-tertiary-o-16: rgba(27, 33, 51, 0.16);
+  --color-tertiary-o-24: rgba(27, 33, 51, 0.24);
+  --color-tertiary-o-32: rgba(27, 33, 51, 0.32);
+  --color-tertiary-o-40: rgba(27, 33, 51, 0.40);
+  --color-tertiary-o-48: rgba(27, 33, 51, 0.48);
+  --color-tertiary-o-56: rgba(27, 33, 51, 0.56);
+  --color-tertiary-o-64: rgba(27, 33, 51, 0.64);
+  --color-tertiary-o-72: rgba(27, 33, 51, 0.72);
+  --color-tertiary-o-80: rgba(27, 33, 51, 0.80);
+  --color-tertiary-o-88: rgba(27, 33, 51, 0.88);
+  --color-tertiary-o-96: rgba(27, 33, 51, 0.96);
+  --color-black-opacity-8: rgba(0, 0, 0, 0.08);
+  --color-black-opacity-16: rgba(0, 0, 0, 0.16);
+  --color-black-opacity-24: rgba(0, 0, 0, 0.24);
+  --color-black-opacity-32: rgba(0, 0, 0, 0.32);
+  --color-black-opacity-40: rgba(0, 0, 0, 0.40);
+  --color-black-opacity-48: rgba(0, 0, 0, 0.48);
+  --color-black-opacity-56: rgba(0, 0, 0, 0.56);
+  --color-black-opacity-64: rgba(0, 0, 0, 0.64);
+  --color-black-opacity-72: rgba(0, 0, 0, 0.72);
+  --color-black-opacity-80: rgba(0, 0, 0, 0.80);
+  --color-black-opacity-88: rgba(0, 0, 0, 0.88);
+  --color-black-opacity-96: rgba(0, 0, 0, 0.96);
+  --color-black-wo-opacity-50: #E6E6E6;
+  --color-black-wo-opacity-100: #B0B0B0;
+  --color-black-wo-opacity-200: #8A8A8A;
+  --color-black-wo-opacity-300: #545454;
+  --color-black-wo-opacity-400: #333333;
+  --color-black-wo-opacity-500: #000000;
+  --color-white-white-o-8: rgba(255, 255, 255, 0.08);
+  --color-white-white-o-16: rgba(255, 255, 255, 0.16);
+  --color-white-white-o-24: rgba(255, 255, 255, 0.24);
+  --color-white-white-o-32: rgba(255, 255, 255, 0.32);
+  --color-white-white-o-40: rgba(255, 255, 255, 0.40);
+  --color-white-white-o-48: rgba(255, 255, 255, 0.48);
+  --color-white-white-o-56: rgba(255, 255, 255, 0.56);
+  --color-white-white-o-64: rgba(255, 255, 255, 0.64);
+  --color-white-white-o-72: rgba(255, 255, 255, 0.72);
+  --color-white-white-o-80: rgba(255, 255, 255, 0.80);
+  --color-white-white-o-88: rgba(255, 255, 255, 0.88);
+  --color-white-white-o-96: rgba(255, 255, 255, 0.96);
+  --color-white-wo-opacity-500: #FFFFFF;
+  --color-accents-red: #FF383C;
+  --color-accents-orange: #FF8D28;
+  --color-accents-yellow: #FFCC00;
+  --color-accents-green: #34C759;
+  --color-accents-mint: #00C8B3;
+  --color-accents-teal: #00C3D0;
+  --color-accents-cyan: #00C0E8;
+  --color-accents-blue: #0088FF;
+  --color-accents-indigo: #6155F5;
+  --color-accents-purple: #CB30E0;
+  --color-accents-pink: #FF2D55;
+  --color-accents-brown: #AC7F5E;
+  --color-error-red-500: #D13924;
+  --color-error-red-o-16: rgba(209, 57, 36, 0.16);
+  --color-error-red-o-24: rgba(209, 57, 36, 0.24);
+  --color-error-red-o-32: rgba(209, 57, 36, 0.32);
+  --color-error-red-o-40: rgba(209, 57, 36, 0.40);
+  --color-error-red-o-48: rgba(209, 57, 36, 0.48);
+  --color-success-green-500: #1D8923;
+  --color-success-green-o-16: rgba(29, 137, 35, 0.16);
+  --color-success-green-o-24: rgba(29, 137, 35, 0.24);
+  --color-success-green-o-32: rgba(29, 137, 35, 0.32);
+  --color-success-green-o-40: rgba(29, 137, 35, 0.40);
+  --color-success-green-o-48: rgba(29, 137, 35, 0.48);
+  --color-warning-yellow-500: #E99E38;
+  --color-warning-yellow-o-16: rgba(233, 158, 56, 0.16);
+  --color-warning-yellow-o-24: rgba(233, 158, 56, 0.24);
+  --color-warning-yellow-o-32: rgba(233, 158, 56, 0.32);
+  --color-warning-yellow-o-40: rgba(233, 158, 56, 0.40);
+  --color-warning-yellow-o-48: rgba(233, 158, 56, 0.48);
+  --color-info-blue-500: #0A5396;
+  --color-info-blue-o-16: rgba(10, 83, 150, 0.16);
+  --color-info-blue-o-24: rgba(10, 83, 150, 0.24);
+  --color-info-blue-o-32: rgba(10, 83, 150, 0.32);
+  --color-info-blue-o-40: rgba(10, 83, 150, 0.40);
+  --color-info-blue-o-48: rgba(10, 83, 150, 0.48);
+
+  // --- Semantic Text Colors ---
+  --text-bandw-black-display: rgba(0, 0, 0, 0.96);
+  --text-bandw-black-heading: rgba(0, 0, 0, 0.96);
+  --text-bandw-black-title: rgba(0, 0, 0, 0.88);
+  --text-bandw-black-sub-heading: rgba(0, 0, 0, 0.80);
+  --text-bandw-black-body: rgba(0, 0, 0, 0.80);
+  --text-bandw-black-captions: rgba(0, 0, 0, 0.72);
+  --text-bandw-black-lables: rgba(0, 0, 0, 0.72);
+  --text-bandw-black-fine-print: rgba(0, 0, 0, 0.72);
+  --text-bandw-white-display: rgba(255, 255, 255, 0.96);
+  --text-bandw-white-heading: rgba(255, 255, 255, 0.96);
+  --text-bandw-white-title: rgba(255, 255, 255, 0.96);
+  --text-bandw-white-sub-heading: rgba(255, 255, 255, 0.80);
+  --text-bandw-white-body: rgba(255, 255, 255, 0.80);
+  --text-bandw-white-captions: rgba(255, 255, 255, 0.72);
+  --text-bandw-white-lables: rgba(255, 255, 255, 0.72);
+  --text-bandw-white-fine-print: rgba(255, 255, 255, 0.72);
+  --text-permanent-black-display: rgba(0, 0, 0, 0.96);
+  --text-permanent-black-heading: rgba(0, 0, 0, 0.96);
+  --text-permanent-black-title: rgba(0, 0, 0, 0.96);
+  --text-permanent-black-sub-heading: rgba(0, 0, 0, 0.80);
+  --text-permanent-black-body: rgba(0, 0, 0, 0.80);
+  --text-permanent-black-captions: rgba(0, 0, 0, 0.72);
+  --text-permanent-black-lables: rgba(0, 0, 0, 0.72);
+  --text-permanent-black-fine-print: rgba(0, 0, 0, 0.72);
+  --text-permanent-white-display: rgba(255, 255, 255, 0.96);
+  --text-permanent-white-heading: rgba(255, 255, 255, 0.96);
+  --text-permanent-white-title: rgba(255, 255, 255, 0.96);
+  --text-permanent-white-sub-heading: rgba(255, 255, 255, 0.80);
+  --text-permanent-white-body: rgba(255, 255, 255, 0.80);
+  --text-permanent-white-captions: rgba(255, 255, 255, 0.72);
+  --text-permanent-white-lables: rgba(255, 255, 255, 0.72);
+  --text-permanent-white-fine-print: rgba(255, 255, 255, 0.72);
+  --text-system-text-disabled: rgba(0, 0, 0, 0.48);
+  --text-system-text-success: #1D8923;
+  --text-system-text-error: #D13924;
+  --text-system-text-warning: #E99E38;
+  --text-system-text-information: #0A5396;
+  --text-button-text-primary-white: #FFFFFF;
+  --text-button-text-primary-blue: #1B4CA1;
+  --text-button-text-primary-white-disabled: rgba(27, 76, 161, 0.48);
+  --text-button-text-primary-outlined: #1B4CA1;
+  --text-button-text-primary-outlined-disabled: rgba(27, 76, 161, 0.48);
+  --text-button-text-secondary: #000000;
+  --text-button-text-secondary-disabled: rgba(0, 0, 0, 0.48);
+  --text-button-text-secondary-outline: #000000;
+  --text-button-text-secondary-outline-disabled: rgba(0, 0, 0, 0.48);
+  --text-button-text-link: #1B4CA1;
+  --text-button-text-link-disabled: rgba(27, 76, 161, 0.48);
+  --environment-all-fills-primary-primary-50-900: #E8EDF6;
+  --environment-all-fills-primary-primary-100-800: #B8C8E2;
+  --environment-all-fills-primary-primary-200-700: #96ADD4;
+  --environment-all-fills-primary-primary-300-600: #6687C0;
+  --environment-all-fills-primary-primary-400-500: #4970B4;
+  --environment-all-fills-primary-primary-500-400: #1B4CA1;
+  --environment-all-fills-primary-primary-600-300: #194593;
+  --environment-all-fills-primary-primary-700-200: #133672;
+  --environment-all-fills-primary-primary-800-100: #0F2A59;
+  --environment-all-fills-primary-primary-900-50: #0B2044;
+  --environment-all-fills-primary-o-primary-o-8-96: rgba(27, 76, 161, 0.08);
+  --environment-all-fills-primary-o-primary-o-16-88: rgba(27, 76, 161, 0.16);
+  --environment-all-fills-primary-o-primary-o-24-80: rgba(27, 76, 161, 0.24);
+  --environment-all-fills-primary-o-primary-o-32-72: rgba(27, 76, 161, 0.32);
+  --environment-all-fills-primary-o-primary-o-40-64: rgba(27, 76, 161, 0.40);
+  --environment-all-fills-primary-o-primary-o-48-56: rgba(27, 76, 161, 0.48);
+  --environment-all-fills-primary-o-primary-o-56-48: rgba(27, 76, 161, 0.56);
+  --environment-all-fills-primary-o-primary-o-64-40: rgba(27, 76, 161, 0.64);
+  --environment-all-fills-primary-o-primary-o-72-32: rgba(27, 76, 161, 0.72);
+  --environment-all-fills-primary-o-primary-o-80-24: rgba(27, 76, 161, 0.80);
+  --environment-all-fills-primary-o-primary-o-88-16: rgba(27, 76, 161, 0.88);
+  --environment-all-fills-primary-o-primary-o-96-8: rgba(27, 76, 161, 0.96);
+  --environment-all-fills-secondry-secondry-50-900: #FEF5EA;
+  --environment-all-fills-secondry-secondry-100-800: #FBDEBF;
+  --environment-all-fills-secondry-secondry-200-700: #F9CF9F;
+  --environment-all-fills-secondry-secondry-300-600: #F7B974;
+  --environment-all-fills-secondry-secondry-400-500: #F5AB59;
+  --environment-all-fills-secondry-secondry-500-400: #F3962F;
+  --environment-all-fills-secondry-secondry-600-300: #DD892B;
+  --environment-all-fills-secondry-secondry-700-200: #AD6B21;
+  --environment-all-fills-secondry-secondry-800-100: #86531A;
+  --environment-all-fills-secondry-secondry-900-50: #663F14;
+  --environment-all-fills-secondry-o-secondary-o-8-96: rgba(243, 150, 47, 0.08);
+  --environment-all-fills-secondry-o-secondary-o-16-88: rgba(243, 150, 47, 0.16);
+  --environment-all-fills-secondry-o-secondary-o-24-80: rgba(243, 150, 47, 0.24);
+  --environment-all-fills-secondry-o-secondary-o-32-72: rgba(243, 150, 47, 0.32);
+  --environment-all-fills-secondry-o-secondary-o-40-64: rgba(243, 150, 47, 0.40);
+  --environment-all-fills-secondry-o-secondary-o-48-56: rgba(243, 150, 47, 0.48);
+  --environment-all-fills-secondry-o-secondary-o-56-48: rgba(243, 150, 47, 0.56);
+  --environment-all-fills-secondry-o-secondary-o-64-40: rgba(243, 150, 47, 0.64);
+  --environment-all-fills-secondry-o-secondary-o-72-32: rgba(243, 150, 47, 0.72);
+  --environment-all-fills-secondry-o-secondary-o-80-24: rgba(243, 150, 47, 0.80);
+  --environment-all-fills-secondry-o-secondary-o-88-16: rgba(243, 150, 47, 0.88);
+  --environment-all-fills-secondry-o-secondary-o-96-8: rgba(243, 150, 47, 0.96);
+  --environment-all-fills-tertiary-blue-tertiary-50-900: #E8E9EB;
+  --environment-all-fills-tertiary-blue-tertiary-100-800: #B8BAC0;
+  --environment-all-fills-tertiary-blue-tertiary-200-700: #9699A1;
+  --environment-all-fills-tertiary-blue-tertiary-300-600: #666A76;
+  --environment-all-fills-tertiary-blue-tertiary-400-500: #494D5C;
+  --environment-all-fills-tertiary-blue-tertiary-500-400: #1B2133;
+  --environment-all-fills-tertiary-blue-tertiary-600-300: #191E2E;
+  --environment-all-fills-tertiary-blue-tertiary-700-200: #131724;
+  --environment-all-fills-tertiary-blue-tertiary-800-100: #0F121C;
+  --environment-all-fills-tertiary-blue-tertiary-900-50: #0B0E15;
+  --environment-all-fills-tertiary-o-tertiary-o-8-96: rgba(27, 33, 51, 0.08);
+  --environment-all-fills-tertiary-o-tertiary-o-16-88: rgba(27, 33, 51, 0.16);
+  --environment-all-fills-tertiary-o-tertiary-o-24-80: rgba(27, 33, 51, 0.24);
+  --environment-all-fills-tertiary-o-tertiary-o-32-72: rgba(27, 33, 51, 0.32);
+  --environment-all-fills-tertiary-o-tertiary-o-40-64: rgba(27, 33, 51, 0.40);
+  --environment-all-fills-tertiary-o-tertiary-o-48-56: rgba(27, 33, 51, 0.48);
+  --environment-all-fills-tertiary-o-tertiary-o-56-48: rgba(27, 33, 51, 0.56);
+  --environment-all-fills-tertiary-o-tertiary-o-64-40: rgba(27, 33, 51, 0.64);
+  --environment-all-fills-tertiary-o-tertiary-o-72-32: rgba(27, 33, 51, 0.72);
+  --environment-all-fills-tertiary-o-tertiary-o-80-24: rgba(27, 33, 51, 0.80);
+  --environment-all-fills-tertiary-o-tertiary-o-88-16: rgba(27, 33, 51, 0.88);
+  --environment-all-fills-tertiary-o-tertiary-o-96-8: rgba(27, 33, 51, 0.96);
+  --environment-all-fills-black-gray-50-500: #E6E6E6;
+  --environment-all-fills-black-gray-100-400: #B0B0B0;
+  --environment-all-fills-black-gray-200-300: #8A8A8A;
+  --environment-all-fills-black-gray-300-200: #545454;
+  --environment-all-fills-black-gray-400-100: #333333;
+  --environment-all-fills-black-gray-500-50: #000000;
+  --environment-all-fills-black-o-black-o-8-96: rgba(0, 0, 0, 0.08);
+  --environment-all-fills-black-o-black-o-16-88: rgba(0, 0, 0, 0.16);
+  --environment-all-fills-black-o-black-o-24-80: rgba(0, 0, 0, 0.24);
+  --environment-all-fills-black-o-black-o-32-72: rgba(0, 0, 0, 0.32);
+  --environment-all-fills-black-o-black-o-40-64: rgba(0, 0, 0, 0.40);
+  --environment-all-fills-black-o-black-o-48-56: rgba(0, 0, 0, 0.48);
+  --environment-all-fills-black-o-black-o-56-48: rgba(0, 0, 0, 0.56);
+  --environment-all-fills-black-o-black-o-64-40: rgba(0, 0, 0, 0.64);
+  --environment-all-fills-black-o-black-o-72-32: rgba(0, 0, 0, 0.72);
+  --environment-all-fills-black-o-black-o-80-24: rgba(0, 0, 0, 0.80);
+  --environment-all-fills-black-o-black-o-88-16: rgba(0, 0, 0, 0.88);
+  --environment-all-fills-black-o-gray-500-50-7: rgba(0, 0, 0, 0.96);
+  --environment-all-fills-white-white-500-500: #FFFFFF;
+  --environment-all-fills-white-o-white-o-8-96: rgba(255, 255, 255, 0.08);
+  --environment-all-fills-white-o-white-o-16-88: rgba(255, 255, 255, 0.16);
+  --environment-all-fills-white-o-white-o-24-80: rgba(255, 255, 255, 0.24);
+  --environment-all-fills-white-o-white-o-32-72: rgba(255, 255, 255, 0.32);
+  --environment-all-fills-white-o-white-o-40-64: rgba(255, 255, 255, 0.40);
+  --environment-all-fills-white-o-white-o-48-56: rgba(255, 255, 255, 0.48);
+  --environment-all-fills-white-o-white-o-56-48: rgba(255, 255, 255, 0.56);
+  --environment-all-fills-white-o-white-o-64-40: rgba(255, 255, 255, 0.64);
+  --environment-all-fills-white-o-white-o-72-32: rgba(255, 255, 255, 0.72);
+  --environment-all-fills-white-o-white-o-80-24: rgba(255, 255, 255, 0.80);
+  --environment-all-fills-white-o-white-o-88-16: rgba(255, 255, 255, 0.88);
+  --environment-all-fills-white-o-white-o-96-8: rgba(255, 255, 255, 0.96);
+  --environment-all-fills-system-success: #1D8923;
+  --environment-all-fills-system-error: #D13924;
+  --environment-all-fills-system-warning: #E99E38;
+  --environment-all-fills-system-information: #0A5396;
+  --environment-all-fills-overlay-backdrop: rgba(0, 0, 0, 0.32);
+  --environment-border-and-divider-default-1: rgba(0, 0, 0, 0.16);
+  --environment-border-and-divider-focused: #0B2044;
+  --environment-border-and-divider-disable: rgba(0, 0, 0, 0.24);
+  --environment-application-backgrounds-system-background-1: #FFFFFF;
+  --environment-application-backgrounds-card-background: #FFFFFF;
+  --environment-application-backgrounds-other-background: #1B4CA1;
+  --environment-accents-red: #FF383C;
+  --environment-accents-orange: #FF8D28;
+  --environment-accents-yellow: #FFCC00;
+  --environment-accents-green: #34C759;
+  --environment-accents-mint: #00C8B3;
+  --environment-accents-teal: #00C3D0;
+  --environment-accents-cyan: #00C0E8;
+  --environment-accents-blue: #0088FF;
+  --environment-accents-indigo: #6155F5;
+  --environment-accents-purple: #CB30E0;
+  --environment-accents-pink: #FF2D55;
+  --environment-accents-brown: #AC7F5E;
+  --environment-button-primary-filled-primary: #1B4CA1;
+  --environment-button-primary-filled-primary-hover: #133672;
+  --environment-button-primary-filled-primary-focus: #194593;
+  --environment-button-primary-filled-primary-disabled: rgba(27, 76, 161, 0.48);
+  --environment-button-primary-outline-primary-outline: #1B4CA1;
+  --environment-button-primary-outline-primary-outline-hover: #133672;
+  --environment-button-primary-outline-primary-outline-focus: #194593;
+  --environment-button-primary-outline-primary-outline-disabled: rgba(27, 76, 161, 0.48);
+  --environment-button-secondary-filled-secondary: #F3962F;
+  --environment-button-secondary-filled-secondary-hover: #AD6B21;
+  --environment-button-secondary-filled-secondary-focus: #DD892B;
+  --environment-button-secondary-filled-secondary-disabled: rgba(243, 150, 47, 0.48);
+  --environment-button-secondary-outline-secondary-outline: #F3962F;
+  --environment-button-secondary-outline-secondary-outline-hover: #AD6B21;
+  --environment-button-secondary-outline-secondary-outline-focus: #DD892B;
+  --environment-button-secondary-outline-secondary-outline-disabled: rgba(243, 150, 47, 0.48);
+  --environment-cards-overall-cards-primary: #E8EDF6;
+  --environment-cards-system-cards-success: #E8F5E9;
+  --environment-cards-system-cards-error: #FDECEA;
+  --environment-cards-system-cards-warning: #FFF3E0;
+  --environment-cards-system-cards-information: #E3F2FD;
+  --environment-icon-overall-primary-bandw: #000000;
+  --environment-icon-overall-primary-wandb: #FFFFFF;
+  --environment-icon-overall-secondary-bandw: rgba(0, 0, 0, 0.72);
+  --environment-icon-overall-secondary-wandb: rgba(255, 255, 255, 0.72);
+  --environment-icon-permanent-permanent-white-icon: #FFFFFF;
+  --environment-icon-permanent-permanent-black-icon: #000000;
+  --environment-icon-permanent-permanent-white-disable-icon: rgba(255, 255, 255, 0.48);
+  --environment-icon-permanent-permanent-black-disable-icon-2: rgba(0, 0, 0, 0.48);
+  --environment-icon-permanent-permanent-blue-icon: #1B4CA1;
+  --environment-icon-permanent-permanent-blue-disable-icon: rgba(27, 76, 161, 0.48);
+  --environment-icon-system-success: #1D8923;
+  --environment-icon-system-error: #D13924;
+  --environment-icon-system-warning: #E99E38;
+  --environment-icon-system-information: #0A5396;
+
+  // --- Spacing Scale ---
+  --space-0: 0px;
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-22: 22px;
+  --space-24: 24px;
+  --space-26: 26px;
+  --space-28: 28px;
+  --space-30: 30px;
+  --space-32: 32px;
+  --space-34: 34px;
+  --space-36: 36px;
+  --space-38: 38px;
+  --space-40: 40px;
+  --space-42: 42px;
+  --space-44: 44px;
+  --space-46: 46px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-128: 128px;
+
+  // --- Padding Tokens ---
+  --padding-no-padding: 0px;
+  --padding-xs-padding: 4px;
+  --padding-s-padding: 8px;
+  --padding-m-padding: 12px;
+  --padding-l-padding: 16px;
+  --padding-xl-padding: 20px;
+  --padding-xxl-padding: 24px;
+  --padding-xxxl-padding: 32px;
+
+  // --- Gap Tokens ---
+  --gap-no-gap: 0px;
+  --gap-xs-gap: 4px;
+  --gap-s-gap: 8px;
+  --gap-m-gap: 12px;
+  --gap-l-gap: 16px;
+  --gap-xl-gap: 20px;
+  --gap-xxl-gap: 24px;
+  --gap-xxxl-gap: 32px;
+
+  // --- Border Radius ---
+  --radius-4: 4px;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-999: 999px;
+
+  // --- Stroke/Border Width ---
+  --stroke-1: 1px;
+  --stroke-2: 2px;
+
+  // --- Icon Sizes ---
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 32px;
+  --icon-xxl: 40px;
+
+  // --- Typography (Large Desktop base) ---
+  --font-size-fine-print-1: 12px;
+  --font-size-label-1: 12px;
+  --font-size-caption-1: 12px;
+  --font-size-button-2: 14px;
+  --font-size-button-1: 16px;
+  --font-size-body-2: 14px;
+  --font-size-body-1: 16px;
+  --font-size-sub-heading-2: 16px;
+  --font-size-sub-heading-1: 18px;
+  --font-size-title-2: 20px;
+  --font-size-title-1: 24px;
+  --font-size-heading-2: 28px;
+  --font-size-heading-1: 32px;
+  --font-size-dispaly-2: 40px;
+  --font-size-display-1: 48px;
+
+  // --- Grid System (Large Desktop base) ---
+  --grid-grid-column: 12;
+  --grid-grid-gutter: 16px;
+  --grid-grid-margin-landr: 16px;
+
+  // --- Semantic Surface Colors ---
+  --surface-primary: #ffffff;
+  --surface-secondary: #EFF3F9;
+  --surface-tertiary: #F5F5F5;
+  --surface-inverse: #1B2133;
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --border-focus: var(--color-primary-500-main, #1B4CA1);
+
+  // --- Font Families ---
+  --font-family-primary: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'Fira Code', Menlo, Monaco, Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  // --- Semantic Text Colors (Dark) ---
+  --text-bandw-black-display: rgba(255, 255, 255, 0.96);
+  --text-bandw-black-heading: rgba(255, 255, 255, 0.96);
+  --text-bandw-black-title: rgba(255, 255, 255, 0.88);
+  --text-bandw-black-sub-heading: rgba(255, 255, 255, 0.80);
+  --text-bandw-black-body: rgba(255, 255, 255, 0.80);
+  --text-bandw-black-captions: rgba(255, 255, 255, 0.72);
+  --text-bandw-black-lables: rgba(255, 255, 255, 0.72);
+  --text-bandw-black-fine-print: rgba(255, 255, 255, 0.72);
+  --text-bandw-white-display: rgba(255, 255, 255, 0.96);
+  --text-bandw-white-heading: rgba(255, 255, 255, 0.96);
+  --text-bandw-white-title: rgba(255, 255, 255, 0.96);
+  --text-bandw-white-sub-heading: rgba(255, 255, 255, 0.80);
+  --text-bandw-white-body: rgba(255, 255, 255, 0.80);
+  --text-bandw-white-captions: rgba(255, 255, 255, 0.72);
+  --text-bandw-white-lables: rgba(255, 255, 255, 0.72);
+  --text-bandw-white-fine-print: rgba(255, 255, 255, 0.72);
+  --text-permanent-black-display: rgba(0, 0, 0, 0.96);
+  --text-permanent-black-heading: rgba(0, 0, 0, 0.96);
+  --text-permanent-black-title: rgba(0, 0, 0, 0.96);
+  --text-permanent-black-sub-heading: rgba(0, 0, 0, 0.80);
+  --text-permanent-black-body: rgba(0, 0, 0, 0.80);
+  --text-permanent-black-captions: rgba(0, 0, 0, 0.72);
+  --text-permanent-black-lables: rgba(0, 0, 0, 0.72);
+  --text-permanent-black-fine-print: rgba(0, 0, 0, 0.72);
+  --text-permanent-white-display: rgba(255, 255, 255, 0.96);
+  --text-permanent-white-heading: rgba(255, 255, 255, 0.96);
+  --text-permanent-white-title: rgba(255, 255, 255, 0.96);
+  --text-permanent-white-sub-heading: rgba(255, 255, 255, 0.80);
+  --text-permanent-white-body: rgba(255, 255, 255, 0.80);
+  --text-permanent-white-captions: rgba(255, 255, 255, 0.72);
+  --text-permanent-white-lables: rgba(255, 255, 255, 0.72);
+  --text-permanent-white-fine-print: rgba(255, 255, 255, 0.72);
+  --text-system-text-disabled: rgba(255, 255, 255, 0.48);
+  --text-system-text-success: #1D8923;
+  --text-system-text-error: #D13924;
+  --text-system-text-warning: #E99E38;
+  --text-system-text-information: #0A5396;
+  --text-button-text-primary-white: #1B4CA1;
+  --text-button-text-primary-blue: #FFFFFF;
+  --text-button-text-primary-white-disabled: rgba(27, 76, 161, 0.48);
+  --text-button-text-primary-outlined: #FFFFFF;
+  --text-button-text-primary-outlined-disabled: rgba(255, 255, 255, 0.48);
+  --text-button-text-secondary: #000000;
+  --text-button-text-secondary-disabled: rgba(0, 0, 0, 0.48);
+  --text-button-text-secondary-outline: #FFFFFF;
+  --text-button-text-secondary-outline-disabled: rgba(255, 255, 255, 0.48);
+  --text-button-text-link: #FFFFFF;
+  --text-button-text-link-disabled: rgba(255, 255, 255, 0.48);
+  --environment-all-fills-primary-primary-50-900: #0B2044;
+  --environment-all-fills-primary-primary-100-800: #0F2A59;
+  --environment-all-fills-primary-primary-200-700: #133672;
+  --environment-all-fills-primary-primary-300-600: #194593;
+  --environment-all-fills-primary-primary-400-500: #1B4CA1;
+  --environment-all-fills-primary-primary-500-400: #4970B4;
+  --environment-all-fills-primary-primary-600-300: #6687C0;
+  --environment-all-fills-primary-primary-700-200: #96ADD4;
+  --environment-all-fills-primary-primary-800-100: #B8C8E2;
+  --environment-all-fills-primary-primary-900-50: #E8EDF6;
+  --environment-all-fills-primary-o-primary-o-8-96: rgba(27, 76, 161, 0.96);
+  --environment-all-fills-primary-o-primary-o-16-88: rgba(27, 76, 161, 0.88);
+  --environment-all-fills-primary-o-primary-o-24-80: rgba(27, 76, 161, 0.80);
+  --environment-all-fills-primary-o-primary-o-32-72: rgba(27, 76, 161, 0.72);
+  --environment-all-fills-primary-o-primary-o-40-64: rgba(27, 76, 161, 0.64);
+  --environment-all-fills-primary-o-primary-o-48-56: rgba(27, 76, 161, 0.56);
+  --environment-all-fills-primary-o-primary-o-56-48: rgba(27, 76, 161, 0.48);
+  --environment-all-fills-primary-o-primary-o-64-40: rgba(27, 76, 161, 0.40);
+  --environment-all-fills-primary-o-primary-o-72-32: rgba(27, 76, 161, 0.32);
+  --environment-all-fills-primary-o-primary-o-80-24: rgba(27, 76, 161, 0.24);
+  --environment-all-fills-primary-o-primary-o-88-16: rgba(27, 76, 161, 0.16);
+  --environment-all-fills-primary-o-primary-o-96-8: rgba(27, 76, 161, 0.08);
+  --environment-all-fills-secondry-secondry-50-900: #663F14;
+  --environment-all-fills-secondry-secondry-100-800: #86531A;
+  --environment-all-fills-secondry-secondry-200-700: #AD6B21;
+  --environment-all-fills-secondry-secondry-300-600: #DD892B;
+  --environment-all-fills-secondry-secondry-400-500: #F3962F;
+  --environment-all-fills-secondry-secondry-500-400: #F5AB59;
+  --environment-all-fills-secondry-secondry-600-300: #F7B974;
+  --environment-all-fills-secondry-secondry-700-200: #F9CF9F;
+  --environment-all-fills-secondry-secondry-800-100: #FBDEBF;
+  --environment-all-fills-secondry-secondry-900-50: #FEF5EA;
+  --environment-all-fills-secondry-o-secondary-o-8-96: rgba(243, 150, 47, 0.96);
+  --environment-all-fills-secondry-o-secondary-o-16-88: rgba(243, 150, 47, 0.88);
+  --environment-all-fills-secondry-o-secondary-o-24-80: rgba(243, 150, 47, 0.80);
+  --environment-all-fills-secondry-o-secondary-o-32-72: rgba(243, 150, 47, 0.72);
+  --environment-all-fills-secondry-o-secondary-o-40-64: rgba(243, 150, 47, 0.64);
+  --environment-all-fills-secondry-o-secondary-o-48-56: rgba(243, 150, 47, 0.56);
+  --environment-all-fills-secondry-o-secondary-o-56-48: rgba(243, 150, 47, 0.48);
+  --environment-all-fills-secondry-o-secondary-o-64-40: rgba(243, 150, 47, 0.40);
+  --environment-all-fills-secondry-o-secondary-o-72-32: rgba(243, 150, 47, 0.32);
+  --environment-all-fills-secondry-o-secondary-o-80-24: rgba(243, 150, 47, 0.24);
+  --environment-all-fills-secondry-o-secondary-o-88-16: rgba(243, 150, 47, 0.16);
+  --environment-all-fills-secondry-o-secondary-o-96-8: rgba(243, 150, 47, 0.08);
+  --environment-all-fills-tertiary-blue-tertiary-50-900: #0B0E15;
+  --environment-all-fills-tertiary-blue-tertiary-100-800: #0F121C;
+  --environment-all-fills-tertiary-blue-tertiary-200-700: #131724;
+  --environment-all-fills-tertiary-blue-tertiary-300-600: #191E2E;
+  --environment-all-fills-tertiary-blue-tertiary-400-500: #1B2133;
+  --environment-all-fills-tertiary-blue-tertiary-500-400: #494D5C;
+  --environment-all-fills-tertiary-blue-tertiary-600-300: #666A76;
+  --environment-all-fills-tertiary-blue-tertiary-700-200: #9699A1;
+  --environment-all-fills-tertiary-blue-tertiary-800-100: #B8BAC0;
+  --environment-all-fills-tertiary-blue-tertiary-900-50: #E8E9EB;
+  --environment-all-fills-tertiary-o-tertiary-o-8-96: rgba(27, 33, 51, 0.96);
+  --environment-all-fills-tertiary-o-tertiary-o-16-88: rgba(27, 33, 51, 0.88);
+  --environment-all-fills-tertiary-o-tertiary-o-24-80: rgba(27, 33, 51, 0.80);
+  --environment-all-fills-tertiary-o-tertiary-o-32-72: rgba(27, 33, 51, 0.72);
+  --environment-all-fills-tertiary-o-tertiary-o-40-64: rgba(27, 33, 51, 0.64);
+  --environment-all-fills-tertiary-o-tertiary-o-48-56: rgba(27, 33, 51, 0.56);
+  --environment-all-fills-tertiary-o-tertiary-o-56-48: rgba(27, 33, 51, 0.48);
+  --environment-all-fills-tertiary-o-tertiary-o-64-40: rgba(27, 33, 51, 0.40);
+  --environment-all-fills-tertiary-o-tertiary-o-72-32: rgba(27, 33, 51, 0.32);
+  --environment-all-fills-tertiary-o-tertiary-o-80-24: rgba(27, 33, 51, 0.24);
+  --environment-all-fills-tertiary-o-tertiary-o-88-16: rgba(27, 33, 51, 0.16);
+  --environment-all-fills-tertiary-o-tertiary-o-96-8: rgba(27, 33, 51, 0.08);
+  --environment-all-fills-black-gray-50-500: #000000;
+  --environment-all-fills-black-gray-100-400: #333333;
+  --environment-all-fills-black-gray-200-300: #545454;
+  --environment-all-fills-black-gray-300-200: #8A8A8A;
+  --environment-all-fills-black-gray-400-100: #B0B0B0;
+  --environment-all-fills-black-gray-500-50: #E8E9EB;
+  --environment-all-fills-black-o-black-o-8-96: rgba(0, 0, 0, 0.96);
+  --environment-all-fills-black-o-black-o-16-88: rgba(0, 0, 0, 0.88);
+  --environment-all-fills-black-o-black-o-24-80: rgba(0, 0, 0, 0.80);
+  --environment-all-fills-black-o-black-o-32-72: rgba(0, 0, 0, 0.72);
+  --environment-all-fills-black-o-black-o-40-64: rgba(0, 0, 0, 0.64);
+  --environment-all-fills-black-o-black-o-48-56: rgba(27, 33, 51, 0.56);
+  --environment-all-fills-black-o-black-o-56-48: rgba(27, 33, 51, 0.48);
+  --environment-all-fills-black-o-black-o-64-40: rgba(27, 33, 51, 0.40);
+  --environment-all-fills-black-o-black-o-72-32: rgba(27, 33, 51, 0.32);
+  --environment-all-fills-black-o-black-o-80-24: rgba(27, 33, 51, 0.24);
+  --environment-all-fills-black-o-black-o-88-16: rgba(27, 33, 51, 0.16);
+  --environment-all-fills-black-o-gray-500-50-7: rgba(27, 33, 51, 0.08);
+  --environment-all-fills-white-white-500-500: #FFFFFF;
+  --environment-all-fills-white-o-white-o-8-96: rgba(255, 255, 255, 0.96);
+  --environment-all-fills-white-o-white-o-16-88: rgba(255, 255, 255, 0.88);
+  --environment-all-fills-white-o-white-o-24-80: rgba(255, 255, 255, 0.80);
+  --environment-all-fills-white-o-white-o-32-72: rgba(255, 255, 255, 0.72);
+  --environment-all-fills-white-o-white-o-40-64: rgba(255, 255, 255, 0.64);
+  --environment-all-fills-white-o-white-o-48-56: rgba(255, 255, 255, 0.56);
+  --environment-all-fills-white-o-white-o-56-48: rgba(255, 255, 255, 0.48);
+  --environment-all-fills-white-o-white-o-64-40: rgba(255, 255, 255, 0.40);
+  --environment-all-fills-white-o-white-o-72-32: rgba(255, 255, 255, 0.32);
+  --environment-all-fills-white-o-white-o-80-24: rgba(255, 255, 255, 0.24);
+  --environment-all-fills-white-o-white-o-88-16: rgba(255, 255, 255, 0.16);
+  --environment-all-fills-white-o-white-o-96-8: rgba(255, 255, 255, 0.08);
+  --environment-all-fills-system-success: #1D8923;
+  --environment-all-fills-system-error: #D13924;
+  --environment-all-fills-system-warning: #E99E38;
+  --environment-all-fills-system-information: #0A5396;
+  --environment-all-fills-overlay-backdrop: rgba(0, 0, 0, 0.32);
+  --environment-border-and-divider-default-1: rgba(255, 255, 255, 0.24);
+  --environment-border-and-divider-focused: #B8C8E2;
+  --environment-border-and-divider-disable: rgba(255, 255, 255, 0.08);
+  --environment-application-backgrounds-system-background-1: #0B2044;
+  --environment-application-backgrounds-card-background: #133672;
+  --environment-application-backgrounds-other-background: #133672;
+  --environment-accents-red: #FF383C;
+  --environment-accents-orange: #FF8D28;
+  --environment-accents-yellow: #FFCC00;
+  --environment-accents-green: #34C759;
+  --environment-accents-mint: #00C8B3;
+  --environment-accents-teal: #00C3D0;
+  --environment-accents-cyan: #00C0E8;
+  --environment-accents-blue: #0088FF;
+  --environment-accents-indigo: #6155F5;
+  --environment-accents-purple: #CB30E0;
+  --environment-accents-pink: #FF2D55;
+  --environment-accents-brown: #AC7F5E;
+  --environment-button-primary-filled-primary: #FFFFFF;
+  --environment-button-primary-filled-primary-hover: #FFFFFF;
+  --environment-button-primary-filled-primary-focus: #FFFFFF;
+  --environment-button-primary-filled-primary-disabled: rgba(255, 255, 255, 0.48);
+  --environment-button-primary-outline-primary-outline: #FFFFFF;
+  --environment-button-primary-outline-primary-outline-hover: #FFFFFF;
+  --environment-button-primary-outline-primary-outline-focus: #FFFFFF;
+  --environment-button-primary-outline-primary-outline-disabled: rgba(255, 255, 255, 0.48);
+  --environment-button-secondary-filled-secondary: #F3962F;
+  --environment-button-secondary-filled-secondary-hover: #AD6B21;
+  --environment-button-secondary-filled-secondary-focus: #DD892B;
+  --environment-button-secondary-filled-secondary-disabled: rgba(243, 150, 47, 0.48);
+  --environment-button-secondary-outline-secondary-outline: #F3962F;
+  --environment-button-secondary-outline-secondary-outline-hover: #AD6B21;
+  --environment-button-secondary-outline-secondary-outline-focus: #DD892B;
+  --environment-button-secondary-outline-secondary-outline-disabled: rgba(243, 150, 47, 0.48);
+  --environment-cards-overall-cards-primary: #0F121C;
+  --environment-cards-system-cards-success: rgba(29, 137, 35, 0.12);
+  --environment-cards-system-cards-error: rgba(209, 57, 36, 0.12);
+  --environment-cards-system-cards-warning: rgba(233, 158, 56, 0.12);
+  --environment-cards-system-cards-information: rgba(10, 83, 150, 0.12);
+  --environment-icon-overall-primary-bandw: #FFFFFF;
+  --environment-icon-overall-primary-wandb: #000000;
+  --environment-icon-overall-secondary-bandw: rgba(255, 255, 255, 0.72);
+  --environment-icon-overall-secondary-wandb: rgba(0, 0, 0, 0.72);
+  --environment-icon-permanent-permanent-white-icon: #FFFFFF;
+  --environment-icon-permanent-permanent-black-icon: #000000;
+  --environment-icon-permanent-permanent-white-disable-icon: rgba(255, 255, 255, 0.48);
+  --environment-icon-permanent-permanent-black-disable-icon-2: rgba(0, 0, 0, 0.48);
+  --environment-icon-permanent-permanent-blue-icon: #1B4CA1;
+  --environment-icon-permanent-permanent-blue-disable-icon: rgba(27, 76, 161, 0.48);
+  --environment-icon-system-success: #1D8923;
+  --environment-icon-system-error: #D13924;
+  --environment-icon-system-warning: #E99E38;
+  --environment-icon-system-information: #0A5396;
+
+  // --- Semantic Surface Colors (Dark) ---
+  --surface-primary: #1B2133;
+  --surface-secondary: #252D3F;
+  --surface-tertiary: #333D4C;
+  --surface-inverse: #ffffff;
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-focus: var(--color-primary-300, #6687C0);
+}
+
+// --- Responsive Typography ---
+@media (max-width: 425px) {
+  :root {
+    --font-size-fine-print-1: 12px;
+    --font-size-label-1: 12px;
+    --font-size-caption-1: 12px;
+    --font-size-button-2: 14px;
+    --font-size-button-1: 16px;
+    --font-size-body-2: 14px;
+    --font-size-body-1: 16px;
+    --font-size-sub-heading-2: 14px;
+    --font-size-sub-heading-1: 16px;
+    --font-size-title-2: 16px;
+    --font-size-title-1: 18px;
+    --font-size-heading-2: 20px;
+    --font-size-heading-1: 24px;
+    --font-size-dispaly-2: 28px;
+    --font-size-display-1: 30px;
+  }
+}
+
+@media (min-width: 426px) and (max-width: 1023px) {
+  :root {
+    --font-size-fine-print-1: 12px;
+    --font-size-label-1: 12px;
+    --font-size-caption-1: 12px;
+    --font-size-button-2: 14px;
+    --font-size-button-1: 16px;
+    --font-size-body-2: 14px;
+    --font-size-body-1: 16px;
+    --font-size-sub-heading-2: 14px;
+    --font-size-sub-heading-1: 16px;
+    --font-size-title-2: 16px;
+    --font-size-title-1: 20px;
+    --font-size-heading-2: 24px;
+    --font-size-heading-1: 28px;
+    --font-size-dispaly-2: 30px;
+    --font-size-display-1: 36px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1339px) {
+  :root {
+    --font-size-fine-print-1: 12px;
+    --font-size-label-1: 12px;
+    --font-size-caption-1: 12px;
+    --font-size-button-2: 14px;
+    --font-size-button-1: 16px;
+    --font-size-body-2: 14px;
+    --font-size-body-1: 16px;
+    --font-size-sub-heading-2: 14px;
+    --font-size-sub-heading-1: 16px;
+    --font-size-title-2: 16px;
+    --font-size-title-1: 20px;
+    --font-size-heading-2: 24px;
+    --font-size-heading-1: 28px;
+    --font-size-dispaly-2: 30px;
+    --font-size-display-1: 36px;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --font-size-fine-print-1: 12px;
+    --font-size-label-1: 12px;
+    --font-size-caption-1: 12px;
+    --font-size-button-2: 14px;
+    --font-size-button-1: 16px;
+    --font-size-body-2: 14px;
+    --font-size-body-1: 16px;
+    --font-size-sub-heading-2: 16px;
+    --font-size-sub-heading-1: 18px;
+    --font-size-title-2: 20px;
+    --font-size-title-1: 24px;
+    --font-size-heading-2: 28px;
+    --font-size-heading-1: 32px;
+    --font-size-dispaly-2: 40px;
+    --font-size-display-1: 48px;
+  }
+}
+
+// --- Responsive Grid ---
+@media (max-width: 425px) {
+  :root {
+    --grid-grid-column: 4;
+    --grid-grid-gutter: 20px;
+    --grid-grid-margin-landr: 20px;
+  }
+}
+
+@media (min-width: 426px) and (max-width: 1023px) {
+  :root {
+    --grid-grid-column: 6;
+    --grid-grid-gutter: 16px;
+    --grid-grid-margin-landr: 16px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1339px) {
+  :root {
+    --grid-grid-column: 12;
+    --grid-grid-gutter: 16px;
+    --grid-grid-margin-landr: 16px;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --grid-grid-column: 12;
+    --grid-grid-gutter: 16px;
+    --grid-grid-margin-landr: 16px;
+  }
+}
+

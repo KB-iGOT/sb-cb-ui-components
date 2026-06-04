@@ -1,0 +1,302 @@
+// ==============================================
+// THEME-AWARE COLOR UTILITY CLASSES
+// These classes automatically adapt between light & dark mode
+// via CSS custom properties bound to [data-theme]
+// ==============================================
+
+// ──────────────────────────────────────────────
+// TEXT COLOR CLASSES
+// ──────────────────────────────────────────────
+
+// --- Semantic Text (auto-flips light ↔ dark) ---
+.text-display { color: var(--text-bandw-black-display); }
+.text-heading { color: var(--text-bandw-black-heading); }
+.text-title { color: var(--text-bandw-black-title); }
+.text-sub-heading { color: var(--text-bandw-black-sub-heading); }
+.text-body { color: var(--text-bandw-black-body); }
+.text-caption { color: var(--text-bandw-black-captions); }
+.text-label { color: var(--text-bandw-black-lables); }
+.text-fine-print { color: var(--text-bandw-black-fine-print); }
+.text-disabled { color: var(--text-system-text-disabled); }
+
+// --- System / Status Text ---
+.text-success { color: var(--text-system-text-success); }
+.text-error { color: var(--text-system-text-error); }
+.text-warning { color: var(--text-system-text-warning); }
+.text-info { color: var(--text-system-text-information); }
+
+// --- Primary Color Text (theme-aware via fills) ---
+.text-primary { color: var(--environment-all-fills-primary-primary-500-400); }
+.text-primary-light { color: var(--environment-all-fills-primary-primary-300-600); }
+.text-primary-dark { color: var(--environment-all-fills-primary-primary-700-200); }
+
+// --- Secondary Color Text ---
+.text-secondary { color: var(--environment-all-fills-secondry-secondry-400-500); }
+.text-secondary-light { color: var(--environment-all-fills-secondry-secondry-300-600); }
+.text-secondary-dark { color: var(--environment-all-fills-secondry-secondry-700-200); }
+
+// --- Tertiary Color Text ---
+.text-tertiary { color: var(--environment-all-fills-tertiary-blue-tertiary-400-500); }
+
+// --- Link Text (auto-flips: blue in light, white in dark) ---
+.text-link { color: var(--text-button-text-link); }
+.text-link-disabled { color: var(--text-button-text-link-disabled); }
+
+// --- Button Text ---
+.text-btn-primary { color: var(--text-button-text-primary-white); }
+.text-btn-secondary { color: var(--text-button-text-secondary); }
+
+// --- Permanent Text (does NOT flip) ---
+.text-permanent-black { color: var(--text-permanent-black-body); }
+.text-permanent-white { color: var(--text-permanent-white-body); }
+.text-permanent-black-heading { color: var(--text-permanent-black-heading); }
+.text-permanent-white-heading { color: var(--text-permanent-white-heading); }
+
+// --- White Text ---
+.text-white { color: #FFFFFF; }
+.text-black { color: #000000; }
+
+// --- Accent Text ---
+.text-accent-red { color: var(--environment-accents-red); }
+.text-accent-orange { color: var(--environment-accents-orange); }
+.text-accent-yellow { color: var(--environment-accents-yellow); }
+.text-accent-green { color: var(--environment-accents-green); }
+.text-accent-mint { color: var(--environment-accents-mint); }
+.text-accent-teal { color: var(--environment-accents-teal); }
+.text-accent-cyan { color: var(--environment-accents-cyan); }
+.text-accent-blue { color: var(--environment-accents-blue); }
+.text-accent-indigo { color: var(--environment-accents-indigo); }
+.text-accent-purple { color: var(--environment-accents-purple); }
+.text-accent-pink { color: var(--environment-accents-pink); }
+
+
+// ──────────────────────────────────────────────
+// BACKGROUND COLOR CLASSES
+// ──────────────────────────────────────────────
+
+// --- Surfaces (auto-flips) ---
+.bg-surface-primary { background-color: var(--surface-primary); }
+.bg-surface-secondary { background-color: var(--surface-secondary); }
+.bg-surface-tertiary { background-color: var(--surface-tertiary); }
+.bg-surface-inverse { background-color: var(--surface-inverse); }
+
+// --- Application Backgrounds ---
+.bg-system { background-color: var(--environment-application-backgrounds-system-background-1); }
+.bg-card { background-color: var(--environment-application-backgrounds-card-background); }
+.bg-other { background-color: var(--environment-application-backgrounds-other-background); }
+// --- Primary Fills (theme-aware, shades flip) ---
+.bg-primary-50 { background-color: var(--environment-all-fills-primary-primary-50-900); }
+.bg-primary-100 { background-color: var(--environment-all-fills-primary-primary-100-800); }
+.bg-primary-200 { background-color: var(--environment-all-fills-primary-primary-200-700); }
+.bg-primary-300 { background-color: var(--environment-all-fills-primary-primary-300-600); }
+.bg-primary-400 { background-color: var(--environment-all-fills-primary-primary-400-500); }
+.bg-primary-500 { background-color: var(--environment-all-fills-primary-primary-500-400); }
+.bg-primary-600 { background-color: var(--environment-all-fills-primary-primary-600-300); }
+.bg-primary-700 { background-color: var(--environment-all-fills-primary-primary-700-200); }
+.bg-primary-800 { background-color: var(--environment-all-fills-primary-primary-800-100); }
+.bg-primary-900 { background-color: var(--environment-all-fills-primary-primary-900-50); }
+
+// --- Primary with Opacity (theme-aware) ---
+.bg-primary-o-8 { background-color: var(--environment-all-fills-primary-o-primary-o-8-96); }
+.bg-primary-o-16 { background-color: var(--environment-all-fills-primary-o-primary-o-16-88); }
+.bg-primary-o-24 { background-color: var(--environment-all-fills-primary-o-primary-o-24-80); }
+.bg-primary-o-32 { background-color: var(--environment-all-fills-primary-o-primary-o-32-72); }
+.bg-primary-o-48 { background-color: var(--environment-all-fills-primary-o-primary-o-48-56); }
+
+// --- Secondary Fills (theme-aware) ---
+.bg-secondary-50 { background-color: var(--environment-all-fills-secondry-secondry-50-900); }
+.bg-secondary-100 { background-color: var(--environment-all-fills-secondry-secondry-100-800); }
+.bg-secondary-200 { background-color: var(--environment-all-fills-secondry-secondry-200-700); }
+.bg-secondary-300 { background-color: var(--environment-all-fills-secondry-secondry-300-600); }
+.bg-secondary-400 { background-color: var(--environment-all-fills-secondry-secondry-400-500); }
+.bg-secondary-500 { background-color: var(--environment-all-fills-secondry-secondry-500-400); }
+.bg-secondary-600 { background-color: var(--environment-all-fills-secondry-secondry-600-300); }
+.bg-secondary-700 { background-color: var(--environment-all-fills-secondry-secondry-700-200); }
+.bg-secondary-800 { background-color: var(--environment-all-fills-secondry-secondry-800-100); }
+.bg-secondary-900 { background-color: var(--environment-all-fills-secondry-secondry-900-50); }
+
+// --- Tertiary Fills (theme-aware) ---
+.bg-tertiary-50 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-50-900); }
+.bg-tertiary-100 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-100-800); }
+.bg-tertiary-200 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-200-700); }
+.bg-tertiary-300 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-300-600); }
+.bg-tertiary-400 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-400-500); }
+.bg-tertiary-500 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-500-400); }
+.bg-tertiary-600 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-600-300); }
+.bg-tertiary-700 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-700-200); }
+.bg-tertiary-800 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-800-100); }
+.bg-tertiary-900 { background-color: var(--environment-all-fills-tertiary-blue-tertiary-900-50); }
+
+// --- Black/Gray Fills (theme-aware) ---
+.bg-gray-50 { background-color: var(--environment-all-fills-black-gray-50-500); }
+.bg-gray-100 { background-color: var(--environment-all-fills-black-gray-100-400); }
+.bg-gray-200 { background-color: var(--environment-all-fills-black-gray-200-300); }
+.bg-gray-300 { background-color: var(--environment-all-fills-black-gray-300-200); }
+.bg-gray-400 { background-color: var(--environment-all-fills-black-gray-400-100); }
+.bg-gray-500 { background-color: var(--environment-all-fills-black-gray-500-50); }
+
+// --- White fill ---
+.bg-white { background-color: var(--environment-all-fills-white-white-500-500); }
+
+// --- System Status Backgrounds ---
+.bg-success { background-color: var(--environment-all-fills-system-success); }
+.bg-error { background-color: var(--environment-all-fills-system-error); }
+.bg-warning { background-color: var(--environment-all-fills-system-warning); }
+.bg-info { background-color: var(--environment-all-fills-system-information); }
+
+// --- Accent Backgrounds ---
+.bg-accent-red { background-color: var(--environment-accents-red); }
+.bg-accent-orange { background-color: var(--environment-accents-orange); }
+.bg-accent-yellow { background-color: var(--environment-accents-yellow); }
+.bg-accent-green { background-color: var(--environment-accents-green); }
+.bg-accent-mint { background-color: var(--environment-accents-mint); }
+.bg-accent-teal { background-color: var(--environment-accents-teal); }
+.bg-accent-cyan { background-color: var(--environment-accents-cyan); }
+.bg-accent-blue { background-color: var(--environment-accents-blue); }
+.bg-accent-indigo { background-color: var(--environment-accents-indigo); }
+.bg-accent-purple { background-color: var(--environment-accents-purple); }
+.bg-accent-pink { background-color: var(--environment-accents-pink); }
+.bg-accent-brown { background-color: var(--environment-accents-brown); }
+
+// --- Overlay ---
+.bg-overlay { background-color: var(--environment-all-fills-overlay-backdrop); }
+
+// --- Cards ---
+.bg-card-primary { background-color: var(--environment-cards-overall-cards-primary); }
+.bg-card-success { background-color: var(--environment-cards-system-cards-success); }
+.bg-card-error { background-color: var(--environment-cards-system-cards-error); }
+.bg-card-warning { background-color: var(--environment-cards-system-cards-warning); }
+.bg-card-info { background-color: var(--environment-cards-system-cards-information); }
+
+
+// ──────────────────────────────────────────────
+// BORDER COLOR CLASSES
+// ──────────────────────────────────────────────
+
+.border-default { border-color: var(--border-default); }
+.border-strong { border-color: var(--border-strong); }
+.border-focus { border-color: var(--border-focus); }
+
+// Text color 1B4CA1 TO #F3962F
+.text-ring-progress          { color: var(--color-primary-500); }
+[data-theme="dark"] .text-ring-progress { color: var(--color-secondary-500); }
+
+//  background (light: #ffffff | dark: #0b0e15)
+.bg-card-1           { background-color: var(--color-white-wo-opacity-500); }
+[data-theme="dark"] .bg-card-1 { background-color: var(--color-tertiary-900); }
+
+.border-divider { border-color: var(--environment-border-and-divider-default-1); }
+.border-focused { border-color: var(--environment-border-and-divider-focused); }
+.border-disabled { border-color: var(--environment-border-and-divider-disable); }
+
+// --- Border with Color (includes border-style) ---
+.bordered { border: var(--stroke-1) solid var(--border-default); }
+.bordered-strong { border: var(--stroke-1) solid var(--border-strong); }
+.bordered-focus { border: var(--stroke-2) solid var(--border-focus); }
+.bordered-primary { border: var(--stroke-1) solid var(--environment-button-primary-outline-primary-outline); }
+.bordered-secondary { border: var(--stroke-1) solid var(--environment-button-secondary-outline-secondary-outline); }
+
+// --- Border Accent Colors ---
+.border-accent-success { border-color: var(--environment-all-fills-system-success); }
+.border-accent-error { border-color: var(--environment-all-fills-system-error); }
+.border-accent-warning { border-color: var(--environment-all-fills-system-warning); }
+.border-accent-info { border-color: var(--environment-all-fills-system-information); }
+
+
+// ──────────────────────────────────────────────
+// ICON COLOR CLASSES
+// ──────────────────────────────────────────────
+
+.icon-primary { color: var(--environment-icon-overall-primary-bandw); }
+.icon-secondary { color: var(--environment-icon-overall-secondary-bandw); }
+.icon-inverse { color: var(--environment-icon-overall-primary-wandb); }
+.icon-blue { color: var(--environment-icon-permanent-permanent-blue-icon); }
+.icon-blue-disabled { color: var(--environment-icon-permanent-permanent-blue-disable-icon); }
+.icon-white { color: var(--environment-icon-permanent-permanent-white-icon); }
+.icon-black { color: var(--environment-icon-permanent-permanent-black-icon); }
+.icon-success { color: var(--environment-icon-system-success); }
+.icon-error { color: var(--environment-icon-system-error); }
+.icon-warning { color: var(--environment-icon-system-warning); }
+.icon-info { color: var(--environment-icon-system-information); }
+
+
+// ──────────────────────────────────────────────
+// BUTTON CLASSES
+// ──────────────────────────────────────────────
+
+.btn-filled-primary {
+  background-color: var(--environment-button-primary-filled-primary);
+  color: var(--text-button-text-primary-white);
+  border: none;
+  border-radius: var(--radius-4);
+  cursor: pointer;
+
+  &:hover { background-color: var(--environment-button-primary-filled-primary-hover); }
+  &:focus { background-color: var(--environment-button-primary-filled-primary-focus); }
+  &:disabled, &.disabled {
+    background-color: var(--environment-button-primary-filled-primary-disabled);
+    color: var(--text-button-text-primary-white-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.btn-outlined-primary {
+  background-color: transparent;
+  color: var(--text-button-text-primary-outlined);
+  border: var(--stroke-1) solid var(--environment-button-primary-outline-primary-outline);
+  border-radius: var(--radius-4);
+  cursor: pointer;
+
+  &:hover { border-color: var(--environment-button-primary-outline-primary-outline-hover); }
+  &:focus { border-color: var(--environment-button-primary-outline-primary-outline-focus); }
+  &:disabled, &.disabled {
+    border-color: var(--environment-button-primary-outline-primary-outline-disabled);
+    color: var(--text-button-text-primary-outlined-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.btn-filled-secondary {
+  background-color: var(--environment-button-secondary-filled-secondary);
+  color: var(--text-button-text-secondary);
+  border: none;
+  border-radius: var(--radius-4);
+  cursor: pointer;
+
+  &:hover { background-color: var(--environment-button-secondary-filled-secondary-hover); }
+  &:focus { background-color: var(--environment-button-secondary-filled-secondary-focus); }
+  &:disabled, &.disabled {
+    background-color: var(--environment-button-secondary-filled-secondary-disabled);
+    color: var(--text-button-text-secondary-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.btn-outlined-secondary {
+  background-color: transparent;
+  color: var(--text-button-text-secondary-outline);
+  border: var(--stroke-1) solid var(--environment-button-secondary-outline-secondary-outline);
+  border-radius: var(--radius-4);
+  cursor: pointer;
+
+  &:hover { border-color: var(--environment-button-secondary-outline-secondary-outline-hover); }
+  &:focus { border-color: var(--environment-button-secondary-outline-secondary-outline-focus); }
+  &:disabled, &.disabled {
+    border-color: var(--environment-button-secondary-outline-secondary-outline-disabled);
+    color: var(--text-button-text-secondary-outline-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--text-button-text-link);
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:disabled, &.disabled {
+    color: var(--text-button-text-link-disabled);
+    cursor: not-allowed;
+  }
+}

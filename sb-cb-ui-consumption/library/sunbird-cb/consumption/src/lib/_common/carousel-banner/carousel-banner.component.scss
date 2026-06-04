@@ -1,0 +1,460 @@
+// ─── Design tokens ────────────────────────────────────────────────────────────
+$cb-primary:          #1b4ca1;
+$cb-primary-dark:     #143a80;
+$cb-white:            #ffffff;
+
+$cb-nav-bg:           rgba(0, 0, 0, 0.45);
+$cb-nav-hover-bg:     rgba(0, 0, 0, 0.65);
+$cb-nav-icon-color:   #ffffff;
+$cb-nav-size:         32px;
+$cb-nav-icon-size:    18px;
+$cb-nav-shadow:       none;
+$cb-nav-shadow-hover: none;
+
+$cb-dot-inactive: var(--text-system-text-disabled);
+$cb-dot-active:   var(--text-bandw-black-display);
+
+$cb-overlay-gradient: linear-gradient(
+  to right,
+  rgba(0, 0, 0, 0.65) 0%,
+  rgba(0, 0, 0, 0.1) 60%,
+  transparent 100%
+);
+
+// ─── Size map ─────────────────────────────────────────────────────────────────
+$banner-sizes: (
+  'xs': 140px,
+  'sm': 200px,
+  'md': 320px,
+  'lg': 480px,
+  'xl': 600px,
+);
+
+// ─── Host ─────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+  width: 100%;
+}
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
+.ws-carousel {
+  position: relative;
+  width: 100%;
+  user-select: none;
+
+  // ── Peek variant ──────────────────────────────────────────────────────
+  // When peekPercent > 0 the root clips overflow (so the peeked slide
+  // doesn't bleed out of the widget) while the track-wrapper lets the
+  // overflowing slides show through.
+  &--peek {
+    overflow: hidden;
+
+    .ws-carousel__track-wrapper {
+      overflow: visible;
+    }
+
+    // When peek + middle-outside nav are combined, keep track-wrapper
+    // clipped so slides don't bleed into the button padding area.
+    // Peek still works because slides are < 100% width — the next slide
+    // is naturally visible within the track-wrapper viewport.
+    &.ws-carousel--nav-middle-outside {
+      .ws-carousel__track-wrapper {
+        overflow: hidden;
+      }
+    }
+  }
+
+  // ── Size variants ─────────────────────────────────────────────────────
+  @each $key, $h in $banner-sizes {
+    &--size-#{$key} {
+      .ws-carousel__slide,
+      .ws-carousel__track-wrapper {
+        height: $h;
+      }
+    }
+  }
+
+  // ── Outer wrapper ─────────────────────────────────────────────────────
+  // Only used for middle-outside to add lateral space for outside buttons.
+  &__outer {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    &--with-outside-nav {
+      padding: 0 ($cb-nav-size + 10px);
+
+      .ws-carousel__nav--outside {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+
+        &.ws-carousel__nav--prev { left: 0; }
+        &.ws-carousel__nav--next { right: 0; }
+      }
+    }
+  }
+
+  // ── Track ─────────────────────────────────────────────────────────────
+  &__track-wrapper {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    border-radius: 12px;
+    height: 480px; // default, overridden by size variants
+  }
+
+  &__track {
+    display: flex;
+    height: 100%;
+    gap: 12px;
+    will-change: transform;
+    transition: none; // overridden by fx variants
+  }
+
+  // ── Slide ─────────────────────────────────────────────────────────────
+  &__slide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+
+    &--clickable { cursor: pointer; }
+  }
+
+  // ── Transition effect variants ─────────────────────────────────────────
+  &--fx-none  &__track { transition: none; }
+  &--fx-slide &__track { transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1); }
+
+  &--fx-fade &__track  { transition: none; position: relative; }
+  &--fx-fade &__slide  {
+    position: absolute;
+    inset: 0;
+    flex: none;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    pointer-events: none;
+    &--active { opacity: 1; pointer-events: auto; }
+  }
+
+  // Suppresses transition during wrap-around instant jump
+  &__track--no-transition { transition: none !important; }
+
+  // ── Banner image ──────────────────────────────────────────────────────
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+  }
+
+  // ── Overlay ───────────────────────────────────────────────────────────
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: $cb-overlay-gradient;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 3rem;
+    pointer-events: none;
+
+    // ── 9-position modifiers ─────────────────────────────────────────
+    &--top-left     { justify-content: flex-start; align-items: flex-start; }
+    &--top-middle   { justify-content: flex-start; align-items: center;     text-align: center; }
+    &--top-right    { justify-content: flex-start; align-items: flex-end;   text-align: right; }
+    &--middle-left  { justify-content: center;     align-items: flex-start; }
+    &--middle       { justify-content: center;     align-items: center;     text-align: center; }
+    &--middle-right { justify-content: center;     align-items: flex-end;   text-align: right; }
+    &--bottom-left  { justify-content: flex-end;   align-items: flex-start; }
+    &--bottom-middle{ justify-content: flex-end;   align-items: center;     text-align: center; }
+    &--bottom-right { justify-content: flex-end;   align-items: flex-end;   text-align: right; }
+
+    &--top-right, &--middle-right, &--bottom-right {
+      background: linear-gradient(to left, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+    }
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    color: $cb-white;
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(var(--font-size-title-2  ), var(--font-size-heading-2), var(--font-size-heading-1));
+    font-weight: 700;
+    line-height: 1.25;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    max-width: 60%;
+  }
+
+  &__subtitle {
+    margin: 0 0 1.25rem;
+    color: rgba($cb-white, 0.9);
+    font-size: clamp(var(--font-size-body-2), var(--font-size-sub-heading-2), var(--font-size-sub-heading-1));
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 55%;
+  }
+
+  &__cta {
+    align-self: flex-start; // default; overridden by position modifiers below
+    pointer-events: all;
+    padding: 0 20px;
+    height: 36px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    background-color: $cb-primary;
+    color: $cb-white;
+    transition: background-color 200ms ease;
+
+    &:hover { background-color: $cb-primary-dark; }
+
+    // ── Horizontal alignment modifiers ──────────────────────────────
+    &--top-left,    &--bottom-left   { align-self: flex-start; }
+    &--top-middle,  &--bottom-middle { align-self: center;     }
+    &--top-right,   &--bottom-right  { align-self: flex-end;   }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // NAV BUTTON
+  &__nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width:  $cb-nav-size;
+    height: $cb-nav-size;
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background-color: $cb-nav-bg;
+    color: $cb-nav-icon-color;
+    box-shadow: $cb-nav-shadow;
+    cursor: pointer;
+    transition: background-color 200ms ease;
+    outline-offset: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+
+    // ── mat-icon inside the button ──────────────────────────────────
+    // The Material Icons font must be loaded (index.html) for the
+    // ligature "chevron_left" / "chevron_right" to render as glyphs.
+    mat-icon {
+      // Force ligature rendering
+      font-family: 'Material Icons', sans-serif;
+      font-style: normal;
+      font-weight: normal;
+      font-size: $cb-nav-icon-size;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+
+      // Layout
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width:  $cb-nav-icon-size;
+      height: $cb-nav-icon-size;
+      position: static;          // prevent positional drift
+      color: $cb-nav-icon-color;
+      pointer-events: none;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: $cb-nav-hover-bg;
+      box-shadow: $cb-nav-shadow-hover;
+      // NO transform/translate → icon stays perfectly centred
+    }
+
+    &:focus-visible {
+      outline: 2px solid $cb-primary;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // MIDDLE-INSIDE split buttons – pinned to left/right edges of the slide
+  // ─────────────────────────────────────────────────────────────────────
+  &__nav--mid-left,
+  &__nav--mid-right {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+  }
+
+  &__nav--mid-left  { left: 12px; }
+  &__nav--mid-right { right: 12px; }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // CTRL BAR  – rendered BELOW the track for:
+  //   top-left | top-right | bottom-left | bottom-right
+  //
+  // Layout: [<]  [• •pill• •]  [>]
+  // Alignment driven by position modifier class.
+  // ─────────────────────────────────────────────────────────────────────
+  &__ctrl-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+
+    &--top-left,
+    &--bottom-left  { justify-content: flex-start; }
+
+    &--top-middle,
+    &--bottom-middle { justify-content: center; }
+
+    &--top-right,
+    &--bottom-right { justify-content: flex-end; }
+  }
+
+  &__dots-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // DOTS ROW  – center-aligned for middle-outside / middle-inside
+  // ─────────────────────────────────────────────────────────────────────
+  &__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center; // default: bottom-middle
+    gap: 6px;
+    padding: 10px 0 0;
+
+    &--bottom-left   { justify-content: flex-start; }
+    &--bottom-middle { justify-content: center;     }
+    &--bottom-right  { justify-content: flex-end;   }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // DOT PILL  (shared between __dots and __dots-row)
+  // ─────────────────────────────────────────────────────────────────────
+  &__dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: $cb-dot-inactive;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition:
+      background-color 250ms ease,
+      width 250ms ease,
+      border-radius 250ms ease;
+
+    &--active {
+      background-color: $cb-dot-active;
+      width: 22px;
+      border-radius: 4px;
+    }
+
+    &:hover:not(&--active) {
+      background-color: rgba($cb-primary, 0.55);
+    }
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+.ws-carousel--size-xs {
+  .ws-carousel__nav { width: 22px; height: 22px; border-radius: 4px;
+    mat-icon { font-size: 14px; height: 14px; width: 14px; } }
+  .ws-carousel__overlay { padding: 0.5rem 0.75rem; justify-content: center; }
+  .ws-carousel__title {
+    font-size: 0.9rem; max-width: 85%; margin-bottom: 0.2rem;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ws-carousel__subtitle {
+    font-size: 0.75rem; max-width: 85%; margin-bottom: 0.35rem;
+    display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ws-carousel__cta { height: 26px; font-size: 0.7rem; padding: 0 10px; }
+  .ws-carousel__ctrl-bar { gap: 6px; padding-top: 6px; padding-bottom: 6px; }
+  .ws-carousel__dots { padding-top: 6px; }
+}
+
+.ws-carousel--size-sm {
+  .ws-carousel__nav { width: 26px; height: 26px; border-radius: 5px;
+    mat-icon { font-size: 15px; height: 15px; width: 15px; } }
+  .ws-carousel__overlay { padding: 0.75rem 1rem; }
+  .ws-carousel__title { font-size: 1.05rem; max-width: 85%; margin-bottom: 0.3rem; }
+  .ws-carousel__subtitle { font-size: 0.875rem; max-width: 80%; margin-bottom: 0.5rem; }
+  .ws-carousel__cta { height: 30px; font-size: 0.8rem; padding: 0 14px; }
+}
+
+.ws-carousel--size-md {
+  .ws-carousel__nav { width: 28px; height: 28px;
+    mat-icon { font-size: 16px; height: 16px; width: 16px; } }
+  .ws-carousel__overlay { padding: 1rem 1.5rem; }
+  .ws-carousel__title { max-width: 75%; }
+  .ws-carousel__subtitle { max-width: 70%; }
+}
+
+@media (max-width: 768px) {
+  .ws-carousel {
+    &__outer--with-outside-nav {
+      padding: 0;
+      .ws-carousel__nav--outside {
+        &.ws-carousel__nav--prev { left: 6px; }
+        &.ws-carousel__nav--next { right: 6px; }
+      }
+    }
+    &__overlay { padding: 1rem 1.25rem; }
+    &__title, &__subtitle { max-width: 90%; }
+  }
+}
+
+// ─── middle-inside: push overlay content clear of the inside nav arrows ───────
+// Arrow buttons are pinned at left/right: 12px with width $cb-nav-size (32px).
+// We add 60px horizontal padding (32 + 12 + 16 breathing-room) on md/lg/xl.
+
+.ws-carousel--nav-middle-inside {
+  .ws-carousel__overlay {
+    padding-left:  calc(#{$cb-nav-size} + 28px);
+    padding-right: calc(#{$cb-nav-size} + 28px);
+  }
+}
+
+// Smaller buttons on xs/sm → proportionally smaller padding
+.ws-carousel--size-xs.ws-carousel--nav-middle-inside {
+  .ws-carousel__overlay {
+    padding-left:  44px;  // 22px (btn) + 12px (offset) + 10px (gap)
+    padding-right: 44px;
+  }
+}
+
+.ws-carousel--size-sm.ws-carousel--nav-middle-inside {
+  .ws-carousel__overlay {
+    padding-left:  50px;  // 26px (btn) + 12px (offset) + 12px (gap)
+    padding-right: 50px;
+  }
+}

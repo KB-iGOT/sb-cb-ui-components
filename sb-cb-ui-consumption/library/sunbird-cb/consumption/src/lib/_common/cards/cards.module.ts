@@ -37,6 +37,7 @@ import { PipePublicURLModule } from '@sunbird-cb/utils-v2'
 import { AvailableLanguagesComponent } from './available-languages/available-languages.component'
 import { KnowledgeLevelModule } from '../knowledge-level/knowledge-level.module'
 import { BadgeStatsComponent } from './badge-stats/badge-stats.component'
+import { CardCourseComponent } from './card-course/card-course.component'
 
 
 @NgModule({
@@ -56,7 +57,8 @@ import { BadgeStatsComponent } from './badge-stats/badge-stats.component'
         CardProgressPortraitLibComponent,
         CardMdoChannelV1Component,
         AvailableLanguagesComponent,
-        BadgeStatsComponent
+        BadgeStatsComponent,
+        CardCourseComponent
     ],
     imports: [
         CommonModule,
@@ -99,7 +101,8 @@ import { BadgeStatsComponent } from './badge-stats/badge-stats.component'
         CardPortraitExtComponent,
         AvailableLanguagesComponent,
         ProviderCardComponent,
-        BadgeStatsComponent
+        BadgeStatsComponent,
+        CardCourseComponent
     ]
 })
 export class CardsModule { }
