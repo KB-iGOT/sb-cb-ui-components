@@ -1,0 +1,79 @@
+<!-- ═══════════════════════════════════════════════════
+     Spotlight Cards Widget
+     • Configurable heading  (top-left)
+     • Accordion toggle btn  (top-right)
+     • Tiled cards: icon + label + click redirect
+     ═══════════════════════════════════════════════════ -->
+<!-- ── SKELETON STATE ──────────────────────────────────────── -->
+@if (isLoading) {
+<section class="ws-spotlight" aria-busy="true" aria-label="Loading Spotlight section">
+
+  <div class="ws-spotlight__header">
+    <div class="ws-sk ws-sk--title" role="presentation"></div>
+    <div class="ws-sk ws-sk--toggle" role="presentation"></div>
+  </div>
+
+  <div class="ws-spotlight__grid" aria-hidden="true">
+    @for (item of skeletonItems; track item) {
+    <div class="ws-spotlight__card ws-spotlight__card--skeleton">
+      <div class="ws-sk ws-sk--arrow"></div>
+      <div class="ws-sk ws-sk--icon"></div>
+      <div class="ws-sk ws-sk--label"></div>
+    </div>
+    }
+  </div>
+
+</section>
+}
+
+<!-- ── CONTENT STATE ───────────────────────────────────────── -->
+@if (!isLoading) {<section class="ws-spotlight" aria-label="Spotlight section">
+
+  <!-- ── Header row ───────────────────────────────────── -->
+  <div class="ws-spotlight__header">
+    <h2 class="ws-spotlight__title">{{ heading }}</h2>
+
+    @if (showToggle) {
+    <button type="button" class="ws-spotlight__toggle" [attr.aria-expanded]="!isCollapsed"
+      [attr.aria-label]="isCollapsed ? 'Expand ' + heading : 'Collapse ' + heading" (click)="toggle()">
+      <mat-icon class="ws-spotlight__toggle-icon" [class.ws-spotlight__toggle-icon--collapsed]="isCollapsed"
+        aria-hidden="true">
+        expand_more
+      </mat-icon>
+    </button>
+    }
+  </div>
+
+  <!-- ── Cards grid ─────────────────────────────────── -->
+  @if (!isCollapsed) {
+  <div class="ws-spotlight__grid" role="list">
+    @for (card of cards; track card.label) {
+    <div class="ws-spotlight__card" role="listitem">
+
+      <!-- Arrow chip – the ONLY clickable area that redirects -->
+      <div class="ws-spotlight__card-top">
+        <button type="button" class="ws-spotlight__card-arrow" [attr.aria-label]="'Open ' + card.label"
+          (click)="navigate(card)">
+          <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- Icon / illustration (wrapped so space is always reserved) -->
+      <div class="ws-spotlight__card-body">
+        @if (card.iconUrl) {
+        <div class="ws-spotlight__card-icon">
+          <img [src]="card.iconUrl" [alt]="card.iconAlt || card.label" class="ws-spotlight__card-img" loading="lazy" />
+        </div>
+        }
+      </div>
+
+      <!-- Label -->
+      <span class="ws-spotlight__card-label">{{ card.label }}</span>
+
+    </div>
+    }
+  </div>
+  }
+
+</section>
+}

@@ -10,7 +10,8 @@ import { TopLearnersModule } from './_common/top-learners/top-learners.module'
 import { CbpPlanModule } from './_common/cbp-plan/cbp-plan.module'
 import { CompetencySummaryModule } from './_common/competency-summary/competency-summary.module'
 import { AssessmentModule } from './_common/assessments/assessment.module'
-import { PeerValidationLibModule } from './_common/peer-validation/peer-validation-lib.module';
+import { PeerValidationLibModule } from './_common/peer-validation/peer-validation-lib.module'
+import { SpotlightCardsModule } from './_common/spotlight-cards/spotlight-cards.module'
 
 @NgModule({
   declarations: [ConsumptionComponent],
@@ -29,7 +30,8 @@ import { PeerValidationLibModule } from './_common/peer-validation/peer-validati
     CbpPlanModule,
     CompetencySummaryModule,
     AssessmentModule,
-    PeerValidationLibModule
+    PeerValidationLibModule,
+    SpotlightCardsModule
   ],
 })
 export class ConsumptionModule { }

@@ -1,0 +1,460 @@
+/* ── Dimensions ─────────────────────────────────────────── */
+$cc-width : 255px;
+$cc-height : 322px;
+$cc-img-h : 140px;
+$cc-body-h : $cc-height - $cc-img-h;
+/* 182px */
+$cc-radius : 10px;
+$cc-body-pad : 10px 12px;
+
+/* ── Colour tokens ──────────────────────────────────────── */
+$cyan-primary : #00bcd4;
+$amber : #f5a623;
+$chip-bg : #f1f1f1;
+$chip-text : #333;
+$apar-bg : #e8f5e9;
+$apar-text : #388e3c;
+$ca-bg : #e3f2fd;
+$ca-text : #1565c0;
+$overdue-red : #d32f2f;
+$done-green : #388e3c;
+$white-80 : rgba(255, 255, 255, 0.88);
+
+/* ═══════════════════════════════════════════════════════════
+   Base card
+   ═══════════════════════════════════════════════════════════ */
+.cc-card {
+  display: flex;
+  flex-direction: column;
+  width: $cc-width;
+  height: $cc-height;
+  /* ← FIXED – never changes */
+  border-radius: $cc-radius;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  background: var(--environment-application-backgrounds-card-background-1);
+  cursor: pointer;
+  font-family: inherit;
+  box-sizing: border-box;
+  border: 1px solid var(--border-default);
+
+  &--expired {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ── MEDIA (image section) ────────────────────────────── */
+  &__media {
+    position: relative;
+    flex: 0 0 $cc-img-h;
+    height: $cc-img-h;
+    overflow: hidden;
+    background: #e0e0e0;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Badge container – bottom-left of image, stacks multiple badges vertically */
+  &__badges {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* Left-corner badge – all variants use the same light pill style */
+  &__left-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #E8EDF6;
+    color: #000000;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  &__badge-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Duration chip – bottom-right of image */
+  &__duration {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  &__dur-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+    line-height: 12px;
+  }
+
+
+  /* ── BODY ─────────────────────────────────────────────── */
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: $cc-body-pad;
+    overflow: hidden;
+    background: var(--environment-application-backgrounds-card-background-1);
+  }
+
+  /* Row 1 – type chip + rating (fixed 26px) */
+  &__type-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 26px;
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  &__type-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 14px;
+    padding: 2px 10px;
+    background: $amber;
+    max-width: 70%;
+    overflow: hidden;
+  }
+
+  &__type-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a1a1a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__rating {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-bandw-black-sub-heading);
+    /* rating number – black */
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  &__star-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    color: $amber;
+    /* star stays amber */
+  }
+
+  /* Row 2 – title (fixed 46px = 2 lines × 23px) */
+  &__title-wrap {
+    height: 46px;
+    flex-shrink: 0;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  &__title {
+    margin: 0;
+    /* Defensive: reset any inherited/global white-space or word-wrap overrides */
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 23px;
+    color: var(--text-bandw-black-sub-heading);
+    /* 2-line clamp – works in all modern browsers (Chrome, Firefox, Safari, Edge) */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Row 3 – chips: APAR | CA | level (fixed 32px, always reserves space) */
+  &__chips-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: $chip-bg;
+    color: $chip-text;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &--apar {
+      /* same grey as base chip */
+    }
+
+    &--ca {
+      /* same grey as base chip */
+    }
+
+    &--level {
+      /* same grey as base chip */
+    }
+
+    &--level-beginner {
+      /* same grey as base chip */
+    }
+
+    &--level-intermediate {
+      /* same grey as base chip */
+    }
+
+    &--level-advanced {
+      /* same grey as base chip */
+    }
+  }
+
+  .cc-chip-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .cc-chip-icon--apar,
+  .cc-chip-icon--ca {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Row 4 – org + status (fixed 28px, always reserves space) */
+  &__org-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  &__org-logo {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #fff;
+    border: 3px solid #f5f5f5;
+  }
+
+  &__org-name {
+    font-size: 11px;
+    color:var(--text-bandw-black-sub-heading);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__status {
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &--overdue {
+      color: $overdue-red;
+    }
+
+    &--done {
+      color: $done-green;
+    }
+  }
+
+  /* Footer: org+status – sticks to card bottom */
+  &__footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Divider between chips row and org row */
+  &__divider {
+    height: 1px;
+    background: var(--surface-secondary);
+    margin: 4px 0;
+    flex-shrink: 0;
+  }
+
+  /* ── Language ribbon – premium diagonal corner ribbon, top-right ───── */
+  &__lang-pill {
+    position: absolute;
+    top: 31px;
+    right: -47px;
+    left: auto;
+    width: 182px;
+    transform: rotate(45deg);
+    transform-origin: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      to right,
+      #7c3aed 0%,
+      #5b21b6 30%,
+      #4338ca 60%,
+      #2563eb 100%
+    );
+    padding: 3px 0;
+    z-index: 3;
+    overflow: visible;
+    clip-path: none;
+    pointer-events: none;
+    box-shadow:
+      0 2px 8px rgba(79, 70, 229, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  &__lang-pill-icon {
+    display: none;
+  }
+
+  &__lang-pill-text {
+    font-size: 9.5px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow:
+      0 0 4px rgba(0, 0, 0, 0.9),
+      0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Skeleton loader helpers
+   ═══════════════════════════════════════════════════════════ */
+.cc-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: cc-shimmer 1.4s infinite;
+  border-radius: 4px;
+
+  &--chip {
+    width: 60px;
+    height: 22px;
+    border-radius: 12px;
+  }
+
+  &--rating {
+    width: 40px;
+    height: 14px;
+  }
+
+  &--line {
+    height: 13px;
+  }
+
+  &--avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Image placeholder – pulse "breathing" animation, icon centred */
+  &--img-placeholder {
+    background: #e8e8e8;
+    animation: cc-breathe 1.8s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+  }
+}
+
+.cc-skeleton__img-icon {
+  width: 44px;
+  height: 44px;
+  color: #9e9e9e;
+  /* drives currentColor on the stroke path */
+  opacity: 0.7;
+}
+
+.cc-card--skeleton .cc-card__media {
+  background: #e8e8e8;
+}
+
+@keyframes cc-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes cc-breathe {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* Tooltip for truncated titles */
+::ng-deep .cc-title-tooltip.mat-mdc-tooltip {
+  font-size: 12px;
+  max-width: 220px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}

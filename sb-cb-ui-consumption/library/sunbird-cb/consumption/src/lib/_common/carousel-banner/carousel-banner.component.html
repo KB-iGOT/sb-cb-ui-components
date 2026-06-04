@@ -1,0 +1,238 @@
+@if (loading) {
+<div role="status" class="animate-pulse w-full">
+
+  <!-- ── TOP ctrl-bar skeleton (top-left | top-middle | top-right) ────── -->
+  @if (isTop) {
+  <div class="flex items-center gap-2 pb-2" [ngClass]="skeletonCtrlBarJustify">
+    @if (showArrows) {
+    <div class="w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600 flex-shrink-0"></div>
+    }
+    @if (showDots) {
+    <div class="w-5 h-2 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+    <div class="w-2 h-2 bg-gray-200 rounded-full dark:bg-gray-600"></div>
+    <div class="w-2 h-2 bg-gray-200 rounded-full dark:bg-gray-600"></div>
+    }
+    @if (showArrows) {
+    <div class="w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600 flex-shrink-0"></div>
+    }
+  </div>
+  }
+
+  <!-- ── Image row (arrows outside flank the image; arrows inside are pinned inside) ── -->
+  <div class="flex items-center gap-2" [ngClass]="skeletonHeightClass">
+
+    <!-- Prev: middle-outside skeleton arrow -->
+    @if (showArrows && isOutside) {
+    <div class="w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600 flex-shrink-0"></div>
+    }
+
+    <!-- Image placeholder -->
+    <div class="relative flex items-center justify-center flex-1 h-full bg-gray-300 rounded-xl dark:bg-gray-700">
+      <svg class="w-11 h-11 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor" viewBox="0 0 20 18">
+        <path
+          d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
+      </svg>
+
+      <!-- Prev/Next: middle-inside skeleton arrows pinned to edges -->
+      @if (showArrows && isMiddleInside) {
+      <div class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600"></div>
+      <div class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600"></div>
+      }
+    </div>
+
+    <!-- Next: middle-outside skeleton arrow -->
+    @if (showArrows && isOutside) {
+    <div class="w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600 flex-shrink-0"></div>
+    }
+  </div>
+
+  <!-- ── Dots row (middle-outside | middle-inside) ─────────────────── -->
+  @if (showDots && isMiddlePosition) {
+  <div class="flex gap-2 pt-3" [ngClass]="skeletonDotsJustify">
+    <div class="w-5 h-2 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+    <div class="w-2 h-2 bg-gray-200 rounded-full dark:bg-gray-600"></div>
+    <div class="w-2 h-2 bg-gray-200 rounded-full dark:bg-gray-600"></div>
+  </div>
+  }
+
+  <!-- ── BOTTOM ctrl-bar skeleton (bottom-left | bottom-middle | bottom-right) ── -->
+  @if (isBottom) {
+  <div class="flex items-center gap-2 pt-2" [ngClass]="skeletonCtrlBarJustify">
+    @if (showArrows) {
+    <div class="w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600 flex-shrink-0"></div>
+    }
+    @if (showDots) {
+    <div class="w-5 h-2 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+    <div class="w-2 h-2 bg-gray-200 rounded-full dark:bg-gray-600"></div>
+    <div class="w-2 h-2 bg-gray-200 rounded-full dark:bg-gray-600"></div>
+    }
+    @if (showArrows) {
+    <div class="w-8 h-8 bg-gray-200 rounded-md dark:bg-gray-600 flex-shrink-0"></div>
+    }
+  </div>
+  }
+
+  <span class="sr-only">Loading...</span>
+</div>
+}
+
+@if (!loading && banners && banners.length > 0) {
+<div class="ws-carousel" [ngClass]="hostClasses" role="region" aria-label="Promotional Banners"
+  aria-roledescription="carousel">
+  <!-- Screen-reader live announcer: fires whenever currentIndex changes -->
+  <span class="sr-only" aria-live="polite" aria-atomic="true">Slide {{ currentIndex + 1 }} of {{ banners.length
+    }}</span>
+  <!-- TOP CTRL BAR  (top-left | top-right) – rendered ABOVE the track -->
+  @if (isTop) {
+  <div class="ws-carousel__ctrl-bar" [ngClass]="'ws-carousel__ctrl-bar--' + navButtonPosition">
+    @if (showArrows && banners.length > 1) {
+    <button type="button" class="ws-carousel__nav" aria-label="Previous banner" [disabled]="banners.length <= 1"
+      (click)="prev()">
+      <mat-icon aria-hidden="true">chevron_left</mat-icon>
+    </button>
+    }
+    @if (showDots && banners.length > 1) {
+    <div class="ws-carousel__dots-row" role="tablist" aria-label="Slide indicators">
+      @for (item of banners; track item.bannerUrl; let i = $index) {
+      <button type="button" class="ws-carousel__dot" [class.ws-carousel__dot--active]="i === currentIndex" role="tab"
+        [attr.aria-selected]="i === currentIndex" [attr.aria-label]="'Go to slide ' + (i + 1)"
+        (click)="goTo(i)"></button>
+      }
+    </div>
+    }
+    @if (showArrows && banners.length > 1) {
+    <button type="button" class="ws-carousel__nav" aria-label="Next banner" [disabled]="banners.length <= 1"
+      (click)="next()">
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+    }
+  </div>
+  }
+  <!-- OUTER WRAPPER  – lateral padding for middle-outside only -->
+  <div class="ws-carousel__outer" [class.ws-carousel__outer--with-outside-nav]="isOutside">
+
+    <!-- Prev: middle-outside -->
+    @if (showArrows && isOutside) {
+    <button type="button" class="ws-carousel__nav ws-carousel__nav--outside ws-carousel__nav--prev"
+      aria-label="Previous banner" [disabled]="banners.length <= 1" (click)="prev()">
+      <mat-icon aria-hidden="true">chevron_left</mat-icon>
+    </button>
+    }
+
+    <!-- ============================================================
+         SLIDE TRACK
+    ============================================================ -->
+    <div class="ws-carousel__track-wrapper" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
+      (wheel)="onWheel($event)">
+      <div class="ws-carousel__track" [class.ws-carousel__track--no-transition]="skipTransition"
+        [style.transform]="trackTransform">
+        @for (item of banners; track item.bannerUrl; let i = $index) {
+        <div class="ws-carousel__slide" [class.ws-carousel__slide--active]="i === currentIndex" role="group"
+          aria-roledescription="slide" [attr.aria-label]="'Slide ' + (i + 1) + ' of ' + banners.length"
+          [attr.aria-hidden]="i !== currentIndex" (click)="onBannerClick(item)"
+          [class.ws-carousel__slide--clickable]="!!item.redirectionUrl" [style.flex]="slideFlexBasis"
+          [style.width]="slideFlexBasis ? 'auto' : null">
+          <!-- Banner image -->
+          <img class="ws-carousel__image" [src]="item.bannerUrl" [alt]="item.altText || 'Banner ' + (i + 1)"
+            loading="lazy" />
+
+          <!-- Overlay: title / subtitle / CTA -->
+          @if (item.title || item.subtitle || item.ctaLabel) {
+          <div class="ws-carousel__overlay" [ngClass]="overlayClass(item)">
+
+            @if (item.ctaLabel && isCtaTop(item)) {
+            <button type="button" class="ws-carousel__cta" [ngClass]="'ws-carousel__cta--' + resolvedCtaPosition(item)"
+              [style.cursor]="item.redirectionUrl ? 'pointer' : 'default'"
+              [attr.aria-label]="item.ctaLabel + (item.title ? ': ' + item.title : '')"
+              (click)="$event.stopPropagation(); onBannerClick(item)">
+              {{ item.ctaLabel }}
+            </button>
+            }
+
+            @if (item.title) {
+            <h2 class="ws-carousel__title">{{ item.title }}</h2>
+            }
+            @if (item.subtitle) {
+            <p class="ws-carousel__subtitle">{{ item.subtitle }}</p>
+            }
+
+            @if (item.ctaLabel && !isCtaTop(item)) {
+            <button type="button" class="ws-carousel__cta" [ngClass]="'ws-carousel__cta--' + resolvedCtaPosition(item)"
+              [style.cursor]="item.redirectionUrl ? 'pointer' : 'default'"
+              [attr.aria-label]="item.ctaLabel + (item.title ? ': ' + item.title : '')"
+              (click)="$event.stopPropagation(); onBannerClick(item)">
+              {{ item.ctaLabel }}
+            </button>
+            }
+          </div>
+          }
+
+        </div>
+        }
+      </div>
+
+      <!-- ============================================================
+           MIDDLE-INSIDE – single pair of arrows pinned to track-wrapper edges
+           (moved outside @for so peek-visible slides don't duplicate them)
+      ============================================================ -->
+      @if (showArrows && isMiddleInside && banners.length > 1) {
+      <button type="button" class="ws-carousel__nav ws-carousel__nav--mid-left" aria-label="Previous banner"
+        [disabled]="banners.length <= 1" (click)="prev()">
+        <mat-icon aria-hidden="true">chevron_left</mat-icon>
+      </button>
+      <button type="button" class="ws-carousel__nav ws-carousel__nav--mid-right" aria-label="Next banner"
+        [disabled]="banners.length <= 1" (click)="next()">
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </button>
+      }
+    </div><!-- /track-wrapper -->
+
+    <!-- Next: middle-outside -->
+    @if (showArrows && isOutside) {
+    <button type="button" class="ws-carousel__nav ws-carousel__nav--outside ws-carousel__nav--next"
+      aria-label="Next banner" [disabled]="banners.length <= 1" (click)="next()">
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+    }
+  </div>
+
+  <!-- BOTTOM CTRL BAR  (bottom-left | bottom-right) – below the track -->
+  @if (isBottom) {
+  <div class="ws-carousel__ctrl-bar" [ngClass]="'ws-carousel__ctrl-bar--' + navButtonPosition">
+    @if (showArrows && banners.length > 1) {
+    <button type="button" class="ws-carousel__nav" aria-label="Previous banner" [disabled]="banners.length <= 1"
+      (click)="prev()">
+      <mat-icon aria-hidden="true">chevron_left</mat-icon>
+    </button>
+    }
+    @if (showDots && banners.length > 1) {
+    <div class="ws-carousel__dots-row" role="tablist" aria-label="Slide indicators">
+      @for (item of banners; track item.bannerUrl; let i = $index) {
+      <button type="button" class="ws-carousel__dot" [class.ws-carousel__dot--active]="i === currentIndex" role="tab"
+        [attr.aria-selected]="i === currentIndex" [attr.aria-label]="'Go to slide ' + (i + 1)"
+        (click)="goTo(i)"></button>
+      }
+    </div>
+    }
+    @if (showArrows && banners.length > 1) {
+    <button type="button" class="ws-carousel__nav" aria-label="Next banner" [disabled]="banners.length <= 1"
+      (click)="next()">
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+    }
+  </div>
+  }
+
+  <!-- DOTS ONLY (middle-outside | middle-inside) top/bottom positions use ctrl-bar above -->
+  @if (isMiddlePosition && showDots && banners.length > 1) {
+  <div class="ws-carousel__dots" [ngClass]="'ws-carousel__dots--' + dotsPosition" role="tablist"
+    aria-label="Slide indicators">
+    @for (item of banners; track item.bannerUrl; let i = $index) {
+    <button type="button" class="ws-carousel__dot" [class.ws-carousel__dot--active]="i === currentIndex" role="tab"
+      [attr.aria-selected]="i === currentIndex" [attr.aria-label]="'Go to slide ' + (i + 1)" (click)="goTo(i)"></button>
+    }
+  </div>
+  }
+</div>
+}
