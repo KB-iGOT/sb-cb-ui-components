@@ -37,6 +37,8 @@ export interface PillConfig {
   translateLabel: boolean
   visibilityMode: VisibilityMode
   contentConfig: ContentConfig
+  pillDescription?: string[]
+  pillImageUrl?: string
 }
 
 export interface TabConfig {

@@ -1,7 +1,7 @@
 <section class="carousel-container" role="region" aria-roledescription="carousel" aria-label="Content carousel"
   (keydown)="onKeydown($event)" tabindex="0">
   <!-- Viewport -->
-  <div class="carousel-viewport" #viewport>
+  <div class="carousel-viewport py-2" #viewport>
     <div class="carousel-track" [style.transform]="'translateX(' + translateX() + 'px)'" [style.gap.px]="gap()">
       @for (item of items(); track trackByIndex($index)) {
       <div class="carousel-item" [style.width.px]="cardWidth()" [style.min-width.px]="cardWidth()"
@@ -16,10 +16,11 @@
 
   <!-- Navigation & Dots -->
   @if (showNavigation() || showDots()) {
-  <div class="carousel-controls">
+  <div class="carousel-controls flex items-center justify-start mt-4 gap-3">
     @if (showNavigation()) {
-    <button class="carousel-nav-btn carousel-nav-prev" [class.disabled]="!canGoPrevious()" [disabled]="!canGoPrevious()"
-      (click)="goPrevious()" aria-label="Previous page" type="button">
+    <button class="carousel-nav-btn carousel-nav-prev flex items-center justify-center"
+      [class.disabled]="!canGoPrevious()" [disabled]="!canGoPrevious()" (click)="goPrevious()"
+      aria-label="Previous page" type="button">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round" />
@@ -38,8 +39,8 @@
     }
 
     @if (showNavigation()) {
-    <button class="carousel-nav-btn carousel-nav-next" [class.disabled]="!canGoNext()" [disabled]="!canGoNext()"
-      (click)="goNext()" aria-label="Next page" type="button">
+    <button class="carousel-nav-btn carousel-nav-next flex items-center justify-center" [class.disabled]="!canGoNext()"
+      [disabled]="!canGoNext()" (click)="goNext()" aria-label="Next page" type="button">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round" />

@@ -68,15 +68,10 @@
 
       <!-- View All Button -->
       @if (shouldShowViewAll()) {
-      <button mat-stroked-button color="primary" class="view-all-btn w-full" (click)="toggleViewAll()"
-        [attr.aria-label]="isExpanded() ? 'Show fewer statistics' : 'View all statistics'"
-        [attr.aria-expanded]="isExpanded()">
-        <mat-icon class="mr-1" aria-hidden="true">
-          {{ isExpanded() ? 'expand_less' : 'expand_more' }}
-        </mat-icon>
-        {{ isExpanded() ? ('Show Less' | translate) : (section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
-        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar'))) }}
-      </button>
+      <a class="view-all-link" (click)="onViewAllClick()" [attr.aria-label]="'View all ' + section?.sectionTitle">
+        {{ section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
+        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar')) }}
+      </a>
       }
     </div>
   </mat-expansion-panel>
@@ -127,15 +122,10 @@
 
       <!-- View All Button -->
       @if (shouldShowViewAll()) {
-      <button mat-stroked-button color="primary" class="view-all-btn w-full" (click)="toggleViewAll()"
-        [attr.aria-label]="isExpanded() ? 'Show fewer statistics' : 'View all statistics'"
-        [attr.aria-expanded]="isExpanded()">
-        <mat-icon class="mr-1" aria-hidden="true">
-          {{ isExpanded() ? 'expand_less' : 'expand_more' }}
-        </mat-icon>
-        {{ isExpanded() ? ('Show Less' | translate) : (section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
-        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar'))) }}
-      </button>
+      <a class="view-all-link" (click)="onViewAllClick()" [attr.aria-label]="'View all ' + section?.sectionTitle">
+        {{ section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
+        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar')) }}
+      </a>
       }
     </div>
   </div>

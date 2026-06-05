@@ -50,4 +50,9 @@ export class ContentStripWithPillsComponent {
     const active = this.activePillKey() || this.defaultPillKey()
     return active === pillKey
   }
+
+  getActivePill(): PillConfig | undefined {
+    const active = this.activePillKey() || this.defaultPillKey()
+    return this.visiblePills()?.find(p => p?.pillKey === active)
+  }
 }
