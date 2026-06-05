@@ -1,8 +1,8 @@
 <div class="w-full">
   <!-- Header -->
-  <div class="flex items-center justify-between cursor-pointer px-4 py-3 bg-white rounded-t-lg"
-    (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()" tabindex="0"
-    role="button" [attr.aria-expanded]="isExpanded()">
+  <div class="flex items-center justify-between cursor-pointer px-4 py-3 accordian-header" (click)="toggleExpanded()"
+    (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()" tabindex="0" role="button"
+    [attr.aria-expanded]="isExpanded()">
     <div class="section-header">{{ header() }}</div>
     <div class="flex items-center justify-center arrow-icon-container">
       <mat-icon class="transition-transform duration-300" [class.rotate-180]="isExpanded()">

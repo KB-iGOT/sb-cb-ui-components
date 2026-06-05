@@ -11,3 +11,113 @@
     display: none;
   }
 }
+
+.pills-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+// Inactive Pill
+.pill-inactive {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 32px;
+  border: 1px solid var(--environment-border-and-divider-default-1, rgba(0, 0, 0, 0.16));
+  font-size: var(--font-size-body-2);
+  color: var(--text-bandw-black-sub-heading);
+  background-color: transparent;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: colors 200ms;
+  cursor: pointer;
+}
+
+// Active Pill - Expanded Card
+.pill-active {
+  width: 254px;
+  height: 88px;
+  border-radius: 24px;
+  background-color: var(--color-primary-500);
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border-bottom: 5px solid var(--color-secondary-500);
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    height: 100%;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: var(--font-size-sub-heading-2);
+    color: var(--text-button-text-primary-white);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__descriptions {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color: var(--text-button-text-primary-white);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__image {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  &__border {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 0 0 24px 24px;
+    background-color: var(--color-secondary-500);
+  }
+
+  &__arrow {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--color-secondary-500);
+  }
+}
