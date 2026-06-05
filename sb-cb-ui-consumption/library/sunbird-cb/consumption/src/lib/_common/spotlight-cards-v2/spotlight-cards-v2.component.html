@@ -5,7 +5,7 @@
      • Tiled cards: icon + label + click redirect
      ═══════════════════════════════════════════════════ -->
 <!-- ── SKELETON STATE ──────────────────────────────────────── -->
-@if (isLoading) {
+@if (resolvedIsLoading()) {
 <section class="ws-spotlight" aria-busy="true" aria-label="Loading Spotlight section">
 
   <div class="ws-spotlight__header">
@@ -14,7 +14,7 @@
   </div>
 
   <div class="ws-spotlight__grid" aria-hidden="true">
-    @for (item of skeletonItems; track item) {
+    @for (item of skeletonItems(); track item) {
     <div class="ws-spotlight__card ws-spotlight__card--skeleton">
       <div class="ws-sk ws-sk--arrow"></div>
       <div class="ws-sk ws-sk--icon"></div>
@@ -27,16 +27,16 @@
 }
 
 <!-- ── CONTENT STATE ───────────────────────────────────────── -->
-@if (!isLoading) {<section class="ws-spotlight" aria-label="Spotlight section">
+@if (!resolvedIsLoading()) {<section class="ws-spotlight" aria-label="Spotlight section">
 
   <!-- ── Header row ───────────────────────────────────── -->
   <div class="ws-spotlight__header">
-    <h2 class="ws-spotlight__title">{{ heading }}</h2>
+    <h2 class="ws-spotlight__title">{{ resolvedHeading() }}</h2>
 
-    @if (showToggle) {
-    <button type="button" class="ws-spotlight__toggle" [attr.aria-expanded]="!isCollapsed"
-      [attr.aria-label]="isCollapsed ? 'Expand ' + heading : 'Collapse ' + heading" (click)="toggle()">
-      <mat-icon class="ws-spotlight__toggle-icon" [class.ws-spotlight__toggle-icon--collapsed]="isCollapsed"
+    @if (resolvedShowToggle()) {
+    <button type="button" class="ws-spotlight__toggle" [attr.aria-expanded]="!isCollapsed()"
+      [attr.aria-label]="isCollapsed() ? 'Expand ' + resolvedHeading() : 'Collapse ' + resolvedHeading()" (click)="toggle()">
+      <mat-icon class="ws-spotlight__toggle-icon" [class.ws-spotlight__toggle-icon--collapsed]="isCollapsed()"
         aria-hidden="true">
         expand_more
       </mat-icon>
@@ -45,9 +45,9 @@
   </div>
 
   <!-- ── Cards grid ─────────────────────────────────── -->
-  @if (!isCollapsed) {
+  @if (!isCollapsed()) {
   <div class="ws-spotlight__grid" role="list">
-    @for (card of cards; track card.label) {
+    @for (card of resolvedCards(); track card.label) {
     <div class="ws-spotlight__card" role="listitem">
 
       <!-- Arrow chip – the ONLY clickable area that redirects -->

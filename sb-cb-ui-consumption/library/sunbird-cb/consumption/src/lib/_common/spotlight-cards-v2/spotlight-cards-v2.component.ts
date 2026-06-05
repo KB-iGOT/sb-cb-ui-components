@@ -1,0 +1,112 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  signal,
+  untracked,
+} from '@angular/core'
+import { MatIconModule } from '@angular/material/icon'
+import { Router } from '@angular/router'
+import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { NsSpotlightCardsV2 } from './spotlight-cards-v2.model'
+
+@Component({
+  selector: 'ws-widget-spotlight-cards-v2',
+  standalone: true,
+  imports: [MatIconModule],
+  templateUrl: './spotlight-cards-v2.component.html',
+  styleUrls: ['./spotlight-cards-v2.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class WsWidgetSpotlightCardsV2Component {
+
+  /** Section heading shown at the top-left. */
+  heading = input<string>('In Spotlight')
+
+  /** Cards to render. */
+  cards = input<NsSpotlightCardsV2.ISpotlightCard[]>([])
+
+  /** Whether the accordion toggle button is visible. */
+  showToggle = input<boolean>(true)
+
+  /** Initial collapsed state. */
+  collapsed = input<boolean>(false)
+
+  /** Accept the full config object as an alternative to individual inputs. */
+  config = input<NsSpotlightCardsV2.ISpotlightCardsConfig | null>(null)
+
+  /** Show skeleton loading state instead of real cards. */
+  isLoading = input<boolean>(false)
+
+  /** Number of skeleton placeholder cards to render while loading. */
+  skeletonCount = input<number>(4)
+
+  // Internal collapsed state (toggled by user, seeded from inputs)
+  isCollapsed = signal(false)
+
+  // Resolved values — config input overrides individual inputs when provided
+  resolvedHeading = computed(() => this.config()?.heading ?? this.heading())
+  resolvedCards = computed(() => this.config()?.cards ?? this.cards() ?? [])
+  resolvedShowToggle = computed(() => this.config()?.showToggle ?? this.showToggle())
+  resolvedIsLoading = computed(() => this.config()?.isLoading ?? this.isLoading())
+
+  /** Array used to render skeleton card placeholders with @for. */
+  skeletonItems = computed(() =>
+    Array.from({ length: this.skeletonCount() }, (_, i) => i)
+  )
+
+  constructor(
+    private readonly router: Router,
+    private readonly events: EventService,
+  ) {
+    // Seed isCollapsed from config or collapsed input reactively
+    effect(() => {
+      const cfg = this.config()
+      const col = this.collapsed()
+      untracked(() => {
+        this.isCollapsed.set(cfg?.collapsed ?? col)
+      })
+    })
+  }
+
+  toggle(): void {
+    this.isCollapsed.update(v => !v)
+    this.events.raiseInteractTelemetry(
+      {
+        type: WsEvents.EnumInteractTypes.CLICK,
+        subType: 'spotlight-toggle',
+        id: this.isCollapsed() ? 'collapse' : 'expand',
+      },
+      {
+        id: this.resolvedHeading(),
+        type: 'spotlight-section',
+      },
+      { module: WsEvents.EnumTelemetrymodules.HOME },
+    )
+  }
+
+  navigate(card: NsSpotlightCardsV2.ISpotlightCard): void {
+    if (!card.redirectionUrl) {
+      return
+    }
+    this.events.raiseInteractTelemetry(
+      {
+        type: WsEvents.EnumInteractTypes.CLICK,
+        subType: 'spotlight-card',
+        id: card.label,
+      },
+      {
+        id: card.redirectionUrl,
+        type: 'spotlight-card',
+      },
+      { module: WsEvents.EnumTelemetrymodules.HOME },
+    )
+    if (card.externalUrl) {
+      window.open(card.redirectionUrl, '_blank', 'noopener,noreferrer')
+    } else {
+      this.router.navigateByUrl(card.redirectionUrl)
+    }
+  }
+}
