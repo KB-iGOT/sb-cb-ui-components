@@ -1,16 +1,46 @@
 <div class="w-full">
   <!-- Pills Navigation -->
   @if (visiblePills()?.length) {
-  <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
+  <div class="pills-container scrollbar-hide">
     @for (pill of visiblePills(); track pill.pillKey) {
-    <button type="button"
-      class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 border"
-      [class.bg-blue-600]="isPillActive(pill.pillKey)" [class.text-white]="isPillActive(pill.pillKey)"
-      [class.border-blue-600]="isPillActive(pill.pillKey)" [class.bg-white]="!isPillActive(pill.pillKey)"
-      [class.text-gray-700]="!isPillActive(pill.pillKey)" [class.border-gray-300]="!isPillActive(pill.pillKey)"
-      [class.hover:bg-gray-100]="!isPillActive(pill.pillKey)" (click)="selectPill(pill.pillKey)">
+    @if (isPillActive(pill.pillKey)) {
+    <!-- Active Pill - Expanded Card -->
+    <div class="pill-active" (click)="selectPill(pill.pillKey)">
+
+      <!-- Card Content -->
+      <div class="pill-active__content">
+        <!-- Text Content -->
+        <div class="pill-active__text">
+          <!-- Label -->
+          <div class="pill-active__label">
+            {{ pill.pillLabel }}
+          </div>
+
+          <!-- Descriptions -->
+          @if (pill.pillDescription && pill.pillDescription.length > 0) {
+          <div class="pill-active__descriptions">
+            @for (desc of pill.pillDescription; track $index) {
+            <div class="pill-active__desc">
+              {{ desc }}
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <!-- Image Section -->
+        @if (pill.pillImageUrl) {
+        <img [src]="pill.pillImageUrl" [alt]="pill.pillLabel" class="pill-active__image">
+        }
+      </div>
+      <!-- Down Arrow -->
+      <div class="pill-active__arrow"></div>
+    </div>
+    } @else {
+    <!-- Inactive Pill -->
+    <button type="button" class="pill-inactive" (click)="selectPill(pill.pillKey)">
       {{ pill.pillLabel }}
     </button>
+    }
     }
   </div>
   }

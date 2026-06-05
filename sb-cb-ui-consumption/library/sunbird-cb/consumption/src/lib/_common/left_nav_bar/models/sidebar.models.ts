@@ -73,6 +73,7 @@ export interface BaseSectionConfig {
   sectionTitle: string
   sectionLoading?: boolean
   disableTranslate?: boolean
+  viewAllKey?: string
   collapsible: boolean
   showViewAll: boolean
   viewAllLabel?: string

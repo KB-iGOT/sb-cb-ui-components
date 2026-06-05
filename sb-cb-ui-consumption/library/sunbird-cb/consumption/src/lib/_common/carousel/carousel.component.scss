@@ -32,32 +32,23 @@
 }
 
 // --- Controls: ← ● ○ ○ → ---
-.carousel-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-}
+// .carousel-controls {
+//   gap: 12px;
+// }
 
 // Navigation buttons
 .carousel-nav-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  border: 1px solid #e0e0e0;
-  background: #fff;
-  color: #1b2133;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--text-bandw-black-display);
+  color: var(--surface-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover:not(.disabled) {
-    background: #1b2133;
-    color: #fff;
-    border-color: #1b2133;
+    opacity: 0.8;
   }
 
   &:focus-visible {
@@ -66,8 +57,10 @@
   }
 
   &.disabled {
-    opacity: 0.4;
+    background-color: var(--color-tertiary-50);
+    color: var(--surface-primary);
     cursor: not-allowed;
+    opacity: 1;
   }
 
   svg {
@@ -83,11 +76,11 @@
 }
 
 .carousel-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  border: none;
-  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--environment-icon-overall-primary-bandw);
+  background-color: var(--environment-application-backgrounds-system-background-1);
   cursor: pointer;
   padding: 0;
   transition: all 0.3s ease;
@@ -96,14 +89,9 @@
     background-color: rgba(0, 0, 0, 0.5);
   }
 
-  &:focus-visible {
-    outline: 2px solid #4a90d9;
-    outline-offset: 2px;
-  }
-
   &.active {
     width: 20px;
-    border-radius: 4px;
-    background-color: #1b2133;
+    border-radius: 5px;
+    background-color: var(--environment-icon-overall-primary-bandw);
   }
 }

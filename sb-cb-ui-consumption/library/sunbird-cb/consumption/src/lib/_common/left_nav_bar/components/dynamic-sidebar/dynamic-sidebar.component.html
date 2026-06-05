@@ -57,7 +57,8 @@
         <!-- Render Stat Cards Section -->
         @if (section.cardType === SidebarCardType.STAT_CARDS) {
         <app-sidebar-stat-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
-          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Statistics section'" />
+          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Statistics section'"
+          (itemClicked)="onNavItemClicked($event)" />
         }
 
         <!-- Render Info Cards Section -->

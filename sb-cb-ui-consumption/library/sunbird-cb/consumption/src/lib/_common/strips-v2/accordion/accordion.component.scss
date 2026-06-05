@@ -3,6 +3,10 @@
   width: 100%;
 }
 
+.accordian-header {
+  background-color: var(--environment-application-backgrounds-system-background-1, #FFFFFF);
+}
+
 .section-header {
   font: 600 var(--font-size-title-2) var(--font-family-heading);
 }
