@@ -2,10 +2,13 @@
 @use '@sunbird-cb/design-system/src/styles/ws-mixins' as  *;
 
 .author-card {
-  width: 330px;
-  height: 62px;
+  width: 100%;
+  min-height: 70px;
   box-shadow: none !important;
   border: 0;
+  align-content: center;
+  background: white !important;
+  padding: 5px 16px;
 
   @include breakpoint-lt-s {
     margin-left: $size-xs;
@@ -16,4 +19,66 @@
 
 .width-0 {
   width: 0;
+}
+
+.approve-btn {
+  width: auto;
+  border: 1px solid #0075B7;
+  border-radius: 4px;
+  color: #0075B7 !important;
+}
+
+button {
+  display: inline;
+  /* stylelint-disable */
+  font: 600 14px/20px Lato;
+  /* stylelint-enable */
+  padding: 0.5em 1em;
+  color: rgba(0, 0, 0, 0.7);
+  background: transparent;
+}
+
+.btn-link {
+  color: #0075B7 !important;
+  text-decoration: underline;
+}
+
+.btn-link:focus-visible {
+  outline: none;
+}
+
+.view-report-btn {
+  width: auto;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.87) !important;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.rejectedIcon {
+  padding-top: 1px;
+  color: #d13924 !important;
+}
+
+.pendingIcon {
+  padding-top: 1px;
+  color: #e99e38 !important;
+}
+
+.remove-user {
+  color: #0074b6 !important;
+  cursor: pointer !important;
+}
+
+:host .new-secondary-button {
+  /* stylelint-disable */
+  font-family: Lato;
+  /* stylelint-enable */
+  font-weight: 700 !important;
+  line-height: 16.8px !important;
+  border: none !important;
+
 }
