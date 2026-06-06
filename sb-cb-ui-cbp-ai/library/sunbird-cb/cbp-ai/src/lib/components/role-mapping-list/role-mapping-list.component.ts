@@ -764,7 +764,10 @@ export class RoleMappingListComponent {
 
   toggleAllRows(event: any) {
     if (event.checked) {
-      this.dataSource.data.forEach(row => this.selection.select(row));
+      
+      this.dataSource.data
+  .filter(row => row?.cbp_plans?.length)
+  .forEach(row => this.selection.select(row));
     } else {
       this.selection.clear();
     }
@@ -774,7 +777,7 @@ export class RoleMappingListComponent {
 
     this.activeTab = tab;
 
-    this.selection.clear();
+    // this.selection.clear();
 
     this.applyAllFilters();
 

@@ -6,7 +6,7 @@
             </div>
             <div class="right-section">
                 <div class="btn-group-compact">
-                    <div>
+                    <div *ngIf="sharedService.fromMdoPortal">
                         <input class="btn-active" type="button" value="Add More Course From iGOT"
                             (click)="suggestMoreCourses()" />
                     </div>
@@ -218,7 +218,7 @@
                             <div class="percentage" *ngIf="item?.relevancy">{{item?.relevancy}}%</div>
                             <div class="percentage" *ngIf="!item?.relevancy">N/A</div>
                         </div>
-                        <div class="delete-button" *ngIf="!(sharedService?.fromMdoPortal)">
+                        <div class="delete-button" *ngIf="!(data?.fromRequestPage) || (sharedService?.fromMdoPortal && data?.requestStatus?.toLowerCase() === 'pending')">
                             <mat-icon matTooltip="Delete Course" matTooltipPosition="above"
                                 class="text-danger cursor-pointer" (click)="deleteCard(item, i)">delete</mat-icon>
                         </div>

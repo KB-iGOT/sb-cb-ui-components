@@ -552,6 +552,8 @@ text-underline-position: from-font;
   color: #c53030;
   font-size: 18px;
   line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .popup-footer {

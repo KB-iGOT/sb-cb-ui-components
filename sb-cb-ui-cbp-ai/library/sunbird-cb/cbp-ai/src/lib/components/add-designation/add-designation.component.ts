@@ -327,8 +327,15 @@ if (searchControl) {
     }))
       .subscribe({
         next: (res: any) => {
+          
 
   const content = _.get(res, 'result.result.data', []);
+
+  if(content?.length === 0) {
+    this.noMoreLegacyDesignations = true;
+  } else {
+    this.noMoreLegacyDesignations = false;
+  }
 
   const matchedIds = new Set(this.matchedDesignationIds);
 

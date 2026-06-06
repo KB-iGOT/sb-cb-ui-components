@@ -401,6 +401,11 @@ export class ApprovalRequestsComponent {
       next: (res: any) => {
         console.log('res', res)
         this.loading = false
+         this.snackBar.open('Request Revoked Successfully', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-success']
+        });
+        this.showRevokeRequestPopupFlag = false
         this.getApprovalRequests()
       },
       error: () => {

@@ -72,12 +72,7 @@ export class ApprovalRequestFormComponent {
             this.masterData.mdo = this.masterData.mdoFiltered.slice(0, this.mdoListLoadCount);
 
           } else {
-            this.mdoFilterEnable = false;
-
-            // show first page from backup
-            this.masterData.mdo = this.masterData.mdoBackup.slice(0, this.mdoDefaultLoadCount);
-            this.mdoListLoadCount = this.mdoDefaultLoadCount;
-            this.mdoOffset = 0;
+             this.resetMdoList();
           }
         });
     }
@@ -104,7 +99,7 @@ export class ApprovalRequestFormComponent {
       request_name: ['', [
       Validators.required,
       Validators.maxLength(100),
-      Validators.pattern(/^(?!\s*$)[A-Za-z0-9 ]+$/)
+     Validators.pattern(/^(?!\s*$)[A-Za-z0-9 /-]+$/)
     ]],
       searchmdo: [''],
     });
@@ -230,9 +225,8 @@ export class ApprovalRequestFormComponent {
     if (searchText?.length) {
       requestBody['request']["query"] = searchText
       // when searching, start from first page
-      requestBody.pageNumber = 0
-      // allow larger page for search if needed
-      requestBody.pageSize = pageIndex === 0 ? 50 : this.mdoListLoadCount
+      requestBody.request.pageNumber = 0;
+requestBody.request.pageSize = 50;
       // reset guard when performing a fresh search
       this.noMoreLegacymdos = false
     }
@@ -283,7 +277,7 @@ export class ApprovalRequestFormComponent {
           // Ensure visible list matches the requested display count
           this.masterData['mdo'] = (this.masterData['mdoBackup'] || []).slice(0, this.mdoListLoadCount)
           // loading flag cleared in finalize()
-          this.checkCurrentmdoPresent()
+        //  this.checkCurrentmdoPresent()
         },
         error: () => {
           // Stop further automatic calls on repeated errors to avoid tight loops
@@ -293,27 +287,27 @@ export class ApprovalRequestFormComponent {
         }
       })
   }
-checkCurrentmdoPresent() {
-  const selectedmdo = this.approvalRequestForm.get('mdo_name')?.value;
+// checkCurrentmdoPresent() {
+//   const selectedmdo = this.approvalRequestForm.get('mdo_name')?.value;
 
-  if (!selectedmdo || !this.masterData?.mdo) return;
+//   if (!selectedmdo || !this.masterData?.mdo) return;
 
-  const exists = this.masterData.mdo.some(
-    (item: any) => item?.name?.toLowerCase() === selectedmdo?.toLowerCase()
-  );
+//   const exists = this.masterData.mdo.some(
+//     (item: any) => item?.name?.toLowerCase() === selectedmdo?.toLowerCase()
+//   );
 
-  if (!exists) {
-    const newmdo = {
-      name: selectedmdo,
-      status: 'Active',
-      id: 'custom-' + Date.now()
-    };
+//   if (!exists) {
+//     const newmdo = {
+//       name: selectedmdo,
+//       status: 'Active',
+//       id: 'custom-' + Date.now()
+//     };
 
-    this.masterData.mdoBackup = this.masterData.mdoBackup || [];
-    this.masterData.mdoBackup.unshift(newmdo);
-    this.masterData.mdo.unshift(newmdo);
-  }
-}
+//     this.masterData.mdoBackup = this.masterData.mdoBackup || [];
+//     this.masterData.mdoBackup.unshift(newmdo);
+//     this.masterData.mdo.unshift(newmdo);
+//   }
+// }
   onmdoDropdownClosed(): void {
     // Keep the mdo value but clear the search input
     const currentmdo = this.approvalRequestForm.get('mdo_name')!.value
@@ -344,7 +338,7 @@ checkCurrentmdoPresent() {
     } else if (this.masterData && this.masterData?.mdoBackup) {
       this.masterData.mdo = this.masterData?.mdoBackup.slice(0, this.mdoDefaultLoadCount)
       this.mdoFilterEnable = false
-      this.checkCurrentmdoPresent()
+     // this.checkCurrentmdoPresent()
     }
   }
   setupScrollListener(opened: boolean): void {
@@ -417,7 +411,7 @@ checkCurrentmdoPresent() {
             // Update the filtered list with more items
             setTimeout(() => {
               this.masterData.mdo = this.masterData?.mdoBackup?.slice(0, this.mdoListLoadCount)
-              this.checkCurrentmdoPresent()
+             // this.checkCurrentmdoPresent()
               this.isLoadingMoremdos = false
             }, 500) // Small timeout to simulate loading and prevent multiple triggers
           } else {
@@ -439,6 +433,24 @@ checkCurrentmdoPresent() {
   get searchmdoControl(): FormControl {
     return this.approvalRequestForm.get('searchmdo') as FormControl;
   }
+
+  clearMdoSearch(): void {
+  this.searchmdoControl.setValue('', { emitEvent: true });
+
+  this.resetMdoList();
+    
+}
+
+private resetMdoList(): void {
+  this.mdoFilterEnable = false;
+  this.mdoSearchText = '';
+  this.mdoOffset = 0;
+  this.mdoListLoadCount = this.mdoDefaultLoadCount;
+
+  this.masterData.mdo =
+    this.masterData.mdoBackup.slice(0, this.mdoDefaultLoadCount);
+    this.getmdo()
+}
 
 
 }

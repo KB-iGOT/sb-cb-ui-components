@@ -3,6 +3,7 @@
         <div class="popup-header">
             <div>
                 <div class="heading">Approve & Publish Plan</div>
+                <p>Enter the plan details to approve and publish this request.</p>
             </div>
             <div class="cursor-pointer" (click)="closeDialog()">
                 <mat-icon>close</mat-icon>
@@ -13,7 +14,7 @@
         <mat-card class="mt-1">
             <div class="mt-2 section">
                 <div class="sub-heading">
-                    <p>Name of Plan</p>
+                    <p>Name of Plan <span class="error">*</span></p>
                 </div>
                 <div class="mt-4 additional-details">
                     <input type="text" formControlName="request_name" [value]="" placeholder="Enter plan name"
@@ -22,7 +23,7 @@
             </div>
             <div class="mt-2 section">
                 <div class="sub-heading">
-                    <p>Timeline (Due Date)</p>
+                    <p>Timeline (Due Date) <span class="error">*</span></p>
                 </div>
                 <div class="section-header mt-4">
                     <mat-form-field appearance="outline" class="full-width custom-date-field">

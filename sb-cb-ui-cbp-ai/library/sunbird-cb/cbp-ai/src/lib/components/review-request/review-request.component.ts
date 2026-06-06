@@ -310,6 +310,8 @@ export class ReviewRequestComponent {
     menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('View CBP Plan clicked', element);
+    element['fromRequestPage'] = true
+    element['requestStatus'] = this.request?.status
     const dialogRef = this.dialog.open(ViewCbpPlanComponent, {
       width: '1000px',
       data: element,
@@ -337,6 +339,8 @@ export class ReviewRequestComponent {
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
+    element['fromRequestPage'] = true
+    element['requestStatus'] = this.request?.status
     const dialogRef = this.dialog.open(ViewCourseRecommendationComponent, {
       width: '1000px',
       data: element,

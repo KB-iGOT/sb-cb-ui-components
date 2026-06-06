@@ -152,7 +152,7 @@
             <!-- Date Column -->
             <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef> Date & Time</th>
-                <td mat-cell *matCellDef="let request" style="width: 12%;"> {{ request.created_at | date: 'MMM d, y hh:mm:s a'}}
+                <td mat-cell *matCellDef="let request" style="width: 12%;"> {{ request.created_at | date: 'MMM d, y hh:mm:ss a'}}
                 </td>
             </ng-container>
 
@@ -274,7 +274,7 @@
         </div>
         <div class="ml-10">
             <button  mat-raised-button
-               class="btn-active" (click)="approveAndPublish()">
+               class="btn-active" (click)="revokeApprovalRequestConfirm()">
 
                 Yes
             </button>

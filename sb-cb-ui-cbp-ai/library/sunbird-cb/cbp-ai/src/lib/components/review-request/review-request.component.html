@@ -56,40 +56,40 @@
                 <div class="detail-box" *ngIf="!(sharedService.fromMdoPortal)">
                     <mat-icon>tag</mat-icon>
                     <div>
-                        <p class="label">Request ID</p>
-                        <p class="value">{{request?.id}}</p>
+                        <p class="value">Request ID</p>
+                        <p class="label">{{request?.id}}</p>
                     </div>
                 </div>
 
                 <div class="detail-box">
                     <mat-icon>assignment</mat-icon>
                     <div>
-                        <p class="label">Request Name</p>
-                        <p class="value">{{request?.request_name}}</p>
+                        <p class="value">Request Name</p>
+                        <p class="label">{{request?.request_name}}</p>
                     </div>
                 </div>
 
                 <div class="detail-box">
                     <mat-icon>mail</mat-icon>
                     <div>
-                        <p class="label">Requested By</p>
-                        <p class="value">{{request?.user?.email}}</p>
+                        <p class="value">Submitted By</p>
+                        <p class="label">{{request?.user?.email}}</p>
                     </div>
                 </div>
 
                 <div class="detail-box">
                     <mat-icon>event</mat-icon>
                     <div>
-                        <p class="label">Submitted On</p>
-                        <p class="value">{{request?.created_at | date: 'MMM d, y hh:mm:s a'}}</p>
+                        <p class="value">Submitted On</p>
+                        <p class="label">{{request?.created_at | date: 'MMM d, y hh:mm:s a'}}</p>
                     </div>
                 </div>
 
                 <div class="detail-box">
                     <mat-icon>person</mat-icon>
                     <div>
-                        <p class="label">No. of Designations</p>
-                        <p class="value">{{request?.designation_count}}</p>
+                        <p class="value">No. of Designations</p>
+                        <p class="label">{{request?.designation_count}}</p>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@
             <div class="organization">
                 <p class="label">Organization</p>
                 <p class="org-value">{{request?.state_center_name}} <span
-                        *ngIf="request?.department_name">{{request?.department_name}}</span></p>
+                        *ngIf="request?.department_name">/ {{request?.department_name}}</span></p>
             </div>
 
         </mat-card>
@@ -273,7 +273,7 @@
 
                                     
 
-                                        <button mat-menu-item (click)="editRoleMapping(element, menuTrigger)">
+                                        <button *ngIf="(sharedService.fromMdoPortal && element?.status.toLowerCase() === 'pending')" mat-menu-item (click)="editRoleMapping(element, menuTrigger)">
                                             <mat-icon>edit</mat-icon>
                                             <span>Edit Role Mapping</span>
                                         </button>

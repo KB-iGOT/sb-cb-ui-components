@@ -73,9 +73,9 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       this.planData = data?.element
       this.requestRowData = data?.requestData
     } else {
-      if(data?.fromLibrary) {
+      if (data?.fromLibrary) {
         this.planData = data?.element
-      } else {  
+      } else {
         this.planData = data
       }
     }
@@ -122,7 +122,6 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
             this.desigantionFilterEnable = true;
 
             // API SEARCH ONLY
-            console.log('mjsdfm')
             this.getDesignation(txt, 0);
 
           } else {
@@ -592,163 +591,168 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     console.log(this.cbpForm?.get('competencies')?.value);
   }
   getDesignation(searchText?: string, offset?: number): void {
- 
-     // clear any previous debug hooks
-     if (!searchText || searchText?.length === 0) {
-       // noop
-     }
- 
-     const reqOffset = (typeof offset === 'number') ? offset : this.designationOffset
-     let reqLimit = this.designationDefaultLoadCount
-     const pageIndex = reqLimit > 0 ? Math.floor(reqOffset / reqLimit) : 0
-     // if we're requesting from first page, clear the no-more-data guard
-     if (pageIndex === 0) {
-       this.noMoreLegacyDesignations = false
-       reqLimit = 50
-     }
-     const requestBody: any = {
-       filterCriteriaMap: {
-         status: 'Active'
-       },
-       requestedFields: [],
-       pageNumber: pageIndex,
-       pageSize: reqLimit,
-     }
-     if (searchText?.length) {
-       requestBody['searchString'] = searchText
-       // when searching, start from first page
-       requestBody.pageNumber = 0
-       // allow larger page for search if needed
-       requestBody.pageSize = pageIndex === 0 ? 50 : this.designationListLoadCount
-       // reset guard when performing a fresh search
-       this.noMoreLegacyDesignations = false
-     }
- 
-     // indicate loading state so scroll handlers don't trigger parallel calls
-     this.isLoadingMoreDesignations = true
- 
-     this.sharedService.searchPublicDesignation(requestBody).pipe(finalize(() => {
-       this.isLoadingMoreDesignations = false
-       this.designationInitInProgress = false
-     }))
-       .subscribe({
-         next: (res: any) => {
- 
-   const content = _.get(res, 'result.result.data', []);
- 
-   const matchedIds = new Set(this.matchedDesignationIds);
- 
-   const mapped = content
-   .filter((item: any) => !matchedIds.has(item?.id))
-   .map((item: any) => ({
-     id: item?.id,
-     name: item?.designation || '',
-     status: item?.status || 'Active',
-   }));
- 
-   const total = _.get(
-     res,
-     'result.result.totalcount',
-     _.get(
-       res,
-       'result.result.data.totalCount',
-       _.get(res, 'result.result.totalCount', 0)
-     )
-   );
- 
-   this.defaultSearchDesignationCount = total;
- 
-   // =========================
-   // SEARCH MODE
-   // =========================
- 
-   if (searchText?.length) {
- 
-     this.masterData.designationFiltered = mapped;
- 
-     this.masterData.designation =
-       this.masterData.designationFiltered.slice(
-         0,
-         this.searchDesignationLoadCount
-       );
- 
-     this.checkCurrentDesignationPresent();
- 
-     return;
-   }
- 
-   // =========================
-   // NORMAL MODE
-   // =========================
- 
-   if (!this.masterData['designationBackup'] || reqOffset === 0) {
- 
-     this.masterData['designationBackup'] = mapped;
- 
-   } else {
- 
-     const combined =
-       (this.masterData['designationBackup'] || []).concat(mapped);
- 
-     this.masterData['designationBackup'] = _.uniqBy(
-       combined,
-       (it: any) => (it?.name || '').toLowerCase()
-     );
-   }
- 
-   this.masterData.designation =
-     (this.masterData.designationBackup || []).slice(
-       0,
-       this.designationListLoadCount
-     );
- 
-   // selected value preserve
-   const designationControl =
-     this.cbpForm.get('designation_name');
- 
-   if (designationControl) {
- 
-     const currentValues =
-       designationControl.value || [];
 
-      console.log('currentValues', currentValues)
-    
-     const validValues = currentValues
-         this.masterData.designationBackup.some(
-           (item: any) => item?.name === currentValues
-         )
-     
-     console.log(validValues)
-     console.log( this.masterData.designationBackup)
- 
-    //  if (validValues.length !== currentValues.length) {
-       designationControl.setValue(validValues);
-    //  }
-   }
- 
-   // no more data
-   if (!mapped || mapped.length === 0) {
-     this.noMoreLegacyDesignations = true;
-   }
- 
-   if (
-     this.defaultSearchDesignationCount &&
-     (this.masterData['designationBackup'] || []).length >=
-     this.defaultSearchDesignationCount
-   ) {
-     this.noMoreLegacyDesignations = true;
-   }
- 
-   this.checkCurrentDesignationPresent();
- },
-         error: () => {
-           // Stop further automatic calls on repeated errors to avoid tight loops
-           // loading flag cleared in finalize()
-           this.noMoreLegacyDesignations = true
-           // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
-         }
-       })
-   }
+    // clear any previous debug hooks
+    if (!searchText || searchText?.length === 0) {
+      // noop
+    }
+
+    const reqOffset = (typeof offset === 'number') ? offset : this.designationOffset
+    let reqLimit = this.designationDefaultLoadCount
+    const pageIndex = reqLimit > 0 ? Math.floor(reqOffset / reqLimit) : 0
+    // if we're requesting from first page, clear the no-more-data guard
+    if (pageIndex === 0) {
+      this.noMoreLegacyDesignations = false
+      reqLimit = 50
+    }
+    const requestBody: any = {
+      filterCriteriaMap: {
+        status: 'Active'
+      },
+      requestedFields: [],
+      pageNumber: pageIndex,
+      pageSize: reqLimit,
+    }
+    if (searchText?.length) {
+      requestBody['searchString'] = searchText
+      // when searching, start from first page
+      requestBody.pageNumber = 0
+      // allow larger page for search if needed
+      requestBody.pageSize = pageIndex === 0 ? 50 : this.designationListLoadCount
+      // reset guard when performing a fresh search
+      this.noMoreLegacyDesignations = false
+    }
+
+    // indicate loading state so scroll handlers don't trigger parallel calls
+    this.isLoadingMoreDesignations = true
+
+    this.sharedService.searchPublicDesignation(requestBody).pipe(finalize(() => {
+      this.isLoadingMoreDesignations = false
+      this.designationInitInProgress = false
+    }))
+      .subscribe({
+        next: (res: any) => {
+
+          const content = _.get(res, 'result.result.data', []);
+           if(content?.length === 0) {
+    this.noMoreLegacyDesignations = true;
+  } else {
+    this.noMoreLegacyDesignations = false;
+  }
+
+          const matchedIds = new Set(this.matchedDesignationIds);
+
+          const mapped = content
+            .filter((item: any) => !matchedIds.has(item?.id))
+            .map((item: any) => ({
+              id: item?.id,
+              name: item?.designation || '',
+              status: item?.status || 'Active',
+            }));
+
+          const total = _.get(
+            res,
+            'result.result.totalcount',
+            _.get(
+              res,
+              'result.result.data.totalCount',
+              _.get(res, 'result.result.totalCount', 0)
+            )
+          );
+
+          this.defaultSearchDesignationCount = total;
+
+          // =========================
+          // SEARCH MODE
+          // =========================
+
+          if (searchText?.length) {
+
+            this.masterData.designationFiltered = mapped;
+
+            this.masterData.designation =
+              this.masterData.designationFiltered.slice(
+                0,
+                this.searchDesignationLoadCount
+              );
+
+            this.checkCurrentDesignationPresent();
+
+            return;
+          }
+
+          // =========================
+          // NORMAL MODE
+          // =========================
+
+          if (!this.masterData['designationBackup'] || reqOffset === 0) {
+
+            this.masterData['designationBackup'] = mapped;
+
+          } else {
+
+            const combined =
+              (this.masterData['designationBackup'] || []).concat(mapped);
+
+            this.masterData['designationBackup'] = _.uniqBy(
+              combined,
+              (it: any) => (it?.name || '').toLowerCase()
+            );
+          }
+
+          this.masterData.designation =
+            (this.masterData.designationBackup || []).slice(
+              0,
+              this.designationListLoadCount
+            );
+
+          // selected value preserve
+          const designationControl =
+            this.cbpForm.get('designation_name');
+
+          if (designationControl) {
+
+            const currentValues =
+              designationControl.value || [];
+
+            console.log('currentValues', currentValues)
+
+            const validValues = currentValues
+            this.masterData.designationBackup.some(
+              (item: any) => item?.name === currentValues
+            )
+
+            console.log(validValues)
+            console.log(this.masterData.designationBackup)
+
+            //  if (validValues.length !== currentValues.length) {
+            designationControl.setValue(validValues);
+            //  }
+          }
+
+          // no more data
+          if (!mapped || mapped.length === 0) {
+            this.noMoreLegacyDesignations = true;
+          }
+
+          if (
+            this.defaultSearchDesignationCount &&
+            (this.masterData['designationBackup'] || []).length >=
+            this.defaultSearchDesignationCount
+          ) {
+            this.noMoreLegacyDesignations = true;
+          }
+
+          this.checkCurrentDesignationPresent();
+        },
+        error: () => {
+          // Stop further automatic calls on repeated errors to avoid tight loops
+          // loading flag cleared in finalize()
+          this.noMoreLegacyDesignations = true
+          // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
+        }
+      })
+  }
 
   ensureSelectedDesignationExists() {
     const selected = this.planData?.designation_name;
@@ -933,78 +937,96 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     }, 300);
   }
 
-  onDesignationSelectScroll(event: any): void {
+   onDesignationSelectScroll(event: any): void {
 
-    const element = event.target;
+    const element = event?.target;
 
-    const atBottom =
-      element.scrollHeight - element.scrollTop <=
-      element.clientHeight + 10;
+    const reachedBottom =
+      element.scrollTop + element.clientHeight >=
+      element.scrollHeight - 5;
 
-    if (!atBottom || this.isLoadingMoreDesignations) {
+    if (!reachedBottom || this.isLoadingMoreDesignations) {
       return;
     }
 
-    const loaded =
-      this.masterData?.designationBackup?.length || 0;
+    // =========================
+    // SEARCH MODE
+    // =========================
+    if (this.desigantionFilterEnable) {
 
-    const visible =
-      this.masterData?.designation?.length || 0;
+      this.isLoadingMoreDesignations = true;
 
-    console.log({
-      loaded,
-      visible,
-      total: this.defaultSearchDesignationCount
-    });
+      this.searchDesignationLoadCount += 50;
 
-    /**
-     * STEP 1
-     * SHOW MORE FROM LOCAL CACHE
-     */
-    if (visible < loaded) {
+      setTimeout(() => {
+
+        this.masterData.designation =
+          this.masterData.designationFiltered.slice(
+            0,
+            this.searchDesignationLoadCount
+          );
+
+        this.checkCurrentDesignationPresent();
+
+        this.isLoadingMoreDesignations = false;
+
+      }, 300);
+
+      return;
+    }
+
+    // =========================
+    // NORMAL MODE
+    // =========================
+
+    // local pagination
+    if (
+      this.masterData?.designationBackup?.length >
+      this.masterData?.designation?.length
+    ) {
+
+      this.isLoadingMoreDesignations = true;
 
       this.designationListLoadCount +=
         this.designationDefaultLoadCount;
 
-      // IMPORTANT
-      // create NEW ARRAY reference
-      this.masterData = {
-        ...this.masterData,
-        designation: [
-          ...this.masterData.designationBackup.slice(
+      setTimeout(() => {
+
+        this.masterData.designation =
+          this.masterData.designationBackup.slice(
             0,
             this.designationListLoadCount
-          )
-        ]
-      };
+          );
 
-      // FORCE UI UPDATE
-      this.cdRef.detectChanges();
+        this.checkCurrentDesignationPresent();
 
-      // restore scroll position
-      setTimeout(() => {
-        element.scrollTop = element.scrollTop - 20;
-      });
+        this.isLoadingMoreDesignations = false;
+
+      }, 300);
 
       return;
     }
 
-    /**
-     * STEP 2
-     * FETCH NEXT PAGE
-     */
+    // server pagination
+    const loadedLegacy =
+      (this.masterData?.designationBackup || []).length;
+
     if (
-      loaded < this.defaultSearchDesignationCount &&
-      !this.noMoreLegacyDesignations
+      !this.noMoreLegacyDesignations &&
+      this.defaultSearchDesignationCount &&
+      loadedLegacy < this.defaultSearchDesignationCount
     ) {
 
-      this.designationOffset +=
+      this.isLoadingMoreDesignations = true;
+
+      this.designationOffset =
+        (this.designationOffset || 0) +
         this.designationDefaultLoadCount;
 
-      this.getDesignation(
-        this.designationSearchText || undefined,
-        this.designationOffset
-      );
+      this.designationListLoadCount +=
+        this.designationDefaultLoadCount;
+
+      this.getDesignation(undefined, this.designationOffset);
     }
   }
 

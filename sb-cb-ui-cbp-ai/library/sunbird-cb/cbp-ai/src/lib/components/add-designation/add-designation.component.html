@@ -48,7 +48,7 @@
                                 Load More...
                             </div>
                             <!-- No results message -->
-                            <mat-option *ngIf="(masterData?.designation)?.length === 0" disabled class="no-data-option">
+                            <mat-option *ngIf="(masterData?.designation)?.length === 0 || noMoreLegacyDesignations" disabled class="no-data-option">
 
                                 Designation Not Found.
 

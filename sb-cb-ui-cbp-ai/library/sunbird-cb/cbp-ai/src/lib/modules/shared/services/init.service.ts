@@ -27,6 +27,7 @@ export class InitService {
 }
 
   private async setConfiDetails(configDetails: any = null): Promise<any> {
+    
     if (configDetails) {
       this.configDetails = configDetails
       this.baseUrl = configDetails.portalURL

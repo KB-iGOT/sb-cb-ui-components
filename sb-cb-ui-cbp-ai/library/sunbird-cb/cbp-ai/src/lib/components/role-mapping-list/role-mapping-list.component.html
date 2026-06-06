@@ -88,7 +88,7 @@
                             <input class="btn-active" type="button" value="Add More Designation"
                                 (click)="addMoreDesignation()" />
                         </div>
-                        <div class="ml-2">
+                        <div class="ml-2" *ngIf="activeTab === 'matched'">
                             <button
                                 [ngClass]="selection.selected.length ? 'btn-active-outline' : 'btn-active-outline-disable'"
                                 (click)="sendForApprovalForm()">
@@ -251,7 +251,7 @@
                                                 <mat-checkbox class="radio-style-checkbox"
                                                     (click)="$event.stopPropagation()" (change)="toggleRow(row)"
                                                     [checked]="selection.isSelected(row)"
-                                                    [disabled]="!row?.cbp_plans?.length">
+                                                    [disabled]="!row?.cbp_plans?.length" [ngClass]="!row?.cbp_plans?.length ? 'grayd-disable':''">
                                                 </mat-checkbox>
                                             </span>
                                         </td>

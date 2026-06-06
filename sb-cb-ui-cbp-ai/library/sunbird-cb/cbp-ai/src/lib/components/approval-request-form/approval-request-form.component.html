@@ -27,6 +27,7 @@
                     >
                         Request name is required
                     </mat-error>
+                    <mat-hint class="hint">Hint:Enter a request name (up to 100 characters).</mat-hint>
 
                     <mat-error
                         *ngIf="
@@ -59,7 +60,7 @@
                                         (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
                                         (keyup)="mdoSearch($event)" autocomplete="off">
                                     <button *ngIf="searchmdoControl?.value" type="button" class="clear-button"
-                                        (click)="searchmdoControl.setValue('')">
+                                        (click)="clearMdoSearch()">
                                         ✕ Clear Search
                                     </button>
                                 </div>
@@ -75,7 +76,7 @@
                             <!-- No results message -->
                             <mat-option *ngIf="(masterData?.mdo )?.length === 0" disabled>
                                 <!-- No matches found -->
-                                <div class="mat-error txt-size">No MDO Admin/Leader mapped. Please contact system administrator.</div>
+                                <div class="mat-error txt-size">No Record Found</div>
                             </mat-option>
                         </mat-select>
                         <!-- <mat-error class="text-xs"

@@ -1013,13 +1013,14 @@ export class GenerateCourseRecommendationComponent {
           } else if (subThemeToSubThemeMatch) {
             matchType = 'SubTheme-to-SubTheme';
             isMatch = true;
-          } else if (themeToSubThemeMatch) {
-            matchType = 'Theme-to-SubTheme';
-            isMatch = true;
-          } else if (subThemeToThemeMatch) {
-            matchType = 'SubTheme-to-Theme';
-            isMatch = true;
           }
+          // else if (themeToSubThemeMatch) {
+          //   matchType = 'Theme-to-SubTheme';
+          //   isMatch = true;
+          // } else if (subThemeToThemeMatch) {
+          //   matchType = 'SubTheme-to-Theme';
+          //   isMatch = true;
+          // }
         }
 
         if (isMatch) {

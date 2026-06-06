@@ -497,12 +497,21 @@ export class SharedService {
     };
 
     console.log('getIGOTSuggestedCourses final request:', JSON.stringify(req, null, 2));
+    if (this.fromMdoPortal) {
 
-    const headers = this.headers
-    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, req, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      const headers = this.headers
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, req, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
+    
   }
 
   getSuggestedCourses(role_mapping_id) {
