@@ -1,9 +1,9 @@
 <div class="view-cbp-plan">
     <div class="popup-container">
         <div class="popup-header">
-            <div>
+            <div style="margin: 5px;">
                 <div class="heading">Reject Request</div>
-                <div style="font-weight: normal !important;">Are you sure you want to reject <strong>"{{data?.request_name}}"</strong> request? Please provide a reason.</div>
+                <div class="sub-heading"><p>Are you sure you want to reject <strong>"{{data?.request_name}}"</strong> request? Please provide a reason.</p></div>
             </div>
             <div class="cursor-pointer" (click)="closeDialog()">
                 <mat-icon>close</mat-icon>
@@ -13,13 +13,16 @@
     <div class="section-container" [formGroup]="rejectRequestForm">
         <mat-card class="mt-1">
             <div class="mt-2 section">
-                <div class="sub-heading">
+                <div class="sub-heading-main">
                     <p>Reason for Rejection <span class="error">*</span></p>
                 </div>
                 <div class="mt-4 additional-details">
                     <textarea formControlName="rejection_comment" placeholder="Enter reason for rejection" rows="5"
                         class="custom-textarea">
                     </textarea>
+                     <mat-error class="error" *ngIf="rejection_comment?.hasError('required') && rejection_comment?.touched">
+                        Reason for rejecttion is required.
+                    </mat-error>
                 </div>
             </div>
 

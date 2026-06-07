@@ -1,4 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedService } from '../../modules/shared/services/shared.service';
@@ -21,9 +22,33 @@ export class SuggestMoreCoursesComponent implements OnInit {
   pageSize = 12
   totalCount = 0
   totalPages = 0
+  filterForm!: FormGroup;
+  competenciesType = ['All', 'Behavioural', 'Functional', 'Domain']
+  ratings = ['4.5 and above', '4.0 and above', '3.5 and above', '2.5 and above', '1 and above'];
+  languages = ['English', 'Hindi', 'Tamil', 'Kannada', 'Telugu', 'Malayalam', 'Assamese', 'Bengali', 'Gujarati', 'Marathi', 'Odia', 'Punjabi', 'Konkani', 'Bodo', 'Dogri', 'Kashmiri', 'Maithili', 'Manipuri', 'Nepali', 'Sanskrit', 'Santali', 'Sindhi', 'Urdu'];
+  durations = [
+    { label: '< 1 Hour', value: '3600' },
+    { label: '1-5 Hours', value: '4376' },
+    { label: '5+ Hours', value: '18000' }
+  ];
+  providers = [];
+  filteredCompetency = [...this.competenciesType];
+  filteredRatings = [...this.ratings];
+  filteredLanguages = [...this.languages];
+  filteredDurations = [...this.durations];
+  filteredProviders = [...this.providers];
+  fullCourseList = []
+  // Selected filters
+  selectedCompetency = 'All';
+  selectedRating: string | null = null;
+  selectedLanguage: string | null = null;
+  selectedDuration: string | null = null;
+  selectedProvider: string | null = null;
+  filterdCourses: any = []
   constructor(
     public dialogRef: MatDialogRef<SuggestMoreCoursesComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private fb: FormBuilder,
     public sharedService: SharedService,
     public snackBar: MatSnackBar
   ) {
@@ -32,11 +57,14 @@ export class SuggestMoreCoursesComponent implements OnInit {
 
 
   ngOnInit() {
+    this.filterForm = this.fb.group({
+      competency: [[]],
+      rating: [[]],
+      language: [[]],
+      duration: [[]],
+      provider: [[]]
+    });
     this.loadAllCourses();
-  }
-  applyFilter() {
-    // This method is kept for future use if needed
-    // Search is now only triggered by search button click
   }
 
   searchData() {
@@ -70,13 +98,50 @@ export class SuggestMoreCoursesComponent implements OnInit {
             "Course"
           ]
         },
-        "fields": [
-          "posterImage",
-          "description",
-          "name"
+        fields: [
+          'downloadUrl',
+          'organisation',
+          'language',
+          'source',
+          'appIcon',
+          'identifier',
+          'name',
+          'primaryCategory',
+          'contentType',
+          'posterImage',
+          'createdOn',
+          'duration',
+          'avgRating',
+          'additionalTags',
+          'courseCategory',
+          'mimeType',
+          'contentId',
+          'creatorLogo',
+          'sectorDetails_v1',
+          'languageMapV1',
+          'language',
+          'completionSurveyLink',
+          'difficultyLevel',
+          'competencies_v6.competencyAreaName'
         ],
+        facets: [
+          'avgRating',
+          'language',
+          'organisation',
+          'courseCategory',
+          'sectorDetails_v1.sectorName',
+          'sectorDetails_v1.subSectorName',
+          'competencies_v6.competencyAreaName',
+          'competencies_v6.competencyThemeName',
+          'competencies_v6.competencySubThemeName',
+          'duration'
+        ],
+        "query": this.searchText.trim(),
         "limit": this.pageSize,
-        "offset": this.currentPage * this.pageSize
+        "offset": this.currentPage * this.pageSize,
+        sort_by: {
+          createdOn: 'desc'
+        }
       }
     };
 
@@ -87,10 +152,25 @@ export class SuggestMoreCoursesComponent implements OnInit {
         this.loading = false;
         console.log('All courses loaded:', res);
         if (res && res.result) {
+          const allCourses = res.result.content || [];
           this.suggestedCourses = res.result.content || [];
           this.originalData = res.result.content || [];
           this.totalCount = res.result.totalHits || res.result.count || 0;
           this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+
+          this.suggestedCourses.forEach((item) => {
+            if (item && item.organisation && item.organisation.length) {
+              if (this.filteredProviders.indexOf(item.organisation[0]) < 0) {
+                this.filteredProviders.push(item.organisation[0])
+              }
+
+            }
+          })
+          this.fullCourseList = allCourses
+          let identifiersArr = []
+          this.fullCourseList.map((item) => {
+            identifiersArr.push(item?.identifier)
+          })
         } else {
           this.suggestedCourses = [];
           this.originalData = [];
@@ -113,17 +193,7 @@ export class SuggestMoreCoursesComponent implements OnInit {
     this.dialogRef.close()
   }
 
-  // Pagination methods
-  onPageChange(page: number) {
-    if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      if (this.searchText.trim()) {
-        this.performSearch();
-      } else {
-        this.loadAllCourses();
-      }
-    }
-  }
+
 
   // Separate method for performing search with query
   performSearch() {
@@ -147,14 +217,50 @@ export class SuggestMoreCoursesComponent implements OnInit {
             "Course"
           ]
         },
-        "fields": [
-          "posterImage",
-          "description",
-          "name"
+        fields: [
+          'downloadUrl',
+          'organisation',
+          'language',
+          'source',
+          'appIcon',
+          'identifier',
+          'name',
+          'primaryCategory',
+          'contentType',
+          'posterImage',
+          'createdOn',
+          'duration',
+          'avgRating',
+          'additionalTags',
+          'courseCategory',
+          'mimeType',
+          'contentId',
+          'creatorLogo',
+          'sectorDetails_v1',
+          'languageMapV1',
+          'language',
+          'completionSurveyLink',
+          'difficultyLevel',
+          'competencies_v6.competencyAreaName'
+        ],
+        facets: [
+          'avgRating',
+          'language',
+          'organisation',
+          'courseCategory',
+          'sectorDetails_v1.sectorName',
+          'sectorDetails_v1.subSectorName',
+          'competencies_v6.competencyAreaName',
+          'competencies_v6.competencyThemeName',
+          'competencies_v6.competencySubThemeName',
+          'duration'
         ],
         "query": this.searchText.trim(),
         "limit": this.pageSize,
-        "offset": this.currentPage * this.pageSize
+        "offset": this.currentPage * this.pageSize,
+        sort_by: {
+          createdOn: 'desc'
+        }
       }
     };
 
@@ -288,12 +394,12 @@ export class SuggestMoreCoursesComponent implements OnInit {
 
         if (this.planData.fromMdoPortal) {
           let reqBodyNew = {
-      "role_mapping_id": this.planData.id,
-      "recommended_course_id": this.planData.recommended_course_id,
-      "course_identifiers": allIdentifiers
-    }
+            "item_id": this.planData.id,
+            "request_id": this.planData.cbp_plan_id,
+            "identifiers": allIdentifiers
+          }
           if (this.planData.cbp_plan_id) {
-            this.sharedService.updateCourse(reqBodyNew, this.planData.cbp_plan_id).subscribe({
+            this.sharedService.addMDOCourse(reqBodyNew).subscribe({
               next: (res) => {
                 // Success handling
                 console.log('Success:', res);
@@ -439,6 +545,206 @@ export class SuggestMoreCoursesComponent implements OnInit {
     } else {
       let url = `https://portal.igotkarmayogi.gov.in/app/toc/${item?.identifier}/overview?`
       window.open(url, '_blank')
+    }
+  }
+
+  applyFilter(value: any) {
+    console.log('this.searchText', value)
+    this.searchText = value
+    this.filterdCourses = this.filterData(this.searchText);
+  }
+
+  applyFilters(): void {
+    this.currentPage = 0;
+    this.loadCoursesByFilters();
+  }
+
+  loadCoursesByFilters() {
+
+
+    const {
+      competency = [],
+      rating = [],
+      language = [],
+      duration = [],
+      provider = []
+    } = this.filterForm.value;
+
+    const filters: any = {
+      primaryCategory: ['Course'],
+      status: ['Live'],
+      contentType: ['Course'],
+      courseCategory: {
+        '!=': ['pre enrolment assessment']
+      }
+    };
+
+    /* Competency */
+    if (competency?.length) {
+      filters['competencies_v6.competencyAreaName'] = competency;
+    }
+
+    /* Language */
+    if (language?.length) {
+      filters.language = language.map((x: string) =>
+        x.toLowerCase()
+      );
+    }
+
+    /* Provider */
+    if (provider?.length) {
+      filters.organisation = provider;
+    }
+
+    /* Rating */
+    if (rating?.length) {
+      const highestRating = Math.max(
+        ...rating.map((r: string) =>
+          Number(r.split(' ')[0])
+        )
+      );
+
+      filters.avgRating = {
+        '>=': highestRating
+      };
+    }
+
+    /* Duration */
+    if (duration?.length) {
+      filters.duration = duration[0];
+    }
+
+    const reqBody = {
+      request: {
+        filters,
+        fields: [
+          'downloadUrl',
+          'organisation',
+          'language',
+          'source',
+          'appIcon',
+          'identifier',
+          'name',
+          'primaryCategory',
+          'contentType',
+          'posterImage',
+          'createdOn',
+          'duration',
+          'avgRating',
+          'additionalTags',
+          'courseCategory',
+          'mimeType',
+          'contentId',
+          'creatorLogo',
+          'sectorDetails_v1',
+          'languageMapV1',
+          'language',
+          'completionSurveyLink',
+          'difficultyLevel',
+          'competencies_v6.competencyAreaName'
+        ],
+        facets: [
+          'avgRating',
+          'language',
+          'organisation',
+          'courseCategory',
+          'sectorDetails_v1.sectorName',
+          'sectorDetails_v1.subSectorName',
+          'competencies_v6.competencyAreaName',
+          'competencies_v6.competencyThemeName',
+          'competencies_v6.competencySubThemeName',
+          'duration'
+        ],
+        query: this.searchText?.trim() || '',
+        limit: this.pageSize,
+        offset: this.currentPage * this.pageSize,
+        sort_by: {
+          createdOn: 'desc'
+        }
+      }
+    };
+
+    console.log(
+      'API FILTER PAYLOAD',
+      JSON.stringify(reqBody, null, 2)
+    );
+
+    this.sharedService.getIGOTSuggestedCourses(reqBody).subscribe({
+      next: (res: any) => {
+
+
+        this.suggestedCourses =
+          res?.result?.content || [];
+
+        this.totalCount =
+          res?.result?.totalHits ||
+          res?.result?.count ||
+          0;
+
+        this.totalPages = Math.ceil(
+          this.totalCount / this.pageSize
+        );
+      },
+      error: (error) => {
+
+        console.error(error);
+      }
+    });
+  }
+
+
+  onSearchChange(value: string) {
+    this.searchText = value;
+    this.currentPage = 0;
+
+    this.loadCoursesByFilters();
+  }
+
+  onPageChange(page: number) {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.loadCoursesByFilters();
+    }
+  }
+
+  resetFilters(): void {
+    this.searchText = '';
+
+    this.filterForm.reset({
+      competency: [],
+      rating: [],
+      language: [],
+      duration: [],
+      provider: []
+    });
+
+    this.currentPage = 0;
+
+    this.loadCoursesByFilters();
+  }
+
+  filterList(value: string, type: string) {
+    const search = value.toLowerCase();
+
+    switch (type) {
+      case 'competency':
+        this.filteredCompetency = this.competenciesType.filter(v => v.toLowerCase().includes(search));
+        break;
+      case 'rating':
+        this.filteredRatings = this.ratings.filter(v => v.toLowerCase().includes(search));
+        break;
+      case 'language':
+        this.filteredLanguages = this.languages.filter(v => v.toLowerCase().includes(search));
+        break;
+      case 'duration':
+        this.filteredDurations = this.durations.filter(
+          (v: { label: string; value: string }) =>
+            v.label.toLowerCase().includes(search)
+        );
+        break;
+      case 'provider':
+        this.filteredProviders = this.providers.filter(v => v.toLowerCase().includes(search));
+        break;
     }
   }
 }

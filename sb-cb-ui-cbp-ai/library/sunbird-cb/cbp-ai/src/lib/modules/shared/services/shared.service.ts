@@ -68,7 +68,8 @@ const API_END_POINTS = {
   MDO_ADD_USER_COURSE: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
   MDO_SUGGESTED_COURSE_LIST: 'apis/proxies/v8/ai/cbp/v1/course/suggestions',
   MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update',
-  REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry'
+  REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry',
+  MDO_ADD_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add'
 
 }
 
@@ -467,6 +468,13 @@ export class SharedService {
   updateCourse(reqBody, cbp_plan_id) {
     const headers = this.headers
     return this.http.put<any>(`${this.baseUrl}${API_END_POINTS.UPDATE_COURSES}/${cbp_plan_id}`, reqBody, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  addMDOCourse(reqBody) {
+     return this.http.put<any>(`${this.mdoBaseUrl}${API_END_POINTS.MDO_ADD_COURSE}`, reqBody)
       .pipe(map((response: any) => {
         return response
       }))

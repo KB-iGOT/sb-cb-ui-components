@@ -101,4 +101,8 @@ export class RejectRequestFormComponent implements OnInit {
         }
       });
   }
+
+   get rejection_comment() {
+  return this.rejectRequestForm.get('rejection_comment');
+}
 }

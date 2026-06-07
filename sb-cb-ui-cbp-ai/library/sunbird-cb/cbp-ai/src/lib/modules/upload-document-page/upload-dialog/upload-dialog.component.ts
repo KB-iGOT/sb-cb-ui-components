@@ -20,7 +20,7 @@ export class UploadDialogComponent {
   cbpFinalObj: any = {};
   loading = false;
   uploadedFileData: any = {};
-
+  selectedDocumentType = ''
   constructor(
     public dialogRef: MatDialogRef<UploadDialogComponent>,
     public sharedService: SharedService,
@@ -136,7 +136,7 @@ export class UploadDialogComponent {
     if (this.selectedFiles.length === 0) {
       return;
     }
-  
+
     if (this.totalFileCount > this.MAX_FILES) {
       this.snackBar.open('Maximum 10 documents allowed.', 'X', {
         duration: 3000,
@@ -144,42 +144,60 @@ export class UploadDialogComponent {
       });
       return;
     }
-  
+
     const formData = new FormData();
-  
+
     // Required fields
     formData.append(
       'state_center_id',
       this.cbpFinalObj?.ministry?.identifier || ''
     );
-  
+    if (this.cbpFinalObj?.departments && typeof this.cbpFinalObj?.departments === 'string') {
+      formData.append(
+        'department_id',
+        this.cbpFinalObj?.departments || ''
+      );
+    }
+
     formData.append(
-      'department_id',
-      this.cbpFinalObj?.departments || ''
+      'document_type',
+      this.selectedDocumentType || ''
     );
-  
     // Append multiple files with SAME key "files"
     this.selectedFiles.forEach((file: File) => {
       formData.append('files', file, file.name);
     });
-  
+
     this.loading = true;
-  
+
+    console.log('formData--',formData)
+
     this.sharedService.uploadDocument(formData).subscribe({
       next: (res) => {
-        this.loading = false;
-        this.uploadedFileData = res;
-        this.triggerFileSummary();
-        this.snackBar.open(res?.message, 'X', {
-          duration: 3000,
-          panelClass: ['snackbar-success']
-        });
-  
-        
+        if (res && res.status === 'complete') {
+          this.loading = false;
+          this.uploadedFileData = res;
+          this.triggerFileSummary();
+          this.snackBar.open(res?.message, 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+          });
+        } else {
+          this.loading = false;
+
+          this.snackBar.open(
+            res?.message || 'Upload failed',
+            'X',
+            { duration: 3000, panelClass: ['snackbar-error'] }
+          );
+        }
+
+
+
       },
       error: (error) => {
         this.loading = false;
-  
+
         this.snackBar.open(
           error?.error?.detail || 'Upload failed',
           'X',
@@ -188,23 +206,23 @@ export class UploadDialogComponent {
       }
     });
   }
-  
+
 
 
   triggerFileSummary() {
     if (!this.uploadedFileData?.successful_uploads?.length) return;
-  
+
     const files = this.uploadedFileData.successful_uploads;
     const totalFiles = files.length;
-  
+
     const dialogRefForProgress = this.dialog.open(ProgressDialogComponent, {
       disableClose: true,
       data: { progress: 0, message: `Processing 0 of ${totalFiles} summaries...` }
     });
-  
+
     let completedFiles = 0;
-  
-    const pollingRequests = files.map(file =>
+
+    const pollingRequests = files.map((file: any) =>
       interval(5000).pipe(
         startWith(0), // trigger immediately
         switchMap(() => this.sharedService.triggerFileSummary(file.file_id)), // must return { summary_status }
@@ -218,7 +236,7 @@ export class UploadDialogComponent {
         takeWhile((res: any) => res.summary_status !== 'COMPLETED', true)
       )
     );
-  
+
     forkJoin(pollingRequests).subscribe({
       complete: () => {
         dialogRefForProgress.componentInstance.data.progress = 100;
@@ -234,7 +252,7 @@ export class UploadDialogComponent {
       }
     });
   }
-  
+
 
 
 }

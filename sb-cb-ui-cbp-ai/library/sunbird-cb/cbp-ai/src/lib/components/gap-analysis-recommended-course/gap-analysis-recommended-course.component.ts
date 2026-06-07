@@ -52,7 +52,7 @@ export class GapAnalysisRecommendedCourseComponent {
         let allCourses = []
         if(res && res.filtered_courses && res.filtered_courses.length) {
           res.filtered_courses.forEach((item)=>{
-            if(item?.relevancy > 85) {
+            if(item?.relevancy > 75) {
               allCourses.push(item)
             }
           })

@@ -29,7 +29,11 @@ export class PublishApproveRequestFormComponent implements OnInit {
 
   initializeForm(): void {
     this.approvalRequestForm = this.fb.group({
-      request_name: ['', Validators.required],
+      request_name: ['', [
+        Validators.required,
+        Validators.maxLength(70),
+        Validators.pattern(/^[a-zA-Z0-9._\-$/:[\]'! ]+$/)
+      ]],
       due_date: [null, Validators.required]
     });
   }
@@ -96,4 +100,12 @@ approveAndPublish() {
         }
       });
   }
+
+  get request_name() {
+  return this.approvalRequestForm.get('request_name');
+}
+
+get due_date() {
+  return this.approvalRequestForm.get('due_date');
+}
 }
