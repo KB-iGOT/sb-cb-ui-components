@@ -600,7 +600,9 @@ export class RoleMappingListComponent {
                 state_center_id: this.formData.value.ministry
               }
               if (this.formData.value.departments) {
-                obj['department_id'] = this.formData.value.departments
+                if(typeof this.formData.value.departments === 'string') {
+                  obj['department_id'] = this.formData.value.departments
+                }                
               }
               this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
                 console.log('res', res)
@@ -651,9 +653,10 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          if (this.formData.value.departments?.length) {
-            obj['department_id'] = this.formData.value.departments
-          }
+          
+          if(typeof this.formData.value.departments === 'string') {
+                  obj['department_id'] = this.formData.value.departments
+            }  
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
@@ -700,9 +703,9 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          if (this.formData.value.departments) {
-            obj['department_id'] = this.formData.value.departments
-          }
+          if(typeof this.formData.value.departments === 'string') {
+                  obj['department_id'] = this.formData.value.departments
+                }  
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)

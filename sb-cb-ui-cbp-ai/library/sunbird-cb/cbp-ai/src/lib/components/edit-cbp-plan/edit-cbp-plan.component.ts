@@ -810,9 +810,9 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       selectedObj = {
         name: selectedDesignation,
         status: 'Active',
-        id: 'custom-' + Date.now() + '-' + Math.random(),
+        id: '',
         igot_designation_name: selectedDesignation,
-        igot_designation_id: 'custom-' + Date.now() + '-' + Math.random(),
+        igot_designation_id: '',
       };
     }
 

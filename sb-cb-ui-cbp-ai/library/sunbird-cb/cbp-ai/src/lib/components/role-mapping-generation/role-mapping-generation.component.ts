@@ -133,7 +133,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         ministryType: ['ministry', Validators.required],
         ministry: [null, Validators.required],
         sectors: [[]],
-        departments: [[]], // shown only if ministryType == 'state'
+        departments: [''], // shown only if ministryType == 'state'
         additionalDetails: [''],
         additional_document: []
       });
