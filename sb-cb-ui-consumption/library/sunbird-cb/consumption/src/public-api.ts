@@ -153,15 +153,13 @@ export * from './lib/_common/competencies/competency-list/competency-list.compon
 
 export * from './lib/_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
 
-export * from './lib/_common/carousel-banner/carousel-banner.module'
-export * from './lib/_common/carousel-banner/carousel-banner.component'
-export * from './lib/_common/carousel-banner/carousel-banner.model'
+export * from './lib/_common/carousel-banner-v2/carousel-banner-v2.component'
+export * from './lib/_common/carousel-banner-v2/carousel-banner-v2.model'
 
-export * from './lib/_common/spotlight-cards/spotlight-cards.module'
-export * from './lib/_common/spotlight-cards/spotlight-cards.component'
-export * from './lib/_common/spotlight-cards/spotlight-cards.model'
+export * from './lib/_common/spotlight-cards-v2/spotlight-cards-v2.component'
+export * from './lib/_common/spotlight-cards-v2/spotlight-cards-v2.model'
 
-export * from './lib/_common/cards/card-course/card-course.component'
+export * from './lib/_common/card-course-v2/card-course-v2.component'
 // Left Navigation Bar - Dynamic Sidebar
 export * from './lib/_common/left_nav_bar/models/sidebar.models'
 export * from './lib/_common/left_nav_bar/constants/sidebar.constants'

@@ -1,11 +1,5 @@
-<!-- ═══════════════════════════════════════════════════════════
-     sb-uic-card-course
-     Fixed-height (346 px) configurable course card.
-     All rows reserve space so the height never shifts.
-     ═══════════════════════════════════════════════════════════ -->
-
 <!-- ── SKELETON STATE ──────────────────────────────────────── -->
-@if (isLoading) {
+@if (isLoading()) {
 <div class="cc-card cc-card--skeleton" aria-busy="true" aria-label="Loading course card">
 
   <div class="cc-card__media cc-skeleton cc-skeleton--img-placeholder" aria-hidden="true">
@@ -34,9 +28,6 @@
     </div>
 
     <div class="cc-card__footer">
-      <div class="cc-card__lang-row">
-        <div class="cc-skeleton cc-skeleton--line w-2/3"></div>
-      </div>
       <div class="cc-card__divider"></div>
       <div class="cc-card__org-row">
         <div class="cc-skeleton cc-skeleton--avatar"></div>
@@ -48,55 +39,64 @@
 }
 
 <!-- ── CONTENT STATE ───────────────────────────────────────── -->
-@if (!isLoading && content) {
-<div class="cc-card" role="article" [attr.aria-label]="content.name" [class.cc-card--expired]="!isLiveOrMarkForDeletion"
-  tabindex="0" (click)="onCardClick()" (keydown.enter)="onCardClick()"
+@if (!isLoading() && content(); as c) {
+<div class="cc-card" role="article" [attr.aria-label]="c.name"
+  [class.cc-card--expired]="!isLiveOrMarkForDeletion()"
+  tabindex="0"
+  (click)="onCardClick()"
+  (keydown.enter)="onCardClick()"
   (keydown.space)="$event.preventDefault(); onCardClick()">
 
   <!-- ┌─── MEDIA (image + overlays) ──────────────────────────┐ -->
   <div class="cc-card__media">
-    <img class="cc-card__img" [src]="thumbnailUrl" [wsUtilsDefaultThumbnail]="defaultThumbnail" [alt]="content.name"
+    <img class="cc-card__img"
+      [src]="thumbnailUrl()"
+      [wsUtilsDefaultThumbnail]="defaultThumbnail()"
+      [alt]="c.name"
       loading="lazy" />
+
     <div class="cc-card__badges">
-      @if (isIgotSpecialization) {
+      @if (isIgotSpecialization()) {
       <span class="cc-card__left-badge cc-card__left-badge--igot"
         [attr.aria-label]="'cardcontentv2.iGOTSpecializationProgram' | translate">
         {{ 'cardcontentv2.iGOTSpecializationProgram' | translate }}
       </span>
       }
-      @if (isPopular) {
+      @if (isPopular()) {
       <span class="cc-card__left-badge">{{ 'cardcontentv2.mostPopular' | translate }}</span>
       }
-      @if (isMostEnrolled) {
+      @if (isMostEnrolled()) {
       <span class="cc-card__left-badge">{{ 'cardcontentv2.mostEnrolled' | translate }}</span>
       }
-      @if (isMostTrending) {
+      @if (isMostTrending()) {
       <span class="cc-card__left-badge">{{ 'cardcontentv2.mostTrending' | translate }}</span>
       }
     </div>
 
-    <!-- Language pill – top of image (shown when content is multilingual) -->
-    @if (languageCount > 1) {
+    <!-- Language pill – shown when content is multilingual -->
+    @if (languageCount() > 1) {
     <div class="cc-card__lang-pill"
-      [attr.aria-label]="'cardcontentv2.availableInLanguages' | translate: { count: languageCount }">
-      <!-- <mat-icon class="cc-card__lang-pill-icon" aria-hidden="true">translate</mat-icon> -->
-      <span class="cc-card__lang-pill-text">{{ 'cardcontentv2.availableInLanguages' | translate: { count: languageCount } }}</span>
+      [attr.aria-label]="'cardcontentv2.availableInLanguages' | translate: { count: languageCount() }">
+      <span class="cc-card__lang-pill-text">
+        {{ 'cardcontentv2.availableInLanguages' | translate: { count: languageCount() } }}
+      </span>
     </div>
     }
 
     <!-- Duration overlay (bottom-right) -->
-    @if (durationSeconds > 0) {
-    <span class="cc-card__duration" [attr.aria-label]="(durationSeconds | pipeDurationTransform: 'hms') + ' duration'">
+    @if (durationSeconds() > 0) {
+    <span class="cc-card__duration"
+      [attr.aria-label]="(durationSeconds() | pipeDurationTransform: 'hms') + ' duration'">
       <mat-icon class="cc-card__dur-icon" aria-hidden="true">access_time</mat-icon>
-      <span aria-hidden="true">{{ durationSeconds | pipeDurationTransform: 'hms' }}</span>
+      <span aria-hidden="true">{{ durationSeconds() | pipeDurationTransform: 'hms' }}</span>
     </span>
     }
 
-    @if (programDurationDays > 0) {
+    @if (programDurationDays() > 0) {
     <span class="cc-card__duration"
-      [attr.aria-label]="programDurationDays + (programDurationDays === 1 ? ' day' : ' days') + ' duration'">
+      [attr.aria-label]="programDurationDays() + (programDurationDays() === 1 ? ' day' : ' days') + ' duration'">
       <mat-icon class="cc-card__dur-icon" aria-hidden="true">access_time</mat-icon>
-      {{ programDurationDays }} {{ programDurationDays === 1 ? 'day' : 'days' }}
+      {{ programDurationDays() }} {{ programDurationDays() === 1 ? 'day' : 'days' }}
     </span>
     }
   </div>
@@ -108,69 +108,80 @@
     <!-- Row 1 – content type chip + star rating -->
     <div class="cc-card__type-row">
       <span class="cc-card__type-chip">
-        <sb-uic-display-content-type class="cc-card__type-text" [title]="displayType"
-          [displayContentType]="displayType">
+        <sb-uic-display-content-type
+          class="cc-card__type-text"
+          [title]="displayType()"
+          [displayContentType]="displayType()">
         </sb-uic-display-content-type>
       </span>
 
-      @if (content.avgRating) {
-      <span class="cc-card__rating" [attr.aria-label]="'Rating: ' + content.avgRating">
+      @if (c.avgRating) {
+      <span class="cc-card__rating" [attr.aria-label]="'Rating: ' + c.avgRating">
         <mat-icon class="cc-card__star-icon" aria-hidden="true">star_border</mat-icon>
-        <span aria-hidden="true">{{ content.avgRating }}</span>
+        <span aria-hidden="true">{{ c.avgRating }}</span>
       </span>
       }
     </div>
 
     <!-- Row 2 – title (always 2-line height) -->
     <div class="cc-card__title-wrap">
-      <h3 #titleEl class="cc-card__title" [matTooltip]="content.name" [matTooltipDisabled]="!isTitleTruncated"
-        [matTooltipShowDelay]="400" matTooltipClass="cc-title-tooltip">{{ content.name }}</h3>
+      <h3 #titleEl class="cc-card__title"
+        [matTooltip]="c.name"
+        [matTooltipDisabled]="!isTitleTruncated()"
+        [matTooltipShowDelay]="400"
+        matTooltipClass="cc-title-tooltip">{{ c.name }}</h3>
     </div>
 
-    <!-- Row 3 – chips: APAR | CA | level (always reserve height) -->
+    <!-- Row 3 – chips: APAR | CA | level -->
     <div class="cc-card__chips-row">
-      @if (isApar) {
+      @if (isApar()) {
       <span class="cc-card__chip cc-card__chip--apar">
-        <img class="cc-chip-icon cc-chip-icon--apar" src="assets/icons/content/apar.svg" alt=""
-          aria-hidden="true" />APAR
+        <img class="cc-chip-icon cc-chip-icon--apar"
+          src="assets/icons/content/apar.svg" alt="" aria-hidden="true" />APAR
       </span>
       }
-      @if (isCa) {
+      @if (isCa()) {
       <span class="cc-card__chip cc-card__chip--ca">
-        <img class="cc-chip-icon cc-chip-icon--ca" src="assets/icons/content/ca.svg" alt="" aria-hidden="true" />CA
+        <img class="cc-chip-icon cc-chip-icon--ca"
+          src="assets/icons/content/ca.svg" alt="" aria-hidden="true" />CA
       </span>
       }
-      @if (content.difficultyLevel) {
+      @if (c.difficultyLevel) {
       <span class="cc-card__chip cc-card__chip--level"
-        [ngClass]="'cc-card__chip--level-' + (content.difficultyLevel | lowercase)">
+        [ngClass]="'cc-card__chip--level-' + (c.difficultyLevel | lowercase)">
         <img class="cc-chip-icon" src="assets/icons/content/level.svg" alt="" aria-hidden="true" />
-        {{ content.difficultyLevel }}
+        {{ c.difficultyLevel }}
       </span>
       }
     </div>
 
     <!-- Row 4 – footer: org + status -->
     <div class="cc-card__footer">
-
       <div class="cc-card__divider"></div>
 
-      <!-- Org logo + org name + status -->
       <div class="cc-card__org-row">
-        <img class="cc-card__org-logo" [src]="content.creatorLogo || defaultSLogo"
-          [wsUtilsDefaultThumbnail]="defaultSLogo" [alt]="orgName" loading="lazy" />
+        <img class="cc-card__org-logo"
+          [src]="c.creatorLogo || defaultSLogo()"
+          [wsUtilsDefaultThumbnail]="defaultSLogo()"
+          [alt]="orgName()"
+          loading="lazy" />
 
-        <span #orgEl class="cc-card__org-name" [matTooltip]="orgName" [matTooltipDisabled]="!isOrgTruncated"
-          [matTooltipShowDelay]="400" matTooltipClass="cc-title-tooltip">{{ orgName }}</span>
+        <span #orgEl class="cc-card__org-name"
+          [matTooltip]="orgName()"
+          [matTooltipDisabled]="!isOrgTruncated()"
+          [matTooltipShowDelay]="400"
+          matTooltipClass="cc-title-tooltip">{{ orgName() }}</span>
 
-        @if (cbpStatus) {
-        <span class="cc-card__status" [class.cc-card__status--overdue]="cbpStatus === 'Overdue'"
-          [class.cc-card__status--done]="cbpStatus === 'Completed'"
-          [attr.aria-label]="(cbpStatus === 'Overdue' ? 'cardcontentv2.overDue' : 'cardcontentv2.completed') | translate">
-          <span aria-hidden="true">&#9679;&nbsp;</span>{{ (cbpStatus === 'Overdue' ? 'cardcontentv2.overDue' : 'cardcontentv2.completed') | translate }}
+        @if (cbpStatus()) {
+        <span class="cc-card__status"
+          [class.cc-card__status--overdue]="cbpStatus() === 'Overdue'"
+          [class.cc-card__status--done]="cbpStatus() === 'Completed'"
+          [attr.aria-label]="(cbpStatus() === 'Overdue' ? 'cardcontentv2.overDue' : 'cardcontentv2.completed') | translate">
+          <span aria-hidden="true">&#9679;&nbsp;</span>
+          {{ (cbpStatus() === 'Overdue' ? 'cardcontentv2.overDue' : 'cardcontentv2.completed') | translate }}
         </span>
         }
       </div>
-
     </div>
 
   </div>
