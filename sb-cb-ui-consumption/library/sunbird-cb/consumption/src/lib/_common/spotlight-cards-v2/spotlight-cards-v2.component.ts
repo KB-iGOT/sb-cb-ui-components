@@ -13,14 +13,14 @@ import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsSpotlightCardsV2 } from './spotlight-cards-v2.model'
 
 @Component({
-  selector: 'ws-widget-spotlight-cards-v2',
+  selector: 'sb-uic-spotlight-cards-v2',
   standalone: true,
   imports: [MatIconModule],
   templateUrl: './spotlight-cards-v2.component.html',
   styleUrls: ['./spotlight-cards-v2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WsWidgetSpotlightCardsV2Component {
+export class SbUicSpotlightCardsV2Component {
 
   /** Section heading shown at the top-left. */
   heading = input<string>('In Spotlight')

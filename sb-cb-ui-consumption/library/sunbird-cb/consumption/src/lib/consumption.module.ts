@@ -11,14 +11,14 @@ import { CbpPlanModule } from './_common/cbp-plan/cbp-plan.module'
 import { CompetencySummaryModule } from './_common/competency-summary/competency-summary.module'
 import { AssessmentModule } from './_common/assessments/assessment.module'
 import { PeerValidationLibModule } from './_common/peer-validation/peer-validation-lib.module'
-import { WsWidgetSpotlightCardsV2Component } from './_common/spotlight-cards-v2/spotlight-cards-v2.component'
+import { SbUicSpotlightCardsV2Component } from './_common/spotlight-cards-v2/spotlight-cards-v2.component'
 
 @NgModule({
   declarations: [ConsumptionComponent],
   imports: [
     ContentStripWithTabsLibModule,
     SlidersLibModule,
-    WsWidgetSpotlightCardsV2Component,
+    SbUicSpotlightCardsV2Component,
   ],
   exports: [ConsumptionComponent,
     ContentStripWithTabsLibModule,
@@ -32,7 +32,7 @@ import { WsWidgetSpotlightCardsV2Component } from './_common/spotlight-cards-v2/
     CompetencySummaryModule,
     AssessmentModule,
     PeerValidationLibModule,
-    WsWidgetSpotlightCardsV2Component,
+    SbUicSpotlightCardsV2Component,
   ],
 })
 export class ConsumptionModule { }

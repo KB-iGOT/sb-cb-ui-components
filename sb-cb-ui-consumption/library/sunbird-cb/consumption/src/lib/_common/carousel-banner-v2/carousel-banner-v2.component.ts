@@ -15,14 +15,14 @@ import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsCarouselBannerV2 } from './carousel-banner-v2.model'
 
 @Component({
-  selector: 'ws-widget-carousel-banner-v2',
+  selector: 'sb-uic-carousel-banner-v2',
   standalone: true,
   imports: [NgClass, MatIconModule],
   templateUrl: './carousel-banner-v2.component.html',
   styleUrls: ['./carousel-banner-v2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WsWidgetCarouselBannerV2Component implements OnDestroy {
+export class SbUicCarouselBannerV2Component implements OnDestroy {
 
   // Signal inputs
   banners = input<NsCarouselBannerV2.IBannerItem[]>([])
