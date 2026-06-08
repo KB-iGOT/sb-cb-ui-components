@@ -10,6 +10,7 @@ import { ViewerUtilService } from '../../viewer-util.service'
 import { AccessControlService } from '@sunbird-cb/toc/lib/services/access-control.service'
 
 @Component({
+  standalone: false,
   selector: 'viewer-offline-session',
   templateUrl: './offline-session.component.html',
   styleUrls: ['./offline-session.component.scss'],

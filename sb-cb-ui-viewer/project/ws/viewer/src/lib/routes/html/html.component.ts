@@ -14,6 +14,7 @@ import { filter } from 'rxjs/operators'
 import { ViewerUtilService } from '../../viewer-util.service'
 import { AccessControlService } from '@sunbird-cb/toc'
 @Component({
+  standalone: false,
   selector: 'viewer-html',
   templateUrl: './html.component.html',
   styleUrls: ['./html.component.scss'],

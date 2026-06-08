@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router'
 import { ViewerUtilService } from '../../viewer-util.service'
 import { AccessControlService } from '@sunbird-cb/toc'
 @Component({
+  standalone: false,
   selector: 'viewer-pdf',
   templateUrl: './pdf.component.html',
   styleUrls: ['./pdf.component.scss'],

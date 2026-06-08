@@ -14,6 +14,7 @@ import { AccessControlService } from '@sunbird-cb/toc'
 import { NsContent } from '../../models/constant'
 
 @Component({
+  standalone: false,
   selector: 'viewer-audio',
   templateUrl: './audio.component.html',
   styleUrls: ['./audio.component.scss'],

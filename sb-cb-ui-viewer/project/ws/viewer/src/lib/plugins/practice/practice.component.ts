@@ -34,13 +34,14 @@ import { FinalAssessmentPopupComponent } from './components/final-assessment-pop
 import { MatSidenav } from '@angular/material/sidenav'
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms'
 import { AppTocService } from '../../services/app-toc.service'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
-import { MatLegacySnackBar as MatSnackBar, MatLegacySnackBarConfig as MatSnackBarConfig } from '@angular/material/legacy-snack-bar'
+import { MatDialog } from '@angular/material/dialog'
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar'
 import { PendingFunctionService } from '../../services/pending-function.service'
 
 // import { ViewerDataService } from '../../viewer-data.service'
 export type FetchStatus = 'hasMore' | 'fetching' | 'done' | 'error' | 'none'
 @Component({
+  standalone: false,
   selector: 'viewer-plugin-practice',
   templateUrl: './practice.component.html',
   styleUrls: ['./practice.component.scss'],
@@ -506,7 +507,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
     this.fetchingSectionsStatus = 'fetching'
     if (this.quizSvc.paperSections && this.quizSvc.paperSections.value
       && _.get(this.quizSvc.paperSections, 'value.questionSet.children')) {
-      this.paperSections = _.get(this.quizSvc.paperSections, 'value.questionSet.children')
+      this.paperSections = _.get(this.quizSvc.paperSections, 'value.questionSet.children') || null
       this.questionSectionTableData = _.get(this.quizSvc.paperSections, 'value.questionSet.children')
 
       const showTimer = _.toLower(_.get(this.quizSvc.paperSections, 'value.questionSet.showTimer')) === 'yes'

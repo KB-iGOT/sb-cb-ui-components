@@ -13,6 +13,7 @@ import { Platform } from '@angular/cdk/platform'
 import { AccessControlService } from '@sunbird-cb/toc'
 
 @Component({
+  standalone: false,
   selector: 'viewer-video',
   templateUrl: './video.component.html',
   styleUrls: ['./video.component.scss'],
