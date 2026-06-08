@@ -159,7 +159,7 @@ export * from './lib/_common/carousel-banner-v2/carousel-banner-v2.model'
 export * from './lib/_common/spotlight-cards-v2/spotlight-cards-v2.component'
 export * from './lib/_common/spotlight-cards-v2/spotlight-cards-v2.model'
 
-export * from './lib/_common/cards/card-course/card-course.component'
+export * from './lib/_common/card-course-v2/card-course-v2.component'
 // Left Navigation Bar - Dynamic Sidebar
 export * from './lib/_common/left_nav_bar/models/sidebar.models'
 export * from './lib/_common/left_nav_bar/constants/sidebar.constants'
