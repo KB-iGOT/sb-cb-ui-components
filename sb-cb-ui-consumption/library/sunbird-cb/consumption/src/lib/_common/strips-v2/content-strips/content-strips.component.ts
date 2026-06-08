@@ -1,4 +1,4 @@
-import { Component, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit, TemplateRef, viewChild } from '@angular/core'
+import { Component, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ContentConfig, CardType } from '../models/content-section.model'
@@ -6,12 +6,15 @@ import { CardViewModel } from '../models/card.model'
 import { ContentApiService } from '../services/content-api.service'
 import { CardTransformerService } from '../services/card-transformer.service'
 import { CarouselComponent } from '../../carousel/carousel.component'
-import { CardsModule } from '../../../../public-api'
+import { CardCourseV2Component } from '../../../../public-api'
 
 @Component({
   selector: 'sb-uic-content-strips',
   standalone: true,
-  imports: [CommonModule, CarouselComponent, CardsModule],
+  imports: [
+    CommonModule,
+    CarouselComponent,
+    CardCourseV2Component],
   templateUrl: './content-strips.component.html',
   styleUrl: './content-strips.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -19,15 +22,12 @@ import { CardsModule } from '../../../../public-api'
 export class ContentStripsComponent implements OnInit {
   contentConfig = input.required<ContentConfig>();
 
+  // Expose CardType enum so the template can use it in @switch
+  CardType = CardType;
+
   private apiService = inject(ContentApiService);
   private cardTransformer = inject(CardTransformerService);
   private destroyRef = inject(DestroyRef);
-
-  // Template references for card types
-  courseCardTemplate = viewChild.required<TemplateRef<any>>('courseCardTemplate');
-  spotlightCardTemplate = viewChild.required<TemplateRef<any>>('spotlightCardTemplate');
-  assessmentCardTemplate = viewChild.required<TemplateRef<any>>('assessmentCardTemplate');
-  programCardTemplate = viewChild.required<TemplateRef<any>>('programCardTemplate');
 
   cards = signal<CardViewModel[]>([]);
   skeletonArray = signal<number[]>([]);
@@ -98,19 +98,5 @@ export class ContentStripsComponent implements OnInit {
 
   getCardType(): CardType {
     return this.contentConfig()?.cardType ?? CardType.CourseCard
-  }
-
-  getCardTemplate(): TemplateRef<any> {
-    switch (this.getCardType()) {
-      case CardType.SpotlightCard:
-        return this.spotlightCardTemplate()
-      case CardType.AssessmentCard:
-        return this.assessmentCardTemplate()
-      case CardType.ProgramCard:
-        return this.programCardTemplate()
-      case CardType.CourseCard:
-      default:
-        return this.courseCardTemplate()
-    }
   }
 }

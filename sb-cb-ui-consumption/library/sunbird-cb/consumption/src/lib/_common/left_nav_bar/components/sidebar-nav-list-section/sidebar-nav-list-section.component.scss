@@ -40,8 +40,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .nav-icon img {
-      filter: brightness(0) invert(1);
+    .nav-icon .icon-svg {
+      background-color: var(--text-button-text-primary-white);
     }
   }
 
@@ -57,8 +57,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .nav-icon img {
-      filter: brightness(0) invert(1);
+    .nav-icon .icon-svg {
+      background-color: var(--text-button-text-primary-white);
     }
   }
 
@@ -88,8 +88,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .nav-icon img {
-      filter: brightness(0) invert(1);
+    .nav-icon .icon-svg {
+      background-color: var(--text-button-text-primary-white);
     }
   }
 
@@ -103,8 +103,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .nav-icon img {
-      filter: brightness(0) invert(1);
+    .nav-icon .icon-svg {
+      background-color: var(--text-button-text-primary-white);
     }
   }
 
@@ -123,12 +123,20 @@
     transition: color 0.2s ease;
   }
 
-  img {
-    transition: transform 0.2s ease;
+  .icon-svg {
+    display: block;
+    background-color: var(--text-bandw-black-body);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
   }
 }
 
-.nav-link:hover .nav-icon img {
+.nav-link:hover .nav-icon .icon-svg {
   transform: scale(1.1);
 }
 

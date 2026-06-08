@@ -42,10 +42,9 @@
           @if (item?.iconName) {
           <mat-icon class="text-xl" aria-hidden="true">{{ item?.iconName }}</mat-icon>
           } @else if (item?.iconUrl) {
-          <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="w-5 h-5 object-contain"
-            loading="lazy" role="presentation" />
-          } @else {
-          <mat-icon class="text-xl" aria-hidden="true">label</mat-icon>
+          <span class="icon-svg w-5 h-5" [style.mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'"
+            [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'"
+            role="presentation"></span>
           }
         </span>
 
