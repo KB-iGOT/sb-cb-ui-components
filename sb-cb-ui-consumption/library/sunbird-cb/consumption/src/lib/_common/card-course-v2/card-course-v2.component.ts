@@ -1,0 +1,201 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  afterNextRender,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core'
+import { LowerCasePipe, NgClass } from '@angular/common'
+import { Router } from '@angular/router'
+import { TranslateModule } from '@ngx-translate/core'
+import { MatIconModule } from '@angular/material/icon'
+import { MatTooltipModule } from '@angular/material/tooltip'
+import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { NsContent } from '../../_models/widget-content.model'
+import { ContentLanguageService } from '../../_services/content-language.service'
+import { CommonMethodsService } from '../../_services/common-methods.service'
+import { DefaultThumbnailModule } from '../../_directives/default-thumbnail/default-thumbnail.module'
+import { PipeDurationTransformModule } from '../../_pipes/pipe-duration-transform/pipe-duration-transform.module'
+import { DisplayContentTypeLibModule } from '../display-content-type-lib/display-content-type-lib.module'
+
+@Component({
+  selector: 'sb-uic-card-course-v2',
+  templateUrl: './card-course-v2.component.html',
+  styleUrls: ['./card-course-v2.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgClass,
+    LowerCasePipe,
+    MatIconModule,
+    MatTooltipModule,
+    TranslateModule,
+    DefaultThumbnailModule,
+    PipeDurationTransformModule,
+    DisplayContentTypeLibModule,
+  ],
+})
+export class CardCourseV2Component {
+
+  // ── Signal inputs ──────────────────────────────────────────────────────────
+  content = input<NsContent.IContent | null>(null)
+  cbPlanMapData = input<Record<string, any>>({})
+  isiGOTSpecialization = input<boolean>(false)
+  isLoading = input<boolean>(false)
+  isLiveOrMarkForDeletion = input<boolean>(true)
+
+  // ── Output ─────────────────────────────────────────────────────────────────
+  contentData = output<NsContent.IContent>()
+
+  // ── Signal view queries ────────────────────────────────────────────────────
+  private readonly titleElRef = viewChild<ElementRef<HTMLElement>>('titleEl')
+  private readonly orgElRef = viewChild<ElementRef<HTMLElement>>('orgEl')
+
+  // ── Injected services ──────────────────────────────────────────────────────
+  private readonly router = inject(Router)
+  private readonly configSvc = inject(ConfigurationsService)
+  private readonly events = inject(EventService)
+  private readonly contentLangSvc = inject(ContentLanguageService)
+  private readonly commonSvc = inject(CommonMethodsService)
+
+  // ── Internal mutable state ─────────────────────────────────────────────────
+  readonly defaultThumbnail = signal('')
+  readonly defaultSLogo = signal('')
+  readonly isTitleTruncated = signal(false)
+  readonly isOrgTruncated = signal(false)
+  private readonly caCourseUnitIds = signal<string[]>([])
+
+  // ── Computed values ────────────────────────────────────────────────────────
+  readonly languageCount = computed(() => {
+    const c = this.content()
+    return c ? this.contentLangSvc.getAllContentLanguages(c).length : 0
+  })
+
+  readonly thumbnailUrl = computed(() => {
+    const c = this.content()
+    return c?.posterImage || c?.appIcon || this.defaultThumbnail()
+  })
+
+  readonly displayType = computed<NsContent.EDisplayContentTypes>(() =>
+    (this.content()?.courseCategory ||
+      this.content()?.primaryCategory ||
+      'Course') as NsContent.EDisplayContentTypes
+  )
+
+  readonly orgName = computed(() => {
+    const orgs = this.content()?.organisation
+    if (orgs?.length) { return orgs[0] }
+    return this.content()?.sourceName || 'Karmayogi Bharat'
+  })
+
+  readonly isPopular = computed(() => (this.content()?.additionalTags ?? []).includes('Most popular'))
+  readonly isMostEnrolled = computed(() => (this.content()?.additionalTags ?? []).includes('mostEnrolled'))
+  readonly isMostTrending = computed(() => (this.content()?.additionalTags ?? []).includes('mostTrending'))
+
+  readonly isIgotSpecialization = computed(() =>
+    this.isiGOTSpecialization() &&
+    (this.content()?.additionalTags ?? []).includes('iGOT Specialization')
+  )
+
+  readonly isApar = computed(() => !!(this.content() as any)?.isApar)
+
+  readonly isCa = computed(() =>
+    this.caCourseUnitIds().includes(this.content()?.identifier ?? '') ||
+    !!(this.content() as any)?.isCA
+  )
+
+  readonly cbpStatus = computed<string | null>(() => {
+    const id = this.content()?.identifier
+    if (!id) { return null }
+    const plan = this.cbPlanMapData()[id]
+    if (!plan) { return null }
+    if (plan.contentStatus === 2) { return 'Completed' }
+    if (plan.planDuration === 'overdue') { return 'Overdue' }
+    return null
+  })
+
+  readonly durationSeconds = computed(() =>
+    this.content()?.programDuration ? 0 : (this.content()?.duration || 0)
+  )
+
+  readonly programDurationDays = computed(() => this.content()?.programDuration || 0)
+
+  constructor() {
+    // One-time initialisation from config
+    const cfg = this.configSvc.instanceConfig
+    if (cfg) {
+      this.defaultThumbnail.set(cfg.logos.defaultContent || '')
+      this.defaultSLogo.set(cfg.logos.defaultSourceLogo || '')
+    } else {
+      this.defaultThumbnail.set('/assets/instances/eagle/app_logos/default.png')
+      this.defaultSLogo.set('/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg')
+    }
+    this.caCourseUnitIds.set(JSON.parse(this.commonSvc.getCourseUnitIds() || '[]'))
+
+    // Truncation detection — runs once after the first render pass
+    afterNextRender(() => this.checkTruncation())
+  }
+
+  // ── Event handlers ─────────────────────────────────────────────────────────
+  onCardClick(): void {
+    if (!this.isLiveOrMarkForDeletion()) { return }
+    this.raiseTelemetry()
+    const c = this.content()
+    if (c) { this.contentData.emit(c) }
+    this.navigate()
+  }
+
+  // ── Private helpers ────────────────────────────────────────────────────────
+  private checkTruncation(): void {
+    const t = this.titleElRef()?.nativeElement
+    const o = this.orgElRef()?.nativeElement
+
+    if (t) {
+      const clampedHeight = t.clientHeight
+      if (clampedHeight > 0) {
+        t.style.setProperty('-webkit-line-clamp', 'none')
+        t.style.display = 'block'
+        const naturalHeight = t.scrollHeight
+        t.style.removeProperty('-webkit-line-clamp')
+        t.style.display = ''
+        this.isTitleTruncated.set(naturalHeight > clampedHeight)
+      } else {
+        this.isTitleTruncated.set(false)
+      }
+    }
+
+    this.isOrgTruncated.set(!!o && o.scrollWidth > o.clientWidth)
+  }
+
+  private raiseTelemetry(): void {
+    const c = this.content()
+    this.events.raiseInteractTelemetry(
+      { type: WsEvents.EnumInteractTypes.CLICK, subType: 'course-card', id: 'card-content' },
+      { id: c?.identifier, type: c?.primaryCategory },
+      { module: WsEvents.EnumTelemetrymodules.HOME },
+    )
+  }
+
+  private navigate(): void {
+    const id = this.content()?.identifier
+    if (!id) { return }
+
+    if (id.startsWith('ext_')) {
+      this.router.navigateByUrl(`/app/toc/ext/${id}`)
+      return
+    }
+
+    const category = this.content()?.primaryCategory || ''
+    if (category === 'Offline Session') {
+      this.router.navigate([`/app/event-hub/home/${id}`])
+      return
+    }
+
+    this.router.navigate(['/app/toc', id, 'overview'])
+  }
+}

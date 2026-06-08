@@ -1,4 +1,4 @@
-export namespace NsSpotlightCards {
+export namespace NsSpotlightCardsV2 {
 
   export interface ISpotlightCard {
     /** URL of the card icon / illustration image. */

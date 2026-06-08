@@ -2,7 +2,7 @@
  * Namespace following sunbird-cb-portal ws-widget conventions.
  * All model types, enums, and interfaces for the Carousel Banner widget.
  */
-export namespace NsCarouselBanner {
+export namespace NsCarouselBannerV2 {
   /**
    * Size variants for the banner height.
    * - xs : 140px  (extra-compact, inline teasers)
