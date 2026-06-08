@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-viewer",
-  "version": "0.0.1",
+  "version": "0.0.1-ang-17-20",
   "scripts": {
     "ng": "ng",
     "build": "ng build",
