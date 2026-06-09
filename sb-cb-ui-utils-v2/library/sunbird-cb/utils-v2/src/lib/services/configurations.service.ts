@@ -121,7 +121,7 @@ export class ConfigurationsService {
 
   changeNavBarFullView = new Subject()
   openExploreMenuForMWeb = new Subject()
-
+  headerFooterConfigData: any = null
   orgReadData: any
   spvOrgReadData: any
   menus: any
