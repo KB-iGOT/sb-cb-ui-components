@@ -1,4 +1,3 @@
-
 <ng-template #certificateCard>
     <ng-container *ngIf="!disableCertificate">
         <ng-container *ngIf="!lockCertificate; else certificateLock">
@@ -18,8 +17,9 @@
                                         (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div> -->
                                     <div class="text-xs font-light" *ngIf="content?.completedOn">
                                         <div *ngIf="content?.courseCategory;else primaryCategoryCheck">
-                                            {{ 'apptocsinglepage.completedOn' | translate }} {{content?.courseCategory}} {{
-                                                'apptocsinglepage.on' | translate 
+                                            {{ 'apptocsinglepage.completedOn' | translate }} {{content?.courseCategory}}
+                                            {{
+                                            'apptocsinglepage.on' | translate
                                             }} {{
                                             content?.completedOn
                                             ?
@@ -27,21 +27,22 @@
 
                                         </div>
                                         <ng-template #primaryCategoryCheck>
-                                        <div *ngIf="content?.primaryCategory === 'Standalone Assessment'">
-                                            {{ 'apptocsinglepage.completedAssessment' | translate }} {{
-                                            content?.completedOn
-                                            ?
-                                            (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
+                                            <div *ngIf="content?.primaryCategory === 'Standalone Assessment'">
+                                                {{ 'apptocsinglepage.completedAssessment' | translate }} {{
+                                                content?.completedOn
+                                                ?
+                                                (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
 
-                                        <div *ngIf="content?.primaryCategory === 'Program'">
-                                            {{ 'apptocsinglepage.completedProgram' | translate }} {{
-                                            content?.completedOn ?
-                                            (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
+                                            <div *ngIf="content?.primaryCategory === 'Program'">
+                                                {{ 'apptocsinglepage.completedProgram' | translate }} {{
+                                                content?.completedOn ?
+                                                (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
 
-                                        <div *ngIf="content?.primaryCategory === 'Course'">
-                                            {{ 'apptocsinglepage.completedCourse' | translate }} {{ content?.completedOn
-                                            ?
-                                            (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
+                                            <div *ngIf="content?.primaryCategory === 'Course'">
+                                                {{ 'apptocsinglepage.completedCourse' | translate }} {{
+                                                content?.completedOn
+                                                ?
+                                                (content?.completedOn | date: 'd MMM, y') : 'NA' }}</div>
                                         </ng-template>
                                     </div>
 
@@ -167,7 +168,7 @@
     </div>
 </ng-template>
 <div class="flex flex-col mt-4" [ngClass]="isMobile ? 'mx-4' : ''"
-    *ngIf="contentReadData?.retirementDate && contentReadData?.lastEnrollmentDate">
+    *ngIf="contentReadData?.retirementDate && contentReadData?.lastEnrollmentDate && config?.uiVisibility?.about?.retirementWarning !== false">
     <ng-container *ngIf="!skeletonLoader">
         <div class="flex items-center content-retire-container">
             <mat-icon class="material-icons retire-info-icon">warning</mat-icon>
@@ -188,7 +189,7 @@
 
 <div class="flex flex-col my-4 px-4" [class.mt60]="sticky" [ngClass]="isMobile ? '' : 'gap-10'">
     <ng-container
-        *ngIf="(content?.completionStatus === 2 || content?.certificateObj?.certId) && !fromMarketPlace && !disableCertificate">
+        *ngIf="(content?.completionStatus === 2 || content?.certificateObj?.certId) && !fromMarketPlace && !disableCertificate && config?.uiVisibility?.about?.certificate !== false">
         <div class="certificate-container" *ngIf="!skeletonLoader">
             <div class="flex flex-row earned-certificate-container">
                 <div class="ribbon"></div>
@@ -216,7 +217,8 @@
             </div>
         </div>
     </ng-container>
-    <ng-container *ngIf="showMarketPlaceCertificate && fromMarketPlace">
+    <ng-container
+        *ngIf="showMarketPlaceCertificate && fromMarketPlace && config?.uiVisibility?.about?.certificate !== false">
         <div class="certificate-container" *ngIf="!skeletonLoader && !disableCertificate">
             <div class="flex flex-row earned-certificate-container">
                 <div class="ribbon"></div>
@@ -264,7 +266,8 @@
         </div>
     </ng-container>
 
-    <ng-container *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
+    <ng-container
+        *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM && config?.uiVisibility?.about?.batchInfo !== false">
         <div class="flex flex-row gap-3 justify-around hideAbove1200">
             <div class="batch-info">
                 <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize ||
@@ -321,7 +324,7 @@
         </div>
     </ng-container>
 
-    <div class="flex flex-col" *ngIf="fromViewer || isMobile">
+    <div class="flex flex-col" *ngIf="(fromViewer || isMobile) && config?.uiVisibility?.about?.kpiValues !== false">
         <ng-container *ngIf="skeletonLoader">
             <div class="flex flex-row gap-3">
                 <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'"
@@ -333,19 +336,19 @@
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader && !fromMarketPlace && !fromMDO">
-           
+
             <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure" [isMobile]="isMobile"
                 [contentReadData]="contentReadData" [baseContentReadData]="baseContentReadData"
-                [languageList]="languageList"></ws-widget-toc-kpi-values>
+                [languageList]="languageList" [config]="config"></ws-widget-toc-kpi-values>
         </ng-container>
-         <ng-container *ngIf="!skeletonLoader && !fromMarketPlace && fromMDO">
-            <ws-widget-toc-kpi-values [content]="content?.result?.content" [tocStructure]="tocStructure" [isMobile]="isMobile"
-                [contentReadData]="contentReadData" [baseContentReadData]="baseContentReadData"
-                [languageList]="languageList"></ws-widget-toc-kpi-values>
+        <ng-container *ngIf="!skeletonLoader && !fromMarketPlace && fromMDO">
+            <ws-widget-toc-kpi-values [content]="content?.result?.content" [tocStructure]="tocStructure"
+                [isMobile]="isMobile" [contentReadData]="contentReadData" [baseContentReadData]="baseContentReadData"
+                [languageList]="languageList" [config]="config"></ws-widget-toc-kpi-values>
         </ng-container>
     </div>
 
-    <div class="flex flex-col">
+    <div class="flex flex-col" *ngIf="config?.uiVisibility?.about?.description !== false">
         <ng-container *ngIf="skeletonLoader">
             <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
                 [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
@@ -383,7 +386,8 @@
         </ng-container>
     </div>
 
-    <div class="flex flex-col" *ngIf="contentReadData?.instructions || contentReadData?.purpose">
+    <div class="flex flex-col"
+        *ngIf="(contentReadData?.instructions || contentReadData?.purpose) && config?.uiVisibility?.about?.learningOutcome !== false">
         <ng-container *ngIf="skeletonLoader">
             <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
                 [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
@@ -482,80 +486,86 @@
         </ng-container>
     </div>
 
-    <ng-container *ngIf="skeletonLoader">
-        <div class="flex flex-col gap-3">
-            <ws-widget-skeleton-loader [width]="'120px'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-            <div class="flex flex-row gap-3">
-                <ng-container *ngFor="let i of [1, 2]">
-                    <ws-widget-skeleton-loader [width]="'120px'" [height]="'32px'"
-                        [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                </ng-container>
-            </div>
-            <div class="flex flex-row gap-4">
-                <ws-widget-skeleton-loader [width]="'250px'" [height]="'80px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'250px'" [height]="'80px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-            </div>
-        </div>
-    </ng-container>
-
-    <ng-container *ngIf="!skeletonLoader">
-        
-        <ng-container *ngIf="!strip?.loaderWidgets?.length || !competenciesObject">
-            <div class="flex flex-col">
-                <ng-container [ngTemplateOutlet]="competencyLabel"></ng-container>
-                {{ 'apptocsinglepage.noCompetencyFound' | translate }}
-            </div>
-        </ng-container>
-        
-        <ng-container *ngIf="strip?.loaderWidgets?.length > 0">
+    <ng-container *ngIf="config?.uiVisibility?.about?.competencies !== false">
+        <ng-container *ngIf="skeletonLoader">
             <div class="flex flex-col gap-3">
-                <ng-container [ngTemplateOutlet]="competencyLabel"></ng-container>
-                <div class="flex flex-row gap-3 sm:gap-4 mb-3">
-                    <ng-container *ngFor="let item of competenciesObject">
-                        <div class="themes-button" [ngClass]="{'theme-activated': competencySelected === item.key}"
-                            (click)="handleShowCompetencies(item)">{{ item.key }}</div>
+                <ws-widget-skeleton-loader [width]="'120px'" [height]="'16px'"
+                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <div class="flex flex-row gap-3">
+                    <ng-container *ngFor="let i of [1, 2]">
+                        <ws-widget-skeleton-loader [width]="'120px'" [height]="'32px'"
+                            [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                     </ng-container>
                 </div>
-                <ng-container *ngFor="let item of competenciesObject">
-                    <div *ngIf="item?.key === competencySelected">
-                        <ws-utils-horizontal-scroller-v2 [loadStatus]="'done'" [stripConfig]="strip.stripConfig">
-                            <ng-container *ngFor="let widget of strip?.loaderWidgets;">
-                                <ng-container [sbUiResolverWidget]="widget"></ng-container>
-                            </ng-container>
-                        </ws-utils-horizontal-scroller-v2>
-                    </div>
-                </ng-container>
+                <div class="flex flex-row gap-4">
+                    <ws-widget-skeleton-loader [width]="'250px'" [height]="'80px'"
+                        [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                    <ws-widget-skeleton-loader [width]="'250px'" [height]="'80px'"
+                        [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                </div>
             </div>
         </ng-container>
-    </ng-container>
 
+        <ng-container *ngIf="!skeletonLoader">
 
-    <ng-container *ngIf="skeletonLoader">
-        <ws-widget-skeleton-loader [width]="'48px'" [height]="'16px'"
-            [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-        <div class="flex flex-col gap-2 mt-4">
-            <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-            <ws-widget-skeleton-loader [width]="'100%'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-        </div>
-    </ng-container>
-    <ng-container *ngIf="!skeletonLoader">
-        <!-- {{content|json}} -->
-        <ng-container *ngIf="contentReadData?.keywords?.length">
-            <ng-container [ngTemplateOutlet]="tagsList"
-                [ngTemplateOutletContext]="{ tagData: contentReadData?.keywords }"></ng-container>
+            <ng-container *ngIf="!strip?.loaderWidgets?.length || !competenciesObject">
+                <div class="flex flex-col">
+                    <ng-container [ngTemplateOutlet]="competencyLabel"></ng-container>
+                    {{ 'apptocsinglepage.noCompetencyFound' | translate }}
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="strip?.loaderWidgets?.length > 0">
+                <div class="flex flex-col gap-3">
+                    <ng-container [ngTemplateOutlet]="competencyLabel"></ng-container>
+                    <div class="flex flex-row gap-3 sm:gap-4 mb-3">
+                        <ng-container *ngFor="let item of competenciesObject">
+                            <div class="themes-button" [ngClass]="{'theme-activated': competencySelected === item.key}"
+                                (click)="handleShowCompetencies(item)">{{ item.key }}</div>
+                        </ng-container>
+                    </div>
+                    <ng-container *ngFor="let item of competenciesObject">
+                        <div *ngIf="item?.key === competencySelected">
+                            <ws-utils-horizontal-scroller-v2 [loadStatus]="'done'" [stripConfig]="strip.stripConfig">
+                                <ng-container *ngFor="let widget of strip?.loaderWidgets;">
+                                    <ng-container [sbUiResolverWidget]="widget"></ng-container>
+                                </ng-container>
+                            </ws-utils-horizontal-scroller-v2>
+                        </div>
+                    </ng-container>
+                </div>
+            </ng-container>
         </ng-container>
-        <ng-container *ngIf="content?.searchTags?.length > 1">
-            <ng-container *ngIf="content?.searchTags?.length" [ngTemplateOutlet]="tagsList"
-                [ngTemplateOutletContext]="{ tagData: content?.searchTags?.slice(1,content?.searchTags?.length) }"></ng-container>
+    </ng-container>
+
+
+    <ng-container *ngIf="config?.uiVisibility?.about?.tags?.visible !== false">
+        <ng-container *ngIf="skeletonLoader">
+            <ws-widget-skeleton-loader [width]="'48px'" [height]="'16px'"
+                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            <div class="flex flex-col gap-2 mt-4">
+                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'"
+                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'100%'" [height]="'16px'"
+                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="!skeletonLoader">
+            <!-- {{content|json}} -->
+            <ng-container
+                *ngIf="contentReadData?.keywords?.length && config?.uiVisibility?.about?.tags?.keywords !== false">
+                <ng-container [ngTemplateOutlet]="tagsList"
+                    [ngTemplateOutletContext]="{ tagData: contentReadData?.keywords }"></ng-container>
+            </ng-container>
+            <ng-container
+                *ngIf="content?.searchTags?.length > 1 && config?.uiVisibility?.about?.tags?.searchTags !== false">
+                <ng-container *ngIf="content?.searchTags?.length" [ngTemplateOutlet]="tagsList"
+                    [ngTemplateOutletContext]="{ tagData: content?.searchTags?.slice(1,content?.searchTags?.length) }"></ng-container>
+            </ng-container>
         </ng-container>
     </ng-container>
     <ng-container *ngIf="(!skeletonLoader && sectorsList?.length) && (content?.primaryCategory?.toLowerCase() === 'learning resource' ||
-    content?.resourceCategory?.toLowerCase() === 'case study')">
+    content?.resourceCategory?.toLowerCase() === 'case study') && config?.uiVisibility?.about?.sectors !== false">
         <div class="flex flex-col">
             <div class="mat-subheading-1 nodtranslate">{{ 'gyaanKarmayogi.sectors' | translate }}</div>
             <ng-container *ngIf="sectorsList?.length > 0">
@@ -611,7 +621,8 @@
 
     <ng-template #tagsList let-tagData="tagData">
         <div class="flex flex-col" *ngIf="tagData?.length">
-            <div class="mat-subheading-1 nodtranslate">{{ 'userProfile.tags' | translate }}</div>
+            <div class="mat-subheading-1 nodtranslate" *ngIf="config?.uiVisibility?.about?.tags?.title !== false">{{
+                'userProfile.tags' | translate }}</div>
             <ng-container *ngIf="tagData?.length">
                 <div class="flex flex-wrap gap-2" [ngClass]="{'tags-ellipsis': tagsEllipsis && !viewMoreTags}"
                     #tagsElem>
@@ -623,10 +634,12 @@
                     </ng-container>
                 </div>
                 <div class="flex items-center ws-mat-default-text underline cursor-pointer text-xs"
-                    *ngIf="tagsEllipsis && !viewMoreTags" (click)="viewMoreTags = !viewMoreTags">{{
+                    *ngIf="tagsEllipsis && !viewMoreTags && config?.uiVisibility?.about?.tags?.viewMoreLink !== false"
+                    (click)="viewMoreTags = !viewMoreTags">{{
                     'apptocsinglepage.viewMore' | translate }}</div>
                 <div class="flex items-center ws-mat-default-text underline cursor-pointer text-xs mt-1"
-                    *ngIf="viewMoreTags" (click)="viewMoreTags = !viewMoreTags">{{ 'apptocsinglepage.viewLess' |
+                    *ngIf="viewMoreTags && config?.uiVisibility?.about?.tags?.viewMoreLink !== false"
+                    (click)="viewMoreTags = !viewMoreTags">{{ 'apptocsinglepage.viewLess' |
                     translate }}</div>
             </ng-container>
             <div class="flex flex-wrap gap-2" *ngIf="!tagData?.length">
@@ -702,7 +715,8 @@
         </div>
     </ng-container>
 
-    <ng-container *ngIf="!skeletonLoader && !fromMarketPlace">
+    <ng-container
+        *ngIf="!skeletonLoader && !fromMarketPlace && config?.uiVisibility?.about?.authorsAndCurators !== false">
         <div class="flex flex-column gap-3" [ngClass]="{'hideAbove1200': !router.url.includes('/viewer/')}">
             <div class="text-base font-bold">{{ 'apptocsinglepage.authorsAndCurators' | translate }}</div>
             <div class="flex flex-col gap-4">
@@ -734,7 +748,8 @@
             </div>
         </div>
 
-        <div *ngIf="!fromMDO" class="flex flex-column gap-3" [ngClass]="{'hideAbove1200': !router.url.includes('/viewer/')}">
+        <div *ngIf="!fromMDO && config?.uiVisibility?.about?.provider !== false" class="flex flex-column gap-3"
+            [ngClass]="{'hideAbove1200': !router.url.includes('/viewer/')}">
             <div class="text-base font-bold">{{ 'apptocsinglepage.provider' | translate }}</div>
             <div class="flex flex-row gap-4 items-center">
                 <div class="provider-logo-div">
@@ -746,13 +761,16 @@
                 <div class="text-sm break-all">{{ handleCapitalize(content?.source, 'source') }}</div>
             </div>
         </div>
-        <div *ngIf="fromMDO" class="flex flex-column gap-3" [ngClass]="{'hideAbove1200': !router.url.includes('/viewer/')}">
+        <div *ngIf="fromMDO && config?.uiVisibility?.about?.provider !== false" class="flex flex-column gap-3"
+            [ngClass]="{'hideAbove1200': !router.url.includes('/viewer/')}">
             <div class="text-base font-bold">{{ 'apptocsinglepage.provider' | translate }}</div>
             <div class="flex flex-row gap-4 items-center">
                 <div class="provider-logo-div">
-                    <img *ngIf="(content?.result?.content?.creatorLogo)" height="36px" width="36px" [src]="content?.result?.content?.creatorLogo"
+                    <img *ngIf="(content?.result?.content?.creatorLogo)" height="36px" width="36px"
+                        [src]="content?.result?.content?.creatorLogo"
                         alt="{{ 'apptocsinglepage.provider' | translate }}" />
-                    <img *ngIf="!(content?.result?.content?.creatorLogo)" height="36px" width="36px" src="/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg"
+                    <img *ngIf="!(content?.result?.content?.creatorLogo)" height="36px" width="36px"
+                        src="/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg"
                         alt="{{ 'apptocsinglepage.provider' | translate }}" />
                 </div>
                 <div class="text-sm break-all">{{ handleCapitalize(content?.result?.content?.source, 'source') }}</div>
@@ -764,21 +782,28 @@
         <ws-widget-skeleton-loader [width]="'100%'" [height]="'400px'"
             [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
     </ng-container>
-    <ng-container *ngIf="!skeletonLoader && !forPreview">
+    <ng-container
+        *ngIf="!skeletonLoader && !forPreview && config?.uiVisibility?.about?.ratingsAndReviews?.visible !== false">
         <!-- <ng-container *ngIf="content?.averageRating"> -->
         <div class="flex flex-col ratings-div gap-10" id="ratingsDiv" *ngIf="showReviews">
-            <ws-widget-rating-summary [ratingSummary]="ratingSummaryProcessed"></ws-widget-rating-summary>
+            <ng-container *ngIf="config?.uiVisibility?.about?.ratingsAndReviews?.ratingSummary !== false">
+                <ws-widget-rating-summary [ratingSummary]="ratingSummaryProcessed"></ws-widget-rating-summary>
+            </ng-container>
 
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-3"
+                *ngIf="config?.uiVisibility?.about?.ratingsAndReviews?.topReviews?.visible !== false">
                 <div class="flex flex-row gap-4">
-                    <div class="flex-1 mat-subheading-1 nodtranslate" id="reviewContainer">{{
+                    <div class="flex-1 mat-subheading-1 nodtranslate" id="reviewContainer"
+                        *ngIf="config?.uiVisibility?.about?.ratingsAndReviews?.topReviews?.title !== false">{{
                         'apptocsinglepage.topReviews' | translate }}</div>
-                    <ng-container *ngIf="ratingSummaryProcessed?.avgRating">
+                    <ng-container
+                        *ngIf="ratingSummaryProcessed?.avgRating && config?.uiVisibility?.about?.ratingsAndReviews?.topReviews?.showAllLink !== false">
                         <div class="ws-mat-default-text cursor-pointer" (click)="handleOpenReviewModal()">{{
                             'msg.showAll' | translate }}</div>
                     </ng-container>
                 </div>
-                <ng-container *ngIf="topRatingReviews && topRatingReviews?.length">
+                <ng-container
+                    *ngIf="topRatingReviews && topRatingReviews?.length && config?.uiVisibility?.about?.ratingsAndReviews?.topReviews?.reviewCards !== false">
                     <div class="flex gap-5" [ngClass]="isMobile ? 'horizontal-strip' : 'flex-wrap'">
                         <div class="comment-div" *ngFor="let eachReview of topRatingReviews | slice:0:4; let i = index">
                             <div class="p-4 flex flex-col gap-6">
@@ -808,7 +833,8 @@
                         </div>
                     </div>
                 </ng-container>
-                <div *ngIf="!topRatingReviews || !topRatingReviews?.length">
+                <div
+                    *ngIf="(!topRatingReviews || !topRatingReviews?.length) && config?.uiVisibility?.about?.ratingsAndReviews?.topReviews?.noReviewsMessage !== false">
                     <div class="flex flex-col text-center items-center justify-center bg-white p-4 rounded-md">
                         <div class="font-base font-bold nodtranslate">{{ 'apptocsinglepage.noReviewsFound' | translate
                             }}</div>

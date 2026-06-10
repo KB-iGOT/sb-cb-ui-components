@@ -153,7 +153,7 @@
         </mat-tab>
 
         <!-- About Tab -->
-        <mat-tab label="{{ 'apptocsinglepage.about' | translate }}">
+        <mat-tab label="{{ 'apptocsinglepage.about' | translate }}" *ngIf="config?.uiVisibility?.tabs?.aboutTab !== false">
             <ng-template matTabContent>
                 <div class="ai-tutor-get-started-mobile my-2 ml-2" *ngIf="!viewerPage && enableAITutorFlag && isMobile">
                     <div class="flex flex-row align-items-center w-98">
@@ -195,7 +195,7 @@
 
         <!-- Content Tab -->
         <ng-container *ngIf="content?.children?.length">
-            <mat-tab label="{{ 'apptocsinglepage.content' | translate }}" *ngIf="contentTabFlag">
+            <mat-tab label="{{ 'apptocsinglepage.content' | translate }}" *ngIf="contentTabFlag && config?.uiVisibility?.tabs?.contentTab !== false">
                 <ng-template matTabContent>
                     <ws-widget-app-toc-content [batchId]="batchId" [componentName]="componentName" [pathSet]="pathSet"
                         [content]="content" [tocStructure]="tocStructure" [config]="config" [forPreview]="forPreview"
@@ -206,7 +206,7 @@
             </mat-tab>
         </ng-container>
 
-        <ng-container *ngIf="config?.commentsTab && !forPreview">
+        <ng-container *ngIf="config?.commentsTab && !forPreview && config?.uiVisibility?.tabs?.discussionTab !== false">
             <mat-tab label="{{ 'apptocsinglepage.startDiscussion' | translate }}">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="commentsDiv"
@@ -227,7 +227,7 @@
             </mat-tab>
         </ng-container>
         <ng-container
-            *ngIf="config?.samuhikCharchaTab && condition && contentReadData?.eventLinked?.length > 0 && enableSamuhikCharchaTab">
+            *ngIf="config?.samuhikCharchaTab && condition && contentReadData?.eventLinked?.length > 0 && enableSamuhikCharchaTab && config?.uiVisibility?.tabs?.discussionTab !== false">
             <mat-tab label="{{ 'apptocsinglepage.samuhikCharcha' | translate }}">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="samuhikCharchaDiv">
@@ -240,7 +240,7 @@
         </ng-container>
 
         <!-- Teachers Note Tab -->
-        <ng-container *ngIf="contentReadData?.referenceNodes && teacherNotesFlag">
+        <ng-container *ngIf="contentReadData?.referenceNodes && teacherNotesFlag && config?.uiVisibility?.tabs?.teachersNoteTab !== false">
             <mat-tab label="Teachers Note">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="teachersNoteDiv">
@@ -252,7 +252,7 @@
         </ng-container>
 
         <!-- Reference Note Tab -->
-        <ng-container *ngIf="contentReadData?.referenceNodes && referenceNotesFlag">
+        <ng-container *ngIf="contentReadData?.referenceNodes && referenceNotesFlag && config?.uiVisibility?.tabs?.referenceNoteTab !== false">
             <mat-tab label="Reference Note">
                 <ng-template matTabContent>
                     <div class="flex flex-col ratings-div mt-5" id="teachersNoteDiv">
