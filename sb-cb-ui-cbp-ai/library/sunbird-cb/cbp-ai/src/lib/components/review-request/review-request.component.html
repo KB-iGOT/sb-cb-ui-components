@@ -12,13 +12,13 @@
             </div>
         </div>
         <div class="right-section">
-        <div class="status-badge" *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' )">
+        <div [ngClass]="sharedService.fromMdoPortal ? 'status-badge-mdo' : 'status-badge'"  *ngIf="(request?.status === 'pending' || request?.status === 'PENDING' )">
             {{request?.status | titlecase}}
         </div>
-        <div class="status-badge-success" *ngIf="(request?.status === 'approved' || request?.status === 'APPROVED' )">
+        <div [ngClass]="sharedService.fromMdoPortal ? 'status-badge-success-mdo' : 'status-badge-success'" *ngIf="(request?.status === 'approved' || request?.status === 'APPROVED' )">
             {{request?.status | titlecase}}
         </div>
-        <div class="status-badge-rejected" *ngIf="(request?.status === 'rejected' || request?.status === 'REJECTED' )">
+        <div [ngClass]="sharedService.fromMdoPortal ? 'status-badge-rejected-mdo' : 'status-badge-rejected'" class="status-badge-rejected" *ngIf="(request?.status === 'rejected' || request?.status === 'REJECTED' )">
             {{request?.status | titlecase}}
         </div>
 
@@ -98,7 +98,7 @@
             <mat-divider class="divider"></mat-divider>
 
             <div class="organization">
-                <p class="label">Organization</p>
+                <p class="value">Organization</p>
                 <p class="org-value">{{request?.state_center_name}} <span
                         *ngIf="request?.department_name">/ {{request?.department_name}}</span></p>
             </div>

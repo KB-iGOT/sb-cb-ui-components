@@ -6,7 +6,7 @@
             </div>
             <div class="right-section">
                 <div class="btn-group-compact">
-                    <div *ngIf="sharedService.fromMdoPortal">
+                    <div *ngIf="sharedService.fromMdoPortal && data?.requestStatus?.toLowerCase() == 'pending'">
                         <input class="btn-active" type="button" value="Add More Course From iGOT"
                             (click)="suggestMoreCourses()" />
                     </div>
@@ -151,7 +151,7 @@
                     </div>
                     <div class="course-title mt-4">
                         <div class="cursor-pointer">
-                            <div *ngIf="item?.course" (click)="redirectToCoure(item)">{{item?.course}}</div>
+                            <div *ngIf="item?.course && (!sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">{{item?.course}}</div>
                             <div *ngIf="item?.name && (sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">
                                 {{item?.name}}</div>
                         </div>
@@ -280,7 +280,7 @@
         </div>
     </div>
     <div class="popup-footer" *ngIf="filterdCourses?.length">
-        <div>
+        <div *ngIf="!(data?.fromRequestPage)">
             <input class="btn-active" type="button" value="Download" (click)="downloadPdfFromBE()" />
         </div>
         <!-- <div>

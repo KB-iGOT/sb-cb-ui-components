@@ -646,6 +646,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
             .filter((item: any) => !matchedIds.has(item?.id))
             .map((item: any) => ({
               id: item?.id,
+              igot_designation_id: item?.id,
               name: item?.designation || '',
               status: item?.status || 'Active',
             }));
@@ -767,7 +768,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
         name: selected,
         status: 'Active',
         igot_designation_name: this.planData?.designation_name,
-        igot_designation_id: this.planData?.igot_designation_id || "DESG-002314",
+        igot_designation_id: this.planData?.igot_designation_id,
       };
 
       // ✅ Add at TOP so it's visible immediately

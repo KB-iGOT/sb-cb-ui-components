@@ -194,7 +194,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       skip: 0,
       limit: 200
     }
-    if (formData?.departments) {
+    if (typeof formData?.departments === 'string') {
       reqBody['department_id'] = formData?.departments
     }
     this.apiLoading = true
@@ -204,6 +204,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         let wAOCount = 0
         this.apiLoading = false
         this.documents = res?.items
+        this.disableUploadDocument = false
+        this.disableUploadDocumentOriginal = false
         this.documents.forEach((item)=>{
           if(item?.document_type === 'Work Allocation Order') {
             wAOCount =wAOCount+1
@@ -220,6 +222,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       } else {
         this.documents = []
         this.apiLoading = false
+        this.disableUploadDocument = false
+        this.disableUploadDocumentOriginal = false
       }
     })
   }
@@ -545,8 +549,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       this.roleMappingForm.setErrors({ invalid: true });
       setTimeout(() => {
         this.roleMappingForm.updateValueAndValidity();
-         this.disableUploadDocument = true
-          this.disableUploadDocumentOriginal = true
+        //  this.disableUploadDocument = true
+        //   this.disableUploadDocumentOriginal = true
       }, 5000)
     }
   }

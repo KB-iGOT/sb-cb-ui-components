@@ -67,6 +67,40 @@ background:#d32f2f;
   margin-top: 8px;
 }
 
+
+.status-badge-mdo{
+  background:orange;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  height: 24px;
+  margin-top: 8px;
+}
+
+.status-badge-mdo-success {
+background:#16873a;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  height: 24px;
+  margin-top: 8px;
+}
+
+.status-badge-mdo-rejected {
+background:#d32f2f;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  height: 24px;
+  margin-top: 8px;
+}
+
 /* CARD */
 
 .details-card{

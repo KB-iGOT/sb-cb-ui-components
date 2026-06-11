@@ -41,10 +41,10 @@ export class ViewCourseRecommendationComponent {
     this.loading = true
     console.log('this.data--', this.data)
     this.cbpPlanData = this.sharedService.cbpPlanFinalObj
-    if(this.data?.cbp_plan_data && this.data.cbp_plan_data.length) {
+    if (this.data?.cbp_plan_data && this.data.cbp_plan_data.length) {
       this.reviewRequestPlanData = this.data?.cbp_plan_data[0]
     }
-    
+
     console.log('cbpPlanData--', this.cbpPlanData)
 
 
@@ -190,7 +190,12 @@ export class ViewCourseRecommendationComponent {
   }
 
   closeDialog() {
-    this.dialogRef.close()
+    if(this.sharedService.fromMdoPortal) {
+      this.dialogRef.close()
+    } else {
+      this.dialogRef.close('saved')
+    }
+    
   }
 
   addMoreCourses() {
@@ -468,8 +473,10 @@ export class ViewCourseRecommendationComponent {
 
     this.loading = true;
 
+    let requestId = this.route.snapshot.paramMap.get('request_id')
+
     this.sharedService
-      .deleteRecommendedCourse(roleMappingId, courseIdentifier)
+      .deleteRecommendedCourse(roleMappingId, courseIdentifier, requestId)
       .subscribe({
         next: () => {
           // Remove from UI
@@ -533,25 +540,96 @@ export class ViewCourseRecommendationComponent {
   }
 
   suggestMoreCourses() {
-     // this.dialogRef.close()
-     console.log('cbp_plan_id---', this.cbpPlanData)
-     const dialogRefNew = this.dialog.open(SuggestMoreCoursesComponent, {
-       width: '950px',
-       data: { cbp_plan_id: this.reviewRequestPlanData?.id, recommended_course_id: this.recommended_course_id, role_mapping_id: this.planData.id, fromMdoPortal: this.sharedService.fromMdoPortal },
-       panelClass: 'view-cbp-plan-popup',
-       minHeight: '400px',          // Set minimum height
-       maxHeight: '90vh',           // Prevent it from going beyond viewport
-       disableClose: true // Optional: prevent closing with outside click
-     });
- 
-     dialogRefNew.afterClosed().subscribe(result => {
-       if (result === 'saved') {
-         console.log('Changes saved!');
-         // Refresh data or show a toast here
-         this.getSuggestedCourse()
-       }  else {
-         this.getSuggestedCourse()
-       }
-     });
-   }
+    // this.dialogRef.close()
+    console.log('cbp_plan_id---', this.cbpPlanData)
+    const dialogRefNew = this.dialog.open(SuggestMoreCoursesComponent, {
+      width: '950px',
+      data: { cbp_plan_id: this.reviewRequestPlanData?.id, recommended_course_id: this.recommended_course_id, role_mapping_id: this.planData.id, fromMdoPortal: this.sharedService.fromMdoPortal },
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '400px',          // Set minimum height
+      maxHeight: '90vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRefNew.afterClosed().subscribe(result => {
+      if (result === 'saved') {
+        console.log('Changes saved!');
+        // Refresh data or show a toast here
+        if (this.sharedService.fromMdoPortal) {
+         
+          this.callCourseForMDO()
+
+        } else {
+          this.getSuggestedCourse()
+        }
+        
+      } else {
+        if (this.sharedService.fromMdoPortal) {
+         
+          this.callCourseForMDO()
+
+        } else {
+          this.getSuggestedCourse()
+        }
+      }
+    });
+  }
+
+  callCourseForMDO() {
+     const requestId = this.route.snapshot.paramMap.get('request_id');
+          let res: any
+          if (this.planData?.cbp_plan_data && this.planData?.cbp_plan_data.length) {
+            res = this.planData?.cbp_plan_data[0]
+            this.recommended_course_id = res.id
+            let allCourses = []
+            if (res && res.selected_courses && res.selected_courses.length) {
+              res.selected_courses.forEach((item) => {
+                // if(item?.relevancy >= 85) {
+                allCourses.push(item)
+                // }
+              })
+            }
+            this.filterdCourses = allCourses
+            let identifiersArr = []
+            console.log('this.filterdCourses', this.filterdCourses)
+            this.filterdCourses.map((item) => {
+              identifiersArr.push(item?.identifier)
+            })
+            this.loading = false
+            this.sharedService
+              .getAdditionalParameterforSuggestedCourses(identifiersArr)
+              .subscribe((response) => {
+
+                if (response?.result?.content?.length) {
+
+                  const updatedCourses = this.filterdCourses.map(course => {
+
+                    const matched = response.result.content.find(
+                      item => item.identifier === course.identifier
+                    )
+
+                    if (matched) {
+                      return {
+                        ...course,
+                        language: matched.language,
+                        avgRating: matched.avgRating,
+                        course: matched.name
+                      }
+                    }
+
+                    return course
+                  })
+
+                  this.filterdCourses = updatedCourses
+
+                  this.updateCompetencyCounts()
+
+                  this.cdr.detectChanges()
+                }
+              })
+            console.log('this.filterdCourses from mdo', this.filterdCourses)
+            this.updateCompetencyCounts()
+            this.cdr.detectChanges()
+          }
+  }
 }

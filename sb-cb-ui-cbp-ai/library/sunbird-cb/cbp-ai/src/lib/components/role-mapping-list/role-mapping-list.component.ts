@@ -51,7 +51,7 @@ export class RoleMappingListComponent {
   unMatchedRoleMapping = 0
   matchedRoleMappingIds = []
   matchedDesignationNames: string[] = [];
-  portalData:any = {}
+  portalData: any = {}
   @Output() moveToInitialScreen = new EventEmitter<any>()
   activeTab: 'matched' | 'unmatched' = 'matched';
 
@@ -62,9 +62,9 @@ export class RoleMappingListComponent {
   constructor(
     public sharedService: SharedService,
     private dialog: MatDialog,
-  private router: Router,
-  private activatedRoute: ActivatedRoute
-) {
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
 
   }
 
@@ -75,28 +75,28 @@ export class RoleMappingListComponent {
 
   ngOnInit() {
 
-  this.portalData = this.activatedRoute.snapshot.data['parentData']
+    this.portalData = this.activatedRoute.snapshot.data['parentData']
     this.sharedService.checkRoleMappingFormValidation.next(true)
     this.sharedService.updateDesignationHierarchySubject.subscribe((data) => {
       if (data) {
-        if(this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal && 
-      this.portalData?.parentAppData?.fromPortal === 'mdo'
-    ){ 
+        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        ) {
 
-    } else {  
-      this.loadRoleMappingList()
-    }
-  }
-      
+        } else {
+          this.loadRoleMappingList()
+        }
+      }
+
     })
-    if(this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal && 
+    if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
       this.portalData?.parentAppData?.fromPortal === 'mdo'
-    ){ 
+    ) {
 
     } else {
       this.loadRoleMappingList()
     }
-    
+
 
 
   }
@@ -345,11 +345,12 @@ export class RoleMappingListComponent {
         console.log('Changes saved!');
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
-        if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.id) {
-          this.sharedService.getRoleMappingByStateCenter(this.sharedService.cbpPlanFinalObj.ministry.id).subscribe((res) => {
+        if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.identifier) {
+          this.sharedService.getRoleMappingByStateCenter(this.sharedService.cbpPlanFinalObj.ministry.identifier).subscribe((res) => {
             console.log('res', res)
             this.dataSource = new MatTableDataSource(res)
             this.dataSource.paginator = this.paginator;
+            this.loadRoleMappingList()
             this.originalData = res;
             console.log('this.dataSource', this.dataSource)
           })
@@ -538,10 +539,10 @@ export class RoleMappingListComponent {
   }
 
   moveToInitialScreenLayout(event) {
-   // this.moveToInitialScreen.emit(event)
+    // this.moveToInitialScreen.emit(event)
     this.router.navigate(['/ai/initial'], {
-                onSameUrlNavigation: 'reload'
-              });
+      onSameUrlNavigation: 'reload'
+    });
   }
 
   openFullList(element: any, type: any) {
@@ -562,7 +563,7 @@ export class RoleMappingListComponent {
   }
 
   loadRoleMappingList() {
-    
+
     this.cbpFinalObj = this.sharedService.getCBPPlanLocalStorage()
     this.dataSource = new MatTableDataSource(this.cbpFinalObj?.role_mapping_generation)
     this.originalDataSource = new MatTableDataSource(this.cbpFinalObj?.role_mapping_generation)
@@ -600,9 +601,9 @@ export class RoleMappingListComponent {
                 state_center_id: this.formData.value.ministry
               }
               if (this.formData.value.departments) {
-                if(typeof this.formData.value.departments === 'string') {
+                if (typeof this.formData.value.departments === 'string') {
                   obj['department_id'] = this.formData.value.departments
-                }                
+                }
               }
               this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
                 console.log('res', res)
@@ -653,10 +654,10 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          
-          if(typeof this.formData.value.departments === 'string') {
-                  obj['department_id'] = this.formData.value.departments
-            }  
+
+          if (typeof this.formData.value.departments === 'string') {
+            obj['department_id'] = this.formData.value.departments
+          }
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
@@ -703,9 +704,9 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          if(typeof this.formData.value.departments === 'string') {
-                  obj['department_id'] = this.formData.value.departments
-                }  
+          if (typeof this.formData.value.departments === 'string') {
+            obj['department_id'] = this.formData.value.departments
+          }
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
@@ -767,10 +768,10 @@ export class RoleMappingListComponent {
 
   toggleAllRows(event: any) {
     if (event.checked) {
-      
+
       this.dataSource.data
-  .filter(row => row?.cbp_plans?.length)
-  .forEach(row => this.selection.select(row));
+        .filter(row => row?.cbp_plans?.length)
+        .forEach(row => this.selection.select(row));
     } else {
       this.selection.clear();
     }
@@ -880,5 +881,16 @@ export class RoleMappingListComponent {
 
   }
 
+  getActivateCbpPlan(row) {
+    let found = false
+    if (row?.cbp_plans && row?.cbp_plans?.length) {
+      row.cbp_plans.forEach(element => {
+        if (element?.selected_courses && element?.selected_courses?.length) {
+          found = true
+        }
+      })
+    }
+    return !found
+  }
 
 }

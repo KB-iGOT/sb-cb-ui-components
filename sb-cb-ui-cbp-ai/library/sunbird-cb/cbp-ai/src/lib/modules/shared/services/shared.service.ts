@@ -69,7 +69,8 @@ const API_END_POINTS = {
   MDO_SUGGESTED_COURSE_LIST: 'apis/proxies/v8/ai/cbp/v1/course/suggestions',
   MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update',
   REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry',
-  MDO_ADD_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add'
+  MDO_ADD_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
+  MDO_DELETE_APPROVE_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/remove'
 
 }
 
@@ -905,13 +906,27 @@ export class SharedService {
       }))
   }
 
-  deleteRecommendedCourse(roleMappingId: string, courseIdentifier: string) {
+  deleteRecommendedCourse(roleMappingId: string, courseIdentifier: string , requestId?: string) {
     const headers = this.headers;
 
-    return this.http.delete<any>(
+    if(this.fromMdoPortal) {
+      let reqBody = {
+          "request_id": requestId,
+          "item_id": roleMappingId,
+          "identifier": courseIdentifier
+        }
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_DELETE_APPROVE_COURSE}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      return this.http.delete<any>(
       `${this.baseUrl}${API_END_POINTS.DELETE_COURSE_RECOMMENDATION}/${roleMappingId}/course/${courseIdentifier}`,
       { headers }
     );
+    }
+
+    
   }
 
   getCbpPlansWithSelectedCourses(): any[] {

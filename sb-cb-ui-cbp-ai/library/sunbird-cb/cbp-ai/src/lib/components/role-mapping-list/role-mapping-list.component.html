@@ -247,11 +247,11 @@
 
                                         <td mat-cell *matCellDef="let row" [hidden]="activeTab !== 'matched'">
                                             <span matTooltip="Please generate & save course recommendation to select. Course recommendation generation & save is pending."
-                                                [matTooltipDisabled]="row?.cbp_plans?.length > 0">
+                                                [matTooltipDisabled]="!getActivateCbpPlan(row)">
                                                 <mat-checkbox class="radio-style-checkbox"
                                                     (click)="$event.stopPropagation()" (change)="toggleRow(row)"
                                                     [checked]="selection.isSelected(row)"
-                                                    [disabled]="!row?.cbp_plans?.length" [ngClass]="!row?.cbp_plans?.length ? 'grayd-disable':''">
+                                                    [disabled]="getActivateCbpPlan(row)" [ngClass]=" getActivateCbpPlan(row)? 'grayd-disable':''">
                                                 </mat-checkbox>
                                             </span>
                                         </td>
