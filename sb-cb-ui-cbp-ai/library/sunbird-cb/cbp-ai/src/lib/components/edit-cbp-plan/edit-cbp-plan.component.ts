@@ -80,7 +80,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       }
     }
 
-    console.log('Received data:', data);
+    console.log('Received data:', this.planData);
     // this.planData.competencies.map((competencies:any)=>{
     //   this.competenciesCount['total'] = this.competenciesCount['total'] + 1 
     //   if(competencies.type === 'Behavioral') {
@@ -97,9 +97,16 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    console.log('this.data?.matched_role_mappings', this.data?.matched_role_mappings)
     this.matchedDesignationIds = this.data?.matched_role_mappings?.map((item: any) => item?.igot_designation_id) || []
     this.loadCompetenciesData();
     this.initializeForm();
+    if (
+  this.planData?.designation_name &&
+  !this.planData?.igot_designation_id
+) {
+  this.getDesignation(this.planData.designation_name, 0);
+}
     const searchControl = this.cbpForm.get('searchDesignation');
 
     if (searchControl) {
@@ -235,12 +242,30 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   }
 
   saveRoleMapping() {
+    console.log("saved function called...")
     if (this.cbpForm.invalid) return;
 
     const formData = this.cbpForm.value;
     console.log('Submitted Data:', formData);
     let cbpPlanData: any = this.sharedService.cbpPlanFinalObj;
     console.log('cbpPlanData', cbpPlanData)
+    console.log(
+  'Backup entry:',
+  this.masterData.designationBackup.find(
+    (x: any) =>
+      x.name?.toLowerCase() ===
+      formData.designation_name?.toLowerCase()
+  )
+);
+
+console.log(
+  'Visible entry:',
+  this.masterData.designation.find(
+    (x: any) =>
+      x.name?.toLowerCase() ===
+      formData.designation_name?.toLowerCase()
+  )
+);
     const roleResponsibilitiesArray = this.cbpForm.value.role_responsibilities_text
       .split('\n')
       .map(line => line.trim())
@@ -265,19 +290,37 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       req["igot_designation_id"] = formData?.igot_designation_id || '',
         req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
     } else {
+      
       console.log('masterData?.designation', this.masterData?.designation)
 
       req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+       console.log(
+      'Searching in backup:',
+      this.masterData.designationBackup.find(
+        (x: any) =>
+          x.name?.trim().toLowerCase() ===
+          formData.designation_name?.trim().toLowerCase()
+      )
+    );
       const selectedDesignation = this.masterData?.designation?.find(
         (item: any) =>
           item?.name?.toLowerCase() === formData?.designation_name?.toLowerCase()
       );
+const backupDesignation =
+  this.masterData.designationBackup.find(
+    (x: any) =>
+      x.name?.toLowerCase() ===
+      formData.designation_name?.toLowerCase()
+  );
 
+console.log('backupDesignation', backupDesignation);
       req["igot_designation_id"] = selectedDesignation?.igot_designation_id || '';
-
+console.log('designation_name 123 ', formData.designation_name);
+console.log('selectedDesignation 123', selectedDesignation);
+console.log('igot_designation_id 123', req['igot_designation_id']);
     }
 
-    if (this.sharedService.fromMdoPortal) {
+    if (this.sharedService.fromMdoPortal) { 
       req['request_id'] = this.requestRowData?.id
       req['item_id'] = this.planData?.id
     }
@@ -297,7 +340,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.log('error', error)
-        this.dialogRef.close()
+        // this.dialogRef.close()
         // Handle 409 Conflict here
         // alert('Conflict detected: The resource already exists or action conflicts.');
         //this.get
@@ -650,6 +693,17 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
               name: item?.designation || '',
               status: item?.status || 'Active',
             }));
+            console.log(
+  'Managing Director from API ====',
+  mapped.filter(
+    (x: any) =>
+      x.name?.trim().toLowerCase() === 'managing director'
+  )
+);
+console.log(
+  'Total mapped designations ====',
+  mapped.length
+);
 
           const total = _.get(
             res,
@@ -667,20 +721,37 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
           // SEARCH MODE
           // =========================
 
-          if (searchText?.length) {
+        if (searchText?.length) {
 
-            this.masterData.designationFiltered = mapped;
+  this.masterData.designationFiltered = mapped;
 
-            this.masterData.designation =
-              this.masterData.designationFiltered.slice(
-                0,
-                this.searchDesignationLoadCount
-              );
+  // IMPORTANT: merge searched result into backup
+  const combined = [
+    ...(this.masterData.designationBackup || []),
+    ...mapped
+  ];
 
-            this.checkCurrentDesignationPresent();
+  this.masterData.designationBackup = _.uniqBy(
+    combined,
+    (it: any) => (it?.name || '').toLowerCase()
+  );
 
-            return;
-          }
+  this.masterData.designation =
+    this.masterData.designationFiltered.slice(
+      0,
+      this.searchDesignationLoadCount
+    );
+
+  console.log(
+    'Backup after search',
+    this.masterData.designationBackup.find(
+      (x: any) =>
+        x.name?.toLowerCase() === 'managing director'
+    )
+  );
+
+  return;
+}
 
           // =========================
           // NORMAL MODE
@@ -696,9 +767,10 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
               (this.masterData['designationBackup'] || []).concat(mapped);
 
             this.masterData['designationBackup'] = _.uniqBy(
-              combined,
-              (it: any) => (it?.name || '').toLowerCase()
-            );
+  combined,
+  (it: any) =>
+    `${(it?.name || '').toLowerCase()}_${it?.igot_designation_id}`
+)
           }
 
           this.masterData.designation =
@@ -794,11 +866,18 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     const normalize = (v: string) => (v || '').trim().toLowerCase();
 
     const backup = [...this.masterData.designationBackup];
-
-    const existingIndex = backup.findIndex(
-      (item: any) =>
-        normalize(item?.name) === normalize(selectedDesignation)
-    );
+console.log(
+  'All matching records',
+  backup.filter(
+    (item: any) =>
+      normalize(item?.name) === normalize(selectedDesignation)
+  )
+);
+const existingIndex = backup.findIndex(
+  (item: any) =>
+    normalize(item?.name) === normalize(selectedDesignation) &&
+    item?.igot_designation_id
+);
 
     let selectedObj: any;
 
