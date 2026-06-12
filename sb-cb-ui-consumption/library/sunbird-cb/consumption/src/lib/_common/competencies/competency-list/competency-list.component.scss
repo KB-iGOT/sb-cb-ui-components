@@ -173,6 +173,15 @@
   max-width: none !important;
 }
 
+.competency-area-description {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  background-color: #f5f7ff;
+  border-radius: 0 4px 4px 0;
+}
+
 // Angular Material overrides
 ::ng-deep .mat-pseudo-checkbox-checked {
   background: #0074b6 !important;

@@ -1,0 +1,107 @@
+<div class="view-cbp-plan">
+    <div class="popup-container">
+        <div class="popup-header">
+            <div>
+                <div class="heading">Send For Approval</div>
+            </div>
+            <div class="cursor-pointer" (click)="closeDialog()">
+                <mat-icon>close</mat-icon>
+            </div>
+        </div>
+    </div>
+    <div class="section-container" [formGroup]="approvalRequestForm">
+        <mat-card class="mt-1">
+            <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Request Name</p>
+                </div>
+                <div class="mt-4 additional-details">
+                    <input type="text" formControlName="request_name" [value]="" placeholder="Enter a name for this request..."
+                        style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width:100%;font-size: 14px;font-family: 'Lato';">
+                </div>
+            </div>
+            <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Select MDO Admin/Leader</p>
+                </div>
+                <div class="section-header mt-4">
+                    <!-- <input type="text" formControlName="mdo_name" placeholder="Enter mdo" [value]=""
+                        style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width: 100%;font-size: 14px;font-family: 'Lato';"> -->
+                    <mat-form-field appearance="outline" class="margin-top-s w-full required-select">
+                        <mat-select #position formControlName="mdo_name"
+                            placeholder="Select MDO Admin/Leader" (closed)="onmdoDropdownClosed()"
+                            panelClass="search-panel" (openedChange)="setupScrollListener($event)">
+
+                            <!-- Sticky search input container -->
+                            <div class="sticky-search-container" (click)="$event.stopPropagation()">
+                                <div class="search-input-wrapper">
+                                    <input type="text" placeholder="Search mdo admin/leader"
+                                        formControlName="searchmdo" class="search-input"
+                                        (keydown)="$event.stopPropagation()"
+                                        (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
+                                        (keyup)="mdoSearch($event)" autocomplete="off">
+                                    <button *ngIf="searchmdoControl?.value" type="button" class="clear-button"
+                                        (click)="searchmdoControl.setValue('')">
+                                        ✕ Clear Search
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Options list -->
+                            <mat-option [value]="mdo?.id" *ngFor="let mdo of masterData?.mdo">
+                                {{mdo?.name}}
+                            </mat-option>
+                            <!-- Loading indicator -->
+                            <div *ngIf="isLoadingMoremdos" class="loading-indicator">
+                                Load More...
+                            </div>
+                            <!-- No results message -->
+                            <mat-option *ngIf="(masterData?.mdo )?.length === 0" disabled>
+                                <!-- No matches found -->
+                                <div class="mat-error txt-size">mdo Not Found.</div>
+                            </mat-option>
+                        </mat-select>
+                        <!-- <mat-error class="text-xs"
+                            *ngIf="approvalRequestForm?.get('mdo_name')?.touched && approvalRequestForm?.get('mdo_name')?.invalid">
+                            Please select at least one mdo.
+                        </mat-error> -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            
+            <!-- <div class="mt-2 section">
+                <div class="sub-heading">
+                    <p>Upload Document (PDF/Word/Excel/TXT)</p>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label for="uploadDoc" class="file-upload-label">
+                        <span class="file-upload-icon">📎</span>
+                        <span>{{ uploadedFile?.name || 'Choose a file (PDF, Word, Excel, TXT)' }}</span>
+                    </label>
+
+                    <small class="file-upload-hint">Max file size: 25MB</small>
+
+                    <input id="uploadDoc" type="file" (change)="onFileChange($event)"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="file-upload-input" />
+
+                    <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
+                </div>
+            </div> -->
+
+        </mat-card>
+    </div>
+    <div class="popup-footer">
+        <div>
+            <input class="btn-active" type="button" value="Cancel" (click)="cancelForm()" />
+        </div>
+        <div>
+            
+            <button [disabled]="approvalRequestForm?.invalid"
+                [ngClass]="approvalRequestForm?.invalid ? 'btn-disable':'btn-active'" type="button"
+                (click)="savemdo()" ><mat-icon>send</mat-icon> Send Request</button>
+        </div>
+    </div>
+</div>
+<div class="overlay-loader" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+</div>

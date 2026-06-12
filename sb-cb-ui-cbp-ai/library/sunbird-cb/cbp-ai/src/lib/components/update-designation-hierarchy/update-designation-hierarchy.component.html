@@ -1,0 +1,59 @@
+<div class="overlay" *ngIf="isOpen" (click)="cancel()"></div>
+
+<div class="drawer" [class.open]="isOpen">
+
+    <!-- HEADER -->
+    <div class="drawer-header">
+        <h4>Update Designation Hierarchy</h4>
+        <button class="close-btn" (click)="cancel()">✕</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="drawer-body" cdkDropList (cdkDropListDropped)="drop($event)">
+
+        <div class="designation-item" *ngFor="let item of designations; trackBy: trackById; let i = index" cdkDrag>
+            <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+            </div>
+
+            <div class="designation-name">{{ item.name }}</div>
+
+            <!-- Custom Select -->
+            <div class="custom-select">
+                <div class="selected-value" (click)="toggleDropdown(item, $event)">
+                    {{ item.sort_order }}
+                    <span class="chevron" [class.open]="openDropdownId === item.id"><mat-icon>arrow_drop_down</mat-icon></span>
+                </div>
+
+                <div class="dropdown" [id]="'dropdown-' + item.id" *ngIf="openDropdownId === item.id"
+                    (click)="$event.stopPropagation()">
+                    <input type="text" placeholder="Search..." [(ngModel)]="item.searchFilter"
+                        (ngModelChange)="filterNumbers(item)" class="search-box">
+
+                    <div class="option" *ngFor="let num of item.filteredNumbers"
+                        (click)="selectNumber(item, num, $event)">
+                        {{ num }}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="drawer-footer">
+        <button class="btn cancel" (click)="cancel()">Cancel</button>
+        <button class="btn submit" (click)="submit()">Submit</button>
+    </div>
+
+</div>
+
+<div class="overlay-loader" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+</div>

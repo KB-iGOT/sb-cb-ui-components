@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core'
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core'
 import { ActivatedRoute, Data } from '@angular/router'
 import { NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import { ConfigurationsService, NsContent } from '@sunbird-cb/utils-v2'
@@ -49,7 +49,8 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   constructor(
     private route: ActivatedRoute,
     private tocSvc: AppTocService,
-    private configSvc: ConfigurationsService
+    private configSvc: ConfigurationsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.tocSvc.resumeData.subscribe((res: any) => {
       this.resumeData = res
@@ -102,6 +103,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
       if (update && update.hashmap) {
         // Update hierarchyMapData with the latest hashmap from the service
         this.hierarchyMapData = update.hashmap
+        this.cdr.detectChanges()
       }
     })
     const instanceConfig = this.configSvc.instanceConfig
