@@ -1,7 +1,7 @@
 {
   "name": "@sunbird-cb/ui-viewer",
   "main": "./src/public-api.ts",
-  "version": "0.0.1-ang-17-20",
+  "version": "0.0.2-ang-17-20",
   "peerDependencies": {
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0"

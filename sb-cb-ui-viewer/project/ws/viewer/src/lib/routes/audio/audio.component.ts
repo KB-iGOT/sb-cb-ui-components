@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core'
+import { Component, Inject, OnInit, OnDestroy, Optional } from '@angular/core'
 import { Subscription } from 'rxjs'
 import { ValueService } from '@sunbird-cb/utils'
 import { ActivatedRoute } from '@angular/router'
@@ -40,7 +40,7 @@ export class AudioComponent implements OnInit, OnDestroy {
     private valueSvc: ValueService,
     private viewerSvc: ViewerUtilService,
     private accessControlSvc: AccessControlService,
-    @Inject('environment') private environment: any,
+    @Optional() @Inject('environment') private environment: any,
   ) { }
 
   ngOnInit() {
@@ -104,7 +104,7 @@ export class AudioComponent implements OnInit, OnDestroy {
           this.widgetResolverAudioData = this.initWidgetResolverAudioData()
           // ? this.viewerSvc.getAuthoringUrl(this.audioData.artifactUrl)
           // tslint:disable-next-line: max-line-length
-          this.widgetResolverAudioData.widgetData.url = this.audioData ? this.forPreview ? this.audioData.artifactUrl : this.audioData.artifactUrl : '' // NOSONAR
+          this.widgetResolverAudioData.widgetData.url = this.audioData ? this.generateUrl(this.audioData.artifactUrl) : '' // NOSONAR
           this.widgetResolverAudioData.widgetData.identifier = this.audioData
             ? this.audioData.identifier
             : ''
@@ -147,6 +147,14 @@ export class AudioComponent implements OnInit, OnDestroy {
     }
   }
   generateUrl(oldUrl: string) {
+    if (!this.environment || !this.environment.azureHost) {
+      try {
+        const urlObj = new URL(oldUrl)
+        return `${window.location.origin}${urlObj.pathname}`
+      } catch {
+        return oldUrl
+      }
+    }
     const chunk = oldUrl ? oldUrl.split('/') : []
     const newChunk = this.environment.azureHost.split('/')
     const newLink = []

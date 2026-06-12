@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core'
+import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { NsContent } from '@sunbird-cb/collection'
@@ -50,7 +50,7 @@ export class OfflineSessionComponent implements OnInit, OnDestroy {
     private viewerSvc: ViewerUtilService,
     private accessControlSvc: AccessControlService,
     private configSvc: ConfigurationsService,
-    @Inject('environment') private environment: any,
+    @Optional() @Inject('environment') private environment: any,
   ) { }
 
   ngOnInit() {
@@ -221,6 +221,14 @@ export class OfflineSessionComponent implements OnInit, OnDestroy {
   }
 
   generateUrl(oldUrl: string) {
+    if (!this.environment || !this.environment.azureHost) {
+      try {
+        const urlObj = new URL(oldUrl)
+        return `${window.location.origin}${urlObj.pathname}`
+      } catch {
+        return oldUrl
+      }
+    }
     const chunk = oldUrl.split('/')
     const newChunk = this.environment.azureHost.split('/')
     const newLink = []

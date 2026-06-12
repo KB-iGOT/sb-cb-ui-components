@@ -5,6 +5,7 @@ import {
   Inject,
   Input,
   OnChanges, OnDestroy, OnInit,
+  Optional,
   QueryList,
   SimpleChanges,
   ViewChild, ViewChildren,
@@ -187,10 +188,10 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
     private widgetContentService: WidgetContentService,
     private tocSvc: AppTocService,
     private pendingFunctionService: PendingFunctionService,
-    @Inject('environment') private environment: any,
+    @Optional() @Inject('environment') private environment: any,
 
   ) {
-    if (this.environment.assessmentBuffer) {
+    if (this.environment && this.environment.assessmentBuffer) {
       this.assessmentBuffer = this.environment.assessmentBuffer
     }
     this.renderer.listen('window', 'click', event => {
@@ -1654,7 +1655,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
           if (quizV4Res.result.primaryCategory === 'Course Assessment') {
             setTimeout(() => {
               this.getQuizResult()
-            }, this.environment.quizResultTimeout)
+            }, (this.environment && this.environment.quizResultTimeout) || 3000)
           } else if (quizV4Res.result.primaryCategory === 'Practice Question Set') {
             this.assignQuizResult(quizV4Res.result)
           }
@@ -1666,7 +1667,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
             if (quizV4Res.result.primaryCategory === 'Course Assessment') {
               setTimeout(() => {
                 this.getQuizResult()
-              }, this.environment.quizResultTimeout)
+              }, (this.environment && this.environment.quizResultTimeout) || 3000)
             } else if (quizV4Res.result.primaryCategory === 'Practice Question Set') {
               this.assignQuizResult(quizV4Res.result)
             }
@@ -1677,7 +1678,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
             if (quizV4Res.result.primaryCategory === 'Course Assessment') {
               setTimeout(() => {
                 this.getQuizResult()
-              }, this.environment.quizResultTimeout)
+              }, (this.environment && this.environment.quizResultTimeout) || 3000)
             } else if (quizV4Res.result.primaryCategory === 'Practice Question Set') {
               this.assignQuizResult(quizV4Res.result)
             }
@@ -1700,7 +1701,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
             if (this.forPreview && this.quizData.isPublic) {
               this.raiseEvent(WsEvents.EnumTelemetrySubType.Unloaded, this.quizData)
             }
-          }, this.environment.quizResultTimeout)
+          }, (this.environment && this.environment.quizResultTimeout) || 3000)
         } else if (quizV4Res.result.primaryCategory === 'Practice Question Set') {
           this.assignQuizResult(quizV4Res.result)
         }
