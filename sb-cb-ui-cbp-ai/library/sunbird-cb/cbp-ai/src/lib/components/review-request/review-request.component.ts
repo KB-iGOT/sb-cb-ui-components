@@ -42,7 +42,7 @@ export class ReviewRequestComponent {
   portalData: any
   activeRowElement: any
   requestData: any
-  so
+  requestId:any
   constructor(public sharedService: SharedService, public snackBar: MatSnackBar, public route: ActivatedRoute, public router: Router,
     private dialog: MatDialog,
   ) {
@@ -52,6 +52,7 @@ export class ReviewRequestComponent {
   ngOnInit() {
     this.portalData = this.route.snapshot.data['parentData']
     const requestId = this.route.snapshot.paramMap.get('request_id');
+    this.requestId = this.route.snapshot.paramMap.get('request_id');
 
     const source = this.route.snapshot.queryParamMap.get('source');
 
@@ -340,6 +341,7 @@ export class ReviewRequestComponent {
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
     element['fromRequestPage'] = true
+    element['requestId'] = this.requestId
     element['requestStatus'] = this.request?.status
     const dialogRef = this.dialog.open(ViewCourseRecommendationComponent, {
       width: '1000px',

@@ -58,7 +58,8 @@ export class ApprovalRequestsComponent {
     { "code": "", label: "All Status" },
     { "code": "pending", label: "Pending" },
     { "code": "approved", label: "Approved" },
-    { "code": "rejected", label: "Rejected" }
+    { "code": "rejected", label: "Rejected" },
+    { "code": "draft", label: "Revoked" },
   ];
   time = [
     { "code": "", label: "All Time" },

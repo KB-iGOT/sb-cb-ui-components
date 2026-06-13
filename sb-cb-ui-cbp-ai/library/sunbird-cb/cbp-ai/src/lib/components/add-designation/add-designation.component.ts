@@ -765,7 +765,7 @@ panel.addEventListener(
     // =========================
     if (this.desigantionFilterEnable) {
 
-      this.isLoadingMoreDesignations = true;
+      // this.isLoadingMoreDesignations = true;
 
       this.searchDesignationLoadCount += 50;
 
@@ -776,10 +776,10 @@ panel.addEventListener(
             0,
             this.searchDesignationLoadCount
           );
-
+          // this.isLoadingMoreDesignations = false;
         this.checkCurrentDesignationPresent();
 
-        this.isLoadingMoreDesignations = false;
+        
 
       }, 300);
 
@@ -821,13 +821,14 @@ panel.addEventListener(
     // server pagination
     const loadedLegacy =
       (this.masterData?.designationBackup || []).length;
-
+    console.log('loadedLegacy--',loadedLegacy)
+    console.log('this.noMoreLegacyDesignations--',this.noMoreLegacyDesignations)
+    console.log('this.defaultSearchDesignationCount',this.defaultSearchDesignationCount)
     if (
       !this.noMoreLegacyDesignations &&
       this.defaultSearchDesignationCount &&
       loadedLegacy < this.defaultSearchDesignationCount
     ) {
-
       this.isLoadingMoreDesignations = true;
 
       this.designationOffset =
@@ -836,8 +837,12 @@ panel.addEventListener(
 
       this.designationListLoadCount +=
         this.designationDefaultLoadCount;
+      
+        console.log('this.designationOffset--', this.designationOffset)
 
       this.getDesignation(undefined, this.designationOffset);
+    } else {
+      this.isLoadingMoreDesignations = false;
     }
   }
 

@@ -59,6 +59,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     this.onDesignationSelectScroll.bind(this);
   searchDesignationLoadCount = 50
   matchedDesignationIds = []
+  @ViewChild('editSection') editSection!: ElementRef;
   constructor(
     public dialogRef: MatDialogRef<EditCbpPlanComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -102,11 +103,11 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     this.loadCompetenciesData();
     this.initializeForm();
     if (
-  this.planData?.designation_name &&
-  !this.planData?.igot_designation_id
-) {
-  this.getDesignation(this.planData.designation_name, 0);
-}
+      this.planData?.designation_name &&
+      !this.planData?.igot_designation_id
+    ) {
+      this.getDesignation(this.planData.designation_name, 0);
+    }
     const searchControl = this.cbpForm.get('searchDesignation');
 
     if (searchControl) {
@@ -250,22 +251,22 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     let cbpPlanData: any = this.sharedService.cbpPlanFinalObj;
     console.log('cbpPlanData', cbpPlanData)
     console.log(
-  'Backup entry:',
-  this.masterData.designationBackup.find(
-    (x: any) =>
-      x.name?.toLowerCase() ===
-      formData.designation_name?.toLowerCase()
-  )
-);
+      'Backup entry:',
+      this.masterData.designationBackup.find(
+        (x: any) =>
+          x.name?.toLowerCase() ===
+          formData.designation_name?.toLowerCase()
+      )
+    );
 
-console.log(
-  'Visible entry:',
-  this.masterData.designation.find(
-    (x: any) =>
-      x.name?.toLowerCase() ===
-      formData.designation_name?.toLowerCase()
-  )
-);
+    console.log(
+      'Visible entry:',
+      this.masterData.designation.find(
+        (x: any) =>
+          x.name?.toLowerCase() ===
+          formData.designation_name?.toLowerCase()
+      )
+    );
     const roleResponsibilitiesArray = this.cbpForm.value.role_responsibilities_text
       .split('\n')
       .map(line => line.trim())
@@ -290,37 +291,37 @@ console.log(
       req["igot_designation_id"] = formData?.igot_designation_id || '',
         req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
     } else {
-      
+
       console.log('masterData?.designation', this.masterData?.designation)
 
       req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
-       console.log(
-      'Searching in backup:',
-      this.masterData.designationBackup.find(
-        (x: any) =>
-          x.name?.trim().toLowerCase() ===
-          formData.designation_name?.trim().toLowerCase()
-      )
-    );
+      console.log(
+        'Searching in backup:',
+        this.masterData.designationBackup.find(
+          (x: any) =>
+            x.name?.trim().toLowerCase() ===
+            formData.designation_name?.trim().toLowerCase()
+        )
+      );
       const selectedDesignation = this.masterData?.designation?.find(
         (item: any) =>
           item?.name?.toLowerCase() === formData?.designation_name?.toLowerCase()
       );
-const backupDesignation =
-  this.masterData.designationBackup.find(
-    (x: any) =>
-      x.name?.toLowerCase() ===
-      formData.designation_name?.toLowerCase()
-  );
+      const backupDesignation =
+        this.masterData.designationBackup.find(
+          (x: any) =>
+            x.name?.toLowerCase() ===
+            formData.designation_name?.toLowerCase()
+        );
 
-console.log('backupDesignation', backupDesignation);
+      console.log('backupDesignation', backupDesignation);
       req["igot_designation_id"] = selectedDesignation?.igot_designation_id || '';
-console.log('designation_name 123 ', formData.designation_name);
-console.log('selectedDesignation 123', selectedDesignation);
-console.log('igot_designation_id 123', req['igot_designation_id']);
+      console.log('designation_name 123 ', formData.designation_name);
+      console.log('selectedDesignation 123', selectedDesignation);
+      console.log('igot_designation_id 123', req['igot_designation_id']);
     }
 
-    if (this.sharedService.fromMdoPortal) { 
+    if (this.sharedService.fromMdoPortal) {
       req['request_id'] = this.requestRowData?.id
       req['item_id'] = this.planData?.id
     }
@@ -577,12 +578,15 @@ console.log('igot_designation_id 123', req['igot_designation_id']);
       this.editCompetencyIndex = index
     }
     this.selectedCompetencyType = 'Domain'
-    setTimeout(() => {
-      this.dialogContent.nativeElement.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }, 500)
+    this.cdRef.detectChanges();
+    console.log('scrollTop before', this.dialogContent.nativeElement.scrollTop);
+    
+  setTimeout(() => {
+    this.editSection.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  });
   }
 
   cancelUpdate() {
@@ -677,12 +681,12 @@ console.log('igot_designation_id 123', req['igot_designation_id']);
         next: (res: any) => {
 
           const content = _.get(res, 'result.result.data', []);
-           if(content?.length === 0) {
-    this.noMoreLegacyDesignations = true;
-  } else {
-    this.noMoreLegacyDesignations = false;
-  }
-
+          if (content?.length === 0) {
+            this.noMoreLegacyDesignations = true;
+          } else {
+            this.noMoreLegacyDesignations = false;
+          }
+          
           const matchedIds = new Set(this.matchedDesignationIds);
 
           const mapped = content
@@ -693,17 +697,17 @@ console.log('igot_designation_id 123', req['igot_designation_id']);
               name: item?.designation || '',
               status: item?.status || 'Active',
             }));
-            console.log(
-  'Managing Director from API ====',
-  mapped.filter(
-    (x: any) =>
-      x.name?.trim().toLowerCase() === 'managing director'
-  )
-);
-console.log(
-  'Total mapped designations ====',
-  mapped.length
-);
+          console.log(
+            'Managing Director from API ====',
+            mapped.filter(
+              (x: any) =>
+                x.name?.trim().toLowerCase() === 'managing director'
+            )
+          );
+          console.log(
+            'Total mapped designations ====',
+            mapped.length
+          );
 
           const total = _.get(
             res,
@@ -721,37 +725,38 @@ console.log(
           // SEARCH MODE
           // =========================
 
-        if (searchText?.length) {
+          if (searchText?.length) {
+            console.log('matchedIds--', this.matchedDesignationIds)
 
-  this.masterData.designationFiltered = mapped;
+            this.masterData.designationFiltered = mapped;
 
-  // IMPORTANT: merge searched result into backup
-  const combined = [
-    ...(this.masterData.designationBackup || []),
-    ...mapped
-  ];
+            // IMPORTANT: merge searched result into backup
+            const combined = [
+              ...(this.masterData.designationBackup || []),
+              ...mapped
+            ];
 
-  this.masterData.designationBackup = _.uniqBy(
-    combined,
-    (it: any) => (it?.name || '').toLowerCase()
-  );
+            this.masterData.designationBackup = _.uniqBy(
+              combined,
+              (it: any) => (it?.name || '').toLowerCase()
+            );
 
-  this.masterData.designation =
-    this.masterData.designationFiltered.slice(
-      0,
-      this.searchDesignationLoadCount
-    );
+            this.masterData.designation =
+              this.masterData.designationFiltered.slice(
+                0,
+                this.searchDesignationLoadCount
+              );
+              console.log('this.masterData.designation----',this.masterData.designation)
+            console.log(
+              'Backup after search',
+              this.masterData.designationBackup.find(
+                (x: any) =>
+                  x.name?.toLowerCase() === 'managing director'
+              )
+            );
 
-  console.log(
-    'Backup after search',
-    this.masterData.designationBackup.find(
-      (x: any) =>
-        x.name?.toLowerCase() === 'managing director'
-    )
-  );
-
-  return;
-}
+            return;
+          }
 
           // =========================
           // NORMAL MODE
@@ -767,10 +772,10 @@ console.log(
               (this.masterData['designationBackup'] || []).concat(mapped);
 
             this.masterData['designationBackup'] = _.uniqBy(
-  combined,
-  (it: any) =>
-    `${(it?.name || '').toLowerCase()}_${it?.igot_designation_id}`
-)
+              combined,
+              (it: any) =>
+                `${(it?.name || '').toLowerCase()}_${it?.igot_designation_id}`
+            )
           }
 
           this.masterData.designation =
@@ -866,18 +871,18 @@ console.log(
     const normalize = (v: string) => (v || '').trim().toLowerCase();
 
     const backup = [...this.masterData.designationBackup];
-console.log(
-  'All matching records',
-  backup.filter(
-    (item: any) =>
-      normalize(item?.name) === normalize(selectedDesignation)
-  )
-);
-const existingIndex = backup.findIndex(
-  (item: any) =>
-    normalize(item?.name) === normalize(selectedDesignation) &&
-    item?.igot_designation_id
-);
+    console.log(
+      'All matching records',
+      backup.filter(
+        (item: any) =>
+          normalize(item?.name) === normalize(selectedDesignation)
+      )
+    );
+    const existingIndex = backup.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation) &&
+        item?.igot_designation_id
+    );
 
     let selectedObj: any;
 
@@ -1017,98 +1022,100 @@ const existingIndex = backup.findIndex(
     }, 300);
   }
 
-   onDesignationSelectScroll(event: any): void {
+ onDesignationSelectScroll(event: any): void {
 
-    const element = event?.target;
+  const element = event?.target;
 
-    const reachedBottom =
-      element.scrollTop + element.clientHeight >=
-      element.scrollHeight - 5;
+  const reachedBottom =
+    element.scrollTop + element.clientHeight >=
+    element.scrollHeight - 10;
 
-    if (!reachedBottom || this.isLoadingMoreDesignations) {
-      return;
-    }
-
-    // =========================
-    // SEARCH MODE
-    // =========================
-    if (this.desigantionFilterEnable) {
-
-      this.isLoadingMoreDesignations = true;
-
-      this.searchDesignationLoadCount += 50;
-
-      setTimeout(() => {
-
-        this.masterData.designation =
-          this.masterData.designationFiltered.slice(
-            0,
-            this.searchDesignationLoadCount
-          );
-
-        this.checkCurrentDesignationPresent();
-
-        this.isLoadingMoreDesignations = false;
-
-      }, 300);
-
-      return;
-    }
-
-    // =========================
-    // NORMAL MODE
-    // =========================
-
-    // local pagination
-    if (
-      this.masterData?.designationBackup?.length >
-      this.masterData?.designation?.length
-    ) {
-
-      this.isLoadingMoreDesignations = true;
-
-      this.designationListLoadCount +=
-        this.designationDefaultLoadCount;
-
-      setTimeout(() => {
-
-        this.masterData.designation =
-          this.masterData.designationBackup.slice(
-            0,
-            this.designationListLoadCount
-          );
-
-        this.checkCurrentDesignationPresent();
-
-        this.isLoadingMoreDesignations = false;
-
-      }, 300);
-
-      return;
-    }
-
-    // server pagination
-    const loadedLegacy =
-      (this.masterData?.designationBackup || []).length;
-
-    if (
-      !this.noMoreLegacyDesignations &&
-      this.defaultSearchDesignationCount &&
-      loadedLegacy < this.defaultSearchDesignationCount
-    ) {
-
-      this.isLoadingMoreDesignations = true;
-
-      this.designationOffset =
-        (this.designationOffset || 0) +
-        this.designationDefaultLoadCount;
-
-      this.designationListLoadCount +=
-        this.designationDefaultLoadCount;
-
-      this.getDesignation(undefined, this.designationOffset);
-    }
+  if (!reachedBottom) {
+    return;
   }
+
+  if (this.isLoadingMoreDesignations) {
+    return;
+  }
+
+  console.log('=== Scroll Triggered ===');
+  console.log('Visible:', this.masterData?.designation?.length);
+  console.log('Backup:', this.masterData?.designationBackup?.length);
+  console.log('Total:', this.defaultSearchDesignationCount);
+  console.log('Offset:', this.designationOffset);
+
+  // =====================
+  // SEARCH MODE
+  // =====================
+  if (this.desigantionFilterEnable) {
+
+    this.searchDesignationLoadCount += 50;
+
+    this.masterData.designation =
+      (this.masterData.designationFiltered || []).slice(
+        0,
+        this.searchDesignationLoadCount
+      );
+
+    this.cdRef.detectChanges();
+
+    return;
+  }
+
+  // =====================
+  // LOCAL PAGINATION
+  // =====================
+  if (
+    (this.masterData?.designationBackup || []).length >
+    (this.masterData?.designation || []).length
+  ) {
+
+    this.designationListLoadCount +=
+      this.designationDefaultLoadCount;
+
+    this.masterData.designation =
+      this.masterData.designationBackup.slice(
+        0,
+        this.designationListLoadCount
+      );
+
+    this.cdRef.detectChanges();
+
+    return;
+  }
+
+  // =====================
+  // API PAGINATION
+  // =====================
+  const loadedCount =
+    (this.masterData?.designationBackup || []).length;
+
+  if (this.noMoreLegacyDesignations && this.searchText) {
+    console.log('No more data');
+    return;
+  }
+
+  if (
+    this.defaultSearchDesignationCount > 0 &&
+    loadedCount >= this.defaultSearchDesignationCount
+  ) {
+
+    this.noMoreLegacyDesignations = true;
+
+    console.log('All records loaded');
+
+    return;
+  }
+
+  this.designationOffset += this.designationDefaultLoadCount;
+
+  console.log(
+    'Loading next page => offset:',
+    this.designationOffset
+  );
+
+  this.getDesignation(undefined, this.designationOffset);
+}
 
   get searchDesignationControl(): FormControl {
     return this.cbpForm.get('searchDesignation') as FormControl;

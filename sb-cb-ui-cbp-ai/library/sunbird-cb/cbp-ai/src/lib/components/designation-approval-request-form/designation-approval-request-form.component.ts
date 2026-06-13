@@ -100,11 +100,11 @@ export class DesignationApprovalRequestFormComponent {
     this.approvalRequestForm = this.fb.group({
       division_name: [this.role_mapping_ids?.wing_division_section || '', [
       Validators.required,
-      Validators.pattern(/^[A-Za-z0-9 _/-]+$/)
+      Validators.pattern(/^[A-Za-z0-9 ,()-]+$/)
     ]],
       request_name: [this.role_mapping_ids?.designation_name || '', [
       Validators.required,
-      Validators.pattern(/^[A-Za-z0-9 _/-]+$/)
+      Validators.pattern(/^[A-Za-z0-9 /-]+$/)
     ]],
     //  searchmdo: [''],
     });

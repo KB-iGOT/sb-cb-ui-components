@@ -37,9 +37,11 @@ export class ViewCourseRecommendationComponent {
   activeRowElement: any
   requestData: any
   reviewRequestPlanData: any
+  requestId:any
   ngOnInit() {
     this.loading = true
     console.log('this.data--', this.data)
+    this.requestId = this.data.requestId
     this.cbpPlanData = this.sharedService.cbpPlanFinalObj
     if (this.data?.cbp_plan_data && this.data.cbp_plan_data.length) {
       this.reviewRequestPlanData = this.data?.cbp_plan_data[0]
@@ -473,7 +475,7 @@ export class ViewCourseRecommendationComponent {
 
     this.loading = true;
 
-    let requestId = this.route.snapshot.paramMap.get('request_id')
+    let requestId = this.requestId
 
     this.sharedService
       .deleteRecommendedCourse(roleMappingId, courseIdentifier, requestId)
