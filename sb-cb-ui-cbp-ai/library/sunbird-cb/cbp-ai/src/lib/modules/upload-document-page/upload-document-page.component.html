@@ -1,45 +1,55 @@
 <div class="upload-container">
     <div class="header">
-        <div class="sub-heading mt-10 mb-10 ml-10 cursor-pointer">
+        <div class="sub-heading mt-10 cursor-pointer">
             <p (click)="routeToInitial()"><mat-icon style="vertical-align: middle;">arrow_back</mat-icon><span
                     class="pl-10">Back to Role Mapping Generation</span></p>
         </div>
 
     </div>
-    <mat-card class="mat-card-container mt-20" [formGroup]="roleMappingForm">
+    <mat-card class="mat-card-container" [formGroup]="roleMappingForm">
         <div class="header">
             <div class="sub-heading">
                 <p>CBP Document Library</p>
             </div>
-           
-           
+
+
         </div>
         <div class="edit-section mt-4">
             <div class="select-map-route-container">
                 <div class="select-map-flex-container">
                     <div class="select-map-flex">
                         <div class="selected-mapping-route">
-                            <p>{{cbpPlanFinalObj?.ministry?.orgName}} <span
-                                    *ngIf="cbpPlanFinalObj?.department_name">
+                            <p>{{cbpPlanFinalObj?.ministry?.orgName}} <span *ngIf="cbpPlanFinalObj?.department_name">
                                     / {{cbpPlanFinalObj?.department_name}}</span>
                             </p>
                         </div>
                         <div class="edit-plan cursor-pointer" (click)="routeToInitial()">
                             <mat-icon>edit</mat-icon>Edit
                         </div>
-<!--                            <div class="cursor-pointer ml-10">-->
-<!--                                <button class="btn-active cursor-pointer" (click)="moveToInitialScreenLayout('add')">-->
-<!--                                    <mat-icon>add</mat-icon>-->
-<!--                                    Create New CBP-->
-<!--                                </button>-->
-<!--                            </div>-->
+                        <!--                            <div class="cursor-pointer ml-10">-->
+                        <!--                                <button class="btn-active cursor-pointer" (click)="moveToInitialScreenLayout('add')">-->
+                        <!--                                    <mat-icon>add</mat-icon>-->
+                        <!--                                    Create New CBP-->
+                        <!--                                </button>-->
+                        <!--                            </div>-->
                     </div>
-                    <div>
-                        <button [ngClass]="!(cbpPlanFinalObj?.ministry?.orgName) ? 'btn-disable':'btn-active'" mat-raised-button
-                            color="primary" [disabled]="!(cbpPlanFinalObj?.ministry?.orgName)" (click)="openUploadDialog()">
-                            <mat-icon>upload</mat-icon> Upload Document
-                        </button>
+                    <div class="flex flex-row">
+                        <div>
+                            <button class="btn-active-sample"
+                                mat-raised-button color="primary" [disabled]="!(cbpPlanFinalObj?.ministry?.orgName)"
+                                (click)="showSampleDialog()">
+                                <mat-icon>description</mat-icon> Sample Format
+                            </button>
+                        </div>
+                        <div class="ml-5">
+                            <button [ngClass]="!(cbpPlanFinalObj?.ministry?.orgName) ? 'btn-disable':'btn-active'"
+                                mat-raised-button color="primary" [disabled]="!(cbpPlanFinalObj?.ministry?.orgName)"
+                                (click)="openUploadDialog()">
+                                <mat-icon>upload</mat-icon> Upload Document
+                            </button>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -76,7 +86,8 @@
             {{filteredDocuments()?.length}} Documents</p>
         <table style="border-radius: 25px 25px 0 0;
         overflow: hidden;
-        box-shadow: 0 5px 5px rgba(0, 0, 0, 0.12);" mat-table [dataSource]="filteredDocuments()" class="mat-elevation-z2 full-width-table mt-10">
+        box-shadow: 0 5px 5px rgba(0, 0, 0, 0.12);" mat-table [dataSource]="filteredDocuments()"
+            class="mat-elevation-z2 full-width-table mt-10">
 
             <!-- Document Column -->
             <ng-container matColumnDef="name">
@@ -89,12 +100,25 @@
                 </td>
             </ng-container>
 
+            <!-- Document Column -->
+            <ng-container matColumnDef="document_type">
+                <th mat-header-cell *matHeaderCellDef> Document Type</th>
+                <td mat-cell *matCellDef="let doc" style="width: 15%;">
+                    <div>
+                        <div class="doc-title" *ngIf="doc.document_type">{{ doc.document_type }}</div>
+                        <div class="doc-title" *ngIf="!doc.document_type">N/A</div>
+                    </div>
+                </td>
+            </ng-container>
+
             <!-- Summary Status Column -->
             <ng-container matColumnDef="summary_status">
                 <th mat-header-cell *matHeaderCellDef> Summary Status </th>
-                <td mat-cell *matCellDef="let doc" style="width: 15%;"> 
-                   <span *ngIf="doc.summary_status === 'COMPLETED'" class="success"> {{ doc.summary_status | titlecase }} </span>
-                   <span *ngIf="doc.summary_status !== 'COMPLETED'" class="in-progress"> {{ doc.summary_status | titlecase }} </span>
+                <td mat-cell *matCellDef="let doc" style="width: 15%;">
+                    <span *ngIf="doc.summary_status === 'COMPLETED'" class="success"> {{ doc.summary_status | titlecase
+                        }} </span>
+                    <span *ngIf="doc.summary_status !== 'COMPLETED'" class="in-progress"> {{ doc.summary_status |
+                        titlecase }} </span>
                 </td>
             </ng-container>
 
@@ -122,13 +146,13 @@
                         <mat-icon>download</mat-icon>
                     </button>
 
-                    <button style="margin-left: 15px;" *ngIf="doc.summary_status === 'COMPLETED'" mat-icon-button color="primary"
-                        (click)="viewSummary(doc)" matTooltip="View Summary">
+                    <button style="margin-left: 15px;" *ngIf="doc.summary_status === 'COMPLETED'" mat-icon-button
+                        color="primary" (click)="viewSummary(doc)" matTooltip="View Summary">
                         <mat-icon>visibility</mat-icon>
                     </button>
 
-                    <button style="margin-left: 15px;" *ngIf="doc.summary_status === 'COMPLETED'" mat-icon-button color="warn"
-                        (click)="deleteDocument(doc)" matTooltip="Delete">
+                    <button style="margin-left: 15px;"  mat-icon-button
+                        color="warn" (click)="deleteDocument(doc)" matTooltip="Delete">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </td>
@@ -145,12 +169,122 @@
             No record found
         </div>
         <!-- Pagination -->
-        <div class="border-1">
+        <div class="mt-10">
             <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
         </div>
 
 
     </mat-card>
+</div>
+
+
+
+<!-- Overlay -->
+<div class="popup-overlay" *ngIf="showSampleDialogFlag">
+
+  <!-- Popup -->
+  <div class="sample-popup">
+
+    <!-- Header -->
+    <div class="popup-header">
+      <div class="title-section">
+        <div class="title-icon">
+          <mat-icon>description</mat-icon>
+        </div>
+
+        <div>
+          <p class="heading">Download Sample Document</p>
+
+          <p>
+            Use these sample templates as a reference for preparing your
+            designation & role mapping document.
+          </p>
+        </div>
+      </div>
+
+      <button mat-icon-button class="close-btn" (click)="showSampleDialogFlag = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Card 1 -->
+    <div class="document-card">
+
+      <div class="doc-left">
+
+        <div class="doc-icon blue">
+          <mat-icon>description</mat-icon>
+        </div>
+
+        <div class="doc-content">
+          <div class="doc-title">Sample Work Allocation order structure</div>
+
+          <div class="doc-subtitle">
+            .docx · Editable template
+          </div>
+        </div>
+
+      </div>
+
+       <a
+    href="assets/sample-documents/Draft Template_Input Document_AI-CBP Tool (19052026).docx"
+    download
+    class="download-btn">
+
+    <mat-icon>download</mat-icon>
+
+  </a>
+
+    </div>
+
+    <!-- Card 2 -->
+    <div class="document-card">
+
+      <div class="doc-left">
+
+        <div class="doc-icon red">
+          <mat-icon>picture_as_pdf</mat-icon>
+        </div>
+
+        <div class="doc-content">
+          <div class="doc-title">Sample work allocation order document</div>
+
+          <div class="doc-subtitle">
+            .pdf · Reference format
+          </div>
+        </div>
+
+      </div>
+
+        <a
+    href="assets/sample-documents/MPTB-English.pdf"
+    download
+    class="download-btn">
+
+    <mat-icon>download</mat-icon>
+
+  </a>
+
+    </div>
+
+    <!-- Note -->
+    <div class="note-box">
+      <span class="note-label">Note:</span>
+      Please make sure the uploadable document is in
+      <b>PDF format</b> only. Maximum file size:
+      <b>25 MB</b>.
+    </div>
+
+    <!-- Footer -->
+    <div class="popup-footer">
+      <button
+        class="close-footer-btn"
+        (click)="showSampleDialogFlag = false">
+        Close
+      </button>
+    </div>
+
+  </div>
 </div>
 
 

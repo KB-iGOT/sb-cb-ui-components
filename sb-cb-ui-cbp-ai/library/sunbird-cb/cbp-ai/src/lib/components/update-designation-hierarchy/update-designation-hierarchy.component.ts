@@ -83,7 +83,7 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
       }))
     };
 
-    if (this.department_id) {
+    if (typeof this.department_id === 'string' && this.department_id) {
       payload['department_id'] = this.department_id
     }
     if (this.state_center_id) {
@@ -200,7 +200,8 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
       name: r.designation_name,
       sort_order: r.sort_order || index + 1,
       searchFilter: '',              // Search input value
-      filteredNumbers: [...this.numbers] // Numbers to display in select
+      filteredNumbers: [...this.numbers], // Numbers to display in select
+      wing_division_section: r.wing_division_section
     }));
 
 

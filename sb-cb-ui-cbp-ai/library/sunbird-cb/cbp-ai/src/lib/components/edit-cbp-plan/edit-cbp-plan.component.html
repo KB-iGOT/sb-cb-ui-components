@@ -18,39 +18,42 @@
             </div> -->
 
             <mat-form-field appearance="outline" class="mt-4 margin-top-s w-full required-select"  style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width: 100%;font-size: 14px;font-family: 'Lato';">
-                <mat-select #position formControlName="designation_name" placeholder="Select designation"
-                    (closed)="onDesignationDropdownClosed()" panelClass="search-panel"
-                    (openedChange)="setupScrollListener($event)">
+                <mat-select #designation formControlName="designation_name"
+                            placeholder="Select designation" (closed)="onDesignationDropdownClosed()"
+                            panelClass="search-panel" (openedChange)="setupScrollListener($event)"
+                            >
 
-                    <!-- Sticky search input container -->
-                    <div class="sticky-search-container" (click)="$event.stopPropagation()">
-                        <div class="search-input-wrapper">
-                            <input type="text" placeholder="Search designation" style="width:100%"
-                                formControlName="searchDesignation" class="search-input"
-                                (keydown)="$event.stopPropagation()"
-                                (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
-                                (keyup)="designationSearch($event)" autocomplete="off">
-                            <div *ngIf="searchDesignationControl?.value" type="button" class="clear-icon"
-                                (click)="searchDesignationControl.setValue('')">
-                                <mat-icon>close</mat-icon>
+                            <!-- Sticky search input container -->
+                            <div class="sticky-search-container" (click)="$event.stopPropagation()">
+                                <div class="search-input-wrapper">
+                                    <input type="text" placeholder="Search designation" style="width:100%"
+                                        formControlName="searchDesignation" class="search-input"
+                                        (keydown)="$event.stopPropagation()"
+                                        (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
+                                         autocomplete="off">
+                                         <!-- (keyup)="designationSearch($event)" -->
+                                    <div *ngIf="searchDesignationControl?.value" type="button" class="clear-icon"
+                                        (click)="clearDesignationSearch($event)">
+                                        <mat-icon>close</mat-icon>
+                                </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Options list -->
-                    <mat-option [value]="designation?.name" *ngFor="let designation of masterData?.designation">
-                        {{designation?.name}}
-                    </mat-option>
-                    <!-- Loading indicator -->
-                    <div *ngIf="isLoadingMoreDesignations" class="loading-indicator">
-                        Load More...
-                    </div>
-                    <!-- No results message -->
-                    <mat-option *ngIf="(masterData?.designation)?.length === 0" disabled class="no-data-option">
+                            <!-- Options list -->
+                            <mat-option [value]="designation?.name" *ngFor="let designation of masterData?.designation">
+                                {{designation?.name}}
+                            </mat-option>
+                            <!-- Loading indicator -->
+                            <div *ngIf="isLoadingMoreDesignations" class="loading-indicator">
+                                Load More...
+                            </div>
+                            <!-- No results message -->
+                            <mat-option *ngIf="(masterData?.designation)?.length === 0 || noMoreLegacyDesignations" disabled class="no-data-option">
 
-                        Designation Not Found.
+                                Designation Not Found.
 
-                    </mat-option>
-                </mat-select>
+                            </mat-option>
+                            
+                        </mat-select>
                 <!-- <mat-error class="text-xs"
                             *ngIf="designationForm?.get('designation_name')?.touched && designationForm?.get('designation_name')?.invalid">
                             Please select at least one designation.
@@ -123,7 +126,7 @@
                 <div class="sub-heading">
                     <p>Competency</p>
                 </div>
-                <div class="enhanced-competency-section mt-2">
+                <div  #editSection class="enhanced-competency-section mt-2">
                     <!-- Step 1: Select Competency Type -->
                     <div class="competency-step">
                         <label class="step-label">1. Select Core Competency Type</label>
@@ -153,7 +156,7 @@
                                     <mat-option class="search-option" disabled>
                                         <mat-form-field appearance="outline" class="search-field">
                                             <input matInput placeholder="Search themes..." formControlName="themeSearch"
-                                                (input)="filterThemes($event.target.value)"
+                                                (input)="filterThemes($event.target?.value)"
                                                 (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
                                         </mat-form-field>
                                     </mat-option>
@@ -186,7 +189,7 @@
                         <div class="competency-dropdown-container"
                             *ngIf="selectedCompetencyType === 'Behavioral' || selectedCompetencyType === 'Functional'">
                             <mat-form-field appearance="outline" class="competency-dropdown">
-                                <mat-select formControlName="competencySubTheme"
+                                <mat-select  formControlName="competencySubTheme"
                                     placeholder="Search and select sub-theme"
                                     (selectionChange)="onSubThemeChange($event.value)">
                                     <!-- Search input inside dropdown -->

@@ -4,16 +4,26 @@
             <div>
                 <div class="heading">View Course Recommendation</div>
             </div>
-            <div class="cursor-pointer" (click)="closeDialog()">
-                <mat-icon>close</mat-icon>
+            <div class="right-section">
+                <div class="btn-group-compact">
+                    <div *ngIf="sharedService.fromMdoPortal && data?.requestStatus?.toLowerCase() == 'pending'">
+                        <input class="btn-active" type="button" value="Add More Course From iGOT"
+                            (click)="suggestMoreCourses()" />
+                    </div>
+                </div>
+                <div class="cursor-pointer" (click)="closeDialog()">
+                    <mat-icon>close</mat-icon>
+                </div>
             </div>
         </div>
     </div>
     <div class="section-container mt-2" #pdfContent>
         <div class="ministry-heading mt-2">
-           <span *ngIf="!cbpPlanData?.department_name">{{cbpPlanData?.ministry.orgName}}</span> 
-           <span *ngIf="cbpPlanData?.department_name">{{cbpPlanData?.department_name}}</span> 
-            <span *ngIf="planData?.designation_name"> / {{planData?.designation_name}}</span>
+            <span *ngIf="!cbpPlanData?.department_name">{{cbpPlanData?.ministry?.orgName}}</span>
+            <span *ngIf="cbpPlanData?.department_name">{{cbpPlanData?.department_name}}</span>
+            <span *ngIf="planData?.designation_name">
+                <span *ngIf="!(sharedService.fromMdoPortal)"> / </span>
+                {{planData?.designation_name}}</span>
         </div>
         <div class="competency-container mt-4">
             <div class="outside-layer-total">
@@ -38,18 +48,18 @@
                 </div>
                 <div class="count">
                     {{competenciesCount?.public_courses}}
-                    
+
                 </div>
             </div>
-            
+
         </div>
         <div class="my-4">
-        
+
             <div class="course-list-container">
                 <div class="course-list-item" *ngFor="let item of filterdCourses;let i=index">
                     <div class="course-header">
                         <div class="checked-course-container">
-                           
+
                             <div>
                                 <div class="course-pill">
                                     <div class="course-pill-text">
@@ -73,21 +83,21 @@
                             <div class="ai-recommened-pill-green">
                                 <div class="ai-recommened-pill-green-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
-                                    
-                                    <span >AI Recommended - iGOT </span>
+
+                                    <span>AI Recommended - iGOT </span>
 
                                 </div>
                             </div>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                 <div class="ai-recommened-pill-orange-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
-                                    <a class="cursor-pointer" [href]="item?.public_link" target="_blank"><span>Platform - {{item?.platform}}</span></a>
-                                </div>  
+                                    <a class="cursor-pointer" [href]="item?.public_link" target="_blank"><span>Platform
+                                            - {{item?.platform}}</span></a>
+                                </div>
                             </div>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.organisation?.length">
                                 <div class="ai-recommened-pill-orange-text">
-                                    <span class="ai-loader-icon"><img
-                                            src="assets/icons/ai-loader.gif"></span>
+                                    <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
                                     <span>Provider - {{item?.organisation[0]}}</span>
                                 </div>
                             </div>
@@ -96,21 +106,21 @@
                             <div class="ai-recommened-pill-public">
                                 <div class="ai-recommened-pill-public-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
-                                    
-                                    <span >AI Recommended - Public </span>
+
+                                    <span>AI Recommended - Public </span>
 
                                 </div>
                             </div>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                 <div class="ai-recommened-pill-orange-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
-                                    <a class="cursor-pointer" [href]="item?.public_link" target="_blank"><span>Platform - {{item?.platform}}</span></a>
-                                </div>  
+                                    <a class="cursor-pointer" [href]="item?.public_link" target="_blank"><span>Platform
+                                            - {{item?.platform}}</span></a>
+                                </div>
                             </div>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.organisation?.length">
                                 <div class="ai-recommened-pill-orange-text">
-                                    <span class="ai-loader-icon"><img
-                                            src="assets/icons/ai-loader.gif"></span>
+                                    <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
                                     <span>Provider - {{item?.organisation[0]}}</span>
                                 </div>
                             </div>
@@ -119,7 +129,7 @@
                             <div class="ai-recommened-pill-gray">
                                 <div class="ai-recommened-pill-gray-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
-                                    
+
                                     <span>Manually Suggested - iGOT </span>
 
                                 </div>
@@ -127,40 +137,39 @@
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                 <div class="ai-recommened-pill-orange-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
-                                    <a class="cursor-pointer" [href]="item?.public_link" target="_blank"><span>Platform - {{item?.platform}}</span></a>
-                                </div>  
+                                    <a class="cursor-pointer" [href]="item?.public_link" target="_blank"><span>Platform
+                                            - {{item?.platform}}</span></a>
+                                </div>
                             </div>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.organisation?.length">
                                 <div class="ai-recommened-pill-orange-text">
-                                    <span class="ai-loader-icon"><img
-                                            src="assets/icons/ai-loader.gif"></span>
+                                    <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
                                     <span>Provider - {{item?.organisation[0]}}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="course-title mt-4">
-                        <div>
-                            <div *ngIf="item?.course">{{item?.course}}</div>
-                            <!-- <div *ngIf="item?.name">{{item?.name}}</div> -->
+                        <div class="cursor-pointer">
+                            <div *ngIf="item?.course && (!sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">{{item?.course}}</div>
+                            <div *ngIf="item?.name && (sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">
+                                {{item?.name}}</div>
                         </div>
                     </div>
                     <div class="course-desc mt-2">
-                        <div *ngIf="isPDFDownload">
+                        <div *ngIf="isPDFDownload || sharedService?.fromMdoPortal">
                             <div>{{item?.rationale}}</div>
                         </div>
                     </div>
                     <div class="mt-3" *ngIf="getCompetenciesByType('Behavioural',i)?.length">
                         <div class="competency-sub-heading">Behavioral Competencies</div>
                         <ul class="competency-list mt-1">
-                            <li class="behavioural-pill"
-                                *ngFor="let comp of getDisplayedCompetencies('Behavioural',i)">
+                            <li class="behavioural-pill" *ngFor="let comp of getDisplayedCompetencies('Behavioural',i)">
                                 <span class="competency-text"> {{ comp.competencyThemeName }} -
                                     {{
                                     comp.competencySubThemeName }} </span>
                             </li>
-                            <li *ngIf="hasMoreThanTwo('Behavioural',i)"
-                                class="show-more-competency">
+                            <li *ngIf="hasMoreThanTwo('Behavioural',i)" class="show-more-competency">
                                 <span class="show-more-link cursor-pointer"
                                     (click)="toggleCompetencies('Behavioural',i)">
                                     {{ isExpanded('Behavioural',i) ? 'Show Less' : '+' +
@@ -172,14 +181,12 @@
                     <div class="mt-2" *ngIf="getCompetenciesByType('Functional',i)?.length">
                         <div class="competency-sub-heading">Functional Competencies</div>
                         <ul class="competency-list mt-1">
-                            <li class="functional-pill"
-                                *ngFor="let comp of getDisplayedCompetencies('Functional',i)">
+                            <li class="functional-pill" *ngFor="let comp of getDisplayedCompetencies('Functional',i)">
                                 <span class="competency-text"> {{ comp.competencyThemeName }} -
                                     {{
                                     comp.competencySubThemeName }} </span>
                             </li>
-                            <li *ngIf="hasMoreThanTwo('Functional',i)"
-                                class="show-more-competency">
+                            <li *ngIf="hasMoreThanTwo('Functional',i)" class="show-more-competency">
                                 <span class="show-more-link cursor-pointer"
                                     (click)="toggleCompetencies('Functional',i)">
                                     {{ isExpanded('Functional',i) ? 'Show Less' : '+' +
@@ -191,15 +198,13 @@
                     <div class="mt-2" *ngIf="getCompetenciesByType('Domain',i)?.length">
                         <div class="competency-sub-heading">Domain Competencies</div>
                         <ul class="competency-list mt-1">
-                            <li class="domain-pill"
-                                *ngFor="let comp of getDisplayedCompetencies('Domain',i)">
+                            <li class="domain-pill" *ngFor="let comp of getDisplayedCompetencies('Domain',i)">
                                 <span class="competency-text"> {{ comp.competencyThemeName }} -
                                     {{
                                     comp.competencySubThemeName }} </span>
                             </li>
                             <li *ngIf="hasMoreThanTwo('Domain',i)" class="show-more-competency">
-                                <span class="show-more-link cursor-pointer"
-                                    (click)="toggleCompetencies('Domain',i)">
+                                <span class="show-more-link cursor-pointer" (click)="toggleCompetencies('Domain',i)">
                                     {{ isExpanded('Domain',i) ? 'Show Less' : '+' +
                                     getRemainingCount('Domain',i) + ' More' }}
                                 </span>
@@ -207,14 +212,15 @@
                         </ul>
                     </div>
                     <div class="mt-2 d-flex justify-content-between item">
-                        <div class="relevancy-container">
+                        <div class="relevancy-container" *ngIf="item?.relevancy">
                             <div class="relevancy">Relevancy</div>
                             <div class="dash">-</div>
                             <div class="percentage" *ngIf="item?.relevancy">{{item?.relevancy}}%</div>
                             <div class="percentage" *ngIf="!item?.relevancy">N/A</div>
                         </div>
-                        <div class="delete-button">
-                           <mat-icon matTooltip="Delete Course" matTooltipPosition="above" class="text-danger cursor-pointer" (click)="deleteCard(item, i)" >delete</mat-icon>
+                        <div class="delete-button" *ngIf="!(data?.fromRequestPage) || (sharedService?.fromMdoPortal && data?.requestStatus?.toLowerCase() === 'pending')">
+                            <mat-icon matTooltip="Delete Course" matTooltipPosition="above"
+                                class="text-danger cursor-pointer" (click)="deleteCard(item, i)">delete</mat-icon>
                         </div>
                     </div>
                     <!-- <div>
@@ -274,8 +280,8 @@
         </div>
     </div>
     <div class="popup-footer" *ngIf="filterdCourses?.length">
-        <div>
-            <input class="btn-active" type="button" value="Download" (click)="downloadPdfFromBE()"/>
+        <div *ngIf="!(data?.fromRequestPage)">
+            <input class="btn-active" type="button" value="Download" (click)="downloadPdfFromBE()" />
         </div>
         <!-- <div>
             <input class="btn-active" type="button" value="Add Personalisation" (click)="addPersonilisation()"/>

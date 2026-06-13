@@ -734,7 +734,6 @@ border: none;
 }
 
 .custom-bullet-list {
-    list-style: none; /* Remove default bullets */
     padding-left: 20px; /* Left padding for indent */
     margin: 10px 0;
     font-family: Lato;
@@ -745,10 +744,10 @@ border: none;
       margin-bottom: 8px;
   
       &::before {
-        content: '•';
+        // content: '•';
         position: absolute;
         left: 0;
-        color: #1B4CA1; /* Blue bullet */
+        // color: #1B4CA1; /* Blue bullet */
         // font-size: 20px;
         line-height: 1.5;
         top: 0;
@@ -759,6 +758,15 @@ border: none;
       }
     }
   }
+
+  .custom-bullet-list ul {
+  list-style: disc outside !important;
+}
+
+.custom-bullet-list li {
+  list-style-type: disc !important;
+  display: list-item !important;
+}
 
   .vertical-middle {
     vertical-align: middle;

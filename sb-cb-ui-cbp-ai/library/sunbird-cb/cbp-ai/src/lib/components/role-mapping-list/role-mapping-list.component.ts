@@ -13,6 +13,8 @@ import { AddDesignationComponent } from '../add-designation/add-designation.comp
 import { SelectionModel } from '@angular/cdk/collections';
 import { ApprovalRequestFormComponent } from '../approval-request-form/approval-request-form.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { DesignationApprovalRequestFormComponent } from '../designation-approval-request-form/designation-approval-request-form.component';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
     selector: 'app-role-mapping-list',
     templateUrl: './role-mapping-list.component.html',
@@ -25,6 +27,7 @@ export class RoleMappingListComponent {
   selectedValue = ''
   //'select'
   displayedColumns: string[] = [
+    'select',
     'designation_name',
     'role_responsibilities',
     'activities',
@@ -49,16 +52,20 @@ export class RoleMappingListComponent {
   unMatchedRoleMapping = 0
   matchedRoleMappingIds = []
   matchedDesignationNames: string[] = [];
-
+  portalData: any = {}
   @Output() moveToInitialScreen = new EventEmitter<any>()
   activeTab: 'matched' | 'unmatched' = 'matched';
 
   matchedDesignationSet = new Set<string>();
   masterData: any[] = [];
   tabFilteredData: any[] = [];   // after matched/unmatched filter
+  matchedRoleMappingData: any[] = [];
   constructor(
     public sharedService: SharedService,
-    private dialog: MatDialog) {
+    private dialog: MatDialog,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
 
   }
 
@@ -68,14 +75,29 @@ export class RoleMappingListComponent {
   }
 
   ngOnInit() {
-    console.log('haredService?.cbpPlanFinalObj', this.sharedService?.cbpPlanFinalObj)
+
+    this.portalData = this.activatedRoute.snapshot.data['parentData']
     this.sharedService.checkRoleMappingFormValidation.next(true)
     this.sharedService.updateDesignationHierarchySubject.subscribe((data) => {
       if (data) {
-        this.loadRoleMappingList()
+        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        ) {
+
+        } else {
+          this.loadRoleMappingList()
+        }
       }
+
     })
-    this.loadRoleMappingList()
+    if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+      this.portalData?.parentAppData?.fromPortal === 'mdo'
+    ) {
+
+    } else {
+      this.loadRoleMappingList()
+    }
+
 
 
   }
@@ -206,6 +228,7 @@ export class RoleMappingListComponent {
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
+    element['matched_role_mappings']= this.matchedRoleMappingData
     const dialogRef = this.dialog.open(EditCbpPlanComponent, {
       width: '1000px',
       data: element,
@@ -221,7 +244,7 @@ export class RoleMappingListComponent {
       //   // Refresh data or show a toast here
 
       // }
-      this.refreshRoleMappingData();
+      this.loadRoleMappingList();
     });
   }
 
@@ -265,7 +288,7 @@ export class RoleMappingListComponent {
         console.log('Changes saved!');
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
-        
+
         if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.identifier) {
           if (this.sharedService.cbpPlanFinalObj.departments) {
             this.loading = true
@@ -280,7 +303,7 @@ export class RoleMappingListComponent {
             this.sharedService.getRoleMappingByStateCenterAndDepartment(this.sharedService.cbpPlanFinalObj.ministry.identifier, this.sharedService.cbpPlanFinalObj.departments).subscribe((res) => {
               console.log('res', res)
               this.selection.clear();
-             this.loadRoleMappingList()
+              this.loadRoleMappingList()
               console.log('this.dataSource', this.dataSource)
               this.loading = false
             })
@@ -293,7 +316,7 @@ export class RoleMappingListComponent {
             this.sharedService.getRoleMappingByStateCenterAndDepartment(this.sharedService.cbpPlanFinalObj.ministry.identifier, this.sharedService.cbpPlanFinalObj.departments).subscribe((res) => {
               console.log('res', res)
               this.selection.clear();
-             this.loadRoleMappingList()
+              this.loadRoleMappingList()
               console.log('this.dataSource', this.dataSource)
               this.loading = false
             })
@@ -324,11 +347,12 @@ export class RoleMappingListComponent {
         console.log('Changes saved!');
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
-        if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.id) {
-          this.sharedService.getRoleMappingByStateCenter(this.sharedService.cbpPlanFinalObj.ministry.id).subscribe((res) => {
+        if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.identifier) {
+          this.sharedService.getRoleMappingByStateCenter(this.sharedService.cbpPlanFinalObj.ministry.identifier).subscribe((res) => {
             console.log('res', res)
             this.dataSource = new MatTableDataSource(res)
             this.dataSource.paginator = this.paginator;
+            this.loadRoleMappingList()
             this.originalData = res;
             console.log('this.dataSource', this.dataSource)
           })
@@ -421,7 +445,7 @@ export class RoleMappingListComponent {
   addMoreDesignation() {
     const dialogRef = this.dialog.open(AddDesignationComponent, {
       width: '600px',
-      data: { state_center_id: '' },
+      data: { state_center_id: '', matched_role_mappings: this.matchedRoleMappingData },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height
       maxHeight: '90vh',           // Prevent it from going beyond viewport
@@ -432,7 +456,7 @@ export class RoleMappingListComponent {
       if (result === 'saved') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
-        this.refreshRoleMappingData();
+        this.loadRoleMappingList();
       }
     });
   }
@@ -517,7 +541,10 @@ export class RoleMappingListComponent {
   }
 
   moveToInitialScreenLayout(event) {
-    this.moveToInitialScreen.emit(event)
+    // this.moveToInitialScreen.emit(event)
+    this.router.navigate(['/ai/initial'], {
+      onSameUrlNavigation: 'reload'
+    });
   }
 
   openFullList(element: any, type: any) {
@@ -538,6 +565,7 @@ export class RoleMappingListComponent {
   }
 
   loadRoleMappingList() {
+
     this.cbpFinalObj = this.sharedService.getCBPPlanLocalStorage()
     this.dataSource = new MatTableDataSource(this.cbpFinalObj?.role_mapping_generation)
     this.originalDataSource = new MatTableDataSource(this.cbpFinalObj?.role_mapping_generation)
@@ -561,10 +589,9 @@ export class RoleMappingListComponent {
     }
     console.log('this.formData', this.formData)
     if (this.formData && this.formData.value && this.formData.value.ministryType === 'ministry') {
-
       let state_center_id = this.formData.value.ministry
       this.loading = true
-      if (this.formData.value.departments) {
+      if (this.formData.value.departments?.length) {
         let department_id = this.formData.value.departments
         if (typeof department_id === 'string') {
           this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe({
@@ -576,12 +603,15 @@ export class RoleMappingListComponent {
                 state_center_id: this.formData.value.ministry
               }
               if (this.formData.value.departments) {
-                obj['department_id'] = this.formData.value.departments
+                if (typeof this.formData.value.departments === 'string') {
+                  obj['department_id'] = this.formData.value.departments
+                }
               }
               this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
                 console.log('res', res)
 
                 console.log('matchedRoleMapping', matchedRoleMapping)
+                this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
                 this.matchedRoleMapping = matchedRoleMapping?.matched_count
                 this.matchedDesignationNames =
                   matchedRoleMapping?.matched_details?.map(
@@ -626,12 +656,14 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          if (this.formData.value.departments) {
+
+          if (typeof this.formData.value.departments === 'string') {
             obj['department_id'] = this.formData.value.departments
           }
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
+            this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
             this.matchedRoleMapping = matchedRoleMapping?.matched_count
             this.matchedDesignationNames =
               matchedRoleMapping?.matched_details?.map(
@@ -674,12 +706,13 @@ export class RoleMappingListComponent {
           let obj = {
             state_center_id: this.formData.value.ministry
           }
-          if (this.formData.value.departments) {
+          if (typeof this.formData.value.departments === 'string') {
             obj['department_id'] = this.formData.value.departments
           }
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
             console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
+            this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
             this.matchedRoleMapping = matchedRoleMapping?.matched_count
             this.matchedDesignationNames =
               matchedRoleMapping?.matched_details?.map(
@@ -737,7 +770,10 @@ export class RoleMappingListComponent {
 
   toggleAllRows(event: any) {
     if (event.checked) {
-      this.dataSource.data.forEach(row => this.selection.select(row));
+
+      this.dataSource.data
+        .filter(row => row?.cbp_plans?.length)
+        .forEach(row => this.selection.select(row));
     } else {
       this.selection.clear();
     }
@@ -747,7 +783,7 @@ export class RoleMappingListComponent {
 
     this.activeTab = tab;
 
-    this.selection.clear();
+    // this.selection.clear();
 
     this.applyAllFilters();
 
@@ -814,7 +850,8 @@ export class RoleMappingListComponent {
         //   // Refresh data or show a toast here
 
         // }
-        this.refreshRoleMappingData();
+        this.selection.clear()
+        this.loadRoleMappingList();
       });
     }
 
@@ -824,5 +861,38 @@ export class RoleMappingListComponent {
     return this.dataSource?.data?.some((row: any) => row?.cbp_plans?.length > 0);
   }
 
+  sendForDesignationNameApproval(element) {
+    this.activeRowElement = element
+    const dialogRef = this.dialog.open(DesignationApprovalRequestFormComponent, {
+      width: '600px',
+      data: element,
+      panelClass: 'view-cbp-plan-popup',
+      minHeight: '300px',          // Set minimum height
+      maxHeight: '80vh',           // Prevent it from going beyond viewport
+      disableClose: true // Optional: prevent closing with outside click
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // if (result === 'saved') {
+      //   console.log('Changes saved!');
+      //   // Refresh data or show a toast here
+
+      // }
+      this.loadRoleMappingList();
+    });
+
+  }
+
+  getActivateCbpPlan(row) {
+    let found = false
+    if (row?.cbp_plans && row?.cbp_plans?.length) {
+      row.cbp_plans.forEach(element => {
+        if (element?.selected_courses && element?.selected_courses?.length) {
+          found = true
+        }
+      })
+    }
+    return !found
+  }
 
 }

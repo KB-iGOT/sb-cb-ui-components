@@ -7,8 +7,6 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { type } from 'os';
-import { element } from 'protractor';
 import { ListPopupComponent } from '../../components/list-popup/list-popup.component';
 @Component({
     selector: 'app-upload-document-page',
@@ -46,7 +44,7 @@ export class UploadDocumentPageComponent {
 
   ]
   searchText = '';
-  displayedColumns: string[] = ['name', 'summary_status',  'date', 'actions'];
+  displayedColumns: string[] = ['name','document_type', 'summary_status',  'date', 'actions'];
   cbpFinalObj:any= {}
   departmentData:any = []
   documents = [
@@ -73,6 +71,7 @@ export class UploadDocumentPageComponent {
   loginUserOrgIds = []
   originalMinistryData = []
   cbpPlanFinalObj:any
+  showSampleDialogFlag = false
   constructor(public dialog: MatDialog, public sharedService: SharedService, 
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -299,7 +298,7 @@ export class UploadDocumentPageComponent {
     }
 
     routeToMain() {
-      this.router.navigate(['/ai/']);
+      this.router.navigate(['/']);
     }
 
     viewSummary(doc) {
@@ -401,16 +400,19 @@ export class UploadDocumentPageComponent {
     }
 
     routeToInitial() {
-      this.router.navigate(['/ai/initial']);
+      this.router.navigate(['/initial']);
     }
 
-    clearSearch() {
+    showSampleDialog() {
+      this.showSampleDialogFlag = true
+    }
+
+    downloadSampleDocx() {
 
     }
-    
-    openFullList(element:any, type:any) {
-      console.log('element, type', element, type)   
+
+    downloadSamplePdf(){
+
     }
 
 }
-

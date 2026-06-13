@@ -14,7 +14,7 @@
 
 
         </div>
-        <div class="edit-section mt-4">
+        <!-- <div class="edit-section mt-4">
             <div class="select-map-route-container">
                 <div class="select-map-flex-container">
                     <div class="select-map-flex">
@@ -26,29 +26,19 @@
                         <div class="edit-plan cursor-pointer" (click)="routeToInitial()">
                             <mat-icon>edit</mat-icon>Edit
                         </div>
-                        <!--                            <div class="cursor-pointer ml-10">-->
-                        <!--                                <button class="btn-active cursor-pointer" (click)="moveToInitialScreenLayout('add')">-->
-                        <!--                                    <mat-icon>add</mat-icon>-->
-                        <!--                                    Create New CBP-->
-                        <!--                                </button>-->
-                        <!--                            </div>-->
+                        
                     </div>
-                    <!-- <div>
-                        <button [ngClass]="!(cbpPlanFinalObj?.ministry?.orgName) ? 'btn-disable':'btn-active'" mat-raised-button
-                            color="primary" [disabled]="!(cbpPlanFinalObj?.ministry?.orgName)" (click)="openUploadDialog()">
-                            <mat-icon>upload</mat-icon> Upload Document
-                        </button>
-                    </div> -->
+                    
                 </div>
             </div>
-        </div>
+        </div> -->
 
 
 
 
 
     </mat-card>
-    <mat-card class="">
+    <mat-card class="" style="z-index: 0;padding:6px 0">
         <form [formGroup]="filterForm">
             <div class="search flex margin-right-m filter-container">
                 <div>
@@ -61,15 +51,15 @@
                 <div>
                     <b> Filters</b>
                 </div>
-                <div class="mt-10 w-50">
+                <div class="w-50">
 
-                    <div class="search-container"> 
+                    <div class="search-container">
                         <div class="rsearch">
                             <mat-icon
                                 class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
-                            <input class="sinput color-60 w-full"  label="" formControlName="search"
-                                (keyup)="applyFilters()" placeholder="Search by Request ID" type="Standard">
-                          
+                            <input class="sinput color-60 w-full" label="" formControlName="search"
+                                (keyup)="getApprovalRequests()" placeholder="Search by Request Name" type="Standard">
+
                         </div>
 
                     </div>
@@ -85,7 +75,7 @@
                             </mat-label> -->
 
                             <mat-select formControlName="status" panelClass="select-search-panel"
-                                (selectionChange)="applyFilters()">
+                                (selectionChange)="getApprovalRequests()">
 
                                 <!-- Search box -->
                                 <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
@@ -129,8 +119,8 @@
                 </div>
             </div>
         </form>
-        <p class="mt-10" style="font-family: 'Lato'; font-size: 18px; margin-left: 10px;">
-            {{dataSource.data.length}} Approval Requests</p>
+        <p class="mt-15" style="font-family: 'Lato'; font-size: 18px; margin-left: 10px;margin-top: 15px;">
+            {{totalRecords}} Approval Requests</p>
         <table style="border-radius: 25px 25px 0 0;
         overflow: hidden;
         box-shadow: 0 5px 5px rgba(0, 0, 0, 0.12);" mat-table [dataSource]="dataSource"
@@ -138,8 +128,8 @@
 
             <!-- Document Column -->
             <ng-container matColumnDef="request_id">
-                <th mat-header-cell *matHeaderCellDef> Request ID </th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                <th mat-header-cell *matHeaderCellDef> Request Name </th>
+                <td mat-cell *matCellDef="let request" style="width: 25%;">
                     <div>
                         <div class="doc-title" *ngIf="request.request_name">{{ request.request_name }}</div>
                         <div class="doc-title" *ngIf="!request.request_name">{{ request.request_name }}</div>
@@ -162,13 +152,14 @@
             <!-- Date Column -->
             <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef> Date & Time</th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;"> {{ request.created_at | date: 'MMM d, y'}} </td>
+                <td mat-cell *matCellDef="let request" style="width: 12%;"> {{ request.created_at | date: 'MMM d, y hh:mm:ss a'}}
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="designation">
-                <th mat-header-cell *matHeaderCellDef> No of Designation </th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;">
-                    <span>{{request?.designation_count}}</span>
+                <th mat-header-cell *matHeaderCellDef> No. of Designation </th>
+                <td mat-cell *matCellDef="let request" style="width: 10%; text-align: center;">
+                    <span class="designation-count">{{request?.designation_count}}</span>
                 </td>
             </ng-container>
 
@@ -176,11 +167,15 @@
             <!-- Summary Status Column -->
             <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef> Request Status </th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;">
-                     <span *ngIf="request.status === 'completed'" class="success"> {{ request.status | titlecase
+                <td mat-cell *matCellDef="let request" style="width: 10%;">
+                    <span *ngIf="request.status === 'draft' || request.status === 'DRAFT' || request.status === 'revoke' || request.status === 'REVOKE' || request.status === 'REVOKED' || request.status === 'revoked'" class="draft"> Revoked </span>
+                    <span *ngIf="request.status === 'approved' || request.status === 'APPROVED'" class="success"> {{ request.status | titlecase
                         }} </span>
-                    <span *ngIf="request.status !== 'completed'" class="in-progress"> {{ request.status |
+                    <span *ngIf="request.status === 'pending' || request.status === 'PENDING'" class="in-progress"> {{ request.status |
                         titlecase }} </span>
+                    <span *ngIf="request.status === 'rejected' || request.status === 'REJECTED'" class="rejected"> {{ request.status |
+                        titlecase }} </span>
+                    <span (click)="showRejectPopup(request)" *ngIf="request.status === 'rejected' || request.status === 'REJECTED'" style="margin-left: 10px;cursor: pointer;"><mat-icon class="vertical-middle">remove_red_eye</mat-icon></span>
                 </td>
             </ng-container>
 
@@ -192,13 +187,13 @@
                         <div>
                             <button class="btn-active" mat-raised-button color="primary" (click)="viewRequest(request)"
                                 matTooltip="View/Review Request">
-                                View/Review Request
+                                View Request
                             </button>
                         </div>
                         <div>
-                            <button style="margin-left: 15px;" *ngIf="request.status === 'COMPLETED'"
-                                mat-icon-button color="warn" (click)="revokeApprovalRequest(request)" matTooltip="Delete">
-                                <mat-icon>delete</mat-icon>
+                            <button style="margin-left: 15px;" class="btn-gray" *ngIf="request.status === 'PENDING' || request.status === 'pending'" 
+                                 (click)="revokeApprovalRequest(request)" matTooltip="Revoke Request">
+                                <mat-icon>cancel</mat-icon>
                                 Revoke Request
                             </button>
                         </div>
@@ -224,11 +219,69 @@
         <!-- Pagination -->
         <div class="mt-1">
             <!-- <mat-paginator class="custom-pagination" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator> -->
-            <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
+            <mat-paginator [length]="totalRecords" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 20]" (page)="onPageChange($event)">
+            </mat-paginator>
         </div>
 
 
     </mat-card>
+</div>
+
+<!-- Popup Overlay -->
+<div class="popup-overlay" *ngIf="showRejectPopupFlag">
+  <div class="popup-card">
+    
+    <!-- Close Button -->
+    <button class="close-btn" (click)="closeRejectPopup()">&times;</button>
+
+    <!-- Title -->
+    <h2>Rejection Reason</h2>
+
+    <!-- Subtitle -->
+    <p class="subtitle">
+      This request was rejected for the following reason:
+    </p>
+
+    <!-- Error Box -->
+    <div class="error-box">
+      {{rejectionDetail?.reviewer_comments}}
+    </div>
+
+  </div>
+</div>
+
+<div class="popup-overlay" *ngIf="showRevokeRequestPopupFlag">
+  <div class="popup-card">
+    
+    <!-- Close Button -->
+    <button class="close-btn" (click)="closeRevokePopup()">&times;</button>
+
+    <!-- Title -->
+    <h2>Revoke Request</h2>
+
+    <!-- Subtitle -->
+    <p class="subtitle">
+     <strong>Are you sure you want to revoke this request? </strong><br><br>
+     Once revoked, you will not be able to make any changes to this request. If you wish to proceed later, you will need to create a new request and submit it again, Do you want to continue?  <br><br>
+     
+    </p>
+   
+
+   <div class="popup-footer">
+        <div>
+            <input class="btn-active-gray" mat-raised-button type="button" value="No" (click)="closeRevokePopup()" />
+        </div>
+        <div class="ml-10">
+            <button  mat-raised-button
+               class="btn-active" (click)="revokeApprovalRequestConfirm()">
+
+                Yes
+            </button>
+        </div>
+    </div>
+
+  </div>
 </div>
 
 

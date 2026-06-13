@@ -1,26 +1,27 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
-import { finalize } from 'rxjs/operators';
-import  _ from 'lodash'
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import * as _ from 'lodash-es'
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { ActivatedRoute } from '@angular/router';
 @Component({
     selector: 'app-edit-cbp-plan',
     templateUrl: './edit-cbp-plan.component.html',
     styleUrls: ['./edit-cbp-plan.component.scss'],
     standalone: false
 })
-export class EditCbpPlanComponent implements OnInit{
+export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
   selectedValue = ''
   searchText = ''
-  planData:any
-  competenciesCount = {total:0, behavioral:0, functional:0, domain:0}
+  planData: any
+  competenciesCount = { total: 0, behavioral: 0, functional: 0, domain: 0 }
   cbpForm: FormGroup;
-  loading= false
-  
+  loading = false
+
   // Enhanced competency selection properties
   competenciesData: any[] = [];
   availableThemes: any[] = [];
@@ -36,7 +37,7 @@ export class EditCbpPlanComponent implements OnInit{
   subThemeSearchText = '';
   editDomainCompetencyFlag = false
   editCompetencyIndex = -1
-  originalCompetencyValueArr:any = []
+  originalCompetencyValueArr: any = []
   desigantionFilterEnable = false
   isLoadingMoreDesignations = false;
   designationOffset = 0
@@ -51,17 +52,37 @@ export class EditCbpPlanComponent implements OnInit{
   @ViewChild('dialogContent') dialogContent!: ElementRef;
   @ViewChild('designation', { read: ElementRef }) designationRef?: ElementRef
   masterData: any = {}
+  portalData: any
+  activeRowElement: any
+  requestData: any
+  requestRowData: any
+  onDesignationSelectScrollBound =
+    this.onDesignationSelectScroll.bind(this);
+  searchDesignationLoadCount = 50
+  matchedDesignationIds = []
+  @ViewChild('editSection') editSection!: ElementRef;
   constructor(
     public dialogRef: MatDialogRef<EditCbpPlanComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
     private cdRef: ChangeDetectorRef,
-    private sharedService:SharedService,
+    private sharedService: SharedService,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
+    public route: ActivatedRoute
   ) {
-    this.planData = data
-    console.log('Received data:', data);
+    if (this.sharedService.fromMdoPortal) {
+      this.planData = data?.element
+      this.requestRowData = data?.requestData
+    } else {
+      if (data?.fromLibrary) {
+        this.planData = data?.element
+      } else {
+        this.planData = data
+      }
+    }
+
+    console.log('Received data:', this.planData);
     // this.planData.competencies.map((competencies:any)=>{
     //   this.competenciesCount['total'] = this.competenciesCount['total'] + 1 
     //   if(competencies.type === 'Behavioral') {
@@ -78,9 +99,72 @@ export class EditCbpPlanComponent implements OnInit{
 
 
   ngOnInit() {
+    console.log('this.data?.matched_role_mappings', this.data?.matched_role_mappings)
+    this.matchedDesignationIds = this.data?.matched_role_mappings?.map((item: any) => item?.igot_designation_id) || []
     this.loadCompetenciesData();
     this.initializeForm();
+    if (
+      this.planData?.designation_name &&
+      !this.planData?.igot_designation_id
+    ) {
+      this.getDesignation(this.planData.designation_name, 0);
+    }
+    const searchControl = this.cbpForm.get('searchDesignation');
+
+    if (searchControl) {
+      searchControl.valueChanges
+        .pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        )
+        .subscribe((res: any) => {
+
+          const txt = res?.toString()?.trim() ?? '';
+
+          this.designationSearchText = txt;
+
+          // RESET SEARCH PAGINATION
+          this.searchDesignationLoadCount = 50;
+
+          if (txt?.length) {
+
+            this.desigantionFilterEnable = true;
+
+            // API SEARCH ONLY
+            this.getDesignation(txt, 0);
+
+          } else {
+
+            this.desigantionFilterEnable = false;
+
+            this.masterData.designation =
+              (this.masterData.designationBackup || []).slice(
+                0,
+                this.designationDefaultLoadCount
+              );
+
+            this.designationListLoadCount =
+              this.designationDefaultLoadCount;
+
+            this.designationOffset = 0;
+
+            this.checkCurrentDesignationPresent();
+          }
+        });
+    }
+
+
+    if (
+      !this.masterData.designationBackup ||
+      this.masterData.designationBackup.length === 0
+    ) {
+      this.getDesignationSafe();
+    }
     this.updateCompetencyCounts()
+
+    const requestId = this.route.snapshot.paramMap.get('request_id');
+
+    console.log('requestId', requestId)
   }
 
   loadCompetenciesData() {
@@ -97,7 +181,7 @@ export class EditCbpPlanComponent implements OnInit{
 
   updateCompetencyCounts() {
     const comps = this.competenciesArray.value;
-    this.competenciesCount = {total: 0, behavioral: 0, functional: 0, domain: 0};
+    this.competenciesCount = { total: 0, behavioral: 0, functional: 0, domain: 0 };
     comps.forEach(c => {
       this.competenciesCount.total++;
       if (c.type.toLowerCase() === 'behavioral') this.competenciesCount.behavioral++;
@@ -121,15 +205,16 @@ export class EditCbpPlanComponent implements OnInit{
       themeSearch: [''],
       subThemeSearch: [''],
       competencies: this.fb.array(this.planData?.competencies || []), // optional customization,
-      searchDesignation: ['']
+      searchDesignation: [''],
+      igot_designation_id: [this.planData?.igot_designation_id || '']
     });
 
-     if (!this.masterData['designationBackup']) {
+    if (!this.masterData['designationBackup']) {
       this.getDesignationSafe()
     }
   }
 
-   private getDesignationSafe(): void {
+  private getDesignationSafe(): void {
     if (this.designationInitInProgress || this.isLoadingMoreDesignations) {
       return
     }
@@ -147,7 +232,7 @@ export class EditCbpPlanComponent implements OnInit{
   }
 
   applyFilter() {
-   
+
   }
 
   getCompetenciesByType(type: string): any[] {
@@ -155,38 +240,95 @@ export class EditCbpPlanComponent implements OnInit{
   }
 
   closeDialog() {
-    this.dialogRef.close(); 
+    this.dialogRef.close();
   }
 
   saveRoleMapping() {
+    console.log("saved function called...")
     if (this.cbpForm.invalid) return;
 
-  const formData = this.cbpForm.value;
-  console.log('Submitted Data:', formData);
-  let cbpPlanData:any = this.sharedService.cbpPlanFinalObj;
-  console.log('cbpPlanData',cbpPlanData)
-  const roleResponsibilitiesArray = this.cbpForm.value.role_responsibilities_text
-  .split('\n')
-  .map(line => line.trim())
-  .filter(line => line); 
-  const activities = this.cbpForm.value.activities_text
-  .split('\n')
-  .map(line => line.trim())
-  .filter(line => line); 
-  this.loading = true
-  let req = 
+    const formData = this.cbpForm.value;
+    console.log('Submitted Data:', formData);
+    let cbpPlanData: any = this.sharedService.cbpPlanFinalObj;
+    console.log('cbpPlanData', cbpPlanData)
+    console.log(
+      'Backup entry:',
+      this.masterData.designationBackup.find(
+        (x: any) =>
+          x.name?.toLowerCase() ===
+          formData.designation_name?.toLowerCase()
+      )
+    );
+
+    console.log(
+      'Visible entry:',
+      this.masterData.designation.find(
+        (x: any) =>
+          x.name?.toLowerCase() ===
+          formData.designation_name?.toLowerCase()
+      )
+    );
+    const roleResponsibilitiesArray = this.cbpForm.value.role_responsibilities_text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line);
+    const activities = this.cbpForm.value.activities_text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line);
+    this.loading = true
+    let req =
     {
-      "sector_name":cbpPlanData?.sectors?.join(","),
-      "instruction": cbpPlanData?.instruction ? cbpPlanData.instruction:'',
-      "designation_name": formData?.designation_name ? formData.designation_name : '',
+      "sector_name": cbpPlanData?.sectors?.join(","),
+      "instruction": cbpPlanData?.instruction ? cbpPlanData.instruction : '',
       "wing_division_section": formData?.wing_division_section,
-      "role_responsibilities":roleResponsibilitiesArray,
+      "role_responsibilities": roleResponsibilitiesArray,
       "activities": activities,
       "competencies": formData.competencies
     }
+    console.log('masterData?.designation', this.masterData?.designation)
+
+    if (formData?.igot_designation_id) {
+      req["igot_designation_id"] = formData?.igot_designation_id || '',
+        req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+    } else {
+
+      console.log('masterData?.designation', this.masterData?.designation)
+
+      req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+      console.log(
+        'Searching in backup:',
+        this.masterData.designationBackup.find(
+          (x: any) =>
+            x.name?.trim().toLowerCase() ===
+            formData.designation_name?.trim().toLowerCase()
+        )
+      );
+      const selectedDesignation = this.masterData?.designation?.find(
+        (item: any) =>
+          item?.name?.toLowerCase() === formData?.designation_name?.toLowerCase()
+      );
+      const backupDesignation =
+        this.masterData.designationBackup.find(
+          (x: any) =>
+            x.name?.toLowerCase() ===
+            formData.designation_name?.toLowerCase()
+        );
+
+      console.log('backupDesignation', backupDesignation);
+      req["igot_designation_id"] = selectedDesignation?.igot_designation_id || '';
+      console.log('designation_name 123 ', formData.designation_name);
+      console.log('selectedDesignation 123', selectedDesignation);
+      console.log('igot_designation_id 123', req['igot_designation_id']);
+    }
+
+    if (this.sharedService.fromMdoPortal) {
+      req['request_id'] = this.requestRowData?.id
+      req['item_id'] = this.planData?.id
+    }
     let role_mapping_id = this.planData.id
-    
-    this.sharedService.updateRoleMapping(role_mapping_id,req).subscribe({
+
+    this.sharedService.updateRoleMapping(role_mapping_id, req).subscribe({
       next: (res) => {
         // Success handling
         console.log('Success:', res);
@@ -200,17 +342,17 @@ export class EditCbpPlanComponent implements OnInit{
       },
       error: (error) => {
         console.log('error', error)
-        this.dialogRef.close()
-          // Handle 409 Conflict here
-          // alert('Conflict detected: The resource already exists or action conflicts.');
-          //this.get
-          // Or you can set a UI error message variable
-          this.snackBar.open(error?.error?.detail, 'X', {
-            duration: 3000,
-            panelClass: ['snackbar-error']
-          });
-          this.loading = false
-          //this.alreadyAvailableRoleMapping.emit(this.roleMappingForm)
+        // this.dialogRef.close()
+        // Handle 409 Conflict here
+        // alert('Conflict detected: The resource already exists or action conflicts.');
+        //this.get
+        // Or you can set a UI error message variable
+        this.snackBar.open(error?.error?.detail, 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+        this.loading = false
+        //this.alreadyAvailableRoleMapping.emit(this.roleMappingForm)
       }
     });
   }
@@ -219,8 +361,8 @@ export class EditCbpPlanComponent implements OnInit{
     // Mark all controls as pristine and untouched without changing the values
     this.cbpForm.markAsPristine();
     this.cbpForm.markAsUntouched();
-   // this.competenciesArray.value = this.originalCompetencyValueArr
-   // console.log('this.competenciesArray',this.competenciesArray)
+    // this.competenciesArray.value = this.originalCompetencyValueArr
+    // console.log('this.competenciesArray',this.competenciesArray)
     // Also, if you want to mark all child controls (FormControls / FormArrays / FormGroups) as pristine and untouched
     this.markFormGroupPristineUntouched(this.cbpForm);
     // if(this.editCompetencyIndex > -1) {
@@ -230,7 +372,7 @@ export class EditCbpPlanComponent implements OnInit{
     // }
     this.dialogRef.close()
   }
-  
+
   private markFormGroupPristineUntouched(formGroup: FormGroup | FormArray) {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.controls[key];
@@ -259,7 +401,7 @@ export class EditCbpPlanComponent implements OnInit{
     this.filteredSubThemes = [];
     this.themeSearchText = '';
     this.subThemeSearchText = '';
-    
+
     // Reset form controls
     this.cbpForm.patchValue({
       competencyTheme: '',
@@ -269,14 +411,14 @@ export class EditCbpPlanComponent implements OnInit{
       themeSearch: '',
       subThemeSearch: ''
     });
-    
+
     if (type === 'Behavioral' || type === 'Functional') {
       // Load themes from JSON for Behavioral and Functional
-      const competencyCategory = this.competenciesData.find(cat => 
-        cat.name.toLowerCase() === type.toLowerCase() || 
+      const competencyCategory = this.competenciesData.find(cat =>
+        cat.name.toLowerCase() === type.toLowerCase() ||
         (type === 'Behavioral' && cat.name === 'Behavioural')
       );
-      
+
       if (competencyCategory) {
         this.availableThemes = competencyCategory.competency_theme || [];
         this.filteredThemes = [...this.availableThemes];
@@ -284,19 +426,19 @@ export class EditCbpPlanComponent implements OnInit{
     }
     // For Domain, no themes are loaded - user will enter manually
   }
-  
+
   onThemeChange(themeName: string) {
     this.selectedTheme = themeName;
     this.selectedSubTheme = '';
     this.availableSubThemes = [];
     this.filteredSubThemes = [];
     this.subThemeSearchText = '';
-    
+
     this.cbpForm.patchValue({
       competencySubTheme: '',
       subThemeSearch: ''
     });
-    
+
     // Find the selected theme and load its sub-themes
     const selectedThemeObj = this.availableThemes.find(theme => theme.name === themeName);
     if (selectedThemeObj) {
@@ -304,16 +446,16 @@ export class EditCbpPlanComponent implements OnInit{
       this.filteredSubThemes = [...this.availableSubThemes];
     }
   }
-  
+
   onSubThemeChange(subThemeName: string) {
     this.selectedSubTheme = subThemeName;
   }
-  
+
   addCompetency() {
     let type = this.selectedCompetencyType;
     let theme = '';
     let subTheme = '';
-    
+
     if (type === 'Domain') {
       // For Domain, use manual input
       theme = this.cbpForm.value.manualThemeInput?.trim();
@@ -323,12 +465,12 @@ export class EditCbpPlanComponent implements OnInit{
       theme = this.selectedTheme;
       subTheme = this.selectedSubTheme;
     }
-    
+
     if (type && theme && subTheme) {
-      const exists = this.competenciesArray.value.some(c => 
+      const exists = this.competenciesArray.value.some(c =>
         c.theme === theme && c.sub_theme === subTheme && c.type === type
       );
-      
+
       if (!exists) {
         const newComp = this.fb.group({
           type: [type],
@@ -337,19 +479,19 @@ export class EditCbpPlanComponent implements OnInit{
         });
         this.competenciesArray.push(newComp);
       }
-      
+
       // Clear input fields after adding
       this.resetCompetencyForm();
     }
-    
+
     const currentValues = this.competenciesArray.value;
     this.cbpForm.patchValue({ competencies: [...currentValues] });
-    
+
     this.updateCompetencyCounts();
     this.cdRef.detectChanges();
     console.log(this.cbpForm?.get('competencies')?.value);
   }
-  
+
   resetCompetencyForm() {
     this.selectedCompetencyType = '';
     this.selectedTheme = '';
@@ -362,7 +504,7 @@ export class EditCbpPlanComponent implements OnInit{
     this.filteredSubThemes = [];
     this.themeSearchText = '';
     this.subThemeSearchText = '';
-    
+
     this.cbpForm.patchValue({
       competencyType: '',
       competencyTheme: '',
@@ -373,32 +515,32 @@ export class EditCbpPlanComponent implements OnInit{
       subThemeSearch: ''
     });
   }
-  
+
   filterThemes(searchText: string) {
     this.themeSearchText = searchText;
     if (!searchText.trim()) {
       this.filteredThemes = [...this.availableThemes];
     } else {
-      this.filteredThemes = this.availableThemes.filter(theme => 
+      this.filteredThemes = this.availableThemes.filter(theme =>
         theme.name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
   }
-  
+
   filterSubThemes(searchText: string) {
     this.subThemeSearchText = searchText;
     if (!searchText.trim()) {
       this.filteredSubThemes = [...this.availableSubThemes];
     } else {
-      this.filteredSubThemes = this.availableSubThemes.filter(subTheme => 
+      this.filteredSubThemes = this.availableSubThemes.filter(subTheme =>
         subTheme.toLowerCase().includes(searchText.toLowerCase())
       );
     }
   }
-  
+
   canAddCompetency(): boolean {
     if (!this.selectedCompetencyType) return false;
-    
+
     if (this.selectedCompetencyType === 'Domain') {
       const theme = this.cbpForm.value.manualThemeInput?.trim();
       const subTheme = this.cbpForm.value.manualSubThemeInput?.trim();
@@ -412,7 +554,7 @@ export class EditCbpPlanComponent implements OnInit{
     const index = this.competenciesArray.controls.findIndex(
       control => control.value.theme === comp.theme && control.value.type === comp.type
     );
-  
+
     if (index !== -1) {
       this.competenciesArray.removeAt(index);
     }
@@ -428,21 +570,24 @@ export class EditCbpPlanComponent implements OnInit{
       manualThemeInput: comp?.theme,
       manualSubThemeInput: comp?.sub_theme
     });
-    const index = this.competenciesArray.value.findIndex(c => 
+    const index = this.competenciesArray.value.findIndex(c =>
       c.theme === comp?.theme &&
       c.sub_theme === comp?.sub_theme &&
       c.type === "Domain"
     );
-    if(index > -1) {
+    if (index > -1) {
       this.editCompetencyIndex = index
     }
     this.selectedCompetencyType = 'Domain'
-    setTimeout(() => {
-      this.dialogContent.nativeElement.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }, 500)
+    this.cdRef.detectChanges();
+    console.log('scrollTop before', this.dialogContent.nativeElement.scrollTop);
+    
+  setTimeout(() => {
+    this.editSection.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  });
   }
 
   cancelUpdate() {
@@ -455,23 +600,23 @@ export class EditCbpPlanComponent implements OnInit{
     let type = this.selectedCompetencyType;
     let theme = '';
     let subTheme = '';
-    
+
     if (type === 'Domain') {
       // For Domain, use manual input
       theme = this.cbpForm.value.manualThemeInput?.trim();
       subTheme = this.cbpForm.value.manualSubThemeInput?.trim();
       this.originalCompetencyValueArr = JSON.parse(JSON.stringify(this.competenciesArray.value))
     }
-    console.log(' this.competenciesArray',  this.competenciesArray)
+    console.log(' this.competenciesArray', this.competenciesArray)
     if (type && theme && subTheme) {
-      
-      console.log('this.editCompetencyIndex--',this.editCompetencyIndex)
-      if(this.editCompetencyIndex > -1) {
+
+      console.log('this.editCompetencyIndex--', this.editCompetencyIndex)
+      if (this.editCompetencyIndex > -1) {
         this.competenciesArray.value[this.editCompetencyIndex]['type'] = type
         this.competenciesArray.value[this.editCompetencyIndex]['theme'] = theme
         this.competenciesArray.value[this.editCompetencyIndex]['sub_theme'] = subTheme
       }
-      
+
       // if (!exists) {
       //   const newComp = this.fb.group({
       //     type: [type],
@@ -480,301 +625,534 @@ export class EditCbpPlanComponent implements OnInit{
       //   });
       //   this.competenciesArray.push(newComp);
       // }
-      
+
       // Clear input fields after adding
       this.resetCompetencyForm();
       console.log('this.originalCompetencyValueArr', this.originalCompetencyValueArr)
     }
-    
+
     const currentValues = this.competenciesArray.value;
     this.cbpForm.patchValue({ competencies: [...currentValues] });
-    
+
     this.updateCompetencyCounts();
     this.cdRef.detectChanges();
     console.log(this.cbpForm?.get('competencies')?.value);
   }
-
   getDesignation(searchText?: string, offset?: number): void {
-  
-      // clear any previous debug hooks
-      if (!searchText || searchText?.length === 0) {
-        // noop
-      }
-  
-      const reqOffset = (typeof offset === 'number') ? offset : this.designationOffset
-      let reqLimit = this.designationDefaultLoadCount
-      const pageIndex = reqLimit > 0 ? Math.floor(reqOffset / reqLimit) : 0
-      // if we're requesting from first page, clear the no-more-data guard
-      if (pageIndex === 0) {
-        this.noMoreLegacyDesignations = false
-        reqLimit = 50
-      }
-      const requestBody: any = {
-        filterCriteriaMap: {
-          status: 'Active'
-        },
-        requestedFields: [],
-        pageNumber: pageIndex,
-        pageSize: reqLimit,
-      }
-      if (searchText?.length) {
-        requestBody['searchString'] = searchText
-        // when searching, start from first page
-        requestBody.pageNumber = 0
-        // allow larger page for search if needed
-        requestBody.pageSize = pageIndex === 0 ? 50 : this.designationListLoadCount
-        // reset guard when performing a fresh search
-        this.noMoreLegacyDesignations = false
-      }
-  
-      // indicate loading state so scroll handlers don't trigger parallel calls
-      this.isLoadingMoreDesignations = true
-  
-      this.sharedService.searchPublicDesignation(requestBody).pipe(finalize(() => {
-        this.isLoadingMoreDesignations = false
-        this.designationInitInProgress = false
-      }))
-        .subscribe({
-          next: (res: any) => {
-            const content = _.get(res, 'result.result.data', [])
-            const mapped = content.map((item: any) => ({
+
+    // clear any previous debug hooks
+    if (!searchText || searchText?.length === 0) {
+      // noop
+    }
+
+    const reqOffset = (typeof offset === 'number') ? offset : this.designationOffset
+    let reqLimit = this.designationDefaultLoadCount
+    const pageIndex = reqLimit > 0 ? Math.floor(reqOffset / reqLimit) : 0
+    // if we're requesting from first page, clear the no-more-data guard
+    if (pageIndex === 0) {
+      this.noMoreLegacyDesignations = false
+      reqLimit = 50
+    }
+    const requestBody: any = {
+      filterCriteriaMap: {
+        status: 'Active'
+      },
+      requestedFields: [],
+      pageNumber: pageIndex,
+      pageSize: reqLimit,
+    }
+    if (searchText?.length) {
+      requestBody['searchString'] = searchText
+      // when searching, start from first page
+      requestBody.pageNumber = 0
+      // allow larger page for search if needed
+      requestBody.pageSize = pageIndex === 0 ? 50 : this.designationListLoadCount
+      // reset guard when performing a fresh search
+      this.noMoreLegacyDesignations = false
+    }
+
+    // indicate loading state so scroll handlers don't trigger parallel calls
+    this.isLoadingMoreDesignations = true
+
+    this.sharedService.searchPublicDesignation(requestBody).pipe(finalize(() => {
+      this.isLoadingMoreDesignations = false
+      this.designationInitInProgress = false
+    }))
+      .subscribe({
+        next: (res: any) => {
+
+          const content = _.get(res, 'result.result.data', []);
+          if (content?.length === 0) {
+            this.noMoreLegacyDesignations = true;
+          } else {
+            this.noMoreLegacyDesignations = false;
+          }
+          
+          const matchedIds = new Set(this.matchedDesignationIds);
+
+          const mapped = content
+            .filter((item: any) => !matchedIds.has(item?.id))
+            .map((item: any) => ({
+              id: item?.id,
+              igot_designation_id: item?.id,
               name: item?.designation || '',
               status: item?.status || 'Active',
-            }))
-  
-            // total count may be present in different keys depending on API version.
-            // Prefer 'result.result.totalcount' (legacy lower-case) then data.totalCount, then totalCount
-            const total = _.get(res, 'result.result.totalcount', _.get(res, 'result.result.data.totalCount', _.get(res, 'result.result.totalCount', 0)))
-            this.defaultSearchDesignationCount = total
-  
-            // If offset is zero (first page) replace backup, otherwise append + dedupe
-            if (!this.masterData['designationBackup'] || reqOffset === 0) {
-              this.masterData['designationBackup'] = mapped
-            } else {
-              const combined = (this.masterData['designationBackup'] || []).concat(mapped)
-              this.masterData['designationBackup'] = _.uniqBy(combined, (it: any) => (it?.name || '').toLowerCase())
-            }
-  
-            // If server returned no new items, mark as no-more-data to stop further scroll requests
-            if (!mapped || mapped?.length === 0) {
-              this.noMoreLegacyDesignations = true
-            }
-  
-            // If we've loaded at least the total count, mark no-more-data
-            if (this.defaultSearchDesignationCount && (this.masterData['designationBackup'] || []).length >= this.defaultSearchDesignationCount) {
-              this.noMoreLegacyDesignations = true
-            }
-  
-            // Ensure visible list matches the requested display count
-            this.masterData['designation'] = (this.masterData['designationBackup'] || []).slice(0, this.designationListLoadCount)
-            // loading flag cleared in finalize()
-             this.ensureSelectedDesignationExists();
-            this.checkCurrentDesignationPresent()
-          },
-          error: () => {
-            // Stop further automatic calls on repeated errors to avoid tight loops
-            // loading flag cleared in finalize()
-            this.noMoreLegacyDesignations = true
-            // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
-          }
-        })
+            }));
+          console.log(
+            'Managing Director from API ====',
+            mapped.filter(
+              (x: any) =>
+                x.name?.trim().toLowerCase() === 'managing director'
+            )
+          );
+          console.log(
+            'Total mapped designations ====',
+            mapped.length
+          );
 
-        this.cbpForm.get('designation_name')?.setValue(
-          this.planData?.designation_name || ''
-        );
+          const total = _.get(
+            res,
+            'result.result.totalcount',
+            _.get(
+              res,
+              'result.result.data.totalCount',
+              _.get(res, 'result.result.totalCount', 0)
+            )
+          );
+
+          this.defaultSearchDesignationCount = total;
+
+          // =========================
+          // SEARCH MODE
+          // =========================
+
+          if (searchText?.length) {
+            console.log('matchedIds--', this.matchedDesignationIds)
+
+            this.masterData.designationFiltered = mapped;
+
+            // IMPORTANT: merge searched result into backup
+            const combined = [
+              ...(this.masterData.designationBackup || []),
+              ...mapped
+            ];
+
+            this.masterData.designationBackup = _.uniqBy(
+              combined,
+              (it: any) => (it?.name || '').toLowerCase()
+            );
+
+            this.masterData.designation =
+              this.masterData.designationFiltered.slice(
+                0,
+                this.searchDesignationLoadCount
+              );
+              console.log('this.masterData.designation----',this.masterData.designation)
+            console.log(
+              'Backup after search',
+              this.masterData.designationBackup.find(
+                (x: any) =>
+                  x.name?.toLowerCase() === 'managing director'
+              )
+            );
+
+            return;
+          }
+
+          // =========================
+          // NORMAL MODE
+          // =========================
+
+          if (!this.masterData['designationBackup'] || reqOffset === 0) {
+
+            this.masterData['designationBackup'] = mapped;
+
+          } else {
+
+            const combined =
+              (this.masterData['designationBackup'] || []).concat(mapped);
+
+            this.masterData['designationBackup'] = _.uniqBy(
+              combined,
+              (it: any) =>
+                `${(it?.name || '').toLowerCase()}_${it?.igot_designation_id}`
+            )
+          }
+
+          this.masterData.designation =
+            (this.masterData.designationBackup || []).slice(
+              0,
+              this.designationListLoadCount
+            );
+
+          // selected value preserve
+          const designationControl =
+            this.cbpForm.get('designation_name');
+
+          if (designationControl) {
+
+            const currentValues =
+              designationControl.value || [];
+
+            console.log('currentValues', currentValues)
+
+            const validValues = currentValues
+            this.masterData.designationBackup.some(
+              (item: any) => item?.name === currentValues
+            )
+
+            console.log(validValues)
+            console.log(this.masterData.designationBackup)
+
+            //  if (validValues.length !== currentValues.length) {
+            designationControl.setValue(validValues);
+            //  }
+          }
+
+          // no more data
+          if (!mapped || mapped.length === 0) {
+            this.noMoreLegacyDesignations = true;
+          }
+
+          if (
+            this.defaultSearchDesignationCount &&
+            (this.masterData['designationBackup'] || []).length >=
+            this.defaultSearchDesignationCount
+          ) {
+            this.noMoreLegacyDesignations = true;
+          }
+
+          this.checkCurrentDesignationPresent();
+        },
+        error: () => {
+          // Stop further automatic calls on repeated errors to avoid tight loops
+          // loading flag cleared in finalize()
+          this.noMoreLegacyDesignations = true
+          // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
+        }
+      })
+  }
+
+  ensureSelectedDesignationExists() {
+    const selected = this.planData?.designation_name;
+    if (!selected) return;
+
+    const exists = this.masterData['designationBackup']?.some(
+      (d: any) => d.name?.toLowerCase() === selected.toLowerCase()
+    );
+
+    if (!exists) {
+      const customObj = {
+        name: selected,
+        status: 'Active',
+        igot_designation_name: this.planData?.designation_name,
+        igot_designation_id: this.planData?.igot_designation_id,
+      };
+
+      // ✅ Add at TOP so it's visible immediately
+      this.masterData['designationBackup'] = [
+        customObj,
+        ...(this.masterData['designationBackup'] || [])
+      ];
+
+      this.masterData['designation'] = [
+        customObj,
+        ...(this.masterData['designation'] || [])
+      ];
+    }
+  }
+
+  checkCurrentDesignationPresent() {
+    const selectedDesignation: string =
+      (this.cbpForm.get('designation_name')?.value || '').toString().trim();
+
+    if (!selectedDesignation) return;
+    if (!this.masterData?.designationBackup) return;
+
+    const normalize = (v: string) => (v || '').trim().toLowerCase();
+
+    const backup = [...this.masterData.designationBackup];
+    console.log(
+      'All matching records',
+      backup.filter(
+        (item: any) =>
+          normalize(item?.name) === normalize(selectedDesignation)
+      )
+    );
+    const existingIndex = backup.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation) &&
+        item?.igot_designation_id
+    );
+
+    let selectedObj: any;
+
+    // If exists → remove it and reuse
+    if (existingIndex > -1) {
+      selectedObj = backup.splice(existingIndex, 1)[0];
+    }
+    // If not exists → create new
+    else {
+      selectedObj = {
+        name: selectedDesignation,
+        status: 'Active',
+        id: '',
+        igot_designation_name: selectedDesignation,
+        igot_designation_id: '',
+      };
     }
 
-    ensureSelectedDesignationExists() {
-  const selected = this.planData?.designation_name;
+    // 🔥 Move to top
+    this.masterData.designationBackup = [
+      selectedObj,
+      ...backup
+    ];
 
-  if (!selected) return;
+    // Also update visible list (same order logic)
+    const visible = [...(this.masterData.designation || [])];
 
-  const exists = this.masterData['designationBackup']?.some(
-    (d: any) => d.name?.toLowerCase() === selected.toLowerCase()
+    const visibleIndex = visible.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation)
+    );
+
+    if (visibleIndex > -1) {
+      visible.splice(visibleIndex, 1);
+    }
+
+    this.masterData.designation = [
+      selectedObj,
+      ...visible
+    ];
+
+    this.cdRef.detectChanges();
+  }
+  onDesignationDropdownClosed(): void {
+    // Keep the designation value but clear the search input
+    const currentDesignation = this.cbpForm.get('designation_name')!.value
+    setTimeout(() => {
+      if (this.cbpForm.get('searchDesignation')) {
+        this.cbpForm.get('searchDesignation')!.setValue('')
+      }
+      // Ensure the designation value remains selected
+      if (currentDesignation) {
+        const designationControl = this.cbpForm.get('designation_name');
+        if (designationControl) {
+          designationControl.setValue(currentDesignation)
+        }
+      }
+    }, 100)
+  }
+
+  designationSearch(evt: any) {
+    const searchText = evt?.target?.value
+    const txt = (searchText || '').toString().trim()
+    if (this.isLoadingMoreDesignations) return
+
+    this.designationSearchText = txt
+    if (txt?.length) {
+      this.desigantionFilterEnable = true
+      this.isLoadingMoreDesignations = true
+      this.getDesignation(txt, 0)
+    } else if (this.masterData && this.masterData?.designationBackup) {
+      this.masterData.designation = this.masterData?.designationBackup.slice(0, this.designationDefaultLoadCount)
+      this.desigantionFilterEnable = false
+      this.checkCurrentDesignationPresent()
+    }
+  }
+
+  setupScrollListener(opened: boolean): void {
+
+    if (!opened) {
+      this.scrollListenerAttached = false;
+      return;
+    }
+
+    if (this.scrollListenerAttached) return;
+    this.scrollListenerAttached = true;
+    this.desigantionFilterEnable = false;
+
+    // ✅ Only reset pagination if we have no data yet
+    if (!this.masterData.designationBackup?.length) {
+      this.designationListLoadCount = this.designationDefaultLoadCount;
+      this.designationOffset = 0;
+      this.getDesignation(undefined, 0);
+    } else {
+      // ✅ Restore from backup without resetting offset
+      this.masterData.designation = this.masterData.designationBackup.slice(
+        0, this.designationListLoadCount
+      );
+      this.checkCurrentDesignationPresent();
+    }
+
+    // focus search input
+    setTimeout(() => {
+
+      const searchInput =
+        document.querySelector('.search-input') as HTMLInputElement;
+
+      if (searchInput) {
+        searchInput.focus();
+      }
+
+    }, 200);
+
+    // attach scroll
+    setTimeout(() => {
+
+      const panel = document.querySelector(
+        '.mat-select-panel.search-panel'
+      ) as HTMLElement | null;
+
+      if (!panel) {
+        return;
+      }
+
+      // REMOVE OLD LISTENER
+      panel.removeEventListener(
+        'scroll',
+        this.onDesignationSelectScroll as any
+      );
+
+      panel.addEventListener(
+        'scroll',
+        this.onDesignationSelectScroll.bind(this),
+        { passive: true }
+      );
+
+    }, 300);
+  }
+
+ onDesignationSelectScroll(event: any): void {
+
+  const element = event?.target;
+
+  const reachedBottom =
+    element.scrollTop + element.clientHeight >=
+    element.scrollHeight - 10;
+
+  if (!reachedBottom) {
+    return;
+  }
+
+  if (this.isLoadingMoreDesignations) {
+    return;
+  }
+
+  console.log('=== Scroll Triggered ===');
+  console.log('Visible:', this.masterData?.designation?.length);
+  console.log('Backup:', this.masterData?.designationBackup?.length);
+  console.log('Total:', this.defaultSearchDesignationCount);
+  console.log('Offset:', this.designationOffset);
+
+  // =====================
+  // SEARCH MODE
+  // =====================
+  if (this.desigantionFilterEnable) {
+
+    this.searchDesignationLoadCount += 50;
+
+    this.masterData.designation =
+      (this.masterData.designationFiltered || []).slice(
+        0,
+        this.searchDesignationLoadCount
+      );
+
+    this.cdRef.detectChanges();
+
+    return;
+  }
+
+  // =====================
+  // LOCAL PAGINATION
+  // =====================
+  if (
+    (this.masterData?.designationBackup || []).length >
+    (this.masterData?.designation || []).length
+  ) {
+
+    this.designationListLoadCount +=
+      this.designationDefaultLoadCount;
+
+    this.masterData.designation =
+      this.masterData.designationBackup.slice(
+        0,
+        this.designationListLoadCount
+      );
+
+    this.cdRef.detectChanges();
+
+    return;
+  }
+
+  // =====================
+  // API PAGINATION
+  // =====================
+  const loadedCount =
+    (this.masterData?.designationBackup || []).length;
+
+  if (this.noMoreLegacyDesignations && this.searchText) {
+    console.log('No more data');
+    return;
+  }
+
+  if (
+    this.defaultSearchDesignationCount > 0 &&
+    loadedCount >= this.defaultSearchDesignationCount
+  ) {
+
+    this.noMoreLegacyDesignations = true;
+
+    console.log('All records loaded');
+
+    return;
+  }
+
+  this.designationOffset += this.designationDefaultLoadCount;
+
+  console.log(
+    'Loading next page => offset:',
+    this.designationOffset
   );
 
-  if (!exists) {
-    const customObj = {
-      name: selected,
-      status: 'Active',
-      igot_designation_name: "Principal Secretary",
-      igot_designation_id: "DESG-002314",
-    };
-
-    // ✅ Add at TOP so it's visible immediately
-    this.masterData['designationBackup'] = [
-      customObj,
-      ...(this.masterData['designationBackup'] || [])
-    ];
-
-    this.masterData['designation'] = [
-      customObj,
-      ...(this.masterData['designation'] || [])
-    ];
-  }
+  this.getDesignation(undefined, this.designationOffset);
 }
 
-    checkCurrentDesignationPresent() {
-      const selectedDesignations: string[] =
-        this.cbpForm.get('designation_name')?.value || [];
-  
-      if (!Array.isArray(selectedDesignations) || !selectedDesignations.length) {
-        return;
-      }
-  
-      if (!this.masterData?.designation) {
-        return;
-      }
-  
-      selectedDesignations.forEach((selectedName: string) => {
-        const exists = this.masterData.designation.some(
-          (item: any) =>
-            item?.name?.toLowerCase() === selectedName?.toLowerCase()
-        );
-  
-        if (!exists) {
-          const newDesignation = {
-            name: selectedName,
-            status: 'Active',
-            id: 'custom-' + Date.now() + '-' + Math.random()
-          };
-  
-          // Add to backup list as well
-          this.masterData.designationBackup =
-            this.masterData.designationBackup || [];
-  
-          this.masterData.designationBackup.unshift(newDesignation);
-  
-          // Also update visible list
-          this.masterData.designation.unshift(newDesignation);
-        }
-      });
+  get searchDesignationControl(): FormControl {
+    return this.cbpForm.get('searchDesignation') as FormControl;
+  }
+
+  clearDesignationSearch(event: Event): void {
+    this.searchDesignationLoadCount = 50;
+    event.stopPropagation();
+
+    this.searchDesignationControl.setValue('');
+
+    this.desigantionFilterEnable = false;
+
+    this.masterData.designation =
+      (this.masterData.designationBackup || []).slice(
+        0,
+        this.designationDefaultLoadCount
+      );
+
+    this.designationListLoadCount = this.designationDefaultLoadCount;
+    this.designationOffset = 0;
+  }
+
+  ngOnDestroy(): void {
+
+    const panel = document.querySelector(
+      '.mat-mdc-select-panel'
+    ) as HTMLElement;
+
+    if (panel) {
+      panel.removeEventListener(
+        'scroll',
+        this.onDesignationSelectScrollBound
+      );
     }
-    onDesignationDropdownClosed(): void {
-      // Keep the designation value but clear the search input
-      const currentDesignation = this.cbpForm.get('designation_name')!.value
-      setTimeout(() => {
-        if (this.cbpForm.get('searchDesignation')) {
-          this.cbpForm.get('searchDesignation')!.setValue('')
-        }
-        // Ensure the designation value remains selected
-        if (currentDesignation) {
-          const designationControl = this.cbpForm.get('designation_name');
-          if (designationControl) {
-            designationControl.setValue(currentDesignation)
-          }
-        }
-      }, 100)
-    }
-  
-    designationSearch(evt: any) {
-      const searchText = evt?.target?.value
-      const txt = (searchText || '').toString().trim()
-      if (this.isLoadingMoreDesignations) return
-  
-      this.designationSearchText = txt
-      if (txt?.length) {
-        this.desigantionFilterEnable = true
-        this.isLoadingMoreDesignations = true
-        this.getDesignation(txt, 0)
-      } else if (this.masterData && this.masterData?.designationBackup) {
-        this.masterData.designation = this.masterData?.designationBackup.slice(0, this.designationDefaultLoadCount)
-        this.desigantionFilterEnable = false
-        this.checkCurrentDesignationPresent()
-      }
-    }
-    setupScrollListener(opened: boolean): void {
-      if (opened) {
-        if (!this.scrollListenerAttached) {
-          this.scrollListenerAttached = true
-  
-          this.desigantionFilterEnable = false
-          this.designationListLoadCount = this.designationDefaultLoadCount
-          this.designationOffset = 0
-  
-          this.isLoadingMoreDesignations = true
-          this.getDesignation(undefined, 0)
-  
-          // Clear search box once
-          if (this.cbpForm.get('searchDesignation')) {
-            this.cbpForm.get('searchDesignation')!.setValue('')
-          }
-  
-          setTimeout(() => {
-            const searchInput = document.querySelector('.search-input') as HTMLInputElement
-            if (searchInput) {
-              searchInput.focus()
-            }
-          }, 100)
-  
-          // Attach scroll listener safely
-          setTimeout(() => {
-            const panel = document.querySelector('.mat-select-panel.search-panel') as HTMLElement | null
-            if (panel) {
-              // align panel width to trigger
-              try {
-                const triggerEl = this.designationRef && this.designationRef.nativeElement as HTMLElement
-                if (triggerEl) {
-                  const rect = triggerEl.getBoundingClientRect()
-                  // set width and left so panel aligns exactly below the trigger
-                  panel.style.width = `${Math.round(rect.width)}px`
-                  // leave left to overlay positioning but nudge if necessary
-                  // compute left relative to viewport and apply to panel
-                  const overlayLeft = rect.left
-                  panel.style.left = `${Math.round(overlayLeft)}px`
-                }
-              } catch (e) {
-                // ignore DOM errors in SSR or unexpected cases
-              }
-  
-              const scrollHandler = this.onDesignationSelectScroll.bind(this)
-              panel.addEventListener('scroll', scrollHandler, { passive: true })
-            }
-          }, 150)
-        }
-      } else {
-        // Dropdown closed — reset scroll flag so it can reattach next time
-        this.scrollListenerAttached = false
-      }
-    }
-  
-    onDesignationSelectScroll(event: any): void {
-      const element = event?.target
-      if (!this.desigantionFilterEnable) {
-        // Check if user has scrolled to the bottom (with a small threshold)
-        if (element.scrollTop + element?.clientHeight >= element?.scrollHeight - 5) {
-          // Only load more if not already loading and if there are potentially more items
-          if (!this.isLoadingMoreDesignations) {
-            // If org uses IGOT designation taxonomy, request more from the API by increasing the limit
-            if (this.masterData?.designationBackup?.length > this.masterData?.designation?.length) {
-              // Local pagination: expand the sliced list
-              this.isLoadingMoreDesignations = true
-              this.designationListLoadCount += this.designationDefaultLoadCount
-              // Update the filtered list with more items
-              setTimeout(() => {
-                this.masterData.designation = this.masterData?.designationBackup?.slice(0, this.designationListLoadCount)
-                this.checkCurrentDesignationPresent()
-                this.isLoadingMoreDesignations = false
-              }, 500) // Small timeout to simulate loading and prevent multiple triggers
-            } else {
-              // Legacy (server) pagination: request next page if total not reached
-              const loadedLegacy = (this.masterData?.designationBackup || []).length
-              if (!this.noMoreLegacyDesignations && this.defaultSearchDesignationCount && loadedLegacy < this.defaultSearchDesignationCount) {
-                this.isLoadingMoreDesignations = true
-                this.designationOffset = (this.designationOffset || 0) + this.designationDefaultLoadCount
-                // increase display count to include newly fetched items
-                this.designationListLoadCount += this.designationDefaultLoadCount
-                this.getDesignation(undefined, this.designationOffset)
-              }
-            }
-          }
-        }
-      }
-    }
-  
-    get searchDesignationControl(): FormControl {
-      return this.cbpForm.get('searchDesignation') as FormControl;
-    }
+  }
 
 
 }

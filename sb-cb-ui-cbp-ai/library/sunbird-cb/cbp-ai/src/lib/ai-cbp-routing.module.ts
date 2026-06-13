@@ -8,11 +8,15 @@ import { RoleMappingListComponent } from './components/role-mapping-list/role-ma
 import { RoleMappingGenerationComponent } from './components/role-mapping-generation/role-mapping-generation.component';
 import { InitialScreenComponent } from './modules/initial-screen/initial-screen.component';
 import { ReviewRequestComponent } from './components/review-request/review-request.component';
+import { InitResolver } from './resolver/init-resolver.sevice';
 
 const routes: Routes = [
     {
         path: '',
         component: AiCbpComponent,
+        resolve: {
+            initData: InitResolver
+        },
         children: [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'upload-documents', component: UploadDocumentPageComponent },

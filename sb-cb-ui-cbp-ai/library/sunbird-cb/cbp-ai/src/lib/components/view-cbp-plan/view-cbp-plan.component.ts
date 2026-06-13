@@ -3,6 +3,8 @@ import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { EditCbpPlanComponent } from '../edit-cbp-plan/edit-cbp-plan.component';
 import { GenerateCourseRecommendationComponent } from '../generate-course-recommendation/generate-course-recommendation.component';
 import html2pdf from 'html2pdf.js';
+import { ActivatedRoute } from '@angular/router';
+import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
     selector: 'app-view-cbp-plan',
     templateUrl: './view-cbp-plan.component.html',
@@ -15,10 +17,15 @@ export class ViewCbpPlanComponent {
   searchText = ''
   planData:any
   competenciesCount = {total:0, behavioral:0, functional:0, domain:0}
+   fromMdo = false
+  portalData:any
+  requestData:any
   constructor(
     public dialogRef: MatDialogRef<ViewCbpPlanComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public route: ActivatedRoute,
+    public sharedService: SharedService
   ) {
     this.planData = data
     console.log('Received data:', data);
@@ -34,6 +41,10 @@ export class ViewCbpPlanComponent {
         this.competenciesCount['domain'] = this.competenciesCount['domain'] +1
       }
     })
+  }
+
+  ngOnInit() {
+     this.fromMdo= this.sharedService.fromMdoPortal
   }
 
   searchData() {
@@ -53,10 +64,18 @@ export class ViewCbpPlanComponent {
   }
 
   editCBPPlan() {
+    let editData:any 
+    if(this.fromMdo && this.sharedService.requestData) {
+      editData = {element : this.planData, 
+  requestData: this.sharedService.requestData
+}
+    } else {
+      editData = this.planData
+    }
     this.dialogRef.close();
     const dialogRefNew = this.dialog.open(EditCbpPlanComponent, {
       width: '1000px',
-      data: this.planData,
+      data: editData,
        panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height
       maxHeight: '80vh',           // Prevent it from going beyond viewport

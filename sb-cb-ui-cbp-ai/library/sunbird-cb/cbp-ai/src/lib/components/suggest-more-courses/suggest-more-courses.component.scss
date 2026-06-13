@@ -834,3 +834,144 @@ border: none;
     min-width: auto;
   }
 }
+
+.search-and-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 37%;
+  margin:0 5px;
+}
+
+
+.search-container-compact {
+  flex: 0 0 auto;
+  min-width: 180px;
+
+  .rsearch {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    color: #666;
+    font-size: 20px;
+    z-index: 1;
+  }
+
+  .sinput-compact {
+    border-radius: 25px;
+    border: 2px solid #ccc;
+    padding: 20px 12px 20px 40px;
+    height: 32px;
+    width: 100%;
+    font: 400 14px Lato;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #1B4CA1;
+      box-shadow: 0 0 0 2px rgba(27, 76, 161, 0.1);
+    }
+
+    &::placeholder {
+      color: #999;
+    }
+  }
+}
+
+.btn-group-compact {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+
+.section-header-improved,
+.section-header-improved-sec-2 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+::ng-deep  .select-search-panel {
+  border: 1px solid #ccc!important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  
+ 
+}
+
+:host ::ng-deep .mat-select-arrow-wrapper {
+  margin-top: 5px !important;
+}
+
+:host ::ng-deep  .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: #ccc; /* gray */
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline.mat-focused
+.mat-form-field-outline-thick {
+  color: #1B4CA1; /* Material blue */
+  border-color: #1B4CA1 !important;
+}
+
+::ng-deep .select-search-panel .mat-option.mat-selected:not(.mat-option-disabled) {
+  background-color: #1B4CA1 !important;
+  color: #ffffff !important;
+}
+
+
+/* Apply border and rounded corners to the whole form field */
+:host ::ng-deep .mat-form-field-appearance-outline {
+  border-radius: 25px; /* Apply rounded corners to the whole outline */
+  border: 1px solid #ccc; /* Add border to the entire form field */
+}
+
+:host ::ng-deep .mat-form-field-focused .mat-form-field-appearance-outline {
+  border-color: #1B4CA1 !important; /* Blue border when focused */
+}
+
+/* Apply the left border with proper radius to start */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-start {
+ // border-left: 1px solid #ccc;
+  border-radius: 25px 0 0 25px; /* Rounded left corner */
+  border: none !important;
+}
+
+/* Apply the right border with proper radius to end */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-end {
+  border-right: none !important;
+  border: none !important;
+  border-radius: 0 25px 25px 0; /* Rounded right corner */
+}
+
+/* Apply top and bottom borders for consistency */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-gap {
+  // border-top: 1px solid #ccc;
+  // border-bottom: 1px solid #ccc;
+  border: none !important;
+  border-radius: 25px; /* Apply same radius to the gap */
+}
+
+
+
+
+
+:host::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+  background-color: transparent !important;
+}
+
+
+:host ::ng-deep .search-and-buttons-container {
+   .mat-option-text {
+    color:#fff !important
+  }
+}

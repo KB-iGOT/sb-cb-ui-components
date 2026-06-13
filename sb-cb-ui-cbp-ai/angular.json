@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "sb-cb-ui-cbp-ai": {
+    "cbp-ai": {
       "projectType": "library",
       "root": "library/sunbird-cb/cbp-ai",
       "sourceRoot": "library/sunbird-cb/cbp-ai/src",

@@ -59,7 +59,8 @@ export class ApprovalRequestsComponent {
     { "code": "", label: "All Status" },
     { "code": "pending", label: "Pending" },
     { "code": "approved", label: "Approved" },
-    { "code": "rejected", label: "Rejected" }
+    { "code": "rejected", label: "Rejected" },
+    { "code": "draft", label: "Revoked" },
   ];
   time = [
     { "code": "", label: "All Time" },
@@ -69,6 +70,13 @@ export class ApprovalRequestsComponent {
   ];
   filteredStatus = [...this.status];
   filteredTime = [...this.time];
+  pageIndex = 0;
+  pageSize = 10;
+  totalRecords = 0;
+  showRejectPopupFlag = false
+  showRevokeRequestPopupFlag = false
+  rejectionDetail:any
+  revokeRequestedRequest:any 
   constructor(public dialog: MatDialog, public sharedService: SharedService,
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -113,35 +121,69 @@ export class ApprovalRequestsComponent {
     }
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
+  // ngAfterViewInit() {
+  //   this.dataSource.paginator = this.paginator;
+  // }
+
+ getApprovalRequests() {
+
+  let reqBody: any = {
+    state_center_id: this.cbpPlanFinalObj?.ministry?.identifier,
+    include_summary: true,
+    page: this.pageIndex + 1,
+    page_size: this.pageSize
+  };
+
+  const search = this.filterForm.get('search')?.value;
+  const status = this.filterForm.get('status')?.value;
+  const time = this.filterForm.get('time')?.value;
+
+  if (search) {
+    reqBody.search = search;
   }
 
-  getApprovalRequests() {
-
-    let reqBody = {
-      state_center_id: this.cbpPlanFinalObj?.ministry?.identifier,
-      include_summary: true,
-      skip: 0,
-      limit: 200
-    }
-    if (this.cbpPlanFinalObj && this.cbpPlanFinalObj?.departments) {
-      reqBody['department_id'] = this.cbpPlanFinalObj?.departments
-    }
-    this.loading = true
-
-    this.sharedService.getApprovalRequests(reqBody).subscribe((res) => {
-      console.log('res--', res)
-      if (res && res?.items && res?.items?.length) {
-        this.loading = false
-        this.approvalRequests = res?.items
-        this.dataSource.data = this.approvalRequests;
-        console.log('this.approvalRequests', this.approvalRequests)
-      } else {
-        this.loading = false
-      }
-    })
+  if (status) {
+    reqBody.status = status;
   }
+
+  // Time filter
+  if (time) {
+
+    const today = new Date();
+    let fromDate = new Date();
+
+    if (time === 'last_7_days') {
+      fromDate.setDate(today.getDate() - 7);
+    }
+
+    if (time === 'last_30_days') {
+      fromDate.setDate(today.getDate() - 30);
+    }
+
+    if (time === 'last_90_days') {
+      fromDate.setDate(today.getDate() - 90);
+    }
+
+    reqBody.from_date = fromDate.toISOString().split('T')[0];
+    reqBody.to_date = today.toISOString().split('T')[0];
+  }
+
+  if (this.cbpPlanFinalObj?.departments) {
+    reqBody.department_id = this.cbpPlanFinalObj.departments;
+  }
+
+  this.loading = true;
+
+  this.sharedService.getApprovalRequests(reqBody).subscribe((res) => {
+
+    this.loading = false;
+
+    this.approvalRequests = res?.items || [];
+    this.dataSource.data = this.approvalRequests;
+    this.totalRecords = res?.total || 0;
+
+  });
+}
 
 
 
@@ -343,11 +385,17 @@ export class ApprovalRequestsComponent {
   }
 
   revokeApprovalRequest(request: any): void {
+    this.showRevokeRequestPopupFlag = true
+    this.revokeRequestedRequest = request
     console.log('request--', request)
+   
+  }
+
+  revokeApprovalRequestConfirm() {
     this.loading = true
     let reqBody =
     {
-      "request_id": request?.id
+      "request_id": this.revokeRequestedRequest?.id
     }
 
     this.sharedService.revokeApprovalRequest(reqBody).subscribe({
@@ -355,6 +403,11 @@ export class ApprovalRequestsComponent {
       next: (res: any) => {
         console.log('res', res)
         this.loading = false
+         this.snackBar.open('Request Revoked Successfully', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-success']
+        });
+        this.showRevokeRequestPopupFlag = false
         this.getApprovalRequests()
       },
       error: () => {
@@ -367,6 +420,9 @@ export class ApprovalRequestsComponent {
     });
   }
 
+  closeRevokePopup() {
+    this.showRevokeRequestPopupFlag = false
+  }
   onOpened(opened: boolean) {
     this.panelOpen = opened;
   }
@@ -443,5 +499,22 @@ export class ApprovalRequestsComponent {
     this.searchText = '';
     this.applyFilters();
   }
+
+  onPageChange(event: any) {
+  this.pageIndex = event.pageIndex;
+  this.pageSize = event.pageSize;
+
+  this.getApprovalRequests();
+}
+
+showRejectPopup(element) {
+  console.log('element', element)
+  this.showRejectPopupFlag = true
+  this.rejectionDetail = element
+}
+
+closeRejectPopup() {
+  this.showRejectPopupFlag = false
+}
 
 }

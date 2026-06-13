@@ -1,4 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedService } from '../../modules/shared/services/shared.service';
@@ -9,35 +10,62 @@ import { SharedService } from '../../modules/shared/services/shared.service';
     styleUrls: ['./suggest-more-courses.component.scss'],
     standalone: false
 })
-export class SuggestMoreCoursesComponent implements OnInit{
+export class SuggestMoreCoursesComponent implements OnInit {
   searchText = ''
-  suggestedCourses:any = []
-  originalData:any = []
-  selectFilterCourses:any = []
-  planData:any = {}
-  loading=false
+  suggestedCourses: any = []
+  originalData: any = []
+  selectFilterCourses: any = []
+  planData: any = {}
+  loading = false
 
   // Pagination properties
   currentPage = 0
   pageSize = 12
   totalCount = 0
   totalPages = 0
+  filterForm!: FormGroup;
+  competenciesType = ['All', 'Behavioural', 'Functional', 'Domain']
+  ratings = ['4.5 and above', '4.0 and above', '3.5 and above', '2.5 and above', '1 and above'];
+  languages = ['English', 'Hindi', 'Tamil', 'Kannada', 'Telugu', 'Malayalam', 'Assamese', 'Bengali', 'Gujarati', 'Marathi', 'Odia', 'Punjabi', 'Konkani', 'Bodo', 'Dogri', 'Kashmiri', 'Maithili', 'Manipuri', 'Nepali', 'Sanskrit', 'Santali', 'Sindhi', 'Urdu'];
+  durations = [
+    { label: '< 1 Hour', value: '3600' },
+    { label: '1-5 Hours', value: '4376' },
+    { label: '5+ Hours', value: '18000' }
+  ];
+  providers = [];
+  filteredCompetency = [...this.competenciesType];
+  filteredRatings = [...this.ratings];
+  filteredLanguages = [...this.languages];
+  filteredDurations = [...this.durations];
+  filteredProviders = [...this.providers];
+  fullCourseList = []
+  // Selected filters
+  selectedCompetency = 'All';
+  selectedRating: string | null = null;
+  selectedLanguage: string | null = null;
+  selectedDuration: string | null = null;
+  selectedProvider: string | null = null;
+  filterdCourses: any = []
   constructor(
     public dialogRef: MatDialogRef<SuggestMoreCoursesComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private fb: FormBuilder,
     public sharedService: SharedService,
     public snackBar: MatSnackBar
   ) {
-    this.planData= data
+    this.planData = data
   }
 
 
   ngOnInit() {
+    this.filterForm = this.fb.group({
+      competency: [[]],
+      rating: [[]],
+      language: [[]],
+      duration: [[]],
+      provider: [[]]
+    });
     this.loadAllCourses();
-  }
-  applyFilter() {
-    // This method is kept for future use if needed
-    // Search is now only triggered by search button click
   }
 
   searchData() {
@@ -71,13 +99,50 @@ export class SuggestMoreCoursesComponent implements OnInit{
             "Course"
           ]
         },
-        "fields": [
-          "posterImage",
-          "description",
-          "name"
+        fields: [
+          'downloadUrl',
+          'organisation',
+          'language',
+          'source',
+          'appIcon',
+          'identifier',
+          'name',
+          'primaryCategory',
+          'contentType',
+          'posterImage',
+          'createdOn',
+          'duration',
+          'avgRating',
+          'additionalTags',
+          'courseCategory',
+          'mimeType',
+          'contentId',
+          'creatorLogo',
+          'sectorDetails_v1',
+          'languageMapV1',
+          'language',
+          'completionSurveyLink',
+          'difficultyLevel',
+          'competencies_v6.competencyAreaName'
         ],
+        facets: [
+          'avgRating',
+          'language',
+          'organisation',
+          'courseCategory',
+          'sectorDetails_v1.sectorName',
+          'sectorDetails_v1.subSectorName',
+          'competencies_v6.competencyAreaName',
+          'competencies_v6.competencyThemeName',
+          'competencies_v6.competencySubThemeName',
+          'duration'
+        ],
+        "query": this.searchText.trim(),
         "limit": this.pageSize,
-        "offset": this.currentPage * this.pageSize
+        "offset": this.currentPage * this.pageSize,
+        sort_by: {
+          createdOn: 'desc'
+        }
       }
     };
 
@@ -88,10 +153,25 @@ export class SuggestMoreCoursesComponent implements OnInit{
         this.loading = false;
         console.log('All courses loaded:', res);
         if (res && res.result) {
+          const allCourses = res.result.content || [];
           this.suggestedCourses = res.result.content || [];
           this.originalData = res.result.content || [];
           this.totalCount = res.result.totalHits || res.result.count || 0;
           this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+
+          this.suggestedCourses.forEach((item) => {
+            if (item && item.organisation && item.organisation.length) {
+              if (this.filteredProviders.indexOf(item.organisation[0]) < 0) {
+                this.filteredProviders.push(item.organisation[0])
+              }
+
+            }
+          })
+          this.fullCourseList = allCourses
+          let identifiersArr = []
+          this.fullCourseList.map((item) => {
+            identifiersArr.push(item?.identifier)
+          })
         } else {
           this.suggestedCourses = [];
           this.originalData = [];
@@ -114,17 +194,7 @@ export class SuggestMoreCoursesComponent implements OnInit{
     this.dialogRef.close()
   }
 
-  // Pagination methods
-  onPageChange(page: number) {
-    if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      if (this.searchText.trim()) {
-        this.performSearch();
-      } else {
-        this.loadAllCourses();
-      }
-    }
-  }
+
 
   // Separate method for performing search with query
   performSearch() {
@@ -148,14 +218,50 @@ export class SuggestMoreCoursesComponent implements OnInit{
             "Course"
           ]
         },
-        "fields": [
-          "posterImage",
-          "description",
-          "name"
+        fields: [
+          'downloadUrl',
+          'organisation',
+          'language',
+          'source',
+          'appIcon',
+          'identifier',
+          'name',
+          'primaryCategory',
+          'contentType',
+          'posterImage',
+          'createdOn',
+          'duration',
+          'avgRating',
+          'additionalTags',
+          'courseCategory',
+          'mimeType',
+          'contentId',
+          'creatorLogo',
+          'sectorDetails_v1',
+          'languageMapV1',
+          'language',
+          'completionSurveyLink',
+          'difficultyLevel',
+          'competencies_v6.competencyAreaName'
+        ],
+        facets: [
+          'avgRating',
+          'language',
+          'organisation',
+          'courseCategory',
+          'sectorDetails_v1.sectorName',
+          'sectorDetails_v1.subSectorName',
+          'competencies_v6.competencyAreaName',
+          'competencies_v6.competencyThemeName',
+          'competencies_v6.competencySubThemeName',
+          'duration'
         ],
         "query": this.searchText.trim(),
         "limit": this.pageSize,
-        "offset": this.currentPage * this.pageSize
+        "offset": this.currentPage * this.pageSize,
+        sort_by: {
+          createdOn: 'desc'
+        }
       }
     };
 
@@ -262,69 +368,73 @@ export class SuggestMoreCoursesComponent implements OnInit{
 
   addCourses() {
     this.loading = true;
-    
+
     // First, get existing suggested courses to avoid overwriting
-    this.sharedService.getSuggestedCourses(this.planData.role_mapping_id).subscribe({
-      next: (existingRes) => {
-        console.log('Existing suggested courses:', existingRes);
-        
-        // Extract existing course identifiers
-        let existingIdentifiers: string[] = [];
-        if (existingRes && Array.isArray(existingRes)) {
-          existingIdentifiers = existingRes.map(course => course.identifier).filter(id => id);
-        }
-        
-        // Merge existing identifiers with new selections (avoiding duplicates)
-        const allIdentifiers = [...new Set([...existingIdentifiers, ...this.selectFilterCourses])];
-        
-        console.log('Existing identifiers:', existingIdentifiers);
-        console.log('New selections:', this.selectFilterCourses);
-        console.log('Combined identifiers:', allIdentifiers);
-        
-        // Prepare request body with combined identifiers
-        let reqBody = {
-          "role_mapping_id": this.planData.role_mapping_id,
-          "course_identifiers": allIdentifiers
-        }
-        
-        // Save the combined list
-        this.sharedService.saveSuggestedCourse(reqBody).subscribe({
+    if (this.planData.fromMdoPortal) {
+      const allIdentifiers = [...new Set([...this.selectFilterCourses])];
+      let reqBodyNew = {
+        "item_id": this.planData.role_mapping_id,
+        "request_id": this.planData.cbp_plan_id,
+        "identifiers": allIdentifiers
+      }
+      if (this.planData.cbp_plan_id) {
+        this.sharedService.addMDOCourse(reqBodyNew).subscribe({
           next: (res) => {
             // Success handling
             console.log('Success:', res);
             this.loading = false
             this.dialogRef.close('saved')
-            this.snackBar.open('Courses Added Successfully', 'X', {
+            this.snackBar.open('Courses Updated Successfully', 'X', {
               duration: 3000,
               panelClass: ['snackbar-success']
             });
+            //this.successRoleMapping.emit(this.roleMappingForm)
           },
           error: (error) => {
-            console.log('Save error', error)
+            console.log('error', error)
             this.dialogRef.close()
-            this.snackBar.open(error?.error?.detail || 'Failed to save courses', 'X', {
+            // Handle 409 Conflict here
+            // alert('Conflict detected: The resource already exists or action conflicts.');
+            //this.get
+            // Or you can set a UI error message variable
+            this.snackBar.open(error?.error?.detail, 'X', {
               duration: 3000,
               panelClass: ['snackbar-error']
             });
             this.loading = false
+            //this.alreadyAvailableRoleMapping.emit(this.roleMappingForm)
           }
         });
-      },
-      error: (error) => {
-        console.log('Error fetching existing courses:', error);
-        
-        // If fetching existing courses fails, proceed with just new selections
-        // This could happen if no courses exist yet (404) which is normal
-        if (error.status === 404) {
-          console.log('No existing suggested courses found, proceeding with new selections only');
-          
+      }
+    } else {
+      this.sharedService.getSuggestedCourses(this.planData.role_mapping_id).subscribe({
+        next: (existingRes) => {
+          console.log('Existing suggested courses:', existingRes);
+
+          // Extract existing course identifiers
+          let existingIdentifiers: string[] = [];
+          if (existingRes && Array.isArray(existingRes)) {
+            existingIdentifiers = existingRes.map(course => course.identifier).filter(id => id);
+          }
+
+          // Merge existing identifiers with new selections (avoiding duplicates)
+          const allIdentifiers = [...new Set([...existingIdentifiers, ...this.selectFilterCourses])];
+
+          console.log('Existing identifiers:', existingIdentifiers);
+          console.log('New selections:', this.selectFilterCourses);
+          console.log('Combined identifiers:', allIdentifiers);
+
+          // Prepare request body with combined identifiers
           let reqBody = {
             "role_mapping_id": this.planData.role_mapping_id,
-            "course_identifiers": this.selectFilterCourses
+            "course_identifiers": allIdentifiers
           }
-          
+
+
+          // Save the combined list
           this.sharedService.saveSuggestedCourse(reqBody).subscribe({
             next: (res) => {
+              // Success handling
               console.log('Success:', res);
               this.loading = false
               this.dialogRef.close('saved')
@@ -333,32 +443,71 @@ export class SuggestMoreCoursesComponent implements OnInit{
                 panelClass: ['snackbar-success']
               });
             },
-            error: (saveError) => {
-              console.log('Save error', saveError)
+            error: (error) => {
+              console.log('Save error', error)
               this.dialogRef.close()
-              this.snackBar.open(saveError?.error?.detail || 'Failed to save courses', 'X', {
+              this.snackBar.open(error?.error?.detail || 'Failed to save courses', 'X', {
                 duration: 3000,
                 panelClass: ['snackbar-error']
               });
               this.loading = false
             }
           });
-        } else {
-          // Other errors - show error message
-          console.error('Unexpected error fetching existing courses:', error);
-          this.loading = false
-          this.snackBar.open('Failed to load existing courses. Please try again.', 'X', {
-            duration: 3000,
-            panelClass: ['snackbar-error']
-          });
+
+
+
+        },
+        error: (error) => {
+          console.log('Error fetching existing courses:', error);
+
+          // If fetching existing courses fails, proceed with just new selections
+          // This could happen if no courses exist yet (404) which is normal
+          if (error.status === 404) {
+            console.log('No existing suggested courses found, proceeding with new selections only');
+
+            let reqBody = {
+              "role_mapping_id": this.planData.role_mapping_id,
+              "course_identifiers": this.selectFilterCourses
+            }
+
+            this.sharedService.saveSuggestedCourse(reqBody).subscribe({
+              next: (res) => {
+                console.log('Success:', res);
+                this.loading = false
+                this.dialogRef.close('saved')
+                this.snackBar.open('Courses Added Successfully', 'X', {
+                  duration: 3000,
+                  panelClass: ['snackbar-success']
+                });
+              },
+              error: (saveError) => {
+                console.log('Save error', saveError)
+                this.dialogRef.close()
+                this.snackBar.open(saveError?.error?.detail || 'Failed to save courses', 'X', {
+                  duration: 3000,
+                  panelClass: ['snackbar-error']
+                });
+                this.loading = false
+              }
+            });
+          } else {
+            // Other errors - show error message
+            console.error('Unexpected error fetching existing courses:', error);
+            this.loading = false
+            this.snackBar.open('Failed to load existing courses. Please try again.', 'X', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            });
+          }
         }
-      }
-    });
+      });
+    }
+
   }
 
   selectAllCourses(event) {
-    if(event.checked) {
-      for(let i=0; i<this.suggestedCourses.length;i++) {
+    if (event.checked) {
+      for (let i = 0; i < this.suggestedCourses.length; i++) {
         this.selectFilterCourses.push(this.suggestedCourses[i].identifier)
       }
     } else {
@@ -370,7 +519,7 @@ export class SuggestMoreCoursesComponent implements OnInit{
   selectedFilterCourses(event, item) {
     console.log('event', event)
     console.log('item', item)
-    if(event.checked) {
+    if (event.checked) {
       this.selectFilterCourses.push(item?.identifier)
     } else {
       const index = this.selectFilterCourses.indexOf(item?.identifier);
@@ -384,7 +533,7 @@ export class SuggestMoreCoursesComponent implements OnInit{
 
   checkIfCourseExists(item) {
     let flag = false
-    if(this.selectFilterCourses.indexOf(item?.identifier)> -1) {
+    if (this.selectFilterCourses.indexOf(item?.identifier) > -1) {
       flag = true
     }
     return flag
@@ -393,5 +542,214 @@ export class SuggestMoreCoursesComponent implements OnInit{
   onImgError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
     imgElement.src = 'assets/career/careers1.png'; // replace with your default image path
+  }
+
+  redirectToCoure(item) {
+    if (item?.public_link) {
+      window.open(item?.public_link, '_blank')
+    } else {
+      let url = `https://portal.igotkarmayogi.gov.in/app/toc/${item?.identifier}/overview?`
+      window.open(url, '_blank')
+    }
+  }
+
+  applyFilter(value: any) {
+    console.log('this.searchText', value)
+    this.searchText = value
+    this.filterdCourses = this.filterData(this.searchText);
+  }
+
+  applyFilters(): void {
+    this.currentPage = 0;
+    this.loadCoursesByFilters();
+  }
+
+  loadCoursesByFilters() {
+
+
+    const {
+      competency = [],
+      rating = [],
+      language = [],
+      duration = [],
+      provider = []
+    } = this.filterForm.value;
+
+    const filters: any = {
+      primaryCategory: ['Course'],
+      status: ['Live'],
+      contentType: ['Course'],
+      courseCategory: {
+        '!=': ['pre enrolment assessment']
+      }
+    };
+
+    /* Competency */
+    if (competency?.length) {
+      filters['competencies_v6.competencyAreaName'] = competency;
+    }
+
+    /* Language */
+    if (language?.length) {
+      filters.language = language.map((x: string) =>
+        x.toLowerCase()
+      );
+    }
+
+    /* Provider */
+    if (provider?.length) {
+      filters.organisation = provider;
+    }
+
+    /* Rating */
+    if (rating?.length) {
+      const highestRating = Math.max(
+        ...rating.map((r: string) =>
+          Number(r.split(' ')[0])
+        )
+      );
+
+      filters.avgRating = {
+        '>=': highestRating
+      };
+    }
+
+    /* Duration */
+    if (duration?.length) {
+      filters.duration = duration[0];
+    }
+
+    const reqBody = {
+      request: {
+        filters,
+        fields: [
+          'downloadUrl',
+          'organisation',
+          'language',
+          'source',
+          'appIcon',
+          'identifier',
+          'name',
+          'primaryCategory',
+          'contentType',
+          'posterImage',
+          'createdOn',
+          'duration',
+          'avgRating',
+          'additionalTags',
+          'courseCategory',
+          'mimeType',
+          'contentId',
+          'creatorLogo',
+          'sectorDetails_v1',
+          'languageMapV1',
+          'language',
+          'completionSurveyLink',
+          'difficultyLevel',
+          'competencies_v6.competencyAreaName'
+        ],
+        facets: [
+          'avgRating',
+          'language',
+          'organisation',
+          'courseCategory',
+          'sectorDetails_v1.sectorName',
+          'sectorDetails_v1.subSectorName',
+          'competencies_v6.competencyAreaName',
+          'competencies_v6.competencyThemeName',
+          'competencies_v6.competencySubThemeName',
+          'duration'
+        ],
+        query: this.searchText?.trim() || '',
+        limit: this.pageSize,
+        offset: this.currentPage * this.pageSize,
+        sort_by: {
+          createdOn: 'desc'
+        }
+      }
+    };
+
+    console.log(
+      'API FILTER PAYLOAD',
+      JSON.stringify(reqBody, null, 2)
+    );
+
+    this.sharedService.getIGOTSuggestedCourses(reqBody).subscribe({
+      next: (res: any) => {
+
+
+        this.suggestedCourses =
+          res?.result?.content || [];
+
+        this.totalCount =
+          res?.result?.totalHits ||
+          res?.result?.count ||
+          0;
+
+        this.totalPages = Math.ceil(
+          this.totalCount / this.pageSize
+        );
+      },
+      error: (error) => {
+
+        console.error(error);
+      }
+    });
+  }
+
+
+  onSearchChange(value: string) {
+    this.searchText = value;
+    this.currentPage = 0;
+
+    this.loadCoursesByFilters();
+  }
+
+  onPageChange(page: number) {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.loadCoursesByFilters();
+    }
+  }
+
+  resetFilters(): void {
+    this.searchText = '';
+
+    this.filterForm.reset({
+      competency: [],
+      rating: [],
+      language: [],
+      duration: [],
+      provider: []
+    });
+
+    this.currentPage = 0;
+
+    this.loadCoursesByFilters();
+  }
+
+  filterList(value: string, type: string) {
+    const search = value.toLowerCase();
+
+    switch (type) {
+      case 'competency':
+        this.filteredCompetency = this.competenciesType.filter(v => v.toLowerCase().includes(search));
+        break;
+      case 'rating':
+        this.filteredRatings = this.ratings.filter(v => v.toLowerCase().includes(search));
+        break;
+      case 'language':
+        this.filteredLanguages = this.languages.filter(v => v.toLowerCase().includes(search));
+        break;
+      case 'duration':
+        this.filteredDurations = this.durations.filter(
+          (v: { label: string; value: string }) =>
+            v.label.toLowerCase().includes(search)
+        );
+        break;
+      case 'provider':
+        this.filteredProviders = this.providers.filter(v => v.toLowerCase().includes(search));
+        break;
+    }
   }
 }

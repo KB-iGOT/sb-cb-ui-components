@@ -3,9 +3,10 @@ import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } f
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, debounceTime, distinctUntilChanged, finalize, startWith } from 'rxjs/operators';
-import _ from 'lodash'
+import * as _ from 'lodash'
 import { forkJoin, of } from 'rxjs';
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { Router } from '@angular/router';
 @Component({
     selector: 'app-approval-request-form',
     templateUrl: './approval-request-form.component.html',
@@ -35,7 +36,8 @@ export class ApprovalRequestFormComponent {
     private fb: FormBuilder,
     private cdRef: ChangeDetectorRef,
     private sharedService: SharedService,
-    private snackBar: MatSnackBar) {
+    private snackBar: MatSnackBar,
+  public router: Router) {
       this.role_mapping_ids = data
     this.masterData = {
       mdoBackup: [],
@@ -71,12 +73,7 @@ export class ApprovalRequestFormComponent {
             this.masterData.mdo = this.masterData.mdoFiltered.slice(0, this.mdoListLoadCount);
 
           } else {
-            this.mdoFilterEnable = false;
-
-            // show first page from backup
-            this.masterData.mdo = this.masterData.mdoBackup.slice(0, this.mdoDefaultLoadCount);
-            this.mdoListLoadCount = this.mdoDefaultLoadCount;
-            this.mdoOffset = 0;
+             this.resetMdoList();
           }
         });
     }
@@ -100,7 +97,11 @@ export class ApprovalRequestFormComponent {
   initializeForm() {
     this.approvalRequestForm = this.fb.group({
       mdo_name: ['', Validators.required],
-      request_name: ['', Validators.required],
+      request_name: ['', [
+      Validators.required,
+      Validators.maxLength(100),
+     Validators.pattern(/^(?!\s*$)[A-Za-z0-9 /-]+$/)
+    ]],
       searchmdo: [''],
     });
   }
@@ -112,6 +113,14 @@ export class ApprovalRequestFormComponent {
   }
 
   savemdo() {
+    const requestName = this.approvalRequestForm.value.request_name?.trim();
+
+    if (!requestName) {
+      this.snackBar.open('Request name is required', 'X', {
+        duration: 3000
+      });
+      return;
+    }
     const selectedmdo: string = this.approvalRequestForm.get('mdo_name')?.value;
 
     if (!selectedmdo) {
@@ -125,7 +134,7 @@ export class ApprovalRequestFormComponent {
       state_center_id: this.sharedService.cbpPlanFinalObj.ministry.identifier,
       // state_center_name: this.sharedService.cbpPlanFinalObj.ministry.orgName,
       role_mapping_ids: this.role_mapping_ids.map((item: any) => item.id),
-      request_name: this.approvalRequestForm.value.request_name,
+      request_name:requestName,
     };
 
     if (this.sharedService.cbpPlanFinalObj?.ministry?.sbOrgType === 'state' && this.sharedService.cbpPlanFinalObj.department_name) {
@@ -148,11 +157,12 @@ export class ApprovalRequestFormComponent {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
-          this.snackBar.open('Request sent successfully', 'X', {
+          this.snackBar.open('Request successfully submitted for approval.', 'X', {
             duration: 3000,
             panelClass: ['snackbar-success']
           });
           this.dialogRef.close('saved');
+          this.router.navigate(['/ai/approve-requests']);
         },
         error: (error) => {
           console.log('error', error)
@@ -199,7 +209,7 @@ export class ApprovalRequestFormComponent {
             "MDO_LEADER",
             "MDO_ADMIN"
           ],
-          "rootOrgId": this.sharedService.cbpPlanFinalObj.departments
+          "rootOrgId": this.sharedService.cbpPlanFinalObj.departments ? this.sharedService.cbpPlanFinalObj.departments : this.sharedService.cbpPlanFinalObj.ministry.identifier 
         },
         "fields": [
           "firstName",
@@ -214,11 +224,10 @@ export class ApprovalRequestFormComponent {
       }
     }
     if (searchText?.length) {
-      requestBody['searchString'] = searchText
+      requestBody['request']["query"] = searchText
       // when searching, start from first page
-      requestBody.pageNumber = 0
-      // allow larger page for search if needed
-      requestBody.pageSize = pageIndex === 0 ? 50 : this.mdoListLoadCount
+      requestBody.request.pageNumber = 0;
+requestBody.request.pageSize = 50;
       // reset guard when performing a fresh search
       this.noMoreLegacymdos = false
     }
@@ -269,7 +278,7 @@ export class ApprovalRequestFormComponent {
           // Ensure visible list matches the requested display count
           this.masterData['mdo'] = (this.masterData['mdoBackup'] || []).slice(0, this.mdoListLoadCount)
           // loading flag cleared in finalize()
-          this.checkCurrentmdoPresent()
+        //  this.checkCurrentmdoPresent()
         },
         error: () => {
           // Stop further automatic calls on repeated errors to avoid tight loops
@@ -279,27 +288,27 @@ export class ApprovalRequestFormComponent {
         }
       })
   }
-checkCurrentmdoPresent() {
-  const selectedmdo = this.approvalRequestForm.get('mdo_name')?.value;
+// checkCurrentmdoPresent() {
+//   const selectedmdo = this.approvalRequestForm.get('mdo_name')?.value;
 
-  if (!selectedmdo || !this.masterData?.mdo) return;
+//   if (!selectedmdo || !this.masterData?.mdo) return;
 
-  const exists = this.masterData.mdo.some(
-    (item: any) => item?.name?.toLowerCase() === selectedmdo?.toLowerCase()
-  );
+//   const exists = this.masterData.mdo.some(
+//     (item: any) => item?.name?.toLowerCase() === selectedmdo?.toLowerCase()
+//   );
 
-  if (!exists) {
-    const newmdo = {
-      name: selectedmdo,
-      status: 'Active',
-      id: 'custom-' + Date.now()
-    };
+//   if (!exists) {
+//     const newmdo = {
+//       name: selectedmdo,
+//       status: 'Active',
+//       id: 'custom-' + Date.now()
+//     };
 
-    this.masterData.mdoBackup = this.masterData.mdoBackup || [];
-    this.masterData.mdoBackup.unshift(newmdo);
-    this.masterData.mdo.unshift(newmdo);
-  }
-}
+//     this.masterData.mdoBackup = this.masterData.mdoBackup || [];
+//     this.masterData.mdoBackup.unshift(newmdo);
+//     this.masterData.mdo.unshift(newmdo);
+//   }
+// }
   onmdoDropdownClosed(): void {
     // Keep the mdo value but clear the search input
     const currentmdo = this.approvalRequestForm.get('mdo_name')!.value
@@ -330,7 +339,7 @@ checkCurrentmdoPresent() {
     } else if (this.masterData && this.masterData?.mdoBackup) {
       this.masterData.mdo = this.masterData?.mdoBackup.slice(0, this.mdoDefaultLoadCount)
       this.mdoFilterEnable = false
-      this.checkCurrentmdoPresent()
+     // this.checkCurrentmdoPresent()
     }
   }
   setupScrollListener(opened: boolean): void {
@@ -403,7 +412,7 @@ checkCurrentmdoPresent() {
             // Update the filtered list with more items
             setTimeout(() => {
               this.masterData.mdo = this.masterData?.mdoBackup?.slice(0, this.mdoListLoadCount)
-              this.checkCurrentmdoPresent()
+             // this.checkCurrentmdoPresent()
               this.isLoadingMoremdos = false
             }, 500) // Small timeout to simulate loading and prevent multiple triggers
           } else {
@@ -425,6 +434,24 @@ checkCurrentmdoPresent() {
   get searchmdoControl(): FormControl {
     return this.approvalRequestForm.get('searchmdo') as FormControl;
   }
+
+  clearMdoSearch(): void {
+  this.searchmdoControl.setValue('', { emitEvent: true });
+
+  this.resetMdoList();
+    
+}
+
+private resetMdoList(): void {
+  this.mdoFilterEnable = false;
+  this.mdoSearchText = '';
+  this.mdoOffset = 0;
+  this.mdoListLoadCount = this.mdoDefaultLoadCount;
+
+  this.masterData.mdo =
+    this.masterData.mdoBackup.slice(0, this.mdoDefaultLoadCount);
+    this.getmdo()
+}
 
 
 }
