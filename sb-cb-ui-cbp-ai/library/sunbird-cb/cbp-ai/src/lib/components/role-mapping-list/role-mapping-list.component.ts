@@ -227,6 +227,7 @@ export class RoleMappingListComponent {
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
+    element['matched_role_mappings']= this.matchedRoleMappingData
     const dialogRef = this.dialog.open(EditCbpPlanComponent, {
       width: '1000px',
       data: element,

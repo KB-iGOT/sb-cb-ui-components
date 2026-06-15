@@ -4,12 +4,16 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import { SharedService } from '../../modules/shared/services/shared.service';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 @Component({
   selector: 'app-publish-approve-request-form',
   templateUrl: './publish-approve-request-form.component.html',
   styleUrls: ['./publish-approve-request-form.component.scss']
 })
+
+
+
 export class PublishApproveRequestFormComponent implements OnInit {
 
   approvalRequestForm: FormGroup;
@@ -32,9 +36,12 @@ export class PublishApproveRequestFormComponent implements OnInit {
       request_name: ['', [
         Validators.required,
         Validators.maxLength(70),
-        Validators.pattern(/^[a-zA-Z0-9._\-$/:[\]'! ]+$/)
+        Validators.pattern('^[a-zA-Z0-9 -]+$')
       ]],
-      due_date: [null, Validators.required]
+      due_date: [null, [
+    Validators.required,
+    futureDateValidator()
+  ]]
     });
   }
 
@@ -108,4 +115,26 @@ approveAndPublish() {
 get due_date() {
   return this.approvalRequestForm.get('due_date');
 }
+}
+
+export function futureDateValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+
+    if (!control.value) {
+      return null;
+    }
+
+    const date = new Date(control.value);
+
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return { invalidDate: true };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    date.setHours(0, 0, 0, 0);
+
+    return date < today ? { pastDate: true } : null;
+  };
 }

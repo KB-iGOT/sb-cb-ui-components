@@ -372,7 +372,7 @@ export class SuggestMoreCoursesComponent implements OnInit {
     if (this.planData.fromMdoPortal) {
       const allIdentifiers = [...new Set([...this.selectFilterCourses])];
       let reqBodyNew = {
-        "item_id": this.planData.id,
+        "item_id": this.planData.role_mapping_id,
         "request_id": this.planData.cbp_plan_id,
         "identifiers": allIdentifiers
       }
