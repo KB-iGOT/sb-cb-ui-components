@@ -317,4 +317,43 @@ export class DomainConfService {
     return config[key] !== false
   }
 
+  // ── 6. Feature API config accessors ────────────────────────────────────────
+
+  /**
+   * Generic method to get an API URL from globalConfig.apis section.
+   * Falls back to the provided defaultUrl if not configured.
+   *
+   * Usage:
+   *   domainConfSvc.getApiUrl('search', 'searchV4', '/apis/proxies/v8/sunbirdigot/v4/search')
+   *   domainConfSvc.getApiUrl('search', 'volunteerSearch', '/apis/proxies/v8/sunbirdigot/v4/search')
+   *   domainConfSvc.getApiUrl('user', 'profile', '/apis/proxies/v8/api/user/v2/read')
+   *   domainConfSvc.getApiUrl('content', 'explore', '/api/course/v1/explore')
+   *
+   * @param service - the service group key (e.g. 'search', 'user', 'content')
+   * @param apiKey - the specific API key within the service group
+   * @param defaultUrl - fallback URL if not found in config
+   */
+  getApiUrl(service: string, apiKey: string, defaultUrl: string = ''): string {
+    const apis = this.getGlobalConfig()?.apis
+    return apis?.[service]?.[apiKey] || defaultUrl
+  }
+
+  /**
+   * Generic accessor for any feature config under globalConfig.features.
+   * @param featureKey - the key under features (e.g. 'volunteerSearch', 'home', 'explore')
+   */
+  getFeatureConfig(featureKey: string): any {
+    return this.getGlobalConfig()?.features?.[featureKey] || null
+  }
+
+  /**
+   * Checks if a feature is enabled in globalConfig.features.<featureKey>.enabled.
+   * Defaults to true when not configured.
+   */
+  isGlobalFeatureEnabled(featureKey: string): boolean {
+    const config = this.getFeatureConfig(featureKey)
+    if (!config) { return true }
+    return config.enabled !== false
+  }
+
 }
