@@ -321,7 +321,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       console.log('igot_designation_id 123', req['igot_designation_id']);
     }
 
-    if (this.sharedService.fromMdoPortal) { 
+    if (this.sharedService.fromMdoPortal) {
       req['request_id'] = this.requestRowData?.id
       req['item_id'] = this.planData?.id
     }
@@ -754,23 +754,10 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
                   x.name?.toLowerCase() === 'managing director'
               )
             );
+  this.checkCurrentDesignationPresent();
 
-  this.masterData.designation =
-    this.masterData.designationFiltered.slice(
-      0,
-      this.searchDesignationLoadCount
-    );
-
-  console.log(
-    'Backup after search',
-    this.masterData.designationBackup.find(
-      (x: any) =>
-        x.name?.toLowerCase() === 'managing director'
-    )
-  );
-
-  return;
-}
+            return;
+          }
 
           // =========================
           // NORMAL MODE
@@ -939,6 +926,14 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     ];
 
     this.cdRef.detectChanges();
+      setTimeout(() => {
+      const ctrl = this.cbpForm.get('designation_name');
+      const val = ctrl?.value;
+      if (val) {
+        ctrl.setValue(null, { emitEvent: false });
+        ctrl.setValue(val, { emitEvent: false });
+      }
+    });
   }
   onDesignationDropdownClosed(): void {
     // Keep the designation value but clear the search input
