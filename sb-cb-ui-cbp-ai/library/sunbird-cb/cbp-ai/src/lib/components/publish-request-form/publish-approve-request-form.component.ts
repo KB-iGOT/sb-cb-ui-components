@@ -9,7 +9,8 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 @Component({
   selector: 'app-publish-approve-request-form',
   templateUrl: './publish-approve-request-form.component.html',
-  styleUrls: ['./publish-approve-request-form.component.scss']
+  styleUrls: ['./publish-approve-request-form.component.scss'],
+  standalone:false
 })
 
 

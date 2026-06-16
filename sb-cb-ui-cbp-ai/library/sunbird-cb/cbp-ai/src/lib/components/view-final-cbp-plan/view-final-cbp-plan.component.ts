@@ -55,7 +55,6 @@ export class ViewFinalCbpPlanComponent {
   openedFrom!: string;
   isPDFDownload = false;
   @ViewChild('dialogContent') dialogContent!: ElementRef;
-  isPDFDownload = false
   // designationData = [
   //   {
   //     designation: "Secretary (WCD)",

@@ -8,7 +8,8 @@ import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
   selector: 'app-reject-request-form',
   templateUrl: './reject-request-form.component.html',
-  styleUrls: ['./reject-request-form.component.scss']
+  styleUrls: ['./reject-request-form.component.scss'],
+  standalone:false
 })
 export class RejectRequestFormComponent implements OnInit {
 
