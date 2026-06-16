@@ -728,7 +728,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
           if (searchText?.length) {
             console.log('matchedIds--', this.matchedDesignationIds)
 
-            this.masterData.designationFiltered = mapped;
+  this.masterData.designationFiltered = mapped;
 
             // IMPORTANT: merge searched result into backup
             const combined = [
@@ -754,6 +754,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
                   x.name?.toLowerCase() === 'managing director'
               )
             );
+  this.checkCurrentDesignationPresent();
 
             return;
           }
@@ -925,6 +926,14 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     ];
 
     this.cdRef.detectChanges();
+      setTimeout(() => {
+      const ctrl = this.cbpForm.get('designation_name');
+      const val = ctrl?.value;
+      if (val) {
+        ctrl.setValue(null, { emitEvent: false });
+        ctrl.setValue(val, { emitEvent: false });
+      }
+    });
   }
   onDesignationDropdownClosed(): void {
     // Keep the designation value but clear the search input
