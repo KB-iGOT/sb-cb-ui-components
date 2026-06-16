@@ -321,7 +321,9 @@ export class DomainConfService {
 
   /**
    * Generic method to get an API URL from globalConfig.apis section.
-   * Falls back to the provided defaultUrl if not configured.
+   * Returns the configured URL only if enabled is true.
+   * Returns empty string if the API is disabled (enabled: false).
+   * Falls back to defaultUrl if not configured in global-config.json.
    *
    * Usage:
    *   domainConfSvc.getApiUrl('search', 'searchV4', '/apis/proxies/v8/sunbirdigot/v4/search')
@@ -332,10 +334,47 @@ export class DomainConfService {
    * @param service - the service group key (e.g. 'search', 'user', 'content')
    * @param apiKey - the specific API key within the service group
    * @param defaultUrl - fallback URL if not found in config
+   * @returns API URL if enabled, empty string if disabled, defaultUrl if not configured
    */
   getApiUrl(service: string, apiKey: string, defaultUrl: string = ''): string {
     const apis = this.getGlobalConfig()?.apis
-    return apis?.[service]?.[apiKey] || defaultUrl
+    const apiConfig = apis?.[service]?.[apiKey]
+    
+    // If not configured in global-config.json, return defaultUrl
+    if (!apiConfig) { return defaultUrl }
+    
+    // Legacy support: if apiConfig is a string, return it directly
+    if (typeof apiConfig === 'string') { return apiConfig }
+    
+    // New format: check enabled flag
+    // If enabled is false, return empty string (API is disabled)
+    if (apiConfig.enabled === false) { return '' }
+    
+    // If enabled is true or not specified, return the URL
+    return apiConfig.url || defaultUrl
+  }
+
+  /**
+   * Checks if a specific API is enabled in globalConfig.apis.
+   * Returns true if the API is enabled or not configured.
+   * Returns false if explicitly disabled (enabled: false).
+   *
+   * @param service - the service group key (e.g. 'search', 'user', 'content')
+   * @param apiKey - the specific API key within the service group
+   * @returns true if enabled, false if disabled
+   */
+  isApiEnabled(service: string, apiKey: string): boolean {
+    const apis = this.getGlobalConfig()?.apis
+    const apiConfig = apis?.[service]?.[apiKey]
+    
+    // If not configured, assume enabled
+    if (!apiConfig) { return true }
+    
+    // Legacy support: if apiConfig is a string, it's enabled
+    if (typeof apiConfig === 'string') { return true }
+    
+    // New format: check enabled flag (default to true if not specified)
+    return apiConfig.enabled !== false
   }
 
   /**
