@@ -209,7 +209,7 @@
           <div class="flex flex-col ratings-div mt-5" id="commentsDiv"
             *ngIf="discussWidgetData && discussWidgetData?.newCommentSection?.commentTreeData?.entityId">
             <ng-container *ngIf="!commentId">
-              <d-v2-widget-comment [widgetData]="discussWidgetData"></d-v2-widget-comment>
+              <d-v2-widget-comment [widgetData]="discussWidgetData" [uiConfig]="config?.uiVisibility?.discussion"></d-v2-widget-comment>
             </ng-container>
             <ng-container *ngIf="commentId">
               <div class="flex flex-row gap-3 cursor-pointer mb-5" (click)="clearCommentIdFromUrl()">
@@ -217,7 +217,7 @@
                 Back to all comments
               </div>
               <d-v2-widget-comment [widgetData]="discussWidgetData" [commentId]="commentId"
-                [skeletonLoader]></d-v2-widget-comment>
+                [uiConfig]="config?.uiVisibility?.discussion" [skeletonLoader]></d-v2-widget-comment>
             </ng-container>
           </div>
         </ng-template>
