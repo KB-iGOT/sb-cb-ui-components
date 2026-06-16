@@ -326,7 +326,7 @@
 
   <ng-template #progressFunctionality>
     <div class="flex flex-row gap-4">
-      <div class="flex-1">
+      <div class="flex-1" *ngIf="tocConfig?.uiVisibility?.rightPanel?.progress !== false">
         <div class="flex flex-col gap-2">
           <div class="flex flex-row gap-4 text-sm">
             <div class="flex-1 text-xs">{{ 'apptocsinglepage.overallProgress' | translate }}</div>
@@ -339,7 +339,7 @@
         </div>
       </div>
 
-      <ng-container *ngIf="contentCompletionPercent >= 50">
+      <ng-container *ngIf="contentCompletionPercent >= 50 && tocConfig?.uiVisibility?.rightPanel?.starRating !== false">
         <button mat-stroked-button color="accent" type="button" class="rate-button"
           (click)="openFeedbackDialog(content)">
           <mat-icon class="nodtranslate">star_purple500</mat-icon>
