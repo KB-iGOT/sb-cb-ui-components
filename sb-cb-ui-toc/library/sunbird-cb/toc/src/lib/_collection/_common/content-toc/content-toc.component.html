@@ -203,7 +203,7 @@
       </mat-tab>
     </ng-container>
 
-    <ng-container *ngIf="config?.commentsTab && !forPreview && config?.uiVisibility?.tabs?.discussionTab !== false">
+    <ng-container *ngIf="config?.commentsTab && !forPreview && config?.uiVisibility?.tabs?.discussionTab !== false && isCommentApiEnabled()">
       <mat-tab label="{{ 'apptocsinglepage.startDiscussion' | translate }}">
         <ng-template matTabContent>
           <div class="flex flex-col ratings-div mt-5" id="commentsDiv"
@@ -224,7 +224,7 @@
       </mat-tab>
     </ng-container>
     <ng-container
-      *ngIf="config?.samuhikCharchaTab && condition && contentReadData?.eventLinked?.length > 0 && enableSamuhikCharchaTab && config?.uiVisibility?.tabs?.discussionTab !== false">
+      *ngIf="config?.samuhikCharchaTab && condition && contentReadData?.eventLinked?.length > 0 && enableSamuhikCharchaTab && config?.uiVisibility?.tabs?.discussionTab !== false && isCommentApiEnabled()">
       <mat-tab label="{{ 'apptocsinglepage.samuhikCharcha' | translate }}">
         <ng-template matTabContent>
           <div class="flex flex-col ratings-div mt-5" id="samuhikCharchaDiv">
