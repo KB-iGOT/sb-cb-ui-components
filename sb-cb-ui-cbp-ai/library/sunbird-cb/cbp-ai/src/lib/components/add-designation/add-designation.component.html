@@ -1,108 +1,221 @@
 <div class="view-cbp-plan">
-    <div class="popup-container">
-        <div class="popup-header">
-            <div>
-                <div class="heading">Add New Designation</div>
+    <div [formGroup]="designationForm">
+        <div class="popup-container">
+            <div class="popup-header">
+                <div>
+                    <div class="heading">Add New Designation</div>
+
+                </div>
+                <div class="right-container">
+                 <button mat-stroked-button class="add-btn" (click)="addDesignationBlock()"
+                        [disabled]="designationArray?.length >= MAX_DESIGNATIONS">
+
+
+                        <span style="font-size: 32px;">+</span> Add More
+                    </button>
+
+                <div class="cursor-pointer" (click)="closeDialog()">
+                    <mat-icon>close</mat-icon>
+                </div>
+                </div>
             </div>
-            <div class="cursor-pointer" (click)="closeDialog()">
-                <mat-icon>close</mat-icon>
+            <div class="popup-header seperator">
+                <div class="info-row">
+                    <mat-icon class="vertical-middle">info</mat-icon>
+                    <span>
+                        Maximum 10 designations can be selected for CBP generation at one time.
+                    </span>
+                </div>
+                <div class="header-actions">
+
+                    <span class="counter">
+                        {{ designationArray?.length }}/{{ MAX_DESIGNATIONS }}
+                    </span>
+
+                   
+
+                </div>
+
             </div>
         </div>
-    </div>
-    <div class="section-container" [formGroup]="designationForm">
-        <mat-card class="mt-1">
-            <div class="mt-2 section">
-                <div class="sub-heading">
-                    <p>Designation Name</p>
-                </div>
-                <div class="section-header mt-4">
-                    <!-- <input type="text" formControlName="designation_name" placeholder="Enter Designation" [value]=""
-                        style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width: 100%;font-size: 14px;font-family: 'Lato';"> -->
-                    <mat-form-field appearance="outline" class="margin-top-s w-full required-select">
-                        <mat-select multiple #position formControlName="designation_name"
-                            placeholder="Select designation" (closed)="onDesignationDropdownClosed()"
-                            panelClass="search-panel" (openedChange)="setupScrollListener($event)"
-                            >
+        <div class="section-container"> 
+            <div formArrayName="designations">
 
-                            <!-- Sticky search input container -->
-                            <div class="sticky-search-container" (click)="$event.stopPropagation()">
-                                <div class="search-input-wrapper">
-                                    <input type="text" placeholder="Search designation" style="width:100%"
-                                        formControlName="searchDesignation" class="search-input"
-                                        (keydown)="$event.stopPropagation()"
-                                        (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
-                                         autocomplete="off">
-                                         <!-- (keyup)="designationSearch($event)" -->
-                                    <div *ngIf="searchDesignationControl?.value" type="button" class="clear-icon"
-                                        (click)="clearDesignationSearch($event)">
-                                        <mat-icon>close</mat-icon>
-                                </div>
-                                </div>
+                <div *ngFor="let designationGroup of designationArray.controls; let i=index" [formGroupName]="i"
+                    class="designation-wrapper">
+
+                    <!-- EDIT MODE -->
+                    <ng-container *ngIf="designationGroup.value.isEdit">
+
+                        <mat-card class="mt-1 designation-block">
+
+                            <div class="designation-header">
+                                <span class="designation-title">
+                                    Designation {{ i + 1 }}
+                                </span>
                             </div>
-                            <!-- Options list -->
-                            <mat-option [value]="designation?.name" *ngFor="let designation of masterData?.designation">
-                                {{designation?.name}}
-                            </mat-option>
-                            <!-- Loading indicator -->
-                            <div *ngIf="isLoadingMoreDesignations" class="loading-indicator">
-                                Load More...
+
+                            <!-- Designation Dropdown -->
+                            <div class="mt-2 section">
+
+                                <div class="sub-heading">
+                                    <p>Designation Name</p>
+                                </div>
+
+                                <div class="section-header mt-4">
+
+                                    <mat-form-field appearance="outline" class="margin-top-s w-full required-select">
+
+                                        <mat-select placeholder="Select designation" formControlName="designation_name"
+                                            (closed)="onDesignationDropdownClosed(i)" panelClass="search-panel"
+                                            (openedChange)="setupScrollListener($event)">
+
+                                            <div class="sticky-search-container" (click)="$event.stopPropagation()">
+
+                                                <div class="search-input-wrapper">
+
+                                                    <input type="text" placeholder="Search designation"
+                                                        style="width:100%" formControlName="searchDesignation"
+                                                        class="search-input" (keydown)="$event.stopPropagation()"
+                                                        (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
+                                                        autocomplete="off">
+
+                                                    <div *ngIf="searchDesignationControl?.value" class="clear-icon"
+                                                        (click)="clearDesignationSearch(i,$event)">
+
+                                                        <mat-icon>close</mat-icon>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <mat-option *ngFor="let designation of getFilteredDesignations(i)"
+                                                [value]="designation?.name">
+
+                                                {{ designation?.name }}
+
+                                            </mat-option>
+
+                                            <div *ngIf="isLoadingMoreDesignations" class="loading-indicator">
+
+                                                Load More...
+
+                                            </div>
+
+                                            <mat-option
+                                                *ngIf="(masterData?.designation)?.length === 0 || noMoreLegacyDesignations"
+                                                disabled>
+
+                                                Designation Not Found.
+
+                                            </mat-option>
+
+                                        </mat-select>
+
+                                    </mat-form-field>
+
+                                </div>
+
                             </div>
-                            <!-- No results message -->
-                            <mat-option *ngIf="(masterData?.designation)?.length === 0" disabled class="no-data-option">
 
-                                Designation Not Found.
+                            <!-- Instruction -->
+                            <div class="mt-2 section">
 
-                            </mat-option>
-                        </mat-select>
-                        <!-- <mat-error class="text-xs"
-                            *ngIf="designationForm?.get('designation_name')?.touched && designationForm?.get('designation_name')?.invalid">
-                            Please select at least one designation.
-                        </mat-error> -->
-                    </mat-form-field>
+                                <div class="sub-heading">
+                                    <p>Role & Responsibilities / Additional Details</p>
+                                </div>
+
+                                <div class="mt-4 additional-details">
+
+                                    <textarea class="custom-textarea" formControlName="instruction" rows="5"
+                                        placeholder="Add Instructions">
+                            </textarea>
+
+                                </div>
+
+                            </div>
+
+                            <!-- Actions -->
+
+                            <div class="designation-actions">
+                                <button mat-stroked-button color="warn" type="button"
+                                    (click)="deleteDesignationBlock(i)">
+
+                                    <mat-icon>delete</mat-icon>
+
+                                </button>
+
+                                <button  class="save-flat-button" mat-flat-button color="primary" type="button" (click)="saveDesignationBlock(i)">
+
+                                    <mat-icon>check</mat-icon>
+                                    Save
+
+                                </button>
+
+                            </div>
+
+                        </mat-card>
+
+                    </ng-container>
+
+                    <!-- VIEW MODE -->
+                    <ng-container *ngIf="!designationGroup.value.isEdit">
+
+                        <mat-card class="saved-designation-card">
+
+                            <div class="saved-content">
+
+                                <div class="saved-content-desc">
+
+                                    <div class="saved-designation-name" style="font-size: 16px ;font-weight: 600;">
+                                      {{i+1}}. {{ designationGroup.get('designation_name')?.value }} 
+                                    </div>
+
+                                    <div class="saved-instruction">
+                                        {{ designationGroup.get('instruction')?.value }}
+                                    </div>
+
+                                </div>
+
+                                <div class="saved-actions">
+
+                                    <button class="add-btn" mat-stroked-button type="button" (click)="editDesignationBlock(i)">
+
+                                       Edit
+
+                                    </button>
+
+                                    <button mat-stroked-button color="warn" type="button"
+                                        (click)="deleteDesignationBlock(i)">
+
+                                        <mat-icon>delete</mat-icon>
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </mat-card>
+
+                    </ng-container>
+
+                </div>
+
+            </div>
+            <div class="popup-footer">
+                <div>
+                    <input class="btn-active" type="button" value="Cancel" (click)="cancelForm()" />
+                </div>
+                <div>
+                    <input [disabled]="!canGenerateCBP" [ngClass]="!canGenerateCBP ? 'btn-disable':'btn-active'"
+                        type="button" value="Generate CBP" (click)="saveDesignation()" />
                 </div>
             </div>
-
-            <div class="mt-2 section">
-                <div class="sub-heading">
-                    <p>Role & responsibilities /Additional details</p>
-                </div>
-                <div class="mt-4 additional-details">
-                    <textarea class="custom-textarea" formControlName="instruction" rows="5"
-                        placeholder="Add Instructions" [value]=""></textarea>
-                </div>
-            </div>
-            <!-- <div class="mt-2 section">
-                <div class="sub-heading">
-                    <p>Upload Document (PDF/Word/Excel/TXT)</p>
-                </div>
-                <div class="file-upload-wrapper">
-                    <label for="uploadDoc" class="file-upload-label">
-                        <span class="file-upload-icon">📎</span>
-                        <span>{{ uploadedFile?.name || 'Choose a file (PDF, Word, Excel, TXT)' }}</span>
-                    </label>
-
-                    <small class="file-upload-hint">Max file size: 25MB</small>
-
-                    <input id="uploadDoc" type="file" (change)="onFileChange($event)"
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="file-upload-input" />
-
-                    <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
-                </div>
-            </div> -->
-
-        </mat-card>
-    </div>
-    <div class="popup-footer">
-        <div>
-            <input class="btn-active" type="button" value="Cancel" (click)="cancelForm()" />
-        </div>
-        <div>
-            <input [disabled]="designationForm?.invalid"
-                [ngClass]="designationForm?.invalid ? 'btn-disable':'btn-active'" type="button" value="Generate CBP"
-                (click)="saveDesignation()" />
         </div>
     </div>
-</div>
-<div class="overlay-loader" *ngIf="loading">
-    <mat-spinner diameter="50"></mat-spinner>
-</div>
+    <div class="overlay-loader" *ngIf="loading">
+        <mat-spinner diameter="50"></mat-spinner>
+    </div>

@@ -41,6 +41,8 @@
   border-radius:20px;
   font-size:13px;
   font-weight:600;
+  height: 32px;
+  margin-top: 8px;
 }
 
 .status-badge-success {
@@ -50,6 +52,8 @@ background:#16873a;
   border-radius:20px;
   font-size:13px;
   font-weight:600;
+  height: 32px;
+  margin-top: 8px;
 }
 
 .status-badge-rejected {
@@ -59,6 +63,42 @@ background:#d32f2f;
   border-radius:20px;
   font-size:13px;
   font-weight:600;
+  height: 32px;
+  margin-top: 8px;
+}
+
+
+.status-badge-mdo{
+  background:orange;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  height: 24px;
+  margin-top: 8px;
+}
+
+.status-badge-mdo-success {
+background:#16873a;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  height: 24px;
+  margin-top: 8px;
+}
+
+.status-badge-mdo-rejected {
+background:#d32f2f;
+  color:#fff4e5;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  height: 24px;
+  margin-top: 8px;
 }
 
 /* CARD */
@@ -120,6 +160,7 @@ background:#d32f2f;
 
 .value{
   font-weight:600;
+  color:gray;
 }
 
 .organization{
@@ -1189,4 +1230,22 @@ cursor: not-allowed;
   font-size: 14px;
   color: rgba(0,0,0,0.6);
   background: #fff;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.right-section {
+  margin: 0 20px;
+  display: flex;
+  flex-direction: row;
+  gap:16px;
+}
+
+.view-course-btn {
+  color:#1B4CA1;
+  border: 1px solid #1B4CA1 !important;
+  border-radius: 24px;
+  background: #f6f7f9 !important;
 }

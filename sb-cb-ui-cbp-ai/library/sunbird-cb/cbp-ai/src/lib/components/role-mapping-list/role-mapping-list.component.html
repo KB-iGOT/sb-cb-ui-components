@@ -88,7 +88,7 @@
                             <input class="btn-active" type="button" value="Add More Designation"
                                 (click)="addMoreDesignation()" />
                         </div>
-                        <div class="ml-2">
+                        <div class="ml-2" *ngIf="activeTab === 'matched'">
                             <button
                                 [ngClass]="selection.selected.length ? 'btn-active-outline' : 'btn-active-outline-disable'"
                                 (click)="sendForApprovalForm()">
@@ -247,11 +247,11 @@
 
                                         <td mat-cell *matCellDef="let row" [hidden]="activeTab !== 'matched'">
                                             <span matTooltip="Please generate & save course recommendation to select. Course recommendation generation & save is pending."
-                                                [matTooltipDisabled]="row?.cbp_plans?.length > 0">
+                                                [matTooltipDisabled]="!getActivateCbpPlan(row)">
                                                 <mat-checkbox class="radio-style-checkbox"
                                                     (click)="$event.stopPropagation()" (change)="toggleRow(row)"
                                                     [checked]="selection.isSelected(row)"
-                                                    [disabled]="!row?.cbp_plans?.length">
+                                                    [disabled]="getActivateCbpPlan(row)" [ngClass]=" getActivateCbpPlan(row)? 'grayd-disable':''">
                                                 </mat-checkbox>
                                             </span>
                                         </td>
@@ -415,7 +415,7 @@
                         <div class="no-cbp-data" *ngIf="dataSource?.filteredData?.length === 0">
                             <!-- <div><img src="/mdo-assets/images/no-content-data.svg" alt="no-content"></div> -->
                             <div class="sub-heading mt-4">
-                                <p>No Data Found</p>
+                                <p>No role mappings available in this category</p>
                             </div>
                             <!-- <div class=" margin-top-m no-content-create">
                                 <button mat-button type="button" class="search-btns"

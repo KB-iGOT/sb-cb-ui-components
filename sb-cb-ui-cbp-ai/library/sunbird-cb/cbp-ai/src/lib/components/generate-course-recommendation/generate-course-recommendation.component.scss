@@ -1972,7 +1972,7 @@ background: #f8f9fa;
   justify-content: space-between;
 }
 
-:host ::ng-deep .search-and-buttons-container {
+::ng-deep .search-and-buttons-container {
   .mat-form-field-infix {
   
     padding: 10px !important;
@@ -1985,7 +1985,7 @@ background: #f8f9fa;
  
 }
 
-:host ::ng-deep  .select-search-panel {
+::ng-deep  .select-search-panel {
   border: 1px solid #ccc!important;
   border-radius: 12px !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
@@ -2007,7 +2007,7 @@ background: #f8f9fa;
   border-color: #1B4CA1 !important;
 }
 
-:host ::ng-deep .select-search-panel .mat-option.mat-selected:not(.mat-option-disabled) {
+::ng-deep .select-search-panel .mat-option.mat-selected:not(.mat-option-disabled) {
   background-color: #1B4CA1 !important;
   color: #ffffff !important;
 }

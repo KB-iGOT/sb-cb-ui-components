@@ -35,7 +35,10 @@
       <div class="popup-container">
         <div class="popup-header">
           <div>
-            <div class="heading">Regenerate CBP</div>
+            <div class="heading">
+             <span *ngIf="isFromGenerateCourse">Regenerate Course Recommendations</span>
+             <span *ngIf="!isFromGenerateCourse">Regenerate CBP</span>
+            </div>
           </div>
           <div class="cursor-pointer" (click)="cancel('cross')">
             <mat-icon>close</mat-icon>
@@ -47,15 +50,24 @@
             <img src="assets/icons/info.svg" style="scale: 2;margin: 10px;">
           </div>
   
-          <div class="mt-2">
+          <div class="mt-2" *ngIf="!isFromGenerateCourse">
             CBP is already available ,
-            Do you want to Regenerate the Capacity building plan ?
+
+            <span *ngIf="!workAllocationOrderDocumentMissing">Do you want to Regenerate the Capacity building plan ?</span>
+           
+          </div>
+          <div>
+             <span style="text-align: center;" *ngIf="workAllocationOrderDocumentMissing" class="error">Please upload the Work Allocation Order document to regenerate the Capacity Building Plan (CBP)</span>
+          </div>
+          <div class="mt-2" *ngIf="isFromGenerateCourse">
+            Course recommendations are already available ,
+            Do you want to Regenerate Course Recommendations ?
           </div>
         </div>
   
         <div class="popup-footer mt-4">
-          <input class="btn-active-cancel" type="button" value="View Existing CBP" (click)="cancel('button')" />
-          <input class="btn-active" type="button" value="Yes" (click)="regenerateRoleMapping()" />
+          <input class="btn-active-cancel" type="button" [value]="isFromGenerateCourse ? 'View Existing Course Recommendations' : 'View Existing CBP'" (click)="cancel('button')" />
+          <input [ngClass]="workAllocationOrderDocumentMissing ? 'btn-active-disable':'btn-active'" [disabled]="workAllocationOrderDocumentMissing" type="button" value="Yes" (click)="regenerateRoleMapping()" />
         </div>
       </div>
     </div>

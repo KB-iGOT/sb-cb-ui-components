@@ -46,7 +46,7 @@ export class UploadDocumentPageComponent {
 
   ]
   searchText = '';
-  displayedColumns: string[] = ['name', 'summary_status',  'date', 'actions'];
+  displayedColumns: string[] = ['name','document_type', 'summary_status',  'date', 'actions'];
   cbpFinalObj:any= {}
   departmentData:any = []
   documents = [
@@ -73,6 +73,7 @@ export class UploadDocumentPageComponent {
   loginUserOrgIds = []
   originalMinistryData = []
   cbpPlanFinalObj:any
+  showSampleDialogFlag = false
   constructor(public dialog: MatDialog, public sharedService: SharedService, 
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -299,7 +300,7 @@ export class UploadDocumentPageComponent {
     }
 
     routeToMain() {
-      this.router.navigate(['/ai/']);
+      this.router.navigate(['/']);
     }
 
     viewSummary(doc) {
@@ -401,12 +402,19 @@ export class UploadDocumentPageComponent {
     }
 
     routeToInitial() {
-      this.router.navigate(['/ai/initial']);
+      this.router.navigate(['/initial']);
     }
 
-    clearSearch() {
-      
+    showSampleDialog() {
+      this.showSampleDialogFlag = true
+    }
+
+    downloadSampleDocx() {
+
+    }
+
+    downloadSamplePdf(){
+
     }
 
 }
-

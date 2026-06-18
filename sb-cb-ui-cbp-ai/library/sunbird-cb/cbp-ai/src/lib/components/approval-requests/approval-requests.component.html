@@ -38,7 +38,7 @@
 
 
     </mat-card>
-    <mat-card class="" style="z-index: 0;">
+    <mat-card class="" style="z-index: 0;padding:6px 0">
         <form [formGroup]="filterForm">
             <div class="search flex margin-right-m filter-container">
                 <div>
@@ -58,7 +58,7 @@
                             <mat-icon
                                 class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
                             <input class="sinput color-60 w-full" label="" formControlName="search"
-                                (keyup)="getApprovalRequests()" placeholder="Search by Request ID" type="Standard">
+                                (keyup)="onFilterChange()" placeholder="Search by Request Name" type="Standard">
 
                         </div>
 
@@ -75,7 +75,7 @@
                             </mat-label> -->
 
                             <mat-select formControlName="status" panelClass="select-search-panel"
-                                (selectionChange)="getApprovalRequests()">
+                                (selectionChange)="onFilterChange()">
 
                                 <!-- Search box -->
                                 <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
@@ -100,7 +100,7 @@
                             </mat-label> -->
 
                             <mat-select formControlName="time" panelClass="select-search-panel"
-                                (selectionChange)="applyFilters()">
+                                (selectionChange)="onFilterChange()">
 
                                 <!-- Search box -->
                                 <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
@@ -119,7 +119,7 @@
                 </div>
             </div>
         </form>
-        <p class="mt-10" style="font-family: 'Lato'; font-size: 18px; margin-left: 10px;">
+        <p class="mt-15" style="font-family: 'Lato'; font-size: 18px; margin-left: 10px;margin-top: 15px;">
             {{totalRecords}} Approval Requests</p>
         <table style="border-radius: 25px 25px 0 0;
         overflow: hidden;
@@ -129,7 +129,7 @@
             <!-- Document Column -->
             <ng-container matColumnDef="request_id">
                 <th mat-header-cell *matHeaderCellDef> Request Name </th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                <td mat-cell *matCellDef="let request" style="width: 25%;">
                     <div>
                         <div class="doc-title" *ngIf="request.request_name">{{ request.request_name }}</div>
                         <div class="doc-title" *ngIf="!request.request_name">{{ request.request_name }}</div>
@@ -152,13 +152,13 @@
             <!-- Date Column -->
             <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef> Date & Time</th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;"> {{ request.created_at | date: 'MMM d, y hh:mm:s a'}}
+                <td mat-cell *matCellDef="let request" style="width: 12%;"> {{ request.created_at | date: 'MMM d, y hh:mm:ss a'}}
                 </td>
             </ng-container>
 
             <ng-container matColumnDef="designation">
-                <th mat-header-cell *matHeaderCellDef> No of Designation </th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;">
+                <th mat-header-cell *matHeaderCellDef> No. of Designation </th>
+                <td mat-cell *matCellDef="let request" style="width: 10%; text-align: center;">
                     <span class="designation-count">{{request?.designation_count}}</span>
                 </td>
             </ng-container>
@@ -167,9 +167,8 @@
             <!-- Summary Status Column -->
             <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef> Request Status </th>
-                <td mat-cell *matCellDef="let request" style="width: 15%;">
-                    <span *ngIf="request.status === 'draft' || request.status === 'DRAFT' || request.status === 'revoke' || request.status === 'REVOKE' || request.status === 'REVOKED' || request.status === 'revoked'" class="draft"> {{ request.status | titlecase
-                        }} </span>
+                <td mat-cell *matCellDef="let request" style="width: 10%;">
+                    <span *ngIf="request.status === 'draft' || request.status === 'DRAFT' || request.status === 'revoke' || request.status === 'REVOKE' || request.status === 'REVOKED' || request.status === 'revoked'" class="draft"> Revoked </span>
                     <span *ngIf="request.status === 'approved' || request.status === 'APPROVED'" class="success"> {{ request.status | titlecase
                         }} </span>
                     <span *ngIf="request.status === 'pending' || request.status === 'PENDING'" class="in-progress"> {{ request.status |
@@ -246,7 +245,40 @@
 
     <!-- Error Box -->
     <div class="error-box">
-      {{rejectionDetail?.reviewer_comment}}
+      {{rejectionDetail?.reviewer_comments}}
+    </div>
+
+  </div>
+</div>
+
+<div class="popup-overlay" *ngIf="showRevokeRequestPopupFlag">
+  <div class="popup-card">
+    
+    <!-- Close Button -->
+    <button class="close-btn" (click)="closeRevokePopup()">&times;</button>
+
+    <!-- Title -->
+    <h2>Revoke Request</h2>
+
+    <!-- Subtitle -->
+    <p class="subtitle">
+     <strong>Are you sure you want to revoke this request? </strong><br><br>
+     Once revoked, you will not be able to make any changes to this request. If you wish to proceed later, you will need to create a new request and submit it again, Do you want to continue?  <br><br>
+     
+    </p>
+   
+
+   <div class="popup-footer">
+        <div>
+            <input class="btn-active-gray" mat-raised-button type="button" value="No" (click)="closeRevokePopup()" />
+        </div>
+        <div class="ml-10">
+            <button  mat-raised-button
+               class="btn-active" (click)="revokeApprovalRequestConfirm()">
+
+                Yes
+            </button>
+        </div>
     </div>
 
   </div>

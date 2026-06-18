@@ -59,7 +59,8 @@ export class ApprovalRequestsComponent {
     { "code": "", label: "All Status" },
     { "code": "pending", label: "Pending" },
     { "code": "approved", label: "Approved" },
-    { "code": "rejected", label: "Rejected" }
+    { "code": "rejected", label: "Rejected" },
+    { "code": "draft", label: "Revoked" },
   ];
   time = [
     { "code": "", label: "All Time" },
@@ -73,7 +74,9 @@ export class ApprovalRequestsComponent {
   pageSize = 10;
   totalRecords = 0;
   showRejectPopupFlag = false
+  showRevokeRequestPopupFlag = false
   rejectionDetail:any
+  revokeRequestedRequest:any 
   constructor(public dialog: MatDialog, public sharedService: SharedService,
     public snackBar: MatSnackBar,
     private fb: FormBuilder,
@@ -382,11 +385,17 @@ export class ApprovalRequestsComponent {
   }
 
   revokeApprovalRequest(request: any): void {
+    this.showRevokeRequestPopupFlag = true
+    this.revokeRequestedRequest = request
     console.log('request--', request)
+   
+  }
+
+  revokeApprovalRequestConfirm() {
     this.loading = true
     let reqBody =
     {
-      "request_id": request?.id
+      "request_id": this.revokeRequestedRequest?.id
     }
 
     this.sharedService.revokeApprovalRequest(reqBody).subscribe({
@@ -394,6 +403,11 @@ export class ApprovalRequestsComponent {
       next: (res: any) => {
         console.log('res', res)
         this.loading = false
+         this.snackBar.open('Request Revoked Successfully', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-success']
+        });
+        this.showRevokeRequestPopupFlag = false
         this.getApprovalRequests()
       },
       error: () => {
@@ -406,6 +420,9 @@ export class ApprovalRequestsComponent {
     });
   }
 
+  closeRevokePopup() {
+    this.showRevokeRequestPopupFlag = false
+  }
   onOpened(opened: boolean) {
     this.panelOpen = opened;
   }
@@ -481,6 +498,11 @@ export class ApprovalRequestsComponent {
   clearSearch() {
     this.searchText = '';
     this.applyFilters();
+  }
+
+  onFilterChange() {
+    this.pageIndex = 0;
+    this.getApprovalRequests();
   }
 
   onPageChange(event: any) {

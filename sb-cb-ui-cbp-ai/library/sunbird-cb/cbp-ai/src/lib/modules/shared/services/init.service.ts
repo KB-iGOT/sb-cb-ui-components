@@ -3,7 +3,7 @@ import { APP_BASE_HREF } from '@angular/common'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { Inject, Injectable } from '@angular/core'
 /* tslint:disable */
-import _ from 'lodash'
+import * as _ from 'lodash'
 import { map } from 'rxjs/operators'
 import { Observable, Subscription } from 'rxjs'
 
@@ -27,6 +27,7 @@ export class InitService {
 }
 
   private async setConfiDetails(configDetails: any = null): Promise<any> {
+    
     if (configDetails) {
       this.configDetails = configDetails
       this.baseUrl = configDetails.portalURL

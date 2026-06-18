@@ -13,114 +13,293 @@
                 <div>
                     <div class="suggest-course-control">
                         <div>
-                            <input class="btn-active" type="button" value="Cancel" (click)="cancel()"/>
+                            <input class="btn-active" type="button" value="Cancel" (click)="cancel()" />
                         </div>
                         <div>
-                            <input [disabled]="selectFilterCourses?.length ? false : true" [ngClass]="selectFilterCourses?.length ? 'btn-active':'btn-disable'" type="button" value="Add" (click)="addCourses()"/>
+                            <input [disabled]="selectFilterCourses?.length ? false : true"
+                                [ngClass]="selectFilterCourses?.length ? 'btn-active':'btn-disable'" type="button"
+                                value="Add" (click)="addCourses()" />
                         </div>
                     </div>
                 </div>
             </div>
             <div class="mt-4">
                 <div class="search-filter-section">
-                    <div class="search flex margin-right-m">
-                        <label class="label">Search</label>
-                        <div>
-                            <div class="search-container">
-                                <div class="rsearch">
-                                    <mat-icon
-                                        class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
-                                    <input style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 35px;"
-                                        class="sinput color-60 w-full" [(ngModel)]="searchText"
-                                        (keyup.enter)="searchData()" label=""
-                                        placeholder="Search Courses from iGOT" type="Standard">
-                                    <mat-icon *ngIf="searchText.trim().length > 0" 
-                                        class="color-60 clear-icon mat-icon notranslate material-icons mat-icon-no-color cursor-pointer" 
-                                        (click)="clearSearch()">clear</mat-icon>
+                    <form [formGroup]="filterForm" class="filters-container">
+                        <div class="container">
+
+                            <div class="section-header-improved mt-3">
+                                <div class="search-and-buttons-container">
+                                    <div>
+                                        <label>Search Courses</label>
+                                    </div>
+                                    <div class="search-container-compact">
+                                        <div class="rsearch">
+                                            <mat-icon class="search-icon">search</mat-icon>
+                                            <input class="sinput-compact" [value]="searchText"
+                                                (input)="onSearchChange($any($event.target).value)"
+                                                placeholder="Search Courses" type="text">
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div class="pl-2">
-                                    <input [disabled]="!searchText.trim()" [ngClass]="searchText.trim() ? 'btn-active':'btn-disable'" type="button" value="Search" (click)="searchData()" />
+
+
+                                <div class="search-and-buttons-container">
+                                    <div style="margin-left: 10px;">
+                                        <label>Select Competency</label>
+                                    </div>
+                                    <div>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>
+                                                {{ filterForm.value.competency?.length ? '' : 'Competency' }}
+                                            </mat-label>
+
+                                            <mat-select formControlName="competency" multiple
+                                                panelClass="select-search-panel" (selectionChange)="applyFilters()">
+
+                                                <!-- Search box -->
+                                                <input
+                                                    style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                                    matInput placeholder="Search Competency"
+                                                    (click)="$event.stopPropagation()"
+                                                    (keydown)="$event.stopPropagation()"
+                                                    (keyup)="filterList($any($event.target).value, 'competency')" />
+
+                                                <!-- Values -->
+                                                <mat-option *ngFor="let r of filteredCompetency" [value]="r">
+                                                    {{ r }}
+                                                </mat-option>
+
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                </div>
+                                <div class="search-and-buttons-container">
+                                    <div style="margin-left: 10px;">
+                                        <label>Select Rating</label>
+                                    </div>
+                                    <div>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>
+                                                {{ filterForm.value.rating?.length ? '' : 'Rating' }}
+                                            </mat-label>
+
+                                            <mat-select formControlName="rating" multiple
+                                                panelClass="select-search-panel" (selectionChange)="applyFilters()">
+
+                                                <!-- Search box -->
+                                                <input
+                                                    style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                                    matInput placeholder="Search Reatings"
+                                                    (click)="$event.stopPropagation()"
+                                                    (keydown)="$event.stopPropagation()"
+                                                    (keyup)="filterList($any($event.target).value, 'rating')" />
+
+                                                <!-- Values -->
+                                                <mat-option *ngFor="let r of filteredRatings" [value]="r">
+                                                    {{ r }}
+                                                </mat-option>
+
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+                            <div class="section-header-improved-sec-2 mt-4">
+                                <div class="search-and-buttons-container">
+                                    <div style="margin-left: 10px;">
+                                        <label>Select Language</label>
+                                    </div>
+                                    <div>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>
+                                                {{ filterForm.value.language?.length ? '' : 'Language' }}
+                                            </mat-label>
+
+                                            <mat-select formControlName="language" multiple
+                                                panelClass="select-search-panel" (selectionChange)="applyFilters()">
+
+                                                <!-- Search box -->
+                                                <input
+                                                    style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                                    matInput placeholder="Search Languages"
+                                                    (click)="$event.stopPropagation()"
+                                                    (keydown)="$event.stopPropagation()"
+                                                    (keyup)="filterList($any($event.target).value, 'language')" />
+
+                                                <!-- Values -->
+                                                <mat-option *ngFor="let r of filteredLanguages" [value]="r">
+                                                    {{ r }}
+                                                </mat-option>
+
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <div class="search-and-buttons-container">
+                                    <div style="margin-left: 10px;">
+                                        <label>Select Duration</label>
+                                    </div>
+                                    <div>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>
+                                                {{ filterForm.value.duration?.length ? '' : 'Duration' }}
+                                            </mat-label>
+
+                                            <mat-select formControlName="duration" multiple
+                                                panelClass="select-search-panel" (selectionChange)="applyFilters()">
+
+                                                <!-- Search box -->
+                                                <input
+                                                    style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                                    matInput placeholder="Search Duration"
+                                                    (click)="$event.stopPropagation()"
+                                                    (keydown)="$event.stopPropagation()"
+                                                    (keyup)="filterList($any($event.target).value, 'duration')" />
+
+                                                <!-- Values -->
+                                                <mat-option *ngFor="let d of durations" [value]="d.value">
+                                                    {{ d.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <div class="search-and-buttons-container">
+                                    <div style="margin-left: 10px;">
+                                        <label>Select Provider</label>
+                                    </div>
+                                    <div>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>
+
+                                                {{ filterForm.value.provider?.length ? '' : 'Provider' }}
+                                            </mat-label>
+
+                                            <mat-select formControlName="provider" multiple
+                                                panelClass="select-search-panel" (selectionChange)="applyFilters()">
+
+                                                <!-- Search box -->
+                                                <input
+                                                    style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;"
+                                                    matInput placeholder="Search Provider"
+                                                    (click)="$event.stopPropagation()"
+                                                    (keydown)="$event.stopPropagation()"
+                                                    (keyup)="filterList($any($event.target).value, 'provider')" />
+
+                                                <!-- Values -->
+                                                <mat-option *ngFor="let r of filteredProviders" [value]="r">
+                                                    {{ r }}
+                                                </mat-option>
+
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 45px;margin-left: 20px;">
+                                    <input class="btn-active" type="button" value="Reset All Filters"
+                                        (click)="resetFilters()" />
+                                </div>
+                            </div>
+                            <!-- <div class="mt-4">
+                                <div style="font-size:16px;font-weight:bold;color:#000">
+                                    Filtered Course Count : {{filterdCourses?.length}}
                                 </div>
                             </div>
 
 
+                            <div class="mt-2 sub-heading" *ngIf="filterdCourses?.length === 0 ">
+                                <p>No Data Found</p>
+                            </div> -->
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
-            <div class="mt-4">
+            <div class="mt-4" *ngIf="suggestedCourses?.length > 0">
                 <div class="results-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <mat-checkbox [checked]="false" (change)="selectAllCourses($event)">Select All Courses</mat-checkbox>
+                        <mat-checkbox [checked]="false" (change)="selectAllCourses($event)">Select All
+                            Courses</mat-checkbox>
                     </div>
                     <div class="results-info" *ngIf="totalCount > 0">
-                        <span class="text-muted">Showing {{ startItem }} - {{ endItem }} of {{ totalCount }} courses</span>
+                        <span class="text-muted">Showing {{ startItem }} - {{ endItem }} of {{ totalCount }}
+                            courses</span>
                     </div>
                 </div>
             </div>
             <div class="course-card-list">
                 <div class="course-card-container mt-2" *ngFor="let item of suggestedCourses">
-                  <div>
-                    <div class="image-container">
-                      <!-- ✅ Checkbox -->
-                      <mat-checkbox [checked]="checkIfCourseExists(item)" 
-                        class="image-checkbox"
-                        (change)="selectedFilterCourses($event, item)">
-                      </mat-checkbox>
-              
-                      <!-- ✅ Image -->
-                      <img [src]="item?.posterImage" (error)="onImgError($event)" />
-                    </div>
-              
-                    <div class="mt-2" style="width: 100px">
-                      <div class="course-pill">
-                        <div class="course-pill-text">
-                            <span><img src="assets/icons/course.svg"></span>&nbsp;<span>Course</span>
-                        </div>
-                      </div>
-                    </div>
-              
-                    <div class="sub-heading mt-2 cursor-pointer" (click)="redirectToCoure(item)">
-                      <p>{{ item?.name }}</p>
-                    </div>
-                    <div class="mt-2 desc">
-                      <p>{{ item?.description | slice: 0:200 }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Pagination Controls -->
-              <div class="pagination-controls mt-4" *ngIf="totalPages > 1" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-                <button mat-icon-button [disabled]="!hasPreviousPage" (click)="goToFirstPage()" title="First Page">
-                  <mat-icon>first_page</mat-icon>
-                </button>
-                
-                <button mat-icon-button [disabled]="!hasPreviousPage" (click)="goToPreviousPage()" title="Previous Page">
-                  <mat-icon>chevron_left</mat-icon>
-                </button>
-                
-                <span class="pagination-info" style="margin: 0 15px;">
-                  Page {{ currentPage + 1 }} of {{ totalPages }}
-                </span>
-                
-                <button mat-icon-button [disabled]="!hasNextPage" (click)="goToNextPage()" title="Next Page">
-                  <mat-icon>chevron_right</mat-icon>
-                </button>
-                
-                <button mat-icon-button [disabled]="!hasNextPage" (click)="goToLastPage()" title="Last Page">
-                  <mat-icon>last_page</mat-icon>
-                </button>
-              </div>
+                    <div>
+                        <div class="image-container">
+                            <!-- ✅ Checkbox -->
+                            <mat-checkbox [checked]="checkIfCourseExists(item)" class="image-checkbox"
+                                (change)="selectedFilterCourses($event, item)">
+                            </mat-checkbox>
 
-              <!-- No Results Message -->
-              <div class="no-results mt-4" *ngIf="!loading && suggestedCourses.length === 0" style="text-align: center; padding: 20px;">
-                <p class="text-muted">{{ searchText.trim() ? 'No courses found for your search.' : 'No courses available.' }}</p>
-                <button mat-button color="primary" *ngIf="searchText.trim()" (click)="clearSearch()">Clear Search</button>
-              </div>
+                            <!-- ✅ Image -->
+                            <img [src]="item?.posterImage" (error)="onImgError($event)" />
+                        </div>
+
+                        <div class="mt-2" style="width: 100px">
+                            <div class="course-pill">
+                                <div class="course-pill-text">
+                                    <span><img src="assets/icons/course.svg"></span>&nbsp;<span>Course</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sub-heading mt-2 cursor-pointer" (click)="redirectToCoure(item)">
+                            <p>{{ item?.name }}</p>
+                        </div>
+                        <div class="mt-2 desc">
+                            <p>{{ item?.description | slice: 0:200 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination-controls mt-4" *ngIf="totalPages > 1"
+                style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                <button mat-icon-button [disabled]="!hasPreviousPage" (click)="goToFirstPage()" title="First Page">
+                    <mat-icon>first_page</mat-icon>
+                </button>
+
+                <button mat-icon-button [disabled]="!hasPreviousPage" (click)="goToPreviousPage()"
+                    title="Previous Page">
+                    <mat-icon>chevron_left</mat-icon>
+                </button>
+
+                <span class="pagination-info" style="margin: 0 15px;">
+                    Page {{ currentPage + 1 }} of {{ totalPages }}
+                </span>
+
+                <button mat-icon-button [disabled]="!hasNextPage" (click)="goToNextPage()" title="Next Page">
+                    <mat-icon>chevron_right</mat-icon>
+                </button>
+
+                <button mat-icon-button [disabled]="!hasNextPage" (click)="goToLastPage()" title="Last Page">
+                    <mat-icon>last_page</mat-icon>
+                </button>
+            </div>
+
+            <!-- No Results Message -->
+            <div class="no-results mt-4" *ngIf="!loading && suggestedCourses.length === 0"
+                style="text-align: center; padding: 20px;">
+                <p class="text-muted">{{ searchText.trim() ? 'No courses found for your search.' : 'No courses
+                    available.' }}</p>
+                <button mat-button color="primary" *ngIf="searchText.trim()" (click)="clearSearch()">Clear
+                    Search</button>
+            </div>
         </mat-card>
     </div>
-</div> 
+</div>
 <div class="overlay-loader" *ngIf="loading">
     <mat-spinner diameter="50"></mat-spinner>
 </div>

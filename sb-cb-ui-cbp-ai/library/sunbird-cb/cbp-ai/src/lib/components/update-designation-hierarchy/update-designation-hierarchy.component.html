@@ -16,7 +16,12 @@
                 <mat-icon>drag_indicator</mat-icon>
             </div>
 
-            <div class="designation-name">{{ item.name }}</div>
+            <div class="designation-name">
+                <span style="color:#000">{{ item.name }}</span><br/>
+                <span class="wing-division-font">Wing/Division - <span *ngIf="item.wing_division_section">{{ item.wing_division_section }}</span>
+                <span class="wing-division-font" *ngIf="!item.wing_division_section">N/A</span></span>
+            </div>
+
 
             <!-- Custom Select -->
             <div class="custom-select">

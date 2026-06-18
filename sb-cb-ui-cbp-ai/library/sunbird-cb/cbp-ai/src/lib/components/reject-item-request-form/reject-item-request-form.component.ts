@@ -50,7 +50,7 @@ export class RejectItemRequestFormComponent implements OnInit {
     }
 
     const payload = {
-      request_id: this.data?.requestData?.demand_id || this.data?.requestData?.demand_id,
+      request_id: this.data?.requestData?.demand_id || this.data?.requestData?.id,
       rejection_comment: this.rejectRequestForm.value.rejection_comment,
       item_id: this.data?.element?.id,
     };

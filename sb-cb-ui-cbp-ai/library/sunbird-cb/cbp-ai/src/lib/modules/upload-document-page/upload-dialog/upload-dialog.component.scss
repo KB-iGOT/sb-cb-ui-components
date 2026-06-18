@@ -10,6 +10,12 @@
     color: #fff;
 }  
 
+.primary-btn-disabled {
+    background-color: #1B4CA1;
+    color: #fff;
+    opacity: 0.6;
+}  
+
 .disclaimer-text p{
   font-size: 16px;
   font-family: Lato;
@@ -33,4 +39,84 @@
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.document-select {
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 18px;
+}
+
+
+:host ::ng-deep .mat-select-arrow-wrapper {
+  margin-top: 5px !important;
+}
+
+:host ::ng-deep  .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: #ccc; /* gray */
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline.mat-focused
+.mat-form-field-outline-thick {
+  color: #1B4CA1; /* Material blue */
+  border-color: #1B4CA1 !important;
+}
+
+::ng-deep .select-search-panel .mat-option.mat-selected:not(.mat-option-disabled) {
+  background-color: #1B4CA1 !important;
+  color: #ffffff !important;
+}
+
+
+/* Apply border and rounded corners to the whole form field */
+:host ::ng-deep .mat-form-field-appearance-outline {
+  border-radius: 10px !important; /* Apply rounded corners to the whole outline */
+  border: 1px solid #ccc; /* Add border to the entire form field */
+}
+
+:host ::ng-deep .mat-form-field-focused .mat-form-field-appearance-outline {
+  border-color: #1B4CA1 !important; /* Blue border when focused */
+}
+
+/* Apply the left border with proper radius to start */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-start {
+ // border-left: 1px solid #ccc;
+  border-radius: 10px 0 0 10px !important; /* Rounded left corner */
+  border: none !important;
+}
+
+/* Apply the right border with proper radius to end */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-end {
+  border-right: none !important;
+  border: none !important;
+  border-radius: 0 10px 10px 0 !important; /* Rounded right corner */
+}
+
+/* Apply top and bottom borders for consistency */
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-gap {
+  // border-top: 1px solid #ccc;
+  // border-bottom: 1px solid #ccc;
+  border: none !important;
+  border-radius: 10px !important; /* Apply same radius to the gap */
+}
+
+
+
+
+
+:host::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+  background-color: transparent !important;
+}
+
+.error {
+  color:#ff0000;
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-subscript-wrapper {
+  padding:0 !important;
+}
+
+:host ::ng-deep .mat-form-field {
+  padding:0 !important;
+  height: auto !important;
 }

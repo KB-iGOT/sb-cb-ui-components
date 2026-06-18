@@ -121,12 +121,12 @@
     line-height: normal;
     display: flex;
     height: 34px;
-    padding: 0px 16px;
+    // padding: 0px 16px;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     border: none;
-    width: 100%;
+    width: auto;
 }
 
 .btn-gray:hover {
@@ -147,7 +147,7 @@
 }
 
 .mt-10 {
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .mt-20 {
@@ -378,7 +378,7 @@ text-underline-position: from-font;
 }
 
 :host ::ng-deep .mat-select-arrow-wrapper {
-  margin-top: 5px !important;
+  margin-top: 15px !important;
 }
 
 :host ::ng-deep  .mat-form-field-appearance-outline .mat-form-field-outline {
@@ -461,6 +461,7 @@ text-underline-position: from-font;
 
 :host ::ng-deep .language-select .mat-select-value {
   color: white !important;
+  margin-top: 12px !important;
 }
 
 :host ::ng-deep .custom-pagination {
@@ -551,4 +552,34 @@ text-underline-position: from-font;
   color: #c53030;
   font-size: 18px;
   line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popup-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+}
+
+.btn-active-gray {
+    border-radius: var(--Radius-Full-Round, 9999999px);
+opacity: 1;
+background: var(--Primary-KB-Primary-Light, #5b5a5ab3);
+color: var(--white-kb-white-100, #FFF);
+text-align: center;
+
+/* Button */
+font-family: Lato;
+font-size: 14px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+display: flex;
+height: 32px;
+padding: 0px 16px;
+justify-content: center;
+align-items: center;
+gap: 8px;
+border: none;
 }

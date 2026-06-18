@@ -68,7 +68,9 @@ const API_END_POINTS = {
   MDO_ADD_USER_COURSE: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
   MDO_SUGGESTED_COURSE_LIST: 'apis/proxies/v8/ai/cbp/v1/course/suggestions',
   MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update',
-  REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry'
+  REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry',
+  MDO_ADD_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
+  MDO_DELETE_APPROVE_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/remove'
 
 }
 
@@ -472,6 +474,13 @@ export class SharedService {
       }))
   }
 
+  addMDOCourse(reqBody) {
+     return this.http.put<any>(`${this.mdoBaseUrl}${API_END_POINTS.MDO_ADD_COURSE}`, reqBody)
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
   getCourse(role_mapping_id) {
     const headers = this.headers
     return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_COURSES}?role_mapping_id=${role_mapping_id}`, { headers })
@@ -497,12 +506,21 @@ export class SharedService {
     };
 
     console.log('getIGOTSuggestedCourses final request:', JSON.stringify(req, null, 2));
+    if (this.fromMdoPortal) {
 
-    const headers = this.headers
-    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, req, { headers })
-      .pipe(map((response: any) => {
-        return response
-      }))
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      const headers = this.headers
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SUGGESTED_COURSE_LIST}`, req, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
+    
   }
 
   getSuggestedCourses(role_mapping_id) {
@@ -888,13 +906,27 @@ export class SharedService {
       }))
   }
 
-  deleteRecommendedCourse(roleMappingId: string, courseIdentifier: string) {
+  deleteRecommendedCourse(roleMappingId: string, courseIdentifier: string , requestId?: string) {
     const headers = this.headers;
 
-    return this.http.delete<any>(
+    if(this.fromMdoPortal) {
+      let reqBody = {
+          "request_id": requestId,
+          "item_id": roleMappingId,
+          "identifier": courseIdentifier
+        }
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_DELETE_APPROVE_COURSE}`, reqBody)
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      return this.http.delete<any>(
       `${this.baseUrl}${API_END_POINTS.DELETE_COURSE_RECOMMENDATION}/${roleMappingId}/course/${courseIdentifier}`,
       { headers }
     );
+    }
+
+    
   }
 
   getCbpPlansWithSelectedCourses(): any[] {

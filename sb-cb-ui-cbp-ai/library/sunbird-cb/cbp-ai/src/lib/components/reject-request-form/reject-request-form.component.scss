@@ -9,10 +9,20 @@
 .sub-heading p{
     color: #000;
     font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.sub-heading-main p{
+  color: #000;
+    font-family: Montserrat;
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
+
 }
 
 .radio-group {
@@ -131,7 +141,7 @@ resize: none;
 
   .btn-disable {
         border-radius: var(--Radius-Full-Round, 9999999px);
-    opacity: 0.9;
+    opacity: 0.7;
     background: var(--Primary-KB-Primary-Light, #1B4CA1);
     color: #444 !important;
 text-align: center;

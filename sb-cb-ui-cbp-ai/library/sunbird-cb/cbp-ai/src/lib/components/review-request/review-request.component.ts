@@ -43,7 +43,8 @@ export class ReviewRequestComponent {
   portalData: any
   activeRowElement: any
   requestData: any
-  constructor(public sharedService: SharedService, private snackBar: MatSnackBar, private route: ActivatedRoute, private router: Router,
+  requestId:any
+  constructor(public sharedService: SharedService, public snackBar: MatSnackBar, public route: ActivatedRoute, public router: Router,
     private dialog: MatDialog,
   ) {
 
@@ -52,25 +53,30 @@ export class ReviewRequestComponent {
   ngOnInit() {
     this.portalData = this.route.snapshot.data['parentData']
     const requestId = this.route.snapshot.paramMap.get('request_id');
+    this.requestId = this.route.snapshot.paramMap.get('request_id');
 
-    if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+    const source = this.route.snapshot.queryParamMap.get('source');
+
+    if (source === 'mdo') {
       this.portalData?.parentAppData?.fromPortal === 'mdo'
-
-
-    ) {
       this.sharedService.fromMdoPortal = true
-      this.requestData = this.portalData?.parentAppData.requestRowData
-      this.sharedService.requestData = this.portalData?.parentAppData.requestRowData
-      this.sharedService.mdoBaseUrl = this.portalData?.configDetails?.mdoPath
-      this.sharedService.mdoConfigDetails = this.portalData?.configDetails
-      this.sharedService.baseUrl = this.portalData?.configDetails?.mdoPath + "/"
-      this.sharedService.configDetails = this.portalData?.configDetails
+
       this.getMDORequestDetails(requestId);
     } else {
-      if (requestId) {
-        this.getRequestDetails(requestId);
-      }
+      this.getRequestDetails(requestId);
     }
+
+    // if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
+    //   this.portalData?.parentAppData?.fromPortal === 'mdo'
+
+
+    // ) {
+
+    // } else {
+    //   if (requestId) {
+    //     this.getRequestDetails(requestId);
+    //   }
+    // }
 
 
   }
@@ -78,9 +84,12 @@ export class ReviewRequestComponent {
 
   getRequestDetails(requestId) {
     this.loading = true
+
+
     this.sharedService.viewApprovalRequests(requestId).subscribe({
 
       next: (res: any) => {
+
         console.log('res', res)
         this.request = res
         this.loading = false
@@ -102,10 +111,28 @@ export class ReviewRequestComponent {
 
   getMDORequestDetails(requestId) {
     this.loading = true
+
+    this.sharedService.mdoBaseUrl = this.portalData?.configDetails?.mdoPath
+    this.sharedService.mdoConfigDetails = this.portalData?.configDetails
+    this.sharedService.baseUrl = this.portalData?.configDetails?.mdoPath + "/"
+    this.sharedService.configDetails = this.portalData?.configDetails
     this.sharedService.viewMDOApprovalRequests(requestId).subscribe({
 
       next: (res: any) => {
         console.log('res', res)
+        if (res && res.status &&
+          (res.status?.toLowerCase() !== 'pending' && 
+            res.status?.toLowerCase() !== 'approved' && 
+            res.status?.toLowerCase() !== 'rejected')
+        ) {
+          this.snackBar.open('This Request is already revoked', 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-error']
+          });
+          this.router.navigate(['/app/home/ai-cbp-requests']);
+        }
+        this.requestData = res
+        this.sharedService.requestData = res
         this.request = res
         this.loading = false
         this.dataSource = new MatTableDataSource(res?.items);
@@ -160,29 +187,26 @@ export class ReviewRequestComponent {
   }
 
   backToApprovalRequest() {
-    if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-      this.portalData?.parentAppData?.fromPortal === 'mdo'
-
-    ) {
-      history.back();
+    if (this.sharedService.fromMdoPortal) {
+      this.router.navigate(['/app/home/ai-cbp-requests']);
     } else {
       this.router.navigate(['/ai/approve-requests']);
     }
 
   }
 
- applyFilter(): void {
+  applyFilter(): void {
 
-  const filterValue = (this.searchText || '')
-    .trim()
-    .toLowerCase();
+    const filterValue = (this.searchText || '')
+      .trim()
+      .toLowerCase();
 
-  this.dataSource.filter = filterValue;
+    this.dataSource.filter = filterValue;
 
-  if (this.dataSource.paginator) {
-    this.dataSource.paginator.firstPage();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
-}
 
   clearSearch() {
     this.searchText = '';
@@ -195,33 +219,33 @@ export class ReviewRequestComponent {
 
   initializeTableFilter(): void {
 
-  this.dataSource.filterPredicate = (data: any, filter: string): boolean => {
+    this.dataSource.filterPredicate = (data: any, filter: string): boolean => {
 
-    const designation =
-      (data?.designation_name || '').toLowerCase();
+      const designation =
+        (data?.designation_name || '').toLowerCase();
 
-    const wing =
-      (data?.wing_division_section || '').toLowerCase();
+      const wing =
+        (data?.wing_division_section || '').toLowerCase();
 
-    const responsibilities =
-      (data?.role_responsibilities || [])
-        .join(' ')
-        .toLowerCase();
+      const responsibilities =
+        (data?.role_responsibilities || [])
+          .join(' ')
+          .toLowerCase();
 
-    const activities =
-      (data?.activities || [])
-        .join(' ')
-        .toLowerCase();
+      const activities =
+        (data?.activities || [])
+          .join(' ')
+          .toLowerCase();
 
-    const competencies =
-      (data?.competencies || [])
-        .map((c: any) =>
-          `${c?.theme || ''} ${c?.sub_theme || ''}`
-        )
-        .join(' ')
-        .toLowerCase();
+      const competencies =
+        (data?.competencies || [])
+          .map((c: any) =>
+            `${c?.theme || ''} ${c?.sub_theme || ''}`
+          )
+          .join(' ')
+          .toLowerCase();
 
-    const combinedText = `
+      const combinedText = `
       ${designation}
       ${wing}
       ${responsibilities}
@@ -229,9 +253,9 @@ export class ReviewRequestComponent {
       ${competencies}
     `;
 
-    return combinedText.includes(filter);
-  };
-}
+      return combinedText.includes(filter);
+    };
+  }
 
 
   openFullList(element: any, type: any) {
@@ -254,14 +278,16 @@ export class ReviewRequestComponent {
 
 
   editRoleMapping(element: any, menuTrigger: MatMenuTrigger) {
-     menuTrigger.closeMenu();
+    if(menuTrigger) {
+      menuTrigger.closeMenu();
+    }    
     this.activeRowElement = element
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
     const dialogRef = this.dialog.open(EditCbpPlanComponent, {
       width: '1000px',
-      data: { requestData: this.requestData, element: element },
+      data: { requestData: this.requestData, element: element, fromLibrary: true },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height
       maxHeight: '80vh',           // Prevent it from going beyond viewport
@@ -275,8 +301,7 @@ export class ReviewRequestComponent {
 
       // }
       const requestId = this.route.snapshot.paramMap.get('request_id');
-      if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-        this.portalData?.parentAppData?.fromPortal === 'mdo'
+      if (this.sharedService.fromMdoPortal
       ) {
         this.getMDORequestDetails(requestId);
       }
@@ -284,9 +309,11 @@ export class ReviewRequestComponent {
   }
 
   viewCBPPlan(element: any, menuTrigger: MatMenuTrigger) {
-     menuTrigger.closeMenu();
+    menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('View CBP Plan clicked', element);
+    element['fromRequestPage'] = true
+    element['requestStatus'] = this.request?.status
     const dialogRef = this.dialog.open(ViewCbpPlanComponent, {
       width: '1000px',
       data: element,
@@ -306,11 +333,17 @@ export class ReviewRequestComponent {
 
   viewCourseRecommendation(element, menuTrigger: MatMenuTrigger) {
     console.log('View Course Recommendation clicked', element);
-     menuTrigger.closeMenu();
+    if (menuTrigger) {
+      menuTrigger.closeMenu();
+    }
+
     this.activeRowElement = element
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
+    element['fromRequestPage'] = true
+    element['requestId'] = this.requestId
+    element['requestStatus'] = this.request?.status
     const dialogRef = this.dialog.open(ViewCourseRecommendationComponent, {
       width: '1000px',
       data: element,
@@ -326,8 +359,7 @@ export class ReviewRequestComponent {
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
         const requestId = this.route.snapshot.paramMap.get('request_id');
-        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        if (this.sharedService.fromMdoPortal
         ) {
           this.getMDORequestDetails(requestId);
         }
@@ -349,15 +381,15 @@ export class ReviewRequestComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === 'saved') {
+      if (result === 'success') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
         const requestId = this.route.snapshot.paramMap.get('request_id');
-        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        if (this.sharedService.fromMdoPortal
         ) {
           this.getMDORequestDetails(requestId);
+          this.router.navigate(['/app/home/ai-cbp-requests']);
         }
 
       }
@@ -378,15 +410,15 @@ export class ReviewRequestComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === 'saved') {
+      if (result === 'success') {
         console.log('Changes saved!');
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
         const requestId = this.route.snapshot.paramMap.get('request_id');
-        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        if (this.sharedService.fromMdoPortal
         ) {
           this.getMDORequestDetails(requestId);
+          this.router.navigate(['/app/home/ai-cbp-requests']);
         }
 
       }
@@ -398,7 +430,7 @@ export class ReviewRequestComponent {
     console.log('approveAndPublish clicked', element);
 
     console.log('View Course Recommendation clicked', element);
-     menuTrigger.closeMenu();
+    menuTrigger.closeMenu();
     this.activeRowElement = element
     console.log('Edit Role Mapping clicked', element);
     // Navigate or open modal
@@ -419,8 +451,7 @@ export class ReviewRequestComponent {
         // Refresh data or show a toast here
         console.log(this.sharedService.cbpPlanFinalObj)
         const requestId = this.route.snapshot.paramMap.get('request_id');
-        if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-          this.portalData?.parentAppData?.fromPortal === 'mdo'
+        if (this.sharedService.fromMdoPortal
         ) {
           this.getMDORequestDetails(requestId);
         }
@@ -457,8 +488,7 @@ export class ReviewRequestComponent {
             }
           );
 
-          if (this.portalData && this.portalData?.parentAppData && this.portalData?.parentAppData?.fromPortal &&
-            this.portalData?.parentAppData?.fromPortal === 'mdo'
+          if (this.sharedService.fromMdoPortal
           ) {
             this.getMDORequestDetails(requestId);
           }

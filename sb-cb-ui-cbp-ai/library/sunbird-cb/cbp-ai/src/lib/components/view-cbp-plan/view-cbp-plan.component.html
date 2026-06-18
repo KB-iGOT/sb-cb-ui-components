@@ -142,13 +142,13 @@
             </div>
     </div>
     <div class="popup-footer">
-        <div *ngIf="!fromMdo">
+        <div *ngIf="!(data?.fromRequestPage)">
             <input class="btn-active" type="button" value="Generate Course Recommendation" (click)="generateCourseRecommendation()"/>
         </div>
         <div>
             <input class="btn-active" type="button" value="Download" (click)="downloadPDF()"/>
         </div>
-        <div>
+        <div *ngIf="!(data?.fromRequestPage) || (fromMdo && data?.requestStatus.toLowerCase() === 'pending')">
             <input class="btn-active" type="button" value="Edit" (click)="editCBPPlan()"/>
         </div>
     </div>

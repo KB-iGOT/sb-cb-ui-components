@@ -1,8 +1,11 @@
 <div class="view-cbp-plan">
     <div class="popup-container">
         <div class="popup-header">
-            <div>
+            <div style="margin: 5px 0;">
                 <div class="heading">Approve & Publish Plan</div>
+                <div class="sub-heading">
+                    <p>Enter the plan details to approve and publish this request.</p>
+                </div>
             </div>
             <div class="cursor-pointer" (click)="closeDialog()">
                 <mat-icon>close</mat-icon>
@@ -13,26 +16,49 @@
         <mat-card class="mt-1">
             <div class="mt-2 section">
                 <div class="sub-heading">
-                    <p>Name of Plan</p>
+                    <p>Name of Plan <span class="error">*</span></p>
                 </div>
                 <div class="mt-4 additional-details">
                     <input type="text" formControlName="request_name" [value]="" placeholder="Enter plan name"
+                        maxlength="70"
                         style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width:96%;font-size: 14px;font-family: 'Lato';">
+                    <mat-hint align="end" class="request_name_counter">
+                        {{ request_name?.value?.length || 0 }}/70
+                    </mat-hint>
+
+                    <mat-error class="error" *ngIf="request_name?.hasError('required') && request_name?.touched">
+                        Plan name is required.
+                    </mat-error>
+
+                    <mat-error class="error" *ngIf="request_name?.hasError('maxlength')">
+                        Plan name cannot exceed 70 characters.
+                    </mat-error>
+
+                    <mat-error class="error" *ngIf="request_name?.hasError('pattern')">
+                        Only letters (A-Z, a-z), numbers (0-9), spaces, and - characters are allowed.
+                    </mat-error>
                 </div>
             </div>
-            <div class="mt-2 section">
+            <div class="mt-2 mb-2 section">
                 <div class="sub-heading">
-                    <p>Timeline (Due Date)</p>
+                    <p>Timeline (Due Date) <span class="error">*</span></p>
                 </div>
                 <div class="section-header mt-4">
                     <mat-form-field appearance="outline" class="full-width custom-date-field">
                         <input matInput [matDatepicker]="picker" formControlName="due_date"
-                            placeholder="Select due date" [min]="minDate">
+                            placeholder="Select due date (MM/DD/YYYY)" [min]="minDate" readonly>
 
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
 
                         <mat-datepicker #picker></mat-datepicker>
+                        
                     </mat-form-field>
+                    
+                </div>
+                <div>
+                    <mat-error class="error" *ngIf="approvalRequestForm.get('due_date')?.hasError('pastDate')">
+                            Past dates are not allowed
+                        </mat-error>
                 </div>
             </div>
 
@@ -65,9 +91,9 @@
         <div>
 
             <button [disabled]="approvalRequestForm?.invalid" mat-raised-button
-                [ngClass]="approvalRequestForm?.invalid ? 'btn-disable':'approve-btn-footer'" (click)="approveAndPublish()">
+                [ngClass]="approvalRequestForm?.invalid ? 'btn-disable':'approve-btn-footer'"
+                (click)="approveAndPublish()">
 
-                <mat-icon>publish</mat-icon>
                 Approve & Publish
             </button>
         </div>

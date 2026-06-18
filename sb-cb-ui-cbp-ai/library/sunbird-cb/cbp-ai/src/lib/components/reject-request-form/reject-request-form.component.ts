@@ -53,7 +53,7 @@ export class RejectRequestFormComponent implements OnInit {
     }
 
     const payload = {
-      request_id: this.data?.demand_id || this.data?.demand_id,
+      request_id: this.data?.demand_id || this.data?.id,
       rejection_comment: this.rejectRequestForm.value.rejection_comment?.trim()
     };
 
@@ -80,7 +80,7 @@ export class RejectRequestFormComponent implements OnInit {
             }
           );
 
-          this.dialogRef.close('saved');
+          this.dialogRef.close('success');
         },
         error: (err) => {
           this.loading = false
@@ -102,4 +102,8 @@ export class RejectRequestFormComponent implements OnInit {
         }
       });
   }
+
+   get rejection_comment() {
+  return this.rejectRequestForm.get('rejection_comment');
+}
 }

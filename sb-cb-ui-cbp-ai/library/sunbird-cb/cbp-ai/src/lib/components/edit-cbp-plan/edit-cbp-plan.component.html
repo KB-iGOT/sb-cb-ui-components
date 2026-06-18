@@ -47,11 +47,12 @@
                                 Load More...
                             </div>
                             <!-- No results message -->
-                            <mat-option *ngIf="(masterData?.designation)?.length === 0" disabled class="no-data-option">
+                            <mat-option *ngIf="(masterData?.designation)?.length === 0 || noMoreLegacyDesignations" disabled class="no-data-option">
 
                                 Designation Not Found.
 
                             </mat-option>
+                            
                         </mat-select>
                 <!-- <mat-error class="text-xs"
                             *ngIf="designationForm?.get('designation_name')?.touched && designationForm?.get('designation_name')?.invalid">
@@ -125,7 +126,7 @@
                 <div class="sub-heading">
                     <p>Competency</p>
                 </div>
-                <div class="enhanced-competency-section mt-2">
+                <div  #editSection class="enhanced-competency-section mt-2">
                     <!-- Step 1: Select Competency Type -->
                     <div class="competency-step">
                         <label class="step-label">1. Select Core Competency Type</label>

@@ -99,6 +99,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   documents = []
   disableUploadDocument = true
   disableUploadDocumentOriginal = true
+  workAllocationOrderDocumentMissing = false
+  showWorkAllocationOrderDocumentMissing = false
   private destroy$ = new Subject<void>();
   constructor(
     private eventSvc: EventService,
@@ -132,7 +134,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         ministryType: ['ministry', Validators.required],
         ministry: [null, Validators.required],
         sectors: [[]],
-        departments: [[]], // shown only if ministryType == 'state'
+        departments: [''], // shown only if ministryType == 'state'
         additionalDetails: [''],
         additional_document: []
       });
@@ -193,18 +195,36 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       skip: 0,
       limit: 200
     }
-    if (formData?.departments) {
+    if (typeof formData?.departments === 'string') {
       reqBody['department_id'] = formData?.departments
     }
     this.apiLoading = true
 
     this.sharedService.getUploadedDocuments(reqBody).subscribe((res) => {
       if (res && res?.items && res?.items?.length) {
+        let wAOCount = 0
         this.apiLoading = false
         this.documents = res?.items
+        this.disableUploadDocument = false
+        this.disableUploadDocumentOriginal = false
+        this.documents.forEach((item)=>{
+          if(item?.document_type === 'Work Allocation Order') {
+            wAOCount =wAOCount+1
+          }
+        })
+
+        if(wAOCount < 1) {
+          this.workAllocationOrderDocumentMissing = true
+        } else {
+          this.workAllocationOrderDocumentMissing = false
+        }
+        
+        console.log('this.documents--', this.documents)
       } else {
         this.documents = []
         this.apiLoading = false
+        this.disableUploadDocument = false
+        this.disableUploadDocumentOriginal = false
       }
     })
   }
@@ -417,7 +437,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       if (changedFields.includes('additionalDetails') && this.roleMappingForm.value.additionalDetails?.trim() || (file && file.size > 0)) {
         const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
           width: '400px',
-          data: '',
+          data: {documents: this.documents},
           panelClass: 'view-cbp-plan-popup',
           minHeight: '300px',          // Set minimum height
           maxHeight: '80vh',           // Prevent it from going beyond viewport
@@ -530,8 +550,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       this.roleMappingForm.setErrors({ invalid: true });
       setTimeout(() => {
         this.roleMappingForm.updateValueAndValidity();
-         this.disableUploadDocument = true
-          this.disableUploadDocumentOriginal = true
+        //  this.disableUploadDocument = true
+        //   this.disableUploadDocumentOriginal = true
       }, 5000)
     }
   }
@@ -795,12 +815,13 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       .subscribe(data => {
         console.log('role mapping data--', data)
         if (this.firstApiResponse?.is_existing) {
+          this.showWorkAllocationOrderDocumentMissing = false
           this.apiLoading = false;
           this.destroy$.next();   // 🛑 stop polling
           this.destroy$.complete();
           const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
             width: '400px',
-            data: '',
+            data: {documents: this.documents},
             panelClass: 'view-cbp-plan-popup',
             minHeight: '300px',          // Set minimum height
             maxHeight: '80vh',           // Prevent it from going beyond viewport
@@ -857,9 +878,15 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
               this.loading = false
             }
           });
+        } else if (this.workAllocationOrderDocumentMissing) {
+          this.destroy$.next();
+          this.loading = false
+          this.apiLoading = false
+          this.showWorkAllocationOrderDocumentMissing = true
+          return;
         }
         else if (data?.status === 'COMPLETED') {
-          
+          this.showWorkAllocationOrderDocumentMissing = false
           this.loading = false;
 
           this.sharedService.cbpPlanFinalObj['role_mapping_generation'] =

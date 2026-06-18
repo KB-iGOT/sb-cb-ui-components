@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@ang
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { ActivatedRoute } from '@angular/router';
 @Component({
@@ -59,6 +59,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   onDesignationSelectScrollBound =
     this.onDesignationSelectScroll.bind(this);
   searchDesignationLoadCount = 50
+  matchedDesignationIds = []
+  @ViewChild('editSection') editSection!: ElementRef;
   constructor(
     public dialogRef: MatDialogRef<EditCbpPlanComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -73,10 +75,14 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       this.planData = data?.element
       this.requestRowData = data?.requestData
     } else {
-      this.planData = data
+      if (data?.fromLibrary) {
+        this.planData = data?.element
+      } else {
+        this.planData = data
+      }
     }
 
-    console.log('Received data:', data);
+    console.log('Received data:', this.planData);
     // this.planData.competencies.map((competencies:any)=>{
     //   this.competenciesCount['total'] = this.competenciesCount['total'] + 1 
     //   if(competencies.type === 'Behavioral') {
@@ -93,8 +99,16 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    console.log('this.data?.matched_role_mappings', this.data?.matched_role_mappings)
+    this.matchedDesignationIds = this.data?.matched_role_mappings?.map((item: any) => item?.igot_designation_id) || []
     this.loadCompetenciesData();
     this.initializeForm();
+    if (
+      this.planData?.designation_name &&
+      !this.planData?.igot_designation_id
+    ) {
+      this.getDesignation(this.planData.designation_name, 0);
+    }
     const searchControl = this.cbpForm.get('searchDesignation');
 
     if (searchControl) {
@@ -117,7 +131,6 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
             this.desigantionFilterEnable = true;
 
             // API SEARCH ONLY
-            console.log('mjsdfm')
             this.getDesignation(txt, 0);
 
           } else {
@@ -231,12 +244,30 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   }
 
   saveRoleMapping() {
+    console.log("saved function called...")
     if (this.cbpForm.invalid) return;
 
     const formData = this.cbpForm.value;
     console.log('Submitted Data:', formData);
     let cbpPlanData: any = this.sharedService.cbpPlanFinalObj;
     console.log('cbpPlanData', cbpPlanData)
+    console.log(
+      'Backup entry:',
+      this.masterData.designationBackup.find(
+        (x: any) =>
+          x.name?.toLowerCase() ===
+          formData.designation_name?.toLowerCase()
+      )
+    );
+
+    console.log(
+      'Visible entry:',
+      this.masterData.designation.find(
+        (x: any) =>
+          x.name?.toLowerCase() ===
+          formData.designation_name?.toLowerCase()
+      )
+    );
     const roleResponsibilitiesArray = this.cbpForm.value.role_responsibilities_text
       .split('\n')
       .map(line => line.trim())
@@ -255,14 +286,44 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       "activities": activities,
       "competencies": formData.competencies
     }
+    console.log('masterData?.designation', this.masterData?.designation)
 
     if (formData?.igot_designation_id) {
       req["igot_designation_id"] = formData?.igot_designation_id || '',
         req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+    } else {
+
+      console.log('masterData?.designation', this.masterData?.designation)
+
+      req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+      console.log(
+        'Searching in backup:',
+        this.masterData.designationBackup.find(
+          (x: any) =>
+            x.name?.trim().toLowerCase() ===
+            formData.designation_name?.trim().toLowerCase()
+        )
+      );
+      const selectedDesignation = this.masterData?.designation?.find(
+        (item: any) =>
+          item?.name?.toLowerCase() === formData?.designation_name?.toLowerCase()
+      );
+      const backupDesignation =
+        this.masterData.designationBackup.find(
+          (x: any) =>
+            x.name?.toLowerCase() ===
+            formData.designation_name?.toLowerCase()
+        );
+
+      console.log('backupDesignation', backupDesignation);
+      req["igot_designation_id"] = selectedDesignation?.igot_designation_id || '';
+      console.log('designation_name 123 ', formData.designation_name);
+      console.log('selectedDesignation 123', selectedDesignation);
+      console.log('igot_designation_id 123', req['igot_designation_id']);
     }
 
     if (this.sharedService.fromMdoPortal) {
-      req['request_id'] = this.requestRowData?.demand_id
+      req['request_id'] = this.requestRowData?.id
       req['item_id'] = this.planData?.id
     }
     let role_mapping_id = this.planData.id
@@ -281,7 +342,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.log('error', error)
-        this.dialogRef.close()
+        // this.dialogRef.close()
         // Handle 409 Conflict here
         // alert('Conflict detected: The resource already exists or action conflicts.');
         //this.get
@@ -518,12 +579,15 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       this.editCompetencyIndex = index
     }
     this.selectedCompetencyType = 'Domain'
-    setTimeout(() => {
-      this.dialogContent.nativeElement.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }, 500)
+    this.cdRef.detectChanges();
+    console.log('scrollTop before', this.dialogContent.nativeElement.scrollTop);
+    
+  setTimeout(() => {
+    this.editSection.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  });
   }
 
   cancelUpdate() {
@@ -576,7 +640,6 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   }
   getDesignation(searchText?: string, offset?: number): void {
 
-
     // clear any previous debug hooks
     if (!searchText || searchText?.length === 0) {
       // noop
@@ -619,11 +682,33 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
         next: (res: any) => {
 
           const content = _.get(res, 'result.result.data', []);
+          if (content?.length === 0) {
+            this.noMoreLegacyDesignations = true;
+          } else {
+            this.noMoreLegacyDesignations = false;
+          }
+          
+          const matchedIds = new Set(this.matchedDesignationIds);
 
-          const mapped = content.map((item: any) => ({
-            name: item?.designation || '',
-            status: item?.status || 'Active',
-          }));
+          const mapped = content
+            .filter((item: any) => !matchedIds.has(item?.id))
+            .map((item: any) => ({
+              id: item?.id,
+              igot_designation_id: item?.id,
+              name: item?.designation || '',
+              status: item?.status || 'Active',
+            }));
+          console.log(
+            'Managing Director from API ====',
+            mapped.filter(
+              (x: any) =>
+                x.name?.trim().toLowerCase() === 'managing director'
+            )
+          );
+          console.log(
+            'Total mapped designations ====',
+            mapped.length
+          );
 
           const total = _.get(
             res,
@@ -642,16 +727,35 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
           // =========================
 
           if (searchText?.length) {
+            console.log('matchedIds--', this.matchedDesignationIds)
 
-            this.masterData.designationFiltered = mapped;
+  this.masterData.designationFiltered = mapped;
+
+            // IMPORTANT: merge searched result into backup
+            const combined = [
+              ...(this.masterData.designationBackup || []),
+              ...mapped
+            ];
+
+            this.masterData.designationBackup = _.uniqBy(
+              combined,
+              (it: any) => (it?.name || '').toLowerCase()
+            );
 
             this.masterData.designation =
               this.masterData.designationFiltered.slice(
                 0,
                 this.searchDesignationLoadCount
               );
-
-            this.checkCurrentDesignationPresent();
+              console.log('this.masterData.designation----',this.masterData.designation)
+            console.log(
+              'Backup after search',
+              this.masterData.designationBackup.find(
+                (x: any) =>
+                  x.name?.toLowerCase() === 'managing director'
+              )
+            );
+  this.checkCurrentDesignationPresent();
 
             return;
           }
@@ -671,8 +775,9 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
             this.masterData['designationBackup'] = _.uniqBy(
               combined,
-              (it: any) => (it?.name || '').toLowerCase()
-            );
+              (it: any) =>
+                `${(it?.name || '').toLowerCase()}_${it?.igot_designation_id}`
+            )
           }
 
           this.masterData.designation =
@@ -689,25 +794,20 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
             const currentValues =
               designationControl.value || [];
-            console.log('currentValues--', currentValues)
-            const validValues =
-              this.masterData.designationBackup.some(
-                (item: any) => item?.name === currentValues
-              )
-              console.log(this.planData)
-            if (!validValues) {
-              this.cbpForm.get('designation_name')?.setValue(
-                this.planData?.designation_name || ''
-              );
-              console.log('this.cbpForm', this.cbpForm)
-            }
 
             console.log('currentValues', currentValues)
-            console.log('validValues', validValues)
 
-            // if (validValues.length !== currentValues.length) {
-            //   designationControl.setValue(validValues);
-            // }
+            const validValues = currentValues
+            this.masterData.designationBackup.some(
+              (item: any) => item?.name === currentValues
+            )
+
+            console.log(validValues)
+            console.log(this.masterData.designationBackup)
+
+            //  if (validValues.length !== currentValues.length) {
+            designationControl.setValue(validValues);
+            //  }
           }
 
           // no more data
@@ -732,10 +832,6 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
           // this.matSnackBar.open('Unable to fetch designation details, please try again later!')
         }
       })
-
-
-
-
   }
 
   ensureSelectedDesignationExists() {
@@ -751,7 +847,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
         name: selected,
         status: 'Active',
         igot_designation_name: this.planData?.designation_name,
-        igot_designation_id: this.planData?.igot_designation_id || "DESG-002314",
+        igot_designation_id: this.planData?.igot_designation_id,
       };
 
       // ✅ Add at TOP so it's visible immediately
@@ -768,61 +864,78 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   }
 
   checkCurrentDesignationPresent() {
-  const selectedDesignation: string =
-    (this.cbpForm.get('designation_name')?.value || '').toString().trim();
+    const selectedDesignation: string =
+      (this.cbpForm.get('designation_name')?.value || '').toString().trim();
 
-  if (!selectedDesignation) return;
-  if (!this.masterData?.designationBackup) return;
+    if (!selectedDesignation) return;
+    if (!this.masterData?.designationBackup) return;
 
-  const normalize = (v: string) => (v || '').trim().toLowerCase();
+    const normalize = (v: string) => (v || '').trim().toLowerCase();
 
-  const backup = [...this.masterData.designationBackup];
+    const backup = [...this.masterData.designationBackup];
+    console.log(
+      'All matching records',
+      backup.filter(
+        (item: any) =>
+          normalize(item?.name) === normalize(selectedDesignation)
+      )
+    );
+    const existingIndex = backup.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation) &&
+        item?.igot_designation_id
+    );
 
-  const existingIndex = backup.findIndex(
-    (item: any) =>
-      normalize(item?.name) === normalize(selectedDesignation)
-  );
+    let selectedObj: any;
 
-  let selectedObj: any;
+    // If exists → remove it and reuse
+    if (existingIndex > -1) {
+      selectedObj = backup.splice(existingIndex, 1)[0];
+    }
+    // If not exists → create new
+    else {
+      selectedObj = {
+        name: selectedDesignation,
+        status: 'Active',
+        id: '',
+        igot_designation_name: selectedDesignation,
+        igot_designation_id: '',
+      };
+    }
 
-  // If exists → remove it and reuse
-  if (existingIndex > -1) {
-    selectedObj = backup.splice(existingIndex, 1)[0];
-  } 
-  // If not exists → create new
-  else {
-    selectedObj = {
-      name: selectedDesignation,
-      status: 'Active',
-      id: 'custom-' + Date.now() + '-' + Math.random()
-    };
+    // 🔥 Move to top
+    this.masterData.designationBackup = [
+      selectedObj,
+      ...backup
+    ];
+
+    // Also update visible list (same order logic)
+    const visible = [...(this.masterData.designation || [])];
+
+    const visibleIndex = visible.findIndex(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignation)
+    );
+
+    if (visibleIndex > -1) {
+      visible.splice(visibleIndex, 1);
+    }
+
+    this.masterData.designation = [
+      selectedObj,
+      ...visible
+    ];
+
+    this.cdRef.detectChanges();
+      setTimeout(() => {
+      const ctrl = this.cbpForm.get('designation_name');
+      const val = ctrl?.value;
+      if (val) {
+        ctrl.setValue(null, { emitEvent: false });
+        ctrl.setValue(val, { emitEvent: false });
+      }
+    });
   }
-
-  // 🔥 Move to top
-  this.masterData.designationBackup = [
-    selectedObj,
-    ...backup
-  ];
-
-  // Also update visible list (same order logic)
-  const visible = [...(this.masterData.designation || [])];
-
-  const visibleIndex = visible.findIndex(
-    (item: any) =>
-      normalize(item?.name) === normalize(selectedDesignation)
-  );
-
-  if (visibleIndex > -1) {
-    visible.splice(visibleIndex, 1);
-  }
-
-  this.masterData.designation = [
-    selectedObj,
-    ...visible
-  ];
-
-  this.cdRef.detectChanges();
-}
   onDesignationDropdownClosed(): void {
     // Keep the designation value but clear the search input
     const currentDesignation = this.cbpForm.get('designation_name')!.value
@@ -919,80 +1032,100 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     }, 300);
   }
 
-  onDesignationSelectScroll(event: any): void {
+ onDesignationSelectScroll(event: any): void {
 
-    const element = event.target;
+  const element = event?.target;
 
-    const atBottom =
-      element.scrollHeight - element.scrollTop <=
-      element.clientHeight + 10;
+  const reachedBottom =
+    element.scrollTop + element.clientHeight >=
+    element.scrollHeight - 10;
 
-    if (!atBottom || this.isLoadingMoreDesignations) {
-      return;
-    }
-
-    const loaded =
-      this.masterData?.designationBackup?.length || 0;
-
-    const visible =
-      this.masterData?.designation?.length || 0;
-
-    console.log({
-      loaded,
-      visible,
-      total: this.defaultSearchDesignationCount
-    });
-
-    /**
-     * STEP 1
-     * SHOW MORE FROM LOCAL CACHE
-     */
-    if (visible < loaded) {
-
-      this.designationListLoadCount +=
-        this.designationDefaultLoadCount;
-
-      // IMPORTANT
-      // create NEW ARRAY reference
-      this.masterData = {
-        ...this.masterData,
-        designation: [
-          ...this.masterData.designationBackup.slice(
-            0,
-            this.designationListLoadCount
-          )
-        ]
-      };
-
-      // FORCE UI UPDATE
-      this.cdRef.detectChanges();
-
-      // restore scroll position
-      setTimeout(() => {
-        element.scrollTop = element.scrollTop - 20;
-      });
-
-      return;
-    }
-
-    /**
-     * STEP 2
-     * FETCH NEXT PAGE
-     */
-    if (
-      loaded < this.defaultSearchDesignationCount &&
-      !this.noMoreLegacyDesignations
-    ) {
-
-      this.designationOffset +=
-        this.designationDefaultLoadCount;
-
-      this.getDesignation(
-        this.designationSearchText || undefined,
-        this.designationOffset
-      );
-    }
+  if (!reachedBottom) {
+    return;
   }
+
+  if (this.isLoadingMoreDesignations) {
+    return;
+  }
+
+  console.log('=== Scroll Triggered ===');
+  console.log('Visible:', this.masterData?.designation?.length);
+  console.log('Backup:', this.masterData?.designationBackup?.length);
+  console.log('Total:', this.defaultSearchDesignationCount);
+  console.log('Offset:', this.designationOffset);
+
+  // =====================
+  // SEARCH MODE
+  // =====================
+  if (this.desigantionFilterEnable) {
+
+    this.searchDesignationLoadCount += 50;
+
+    this.masterData.designation =
+      (this.masterData.designationFiltered || []).slice(
+        0,
+        this.searchDesignationLoadCount
+      );
+
+    this.cdRef.detectChanges();
+
+    return;
+  }
+
+  // =====================
+  // LOCAL PAGINATION
+  // =====================
+  if (
+    (this.masterData?.designationBackup || []).length >
+    (this.masterData?.designation || []).length
+  ) {
+
+    this.designationListLoadCount +=
+      this.designationDefaultLoadCount;
+
+    this.masterData.designation =
+      this.masterData.designationBackup.slice(
+        0,
+        this.designationListLoadCount
+      );
+
+    this.cdRef.detectChanges();
+
+    return;
+  }
+
+  // =====================
+  // API PAGINATION
+  // =====================
+  const loadedCount =
+    (this.masterData?.designationBackup || []).length;
+
+  if (this.noMoreLegacyDesignations && this.searchText) {
+    console.log('No more data');
+    return;
+  }
+
+  if (
+    this.defaultSearchDesignationCount > 0 &&
+    loadedCount >= this.defaultSearchDesignationCount
+  ) {
+
+    this.noMoreLegacyDesignations = true;
+
+    console.log('All records loaded');
+
+    return;
+  }
+
+  this.designationOffset += this.designationDefaultLoadCount;
+
+  console.log(
+    'Loading next page => offset:',
+    this.designationOffset
+  );
+
+  this.getDesignation(undefined, this.designationOffset);
+}
 
   get searchDesignationControl(): FormControl {
     return this.cbpForm.get('searchDesignation') as FormControl;

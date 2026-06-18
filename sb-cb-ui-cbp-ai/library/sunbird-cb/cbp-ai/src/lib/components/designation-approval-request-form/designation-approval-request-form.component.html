@@ -25,7 +25,7 @@
                         approvalRequestForm.get('request_name')?.hasError('required')
                         "
                     >
-                        Request name is required
+                        Designation Name is required
                     </mat-error>
 
                     <mat-error
@@ -34,7 +34,7 @@
                         approvalRequestForm.get('request_name')?.hasError('pattern')
                         "
                     >
-                        Only letters, numbers, spaces, underscore and hyphen are allowed
+                        Only letters, numbers, spaces, braces (), commas (,), and hyphens (-) are allowed
                     </mat-error>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                         approvalRequestForm.get('division_name')?.hasError('required')
                         "
                     >
-                        Request name is required
+                        Division/Wing is required
                     </mat-error>
 
                     <mat-error
@@ -60,7 +60,7 @@
                         approvalRequestForm.get('division_name')?.hasError('pattern')
                         "
                     >
-                        Only letters, numbers, spaces, underscore and hyphen are allowed
+                        Only letters, numbers, spaces, forward slashes (/), hyphens (-) are allowed.
                     </mat-error>
                 
                 </div>
