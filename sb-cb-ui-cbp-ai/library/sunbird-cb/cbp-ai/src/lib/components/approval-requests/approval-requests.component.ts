@@ -499,6 +499,11 @@ export class ApprovalRequestsComponent {
     this.applyFilters();
   }
 
+  onFilterChange() {
+    this.pageIndex = 0;
+    this.getApprovalRequests();
+  }
+
   onPageChange(event: any) {
   this.pageIndex = event.pageIndex;
   this.pageSize = event.pageSize;
