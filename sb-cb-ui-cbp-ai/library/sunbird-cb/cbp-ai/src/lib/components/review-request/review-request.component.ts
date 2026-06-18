@@ -388,6 +388,7 @@ export class ReviewRequestComponent {
         if (this.sharedService.fromMdoPortal
         ) {
           this.getMDORequestDetails(requestId);
+          this.router.navigate(['/app/home/ai-cbp-requests']);
         }
 
       }
@@ -416,6 +417,7 @@ export class ReviewRequestComponent {
         if (this.sharedService.fromMdoPortal
         ) {
           this.getMDORequestDetails(requestId);
+          this.router.navigate(['/app/home/ai-cbp-requests']);
         }
 
       }

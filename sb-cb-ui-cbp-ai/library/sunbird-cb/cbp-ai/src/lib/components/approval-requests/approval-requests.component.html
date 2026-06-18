@@ -58,7 +58,7 @@
                             <mat-icon
                                 class="color-60 search-icon mat-icon notranslate material-icons mat-icon-no-color">search</mat-icon>
                             <input class="sinput color-60 w-full" label="" formControlName="search"
-                                (keyup)="getApprovalRequests()" placeholder="Search by Request Name" type="Standard">
+                                (keyup)="onFilterChange()" placeholder="Search by Request Name" type="Standard">
 
                         </div>
 
@@ -75,7 +75,7 @@
                             </mat-label> -->
 
                             <mat-select formControlName="status" panelClass="select-search-panel"
-                                (selectionChange)="getApprovalRequests()">
+                                (selectionChange)="onFilterChange()">
 
                                 <!-- Search box -->
                                 <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
@@ -100,7 +100,7 @@
                             </mat-label> -->
 
                             <mat-select formControlName="time" panelClass="select-search-panel"
-                                (selectionChange)="applyFilters()">
+                                (selectionChange)="onFilterChange()">
 
                                 <!-- Search box -->
                                 <input style="border:1px solid #ccc; padding: 5px;width: 92%;margin: 5px;" matInput
