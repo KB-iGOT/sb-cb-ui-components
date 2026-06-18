@@ -1,13 +1,10 @@
-<div class="tips-container" *ngIf="randomlearnAdvisoryObj">
-    <!-- <div class="circle-box">
-        <div class="background-circle">
-
-        </div>
-    </div> -->
+<div class="tips-container"
+    *ngIf="randomlearnAdvisoryObj && config?.uiVisibility?.rightPanel?.learnerAdvisory?.visible !== false">
     <div class="tips-header">
-        <!-- <h3>Tips for Learners</h3> -->
-        <p class="mat-subheading-1 margin-bottom-none">Tips for Learners</p>
-        <div class="ml-4 pl-2 view-more ws-mat-default-text ng-star-inserted">
+        <p class="mat-subheading-1 margin-bottom-none"
+            *ngIf="config?.uiVisibility?.rightPanel?.learnerAdvisory?.title !== false">Tips for Learners</p>
+        <div class="ml-4 pl-2 view-more ws-mat-default-text ng-star-inserted"
+            *ngIf="config?.uiVisibility?.rightPanel?.learnerAdvisory?.readMoreLink !== false">
             <a class="flex ws-mat-default-text items-center justify-center mat-body-1 cursor-pointer"
                 (click)="showAllTips()">
                 <span class="ws-mat-default-text">{{ 'career.readMore' | translate }}</span>
@@ -17,15 +14,12 @@
         </div>
     </div>
     <div class="tip-content">
-        <div class="background">
+        <div class="background" *ngIf="config?.uiVisibility?.rightPanel?.learnerAdvisory?.icon !== false">
             <img class="book-icon" src="{{randomlearnAdvisoryObj?.contentImg}}"
                 alt="{{randomlearnAdvisoryObj?.content}}">
         </div>
-        <div class="tip-data">
+        <div class="tip-data" *ngIf="config?.uiVisibility?.rightPanel?.learnerAdvisory?.tipText !== false">
             <p>{{randomlearnAdvisoryObj?.content}}</p>
         </div>
-        <!-- <div class="tip-count">
-            {{randomlearnAdvisoryObj?.id}}/{{learnAdvisoryData?.length}}
-        </div> -->
     </div>
 </div>

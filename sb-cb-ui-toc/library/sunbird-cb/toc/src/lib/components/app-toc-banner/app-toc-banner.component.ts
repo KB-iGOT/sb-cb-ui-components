@@ -32,6 +32,7 @@ import { TranslateService } from '@ngx-translate/core'
 import { ENTER } from '@angular/cdk/keycodes'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 import { TimerService } from '../../services/timer.service'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { MatAutocomplete as MatAutocomplete, MatAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
 import { MatChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
 import { MatDialog as MatDialog } from '@angular/material/dialog'
@@ -162,6 +163,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
     private events: EventService,
     private langtranslations: MultilingualTranslationsService,
     private timerService: TimerService,
+    private commonMethodsSvc: CommonMethodsService,
     @Inject('environment') private environment: any,
   ) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
@@ -1499,7 +1501,11 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       }
 
     })
-    if (recipients.length) {
+    if (recipients.length && !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.tocConfig?.apiConfig,
+      urlConfigPath: 'shareContent',
+      defaultUrl: '/apis/proxies/v8/user/v1/content/recommend',
+    })) {
       obj.request.recipients = recipients
       this.tocSvc.shareContent(obj).subscribe(result => {
         if (result.responseCode === 'OK') {

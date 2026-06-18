@@ -29,7 +29,7 @@ import {
   UtilityService, WidgetEnrollService, WsEvents,
 } from '@sunbird-cb/utils-v2'
 
-import { ConfirmationDialogComponent, ContentLanguageService, TOCMultiLingualDialogComponent, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
+import { CommonMethodsService, ConfirmationDialogComponent, ContentLanguageService, TOCMultiLingualDialogComponent, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
 import { NsAppToc } from '../../models/app-toc.model'
 import { AppTocService } from '../../services/app-toc.service'
 import { MobileAppsService } from '../../services/mobile-apps.service'
@@ -304,6 +304,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
+    private commonMethodsSvc: CommonMethodsService,
     @Inject('environment') public environment: any
   ) {
     this.historyData = history.state
@@ -339,8 +340,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     })
   }
 
+  private isApiEnabled(urlConfigPath: string, defaultUrl: string): boolean {
+    return !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.tocConfig?.apiConfig,
+      urlConfigPath,
+      defaultUrl,
+    })
+  }
+
   getKarmapointsLimit() {
-    if (!this.forPreview) {
+    if (!this.forPreview && this.isApiEnabled('totalKarmaPoints', '/apis/proxies/v8/user/totalkarmapoints')) {
       this.contentSvc.userKarmaPoints().subscribe((res: any) => {
         if (res && res.kpList) {
           const info = res.kpList.addinfo
@@ -643,7 +652,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
 
   getUserRating(fireUpdate: boolean) {
-    if (!this.forPreview) {
+    if (!this.forPreview && this.isApiEnabled('ratingRead', '/apis/proxies/v8/ratings/v1/read')) {
       if (this.configSvc.userProfile) {
         this.userId = this.configSvc.userProfile.userId || ''
       }
@@ -836,7 +845,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
    * If the user is not enrolled in the course, auto-assigns a batch and navigates to the player page.
    * If the user is already enrolled, does nothing.
    */
-/*******  6d94c646-254c-44d6-a7c3-90bdb9507318  *******/    if (this.baseContentReadData && this.baseContentReadData.identifier) {
+/*******  6d94c646-254c-44d6-a7c3-90bdb9507318  *******/    if (this.baseContentReadData && this.baseContentReadData.identifier && this.isApiEnabled('contentEnroll', '/apis/protected/v8/cohorts/user/autoenrollment')) {
       this.contentSvc.autoAssignBatchApi(this.baseContentReadData.identifier, this.selectedLanguage).subscribe(
         (data: NsContent.IBatchListResponse) => {
           this.batchData = {
@@ -2168,7 +2177,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         courseName: this.contentReadData?.name || '',
         courseID: this.contentReadData?.identifier || '',
         contextOrgId: this.contentReadData?.createdFor && this.contentReadData?.createdFor.length > 0 ?
-          this.contentReadData?.createdFor[0] : ''
+          this.contentReadData?.createdFor[0] : '',
+        apiConfig: this.tocConfig?.apiConfig,
       }
       const dialogRef = this.dialog.open(CompletionSurveyFormComponent, {
         disableClose: true,
@@ -2382,6 +2392,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.checkIfUserEnrolled()
       return
     }
+    if (!this.isApiEnabled('enrollmentData', '/apis/proxies/v8/learner/course/v4/user/enrollment/details')) {
+      this.userEnrollmentList = []
+      this.checkIfUserEnrolled()
+      return
+    }
 
     const request = {
       request: {
@@ -2546,6 +2561,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     } else {
       return new Promise<boolean>((resolve, reject) => {
         if (!identifier) {
+          resolve(false)
+          return
+        }
+        if (!this.isApiEnabled('hierarchy', '/apis/proxies/v8/course/v1/hierarchy')) {
           resolve(false)
           return
         }
@@ -2801,6 +2820,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         resolve(false)
         return
       }
+      if (!this.isApiEnabled('extendedContentRead', '/apis/proxies/v8/extended/content/v1/read')) {
+        resolve(false)
+        return
+      }
 
       const observable = this.contentSvc.fetchContentData(identifier)
 
@@ -2901,7 +2924,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         ...(lang ? { language: lang } : null),
       },
     }
-    if (this.content && this.content.primaryCategory !== NsContent.EPrimaryCategory.RESOURCE) {
+    if (this.content && this.content.primaryCategory !== NsContent.EPrimaryCategory.RESOURCE && this.isApiEnabled('contentProgress', '/apis/proxies/v8/read/content-progres')) {
       this.contentSvc.fetchContentHistoryV2(req).subscribe(
         data => {
           if (data && data.result && data.result.contentList && data.result.contentList.length) {
@@ -3111,6 +3134,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   getServerDateTime() {
+    if (!this.isApiEnabled('getServerDate', '/apis/public/v8/systemDate')) {
+      const clientTime = new Date().getTime()
+      this.tocSvc.changeServerDate(clientTime)
+      this.serverDate = clientTime
+      return
+    }
     // Fetch the server date time and process the response
     this.tocSvc.getServerDate().subscribe(
       (response: any) => {
