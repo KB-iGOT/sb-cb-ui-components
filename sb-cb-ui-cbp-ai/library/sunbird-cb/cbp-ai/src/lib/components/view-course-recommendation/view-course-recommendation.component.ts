@@ -462,7 +462,7 @@ export class ViewCourseRecommendationComponent {
   }
 
   confirmDeleteCourse(item: any, index: number) {
-    const roleMappingId = this.recommended_course_id;
+    const roleMappingId =  this.sharedService.fromMdoPortal ? this.data?.id : this.recommended_course_id;
     const courseIdentifier =
       item?.course_identifier || item?.id || item?.identifier;
 
@@ -546,7 +546,7 @@ export class ViewCourseRecommendationComponent {
     // this.dialogRef.close()
     console.log('cbp_plan_id---', this.cbpPlanData)
     const dialogRefNew = this.dialog.open(SuggestMoreCoursesComponent, {
-      width: '950px',
+      width: '1000px',
       data: { cbp_plan_id: this.reviewRequestPlanData?.id, recommended_course_id: this.recommended_course_id, role_mapping_id: this.planData.id, fromMdoPortal: this.sharedService.fromMdoPortal },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '400px',          // Set minimum height

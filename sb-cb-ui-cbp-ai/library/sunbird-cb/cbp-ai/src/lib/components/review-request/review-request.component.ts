@@ -286,7 +286,7 @@ export class ReviewRequestComponent {
     // Navigate or open modal
     console.log('View CBP Plan clicked', element);
     const dialogRef = this.dialog.open(EditCbpPlanComponent, {
-      width: '1000px',
+      width: '1100px',
       data: { requestData: this.requestData, element: element, fromLibrary: true },
       panelClass: 'view-cbp-plan-popup',
       minHeight: '300px',          // Set minimum height

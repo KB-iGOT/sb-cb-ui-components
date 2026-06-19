@@ -28,7 +28,7 @@
                     <form [formGroup]="filterForm" class="filters-container">
                         <div class="container">
 
-                            <div class="section-header-improved mt-3">
+                            <div class="section-header-improved mt-3 mb-4">
                                 <div class="search-and-buttons-container">
                                     <div>
                                         <label>Search Courses</label>
@@ -50,12 +50,12 @@
                                         <label>Select Competency</label>
                                     </div>
                                     <div>
-                                        <mat-form-field appearance="outline">
+                                        <mat-form-field class="form-select-dropdown">
                                             <mat-label>
-                                                {{ filterForm.value.competency?.length ? '' : 'Competency' }}
+                                                Competency
                                             </mat-label>
 
-                                            <mat-select formControlName="competency" multiple
+                                            <mat-select placeholder="Select Competency" formControlName="competency" multiple class="select-box-dropdown"
                                                 panelClass="select-search-panel" (selectionChange)="applyFilters()">
 
                                                 <!-- Search box -->
@@ -81,12 +81,12 @@
                                         <label>Select Rating</label>
                                     </div>
                                     <div>
-                                        <mat-form-field appearance="outline">
+                                        <mat-form-field class="form-select-dropdown">
                                             <mat-label>
-                                                {{ filterForm.value.rating?.length ? '' : 'Rating' }}
+                                                Rating
                                             </mat-label>
 
-                                            <mat-select formControlName="rating" multiple
+                                            <mat-select placeholder="Select Rating" formControlName="rating" class="select-box-dropdown" multiple
                                                 panelClass="select-search-panel" (selectionChange)="applyFilters()">
 
                                                 <!-- Search box -->
@@ -117,12 +117,12 @@
                                         <label>Select Language</label>
                                     </div>
                                     <div>
-                                        <mat-form-field appearance="outline">
+                                        <mat-form-field class="form-select-dropdown">
                                             <mat-label>
-                                                {{ filterForm.value.language?.length ? '' : 'Language' }}
+                                                Language
                                             </mat-label>
 
-                                            <mat-select formControlName="language" multiple
+                                            <mat-select placeholder="Select Language" formControlName="language" class="select-box-dropdown" multiple
                                                 panelClass="select-search-panel" (selectionChange)="applyFilters()">
 
                                                 <!-- Search box -->
@@ -147,12 +147,12 @@
                                         <label>Select Duration</label>
                                     </div>
                                     <div>
-                                        <mat-form-field appearance="outline">
+                                        <mat-form-field class="form-select-dropdown">
                                             <mat-label>
-                                                {{ filterForm.value.duration?.length ? '' : 'Duration' }}
+                                                Duration
                                             </mat-label>
 
-                                            <mat-select formControlName="duration" multiple
+                                            <mat-select placeholder="Select Duration" formControlName="duration" class="select-box-dropdown" multiple
                                                 panelClass="select-search-panel" (selectionChange)="applyFilters()">
 
                                                 <!-- Search box -->
@@ -176,13 +176,13 @@
                                         <label>Select Provider</label>
                                     </div>
                                     <div>
-                                        <mat-form-field appearance="outline">
+                                        <mat-form-field class="form-select-dropdown">
                                             <mat-label>
 
-                                                {{ filterForm.value.provider?.length ? '' : 'Provider' }}
+                                                Provider
                                             </mat-label>
 
-                                            <mat-select formControlName="provider" multiple
+                                            <mat-select placeholder="Select Provider" formControlName="provider" class="select-box-dropdown" multiple
                                                 panelClass="select-search-panel" (selectionChange)="applyFilters()">
 
                                                 <!-- Search box -->
@@ -202,10 +202,7 @@
                                         </mat-form-field>
                                     </div>
                                 </div>
-                                <div style="margin-top: 45px;margin-left: 20px;">
-                                    <input class="btn-active" type="button" value="Reset All Filters"
-                                        (click)="resetFilters()" />
-                                </div>
+                               
                             </div>
                             <!-- <div class="mt-4">
                                 <div style="font-size:16px;font-weight:bold;color:#000">
@@ -220,6 +217,10 @@
                         </div>
                     </form>
                 </div>
+                 <div style="margin-top: 20px;">
+                                    <input class="btn-active" type="button" value="Reset All Filters"
+                                        (click)="resetFilters()" />
+                                </div>
             </div>
             <div class="mt-4" *ngIf="suggestedCourses?.length > 0">
                 <div class="results-header" style="display: flex; justify-content: space-between; align-items: center;">

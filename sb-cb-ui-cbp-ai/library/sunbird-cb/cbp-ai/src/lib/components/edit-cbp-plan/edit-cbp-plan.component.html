@@ -17,7 +17,7 @@
 
             </div> -->
 
-            <mat-form-field appearance="outline" class="mt-4 margin-top-s w-full required-select"  style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width: 100%;font-size: 14px;font-family: 'Lato';">
+            <mat-form-field appearance="outline" class="mt-4 margin-top-s w-full required-select"  style="border-radius: 16px !important; border: 1px solid #ccc; height: 48px; width: 96%;font-size: 14px;font-family: 'Lato';">
                 <mat-select #designation formControlName="designation_name"
                             placeholder="Select designation" (closed)="onDesignationDropdownClosed()"
                             panelClass="search-panel" (openedChange)="setupScrollListener($event)"
@@ -26,7 +26,7 @@
                             <!-- Sticky search input container -->
                             <div class="sticky-search-container" (click)="$event.stopPropagation()">
                                 <div class="search-input-wrapper">
-                                    <input type="text" placeholder="Search designation" style="width:100%"
+                                    <input type="text" placeholder="Search designation" style="width:96%;padding-left: 5px;"
                                         formControlName="searchDesignation" class="search-input"
                                         (keydown)="$event.stopPropagation()"
                                         (keydown.enter)="$event.preventDefault(); $event.stopPropagation()"
@@ -100,7 +100,7 @@
                 </div>
                 <div class="mt-4">
                     <input type="text" formControlName="wing_division_section" [value]="planData?.wing_division_section"
-                        style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width:100%;font-size: 14px;font-family: 'Lato';">
+                        style="border-radius: 25px; border: 1px solid #ccc; padding: 8px 12px; width:96%;font-size: 14px;font-family: 'Lato';">
                 </div>
             </div>
             <div class="mt-2 section">
@@ -154,7 +154,7 @@
                                     (selectionChange)="onThemeChange($event.value)">
                                     <!-- Search input inside dropdown -->
                                     <mat-option class="search-option" disabled>
-                                        <mat-form-field appearance="outline" class="search-field">
+                                        <mat-form-field  class="search-field">
                                             <input matInput placeholder="Search themes..." formControlName="themeSearch"
                                                 (input)="filterThemes($event.target?.value)"
                                                 (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
@@ -194,7 +194,7 @@
                                     (selectionChange)="onSubThemeChange($event.value)">
                                     <!-- Search input inside dropdown -->
                                     <mat-option class="search-option" disabled>
-                                        <mat-form-field appearance="outline" class="search-field">
+                                        <mat-form-field  class="search-field">
                                             <input matInput placeholder="Search sub-themes..."
                                                 formControlName="subThemeSearch"
                                                 (input)="filterSubThemes($event.target.value)"

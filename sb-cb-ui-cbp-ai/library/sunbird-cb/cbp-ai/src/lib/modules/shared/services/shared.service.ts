@@ -475,7 +475,8 @@ export class SharedService {
   }
 
   addMDOCourse(reqBody) {
-     return this.http.put<any>(`${this.mdoBaseUrl}${API_END_POINTS.MDO_ADD_COURSE}`, reqBody)
+    let mdoBaseUrl = 'http://localhost:3000'
+     return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_ADD_COURSE}`, reqBody)
       .pipe(map((response: any) => {
         return response
       }))
@@ -507,7 +508,7 @@ export class SharedService {
 
     console.log('getIGOTSuggestedCourses final request:', JSON.stringify(req, null, 2));
     if (this.fromMdoPortal) {
-
+      let mdoBaseUrl = 'http://localhost:3000'
       return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
         .pipe(map((response: any) => {
           return response
@@ -910,6 +911,7 @@ export class SharedService {
     const headers = this.headers;
 
     if(this.fromMdoPortal) {
+      let mdoBaseUrl = 'http://localhost:3000'
       let reqBody = {
           "request_id": requestId,
           "item_id": roleMappingId,
@@ -965,7 +967,7 @@ export class SharedService {
       }
     }
     if (this.fromMdoPortal) {
-
+      let mdoBaseUrl = 'http://localhost:3000'
       return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
         .pipe(map((response: any) => {
           return response
