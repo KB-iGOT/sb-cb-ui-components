@@ -2,10 +2,11 @@ import { ConfigurationsService, DomainConfService } from '@sunbird-cb/utils-v2'
 import { NsContent } from '../_services/widget-content.model'
 import { Inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { noop, Observable, Subject } from 'rxjs'
+import { EMPTY, noop, Observable, Subject, of } from 'rxjs'
+import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators'
 import dayjs from 'dayjs'
 import { AppTocService } from './app-toc.service'
-import { ContentLanguageService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
+import { CommonMethodsService, ContentLanguageService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
 import { WidgetContentService } from '../_collection-api'
 
 @Injectable({
@@ -39,8 +40,24 @@ export class ViewerUtilService {
     private userSvc: WidgetUserServiceLib,
     private contentLangSvc: ContentLanguageService,
     private domainConfSvc: DomainConfService,
+    private commonMethodsSvc: CommonMethodsService,
     @Inject('environment') private environment: any
   ) { }
+
+  private playerConfig$: Observable<any> = this.http
+    .get<any>(`${this.configservice.sitePath}/feature/toc.json`)
+    .pipe(catchError(() => of({})), shareReplay(1))
+
+  private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string, callback: (enabled: boolean) => void): void {
+    this.playerConfig$.pipe(
+      map((tocConfig: any) => !!this.commonMethodsSvc.getEnabledUrl({
+        apiConfig: tocConfig?.playerApiConfig,
+        urlConfigPath,
+        defaultUrl,
+      })),
+      take(1),
+    ).subscribe(callback)
+  }
 
   async fetchManifestFile(url: string) {
     this.setS3Cookie(url)
@@ -162,12 +179,14 @@ export class ViewerUtilService {
       //   .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
       //   .subscribe(noop, noop)
       // }
-      this.http
-        .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
-        .subscribe(noop, noop)
+      this.isPlayerApiEnabled('contentProgressUpdate', '/apis/proxies/v8/content-progres', (enabled: boolean) => {
+        if (enabled) {
+          this.http.patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req).subscribe(noop, noop)
+        }
+      })
       const hashEntry = this.tocSvc.hashmap[contentId] || {}
       const currentStatus = hashEntry['completionStatus']
-      
+
       if (!currentStatus || currentStatus < 2) {
         this.tocSvc.hashmap[contentId] = {
           ...hashEntry,
@@ -176,7 +195,7 @@ export class ViewerUtilService {
           completionStatus: Number(req.request.contents[0].status) || 0,
         }
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-        
+
         // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
         this.tocSvc.triggerMilestoneLockUpdate()
         // Emit to trigger viewer component refresh for Learning Pathways
@@ -193,7 +212,7 @@ export class ViewerUtilService {
       courseId,
       batchId,
     }
-    
+
     const tempContentData = this.contentSvc.currentMetaData
     const tempContentReadData = this.contentSvc.currentContentReadMetaData
     const enrollmentList = this.contentSvc.currentBatchEnrollmentList
@@ -335,7 +354,7 @@ export class ViewerUtilService {
                 tempLanguage = this.contentLangSvc.getContentLanguage(child)
                 languageFound = true
               }
-            } 
+            }
           })
         }
       }
@@ -393,13 +412,16 @@ export class ViewerUtilService {
         },
       }
 
-      this.http
-        .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
-        .subscribe(noop, noop)
+      this.isPlayerApiEnabled('contentProgressUpdate', '/apis/proxies/v8/content-progres', (enabled: boolean) => {
+        if (enabled) {
+          this.http.patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req).subscribe(noop, noop)
+        }
+      })
+
       if (this.tocSvc.hashmap && req.request.contents[0]) {
         const hashEntry = this.tocSvc.hashmap[contentId] || {}
         const currentStatus = hashEntry['completionStatus']
-        
+
         if (!currentStatus || currentStatus < 2) {
           this.tocSvc.hashmap[contentId] = {
             ...hashEntry,
@@ -408,12 +430,12 @@ export class ViewerUtilService {
             completionStatus: Number(req.request.contents[0].status) || 0,
           }
           this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-          
+
           // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
           if (this.tocSvc.triggerMilestoneLockUpdate) {
             this.tocSvc.triggerMilestoneLockUpdate()
           }
-          
+
           // Emit to trigger viewer component refresh for Learning Pathways
           this.markAsCompleteSubject.next(true)
         }
@@ -425,21 +447,32 @@ export class ViewerUtilService {
   }
 
   getContent(contentId: string): Observable<NsContent.IContent> {
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-    let url = `/apis/proxies/v8/content/v2/read/${contentId}`
-    if (!forPreview) {
-      url = `/apis/proxies/v8/content/v2/read/${contentId}`
-    } else {
-      if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
-        url = `/apis/proxies/v8/content/v2/read/${contentId}`
-      } else {
-        url = `/api/content/v1/read/${contentId}`
-      }
-    }
-    return this.http.get<NsContent.IContent>(
-      // tslint:disable-next-line:max-line-length
-      // `/apis/authApi/action/content/hierarchy/${contentId}?rootOrg=${this.configservice.rootOrg || 'igot'}&org=${this.configservice.activeOrg || 'dopt'}`,
-      url
+    return this.playerConfig$.pipe(
+      take(1),
+      switchMap((tocConfig: any) => {
+        const enabled = !!this.commonMethodsSvc.getEnabledUrl({
+          apiConfig: tocConfig?.playerApiConfig,
+          urlConfigPath: 'resourceRead',
+          defaultUrl: '/apis/proxies/v8/content/v2/read',
+        })
+        if (!enabled) { return EMPTY }
+        const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+        let url = `/apis/proxies/v8/content/v2/read/${contentId}`
+        if (!forPreview) {
+          url = `/apis/proxies/v8/content/v2/read/${contentId}`
+        } else {
+          if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
+            url = `/apis/proxies/v8/content/v2/read/${contentId}`
+          } else {
+            url = `/api/content/v1/read/${contentId}`
+          }
+        }
+        return this.http.get<NsContent.IContent>(
+          // tslint:disable-next-line:max-line-length
+          // `/apis/authApi/action/content/hierarchy/${contentId}?rootOrg=${this.configservice.rootOrg || 'igot'}&org=${this.configservice.activeOrg || 'dopt'}`,
+          url
+        )
+      }),
     )
   }
 
@@ -495,12 +528,12 @@ export class ViewerUtilService {
   }
 
   updateContentHashMapForAssesstent(contentId: string, contentProgress: any) {
-    
-    
+
+
     const hashEntry = this.tocSvc.hashmap[contentId] || {}
     const currentStatus = hashEntry['completionStatus'] || 0
     const newStatus = Number(contentProgress.status) || 0
-    
+
     // Update if not complete or if new status is higher
     if (currentStatus < 2 || newStatus >= currentStatus) {
       this.tocSvc.hashmap[contentId] = {
@@ -510,15 +543,15 @@ export class ViewerUtilService {
         completionStatus: newStatus,
         status: newStatus,
       }
-      
+
       // Create new hashmap reference for Angular change detection
       this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-      
+
       // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
       if (this.tocSvc.triggerMilestoneLockUpdate) {
         this.tocSvc.triggerMilestoneLockUpdate()
       }
-      
+
       // Emit to trigger viewer component refresh for Learning Pathways
       this.markAsCompleteSubject.next(true)
     }
@@ -594,7 +627,7 @@ export class ViewerUtilService {
           .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
           .subscribe(noop, noop)
       }
-      
+
       if (this.tocSvc.hashmap[contentId] &&
         (!this.tocSvc.hashmap[contentId]['completionStatus'] || this.tocSvc.hashmap[contentId]['completionStatus'] < 2)) {
         this.tocSvc.hashmap[contentId]['completionPercentage'] = req.request.contents[0].completionPercentage
@@ -602,7 +635,7 @@ export class ViewerUtilService {
         this.tocSvc.hashmap[contentId]['parent'] = req.request.contents[0].courseId
         this.tocSvc.hashmap[contentId]['progress'] = req.request.contents[0].progressdetails
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-        
+
         // Trigger milestone lock recomputation - it will emit hashmapUpdated with both progress and lock changes
         if (this.tocSvc.triggerMilestoneLockUpdate) {
           this.tocSvc.triggerMilestoneLockUpdate()
@@ -643,7 +676,7 @@ export class ViewerUtilService {
           .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
           .subscribe(noop, noop)
       }
-      
+
       // Update hashmap - create entry if it doesn't exist
       if (this.tocSvc.hashmap) {
         if (!this.tocSvc.hashmap[contentId]) {
@@ -661,15 +694,15 @@ export class ViewerUtilService {
           this.tocSvc.hashmap[contentId]['completionStatus'] = Number(req.request.contents[0].status) || 0
           this.tocSvc.hashmap[contentId]['status'] = Number(req.request.contents[0].status) || 0
         }
-        
+
         this.tocSvc.hashmap = { ...this.tocSvc.hashmap }
-        
+
         // ALWAYS trigger milestone lock recomputation when pre-assessment completes
         // This ensures milestone 1 unlocks immediately after pre-assessment completion
         if (this.tocSvc.triggerMilestoneLockUpdate) {
           this.tocSvc.triggerMilestoneLockUpdate()
         }
-        
+
         // Emit markAsCompleteSubject to trigger viewer component to refresh enrollment and progress
         // This is critical for Learning Pathways to unlock milestones immediately
         this.markAsCompleteSubject.next(true)

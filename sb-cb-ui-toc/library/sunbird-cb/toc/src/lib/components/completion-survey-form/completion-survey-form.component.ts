@@ -7,6 +7,7 @@ import * as _ from 'lodash'
 import { AppTocService } from '../../services/app-toc.service'
 import { HttpErrorResponse } from '@angular/common/http'
 import { TranslateService } from '@ngx-translate/core'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 //#endregion (imports)
 
 const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a-zA-Z0-9]*[a-zA-Z0-9]+)?(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/
@@ -42,6 +43,7 @@ export class CompletionSurveyFormComponent implements OnInit {
     private fb: FormBuilder,
     private appTocSvc: AppTocService,
     private translate: TranslateService,
+    private commonMethodsSvc: CommonMethodsService,
 
   ) {
     this.surveyId = data.surveyId
@@ -59,7 +61,18 @@ export class CompletionSurveyFormComponent implements OnInit {
     this.getSurveyFormData()
   }
 
+  private isApiEnabled(urlConfigPath: string, defaultUrl: string): boolean {
+    return !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.data?.apiConfig,
+      urlConfigPath,
+      defaultUrl,
+    })
+  }
+
   getSurveyFormData() {
+    if (!this.isApiEnabled('courseCompletionSurvey', '/apis/proxies/v8/forms/v2/getFormById')) {
+      return
+    }
     this.addLoader = this.addLoader + 1
     this.appTocSvc.getFormById(this.surveyId).subscribe((result: any) => {
       this.addLoader = this.addLoader - 1
@@ -171,7 +184,7 @@ export class CompletionSurveyFormComponent implements OnInit {
   submitForm() {
     this.surveyForm.markAllAsTouched()
     this.surveyForm.updateValueAndValidity()
-    if (this.surveyFormIsValid) {
+    if (this.surveyFormIsValid && this.isApiEnabled('submitCompletionSurvey', '/apis/proxies/v8/forms/v2/saveFormSubmit')) {
       const formBody: any = {
         formId: this.surveyId,
         version: 4,

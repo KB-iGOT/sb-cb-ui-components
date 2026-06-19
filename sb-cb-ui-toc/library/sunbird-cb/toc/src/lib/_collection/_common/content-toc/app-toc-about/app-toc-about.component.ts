@@ -28,6 +28,7 @@ import { DiscussUtilsService } from '../../../../services/discuss-utils.service'
 
 import { ReviewsContentComponent } from '../reviews-content/reviews-content.component'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 
 interface IStripUnitContentData {
   key: string
@@ -196,6 +197,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
     private resetRatingsService: ResetRatingsService,
     private contentSvc: WidgetContentService,
     private activatedRoute: ActivatedRoute,
+    private commonMethodsSvc: CommonMethodsService,
     @Inject('environment') environment: any
   ) {
     this.environment = environment
@@ -555,7 +557,11 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   }
 
   fetchRatingSummary() {
-    if (this.content && this.content.identifier && this.content.primaryCategory) {
+    if (this.content && this.content.identifier && this.content.primaryCategory && !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.pageConfigData?.apiConfig,
+      urlConfigPath: 'overallRating',
+      defaultUrl: '/apis/proxies/v8/ratings/v1/summary',
+    })) {
       this.ratingService.getRatingSummary(this.content.identifier, this.content.primaryCategory).subscribe(
         (res: any) => {
           if (res && res.result && res.result.response) {
