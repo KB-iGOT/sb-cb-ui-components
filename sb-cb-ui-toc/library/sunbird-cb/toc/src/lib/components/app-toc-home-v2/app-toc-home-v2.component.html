@@ -15,8 +15,7 @@
                       !(contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId)">
           <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
             [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
-            [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')"
-            class="flex action-button justify-center">
+            [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
             <ng-container *ngIf="(!content?.completionPercentage || content?.completionPercentage < 100) && !certData">
               <ng-container *ngIf="!forPreview || isInIFrame; else authView">
                 {{ translateLabels('resume', 'apptochome') }}
@@ -69,8 +68,8 @@
                       !(contentReadData?.primaryCategory === primaryCategory.PROGRAM) &&
                       !(contentReadData?.primaryCategory === primaryCategory.MANDATORY_COURSE_GOAL)">
           <ng-container *ngIf="contentReadData?.primaryCategory !== primaryCategory.RESOURCE  && !enrollBtnLoading">
-            <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame"
-              (click)="handleEnrollment($event)" [ngClass]="{'disable-start-btn': !canEnroll()}">
+            <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame" (click)="handleEnrollment($event)"
+              [ngClass]="{'disable-start-btn': !canEnroll()}">
               <ng-container>
                 {{ 'apptochome.enroll' | translate }}
               </ng-container>
@@ -110,9 +109,8 @@
               <ng-container
                 *ngIf="((contentReadData?.primaryCategory !== primaryCategory.RESOURCE)  && !enrollBtnLoading) && contentReadData?.batches[0].endDate">
                 <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
-                  [userEnrollmentList]="userEnrollmentList" [analytics]="analytics"
-                  (programEnrollCall)="programEnrollCall($event)" [resumeData]="resumeData" [batchData]="batchData"
-                  [contentReadData]="contentReadData">
+                  [userEnrollmentList]="userEnrollmentList" [analytics]="analytics" (programEnrollCall)="programEnrollCall($event)"
+                  [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
                 </ws-app-toc-banner>
               </ng-container>
             </ng-container>
@@ -121,8 +119,7 @@
             *ngIf="(courseCategory?.MODERATED_PROGRAM === contentReadData?.courseCategory) && !contentReadData?.batches && !batchData?.enrolled && !enrollBtnLoading">
             No Batches
           </ng-container>
-          <ng-container
-            *ngIf="courseCategory?.MODERATED_PROGRAM !== contentReadData?.courseCategory && !enrollBtnLoading">
+          <ng-container *ngIf="courseCategory?.MODERATED_PROGRAM !== contentReadData?.courseCategory && !enrollBtnLoading">
             <ng-container
               *ngIf="!(contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId) && contentReadData?.primaryCategory !== primaryCategory.MANDATORY_COURSE_GOAL">
               <span class="font-bold shadow-lg text-info-div">{{ 'apptochome.youAreNotInvited' | translate }} </span>
@@ -135,8 +132,7 @@
                 {{getStartDate}}!</span>
             </ng-container>
           </ng-container>
-          <ng-container
-            *ngIf="!isBatchInProgress && courseCategory?.MODERATED_PROGRAM === contentReadData?.courseCategory && !enrollBtnLoading">
+          <ng-container *ngIf="!isBatchInProgress && courseCategory?.MODERATED_PROGRAM === contentReadData?.courseCategory && !enrollBtnLoading">
             <ng-container *ngIf="!isBatchInProgress && currentCourseBatchId && getStartDate !== 'NA'">
               <span class="font-bold shadow-lg text-info-div">{{ 'apptochome.batchWillStart' | translate }}
                 {{getStartDate}}!</span>
@@ -148,10 +144,8 @@
                           (contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId) ||
                           (contentReadData?.primaryCategory === primaryCategory.MANDATORY_COURSE_GOAL && currentCourseBatchId)
                         )">
-            <a *ngIf="showStart.show && !isPostAssessment"
-              [routerLink]="resumeData ? resumeDataLink?.url : firstResourceLink?.url"
-              [queryParams]="resumeData ? generateQuery('RESUME') : generateQuery('START')"
-              class="flex action-button justify-center resume">
+            <a *ngIf="showStart.show && !isPostAssessment" [routerLink]="resumeData ? resumeDataLink?.url : firstResourceLink?.url"
+              [queryParams]="resumeData ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center resume">
               <ng-container *ngIf="!content?.completionPercentage || content?.completionPercentage < 100">
                 <ng-container *ngIf="!forPreview || isInIFrame">
                   {{ resumeData && (content?.completionPercentage < 100 && content?.completionPercentage> 0) ?
@@ -199,8 +193,7 @@
         *ngIf="isBatchInProgress && (contentReadData?.primaryCategory === primaryCategory.CURATED_PROGRAM && batchData?.enrolled) && !enrollBtnLoading">
         <a *ngIf="showStart.show && !isPostAssessment" (click)="raiseTelemetryForPublic($event)"
           [routerLink]="resumeData ? resumeDataLink?.url : firstResourceLink?.url"
-          [queryParams]="resumeData ? generateQuery('RESUME') : generateQuery('START')"
-          class="flex action-button justify-center resume">
+          [queryParams]="resumeData ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center resume">
           <ng-container *ngIf="!content?.completionPercentage || content?.completionPercentage < 100">
             <ng-container *ngIf="!forPreview || isInIFrame; else authView">
               {{ resumeData && (content?.completionPercentage < 100 && content?.completionPercentage> 0) ?
@@ -216,15 +209,12 @@
       </ng-container>
 
       <ng-container *ngIf="enrollBtnLoading">
-        <ws-widget-skeleton-loader [width]="'100%'" [height]="'36px'"
-          [bindingClass]="'flex rounded h-8'"></ws-widget-skeleton-loader>
+        <ws-widget-skeleton-loader [width]="'100%'" [height]="'36px'" [bindingClass]="'flex rounded h-8'"></ws-widget-skeleton-loader>
       </ng-container>
 
       <!-- Curated program block -->
-      <ng-container
-        *ngIf="contentReadData?.primaryCategory === primaryCategory.CURATED_PROGRAM && !batchData?.enrolled && !enrollBtnLoading">
-        <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame"
-          (click)="handleEnrollment($event)">
+      <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.CURATED_PROGRAM && !batchData?.enrolled && !enrollBtnLoading">
+        <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame" (click)="handleEnrollment($event)">
           <ng-container>
             {{ 'apptochome.enroll' | translate }}
           </ng-container>
@@ -233,8 +223,7 @@
       <!-- STANDALONE_ASSESSMENT black -->
       <ng-container
         *ngIf="contentReadData?.primaryCategory === primaryCategory.STANDALONE_ASSESSMENT && !batchData?.enrolled && !enrollBtnLoading && contentReadData?.courseCategory !== 'Invite-Only Assessment'">
-        <a class="flex action-button justify-center resume" (click)="handleEnrollment($event)"
-          *ngIf="!forPreview || isInIFrame">
+        <a class="flex action-button justify-center resume" (click)="handleEnrollment($event)" *ngIf="!forPreview || isInIFrame">
           <ng-container>
             {{ 'apptochome.enroll' | translate }}
           </ng-container>
@@ -331,16 +320,14 @@
             <div class="flex-1 text-xs">{{ 'apptocsinglepage.overallProgress' | translate }}</div>
             <div class="text-xs" *ngIf="content?.completionPercentage > 0"> {{ content?.completionPercentage }} %</div>
           </div>
-          <ws-widget-content-progress *ngIf="content?.identifier" [forPreview]="forPreview"
-            [contentId]="content?.identifier" [progress]="content?.completionPercentage" [progressType]="'percentage'"
-            [customClassName]="'content-progress'">
+          <ws-widget-content-progress *ngIf="content?.identifier" [forPreview]="forPreview" [contentId]="content?.identifier"
+            [progress]="content?.completionPercentage" [progressType]="'percentage'" [customClassName]="'content-progress'">
           </ws-widget-content-progress>
         </div>
       </div>
 
       <ng-container *ngIf="contentCompletionPercent >= 50">
-        <button mat-stroked-button color="accent" type="button" class="rate-button"
-          (click)="openFeedbackDialog(content)">
+        <button mat-stroked-button color="accent" type="button" class="rate-button" (click)="openFeedbackDialog(content)">
           <mat-icon class="nodtranslate">star_purple500</mat-icon>
           <ng-container *ngIf="!userRating">
             <div>{{ 'apptocsinglepage.rateNow' | translate }}</div>
@@ -362,10 +349,8 @@
           </div>
           <div class="flex items-center justify-between gap-4">
             <ng-container *ngIf="skeletonLoader">
-              <ws-widget-skeleton-loader [width]="'132px'" [height]="'32px'"
-                [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
-              <ws-widget-skeleton-loader [width]="'140px'" [height]="'24px'"
-                [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+              <ws-widget-skeleton-loader [width]="'132px'" [height]="'32px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+              <ws-widget-skeleton-loader [width]="'140px'" [height]="'24px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
             </ng-container>
 
             <ng-container *ngIf="!skeletonLoader">
@@ -390,8 +375,7 @@
                 <!-- Knowledge level block for search box -->
                 <!-- {{content?.difficultyLevel}} -->
                 <div *ngIf="contentReadData?.difficultyLevel" class="knowledge-level-container6">
-                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'beginner'"
-                    class="level-badge beginner">
+                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'beginner'" class="level-badge beginner">
                     <!-- <span *ngIf="false" class="level-badge beginner"> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">
                       <rect width="16" height="16" fill="#DBF4DC" />
@@ -401,8 +385,7 @@
                     </svg>
                     {{contentReadData?.difficultyLevel}}
                   </span>
-                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'intermediate'"
-                    class="level-badge intermediate">
+                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'intermediate'" class="level-badge intermediate">
                     <!-- <span *ngIf="true" class="level-badge intermediate"> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">
                       <rect width="16" height="16" fill="#D1DBEC" />
@@ -415,8 +398,7 @@
                     </svg>
                     {{contentReadData?.difficultyLevel}}
                   </span>
-                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'advanced'"
-                    class="level-badge advanced">
+                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'advanced'" class="level-badge advanced">
                     <!-- <span *ngIf="false" class="level-badge advanced"> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">
                       <g clip-path="url(#clip0)">
@@ -442,7 +424,8 @@
                 </div>
                 <div *ngIf="showBadgeIcon()" class="knowledge-level-container badgediv">
                   <span class="custom-badge">
-                    <img class="badge-img bg-transparent" src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt="" srcset="">
+                    <img class="badge-img bg-transparent" src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt=""
+                      srcset="">
                   </span>
                 </div>
                 <div class="flex items-center" *ngIf="cbPlanEndDate">
@@ -455,8 +438,7 @@
               </div>
             </ng-container>
             <ng-container *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier">
-              <div class="new-version-chip rounded-2xl" (click)="navigateToNewVersion()"
-                (keydown)="navigateToNewVersion()">
+              <div class="new-version-chip rounded-2xl" (click)="navigateToNewVersion()" (keydown)="navigateToNewVersion()">
                 <span class="new-version-text nodtranslate">{{ 'apptoc.newVersion' | translate }}</span>
               </div>
             </ng-container>
@@ -466,10 +448,8 @@
           </div>
           <div class="flex flex-col gap-2">
             <ng-container *ngIf="skeletonLoader">
-              <ws-widget-skeleton-loader [width]="'90%'" [height]="'32px'"
-                [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
-              <ws-widget-skeleton-loader [width]="'70%'" [height]="'32px'"
-                [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+              <ws-widget-skeleton-loader [width]="'90%'" [height]="'32px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+              <ws-widget-skeleton-loader [width]="'70%'" [height]="'32px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
             </ng-container>
             <ng-container *ngIf="!skeletonLoader">
               <div class="banner-text text-base sm:text-4xl leading-6 sm:leading-10 font-bold nodtranslate">{{
@@ -481,15 +461,13 @@
           </div>
 
           <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'120px'" [height]="'40px'"
-              [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
-            <ws-widget-skeleton-loader [width]="'88px'" [height]="'24px'"
-              [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'120px'" [height]="'40px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'88px'" [height]="'24px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
           </ng-container>
           <ng-container *ngIf="!skeletonLoader">
             <div class="flex gap-4 items-center">
-              <div class="flex flex-row rating-chip py-2 items-center cursor-pointer"
-                (click)="handleNavigateToReviews()" *ngIf="content?.averageRating">
+              <div class="flex flex-row rating-chip py-2 items-center cursor-pointer" (click)="handleNavigateToReviews()"
+                *ngIf="content?.averageRating">
                 <div class="flex flex-row gap-1 margin-left-s items-center">
                   <mat-icon class="nodtranslate">grade</mat-icon>
                   <div class="text-white text-sm leading-4">{{ content?.averageRating }}</div>
@@ -517,8 +495,7 @@
             </div>
           </ng-container>
           <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'180px'" [height]="'20px'"
-              [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'180px'" [height]="'20px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
           </ng-container>
           <ng-container *ngIf="!skeletonLoader && contentReadData?.sYS_INTERNAL_LAST_UPDATED_ON">
             <div class="text-xs leading-4 source-text nodtranslate">({{ 'apptoc.lastUpdatedOn' | translate }} {{
@@ -529,8 +506,8 @@
               <mat-chip-list class="lang-chips">
                 <!-- Show up to 6 chips -->
                 <ng-container *ngFor="let lang of languageList | slice:0:5; let i = index">
-                  <mat-chip class="matchip-custom" selectable="true"
-                    [selected]="lang?.identifier === selectedLanguage?.identifier" (click)="onLanguageSelect(lang)">
+                  <mat-chip class="matchip-custom" selectable="true" [selected]="lang?.identifier === selectedLanguage?.identifier"
+                    (click)="onLanguageSelect(lang)">
                     {{ lang.name || lang.value }}
                   </mat-chip>
                 </ng-container>
@@ -592,11 +569,9 @@
                 }}</span>
             </div>
             <div class="flex flex-middle relevant-container">
-              <div class="flex flex-middle relevent-normal relevent-btn py-2 px-4 relevant-box"
-                (mouseenter)="isReleventBtnHovered = true" (mouseleave)="isReleventBtnHovered = false"
-                (click)="handleAcceptRelevent()">
-                <img [src]="isReleventBtnHovered  ? SAKSHAMAI_ICON_LOADER : SAKSHAMAI_ICON_NORMAL"
-                  alt="loader" width="16" height="16" class="mr-2">
+              <div class="flex flex-middle relevent-normal relevent-btn py-2 px-4 relevant-box" (mouseenter)="isReleventBtnHovered = true"
+                (mouseleave)="isReleventBtnHovered = false" (click)="handleAcceptRelevent()">
+                <img [src]="isReleventBtnHovered  ? SAKSHAMAI_ICON_LOADER : SAKSHAMAI_ICON_NORMAL" alt="loader" width="16" height="16" class="mr-2">
                 <span class="text-relevent ff-lato text-sm font-bold">{{ 'home.relevent' | translate }}</span>
               </div>
 
@@ -608,23 +583,20 @@
           </div>
         </div>
       </ng-container>
-      <div class="pb-4 lg:py-4"
-        *ngIf="contentReadData?.identifier && content?.identifier && baseContentReadData?.identifier">
+      <div class="pb-4 lg:py-4" *ngIf="contentReadData?.identifier && content?.identifier && baseContentReadData?.identifier">
         <!-- Overall progress functionality -->
         <div class="mobile-progress">
           <ng-container [ngTemplateOutlet]="progressFunctionality"></ng-container>
         </div>
         <!-- Overall progress functionality -->
-        <ws-widget-content-toc [content]="content" [componentName]="'toc'" [pathSet]="pathSet"
-          [tocStructure]="tocStructure" [forPreview]="forPreview" [isEnrolled]="batchData?.enrolled"
-          [resumeData]="resumeData" [batchData]="batchData" [skeletonLoader]="skeletonLoader"
+        <ws-widget-content-toc [content]="content" [componentName]="'toc'" [pathSet]="pathSet" [tocStructure]="tocStructure" [forPreview]="forPreview"
+          [isEnrolled]="batchData?.enrolled" [resumeData]="resumeData" [batchData]="batchData" [skeletonLoader]="skeletonLoader"
           [changeTab]="changeTab" [hierarchyMapData]="tocSvc?.hashmap" [selectedBatchData]="selectedBatchData"
           [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"
-          [kparray]="kparray" (playResumeForAI)="playResumeForAI()" (enrollUserToAI)="enrollUserToAI()"
-          [contentReadData]="contentReadData" [baseContentReadData]="baseContentReadData" [languageList]="languageList"
-          [lockCertificate]="lockCertificate" (trigerCompletionSurveyForm)="openSurveyFormPopup($event)"
-          [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg"
-          (resumeContent)="resumeContentData()"></ws-widget-content-toc>
+          [kparray]="kparray" (playResumeForAI)="playResumeForAI()" (enrollUserToAI)="enrollUserToAI()" [contentReadData]="contentReadData"
+          [baseContentReadData]="baseContentReadData" [languageList]="languageList" [lockCertificate]="lockCertificate"
+          (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg"
+          [areAllActiveBatchesFull]="areAllActiveBatchesFull" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
         <div class="mob-tip-for-learner">
           <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
             <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"></ws-widget-tips-for-learner-card>
@@ -640,17 +612,14 @@
       <div class="right-content">
         <div class="right-content-inner">
           <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'384px'" [height]="'224px'"
-              [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'384px'" [height]="'224px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
           </ng-container>
           <ng-container *ngIf="!skeletonLoader">
-            <div class="flex flex-col image-div"
-              [ngStyle]="{
+            <div class="flex flex-col image-div" [ngStyle]="{
         'background-image': 'url(' + contentReadData?.posterImage + ')', 'background-repeat': 'no-repeat', 'background-size': 'cover'}"
               [ngClass]="{'image-backdrop': scrolled}">
               <div class="flex flex-col justify-between text-container">
-                <div class="flex items-center gap-4 justify-between"
-                  [ngClass]="{'justify-between': scrolled, 'justify-end': !scrolled}">
+                <div class="flex items-center gap-4 justify-between" [ngClass]="{'justify-between': scrolled, 'justify-end': !scrolled}">
                   <div class="flex flex-row tag-div rounded-2xl gap-1 items-center p-2" *ngIf="scrolled">
                     <mat-icon class="ws-mat-orange-text nodtranslate">video_library</mat-icon>
                     <ng-container *ngIf="contentReadData?.courseCategory">
@@ -662,8 +631,7 @@
                         translateLabel(contentReadData?.primaryCategory, 'searchfilters') }}</div>
                     </ng-container>
                   </div>
-                  <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag"
-                    *ngIf="canShare && !forPreview">
+                  <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag" *ngIf="canShare && !forPreview">
                     <mat-icon class="nodtranslate">share</mat-icon>
                     <div>{{ 'apptocsinglepage.share' | translate }}</div>
                   </div>
@@ -671,8 +639,8 @@
                 <div class="flex flex-col gap-1" *ngIf="scrolled">
                   <div class="text-xl leading-6 text-white font-bold">{{ handleCapitalize(contentReadData?.name) }}
                   </div>
-                  <div class="text-sm source-text font-semibold break-words" #contentSource
-                    [ngClass]="{'sourceEllipsis': sourceEllipsis}" title="{{contentReadData?.source}}">{{
+                  <div class="text-sm source-text font-semibold break-words" #contentSource [ngClass]="{'sourceEllipsis': sourceEllipsis}"
+                    title="{{contentReadData?.source}}">{{
                     'cardcontentv2.by' | translate }} {{ contentReadData?.source }}</div>
                 </div>
               </div>
@@ -680,37 +648,48 @@
           </ng-container>
 
 
-          <div class="flex flex-col gap-4 p-5 border-bottom">
-            <div class="flex flex-col gap-1  cursor-pointer switch-version"
-              *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier"
+          <div class="flex flex-col gap-2 p-5 border-bottom">
+            <div class="flex flex-col gap-1  cursor-pointer switch-version" *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier"
               (click)="navigateToNewVersion()" (keydown)="navigateToNewVersion()">
               <span class="btn-switch">{{ 'apptoc.switchToNewVersion' | translate }}</span>
             </div>
 
-            <ng-container *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData && !batchData?.enrolled && !batchData?.content?.length">
-              <div class="flex flex-col gap-4">
+            <ng-container
+              *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData && !batchData?.enrolled && !batchData?.content?.length">
+              <div class="flex flex-col">
                 <div class="text-sm text-center">No batches available for this program.</div>
               </div>
             </ng-container>
-            <ng-container *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData && !batchData?.enrolled && batchData?.content?.length && batchData?.allBatchesExpired">
-              <div class="flex flex-col gap-4">
-                <div class="text-sm text-center text-black-700">Currently, there are no active batches available for enrollment.</div>
-              </div>
-            </ng-container>
-            <ng-container *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData && !batchData?.enrolled && isBatchFull">
-              <div class="flex flex-row justify-center items-center mt-2">
-                <div class="text-sm batch-green-text margin-remove-bottom">This batch is currently full and not accepting new enrollments.</div>
-              </div>
-            </ng-container>
-            <ng-container *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData && !batchData?.enrolled && showLimitedSeatsMsg">
-              <div class="flex flex-row justify-center items-center mt-2">
-                <div class="text-sm batch-orange-text margin-remove-bottom">Limited seats are available in ongoing batches. Please enroll in an available batch.</div>
-              </div>
-            </ng-container>
 
-            <div class="flex flex-col gap-4"
-              *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM &&
-              !(!batchData?.enrolled && (!batchData?.content?.length || batchData?.allBatchesExpired))">
+            <ng-conatiner
+              *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData &&  batchData?.content?.length && !batchData?.enrolled">
+              <ng-container *ngIf="areAllActiveBatchesFull">
+                <div class="flex flex-row justify-center items-center mt-2">
+                  <div class="text-sm batch-red-text margin-remove-bottom">All batches for this program are currently full.</div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="batchData?.allBatchesExpired">
+                <div class="flex flex-col">
+                  <div class="text-sm batch-red-text text-black-700">Currently, there are no active batches available for enrollment.</div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="isBatchFull">
+                <div class="flex flex-row justify-center items-center mt-2">
+                  <div class="text-sm batch-green-text margin-remove-bottom">This batch is currently full and not accepting new enrollments.</div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="showLimitedSeatsMsg">
+                <div class="flex flex-row justify-center items-center mt-2">
+                  <div class="text-sm batch-orange-text margin-remove-bottom">Limited seats are available in ongoing batches. Please enroll in an
+                    available batch.</div>
+                </div>
+              </ng-container>
+            </ng-conatiner>
+            <div class="flex flex-col gap-4" *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM &&
+              !(!batchData?.enrolled && (!batchData?.content?.length || batchData?.allBatchesExpired || areAllActiveBatchesFull))">
               <div class="flex flex-row gap-3 justify-around" *ngIf="(preAssessmentCompletionStatus ||  !preAssessmentRequiredFlag)">
                 <div class="batch-info">
                   <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize
@@ -726,26 +705,22 @@
                   <div class="batch-label">{{ 'apptoc.totalEnrolled' | translate }}</div>
                 </div>
               </div>
-              <ng-container
-                *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && !preAssessmentCompletionStatus">
-                <a class="flex action-button enroll-btn justify-center resume"
-                  *ngIf="contentReadData?.preEnrolmentResources?.length" (click)="routeToPreAssessent()">
+              <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && !preAssessmentCompletionStatus">
+                <a class="flex action-button enroll-btn justify-center resume" *ngIf="contentReadData?.preEnrolmentResources?.length"
+                  (click)="routeToPreAssessent()">
                   <ng-container>
                     {{ 'apptochome.preEnroll' | translate }}
                   </ng-container>
                 </a>
               </ng-container>
-              <ng-container
-                *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && preAssessmentCompletionStatus">
+              <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && preAssessmentCompletionStatus">
                 <a class="flex preenrolldone-btn justify-center resume">
                   <ng-container>
-                    {{ 'apptochome.preEnrollDone' | translate }}<img src="/assets/icons/Accept_icon.png" alt="tick"
-                      class="tick-icon">
+                    {{ 'apptochome.preEnrollDone' | translate }}<img src="/assets/icons/Accept_icon.png" alt="tick" class="tick-icon">
                   </ng-container>
                 </a>
               </ng-container>
-              <ng-container
-                *ngIf="timer && timer.days >= 0 && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
+              <ng-container *ngIf="timer && timer.days >= 0 && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
                 <div class="flex flex-col gap-6 batch-timer">
                   <div class="flex flex-row">
                     <div class="flex-1">
@@ -788,9 +763,8 @@
        )">
 
                   <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
-                    [userEnrollmentList]="userEnrollmentList" (withdrawOrEnroll)="withdrawOrEnroll($event)"
-                    [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
-                    [contentReadData]="contentReadData">
+                    [userEnrollmentList]="userEnrollmentList" (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics"
+                    [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
                   </ws-app-toc-banner>
                 </ng-container>
               </ng-container>
@@ -798,10 +772,8 @@
 
 
             <ng-container *ngIf="skeletonLoader">
-              <ws-widget-skeleton-loader [width]="'336px'" [height]="'40px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-              <ws-widget-skeleton-loader [width]="'336px'" [height]="'68px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+              <ws-widget-skeleton-loader [width]="'336px'" [height]="'40px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+              <ws-widget-skeleton-loader [width]="'336px'" [height]="'68px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             </ng-container>
 
             <ng-container *ngIf="!skeletonLoader">
@@ -839,15 +811,13 @@
                   [pCategory]="contentReadData?.primaryCategory"></ws-app-karmapoints-panel>
               </div> -->
 
-                <ng-container
-                  *ngIf="actionBtnStatus !== 'wait' && contentReadData?.status !== 'Deleted' && contentReadData?.status !== 'Expired'">
+                <ng-container *ngIf="actionBtnStatus !== 'wait' && contentReadData?.status !== 'Deleted' && contentReadData?.status !== 'Expired'">
                   <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
                 </ng-container>
               </div>
 
               <div class="karma-points-div">
-                <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
-                  [content]="content"
+                <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)" [content]="content"
                   [baseContentReadData]="baseContentReadData"
                   [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"></ws-widget-karma-points>
               </div>
@@ -856,61 +826,45 @@
             <ng-container *ngIf="skeletonLoader">
               <div class="flex flex-wrap gap-6">
                 <div class="flex flex-col items-center gap-2 kpi-loader-div">
-                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                 </div>
                 <div class="flex flex-col items-center gap-2 kpi-loader-div">
-                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                 </div>
                 <div class="flex flex-col items-center gap-2 kpi-loader-div">
-                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                 </div>
                 <div class="flex flex-col items-center gap-2 kpi-loader-div">
-                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                 </div>
                 <div class="flex flex-col items-center gap-2 kpi-loader-div">
-                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                  <ws-widget-skeleton-loader [width]="'40px'" [height]="'8px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'28px'" [height]="'28px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'40px'" [height]="'8px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'48px'" [height]="'8px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                 </div>
               </div>
             </ng-container>
 
             <ng-container *ngIf="!skeletonLoader">
-              <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure"
-                [showInstructorLedMsg]="showInstructorLedMsg" [contentReadData]="contentReadData"
-                [languageList]="languageList"></ws-widget-toc-kpi-values>
+              <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure" [showInstructorLedMsg]="showInstructorLedMsg"
+                [contentReadData]="contentReadData" [languageList]="languageList"></ws-widget-toc-kpi-values>
             </ng-container>
           </div>
 
           <div class="flex flex-col gap-8 p-5">
             <ng-container *ngIf="skeletonLoader">
               <div class="flex flex-col gap-4" *ngFor="let i of [1, 2]">
-                <ws-widget-skeleton-loader [width]="'72px'" [height]="'20px'"
-                  [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'72px'" [height]="'20px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
 
                 <div class="flex flex-row items-center gap-3">
-                  <ws-widget-skeleton-loader [width]="'36px'" [height]="'36px'"
-                    [bindingClass]="'rounded-full'"></ws-widget-skeleton-loader>
+                  <ws-widget-skeleton-loader [width]="'36px'" [height]="'36px'" [bindingClass]="'rounded-full'"></ws-widget-skeleton-loader>
                   <div class="flex flex-col gap-2">
-                    <ws-widget-skeleton-loader [width]="'124px'" [height]="'20px'"
-                      [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                    <ws-widget-skeleton-loader [width]="'124px'" [height]="'12px'"
-                      [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                    <ws-widget-skeleton-loader [width]="'124px'" [height]="'20px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                    <ws-widget-skeleton-loader [width]="'124px'" [height]="'12px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                   </div>
                 </div>
               </div>
@@ -919,11 +873,10 @@
             <ng-container *ngIf="!skeletonLoader">
               <div class="flex flex-col gap-3" *ngIf="handleParseJsonData(contentReadData?.creatorDetails)?.length">
                 <div class="text-base font-bold">{{ 'apptocsinglepage.authors' | translate }}</div>
-                <div class="flex flex-row gap-4 items-center"
-                  *ngFor="let author of handleParseJsonData(contentReadData?.creatorDetails)">
+                <div class="flex flex-row gap-4 items-center" *ngFor="let author of handleParseJsonData(contentReadData?.creatorDetails)">
                   <div class="flex items-center justify-center">
-                    <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'"
-                      [photoUrl]="author?.photo || ''" [name]="author?.name">
+                    <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'" [photoUrl]="author?.photo || ''"
+                      [name]="author?.name">
                     </ws-widget-avatar-photo>
                   </div>
                   <div class="flex flex-col gap-1 justify-center">
@@ -934,11 +887,10 @@
               </div>
               <div class="flex flex-col gap-3" *ngIf="handleParseJsonData(contentReadData?.creatorContacts)?.length">
                 <div class="text-base font-bold">{{ 'apptocsinglepage.creators' | translate }}</div>
-                <div class="flex flex-row gap-4 items-center"
-                  *ngFor="let creeator of handleParseJsonData(contentReadData?.creatorContacts)">
+                <div class="flex flex-row gap-4 items-center" *ngFor="let creeator of handleParseJsonData(contentReadData?.creatorContacts)">
                   <div class="flex items-center justify-center">
-                    <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'"
-                      [photoUrl]="creeator?.photo || ''" [name]="creeator?.name">
+                    <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'" [photoUrl]="creeator?.photo || ''"
+                      [name]="creeator?.name">
                     </ws-widget-avatar-photo>
                   </div>
                   <div class="flex flex-col gap-1 justify-center">
@@ -947,15 +899,13 @@
                   </div>
                 </div>
               </div>
-              <div class="flex flex-col gap-3"
-                *ngIf="contentReadData?.source  && (contentCreatorData && contentCreatorData?.length)">
+              <div class="flex flex-col gap-3" *ngIf="contentReadData?.source  && (contentCreatorData && contentCreatorData?.length)">
                 <div class="text-base font-bold">{{ 'apptocsinglepage.provider' | translate }}</div>
                 <div class="flex flex-row gap-4 items-center" *ngFor="let creator of contentCreatorData">
                   <div class="flex provider-logo-div">
                     <img *ngIf="contentReadData?.creatorLogo" [src]="contentReadData?.creatorLogo"
                       alt="{{ 'apptocsinglepage.provider' | translate }}" />
-                    <img *ngIf="!contentReadData?.creatorLogo" class="mat-icon"
-                      src="/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg"
+                    <img *ngIf="!contentReadData?.creatorLogo" class="mat-icon" src="/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg"
                       alt="{{ 'apptocsinglepage.provider' | translate }}" />
                   </div>
                   <div class="text-sm word-break cursor-pointer" *ngIf="contentReadData?.createdFor?.length"
@@ -984,38 +934,45 @@
   <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
   && batchData && batchData?.allBatchesExpired">
     <div class="mobile-enroll-div orange-background">
-        <div class="flex flex-col gap-4 mx-4 mt-4">
-            <div class="text-sm text-center text-black-700">Currently, there are no active batches available for enrollment.</div>
-        </div>
+      <div class="flex flex-col gap-4 mx-4 mt-4">
+        <div class="text-sm text-center text-black-700">Currently, there are no active batches available for enrollment.</div>
+      </div>
     </div>
   </ng-container>
   <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
   && batchData && batchData?.content?.length === 0">
     <div class="mobile-enroll-div orange-background">
       <div class="flex flex-col gap-4 mx-4 mt-4">
-          <div class="text-sm text-center text-black-700">No batches available for this program.</div>
+        <div class="text-sm text-center text-black-700">No batches available for this program.</div>
       </div>
     </div>
   </ng-container>
-  <div class="mobile-enroll-div" *ngIf="!batchData?.allBatchesExpired && batchData?.content?.length > 0 "
+  <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
+  && batchData && !batchData?.allBatchesExpired && areAllActiveBatchesFull">
+    <div class="mobile-enroll-div orange-background">
+      <div class="flex flex-col gap-4 mx-4 mt-4">
+        <div class="text-sm text-center text-black-700">All batches for this program are currently full.</div>
+      </div>
+    </div>
+  </ng-container>
+  <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !areAllActiveBatchesFull) && batchData?.content?.length > 0 "
     [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
     <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
       <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
-        <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
-          [userEnrollmentList]="userEnrollmentList" (withdrawOrEnroll)="withdrawOrEnroll($event)"
-          [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
+        <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
+          (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
+          [contentReadData]="contentReadData">
         </ws-app-toc-banner>
       </div>
     </ng-container>
     <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
   </div>
 
-  <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content"
-    (resetEnableShare)="resetEnableShare()" [baseContentReadData]="baseContentReadData"></ws-app-share-toc>
+  <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content" (resetEnableShare)="resetEnableShare()"
+    [baseContentReadData]="baseContentReadData"></ws-app-share-toc>
 </ng-container>
 <ng-template #noDataFound>
-  <div
-    class="error-not-found flex flex-wrapped margin-left-m margin-top-xl margin-right-m flex-col justify-center align-items-center text-center">
+  <div class="error-not-found flex flex-wrapped margin-left-m margin-top-xl margin-right-m flex-col justify-center align-items-center text-center">
     <div class="error-logo">
       <div class="error-message ws-mat-primary-text font-weight-bold">
         The page you requested cannot be found
@@ -1034,11 +991,11 @@
 <ng-template #authViewBtn i18n>
   <ng-container *ngIf="displayViewBtn">
     <a (click)="raiseTelemetryForPublic($event)"
-    [routerLink]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url)"
-    [queryParams]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START'))"
-    class="flex action-button justify-center">
-    {{'apptochome.view' | translate}}
-  </a>
+      [routerLink]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url)"
+      [queryParams]="shouldShowSurveyPopup() ? null : ((resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START'))"
+      class="flex action-button justify-center">
+      {{'apptochome.view' | translate}}
+    </a>
   </ng-container>
 </ng-template>
 <ng-template #authViewForInviteOnlyAssessment>

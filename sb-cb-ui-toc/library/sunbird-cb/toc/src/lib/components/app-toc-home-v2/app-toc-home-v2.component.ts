@@ -73,12 +73,12 @@ const flattenItems = (items: any[], key: string | number) => {
 }
 const SNACKBAR_DURATION = 3000
 @Component({
-    selector: 'ws-app-app-toc-home-v2',
-    templateUrl: './app-toc-home-v2.component.html',
-    styleUrls: ['./app-toc-home-v2.component.scss'],
-    // tslint:disable-next-line: use-component-view-encapsulation
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: 'ws-app-app-toc-home-v2',
+  templateUrl: './app-toc-home-v2.component.html',
+  styleUrls: ['./app-toc-home-v2.component.scss'],
+  // tslint:disable-next-line: use-component-view-encapsulation
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   queryParamsData: { [key: string]: string } = {}; // Initialize queryParamsData
@@ -3369,4 +3369,23 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
     return false
   }
+
+  get areAllActiveBatchesFull(): boolean {
+    if (!this.baseContentReadData?.batches || this.baseContentReadData?.batches.length === 0) {
+      return false
+    }
+
+    const activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.handleEnrollmentEndDate(batch))
+    if (activeBatches.length === 0) {
+      return false
+    }
+
+    return activeBatches.every((batch: any) => {
+      const currentBatchSize = _.get(batch, 'batchAttributes.currentBatchSize', 0)
+      const totalApprovedCount = Number(_.get(batch, 'batchAttributes.totalApprovedCount', 0))
+      return currentBatchSize === totalApprovedCount
+    })
+  }
+
+
 }

@@ -204,12 +204,14 @@
   max-width: 792px;
   width: 100%;
 }
+
 /* Windows display scaling ~150% */
 @media (min-resolution: 1.5dppx) {
   .toc-content {
     max-width: 735px;
   }
 }
+
 .right-container {
   .image-div {
     height: 220px;
@@ -491,11 +493,15 @@ a.action-button {
   }
 }
 
+.batch-red-text {
+  color: red;
+}
+
 .orange-background {
   background: #F3962F;
 }
 
-batch-green-text {
+.batch-green-text {
   color: #2F8132 !important;
 }
 
@@ -1225,10 +1231,12 @@ mat-divider {
 .level-badge svg {
   flex-shrink: 0;
 }
+
 .badgediv {
   width: 25px;
   height: 25px;
 }
+
 .badge-img {
   width: 100%;
   height: 100%;
