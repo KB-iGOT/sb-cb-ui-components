@@ -248,7 +248,7 @@
             <ng-container *ngIf="group.value && group.value.length">
               <ng-container *ngFor="let column of group.value">
                 <div class="batch-column">
-                  <div *ngFor="let entity of column" class="org-card py-2">
+                  <div *ngFor="let entity of column" class="org-card">
                     <ng-container
                       *ngIf="
                         selectionType === selectionTypeEnum.Designation ||
