@@ -929,37 +929,6 @@ border: none;
 }
 
 
-/* Apply border and rounded corners to the whole form field */
-:host ::ng-deep .mat-form-field-appearance-outline {
-  border-radius: 25px; /* Apply rounded corners to the whole outline */
-  border: 1px solid #ccc; /* Add border to the entire form field */
-}
-
-:host ::ng-deep .mat-form-field-focused .mat-form-field-appearance-outline {
-  border-color: #1B4CA1 !important; /* Blue border when focused */
-}
-
-/* Apply the left border with proper radius to start */
-:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-start {
- // border-left: 1px solid #ccc;
-  border-radius: 25px 0 0 25px; /* Rounded left corner */
-  border: none !important;
-}
-
-/* Apply the right border with proper radius to end */
-:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-end {
-  border-right: none !important;
-  border: none !important;
-  border-radius: 0 25px 25px 0; /* Rounded right corner */
-}
-
-/* Apply top and bottom borders for consistency */
-:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-gap {
-  // border-top: 1px solid #ccc;
-  // border-bottom: 1px solid #ccc;
-  border: none !important;
-  border-radius: 25px; /* Apply same radius to the gap */
-}
 
 
 
