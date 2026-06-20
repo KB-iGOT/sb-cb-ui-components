@@ -419,7 +419,7 @@ export class SharedService {
   updateRoleMapping(role_mapping_id, reqBody) {
      if (this.fromMdoPortal) {
       let mdoBaseUrl = 'http://localhost:3000'
-      return this.http.put<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_ROLE_MAPPING_UPDATE}`, reqBody)
+      return this.http.put<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_ROLE_MAPPING_UPDATE}`, reqBody)
         .pipe(map((response: any) => {
           return response
         }))
@@ -476,7 +476,7 @@ export class SharedService {
 
   addMDOCourse(reqBody) {
     let mdoBaseUrl = 'http://localhost:3000'
-     return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_ADD_COURSE}`, reqBody)
+     return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_ADD_COURSE}`, reqBody)
       .pipe(map((response: any) => {
         return response
       }))
@@ -509,7 +509,7 @@ export class SharedService {
     console.log('getIGOTSuggestedCourses final request:', JSON.stringify(req, null, 2));
     if (this.fromMdoPortal) {
       let mdoBaseUrl = 'http://localhost:3000'
-      return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
         .pipe(map((response: any) => {
           return response
         }))
@@ -611,7 +611,7 @@ export class SharedService {
   addUserCourse(reqBody) {
     if (this.fromMdoPortal) {
       let mdoBaseUrl = 'http://localhost:3000'
-      return this.http.get<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_ADD_USER_COURSE}`)
+      return this.http.get<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_ADD_USER_COURSE}`)
         .pipe(map((response: any) => {
           return response
         }))
@@ -636,7 +636,7 @@ export class SharedService {
   getCompetencyJson() {
     if (this.fromMdoPortal) {
       let mdoBaseUrl = 'http://localhost:3000'
-      return this.http.get<any>(`${mdoBaseUrl}/assets/jsonfiles/competencies.json`)
+      return this.http.get<any>(`${this.mdoBaseUrl}/assets/jsonfiles/competencies.json`)
         .pipe(map((response: any) => {
           return response
         }))
@@ -917,7 +917,7 @@ export class SharedService {
           "item_id": roleMappingId,
           "identifier": courseIdentifier
         }
-      return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_DELETE_APPROVE_COURSE}`, reqBody)
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_DELETE_APPROVE_COURSE}`, reqBody)
         .pipe(map((response: any) => {
           return response
         }))
@@ -968,7 +968,7 @@ export class SharedService {
     }
     if (this.fromMdoPortal) {
       let mdoBaseUrl = 'http://localhost:3000'
-      return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_SUGGESTED_COURSE_LIST}`, reqBody)
         .pipe(map((response: any) => {
           return response
         }))
@@ -993,7 +993,7 @@ export class SharedService {
   searchPublicDesignation(reqBody) {
     if (this.fromMdoPortal) {
       let mdoBaseUrl = 'http://localhost:3000'
-      return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.MDO_DESIGNATION_SEARCH}`, reqBody)
+      return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.MDO_DESIGNATION_SEARCH}`, reqBody)
         .pipe(map((response: any) => {
           return response
         }))
@@ -1123,7 +1123,7 @@ getApprovalRequests(reqBody: any) {
 
   viewMDOApprovalRequests(request_id) {
     let mdoBaseUrl = 'http://localhost:3000'
-    return this.http.get<any>(`${mdoBaseUrl}/${API_END_POINTS.VIEW_MDO_APPROVAL_REQUEST}/${request_id}`)
+    return this.http.get<any>(`${this.mdoBaseUrl}/${API_END_POINTS.VIEW_MDO_APPROVAL_REQUEST}/${request_id}`)
       .pipe(map((response: any) => {
         return response
       }))
@@ -1131,7 +1131,7 @@ getApprovalRequests(reqBody: any) {
 
   approveAndPublishMDOApprovalRequests(request) {
     let mdoBaseUrl = 'http://localhost:3000'
-    return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.APPROVE_AND_PUBLISH_MDO_APPROVAL_REQUEST}`, request)
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.APPROVE_AND_PUBLISH_MDO_APPROVAL_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))
@@ -1139,7 +1139,7 @@ getApprovalRequests(reqBody: any) {
 
   rejectMDOApprovalRequests(request) {
     let mdoBaseUrl = 'http://localhost:3000'
-    return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.REJECT_APPROVAL_REQUEST}`, request)
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REJECT_APPROVAL_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))
@@ -1147,7 +1147,7 @@ getApprovalRequests(reqBody: any) {
 
   rejectItemMDOApprovalRequests(request) {
     let mdoBaseUrl = 'http://localhost:3000'
-    return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.REJECT_ITEM_APPROVAL_REQUEST}`, request)
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REJECT_ITEM_APPROVAL_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))
@@ -1171,7 +1171,7 @@ getApprovalRequests(reqBody: any) {
 
    RePublishMDOApprovalRequest(request) {
     let mdoBaseUrl = 'http://localhost:3000'
-    return this.http.post<any>(`${mdoBaseUrl}/${API_END_POINTS.REPUBLISH_REQUEST}`, request)
+    return this.http.post<any>(`${this.mdoBaseUrl}/${API_END_POINTS.REPUBLISH_REQUEST}`, request)
       .pipe(map((response: any) => {
         return response
       }))
