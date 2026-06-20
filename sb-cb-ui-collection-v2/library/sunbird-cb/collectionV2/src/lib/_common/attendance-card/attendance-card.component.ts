@@ -4,12 +4,13 @@ import { AttendanceHelperComponent } from '../attendance-helper/attendance-helpe
 import { NsContent } from '@sunbird-cb/utils-v2'
 // tslint:disable
 import _ from 'lodash'
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog'
+import { MatDialog } from '@angular/material/dialog'
 
 @Component({
-  selector: 'ws-widget-attendance-card',
-  templateUrl: './attendance-card.component.html',
-  styleUrls: ['./attendance-card.component.scss']
+    selector: 'ws-widget-attendance-card',
+    templateUrl: './attendance-card.component.html',
+    styleUrls: ['./attendance-card.component.scss'],
+    standalone: false
 })
 export class AttendanceCardComponent implements OnInit {
 

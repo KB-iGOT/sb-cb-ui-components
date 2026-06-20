@@ -5,7 +5,7 @@ import { EventService, ConfigurationsService, WsEvents } from '@sunbird-cb/utils
 // import { ViewerUtilService } from '@ws/viewer/src/lib/viewer-util.service'
 // import { ViewerDataService } from '@ws/viewer/src/lib/viewer-data.service'
 import { WidgetContentService } from '../_services/widget-content.service'
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar'
+import { MatSnackBar } from '@angular/material/snack-bar'
 
 describe('PlayerSurveyComponent', () => {
   let component: PlayerSurveyComponent

@@ -5,9 +5,10 @@ import { ILeftMenu, IMenu } from './left-menu-v1.model'
 // import * as defaultImg from './base64.json'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 @Component({
-  selector: 'ws-widget-left-menu-v1',
-  templateUrl: './left-menu-v1.component.html',
-  styleUrls: ['./left-menu-v1.component.scss'],
+    selector: 'ws-widget-left-menu-v1',
+    templateUrl: './left-menu-v1.component.html',
+    styleUrls: ['./left-menu-v1.component.scss'],
+    standalone: false
 })
 export class LeftMenuV1Component extends WidgetBaseComponent
   implements OnInit, OnDestroy, NsWidgetResolver.IWidgetData<ILeftMenu> {

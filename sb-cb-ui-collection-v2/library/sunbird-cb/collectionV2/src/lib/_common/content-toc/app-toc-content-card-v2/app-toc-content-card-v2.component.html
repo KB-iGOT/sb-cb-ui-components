@@ -68,7 +68,7 @@
                 <div class="text-truncate " [ngClass]="{'cursor-pointer': !isEnabled}"
                     (click)="content.viewChildren = !content.viewChildren; raiseTelemetry(); changeResource()">
                     <div class="flex flex-col sm:flex-row flex-wrap">
-                        <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold"
+                        <p class="margin-remove text-truncate mat-body-1 flex-auto font-bold"
                             [ngClass]="{'text-active': pathSet?.has(content?.identifier)}">
                             <!-- <mat-icon class="margin-right-xs radiobtn time-icon">radio_button_unchecked </mat-icon> -->
                             {{ content?.name | truncate:50 }}
@@ -235,7 +235,7 @@
                             </ng-container>
                             <div [ngClass]="{'collection-active-class': pathSet?.has(content?.identifier)}">
                             </div>
-                            <p class="margin-remove text-truncate mat-subheading-1 flex-auto font-bold"
+                            <p class="margin-remove text-truncate mat-subtitle-2 flex-auto font-bold"
                                 [ngClass]="{'text-active': pathSet?.has(content?.identifier || '')}">
                                 {{index}}. {{ content?.name | truncate:50 }}
                             </p>
@@ -287,7 +287,7 @@
                                 <div class="flex flex-1">
                                     <div class="mt-2 mr-4  flex flex-1 flex-col  progress-container">
                                         <div class="flex flex-row justify-end w-full ">
-                                            <span class="mat-body-2  ">
+                                            <span class="mat-body-1  ">
                                                 {{getCompletionPercentage(content?.identifier)}}%</span>
                                         </div>
 
@@ -327,7 +327,7 @@
                                 <div class="flex flex-1">
                                     <div class="mt-2 mr-4  flex flex-1 flex-col  progress-container">
                                         <div class="flex flex-row justify-end w-full ws-mat-black-text">
-                                            <span class="mat-body-2  ws-mat-black-text">
+                                            <span class="mat-body-1  ws-mat-black-text">
                                                 {{getCompletionPercentage(content?.identifier)}}%</span>
                                         </div>
 
@@ -436,11 +436,11 @@
                             </ng-template>
                         </ng-container>
                         <div [ngClass]="{'collection-active-class': pathSet?.has(content?.identifier)}"></div>
-                        <!-- <p class="margin-remove text-truncate mat-subheading-1 flex-auto font-bold nodtranslate"
+                        <!-- <p class="margin-remove text-truncate mat-subtitle-2 flex-auto font-bold nodtranslate"
                             [ngClass]="{'text-active': pathSet?.has(content.identifier)}">
                             {{index}}. {{ content?.name | truncate:50 }}
                         </p> -->
-                        <a class="margin-remove text-truncate mat-subheading-1 flex-auto font-bold nodtranslate"
+                        <a class="margin-remove text-truncate mat-subtitle-2 flex-auto font-bold nodtranslate"
                             [class.disabled]="null" [ngClass]="{'ml-3': isEnrolled}"
                             [routerLink]="(isAllowed && !forPreview && isEnabled) ? resourceLink.url : null"
                             [queryParams]="computedQueryParams">
@@ -449,7 +449,7 @@
                             <div class="text-truncate " [ngClass]="{'cursor-pointer': !isEnabled}"
                                 (click)="raiseTelemetry(); changeResource()">
                                 <div class="flex flex-col sm:flex-row flex-wrap">
-                                    <p class="margin-remove text-truncate mat-body-2 flex-auto font-bold nodtranslate"
+                                    <p class="margin-remove text-truncate mat-body-1 flex-auto font-bold nodtranslate"
                                         [ngClass]="{'text-active': pathSet?.has(content?.identifier)}">
                                         <!-- <mat-icon class="margin-right-xs radiobtn time-icon">radio_button_unchecked </mat-icon> -->
                                         {{index}}. {{ content?.name | truncate:50 }}
@@ -587,7 +587,7 @@
                             <div class="flex flex-1">
                                 <div class="mt-2 mr-4  flex flex-1 flex-col  progress-container">
                                     <div class="flex flex-row justify-end w-full ">
-                                        <span class="mat-body-2 nodtranslate ">
+                                        <span class="mat-body-1 nodtranslate ">
                                             {{getCompletionPercentage(content?.identifier)}}%</span>
                                     </div>
 
@@ -627,7 +627,7 @@
                             <div class="flex flex-1">
                                 <div class="mt-2 mr-4  flex flex-1 flex-col  progress-container">
                                     <div class="flex flex-row justify-end w-full ws-mat-black-text">
-                                        <span class="mat-body-2  ws-mat-black-text nodtranslate">
+                                        <span class="mat-body-1  ws-mat-black-text nodtranslate">
                                             {{getCompletionPercentage(content?.identifier)}}%</span>
                                     </div>
 

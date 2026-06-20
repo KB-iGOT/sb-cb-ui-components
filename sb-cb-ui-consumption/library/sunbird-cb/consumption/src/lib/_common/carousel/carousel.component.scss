@@ -1,0 +1,109 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid #4a90d9;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+.carousel-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: transform;
+}
+
+.carousel-item {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+// --- Controls: ← ● ○ ○ → ---
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+// Navigation buttons
+.carousel-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #1b2133;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(.disabled) {
+    background: #1b2133;
+    color: #fff;
+    border-color: #1b2133;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4a90d9;
+    outline-offset: 2px;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// Pagination dots
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+
+  &:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4a90d9;
+    outline-offset: 2px;
+  }
+
+  &.active {
+    width: 20px;
+    border-radius: 4px;
+    background-color: #1b2133;
+  }
+}

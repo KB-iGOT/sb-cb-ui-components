@@ -264,7 +264,7 @@ span.optional-span {
 }
 
 .children-container {
-  .mat-subheading-1 {
+  .mat-subtitle-2 {
     /* stylelint-disable */
     font: 500 16px/24px 'Lato' !important;
     /* stylelint-enable */
@@ -480,25 +480,15 @@ span.optional-span {
 .progress-bar-thin {
   height: 5px !important;
 
-  ::ng-deep.mat-progress-bar {
+  mat-progress-bar {
     height: 5px;
-  }
-
-  ::ng-deep.theme-igot.day-mode .mat-progress-bar-buffer {
-    background-color: transparent !important;
+    --mdc-linear-progress-track-color: transparent;
   }
 }
 
-.progress-bar-thin ::ng-deep.mat-progress-bar {
+.progress-bar-thin mat-progress-bar {
   height: 5px;
-}
-
-.progress-bar-thin ::ng-deep.theme-igot.day-mode .mat-progress-bar-buffer {
-  background-color: transparent !important;
-}
-
-.progress-bar-thin ::ng-deep.theme-igot.day-mode .mat-progress-bar-background {
-  fill: transparent;
+  --mdc-linear-progress-track-color: transparent;
 }
 
 .radiobtn {

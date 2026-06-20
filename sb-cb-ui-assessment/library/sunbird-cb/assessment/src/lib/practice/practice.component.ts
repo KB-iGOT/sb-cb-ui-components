@@ -1024,7 +1024,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
       if (!this.fromCreation) {
         // tslint:disable-next-line
         console.log('status', status)
-        this.viewerSvc.realTimeProgressUpdateQuiz(this.identifier, collectionId, batchId, status)
+        // this.viewerSvc.realTimeProgressUpdateQuiz(this.identifier, collectionId, batchId, status)
       }
 
     }

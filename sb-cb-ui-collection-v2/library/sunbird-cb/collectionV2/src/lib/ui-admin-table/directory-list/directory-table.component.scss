@@ -220,7 +220,7 @@ $card-standard-width: 268px;
     line-height: $description-line-height;
   }
 
-  .mat-chip-list-wrapper {
+  .mat-mdc-chip-set {
     padding: 8px 0 16px 0 !important;
   }
 
@@ -684,11 +684,11 @@ $title-line-count: 2;
   background: transparent;
 }
 
-.mat-header-row {
+.mat-mdc-header-row {
   min-height: 40px;
 }
 
-.mat-header-cell {
+.mat-mdc-header-cell {
   background-color: #F5F5F5;
   font-size: 14px;
 }

@@ -1,7 +1,8 @@
-@import "../../_scss/ws-vars";
-@import "../../_scss/ws-mixins";
+@use "../../_scss/ws-vars" as *;
+@use "../../_scss/ws-mixins" as *;
 
-.mat-card {
+// MDC card (replaces .mat-card)
+.mat-mdc-card {
   border: 1px solid $matCardBorderColor;
   box-shadow: none !important;
   border-radius: $size-s !important;

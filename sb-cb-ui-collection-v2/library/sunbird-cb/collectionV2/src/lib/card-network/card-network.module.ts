@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { NgModule } from '@angular/core'
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button'
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card'
-import { MatLegacyChipsModule as MatChipsModule } from '@angular/material/legacy-chips'
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core'
+import { MatButtonModule } from '@angular/material/button'
+import { MatCardModule } from '@angular/material/card'
+import { MatChipsModule } from '@angular/material/chips'
 import { MatDividerModule } from '@angular/material/divider'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatIconModule } from '@angular/material/icon'
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
-import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner'
+import { MatInputModule } from '@angular/material/input'
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { HorizontalScrollerModule, PipeNameTransformModule } from '@sunbird-cb/utils-v2'
 import { CardNetWorkService } from './card-network.service'
 import { ActivityCardModule } from '../activity-card/activity-card.module'
@@ -39,7 +39,8 @@ import { FormsModule } from '@angular/forms'
         MatGridListModule,
         FormsModule,
     ],
-    providers: [CardNetWorkService]
+    providers: [CardNetWorkService],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class CardNetworkModule {
 

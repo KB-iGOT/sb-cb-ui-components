@@ -4,6 +4,7 @@ import { Component, OnInit, Input } from '@angular/core'
   selector: 'ws-widget-avatar-photo',
   templateUrl: './avatar-photo.component.html',
   styleUrls: ['./avatar-photo.component.scss'],
+  standalone: false,
 })
 export class AvatarPhotoComponent implements OnInit {
   @Input() datalen: any
@@ -41,6 +42,9 @@ export class AvatarPhotoComponent implements OnInit {
   ]
 
   ngOnInit() {
+    if (!this.name) {
+      this.name = 'N A'
+    }
     if (!this.photoUrl) {
       this.showInitials = true
       if (!this.initials) {
@@ -63,24 +67,21 @@ export class AvatarPhotoComponent implements OnInit {
 
   private createInititals(): void {
     let initials = ''
-    // const array = `${this.name} `.toString().split(' ')
-    const array = `${this.name && this.name.toString()}`.split(' ')
+    const array = `${this.name} `.toString().split(' ')
     if (array[0] !== 'undefined' && typeof array[1] !== 'undefined') {
       initials += array[0].charAt(0)
       initials += array[1].charAt(0)
     } else {
-      if (this.name) {
-        for (let i = 0; i < this.name.length; i += 1) {
-          if (this.name.charAt(i) === ' ') {
-            continue
-          }
+      for (let i = 0; i < this.name.length; i += 1) {
+        if (this.name.charAt(i) === ' ') {
+          continue
+        }
 
-          if (this.name && this.name.charAt(i) === this.name.charAt(i)) {
-            initials += this.name.charAt(i)
+        if (this.name.charAt(i)) {
+          initials += this.name.charAt(i)
 
-            if (initials.length === 2) {
-              break
-            }
+          if (initials.length === 2) {
+            break
           }
         }
       }

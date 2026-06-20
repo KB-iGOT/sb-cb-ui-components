@@ -31,14 +31,15 @@ mat-expansion-panel {
   }
 }
 
-.mat-progress-bar {
+mat-progress-bar,
+.mat-mdc-progress-bar {
   display: block;
   height: 8px;
   overflow: hidden;
   position: relative;
   transition: opacity 250ms linear;
   border-radius: 10px;
-  background-color: red($color: #000000);
+  --mdc-linear-progress-track-color: rgba(0, 0, 0, 0.08);
   width: 100%;
 }
 

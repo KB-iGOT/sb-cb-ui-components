@@ -63,6 +63,10 @@
 ::ng-deep .nav-list-menu {
   padding-top: 0 !important;
 
+  a[mat-list-item] {
+    cursor: pointer !important;
+  }
+
   .menu-item-a {
     background-color: rgb(255, 255, 255);
     position: relative;
@@ -73,8 +77,11 @@
 
 
 
-    .mat-list-item-content {
-
+    .mdc-list-item__content {
+      .mdc-list-item__primary-text {
+        display: flex;
+        align-items: center;
+      }
       mat-icon.menu-icon {
         width: 16px;
         height: 16px;
@@ -148,7 +155,7 @@
       }
     }
 
-    .mat-list-item-content {
+    .mdc-list-item__content {
       padding: 0 !important;
       justify-content: center;
 

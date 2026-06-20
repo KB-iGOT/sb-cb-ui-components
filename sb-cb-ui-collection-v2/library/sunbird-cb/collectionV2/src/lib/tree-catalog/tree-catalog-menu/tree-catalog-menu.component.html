@@ -1,18 +1,18 @@
 <mat-menu #childMenu="matMenu" name="exploreListContainerHomePage" [overlapTrigger]="false">
   <ng-template matMenuContent>
-    <h3 class="mat-subheading-2 margin-left-m margin-right-m margin-remove-bottom" *ngIf="fetchStatus === 'error'" i18n>
+    <h3 class="mat-subtitle-1 margin-left-m margin-right-m margin-remove-bottom" *ngIf="fetchStatus === 'error'" i18n>
       Error Fetching Data
     </h3>
     <div class="flex flex-center margin-m" *ngIf="fetchStatus === 'fetching'">
       <mat-spinner *ngIf="fetchStatus === 'fetching'"></mat-spinner>
-      <!-- <h2 *ngIf="fetchStatus === 'error'" class="mat-title margin-remove-bottom">
+      <!-- <h2 *ngIf="fetchStatus === 'error'" class="mat-headline-5-6 margin-remove-bottom">
         Error Fetching Data
       </h2> -->
     </div>
 
     <div class="m-4" *ngIf="fetchStatus === 'done' && !catalogItems?.length">
-      <h3 class="mat-subheading-2" i18n>No categories to explore.</h3>
-      <h3 class="mat-subheading-2" i18n>You can find content using search</h3>
+      <h3 class="mat-subtitle-1" i18n>No categories to explore.</h3>
+      <h3 class="mat-subtitle-1" i18n>You can find content using search</h3>
       <div class="flex flex-row-reverse">
         <a routerLink="/app/search/learning" mat-button color="primary" i18n> SEARCH</a>
       </div>

@@ -82,7 +82,8 @@
 }
 
 
-::ng-deep .mat-expansion-indicator {
+::ng-deep .mat-expansion-indicator,
+::ng-deep .mat-expansion-panel-header-indicator {
   display: none !important;
 }
 

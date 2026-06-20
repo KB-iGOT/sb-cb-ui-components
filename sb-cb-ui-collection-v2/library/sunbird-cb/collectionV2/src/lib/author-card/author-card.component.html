@@ -1,9 +1,73 @@
-<mat-card class="flex flex-row author-card ws-mat-background-04" tabindex="0">
-  <div class="flex">
-    <ws-widget-avatar-photo [name]="widgetData?.name" [size]="'m'"></ws-widget-avatar-photo>
-  </div>
-  <div class="flex flex-column margin-left-xs">
-    <span class="mat-body-1">{{widgetData?.name}}</span>
-    <span class="mat-body-2 ws-mat-black60-text">{{widgetData?.authorType}}</span>
+<mat-card class="author-card ws-mat-background-04" tabindex="0">
+  <div class="flex flex-row">
+    <div class="flex mx-2" *ngIf="bulkSelection">
+      <mat-checkbox [checked]="selectedAllUsersFlag" (change)="selectNewRequest($event, widgetData)"></mat-checkbox>
+    </div>
+    <div class="flex">
+      <ws-widget-avatar-photo [name]="widgetData?.name || widgetData?.userInfo.first_name"
+        [photoUrl]="widgetData?.profileImage" [size]="'square-m'">
+      </ws-widget-avatar-photo>
+    </div>
+    <div class="flex flex-column flex-1 margin-left-xs">
+      <span class="mat-body-1 font-weight-700">{{widgetData?.name ||
+        widgetData?.userInfo?.first_name}}</span>
+      <!-- <span class="mat-body-2">{{widgetData?.email ||
+          widgetData?.userInfo?.email}}</span> -->
+      <span class="mat-body-2 ws-mat-black60-text" *ngIf="widgetData?.authorType">{{widgetData?.authorType}}</span>
+      <span class="mat-body-2 ws-mat-black60-text">{{widgetData?.department || (widgetData?.wfInfo &&
+        widgetData?.wfInfo[0].deptName)}}</span>
+    </div>
+    <div *ngIf="approvalType" class="flex flex-middle">
+      <div [ngSwitch]="widgetData?.approvalAction">
+        <div *ngSwitchCase="'rejected'" class="flex flex-row flex-middle">
+          <mat-icon class="rejectedIcon">cancel</mat-icon>
+          <span class="margin-left-xs">Rejected by me</span>
+        </div>
+        <div *ngSwitchCase="'pending'" class="flex flex-row flex-middle">
+          <mat-icon class="pendingIcon">error</mat-icon>
+          <span class="margin-left-xs">Pending with me</span>
+        </div>
+        <div *ngSwitchCase="'rejectedByMdo'" class="flex flex-row flex-middle">
+          <mat-icon class="rejectedIcon">cancel</mat-icon>
+          <span class="margin-left-xs">Rejected by MDO Admin</span>
+        </div>
+        <div *ngSwitchCase="'rejectedByPc'" class="flex flex-row flex-middle">
+          <mat-icon class="rejectedIcon">cancel</mat-icon>
+          <span class="margin-left-xs">Rejected by Program Coordinator</span>
+        </div>
+        <div *ngSwitchCase="'pendingForMdo'" class="flex flex-row flex-middle">
+          <mat-icon class="pendingIcon">error</mat-icon>
+          <span class="margin-left-xs">Pending with MDO Admin</span>
+        </div>
+        <div *ngSwitchCase="'pendingForPc'" class="flex flex-row flex-middle">
+          <mat-icon class="pendingIcon">error</mat-icon>
+          <span class="margin-left-xs">Pending with Program Coordinator</span>
+        </div>
+        <div *ngSwitchCase="'removeByMdo'" class="flex flex-row flex-middle">
+          <mat-icon class="rejectedIcon">delete</mat-icon>
+          <span class="margin-left-xs">Removed by MDO Admin</span>
+        </div>
+        <div *ngSwitchCase="'removeByPc'" class="flex flex-row flex-middle">
+          <mat-icon class="rejectedIcon">delete</mat-icon>
+          <span class="margin-left-xs">Removed by Program Coordinator</span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf=" actions && !remove" class="flex flex-row gap-2 flex-middle">
+      <button *ngIf="!bulkSelection" type="button" mat-button class="new-primary-button button-with-corners"
+        (click)="clickApprove()">Approve</button>
+      <button *ngIf="!bulkSelection" type="button" mat-button class="new-secondary-button-no-border button-with-corners"
+        (click)="clickReject()">Reject</button>
+      <button type="button" mat-button class="new-secondary-button button-with-corners" (click)="viewDetail()"
+        *ngIf="isViewReport">View Details</button>
+    </div>
+    <div *ngIf="remove && remove.toString() === 'true'" class="flex flex-row gap-2 flex-middle">
+      <button type="button" mat-button class="new-secondary-button button-with-corners"
+        (click)="clickRemove()">Remove</button>
+    </div>
+    <div *ngIf="showProfile" class="flex flex-row gap-2 flex-middle">
+      <button type="button" mat-button class="new-secondary-button button-with-corners" (click)="viewDetail()">View
+        Details</button>
+    </div>
   </div>
 </mat-card>
