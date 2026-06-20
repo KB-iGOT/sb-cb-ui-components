@@ -968,8 +968,8 @@ border: none;
   width: 100%;
 
   ::ng-deep .mat-mdc-text-field-wrapper {
-    border-radius: 28px !important;
-    background: #fff !important;
+    border-radius: 25px !important;
+    background: transparent !important;
     padding: 2px 12px;
   }
 
@@ -1014,4 +1014,16 @@ border: none;
   .mat-form-field {
     height: auto;
   }
+}
+
+:host ::ng-deep {
+  /* Default arrow color */
+.mat-mdc-select-arrow svg {
+  fill: #666 !important;
+}
+
+/* When select is focused/active */
+.mat-mdc-form-field.mat-focused .mat-mdc-select-arrow svg {
+  fill: #1b4ca1 !important; // your active color
+}
 }

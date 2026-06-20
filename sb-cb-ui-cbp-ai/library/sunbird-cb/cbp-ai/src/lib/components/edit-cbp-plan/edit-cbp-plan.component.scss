@@ -1414,3 +1414,14 @@ border: none;
   font-size: 14px;
   opacity: 1; // Firefox support
 }
+:host ::ng-deep {
+  /* Default arrow color */
+.mat-mdc-select-arrow svg {
+  fill: #666 !important;
+}
+
+/* When select is focused/active */
+.mat-mdc-form-field.mat-focused .mat-mdc-select-arrow svg {
+  fill: #1b4ca1 !important; // your active color
+}
+}
