@@ -31,7 +31,8 @@ export class ContentLanguageService {
       { name: "संस्कृतम् (Sanskrit)", value: "Sanskrit" },
       { name: "ᱥᱟᱱᱛᱟᱲᱤ (Santali)", value: "Santali" },
       { name: "سنڌي / सिंधी (Sindhi)", value: "Sindhi" },
-      { name: "اُردُو (Urdu)", value: "Urdu" }
+      { name: "اُردُو (Urdu)", value: "Urdu" },
+      { name: "Mizo", value: "Mizo" }
     ];
     
     // Convert array to map for efficient lookup by language value
