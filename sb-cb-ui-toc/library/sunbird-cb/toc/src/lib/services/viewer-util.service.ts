@@ -551,7 +551,6 @@ export class ViewerUtilService {
       if (this.tocSvc.triggerMilestoneLockUpdate) {
         this.tocSvc.triggerMilestoneLockUpdate()
       }
-
       // Emit to trigger viewer component refresh for Learning Pathways
       this.markAsCompleteSubject.next(true)
     }
