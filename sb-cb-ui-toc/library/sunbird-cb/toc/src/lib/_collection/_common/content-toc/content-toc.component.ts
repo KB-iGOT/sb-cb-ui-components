@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, HostListener, Inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { Subscription } from 'rxjs'
 
 import { LoadCheckService } from '../../../services/load-check.service'
@@ -108,9 +109,18 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     private eventSvc: EventService,
     private viewerDataSvc: ViewerDataService,
     private samuhikCharchaSvc: SamuhikCharchaService,
+    private commonMethodsSvc: CommonMethodsService,
     @Inject('environment') private environment: any
 
   ) { }
+
+  isCommentApiEnabled(): boolean {
+    return !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.config?.apiConfig,
+      urlConfigPath: 'commentTreeGet',
+      defaultUrl: '/apis/proxies/v8/commentTree/v1/get',
+    })
+  }
 
   ngOnInit() {
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.all) {

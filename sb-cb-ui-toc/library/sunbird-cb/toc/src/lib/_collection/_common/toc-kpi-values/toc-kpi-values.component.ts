@@ -2,10 +2,10 @@ import { Component, OnInit, Input } from '@angular/core'
 import { NsContent } from '../../../_services/widget-content.model'
 
 @Component({
-    selector: 'ws-widget-toc-kpi-values',
-    templateUrl: './toc-kpi-values.component.html',
-    styleUrls: ['./toc-kpi-values.component.scss'],
-    standalone: false
+  selector: 'ws-widget-toc-kpi-values',
+  templateUrl: './toc-kpi-values.component.html',
+  styleUrls: ['./toc-kpi-values.component.scss'],
+  standalone: false
 })
 
 export class TocKpiValuesComponent implements OnInit {
@@ -17,9 +17,10 @@ export class TocKpiValuesComponent implements OnInit {
   @Input() showInstructorLedMsg = false
   @Input() baseContentReadData: NsContent.IContent | null = null
   @Input() languageList: any
+  @Input() config: any
   constructor() { }
 
   ngOnInit() {
   }
-  
+
 }

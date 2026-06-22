@@ -15,6 +15,7 @@ export class NewCommentComponent implements OnInit, OnDestroy {
   @Input() config!: NsDiscussionV2.INewCommentConfig
   @Input() hierarchyPath = []
   @Input() taggedUsers = []
+  @Input() uiConfig: any
   @Output() newComment = new EventEmitter<any>()
   @Input() disableActions: boolean = false
 
