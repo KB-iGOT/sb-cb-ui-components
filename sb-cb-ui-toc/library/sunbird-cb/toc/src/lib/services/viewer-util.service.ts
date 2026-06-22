@@ -48,9 +48,9 @@ export class ViewerUtilService {
     .get<any>(`${this.configservice.sitePath}/feature/toc.json`)
     .pipe(catchError(() => of({})), shareReplay(1))
 
-  private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string, callback: (enabled: boolean) => void): void {
+  private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string, callback: (url: string) => void): void {
     this.playerConfig$.pipe(
-      map((tocConfig: any) => !!this.commonMethodsSvc.getEnabledUrl({
+      map((tocConfig: any) => this.commonMethodsSvc.getEnabledUrl({
         apiConfig: tocConfig?.playerApiConfig,
         urlConfigPath,
         defaultUrl,
@@ -179,9 +179,9 @@ export class ViewerUtilService {
       //   .patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req)
       //   .subscribe(noop, noop)
       // }
-      this.isPlayerApiEnabled('contentProgressUpdate', '/apis/proxies/v8/content-progres', (enabled: boolean) => {
-        if (enabled) {
-          this.http.patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req).subscribe(noop, noop)
+      this.isPlayerApiEnabled('contentProgressUpdate', '/apis/proxies/v8/content-progres', (url: string) => {
+        if (url) {
+          this.http.patch(`${url}/${contentId}`, req).subscribe(noop, noop)
         }
       })
       const hashEntry = this.tocSvc.hashmap[contentId] || {}
@@ -412,9 +412,9 @@ export class ViewerUtilService {
         },
       }
 
-      this.isPlayerApiEnabled('contentProgressUpdate', '/apis/proxies/v8/content-progres', (enabled: boolean) => {
-        if (enabled) {
-          this.http.patch(`${this.API_ENDPOINTS.PROGRESS_UPDATE}/${contentId}`, req).subscribe(noop, noop)
+      this.isPlayerApiEnabled('contentProgressUpdate', '/apis/proxies/v8/content-progres', (url: string) => {
+        if (url) {
+          this.http.patch(`${url}/${contentId}`, req).subscribe(noop, noop)
         }
       })
 
@@ -622,9 +622,13 @@ export class ViewerUtilService {
 
       const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
       if (resourceStatus < 2) {
-        this.http
-          .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
-          .subscribe(noop, noop)
+        this.isPlayerApiEnabled('preAssessmentStateUpdate', '/apis/proxies/v8/content/v2/state/update', (url: string) => {
+          if (url) {
+            this.http
+              .patch(url, req)
+              .subscribe(noop, noop)
+          }
+        })
       }
 
       if (this.tocSvc.hashmap[contentId] &&
@@ -671,9 +675,13 @@ export class ViewerUtilService {
       }
       const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
       if (resourceStatus < 2) {
-        this.http
-          .patch(`${this.API_ENDPOINTS.PRE_ASSESSMENT_STATE_UPDATE}`, req)
-          .subscribe(noop, noop)
+        this.isPlayerApiEnabled('preAssessmentStateUpdate', '/apis/proxies/v8/content/v2/state/update', (url: string) => {
+          if (url) {
+            this.http
+              .patch(url, req)
+              .subscribe(noop, noop)
+          }
+        })
       }
 
       // Update hashmap - create entry if it doesn't exist
