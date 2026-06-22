@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import { NsCardContent } from '../../../_models/card-content.model'
 import { MatSnackBar } from '@angular/material/snack-bar'
-import { ConfigurationsService, EventService } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, DomainConfService, EventService } from '@sunbird-cb/utils-v2'
 import * as _ from "lodash"
 import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
@@ -34,6 +34,7 @@ export class CardPortraitExtComponent implements OnInit {
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
     private configSvc: ConfigurationsService,
+    private domainConfSvc: DomainConfService,
     private contSvc: WidgetContentLibService,) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
@@ -42,6 +43,10 @@ export class CardPortraitExtComponent implements OnInit {
         this.translate.use(lang)
       }
     })
+  }
+
+  isCardElementEnabled(key: string): boolean {
+    return this.domainConfSvc.isConfigEnabled('components.cards', key)
   }
 
   ngOnInit() {
