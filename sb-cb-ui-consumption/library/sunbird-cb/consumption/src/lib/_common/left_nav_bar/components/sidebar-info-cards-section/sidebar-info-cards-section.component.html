@@ -40,7 +40,7 @@
       <!-- Info Card WITHOUT Children (Group as single card) -->
       @if (!item.hasChildren) {
       <a [routerLink]="item.navUrl"
-        class="info-card block bg-gradient-to-br border border-blue-100 border-b-0 last:border-b p-3 transition-all duration-200 hover:bg-blue-100 group rounded-lg"
+        class="info-card sidebar-link-override block bg-gradient-to-br border border-blue-100 border-b-0 last:border-b p-3 transition-all duration-200 hover:bg-blue-100 group rounded-lg"
         matRipple [matRippleColor]="'rgba(59, 130, 246, 0.08)'" role="listitem"
         [attr.aria-label]="item.title + (item.description ? ': ' + item.description : '')">
 
@@ -114,8 +114,8 @@
         <div class="children-cards" role="list" [attr.aria-label]="item.title + ' items'">
           @for (child of item.children; track trackByChildTitle($index, child)) {
           <a [href]="child.navUrl" target="_blank" rel="noopener noreferrer"
-            class="child-card block border-b last:border-b-0 p-3 hover:bg-blue-50 transition-colors" matRipple
-            [matRippleColor]="'rgba(59, 130, 246, 0.08)'" role="listitem"
+            class="child-card sidebar-link-override block border-b last:border-b-0 p-3 hover:bg-blue-50 transition-colors"
+            matRipple [matRippleColor]="'rgba(59, 130, 246, 0.08)'" role="listitem"
             [attr.aria-label]="child.title + (child.description ? ': ' + child.description : '')">
 
             <div class="flex items-start gap-2.5">
@@ -169,7 +169,7 @@
       <!-- Info Card WITHOUT Children (Group as single card) -->
       @if (!item.hasChildren) {
       <a [routerLink]="item.navUrl"
-        class="info-card block bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 border-b-0 last:border-b p-3 transition-all duration-200 hover:bg-blue-100 group first:rounded-t-lg last:rounded-b-lg"
+        class="info-card sidebar-link-override block bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 border-b-0 last:border-b p-3 transition-all duration-200 hover:bg-blue-100 group first:rounded-t-lg last:rounded-b-lg"
         matRipple [matRippleColor]="'rgba(59, 130, 246, 0.08)'" role="listitem"
         [attr.aria-label]="item.title + (item.description ? ': ' + item.description : '')">
 
@@ -243,7 +243,7 @@
         <div class="children-cards bg-white" role="list" [attr.aria-label]="item.title + ' items'">
           @for (child of item.children; track trackByChildTitle($index, child)) {
           <a [href]="child.navUrl" target="_blank" rel="noopener noreferrer"
-            class="child-card block bg-white border-b border-gray-200 last:border-b-0 p-3 hover:bg-blue-50 transition-colors"
+            class="child-card sidebar-link-override block bg-white border-b border-gray-200 last:border-b-0 p-3 hover:bg-blue-50 transition-colors"
             matRipple [matRippleColor]="'rgba(59, 130, 246, 0.08)'" role="listitem"
             [attr.aria-label]="child.title + (child.description ? ': ' + child.description : '')">
 

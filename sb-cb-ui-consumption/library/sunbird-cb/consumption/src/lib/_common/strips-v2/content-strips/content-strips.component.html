@@ -12,9 +12,20 @@
   @if (!loading() && cards()?.length) {
   <sb-uic-carousel [items]="cards()" [cardWidth]="280" [gap]="16">
     <ng-template #carouselCard let-item let-index="index">
-      <ng-container [ngTemplateOutlet]="getCardTemplate()"
-        [ngTemplateOutletContext]="{ $implicit: item, index: index }">
-      </ng-container>
+      @switch (getCardType()) {
+      @case (CardType.CourseCard) {
+      <sb-uic-card-course-v2 [content]="item" [isLoading]="loading()"></sb-uic-card-course-v2>
+      }
+      <!-- @case (CardType.AssessmentCard) {
+      <sb-uic-card-assessment-strip [card]="item" />
+      }
+      @case (CardType.ProgramCard) {
+      <sb-uic-card-program-strip [card]="item" />
+      }
+      @default {
+      <sb-uic-card-course-strip [card]="item" />
+      } -->
+      }
     </ng-template>
   </sb-uic-carousel>
 
@@ -32,96 +43,8 @@
   @if (!loading() && !cards()?.length) {
   <sb-uic-carousel [items]="dummyCards()" [cardWidth]="280" [gap]="16">
     <ng-template #carouselCard let-item let-index="index">
-      <ng-container [ngTemplateOutlet]="courseCardTemplate"
-        [ngTemplateOutletContext]="{ $implicit: item, index: index }">
-      </ng-container>
+      <!-- <sb-uic-card-course-strip [card]="item" /> -->
     </ng-template>
   </sb-uic-carousel>
   }
 </div>
-
-<!-- Card Templates -->
-<ng-template #courseCardTemplate let-card let-index="index">
-  <div
-    class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full cursor-pointer">
-    <div class="relative">
-      @if (card.image) {
-      <img [src]="card.image" [alt]="card.title" class="w-full h-40 object-cover" />
-      } @else {
-      <div class="w-full h-40 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-        <span class="text-white text-sm font-medium text-center px-2">{{ card.title }}</span>
-      </div>
-      }
-      @if (card.rating) {
-      <span class="absolute top-2 right-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded">
-        {{ card.rating }}
-      </span>
-      }
-      @if (card.duration) {
-      <span
-        class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded flex items-center gap-1">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-          <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-        {{ card.duration }}
-      </span>
-      }
-    </div>
-    <div class="p-3">
-      <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">{{ card.title }}</h3>
-      @if (card.provider) {
-      <p class="text-xs text-gray-500 mb-1">{{ card.provider }}</p>
-      }
-      <div class="flex items-center gap-2 flex-wrap">
-        @if (card.level) {
-        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{{ card.level }}</span>
-        }
-      </div>
-    </div>
-  </div>
-</ng-template>
-
-<ng-template #spotlightCardTemplate let-card let-index="index">
-  <div
-    class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-4 flex flex-col items-center justify-center min-h-[160px] hover:shadow-md transition-shadow duration-300 h-full cursor-pointer">
-    @if (card.image) {
-    <img [src]="card.image" [alt]="card.title" class="w-16 h-16 rounded-full object-cover mb-2" />
-    } @else {
-    <div class="w-16 h-16 rounded-full bg-blue-200 flex items-center justify-center mb-2">
-      <span class="text-blue-700 text-lg font-bold">{{ card.title?.charAt(0) ?? '' }}</span>
-    </div>
-    }
-    <p class="text-sm font-medium text-gray-800 text-center line-clamp-2">{{ card.title }}</p>
-  </div>
-</ng-template>
-
-<ng-template #assessmentCardTemplate let-card let-index="index">
-  <div
-    class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border-l-4 border-orange-500 h-full cursor-pointer">
-    <div class="p-4">
-      <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-2">{{ card.title }}</h3>
-      @if (card.duration) {
-      <p class="text-xs text-gray-500 mb-1">Duration: {{ card.duration }}</p>
-      }
-      @if (card.level) {
-      <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">{{ card.level }}</span>
-      }
-    </div>
-  </div>
-</ng-template>
-
-<ng-template #programCardTemplate let-card let-index="index">
-  <div
-    class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border-t-4 border-green-500 h-full cursor-pointer">
-    @if (card.image) {
-    <img [src]="card.image" [alt]="card.title" class="w-full h-32 object-cover" />
-    }
-    <div class="p-3">
-      <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">{{ card.title }}</h3>
-      @if (card.provider) {
-      <p class="text-xs text-gray-500">{{ card.provider }}</p>
-      }
-    </div>
-  </div>
-</ng-template>
