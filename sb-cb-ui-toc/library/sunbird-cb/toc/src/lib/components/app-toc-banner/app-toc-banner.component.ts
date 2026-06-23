@@ -552,13 +552,14 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       const profileForm = this.dialog.open(EnrollProfileFormComponent, {
         width: '920px',
         maxHeight: '85vh',
+        height:'auto',
         data: {
           courseName,
           batchData,
           showDoptChanges: isDoptContent,
         },
         disableClose: false,
-        panelClass: ['animate__animated', 'animate__slideInLeft'],
+        panelClass: ['animate__animated', 'animate__slideInLeft', 'enrol-profile-form-component'],
       })
       profileForm.afterClosed().subscribe(result => {
         if (result) {
