@@ -73,12 +73,12 @@ const flattenItems = (items: any[], key: string | number) => {
 }
 const SNACKBAR_DURATION = 3000
 @Component({
-    selector: 'ws-app-app-toc-home-v2',
-    templateUrl: './app-toc-home-v2.component.html',
-    styleUrls: ['./app-toc-home-v2.component.scss'],
-    // tslint:disable-next-line: use-component-view-encapsulation
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: 'ws-app-app-toc-home-v2',
+  templateUrl: './app-toc-home-v2.component.html',
+  styleUrls: ['./app-toc-home-v2.component.scss'],
+  // tslint:disable-next-line: use-component-view-encapsulation
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   queryParamsData: { [key: string]: string } = {}; // Initialize queryParamsData
@@ -895,6 +895,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         (data: NsContent.IBatchListResponse) => {
           this.batchData = data
           this.batchData.enrolled = false
+          if (this.contentReadData?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+            if (this.batchData.content && this.batchData.content.length > 0) {
+              this.batchData.allBatchesExpired = this.batchData.content.every(
+                (batch: any) => !this.handleEnrollmentEndDate(batch)
+              )
+            }
+          }
           this.tocSvc.setBatchData(this.batchData)
           this.routerChangeHandler(false)
         },
@@ -903,6 +910,21 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         },
       )
     }
+  }
+
+  get isBatchFull(): boolean {
+    const enrolled = this.selectedBatchData?.userCount?.enrolled
+    const currentBatchSize = this.selectedBatchData?.content?.[0]?.batchAttributes?.currentBatchSize
+    return (enrolled !== undefined && currentBatchSize !== undefined && enrolled >= currentBatchSize)
+  }
+
+  get showLimitedSeatsMsg(): boolean {
+    const enrolled = this.selectedBatchData?.userCount?.enrolled
+    const currentBatchSize = this.selectedBatchData?.content?.[0]?.batchAttributes?.currentBatchSize
+    if (enrolled === undefined || currentBatchSize === undefined || currentBatchSize === 0) {
+      return false
+    }
+    return !this.isBatchFull && (enrolled > currentBatchSize * 0.8)
   }
 
 
@@ -963,8 +985,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   public handleEnrollmentEndDate(batch: any) {
     const enrollmentEndDate = dayjs(_.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
-    const systemDate = dayjs()
-    return enrollmentEndDate ? dayjs(enrollmentEndDate).isBefore(systemDate) : false
+    const systemDate = dayjs(this.serverDate).format('YYYY-MM-DD')
+    return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
+      (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
 
   private openSnackbar(primaryMsg: string, duration: number = 5000) {
@@ -2111,7 +2134,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // Fetch the multilingual content
       try {
-        if (this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
+        if (this.baseContentReadData && this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
           this.contentReadData = initData.content
         } else {
           const success = await this.fetchContentRead(queryParamsDataTemp.MLId)
@@ -3346,4 +3369,23 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
     return false
   }
+
+  get areAllActiveBatchesFull(): boolean {
+    if (!this.baseContentReadData?.batches || this.baseContentReadData?.batches.length === 0) {
+      return false
+    }
+
+    const activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.handleEnrollmentEndDate(batch))
+    if (activeBatches.length === 0) {
+      return false
+    }
+
+    return activeBatches.every((batch: any) => {
+      const currentBatchSize = _.get(batch, 'batchAttributes.currentBatchSize', 0)
+      const totalApprovedCount = Number(_.get(batch, 'batchAttributes.totalApprovedCount', 0))
+      return currentBatchSize === totalApprovedCount
+    })
+  }
+
+
 }
