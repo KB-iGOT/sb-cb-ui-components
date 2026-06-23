@@ -5,6 +5,7 @@
   z-index: 1001;
   transition: width 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   flex-shrink: 0;
+  background-color: var(--environment-application-backgrounds-system-background-1);
 
   &.sidebar-open {
     width: 328px;
@@ -49,6 +50,7 @@
 .sidebar-content {
   width: 100%;
   overflow-x: hidden;
+  background-color: var(--environment-application-backgrounds-system-background-1);
 
   @media (max-width: 768px) {
     width: 100%;

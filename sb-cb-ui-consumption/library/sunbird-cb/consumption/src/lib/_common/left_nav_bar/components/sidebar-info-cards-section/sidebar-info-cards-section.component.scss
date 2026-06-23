@@ -6,6 +6,11 @@
   margin-bottom: 1rem;
 }
 
+// Override theme night-mode anchor background
+.sidebar-link-override {
+  background-color: transparent !important;
+}
+
 .custom-expansion-panel {
   box-shadow: none !important;
   background: transparent !important;
@@ -39,6 +44,7 @@
 
 .section-title {
   user-select: none;
+  color: var(--text-bandw-black-body);
 }
 
 .info-cards-content {
@@ -50,7 +56,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--text-bandw-black-body);
-  background-color: var(--color-primary-50);
+  background-color: var(--environment-cards-overall-cards-primary) !important;
 
   .info-icon mat-icon {
     color: var(--text-bandw-black-body);
@@ -125,11 +131,13 @@
   line-height: 1.4;
   word-break: break-word;
   margin-bottom: 5px;
+  color: var(--text-bandw-black-body);
 }
 
 .info-description {
   line-height: 1.4;
   word-break: break-word;
+  color: var(--text-bandw-black-body);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -146,7 +154,7 @@
 // Info Cards with Children
 .info-card-with-children {
   transition: all 0.2s ease;
-  background-color: var(--color-primary-50);
+  background-color: var(--environment-cards-overall-cards-primary) !important;
 
 
 
@@ -198,6 +206,7 @@
   cursor: pointer;
   transition: all 0.15s ease;
   color: var(--text-bandw-black-body);
+  background: transparent !important;
 
   .child-icon mat-icon {
     color: var(--text-bandw-black-body);
@@ -271,11 +280,13 @@
 .child-title {
   line-height: 1.3;
   word-break: break-word;
+  color: var(--text-bandw-black-body);
 }
 
 .child-description {
   line-height: 1.3;
   word-break: break-word;
+  color: var(--text-bandw-black-body);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;

@@ -70,7 +70,7 @@
 
   &__label {
     font-size: var(--font-size-sub-heading-2);
-    color: var(--text-button-text-primary-white);
+    color: #ffffff;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -85,7 +85,7 @@
 
   &__desc {
     font-size: 12px;
-    color: var(--text-button-text-primary-white);
+    color: #ffffff;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

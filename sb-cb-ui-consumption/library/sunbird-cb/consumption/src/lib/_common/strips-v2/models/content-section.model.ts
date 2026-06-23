@@ -12,7 +12,6 @@ export enum DisplayType {
 
 export enum CardType {
   CourseCard = 'courseCard',
-  SpotlightCard = 'spotlightCard',
   AssessmentCard = 'assessmentCard',
   ProgramCard = 'programCard'
 }

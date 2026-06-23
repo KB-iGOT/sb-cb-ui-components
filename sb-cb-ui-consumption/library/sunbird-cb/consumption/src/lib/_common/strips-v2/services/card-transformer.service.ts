@@ -13,8 +13,6 @@ export class CardTransformerService {
     switch (cardType) {
       case CardType.CourseCard:
         return this.processCourseCards(response)
-      case CardType.SpotlightCard:
-        return this.processSpotlightCards(response)
       case CardType.AssessmentCard:
         return this.processAssessmentCards(response)
       case CardType.ProgramCard:
@@ -36,22 +34,6 @@ export class CardTransformerService {
       rating: (item?.['averageRating'] as number) ?? 0,
       provider: (item?.['sourceName'] as string) ?? (item?.['source'] as string) ?? '',
       level: (item?.['complexityLevel'] as string) ?? '',
-      metadata: item ?? {}
-    }))
-  }
-
-  processSpotlightCards(response: unknown): CardViewModel[] {
-    const data = this.extractResultArray(response)
-    return data.map((item: Record<string, unknown>) => ({
-      id: (item?.['identifier'] as string) ?? '',
-      title: (item?.['name'] as string) ?? '',
-      image: (item?.['appIcon'] as string) ?? '',
-      tags: [],
-      duration: '',
-      status: '',
-      rating: 0,
-      provider: (item?.['sourceName'] as string) ?? '',
-      level: '',
       metadata: item ?? {}
     }))
   }
