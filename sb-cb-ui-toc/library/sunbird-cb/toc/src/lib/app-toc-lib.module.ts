@@ -311,6 +311,7 @@ export class AppTocLibModule {
   ) {
     if (isPlatformBrowser(this.platformId)) {
       this.injectGlobalTabStyles()
+      this.injectDescEllipsisStyles()
     }
   }
 
@@ -335,6 +336,21 @@ export class AppTocLibModule {
       .mat-mdc-tab-group .mdc-tab--active .mdc-tab__text-label,
       .mat-mdc-tab-nav-bar .mdc-tab--active .mdc-tab__text-label {
         font-weight: 700 !important;
+      }
+    `
+    this.document.head.appendChild(style)
+  }
+
+  private injectDescEllipsisStyles(): void {
+    const styleId = 'sb-cb-toc-desc-ellipsis-styles'
+    if (this.document.getElementById(styleId)) {
+      return
+    }
+    const style = this.document.createElement('style')
+    style.id = styleId
+    style.textContent = `
+      .desc-ellipsis {
+        min-height: calc(3 * 24px - 4px) !important;
       }
     `
     this.document.head.appendChild(style)
