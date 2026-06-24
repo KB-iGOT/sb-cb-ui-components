@@ -291,7 +291,7 @@
 </div>
 
 <ng-template #batchDropdown>
-  <form class="flex flex-col gap-4">
+  <form class="flex flex-col">
     <ng-container *ngIf="batchData && !batchData?.enrolled
       && (!batchData.workFlow?.wfInitiated || (batchData.workFlow?.wfInitiated && batchData?.workFlow?.wfItem?.currentStatus === WFBlendedProgramStatus.REJECTED ||  batchData?.workFlow?.wfItem?.currentStatus === WFBlendedProgramStatus.WITHDRAWN || batchData?.workFlow?.wfItem?.currentStatus === WFBlendedProgramStatus.REMOVED))
       && batchData?.content?.length">

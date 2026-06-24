@@ -224,7 +224,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
         const currentBatchSize = selectedBatch?.content?.[0]?.batchAttributes?.currentBatchSize
         if (enrolled !== undefined && currentBatchSize !== undefined) {
           this.isBatchFull = enrolled >= currentBatchSize
-          this.showLimitedSeatsMsg = !this.isBatchFull && currentBatchSize > 0 && (enrolled > currentBatchSize * 0.8)
+          this.showLimitedSeatsMsg = !this.isBatchFull && currentBatchSize > 0 && (enrolled >= (currentBatchSize * 0.8))
         } else {
           this.isBatchFull = false
           this.showLimitedSeatsMsg = false
