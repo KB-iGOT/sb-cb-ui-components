@@ -276,7 +276,7 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       .map(line => line.trim())
       .filter(line => line);
     this.loading = true
-    let req =
+    let req: any =
     {
       "sector_name": cbpPlanData?.sectors?.join(","),
       "instruction": cbpPlanData?.instruction ? cbpPlanData.instruction : '',
@@ -287,39 +287,50 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     }
     console.log('masterData?.designation', this.masterData?.designation)
 
-    if (formData?.igot_designation_id) {
-      req["igot_designation_id"] = formData?.igot_designation_id || '',
-        req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
+    const normalize = (v: string) => (v || '').trim().toLowerCase();
+    const selectedDesignationName =
+      formData?.designation_name ? formData.designation_name : '';
+    const visibleDesignation = (this.masterData?.designation || []).find(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignationName) &&
+        item?.igot_designation_id
+    );
+    const backupDesignation = (this.masterData?.designationBackup || []).find(
+      (item: any) =>
+        normalize(item?.name) === normalize(selectedDesignationName) &&
+        item?.igot_designation_id
+    );
+    const isSameAsExistingDesignation =
+      normalize(this.planData?.designation_name || '') ===
+      normalize(selectedDesignationName);
+
+    const resolvedDesignationId =
+      formData?.igot_designation_id ||
+      visibleDesignation?.igot_designation_id ||
+      backupDesignation?.igot_designation_id ||
+      (isSameAsExistingDesignation
+        ? (this.planData?.igot_designation_id || '')
+        : '');
+
+    if (isSameAsExistingDesignation && !resolvedDesignationId) {
+      console.log('Skipping designation payload for unchanged unmatched designation');
     } else {
+      if (!resolvedDesignationId) {
+        this.loading = false
+        this.snackBar.open('Please select a valid designation from the list.', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+        return;
+      }
 
-      console.log('masterData?.designation', this.masterData?.designation)
+      req["designation_name"] = selectedDesignationName;
+      req["igot_designation_id"] = resolvedDesignationId;
+    }
 
-      req["designation_name"] = formData?.designation_name ? formData.designation_name : ''
-      console.log(
-        'Searching in backup:',
-        this.masterData.designationBackup.find(
-          (x: any) =>
-            x.name?.trim().toLowerCase() ===
-            formData.designation_name?.trim().toLowerCase()
-        )
-      );
-      const selectedDesignation = this.masterData?.designation?.find(
-        (item: any) =>
-          item?.name?.toLowerCase() === formData?.designation_name?.toLowerCase()
-      );
-      const backupDesignation =
-        this.masterData.designationBackup.find(
-          (x: any) =>
-            x.name?.toLowerCase() ===
-            formData.designation_name?.toLowerCase()
-        );
 
       console.log('backupDesignation', backupDesignation);
-      req["igot_designation_id"] = selectedDesignation?.igot_designation_id || '';
-      console.log('designation_name 123 ', formData.designation_name);
-      console.log('selectedDesignation 123', selectedDesignation);
       console.log('igot_designation_id 123', req['igot_designation_id']);
-    }
 
     if (this.sharedService.fromMdoPortal) {
       req['request_id'] = this.requestRowData?.id
@@ -902,10 +913,13 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       };
     }
 
-    // 🔥 Move to top
+    const deduplicatedBackup = backup.filter(
+      (item: any) => normalize(item?.name) !== normalize(selectedDesignation)
+    );
+
     this.masterData.designationBackup = [
       selectedObj,
-      ...backup
+      ...deduplicatedBackup
     ];
 
     // Also update visible list (same order logic)
