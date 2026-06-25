@@ -1,0 +1,407 @@
+<div class="container-fluid white-background bk-micro-site" id="bk-micro-site">
+  <div class="flex flex-col flex-1">
+    <ng-container *ngIf="sectionList?.length">
+      <ng-container *ngFor="let section of sectionList">
+        <ng-container *ngIf="section?.enabled">
+          <section id="{{section?.key}}" class="w-full"
+            [ngClass]="{'container': section.wrapperClass}">
+            <ng-container *ngFor="let column of section.column">
+              <div id="{{column?.key}}" class="col-span-{{column.colspan || 12}}">
+                <ng-container *ngIf="column?.enabled" [ngSwitch]="column?.key">
+                  <ng-container *ngSwitchCase="'topBannerSection'" [ngTemplateOutlet]="topBannerSection"
+                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                  <ng-container *ngSwitchCase="'topCarouselSection'" [ngTemplateOutlet]="topCarouselSection"
+                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                  <ng-container *ngSwitchCase="'keyHighlightsSection'" [ngTemplateOutlet]="keyHighlightsSection"
+                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                  <ng-container *ngSwitchCase="'mainContentSection'" [ngTemplateOutlet]="mainContentSection"
+                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                  <ng-container *ngSwitchCase="'lookerSection'" [ngTemplateOutlet]="lookerTemplate"
+                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                </ng-container>
+              </div>
+            </ng-container>
+          </section>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </div>
+</div>
+
+<!-- TOP CAROUSEL SECTION -->
+<ng-template #topCarouselSection let-data="data">
+  <ng-container *ngIf="data?.display !== false && data?.slides?.length">
+
+    <!-- Image + arrows container -->
+    <div class="bk-carousel" [style.height]="getCarouselHeight(data?.size)">
+
+      <div class="bk-carousel__current"
+        [style.cursor]="data.slides[carouselIndex]?.redirectionUrl ? 'pointer' : 'default'"
+        (click)="onCarouselClick(data.slides[carouselIndex])">
+        <img [src]="data.slides[carouselIndex]?.imageUrl"
+          [alt]="'Slide ' + (carouselIndex + 1)"
+          class="bk-carousel__img">
+      </div>
+
+      <!-- Arrows — only when more than 1 slide -->
+      <ng-container *ngIf="data.slides.length > 1">
+        <button class="bk-carousel__arrow bk-carousel__arrow--prev"
+          (click)="carouselPrev(data.slides.length)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="bk-carousel__arrow bk-carousel__arrow--next"
+          (click)="carouselNext(data.slides.length)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </ng-container>
+
+    </div>
+
+    <!-- Dots BELOW the image — only when more than 1 slide -->
+    <div class="bk-carousel__dots" *ngIf="data.slides.length > 1">
+      <span *ngFor="let s of data.slides; let i = index"
+        class="bk-carousel__dot"
+        [class.bk-carousel__dot--active]="i === carouselIndex"
+        (click)="goToCarouselSlide(i)">
+      </span>
+    </div>
+
+  </ng-container>
+</ng-template>
+
+<!-- TOP BANNER SECTION -->
+<ng-template #topBannerSection let-data="data">
+  <div class="bk-top-banner" [ngStyle]="data?.backgroundStyle">
+    <div class="bk-top-banner__inner">
+      <div class="bk-top-banner__content">
+        <p class="bk-top-banner__tag" *ngIf="data?.programTag">{{ data.programTag }}</p>
+        <h1 class="bk-top-banner__title" *ngIf="data?.title">{{ data.title }}</h1>
+        <p class="bk-top-banner__subtitle" *ngIf="data?.subtitle">{{ data.subtitle }}</p>
+        <p class="bk-top-banner__description" *ngIf="data?.description">{{ data.description }}</p>
+        <ul class="bk-top-banner__features" *ngIf="data?.features?.length">
+          <li *ngFor="let feature of data.features" class="bk-top-banner__feature-item">
+            <span class="bk-top-banner__check-icon">✓</span>
+            <span>{{ feature }}</span>
+          </li>
+        </ul>
+        <button *ngIf="data?.ctaButton?.text" class="bk-top-banner__cta"
+          (click)="raiseCtaClick(data.ctaButton.text)">
+          {{ data.ctaButton.text }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- KEY HIGHLIGHTS SECTION -->
+<ng-template #keyHighlightsSection let-data="data">
+  <div class="col-span-12 bk-key-highlights-section">
+    <div class="flex items-center justify-center">
+      <div class="{{ data?.containerClass || 'container' }}">
+        <sb-uic-key-highlights
+          (emptyResponse)="hideKeyHighlight($event, data)"
+          [formData]="data"
+          [providerId]="providerId"
+          [mode]="isMobile ? 'mobile' : 'desktop'">
+        </sb-uic-key-highlights>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- MAIN CONTENT SECTION -->
+<ng-template #mainContentSection let-data="data">
+  <div class="flex items-center justify-center">
+    <div class="{{ data?.containerClass || 'container' }}">
+      <!-- CSS classes handle responsive: col-span-12 (mobile stack) → md:col-span-X (desktop split) -->
+      <div class="grid grid-cols-12 gap-8 mb-6" *ngIf="data?.deskTopKeys">
+        <div *ngIf="data?.deskTopKeys?.leftContent?.data?.length"
+          class="col-span-12 md:col-span-{{data?.deskTopKeys?.leftContent?.colspan || 12}}">
+          <ng-container *ngFor="let widgetKey of data?.deskTopKeys?.leftContent?.data">
+            <ng-container [ngTemplateOutlet]="contentsDisplay"
+              [ngTemplateOutletContext]="{widgetKey: widgetKey}"></ng-container>
+          </ng-container>
+        </div>
+        <div *ngIf="data?.deskTopKeys?.rightContent?.data?.length"
+          class="col-span-12 md:col-span-{{data?.deskTopKeys?.rightContent?.colspan || 12}}">
+          <ng-container *ngFor="let widgetKey of data?.deskTopKeys?.rightContent?.data">
+            <ng-container [ngTemplateOutlet]="contentsDisplay"
+              [ngTemplateOutletContext]="{widgetKey: widgetKey}"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- WIDGET DISPATCHER -->
+<ng-template #contentsDisplay let-widgetKey="widgetKey">
+  <ng-container *ngIf="individualSection && individualSection[widgetKey]" [ngSwitch]="widgetKey">
+    <ng-container *ngSwitchCase="'contentStrips'" [ngTemplateOutlet]="contentStrips"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'recommended'" [ngTemplateOutlet]="recommended"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'mentorship'" [ngTemplateOutlet]="mentorship"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'myprogress'" [ngTemplateOutlet]="myprogress"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'events'" [ngTemplateOutlet]="events"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'mdoLeaderboard'" [ngTemplateOutlet]="mdoLeaderboard"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'programContent'" [ngTemplateOutlet]="programContent"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'weekProgress'" [ngTemplateOutlet]="weekProgress"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'speakerOftheDay'" [ngTemplateOutlet]="speakerOftheDay"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+    <ng-container *ngSwitchCase="'webinarOftheDay'" [ngTemplateOutlet]="webinarOftheDay"
+      [ngTemplateOutletContext]="{data: individualSection[widgetKey]}"></ng-container>
+  </ng-container>
+</ng-template>
+
+<!-- CONTENT STRIPS -->
+<ng-template #contentStrips let-data="data">
+  <ng-container *ngFor="let stripData of data">
+    <ng-container *ngIf="stripData?.active">
+      <div class="bk-week-strip">
+
+        <!-- Header -->
+        <div class="bk-week-strip__header">
+          <div class="bk-week-strip__title-row">
+            <h2 class="bk-week-strip__title">{{ stripData.title }}</h2>
+            <span class="bk-week-strip__badge">New</span>
+          </div>
+          <a class="bk-week-strip__view-all"
+            *ngIf="stripData?.viewMoreUrl?.path"
+            [routerLink]="stripData.viewMoreUrl.path">
+            Show all <mat-icon>chevron_right</mat-icon>
+          </a>
+          <span class="bk-week-strip__view-all" *ngIf="!stripData?.viewMoreUrl?.path">
+            Show all <mat-icon>chevron_right</mat-icon>
+          </span>
+        </div>
+        <p class="bk-week-strip__desc" *ngIf="stripData?.titleDescription">
+          {{ stripData.titleDescription }}
+        </p>
+
+        <!-- Tabs + Cards -->
+        <mat-tab-group class="bk-content-tabs" animationDuration="0ms">
+          <mat-tab *ngFor="let tab of stripData?.tabs" [label]="tab.label">
+            <div class="bk-cards-scroll" *ngIf="tab?.cards?.length; else noCards">
+              <div class="bk-card" *ngFor="let card of tab.cards"
+                role="button" tabindex="0" (click)="navigateToContent(card)">
+                <div class="bk-card__img-wrap">
+                  <img *ngIf="card.posterImage" [src]="card.posterImage" [alt]="card.name" class="bk-card__img">
+                  <div *ngIf="!card.posterImage" class="bk-card__img bk-card__img--placeholder"></div>
+                  <div class="bk-card__duration" *ngIf="card.duration">
+                    <mat-icon>access_time</mat-icon>{{ card.duration }}
+                  </div>
+                </div>
+                <div class="bk-card__body">
+                  <div class="bk-card__category" *ngIf="card.category">
+                    <mat-icon>video_library</mat-icon>
+                    <span>{{ card.category }}</span>
+                  </div>
+                  <h4 class="bk-card__title">{{ card.name }}</h4>
+                  <div class="bk-card__org" *ngIf="card.org">
+                    <img *ngIf="card.orgLogo" [src]="card.orgLogo" [alt]="card.org" class="bk-card__org-logo">
+                    <span>{{ card.org }}</span>
+                  </div>
+                  <div class="bk-card__rating" *ngIf="card.rating">
+                    <span class="bk-card__star">★</span>{{ card.rating }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ng-template #noCards>
+              <p class="bk-cards-empty">No content available for this tab yet.</p>
+            </ng-template>
+          </mat-tab>
+        </mat-tab-group>
+
+      </div>
+    </ng-container>
+  </ng-container>
+</ng-template>
+
+<!-- RECOMMENDED SECTION -->
+<ng-template #recommended let-data="data">
+  <div class="{{ data?.containerClass }}" *ngIf="data?.enabled !== false">
+    <div class="bk-rec">
+
+      <!-- Header row -->
+      <div class="bk-rec__header">
+        <h2 class="bk-rec__title">{{ data?.title || 'Recommended' }}</h2>
+        <a class="bk-rec__show-all" *ngIf="data?.showAllUrl" [routerLink]="data.showAllUrl">
+          Show all <mat-icon>chevron_right</mat-icon>
+        </a>
+      </div>
+
+      <!-- Slider -->
+      <div class="bk-rec__slider" *ngIf="recommendedItems.length">
+        <button class="bk-rec__arrow" [disabled]="!canRecPrev" (click)="recPrev()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <div class="bk-rec__track">
+          <div class="bk-rec__card" *ngFor="let item of visibleRecItems"
+            role="button" tabindex="0" (click)="navigateToContent(item)">
+            <!-- Poster -->
+            <div class="bk-rec__card-img-wrap">
+              <img *ngIf="item.posterImage || item.appIcon"
+                [src]="item.posterImage || item.appIcon" [alt]="item.name"
+                class="bk-rec__card-img">
+              <div *ngIf="!item.posterImage && !item.appIcon"
+                class="bk-rec__card-img bk-rec__card-img--ph"></div>
+              <div class="bk-rec__card-dur" *ngIf="item.duration">
+                <mat-icon>access_time</mat-icon>{{ item.duration }}
+              </div>
+            </div>
+            <!-- Body -->
+            <div class="bk-rec__card-body">
+              <div class="bk-rec__card-cat" *ngIf="item.primaryCategory || item.contentType">
+                <mat-icon>video_library</mat-icon>
+                <span>{{ item.primaryCategory || item.contentType }}</span>
+              </div>
+              <h4 class="bk-rec__card-title">{{ item.name }}</h4>
+              <div class="bk-rec__card-org" *ngIf="item.organisation?.length || item.creatorLogo">
+                <img *ngIf="item.creatorLogo" [src]="item.creatorLogo" class="bk-rec__card-org-logo">
+                <span>By {{ (item.organisation && item.organisation[0]) || item.channel }}</span>
+              </div>
+              <div class="bk-rec__card-rating" *ngIf="item.averageRating">
+                <span class="bk-rec__card-star">★</span>{{ item.averageRating }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="bk-rec__arrow" [disabled]="!canRecNext" (click)="recNext()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- Dots -->
+      <div class="bk-rec__dots" *ngIf="recTotalDots.length > 1">
+        <span *ngFor="let p of recTotalDots" class="bk-rec__dot"
+          [class.bk-rec__dot--active]="p === recPage"
+          (click)="goToRecPage(p)">
+        </span>
+      </div>
+
+    </div>
+  </div>
+</ng-template>
+
+<!-- MENTORSHIP SECTION -->
+<ng-template #mentorship let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <div class="bk-mentorship">
+
+      <!-- Header row -->
+      <div class="bk-mentorship__header">
+        <div>
+          <h2 class="bk-mentorship__title" *ngIf="data?.title">{{ data.title }}</h2>
+          <p class="bk-mentorship__desc" *ngIf="data?.subtitle">{{ data.subtitle }}</p>
+        </div>
+        <a class="bk-mentorship__view-all"
+          *ngIf="data?.showAllButton !== false && data?.viewAllUrl"
+          [routerLink]="data.viewAllUrl">
+          Show all <mat-icon>chevron_right</mat-icon>
+        </a>
+      </div>
+
+      <!-- Portal provides d-v2-community-card template (cards + skeleton + arrows) -->
+      <ng-container *ngIf="communityCardsTemplate">
+        <ng-container *ngTemplateOutlet="communityCardsTemplate;
+          context: { communities: communities, loading: communitiesLoading }">
+        </ng-container>
+      </ng-container>
+
+    </div>
+  </div>
+</ng-template>
+
+<!-- MY PROGRESS -->
+<ng-template #myprogress let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <sb-uic-user-progress
+      [objectData]="data?.data"
+      [rootOrgId]="configDetails?.unMappedUser?.rootOrgId">
+    </sb-uic-user-progress>
+  </div>
+</ng-template>
+
+<!-- EVENTS -->
+<ng-template #events let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <sb-uic-events [object]="data.column[0]" [nwlEventsConfig]="bkConfiguration"
+      [eventsApiConfig]="data?.eventsApiConfig" [mode]="'mobile'">
+    </sb-uic-events>
+  </div>
+</ng-template>
+
+<!-- SPEAKER OF THE DAY -->
+<ng-template #speakerOftheDay let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <sb-uic-speakers [objectData]="data?.data"></sb-uic-speakers>
+  </div>
+</ng-template>
+
+<!-- WEBINAR OF THE DAY -->
+<ng-template #webinarOftheDay let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <sb-uic-speakers-v2 [objectData]="data?.data"></sb-uic-speakers-v2>
+  </div>
+</ng-template>
+
+<!-- PROGRAM CONTENT (AI-style program) -->
+<ng-template #programContent let-data="data">
+  <ng-container *ngFor="let stripData of data">
+    <ng-container *ngIf="stripData?.enabled">
+      <div class="{{ stripData?.containerClass }}">
+        <sb-uic-ai-program [programData]="stripData"></sb-uic-ai-program>
+      </div>
+    </ng-container>
+  </ng-container>
+</ng-template>
+
+<!-- WEEK PROGRESS -->
+<ng-template #weekProgress let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <sb-uic-week-progress [programData]="data" [bkConfig]="bkConfiguration"></sb-uic-week-progress>
+  </div>
+</ng-template>
+
+<!-- MDO LEADERBOARD -->
+<ng-template #mdoLeaderboard let-data="data">
+  <div class="{{ data?.containerClass }}">
+    <sb-uic-mdo-leaderboard-v2
+      [object]="data?.data"
+      (tabClicked)="raiseTabClick($event)">
+    </sb-uic-mdo-leaderboard-v2>
+  </div>
+</ng-template>
+
+<!-- LOOKER EMBED -->
+<ng-template #lookerTemplate let-data="data">
+  <div class="flex items-center justify-center">
+    <div class="{{ data?.containerClass || 'container' }}">
+      <div class="key-speakers flex-wrap flex items-center justify-center">
+        <h1 class="featured text-center">{{ data?.header?.headerText }}</h1>
+        <p class="featured-description p-4 md:p-0 text-center">{{ data?.header?.description }}</p>
+      </div>
+      <div class="lookpro" *ngIf="data?.sanitizedUrl">
+        <iframe
+          title="{{ data?.header?.headerText }}"
+          width="{{ isMobile ? data?.iframe?.mWidth : data?.iframe?.width || '100%' }}"
+          height="{{ isMobile ? data?.iframe?.mHeight : data?.iframe?.height || 520 }}"
+          [src]="data?.sanitizedUrl"
+          frameborder="0"
+          style="border:0"
+          sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</ng-template>

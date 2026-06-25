@@ -35,8 +35,8 @@ export class InsiteDataService {
   }
 
 
-  fetchTrainingDetails(request: any): Observable<any> {
-    return this.http.post<any>(API_END_POINTS.TRAINING_DETAILS, request)
+  fetchTrainingDetails(request: any, url?: string): Observable<any> {
+    return this.http.post<any>(url || API_END_POINTS.TRAINING_DETAILS, request)
   }
 
   fetchSlwLeaderboard(request: any): Observable<any> {
