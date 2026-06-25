@@ -2,7 +2,12 @@
     <div class="popup-container">
         <div class="popup-header">
             <div>
-                <div class="heading">Edit Role Mapping</div>
+               <div class="heading">
+  Edit Role Mapping
+  <span class="text-sm">
+    ({{ cbpForm?.get('designation_name')?.value || planData?.designation_name }})
+  </span>
+</div>
             </div>
             <div class="cursor-pointer" (click)="closeDialog()">
                 <mat-icon>close</mat-icon>
@@ -39,9 +44,20 @@
                                 </div>
                             </div>
                             <!-- Options list -->
-                            <mat-option [value]="designation?.name" *ngFor="let designation of masterData?.designation">
-                                {{designation?.name}}
-                            </mat-option>
+                <!-- <ng-container *ngFor="let designation of masterData?.designation">
+  <mat-option
+    *ngIf="designation?.name !== planData?.designation_name"
+    [value]="designation?.name">
+    {{ designation?.name }}
+  </mat-option>
+</ng-container> -->
+<ng-container *ngFor="let designation of masterData?.designation">
+  <mat-option
+    *ngIf="planData?.igot_designation_id || designation?.name !== planData?.designation_name"
+    [value]="designation?.name">
+    {{ designation?.name }}
+  </mat-option>
+</ng-container>
                             <!-- Loading indicator -->
                             <div *ngIf="isLoadingMoreDesignations" class="loading-indicator">
                                 Load More...
