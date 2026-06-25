@@ -48,7 +48,10 @@
                                     src="https://portal.dev.karmayogibharat.net/content-store/orgStore/0135071359030722569/1726808794219_InProgress_Icon.svg"
                                     alt="">
                                 <div>
-                                    <div class="counter">{{formatNumber(userProgress?.total_learning_hours)}}</div>
+                                    <div class="counter">
+                                      <ng-container *ngIf="objectData?.hoursFormatted">{{ formatLearningHours(userProgress?.total_learning_hours) }}</ng-container>
+                                      <ng-container *ngIf="!objectData?.hoursFormatted">{{ formatNumber(userProgress?.total_learning_hours) }}</ng-container>
+                                    </div>
                                     <div class="counter-title pt-1">Learning Hours</div>
                                 </div>
                             </div>
@@ -60,7 +63,7 @@
                                     alt="">
                                 <div>
                                     <div class="counter">{{userProgress?.count || 0}}</div>
-                                    <div class="counter-title pt-1">Certificates</div>
+                                    <div class="counter-title pt-1">{{ objectData?.coursesLabel || 'Certificates' }}</div>
                                 </div>
                             </div>
                         </div>

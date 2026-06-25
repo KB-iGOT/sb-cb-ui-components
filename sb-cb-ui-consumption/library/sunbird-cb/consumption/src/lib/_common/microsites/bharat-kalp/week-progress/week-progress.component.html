@@ -1,0 +1,254 @@
+<!-- ── Shared week-content template ── -->
+<ng-template #weekContentTpl let-isPopup="isPopup">
+  <div [class.wp-week-content]="!isPopup" [class.wp-popup__content]="isPopup"
+    *ngIf="selectedWeekData">
+    <!-- Progress ring -->
+    <div class="wp-ring-wrap" [class.wp-ring-wrap--lg]="isPopup">
+      <svg viewBox="0 0 36 36" class="wp-ring" [class.wp-ring--lg]="isPopup">
+        <circle class="wp-ring__bg" cx="18" cy="18" r="15.9"
+          [attr.stroke]="getRingBgColor(selectedWeek)"/>
+        <circle class="wp-ring__fill" cx="18" cy="18" r="15.9"
+          [attr.stroke]="getRingColor(selectedWeek)"
+          [attr.stroke-dasharray]="getRingDash(selectedWeekData!.progress)"
+          transform="rotate(-90 18 18)"/>
+      </svg>
+      <div class="wp-ring__text">
+        <span class="wp-ring__pct">{{ selectedWeekData!.progress || 0 }}%</span>
+      </div>
+    </div>
+
+    <!-- Body: main content (left) + actions aside (right) -->
+    <div class="wp-wc__body">
+      <div class="wp-wc__main">
+        <h3 class="wp-wc__title">{{ selectedWeekData!.title }}</h3>
+        <ul class="wp-wc__topics" *ngIf="selectedWeekData!.topics?.length">
+          <li *ngFor="let t of selectedWeekData!.topics">{{ t }}</li>
+        </ul>
+        <span class="wp-wc__date" *ngIf="isPopup && getWeekDateRange(selectedWeek)">
+          {{ getWeekDateRange(selectedWeek) }}
+        </span>
+      </div>
+
+      <!-- Right: status badge + explore button stacked -->
+      <div class="wp-wc__aside">
+        <span class="wp-status"
+          [class.wp-status--done]="selectedWeekStatus === 'completed'"
+          [class.wp-status--progress]="selectedWeekStatus === 'in-progress'">
+          {{ selectedWeekStatus === 'completed' ? 'Completed' : 'In Progress' }}
+        </span>
+        <button class="wp-popup__explore-btn" *ngIf="isPopup" (click)="exploreWeekContent()">
+          Explore weekly content <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ── Shared stepper template ── -->
+<ng-template #stepperTpl let-weeks="weeks" let-sm="sm">
+  <ng-container *ngFor="let w of weeks; let last = last">
+    <div class="wp-tl-step"
+      [class.wp-tl-step--sm]="sm"
+      [class.wp-tl-step--selected]="w === selectedWeek"
+      (click)="onWeekClick(w)" role="button" [attr.tabindex]="0"
+      [attr.aria-label]="'Week ' + w">
+      <div class="wp-tl-node" [class.wp-tl-node--sm]="sm">
+        <div class="wp-tl-dot"
+          [class.wp-tl-dot--sm]="sm"
+          [class.wp-tl-dot--done]="getWeekStatus(w) === 'completed'"
+          [class.wp-tl-dot--current]="getWeekStatus(w) === 'in-progress'"
+          [class.wp-tl-dot--upcoming]="getWeekStatus(w) === 'upcoming'">
+        </div>
+      </div>
+      <span class="wp-tl-label"
+        [class.wp-tl-label--sm]="sm"
+        [class.wp-tl-label--selected]="w === selectedWeek">
+        {{ w === selectedWeek ? 'Week ' + w : 'W' + w }}
+      </span>
+    </div>
+    <div *ngIf="!last" class="wp-tl-line"
+      [class.wp-tl-line--sm]="sm"
+      [class.wp-tl-line--done]="isWeekCompleted(w)">
+    </div>
+  </ng-container>
+</ng-template>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="wp-wrapper" *ngIf="programData?.enabled">
+  <div class="wp-card">
+
+    <!-- Header -->
+    <div class="wp-header">
+      <span class="wp-header__label">
+        {{ programData.totalWeeks }} week program
+        <span class="wp-header__pipe"> | </span>
+        Weeks {{ currentWeek }} out of {{ programData.totalWeeks }}
+      </span>
+      <button class="wp-header__btn" (click)="openPopup()">
+        View All Weeks <span class="wp-header__arrow">›</span>
+      </button>
+    </div>
+
+    <!-- Week card slider -->
+    <div class="wp-card-slider">
+      <div class="wp-card-slider__track" #cardTrack (scroll)="onTrackScroll($event)">
+        <div class="wp-week-card"
+          *ngFor="let w of allWeeks"
+          [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
+          [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'"
+          [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'">
+
+          <!-- Card top: week label + status badge -->
+          <div class="wp-week-card__top">
+            <span class="wp-week-card__num">Week {{ w }}</span>
+            <span class="wp-week-card__badge"
+              [class.wp-week-card__badge--done]="getWeekStatus(w) === 'completed'"
+              [class.wp-week-card__badge--progress]="getWeekStatus(w) === 'in-progress'"
+              [class.wp-week-card__badge--upcoming]="getWeekStatus(w) === 'upcoming'">
+              {{ getWeekStatus(w) === 'completed' ? 'Completed' : getWeekStatus(w) === 'in-progress' ? 'In Progress' : 'Locked' }}
+            </span>
+          </div>
+
+          <!-- Progress ring for started weeks, lock icon for upcoming -->
+          <div class="wp-week-card__ring-center">
+            <ng-container *ngIf="getWeekStatus(w) !== 'upcoming'">
+              <div class="wp-ring-wrap wp-ring-wrap--card">
+                <svg viewBox="0 0 36 36" class="wp-ring wp-ring--card">
+                  <circle class="wp-ring__bg" cx="18" cy="18" r="15.9"
+                    [style.stroke]="getCardRingBg(w)"/>
+                  <circle class="wp-ring__fill" cx="18" cy="18" r="15.9"
+                    [style.stroke]="getRingColor(w)"
+                    [attr.stroke-dasharray]="getRingDash(getWeekData(w)?.progress)"
+                    transform="rotate(-90 18 18)"/>
+                </svg>
+                <div class="wp-ring__text">
+                  <span class="wp-ring__pct wp-ring__pct--card">{{ getWeekData(w)?.progress || 0 }}%</span>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="getWeekStatus(w) === 'upcoming'">
+              <div class="wp-week-card__lock-circle">
+                <mat-icon>lock</mat-icon>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Week title -->
+          <p class="wp-week-card__title">{{ getWeekData(w)?.title || ('Week ' + w) }}</p>
+
+          <!-- Footer -->
+          <div class="wp-week-card__footer">
+            <ng-container *ngIf="getWeekStatus(w) !== 'upcoming'">
+              <span class="wp-week-card__count">
+                {{ getWeekData(w)?.doIds?.length || 0 }} courses
+              </span>
+              <button class="wp-week-card__view-btn" (click)="viewWeek(w)">View</button>
+            </ng-container>
+            <span class="wp-week-card__coming" *ngIf="getWeekStatus(w) === 'upcoming'">
+              Coming soon...
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation arrows -->
+      <div class="wp-card-slider__nav">
+        <button class="wp-card-slider__arrow" [disabled]="!canCardsPrev" (click)="cardsPrev()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="wp-card-slider__arrow" [disabled]="!canCardsNext" (click)="cardsNext()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- New Releases strip -->
+    <ng-container *ngIf="activeStrip">
+      <div class="wp-strip__header">
+        <div class="wp-strip__title-row">
+          <h3 class="wp-strip__title">New Releases For Week {{ currentWeek }}</h3>
+          <span class="wp-strip__badge">New</span>
+        </div>
+        <span class="wp-strip__view-all" (click)="onViewAll(activeStrip)">
+          Show all <mat-icon class="wp-strip__chevron">chevron_right</mat-icon>
+        </span>
+      </div>
+      <p class="wp-strip__desc">Below Content is related to Week {{ currentWeek }}</p>
+      <mat-tab-group class="wp-tabs" animationDuration="0ms"
+        [selectedIndex]="activeTabIndex"
+        (selectedIndexChange)="onTabChange($event)">
+        <mat-tab *ngFor="let tab of activeTabs" [label]="tab.label"></mat-tab>
+      </mat-tab-group>
+      <div class="wp-slider" *ngIf="activeTabCards.length">
+        <button class="wp-slider__arrow" [disabled]="!canGoPrev" (click)="prevSlide()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <div class="wp-slider__cards">
+          <div class="wp-card-item" *ngFor="let card of visibleCards"
+            role="button" tabindex="0" (click)="navigateToCard(card)">
+            <div class="wp-card-item__img-wrap">
+              <img *ngIf="card.posterImage" [src]="card.posterImage" [alt]="card.name"
+                class="wp-card-item__img">
+              <div *ngIf="!card.posterImage" class="wp-card-item__img wp-card-item__img--ph"></div>
+              <div class="wp-card-item__dur" *ngIf="card.duration">
+                <mat-icon>access_time</mat-icon>{{ card.duration }}
+              </div>
+            </div>
+            <div class="wp-card-item__body">
+              <div class="wp-card-item__cat" *ngIf="card.category">
+                <mat-icon>video_library</mat-icon>
+                <span>{{ card.category }}</span>
+              </div>
+              <h4 class="wp-card-item__title">{{ card.name }}</h4>
+              <div class="wp-card-item__org" *ngIf="card.org">
+                <img *ngIf="card.orgLogo" [src]="card.orgLogo" [alt]="card.org"
+                  class="wp-card-item__org-logo">
+                <span>{{ card.org }}</span>
+              </div>
+              <div class="wp-card-item__rating" *ngIf="card.rating">
+                <span class="wp-card-item__star">★</span>{{ card.rating }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="wp-slider__arrow" [disabled]="!canGoNext" (click)="nextSlide()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      <div class="wp-dots" *ngIf="totalDotPages.length > 1">
+        <span *ngFor="let page of totalDotPages" class="wp-dot"
+          [class.wp-dot--active]="page === currentPage" (click)="goToPage(page)">
+        </span>
+      </div>
+    </ng-container>
+
+  </div><!-- /wp-card -->
+
+  <!-- ── View All Weeks Popup ── -->
+  <div class="wp-popup-overlay" *ngIf="showAllWeeksPopup" (click)="closeOnOverlay($event)">
+    <div class="wp-popup" role="dialog" aria-modal="true">
+
+      <div class="wp-popup__header">
+        <span class="wp-popup__meta">
+          {{ programData.totalWeeks }} week program
+          <span class="wp-header__pipe"> | </span>
+          Weeks {{ currentWeek }} out of {{ programData.totalWeeks }}
+        </span>
+        <button class="wp-popup__close" (click)="closePopup()" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- All weeks stepper — no scroll, distributes across full width -->
+      <div class="wp-popup__rail">
+        <ng-container *ngTemplateOutlet="stepperTpl; context: { weeks: allWeeks, sm: true }">
+        </ng-container>
+      </div>
+
+      <!-- Week detail with explore button inside the aside -->
+      <ng-container *ngTemplateOutlet="weekContentTpl; context: { isPopup: true }"></ng-container>
+
+    </div>
+  </div>
+
+</div>

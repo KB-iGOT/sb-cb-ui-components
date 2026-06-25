@@ -1,0 +1,972 @@
+$orange: #F37400;
+$green: #1E8A44;
+$blue: #1B4CA1;
+$gray-dot: #D0D5DD;
+$card-bg: #F5F7FA;
+$text-dark: #212121;
+$text-secondary: #616161;
+$border: #E2E8F0;
+
+/* ─── Wrapper ─── */
+.wp-wrapper {
+  width: 100%;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+/* ─── Card ─── */
+.wp-card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Header ─── */
+.wp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+
+  &__label {
+    font-size: 13px;
+    color: $text-secondary;
+    font-weight: 500;
+    background: #F0F1F3;
+    border-radius: 20px;
+    padding: 5px 14px;
+  }
+
+  &__pipe {
+    margin: 0 4px;
+    color: #bbb;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $blue;
+    border: 1.5px solid $blue;
+    border-radius: 20px;
+    padding: 5px 14px;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+
+    &:hover { background: #ebf1ff; }
+  }
+
+  &__arrow {
+    font-size: 16px;
+    line-height: 1;
+  }
+}
+
+/* ─── Timeline ─────────────────────────────────────────────── */
+.wp-timeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.wp-tl-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  /* width = node wrapper — labels overflow below; keeps dot flush with line */
+  width: 20px;
+  min-width: 20px;
+  overflow: visible;
+  outline: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+
+  &:hover .wp-tl-dot--done,
+  &:hover .wp-tl-dot--current { opacity: 0.85; }
+  &:hover .wp-tl-dot--upcoming { border-color: #b0b0b0; }
+
+  /* Only the selected week label goes dark — all others stay gray */
+  &--selected .wp-tl-label {
+    color: $text-dark !important;
+    font-weight: 700 !important;
+  }
+
+  /* Popup — same trick: fixed to node width, labels overflow, z-index above lines */
+  &--sm {
+    flex: 0 0 14px;
+    width: 14px;
+    min-width: 0;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Fixed 20×20 wrapper keeps line margin-top consistent regardless of dot size */
+.wp-tl-node {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &--sm {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+}
+
+.wp-tl-dot {
+  border-radius: 50%;
+  transition: all 0.18s ease;
+
+  /* Completed — 14px green filled */
+  &--done {
+    width: 14px;
+    height: 14px;
+    background: $green;
+    border: 2px solid $green;
+  }
+
+  /* Current / In-progress — same 14px outer as completed, orange fill + blue border */
+  &--current {
+    width: 14px;
+    height: 14px;
+    background: $orange;
+    border: 3px solid $blue;
+  }
+
+  &--upcoming {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 2px solid $gray-dot;
+  }
+
+  /* Popup sm variant — uniform 10px for all states */
+  &--sm {
+    &.wp-tl-dot--done {
+      width: 10px;
+      height: 10px;
+    }
+    &.wp-tl-dot--current {
+      width: 10px;
+      height: 10px;
+      border-width: 2.5px;
+    }
+    &.wp-tl-dot--upcoming {
+      width: 10px;
+      height: 10px;
+    }
+  }
+}
+
+.wp-tl-label {
+  font-size: 11px;
+  color: #9e9e9e;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
+  /* Overflow so label is visible even though step width = node width */
+  position: relative;
+  z-index: 2;
+
+  &--sm {
+    font-size: 10px;
+    white-space: nowrap;
+    position: relative;
+    z-index: 2;
+  }
+}
+
+/* Line — margin-top centers it with the node wrapper */
+.wp-tl-line {
+  flex: 1;
+  height: 2px;
+  background: $gray-dot;
+  margin-top: 9px;   /* (20px node - 2px line) / 2 = 9px */
+  min-width: 8px;
+  flex-shrink: 1;
+  position: relative;
+  z-index: 0;
+
+  &--done { background: $green; }
+
+  /* Popup — node 14px so (14-2)/2 = 6px. z-index below step so dot covers line end */
+  &--sm {
+    margin-top: 6px;
+    min-width: 0;
+    flex: 1 1 0;
+    position: relative;
+    z-index: 0;
+  }
+}
+
+/* ─── Week Content Card ─────────────────────────────────────── */
+.wp-week-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: $card-bg;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Two-column layout: main (title + topics) | aside (status + button) */
+.wp-wc__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.wp-wc__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wp-wc__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.wp-wc__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: $text-dark;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.wp-wc__topics {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: $text-secondary;
+    line-height: 1.4;
+
+    &::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: $green;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.wp-wc__date {
+  font-size: 11px;
+  color: #9e9e9e;
+}
+
+/* ─── Status Badge — square, filled, white text ─── */
+.wp-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
+  color: #fff;
+  background: $gray-dot; /* fallback for upcoming */
+
+  &--done {
+    background: $green;
+    color: #fff;
+  }
+
+  &--progress {
+    background: #1565C0;
+    color: #fff;
+  }
+}
+
+/* ─── Progress Ring ─── */
+.wp-ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+
+  &--lg {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.wp-ring {
+  width: 72px;
+  height: 72px;
+
+  &--lg { width: 80px; height: 80px; }
+
+  &__bg {
+    fill: none;
+    stroke: $border;
+    stroke-width: 3;
+  }
+
+  &__fill {
+    fill: none;
+    stroke: $blue;
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.4s ease;
+  }
+}
+
+.wp-ring__text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.wp-ring__pct {
+  font-size: 13px;
+  font-weight: 700;
+  color: $text-dark;
+  line-height: 1;
+}
+
+/* ─── Divider ─── */
+.wp-divider {
+  height: 1px;
+  background: #E8ECF2;
+  margin: 20px 0;
+}
+
+/* ─── Strip Header ─── */
+.wp-strip {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 4px;
+    gap: 8px;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  &__badge {
+    background: #E53935;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+
+  &__view-all {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $blue;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  &__chevron {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color: $text-secondary;
+    margin: 0 0 8px;
+  }
+}
+
+/* ─── Tabs ─── */
+.wp-tabs {
+  margin-bottom: 16px;
+
+  ::ng-deep .mat-mdc-tab-header {
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #616161;
+  }
+
+  ::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+    color: $blue;
+    font-weight: 700;
+  }
+
+  ::ng-deep .mdc-tab-indicator__content--underline {
+    border-color: $blue;
+  }
+
+  /* Cards render below via slider, not in Angular tab body */
+  ::ng-deep .mat-mdc-tab-body { display: none !important; }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ─── Slider ─── */
+.wp-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__arrow {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    padding: 0;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #fff;
+    }
+
+    &:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    &:hover:not(:disabled) { opacity: 0.8; }
+  }
+
+  &__cards {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+  }
+}
+
+/* ─── Portrait Card — fills 4 per row, responsive to container width ─── */
+.wp-card-item {
+  flex: 0 0 calc((100% - 44px) / 4);
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+
+  &:hover { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
+
+  &__img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #edf2f8;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+
+    &--ph {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #dce6f5 0%, #c7d6eb 100%);
+    }
+  }
+
+  &__dur {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    line-height: 1;
+
+    mat-icon { font-size: 11px; width: 11px; height: 11px; line-height: 1; }
+  }
+
+  &__body {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  &__cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid $orange;
+    border-radius: 8px;
+    padding: 1px 6px;
+    width: fit-content;
+
+    mat-icon { font-size: 11px; width: 11px; height: 11px; color: $orange; }
+    span { font-size: 10px; color: $text-dark; }
+  }
+
+  &__title {
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__org {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: $text-secondary;
+  }
+
+  &__org-logo { width: 14px; height: 14px; border-radius: 2px; object-fit: contain; }
+
+  &__rating {
+    font-size: 11px;
+    font-weight: 600;
+    color: $text-dark;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__star { color: #f9a825; font-size: 12px; line-height: 1; }
+}
+
+/* ─── Dot Indicators ─── */
+.wp-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.wp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $gray-dot;
+  cursor: pointer;
+  transition: background 0.2s ease, width 0.2s ease;
+
+  &--active { background: $orange; width: 20px; border-radius: 4px; }
+}
+
+/* ─── Popup Overlay ─── */
+.wp-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.48);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.wp-popup {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  max-width: min(94vw, 920px);
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  &__meta {
+    font-size: 13px;
+    color: $text-secondary;
+    font-weight: 500;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    border: 1px solid $border;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; color: $text-secondary; }
+
+    &:hover { background: #f5f5f5; }
+  }
+
+  /* All 16 weeks fit in one row — no scroll, flex distributes, gap: 0 for seamless connection */
+  &__rail {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    width: 100%;
+    margin-bottom: 24px;
+    overflow: visible;
+  }
+
+  /* Week detail block inside popup */
+  &__content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: $card-bg;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  &__explore-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 18px;
+    border: 1.5px solid $blue;
+    border-radius: 20px;
+    background: transparent;
+    color: $blue;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+    &:hover { background: #ebf1ff; }
+  }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  .wp-card {
+    padding: 16px;
+  }
+
+  .wp-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .wp-ring-wrap {
+    width: 56px;
+    height: 56px;
+  }
+
+  .wp-ring {
+    width: 56px;
+    height: 56px;
+  }
+
+  .wp-ring__pct {
+    font-size: 11px;
+  }
+
+  .wp-popup {
+    padding: 16px;
+    max-height: 92vh;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Week Card Slider (new main-view design)
+══════════════════════════════════════════════════════════════ */
+.wp-card-slider {
+  margin-bottom: 20px;
+  overflow: hidden;
+
+  &__track {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    margin-bottom: 14px;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  &__nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  &__arrow {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: opacity 0.15s;
+
+    mat-icon {
+      color: #fff;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+
+    &:disabled { opacity: 0.25; cursor: default; }
+  }
+}
+
+/* ── Individual week card ── */
+.wp-week-card {
+  flex: 0 0 calc((100% - 48px) / 4.1);
+  min-width: 0;
+  border-radius: 24px;
+  border: 2.5px solid #E0E0E0;
+  background: #F5F5F5;
+  padding: 20px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 270px;
+
+  &--completed {
+    border-color: $green;
+    background: #D6F0DC;
+  }
+
+  &--progress {
+    border-color: $orange;
+    background: #FDEBD5;
+  }
+
+  &--upcoming {
+    border-color: #BDBDBD;
+    background: #EBEBEB;
+  }
+
+  /* Top row: "Week X" + status badge */
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__num {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-dark;
+  }
+
+  &__badge {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 14px;
+    white-space: nowrap;
+
+    &--done     { background: $green;  color: #fff; }
+    &--progress { background: $orange; color: #fff; }
+    &--upcoming { background: #9E9E9E; color: #fff; }
+  }
+
+  /* Center wrapper — overrides wp-ring-wrap size for card context */
+  &__ring-center {
+    display: flex;
+    justify-content: center;
+
+    .wp-ring-wrap,
+    .wp-ring-wrap--card {
+      width: 108px;
+      height: 108px;
+    }
+
+    .wp-ring,
+    .wp-ring--card {
+      width: 108px;
+      height: 108px;
+    }
+
+    .wp-ring__pct,
+    .wp-ring__pct--card {
+      font-size: 18px;
+      font-weight: 700;
+    }
+  }
+
+  /* Lock icon circle for upcoming weeks */
+  &__lock-circle {
+    width: 108px;
+    height: 108px;
+    border-radius: 50%;
+    border: 2.5px solid #BDBDBD;
+    background: #E0E0E0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 34px;
+      width: 34px;
+      height: 34px;
+      color: #BDBDBD;
+    }
+  }
+
+  /* Week title — always reserves 2 lines so footer stays at bottom */
+  &__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0;
+    text-align: center;
+    line-height: 1.4;
+    /* 2 lines × font-size × line-height = 2 × 16 × 1.4 = 44.8px */
+    min-height: 45px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* Footer */
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin-top: auto;
+  }
+
+  &__count {
+    font-size: 14px;
+    color: $text-secondary;
+  }
+
+  &__coming {
+    font-size: 14px;
+    color: #9E9E9E;
+  }
+
+  &__view-btn {
+    font-size: 14px;
+    font-weight: 600;
+    color: $blue;
+    border: 1.5px solid $blue;
+    border-radius: 22px;
+    padding: 8px 22px;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover { background: #EBF1FF; }
+  }
+}
