@@ -301,6 +301,10 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
     this.setBatchControl()
   }
 
+  findIsBatchFull(batch: any): boolean {
+    return this.contentReadData && this.contentReadData.batches.find((b: any) => b.batchId === batch.batchId && Number(batch.batchAttributes.currentBatchSize || 0) === b.batchAttributes.totalApprovedCount)
+  }
+
   get isBatchFull(): boolean {
     const enrolled = this.selectedBatchData?.userCount?.enrolled
     const currentBatchSize = this.selectedBatchData?.content?.[0]?.batchAttributes?.currentBatchSize
