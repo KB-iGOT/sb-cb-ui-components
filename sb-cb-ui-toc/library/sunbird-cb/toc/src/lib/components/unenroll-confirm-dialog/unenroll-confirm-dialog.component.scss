@@ -1,0 +1,176 @@
+.unenroll-dialog-container {
+  width: 100%;
+  font-family: inherit;
+}
+
+.unenroll-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px;
+}
+
+.unenroll-dialog-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  color: #555;
+
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+}
+
+.unenroll-dialog-body {
+  padding: 20px 24px 8px 0px !important;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.unenroll-question {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 16px;
+  line-height: 1.5;
+
+  strong {
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+}
+
+.unenroll-subheading {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.unenroll-impact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+
+  li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 6px;
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #1b4ca1;
+      font-weight: bold;
+    }
+
+    strong {
+      color: #1a1a1a;
+    }
+  }
+}
+
+.unenroll-acknowledge {
+  padding: 0 0 4px 0;
+
+  ::ng-deep .mat-mdc-checkbox .mdc-form-field {
+    font-size: 14px;
+    color: #333;
+  }
+
+  // MDC CSS variables for checked state background & checkmark
+  ::ng-deep .mat-mdc-checkbox.mat-primary {
+    --mdc-checkbox-selected-checkmark-color: #ffffff;
+    --mdc-checkbox-selected-focus-icon-color: #1b4ca1;
+    --mdc-checkbox-selected-hover-icon-color: #1b4ca1;
+    --mdc-checkbox-selected-icon-color: #1b4ca1;
+    --mdc-checkbox-selected-pressed-icon-color: #1b4ca1;
+    --mdc-checkbox-unselected-hover-icon-color: #1b4ca1;
+    --mat-checkbox-checked-ripple-color: rgba(27, 76, 161, 0.12);
+  }
+
+  // Direct element override for the checkbox background when checked
+  ::ng-deep .mat-mdc-checkbox .mdc-checkbox__native-control:checked ~ .mdc-checkbox__background {
+    background-color: #1b4ca1 !important;
+    border-color: #1b4ca1 !important;
+  }
+
+  // Also target focus & indeterminate states
+  ::ng-deep .mat-mdc-checkbox .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background,
+  ::ng-deep .mat-mdc-checkbox .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background {
+    background-color: #1b4ca1 !important;
+    border-color: #1b4ca1 !important;
+  }
+}
+
+.unenroll-dialog-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px;
+  padding: 0px !important;
+}
+
+.unenroll-cancel-btn {
+  border: 1px solid #1b4ca1 !important;
+  color: #1b4ca1 !important;
+  border-radius: 64px;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.5px;
+  padding: 8px 16px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #b5b6b6 !important;
+    color: white !important;
+  }
+}
+
+.unenroll-continue-btn {
+  background-color: #1b4ca1 !important;
+  font-family: Lato-Bold, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.5px;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 64px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff !important;
+
+  // Target the MDC button label directly
+  ::ng-deep .mdc-button__label {
+    color: #ffffff !important;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: #1b4ca1 !important;
+  }
+
+  &:disabled {
+    background-color: #9fb3d4 !important;
+    color: #ffffff !important;
+    cursor: not-allowed;
+
+    ::ng-deep .mdc-button__label {
+      color: #ffffff !important;
+    }
+  }
+}

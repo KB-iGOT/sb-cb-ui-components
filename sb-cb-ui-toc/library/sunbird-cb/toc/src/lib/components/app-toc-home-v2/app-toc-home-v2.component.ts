@@ -53,6 +53,7 @@ import { PublicSurveyFormComponent } from '../public-survey-form/public-survey-f
 import { NsCardContent } from '../../models/card-content.model'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
+import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -73,12 +74,12 @@ const flattenItems = (items: any[], key: string | number) => {
 }
 const SNACKBAR_DURATION = 3000
 @Component({
-    selector: 'ws-app-app-toc-home-v2',
-    templateUrl: './app-toc-home-v2.component.html',
-    styleUrls: ['./app-toc-home-v2.component.scss'],
-    // tslint:disable-next-line: use-component-view-encapsulation
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: 'ws-app-app-toc-home-v2',
+  templateUrl: './app-toc-home-v2.component.html',
+  styleUrls: ['./app-toc-home-v2.component.scss'],
+  // tslint:disable-next-line: use-component-view-encapsulation
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   queryParamsData: { [key: string]: string } = {}; // Initialize queryParamsData
@@ -1790,6 +1791,28 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   enrollUserToAI() {
     this.fromAITutor = true
     this.handleAutoBatchAssign()
+  }
+
+  openUnenrollDialog(): void {
+    // setTimeout allows mat-menu close animation to finish before
+    // the MatDialog overlay opens, preventing the backdrop conflict
+    setTimeout(() => {
+      const dialogRef = this.dialog.open(UnenrollConfirmDialogComponent, {
+        width: '520px',
+        disableClose: false,
+        panelClass: 'unenroll-dialog-panel',
+        data: {
+          contentName: this.contentReadData?.name || 'this course',
+        },
+      })
+
+      dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          // TODO: Call the actual un-enrollment API here
+          this.openSnackbar('You have been successfully un-enrolled from the course.')
+        }
+      })
+    }, 100)
   }
 
   openSurveyFormPopup(event: boolean) {
