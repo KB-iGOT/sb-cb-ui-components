@@ -754,7 +754,7 @@ export class GenerateCourseRecommendationComponent {
         item?.type &&
         ['behavioral', 'behavioural'].includes(item.type.toLowerCase())
       )
-      .map(item => `${item.theme}-${item.sub_theme}`)
+      .map(item => this.formatThemeWithSubTheme(item?.theme, item?.sub_theme))
       .filter((theme): theme is string => Boolean(theme)); // Ensures type safety
 
     const uniqueBehavioralThemes = Array.from(new Set(behavioralThemes));
@@ -769,7 +769,7 @@ export class GenerateCourseRecommendationComponent {
         item?.type &&
         ['functional'].includes(item.type.toLowerCase())
       )
-      .map(item => `${item.theme}-${item.sub_theme}`)
+      .map(item => this.formatThemeWithSubTheme(item?.theme, item?.sub_theme))
       .filter((theme): theme is string => Boolean(theme)); // Ensures type safety
 
     const uniqueFunctionalThemes = Array.from(new Set(functionalThemes));
@@ -786,7 +786,7 @@ export class GenerateCourseRecommendationComponent {
         item?.type &&
         ['domain'].includes(item.type.toLowerCase())
       )
-      .map(item => `${item.theme}-${item.sub_theme}`)
+      .map(item => this.formatThemeWithSubTheme(item?.theme, item?.sub_theme))
       .filter((theme): theme is string => Boolean(theme)); // Ensures type safety
 
     const uniqueDomainThemes = Array.from(new Set(domainThemes));
@@ -1033,10 +1033,10 @@ export class GenerateCourseRecommendationComponent {
 
           // Store matched competency info for later use
           let obj = {};
-          obj[typeKey] = [themeKey]; // Store the original theme, not the course theme
+          obj[typeKey] = [this.getThemeSubThemeKey(themeKey, subThemeKey)];
           this.competencyNotMatchedByCategory.push(obj);
           seen.add(matchKey);
-          matchedCompetencies.add(themeKey); // Track matched themes
+          matchedCompetencies.add(this.getThemeSubThemeKey(themeKey, subThemeKey));
           isMatched = true;
 
           if (counts.hasOwnProperty(typeKey)) {
@@ -1058,14 +1058,21 @@ export class GenerateCourseRecommendationComponent {
     let allCategoryCompetencies = [];
     for (let i = 0; i < this.planData.competencies.length; i++) {
       if (this.planData.competencies[i]['type']?.toLowerCase() === categoryType?.toLowerCase()) {
-        allCategoryCompetencies.push(this.planData.competencies[i]['theme']?.toLowerCase().trim());
+        allCategoryCompetencies.push(
+          this.getThemeSubThemeKey(
+            this.planData.competencies[i]['theme'],
+            this.planData.competencies[i]['sub_theme']
+          )
+        );
       }
     }
 
     // Get matched competencies for this category from courses
     let matchedCompetencies = [];
+    console.log('competencyNotMatchedByCategory', this.competencyNotMatchedByCategory)
     for (let i = 0; i < this.competencyNotMatchedByCategory.length; i++) {
       if (this.competencyNotMatchedByCategory[i][categoryType?.toLowerCase()]) {
+        console.log('competencyNotMatchedByCategory[i]', this.competencyNotMatchedByCategory[i])
         // Extract matched themes from course competencies
         this.competencyNotMatchedByCategory[i][categoryType?.toLowerCase()].forEach(theme => {
           if (theme) {
@@ -1128,7 +1135,7 @@ export class GenerateCourseRecommendationComponent {
                   matchType: matchType
                 });
 
-                matchedCompetencies.push(fracTheme);
+                matchedCompetencies.push(this.getThemeSubThemeKey(fracTheme, fracSubTheme));
                 break; // Found a match, move to next course competency
               }
             }
@@ -1165,12 +1172,12 @@ export class GenerateCourseRecommendationComponent {
 
     // If competency parameters are provided, add them to the dialog data
     if (missingCompetency && competencyType) {
-      // Parse the theme from the missing competency string (assumes format "theme-subtheme" or just "theme")
-      const theme = missingCompetency.trim();
+      const { theme, subTheme } = this.parseThemeAndSubTheme(missingCompetency);
 
       dialogData.prefillCompetency = {
         type: competencyType,
-        theme: theme
+        theme: theme,
+        subTheme: subTheme
       };
     }
 
@@ -1201,8 +1208,9 @@ export class GenerateCourseRecommendationComponent {
 
   filterOnCompetencyTheme(themeItem) {
     this.selectedThemeFilter = themeItem;
-    let themeName = themeItem?.split("-")[0]?.trim();
-    let subThemeName = themeItem?.split("-")[1]?.trim();
+    const { theme, subTheme } = this.parseThemeAndSubTheme(themeItem || '');
+    let themeName = theme;
+    let subThemeName = subTheme;
 
     console.log('Filtering by theme:', themeName, 'subTheme:', subThemeName, 'Tab index:', this.innerTabActiveIndex);
 
@@ -1308,10 +1316,7 @@ export class GenerateCourseRecommendationComponent {
       return;
     }
 
-    // Parse theme and sub-theme from selectedThemeFilter (format: "Theme - SubTheme")
-    const themeParts = this.selectedThemeFilter.split('-');
-    const theme = themeParts[0]?.trim();
-    const subTheme = themeParts[1]?.trim();
+    const { theme, subTheme } = this.parseThemeAndSubTheme(this.selectedThemeFilter);
 
     // Get the current competency type based on the active tab
     // Map the tab labels to the format expected by AddCourseComponent
@@ -1375,7 +1380,8 @@ export class GenerateCourseRecommendationComponent {
     console.log('this.planData.competencies', this.planData)
     console.log('this.behaviouralNotMatched', this.behaviouralNotMatched)
     this.planData.competencies.map((item) => {
-      if (item && item?.type === 'Behavioral' && this.behaviouralNotMatched.indexOf(item?.theme?.toLowerCase()) < 0) {
+      const competencyKey = this.getThemeSubThemeKey(item?.theme, item?.sub_theme);
+      if (item && item?.type === 'Behavioral' && this.behaviouralNotMatched.indexOf(competencyKey) < 0) {
         this.behaviouralMatched.push(item)
       }
     })
@@ -1386,7 +1392,8 @@ export class GenerateCourseRecommendationComponent {
   getFunctionalMatched() {
     this.functionalMatched = []
     this.planData.competencies.map((item) => {
-      if (item && item?.type === 'Functional' && this.functionalNotMatched.indexOf(item?.theme?.toLowerCase()) < 0) {
+      const competencyKey = this.getThemeSubThemeKey(item?.theme, item?.sub_theme);
+      if (item && item?.type === 'Functional' && this.functionalNotMatched.indexOf(competencyKey) < 0) {
         this.functionalMatched.push(item)
       }
     })
@@ -1396,11 +1403,54 @@ export class GenerateCourseRecommendationComponent {
   getDomainMatched() {
     this.domainMatched = []
     this.planData.competencies.map((item) => {
-      if (item && item?.type === 'Domain' && this.domainNotMatched.indexOf(item?.theme?.toLowerCase()) < 0) {
+      const competencyKey = this.getThemeSubThemeKey(item?.theme, item?.sub_theme);
+      if (item && item?.type === 'Domain' && this.domainNotMatched.indexOf(competencyKey) < 0) {
         this.domainMatched.push(item)
       }
     })
     console.log('this.domainMatched--', this.domainMatched)
+  }
+
+  private formatThemeWithSubTheme(theme: any, subTheme: any): string {
+    const normalizedTheme = (theme || '').toString().trim();
+    const normalizedSubTheme = (subTheme || '').toString().trim();
+
+    if (normalizedTheme && normalizedSubTheme) {
+      return `${normalizedTheme} - ${normalizedSubTheme}`;
+    }
+
+    return normalizedTheme || normalizedSubTheme;
+  }
+
+  private getThemeSubThemeKey(theme: any, subTheme: any): string {
+    return this.formatThemeWithSubTheme(theme, subTheme).toLowerCase().trim();
+  }
+
+  private parseThemeAndSubTheme(value: string): { theme: string; subTheme: string } {
+    const text = (value || '').toString().trim();
+    if (!text) {
+      return { theme: '', subTheme: '' };
+    }
+
+    if (text.includes(' - ')) {
+      const parts = text.split(' - ');
+      return {
+        theme: (parts.shift() || '').trim(),
+        subTheme: parts.join(' - ').trim()
+      };
+    }
+
+    if (text.includes('-')) {
+      const parts = text.split('-');
+      if (parts.length === 2) {
+        return {
+          theme: parts[0].trim(),
+          subTheme: parts[1].trim()
+        };
+      }
+    }
+
+    return { theme: text, subTheme: '' };
   }
 
   downloadPDF() {

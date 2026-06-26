@@ -244,6 +244,17 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
 
   saveRoleMapping() {
     console.log("saved function called...")
+      if (
+    !this.planData?.igot_designation_id &&
+    this.cbpForm.get('designation_name')?.value === this.planData?.designation_name
+  ) {
+    this.snackBar.open('Please select atleast one designation', 'X', {
+      duration: 3000,
+      panelClass: ['snackbar-error']
+    });
+    return;
+  }
+
     if (this.cbpForm.invalid) return;
 
     const formData = this.cbpForm.value;
