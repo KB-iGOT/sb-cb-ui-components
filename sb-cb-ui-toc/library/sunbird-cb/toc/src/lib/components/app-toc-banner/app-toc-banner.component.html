@@ -306,7 +306,7 @@
                   {{ batch.name }} ( {{ batch.startDate | date: 'd MMM, yyyy' }} - {{ (batch.endDate | date: 'd MMM, yyyy')
                   || 'present' }} )
                 </div>
-                <div class="expired ws-mat-green-text" *ngIf="findIsBatchFull(batch)">
+                <div class="expired ws-mat-green-text" *ngIf="batch.batchId === selectedBatch?.batchId && isBatchFull">
                   Full
                 </div>
               </div>
