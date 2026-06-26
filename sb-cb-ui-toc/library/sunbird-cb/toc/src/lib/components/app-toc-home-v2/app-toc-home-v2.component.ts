@@ -1905,7 +1905,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  getPreAssessmentRequired() {
+  private async getPreAssessmentRequired() {
     this.preAssessmentRequiredFlag = false
     if (this.contentReadData?.preEnrolmentResources?.length) {
       this.contentReadData?.preEnrolmentResources?.forEach((item: any) => {
@@ -1916,7 +1916,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  getPreAssessmentCompletionStatus() {
+  private async getPreAssessmentCompletionStatus() {
     this.preAssessmentCompletionStatus = false
     let preEnrollmentResourcesArr: any = []
     let preEnrollmentMandatoryResourcesArr: any = []
@@ -2138,9 +2138,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     if (queryParamsDataTemp.MLId) {
       // Store the original content data for reference
       this.baseContentReadData = initData.content
-      if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-        this.areAllActiveBatchesFull()
-      }
       // Fetch the multilingual content
       try {
         if (this.baseContentReadData && this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
@@ -2165,17 +2162,26 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       // No multilingual content requested, use the original content
       this.contentReadData = initData.content
       this.baseContentReadData = initData.content
-      if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-        this.areAllActiveBatchesFull()
-      }
     }
     // Added to make sure this reference was incorrect, assigning again to make sure global variable is properly updated
     this.queryParamsData = queryParamsDataTemp
 
     // Continue with the rest of the processing
     this.loadLanguageData()
-    this.getPreAssessmentCompletionStatus()
-    this.getPreAssessmentRequired()
+    await this.getPreAssessmentCompletionStatus()
+    await this.getPreAssessmentRequired()
+    if (this.preAssessmentRequiredFlag) {
+      if (this.preAssessmentCompletionStatus) {
+        if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+          this.areAllActiveBatchesFull()
+        }
+      }
+    } else {
+      if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+        this.areAllActiveBatchesFull()
+      }
+    }
+
 
     await this.handleContentPreviewOrEnrollment()
 
