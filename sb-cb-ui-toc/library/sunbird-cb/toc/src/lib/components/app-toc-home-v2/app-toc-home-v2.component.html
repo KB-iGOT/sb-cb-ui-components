@@ -110,7 +110,7 @@
                 *ngIf="((contentReadData?.primaryCategory !== primaryCategory.RESOURCE)  && !enrollBtnLoading) && contentReadData?.batches[0].endDate">
                 <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
                   [userEnrollmentList]="userEnrollmentList" [analytics]="analytics" (programEnrollCall)="programEnrollCall($event)"
-                  [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
+                  [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
                 </ws-app-toc-banner>
               </ng-container>
             </ng-container>
@@ -596,7 +596,7 @@
           [kparray]="kparray" (playResumeForAI)="playResumeForAI()" (enrollUserToAI)="enrollUserToAI()" [contentReadData]="contentReadData"
           [baseContentReadData]="baseContentReadData" [languageList]="languageList" [lockCertificate]="lockCertificate"
           (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg"
-          [areAllActiveBatchesFull]="areAllActiveBatchesFull" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
+          [areAllActiveBatchesFull]="allBatchesAreFull" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
         <div class="mob-tip-for-learner">
           <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
             <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"></ws-widget-tips-for-learner-card>
@@ -663,7 +663,7 @@
 
             <ng-conatiner
               *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData &&  batchData?.content?.length && !batchData?.enrolled">
-              <ng-container *ngIf="areAllActiveBatchesFull">
+              <ng-container *ngIf="allBatchesAreFull">
                 <div class="flex flex-row justify-center items-center mt-2">
                   <div class="text-sm batch-red-text margin-remove-bottom">All batches for this program are currently full.</div>
                 </div>
@@ -689,7 +689,7 @@
               </ng-container>
             </ng-conatiner>
             <div class="flex flex-col gap-4" *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM &&
-              !(!batchData?.enrolled && (!batchData?.content?.length || batchData?.allBatchesExpired || areAllActiveBatchesFull))">
+              !(!batchData?.enrolled && (!batchData?.content?.length || batchData?.allBatchesExpired || allBatchesAreFull))">
               <!-- <div class="flex flex-row gap-2">
                 <mat-icon class="batch-details-info">info</mat-icon>
                 <div class="text-black-50 font-normal">Enrollment numbers refresh every 2 hours.</div>
@@ -768,7 +768,7 @@
 
                   <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
                     [userEnrollmentList]="userEnrollmentList" (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics"
-                    [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
+                    [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
                   </ws-app-toc-banner>
                 </ng-container>
               </ng-container>
@@ -952,20 +952,20 @@
     </div>
   </ng-container>
   <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
-  && batchData && !batchData?.allBatchesExpired && areAllActiveBatchesFull">
+  && batchData && !batchData?.allBatchesExpired && allBatchesAreFull">
     <div class="mobile-enroll-div orange-background">
       <div class="flex flex-col gap-4 mx-4 mt-4">
         <div class="text-sm text-center text-black-700">All batches for this program are currently full.</div>
       </div>
     </div>
   </ng-container>
-  <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !areAllActiveBatchesFull) && batchData?.content?.length > 0 "
+  <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0 "
     [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
     <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
       <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
         <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
           (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
-          [contentReadData]="contentReadData">
+          [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
         </ws-app-toc-banner>
       </div>
     </ng-container>

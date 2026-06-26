@@ -42,11 +42,11 @@ dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 
 @Component({
-    selector: 'ws-app-toc-banner',
-    templateUrl: './app-toc-banner.component.html',
-    styleUrls: ['./app-toc-banner.component.scss'],
-    providers: [AccessControlService, DatePipe],
-    standalone: false
+  selector: 'ws-app-toc-banner',
+  templateUrl: './app-toc-banner.component.html',
+  styleUrls: ['./app-toc-banner.component.scss'],
+  providers: [AccessControlService, DatePipe],
+  standalone: false
 })
 
 export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
@@ -61,6 +61,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() userEnrollmentList: NsContent.ICourse[] | null = null
   @Output() withdrawOrEnroll = new EventEmitter<string>()
   @Input() contentReadData: NsContent.IContent | null = null
+  @Input() fullBatcheIds: any = []
   @Input() clickToShare = false
   @Output() programEnrollCall = new EventEmitter<any>()
   timer: any
@@ -386,11 +387,11 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getDoptEligibleServicesList() {
-    if (this.selectedBatch && this.selectedBatch.batchAttributes 
+    if (this.selectedBatch && this.selectedBatch.batchAttributes
       && this.selectedBatch.batchAttributes.cadreList
       && this.selectedBatch.batchAttributes.cadreList.length > 0) {
-        this.doptEligibleServicesList = this.selectedBatch.batchAttributes.cadreList
-      } else{
+      this.doptEligibleServicesList = this.selectedBatch.batchAttributes.cadreList
+    } else {
       this.doptEligibleServicesList = []
     }
   }
@@ -539,8 +540,8 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       const isDoptContent = _.get(this.content, 'createdFor', []).includes(doptorgID)
       // const isDptUser = _.get(this.userProfileObject, 'rootOrgId') === doptorgID
 
-    this.getDoptEligibleServicesList()
-    const userProfileObject = this.configSvc?.unMappedUser || {}
+      this.getDoptEligibleServicesList()
+      const userProfileObject = this.configSvc?.unMappedUser || {}
       const civilServiceName = _.get(userProfileObject, 'profileDetails.cadreDetails.civilServiceName', '')
       if (this.doptEligibleServicesList && this.doptEligibleServicesList.length > 0) {
         if (!civilServiceName) {
@@ -556,7 +557,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       const profileForm = this.dialog.open(EnrollProfileFormComponent, {
         width: '920px',
         maxHeight: '85vh',
-        height:'auto',
+        height: 'auto',
         data: {
           courseName,
           batchData,
@@ -708,7 +709,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
 
   public handleEnrollmentEndDate(batch: any) {
     const enrollmentEndDate = dayjs(lodash.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
-    const systemDate = dayjs(this.serverDate).format('YYYY-MM-DD')
+    const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
     return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
       (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
