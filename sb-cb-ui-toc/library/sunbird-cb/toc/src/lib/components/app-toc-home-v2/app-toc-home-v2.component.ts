@@ -1,7 +1,7 @@
 import {
   Component, OnDestroy, OnInit, AfterViewInit, AfterViewChecked,
   HostListener, ElementRef, ViewChild, ViewEncapsulation, Input,
-  Inject,
+  Inject, ChangeDetectorRef,
 } from '@angular/core'
 import { Location } from '@angular/common'
 import { SafeHtml, DomSanitizer, SafeStyle } from '@angular/platform-browser'
@@ -225,6 +225,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   // randomlearnAdvisoryObj: any
   // learnAdvisoryDataLength: any
 
+  allBatchesAreFull = false
+  activeBatchIds: any = []
+  fullBatcheIds: any = []
+
   private destroySubject$ = new Subject<any>()
   timerUnsubscribe: any
   timer: any
@@ -304,7 +308,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
-    @Inject('environment') public environment: any
+    @Inject('environment') public environment: any,
+    private cdr: ChangeDetectorRef
   ) {
     this.historyData = history.state
     this.handleBreadcrumbs()
@@ -906,7 +911,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           this.routerChangeHandler(false)
         },
         (error: any) => {
-          this.loggerSvc.error('CONTENT HISTORY FETCH ERROR >', error)
+          this.loggerSvc.error('CONTENT HISTORY FETCH ERROR > ', error)
         },
       )
     }
@@ -983,9 +988,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return this.tocSvc.subtitleOnBanners
   }
 
+
+
   public handleEnrollmentEndDate(batch: any) {
     const enrollmentEndDate = dayjs(_.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
-    const systemDate = dayjs(this.serverDate).format('YYYY-MM-DD')
+    const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
     return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
       (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
@@ -1898,7 +1905,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  getPreAssessmentRequired() {
+  private async getPreAssessmentRequired() {
     this.preAssessmentRequiredFlag = false
     if (this.contentReadData?.preEnrolmentResources?.length) {
       this.contentReadData?.preEnrolmentResources?.forEach((item: any) => {
@@ -1909,7 +1916,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  getPreAssessmentCompletionStatus() {
+  private async getPreAssessmentCompletionStatus() {
     this.preAssessmentCompletionStatus = false
     let preEnrollmentResourcesArr: any = []
     let preEnrollmentMandatoryResourcesArr: any = []
@@ -1969,7 +1976,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setupRouterEventSubscription()
     this.getContentCreatorData()
     this.setupHashmapUpdateSubscription()
-
     this.userId = this.configSvc?.userProfile?.userId || ''
   }
 
@@ -1978,6 +1984,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setErrorCode(initData.errorCode)
     this.setupBatchControlSubscription()
     this.tocSvc.contentLoader.next(false)
+
   }
 
   private setErrorCode(errorCode: NsAppToc.EWsTocErrorCode) {
@@ -2131,7 +2138,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     if (queryParamsDataTemp.MLId) {
       // Store the original content data for reference
       this.baseContentReadData = initData.content
-
       // Fetch the multilingual content
       try {
         if (this.baseContentReadData && this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
@@ -2162,8 +2168,20 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
     // Continue with the rest of the processing
     this.loadLanguageData()
-    this.getPreAssessmentCompletionStatus()
-    this.getPreAssessmentRequired()
+    await this.getPreAssessmentCompletionStatus()
+    await this.getPreAssessmentRequired()
+    if (this.preAssessmentRequiredFlag) {
+      if (this.preAssessmentCompletionStatus) {
+        if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+          this.areAllActiveBatchesFull()
+        }
+      }
+    } else {
+      if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+        this.areAllActiveBatchesFull()
+      }
+    }
+
 
     await this.handleContentPreviewOrEnrollment()
 
@@ -3370,22 +3388,51 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return false
   }
 
-  get areAllActiveBatchesFull(): boolean {
+  async areAllActiveBatchesFull(): Promise<void> {
     if (!this.baseContentReadData?.batches || this.baseContentReadData?.batches.length === 0) {
-      return false
+      return
     }
-
-    const activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.handleEnrollmentEndDate(batch))
-    if (activeBatches.length === 0) {
-      return false
+    this.activeBatchIds = []
+    this.fullBatcheIds = []
+    let activeBatches = []
+    activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.handleEnrollmentEndDate(batch))
+    this.activeBatchIds = activeBatches.map((batch: any) => batch.batchId)
+    if (this.activeBatchIds.length === 0) {
+      return
     }
-
-    return activeBatches.every((batch: any) => {
-      const currentBatchSize = _.get(batch, 'batchAttributes.currentBatchSize', 0)
-      const totalApprovedCount = Number(_.get(batch, 'batchAttributes.totalApprovedCount', 0))
-      return currentBatchSize === totalApprovedCount
-    })
+    await Promise.all(
+      activeBatches.map(async (batch: any) => {
+        const currentBatchSize = Number(_.get(batch, 'batchAttributes.currentBatchSize', 0))
+        const totalApprovedCount = await this.getBatchUserCount(batch)
+        if (currentBatchSize === totalApprovedCount) {
+          this.fullBatcheIds.push(batch.batchId)
+        }
+      })
+    )
+    this.allBatchesAreFull = this.fullBatcheIds.length === this.activeBatchIds.length
+    this.cdr.detectChanges()
   }
 
-
+  async getBatchUserCount(batch: any): Promise<number> {
+    const req = {
+      serviceName: 'blendedprogram',
+      applicationStatus: '',
+      applicationIds: [
+        batch.batchId,
+      ],
+      limit: 100,
+      offset: 0,
+    }
+    try {
+      const res: any = await this.contentSvc.fetchBlendedUserCOUNT(req)
+      if (res && res.result && res.result.data) {
+        const approvedEntry = res.result.data.find((ele: any) => ele.currentStatus === 'APPROVED')
+        return approvedEntry ? Number(approvedEntry.statusCount) : 0
+      }
+      return 0
+    } catch (err: any) {
+      console.error('Error fetching batch user count', err)
+      return 0
+    }
+  }
 }
