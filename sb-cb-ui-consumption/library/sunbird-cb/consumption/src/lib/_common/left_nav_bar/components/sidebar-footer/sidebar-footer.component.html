@@ -1,0 +1,29 @@
+<div class="footer-content flex items-center px-6 py-1">
+  @for (item of itemsList; track item.code) {
+  <a class="footer-item w-full" (click)="onItemClick(item)" [attr.aria-label]="item.iconName">
+    <div class="flex items-center justify-between">
+      @if (isOpen) {
+      <div class="flex gap-1 items-center">
+        @if (item.iconName || item.iconUrl) {
+        <div class="footer-icon-content flex items-center justify-center">
+          @if (item?.iconName) {
+          <mat-icon class="footer-icon" aria-hidden="true">{{ item?.iconName }}</mat-icon>
+          } @else if (item?.iconUrl) {
+          <span class="icon-svg w-5 h-5" [style.mask-image]="'url(/assets/icons/' + item?.iconUrl + '.svg)'"
+            [style.-webkit-mask-image]="'url(/assets/icons/' + item?.iconUrl + '.svg)'" role="presentation"></span>
+          }
+        </div>
+        }
+        <div class="item-text">{{ translateLabels(item.label, 'leftNavBar', item.disableTranslate) }}</div>
+      </div>
+      }
+      @if (item.infoIcon) {
+      <mat-icon class="info-icon"
+        [attr.title]="item.infoText ? translateLabels(item.infoText, 'leftNavBar', item.disableTranslate) : ''">
+        {{ item.infoIcon }}
+      </mat-icon>
+      }
+    </div>
+  </a>
+  }
+</div>

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core'
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule, Router } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
@@ -21,10 +21,10 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
  * - RouterLink integration
  *
  * @example
- * <app-sidebar-nav-list-section [section]="navListConfig" />
+ * <sb-uic-sidebar-nav-list-section [section]="navListConfig" />
  */
 @Component({
-  selector: 'app-sidebar-nav-list-section',
+  selector: 'sb-uic-sidebar-nav-list-section',
   standalone: true,
   imports: [
     CommonModule,
@@ -38,16 +38,13 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
   styleUrls: ['./sidebar-nav-list-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SidebarNavListSectionComponent {
+export class SidebarNavListSectionComponent implements OnChanges {
   /**
    * Navigation list section configuration
    */
   @Input({ required: true }) section!: NavListSectionConfig
-
-  /**
-   * Sidebar open/close state
-   */
-  @Input({ required: true }) isOpen!: boolean
+  @Input({ required: true }) isOpen!: boolean // Sidebar open/close state
+  @Input({ required: true }) detailsChanged!: boolean
 
   /**
    * Content visibility state (with delayed hiding)
@@ -55,7 +52,17 @@ export class SidebarNavListSectionComponent {
   @Input({ required: true }) showContent!: boolean
   @Input() activeItemCode?: string
 
-  @Output() itemClicked = new EventEmitter<string>()
+  @Output() itemClicked = new EventEmitter<{ code: string; subType: string }>()
+
+  itemsList: NavListItem[] = []
+  limitedItemsList: NavListItem[] = []
+
+  viewAllItems = signal<boolean>(false)
+  showViewAll = signal<boolean>(false)
+
+  visibleItems = computed(() =>
+    this.viewAllItems() ? this.itemsList : this.limitedItemsList
+  );
 
   constructor(
     private router: Router,
@@ -71,16 +78,32 @@ export class SidebarNavListSectionComponent {
     })
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['section'] && this.section && this.section.items) {
+      this.itemsList = this.section.items.filter(item => item.enabled !== false)
+      if (this.section.maxItemsVisible) {
+        this.limitedItemsList = this.itemsList.slice(0, this.section.maxItemsVisible)
+      }
+      if (this.section.showViewAll && this.section.maxItemsVisible && this.itemsList.length > this.section.maxItemsVisible) {
+        this.showViewAll.set(true)
+      }
+      if (!this.showViewAll()) {
+        this.viewAllItems.set(true)
+      }
+    }
+  }
+
   /**
    * Translate a label using MultilingualTranslationsService
    */
+
   translateLabels(label: string, type: string): string {
     return this.langtranslations.translateActualLabel(label, type, '')
   }
 
   onItemClick(item: NavListItem): void {
     if (item?.code) {
-      this.itemClicked.emit(item.code)
+      this.itemClicked.emit({ code: item.code, subType: item.subtype ?? '' })
     }
   }
 

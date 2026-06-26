@@ -44,27 +44,29 @@
       <!-- Scrollable Navigation Sections -->
       <nav id="sidebar-nav" class="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden" [class.p-4]="isOpen()"
         [class.p-2]="!isOpen()" role="navigation" aria-label="Sidebar navigation sections">
-        @if (menuBarDetails?.navSections && menuBarDetails.navSections.length > 0) {
-        @for (section of menuBarDetails.navSections; track trackByCardType($index, section)) {
+        @if (navSections && navSections.length > 0) {
+        @for (section of navSections; track trackByCardType($index, section)) {
 
         <!-- Render Nav List Section -->
         @if (section.cardType === SidebarCardType.NAV_LIST) {
-        <app-sidebar-nav-list-section [section]="section" [activeItemCode]="menuBarDetails?.activeItemCode"
-          [isOpen]="isOpen()" [showContent]="showContent()" (itemClicked)="onNavItemClicked($event)" class="block mb-4"
+        <sb-uic-sidebar-nav-list-section [section]="section" [activeItemCode]="menuBarDetails?.activeItemCode"
+          [isOpen]="isOpen()" [showContent]="showContent()" [detailsChanged]="detailsChanged"
+          (itemClicked)="onNavItemClicked($event)" class="block mb-4"
           [attr.aria-label]="section.sectionTitle || 'Navigation menu'" />
         }
 
         <!-- Render Stat Cards Section -->
         @if (section.cardType === SidebarCardType.STAT_CARDS) {
-        <app-sidebar-stat-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
-          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Statistics section'"
-          (itemClicked)="onNavItemClicked($event)" />
+        <sb-uic-sidebar-stat-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
+          [detailsChanged]="detailsChanged" class="block mb-4"
+          [attr.aria-label]="section.sectionTitle || 'Statistics section'" (itemClicked)="onNavItemClicked($event)" />
         }
 
         <!-- Render Info Cards Section -->
         @if (section.cardType === SidebarCardType.INFO_CARDS) {
-        <app-sidebar-info-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
-          class="block mb-4" [attr.aria-label]="section.sectionTitle || 'Information cards section'" />
+        <sb-uic-sidebar-info-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
+          [detailsChanged]="detailsChanged" class="block mb-4"
+          [attr.aria-label]="section.sectionTitle || 'Information cards section'" />
         }
 
         }
@@ -77,6 +79,11 @@
         }
         }
       </nav>
+      <!-- Footer Section -->
+      @if (footerSections) {
+      <sb-uic-sidebar-footer [itemsList]="footerSections" [isOpen]="isOpen()"
+        (itemClicked)="onNavItemClicked($event)"></sb-uic-sidebar-footer>
+      }
     </div>
   </aside>
 

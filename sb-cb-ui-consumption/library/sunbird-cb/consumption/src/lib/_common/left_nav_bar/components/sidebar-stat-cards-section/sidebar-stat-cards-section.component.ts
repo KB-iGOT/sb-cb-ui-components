@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed, ChangeDetectionStrategy } from '@angular/core'
+import { Component, Input, Output, EventEmitter, computed, ChangeDetectionStrategy, SimpleChanges, OnChanges, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
@@ -23,10 +23,10 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
  * - Material Design cards
  *
  * @example
- * <app-sidebar-stat-cards-section [section]="statCardsConfig" />
+ * <sb-uic-sidebar-stat-cards-section [section]="statCardsConfig" />
  */
 @Component({
-  selector: 'app-sidebar-stat-cards-section',
+  selector: 'sb-uic-sidebar-stat-cards-section',
   standalone: true,
   imports: [
     CommonModule,
@@ -41,11 +41,12 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
   styleUrls: ['./sidebar-stat-cards-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SidebarStatCardsSectionComponent {
+export class SidebarStatCardsSectionComponent implements OnChanges {
   /**
    * Stat cards section configuration
    */
   @Input({ required: true }) section!: StatCardsSectionConfig
+  @Input({ required: true }) detailsChanged!: boolean
 
   /**
    * Sidebar open/close state
@@ -57,11 +58,12 @@ export class SidebarStatCardsSectionComponent {
    */
   @Input({ required: true }) showContent!: boolean
 
-  @Output() itemClicked = new EventEmitter<string>()
+  @Output() itemClicked = new EventEmitter<{ code: string; subType: string }>()
 
   constructor(
     private translate: TranslateService,
-    private langtranslations: MultilingualTranslationsService
+    private langtranslations: MultilingualTranslationsService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
@@ -72,6 +74,12 @@ export class SidebarStatCardsSectionComponent {
     })
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // Manually detect changes when detailsChanged flag is toggled
+    if (changes['detailsChanged'] && !changes['detailsChanged'].firstChange) {
+      this.cdr.markForCheck()
+    }
+  }
   /**
    * Translate a label using MultilingualTranslationsService
    */
@@ -79,16 +87,14 @@ export class SidebarStatCardsSectionComponent {
     return this.langtranslations.translateActualLabel(label, type, '')
   }
 
-  /**
-   * Computed signal for all items (no limit applied)
-   */
   visibleItems = computed(() => {
     return this.section?.items ?? []
   });
 
-  /**
-   * Computed signal to check if "View All" button should be shown
-   */
+  sectionLoading = computed(() => {
+    return this.section?.sectionLoading ?? false
+  });
+
   shouldShowViewAll = computed(() => {
     return this.section?.showViewAll ?? false
   });
@@ -97,7 +103,8 @@ export class SidebarStatCardsSectionComponent {
    * Handle View All click - emit event to parent
    */
   onViewAllClick(): void {
-    this.itemClicked.emit(this.section.viewAllKey ?? '')
+    console.log('View All clicked for section:', this.section)
+    this.itemClicked.emit({ code: this.section.viewAllKey ?? '', subType: '' })
   }
 
   /**

@@ -2,7 +2,7 @@
   [attr.aria-label]="section?.sectionTitle || 'Statistics section'">
 
   <!-- Skeleton Loader -->
-  @if (section?.sectionLoading) {
+  @if (sectionLoading()) {
   <div class="skeleton-stat-cards space-y-3 p-3">
     @for (i of [1, 2, 3]; track i) {
     <div class="flex items-start gap-3 p-4 rounded-lg border border-blue-100">
@@ -28,7 +28,7 @@
     <mat-expansion-panel-header class="section-header">
       <mat-panel-title class="text-xs font-semibold text-gray-500 uppercase tracking-wider" role="heading"
         aria-level="2">
-        {{ section?.disableTranslate ? section?.sectionTitle : translateLabels(section?.sectionTitle, 'sidebar') }}
+        {{ section?.disableTranslate ? section?.sectionTitle : translateLabels(section?.sectionTitle, 'leftNavBar') }}
       </mat-panel-title>
     </mat-expansion-panel-header>
 
@@ -55,7 +55,7 @@
           <!-- Content -->
           <div class="stat-content flex-1 min-w-0">
             <p class="stat-header text-xs text-gray-600 mb-1" id="stat-label-{{$index}}">
-              {{ item?.disableTranslate ? item?.headerLabel : translateLabels(item?.headerLabel, 'sidebar') }}
+              {{ item?.disableTranslate ? item?.headerLabel : translateLabels(item?.headerLabel, 'leftNavBar') }}
             </p>
             <p class="stat-value text-lg font-bold text-indigo-900 truncate"
               [attr.aria-describedby]="'stat-label-' + $index">
@@ -70,7 +70,7 @@
       @if (shouldShowViewAll()) {
       <a class="view-all-link" (click)="onViewAllClick()" [attr.aria-label]="'View all ' + section?.sectionTitle">
         {{ section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
-        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar')) }}
+        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'leftNavBar')) }}
       </a>
       }
     </div>
@@ -81,7 +81,7 @@
     @if (section?.sectionTitle) {
     <h3 class="section-title text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1" role="heading"
       aria-level="2">
-      {{ section?.disableTranslate ? section?.sectionTitle : translateLabels(section?.sectionTitle, 'sidebar') }}
+      {{ section?.disableTranslate ? section?.sectionTitle : translateLabels(section?.sectionTitle, 'leftNavBar') }}
     </h3>
     }
 
@@ -109,7 +109,7 @@
           <!-- Content -->
           <div class="stat-content flex-1 min-w-0">
             <p class="stat-header text-xs text-gray-600 mb-1" id="stat-label-non-{{$index}}">
-              {{ item?.disableTranslate ? item?.headerLabel : translateLabels(item?.headerLabel, 'sidebar') }}
+              {{ item?.disableTranslate ? item?.headerLabel : translateLabels(item?.headerLabel, 'leftNavBar') }}
             </p>
             <p class="stat-value text-lg font-bold text-indigo-900 truncate"
               [attr.aria-describedby]="'stat-label-non-' + $index">
@@ -124,7 +124,7 @@
       @if (shouldShowViewAll()) {
       <a class="view-all-link" (click)="onViewAllClick()" [attr.aria-label]="'View all ' + section?.sectionTitle">
         {{ section?.disableTranslateOnViewAll ? (section?.viewAllLabel ||
-        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'sidebar')) }}
+        'View All') : (translateLabels(section?.viewAllLabel || 'View All', 'leftNavBar')) }}
       </a>
       }
     </div>
