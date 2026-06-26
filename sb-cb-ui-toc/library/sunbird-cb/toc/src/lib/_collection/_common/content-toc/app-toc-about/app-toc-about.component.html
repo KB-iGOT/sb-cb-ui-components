@@ -266,10 +266,10 @@
     </ng-container>
 
     <ng-container *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM && selectedBatchData && !areAllActiveBatchesFull">
-        <div class="flex flex-row gap-2 mb-4 hideAbove1200">
+        <!-- <div class="flex flex-row gap-2 mb-4 hideAbove1200">
             <mat-icon class="batch-details-info">info</mat-icon>
             <div class="text-black-50 font-normal">Enrollment numbers refresh every 2 hours.</div>
-        </div>
+        </div> -->
         <div class="flex flex-row gap-3 justify-around hideAbove1200">
             <div class="batch-info">
                 <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize ||
