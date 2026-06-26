@@ -25,11 +25,11 @@ export namespace WsEvents {
     Log = 'Log',
     Trace = 'Trace',
   }
-   export enum WsAuditTypes {
-     Created = 'Created',
-     Updated = 'Updated',
-     Deleted = 'Deleted',
-   }
+  export enum WsAuditTypes {
+    Created = 'Created',
+    Updated = 'Updated',
+    Deleted = 'Deleted',
+  }
   export enum WsTimeSpentType {
     Page = 'Page',
     Player = 'Player',
@@ -65,6 +65,19 @@ export namespace WsEvents {
     Chatbot = 'Chatbot',
     GetStarted = 'Get Started',
     PlatformRating = 'PlatformRating',
+    PageMenu = 'page-menu',
+    ResumeContentPopupHome = 'resume-content-popup-home',
+    AparCourses = 'apar-courses',
+    CaProgram = 'ca-program',
+    LearningPath = 'learning-path',
+    StandaloneAssessment = 'standalone-assessment',
+    ModeratedContent = 'moderated-content',
+    TrendingOnIgot = 'trending-on-igot',
+    FeaturedAiCourses = 'featured-ai-courses',
+    ThirtyMinutesOrLess = '30-minutes-or-less',
+    NewReleases = 'new-releases',
+    PopularOnIgot = 'popular-on-igot',
+    Spotlight = 'spotlight'
   }
 
   export interface ITelemetryPageContext {
