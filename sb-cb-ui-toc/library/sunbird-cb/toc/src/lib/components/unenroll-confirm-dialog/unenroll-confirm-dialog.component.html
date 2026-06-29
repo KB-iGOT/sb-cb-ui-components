@@ -11,7 +11,7 @@
   <mat-dialog-content class="unenroll-dialog-body">
     <ng-container *ngIf="!showFeedbackForm; else feedbackFormTemplate">
       <p class="unenroll-question">
-        Are you sure you want to un-enroll from <strong>{{ data.contentName }}</strong>?
+        Are you sure you want to un-enroll from <strong>{{ data?.content?.name }}</strong>?
       </p>
 
       <p class="unenroll-subheading">Un-enrolling from this course will:</p>

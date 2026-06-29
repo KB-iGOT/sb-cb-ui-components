@@ -1,10 +1,7 @@
 import { Component, Inject } from '@angular/core'
 import { FormArray, FormControl, FormGroup } from '@angular/forms'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
-
-export interface UnenrollDialogData {
-  contentName: string
-}
+import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 
 @Component({
   selector: 'ws-app-unenroll-confirm-dialog',
@@ -29,7 +26,8 @@ export class UnenrollConfirmDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<UnenrollConfirmDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: UnenrollDialogData,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private events: EventService,
   ) { }
 
   onCancel(): void {
@@ -52,6 +50,7 @@ export class UnenrollConfirmDialogComponent {
 
   onConfirmUnenroll(): void {
     if (this.hasSelectedFeedbackReason()) {
+      this.raiseTelemetryEvent()
       const selectedReasonFlags = (this.feedbackForm.get('reasons') as FormArray).value
       const selectedReasons = this.feedbackReasons.filter((_, index) => selectedReasonFlags[index])
       const feedbackPayload = {
@@ -62,5 +61,22 @@ export class UnenrollConfirmDialogComponent {
       console.log('Un-enroll feedback:', feedbackPayload)
       this.dialogRef.close(true)
     }
+  }
+
+  raiseTelemetryEvent(): void {
+    this.events.raiseInteractTelemetry(
+      {
+        type: 'click',
+        id: 'btn-un-enroll',
+      },
+      {
+        id: this.data?.content?.name || 'unknown-content',
+        type: this.data?.content?.primaryCategory || ''
+      },
+      {
+        pageIdExt: 'btn-un-enroll',
+        module: WsEvents.EnumTelemetrymodules.CONTENT,
+      })
+
   }
 }
