@@ -22,6 +22,9 @@ export class EventsComponent implements OnInit {
   requestBody: any
   currentDay: any
   loader: boolean = false
+  showAllEvents = false
+
+  toggleShowAll(): void { this.showAllEvents = !this.showAllEvents }
 
   // Will store the event callback function from the parent
   private eventCallback: Function | undefined
