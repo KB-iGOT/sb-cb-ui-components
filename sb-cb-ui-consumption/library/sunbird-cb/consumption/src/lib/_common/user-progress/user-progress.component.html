@@ -51,8 +51,6 @@
                                 <div>
                                     <div class="counter">
                                       {{ objectData?.bkLearningHoursFormatted || '0m' }}
-                                      <ng-container *ngIf="objectData?.hoursFormatted">{{ formatLearningHours(userProgress?.total_learning_hours) }}</ng-container>
-                                      <ng-container *ngIf="!objectData?.hoursFormatted">{{ formatNumber(userProgress?.total_learning_hours) }}</ng-container>
                                     </div>
                                     <div class="counter-title pt-1">Learning Hours</div>
                                 </div>

@@ -335,7 +335,8 @@
 <!-- WEEK PROGRESS -->
 <ng-template #weekProgress let-data="data">
   <div class="{{ data?.containerClass }}">
-    <sb-uic-week-progress [programData]="data" [bkConfig]="bkConfiguration"></sb-uic-week-progress>
+    <sb-uic-week-progress [programData]="data" [bkConfig]="bkConfiguration"
+      (progressStats)="onProgressStats($event)"></sb-uic-week-progress>
   </div>
 </ng-template>
 
