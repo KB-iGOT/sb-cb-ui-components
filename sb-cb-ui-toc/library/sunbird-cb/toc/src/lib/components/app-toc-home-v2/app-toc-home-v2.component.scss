@@ -478,6 +478,10 @@ a.action-button {
   }
 }
 
+.text-red {
+  color: #D32F2F !important;
+}
+
 .mobile-enroll-div {
   padding: 16px;
   position: fixed;
@@ -1248,6 +1252,7 @@ mat-divider {
   height: 32px !important;
   line-height: 32px !important;
   padding: 0 !important;
+  background-color: #0000 !important;
 
   .mat-icon {
     font-size: 20px;
