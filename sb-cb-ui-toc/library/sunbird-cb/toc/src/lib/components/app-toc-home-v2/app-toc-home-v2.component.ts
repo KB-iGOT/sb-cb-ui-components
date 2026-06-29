@@ -1803,6 +1803,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         panelClass: 'unenroll-dialog-panel',
         data: {
           content: this.contentReadData,
+          tocConfig: this.tocConfig,
         },
       })
 
