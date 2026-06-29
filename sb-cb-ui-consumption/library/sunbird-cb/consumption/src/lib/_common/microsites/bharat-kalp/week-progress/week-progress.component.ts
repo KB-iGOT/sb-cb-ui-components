@@ -76,7 +76,7 @@ type WeekStatus = 'completed' | 'in-progress' | 'upcoming'
 })
 export class WeekProgressComponent implements OnInit, AfterViewInit {
   @Input() programData!: WeekProgressData
-  @Input() bkConfig?: { startDate?: string; endDate?: string; [key: string]: any }
+  @Input() bkConfig?: { startDate?: string; endDate?: string;[key: string]: any }
 
   currentWeek = 1
   selectedWeek = 1
@@ -105,7 +105,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     private http: HttpClient,
     private configSvc: ConfigurationsService,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.currentWeek = this._computeCurrentWeek()
@@ -130,9 +130,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
       if (!wd?.content_ids) continue
 
       const weekIds = [
-        ...(wd.content_ids.course     || []),
-        ...(wd.content_ids.program    || []),
-        ...(wd.content_ids.event      || []),
+        ...(wd.content_ids.course || []),
+        ...(wd.content_ids.program || []),
+        ...(wd.content_ids.event || []),
         ...(wd.content_ids.assessment || []),
       ].filter(id => !!id)
 
@@ -178,9 +178,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (!wd?.content_ids) return
 
     const idMap: { [tab: string]: string[] } = {
-      Courses:    wd.content_ids.course     || [],
-      Programs:   wd.content_ids.program    || [],
-      Events:     wd.content_ids.event      || [],
+      Courses: wd.content_ids.course || [],
+      Programs: wd.content_ids.program || [],
+      Events: wd.content_ids.event || [],
       Assessment: wd.content_ids.assessment || [],
     }
 
@@ -215,10 +215,10 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
           this.weekContentCards[tab] = ids
             .filter(id => byId[id])
             .map((id, pos) => ({
-              content:      byId[id],
-              cardSubType:  'standard' as NsCardContent.TCardSubType,
-              context:      { pageSection: 'bharat-kalp-week-strip', position: pos },
-              stateData:    {},
+              content: byId[id],
+              cardSubType: 'standard' as NsCardContent.TCardSubType,
+              context: { pageSection: 'bharat-kalp-week-strip', position: pos },
+              stateData: {},
             }))
         })
 
@@ -271,9 +271,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     const wd = this.getWeekData(week)
     if (!wd?.content_ids) return wd?.course_count || 0
     return (
-      (wd.content_ids.course?.length     || 0) +
-      (wd.content_ids.program?.length    || 0) +
-      (wd.content_ids.event?.length      || 0) +
+      (wd.content_ids.course?.length || 0) +
+      (wd.content_ids.program?.length || 0) +
+      (wd.content_ids.event?.length || 0) +
       (wd.content_ids.assessment?.length || 0)
     )
   }
@@ -411,7 +411,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     const queryParams: { [k: string]: string } = {}
     if (content.batchId) queryParams['batchId'] = content.batchId
     if (content.language?.length) {
-      queryParams['ML']   = content.language[0].toLowerCase()
+      queryParams['ML'] = content.language[0].toLowerCase()
       queryParams['MLId'] = content.identifier
     }
     /* Pass source URL so the portal can restore back-navigation context */
