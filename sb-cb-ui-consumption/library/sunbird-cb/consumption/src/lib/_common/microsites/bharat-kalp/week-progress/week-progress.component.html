@@ -104,17 +104,22 @@
           <div class="wp-week-card" *ngIf="!isWeekLoading(w)"
             [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
             [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'"
+            [class.wp-week-card--not-started]="getWeekStatus(w) === 'not-started'"
             [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'"
             [class.wp-week-card--current]="w === currentWeek">
 
             <!-- Card top: week label + status badge -->
             <div class="wp-week-card__top">
               <span class="wp-week-card__num">Week {{ w }}</span>
-              <span class="wp-week-card__badge" [class.wp-week-card__badge--done]="getWeekStatus(w) === 'completed'"
+              <span class="wp-week-card__badge"
+                [class.wp-week-card__badge--done]="getWeekStatus(w) === 'completed'"
                 [class.wp-week-card__badge--progress]="getWeekStatus(w) === 'in-progress'"
+                [class.wp-week-card__badge--not-started]="getWeekStatus(w) === 'not-started'"
                 [class.wp-week-card__badge--upcoming]="getWeekStatus(w) === 'upcoming'">
-                {{ getWeekStatus(w) === 'completed' ? 'Completed' : getWeekStatus(w) === 'in-progress' ? 'In Progress' :
-                'Locked' }}
+                {{ getWeekStatus(w) === 'completed' ? 'Completed'
+                   : getWeekStatus(w) === 'in-progress' ? 'In Progress'
+                   : getWeekStatus(w) === 'not-started' ? 'Not Started'
+                   : 'Locked' }}
               </span>
             </div>
 

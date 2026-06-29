@@ -66,17 +66,14 @@ export class BharatKalpComponent implements OnInit {
   communities: any[] = []
   communitiesLoading = true
 
-  /* ── Stats derived from enrollment API ── */
-  bkCompletedCount       = 0
+  /* ── Stats fed by week-progress (progressStats) Output — no extra API call ── */
+  bkCompletedCount         = 0
   bkLearningHoursFormatted = '0m'
 
-  private _formatHours(totalHours: number): string {
-    if (!totalHours || isNaN(totalHours)) return '0m'
-    const h = Math.floor(totalHours)
-    const m = Math.round((totalHours - h) * 60)
-    if (h === 0) return `${m}m`
-    if (m === 0) return `${h}hr`
-    return `${h}hr ${m}m`
+  /** Receives stats emitted by sb-uic-week-progress after all per-week calls finish */
+  onProgressStats(stats: { completedCount: number; learningHoursFormatted: string }): void {
+    this.bkCompletedCount         = stats.completedCount
+    this.bkLearningHoursFormatted = stats.learningHoursFormatted
   }
 
   /** Merges computed stats into myprogress objectData */
