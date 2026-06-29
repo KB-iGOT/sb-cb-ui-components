@@ -916,6 +916,11 @@ $border: #E2E8F0;
     background: #FDEBD5;
   }
 
+  &--not-started {
+    border-color: $blue;
+    background: #EBF1FF;
+  }
+
   &--upcoming {
     border-color: #BDBDBD;
     background: #EBEBEB;
@@ -954,6 +959,11 @@ $border: #E2E8F0;
 
     &--progress {
       background: $orange;
+      color: #fff;
+    }
+
+    &--not-started {
+      background: $blue;
       color: #fff;
     }
 

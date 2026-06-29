@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core'
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { NsCardContent } from '../../../../_models/card-content.model'
 import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
@@ -66,7 +66,7 @@ export interface WeekProgressData {
   }>
 }
 
-type WeekStatus = 'completed' | 'in-progress' | 'upcoming'
+type WeekStatus = 'completed' | 'in-progress' | 'not-started' | 'upcoming'
 
 @Component({
   selector: 'sb-uic-week-progress',
@@ -77,6 +77,9 @@ type WeekStatus = 'completed' | 'in-progress' | 'upcoming'
 export class WeekProgressComponent implements OnInit, AfterViewInit {
   @Input() programData!: WeekProgressData
   @Input() bkConfig?: { startDate?: string; endDate?: string;[key: string]: any }
+
+  /** Emits computed stats once all per-week enrollment calls complete */
+  @Output() progressStats = new EventEmitter<{ completedCount: number; learningHoursFormatted: string }>()
 
   currentWeek = 1
   selectedWeek = 1
@@ -93,6 +96,20 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   weekCardsLoading = false
   weekCardLoading: { [week: number]: boolean } = {}
   readonly skeletonCards = [1, 2, 3, 4]
+
+  /* Accumulated enrollment data from per-week API calls */
+  private _enrolledMap: { [id: string]: { pct: number; durSec: number } } = {}
+  private _weekCallsTotal  = 0
+  private _weekCallsDone   = 0
+
+  private _formatHours(totalHours: number): string {
+    if (!totalHours || isNaN(totalHours)) return '0m'
+    const h = Math.floor(totalHours)
+    const m = Math.round((totalHours - h) * 60)
+    if (h === 0) return `${m}m`
+    if (m === 0) return `${h}hr`
+    return `${h}hr ${m}m`
+  }
 
   /* ── Week card slider ── */
   @ViewChild('cardTrack') cardTrackRef!: ElementRef<HTMLElement>
@@ -114,7 +131,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     this._loadActiveWeekContent()
   }
 
-  /* ── Fetch completion % per week individually ── */
+  /* ── Fetch completion % per week individually + accumulate for overall stats ── */
   private _loadWeekProgress(): void {
     const userId = (this.configSvc as any)?.userProfile?.userId || ''
     if (!userId) {
@@ -124,15 +141,31 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
     const enrollUrl = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
 
-    /* Make individual API call for each started week (1 to currentWeek) */
+    /* Count how many weeks actually have IDs to call */
+    this._weekCallsTotal = 0
+    this._weekCallsDone  = 0
+    this._enrolledMap    = {}
+
+    for (let week = 1; week <= this.currentWeek; week++) {
+      const wd = this.getWeekData(week)
+      const ids = [
+        ...(wd?.content_ids?.course      || []),
+        ...(wd?.content_ids?.program     || []),
+        ...(wd?.content_ids?.event       || []),
+        ...(wd?.content_ids?.assessment  || []),
+      ].filter(id => !!id)
+      if (ids.length) this._weekCallsTotal++
+    }
+
+    /* Fire one independent API call per started week */
     for (let week = 1; week <= this.currentWeek; week++) {
       const wd = this.getWeekData(week)
       if (!wd?.content_ids) continue
 
       const weekIds = [
-        ...(wd.content_ids.course || []),
-        ...(wd.content_ids.program || []),
-        ...(wd.content_ids.event || []),
+        ...(wd.content_ids.course     || []),
+        ...(wd.content_ids.program    || []),
+        ...(wd.content_ids.event      || []),
         ...(wd.content_ids.assessment || []),
       ].filter(id => !!id)
 
@@ -149,8 +182,13 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
           const courses: any[] = res?.result?.courses || []
           courses.forEach((c: any) => {
             const id = c.courseId || c.identifier || c.contentId
-            if (id && completionMap.hasOwnProperty(id)) {
-              completionMap[id] = c.completionPercentage ?? 0
+            if (id) {
+              if (completionMap.hasOwnProperty(id)) completionMap[id] = c.completionPercentage ?? 0
+              /* Accumulate for overall stats */
+              this._enrolledMap[id] = {
+                pct:    c.completionPercentage ?? 0,
+                durSec: Number(c.duration || c.content?.duration || 0),
+              }
             }
           })
 
@@ -160,9 +198,18 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
           this.weekCardLoading[week] = false
           this.cdr.detectChanges()
 
-          /* Scroll to current week after last week's call resolves */
-          if (week === this.currentWeek) {
-            setTimeout(() => this._scrollToCurrentWeek(), 100)
+          if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
+
+          /* Emit overall stats once all week calls are done */
+          this._weekCallsDone++
+          if (this._weekCallsDone >= this._weekCallsTotal) {
+            const entries = Object.values(this._enrolledMap)
+            const completedCount = entries.filter(e => e.pct >= 100).length
+            const totalSeconds   = entries.reduce((acc, e) => acc + (e.durSec * e.pct / 100), 0)
+            this.progressStats.emit({
+              completedCount,
+              learningHoursFormatted: this._formatHours(totalSeconds / 3600),
+            })
           }
         })
     }
@@ -258,7 +305,10 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   /* Badge / ring: progress-based — 100% = completed, else in-progress, future = upcoming */
   getWeekStatus(week: number): WeekStatus {
     if (week > this.currentWeek) return 'upcoming'
-    return (this.getWeekData(week)?.progress ?? 0) >= 100 ? 'completed' : 'in-progress'
+    const progress = this.getWeekData(week)?.progress ?? 0
+    if (progress >= 100) return 'completed'
+    if (progress > 0)   return 'in-progress'
+    return 'not-started'
   }
 
   /* Line after week W is green when W is before the current week (calendar-based) */
@@ -313,14 +363,15 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   getRingColor(week: number): string {
     const s = this.getWeekStatus(week)
-    if (s === 'completed') return '#1E8A44'
+    if (s === 'completed')   return '#1E8A44'
     if (s === 'in-progress') return '#F37400'
+    if (s === 'not-started') return '#1B4CA1'
     return '#D0D5DD'
   }
 
   getRingBgColor(week: number): string {
     const s = this.getWeekStatus(week)
-    if (s === 'completed') return '#E8F5E9'
+    if (s === 'completed')   return '#E8F5E9'
     if (s === 'in-progress') return '#1B4CA1'
     return '#E2E8F0'
   }
@@ -455,8 +506,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   getCardRingBg(week: number): string {
     const s = this.getWeekStatus(week)
-    if (s === 'completed') return '#C8E6C9'
+    if (s === 'completed')   return '#C8E6C9'
     if (s === 'in-progress') return '#E0E0E0'
+    if (s === 'not-started') return '#E3EAF6'
     return '#EEEEEE'
   }
 
