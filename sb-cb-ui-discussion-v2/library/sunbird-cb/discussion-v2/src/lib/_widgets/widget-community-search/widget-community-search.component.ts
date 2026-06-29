@@ -108,7 +108,8 @@ export class WidgetCommunitySearchComponent  implements OnInit{
     this.isLoading = true;
     let request: any = {
       "filterCriteriaMap": {
-          "status": "active"
+          "status": "active",
+          "communityAccessLevel": "public"
       },
       "requestedFields": [
       ],
