@@ -1,0 +1,65 @@
+@use '@sunbird-cb/design-system/src/styles/ws-common';
+@use '@sunbird-cb/design-system/src/styles/ws-vars';
+@use '@sunbird-cb/design-system/src/styles/_ws-mixins.scss' as *;
+
+:host {
+  display: inline-block;
+}
+
+.log-o {
+  flex: 1;
+  text-align: left;
+}
+
+.new-margin {
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 768px) {
+  .new-margin {
+    margin-top: 8px;
+  }
+}
+
+.border-bottom {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+section {
+  .pfname {
+    p {
+      margin-bottom: 0 !important;
+    }
+  }
+}
+
+::ng-deep .mat-menu-content {
+  padding-bottom: 0 !important;
+  background-color: #fff;
+
+  .mat-menu-item {
+    line-height: 30px;
+    height: 44px;
+    padding: 0 6px;
+    font: 400 14px/21px Lato !important;
+  }
+}
+
+img.profile-badge {
+  position: relative;
+  float: right;
+  margin-top: -10px;
+  margin-left: -10px;
+}
+
+.font-14-bold {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.text-ellipses {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90px;
+}

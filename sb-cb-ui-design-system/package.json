@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/design-system",
-  "version": "0.1.1-design-v2",
+  "version": "0.1.2-design-v2",
   "description": "A repository to illustrate how to share palette and typography through NPM",
   "main": "src/public-api.ts",
   "license": "MIT",
