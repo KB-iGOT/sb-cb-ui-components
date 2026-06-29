@@ -29,12 +29,19 @@
 }
 
 .new-pill-ui-active {
-  background: #1B4CA1 !important;
-  color: white !important;
   --mdc-list-list-item-label-text-color: #fff;
+  --mat-list-active-indicator-shape: 8px;
 
-  .menu-text, span, .mdc-list-item__primary-text {
+  background: #1b4ca1 !important;
+  color: white !important;
+  padding-left: 0;
+  padding-right: 0;
+
+  .menu-text,
+  span,
+  .mdc-list-item__primary-text {
     color: white !important;
+    font-weight: 700;
   }
 }
 
