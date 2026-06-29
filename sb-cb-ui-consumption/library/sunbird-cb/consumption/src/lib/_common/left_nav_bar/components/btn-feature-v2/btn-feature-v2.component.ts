@@ -1,4 +1,4 @@
-import { Component, computed, HostBinding, inject, input, OnDestroy, OnInit, signal } from '@angular/core'
+import { Component, computed, HostBinding, inject, Input, OnDestroy, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { NavigationEnd, Router, RouterModule } from '@angular/router'
 import { MatButtonModule } from '@angular/material/button'
@@ -52,12 +52,12 @@ export const typeMap = {
 export class BtnFeatureV2Component extends WidgetBaseComponent
   implements OnInit, OnDestroy {
 
-  // Inputs using Angular 20 signals
-  widgetData = input.required<NsPage.INavLink>();
-  showFixedLength = input(false);
-
+  // Inputs
+  @Input() widgetData!: NsPage.INavLink
+  @Input() showFixedLength = false
+  @Input()
   @HostBinding('id')
-  public id = signal('');
+  public id = '';
 
   // State signals
   badgeCount = signal('');
@@ -71,7 +71,7 @@ export class BtnFeatureV2Component extends WidgetBaseComponent
 
   // Computed signals replacing getters
   featureStatusColor = computed(() => {
-    const actionBtn = this.widgetData()?.actionBtn
+    const actionBtn = this.widgetData?.actionBtn
     if (actionBtn) {
       switch (actionBtn.status) {
         case 'earlyAccess':
@@ -88,9 +88,9 @@ export class BtnFeatureV2Component extends WidgetBaseComponent
   });
 
   desktopVisible = computed(() => {
-    const actionBtn = this.widgetData()?.actionBtn
+    const actionBtn = this.widgetData?.actionBtn
     if (actionBtn && actionBtn.mobileAppFunction) {
-      return this.mobileSvc.isMobile
+      return this.mobileSvc.isMobile()
     }
     return true
   });
@@ -111,13 +111,14 @@ export class BtnFeatureV2Component extends WidgetBaseComponent
   }
 
   ngOnInit() {
+    console.log('BtnFeatureV2Component initialized with widgetData:', this.widgetData)
     this.instanceVal.set(this.configSvc.rootOrg || '')
 
     if (this.configSvc.restrictedFeatures) {
       this.isPinFeatureAvailable.set(!this.configSvc.restrictedFeatures.has('pinFeatures'))
     }
 
-    const widgetDataValue = this.widgetData()
+    const widgetDataValue = this.widgetData
 
     if (
       !widgetDataValue.actionBtn &&
@@ -136,12 +137,12 @@ export class BtnFeatureV2Component extends WidgetBaseComponent
     }
 
     this.pinnedAppsChangeSubs = this.configurationsSvc.pinnedApps.subscribe(pinnedApps => {
-      const actionBtn = this.widgetData()?.actionBtn
+      const actionBtn = this.widgetData?.actionBtn
       this.isPinned.set(Boolean(actionBtn && pinnedApps.has(actionBtn.id)))
     })
 
-    if (!this.id() && widgetDataValue.actionBtnId) {
-      this.id.set(widgetDataValue.actionBtnId)
+    if (!this.id && widgetDataValue.actionBtnId) {
+      this.id = widgetDataValue.actionBtnId
     }
   }
 
@@ -155,7 +156,7 @@ export class BtnFeatureV2Component extends WidgetBaseComponent
   }
 
   updateBadge() {
-    const actionBtn = this.widgetData()?.actionBtn
+    const actionBtn = this.widgetData?.actionBtn
     if (actionBtn && actionBtn.badgeEndpoint) {
       this.btnFeatureSvc
         .getBadgeCount(actionBtn.badgeEndpoint)

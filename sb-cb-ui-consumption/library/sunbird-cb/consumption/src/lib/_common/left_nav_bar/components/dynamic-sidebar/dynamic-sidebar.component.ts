@@ -1,15 +1,16 @@
-import { Component, Input, Output, EventEmitter, signal, effect, ChangeDetectionStrategy, OnDestroy } from '@angular/core'
+import { Component, Input, Output, EventEmitter, signal, effect, ChangeDetectionStrategy, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { trigger, state, style, transition, animate } from '@angular/animations'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
-import { SidebarConfig, SidebarCardType, SidebarStateChange } from '../../models/sidebar.models'
+import { SidebarConfig, SidebarCardType, SidebarStateChange, SidebarSection, InfoCardItem, StatCardItem, NavListItem } from '../../models/sidebar.models'
 import { SIDEBAR_ANIMATION } from '../../constants/sidebar.constants'
 import { MultilingualTranslationsService } from '../../../../_services/multilingual-translations.service'
 import { SidebarNavListSectionComponent } from '../sidebar-nav-list-section/sidebar-nav-list-section.component'
 import { SidebarStatCardsSectionComponent } from '../sidebar-stat-cards-section/sidebar-stat-cards-section.component'
 import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/sidebar-info-cards-section.component'
+import { SidebarFooterComponent } from '../sidebar-footer/sidebar-footer.component'
 
 /**
  * Dynamic Sidebar Component
@@ -25,10 +26,10 @@ import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/
  * - Material Design integration
  *
  * @example
- * <app-dynamic-sidebar [menuBarDetails]="sidebarConfig" />
+ * <sb-uic-dynamic-sidebar [menuBarDetails]="sidebarConfig" />
  */
 @Component({
-  selector: 'app-dynamic-sidebar',
+  selector: 'sb-uic-dynamic-sidebar',
   standalone: true,
   imports: [
     CommonModule,
@@ -37,7 +38,8 @@ import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/
     TranslateModule,
     SidebarNavListSectionComponent,
     SidebarStatCardsSectionComponent,
-    SidebarInfoCardsSectionComponent
+    SidebarInfoCardsSectionComponent,
+    SidebarFooterComponent
   ],
   templateUrl: './dynamic-sidebar.component.html',
   styleUrls: ['./dynamic-sidebar.component.scss'],
@@ -56,41 +58,32 @@ import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/
     ])
   ]
 })
-export class DynamicSidebarComponent implements OnDestroy {
+export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   /**
    * Sidebar configuration input
    */
   @Input({ required: true }) menuBarDetails!: SidebarConfig
+  @Input({ required: true }) detailsChanged!: boolean
 
   /**
    * Event emitted when sidebar state changes (open/closed)
    * Emits object with isOpen status and current width
    */
   @Output() sidebarStateChange = new EventEmitter<SidebarStateChange>();
-  @Output() navItemClicked = new EventEmitter<string>();
+  @Output() navItemClicked = new EventEmitter<{ code: string; subType: string }>();
 
-  /**
-   * Signal to track sidebar open/close state
-   */
-  isOpen = signal<boolean>(true);
+  isOpen = signal<boolean>(true);// Signal to track sidebar open/close state
 
-  /**
-   * Signal to control content visibility with delayed hiding
-   * Shows immediately when opening, hides with 300ms delay when closing
-   */
+  // Signal to control content visibility with delayed hiding
+  // Shows immediately when opening, hides with 300ms delay when closing
   showContent = signal<boolean>(true);
-
-  /**
-   * Timer reference for delayed content hiding
-   */
-  private hideContentTimer?: ReturnType<typeof setTimeout>
-
-  /**
-   * Expose SidebarCardType enum to template
-   */
-  readonly SidebarCardType = SidebarCardType;
+  private hideContentTimer?: ReturnType<typeof setTimeout> // Timer reference for delayed content hiding
+  readonly SidebarCardType = SidebarCardType; // Expose SidebarCardType enum to template
+  navSections: SidebarSection[] = [];
+  footerSections: any[] = [];
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService
   ) {
@@ -131,6 +124,36 @@ export class DynamicSidebarComponent implements OnDestroy {
     }, { allowSignalWrites: true })
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // Manually detect changes when detailsChanged flag is toggled
+    if (changes['detailsChanged'] && !changes['detailsChanged'].firstChange) {
+      this.cdr.markForCheck()
+    }
+
+    if ((changes['menuBarDetails'] && changes['menuBarDetails'].currentValue) || (changes['detailsChanged'] && this.menuBarDetails)) {
+      this.navSections = []
+
+      this.menuBarDetails.navSections.forEach((section: SidebarSection) => {
+        if (section.enabled !== false) {
+
+          if (section.items) {
+            const filteredItems = section.items?.filter(item => item.enabled !== false) || null
+            section.items = filteredItems as
+              NavListItem[] |
+              StatCardItem[] |
+              InfoCardItem[] |
+              null
+          }
+          this.navSections.push(section)
+        }
+        return false
+      })
+      if (this.menuBarDetails.footerSections) {
+        this.footerSections = this.menuBarDetails.footerSections.filter(section => section.enabled !== false)
+      }
+    }
+  }
+
   /**
    * Emit sidebar state change event
    */
@@ -157,8 +180,8 @@ export class DynamicSidebarComponent implements OnDestroy {
     return `${section.cardType}-${index}`
   }
 
-  onNavItemClicked(code: string) {
-    this.navItemClicked.emit(code)
+  onNavItemClicked(evnet: { code: string; subType: string }) {
+    this.navItemClicked.emit(evnet)
   }
 
   /**

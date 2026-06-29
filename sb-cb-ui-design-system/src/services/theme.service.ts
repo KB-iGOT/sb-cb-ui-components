@@ -47,7 +47,7 @@ export class ThemeService {
     this.setTheme(next);
   }
 
-  private applyTheme(mode: ThemeMode): void {
+  applyTheme(mode: ThemeMode): void {
     if (!this.isBrowser) return;
     const root = document.documentElement;
     root.setAttribute('data-theme', mode);

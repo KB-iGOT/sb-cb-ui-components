@@ -25,6 +25,8 @@ export interface BaseNavItem {
   iconName?: string
   iconUrl?: string
   disableTranslate?: boolean
+  enabled?: boolean
+  subtype?: string
 }
 
 /**
@@ -71,6 +73,7 @@ export interface InfoCardChild extends BaseNavItem {
 export interface BaseSectionConfig {
   cardType: SidebarCardType
   sectionTitle: string
+  sectionKey: string
   sectionLoading?: boolean
   disableTranslate?: boolean
   viewAllKey?: string
@@ -79,6 +82,7 @@ export interface BaseSectionConfig {
   viewAllLabel?: string
   disableTranslateOnViewAll?: boolean
   maxItemsVisible?: number | null
+  enabled?: boolean
 }
 
 /**
@@ -86,7 +90,7 @@ export interface BaseSectionConfig {
  */
 export interface NavListSectionConfig extends BaseSectionConfig {
   cardType: SidebarCardType.NAV_LIST
-  items: NavListItem[]
+  items: NavListItem[] | null
 }
 
 /**
@@ -122,4 +126,5 @@ export interface SidebarConfig {
   defaultOpen: boolean
   activeItemCode?: string
   navSections: SidebarSection[]
+  footerSections?: any[]
 }

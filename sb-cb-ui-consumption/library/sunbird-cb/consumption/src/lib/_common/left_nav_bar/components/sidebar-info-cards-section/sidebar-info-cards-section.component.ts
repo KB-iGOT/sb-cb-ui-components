@@ -1,4 +1,4 @@
-import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core'
+import { Component, Input, signal, ChangeDetectionStrategy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
@@ -24,10 +24,10 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
  * - Material Design accordions
  *
  * @example
- * <app-sidebar-info-cards-section [section]="infoCardsConfig" />
+ * <sb-uic-sidebar-info-cards-section [section]="infoCardsConfig" />
  */
 @Component({
-  selector: 'app-sidebar-info-cards-section',
+  selector: 'sb-uic-sidebar-info-cards-section',
   standalone: true,
   imports: [
     CommonModule,
@@ -43,11 +43,12 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
   styleUrls: ['./sidebar-info-cards-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SidebarInfoCardsSectionComponent {
+export class SidebarInfoCardsSectionComponent implements OnChanges {
   /**
    * Info cards section configuration
    */
   @Input({ required: true }) section!: InfoCardsSectionConfig
+  @Input({ required: true }) detailsChanged!: boolean
 
   /**
    * Sidebar open/close state
@@ -61,7 +62,8 @@ export class SidebarInfoCardsSectionComponent {
 
   constructor(
     private translate: TranslateService,
-    private langtranslations: MultilingualTranslationsService
+    private langtranslations: MultilingualTranslationsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
@@ -70,6 +72,13 @@ export class SidebarInfoCardsSectionComponent {
         this.translate.use(lang)
       }
     })
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Manually detect changes when detailsChanged flag is toggled
+    if (changes['detailsChanged'] && !changes['detailsChanged'].firstChange) {
+      this.cdr.markForCheck()
+    }
   }
 
   /**

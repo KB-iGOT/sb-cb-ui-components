@@ -183,3 +183,4 @@ export * from './lib/_common/strips-v2/content-strip-with-tabs-pills/content-str
 export * from './lib/_common/strips-v2/contetn-sections/contetn-sections.component'
 export * from './lib/_common/left_nav_bar/components/btn-feature-v2/btn-feature-v2.component'
 export * from './lib/_services/mobile-apps.service'
+export * from './lib/_common/btn-profile-v2/btn-profile-v2.component'
