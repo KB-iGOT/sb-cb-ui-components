@@ -18,6 +18,8 @@ import { SpeakersModule } from '../../speakers/speakers.module'
 import { UserProgressModule } from '../../user-progress/user-progress.module'
 import { ContentStripFacetFilterModule } from '../../strips/content-strip-facet-filter/content-strip-facet-filter.module'
 import { MicrositesComponentsModule } from '../micro-sites-components/microsites-components.module'
+import { CardsModule } from '../../cards/cards.module'
+import { HorizontalScrollerV2Module } from '../../horizontal-scroller-v2/horizontal-scroller-v2.module'
 import { CommonMethodsService } from '../../../_services/common-methods.service'
 import { BharatKalpComponent } from './bharat-kalp/bharat-kalp.component'
 import { WeekProgressComponent } from './week-progress/week-progress.component'
@@ -44,6 +46,8 @@ import { WeekProgressComponent } from './week-progress/week-progress.component'
     ContentStripFacetFilterModule,
     PipeSafeSanitizerModule,
     MicrositesComponentsModule,
+    CardsModule,
+    HorizontalScrollerV2Module,
   ],
   exports: [BharatKalpComponent],
   providers: [CommonMethodsService],

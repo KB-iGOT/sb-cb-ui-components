@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Inject, Input, OnInit, Output, TemplateRef } from '@angular/core'
+import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core'
+import { NsCardContent } from '../../../../_models/card-content.model'
 import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
 import { DomSanitizer } from '@angular/platform-browser'
@@ -17,11 +18,10 @@ export class BharatKalpComponent implements OnInit {
   @Input() configDetails: any
   @Input() bkConfiguration: any = {}
   @Input() individualSection: any = {}
-  @Input() communityCardsTemplate: TemplateRef<any> | null = null
+  @Input() communityCardsTemplate: any = null
   @Output() communitiesLoaded = new EventEmitter<any[]>()
 
   providerId = '123456789'
-  descriptionMaxLength = 500
   environment: any
   isMobile = false
 
@@ -59,13 +59,34 @@ export class BharatKalpComponent implements OnInit {
   }
 
   /* ── Recommended slider state ── */
-  recommendedItems: any[] = []
-  recPage = 0
-  readonly recPerView = 3
+  recommendedItems: NsCardContent.ICard[] = []
+  recLoading = false
 
   /* ── Community state ── */
   communities: any[] = []
   communitiesLoading = true
+
+  /* ── Stats derived from enrollment API ── */
+  bkCompletedCount       = 0
+  bkLearningHoursFormatted = '0m'
+
+  private _formatHours(totalHours: number): string {
+    if (!totalHours || isNaN(totalHours)) return '0m'
+    const h = Math.floor(totalHours)
+    const m = Math.round((totalHours - h) * 60)
+    if (h === 0) return `${m}m`
+    if (m === 0) return `${h}hr`
+    return `${h}hr ${m}m`
+  }
+
+  /** Merges computed stats into myprogress objectData */
+  get myProgressData(): any {
+    return {
+      ...(this.individualSection?.myprogress?.data || {}),
+      completedCoursesCount:    this.bkCompletedCount,
+      bkLearningHoursFormatted: this.bkLearningHoursFormatted,
+    }
+  }
 
   constructor(
     @Inject('environment') environment: any,
@@ -83,38 +104,29 @@ export class BharatKalpComponent implements OnInit {
     this.getLookerProUrl()
     this._loadCommunities()
     this._loadRecommended()
+    this._loadCompletedCount()
   }
 
-  /* ── Recommended API ── */
+  /* ── Recommended API — maps to NsCardContent.ICard for sb-uic-card-portrait ── */
   private _loadRecommended(): void {
     const cfg = this.individualSection?.recommended?.apiConfig
     if (!cfg || this.individualSection?.recommended?.enabled === false) return
+    this.recLoading = true
     const url = cfg.url || '/apis/proxies/v8/sunbirdigot/search'
     const body = JSON.parse(JSON.stringify(cfg.requestBody || {}))
     this.http.post<any>(url, body)
       .pipe(catchError(() => of(null)))
       .subscribe(res => {
-        const results = res?.result?.content || res?.result?.Course || []
-        this.recommendedItems = results
+        const results: any[] = res?.result?.content || res?.result?.Course || []
+        this.recommendedItems = results.map((c: any, i: number) => ({
+          content:     c,
+          cardSubType: 'standard' as NsCardContent.TCardSubType,
+          context:     { pageSection: 'bharat-kalp-recommended', position: i },
+          stateData:   {},
+        }))
+        this.recLoading = false
       })
   }
-
-  get visibleRecItems(): any[] {
-    const start = this.recPage * this.recPerView
-    return this.recommendedItems.slice(start, start + this.recPerView)
-  }
-
-  get recTotalDots(): number[] {
-    const pages = Math.ceil(this.recommendedItems.length / this.recPerView) || 1
-    return Array.from({ length: pages }, (_, i) => i)
-  }
-
-  get canRecPrev(): boolean { return this.recPage > 0 }
-  get canRecNext(): boolean { return this.recPage < this.recTotalDots.length - 1 }
-
-  recPrev(): void { if (this.canRecPrev) this.recPage-- }
-  recNext(): void { if (this.canRecNext) this.recPage++ }
-  goToRecPage(p: number): void { this.recPage = p }
 
   /* ── Community API — GET /community/v1/user/communities ── */
   private _loadCommunities(): void {
@@ -137,6 +149,54 @@ export class BharatKalpComponent implements OnInit {
           []
         this.communitiesLoading = false
         this.communitiesLoaded.emit(this.communities)
+      })
+  }
+
+  /** Calls enrollment API with all BK content IDs, counts items with 100% completion */
+  private _loadCompletedCount(): void {
+    const tabs: any[] = this.individualSection?.weekProgress?.Weeks?.[0]?.tabs || []
+    const allIds: string[] = []
+    tabs.forEach((tab: any) => {
+      const ids = tab?.content_ids
+      if (!ids) return
+      ;(['course', 'program', 'event', 'assessment'] as const).forEach(type => {
+        if (ids[type]?.length) allIds.push(...ids[type])
+      })
+    })
+    const uniqueIds = [...new Set(allIds)]
+    if (!uniqueIds.length) return
+
+    const userId = this.configDetails?.userId || this.configDetails?.userProfile?.userId
+    if (!userId) return
+
+    const url = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
+    this.http.post<any>(url, { request: { courseId: uniqueIds } })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        /* Merge all content types: course, program, event, assessment */
+        const result = res?.result || {}
+        const allEnrolled: any[] = [
+          ...(result.courses     || []),
+          ...(result.programs    || []),
+          ...(result.events      || []),
+          ...(result.assessments || []),
+        ]
+
+        /* Completed count across all content types */
+        this.bkCompletedCount = allEnrolled.filter(
+          (c: any) => (c.completionPercentage ?? 0) >= 100
+        ).length
+
+        /* Learning hours = Σ (duration_in_seconds × completionPercentage / 100) / 3600 */
+        let totalSeconds = 0
+        allEnrolled.forEach((c: any) => {
+          const durationSec = Number(c.duration || c.content?.duration || 0)
+          const pct         = Number(c.completionPercentage ?? 0)
+          if (durationSec > 0 && pct > 0) {
+            totalSeconds += (durationSec * pct) / 100
+          }
+        })
+        this.bkLearningHoursFormatted = this._formatHours(totalSeconds / 3600)
       })
   }
 
@@ -172,6 +232,22 @@ export class BharatKalpComponent implements OnInit {
     if (card?.identifier) {
       this.router.navigate(['/app/toc', card.identifier, 'overview'])
     }
+  }
+
+  /** Handles (contentData) from sb-uic-card-portrait — navigates to TOC */
+  onCardNavigate(content: any): void {
+    if (!content?.identifier) return
+    const queryParams: { [k: string]: string } = {}
+    if (content.batchId) queryParams['batchId'] = content.batchId
+    if (content.language?.length) {
+      queryParams['ML']   = content.language[0].toLowerCase()
+      queryParams['MLId'] = content.identifier
+    }
+    /* Pass source so portal can restore back-navigation context */
+    this.router.navigate(
+      ['/app/toc', content.identifier, 'overview'],
+      { queryParams, state: { sourceUrl: '/app/learn/bharat-kalp' } }
+    )
   }
 
   raiseTabClick(event: any) {

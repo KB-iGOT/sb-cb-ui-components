@@ -16,7 +16,7 @@ export class UserProgressComponent implements OnInit {
   @Input() isEdit: boolean = false;
   @Input() isEditable: boolean = false;
   @Output() editClicked = new EventEmitter<any>();
-  insitesData = []
+  insitesData: any[] = []
   currentIndex = 0
   styleData: any = {}
   userProgress: any = {}
