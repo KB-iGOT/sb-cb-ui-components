@@ -61,7 +61,9 @@ $border: #E2E8F0;
     transition: background 0.15s ease;
     flex-shrink: 0;
 
-    &:hover { background: #ebf1ff; }
+    &:hover {
+      background: #ebf1ff;
+    }
   }
 
   &__arrow {
@@ -97,8 +99,13 @@ $border: #E2E8F0;
   z-index: 1;
 
   &:hover .wp-tl-dot--done,
-  &:hover .wp-tl-dot--current { opacity: 0.85; }
-  &:hover .wp-tl-dot--upcoming { border-color: #b0b0b0; }
+  &:hover .wp-tl-dot--current {
+    opacity: 0.85;
+  }
+
+  &:hover .wp-tl-dot--upcoming {
+    border-color: #b0b0b0;
+  }
 
   /* Only the selected week label goes dark — all others stay gray */
   &--selected .wp-tl-label {
@@ -166,11 +173,13 @@ $border: #E2E8F0;
       width: 10px;
       height: 10px;
     }
+
     &.wp-tl-dot--current {
       width: 10px;
       height: 10px;
       border-width: 2.5px;
     }
+
     &.wp-tl-dot--upcoming {
       width: 10px;
       height: 10px;
@@ -202,13 +211,16 @@ $border: #E2E8F0;
   flex: 1;
   height: 2px;
   background: $gray-dot;
-  margin-top: 9px;   /* (20px node - 2px line) / 2 = 9px */
+  margin-top: 9px;
+  /* (20px node - 2px line) / 2 = 9px */
   min-width: 8px;
   flex-shrink: 1;
   position: relative;
   z-index: 0;
 
-  &--done { background: $green; }
+  &--done {
+    background: $green;
+  }
 
   /* Popup — node 14px so (14-2)/2 = 6px. z-index below step so dot covers line end */
   &--sm {
@@ -305,7 +317,8 @@ $border: #E2E8F0;
   flex-shrink: 0;
   line-height: 1.4;
   color: #fff;
-  background: $gray-dot; /* fallback for upcoming */
+  background: $gray-dot;
+  /* fallback for upcoming */
 
   &--done {
     background: $green;
@@ -335,7 +348,10 @@ $border: #E2E8F0;
   width: 72px;
   height: 72px;
 
-  &--lg { width: 80px; height: 80px; }
+  &--lg {
+    width: 80px;
+    height: 80px;
+  }
 
   &__bg {
     fill: none;
@@ -462,7 +478,9 @@ $border: #E2E8F0;
   }
 
   /* Cards render below via slider, not in Angular tab body */
-  ::ng-deep .mat-mdc-tab-body { display: none !important; }
+  ::ng-deep .mat-mdc-tab-body {
+    display: none !important;
+  }
 
   ::ng-deep .mat-mdc-tab-body-wrapper {
     height: 0 !important;
@@ -499,9 +517,14 @@ $border: #E2E8F0;
       color: #fff;
     }
 
-    &:disabled { opacity: 0.25; cursor: not-allowed; }
+    &:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
 
-    &:hover:not(:disabled) { opacity: 0.8; }
+    &:hover:not(:disabled) {
+      opacity: 0.8;
+    }
   }
 
   &__cards {
@@ -525,7 +548,10 @@ $border: #E2E8F0;
   flex-direction: column;
   transition: box-shadow 0.2s ease, transform 0.15s ease;
 
-  &:hover { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
 
   &__img-wrap {
     position: relative;
@@ -563,7 +589,12 @@ $border: #E2E8F0;
     gap: 2px;
     line-height: 1;
 
-    mat-icon { font-size: 11px; width: 11px; height: 11px; line-height: 1; }
+    mat-icon {
+      font-size: 11px;
+      width: 11px;
+      height: 11px;
+      line-height: 1;
+    }
   }
 
   &__body {
@@ -583,8 +614,17 @@ $border: #E2E8F0;
     padding: 1px 6px;
     width: fit-content;
 
-    mat-icon { font-size: 11px; width: 11px; height: 11px; color: $orange; }
-    span { font-size: 10px; color: $text-dark; }
+    mat-icon {
+      font-size: 11px;
+      width: 11px;
+      height: 11px;
+      color: $orange;
+    }
+
+    span {
+      font-size: 10px;
+      color: $text-dark;
+    }
   }
 
   &__title {
@@ -608,7 +648,12 @@ $border: #E2E8F0;
     color: $text-secondary;
   }
 
-  &__org-logo { width: 14px; height: 14px; border-radius: 2px; object-fit: contain; }
+  &__org-logo {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    object-fit: contain;
+  }
 
   &__rating {
     font-size: 11px;
@@ -619,7 +664,11 @@ $border: #E2E8F0;
     gap: 2px;
   }
 
-  &__star { color: #f9a825; font-size: 12px; line-height: 1; }
+  &__star {
+    color: #f9a825;
+    font-size: 12px;
+    line-height: 1;
+  }
 }
 
 /* ─── Dot Indicators ─── */
@@ -638,7 +687,11 @@ $border: #E2E8F0;
   cursor: pointer;
   transition: background 0.2s ease, width 0.2s ease;
 
-  &--active { background: $orange; width: 20px; border-radius: 4px; }
+  &--active {
+    background: $orange;
+    width: 20px;
+    border-radius: 4px;
+  }
 }
 
 /* ─── Popup Overlay ─── */
@@ -694,9 +747,16 @@ $border: #E2E8F0;
     flex-shrink: 0;
     transition: background 0.15s ease;
 
-    mat-icon { font-size: 16px; width: 16px; height: 16px; color: $text-secondary; }
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: $text-secondary;
+    }
 
-    &:hover { background: #f5f5f5; }
+    &:hover {
+      background: #f5f5f5;
+    }
   }
 
   /* All 16 weeks fit in one row — no scroll, flex distributes, gap: 0 for seamless connection */
@@ -735,9 +795,15 @@ $border: #E2E8F0;
     white-space: nowrap;
     flex-shrink: 0;
 
-    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
 
-    &:hover { background: #ebf1ff; }
+    &:hover {
+      background: #ebf1ff;
+    }
   }
 }
 
@@ -789,7 +855,9 @@ $border: #E2E8F0;
     padding-bottom: 4px;
     margin-bottom: 14px;
 
-    &::-webkit-scrollbar { display: none; }
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__nav {
@@ -819,7 +887,10 @@ $border: #E2E8F0;
       line-height: 18px;
     }
 
-    &:disabled { opacity: 0.25; cursor: default; }
+    &:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
   }
 }
 
@@ -835,6 +906,7 @@ $border: #E2E8F0;
   flex-direction: column;
   gap: 14px;
   min-height: 270px;
+  box-shadow: inset 0 0 5px 2px #BDBDBD;
 
   &--completed {
     border-color: $green;
@@ -849,6 +921,11 @@ $border: #E2E8F0;
   &--upcoming {
     border-color: #BDBDBD;
     background: #EBEBEB;
+  }
+
+  /* Inset purple shadow for the current active week */
+  &--current {
+    box-shadow: inset 0 0 5px 3px #e2aaff;
   }
 
   /* Top row: "Week X" + status badge */
@@ -872,9 +949,20 @@ $border: #E2E8F0;
     border-radius: 14px;
     white-space: nowrap;
 
-    &--done     { background: $green;  color: #fff; }
-    &--progress { background: $orange; color: #fff; }
-    &--upcoming { background: #9E9E9E; color: #fff; }
+    &--done {
+      background: $green;
+      color: #fff;
+    }
+
+    &--progress {
+      background: $orange;
+      color: #fff;
+    }
+
+    &--upcoming {
+      background: #9E9E9E;
+      color: #fff;
+    }
   }
 
   /* Center wrapper — overrides wp-ring-wrap size for card context */
@@ -936,7 +1024,7 @@ $border: #E2E8F0;
     -webkit-box-orient: vertical;
   }
 
-  /* Footer */
+  /* Footer — fixed height so locked & unlocked cards stay the same size */
   &__footer {
     display: flex;
     justify-content: space-between;
@@ -944,6 +1032,7 @@ $border: #E2E8F0;
     padding-top: 6px;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
     margin-top: auto;
+    min-height: 46px;   /* matches View-button height */
   }
 
   &__count {
@@ -967,6 +1056,127 @@ $border: #E2E8F0;
     cursor: pointer;
     transition: background 0.15s;
 
-    &:hover { background: #EBF1FF; }
+    &:hover {
+      background: #EBF1FF;
+    }
+  }
+}
+
+/* ─── Strip empty state — same height as card row, centered ─── */
+.wp-strip__empty {
+  min-height: 260px;
+  /* same visual height as a card row */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.wp-strip__empty-img {
+  width: 120px;
+  height: auto;
+  opacity: 0.75;
+}
+
+.wp-strip__empty-text {
+  font-size: 14px;
+  color: #5f6368;
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Mobile responsive for week cards ─── */
+@media (max-width: 768px) {
+  .wp-card-slider {
+    &__track {
+      gap: 12px;
+      padding: 0 4px 4px;
+    }
+
+    &__nav {
+      gap: 8px;
+    }
+  }
+
+  .wp-week-card {
+    flex: 0 0 calc((100% - 12px) / 1.15);
+    min-height: 220px;
+    padding: 14px 12px 12px;
+    gap: 10px;
+    border-radius: 18px;
+
+    &__num {
+      font-size: 15px;
+    }
+
+    &__badge {
+      font-size: 11px;
+      padding: 3px 10px;
+    }
+
+    &__ring-center {
+
+      .wp-ring-wrap,
+      .wp-ring-wrap--card {
+        width: 80px;
+        height: 80px;
+      }
+
+      .wp-ring,
+      .wp-ring--card {
+        width: 80px;
+        height: 80px;
+      }
+
+      .wp-ring__pct,
+      .wp-ring__pct--card {
+        font-size: 14px;
+      }
+    }
+
+    &__lock-circle {
+      width: 80px;
+      height: 80px;
+
+      mat-icon {
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    &__title {
+      font-size: 13px;
+      min-height: 36px;
+    }
+
+    &__count {
+      font-size: 12px;
+    }
+
+    &__coming {
+      font-size: 12px;
+    }
+
+    &__view-btn {
+      font-size: 12px;
+      padding: 6px 16px;
+    }
+  }
+
+  .wp-slider {
+    &__cards {
+      gap: 10px;
+    }
+  }
+
+  .wp-card-item {
+    flex: 0 0 calc((100% - 10px) / 2);
+  }
+
+  .wp-strip__title {
+    font-size: 14px;
   }
 }

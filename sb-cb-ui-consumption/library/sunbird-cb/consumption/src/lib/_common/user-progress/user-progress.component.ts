@@ -16,7 +16,7 @@ export class UserProgressComponent implements OnInit {
   @Input() isEdit: boolean = false;
   @Input() isEditable: boolean = false;
   @Output() editClicked = new EventEmitter<any>();
-  insitesData = []
+  insitesData: any[] = []
   currentIndex = 0
   styleData: any = {}
   userProgress: any = {}
@@ -160,17 +160,6 @@ export class UserProgressComponent implements OnInit {
 
   toggleWeekHightlits() {
     this.expand = !this.expand
-  }
-
-  formatLearningHours(value: any): string {
-    if (!value) return '0'
-    const total = Number(value)
-    if (isNaN(total)) return '0'
-    const h = Math.floor(total)
-    const m = Math.round((total - h) * 60)
-    if (h === 0) return `${m}m`
-    if (m === 0) return `${h}hr`
-    return `${h}hr ${m}m`
   }
 
   formatNumber(value: any): string {

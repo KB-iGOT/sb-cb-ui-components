@@ -84,19 +84,42 @@
         <span class="wp-header__pipe"> | </span>
         Weeks {{ currentWeek }} out of {{ programData.totalWeeks }}
       </span>
-      <button class="wp-header__btn" (click)="openPopup()">
-        View All Weeks <span class="wp-header__arrow">›</span>
-      </button>
+      <!-- View All Weeks button removed -->
     </div>
 
     <!-- Week card slider -->
     <div class="wp-card-slider">
       <div class="wp-card-slider__track" #cardTrack (scroll)="onTrackScroll($event)">
-        <div class="wp-week-card"
-          *ngFor="let w of allWeeks"
-          [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
-          [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'"
-          [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'">
+        <ng-container *ngFor="let w of allWeeks">
+
+          <!-- Skeleton card while individual week API is loading -->
+          <div class="wp-week-card wp-week-card--skeleton" *ngIf="isWeekLoading(w)">
+            <div class="wp-week-card__top">
+              <sb-uic-skeleton-loader [width]="'60px'" [height]="'18px'" [bindingClass]="'flex rounded'">
+              </sb-uic-skeleton-loader>
+              <sb-uic-skeleton-loader [width]="'72px'" [height]="'22px'" [bindingClass]="'flex rounded-full'">
+              </sb-uic-skeleton-loader>
+            </div>
+            <div class="wp-week-card__ring-center">
+              <sb-uic-skeleton-loader [width]="'99px'" [height]="'99px'" [bindingClass]="'flex rounded-full'">
+              </sb-uic-skeleton-loader>
+            </div>
+            <sb-uic-skeleton-loader [width]="'80%'" [height]="'14px'" [bindingClass]="'flex rounded mx-auto'">
+            </sb-uic-skeleton-loader>
+            <div class="wp-week-card__footer" style="border-top:none">
+              <sb-uic-skeleton-loader [width]="'55px'" [height]="'12px'" [bindingClass]="'flex rounded'">
+              </sb-uic-skeleton-loader>
+              <sb-uic-skeleton-loader [width]="'56px'" [height]="'30px'" [bindingClass]="'flex rounded-full'">
+              </sb-uic-skeleton-loader>
+            </div>
+          </div>
+
+          <!-- Actual card when not loading -->
+          <div class="wp-week-card" *ngIf="!isWeekLoading(w)"
+            [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
+            [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'"
+            [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'"
+            [class.wp-week-card--current]="w === currentWeek">
 
           <!-- Card top: week label + status badge -->
           <div class="wp-week-card__top">
@@ -140,7 +163,7 @@
           <div class="wp-week-card__footer">
             <ng-container *ngIf="getWeekStatus(w) !== 'upcoming'">
               <span class="wp-week-card__count">
-                {{ getWeekData(w)?.doIds?.length || 0 }} courses
+                {{ getTotalContentCount(w) }} {{ getTotalContentCount(w) === 1 ? 'content' : 'contents' }}
               </span>
               <button class="wp-week-card__view-btn" (click)="viewWeek(w)">View</button>
             </ng-container>
@@ -149,6 +172,8 @@
             </span>
           </div>
         </div>
+
+        </ng-container>
       </div>
 
       <!-- Navigation arrows -->
@@ -166,6 +191,7 @@
     <ng-container *ngIf="activeStrip">
       <div class="wp-strip__header">
         <div class="wp-strip__title-row">
+          <!-- Title always uses computed currentWeek -->
           <h3 class="wp-strip__title">New Releases For Week {{ currentWeek }}</h3>
           <span class="wp-strip__badge">New</span>
         </div>
@@ -177,49 +203,43 @@
       <mat-tab-group class="wp-tabs" animationDuration="0ms"
         [selectedIndex]="activeTabIndex"
         (selectedIndexChange)="onTabChange($event)">
-        <mat-tab *ngFor="let tab of activeTabs" [label]="tab.label"></mat-tab>
+        <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>
       </mat-tab-group>
-      <div class="wp-slider" *ngIf="activeTabCards.length">
-        <button class="wp-slider__arrow" [disabled]="!canGoPrev" (click)="prevSlide()">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <div class="wp-slider__cards">
-          <div class="wp-card-item" *ngFor="let card of visibleCards"
-            role="button" tabindex="0" (click)="navigateToCard(card)">
-            <div class="wp-card-item__img-wrap">
-              <img *ngIf="card.posterImage" [src]="card.posterImage" [alt]="card.name"
-                class="wp-card-item__img">
-              <div *ngIf="!card.posterImage" class="wp-card-item__img wp-card-item__img--ph"></div>
-              <div class="wp-card-item__dur" *ngIf="card.duration">
-                <mat-icon>access_time</mat-icon>{{ card.duration }}
-              </div>
-            </div>
-            <div class="wp-card-item__body">
-              <div class="wp-card-item__cat" *ngIf="card.category">
-                <mat-icon>video_library</mat-icon>
-                <span>{{ card.category }}</span>
-              </div>
-              <h4 class="wp-card-item__title">{{ card.name }}</h4>
-              <div class="wp-card-item__org" *ngIf="card.org">
-                <img *ngIf="card.orgLogo" [src]="card.orgLogo" [alt]="card.org"
-                  class="wp-card-item__org-logo">
-                <span>{{ card.org }}</span>
-              </div>
-              <div class="wp-card-item__rating" *ngIf="card.rating">
-                <span class="wp-card-item__star">★</span>{{ card.rating }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <button class="wp-slider__arrow" [disabled]="!canGoNext" (click)="nextSlide()">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
+
+      <!-- Skeleton while week content loads -->
+      <sb-uic-horizontal-scroller-v2
+        *ngIf="weekContentLoading"
+        [id]="'week-strip-skeleton'"
+        [loadStatus]="'fetching'"
+        [widgetsLength]="4"
+        [sliderConfig]="{ showNavs: false, showDots: false }">
+        <sb-uic-card-portrait *ngFor="let s of [1,2,3,4]"
+          [isCardLoading]="true">
+        </sb-uic-card-portrait>
+      </sb-uic-horizontal-scroller-v2>
+
+      <!-- Cards via sb-uic-horizontal-scroller-v2 + sb-uic-card-portrait -->
+      <sb-uic-horizontal-scroller-v2
+        *ngIf="!weekContentLoading && activeTabCards.length"
+        [id]="'week-strip-' + activeTabIndex"
+        [loadStatus]="'done'"
+        [widgetsLength]="activeTabCards.length"
+        [defaultMaxWidgets]="activeTabCards.length"
+        [sliderConfig]="{ showNavs: true, showDots: true, dotsAlign: 'center' }">
+        <sb-uic-card-portrait
+          *ngFor="let card of activeTabCards"
+          [widgetData]="card"
+          (contentData)="onCardContentData($event)">
+        </sb-uic-card-portrait>
+      </sb-uic-horizontal-scroller-v2>
+
+      <!-- Empty state — same height as card area, centered, correct image -->
+      <div class="wp-strip__empty" *ngIf="!weekContentLoading && !activeTabCards.length">
+        <img src="/assets/common/error-pages/empty_search.svg"
+          alt="No content" class="wp-strip__empty-img">
+        <p class="wp-strip__empty-text">Content not available</p>
       </div>
-      <div class="wp-dots" *ngIf="totalDotPages.length > 1">
-        <span *ngFor="let page of totalDotPages" class="wp-dot"
-          [class.wp-dot--active]="page === currentPage" (click)="goToPage(page)">
-        </span>
-      </div>
+      <!-- Dots handled by sb-uic-horizontal-scroller-v2 (showDots:true) -->
     </ng-container>
 
   </div><!-- /wp-card -->

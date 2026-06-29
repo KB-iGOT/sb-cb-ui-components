@@ -22,9 +22,6 @@ export class EventsComponent implements OnInit {
   requestBody: any
   currentDay: any
   loader: boolean = false
-  showAllEvents = false
-
-  toggleShowAll(): void { this.showAllEvents = !this.showAllEvents }
 
   // Will store the event callback function from the parent
   private eventCallback: Function | undefined
@@ -84,9 +81,12 @@ export class EventsComponent implements OnInit {
     this.getEventsList()
   }
   getDaysBetweenDates() {
-    if (!this.nwlEventsConfig?.startDate || !this.nwlEventsConfig?.endDate) return
+    if (!this.nwlEventsConfig?.startDate) return
     let currentDate = moment(this.nwlEventsConfig.startDate, 'DD-MM-YYYY')
-    const endDate = moment(this.nwlEventsConfig.endDate, 'DD-MM-YYYY')
+    /* If endDate not provided, default to startDate + 16 weeks */
+    const endDate = this.nwlEventsConfig.endDate
+      ? moment(this.nwlEventsConfig.endDate, 'DD-MM-YYYY')
+      : moment(this.nwlEventsConfig.startDate, 'DD-MM-YYYY').add(16, 'weeks')
     while (currentDate.isSameOrBefore(endDate)) {
       const localObj: { [key: string]: string } = {}
       localObj['startDate'] = currentDate.format('YYYY-MM-DD')

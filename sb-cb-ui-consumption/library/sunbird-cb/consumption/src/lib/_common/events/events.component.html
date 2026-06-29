@@ -18,11 +18,10 @@
         </div>
     </div>
     <div class="grid grid-cols-1 gap-4">
-        <!-- Scrollable wrapper activates only after Show All is clicked -->
-        <div class="events-card-wrapper" [class.events-card-wrapper--expanded]="showAllEvents">
+        <div class="events-card-wrapper events-card-wrapper--scroll">
             <div *ngIf="!loader">
                 <div *ngIf="events?.length > 0">
-                    <div *ngFor="let event of showAllEvents ? events : (events | slice:0:(object?.maxContent || 3))">
+                    <div *ngFor="let event of events">
                         <sb-uic-event-card [objectData]="object" [eventDetails]="event"
                             [loader]="loader"></sb-uic-event-card>
                     </div>
@@ -40,20 +39,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Show All / Show Less toggle — only when total events exceed maxContent -->
-    <div class="flex justify-center mt-4"
-        *ngIf="events?.length > (object?.maxContent || 3)">
-        <a class="flex ws-mat-default-text items-center justify-center mat-body-1 cursor-pointer"
-            (click)="toggleShowAll()">
-            <span *ngIf="!showAllEvents" class="flex items-center gap-1">
-              Show All <mat-icon style="font-size:18px;width:18px;height:18px;line-height:18px">keyboard_arrow_down</mat-icon>
-            </span>
-            <span *ngIf="showAllEvents" class="flex items-center gap-1">
-              Show Less <mat-icon style="font-size:18px;width:18px;height:18px;line-height:18px">keyboard_arrow_up</mat-icon>
-            </span>
-        </a>
     </div>
 
 </div>
