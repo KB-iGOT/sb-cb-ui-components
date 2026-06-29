@@ -197,6 +197,15 @@ export class BharatKalpComponent implements OnInit {
       })
   }
 
+  private _formatHours(hours: number): string {
+    const h = Math.floor(hours)
+    const m = Math.round((hours - h) * 60)
+    if (h > 0 && m > 0) return `${h}h ${m}m`
+    if (h > 0) return `${h}h`
+    if (m > 0) return `${m}m`
+    return '0m'
+  }
+
   hideKeyHighlight(event: any, sectionData: any) {
     if (event) {
       sectionData['hideSection'] = true
