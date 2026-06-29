@@ -1,12 +1,24 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core'
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core'
+import { NsCardContent } from '../../../../_models/card-content.model'
+import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
 import { MatSnackBar } from '@angular/material/snack-bar'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { of } from 'rxjs'
+import { catchError } from 'rxjs/operators'
 import moment from 'moment'
 
 export interface WeekData {
+  id?: string
   title: string
   topics?: string[]
-  doIds?: string[]
+  course_count?: number
+  content_ids?: {
+    course?: string[]
+    program?: string[]
+    event?: string[]
+    assessment?: string[]
+  }
   progress?: number
 }
 
@@ -43,7 +55,15 @@ export interface WeekProgressData {
   viewAllUrl?: string
   containerClass?: string
   contentStrips?: WeekProgressContentStrip[]
-  weeks?: { [key: string]: WeekData }
+  weeks?: { [key: string]: WeekData }       /* legacy object format */
+  Weeks?: Array<{                            /* new array format */
+    active?: boolean
+    weekNumber?: number
+    title?: string
+    titleDescription?: string
+    viewMoreUrl?: { path?: string }
+    tabs?: WeekData[]                        /* week metadata objects */
+  }>
 }
 
 type WeekStatus = 'completed' | 'in-progress' | 'upcoming'
@@ -56,14 +76,23 @@ type WeekStatus = 'completed' | 'in-progress' | 'upcoming'
 })
 export class WeekProgressComponent implements OnInit, AfterViewInit {
   @Input() programData!: WeekProgressData
-  @Input() bkConfig?: { startDate?: string; endDate?: string; [key: string]: any }
+  @Input() bkConfig?: { startDate?: string; endDate?: string;[key: string]: any }
 
   currentWeek = 1
   selectedWeek = 1
   activeTabIndex = 0
-  currentPage = 0
   showAllWeeksPopup = false
-  readonly cardsPerView = 4
+
+  /* ── Dynamic week content strip ── */
+  readonly STRIP_TABS = ['Courses', 'Programs', 'Events', 'Assessment']
+  /* Stable tab objects — same references every change detection cycle (fixes NG0956) */
+  private readonly _stableTabs: WeekProgressTab[] = this.STRIP_TABS.map(label => ({ label, cards: [] }))
+  weekContentCards: { [tab: string]: NsCardContent.ICard[] } = {}
+  weekContentLoading = false
+
+  weekCardsLoading = false
+  weekCardLoading: { [week: number]: boolean } = {}
+  readonly skeletonCards = [1, 2, 3, 4]
 
   /* ── Week card slider ── */
   @ViewChild('cardTrack') cardTrackRef!: ElementRef<HTMLElement>
@@ -73,16 +102,134 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   constructor(
     private router: Router,
     private snackBar: MatSnackBar,
-  ) {}
+    private http: HttpClient,
+    private configSvc: ConfigurationsService,
+    private cdr: ChangeDetectorRef,
+  ) { }
 
   ngOnInit(): void {
     this.currentWeek = this._computeCurrentWeek()
     this.selectedWeek = this.currentWeek
+    this._loadWeekProgress()
+    this._loadActiveWeekContent()
+  }
+
+  /* ── Fetch completion % per week individually ── */
+  private _loadWeekProgress(): void {
+    const userId = (this.configSvc as any)?.userProfile?.userId || ''
+    if (!userId) {
+      setTimeout(() => this._scrollToCurrentWeek(), 100)
+      return
+    }
+
+    const enrollUrl = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
+
+    /* Make individual API call for each started week (1 to currentWeek) */
+    for (let week = 1; week <= this.currentWeek; week++) {
+      const wd = this.getWeekData(week)
+      if (!wd?.content_ids) continue
+
+      const weekIds = [
+        ...(wd.content_ids.course || []),
+        ...(wd.content_ids.program || []),
+        ...(wd.content_ids.event || []),
+        ...(wd.content_ids.assessment || []),
+      ].filter(id => !!id)
+
+      if (!weekIds.length) continue
+
+      this.weekCardLoading[week] = true
+
+      this.http.post<any>(enrollUrl, { request: { courseId: weekIds } })
+        .pipe(catchError(() => of(null)))
+        .subscribe(res => {
+          const completionMap: { [id: string]: number } = {}
+          weekIds.forEach(id => { completionMap[id] = 0 })
+
+          const courses: any[] = res?.result?.courses || []
+          courses.forEach((c: any) => {
+            const id = c.courseId || c.identifier || c.contentId
+            if (id && completionMap.hasOwnProperty(id)) {
+              completionMap[id] = c.completionPercentage ?? 0
+            }
+          })
+
+          const sum = weekIds.reduce((acc, id) => acc + (completionMap[id] ?? 0), 0)
+          wd.progress = Math.round(sum / weekIds.length)
+
+          this.weekCardLoading[week] = false
+          this.cdr.detectChanges()
+
+          /* Scroll to current week after last week's call resolves */
+          if (week === this.currentWeek) {
+            setTimeout(() => this._scrollToCurrentWeek(), 100)
+          }
+        })
+    }
+  }
+
+  /* ── Load content cards for active week strip via search API ── */
+  private _loadActiveWeekContent(): void {
+    /* Use currentWeek (computed from bkConfig dates) for live content — always matches current week */
+    const weekNum = this.currentWeek
+    if (!weekNum) return
+
+    const wd = this.getWeekData(weekNum)
+    if (!wd?.content_ids) return
+
+    const idMap: { [tab: string]: string[] } = {
+      Courses: wd.content_ids.course || [],
+      Programs: wd.content_ids.program || [],
+      Events: wd.content_ids.event || [],
+      Assessment: wd.content_ids.assessment || [],
+    }
+
+    /* Collect all unique IDs for a single API call */
+    const allIds: string[] = []
+    Object.values(idMap).forEach(ids => {
+      ids.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id) })
+    })
+    if (!allIds.length) return
+
+    this.weekContentLoading = true
+
+    this.http.post<any>('/apis/proxies/v8/sunbirdigot/search', {
+      locale: ['en'],
+      request: {
+        filters: {
+          identifier: allIds,          /* search by exact IDs — no status filter needed */
+        },
+        limit: allIds.length + 10,
+      },
+    }).pipe(catchError(() => of(null)))
+      .subscribe(res => {
+        const content: any[] = res?.result?.content || []
+
+        /* Build a lookup by identifier for quick mapping */
+        const byId: { [id: string]: any } = {}
+        content.forEach(c => { byId[c.identifier] = c })
+
+        /* Distribute as NsCardContent.ICard for sb-uic-card-portrait */
+        this.STRIP_TABS.forEach((tab) => {
+          const ids = idMap[tab] || []
+          this.weekContentCards[tab] = ids
+            .filter(id => byId[id])
+            .map((id, pos) => ({
+              content: byId[id],
+              cardSubType: 'standard' as NsCardContent.TCardSubType,
+              context: { pageSection: 'bharat-kalp-week-strip', position: pos },
+              stateData: {},
+            }))
+        })
+
+        this.weekContentLoading = false
+        this.cdr.detectChanges()
+      })
   }
 
   ngAfterViewInit(): void {
-    // Scroll so the current week's card is visible on initial load
-    setTimeout(() => this._scrollToCurrentWeek(), 150)
+    /* Note: _scrollToCurrentWeek is called after weekCardsLoading=false
+       so the #cardTrack element exists in the DOM at that point */
   }
 
   private _scrollToCurrentWeek(): void {
@@ -119,7 +266,33 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     return week < this.currentWeek
   }
 
+  /** Total count across all content types (course + program + event + assessment) */
+  getTotalContentCount(week: number): number {
+    const wd = this.getWeekData(week)
+    if (!wd?.content_ids) return wd?.course_count || 0
+    return (
+      (wd.content_ids.course?.length || 0) +
+      (wd.content_ids.program?.length || 0) +
+      (wd.content_ids.event?.length || 0) +
+      (wd.content_ids.assessment?.length || 0)
+    )
+  }
+
+  /** Check if a specific week card is still loading its progress */
+  isWeekLoading(week: number): boolean {
+    return !!this.weekCardLoading[week]
+  }
+
   getWeekData(week: number): WeekData | null {
+    /* New format: Weeks[0].tabs array with id matching week_N */
+    const weeksArray = this.programData?.Weeks
+    if (weeksArray?.length) {
+      for (const strip of weeksArray) {
+        const found = (strip.tabs || []).find((t: any) => t.id === `week_${week}`)
+        if (found) return found as WeekData
+      }
+    }
+    /* Legacy format: weeks object keyed by week_N */
     return this.programData?.weeks?.[`week_${week}`] || null
   }
 
@@ -188,8 +361,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   exploreWeekContent(): void {
     const data = this.selectedWeekData
-    if (data?.doIds?.length) {
-      this.router.navigate(['/app/toc', data.doIds[0], 'overview'])
+    const firstId = data?.content_ids?.course?.[0]
+    if (firstId) {
+      this.router.navigate(['/app/toc', firstId, 'overview'])
     } else {
       this.snackBar.open('No content available for this week yet', 'Ok', { duration: 3000 })
     }
@@ -197,35 +371,55 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   /* ── Content strips / slider ── */
   get activeStrip(): WeekProgressContentStrip | null {
+    /* New: read from Weeks array */
+    const fromWeeks = (this.programData?.Weeks || []).find((w: any) => w.active) as any
+    if (fromWeeks) {
+      return {
+        active: true,
+        title: fromWeeks.title,
+        titleDescription: fromWeeks.titleDescription,
+        viewMoreUrl: fromWeeks.viewMoreUrl,
+        tabs: this.STRIP_TABS.map(label => ({ label, cards: [] })),
+      }
+    }
+    /* Legacy: read from contentStrips */
     return this.programData?.contentStrips?.find(s => s.active) || null
   }
 
-  get activeTabs(): WeekProgressTab[] { return this.activeStrip?.tabs || [] }
-
-  get activeTabCards(): WeekProgressCard[] {
-    return this.activeTabs[this.activeTabIndex]?.cards || []
+  get activeTabs(): WeekProgressTab[] {
+    if ((this.programData?.Weeks || []).some((w: any) => w.active)) {
+      return this._stableTabs   /* stable references — no new objects per cycle */
+    }
+    return this.activeStrip?.tabs || []
   }
 
-  get visibleCards(): WeekProgressCard[] {
-    const start = this.currentPage * this.cardsPerView
-    return this.activeTabCards.slice(start, start + this.cardsPerView)
+  trackTab(_: number, tab: WeekProgressTab): string { return tab.label }
+
+  get activeTabCards(): NsCardContent.ICard[] {
+    const label = this.STRIP_TABS[this.activeTabIndex]
+    if (label && this.weekContentCards[label]?.length) {
+      return this.weekContentCards[label]
+    }
+    return []
   }
 
-  get totalDotPages(): number[] {
-    const pages = Math.ceil(this.activeTabCards.length / this.cardsPerView) || 1
-    return Array.from({ length: pages }, (_, i) => i)
-  }
+  onTabChange(index: number): void { this.activeTabIndex = index }
 
-  get canGoPrev(): boolean { return this.currentPage > 0 }
-  get canGoNext(): boolean { return this.currentPage < this.totalDotPages.length - 1 }
-
-  onTabChange(index: number): void { this.activeTabIndex = index; this.currentPage = 0 }
-  prevSlide(): void { if (this.canGoPrev) this.currentPage-- }
-  nextSlide(): void { if (this.canGoNext) this.currentPage++ }
-  goToPage(page: number): void { this.currentPage = page }
-
-  navigateToCard(card: WeekProgressCard): void {
-    if (card?.identifier) this.router.navigate(['/app/toc', card.identifier, 'overview'])
+  /** Handles (contentData) emitted by sb-uic-card-portrait */
+  onCardContentData(content: any): void {
+    if (!content?.identifier) return
+    const queryParams: { [k: string]: string } = {}
+    if (content.batchId) queryParams['batchId'] = content.batchId
+    if (content.language?.length) {
+      queryParams['ML'] = content.language[0].toLowerCase()
+      queryParams['MLId'] = content.identifier
+    }
+    /* Pass source URL so the portal can restore back-navigation context */
+    const sourceUrl = this.programData?.viewAllUrl?.replace('/see-all', '') || '/app/learn/bharat-kalp'
+    this.router.navigate(
+      ['/app/toc', content.identifier, 'overview'],
+      { queryParams, state: { sourceUrl } }
+    )
   }
 
   /* ── Week card slider (scroll-based) ── */
@@ -254,12 +448,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   }
 
   viewWeek(week: number): void {
-    const data = this.getWeekData(week)
-    if (data?.doIds?.length) {
-      this.router.navigate(['/app/toc', data.doIds[0], 'overview'])
-    } else {
-      this.snackBar.open('No content available for this week yet', 'Ok', { duration: 3000 })
-    }
+    /* Navigate to see-all page filtered for this specific week */
+    const seeAllUrl = this.programData?.viewAllUrl || '/app/learn/bharat-kalp/see-all'
+    this.router.navigate([seeAllUrl], { queryParams: { week } })
   }
 
   getCardRingBg(week: number): string {
@@ -270,7 +461,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   }
 
   onViewAll(_strip: WeekProgressContentStrip): void {
-    const url = this.programData?.viewAllUrl || '/app/learn/kalp/bharat-kalp/see-all'
-    this.router.navigate([url], { queryParams: { week: this.currentWeek } })
+    const url = this.programData?.viewAllUrl || '/app/learn/bharat-kalp/see-all'
+    this.router.navigate([url])  /* no week param → see-all defaults to All Weeks */
   }
 }
