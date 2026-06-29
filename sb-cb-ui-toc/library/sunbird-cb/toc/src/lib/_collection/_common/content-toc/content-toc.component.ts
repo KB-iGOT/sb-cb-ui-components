@@ -19,10 +19,10 @@ import { SamuhikCharchaService } from '../../../_services/samuhik-charcha.servic
 import * as _ from 'lodash'
 import { NsContent } from '../../../_collection-api'
 @Component({
-    selector: 'ws-widget-content-toc',
-    templateUrl: './content-toc.component.html',
-    styleUrls: ['./content-toc.component.scss'],
-    standalone: false
+  selector: 'ws-widget-content-toc',
+  templateUrl: './content-toc.component.html',
+  styleUrls: ['./content-toc.component.scss'],
+  standalone: false
 })
 
 export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
@@ -56,6 +56,9 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() languageList = []
   @Input() lockCertificate = false
   @Input() fromMDO = false
+  @Input() isBatchFull = false
+  @Input() showLimitedSeatsMsg = false
+  @Input() areAllActiveBatchesFull = false
   @Output() playResumeForAI = new EventEmitter()
   @Output() enrollUserToAI = new EventEmitter()
   @Output() trigerCompletionSurveyForm = new EventEmitter<boolean>()
@@ -95,7 +98,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   showAssignmentsTab = false
   enableSamuhikCharchaTab = false
   samuhikConfig: any
-  batchId:any
+  batchId: any
   constructor(
     private route: ActivatedRoute,
     private utilityService: UtilityService,
@@ -124,7 +127,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     } else {
       this.enableAITutorFlag = false
     }
-     if(this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+    if (this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
       this.enableAITutorFlag = false
     }
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription?.all) {
@@ -259,7 +262,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       this.enableAITutorFlag = false
     }
 
-    if(this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+    if (this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
       this.enableAITutorFlag = false
     }
 
