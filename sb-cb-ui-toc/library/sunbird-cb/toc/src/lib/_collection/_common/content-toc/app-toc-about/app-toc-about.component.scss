@@ -20,8 +20,15 @@
     font-size: 16px;
 }
 
+.batch-details-info {
+    height: 16px;
+    width: 16px;
+    font-size: 16px;
+    margin-top: 2px;
+}
+
 // .desc {
-    
+
 //     ::ng-deep .mob-text p {
 //                   margin: 0px !important;
 
@@ -87,18 +94,19 @@
     }
 }
 
-.mob-text{
+.mob-text {
     word-break: break-word;
     white-space: normal;
     //   word-wrap: break-word;
     overflow-wrap: break-word;
     text-align: left;
 }
+
 ::ng-deep .mob-text p {
-    word-break: break-word!important;
-    white-space: normal!important;
-      word-wrap: break-word!important;
-    overflow-wrap: break-word!important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
     text-align: left;
     // margin: 0px !important;
     //   hyphens: auto;
@@ -312,6 +320,7 @@ $mob-title-line-count: 2;
 .mobile-certificate-container {
     margin-top: 10px;
     margin-bottom: 20px;
+
     .earned-certificate-container {
         display: flex;
         flex-direction: column;
@@ -393,10 +402,10 @@ $mob-title-line-count: 2;
 
     .mobile-karma-points {
         display: none;
-    }    
+    }
 }
 
-@media screen and (max-width: 1200px){
+@media screen and (max-width: 1200px) {
     .pt-mweb-8 {
         padding-top: 2rem;
     }
@@ -518,17 +527,19 @@ $mob-title-line-count: 2;
     -webkit-box-orient: vertical;
     word-wrap: break-word;
 }
+
 .img-container {
     position: relative;
-    
+
     .view-cert {
-      visibility: hidden;
-      display: none;
+        visibility: hidden;
+        display: none;
     }
-    
+
     &:hover {
         display: block;
         z-index: 99999;
+
         .view-cert {
             visibility: visible;
             position: absolute;
@@ -544,6 +555,7 @@ $mob-title-line-count: 2;
             height: 100%;
             background-color: #000000b5;
             border-radius: 8px;
+
             button {
                 color: white;
                 border: 1px solid white;
@@ -556,6 +568,7 @@ $mob-title-line-count: 2;
         }
     }
 }
+
 .view-certificate {
     visibility: visible !important;
     display: block;
@@ -573,7 +586,7 @@ $mob-title-line-count: 2;
     justify-content: center;
     width: 100%;
     height: 100%;
-    
+
     button {
         color: white;
         border: 1px solid white;
@@ -586,21 +599,25 @@ $mob-title-line-count: 2;
     }
 }
 
-.uploader-status ::ng-deep .mat-progress-spinner circle, .mat-spinner circle {
+.uploader-status ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
     stroke: #ffffff;
 }
+
 .uploader-status ::ng-deep .mat-progress-spinner svg {
     width: 24px !important;
     height: 24px !important;
 }
+
 .uploader-status ::ng-deep .mat-progress-spinner {
     width: 24px !important;
     height: 24px !important;
 }
+
 .emailDefault {
     color: #F3962F !important;
     text-decoration: underline !important;
-    
+
 }
 
 .locked-certificate-outer-div {
@@ -631,7 +648,7 @@ $mob-title-line-count: 2;
         font: 700 11.72px/normal Lato;
     }
 
-    .locking-screen-description{
+    .locking-screen-description {
         color: #FFF;
         text-align: center;
         /* stylelint-disable-next-line */
@@ -642,7 +659,7 @@ $mob-title-line-count: 2;
         }
     }
 
-    .surveyFormeButton{
+    .surveyFormeButton {
         background-color: #1B4CA1;
         height: 34px;
         border-radius: 18px;
@@ -666,5 +683,5 @@ $mob-title-line-count: 2;
         width: 58px;
         color: rgba(243, 150, 47, 1);
     }
-    
+
 }
