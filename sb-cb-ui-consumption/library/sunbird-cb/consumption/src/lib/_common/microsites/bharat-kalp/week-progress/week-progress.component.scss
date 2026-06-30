@@ -928,6 +928,16 @@ $border: #E2E8F0;
     * { cursor: not-allowed !important; }
   }
 
+  /* Clickable non-locked cards */
+  &--clickable {
+    cursor: pointer;
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+  }
+
   /* Inset purple shadow for the current active week */
   &--current {
     // box-shadow: inset 0 0 5px 3px #e2aaff;
@@ -1032,6 +1042,7 @@ $border: #E2E8F0;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 
