@@ -102,13 +102,15 @@
             </div>
           </div>
 
-          <!-- Actual card when not loading -->
+          <!-- Actual card when not loading — full card is clickable for non-locked weeks -->
           <div class="wp-week-card" *ngIf="!isWeekLoading(w)"
             [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
             [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'"
             [class.wp-week-card--not-started]="getWeekStatus(w) === 'not-started'"
             [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'"
-            [class.wp-week-card--current]="w === currentWeek">
+            [class.wp-week-card--current]="w === currentWeek"
+            [class.wp-week-card--clickable]="getWeekStatus(w) !== 'upcoming'"
+            (click)="getWeekStatus(w) !== 'upcoming' && viewWeek(w)">
 
             <!-- Card top: week label + status badge -->
             <div class="wp-week-card__top">
@@ -155,9 +157,6 @@
                 <span class="wp-week-card__count">
                   {{ getTotalContentCount(w) }} {{ getTotalContentCount(w) === 1 ? 'content' : 'contents' }}
                 </span>
-                <button class="wp-week-card__view-btn"
-                  [class.wp-week-card__view-btn--active]="w === selectedDisplayWeek"
-                  (click)="viewWeek(w)">View</button>
               </ng-container>
               <span class="wp-week-card__coming" *ngIf="getWeekStatus(w) === 'upcoming'">
                 Coming soon...
@@ -183,11 +182,10 @@
     <ng-container *ngIf="activeStrip">
       <div class="wp-strip__header" #wpStrip>
         <div class="wp-strip__title-row">
-          <h3 class="wp-strip__title">New Releases For Week {{ selectedDisplayWeek }}</h3>
-          <span class="wp-strip__badge">New</span>
+          <h3 class="wp-strip__title">Learning Content For Week {{ selectedDisplayWeek }}</h3>
         </div>
       </div>
-      <p class="wp-strip__desc">Below Content is related to Week {{ selectedDisplayWeek }}</p>
+      <p class="wp-strip__desc">Content curated for Week {{ selectedDisplayWeek }}</p>
       <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex"
         (selectedIndexChange)="onTabChange($event)">
         <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>

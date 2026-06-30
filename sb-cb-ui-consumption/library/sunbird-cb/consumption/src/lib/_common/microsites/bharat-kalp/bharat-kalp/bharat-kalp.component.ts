@@ -114,7 +114,7 @@ export class BharatKalpComponent implements OnInit {
     this.http.post<any>(url, body)
       .pipe(catchError(() => of(null)))
       .subscribe(res => {
-        const results: any[] = res?.result?.content || res?.result?.Course || []
+        const results: any[] = (res?.result?.content || res?.result?.Course || []).slice(2)
         this.recommendedItems = results.map((c: any, i: number) => ({
           content:     c,
           cardSubType: 'standard' as NsCardContent.TCardSubType,

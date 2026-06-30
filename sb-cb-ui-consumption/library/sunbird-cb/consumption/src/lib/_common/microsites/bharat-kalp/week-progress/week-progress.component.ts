@@ -87,7 +87,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   showAllWeeksPopup = false
 
   /* ── Dynamic week content strip ── */
-  readonly STRIP_TABS = ['Courses', 'Programs', 'Events', 'Assessment']
+  readonly STRIP_TABS = ['Courses', 'Programs', 'Events']
   /* Stable tab objects — same references every change detection cycle (fixes NG0956) */
   private readonly _stableTabs: WeekProgressTab[] = this.STRIP_TABS.map(label => ({ label, cards: [] }))
   weekContentCards: { [tab: string]: NsCardContent.ICard[] } = {}
@@ -227,10 +227,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (!wd?.content_ids) return
 
     const idMap: { [tab: string]: string[] } = {
-      Courses: wd.content_ids.course || [],
-      Programs: wd.content_ids.program || [],
-      Events: wd.content_ids.event || [],
-      Assessment: wd.content_ids.assessment || [],
+      Courses:  wd.content_ids.course   || [],
+      Programs: wd.content_ids.program  || [],
+      Events:   wd.content_ids.event    || [],
     }
 
     /* Collect all unique IDs for a single API call */
