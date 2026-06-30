@@ -259,3 +259,19 @@
     --mat-datepicker-calendar-date-hover-state-background-color: #3f51b533;
   }
 }
+
+.filter-pill .mat-mdc-icon-button.mat-mdc-button-base {
+  --mdc-icon-button-state-layer-size: 28px;
+  --mat-icon-button-state-layer-size: 28px;
+  padding: 6px;
+}
+
+::ng-deep .filter-calender {
+  .mat-calendar-period-button {
+    --mat-datepicker-calendar-period-button-text-weight: 600;
+  }
+  .mat-calendar-body-label {
+    --mat-datepicker-calendar-body-label-text-weight: 700;
+    --mat-datepicker-calendar-text-font: lato;
+  }
+}
