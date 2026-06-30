@@ -92,6 +92,8 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   private readonly _stableTabs: WeekProgressTab[] = this.STRIP_TABS.map(label => ({ label, cards: [] }))
   weekContentCards: { [tab: string]: NsCardContent.ICard[] } = {}
   weekContentLoading = false
+  /** Which week's content is displayed in the bottom strip */
+  selectedDisplayWeek = 1
 
   weekCardsLoading = false
   weekCardLoading: { [week: number]: boolean } = {}
@@ -113,6 +115,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   /* ── Week card slider ── */
   @ViewChild('cardTrack') cardTrackRef!: ElementRef<HTMLElement>
+  @ViewChild('wpStrip')   wpStripRef!: ElementRef<HTMLElement>
   _canCardsPrev = false
   _canCardsNext = true
 
@@ -127,8 +130,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.currentWeek = this._computeCurrentWeek()
     this.selectedWeek = this.currentWeek
+    this.selectedDisplayWeek = this.currentWeek
     this._loadWeekProgress()
-    this._loadActiveWeekContent()
+    this._loadActiveWeekContent(this.currentWeek)
   }
 
   /* ── Fetch completion % per week individually + accumulate for overall stats ── */
@@ -216,9 +220,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   }
 
   /* ── Load content cards for active week strip via search API ── */
-  private _loadActiveWeekContent(): void {
-    /* Use currentWeek (computed from bkConfig dates) for live content — always matches current week */
-    const weekNum = this.currentWeek
+  private _loadActiveWeekContent(weekNum: number): void {
     if (!weekNum) return
 
     const wd = this.getWeekData(weekNum)
@@ -461,11 +463,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (!content?.identifier) return
     const queryParams: { [k: string]: string } = {}
     if (content.batchId) queryParams['batchId'] = content.batchId
-    if (content.language?.length) {
-      queryParams['ML'] = content.language[0].toLowerCase()
-      queryParams['MLId'] = content.identifier
-    }
-    /* Pass source URL so the portal can restore back-navigation context */
+    /* ML/MLId omitted — setting MLId = identifier confuses the viewer for non-collection content */
     const sourceUrl = this.programData?.viewAllUrl?.replace('/see-all', '') || '/app/learn/bharat-kalp'
     this.router.navigate(
       ['/app/toc', content.identifier, 'overview'],
@@ -498,10 +496,18 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     this._canCardsNext = el.scrollLeft < el.scrollWidth - el.offsetWidth - 1
   }
 
+  /** View button on a week card — updates the bottom strip and scrolls to it */
   viewWeek(week: number): void {
-    /* Navigate to see-all page filtered for this specific week */
-    const seeAllUrl = this.programData?.viewAllUrl || '/app/learn/bharat-kalp/see-all'
-    this.router.navigate([seeAllUrl], { queryParams: { week } })
+    this.selectedDisplayWeek = week
+    this.activeTabIndex = 0
+    this._loadActiveWeekContent(week)
+    setTimeout(() => {
+      const el = this.wpStripRef?.nativeElement
+      if (!el) return
+      /* Scroll so strip heading sits just below the sticky portal header (~72px) */
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 160
+      window.scrollTo({ top, behavior: 'smooth' })
+    }, 150)
   }
 
   getCardRingBg(week: number): string {
@@ -510,6 +516,11 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (s === 'in-progress') return '#E0E0E0'
     if (s === 'not-started') return '#E3EAF6'
     return '#EEEEEE'
+  }
+
+  viewAllWeeks(): void {
+    const url = this.programData?.viewAllUrl || '/app/learn/bharat-kalp/see-all'
+    this.router.navigate([url])
   }
 
   onViewAll(_strip: WeekProgressContentStrip): void {

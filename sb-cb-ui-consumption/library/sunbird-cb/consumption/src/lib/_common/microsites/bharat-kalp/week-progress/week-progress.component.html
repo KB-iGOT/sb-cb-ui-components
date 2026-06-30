@@ -70,7 +70,9 @@
         <span class="wp-header__pipe"> | </span>
         Weeks {{ currentWeek }} out of {{ programData.totalWeeks }}
       </span>
-      <!-- View All Weeks button removed -->
+      <button class="wp-header__btn" (click)="viewAllWeeks()">
+        View All Weeks <span class="wp-header__arrow">›</span>
+      </button>
     </div>
 
     <!-- Week card slider -->
@@ -153,7 +155,9 @@
                 <span class="wp-week-card__count">
                   {{ getTotalContentCount(w) }} {{ getTotalContentCount(w) === 1 ? 'content' : 'contents' }}
                 </span>
-                <button class="wp-week-card__view-btn" (click)="viewWeek(w)">View</button>
+                <button class="wp-week-card__view-btn"
+                  [class.wp-week-card__view-btn--active]="w === selectedDisplayWeek"
+                  (click)="viewWeek(w)">View</button>
               </ng-container>
               <span class="wp-week-card__coming" *ngIf="getWeekStatus(w) === 'upcoming'">
                 Coming soon...
@@ -177,17 +181,13 @@
 
     <!-- New Releases strip -->
     <ng-container *ngIf="activeStrip">
-      <div class="wp-strip__header">
+      <div class="wp-strip__header" #wpStrip>
         <div class="wp-strip__title-row">
-          <!-- Title always uses computed currentWeek -->
-          <h3 class="wp-strip__title">New Releases For Week {{ currentWeek }}</h3>
+          <h3 class="wp-strip__title">New Releases For Week {{ selectedDisplayWeek }}</h3>
           <span class="wp-strip__badge">New</span>
         </div>
-        <span class="wp-strip__view-all" (click)="onViewAll(activeStrip)">
-          Show all <mat-icon class="wp-strip__chevron">chevron_right</mat-icon>
-        </span>
       </div>
-      <p class="wp-strip__desc">Below Content is related to Week {{ currentWeek }}</p>
+      <p class="wp-strip__desc">Below Content is related to Week {{ selectedDisplayWeek }}</p>
       <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex"
         (selectedIndexChange)="onTabChange($event)">
         <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>
