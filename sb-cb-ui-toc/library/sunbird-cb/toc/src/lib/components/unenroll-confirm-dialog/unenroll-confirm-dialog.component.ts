@@ -64,9 +64,7 @@ export class UnenrollConfirmDialogComponent implements OnInit {
         selectedReasons,
         comments: this.feedbackForm.get('comments')?.value || '',
       }
-
-      console.log('Un-enroll feedback:', feedbackPayload)
-      this.dialogRef.close(true)
+      this.dialogRef.close(feedbackPayload)
     }
   }
 
@@ -74,7 +72,8 @@ export class UnenrollConfirmDialogComponent implements OnInit {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
-        id: 'btn-un-enroll',
+        id: 'unenroll',
+        subType: 'unenroll'
       },
       {
         id: this.data?.content?.name || 'unknown-content',
