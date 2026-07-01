@@ -782,18 +782,8 @@ export class RoleMappingListComponent {
 this.masterData.forEach(item => {
   const roleMappingId = item.id;
 
-  console.log('Role Mapping id : 123', this.masterData);
 
-  this.matchedDesignationSet.forEach(matchedId => {
-    console.log(
-      'Comparing -> 123',
-      roleMappingId,
-      '===',
-      matchedId,
-      '=>',
-      roleMappingId === matchedId
-    );
-  });
+
 });
     if (this.activeTab === 'matched') {
 
