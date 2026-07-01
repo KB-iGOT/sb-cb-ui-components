@@ -101,7 +101,6 @@ export class BharatKalpComponent implements OnInit {
     this.getLookerProUrl()
     this._loadCommunities()
     this._loadRecommended()
-    this._loadCompletedCount()
   }
 
   /* ── Recommended API — maps to NsCardContent.ICard for sb-uic-card-portrait ── */
@@ -114,7 +113,7 @@ export class BharatKalpComponent implements OnInit {
     this.http.post<any>(url, body)
       .pipe(catchError(() => of(null)))
       .subscribe(res => {
-        const results: any[] = (res?.result?.content || res?.result?.Course || []).slice(2)
+        const results: any[] = (res?.result?.content || res?.result?.Course || [])
         this.recommendedItems = results.map((c: any, i: number) => ({
           content:     c,
           cardSubType: 'standard' as NsCardContent.TCardSubType,
@@ -147,63 +146,6 @@ export class BharatKalpComponent implements OnInit {
         this.communitiesLoading = false
         this.communitiesLoaded.emit(this.communities)
       })
-  }
-
-  /** Calls enrollment API with all BK content IDs, counts items with 100% completion */
-  private _loadCompletedCount(): void {
-    const tabs: any[] = this.individualSection?.weekProgress?.Weeks?.[0]?.tabs || []
-    const allIds: string[] = []
-    tabs.forEach((tab: any) => {
-      const ids = tab?.content_ids
-      if (!ids) return
-      ;(['course', 'program', 'event', 'assessment'] as const).forEach(type => {
-        if (ids[type]?.length) allIds.push(...ids[type])
-      })
-    })
-    const uniqueIds = [...new Set(allIds)]
-    if (!uniqueIds.length) return
-
-    const userId = this.configDetails?.userId || this.configDetails?.userProfile?.userId
-    if (!userId) return
-
-    const url = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
-    this.http.post<any>(url, { request: { courseId: uniqueIds } })
-      .pipe(catchError(() => of(null)))
-      .subscribe((res: any) => {
-        /* Merge all content types: course, program, event, assessment */
-        const result = res?.result || {}
-        const allEnrolled: any[] = [
-          ...(result.courses     || []),
-          ...(result.programs    || []),
-          ...(result.events      || []),
-          ...(result.assessments || []),
-        ]
-
-        /* Completed count across all content types */
-        this.bkCompletedCount = allEnrolled.filter(
-          (c: any) => (c.completionPercentage ?? 0) >= 100
-        ).length
-
-        /* Learning hours = Σ (duration_in_seconds × completionPercentage / 100) / 3600 */
-        let totalSeconds = 0
-        allEnrolled.forEach((c: any) => {
-          const durationSec = Number(c.duration || c.content?.duration || 0)
-          const pct         = Number(c.completionPercentage ?? 0)
-          if (durationSec > 0 && pct > 0) {
-            totalSeconds += (durationSec * pct) / 100
-          }
-        })
-        this.bkLearningHoursFormatted = this._formatHours(totalSeconds / 3600)
-      })
-  }
-
-  private _formatHours(hours: number): string {
-    const h = Math.floor(hours)
-    const m = Math.round((hours - h) * 60)
-    if (h > 0 && m > 0) return `${h}h ${m}m`
-    if (h > 0) return `${h}h`
-    if (m > 0) return `${m}m`
-    return '0m'
   }
 
   hideKeyHighlight(event: any, sectionData: any) {
