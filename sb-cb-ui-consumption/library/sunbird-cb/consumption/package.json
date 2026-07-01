@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/consumption",
-  "version": "0.0.4-ang-17-20-bharat-kalp",
+  "version": "0.0.6-ang-17-20-bharat-kalp",
   "dependencies": {
     "tslib": "^2.0.0"
   },

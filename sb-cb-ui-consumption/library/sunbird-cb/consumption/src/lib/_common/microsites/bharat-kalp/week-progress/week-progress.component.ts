@@ -11,6 +11,9 @@ import moment from 'moment'
 export interface WeekData {
   id?: string
   title: string
+  stripTitle?: string
+  stripDesc?: string
+  stripBadge?: { enabled?: boolean; text?: string; background?: string; textColor?: string }
   topics?: string[]
   course_count?: number
   content_ids?: {
@@ -87,7 +90,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   showAllWeeksPopup = false
 
   /* ── Dynamic week content strip ── */
-  readonly STRIP_TABS = ['Courses', 'Programs', 'Events', 'Assessment']
+  readonly STRIP_TABS = ['Courses', 'Programs', 'Events']
   /* Stable tab objects — same references every change detection cycle (fixes NG0956) */
   private readonly _stableTabs: WeekProgressTab[] = this.STRIP_TABS.map(label => ({ label, cards: [] }))
   weekContentCards: { [tab: string]: NsCardContent.ICard[] } = {}
@@ -145,12 +148,13 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
     const enrollUrl = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
 
-    /* Count how many weeks actually have IDs to call */
+    /* Count how many weeks actually have IDs to call (all weeks with content) */
     this._weekCallsTotal = 0
     this._weekCallsDone  = 0
     this._enrolledMap    = {}
 
-    for (let week = 1; week <= this.currentWeek; week++) {
+    const totalWeeks = this.programData.totalWeeks || 16
+    for (let week = 1; week <= totalWeeks; week++) {
       const wd = this.getWeekData(week)
       const ids = [
         ...(wd?.content_ids?.course      || []),
@@ -161,8 +165,8 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
       if (ids.length) this._weekCallsTotal++
     }
 
-    /* Fire one independent API call per started week */
-    for (let week = 1; week <= this.currentWeek; week++) {
+    /* Fire one independent API call per week that has content */
+    for (let week = 1; week <= totalWeeks; week++) {
       const wd = this.getWeekData(week)
       if (!wd?.content_ids) continue
 
@@ -183,12 +187,17 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
           const completionMap: { [id: string]: number } = {}
           weekIds.forEach(id => { completionMap[id] = 0 })
 
-          const courses: any[] = res?.result?.courses || []
-          courses.forEach((c: any) => {
+          const allEnrolled: any[] = [
+            ...(res?.result?.courses     || []),
+            ...(res?.result?.programs    || []),
+            ...(res?.result?.events      || []),
+            ...(res?.result?.assessments || []),
+          ]
+          allEnrolled.forEach((c: any) => {
             const id = c.courseId || c.identifier || c.contentId
-            if (id) {
-              if (completionMap.hasOwnProperty(id)) completionMap[id] = c.completionPercentage ?? 0
-              /* Accumulate for overall stats */
+            /* Only count IDs that belong to this BK week — ignore unrelated enrolled content */
+            if (id && completionMap.hasOwnProperty(id)) {
+              completionMap[id] = c.completionPercentage ?? 0
               this._enrolledMap[id] = {
                 pct:    c.completionPercentage ?? 0,
                 durSec: Number(c.duration || c.content?.duration || 0),
@@ -227,10 +236,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (!wd?.content_ids) return
 
     const idMap: { [tab: string]: string[] } = {
-      Courses: wd.content_ids.course || [],
-      Programs: wd.content_ids.program || [],
-      Events: wd.content_ids.event || [],
-      Assessment: wd.content_ids.assessment || [],
+      Courses:  wd.content_ids.course   || [],
+      Programs: wd.content_ids.program  || [],
+      Events:   wd.content_ids.event    || [],
     }
 
     /* Collect all unique IDs for a single API call */
@@ -304,13 +312,23 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     return Math.min(Math.floor(diffDays / 7) + 1, this.programData.totalWeeks)
   }
 
-  /* Badge / ring: progress-based — 100% = completed, else in-progress, future = upcoming */
+  /* Badge / ring: weeks beyond currentWeek are locked only if they have no content */
   getWeekStatus(week: number): WeekStatus {
-    if (week > this.currentWeek) return 'upcoming'
+    if (week > this.currentWeek && !this._weekHasContent(week)) return 'upcoming'
     const progress = this.getWeekData(week)?.progress ?? 0
     if (progress >= 100) return 'completed'
     if (progress > 0)   return 'in-progress'
     return 'not-started'
+  }
+
+  private _weekHasContent(week: number): boolean {
+    const ids = this.getWeekData(week)?.content_ids
+    if (!ids) return false
+    return (
+      (ids.course?.length     || 0) +
+      (ids.program?.length    || 0) +
+      (ids.event?.length      || 0)
+    ) > 0
   }
 
   /* Line after week W is green when W is before the current week (calendar-based) */
@@ -437,6 +455,24 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     }
     /* Legacy: read from contentStrips */
     return this.programData?.contentStrips?.find(s => s.active) || null
+  }
+
+  /** Heading for the content strip — from per-week stripTitle config, else default */
+  get activeStripTitle(): string {
+    const wd = this.getWeekData(this.selectedDisplayWeek)
+    return wd?.stripTitle || `Learning Content For Week ${this.selectedDisplayWeek}`
+  }
+
+  /** Subheading for the content strip — from per-week stripDesc config, else default */
+  get activeStripDesc(): string {
+    const wd = this.getWeekData(this.selectedDisplayWeek)
+    return wd?.stripDesc || `Content curated for Week ${this.selectedDisplayWeek}`
+  }
+
+  /** Optional badge shown next to strip title — null if disabled or not configured */
+  get activeStripBadge(): WeekData['stripBadge'] | null {
+    const badge = this.getWeekData(this.selectedDisplayWeek)?.stripBadge
+    return badge?.enabled ? badge : null
   }
 
   get activeTabs(): WeekProgressTab[] {
