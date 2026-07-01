@@ -7,10 +7,10 @@
             <ng-container *ngFor="let column of section.column">
               <div id="{{column?.key}}" class="col-span-{{column.colspan || 12}}">
                 <ng-container *ngIf="column?.enabled" [ngSwitch]="column?.key">
-                  <ng-container *ngSwitchCase="'topBannerSection'" [ngTemplateOutlet]="topBannerSection"
+                  <ng-container *ngSwitchCase="'topSection'" [ngTemplateOutlet]="topSection"
                     [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
-                  <ng-container *ngSwitchCase="'topCarouselSection'" [ngTemplateOutlet]="topCarouselSection"
-                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
+                  <!-- <ng-container *ngSwitchCase="'topCarouselSection'" [ngTemplateOutlet]="topCarouselSection"
+                    [ngTemplateOutletContext]="{data: column?.data}"></ng-container> -->
                   <ng-container *ngSwitchCase="'keyHighlightsSection'" [ngTemplateOutlet]="keyHighlightsSection"
                     [ngTemplateOutletContext]="{data: column?.data}"></ng-container>
                   <ng-container *ngSwitchCase="'mainContentSection'" [ngTemplateOutlet]="mainContentSection"
@@ -62,9 +62,17 @@
 
   </ng-container>
 </ng-template>
+<ng-template #topSection let-data="data">
+    <!-- top section desktop layout -->
+    <div class="w-full topSection">
+        <div *ngIf="data.sliderData && data.sliderData.sliders">
+            <sb-uic-sliders [widgetData]="data.sliderData.sliders" [styleData]="data.sliderData.styleData" ></sb-uic-sliders>
+        </div>
 
+    </div>
+</ng-template>
 <!-- TOP BANNER SECTION -->
-<ng-template #topBannerSection let-data="data">
+<ng-template #topBannerSectionCustom let-data="data">
   <div class="bk-top-banner"
     [ngStyle]="{'background': data?.styles?.backgroundColor || '', 'padding-left': data?.styles?.paddingLeft || ''}">
     <div class="bk-top-banner__inner">

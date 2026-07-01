@@ -137,12 +137,18 @@ export class BharatKalpComponent implements OnInit {
     request$.pipe(catchError(() => of(null)))
       .subscribe((res: any) => {
         /* /community/v1/user/communities → result.communityDetails */
-        this.communities =
+        const communities: any[] =
           res?.result?.communityDetails ||
           res?.result?.communities ||
           res?.result?.search_results?.data ||
           res?.communities ||
           []
+        /* Private communities surface first in the strip */
+        this.communities = [...communities].sort((a, b) => {
+          const aPrivate = a?.communityAccessLevel === 'private' ? 0 : 1
+          const bPrivate = b?.communityAccessLevel === 'private' ? 0 : 1
+          return aPrivate - bPrivate
+        })
         this.communitiesLoading = false
         this.communitiesLoaded.emit(this.communities)
       })
