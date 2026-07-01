@@ -612,17 +612,13 @@ export class RoleMappingListComponent {
                 console.log('matchedRoleMapping', matchedRoleMapping)
                 this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
                 this.matchedRoleMapping = matchedRoleMapping?.matched_count
-                this.matchedDesignationNames =
+                const matchedRoleMappingIds =
                   matchedRoleMapping?.matched_details?.map(
-                    x => x.igot_designation_name?.toLowerCase()
+                    x => x.role_mapping_id
                   ) || [];
-                const matchedNames =
-                  matchedRoleMapping?.matched_details?.map(x =>
-                    x.igot_designation_name?.trim().toLowerCase()
-                  ) || [];
-                this.matchedDesignationSet = new Set(matchedNames);
+                this.matchedDesignationSet = new Set(matchedRoleMappingIds);
 
-                this.matchedRoleMapping = matchedNames.length;
+                this.matchedRoleMapping = matchedRoleMappingIds.length;
 
                 this.unMatchedRoleMapping = this.masterData.length - this.matchedRoleMapping;
                 this.applyAllFilters();
@@ -664,17 +660,13 @@ export class RoleMappingListComponent {
             console.log('matchedRoleMapping', matchedRoleMapping)
             this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
             this.matchedRoleMapping = matchedRoleMapping?.matched_count
-            this.matchedDesignationNames =
+            const matchedRoleMappingIds =
               matchedRoleMapping?.matched_details?.map(
-                x => x.igot_designation_name?.toLowerCase()
+                x => x.role_mapping_id
               ) || [];
-            const matchedNames =
-              matchedRoleMapping?.matched_details?.map(x =>
-                x.igot_designation_name?.trim().toLowerCase()
-              ) || [];
-            this.matchedDesignationSet = new Set(matchedNames);
+            this.matchedDesignationSet = new Set(matchedRoleMappingIds);
 
-            this.matchedRoleMapping = matchedNames.length;
+            this.matchedRoleMapping = matchedRoleMappingIds.length;
 
             this.unMatchedRoleMapping = this.masterData.length - this.matchedRoleMapping;
             this.applyAllFilters();
@@ -713,17 +705,13 @@ export class RoleMappingListComponent {
             console.log('matchedRoleMapping', matchedRoleMapping)
             this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
             this.matchedRoleMapping = matchedRoleMapping?.matched_count
-            this.matchedDesignationNames =
+            const matchedRoleMappingIds =
               matchedRoleMapping?.matched_details?.map(
-                x => x.igot_designation_name?.toLowerCase()
+                x => x.role_mapping_id
               ) || [];
-            const matchedNames =
-              matchedRoleMapping?.matched_details?.map(x =>
-                x.igot_designation_name?.trim().toLowerCase()
-              ) || [];
-            this.matchedDesignationSet = new Set(matchedNames);
+            this.matchedDesignationSet = new Set(matchedRoleMappingIds);
 
-            this.matchedRoleMapping = matchedNames.length;
+            this.matchedRoleMapping = matchedRoleMappingIds.length;
 
             this.unMatchedRoleMapping = this.masterData.length - this.matchedRoleMapping;
             this.applyAllFilters();
@@ -791,12 +779,27 @@ export class RoleMappingListComponent {
   applyAllFilters() {
 
     let data = [...this.masterData];
+this.masterData.forEach(item => {
+  const roleMappingId = item.id;
 
+  console.log('Role Mapping id : 123', this.masterData);
+
+  this.matchedDesignationSet.forEach(matchedId => {
+    console.log(
+      'Comparing -> 123',
+      roleMappingId,
+      '===',
+      matchedId,
+      '=>',
+      roleMappingId === matchedId
+    );
+  });
+});
     if (this.activeTab === 'matched') {
 
       data = data.filter(item =>
         this.matchedDesignationSet.has(
-          item.designation_name?.trim().toLowerCase()
+          item.id
         )
       );
 
@@ -806,7 +809,7 @@ export class RoleMappingListComponent {
 
       data = data.filter(item =>
         !this.matchedDesignationSet.has(
-          item.designation_name?.trim().toLowerCase()
+          item.id
         )
       );
 
