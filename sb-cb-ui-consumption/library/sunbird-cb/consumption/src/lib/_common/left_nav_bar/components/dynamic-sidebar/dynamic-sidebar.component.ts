@@ -64,6 +64,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
    */
   @Input({ required: true }) menuBarDetails!: SidebarConfig
   @Input({ required: true }) detailsChanged!: boolean
+  @Input({ required: true }) otherDetailsChanged!: boolean
 
   /**
    * Event emitted when sidebar state changes (open/closed)
@@ -130,7 +131,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
       this.cdr.markForCheck()
     }
 
-    if ((changes['menuBarDetails'] && changes['menuBarDetails'].currentValue) || (changes['detailsChanged'] && this.menuBarDetails)) {
+    if ((changes['menuBarDetails'] && changes['menuBarDetails'].currentValue) || ((changes['detailsChanged'] || changes['otherDetailsChanged']) && this.menuBarDetails)) {
       this.navSections = []
 
       this.menuBarDetails.navSections.forEach((section: SidebarSection) => {
