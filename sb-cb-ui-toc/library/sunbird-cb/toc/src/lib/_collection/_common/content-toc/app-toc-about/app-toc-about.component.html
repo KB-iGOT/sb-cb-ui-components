@@ -56,8 +56,7 @@
                                 <ng-container>
                                     <mat-icon class="icon cursor-pointer " *ngIf="!downloadCertificateBool"
                                         (click)="handleOpenCertificateDialog()">arrow_downward</mat-icon>
-                                    <mat-spinner *ngIf="downloadCertificateBool" strokeWidth="2"
-                                        [diameter]="20"></mat-spinner>
+                                    <mat-spinner *ngIf="downloadCertificateBool" strokeWidth="2" [diameter]="20"></mat-spinner>
                                 </ng-container>
                             </div>
                         </div>
@@ -68,16 +67,14 @@
                             </ng-container>
                             <ng-container *ngIf="!skeletonLoader">
                                 <div class="certificate_box" *ngIf="!content?.certificateObj?.certId">
-                                    <img *ngIf="!fromMarketPlace" src="/assets/icons/toc/no-certificate.svg"
-                                        alt="No certificate image" />
-                                    <img *ngIf="fromMarketPlace" src="/assets/icons/toc/no-certificate-market-place.svg"
-                                        alt="No certificate image" />
+                                    <img *ngIf="!fromMarketPlace" src="/assets/icons/toc/no-certificate.svg" alt="No certificate image" />
+                                    <img *ngIf="fromMarketPlace" src="/assets/icons/toc/no-certificate-market-place.svg" alt="No certificate image" />
                                     <div class="flex items-center certificate_overlay">
                                         <div class="flex flex-col text-center gap-1 p-4 text-white mt-4">
                                             <div>{{'apptochome.certificationTakesTime' | translate }}</div>
                                             <!-- <div>{{'apptochome.issuePersistsMailus' | translate }} mission.karmayogi@gov.in -->
-                                            <div>{{'apptochome.issuePersistsMailus' | translate }} <a
-                                                    href="mailto:mission.karmayogi@gov.in" class="emailDefault">
+                                            <div>{{'apptochome.issuePersistsMailus' | translate }} <a href="mailto:mission.karmayogi@gov.in"
+                                                    class="emailDefault">
                                                     mission.karmayogi&#64;gov.in</a>
                                             </div>
                                         </div>
@@ -85,16 +82,13 @@
                                 </div>
                                 <ng-container *ngIf="content?.certificateObj?.certId">
                                     <div class="img-container">
-                                        <img class="celebration-animation"
-                                            src="assets/images/animation/leaderboard_animation.gif" />
-                                        <img *ngIf="!fromMarketPlace" class="ceritificate-image"
-                                            [src]="'/assets/icons/toc/no-certificate.svg'" alt="certificate image" />
-                                        <img *ngIf="fromMarketPlace" class="ceritificate-image"
-                                            [src]="'/assets/icons/toc/no-certificate-market-place.svg'"
+                                        <img class="celebration-animation" src="assets/images/animation/leaderboard_animation.gif" />
+                                        <img *ngIf="!fromMarketPlace" class="ceritificate-image" [src]="'/assets/icons/toc/no-certificate.svg'"
                                             alt="certificate image" />
+                                        <img *ngIf="fromMarketPlace" class="ceritificate-image"
+                                            [src]="'/assets/icons/toc/no-certificate-market-place.svg'" alt="certificate image" />
 
-                                        <div
-                                            [ngClass]="{'view-certificate': downloadCertificateBool, 'view-cert': !downloadCertificateBool}">
+                                        <div [ngClass]="{'view-certificate': downloadCertificateBool, 'view-cert': !downloadCertificateBool}">
                                             <button type="button" (click)="handleOpenCertificateDialog()">
                                                 <span *ngIf="!downloadCertificateBool">{{
                                                     'apptoccontentcard.viewCertificate' | translate }}</span>
@@ -122,12 +116,11 @@
                             [title]="subTheme">{{ subTheme }}</div>
                     </ng-container>
                     <div class="flex items-center text-primary underline cursor-pointer text-xs"
-                        *ngIf="content?.subTheme?.length > 2 && !content?.viewMore"
-                        (click)="content.viewMore = !content.viewMore">
+                        *ngIf="content?.subTheme?.length > 2 && !content?.viewMore" (click)="content.viewMore = !content.viewMore">
                         {{'competencyCardDetails.viewMore' | translate}}
                     </div>
-                    <div class="flex items-center text-primary underline cursor-pointer text-xs"
-                        *ngIf="content?.viewMore" (click)="content.viewMore = !content.viewMore">
+                    <div class="flex items-center text-primary underline cursor-pointer text-xs" *ngIf="content?.viewMore"
+                        (click)="content.viewMore = !content.viewMore">
                         {{'competencyCardDetails.viewLess' | translate}}
                     </div>
                 </div>
@@ -143,14 +136,13 @@
                         <img src="/assets/icons/lock_wht.svg" alt="lock image" />
                         <div class="certificateLockedText pb-2">{{'apptoc.certificateLockedMessage' | translate }}</div>
                         <div class="locking-screen-description">
-                            {{'apptoc.unlockCertificate' | translate}} <span
-                                class="surveyFormeText">{{'apptoc.surveyForm' | translate}}</span> {{
+                            {{'apptoc.unlockCertificate' | translate}} <span class="surveyFormeText">{{'apptoc.surveyForm' | translate}}</span> {{
                             'apptoc.unlockCertificate2' | translate : { courseCategory: content?.courseCategory ?
                             content?.courseCategory : content?.primaryCategory } }}
                         </div>
 
-                        <button mat-button class="surveyFormeButton px-7"
-                            (click)="openSurveyFormPopup()">{{'apptoc.completeSurveyNow' | translate}}</button>
+                        <button mat-button class="surveyFormeButton px-7" (click)="openSurveyFormPopup()">{{'apptoc.completeSurveyNow' |
+                            translate}}</button>
                     </div>
                 </div>
             </div>
@@ -161,8 +153,7 @@
 <ng-template #competencyLabel>
     <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
         {{ 'apptocsinglepage.competencies' | translate }}
-        <mat-icon
-            class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
+        <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
             [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()"
             matTooltip="{{ 'apptocsinglepage.competenciesTooltip' | translate }}">info_outline</mat-icon>
     </div>
@@ -180,12 +171,25 @@
     </ng-container>
 </div>
 <div class="flex flex-col mt-4 mx-4 block" *ngIf="isMobile && contentReadData?.contentVersionInfo?.identifier">
-    <div class="flex flex-col gap-1  cursor-pointer switch-version" (click)="navigateToNewVersion()"
-        (keydown)="navigateToNewVersion()">
+    <div class="flex flex-col gap-1  cursor-pointer switch-version" (click)="navigateToNewVersion()" (keydown)="navigateToNewVersion()">
         <span class="btn-switch">{{ 'apptoc.switchToNewVersion' | translate }}</span>
     </div>
 </div>
 
+<!-- Batch status messages for mobile (BLENDED_PROGRAM) -->
+<ng-container
+    *ngIf="isMobile && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && selectedBatchData && !selectedBatchData?.enrolled && isBatchFull">
+    <div class="flex flex-row justify-center items-center mx-4 mt-4">
+        <div class="text-sm batch-green-text margin-remove-bottom ss">This batch is currently full and not accepting new enrollments.</div>
+    </div>
+</ng-container>
+<ng-container
+    *ngIf="isMobile && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && selectedBatchData && !selectedBatchData?.enrolled && showLimitedSeatsMsg">
+    <div class="flex flex-row justify-center items-center mx-4 mt-4">
+        <div class="text-sm batch-orange-text margin-remove-bottom">Limited seats are available in ongoing batches. Please enroll in an available
+            batch.</div>
+    </div>
+</ng-container>
 
 <div class="flex flex-col my-4 px-4" [class.mt60]="sticky" [ngClass]="isMobile ? '' : 'gap-10'">
     <ng-container
@@ -267,7 +271,7 @@
     </ng-container>
 
     <ng-container
-        *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM && config?.uiVisibility?.about?.batchInfo !== false">
+        *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM  selectedBatchData && !areAllActiveBatchesFull && config?.uiVisibility?.about?.batchInfo !== false">
         <div class="flex flex-row gap-3 justify-around hideAbove1200">
             <div class="batch-info">
                 <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize ||
@@ -327,12 +331,9 @@
     <div class="flex flex-col" *ngIf="(fromViewer || isMobile) && config?.uiVisibility?.about?.kpiValues !== false">
         <ng-container *ngIf="skeletonLoader">
             <div class="flex flex-row gap-3">
-                <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'60px'" [height]="'60px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader && !fromMarketPlace && !fromMDO">
@@ -350,15 +351,11 @@
 
     <div class="flex flex-col" *ngIf="config?.uiVisibility?.about?.description !== false">
         <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             <div class="flex flex-col gap-2 mt-4">
-                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
@@ -370,17 +367,14 @@
             </div>
             <div *ngIf="!(content?.contentId && content?.contentId.includes('ext_'))"
                 class="mat-subheading-1 font-bold nodtranslate">{{ 'apptocsinglepage.summary' | translate }}</div> -->
-            <div [ngClass]="{'mob-desc-ellipsis': summary.ellipsis && isMobile, 'desc-ellipsis': summary.ellipsis && !isMobile}"
-                #summaryElem>
-                <div class="mob-text nodtranslate"
-                    [innerHtml]="handleCapitalize(contentReadData?.description | replaceNbsp)"></div>
+            <div [ngClass]="{'mob-desc-ellipsis': summary.ellipsis && isMobile, 'desc-ellipsis': summary.ellipsis && !isMobile}" #summaryElem>
+                <div class="mob-text nodtranslate" [innerHtml]="handleCapitalize(contentReadData?.description | replaceNbsp)"></div>
                 <div class="ws-mat-default-text font-bold cursor-pointer text-sm" *ngIf="summary.viewLess"
                     (click)="summary.ellipsis = !summary.ellipsis; summary.viewLess = !summary.viewLess">&nbsp;{{
                     'apptocsinglepage.viewLess' | translate }}</div>
             </div>
             <div class="ws-mat-default-text font-bold text-sm" *ngIf="summary.ellipsis">
-                <span class="cursor-pointer"
-                    (click)="summary.ellipsis = !summary.ellipsis; summary.viewLess = !summary.viewLess">{{
+                <span class="cursor-pointer" (click)="summary.ellipsis = !summary.ellipsis; summary.viewLess = !summary.viewLess">{{
                     'apptocsinglepage.viewMore' | translate }}</span>
             </div>
         </ng-container>
@@ -389,32 +383,26 @@
     <div class="flex flex-col"
         *ngIf="(contentReadData?.instructions || contentReadData?.purpose) && config?.uiVisibility?.about?.learningOutcome !== false">
         <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             <div class="flex flex-col gap-2 mt-4">
-                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
             <div class="mat-subheading-1 nodtranslate">{{ 'apptocsinglepage.learningOutcome' | translate }}</div>
-            <div class="desc"
-                [ngClass]="{'mob-desc-ellipsis': description.ellipsis && isMobile, 'desc-ellipsis': description.ellipsis && !isMobile}"
+            <div class="desc" [ngClass]="{'mob-desc-ellipsis': description.ellipsis && isMobile, 'desc-ellipsis': description.ellipsis && !isMobile}"
                 #descElem>
 
-                <div [innerHTML]="contentReadData?.instructions || contentReadData?.purpose | replaceNbsp"
-                    class="mob-text break-words nodtranslate"></div>
+                <div [innerHTML]="contentReadData?.instructions || contentReadData?.purpose | replaceNbsp" class="mob-text break-words nodtranslate">
+                </div>
                 <div class="ws-mat-default-text font-bold cursor-pointer text-sm" *ngIf="description.viewLess"
                     (click)="description.ellipsis = !description.ellipsis; description.viewLess = !description.viewLess">
                     &nbsp;{{ 'apptocsinglepage.viewLess' | translate }}</div>
             </div>
             <div class="ws-mat-default-text font-bold text-sm" *ngIf="description.ellipsis">
-                <span class="cursor-pointer"
-                    (click)="description.ellipsis = !description.ellipsis; description.viewLess = !description.viewLess">{{
+                <span class="cursor-pointer" (click)="description.ellipsis = !description.ellipsis; description.viewLess = !description.viewLess">{{
                     'apptocsinglepage.viewMore' | translate }}</span>
             </div>
         </ng-container>
@@ -422,15 +410,11 @@
 
     <div class="flex flex-col" *ngIf="content?.objectives">
         <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             <div class="flex flex-col gap-2 mt-4">
-                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
@@ -445,31 +429,24 @@
                     &nbsp;{{ 'apptocsinglepage.viewLess' | translate }}</div>
             </div>
             <div class="ws-mat-default-text font-bold text-sm" *ngIf="objectives.ellipsis">
-                <span class="cursor-pointer"
-                    (click)="objectives.ellipsis = !objectives.ellipsis; objectives.viewLess = !objectives.viewLess">{{
+                <span class="cursor-pointer" (click)="objectives.ellipsis = !objectives.ellipsis; objectives.viewLess = !objectives.viewLess">{{
                     'apptocsinglepage.viewMore' | translate }}</span>
             </div>
         </ng-container>
     </div>
 
-    <div class="flex flex-col"
-        *ngIf="contentReadData?.summary && contentReadData?.contentId && contentReadData?.contentId.includes('ext_')">
+    <div class="flex flex-col" *ngIf="contentReadData?.summary && contentReadData?.contentId && contentReadData?.contentId.includes('ext_')">
         <ng-container *ngIf="skeletonLoader">
-            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'"
-                [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+            <ws-widget-skeleton-loader [width]="'80px'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             <div class="flex flex-col gap-2 mt-4">
-                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'80%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'95%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'65%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
             </div>
         </ng-container>
         <ng-container *ngIf="!skeletonLoader">
             <div class="mat-subheading-1 nodtranslate">{{ 'apptocsinglepage.summary' | translate }}</div>
-            <div class="desc"
-                [ngClass]="{'mob-desc-ellipsis': description.ellipsis && isMobile, 'desc-ellipsis': description.ellipsis && !isMobile}"
+            <div class="desc" [ngClass]="{'mob-desc-ellipsis': description.ellipsis && isMobile, 'desc-ellipsis': description.ellipsis && !isMobile}"
                 #descElem>
 
                 <div [innerHTML]="contentReadData?.summary | replaceNbsp" class="mob-text break-words nodtranslate">
@@ -479,8 +456,7 @@
                     &nbsp;{{ 'apptocsinglepage.viewLess' | translate }}</div>
             </div>
             <div class="ws-mat-default-text font-bold text-sm" *ngIf="description.ellipsis">
-                <span class="cursor-pointer"
-                    (click)="description.ellipsis = !description.ellipsis; description.viewLess = !description.viewLess">{{
+                <span class="cursor-pointer" (click)="description.ellipsis = !description.ellipsis; description.viewLess = !description.viewLess">{{
                     'apptocsinglepage.viewMore' | translate }}</span>
             </div>
         </ng-container>
@@ -573,8 +549,7 @@
                     <div class="flex flex-row gap-3 sm:gap-4 mb-3 flex-wrap">
                         <ng-container *ngFor="let sector of sectorsList; let i = index; let isLast = last">
                             <!-- [ngClass]="{'theme-activated': competencySelected === item.key}"-->
-                            <div class="themes-button"
-                                [ngClass]="{'theme-activated': selectedSectorId === sector?.sectorId}"
+                            <div class="themes-button" [ngClass]="{'theme-activated': selectedSectorId === sector?.sectorId}"
                                 (click)="handleSubsector(sector)">{{ sector?.sectorName }}</div>
                         </ng-container>
                     </div>
@@ -624,8 +599,7 @@
             <div class="mat-subheading-1 nodtranslate" *ngIf="config?.uiVisibility?.about?.tags?.title !== false">{{
                 'userProfile.tags' | translate }}</div>
             <ng-container *ngIf="tagData?.length">
-                <div class="flex flex-wrap gap-2" [ngClass]="{'tags-ellipsis': tagsEllipsis && !viewMoreTags}"
-                    #tagsElem>
+                <div class="flex flex-wrap gap-2" [ngClass]="{'tags-ellipsis': tagsEllipsis && !viewMoreTags}" #tagsElem>
                     <ng-container *ngFor="let tag of tagData; let i = index">
                         <div class="text-xs mob-text">{{ handleCapitalize(tag) }}</div>
                         <div class="flex items-center" *ngIf="tagData?.length > (i + 1)">
@@ -671,14 +645,13 @@
     </ng-container> -->
 
     <div class="mobile-karma-points">
-        <ws-widget-karma-points [content]="content" [btnCategory]="" [condition]="condition"
-            (clickClaimKarmaPoints)="handleClickOfClaim($event)" [data]="kparray">
+        <ws-widget-karma-points [content]="content" [btnCategory]="" [condition]="condition" (clickClaimKarmaPoints)="handleClickOfClaim($event)"
+            [data]="kparray">
         </ws-widget-karma-points>
     </div>
 
     <ng-container *ngIf="skeletonLoader">
-        <ws-widget-skeleton-loader [width]="'100%'" [height]="'72px'"
-            [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+        <ws-widget-skeleton-loader [width]="'100%'" [height]="'72px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
     </ng-container>
     <ng-container *ngIf="!skeletonLoader && !forPreview">
         <!-- commented because of new discussion v2 comments implmentation -->
@@ -698,17 +671,13 @@
     <ng-container *ngIf="skeletonLoader">
         <div class="flex flex-col gap-6">
             <div class="flex flex-col gap-4" *ngFor="let i of [1, 2]">
-                <ws-widget-skeleton-loader [width]="'72px'" [height]="'20px'"
-                    [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                <ws-widget-skeleton-loader [width]="'72px'" [height]="'20px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
 
                 <div class="flex flex-row items-center gap-3">
-                    <ws-widget-skeleton-loader [width]="'36px'" [height]="'36px'"
-                        [bindingClass]="'rounded-full'"></ws-widget-skeleton-loader>
+                    <ws-widget-skeleton-loader [width]="'36px'" [height]="'36px'" [bindingClass]="'rounded-full'"></ws-widget-skeleton-loader>
                     <div class="flex flex-col gap-2">
-                        <ws-widget-skeleton-loader [width]="'124px'" [height]="'20px'"
-                            [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-                        <ws-widget-skeleton-loader [width]="'124px'" [height]="'12px'"
-                            [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                        <ws-widget-skeleton-loader [width]="'124px'" [height]="'20px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+                        <ws-widget-skeleton-loader [width]="'124px'" [height]="'12px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
                     </div>
                 </div>
             </div>
@@ -720,11 +689,10 @@
         <div class="flex flex-column gap-3" [ngClass]="{'hideAbove1200': !router.url.includes('/viewer/')}">
             <div class="text-base font-bold">{{ 'apptocsinglepage.authorsAndCurators' | translate }}</div>
             <div class="flex flex-col gap-4">
-                <div class="flex flex-row gap-4 items-center"
-                    *ngFor="let author of handleParseJsonData(contentReadData?.creatorDetails)">
+                <div class="flex flex-row gap-4 items-center" *ngFor="let author of handleParseJsonData(contentReadData?.creatorDetails)">
                     <div class="flex items-center justify-center">
-                        <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'"
-                            [photoUrl]="author.photo || ''" [name]="author.name">
+                        <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'" [photoUrl]="author.photo || ''"
+                            [name]="author.name">
                         </ws-widget-avatar-photo>
                     </div>
                     <div class="flex flex-col gap-1 justify-center">
@@ -733,11 +701,10 @@
                     </div>
                 </div>
 
-                <div class="flex flex-row gap-4"
-                    *ngFor="let creator of handleParseJsonData(contentReadData?.creatorContacts)">
+                <div class="flex flex-row gap-4" *ngFor="let creator of handleParseJsonData(contentReadData?.creatorContacts)">
                     <div class="flex items-center justify-center">
-                        <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'"
-                            [photoUrl]="creator.photo || ''" [name]="creator.name">
+                        <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'" [photoUrl]="creator.photo || ''"
+                            [name]="creator.name">
                         </ws-widget-avatar-photo>
                     </div>
                     <div class="flex flex-col gap-1 justify-center">
@@ -753,8 +720,7 @@
             <div class="text-base font-bold">{{ 'apptocsinglepage.provider' | translate }}</div>
             <div class="flex flex-row gap-4 items-center">
                 <div class="provider-logo-div">
-                    <img *ngIf="content?.creatorLogo" [src]="content?.creatorLogo"
-                        alt="{{ 'apptocsinglepage.provider' | translate }}" />
+                    <img *ngIf="content?.creatorLogo" [src]="content?.creatorLogo" alt="{{ 'apptocsinglepage.provider' | translate }}" />
                     <img *ngIf="!content?.creatorLogo" src="/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg"
                         alt="{{ 'apptocsinglepage.provider' | translate }}" />
                 </div>
@@ -779,8 +745,7 @@
     </ng-container>
 
     <ng-container *ngIf="skeletonLoader">
-        <ws-widget-skeleton-loader [width]="'100%'" [height]="'400px'"
-            [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
+        <ws-widget-skeleton-loader [width]="'100%'" [height]="'400px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
     </ng-container>
     <ng-container
         *ngIf="!skeletonLoader && !forPreview && config?.uiVisibility?.about?.ratingsAndReviews?.visible !== false">
@@ -818,8 +783,7 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-row gap-2 items-center text-sm">
-                                    <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'"
-                                        [photoUrl]="eachReview?.photo || ''"
+                                    <ws-widget-avatar-photo [randomColor]="true" [datalen]="1" [size]="'round-m'" [photoUrl]="eachReview?.photo || ''"
                                         [name]="eachReview?.firstName"></ws-widget-avatar-photo>
                                     <div class="flex flex-wrap">
                                         <div>{{ handleCapitalize(eachReview?.firstName.toLowerCase(), 'name') }}</div>

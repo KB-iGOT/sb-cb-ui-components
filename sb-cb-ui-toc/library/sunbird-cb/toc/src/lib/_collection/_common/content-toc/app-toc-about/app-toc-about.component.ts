@@ -64,14 +64,14 @@ interface IStripUnitContentData {
 }
 
 @Component({
-    selector: 'ws-widget-app-toc-about',
-    templateUrl: './app-toc-about.component.html',
-    styleUrls: ['./app-toc-about.component.scss'],
-    standalone: false
+  selector: 'ws-widget-app-toc-about',
+  templateUrl: './app-toc-about.component.html',
+  styleUrls: ['./app-toc-about.component.scss'],
+  standalone: false
 })
 
 export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, OnChanges, OnDestroy {
-  
+
   @Input() condition: any
   @Input() kparray: any
   @Input() content: NsContent.IContent | null = null
@@ -94,6 +94,9 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   @Input() languageList = []
   @Input() lockCertificate = false
   @Input() fromMDO = false
+  @Input() isBatchFull = false
+  @Input() showLimitedSeatsMsg = false
+  @Input() areAllActiveBatchesFull = false
   @Output() trigerCompletionSurveyForm = new EventEmitter<boolean>()
   @ViewChild('summaryElem') summaryElem !: ElementRef
   @ViewChild('objectivesElem') objectivesElem !: ElementRef
@@ -215,7 +218,22 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       this.isMobile = false
     }
 
-    
+    this.tocSvc.getSelectedBatch
+      .pipe(takeUntil(this.destroySubject$))
+      .subscribe((selectedBatch: any) => {
+        this.batchData = selectedBatch
+        const enrolled = selectedBatch?.userCount?.enrolled
+        const currentBatchSize = selectedBatch?.content?.[0]?.batchAttributes?.currentBatchSize
+        if (enrolled !== undefined && currentBatchSize !== undefined) {
+          this.isBatchFull = enrolled >= currentBatchSize
+          this.showLimitedSeatsMsg = !this.isBatchFull && currentBatchSize > 0 && (enrolled >= (currentBatchSize * 0.8))
+        } else {
+          this.isBatchFull = false
+          this.showLimitedSeatsMsg = false
+        }
+      })
+
+
 
     if (this.content && this.content.identifier) {
       this.fetchRatingSummary()
@@ -281,7 +299,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       }
     }
 
-   if (
+    if (
       this.content?.contentId &&
       this.content?.certificateObj?.data &&
       Object.keys(this.content.certificateObj.data).length === 0 &&
@@ -335,11 +353,11 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
         if (this.searchTagElem && this.searchTagElem.nativeElement.offsetHeight > 64) {
           this.searchTagsEllipsis = true
         }
-          if(this.fromMDO) {
-        this.baseContentReadData = this.content.result.content
-        console.log('this.baseContentReadData--', this.baseContentReadData)
-        this.loadCompetencies()
-      }
+        if (this.fromMDO) {
+          this.baseContentReadData = this.content.result.content
+          console.log('this.baseContentReadData--', this.baseContentReadData)
+          this.loadCompetencies()
+        }
       }, 500)
     }
 
@@ -378,7 +396,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
           break
         }
       }
-    
+
       if (this.content && this.content.identifier) {
         if (this.ratingSummary && Object.keys(this.ratingSummary).length === 0) {
           this.fetchRatingSummary()
@@ -444,7 +462,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       }
     }
     this.forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-     if (changes.content) {
+    if (changes.content) {
       this.isExternalContent = _.get(changes, 'content.currentValue.contentId', '').toString().includes('ext_')
     }
   }
@@ -871,13 +889,13 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   handleClickOfClaim(event: any): void {
     this.handleClaimService.setClaimData(event)
   }
-  
+
   getCourseIdForCertificate(): string {
     const paramId = this.activatedRoute.snapshot.paramMap.get('id');
     if (this.content?.contentId?.includes('ext_')) {
       return this.content.contentId;
     }
-    
+
     return paramId || '';
   }
 
@@ -908,7 +926,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   //         (response) => {
   //           if (response) {
   //             this.downloadCertificateBool = false;
-             
+
   //             this.dialog.open(CertificateDialogComponent, {
   //               width: '1200px',
   //               data: {
@@ -959,7 +977,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
     this.downloadCertificateBool = true
     const certId = this.content && this.content.certificateObj.certId
     if (this.content && this.content.certificateObj && !this.content.certificateObj.certData) {
-     if (certId) {
+      if (certId) {
         this.contentSvc.downloadCert(certId).subscribe(response => {
           if (this.content) {
             this.downloadCertificateBool = false
@@ -969,7 +987,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
               data: { cet: response.result.printUri, certId: this.content && this.content.certificateObj.certId },
             })
           }
-        },                                             (error: any) => {
+        }, (error: any) => {
           this.downloadCertificateBool = false
           this.loggerService.error('CERTIFICATE FETCH ERROR >', error)
           this.matSnackBar.open('Unable to View Certificate, due to some error!')
@@ -1045,7 +1063,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   ngOnDestroy(): void {
     this.destroySubject$.unsubscribe()
     this.timerUnsubscribe.unsubscribe()
-    if(this.refreshratingSub){
+    if (this.refreshratingSub) {
       this.refreshratingSub.unsubscribe()
     }
   }
