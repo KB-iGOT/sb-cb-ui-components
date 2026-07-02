@@ -22,11 +22,11 @@
     "noUnusedParameters": true,
     "outDir": "./dist/out-tsc",
     "paths": {
-      "@sunbird-cb/resolver": [
-        "library/sunbird-cb/resolver"
+      "@sunbird-cb/itsm-chatbot": [
+        "library/sunbird-cb/itsm-chatbot"
       ],
-      "@sunbird-cb/resolver/*": [
-        "library/sunbird-cb/resolver/*"
+      "@sunbird-cb/itsm-chatbot/*": [
+        "library/sunbird-cb/itsm-chatbot/*"
       ]
     },
     "removeComments": true,
