@@ -1,9 +1,10 @@
 {
   "name": "sb-cb-ui-itsm-chatbot",
-  "version": "0.0.1",
+  "version": "0.0.3-ang-17-20",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
+    "build-watch": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch",
     "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
@@ -22,10 +23,14 @@
     "@angular/material": "^20.2.14",
     "@angular/platform-browser": "^20.3.16",
     "@angular/platform-browser-dynamic": "^20.3.16",
-    "@sunbird-cb/utils-v2":"0.0.5-ang-17-20",
     "@angular/router": "^20.3.16",
+    "@ngx-translate/core": "^18.0.0",
+    "@ngx-translate/http-loader": "^18.0.0",
+    "@sunbird-cb/utils-v2": "0.0.5-ang-17-20",
     "@types/lodash": "4.17.5",
     "moment": "^2.29.1",
+    "ngx-image-cropper": "^9.1.6",
+    "ngx-markdown": "^22.0.0",
     "rxjs": "~6.5.2",
     "tslib": "^2.0.0"
   },
