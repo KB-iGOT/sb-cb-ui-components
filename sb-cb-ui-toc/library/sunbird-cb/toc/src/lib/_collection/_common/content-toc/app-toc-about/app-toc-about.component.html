@@ -271,7 +271,7 @@
     </ng-container>
 
     <ng-container
-        *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM  selectedBatchData && !areAllActiveBatchesFull && config?.uiVisibility?.about?.batchInfo !== false">
+        *ngIf="content && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM && selectedBatchData && !areAllActiveBatchesFull && config?.uiVisibility?.about?.batchInfo !== false">
         <div class="flex flex-row gap-3 justify-around hideAbove1200">
             <div class="batch-info">
                 <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize ||

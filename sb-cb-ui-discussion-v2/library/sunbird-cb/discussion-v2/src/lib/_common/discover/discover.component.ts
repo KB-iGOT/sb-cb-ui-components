@@ -162,7 +162,8 @@ export class DiscoverComponent implements OnInit, OnChanges {
     let request: any = {
       filterCriteriaMap: {
         status: 'active',
-        topicName: topic
+        topicName: topic,
+        communityAccessLevel: 'public'
       },
       requestedFields: [],
       pageNumber: 0,

@@ -3,10 +3,17 @@
     border-radius: 12px;
     border: 1px solid #c3c3c3;
     background: white;
+    overflow: hidden;
     .poster {
         width: 180px;
         height: 107px;
         border-radius: 12px;
+        flex-shrink: 0;
+    }
+    .flex-col {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
     }
     .event-label {
         border: 1px solid #ef951e;

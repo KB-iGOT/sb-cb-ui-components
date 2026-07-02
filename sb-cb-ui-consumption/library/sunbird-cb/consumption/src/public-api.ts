@@ -34,6 +34,8 @@ export * from './lib/_common/content-progress/content-progress.module'
 export * from './lib/_common/microsites/mdo-channels/mdo-channel.module'
 export * from './lib/_common/microsites/providers/providers.module'
 export * from './lib/_common/microsites/national-learning-week/national-learning.module'
+export * from './lib/_common/microsites/bharat-kalp/bharat-kalp.module'
+export * from './lib/_common/microsites/bharat-kalp/bharat-kalp/bharat-kalp.component'
 
 
 export * from './lib/_services/common-methods.service'
