@@ -2,3 +2,18 @@
   display: block;
   width: 100%;
 }
+
+.view-all-content {
+  position: relative;
+
+  .view-all-btn {
+    position: absolute;
+    color: var(--environment-button-primary-filled-primary);
+    border:  1.5px solid var(--environment-button-primary-filled-primary);
+    border-radius: 16px;
+    padding: 0px 16px;
+    height: 32px;
+    top: -45px;
+    cursor: pointer;
+  }
+}

@@ -563,7 +563,8 @@ export class WidgetContentLibService {
         }
       } else {
         this.oneStepResumeEnable = true
-        return this.gotoTocPage(content)
+        const tocPageUrl = this.gotoTocPage(content)
+        return tocPageUrl
       }
     }
   }
@@ -669,7 +670,7 @@ export class WidgetContentLibService {
     }
 
     const urlData = {
-      url: `/app/toc/${content.identifier || content.collectionId}/overview`,
+      url: `/app/toc/${content.identifier || content.collectionId || content.id}/overview`,
       queryParams: content.batchId ? { batchId: content.batchId } : {} as { [key: string]: any },
     }
     if (content.endDate && content?.courseCategory !== NsContent.ECourseCategory.COMPREHENSIVE_ASSESSMENT_PROGRAM) {
@@ -680,6 +681,8 @@ export class WidgetContentLibService {
       urlData.url = `/app/event-hub/home/${content.identifier}`
       urlData.queryParams = {}
     }
+
+    console.log('urlData', urlData)
 
     return urlData
   }

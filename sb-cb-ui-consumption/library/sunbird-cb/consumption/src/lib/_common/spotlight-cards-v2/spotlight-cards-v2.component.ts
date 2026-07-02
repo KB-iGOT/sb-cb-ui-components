@@ -11,11 +11,12 @@ import { MatIconModule } from '@angular/material/icon'
 import { Router } from '@angular/router'
 import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsSpotlightCardsV2 } from './spotlight-cards-v2.model'
+import { TranslateModule } from '@ngx-translate/core'
 
 @Component({
   selector: 'sb-uic-spotlight-cards-v2',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, TranslateModule],
   templateUrl: './spotlight-cards-v2.component.html',
   styleUrls: ['./spotlight-cards-v2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

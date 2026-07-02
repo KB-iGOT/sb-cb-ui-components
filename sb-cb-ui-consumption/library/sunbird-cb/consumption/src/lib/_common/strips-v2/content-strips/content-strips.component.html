@@ -16,23 +16,15 @@
       @case (CardType.CourseCard) {
       <sb-uic-card-course-v2 [content]="item" [isLoading]="loading()"></sb-uic-card-course-v2>
       }
-      <!-- @case (CardType.AssessmentCard) {
-      <sb-uic-card-assessment-strip [card]="item" />
-      }
-      @case (CardType.ProgramCard) {
-      <sb-uic-card-program-strip [card]="item" />
-      }
-      @default {
-      <sb-uic-card-course-strip [card]="item" />
-      } -->
       }
     </ng-template>
   </sb-uic-carousel>
 
   <!-- View All -->
   @if (shouldShowViewAll() && getViewAllUrl()) {
-  <div class="flex justify-end mt-3">
-    <a [href]="getViewAllUrl()" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
+  <div class="flex justify-end mt-3 view-all-content">
+    <a (click)="redirectViewAll(getViewAllUrl()?.path, getViewAllUrl()?.queryParams, getViewAllUrl()?.f)"
+      class="text-sm flex items-center justify-center font-medium view-all-btn hover:text-blue-800 hover:cursor-pointer">
       View All
     </a>
   </div>

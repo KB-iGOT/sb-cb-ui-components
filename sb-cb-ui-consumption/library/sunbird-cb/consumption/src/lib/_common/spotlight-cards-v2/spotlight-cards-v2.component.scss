@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════ */
 
 .ws-spotlight {
-  width: 100%;
+  margin: 0px 17px;
   font-family: inherit;
 
   /* ── Header row ─────────────────────────────────── */
@@ -66,12 +66,35 @@
     flex-wrap: nowrap;
     gap: 16px;
     width: 100%;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+
+    /* Hide scrollbar in webkit browsers */
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 2px;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+    }
   }
 
   /* ── Individual card (div – not clickable itself) ─────── */
   &__card {
     flex: 1 1 0;
-    /* equal share of full row width */
+    /* equal share of full row width on desktop */
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -163,15 +186,21 @@
   }
 }
 
-/* ── Responsive: 2-col wrap on small screens ─────── */
-@media (max-width: 640px) {
+/* ── Responsive: horizontal scroll on small screens ─────── */
+@media (max-width: 768px) {
   .ws-spotlight__grid {
-    flex-wrap: wrap;
+    /* Keep nowrap for horizontal scrolling */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .ws-spotlight__card {
-    flex: 1 1 calc(50% - 8px);
-    min-width: calc(50% - 8px);
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    scroll-snap-align: start;
   }
 }
 

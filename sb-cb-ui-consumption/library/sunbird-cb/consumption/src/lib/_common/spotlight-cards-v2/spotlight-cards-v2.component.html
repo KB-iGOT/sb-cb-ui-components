@@ -31,11 +31,12 @@
 
   <!-- ── Header row ───────────────────────────────────── -->
   <div class="ws-spotlight__header">
-    <h2 class="ws-spotlight__title">{{ resolvedHeading() }}</h2>
+    <h2 class="ws-spotlight__title">{{ resolvedHeading() | translate }}</h2>
 
     @if (resolvedShowToggle()) {
     <button type="button" class="ws-spotlight__toggle" [attr.aria-expanded]="!isCollapsed()"
-      [attr.aria-label]="isCollapsed() ? 'Expand ' + resolvedHeading() : 'Collapse ' + resolvedHeading()" (click)="toggle()">
+      [attr.aria-label]="isCollapsed() ? 'Expand ' + (resolvedHeading() | translate) : 'Collapse ' + (resolvedHeading() | translate)"
+      (click)="toggle()">
       <mat-icon class="ws-spotlight__toggle-icon" [class.ws-spotlight__toggle-icon--collapsed]="isCollapsed()"
         aria-hidden="true">
         expand_more

@@ -154,12 +154,16 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.view-all-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  font-weight: 300;
-  color: var(--text-bandw-black-body);
+.view-all-link {
+  cursor: pointer;
+
+  .view-all-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    font-weight: 300;
+    color: var(--text-bandw-black-body);
+  }
 }
 
 @keyframes pulse {

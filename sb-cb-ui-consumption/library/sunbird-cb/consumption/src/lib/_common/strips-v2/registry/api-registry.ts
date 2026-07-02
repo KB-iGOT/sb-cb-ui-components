@@ -1,4 +1,4 @@
-import { ApiMethod, ApiRegistryConfig } from "../models/content-section.model"
+import { ApiMethod, ApiRegistryConfig } from '../models/content-section.model'
 
 export const API_REGISTRY: ApiRegistryConfig = {
   popularCoursesApi: {
@@ -29,5 +29,144 @@ export const API_REGISTRY: ApiRegistryConfig = {
     endpoint: '/api/content/v1/trending',
     method: ApiMethod.Get,
     queryParams: { category: 'cyber' }
+  },
+  aparApi: {
+    endpoint: '/apis/proxies/v8/user/v1/cbplan',
+    method: ApiMethod.Get
+  },
+  trainingPlanApi: {
+    endpoint: '/apis/proxies/v8/user/v1/cbplan',
+    method: ApiMethod.Get
+  },
+  trendingOnIGOTApi: {
+    endpoint: '/apis/proxies/v8/trending/content/search',
+    method: ApiMethod.Post,
+    body: {
+      "request": {
+        "filters": {
+          "contextType": [
+            "courses"
+          ],
+          "organisation": "across"
+        },
+        "limit": 12
+      },
+      "query": ""
+    }
+  },
+  featuredAiCoursesApi: {
+    endpoint: '/apis/proxies/v8/playList/read/0133783095823810560program9e8b5fb0-0b87-11f0-8b90-4f196756cc33/0133783095823810560',
+    method: ApiMethod.Get
+  },
+  thirtyMinutesOrLessApi: {
+    endpoint: '/apis/proxies/v8/trending/content/search',
+    method: ApiMethod.Post,
+    body: {
+      "request": {
+        "filters": {
+          "contextType": [
+            "under_30_mins"
+          ],
+          "organisation": "across"
+        },
+        "limit": 12
+      },
+      "responseKey": "under_30_mins",
+      "query": ""
+    }
+  },
+  caProgramApi: {
+    endpoint: '/apis/proxies/v8/user/v2/assignedcourses',
+    method: ApiMethod.Post,
+    body: {
+      "courseCategory": "Comprehensive Assessment Program"
+    }
+  },
+  aparModeratedApi: {
+    endpoint: '/apis/proxies/v8/sunbirdigot/v4/search',
+    method: ApiMethod.Post,
+    body: {
+      "request": {
+        "query": "",
+        "filters": {
+          "courseCategory": [
+            "Moderated Course",
+            "Moderated Program",
+            "Moderated Assessment"
+          ],
+          "secureSettings.organisation": "0133783095823810560",
+          "contentType": [
+            "Course"
+          ],
+          "status": [
+            "Live"
+          ],
+          "secureSettings.isVerifiedKarmayogi": "No"
+        },
+        "sort_by": {
+          "lastUpdatedOn": "desc"
+        },
+        "facets": [
+          "mimeType"
+        ],
+        "limit": 20
+      }
+    }
+  },
+  learningPathApi: {
+    endpoint: '/apis/proxies/v8/sunbirdigot/search',
+    method: ApiMethod.Post,
+    body: {
+      "request": {
+        "filters": {
+          "contentType": [
+            "Course"
+          ],
+          "courseCategory": [
+            "learning pathway"
+          ],
+          "status": [
+            "Live"
+          ]
+        },
+        "limit": 5
+      },
+      "query": ""
+    }
+  },
+  standaloneApi: {
+    endpoint: '/apis/proxies/v8/sunbirdigot/search',
+    method: ApiMethod.Post,
+    body: {
+      'request': {
+        'filters': {
+          'primaryCategory': ['Standalone Assessment'],
+          'courseCategory': 'Invite-Only Assessment',
+          'contentType': ['Course']
+        },
+        'query': '',
+        'sort_by': { 'lastUpdatedOn': 'desc' },
+        'fields': [
+          'name', 'appIcon', 'instructions', 'description', 'purpose',
+          'mimeType', 'gradeLevel', 'identifier', 'medium', 'pkgVersion',
+          'board', 'subject', 'resourceType', 'primaryCategory', 'languageMapV1',
+          'contentType', 'channel', 'organisation', 'trackable', 'license',
+          'posterImage', 'idealScreenSize', 'learningMode', 'creatorLogo',
+          'duration', 'avgRating', 'difficultyLevel'
+        ]
+      },
+      'query': ''
+    },
+    chainedApi: {
+      endpoint: '/apis/proxies/v8/learner/course/v4/user/enrollment/details/',
+      method: ApiMethod.Post,
+      addUserId: true,
+      sourceListPath: 'result.content',
+      identifierField: 'identifier',
+      buildBody: (ids: string[]) => ({ request: { courseId: ids } }),
+      enrolledListPath: 'result.courses',
+      enrolledMatchField: 'courseId'
+    }
   }
+
 }

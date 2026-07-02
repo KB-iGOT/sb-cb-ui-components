@@ -6,6 +6,7 @@ import { AccordionComponent } from '../accordion/accordion.component'
 import { ContentStripWithTabsPillsV2Component } from '../content-strip-with-tabs-pills/content-strip-with-tabs-pills.component'
 import { ContentStripWithPillsComponent } from '../content-strip-with-pills/content-strip-with-pills.component'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
+import { SbUicSpotlightCardsV2Component } from '../../spotlight-cards-v2/spotlight-cards-v2.component'
 
 @Component({
   selector: 'sb-uic-contetn-sections',
@@ -15,10 +16,11 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
     AccordionComponent,
     ContentStripWithTabsPillsV2Component,
     ContentStripWithPillsComponent,
-    ContentStripsComponent
+    ContentStripsComponent,
+    SbUicSpotlightCardsV2Component
   ],
   templateUrl: './contetn-sections.component.html',
-  styleUrl: './contetn-sections.component.scss',
+  styleUrls: ['./contetn-sections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContetnSectionsComponent {

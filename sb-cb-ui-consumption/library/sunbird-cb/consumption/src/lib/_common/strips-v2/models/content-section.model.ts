@@ -7,7 +7,8 @@ export enum VisibilityMode {
 export enum DisplayType {
   Tabs = 'tabs',
   Pills = 'pills',
-  Cards = 'cards'
+  Cards = 'cards',
+  Spotlight = 'spotlight'
 }
 
 export enum CardType {
@@ -25,9 +26,21 @@ export interface ContentConfig {
   apiDetailsKey: string
   cardType: CardType
   maxCardsToShow: number
-  cardClickUrl: string
-  viewAllUrl: string | null
+  cardClickDetails: {
+    courseCategory: string
+  }
+  viewMoreUrl: {
+    path: string
+    queryParams?: Record<string, any>
+    f?: any
+  },
   showViewAll: boolean
+}
+
+export interface SpotlightConfig {
+  iconUrl: string
+  label: string
+  redirectionUrl: string
 }
 
 export interface PillConfig {
@@ -62,6 +75,7 @@ export interface ContentSectionConfig {
   defaultPillKey?: string
   pills?: PillConfig[]
   contentConfig?: ContentConfig
+  spotlightConfig?: SpotlightConfig[]
 }
 
 export interface DynamicTab {
@@ -71,12 +85,32 @@ export interface DynamicTab {
   context: TabConfig
 }
 
+export interface ChainedApiConfig {
+  endpoint: string
+  method: ApiMethod
+  queryParams?: Record<string, string>
+  headers?: Record<string, string>
+  addUserId?: boolean
+  // Dot-notation path in first response to extract the source list (e.g., 'result.content')
+  sourceListPath: string
+  // Field in each source item to collect as identifiers (e.g., 'identifier')
+  identifierField: string
+  // Builds the request body for the second API using collected identifiers
+  buildBody: (ids: string[]) => Record<string, unknown>
+  // Dot-notation path in second response to get the enrolled list (e.g., 'result.courses')
+  enrolledListPath: string
+  // Field in each enrolled item to match against source identifiers (e.g., 'courseId')
+  enrolledMatchField: string
+}
+
 export interface ApiRegistryEntry {
   endpoint: string
   method: ApiMethod
   queryParams?: Record<string, string>
   body?: Record<string, unknown>
   headers?: Record<string, string>
+  addUserId?: boolean
+  chainedApi?: ChainedApiConfig
 }
 
 export interface ApiRegistryConfig {

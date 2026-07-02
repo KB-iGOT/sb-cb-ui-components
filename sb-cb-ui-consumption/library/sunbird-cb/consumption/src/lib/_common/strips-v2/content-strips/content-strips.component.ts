@@ -7,6 +7,7 @@ import { ContentApiService } from '../services/content-api.service'
 import { CardTransformerService } from '../services/card-transformer.service'
 import { CarouselComponent } from '../../carousel/carousel.component'
 import { CardCourseV2Component } from '../../../../public-api'
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'sb-uic-content-strips',
@@ -28,6 +29,7 @@ export class ContentStripsComponent implements OnInit {
   private apiService = inject(ContentApiService);
   private cardTransformer = inject(CardTransformerService);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
 
   cards = signal<CardViewModel[]>([]);
   skeletonArray = signal<number[]>([]);
@@ -71,7 +73,7 @@ export class ContentStripsComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          const transformed = this.cardTransformer.transformCards(response, config.cardType)
+          const transformed = this.cardTransformer.transformCards(response, config.cardType, config.apiDetailsKey)
           const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
           this.cards.set(limited)
           this.loading.set(false)
@@ -83,13 +85,24 @@ export class ContentStripsComponent implements OnInit {
       })
   }
 
-  getCardClickUrl(card: CardViewModel): string {
-    const template = this.contentConfig()?.cardClickUrl ?? ''
-    return template.replace(':identifier', card?.id ?? '')
+
+  getViewAllUrl(): { path: string, queryParams?: Record<string, any>, f?: any } | null {
+    return this.contentConfig()?.viewMoreUrl ?? null
   }
 
-  getViewAllUrl(): string | null {
-    return this.contentConfig()?.viewAllUrl ?? null
+  redirectViewAll(path: string, queryParamsData: any, filters?: any) {
+    let queryParams = queryParamsData
+    if (filters) {
+      queryParams = {
+        f: JSON.stringify(filters),
+        queryParamsData
+      }
+    }
+    this.navigateToRoute(path, queryParams)
+  }
+
+  private navigateToRoute(path: string, queryParamsData: any): void {
+    this.router.navigate([path], { queryParams: queryParamsData })
   }
 
   shouldShowViewAll(): boolean {
