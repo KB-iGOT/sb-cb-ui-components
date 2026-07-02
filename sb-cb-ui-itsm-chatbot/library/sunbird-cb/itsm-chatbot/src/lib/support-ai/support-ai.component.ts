@@ -1,12 +1,14 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core'
 import { Router, NavigationEnd } from '@angular/router'
 import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
-
-import { environment } from '../../../environments/environment'
-import { MatDialog } from '@angular/material/dialog'
+// import { RootService } from '../root/root.service'
+// import { environment } from '../../../environments/environment'
+// import { NonReleventFeedbackDialogComponent } from '@sunbird-cb/collection'
+// import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar as MatSnackbarNew } from '@angular/material/snack-bar'
-import cloneDeep from 'lodash/cloneDeep'
+// import cloneDeep from 'lodash/cloneDeep'
 import { SupportAiService } from './support-ai.service'
+import { ChatbotService } from './chatbot.service'
 
 
 @Component({
@@ -107,12 +109,31 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
 
   conversationEnded = false;
   isInputEnabled = false;
+  showRetry = false;
+retryCallback: (() => void) | null = null;
+
+  // course picker var
+  currentPicker: any = null;
+
+pickerSearch = '';
+
+filteredPickerItems: any[] = [];
+
+selectedPickerItem: any = null;
+
+pickerOpened = false;
+showAllPlans = false;
+
+expandedCourseLists: { [planId: string]: boolean } = {};
+
+  // nested picker state
+  expandedPlanIds: { [key: string]: boolean } = {};
   constructor(
     private configSvc: ConfigurationsService,
     private eventSvc: EventService,
     private renderer: Renderer2,
-    private chatbotService: SupportAiService,
-    private dialog: MatDialog,
+    private chatbotService: ChatbotService,
+    // private dialog: MatDialog,
     private matSnackBarNew: MatSnackbarNew,
     private supportAiService: SupportAiService,
     private router: Router) { }
@@ -135,7 +156,7 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
       this.createInititals(this.userInfo.firstName)
     }
 
-    const email = environment.supportEmail || 'mission.karmayogi@gov.in'
+    const email = 'mission.karmayogi@gov.in'
     this.callText = `<a class='hint-text' target='_blank' href='https://bit.ly/44MJlo4'>Teams Call</a>&nbsp;`
     this.emailText = `<a class='hint-text' target='_blank' href='mailto:${email}'>${email}.</a>`
 
@@ -155,74 +176,141 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
           this.createSession()
         }
       },
-      error: () => {
-        this.createSession()
-      }
+    error: () => {
+  this.loadingSupportAI = false;
+  this.setRetry(() => this.initializeSupportAI());
+}
     })
   }
+  private setRetry(callback: () => void) {
+  this.showRetry = true;
+  this.retryCallback = callback;
+}
+
+retryApi() {
+  this.showRetry = false;
+
+  if (this.retryCallback) {
+    this.retryCallback();
+  }
+}
   createSession() {
 
-    this.supportAiService
-      .createSession()
-      .subscribe((res: any) => {
-
-        this.sessionId = res.session_id
-
-        this.chatActivities = []
-
-        this.renderActivities(
-          res.activities
-        )
-
-        this.loadingSupportAI = false
-      })
+   this.supportAiService.createSession().subscribe({
+  next: (res: any) => {
+    this.sessionId = res.session_id;
+    this.chatActivities = [];
+    this.renderActivities(res.activities);
+    this.loadingSupportAI = false;
+    this.showRetry = false;
+  },
+  error: () => {
+    this.loadingSupportAI = false;
+    this.setRetry(() => this.createSession());
   }
-  renderActivities(activities: any[]) {
-
-    activities.forEach(activity => {
-
-      this.chatActivities.push({
-        sender: 'bot',
-        activity
-      })
-
-      if (activity.disable_input !== undefined) {
-        this.isInputEnabled = !activity.disable_input
-      }
-    })
+});
   }
+renderActivities(activities: any[]) {
+
+  activities.forEach((activity, index) => {
+
+    const isLast = index === activities.length - 1;
+
+    this.chatActivities.push({
+      sender: 'bot',
+      activity,
+      showTimestamp: isLast,
+      timestamp: isLast ? new Date() : null,
+      showAllChoices: false
+
+    });
+
+    if (activity.disable_input !== undefined) {
+      this.isInputEnabled = !activity.disable_input;
+    }
+
+    if (activity.type === 'picker') {
+      this.currentPicker = activity;
+      this.filteredPickerItems = [...activity.items];
+      this.pickerSearch = '';
+    }
+
+if (activity.type === 'nested_picker') {
+  this.currentPicker = activity;
+  this.expandedPlanIds = {};
+
+  activity.items?.forEach((plan: any) => {
+    plan.showAllCourses = false;
+  });
+}
+
+  });
+  setTimeout(() => {
+
+    this.scrollToBottomEvent.emit()
+  }, 100);
+}
+filterPickerItems() {
+
+  const search = this.pickerSearch.toLowerCase();
+
+  this.filteredPickerItems =
+    this.currentPicker.items.filter((item: any) =>
+      item.label.toLowerCase().includes(search)
+    );
+
+}
+
+selectPickerItem(item: any) {
+
+  this.selectedPickerItem = item;
+
+  this.pickerOpened = false;
+
+  this.chatActivities.push({
+    sender: 'user',
+    text: item.label,
+    timestamp: new Date()
+  });
+
+  this.sendTurn({
+    action: 'pick_item',
+    picker_id: this.currentPicker.picker_id,
+    item_id: item.id
+  });
+
+}
 
   sendTurn(payload: any) {
 
     this.loadingSupportAI = true
 
-    this.supportAiService
-      .sendTurn(
-        this.sessionId,
-        payload
-      )
+    this.supportAiService.sendTurn(this.sessionId, payload)
       .subscribe({
-
         next: (res: any) => {
 
-          this.renderActivities(
-            res.activities
-          )
+          this.renderActivities(res.activities)
+
+          if (res.activities?.some((a: any) => a.type === 'end')) {
+            this.conversationEnded = true
+          }
 
           this.loadingSupportAI = false
+          this.showRetry = false;
         },
-
         error: () => {
-
-          this.loadingSupportAI = false
-        }
+    this.loadingSupportAI = false;
+    this.setRetry(() => this.sendTurn(payload));
+}
       })
   }
   selectChoice(choice: any) {
 
     this.chatActivities.push({
       sender: 'user',
-      text: choice.label
+      text: choice.label,
+      icon: choice.icon,
+      timestamp: new Date()
     })
 
     this.sendTurn({
@@ -230,29 +318,60 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
       choice_id: choice.id
     })
   }
+
+  startNewConversation() {
+    this.chatActivities = []
+    this.sessionId = ''
+    this.isInputEnabled = false
+    this.createSession()
+  }
   loadHistory() {
 
-    this.supportAiService
-      .getHistory(this.sessionId)
-      .subscribe((res: any) => {
+   this.supportAiService
+  .getHistory(this.sessionId)
+  .subscribe({
+    next: (res: any) => {
 
-        this.chatActivities = []
-        if (res?.messages?.length === 0) {
-          this.createSession()
-        }
-        if (res?.messages?.length) {
+      this.showRetry = false;   // hide retry after success
 
-          res.messages.forEach((msg: any) => {
+      this.chatActivities = [];
+      console.log('res', res);
+
+      if (res?.messages?.length) {
+
+        res.messages.forEach((msg: any) => {
 
             if (msg.role === 'bot') {
 
               msg.activities.forEach(
-                (activity: any) => {
+                (activity: any, idx: number) => {
 
+                  const isLast = idx === msg.activities.length - 1
                   this.chatActivities.push({
                     sender: 'bot',
-                    activity
+                    activity,
+                    showTimestamp: isLast,
+                    timestamp: isLast ? new Date(msg.timestamp || Date.now()) : null
                   })
+
+                  if (activity.disable_input !== undefined) {
+  this.isInputEnabled = !activity.disable_input;
+}
+
+if (activity.type === 'picker') {
+  this.currentPicker = activity;
+  this.filteredPickerItems = [...activity.items];
+  this.pickerSearch = '';
+}
+
+if (activity.type === 'nested_picker') {
+  this.currentPicker = activity;
+  this.expandedPlanIds = {};
+
+  activity.items?.forEach((plan: any) => {
+    plan.showAllCourses = false;
+  });
+}
                 }
               )
             }
@@ -261,14 +380,24 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
 
               this.chatActivities.push({
                 sender: 'user',
-                text: msg.text
+                text: msg.text,
+                timestamp: new Date(msg.timestamp || Date.now())
               })
             }
           })
         }
 
         this.loadingSupportAI = false
-      })
+      },
+      error: () => {
+        this.loadingSupportAI = false;
+        this.setRetry(() => this.loadHistory());
+      }
+    })
+     setTimeout(() => {
+    
+    this.scrollToBottomEvent.emit()
+  }, 200);
   }
 
 
@@ -659,6 +788,11 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
 
   ngAfterViewInit(): void {
     this.resizeTextarea(this.textArea.nativeElement, '')
+
+      setTimeout(() => {
+    
+    this.scrollToBottomEvent.emit()
+  }, 200);
   }
 
   scrollToBottom(): void {
@@ -680,47 +814,38 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
   }
 
   submitSearchQuery(textArea: HTMLTextAreaElement, event: any) {
-    if (!this.initiateSupportNewChat) {
-      return false
-    }
-    if (!this.searchQuery.trim()) {
-      event.preventDefault() // Prevents Enter key from adding a new line
-    }
-    this.searchQuery = this.searchQuery.trim()
-    // console.log('this.aiSearchResultArr--->', this.aiSearchResultArr)
-    this.aiSearchResultArr.map((item: any, index: any) => {
-      if (item && (item.newMessage === '')) {
-        // delete this.aiSearchResultArr[index]
-        this.aiSearchResultArr.splice(index, 1)
-      }
-    })
-    this.resultFetch = false
-    //  console.log(this.searchQuery)
-    this.cloneSearchQuery = ''
-    // this.searchQuery = 'Basics of National Income Accounting'
-    let sendMsgObj = {
-      type: 'sendMsg',
-      tab: 'support-ai',
-      question: this.searchQuery
-    }
-    this.cloneSearchQuery = cloneDeep(this.searchQuery)
-    this.aiSearchResultArr.push(sendMsgObj)
-    this.aiSearchResultArr.push({ type: 'incoming', tab: 'support-ai', answer: '', newMessage: '', showBot: true })
 
-    if (this.aiSearchResultArr.length > 2) {
-      setTimeout(() => {
-        this.scrollToBottomEvent.emit()
-      }, 0)
+    if (!this.isInputEnabled) {
+      return
     }
+
+    if (!this.searchQuery?.trim()) {
+      event.preventDefault()
+      return
+    }
+
+    const message = this.searchQuery.trim()
+
+    // Show user message
+    this.chatActivities.push({
+      sender: 'user',
+      text: message,
+      timestamp: new Date(),
+      showAllChoices: false
+
+    })
+ setTimeout(() => {
+    
+    this.scrollToBottomEvent.emit()
+  }, 100);
+    // Send to chatbot
+    this.sendTurn({
+      action: 'send_message', // Verify this with backend if needed
+      text: message
+    })
+
     this.searchQuery = ''
     this.resetTextAreaHeight(textArea)
-    // this.supportAISearch()
-    // setTimeout(()=>{
-    //   this.searchQuery = ''
-    // },1000)
-
-    //  this.getAiTutorMessage()
-    // this.sendAITutorMessage()
   }
 
   // startNewSupportAISearch() {
@@ -902,27 +1027,28 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
   }
 
   openAIFeedbackPopup(item: any, index: any, cindex: any) {
+    console.log('item, cindex', item, cindex)
     if (this.aiSearchResultArr && this.aiSearchResultArr.length && this.aiSearchResultArr[index] && this.aiSearchResultArr[index]) {
-      if (this.aiSearchResultArr[index].result && this.aiSearchResultArr[index].result[cindex] && this.aiSearchResultArr[index].result[cindex]['feedback'] !== 'down') {
-        const dialogRef = this.dialog.open(NonReleventFeedbackDialogComponent, {
-          disableClose: true,
-          width: '502px',
-          panelClass: ['relevent-feedback-dialog'],
-        })
-        dialogRef.afterClosed().subscribe((result: any) => {
-          if (result) {
-            this.shareAIFeedback(item, result, index, cindex)
-            dialogRef.close()
-          } else {
-            dialogRef.close()
-          }
-        })
-      } else {
-        this.matSnackBarNew.open(
-          'You have already submitted feedback', 'X',
-          { duration: 5000, panelClass: ['error'] }
-        )
-      }
+      // if (this.aiSearchResultArr[index].result && this.aiSearchResultArr[index].result[cindex] && this.aiSearchResultArr[index].result[cindex]['feedback'] !== 'down') {
+      //   const dialogRef = this.dialog.open(NonReleventFeedbackDialogComponent, {
+      //     disableClose: true,
+      //     width: '502px',
+      //     panelClass: ['relevent-feedback-dialog'],
+      //   })
+      //   dialogRef.afterClosed().subscribe((result: any) => {
+      //     if (result) {
+      //       this.shareAIFeedback(item, result, index, cindex)
+      //       dialogRef.close()
+      //     } else {
+      //       dialogRef.close()
+      //     }
+      //   })
+      // } else {
+      //   this.matSnackBarNew.open(
+      //     'You have already submitted feedback', 'X',
+      //     { duration: 5000, panelClass: ['error'] }
+      //   )
+      // }
 
     }
 
@@ -1175,6 +1301,37 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
       })
     }
 
+  }
+
+  toggleNestedItem(planId: string) {
+    this.expandedPlanIds[planId] = !this.expandedPlanIds[planId];
+  }
+
+  formatPlanMeta(meta: string): string {
+    if (!meta) return '';
+    return meta.replace('Ends:', 'Due');
+  }
+
+  getCourseStatusClass(meta: string): string {
+    console.log('meta', meta)
+    if (!meta) return 'status-not-started';
+    const lower = meta.toLowerCase();
+    if (lower.includes('completed')) return 'status-completed';
+    if (lower.includes('in progress')) return 'status-in-progress';
+    return 'status-not-started';
+  }
+
+  selectNestedPickerItem(activity: any, child: any) {
+    this.chatActivities.push({
+      sender: 'user',
+      text: child.label,
+      timestamp: new Date()
+    });
+    this.sendTurn({
+      action: 'pick_item',
+      picker_id: activity.picker_id,
+      item_id: child.id
+    });
   }
 
   ngOnDestroy(): void {
