@@ -186,7 +186,7 @@
       </div>
       <p class="wp-strip__desc">{{ activeStripDesc }}</p>
       <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex"
-        (selectedIndexChange)="onTabChange($event)">
+        [mat-stretch-tabs]="activeTabs.length > 1" (selectedIndexChange)="onTabChange($event)">
         <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>
       </mat-tab-group>
 
