@@ -89,6 +89,20 @@
   }
 }
 
+/* ─── Top banner (sb-uic-sliders) arrows ───
+   The shared slider's base .prev/.next use a negative margin that pushes the arrows
+   ~16px outside the banner edges. Scoped to the Bharat KALP top banner only, keep them inside. */
+.topSection {
+  ::ng-deep .prev {
+    left: 16px;
+    margin-left: 0 !important;
+  }
+  ::ng-deep .next {
+    right: 16px;
+    margin-right: 0 !important;
+  }
+}
+
 /* ─── Top Banner ─── */
 .bk-top-banner {
   background: linear-gradient(135deg, #2D0066 0%, #4B0082 50%, #1a237e 100%);
