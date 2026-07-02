@@ -3,7 +3,7 @@
   role="link" i18n-aria-label>
   <mat-card class="card-portrait mr-2 card-portrait-clickable min-height-remove" [ngClass]="widgetData.cardCustomeClass ? widgetData.cardCustomeClass : ''">
      <div class="course_widget portrait_widget flex  margin-bottom-xs">
-        <div class="flex flex-end flex-middle course_port margin-right-xs" *ngIf="widgetData.content?.primaryCategory">
+        <div class="flex flex-end flex-middle course_port margin-right-xs" *ngIf="isCardElementEnabled('contentType') && widgetData.content?.primaryCategory">
            <mat-icon class="mat-icon main_icon  ws-mat-default-text margin-right-xs">video_library</mat-icon>
            <sb-uic-display-content-type i18n-title title="Content Type" 
            class="ws-mat-black60-text font-normal mat-caption " [useTranslation]="false" [displayContentType]="widgetData.content?.primaryCategory==='Course Unit'
@@ -11,7 +11,7 @@
            :widgetData.content?.primaryCategory">
            </sb-uic-display-content-type>
         </div>
-        <sb-uic-knowledge-level [content]="widgetData?.content"></sb-uic-knowledge-level>
+        <sb-uic-knowledge-level *ngIf="isCardElementEnabled('difficultyLevel')" [content]="widgetData?.content"></sb-uic-knowledge-level>
      </div>
      <div class="flex">
         <div class="margin-right-s">
@@ -20,14 +20,14 @@
                  <img mat-card-image [src]="widgetData?.content?.posterImage | pipePublicURL" loading="lazy"
                  class="card-image ws-mat-primary-lite-background margin-remove" [wsUtilsDefaultThumbnail]="defaultThumbnail"
                  [alt]="widgetData.content.name" />
-                 <div class="duration-box right-corner-portrait" *ngIf="widgetData?.content?.duration > 0; else programDurationSpan">
+                 <div class="duration-box right-corner-portrait" *ngIf="isCardElementEnabled('duration') && widgetData?.content?.duration > 0; else programDurationSpan">
                     <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
                     <span class=" ws-mat-white-text duration">
                     {{ (widgetData?.content?.duration || 120)| pipeDurationTransform: 'hms' }}
                     </span>
                  </div>
                  <ng-template #programDurationSpan>
-                 <div class="duration-box right-corner-portrait" *ngIf="widgetData?.content?.programDuration > 0">
+                 <div class="duration-box right-corner-portrait" *ngIf="isCardElementEnabled('duration') && widgetData?.content?.programDuration > 0">
                     <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
                     <span class=" ws-mat-white-text duration">
                     {{widgetData?.content?.programDuration}} {{widgetData?.content?.programDuration === 1 ? 'day' : 'days'}}
@@ -53,7 +53,7 @@
                   class="card-image ws-mat-primary-lite-background margin-remove"
                   [alt]="widgetData?.content?.name" />
                 </ng-template>
-                <div class="duration-box right-corner-portrait" *ngIf="widgetData?.content?.duration;">
+                 <div class="duration-box right-corner-portrait" *ngIf="isCardElementEnabled('duration') && widgetData?.content?.duration;">
                     <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
                     <span class=" ws-mat-white-text duration">
                     {{ (widgetData?.content?.duration || 120)| pipeDurationTransform: 'hms' }}
@@ -67,7 +67,7 @@
               class="portrait-subheading mat-subheading-2 title-text">
               {{ widgetData?.content?.name }}
            </div>
-           <div class="flex w-full  flex-middle" *ngIf="!(widgetData?.content?.courseProvider?.length && widgetData.content?.courseProvider[0]?.name)">
+           <div class="flex w-full  flex-middle" *ngIf="isCardElementEnabled('organisation') && !(widgetData?.content?.courseProvider?.length && widgetData.content?.courseProvider[0]?.name)">
               <div class="portrait_course_logo_box margin-right-xs">
                  <img [src]="widgetData?.content?.creatorLogo || widgetData?.content?.contentPartner?.link | pipePublicURL " class="source-icon"  loading="lazy" [wsUtilsDefaultThumbnail]="defaultSLogo"
                  [alt]="(widgetData?.content?.sourceName + '_' + widgetData?.content?.identifier)" />
@@ -90,7 +90,7 @@
                   &nbsp;+{{ widgetData?.content?.courseProvider?.length - 1 }}
               </span>
            </div>
-           <div class="flex flex-middle rating-session margin-top-xs">
+           <div class="flex flex-middle rating-session margin-top-xs" *ngIf="isCardElementEnabled('rating')">
             <div class="flex flex-middle" *ngIf="widgetData?.content?.avgRating">
               <mat-icon class="mr-1">star</mat-icon>
               <span>{{widgetData.content.avgRating}}</span>
@@ -112,7 +112,7 @@
     <div class="cbp-mark left-0 border-top-radius">
       <p *ngIf="data.cbpData.planDuration === acbpConstants?.UPCOMING"  class="cbp-warning">{{data.cbpData.endDate | date: 'd MMM, y'}}</p>
       <p *ngIf="data.cbpData.planDuration === acbpConstants?.SUCCESS"  class="cbp-success">{{data.cbpData.endDate | date: 'd MMM, y'}}</p>
-      <p *ngIf="data.cbpData.planDuration === acbpConstants?.OVERDUE" class="cbp-danger">{{'OverDue' }}</p>
+      <p *ngIf="isCardElementEnabled('overdue') && data.cbpData.planDuration === acbpConstants?.OVERDUE" class="cbp-danger">{{'OverDue' }}</p>
     </div>
   </ng-template>
 
