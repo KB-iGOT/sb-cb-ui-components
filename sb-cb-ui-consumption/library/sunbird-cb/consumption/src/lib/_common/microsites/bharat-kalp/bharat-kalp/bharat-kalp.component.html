@@ -167,7 +167,7 @@
 </ng-template>
 
 <!-- CONTENT STRIPS -->
-<ng-template #contentStrips let-data="data">
+<ng-template #contentStripsv2 let-data="data">
   <ng-container *ngFor="let stripData of data">
     <ng-container *ngIf="stripData?.active">
       <div class="bk-week-strip">
@@ -228,6 +228,23 @@
       </div>
     </ng-container>
   </ng-container>
+</ng-template>
+
+<ng-template #contentStrips let-data="data">
+    <ng-container *ngFor="let stripData of data">
+        <ng-container *ngIf="stripData?.active">
+            <sb-uic-content-strip-with-tabs
+                [emitViewAll]="false"
+                (viewAllResponse)="''"
+                (telemtryResponse)="raiseTelemetryInteractEvent($event)"
+                (emptyResponse)="''"
+                [providerId]="'123456789'"
+                [widgetData]="{strips: [stripData]}"
+                [channnelName]="'channnelName'">
+            </sb-uic-content-strip-with-tabs>
+        </ng-container>
+    </ng-container>
+
 </ng-template>
 
 <!-- RECOMMENDED SECTION -->

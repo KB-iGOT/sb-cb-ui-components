@@ -50,6 +50,7 @@ export interface WeekProgressContentStrip {
 
 export interface WeekProgressData {
   enabled: boolean
+  enableTitlePill?: boolean
   startDate?: string
   endDate?: string
   currentWeek?: number
@@ -153,6 +154,20 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
   ) { }
 
+  /** Week count derived from bkConfig startDate/endDate (DD-MM-YYYY); falls back to configured totalWeeks */
+  get totalWeeks(): number {
+    const start = this.bkConfig?.startDate
+    const end = this.bkConfig?.endDate
+    if (start && end) {
+      const s = moment(start, 'DD-MM-YYYY')
+      const e = moment(end, 'DD-MM-YYYY')
+      if (s.isValid() && e.isValid() && e.isSameOrAfter(s)) {
+        return Math.ceil((e.diff(s, 'days') + 1) / 7)
+      }
+    }
+    return this.bkConfig?.totalWeeks || this.programData?.totalWeeks || 16
+  }
+
   ngOnInit(): void {
     this.currentWeek = this._computeCurrentWeek()
     this.selectedWeek = this.currentWeek
@@ -176,7 +191,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     this._weekCallsDone  = 0
     this._enrolledMap    = {}
 
-    const totalWeeks = this.programData.totalWeeks || 16
+    const totalWeeks = this.totalWeeks
     for (let week = 1; week <= totalWeeks; week++) {
       const wd = this.getWeekData(week)
       /* resources aren't trackable/enrollable content — exclude from progress calculation */
@@ -315,7 +330,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     const now = new Date()
     if (now < start) return 1
     const diffDays = Math.floor((now.getTime() - start.getTime()) / 86_400_000)
-    return Math.min(Math.floor(diffDays / 7) + 1, this.programData.totalWeeks)
+    return Math.min(Math.floor(diffDays / 7) + 1, this.totalWeeks)
   }
 
   /* Badge / ring: weeks beyond currentWeek are locked only if they have no content */
@@ -399,7 +414,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   }
 
   get allWeeks(): number[] {
-    return Array.from({ length: this.programData.totalWeeks }, (_, i) => i + 1)
+    return Array.from({ length: this.totalWeeks }, (_, i) => i + 1)
   }
 
   /* ── Interactions ── */
