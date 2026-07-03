@@ -118,6 +118,7 @@ export class ConfigurationsService {
   netcoreConfig: any = {}
   completionSurvey: any = {}
   globalConfig: any = {}
+  globalConfigLoadFailed = false
 
   changeNavBarFullView = new Subject()
   openExploreMenuForMWeb = new Subject()
