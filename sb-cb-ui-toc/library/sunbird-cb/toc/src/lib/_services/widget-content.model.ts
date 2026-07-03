@@ -195,7 +195,7 @@ export namespace NsContent {
   }
 
   export interface ICourse {
-    active: true
+    active: boolean
     addedBy: string
     batch: IBatch
     batchId: string

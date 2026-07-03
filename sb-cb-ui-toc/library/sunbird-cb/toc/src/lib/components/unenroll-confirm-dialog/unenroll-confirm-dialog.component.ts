@@ -61,7 +61,7 @@ export class UnenrollConfirmDialogComponent implements OnInit {
       const selectedReasonFlags = (this.feedbackForm.get('reasons') as FormArray).value
       const selectedReasons = this.feedbackReasons.filter((_, index) => selectedReasonFlags[index])
       const feedbackPayload = {
-        selectedReasons,
+        reasons: selectedReasons,
         comments: this.feedbackForm.get('comments')?.value || '',
       }
       this.dialogRef.close(feedbackPayload)
