@@ -243,6 +243,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   lockCertificate = false
   private lastProgressRefreshTime: number = 0
   private isRefreshingProgress: boolean = false
+  isUnEnrolled: boolean = false
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
     const windowScroll = window.pageYOffset
@@ -1358,11 +1359,29 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  raiseEnrollTelemetry() {
+    raiseEnrollTelemetry() {
+      this.events.raiseInteractTelemetry(
+        {
+          type: 'click',
+          subType: 'enroll',
+          id: this.content ? this.content.identifier : '',
+        },
+        {
+          id: this.content ? this.content.identifier : '',
+          type: this.content ? this.content.primaryCategory : '',
+        },
+        {
+          pageIdExt: `btn-enroll`,
+          module: WsEvents.EnumTelemetrymodules.CONTENT,
+        }
+      )
+    }
+
+  raiseUnEnrollTelemetry() {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
-        subType: 'enroll',
+        subType: 'un-enroll',
         id: this.content ? this.content.identifier : '',
       },
       {
@@ -1370,7 +1389,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         type: this.content ? this.content.primaryCategory : '',
       },
       {
-        pageIdExt: `btn-enroll`,
+        pageIdExt: `btn-un-enroll`,
         module: WsEvents.EnumTelemetrymodules.CONTENT,
       }
     )
@@ -1533,6 +1552,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           }
           return course
         })
+      }
+
+      if(enrolledCourse && !enrolledCourse.active){
+        this.isUnEnrolled = true
       }
 
       // If current course is present in the list of user enrolled course
@@ -2503,6 +2526,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       }
 
+      // If the found content is inactive(un-enrolled), we should not proceed with resume
+      if(foundContent && !foundContent?.active){
+        return 
+      }
+
       const urlData = await this.contentLibSvc.getResourseLink(
         this.content,
         [foundContent],
@@ -3189,6 +3217,40 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.openLangDialog(event)
     } else {
       this.handleAutoBatchAssign()
+    }
+  }
+
+  handleReEnrollment(event: any) {
+      this.enrollBtnLoading = true
+      this.changeTab = !this.changeTab
+      this.raiseUnEnrollTelemetry()
+      console.log('this.enrolledCourseData', this.enrolledCourseData)
+      // API logic and redirection
+      if (this.enrolledCourseData) {
+        const req = {
+            "request": {
+                "courseId": this.enrolledCourseData.courseId,
+                "batchId": this.enrolledCourseData.batchId,
+                "recent_language": this.enrolledCourseData.recent_language || this.selectedLanguage?.langId || '',
+            }
+        }
+      this.contentSvc.reEnroll(req).subscribe(
+        (data: NsContent.IBatchListResponse) => {
+          this.batchData = {
+            content: data.content,
+            enrolled: true,
+          }
+          const batchId = this.getBatchId()
+          if (batchId) {
+            this.navigateToPlayerPage(batchId)
+          }
+          // this.enrollBtnLoading = false
+        },
+        (_error: any) => {
+          this.snackBar.open(_.get(_error, 'error.params.errmsg') || 'Please try again later')
+          this.enrollBtnLoading = false
+        }
+      )
     }
   }
 

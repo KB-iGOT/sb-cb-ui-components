@@ -13,19 +13,30 @@
                       !(contentReadData?.primaryCategory === primaryCategory.RESOURCE && !content?.artifactUrl) &&
                       !(contentReadData?.primaryCategory === primaryCategory.MANDATORY_COURSE_GOAL)) &&
                       !(contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId)">
-          <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
-            [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
-            [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
-            <ng-container *ngIf="(!content?.completionPercentage || content?.completionPercentage < 100) && !certData">
-              <ng-container *ngIf="!forPreview || isInIFrame; else authView">
-                {{ translateLabels('resume', 'apptochome') }}
+          <ng-container *ngIf="!isUnEnrolled">
+            <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
+              [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
+              [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
+              
+                <ng-container *ngIf="(!content?.completionPercentage || content?.completionPercentage < 100) && !certData">
+                  <ng-container *ngIf="!forPreview || isInIFrame; else authView">
+                    {{ translateLabels('resume', 'apptochome') }}
+                  </ng-container>
+                </ng-container>
+                <ng-container *ngIf="content?.completionPercentage === 100 || certData">
+                  {{ content?.completionPercentage >= 100 ? translateLabels('Start again', 'apptochome') :
+                  translateLabels('resume', 'apptochome') }}
+                </ng-container>
+            </a>
+          </ng-container>
+          <ng-container *ngIf="isUnEnrolled">
+            <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame" (click)="handleReEnrollment($event)"
+              [ngClass]="{'disable-start-btn': !canEnroll()}">
+              <ng-container>
+                {{ 'apptochome.re-enroll' | translate }}
               </ng-container>
-            </ng-container>
-            <ng-container *ngIf="content?.completionPercentage === 100 || certData">
-              {{ content?.completionPercentage >= 100 ? translateLabels('Start again', 'apptochome') :
-              translateLabels('resume', 'apptochome') }}
-            </ng-container>
-          </a>
+            </a>
+          </ng-container>
 
           <button *ngIf="isPostAssessment && showTakeAssessment?.post_assessment" (click)="raiseTelemetryForPublic($event)"
             [routerLink]="firstResourceLink?.url" class="flex action-button justify-center">
