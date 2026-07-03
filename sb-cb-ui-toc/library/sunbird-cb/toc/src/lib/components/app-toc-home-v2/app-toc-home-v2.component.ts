@@ -1810,14 +1810,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       dialogRef.afterClosed().subscribe((response: any) => {
         if (response) {
-          const requestBody = {
-            courseId: this.contentReadData ? this.contentReadData.identifier : '',
-            batchId: this.currentCourseBatchId,
-            ...response,
+          const requestBody: any = {
+            request: {
+              courseId: this.contentReadData ? this.contentReadData.identifier : '',
+              batchId: this.currentCourseBatchId,
+              ...response,
+            }
           }
           console.log('Un-enroll request body:', requestBody)
           this.contentSvc.unenrollToCourse(requestBody).subscribe((result: any) => {
             if(result?.responseCode === 'OK') {
+              this.userEnrollmentList[0].active = false
               this.openSnackbar('You have been successfully un-enrolled from the course.')
             } else {
               this.openSnackbar('Un-enrollment failed. Please try again later.')
