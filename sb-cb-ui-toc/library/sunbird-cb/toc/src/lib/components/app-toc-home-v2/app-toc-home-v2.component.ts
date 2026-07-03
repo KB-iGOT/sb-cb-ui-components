@@ -1817,7 +1817,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               ...response,
             }
           }
-          console.log('Un-enroll request body:', requestBody)
           this.contentSvc.unenrollToCourse(requestBody).subscribe((result: any) => {
             if(result?.responseCode === 'OK') {
               this.userEnrollmentList[0].active = false
