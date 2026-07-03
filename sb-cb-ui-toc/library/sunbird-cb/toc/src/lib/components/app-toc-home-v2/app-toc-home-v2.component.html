@@ -453,8 +453,25 @@
                 <span class="new-version-text nodtranslate">{{ 'apptoc.newVersion' | translate }}</span>
               </div>
             </ng-container>
-            <div class="flex items-center text-white mob-share" *ngIf="canShare">
-              <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
+            <div class="flex items-center gap-4">
+              <div class="flex items-center text-white mob-share" *ngIf="canShare">
+                <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
+              </div>
+              <ng-container *ngIf="contentReadData?.courseCategory === 'Course' && contentReadData?.contentType === 'Course' && !forPreview">
+                <ng-container *ngIf="canUnenroll">
+                  <div class="hideAbove1200">
+                    <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
+                      aria-label="More options">
+                      <mat-icon class="nodtranslate text-white">more_vert</mat-icon>
+                    </button>
+                    <mat-menu #moreOptionsMenu="matMenu" xPosition="before" class="toc-kebab-menu">
+                      <button mat-menu-item (click)="openUnenrollDialog()">
+                        <span class="text-red font-bold">Un-enroll</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </ng-container>
+              </ng-container>
             </div>
           </div>
           <div class="flex flex-col gap-2">
@@ -647,15 +664,17 @@
                       <div>{{ 'apptocsinglepage.share' | translate }}</div>
                     </div>
                     <ng-container *ngIf="contentReadData?.courseCategory === 'Course' && contentReadData?.contentType === 'Course' && !forPreview">
-                      <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
-                        aria-label="More options">
-                        <mat-icon class="nodtranslate text-white">more_vert</mat-icon>
-                      </button>
-                      <mat-menu #moreOptionsMenu="matMenu" xPosition="before" class="toc-kebab-menu">
-                        <button mat-menu-item (click)="openUnenrollDialog()">
-                          <span class="text-red font-bold">Un-enroll</span>
+                      <ng-container *ngIf="canUnenroll">
+                        <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
+                          aria-label="More options">
+                          <mat-icon class="nodtranslate text-white">more_vert</mat-icon>
                         </button>
-                      </mat-menu>
+                        <mat-menu #moreOptionsMenu="matMenu" xPosition="before" class="toc-kebab-menu">
+                          <button mat-menu-item (click)="openUnenrollDialog()">
+                            <span class="text-red font-bold">Un-enroll</span>
+                          </button>
+                        </mat-menu>
+                      </ng-container>
                     </ng-container>                    
                   </div>
                 </div>
