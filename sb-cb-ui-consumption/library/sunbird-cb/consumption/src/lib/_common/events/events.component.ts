@@ -13,6 +13,7 @@ export class EventsComponent implements OnInit {
 
   @Input() object: any
   @Input() nwlEventsConfig: any
+  @Input() eventsApiConfig: any
   @Input() isEdit: boolean = false;
   @Input() isEditable: boolean = false;
   @Output() editClicked = new EventEmitter<any>();
@@ -21,6 +22,9 @@ export class EventsComponent implements OnInit {
   requestBody: any
   currentDay: any
   loader: boolean = false
+  showAllEvents = false
+
+  toggleShowAll(): void { this.showAllEvents = !this.showAllEvents }
 
   // Will store the event callback function from the parent
   private eventCallback: Function | undefined
@@ -53,34 +57,41 @@ export class EventsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.requestBody = {
-      locale: [
-        'en',
-      ],
-      query: '',
-      request: {
-        query: '',
-        filters: {
-          status: ['Live'],
-          contentType: 'Event',
-          category: 'Event',
-          startDate: {
-            ">=": '',
-            "<": ''
-          }
-        },
-        sort_by: {
-          startDate: 'desc',
-        },
-      },
+    /* Use requestBody from eventsApiConfig if provided, else use default */
+    const cfgBody = this.eventsApiConfig?.requestBody
+    this.requestBody = cfgBody
+      ? JSON.parse(JSON.stringify(cfgBody))
+      : {
+          locale: ['en'],
+          query: '',
+          request: {
+            query: '',
+            filters: {
+              status: ['Live'],
+              contentType: 'Event',
+              category: 'Event',
+              startDate: { '>=': '', '<': '' },
+            },
+            sort_by: { startDate: 'desc' },
+          },
+        }
+
+    /* Ensure startDate filter object exists when not using eventsApiConfig */
+    if (!this.eventsApiConfig && !this.requestBody.request.filters.startDate) {
+      this.requestBody.request.filters.startDate = { '>=': '', '<': '' }
     }
+
     this.getEventsList()
   }
   getDaysBetweenDates() {
+    if (!this.nwlEventsConfig?.startDate) return
     let currentDate = moment(this.nwlEventsConfig.startDate, 'DD-MM-YYYY')
-    const endDate = moment(this.nwlEventsConfig.endDate, 'DD-MM-YYYY')
+    /* If endDate not provided, default to startDate + 16 weeks */
+    const endDate = this.nwlEventsConfig.endDate
+      ? moment(this.nwlEventsConfig.endDate, 'DD-MM-YYYY')
+      : moment(this.nwlEventsConfig.startDate, 'DD-MM-YYYY').add(16, 'weeks')
     while (currentDate.isSameOrBefore(endDate)) {
-      let localObj = {}
+      const localObj: { [key: string]: string } = {}
       localObj['startDate'] = currentDate.format('YYYY-MM-DD')
       localObj['diplayFormat'] = currentDate.format('MMM DD, YYYY')
       if (currentDate.isSame(moment(), 'day')) {
@@ -98,21 +109,24 @@ export class EventsComponent implements OnInit {
     let requestData: any = {}
     if (this.object && this.object.request && Object.keys(this.object.request).length > 0) {
       requestData = this.object.request
-      let startDate = {
+      requestData.request.filters.startDate = {
         ">=": this.currentDay,
         "<": nextDay.format('YYYY-MM-DD')
       }
-      requestData.request.filters.startDate = startDate
     } else {
+      /* Ensure startDate object exists before assigning */
+      if (!this.requestBody.request.filters.startDate) {
+        this.requestBody.request.filters.startDate = {}
+      }
       this.requestBody.request.filters.startDate[">="] = this.currentDay
       this.requestBody.request.filters.startDate["<"] = nextDay.format('YYYY-MM-DD')
       requestData = this.requestBody
     }
     this.loader = true
-    this.insightSvc.fetchTrainingDetails(requestData).subscribe((res: any) => {
+    this.insightSvc.fetchTrainingDetails(requestData, this.eventsApiConfig?.url).subscribe((res: any) => {
       this.events = []
       if (res && res.result && res.result.count > 0) {
-        res.result.Event.forEach((eveEle) => {
+        res.result.Event.forEach((eveEle: any) => {
           eveEle['eventDate'] = this.customDateFormat(eveEle.startDate, eveEle.startTime)
           eveEle['eventendDate'] = this.customDateFormat(eveEle.endDate, eveEle.endTime)
         })
@@ -121,43 +135,63 @@ export class EventsComponent implements OnInit {
       } else {
         this.loader = false
       }
-    }, error => {
+    }, (_error: any) => {
       this.loader = false
     })
   }
 
   getEventsList() {
     this.getDaysBetweenDates()
-    let nextDay = this.currentDay ? moment(this.currentDay, 'YYYY-MM-DD') : moment(moment(), 'YYYY-MM-DD')
-    nextDay.add(1, 'days')
     this.loader = true
     let requestData: any = {}
-    if (this.object && this.object.request && Object.keys(this.object.request).length > 0) {
-      requestData = this.object.request
-      let startDate = {
-        ">=": this.currentDay,
-        "<": nextDay.format('YYYY-MM-DD')
+
+    if (this.eventsApiConfig) {
+      /* Inject date range from bkConfig (nwlEventsConfig) automatically */
+      if (this.nwlEventsConfig?.startDate || this.nwlEventsConfig?.endDate) {
+        if (!this.requestBody.request.filters.startDate) {
+          this.requestBody.request.filters.startDate = {}
+        }
+        /* Convert DD-MM-YYYY → YYYY-MM-DD for API */
+        if (this.nwlEventsConfig?.startDate) {
+          this.requestBody.request.filters.startDate['>='] =
+            moment(this.nwlEventsConfig.startDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+        }
+        if (this.nwlEventsConfig?.endDate) {
+          this.requestBody.request.filters.startDate['<'] =
+            moment(this.nwlEventsConfig.endDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
+        }
       }
-      requestData.request.filters.startDate = startDate
+      requestData = this.requestBody
+    } else if (this.object && this.object.request && Object.keys(this.object.request).length > 0) {
+      requestData = this.object.request
+      let nextDay = this.currentDay ? moment(this.currentDay, 'YYYY-MM-DD') : moment(moment(), 'YYYY-MM-DD')
+      nextDay.add(1, 'days')
+      requestData.request.filters.startDate = { ">=": this.currentDay, "<": nextDay.format('YYYY-MM-DD') }
     } else {
+      let nextDay = this.currentDay ? moment(this.currentDay, 'YYYY-MM-DD') : moment(moment(), 'YYYY-MM-DD')
+      nextDay.add(1, 'days')
       this.requestBody.request.filters.startDate[">="] = this.currentDay
       this.requestBody.request.filters.startDate["<"] = nextDay.format('YYYY-MM-DD')
       requestData = this.requestBody
     }
-    this.insightSvc.fetchTrainingDetails(requestData).subscribe((res: any) => {
+
+    this.insightSvc.fetchTrainingDetails(requestData, this.eventsApiConfig?.url).subscribe((res: any) => {
       this.events = []
       if (res && res.result && res.result.count > 0) {
-        res.result.Event.forEach((eveEle) => {
-          eveEle['eventDate'] = this.customDateFormat(eveEle.startDate, eveEle.startTime)
-          eveEle['eventendDate'] = this.customDateFormat(eveEle.endDate, eveEle.endTime)
+        res.result.Event.forEach((eveEle: any) => {
+          if (eveEle.startDate && eveEle.startTime) {
+            eveEle['eventDate'] = this.customDateFormat(eveEle.startDate, eveEle.startTime)
+          }
+          if (eveEle.endDate && eveEle.endTime) {
+            eveEle['eventendDate'] = this.customDateFormat(eveEle.endDate, eveEle.endTime)
+          }
         })
-
         this.events = this.sortItemByTime(res.result.Event)
         this.loader = false
       } else {
         this.loader = false
       }
-    }, error => {
+    }, () => {
       this.loader = false
     })
   }

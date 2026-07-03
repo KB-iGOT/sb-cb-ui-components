@@ -18,10 +18,10 @@
         </div>
     </div>
     <div class="grid grid-cols-1 gap-4">
-        <div class="events-card-wrapper">
+        <div class="events-card-wrapper events-card-wrapper--scroll">
             <div *ngIf="!loader">
                 <div *ngIf="events?.length > 0">
-                    <div *ngFor="let event of events | slice:0: object?.maxContent || 5">
+                    <div *ngFor="let event of events">
                         <sb-uic-event-card [objectData]="object" [eventDetails]="event"
                             [loader]="loader"></sb-uic-event-card>
                     </div>
@@ -39,14 +39,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Show All: always at the bottom -->
-    <div class="flex justify-center mt-4">
-        <a [routerLink]="'/app/event-hub/home'"
-            class="flex ws-mat-default-text items-center justify-center mat-body-1 cursor-pointer">
-            Show All <mat-icon>chevron_right</mat-icon>
-        </a>
     </div>
 
 </div>

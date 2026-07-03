@@ -4,7 +4,9 @@
 
 
 
-
+:host .mat-mdc-dialog-content {
+    padding: 0 20px;
+}
 .dialog-header {
     display: flex;
     align-items: flex-start;
@@ -22,7 +24,18 @@
     }
 }
 .dialog-header h1{
-    margin-right: 16px;
+    // margin-right: 16px;
+    flex: 1;
+    margin: 0;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 32px;
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+    margin: 0;
+    padding: 0;
 }
 .close-icon {
     //font-size: 36px;
@@ -128,8 +141,9 @@
     .mat-icon {
         height: 26px;
         width: 26px;
-        color: #f3962f;
+        color: #fff !important;
         transform: scale(1.2);
+        padding: 0 !important;
     }
 }
 
