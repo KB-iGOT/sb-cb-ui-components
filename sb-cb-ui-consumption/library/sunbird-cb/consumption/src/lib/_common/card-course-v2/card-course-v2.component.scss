@@ -30,9 +30,9 @@ $white-80 : rgba(255, 255, 255, 0.88);
   height: $cc-height;
   /* ← FIXED – never changes */
   border-radius: $cc-radius;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  // box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  background: var(--environment-application-backgrounds-card-background-1);
+  // background: var(--environment-application-backgrounds-card-background-1);
   cursor: pointer;
   font-family: inherit;
   box-sizing: border-box;
