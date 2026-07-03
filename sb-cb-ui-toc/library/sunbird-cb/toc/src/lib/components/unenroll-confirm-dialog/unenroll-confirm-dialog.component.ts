@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core'
+import { Component, Inject, OnInit } from '@angular/core'
 import { FormArray, FormControl, FormGroup } from '@angular/forms'
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
@@ -9,26 +9,33 @@ import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
   styleUrls: ['./unenroll-confirm-dialog.component.scss'],
   standalone: false,
 })
-export class UnenrollConfirmDialogComponent {
+export class UnenrollConfirmDialogComponent implements OnInit {
   understood = false
   showFeedbackForm = false
-  feedbackReasons = [
-    'Content is not relevant to my role',
-    'Course is too difficult / too easy',
-    'Not enough time to complete',
-    'Poor content quality',
-    'Enrolled by mistake',
+  feedbackReasons =  [
+    "Content is not relevant to my role",
+    "Course is too difficult / too easy",
+    "Not enough time to complete",
+    "Poor content quality",
+    "Enrolled by mistake",
   ]
-  feedbackForm = new FormGroup({
-    reasons: new FormArray(this.feedbackReasons.map(() => new FormControl(false))),
-    comments: new FormControl(''),
-  })
+  feedbackForm: any
 
   constructor(
     public dialogRef: MatDialogRef<UnenrollConfirmDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private events: EventService,
-  ) { }
+  ) {
+  }
+
+  ngOnInit() {
+    this.feedbackReasons = this.data?.tocConfig?.unEnrollContent?.feedbackReasons
+    console.log('Un-enroll feedback form:', this.feedbackForm)
+    this.feedbackForm = new FormGroup({
+      reasons: new FormArray(this.feedbackReasons.map(() => new FormControl(false))),
+      comments: new FormControl(''),
+    })
+  }
 
   onCancel(): void {
     this.dialogRef.close(false)
@@ -57,9 +64,7 @@ export class UnenrollConfirmDialogComponent {
         selectedReasons,
         comments: this.feedbackForm.get('comments')?.value || '',
       }
-
-      console.log('Un-enroll feedback:', feedbackPayload)
-      this.dialogRef.close(true)
+      this.dialogRef.close(feedbackPayload)
     }
   }
 
@@ -67,7 +72,8 @@ export class UnenrollConfirmDialogComponent {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
-        id: 'btn-un-enroll',
+        id: 'unenroll',
+        subType: 'unenroll'
       },
       {
         id: this.data?.content?.name || 'unknown-content',

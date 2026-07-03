@@ -217,6 +217,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   pathSet = new Set()
   canShare = false
   enableShare = false
+  canUnenroll = false
   rootOrgId: any
   certId: any
   mobile1200: any
@@ -752,7 +753,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           moderatedBatchData = this.batchData && this.batchData.content && this.batchData.content[0]
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
-      } else if (this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+      } else if (this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
         this.autoEnrollLearningPathway(batchData)
       } else {
         this.autoAssignEnroll()
@@ -1563,7 +1564,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           }
         }
         // if enrolled course is completed then to make all languages courses as well as all content as completed
-        if (this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY && enrolledCourse.status === 2) {
+        if (this.contentReadData && this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY && enrolledCourse.status === 2) {
           this.content['completionPercentage'] = 100
           this.content['completionStatus'] = 2
           await this.tocSvc.mapCompletionChildPercentageProgram(this.content)
@@ -1803,13 +1804,28 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         panelClass: 'unenroll-dialog-panel',
         data: {
           content: this.contentReadData,
+          tocConfig: this.tocConfig,
         },
       })
 
-      dialogRef.afterClosed().subscribe((confirmed: boolean) => {
-        if (confirmed) {
-          // TODO: Call the actual un-enrollment API here
-          this.openSnackbar('You have been successfully un-enrolled from the course.')
+      dialogRef.afterClosed().subscribe((response: any) => {
+        if (response) {
+          const requestBody = {
+            courseId: this.contentReadData ? this.contentReadData.identifier : '',
+            batchId: this.currentCourseBatchId,
+            ...response,
+          }
+          console.log('Un-enroll request body:', requestBody)
+          this.contentSvc.unenrollToCourse(requestBody).subscribe((result: any) => {
+            if(result?.responseCode === 'OK') {
+              this.openSnackbar('You have been successfully un-enrolled from the course.')
+            } else {
+              this.openSnackbar('Un-enrollment failed. Please try again later.')
+            }
+          }, (error: any) => {
+            console.error('Un-enrollment error:', error)
+            this.openSnackbar('An error occurred while trying to un-enroll. Please try again later.')
+          })
         }
       })
     }, 100)
@@ -2134,7 +2150,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // Fetch the multilingual content
       try {
-        if (this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
+        if (this.baseContentReadData && this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
           this.contentReadData = initData.content
         } else {
           const success = await this.fetchContentRead(queryParamsDataTemp.MLId)
@@ -2395,6 +2411,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     })
   }
 
+  canBeUnenroll() {
+    if (this.userEnrollmentList?.length > 0) {
+      this.canUnenroll = this.baseContentReadData?.identifier === this.userEnrollmentList[0]?.contentId &&
+        this.userEnrollmentList[0]?.active && this.userEnrollmentList[0]?.status !== 2
+    }
+  }
+
 
   fetchUserEnrollmentDataV2() {
 
@@ -2426,6 +2449,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           if (completedContentData) {
             this.contentViewEventForNetCore('complete')
           }
+          this.canBeUnenroll()
           this.dataTransferSvc.setEnrollData(this.userEnrollmentList)
           if (this.isMultilingual) {
             // in case of back from player we need to check recent language and load
