@@ -60,6 +60,7 @@ const API_END_POINTS = {
   EXT_PUBLIC_CONTENT: (partent: any, contentId: any) => `/apis/proxies/v8/ciosIntegration/v1/read/content/${partent}/${contentId}`,
   ENROLL_CONTENT_DATA: (userId: string,) => `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`,
   LEARNER_PATHWAY_ENROLL: (contentId: string) => `/apis/proxies/v8/learningpathway/v1/enrol/${contentId}`,
+  RE_ENROLL: `/apis/proxies/v8/course/v1/reenroll`,
   UNENROLL_TO_COURSE: `/apis/proxies/v8/course/v2/unenroll`,
 }
 
@@ -205,6 +206,18 @@ export class WidgetContentService {
         )
       )
   }
+
+  reEnroll(req: any): any {
+    return this.http
+      .post<NsContent.IBatchListResponse>(API_END_POINTS.RE_ENROLL, req)
+      .pipe(
+        retry(1),
+        map(
+          (data: any) => data.result.response
+        )
+      )
+  }
+
 
   autoEnrollLP(identifier: any): Observable<NsContent.IBatchListResponse> {
     return this.http.get<NsContent.IBatchListResponse>(`${API_END_POINTS.LEARNER_PATHWAY_ENROLL(identifier)}`)
