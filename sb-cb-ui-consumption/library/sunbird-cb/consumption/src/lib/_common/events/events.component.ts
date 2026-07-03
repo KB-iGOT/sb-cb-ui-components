@@ -146,12 +146,14 @@ export class EventsComponent implements OnInit {
     let requestData: any = {}
 
     if (this.eventsApiConfig) {
-      /* Inject date range from bkConfig (nwlEventsConfig) automatically */
-      if (this.nwlEventsConfig?.startDate || this.nwlEventsConfig?.endDate) {
-        if (!this.requestBody.request.filters.startDate) {
-          this.requestBody.request.filters.startDate = {}
-        }
-        /* Convert DD-MM-YYYY → YYYY-MM-DD for API */
+      if (!this.requestBody.request.filters.startDate) {
+        this.requestBody.request.filters.startDate = {}
+      }
+      if (this.currentDay) {
+        const nextDay = moment(this.currentDay, 'YYYY-MM-DD').add(1, 'days')
+        this.requestBody.request.filters.startDate['>='] = this.currentDay
+        this.requestBody.request.filters.startDate['<'] = nextDay.format('YYYY-MM-DD')
+      } else if (this.nwlEventsConfig?.startDate || this.nwlEventsConfig?.endDate) {
         if (this.nwlEventsConfig?.startDate) {
           this.requestBody.request.filters.startDate['>='] =
             moment(this.nwlEventsConfig.startDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
