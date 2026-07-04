@@ -66,7 +66,9 @@
     <!-- Header -->
     <div class="wp-header">
       <span class="wp-header__label" *ngIf="programData?.enableTitlePill">
-        Week {{ currentWeek }} In Progress
+        {{ isProgramEnded && programData?.endedEventPillText
+           ? programData?.endedEventPillText
+           : 'Week ' + currentWeek + ' In Progress' }}
       </span>
       <button class="wp-header__btn" (click)="viewAllWeeks()">
         View All Weeks <span class="wp-header__arrow">›</span>
@@ -113,7 +115,7 @@
             <!-- Card top: week label + status badge (hidden for upcoming) -->
             <div class="wp-week-card__top">
               <span class="wp-week-card__num">
-                <span class="wp-week-card__live-dot" *ngIf="w === currentWeek"></span>
+                <span class="wp-week-card__live-dot" *ngIf="w === currentWeek && !isProgramEnded"></span>
                 Week {{ w }}
               </span>
               <span class="wp-week-card__badge"

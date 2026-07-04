@@ -51,6 +51,7 @@ export interface WeekProgressContentStrip {
 export interface WeekProgressData {
   enabled: boolean
   enableTitlePill?: boolean
+  endedEventPillText?: string
   startDate?: string
   endDate?: string
   currentWeek?: number
@@ -331,6 +332,14 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (now < start) return 1
     const diffDays = Math.floor((now.getTime() - start.getTime()) / 86_400_000)
     return Math.min(Math.floor(diffDays / 7) + 1, this.totalWeeks)
+  }
+
+  /** Program has ended when bkConfig endDate (DD-MM-YYYY) is in the past */
+  get isProgramEnded(): boolean {
+    const endDate = this.bkConfig?.endDate || this.programData?.endDate
+    if (!endDate) return false
+    const end = moment(endDate, 'DD-MM-YYYY')
+    return end.isValid() && moment().isAfter(end, 'day')
   }
 
   /* Badge / ring: weeks beyond currentWeek are locked only if they have no content */

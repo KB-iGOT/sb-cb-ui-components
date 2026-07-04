@@ -1,5 +1,7 @@
 .user-progress-main-wrapper {
     position: relative;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .edit-section {
@@ -255,6 +257,32 @@
 @media screen and (min-width: 320px) and (max-width: 769px) {
     .week-progress {
         background-color: #d1dbec;
+    }
+}
+
+/* ─── Narrow right-column (tablet 769–1280): fixed 50%/40% tile widths plus
+       padding overflow the column, so let the stat rows wrap and tiles
+       shrink/stack instead ─── */
+@media screen and (max-width: 1280px) {
+    .user-stats > .flex {
+        flex-wrap: wrap;
+    }
+
+    .my-hours,
+    .my-certificates,
+    .k-points {
+        flex: 1 1 140px;
+        width: auto;
+        min-width: 0;
+    }
+
+    .user-details {
+        flex-wrap: wrap;
+    }
+
+    .user-name {
+        min-width: 0;
+        overflow-wrap: anywhere;
     }
 }
 
