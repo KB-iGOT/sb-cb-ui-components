@@ -12,6 +12,7 @@ import { VIEWER_ROUTE_FROM_MIME } from '../../../../_services/viewer-route-util'
 
 export interface WeekData {
   id?: string
+  name?: string
   title: string
   stripTitle?: string
   stripDesc?: string
@@ -335,6 +336,16 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   }
 
   /** Program has ended when bkConfig endDate (DD-MM-YYYY) is in the past */
+  /** Display label for a week — configured `name` from week data (e.g. "Week 0"), falls back to "Week N" */
+  weekLabel(week: number): string {
+    return this.getWeekData(week)?.name || `Week ${week}`
+  }
+
+  /** Compact stepper form of the label — "Week 0" → "W0" */
+  weekLabelShort(week: number): string {
+    return this.weekLabel(week).replace(/^week\s*/i, 'W')
+  }
+
   get isProgramEnded(): boolean {
     const endDate = this.bkConfig?.endDate || this.programData?.endDate
     if (!endDate) return false
