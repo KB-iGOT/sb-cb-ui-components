@@ -43,7 +43,7 @@
 <ng-template #stepperTpl let-weeks="weeks" let-sm="sm">
   <ng-container *ngFor="let w of weeks; let last = last">
     <div class="wp-tl-step" [class.wp-tl-step--sm]="sm" [class.wp-tl-step--selected]="w === selectedWeek"
-      (click)="onWeekClick(w)" role="button" [attr.tabindex]="0" [attr.aria-label]="'Week ' + w">
+      (click)="onWeekClick(w)" role="button" [attr.tabindex]="0" [attr.aria-label]="weekLabel(w)">
       <div class="wp-tl-node" [class.wp-tl-node--sm]="sm">
         <div class="wp-tl-dot" [class.wp-tl-dot--sm]="sm" [class.wp-tl-dot--done]="getWeekStatus(w) === 'completed'"
           [class.wp-tl-dot--current]="getWeekStatus(w) === 'in-progress'"
@@ -51,7 +51,7 @@
         </div>
       </div>
       <span class="wp-tl-label" [class.wp-tl-label--sm]="sm" [class.wp-tl-label--selected]="w === selectedWeek">
-        {{ w === selectedWeek ? 'Week ' + w : 'W' + w }}
+        {{ w === selectedWeek ? weekLabel(w) : weekLabelShort(w) }}
       </span>
     </div>
     <div *ngIf="!last" class="wp-tl-line" [class.wp-tl-line--sm]="sm" [class.wp-tl-line--done]="isWeekCompleted(w)">
@@ -66,7 +66,9 @@
     <!-- Header -->
     <div class="wp-header">
       <span class="wp-header__label" *ngIf="programData?.enableTitlePill">
-        Week {{ currentWeek }} In Progress
+        {{ isProgramEnded && programData?.endedEventPillText
+           ? programData?.endedEventPillText
+           : weekLabel(currentWeek) + ' In Progress' }}
       </span>
       <button class="wp-header__btn" (click)="viewAllWeeks()">
         View All Weeks <span class="wp-header__arrow">›</span>
@@ -113,8 +115,8 @@
             <!-- Card top: week label + status badge (hidden for upcoming) -->
             <div class="wp-week-card__top">
               <span class="wp-week-card__num">
-                <span class="wp-week-card__live-dot" *ngIf="w === currentWeek"></span>
-                Week {{ w }}
+                <span class="wp-week-card__live-dot" *ngIf="w === currentWeek && !isProgramEnded"></span>
+                {{ weekLabel(w) }}
               </span>
               <span class="wp-week-card__badge"
                 *ngIf="getWeekStatus(w) !== 'upcoming'"
@@ -226,7 +228,7 @@
         <span class="wp-popup__meta">
           {{ totalWeeks }} week program
           <span class="wp-header__pipe"> | </span>
-          Week {{ currentWeek }} In Progress
+          {{ weekLabel(currentWeek) }} In Progress
         </span>
         <button class="wp-popup__close" (click)="closePopup()" aria-label="Close">
           <mat-icon>close</mat-icon>
