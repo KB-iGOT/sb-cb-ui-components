@@ -13,8 +13,9 @@
         <div class="flex w-full gap-2">
             {{objectData?.title}}
             <div *ngIf="objectData?.displayInfoIcon">
-                <mat-icon class="up-info-icon"
-                  i18n-matTooltip [matTooltip]="objectData?.infoText">info_outline</mat-icon>
+                <mat-icon class="up-info-icon" #infoTip="matTooltip"
+                  i18n-matTooltip [matTooltip]="objectData?.infoText"
+                  matTooltipTouchGestures="on" (click)="infoTip.toggle()">info_outline</mat-icon>
             </div>
         </div>
         <p class="{{objectData?.descriptionClass}}" *ngIf="objectData?.description">
