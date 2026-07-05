@@ -482,64 +482,60 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
   getMinistryData() {
     this.apiLoading = true
-    this.sharedService.getMinistryData(this.selectedMinistryType).subscribe((data: any) => {
-      console.log('data--', data)
-      this.ministryFullData = data
-      this.apiLoading = false
-      this.ministryData = []
-      if (this.selectedMinistryType === 'ministry') {
-        data.forEach((item) => {
-          if (item?.sbOrgType === 'ministry') {
-            this.ministryData.push(item)
-          }
-        })
-      } else if (this.selectedMinistryType === 'state') {
-        data.forEach((item) => {
-          if (item?.sbOrgType === 'state') {
-            this.ministryData.push(item)
-          }
-        })
-      }
+    const requestedType = this.selectedMinistryType
+    return new Promise<void>((resolve) => {
+      this.sharedService.getMinistryData(requestedType).subscribe((data: any) => {
+        console.log('data--', data)
+        this.apiLoading = false
+        // Ignore stale responses from a type that was changed again before this one returned
+        if (requestedType !== this.selectedMinistryType) {
+          resolve()
+          return
+        }
+        this.ministryFullData = data
+        this.ministryData = []
+        if (requestedType === 'ministry') {
+          data.forEach((item) => {
+            if (item?.sbOrgType === 'ministry') {
+              this.ministryData.push(item)
+            }
+          })
+        } else if (requestedType === 'state') {
+          data.forEach((item) => {
+            if (item?.sbOrgType === 'state') {
+              this.ministryData.push(item)
+            }
+          })
+        }
 
-      this.getUserProfileData()
+        this.getUserProfileData(requestedType, resolve)
+      })
     })
   }
 
   async onMinistryTypeChange(event) {
     console.log('event', event)
 
+    this.sharedService.cbpPlanFinalObj['ministryType'] = event.value
+    this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = []
+    this.selectedMinistryType = event.value
+    this.ministryData = []
+
     if (this.login) {
       await this.getMinistryData()
     }
 
-   
-
-    this.sharedService.cbpPlanFinalObj['ministryType'] = event.value
-    this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = []
-    this.selectedMinistryType = event.value
-
     localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-    this.ministryData = []
     if (event?.value === 'state') {
       this.roleMappingForm.get('ministry')?.setValue(null);
       this.roleMappingForm.get('sectors')?.setValue([]);
       this.roleMappingForm.get('departments')?.setValue([]);
-      this.ministryFullData.forEach((item) => {
-        if (item?.type === 'state') {
-          this.ministryData.push(item)
-        }
-      })
     } else if (event?.value === 'ministry') {
       this.roleMappingForm.get('ministry')?.setValue(null);
       this.roleMappingForm.get('sectors')?.setValue([]);
       this.roleMappingForm.get('departments')?.setValue([]);
-      this.ministryFullData.forEach((item) => {
-        if (item?.type === 'central') {
-          this.ministryData.push(item)
-        }
-      })
     }
-    
+
     this.sharedService.cbpPlanFinalObj['ministry'] = ''
     this.sharedService.cbpPlanFinalObj['department_name'] = ''
     this.sharedService.cbpPlanFinalObj['departments'] = ''
@@ -1173,14 +1169,19 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   }
 
 
-  getUserProfileData() {
+  getUserProfileData(requestedType?: string, done?: () => void) {
     this.sharedService.getUserProfile().subscribe((data) => {
       console.log('data--', data)
       localStorage.setItem('userProfile', JSON.stringify(data))
       this.loginUserOrgIds = data?.organization_ids
+      // Ignore stale responses from a type that was changed again before this one returned
+      if (requestedType && requestedType !== this.selectedMinistryType) {
+        done?.()
+        return
+      }
       let filteredMinistryData = []
       this.ministryFullData.map((item) => {
-        if (this.loginUserOrgIds.indexOf(item?.identifier) > -1) {
+        if (this.loginUserOrgIds.indexOf(item?.identifier) > -1 && item?.sbOrgType === (requestedType || this.selectedMinistryType)) {
           filteredMinistryData.push(item)
         }
       })
@@ -1188,6 +1189,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       this.ministryData = filteredMinistryData
       this.originalMinistryData = filteredMinistryData
       this.filteredList = filteredMinistryData;
+      done?.()
     })
   }
 

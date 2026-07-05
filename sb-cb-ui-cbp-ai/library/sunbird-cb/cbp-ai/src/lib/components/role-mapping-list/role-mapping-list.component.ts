@@ -477,41 +477,8 @@ export class RoleMappingListComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'saved') {
-        console.log('Changes saved!');
-        // Refresh data or show a toast here
-        console.log(this.sharedService.cbpPlanFinalObj)
-        if (this.sharedService.cbpPlanFinalObj && this.sharedService.cbpPlanFinalObj.ministry && this.sharedService.cbpPlanFinalObj.ministry.identifier &&
-          this.sharedService.cbpPlanFinalObj.ministry?.sbOrgType === 'ministry'
-        ) {
-          if (this.sharedService.cbpPlanFinalObj.departments) {
-            this.sharedService.getRoleMappingByStateCenterAndDepartment(this.sharedService.cbpPlanFinalObj.ministry.identifier, this.sharedService.cbpPlanFinalObj.departments).subscribe((res) => {
-              console.log('res', res)
-              this.dataSource = new MatTableDataSource(res)
-              this.dataSource.paginator = this.paginator;
-              this.originalData = res;
-              console.log('this.dataSource', this.dataSource)
-            })
-          } else {
-            this.sharedService.getRoleMappingByStateCenter(this.sharedService.cbpPlanFinalObj.ministry.identifier).subscribe((res) => {
-              console.log('res', res)
-              this.dataSource = new MatTableDataSource(res)
-              this.dataSource.paginator = this.paginator;
-              this.originalData = res;
-              console.log('this.dataSource', this.dataSource)
-            })
-          }
-
-
-        } else {
-          this.sharedService.getRoleMappingByStateCenterAndDepartment(this.sharedService.cbpPlanFinalObj.ministry.identifier, this.sharedService.cbpPlanFinalObj.departments).subscribe((res) => {
-            console.log('res', res)
-            this.dataSource = new MatTableDataSource(res)
-            this.dataSource.paginator = this.paginator;
-            this.originalData = res;
-            console.log('this.dataSource', this.dataSource)
-          })
-        }
-
+        this.selection.clear();
+        this.loadRoleMappingList();
       }
     });
   }
