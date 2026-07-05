@@ -327,6 +327,7 @@ export namespace NsUser {
     mobile?: string
     userRootOrg?: any
     channel?: string
+    profileCompletionPercentage?: number
   }
 
   export interface INodebbUserProfile {
