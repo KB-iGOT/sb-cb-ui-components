@@ -298,7 +298,9 @@
           <h2 class="bk-mentorship__title" *ngIf="data?.title">{{ data.title }}</h2>
           <p class="bk-mentorship__desc" *ngIf="data?.subtitle">{{ data.subtitle }}</p>
         </div>
-        <a class="bk-mentorship__view-all" *ngIf="data?.showAllButton !== false && data?.viewAllUrl"
+        <!-- Show all only makes sense when there are more communities than one view (4 cards) -->
+        <a class="bk-mentorship__view-all"
+          *ngIf="data?.showAllButton !== false && data?.viewAllUrl && communities?.length > 4"
           [routerLink]="data.viewAllUrl">
           Show all <mat-icon>chevron_right</mat-icon>
         </a>
