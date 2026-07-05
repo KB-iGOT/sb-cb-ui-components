@@ -62,6 +62,15 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
   @Input() widgetData!: NsPage.INavLink
 
+  private _showProfileProgress: () => boolean = () => true
+  @Input()
+  set showProfileProgress(value: (() => boolean) | boolean | null | undefined) {
+    this._showProfileProgress = typeof value === 'function' ? value : () => !!value
+  }
+  get showProfileProgress(): () => boolean {
+    return this._showProfileProgress
+  }
+
   // ── Injected services ──────────────────────────────────────────────────────
   private readonly configSvc = inject(ConfigurationsService)
   private readonly dialog = inject(MatDialog)
@@ -81,6 +90,7 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
   // Derived full name for template convenience
   readonly displayName = computed(() => this.givenName())
+  profileCompletionPercentage = 100
 
   constructor() {
     super()
@@ -92,6 +102,8 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
     }
 
     this.updateUserInfo()
+    console.log('BtnProfileV2Component', this.configSvc.unMappedUser?.profileDetails)
+    console.log('BtnProfileV2Component', this.configSvc.userProfile)
 
     // Set up language
     if (localStorage.getItem('websiteLanguage')) {
@@ -119,10 +131,17 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
     const isIgotOrg = deptName === 'igot'
 
     this.hideMenu.set(isNotMyUser && isIgotOrg)
+    this.setProfileCompletionGraph()
+  }
+
+  setProfileCompletionGraph() {
+    const progress = 247 - (247 * this.profileCompletionPercentage) / 100
+    document.documentElement.style.setProperty('--i', String(progress))
   }
 
   // ── User info ──────────────────────────────────────────────────────────────
   private updateUserInfo(): void {
+    this.profileCompletionPercentage = this.configSvc?.userProfileV2?.profileCompletionPercentage || 0
     const profile = this.configSvc.userProfile
     if (profile) {
       const fullName =

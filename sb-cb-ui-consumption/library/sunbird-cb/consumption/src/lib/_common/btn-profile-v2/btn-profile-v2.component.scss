@@ -6,6 +6,62 @@
   display: inline-block;
 }
 
+.progress-wrapper {
+  position: relative;
+  margin-top: -7px;
+
+  .progress-content {
+    position: absolute;
+    width: 33px;
+    height: 33px;
+
+  }
+
+  /* circumference of circle (approx 2πr where r=39.5) */
+  --circ: 248;
+
+  circle {
+    stroke-linecap: butt;
+    stroke-width: 8;
+  }
+
+  .grey {
+    stroke: #e5e5e5;
+  }
+
+  .progress-clr {
+    stroke: var(--environment-icon-system-success);
+    stroke-dasharray: var(--circ);
+    stroke-dashoffset: var(--i);
+  }
+}
+
+.image-container {
+  position: absolute;
+  top: 47px;
+  left: 43px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+
+  img {
+    width: 83px;
+    height: 79px;
+  }
+}
+
+.profile-circle {
+  border-radius: 50%;
+  background-color: rgba(27, 33, 51, 1);
+  font-weight: 600;
+  font-size: 36px;
+  text-transform: uppercase;
+  color: #fff;
+  width: 84px;
+  height: 84px;
+}
+
 .log-o {
   flex: 1;
   text-align: left;
