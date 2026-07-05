@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { NsCardContent } from '../../../../_models/card-content.model'
 import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
@@ -241,6 +241,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
           this.weekCardLoading[week] = false
           this.cdr.detectChanges()
 
+          /* Card widths change as skeletons swap for real cards — refresh arrow state */
+          setTimeout(() => this._updateCardNav(), 100)
+
           if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
 
           /* Emit overall stats once all week calls are done */
@@ -314,13 +317,27 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   private _scrollToCurrentWeek(): void {
     const el = this.cardTrackRef?.nativeElement
-    if (!el || this.currentWeek <= 1) return
-    const cardWidth = (el.offsetWidth - 48) / 4.1
-    const pageIndex = Math.floor((this.currentWeek - 1) / 3)
-    const scrollPos = pageIndex * 3 * (cardWidth + 16)
-    el.scrollLeft = scrollPos
-    this._canCardsPrev = scrollPos > 1
+    if (!el) return
+    if (this.currentWeek > 1) {
+      const cardWidth = (el.offsetWidth - 48) / 4.1
+      const pageIndex = Math.floor((this.currentWeek - 1) / 3)
+      el.scrollLeft = pageIndex * 3 * (cardWidth + 16)
+    }
+    this._updateCardNav()
+  }
+
+  /** Arrows reflect actual overflow: both disabled when the track has nothing to scroll */
+  private _updateCardNav(): void {
+    const el = this.cardTrackRef?.nativeElement
+    if (!el) return
+    this._canCardsPrev = el.scrollLeft > 1
     this._canCardsNext = el.scrollLeft < el.scrollWidth - el.offsetWidth - 1
+    this.cdr.detectChanges()
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this._updateCardNav()
   }
 
   /* ── Date-based current week computation ── */
