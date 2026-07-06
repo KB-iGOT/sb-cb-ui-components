@@ -28,7 +28,7 @@ export class ViewCourseRecommendationComponent {
     this.planData = data
   }
   searchText = ''
-  filterdCourses: any
+  filterdCourses: any[] = []
   selectFilterCourses: any = []
   competenciesCount = { total: 0, public_courses: 0, igot: 0 }
   expandedCompetencies: any = {}; // Track expanded state for each course and competency type
@@ -83,7 +83,7 @@ export class ViewCourseRecommendationComponent {
             // }
           })
         }
-        this.filterdCourses = allCourses
+        this.filterdCourses = this.sortCoursesByRelevancy(allCourses)
         let identifiersArr = []
         console.log('this.filterdCourses', this.filterdCourses)
         this.filterdCourses.map((item) => {
@@ -142,7 +142,7 @@ export class ViewCourseRecommendationComponent {
               // }
             })
           }
-          this.filterdCourses = allCourses
+          this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(allCourses)
           let identifiersArr = []
           console.log('this.filterdCourses', this.filterdCourses)
           this.filterdCourses.map((item) => {
@@ -189,6 +189,70 @@ export class ViewCourseRecommendationComponent {
       if (c.is_public) this.competenciesCount.public_courses++;
       if (!c.is_public) this.competenciesCount.igot++;
     });
+  }
+
+  sortCoursesByRelevancy(courses: any[] = []): any[] {
+    return [...courses].sort((a, b) => {
+      const aScore = this.normalizeRelevancy(a?.relevancy)
+      const bScore = this.normalizeRelevancy(b?.relevancy)
+      return bScore - aScore
+    })
+  }
+
+  sortCoursesByCategoryAndRelevancy(courses: any[] = []): any[] {
+    return [...courses].sort((a, b) => {
+      const categoryPriority = { domain: 1, functional: 2, behavioral: 3, other: 4 };
+      const aPriority = categoryPriority[this.getCourseCategory(a)] || 4;
+      const bPriority = categoryPriority[this.getCourseCategory(b)] || 4;
+
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+
+      return this.normalizeRelevancy(b?.relevancy) - this.normalizeRelevancy(a?.relevancy);
+    })
+  }
+
+  getCourseCategory(course: any): string {
+    const competencies = [
+      ...(course?.competencies || []),
+      ...(course?.competencies_v6 || [])
+    ];
+
+    const categories = new Set(
+      competencies
+        .map((c: any) => this.normalizeCompetency(c?.competencyAreaName))
+        .filter((c: string) => c)
+    );
+
+    if (categories.has('domain')) return 'domain';
+    if (categories.has('functional')) return 'functional';
+    if (categories.has('behavioral')) return 'behavioral';
+
+    return 'other';
+  }
+
+  normalizeRelevancy(value: any): number {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value.trim())
+      return Number.isFinite(parsed) ? parsed : -Infinity
+    }
+
+    return -Infinity
+  }
+
+  normalizeCompetency(value: string): string {
+    if (!value) return ''
+    const v = value.toLowerCase().trim()
+    if (v === 'all') return 'all'
+    if (v.includes('behavioural') || v.includes('behavioral')) return 'behavioral'
+    if (v.includes('functional')) return 'functional'
+    if (v.includes('domain')) return 'domain'
+    return ''
   }
 
   closeDialog() {
@@ -269,6 +333,8 @@ export class ViewCourseRecommendationComponent {
           this.filterdCourses.push(res[i])
         }
 
+        this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(this.filterdCourses)
+
         // Update competency counts after adding suggested courses
         this.updateCompetencyCounts()
 
@@ -298,6 +364,8 @@ export class ViewCourseRecommendationComponent {
         for (let i = 0; i < res.length; i++) {
           this.filterdCourses.push(res[i])
         }
+
+        this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(this.filterdCourses)
 
         // Update competency counts after adding user courses
         this.updateCompetencyCounts()

@@ -6,8 +6,11 @@
                     <span><mat-icon class="vertical-middle">remove_red_eye</mat-icon></span>
                     <span *ngIf="listType === 'role_responsibilities'" class="ml-2">Roles & Responsibilities</span>
                     <span *ngIf="listType === 'activity'" class="ml-2">Key Activities</span>
+                    <span *ngIf="listType === 'domain'" class="ml-2">Domain Competencies</span>
+                    <span *ngIf="listType === 'behavioral'" class="ml-2">Behavioral Competencies</span>
+                    <span *ngIf="listType === 'functional'" class="ml-2">Functional Competencies</span>
                     <span *ngIf="listType === 'doc-summary'" class="ml-2">Summary</span>
-                    
+
                 </div>
 <!--                <div class="sub-text" *ngIf="listType === 'role_responsibilities'">-->
 <!--                    <p>Complete roles and responsibilities</p>-->
@@ -34,6 +37,14 @@
             <ul>
                 <li *ngFor="let item of listData?.activities">
                     {{item}}
+                </li>
+            </ul>
+        </div>
+        <div class="custom-bullet-list"
+            *ngIf="listType === 'domain' || listType === 'behavioral' || listType === 'functional'">
+            <ul>
+                <li *ngFor="let item of competencyList">
+                    {{item.theme}} - {{item.sub_theme}}
                 </li>
             </ul>
         </div>
