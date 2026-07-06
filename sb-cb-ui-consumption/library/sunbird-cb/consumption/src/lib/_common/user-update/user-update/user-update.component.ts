@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core'
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef, ViewChild } from '@angular/core'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import * as _ from 'lodash'
 import { MatSnackBar } from '@angular/material/snack-bar'
@@ -9,22 +9,23 @@ import { ConfirmationDialogComponent } from '../../dialog-components/confirmatio
 import { DatePipe } from '@angular/common'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { COMMA, ENTER } from '@angular/cdk/keycodes'
-import { forkJoin, Observable, of } from 'rxjs'
+import { forkJoin, Observable, of, Subscription } from 'rxjs'
 
 const EMAIL_PATTERN = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*[a-zA-Z0-9]+@[a-zA-Z0-9]+([-a-zA-Z0-9]*[a-zA-Z0-9]+)?(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/
 
 @Component({
-    selector: 'ws-app-user-update',
-    templateUrl: './user-update.component.html',
-    styleUrls: ['./user-update.component.scss'],
-    providers: [DatePipe],
-    standalone: false
+  selector: 'ws-app-user-update',
+  templateUrl: './user-update.component.html',
+  styleUrls: ['./user-update.component.scss'],
+  providers: [DatePipe],
+  standalone: false
 })
-export class UserUpdateComponent implements OnInit {
+export class UserUpdateComponent implements OnInit, OnChanges {
   //#region (variables)
 
   //#region (input output)
   @Input() userId: string | null = null
+  @Input() isNgo: boolean = false
   @Output() updateEvent = new EventEmitter<string>()
 
   @ViewChild('rejectDialog')
@@ -87,6 +88,7 @@ export class UserUpdateComponent implements OnInit {
 
   noHtmlCharacter = new RegExp(/<[^>]*>|(function[^\s]+)|(javascript:[^\s]+)/i)
   htmlDetected = false
+  private designationSearchSubscription?: Subscription
 
   //#endregion (variables)
 
@@ -128,8 +130,25 @@ export class UserUpdateComponent implements OnInit {
       cadreControllingAuthorityName: [''],
       tags: ['', [Validators.pattern(this.namePatern)]],
     })
-
     this.valueChanges()
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isNgo'] && changes['isNgo'].currentValue === true) {
+      const listOfControlsToRemove = ['designation', 'searchDesignation', 'group', 'assignMentor', 'isMyUser']
+      listOfControlsToRemove.forEach(control => this.removeControl(this.userForm, control))
+      const listOfControlsToRemoveFromOtherDetails = ['employeeId', 'ehrmsID', 'civilServiceType', 'civilServiceName', 'cadreName', 'cadreBatch', 'cadreControllingAuthorityName']
+      listOfControlsToRemoveFromOtherDetails.forEach(control => this.removeControl(this.otherDetailsForm, control))
+      if (this.designationSearchSubscription) {
+        this.designationSearchSubscription.unsubscribe()
+      }
+    }
+  }
+
+  removeControl(group: FormGroup, controlName: string) {
+    if (group.contains(controlName)) {
+      group.removeControl(controlName)
+    }
   }
 
   // #region (initialization)
@@ -167,9 +186,11 @@ export class UserUpdateComponent implements OnInit {
         // Handle user details
         if (userDetails) {
           this.userDetails = userDetails
-          this.getApprovalsStatus()
           this.rootOrgId = _.get(userDetails, 'rootOrgId', '')
-          this.checkOrgHasDesignations()
+          if (!this.isNgo) {
+            this.getApprovalsStatus()
+            this.checkOrgHasDesignations()
+          }
           this.userRoles.clear()
           this.patchUserDetails(userDetails)
           this.mapRoles(userDetails)
@@ -344,7 +365,17 @@ export class UserUpdateComponent implements OnInit {
       this.orguserRoles = []
 
       for (let i = 0; i < this.orgTypeList.length; i += 1) {
-        if (this.orgTypeList[i].name === 'MDO') {
+        if (this.isNgo) {
+          if (this.orgTypeList[i].name.toLowerCase() === 'ngo') {
+            _.each(this.orgTypeList[i].roles, rolesObject => {
+              if (rolesObject !== 'MDO_LEADER') {
+                this.uniqueRoles.push({
+                  roleName: rolesObject, description: rolesObject,
+                })
+              }
+            })
+          }
+        } else if (this.orgTypeList[i].name === 'MDO') {
           _.each(this.orgTypeList[i].roles, rolesObject => {
             if (rolesObject !== 'MDO_LEADER') {
               this.uniqueRoles.push({
@@ -420,7 +451,7 @@ export class UserUpdateComponent implements OnInit {
 
     const domicileMediumControl = this.otherDetailsForm.get('domicileMedium')
     if (domicileMediumControl) {
-      domicileMediumControl.valueChanges
+      this.designationSearchSubscription = domicileMediumControl.valueChanges
         .pipe(
           debounceTime(500),
           distinctUntilChanged(),

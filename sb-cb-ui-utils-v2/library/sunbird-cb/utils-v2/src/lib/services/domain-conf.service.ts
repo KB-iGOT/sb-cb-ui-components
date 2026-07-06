@@ -74,7 +74,8 @@ export class DomainConfService {
   private _tenantConfigFile: ITenantConfigFile | null = null
   private _currentTenantConfig: ITenantConfig | null = null
   public loaded = false
-
+  defaultLogo = '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg'
+  defaultRedirectPath = '/page/home'
   constructor(
     private configSvc: ConfigurationsService,
     @Inject('environment') environment: any,
@@ -89,7 +90,7 @@ export class DomainConfService {
     return {
       type: 'core',
       layout: 'default',
-      logo: this.environment?.logo || '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg',
+      logo: this.environment?.logo || this.defaultLogo,
       redirectPath: this.environment?.redirectPath || '/page/home',
       cdnContentHost: this.environment?.cdnContentHost || 'https://portal.igotkarmayogi.gov.in/',
       sitePath: this.environment?.sitePath || 'portal.igotkarmayogi.gov.in',
@@ -198,6 +199,15 @@ export class DomainConfService {
     return config.features.routes[feature] ?? true
   }
 
+  isFeatureByPageEnabled(pageName: string, feature: string): boolean {
+    const config = this.getTenantConfig()
+    const pageFeatures = config?.features?.[pageName]
+    if (!pageFeatures || typeof pageFeatures !== 'object') {
+      return true
+    }
+    return (pageFeatures as { [feature: string]: boolean })[feature] ?? true
+  }
+
   /** Returns all feature flags for the current tenant */
   getFeatures(): ITenantFeatures {
     return this.getTenantConfig().features || {}
@@ -212,21 +222,21 @@ export class DomainConfService {
   // values, not localhost/environment fallbacks.
 
   getDomainCDNHost(): string {
-    return this.getTenantConfig().cdnContentHost || this.environment?.cdnContentHost || ''
+    return this.getTenantConfig().cdnContentHost || this.environment?.cdnContentHost
   }
 
   getDomainAppLogo(): string {
     const tenantLogo = this.getTenantConfig().logo
     if (tenantLogo) { return tenantLogo }
-    return this.configSvc?.instanceConfig?.logos?.app || ''
+    return this.configSvc?.instanceConfig?.logos?.app || this.defaultLogo
   }
 
   getDomainRedirectPath(): string {
-    return this.getTenantConfig().redirectPath || '/page/home'
+    return this.getTenantConfig().redirectPath || this.environment?.redirectPath|| this.defaultRedirectPath
   }
 
   getDomainSitePath(): string {
-    return this.getTenantConfig().sitePath || this.environment?.sitePath || ''
+    return this.getTenantConfig().sitePath || this.environment?.sitePath 
   }
 
   /** True when the current domain is the main KB portal (not a tenant portal) */
@@ -244,4 +254,145 @@ export class DomainConfService {
   getDomainData(): any {
     return this.getTenantConfig()
   }
+
+  // ── 4. Global config accessors (from assets/configurations/global-config.json) ─
+  //
+  // These read from configSvc.globalConfig which is loaded by InitService
+  // at startup from the static JSON file.
+
+  /** Returns the entire globalConfig object */
+  getGlobalConfig(): any {
+    return this.configSvc.globalConfig || {}
+  }
+
+  /**
+   * Single method to check if a specific element is enabled in a given section of globalConfig.
+   *
+   * Usage:
+   *   domainConfSvc.isConfigEnabled('components.header', 'notification')
+   *   domainConfSvc.isConfigEnabled('components.footer', 'downloadApp')
+   *   domainConfSvc.isConfigEnabled('featureFlags', 'chatbot')
+   *
+   * @param sectionKey - dot-notation path to the section (e.g. 'components.header', 'featureFlags')
+   * @param elementKey - the property name within that section (e.g. 'notification', 'language')
+   * @returns true if the value is not explicitly false; defaults to true when not specified
+   */
+  isConfigEnabled(sectionKey: string, elementKey: string): boolean {
+    const config = this.getGlobalConfig()
+    const section = sectionKey.split('.').reduce((obj: any, key: string) => obj?.[key], config)
+    if (!section || section[elementKey] === undefined) { return true }
+    return section[elementKey] !== false
+  }
+
+  // ── 5. Search Categories config ────────────────────────────────────────────
+
+  /**
+   * Returns the searchCategories config from globalConfig.components.searchCategories.
+   * Returns null if not configured.
+   */
+  getSearchCategoriesConfig(): any {
+    return this.getGlobalConfig()?.components?.searchCategories || null
+  }
+
+  /**
+   * Checks if the search categories feature is enabled overall.
+   * Defaults to true when not configured.
+   */
+  isSearchCategoriesEnabled(): boolean {
+    const config = this.getSearchCategoriesConfig()
+    if (!config) { return true }
+    return config.enabled !== false
+  }
+
+  /**
+   * Checks if a specific search category is enabled.
+   * Defaults to true when not configured or when the category key is not specified.
+   *
+   * @param categoryValue - the category value (e.g. 'courses', 'events', 'peoples', 'all')
+   */
+  isSearchCategoryEnabled(categoryValue: string): boolean {
+    const config = this.getSearchCategoriesConfig()
+    if (!config) { return true }
+    const key = categoryValue || 'all'
+    return config[key] !== false
+  }
+
+  // ── 6. Feature API config accessors ────────────────────────────────────────
+
+  /**
+   * Generic method to get an API URL from globalConfig.apis section.
+   * Returns the configured URL only if enabled is true.
+   * Returns empty string if the API is disabled (enabled: false).
+   * Falls back to defaultUrl if not configured in global-config.json.
+   *
+   * Usage:
+   *   domainConfSvc.getApiUrl('search', 'searchV4', '/apis/proxies/v8/sunbirdigot/v4/search')
+   *   domainConfSvc.getApiUrl('search', 'volunteerSearch', '/apis/proxies/v8/sunbirdigot/v4/search')
+   *   domainConfSvc.getApiUrl('user', 'profile', '/apis/proxies/v8/api/user/v2/read')
+   *   domainConfSvc.getApiUrl('content', 'explore', '/api/course/v1/explore')
+   *
+   * @param service - the service group key (e.g. 'search', 'user', 'content')
+   * @param apiKey - the specific API key within the service group
+   * @param defaultUrl - fallback URL if not found in config
+   * @returns API URL if enabled, empty string if disabled, defaultUrl if not configured
+   */
+  getApiUrl(service: string, apiKey: string, defaultUrl: string = ''): string {
+    const apis = this.getGlobalConfig()?.apis
+    const apiConfig = apis?.[service]?.[apiKey]
+    
+    // If not configured in global-config.json, return defaultUrl
+    if (!apiConfig) { return defaultUrl }
+    
+    // Legacy support: if apiConfig is a string, return it directly
+    if (typeof apiConfig === 'string') { return apiConfig }
+    
+    // New format: check enabled flag
+    // If enabled is false, return empty string (API is disabled)
+    if (apiConfig.enabled === false) { return '' }
+    
+    // If enabled is true or not specified, return the URL
+    return apiConfig.url || defaultUrl
+  }
+
+  /**
+   * Checks if a specific API is enabled in globalConfig.apis.
+   * Returns true if the API is enabled or not configured.
+   * Returns false if explicitly disabled (enabled: false).
+   *
+   * @param service - the service group key (e.g. 'search', 'user', 'content')
+   * @param apiKey - the specific API key within the service group
+   * @returns true if enabled, false if disabled
+   */
+  isApiEnabled(service: string, apiKey: string): boolean {
+    const apis = this.getGlobalConfig()?.apis
+    const apiConfig = apis?.[service]?.[apiKey]
+    
+    // If not configured, assume enabled
+    if (!apiConfig) { return true }
+    
+    // Legacy support: if apiConfig is a string, it's enabled
+    if (typeof apiConfig === 'string') { return true }
+    
+    // New format: check enabled flag (default to true if not specified)
+    return apiConfig.enabled !== false
+  }
+
+  /**
+   * Generic accessor for any feature config under globalConfig.features.
+   * @param featureKey - the key under features (e.g. 'volunteerSearch', 'home', 'explore')
+   */
+  getFeatureConfig(featureKey: string): any {
+    return this.getGlobalConfig()?.features?.[featureKey] || null
+  }
+
+  /**
+   * Checks if a feature is enabled in globalConfig.features.<featureKey>.enabled.
+   * Defaults to true when not configured.
+   */
+  isGlobalFeatureEnabled(featureKey: string): boolean {
+    const config = this.getFeatureConfig(featureKey)
+    if (!config) { return true }
+    return config.enabled !== false
+  }
+
 }

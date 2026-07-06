@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '../../../_services/multilingual-translations.service'
 import { WidgetContentLibService } from '../../../_services/widget-content-lib.service'
-import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, DomainConfService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import * as _ from "lodash"
 import { CertificateService } from '../../../_services/certificate.service'
 import { CertificateDialogComponent } from '../../dialog-components/certificate-dialog/certificate-dialog.component'
@@ -58,6 +58,7 @@ export class CardProgressPortraitLibComponent implements OnInit {
     private events: EventService,
     private langtranslations: MultilingualTranslationsService,
     private configSvc: ConfigurationsService,
+    private domainConfSvc: DomainConfService,
     private contSvc: WidgetContentLibService,
     private certificateService: CertificateService,
     private dialog: MatDialog,
@@ -71,6 +72,10 @@ export class CardProgressPortraitLibComponent implements OnInit {
         this.translate.use(lang)
       }
     })
+  }
+
+  isCardElementEnabled(key: string): boolean {
+    return this.domainConfSvc.isConfigEnabled('components.cards', key)
   }
 
   ngOnInit() {

@@ -497,6 +497,29 @@ a.action-button {
   }
 }
 
+.batch-details-info {
+  height: 18px;
+  width: 18px;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.batch-red-text {
+  color: red;
+}
+
+.orange-background {
+  background: #F3962F;
+}
+
+.batch-green-text {
+  color: #2F8132 !important;
+}
+
+.batch-orange-text {
+  color: #FF9800 !important;
+}
+
 @media only screen and (max-width:768px) {
   .new-version-text {
     font-size: 12px !important;

@@ -15,12 +15,11 @@
                       !(contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId)">
           <ng-container *ngIf="!isUnEnrolled && !enrollBtnLoading">
             <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
-              [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
-              [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
-              
-                <ng-container *ngIf="(!content?.completionPercentage || content?.completionPercentage < 100) && !certData">
-                  <ng-container *ngIf="!forPreview || isInIFrame; else authView">
-                    {{ translateLabels('resume', 'apptochome') }}
+            [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
+            [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
+            <ng-container *ngIf="(!content?.completionPercentage || content?.completionPercentage < 100) && !certData">
+              <ng-container *ngIf="!forPreview || isInIFrame; else authView">
+                {{ translateLabels('resume', 'apptochome') }}
                   </ng-container>
                 </ng-container>
                 <ng-container *ngIf="content?.completionPercentage === 100 || certData">
@@ -38,8 +37,9 @@
             </a>
           </ng-container>
 
-          <button *ngIf="isPostAssessment && showTakeAssessment?.post_assessment" (click)="raiseTelemetryForPublic($event)"
-            [routerLink]="firstResourceLink?.url" class="flex action-button justify-center">
+          <button *ngIf="isPostAssessment && showTakeAssessment?.post_assessment"
+            (click)="raiseTelemetryForPublic($event)" [routerLink]="firstResourceLink?.url"
+            class="flex action-button justify-center">
             <ng-container *ngIf="!forPreview || isInIFrame; else authView">{{ 'apptochome.takeAssessment' | translate
               }}</ng-container>
           </button>
@@ -121,7 +121,7 @@
                 *ngIf="((contentReadData?.primaryCategory !== primaryCategory.RESOURCE)  && !enrollBtnLoading) && contentReadData?.batches[0].endDate">
                 <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
                   [userEnrollmentList]="userEnrollmentList" [analytics]="analytics" (programEnrollCall)="programEnrollCall($event)"
-                  [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
+                  [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
                 </ws-app-toc-banner>
               </ng-container>
             </ng-container>
@@ -325,7 +325,7 @@
 
   <ng-template #progressFunctionality>
     <div class="flex flex-row gap-4">
-      <div class="flex-1">
+      <div class="flex-1" *ngIf="tocConfig?.uiVisibility?.rightPanel?.progress !== false">
         <div class="flex flex-col gap-2">
           <div class="flex flex-row gap-4 text-sm">
             <div class="flex-1 text-xs">{{ 'apptocsinglepage.overallProgress' | translate }}</div>
@@ -337,8 +337,9 @@
         </div>
       </div>
 
-      <ng-container *ngIf="contentCompletionPercent >= 50">
-        <button mat-stroked-button color="accent" type="button" class="rate-button" (click)="openFeedbackDialog(content)">
+      <ng-container *ngIf="contentCompletionPercent >= 50 && tocConfig?.uiVisibility?.rightPanel?.starRating !== false">
+        <button mat-stroked-button color="accent" type="button" class="rate-button"
+          (click)="openFeedbackDialog(content)">
           <mat-icon class="nodtranslate">star_purple500</mat-icon>
           <ng-container *ngIf="!userRating">
             <div>{{ 'apptocsinglepage.rateNow' | translate }}</div>
@@ -351,7 +352,7 @@
     </div>
   </ng-template>
 
-  <div class="toc-banner">
+  <div class="toc-banner" *ngIf="tocConfig?.uiVisibility?.banner?.visible !== false">
     <div class="flex flex-row gap-6 fixed-width">
       <div class="banner-details toc-content" #bannerDetails>
         <div class="flex flex-col gap-4">
@@ -366,7 +367,8 @@
 
             <ng-container *ngIf="!skeletonLoader">
               <div class="flex flex-row gap-2 items-center">
-                <div class="flex flex-row tag-div rounded-2xl gap-1 items-center p-2">
+                <div class="flex flex-row tag-div rounded-2xl gap-1 items-center p-2"
+                  *ngIf="tocConfig?.uiVisibility?.banner?.courseBadge !== false">
                   <mat-icon class="ws-mat-orange-text nodtranslate">video_library</mat-icon>
                   <ng-container *ngIf="contentReadData?.courseCategory">
                     <div class="text-xs font-bold text-white leading-3 nodtranslate">{{
@@ -378,15 +380,18 @@
                   </ng-container>
                 </div>
                 <div class="flex flex-row tag-div rounded-2xl gap-1 items-center p-2"
-                  *ngIf="contentReadData?.additionalTags?.includes('iGOT Specialization')">
+                  *ngIf="contentReadData?.additionalTags?.includes('iGOT Specialization') && tocConfig?.uiVisibility?.banner?.iGOTSpecialization !== false">
                   <img class="approved-icon" src="./assets/icons/approved.svg" alt="approved">
                   <div class="text-xs font-bold text-white leading-3 nodtranslate">{{
                     'cardcontentv2.iGOTSpecializationProgram' | translate }}</div>
                 </div>
                 <!-- Knowledge level block for search box -->
                 <!-- {{content?.difficultyLevel}} -->
-                <div *ngIf="contentReadData?.difficultyLevel" class="knowledge-level-container6">
-                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'beginner'" class="level-badge beginner">
+                <div
+                  *ngIf="contentReadData?.difficultyLevel && tocConfig?.uiVisibility?.banner?.difficultyLevel !== false"
+                  class="knowledge-level-container6">
+                  <span *ngIf="contentReadData?.difficultyLevel?.toLowerCase() === 'beginner'"
+                    class="level-badge beginner">
                     <!-- <span *ngIf="false" class="level-badge beginner"> -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">
                       <rect width="16" height="16" fill="#DBF4DC" />
@@ -433,13 +438,16 @@
                     {{contentReadData?.difficultyLevel}}
                   </span>
                 </div>
-                <div *ngIf="showBadgeIcon()" class="knowledge-level-container badgediv">
+                <div *ngIf="showBadgeIcon() && tocConfig?.uiVisibility?.banner?.certificateBadge !== false"
+                  class="knowledge-level-container badgediv">
                   <span class="custom-badge">
-                    <img class="badge-img bg-transparent" src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt=""
+                    <img class="badge-img bg-transparent"
+                      src="{{ baseContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt=""
                       srcset="">
                   </span>
                 </div>
-                <div class="flex items-center" *ngIf="cbPlanEndDate">
+                <div class="flex items-center"
+                  *ngIf="cbPlanEndDate && tocConfig?.uiVisibility?.banner?.dueDate !== false">
                   <div class="flex items-center due-tag text-xs leading-3"
                     [ngClass]="{'due-warning': cbPlanDuration === nsCardContentData.UPCOMING, 'due-overdue': cbPlanDuration === nsCardContentData.OVERDUE, 'due-success': cbPlanDuration === nsCardContentData.SUCCESS}">
                     {{ 'common.dueBy' | translate }} - &nbsp;<span class="font-bold">
@@ -448,13 +456,16 @@
                 </div>
               </div>
             </ng-container>
-            <ng-container *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier">
-              <div class="new-version-chip rounded-2xl" (click)="navigateToNewVersion()" (keydown)="navigateToNewVersion()">
+            <ng-container
+              *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier && tocConfig?.uiVisibility?.banner?.newVersionChip !== false">
+              <div class="new-version-chip rounded-2xl" (click)="navigateToNewVersion()"
+                (keydown)="navigateToNewVersion()">
                 <span class="new-version-text nodtranslate">{{ 'apptoc.newVersion' | translate }}</span>
               </div>
             </ng-container>
             <div class="flex items-center gap-4">
-              <div class="flex items-center text-white mob-share" *ngIf="canShare">
+              <div class="flex items-center text-white mob-share"
+                *ngIf="canShare && tocConfig?.uiVisibility?.banner?.shareButton !== false">
                 <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
               </div>
               <ng-container *ngIf="contentReadData?.courseCategory === 'Course' && contentReadData?.contentType === 'Course' && !forPreview">
@@ -480,9 +491,11 @@
               <ws-widget-skeleton-loader [width]="'70%'" [height]="'32px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
             </ng-container>
             <ng-container *ngIf="!skeletonLoader">
-              <div class="banner-text text-base sm:text-4xl leading-6 sm:leading-10 font-bold nodtranslate">{{
+              <div *ngIf="tocConfig?.uiVisibility?.banner?.heading !== false"
+                class="banner-text text-base sm:text-4xl leading-6 sm:leading-10 font-bold nodtranslate">{{
                 handleCapitalize(contentReadData?.name) }}</div>
-              <div class="text-sm sm:text-base source-text font-semibold break-words nodtranslate" #contentSource
+              <div *ngIf="tocConfig?.uiVisibility?.banner?.byDepartment !== false"
+                class="text-sm sm:text-base source-text font-semibold break-words nodtranslate" #contentSource
                 [ngClass]="{'sourceEllipsis': sourceEllipsis}" title="{{contentReadData?.source}}">{{ 'cardcontentv2.by'
                 | translate }} {{ contentReadData?.source }}</div>
             </ng-container>
@@ -492,7 +505,7 @@
             <ws-widget-skeleton-loader [width]="'120px'" [height]="'40px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
             <ws-widget-skeleton-loader [width]="'88px'" [height]="'24px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
           </ng-container>
-          <ng-container *ngIf="!skeletonLoader">
+          <ng-container *ngIf="!skeletonLoader && tocConfig?.uiVisibility?.banner?.ratingChip !== false">
             <div class="flex gap-4 items-center">
               <div class="flex flex-row rating-chip py-2 items-center cursor-pointer" (click)="handleNavigateToReviews()"
                 *ngIf="content?.averageRating">
@@ -504,7 +517,8 @@
                 <div class="text-white text-sm leading-4 margin-right-m">{{ content?.totalRating | pipeCountTransform }}
                 </div>
               </div>
-              <div class="flex items-center" *ngIf="content?.additionalTags?.length">
+              <div class="flex items-center"
+                *ngIf="content?.additionalTags?.length && tocConfig?.uiVisibility?.banner?.additionalTags !== false">
                 <div class="most-enrolled-chip text-xs leading-3">
                   <span *ngIf="content?.additionalTags?.includes('mostTrending')">{{ 'cardcontentv2.mostTrending' |
                     translate }}</span>
@@ -525,12 +539,14 @@
           <ng-container *ngIf="skeletonLoader">
             <ws-widget-skeleton-loader [width]="'180px'" [height]="'20px'" [bindingClass]="'rounded blue-2-loader'"></ws-widget-skeleton-loader>
           </ng-container>
-          <ng-container *ngIf="!skeletonLoader && contentReadData?.sYS_INTERNAL_LAST_UPDATED_ON">
+          <ng-container
+            *ngIf="!skeletonLoader && contentReadData?.sYS_INTERNAL_LAST_UPDATED_ON && tocConfig?.uiVisibility?.banner?.lastUpdatedDate !== false">
             <div class="text-xs leading-4 source-text nodtranslate">({{ 'apptoc.lastUpdatedOn' | translate }} {{
               contentReadData?.sYS_INTERNAL_LAST_UPDATED_ON | date: 'MMM d, y' }})</div>
           </ng-container>
           <ng-container>
-            <div class="flex flex-row gap-2" *ngIf="languageList?.length > 1">
+            <div class="flex flex-row gap-2"
+              *ngIf="languageList?.length > 1 && tocConfig?.uiVisibility?.banner?.languageChips !== false">
               <mat-chip-list class="lang-chips">
                 <!-- Show up to 6 chips -->
                 <ng-container *ngFor="let lang of languageList | slice:0:5; let i = index">
@@ -597,9 +613,11 @@
                 }}</span>
             </div>
             <div class="flex flex-middle relevant-container">
-              <div class="flex flex-middle relevent-normal relevent-btn py-2 px-4 relevant-box" (mouseenter)="isReleventBtnHovered = true"
-                (mouseleave)="isReleventBtnHovered = false" (click)="handleAcceptRelevent()">
-                <img [src]="isReleventBtnHovered  ? SAKSHAMAI_ICON_LOADER : SAKSHAMAI_ICON_NORMAL" alt="loader" width="16" height="16" class="mr-2">
+              <div class="flex flex-middle relevent-normal relevent-btn py-2 px-4 relevant-box"
+                (mouseenter)="isReleventBtnHovered = true" (mouseleave)="isReleventBtnHovered = false"
+                (click)="handleAcceptRelevent()">
+                <img [src]="isReleventBtnHovered  ? SAKSHAMAI_ICON_LOADER : SAKSHAMAI_ICON_NORMAL" alt="loader"
+                  width="16" height="16" class="mr-2">
                 <span class="text-relevent ff-lato text-sm font-bold">{{ 'home.relevent' | translate }}</span>
               </div>
 
@@ -618,22 +636,24 @@
         </div>
         <!-- Overall progress functionality -->
         <ws-widget-content-toc [content]="content" [componentName]="'toc'" [pathSet]="pathSet" [tocStructure]="tocStructure" [forPreview]="forPreview"
-          [isEnrolled]="batchData?.enrolled" [resumeData]="resumeData" [batchData]="selectedBatchData" [skeletonLoader]="skeletonLoader"
+          [isEnrolled]="batchData?.enrolled" [resumeData]="resumeData" [batchData]="batchData" [skeletonLoader]="skeletonLoader"
           [changeTab]="changeTab" [hierarchyMapData]="tocSvc?.hashmap" [selectedBatchData]="selectedBatchData"
           [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"
           [kparray]="kparray" (playResumeForAI)="playResumeForAI()" (enrollUserToAI)="enrollUserToAI()" [contentReadData]="contentReadData"
           [baseContentReadData]="baseContentReadData" [languageList]="languageList" [lockCertificate]="lockCertificate"
-          (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
-        <div class="mob-tip-for-learner">
+          (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg"
+          [areAllActiveBatchesFull]="allBatchesAreFull" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
+        <div class="mob-tip-for-learner" *ngIf="tocConfig?.uiVisibility?.mobileFooter?.learnerAdvisory !== false">
           <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
-            <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"></ws-widget-tips-for-learner-card>
+            <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"
+              [config]="tocConfig"></ws-widget-tips-for-learner-card>
           </div>
         </div>
       </div>
     </div>
 
 
-    <div class="right-container">
+    <div class="right-container" *ngIf="tocConfig?.uiVisibility?.rightPanel?.visible !== false">
 
       <!-- if needed sticky of right container add this to below div => #rightContainer -->
       <div class="right-content">
@@ -641,8 +661,9 @@
           <ng-container *ngIf="skeletonLoader">
             <ws-widget-skeleton-loader [width]="'384px'" [height]="'224px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
           </ng-container>
-          <ng-container *ngIf="!skeletonLoader">
-            <div class="flex flex-col image-div" [ngStyle]="{
+          <ng-container *ngIf="!skeletonLoader && tocConfig?.uiVisibility?.rightPanel?.posterImage !== false">
+            <div class="flex flex-col image-div"
+              [ngStyle]="{
         'background-image': 'url(' + contentReadData?.posterImage + ')', 'background-repeat': 'no-repeat', 'background-size': 'cover'}"
               [ngClass]="{'image-backdrop': scrolled}">
               <div class="flex flex-col justify-between text-container">
@@ -659,7 +680,8 @@
                     </ng-container>
                   </div>
                   <div class="flex flex-row items-center gap-2">
-                    <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag" *ngIf="canShare && !forPreview">
+                    <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag"
+                      *ngIf="canShare && !forPreview && tocConfig?.uiVisibility?.rightPanel?.shareButton !== false">
                       <mat-icon class="nodtranslate">share</mat-icon>
                       <div>{{ 'apptocsinglepage.share' | translate }}</div>
                     </div>
@@ -675,20 +697,21 @@
                           </button>
                         </mat-menu>
                       </ng-container>
-                    </ng-container>                    
+                    </ng-container>
                   </div>
                 </div>
                 <div class="flex flex-col gap-1" *ngIf="scrolled">
-                  <div class="text-xl leading-6 text-white font-bold">{{ handleCapitalize(contentReadData?.name) }}
+                  <div *ngIf="tocConfig?.uiVisibility?.rightPanel?.heading !== false"
+                    class="text-xl leading-6 text-white font-bold">{{ handleCapitalize(contentReadData?.name) }}
                   </div>
-                  <div class="text-sm source-text font-semibold break-words" #contentSource [ngClass]="{'sourceEllipsis': sourceEllipsis}"
-                    title="{{contentReadData?.source}}">{{
+                  <div *ngIf="tocConfig?.uiVisibility?.rightPanel?.byDepartment !== false"
+                    class="text-sm source-text font-semibold break-words" #contentSource
+                    [ngClass]="{'sourceEllipsis': sourceEllipsis}" title="{{contentReadData?.source}}">{{
                     'cardcontentv2.by' | translate }} {{ contentReadData?.source }}</div>
                 </div>
               </div>
             </div>
           </ng-container>
-
 
           <div class="flex flex-col gap-4 p-5 border-bottom">
             <div class="flex flex-col gap-1  cursor-pointer switch-version" *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier"
@@ -696,7 +719,46 @@
               <span class="btn-switch">{{ 'apptoc.switchToNewVersion' | translate }}</span>
             </div>
 
-            <div class="flex flex-col gap-4" *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
+            <ng-container
+              *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData && !batchData?.enrolled && !batchData?.content?.length">
+              <div class="flex flex-col">
+                <div class="text-sm text-center">No batches available for this program.</div>
+              </div>
+            </ng-container>
+
+            <ng-conatiner
+              *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && batchData &&  batchData?.content?.length && !batchData?.enrolled">
+              <ng-container *ngIf="allBatchesAreFull">
+                <div class="flex flex-row justify-center items-center mt-2">
+                  <div class="text-sm batch-red-text margin-remove-bottom">All batches for this program are currently full.</div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="batchData?.allBatchesExpired">
+                <div class="flex flex-col">
+                  <div class="text-sm batch-red-text text-black-700">Currently, there are no active batches available for enrollment.</div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="isBatchFull">
+                <div class="flex flex-row justify-center items-center mt-2">
+                  <div class="text-sm batch-green-text margin-remove-bottom">This batch is currently full and not accepting new enrollments.</div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="showLimitedSeatsMsg">
+                <div class="flex flex-row justify-center items-center mt-2">
+                  <div class="text-sm batch-orange-text margin-remove-bottom">Limited seats are available in ongoing batches. Please enroll in an
+                    available batch.</div>
+                </div>
+              </ng-container>
+            </ng-conatiner>
+            <div class="flex flex-col gap-4" *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM &&
+              !(!batchData?.enrolled && (!batchData?.content?.length || batchData?.allBatchesExpired || allBatchesAreFull))">
+              <!-- <div class="flex flex-row gap-2">
+                <mat-icon class="batch-details-info">info</mat-icon>
+                <div class="text-black-50 font-normal">Enrollment numbers refresh every 2 hours.</div>
+              </div> -->
               <div class="flex flex-row gap-3 justify-around" *ngIf="(preAssessmentCompletionStatus ||  !preAssessmentRequiredFlag)">
                 <div class="batch-info">
                   <div class="font-base font-bold">{{ selectedBatchData?.content[0]?.batchAttributes?.currentBatchSize
@@ -771,7 +833,7 @@
 
                   <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content"
                     [userEnrollmentList]="userEnrollmentList" (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics"
-                    [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData">
+                    [resumeData]="resumeData" [batchData]="batchData" [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
                   </ws-app-toc-banner>
                 </ng-container>
               </ng-container>
@@ -818,14 +880,15 @@
                   [pCategory]="contentReadData?.primaryCategory"></ws-app-karmapoints-panel>
               </div> -->
 
-                <ng-container *ngIf="actionBtnStatus !== 'wait' && contentReadData?.status !== 'Deleted' && contentReadData?.status !== 'Expired'">
+                <ng-container
+                  *ngIf="actionBtnStatus !== 'wait' && contentReadData?.status !== 'Deleted' && contentReadData?.status !== 'Expired' && tocConfig?.uiVisibility?.rightPanel?.enrollButton !== false">
                   <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
                 </ng-container>
               </div>
 
-              <div class="karma-points-div">
-                <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)" [content]="content"
-                  [baseContentReadData]="baseContentReadData"
+              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false">
+                <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
+                  [content]="content" [baseContentReadData]="baseContentReadData"
                   [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"></ws-widget-karma-points>
               </div>
             </ng-container>
@@ -856,9 +919,10 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="!skeletonLoader">
-              <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure" [showInstructorLedMsg]="showInstructorLedMsg"
-                [contentReadData]="contentReadData" [languageList]="languageList"></ws-widget-toc-kpi-values>
+            <ng-container *ngIf="!skeletonLoader && tocConfig?.uiVisibility?.rightPanel?.kpiValues?.visible !== false">
+              <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure"
+                [showInstructorLedMsg]="showInstructorLedMsg" [contentReadData]="contentReadData"
+                [languageList]="languageList" [config]="tocConfig"></ws-widget-toc-kpi-values>
             </ng-container>
           </div>
 
@@ -878,7 +942,8 @@
             </ng-container>
 
             <ng-container *ngIf="!skeletonLoader">
-              <div class="flex flex-col gap-3" *ngIf="handleParseJsonData(contentReadData?.creatorDetails)?.length">
+              <div class="flex flex-col gap-3"
+                *ngIf="handleParseJsonData(contentReadData?.creatorDetails)?.length && tocConfig?.uiVisibility?.rightPanel?.authors !== false">
                 <div class="text-base font-bold">{{ 'apptocsinglepage.authors' | translate }}</div>
                 <div class="flex flex-row gap-4 items-center" *ngFor="let author of handleParseJsonData(contentReadData?.creatorDetails)">
                   <div class="flex items-center justify-center">
@@ -892,7 +957,8 @@
                   </div>
                 </div>
               </div>
-              <div class="flex flex-col gap-3" *ngIf="handleParseJsonData(contentReadData?.creatorContacts)?.length">
+              <div class="flex flex-col gap-3"
+                *ngIf="handleParseJsonData(contentReadData?.creatorContacts)?.length && tocConfig?.uiVisibility?.rightPanel?.creators !== false">
                 <div class="text-base font-bold">{{ 'apptocsinglepage.creators' | translate }}</div>
                 <div class="flex flex-row gap-4 items-center" *ngFor="let creeator of handleParseJsonData(contentReadData?.creatorContacts)">
                   <div class="flex items-center justify-center">
@@ -906,7 +972,8 @@
                   </div>
                 </div>
               </div>
-              <div class="flex flex-col gap-3" *ngIf="contentReadData?.source  && (contentCreatorData && contentCreatorData?.length)">
+              <div class="flex flex-col gap-3"
+                *ngIf="contentReadData?.source  && (contentCreatorData && contentCreatorData?.length) && tocConfig?.uiVisibility?.rightPanel?.provider !== false">
                 <div class="text-base font-bold">{{ 'apptocsinglepage.provider' | translate }}</div>
                 <div class="flex flex-row gap-4 items-center" *ngFor="let creator of contentCreatorData">
                   <div class="flex provider-logo-div">
@@ -929,8 +996,10 @@
           </div>
         </div>
 
-        <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
-          <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"></ws-widget-tips-for-learner-card>
+        <div
+          *ngIf="learnAdvisoryData && learnAdvisoryData?.length && tocConfig?.uiVisibility?.rightPanel?.learnerAdvisory?.visible !== false">
+          <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"
+            [config]="tocConfig"></ws-widget-tips-for-learner-card>
         </div>
       </div>
 
@@ -938,16 +1007,42 @@
 
     </div>
   </div>
-  <div class="mobile-enroll-div" [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
-    <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM ">
+  <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
+  && batchData && batchData?.allBatchesExpired">
+    <div class="mobile-enroll-div orange-background">
+      <div class="flex flex-col gap-4 mx-4 mt-4">
+        <div class="text-sm text-center text-black-700">Currently, there are no active batches available for enrollment.</div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
+  && batchData && batchData?.content?.length === 0">
+    <div class="mobile-enroll-div orange-background">
+      <div class="flex flex-col gap-4 mx-4 mt-4">
+        <div class="text-sm text-center text-black-700">No batches available for this program.</div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM 
+  && batchData && !batchData?.allBatchesExpired && allBatchesAreFull">
+    <div class="mobile-enroll-div orange-background">
+      <div class="flex flex-col gap-4 mx-4 mt-4">
+        <div class="text-sm text-center text-black-700">All batches for this program are currently full.</div>
+      </div>
+    </div>
+  </ng-container>
+  <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0 "
+    [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
+    <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
       <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
         <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
           (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
-          [contentReadData]="contentReadData">
+          [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
         </ws-app-toc-banner>
       </div>
     </ng-container>
-    <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
+    <ng-container *ngIf="tocConfig?.uiVisibility?.mobileFooter?.enrollButton !== false"
+      [ngTemplateOutlet]="enrollFunctionality"></ng-container>
   </div>
 
   <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content" (resetEnableShare)="resetEnableShare()"

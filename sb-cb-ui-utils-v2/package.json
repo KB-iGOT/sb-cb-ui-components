@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-utils-v2",
-  "version": "0.0.5-ang-17-20",
+  "version": "0.0.3-ang-17-20-role-based",
   "scripts": {
     "ng": "ng",
 

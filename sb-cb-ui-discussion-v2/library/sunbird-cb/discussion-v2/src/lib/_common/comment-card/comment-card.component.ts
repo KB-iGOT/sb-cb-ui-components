@@ -27,6 +27,7 @@ export class CommentCardComponent implements OnInit, OnChanges {
   @Input() userLikedComments: any = []
   @Input() replyParendtData: any = []
   @Input() commentUsersData: any = {}
+  @Input() uiConfig: any
   @Output() newReply = new EventEmitter<any>()
   @Output() likeUnlikeData = new EventEmitter<any>()
 
