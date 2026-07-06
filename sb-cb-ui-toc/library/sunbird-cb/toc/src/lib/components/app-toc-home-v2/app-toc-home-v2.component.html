@@ -13,7 +13,7 @@
                       !(contentReadData?.primaryCategory === primaryCategory.RESOURCE && !content?.artifactUrl) &&
                       !(contentReadData?.primaryCategory === primaryCategory.MANDATORY_COURSE_GOAL)) &&
                       !(contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId)">
-          <ng-container *ngIf="!isUnEnrolled">
+          <ng-container *ngIf="!isUnEnrolled && !enrollBtnLoading">
             <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
               [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
               [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
@@ -29,7 +29,7 @@
                 </ng-container>
             </a>
           </ng-container>
-          <ng-container *ngIf="isUnEnrolled">
+          <ng-container *ngIf="isUnEnrolled && !enrollBtnLoading">
             <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame" (click)="handleReEnrollment($event)"
               [ngClass]="{'disable-start-btn': !canEnroll()}">
               <ng-container>
