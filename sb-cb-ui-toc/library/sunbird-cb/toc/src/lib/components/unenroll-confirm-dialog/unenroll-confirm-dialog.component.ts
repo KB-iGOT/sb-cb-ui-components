@@ -30,7 +30,7 @@ export class UnenrollConfirmDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.feedbackReasons = this.data?.tocConfig?.unEnrollContent?.feedbackReasons
+    this.feedbackReasons = this.data?.tocConfig?.unEnrollContent?.feedbackReasons || this.feedbackReasons
     this.feedbackForm = new FormGroup({
       reasons: new FormArray(this.feedbackReasons.map(() => new FormControl(false))),
       comments: new FormControl(''),
