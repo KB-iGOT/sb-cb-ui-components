@@ -64,4 +64,13 @@
             height: 69px;
         }
     }
+
+    /* Tablet: the card sits in the narrow 4/12 right column — the fixed
+       180px poster left no room for the text, so shrink it there too */
+    @media screen and (min-width: 770px) and (max-width: 1023px) {
+        .poster {
+            width: 100px;
+            height: 69px;
+        }
+    }
 }

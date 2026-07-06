@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { NsCardContent } from '../../../../_models/card-content.model'
 import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
@@ -12,6 +12,7 @@ import { VIEWER_ROUTE_FROM_MIME } from '../../../../_services/viewer-route-util'
 
 export interface WeekData {
   id?: string
+  name?: string
   title: string
   stripTitle?: string
   stripDesc?: string
@@ -50,6 +51,8 @@ export interface WeekProgressContentStrip {
 
 export interface WeekProgressData {
   enabled: boolean
+  enableTitlePill?: boolean
+  endedEventPillText?: string
   startDate?: string
   endDate?: string
   currentWeek?: number
@@ -153,6 +156,20 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
   ) { }
 
+  /** Week count derived from bkConfig startDate/endDate (DD-MM-YYYY); falls back to configured totalWeeks */
+  get totalWeeks(): number {
+    const start = this.bkConfig?.startDate
+    const end = this.bkConfig?.endDate
+    if (start && end) {
+      const s = moment(start, 'DD-MM-YYYY')
+      const e = moment(end, 'DD-MM-YYYY')
+      if (s.isValid() && e.isValid() && e.isSameOrAfter(s)) {
+        return Math.ceil((e.diff(s, 'days') + 1) / 7)
+      }
+    }
+    return this.bkConfig?.totalWeeks || this.programData?.totalWeeks || 16
+  }
+
   ngOnInit(): void {
     this.currentWeek = this._computeCurrentWeek()
     this.selectedWeek = this.currentWeek
@@ -176,7 +193,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     this._weekCallsDone  = 0
     this._enrolledMap    = {}
 
-    const totalWeeks = this.programData.totalWeeks || 16
+    const totalWeeks = this.totalWeeks
     for (let week = 1; week <= totalWeeks; week++) {
       const wd = this.getWeekData(week)
       /* resources aren't trackable/enrollable content — exclude from progress calculation */
@@ -223,6 +240,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
           this.weekCardLoading[week] = false
           this.cdr.detectChanges()
+
+          /* Card widths change as skeletons swap for real cards — refresh arrow state */
+          setTimeout(() => this._updateCardNav(), 100)
 
           if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
 
@@ -297,13 +317,27 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   private _scrollToCurrentWeek(): void {
     const el = this.cardTrackRef?.nativeElement
-    if (!el || this.currentWeek <= 1) return
-    const cardWidth = (el.offsetWidth - 48) / 4.1
-    const pageIndex = Math.floor((this.currentWeek - 1) / 3)
-    const scrollPos = pageIndex * 3 * (cardWidth + 16)
-    el.scrollLeft = scrollPos
-    this._canCardsPrev = scrollPos > 1
+    if (!el) return
+    if (this.currentWeek > 1) {
+      const cardWidth = (el.offsetWidth - 48) / 4.1
+      const pageIndex = Math.floor((this.currentWeek - 1) / 3)
+      el.scrollLeft = pageIndex * 3 * (cardWidth + 16)
+    }
+    this._updateCardNav()
+  }
+
+  /** Arrows reflect actual overflow: both disabled when the track has nothing to scroll */
+  private _updateCardNav(): void {
+    const el = this.cardTrackRef?.nativeElement
+    if (!el) return
+    this._canCardsPrev = el.scrollLeft > 1
     this._canCardsNext = el.scrollLeft < el.scrollWidth - el.offsetWidth - 1
+    this.cdr.detectChanges()
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this._updateCardNav()
   }
 
   /* ── Date-based current week computation ── */
@@ -315,7 +349,25 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     const now = new Date()
     if (now < start) return 1
     const diffDays = Math.floor((now.getTime() - start.getTime()) / 86_400_000)
-    return Math.min(Math.floor(diffDays / 7) + 1, this.programData.totalWeeks)
+    return Math.min(Math.floor(diffDays / 7) + 1, this.totalWeeks)
+  }
+
+  /** Program has ended when bkConfig endDate (DD-MM-YYYY) is in the past */
+  /** Display label for a week — configured `name` from week data (e.g. "Week 0"), falls back to "Week N" */
+  weekLabel(week: number): string {
+    return this.getWeekData(week)?.name || `Week ${week}`
+  }
+
+  /** Compact stepper form of the label — "Week 0" → "W0" */
+  weekLabelShort(week: number): string {
+    return this.weekLabel(week).replace(/^week\s*/i, 'W')
+  }
+
+  get isProgramEnded(): boolean {
+    const endDate = this.bkConfig?.endDate || this.programData?.endDate
+    if (!endDate) return false
+    const end = moment(endDate, 'DD-MM-YYYY')
+    return end.isValid() && moment().isAfter(end, 'day')
   }
 
   /* Badge / ring: weeks beyond currentWeek are locked only if they have no content */
@@ -399,7 +451,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
   }
 
   get allWeeks(): number[] {
-    return Array.from({ length: this.programData.totalWeeks }, (_, i) => i + 1)
+    return Array.from({ length: this.totalWeeks }, (_, i) => i + 1)
   }
 
   /* ── Interactions ── */

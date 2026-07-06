@@ -5,6 +5,7 @@ import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { Observable, of, EMPTY, BehaviorSubject } from 'rxjs'
 import { catchError, retry, map, shareReplay, switchMap, take } from 'rxjs/operators'
 import { NsContent } from './widget-content.model'
+import { TocConfigService } from './toc-config.service'
 // tslint:disable
 import _ from 'lodash'
 import {  viewerRouteGenerator } from './viewer-route-util'
@@ -72,12 +73,11 @@ export class WidgetContentService {
     private configSvc: ConfigurationsService,
     private activatedRoute: ActivatedRoute,
     private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
   ) {
   }
 
-  private playerConfig$: Observable<any> = this.http
-    .get<any>(`${this.configSvc.sitePath}/feature/toc.json`)
-    .pipe(catchError(() => of({})), shareReplay(1))
+  private playerConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
 
   private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
     return this.playerConfig$.pipe(

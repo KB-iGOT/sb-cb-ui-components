@@ -234,17 +234,21 @@
   margin-bottom: 1.5rem !important;
 }
 
-/* Base col spans (mobile: all full-width) */
+/* Base col spans (mobile: all full-width).
+   min-width: 0 lets column content shrink instead of overflowing the track */
 .col-span-12 {
   grid-column: span 12 / span 12 !important;
+  min-width: 0;
 }
 
 .col-span-8 {
   grid-column: span 8 / span 8 !important;
+  min-width: 0;
 }
 
 .col-span-4 {
   grid-column: span 4 / span 4 !important;
+  min-width: 0;
 }
 
 /* Responsive md: variants (desktop: side-by-side columns) */
@@ -280,6 +284,13 @@
     align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 16px;
+  }
+
+  /* Mobile: title/subtitle/show-all sit flush with the edge — give them a front gap */
+  @media (max-width: 768px) {
+    &__header {
+      padding: 0 16px;
+    }
   }
 
   &__title {

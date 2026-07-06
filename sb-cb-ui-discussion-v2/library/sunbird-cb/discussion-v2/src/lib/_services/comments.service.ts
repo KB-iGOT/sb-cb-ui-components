@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
-import { EMPTY, Observable, of } from 'rxjs'
-import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators'
+import { EMPTY, Observable } from 'rxjs'
+import { map, switchMap, take } from 'rxjs/operators'
+import { TocConfigService } from './toc-config.service'
 
 const API_END_POINTS = {
   FETCH_ALL_COMMENTS: (entityType: string, entityId: string, workflow: string) =>
@@ -42,11 +43,11 @@ export class CommentsService {
     private http: HttpClient,
     private configSvc: ConfigurationsService,
     private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
   ) { }
 
-  private apiConfig$: Observable<any> = this.http
-    .get<any>(`${this.configSvc.sitePath}/feature/toc.json`)
-    .pipe(map((tocConfig: any) => tocConfig?.apiConfig), catchError(() => of(null)), shareReplay(1))
+  private apiConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
+    .pipe(map((tocConfig: any) => tocConfig?.apiConfig || null))
 
   private isApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
     return this.apiConfig$.pipe(

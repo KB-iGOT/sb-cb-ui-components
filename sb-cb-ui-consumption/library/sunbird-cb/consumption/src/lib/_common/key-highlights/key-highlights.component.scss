@@ -31,6 +31,19 @@
     padding: 0 30px;
 
 }
+
+.mob-key-highlighs-container {
+  ::ng-deep .navigation {
+    .prev,
+    .next {
+      top: 50% !important;
+      bottom: auto !important;
+      margin-top: 0 !important;
+      transform: translateY(-50%) !important;
+    }
+  }
+}
+
 // Key highlights placeholder styles
 .key-highlights-placeholder {
   display: flex;
