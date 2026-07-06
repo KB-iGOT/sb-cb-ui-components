@@ -1,4 +1,4 @@
-import { Component, Input, signal, ChangeDetectionStrategy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core'
+import { Component, Input, signal, ChangeDetectionStrategy, OnChanges, SimpleChanges, ChangeDetectorRef, Output, EventEmitter } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
@@ -59,6 +59,7 @@ export class SidebarInfoCardsSectionComponent implements OnChanges {
    * Content visibility state (with delayed hiding)
    */
   @Input({ required: true }) showContent!: boolean
+  @Output() itemClicked = new EventEmitter<{ code: string; subType: string }>()
 
   constructor(
     private translate: TranslateService,
@@ -108,24 +109,19 @@ export class SidebarInfoCardsSectionComponent implements OnChanges {
     })
   }
 
-  /**
-   * Check if a card is expanded
-   */
   isCardExpanded(index: number): boolean {
     return this.expandedCards().has(index)
   }
 
-  /**
-   * Track by function for info items
-   */
   trackByTitle(index: number, item: InfoCardItem): string {
     return item.title || `info-item-${index}`
   }
 
-  /**
-   * Track by function for child items
-   */
   trackByChildTitle(index: number, child: any): string {
     return child.title || `child-item-${index}`
+  }
+
+  onItemClicked(item: InfoCardItem | any): void {
+    this.itemClicked.emit({ code: item.code, subType: item.subtype || '' })
   }
 }

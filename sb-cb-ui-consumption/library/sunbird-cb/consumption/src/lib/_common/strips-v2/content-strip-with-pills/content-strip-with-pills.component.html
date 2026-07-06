@@ -46,7 +46,7 @@
   }
 
   <!-- Active Pill Content -->
-  @if (activeContentConfig()) {
+  @if (activeContentConfig() && showContent()) {
   <sb-uic-content-strips [contentConfig]="activeContentConfig()!" />
   }
 </div>

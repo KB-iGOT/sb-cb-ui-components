@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed, ChangeDetectionStrategy, SimpleChanges, OnChanges, ChangeDetectorRef } from '@angular/core'
+import { Component, Input, Output, EventEmitter, computed, signal, ChangeDetectionStrategy, SimpleChanges, OnChanges, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
@@ -78,6 +78,7 @@ export class SidebarStatCardsSectionComponent implements OnChanges {
     // Manually detect changes when detailsChanged flag is toggled
     if (changes['detailsChanged'] && !changes['detailsChanged'].firstChange) {
       this.cdr.markForCheck()
+      this.sectionSignal.set(this.section)
     }
   }
   /**
@@ -87,23 +88,25 @@ export class SidebarStatCardsSectionComponent implements OnChanges {
     return this.langtranslations.translateActualLabel(label, type, '')
   }
 
+  // Keep a signal copy of the `section` input so `computed` can track changes
+  private sectionSignal = signal<StatCardsSectionConfig | undefined>(undefined)
+
   visibleItems = computed(() => {
-    return this.section?.items ?? []
+    return this.sectionSignal()?.items ?? []
   });
 
   sectionLoading = computed(() => {
-    return this.section?.sectionLoading ?? false
+    return this.sectionSignal()?.sectionLoading ?? false
   });
 
   shouldShowViewAll = computed(() => {
-    return this.section?.showViewAll ?? false
+    return this.sectionSignal()?.showViewAll ?? false
   });
 
   /**
    * Handle View All click - emit event to parent
    */
   onViewAllClick(): void {
-    console.log('View All clicked for section:', this.section)
     this.itemClicked.emit({ code: this.section.viewAllKey ?? '', subType: '' })
   }
 

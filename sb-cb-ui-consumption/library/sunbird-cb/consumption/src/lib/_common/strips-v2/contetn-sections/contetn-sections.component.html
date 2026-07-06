@@ -1,6 +1,10 @@
 @if (visibleSections()?.length) {
 <div class="flex flex-col gap-6 w-full">
   @for (section of visibleSections(); track section.sectionKey) {
+  @if (section.displayType === 'spotlight' && section.spotlightConfig && section.spotlightConfig.length) {
+  <sb-uic-spotlight-cards-v2 [heading]="section.header" [cards]="section.spotlightConfig"
+    [showToggle]="true"></sb-uic-spotlight-cards-v2>
+  } @else if (section.displayType !== 'spotlight') {
   <sb-uic-accordion [header]="section.header" [translateHeader]="section.translateHeader" [expanded]="true">
     @switch (section.displayType) {
     @case ('tabs') {
@@ -20,6 +24,7 @@
     }
     }
   </sb-uic-accordion>
+  }
   }
 </div>
 }

@@ -11,11 +11,13 @@ import { MatIconModule } from '@angular/material/icon'
 import { Router } from '@angular/router'
 import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsSpotlightCardsV2 } from './spotlight-cards-v2.model'
+import { TranslateModule } from '@ngx-translate/core'
+import { ContentApiService } from '../../../public-api'
 
 @Component({
   selector: 'sb-uic-spotlight-cards-v2',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, TranslateModule],
   templateUrl: './spotlight-cards-v2.component.html',
   styleUrls: ['./spotlight-cards-v2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,10 +58,10 @@ export class SbUicSpotlightCardsV2Component {
   skeletonItems = computed(() =>
     Array.from({ length: this.skeletonCount() }, (_, i) => i)
   )
-
   constructor(
     private readonly router: Router,
     private readonly events: EventService,
+    private readonly contentApiSvc: ContentApiService
   ) {
     // Seed isCollapsed from config or collapsed input reactively
     effect(() => {
@@ -107,6 +109,12 @@ export class SbUicSpotlightCardsV2Component {
       window.open(card.redirectionUrl, '_blank', 'noopener,noreferrer')
     } else {
       this.router.navigateByUrl(card.redirectionUrl)
+    }
+  }
+
+  emitDetails(cardClickDetails: NsSpotlightCardsV2.cardClickDetails): void {
+    if (cardClickDetails) {
+      this.contentApiSvc.publishCardClickDetails(cardClickDetails)
     }
   }
 }

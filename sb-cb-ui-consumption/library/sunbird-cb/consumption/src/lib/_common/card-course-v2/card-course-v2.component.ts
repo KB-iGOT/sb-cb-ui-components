@@ -19,9 +19,12 @@ import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils
 import { NsContent } from '../../_models/widget-content.model'
 import { ContentLanguageService } from '../../_services/content-language.service'
 import { CommonMethodsService } from '../../_services/common-methods.service'
+import { WidgetContentLibService } from '../../_services/widget-content-lib.service'
+import { ContentApiService } from '../strips-v2/services/content-api.service'
 import { DefaultThumbnailModule } from '../../_directives/default-thumbnail/default-thumbnail.module'
 import { PipeDurationTransformModule } from '../../_pipes/pipe-duration-transform/pipe-duration-transform.module'
 import { DisplayContentTypeLibModule } from '../display-content-type-lib/display-content-type-lib.module'
+import { VIEWER_ROUTE_FROM_MIME } from '../../_services/viewer-route-util'
 
 @Component({
   selector: 'sb-uic-card-course-v2',
@@ -48,6 +51,7 @@ export class CardCourseV2Component {
   isiGOTSpecialization = input<boolean>(false)
   isLoading = input<boolean>(false)
   isLiveOrMarkForDeletion = input<boolean>(true)
+  config = input<any | null>(null)
 
   // ── Output ─────────────────────────────────────────────────────────────────
   contentData = output<NsContent.IContent>()
@@ -62,6 +66,8 @@ export class CardCourseV2Component {
   private readonly events = inject(EventService)
   private readonly contentLangSvc = inject(ContentLanguageService)
   private readonly commonSvc = inject(CommonMethodsService)
+  private readonly contSvc = inject(WidgetContentLibService)
+  private readonly contentApiService = inject(ContentApiService)
 
   // ── Internal mutable state ─────────────────────────────────────────────────
   readonly defaultThumbnail = signal('')
@@ -78,7 +84,7 @@ export class CardCourseV2Component {
 
   readonly thumbnailUrl = computed(() => {
     const c = this.content()
-    return c?.posterImage || c?.appIcon || this.defaultThumbnail()
+    return c?.metadata?.posterImage || c?.metadata?.appIcon || this.defaultThumbnail()
   })
 
   readonly displayType = computed<NsContent.EDisplayContentTypes>(() =>
@@ -102,7 +108,7 @@ export class CardCourseV2Component {
     (this.content()?.additionalTags ?? []).includes('iGOT Specialization')
   )
 
-  readonly isApar = computed(() => !!(this.content() as any)?.isApar)
+  readonly isApar = computed(() => !!(this.content() as any)?.isApar || (this.content()?.metadata?.isApar as boolean) || false)
 
   readonly isCa = computed(() =>
     this.caCourseUnitIds().includes(this.content()?.identifier ?? '') ||
@@ -142,12 +148,41 @@ export class CardCourseV2Component {
   }
 
   // ── Event handlers ─────────────────────────────────────────────────────────
-  onCardClick(): void {
-    if (!this.isLiveOrMarkForDeletion()) { return }
-    this.raiseTelemetry()
-    const c = this.content()
-    if (c) { this.contentData.emit(c) }
-    this.navigate()
+  async onCardClick(): Promise<void> {
+    this.emitDetails()
+    if (this.content()) {
+      if (this.content()?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE && this.content() && this.content()?.mimeType) {
+        let url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(this.content().mimeType)}/${this.content()?.identifier}`
+        let queryParams = {
+          primaryCategory: this.content()?.primaryCategory
+        }
+        this.router.navigate([url], { queryParams })
+      } else if (this.content()?.externalId) {
+        this.router.navigate(
+          [`app/toc/ext/${this.content()?.contentId}`])
+      } else {
+        let urlData: any = await this.contSvc.getResourseLink(this.content()?.metadata)
+        const queryParams = {
+          ...urlData.queryParams
+        }
+        this.router.navigate(
+          [urlData.url],
+          // { queryParams: urlData.queryParams }
+          { queryParams }
+        )
+      }
+
+    }
+  }
+
+  emitDetails(): void {
+    if (this.content() && this.config() && this.config()?.cardClickDetails) {
+      const cardClickDetails = {
+        ...this.config()?.cardClickDetails,
+        identifier: this.content()?.identifier,
+      }
+      this.contentApiService.publishCardClickDetails(cardClickDetails)
+    }
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────

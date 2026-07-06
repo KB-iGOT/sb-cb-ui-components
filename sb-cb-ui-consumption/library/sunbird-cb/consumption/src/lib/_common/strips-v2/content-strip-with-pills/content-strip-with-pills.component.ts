@@ -17,6 +17,7 @@ export class ContentStripWithPillsComponent {
   defaultPillKey = input<string>('');
 
   activePillKey = signal<string>('');
+  showContent = signal<boolean>(false);
 
   visiblePills = computed(() => filterVisiblePills(this.pills()));
 
@@ -39,11 +40,14 @@ export class ContentStripWithPillsComponent {
           }
         }
       }
+      this.showContent.set(true)
     })
   }
 
   selectPill(pillKey: string): void {
+    this.showContent.set(false)
     this.activePillKey.set(pillKey)
+    setTimeout(() => this.showContent.set(true))
   }
 
   isPillActive(pillKey: string): boolean {

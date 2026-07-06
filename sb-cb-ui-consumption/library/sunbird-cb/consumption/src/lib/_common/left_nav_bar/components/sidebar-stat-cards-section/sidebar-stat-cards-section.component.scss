@@ -57,18 +57,18 @@
   transform: translateY(0);
   transition: all 0.2s ease;
 
-  &:hover {
-    transform: translateY(-2px);
-  }
+  // &:hover {
+  //   transform: translateY(-2px);
+  // }
 
-  &:active {
-    transform: translateY(0);
-  }
+  // &:active {
+  //   transform: translateY(0);
+  // }
 
-  &:focus-visible {
-    outline: 2px solid #4f46e5;
-    outline-offset: 2px;
-  }
+  // &:focus-visible {
+  //   outline: 2px solid #4f46e5;
+  //   outline-offset: 2px;
+  // }
 }
 
 .stat-icon {
@@ -150,8 +150,8 @@
     transition: none;
     transform: none;
 
-    &:hover {
-      transform: none;
-    }
+    // &:hover {
+    //   transform: none;
+    // }
   }
 }

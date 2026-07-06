@@ -51,22 +51,21 @@
         @if (section.cardType === SidebarCardType.NAV_LIST) {
         <sb-uic-sidebar-nav-list-section [section]="section" [activeItemCode]="menuBarDetails?.activeItemCode"
           [isOpen]="isOpen()" [showContent]="showContent()" [detailsChanged]="detailsChanged"
-          (itemClicked)="onNavItemClicked($event)" class="block mb-4"
-          [attr.aria-label]="section.sectionTitle || 'Navigation menu'" />
+          (itemClicked)="onNavItemClicked($event)" class="block mb-4" [attr.aria-label]="section.sectionTitle" />
         }
 
         <!-- Render Stat Cards Section -->
         @if (section.cardType === SidebarCardType.STAT_CARDS) {
         <sb-uic-sidebar-stat-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
-          [detailsChanged]="detailsChanged" class="block mb-4"
-          [attr.aria-label]="section.sectionTitle || 'Statistics section'" (itemClicked)="onNavItemClicked($event)" />
+          [detailsChanged]="detailsChanged" class="block mb-4" [attr.aria-label]="section.sectionTitle"
+          (itemClicked)="onNavItemClicked($event)" />
         }
 
         <!-- Render Info Cards Section -->
         @if (section.cardType === SidebarCardType.INFO_CARDS) {
         <sb-uic-sidebar-info-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
-          [detailsChanged]="detailsChanged" class="block mb-4"
-          [attr.aria-label]="section.sectionTitle || 'Information cards section'" />
+          [detailsChanged]="detailsChanged" class="block mb-4" [attr.aria-label]="section.sectionTitle"
+          (itemClicked)="onNavItemClicked($event)" />
         }
 
         }
