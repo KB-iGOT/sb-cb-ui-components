@@ -175,7 +175,8 @@ export class FilterComponent {
     
     let request: any = {
       "filterCriteriaMap": {
-          "status": "active"
+          "status": "active",
+          "communityAccessLevel": "public"
       },
       "requestedFields": [
       ],

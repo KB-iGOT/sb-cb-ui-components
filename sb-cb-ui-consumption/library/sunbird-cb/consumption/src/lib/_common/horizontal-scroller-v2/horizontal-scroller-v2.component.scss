@@ -22,7 +22,7 @@ $spaceFromEnd: 0;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 999;
+  z-index: 2;
   height: 32px !important;
   width:32px !important;
   display: flex;
@@ -44,14 +44,14 @@ $spaceFromEnd: 0;
   @extend %btn;
   @extend %navBtnRounded;
   left: $spaceFromEnd;
-  z-index: 999;
+  z-index: 2;
 }
 
 .nextBtn {
   @extend %btn;
   @extend %navBtnRounded;
   right: $spaceFromEnd;
-  z-index: 999;
+  z-index: 2;
 }
 
 .nextLoading {

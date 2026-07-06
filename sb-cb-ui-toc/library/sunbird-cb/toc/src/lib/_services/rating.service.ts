@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { Observable, of } from 'rxjs'
+import { map, switchMap, take } from 'rxjs/operators'
 import { HttpClient } from '@angular/common/http'
 import { NsAppRating } from '../models/rating.model'
+import { TocConfigService } from './toc-config.service'
 
 const PROXY_SLAG_V8 = '/apis/proxies/v8'
 const API_END_POINTS = {
@@ -21,16 +24,36 @@ const API_END_POINTS = {
 })
 export class RatingService {
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
+  ) { }
+
+  private playerConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
+
+  private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
+    return this.playerConfig$.pipe(
+      map((tocConfig: any) => !!this.commonMethodsSvc.getEnabledUrl({
+        apiConfig: tocConfig?.playerApiConfig,
+        urlConfigPath,
+        defaultUrl,
+      })),
+      take(1),
+    )
+  }
 
   getRating(contentId: string, contentType: string, userId: string): Observable<any> {
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-    if (!forPreview) {
-      return this.http.get<any>(
-        API_END_POINTS.GET_RATING(contentId, contentType, userId)
-      )
-    }
-    return of({})
+    return this.isPlayerApiEnabled('userRating', '/apis/proxies/v8/ratings/v1/read').pipe(
+      switchMap((enabled: boolean) => {
+        if (!enabled) { return of({}) }
+        const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+        if (!forPreview) {
+          return this.http.get<any>(API_END_POINTS.GET_RATING(contentId, contentType, userId))
+        }
+        return of({})
+      }),
+    )
   }
 
   addOrUpdateRating(req: NsAppRating.IRating): Observable<any> {
@@ -40,13 +63,16 @@ export class RatingService {
   }
 
   getRatingSummary(contentId: string, contentType: string): Observable<any> {
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-    if (!forPreview) {
-      return this.http.get<any>(
-        API_END_POINTS.GET_RATING_SUMMARY(contentId, contentType)
-      )
-    }
-    return of({})
+    return this.isPlayerApiEnabled('contentOverallRating', '/apis/proxies/v8/ratings/v1/summary').pipe(
+      switchMap((enabled: boolean) => {
+        if (!enabled) { return of({}) }
+        const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+        if (!forPreview) {
+          return this.http.get<any>(API_END_POINTS.GET_RATING_SUMMARY(contentId, contentType))
+        }
+        return of({})
+      }),
+    )
   }
 
   getRatingLookup(req: NsAppRating.ILookupRequest): Observable<any> {

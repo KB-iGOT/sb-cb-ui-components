@@ -2,7 +2,7 @@
 'reply-card mb-3' : cardType=== 'reply',
 'suspended': comment && comment.status === 'suspended'}">
     <div class="flex user-info">
-        <div>
+        <div *ngIf="uiConfig?.avatar !== false">
             <div class="mr-4">
                 <d-v2-avatar-photo [size]="'ml'" [name]="comment?.commentData?.commentSource?.userName"
                     [photoUrl]="commentUsersData[comment?.commentData?.commentSource?.userId]?.user_profile_img_url"
@@ -16,10 +16,10 @@
 
         <div class="flex flex-1 flex-col">
             <div class="flex items-center">
-                <span class="mat-body-1 bold mr-1 nodtranslate">{{comment?.commentData?.commentSource?.userName}}
+                <span class="mat-body-1 bold mr-1 nodtranslate" *ngIf="uiConfig?.userName !== false">{{comment?.commentData?.commentSource?.userName}}
                 </span>
                 <mat-icon class="icon verified mr-1 nodtranslate"
-                    *ngIf="commentUsersData[comment?.commentData?.commentSource?.userId]?.userProfileStatus?.toLowerCase() === 'verified'"
+                    *ngIf="commentUsersData[comment?.commentData?.commentSource?.userId]?.userProfileStatus?.toLowerCase() === 'verified' && uiConfig?.verifiedBadge !== false"
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
                 <div class="source-tag text-center"
                     *ngIf="commentSvc?.courseDetails?.authors?.includes(comment?.commentData?.commentSource?.userId)">
@@ -31,7 +31,7 @@
                 </div>
             </div>
             <div class="ws-mat-black60-text mat-body-2 nodtranslate"
-                *ngIf="commentUsersData[comment?.commentData?.commentSource?.userId]?.designation !== 'null'">
+                *ngIf="commentUsersData[comment?.commentData?.commentSource?.userId]?.designation !== 'null' && uiConfig?.designation !== false">
                 {{commentUsersData[comment?.commentData?.commentSource?.userId]?.designation}}
                 <!-- {{comment?.commentData?.commentSource?.designation}} -->
             </div>
@@ -56,7 +56,7 @@
             </ng-container> -->
         </div>
 
-        <span class="mat-body-2">
+        <span class="mat-body-2" *ngIf="uiConfig?.timestamp !== false">
             <span class="mr-1 nodtranslate">{{comment?.createdDate === comment?.lastUpdatedDate?'':'(Edited)'}}</span>
             <span class="nodtranslate">{{comment?.lastUpdatedDate | pipeRelativeTime}}</span>
         </span>
@@ -65,7 +65,7 @@
                 aria-label="more">more_vertical</mat-icon>
         </div>
     </div>
-    <div class="comment mb-4 mt-2 " *ngIf="!isEditMode">
+    <div class="comment mb-4 mt-2 " *ngIf="!isEditMode && uiConfig?.commentText !== false">
         <div class="flex">
             <!-- <ng-container *ngFor="let tagUser of comment?.commentData?.taggedUsers">
                 <span class="mr-2 font-semibold ws-mat-default-text">Replying to {{tagUserData[tagUser]?.first_name}}</span>
@@ -116,7 +116,7 @@
     </div>
     <div class="actions" *ngIf="cardConfig?.showActions">
         <div class="flex">
-            <ng-container *ngIf="cardConfig?.actions?.like?.show ">
+            <ng-container *ngIf="cardConfig?.actions?.like?.show && uiConfig?.likeButton !== false">
                 <div class="mr-4 circleBtn"
                     [ngClass]="{'cursor-not-allowed': !commentSvc?.enrolledContent && !cardConfig?.actions?.like?.canLike, 'cursor-pointer': commentSvc?.enrolledContent && cardConfig?.actions?.like?.canLike}"
                     (click)="commentSvc?.enrolledContent && cardConfig?.actions?.like?.canLike && likeUnlikeComment(comment)">
@@ -128,7 +128,7 @@
                     </span>
                 </div>
             </ng-container>
-            <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType !== 'reply'">
+            <ng-container *ngIf="cardConfig?.actions?.comments?.show && cardType !== 'reply' && uiConfig?.replyButton !== false">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="expandReplyComment()">
                     <mat-icon *ngIf="!data.replyToggle" class="icon mr-2 nodtranslate" aria-hidden="false"
                         i18n-aria-label aria-label="Dropdown-open">arrow_drop_down</mat-icon>
@@ -144,7 +144,7 @@
                 </div>
             </ng-container>
             <ng-container
-                *ngIf="cardConfig?.actions?.comments?.show && cardType === 'reply' && commentSvc?.enrolledContent">
+                *ngIf="cardConfig?.actions?.comments?.show && cardType === 'reply' && commentSvc?.enrolledContent && uiConfig?.replyButton !== false">
                 <div class="mr-4 cursor-pointer circleBtn" (click)="data.replyToggle = !data.replyToggle">
                     <mat-icon class="icon mr-2 reply-icon nodtranslate" aria-hidden="false" color="#1B4CA1"
                         i18n-aria-label *ngIf="cardConfig?.actions?.comments?.iconDisplay"
@@ -162,7 +162,7 @@
             <div class="mb-4" *ngIf="commentSvc?.enrolledContent">
                 <d-v2-new-comment [config]="cardConfig?.repliesSection?.newCommentReply"
                     [taggedUsers]="[comment?.commentData?.commentSource?.userId]" [hierarchyPath]="getHierarchyPath"
-                    (newComment)="newComment($event)">
+                    [uiConfig]="uiConfig" (newComment)="newComment($event)">
                 </d-v2-new-comment>
             </div>
             <ng-container *ngIf="replyDataCopy && replyDataCopy?.length > 0; else noReplies">
@@ -173,6 +173,7 @@
                             [replyParendtData]="fetchedReplyData" [userLikedComments]="userLikedComments"
                             [commentUsersData]="commentUsersData"
                             [cardConfig]="cardConfig?.repliesSection?.replyCardConfig" [comment]="reply"
+                            [uiConfig]="uiConfig"
                             [tagUserData]="tagUserData" (likeUnlikeData)="likeUnlikeEvent($event)"></d-v2-comment-card>
                     </ng-container>
                 </ng-container>
@@ -195,6 +196,7 @@
             [ngClass]="{'pl-6': cardConfig?.repliesSection?.indented}">
             <div class="mb-4" *ngIf="commentSvc?.enrolledContent">
                 <d-v2-new-comment [config]="cardConfig?.newCommentReply" [hierarchyPath]="getParentHierarchyPath"
+                    [uiConfig]="uiConfig"
                     (newComment)="newComment($event)" [taggedUsers]="[comment?.commentData?.commentSource?.userId]">
                 </d-v2-new-comment>
             </div>

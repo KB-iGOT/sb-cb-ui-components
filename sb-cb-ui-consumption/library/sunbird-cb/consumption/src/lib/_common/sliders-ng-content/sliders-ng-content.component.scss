@@ -234,7 +234,7 @@ $banner-min-height: 243px;
       bottom: -15px;
       top: unset;
     }
-  } 
+  }
   &.bottom-center {
     .prev {
       left: calc(50% - 20px);
@@ -248,7 +248,7 @@ $banner-min-height: 243px;
       bottom: -15px;
       top: unset;
     }
-  } 
+  }
   &.bottom-left{
     .prev {
       left: 15px;
@@ -319,7 +319,7 @@ $banner-min-height: 243px;
 }
 
 
-@media screen and (max-width: 768px) { 
+@media screen and (max-width: 768px) {
   .default-slider{
     height: 384px;
     width: 100%;
@@ -334,20 +334,34 @@ $banner-min-height: 243px;
     background-color: #F3962F!important;
     color: white;
     top: 50%;
-    font-size: 12px;
-    height: 26px !important;
-    width: 26px !important;
+    transform: translateY(-50%);
+    margin-top: 0;
+    font-size: 14px;
+    line-height: 1;
+    height: 28px !important;
+    width: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
   .next {
     top: 50%;
+    transform: translateY(-50%);
+    margin-top: 0;
     background-color: #F3962F!important;
     color: white;
-    font-size: 12px;
-    height: 26px !important;
-    width: 26px !important;
+    font-size: 14px;
+    line-height: 1;
+    height: 28px !important;
+    width: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
 
-  @media screen and (max-width: 768px) { 
+  @media screen and (max-width: 768px) {
     .prev {
       top: 50px;
       left: 0;

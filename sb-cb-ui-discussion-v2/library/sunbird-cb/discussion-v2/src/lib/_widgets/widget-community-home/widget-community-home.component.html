@@ -14,7 +14,7 @@
                     <div class="hidden md:block">
                         <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
                         <div class="flex items-center" (click)="$event.stopPropagation()">
-                            <button *ngIf="!userJoinedCommunity"
+                            <button *ngIf="!userJoinedCommunity && communityData?.communityAccessLevel?.toLowerCase() === 'public'"
                                 class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 "
                                 (click)="joinCommunityPopUp();$event.stopPropagation()">Join</button>
                             <mat-icon class="cursor-pointer share-icon mr-2"
@@ -40,7 +40,7 @@
                 <div class="hidden md:block">
                     <!-- <button *ngIf="userJoinedCommunity" class="btn rounded-full text-white w-32 h-8 cursor-pointer un-join-btn" (click)="unJoinCommunity()">Un Join</button> -->
                     <div class="flex items-center">
-                        <button *ngIf="!userJoinedCommunity"
+                        <button *ngIf="!userJoinedCommunity && communityData?.communityAccessLevel?.toLowerCase() === 'public'"
                             class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer mr-2 "
                             (click)="joinCommunityPopUp()">Join</button>
                         <mat-icon class="cursor-pointer share-icon mr-2" (click)="enableShare = true">share</mat-icon>
@@ -52,7 +52,7 @@
         </div>
         <div class="block  md:hidden">
             <div class="community-action flex gap-2 items-center ">
-                <button *ngIf="!userJoinedCommunity"
+                <button *ngIf="!userJoinedCommunity && communityData?.communityAccessLevel?.toLowerCase() === 'public'"
                     class="btn rounded-full text-white w-full md:w-32  h-8 cursor-pointer nodtranslate"
                     (click)="joinCommunityPopUp()">Join</button>
             </div>

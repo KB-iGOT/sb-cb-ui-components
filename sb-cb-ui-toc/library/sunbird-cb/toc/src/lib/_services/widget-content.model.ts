@@ -187,11 +187,16 @@ export namespace NsContent {
     content?: IBatch[]
     count?: number,
     enrolled?: boolean,
+    allBatchesExpired?: boolean,
     workFlow?: {
       wfInitiated?: boolean
       batch?: any
       wfItem?: any
     },
+    totalApprovedCount?: any,
+    totalPendingCount?: any,
+    totalWithdrawnCount?: any,
+    totalRejectedCount?: any
   }
 
   export interface ICourse {
@@ -420,12 +425,12 @@ export namespace NsContent {
     TWO_STEP_PC_MDO = 'twoStepPCAndMDOApproval',
   }
 
-  export const  WFSTATUS_MSG_MAPPING: any = {
-    INITIATE:  '',
-    SEND_FOR_MDO_APPROVAL:  'BatchEnrollL1Msg',
-    SEND_FOR_PC_APPROVAL:  'BatchEnrollL2Msg',
-    APPROVED:  'BatchEnrollApprovedMsg',
-    REJECTED:  'BatchEnrollRejectedMsg',
+  export const WFSTATUS_MSG_MAPPING: any = {
+    INITIATE: '',
+    SEND_FOR_MDO_APPROVAL: 'BatchEnrollL1Msg',
+    SEND_FOR_PC_APPROVAL: 'BatchEnrollL2Msg',
+    APPROVED: 'BatchEnrollApprovedMsg',
+    REJECTED: 'BatchEnrollRejectedMsg',
     WITHDRAWN: 'BatchEnrollWithdrawMsg',
     REMOVED: 'BatchEnrollRemoveMsg',
     EXPIRED: 'BatchListExpiredMsg',
