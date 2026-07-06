@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { EMPTY, Observable } from 'rxjs'
 import { map, switchMap, take } from 'rxjs/operators'
 import { TocConfigService } from './toc-config.service'
-
+import * as _ from 'lodash' 
 const API_END_POINTS = {
   FETCH_ALL_COMMENTS: (entityType: string, entityId: string, workflow: string) =>
     `/apis/proxies/v8/comment/v1/getAll?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
@@ -42,7 +41,6 @@ export class CommentsService {
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
-    private commonMethodsSvc: CommonMethodsService,
     private tocConfigSvc: TocConfigService,
   ) { }
 
@@ -51,13 +49,26 @@ export class CommentsService {
 
   private isApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
     return this.apiConfig$.pipe(
-      map((apiConfig: any) => !!this.commonMethodsSvc.getEnabledUrl({
+      map((apiConfig: any) => !!this.getEnabledUrl({
         apiConfig,
         urlConfigPath,
         defaultUrl,
       })),
       take(1),
     )
+  }
+
+  getEnabledUrl(config: any): string {
+    const { apiConfig, urlConfigPath, defaultUrl } = config
+    if (apiConfig && urlConfigPath) {
+      const config = _.get(apiConfig, urlConfigPath)
+      if (config && config.enabled) {
+        return config.url || defaultUrl
+      } else {
+        return ''
+      }
+    }
+    return defaultUrl
   }
 
   fetchAllComment(entityType: string, entityId: string, workflow: string): Observable<any> {
