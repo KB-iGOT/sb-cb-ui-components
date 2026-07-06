@@ -213,7 +213,7 @@ export class WidgetContentService {
       .pipe(
         retry(1),
         map(
-          (data: any) => data.result.response
+          (data: any) => data!.result!.response
         )
       )
   }

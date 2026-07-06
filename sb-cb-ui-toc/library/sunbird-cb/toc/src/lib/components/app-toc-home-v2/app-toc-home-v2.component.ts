@@ -736,7 +736,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     } else {
       this.enrollBtnLoading = true
       this.changeTab = !this.changeTab
-      this.raiseEnrollTelemetry()
+      this.raiseEnrollmentTelemetry('enroll')
       if (this.recommendedCoursesId) {
         this.raiseEnrollTelementryForSakshamAIGenerated()
       }
@@ -1360,29 +1360,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-    raiseEnrollTelemetry() {
-      this.events.raiseInteractTelemetry(
-        {
-          type: 'click',
-          subType: 'enroll',
-          id: this.content ? this.content.identifier : '',
-        },
-        {
-          id: this.content ? this.content.identifier : '',
-          type: this.content ? this.content.primaryCategory : '',
-        },
-        {
-          pageIdExt: `btn-enroll`,
-          module: WsEvents.EnumTelemetrymodules.CONTENT,
-        }
-      )
-    }
-
-  raiseUnEnrollTelemetry() {
+  raiseEnrollmentTelemetry(action: 'enroll' | 're-enroll') {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
-        subType: 'un-enroll',
+        subType: action,
         id: this.content ? this.content.identifier : '',
       },
       {
@@ -1390,7 +1372,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         type: this.content ? this.content.primaryCategory : '',
       },
       {
-        pageIdExt: `btn-un-enroll`,
+        pageIdExt: `btn-${action}`,
         module: WsEvents.EnumTelemetrymodules.CONTENT,
       }
     )
@@ -1845,6 +1827,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               this.userEnrollmentList[0].active = false
               this.enrolledCourseData.active = false
               this.canUnenroll = false
+              this.isUnEnrolled = true
               this.openSnackbar('You have been successfully un-enrolled from the course.')
             } else {
               this.openSnackbar('Un-enrollment failed. Please try again later.')
@@ -3251,7 +3234,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   handleReEnrollment(event: any) {
       this.enrollBtnLoading = true
       this.changeTab = !this.changeTab
-      this.raiseUnEnrollTelemetry()
+      this.raiseEnrollmentTelemetry('re-enroll')
       console.log('this.enrolledCourseData', this.enrolledCourseData)
       // API logic and redirection
       if (this.enrolledCourseData) {
@@ -3263,16 +3246,18 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             }
         }
       this.contentSvc.reEnroll(req).subscribe(
-        (data: NsContent.IBatchListResponse) => {
-          this.batchData = {
-            content: data.content,
-            enrolled: true,
+        (res: any) => {
+          if(res === 'SUCCESS') {
+            const batchId = this.getBatchId()
+            if (batchId) {
+              this.navigateToPlayerPage(batchId)
+            }
+            this.isUnEnrolled = false
+            this.enrollBtnLoading = false
+          } else {
+            this.snackBar.open('Please try again later')
+            this.enrollBtnLoading = false
           }
-          const batchId = this.getBatchId()
-          if (batchId) {
-            this.navigateToPlayerPage(batchId)
-          }
-          // this.enrollBtnLoading = false
         },
         (_error: any) => {
           this.snackBar.open(_.get(_error, 'error.params.errmsg') || 'Please try again later')
