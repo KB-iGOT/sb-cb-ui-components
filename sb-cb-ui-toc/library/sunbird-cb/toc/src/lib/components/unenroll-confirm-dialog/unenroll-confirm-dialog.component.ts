@@ -12,6 +12,7 @@ import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 export class UnenrollConfirmDialogComponent implements OnInit {
   understood = false
   showFeedbackForm = false
+  hasSelectedReason = false
   feedbackReasons =  [
     "Content is not relevant to my role",
     "Course is too difficult / too easy",
@@ -30,10 +31,14 @@ export class UnenrollConfirmDialogComponent implements OnInit {
 
   ngOnInit() {
     this.feedbackReasons = this.data?.tocConfig?.unEnrollContent?.feedbackReasons
-    console.log('Un-enroll feedback form:', this.feedbackForm)
     this.feedbackForm = new FormGroup({
       reasons: new FormArray(this.feedbackReasons.map(() => new FormControl(false))),
       comments: new FormControl(''),
+    })
+
+    // Subscribe to form changes to update hasSelectedReason
+    this.feedbackForm.get('reasons')?.valueChanges.subscribe((values: boolean[]) => {
+      this.hasSelectedReason = values.some(Boolean)
     })
   }
 
@@ -52,13 +57,13 @@ export class UnenrollConfirmDialogComponent implements OnInit {
   }
 
   hasSelectedFeedbackReason(): boolean {
-    return (this.feedbackForm.get('reasons') as FormArray).value.some(Boolean)
+    return (this.feedbackForm?.get('reasons') as FormArray)?.value?.some(Boolean)
   }
 
   onConfirmUnenroll(): void {
-    if (this.hasSelectedFeedbackReason()) {
+    if (this.hasSelectedReason) {
       this.raiseTelemetryEvent()
-      const selectedReasonFlags = (this.feedbackForm.get('reasons') as FormArray).value
+      const selectedReasonFlags = (this.feedbackForm?.get('reasons') as FormArray).value
       const selectedReasons = this.feedbackReasons.filter((_, index) => selectedReasonFlags[index])
       const feedbackPayload = {
         reasons: selectedReasons,

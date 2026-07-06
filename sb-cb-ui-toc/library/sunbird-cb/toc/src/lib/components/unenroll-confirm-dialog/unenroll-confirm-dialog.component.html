@@ -91,7 +91,7 @@
       color="primary"
       class="unenroll-continue-btn"
       [class.unenroll-confirm-btn]="showFeedbackForm"
-      [disabled]="showFeedbackForm ? !hasSelectedFeedbackReason() : !understood"
+      [disabled]="showFeedbackForm ? !hasSelectedReason : !understood"
       (click)="showFeedbackForm ? onConfirmUnenroll() : onContinue()">
       {{ showFeedbackForm ? 'Yes, un-enroll' : 'Continue' }}
     </button>

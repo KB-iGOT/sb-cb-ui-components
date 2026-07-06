@@ -1844,6 +1844,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             if(result?.responseCode === 'OK') {
               this.userEnrollmentList[0].active = false
               this.enrolledCourseData.active = false
+              this.canUnenroll = false
               this.openSnackbar('You have been successfully un-enrolled from the course.')
             } else {
               this.openSnackbar('Un-enrollment failed. Please try again later.')
