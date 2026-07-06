@@ -107,7 +107,6 @@ export class SidebarStatCardsSectionComponent implements OnChanges {
    * Handle View All click - emit event to parent
    */
   onViewAllClick(): void {
-    console.log('View All clicked for section:', this.section)
     this.itemClicked.emit({ code: this.section.viewAllKey ?? '', subType: '' })
   }
 

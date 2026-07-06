@@ -14,7 +14,8 @@
     <ng-template #carouselCard let-item let-index="index">
       @switch (getCardType()) {
       @case (CardType.CourseCard) {
-      <sb-uic-card-course-v2 [content]="item" [isLoading]="loading()"></sb-uic-card-course-v2>
+      <sb-uic-card-course-v2 [content]="item" [config]="contentConfig()"
+        [isLoading]="loading()"></sb-uic-card-course-v2>
       }
       }
     </ng-template>

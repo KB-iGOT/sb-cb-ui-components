@@ -11,6 +11,12 @@ export namespace NsSpotlightCardsV2 {
     redirectionUrl: string
     /** When true the URL is treated as external and opened in a new tab. */
     externalUrl?: boolean
+    cardClickDetails: cardClickDetails
+  }
+
+  export interface cardClickDetails {
+    id: string,
+    subType: string,
   }
 
   /** Root configuration object accepted by <ws-widget-spotlight-cards>. */

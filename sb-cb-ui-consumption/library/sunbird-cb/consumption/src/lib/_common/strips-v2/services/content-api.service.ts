@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Observable, of } from 'rxjs'
+import { Observable, of, Subject } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
 import { ApiMethod, ApiRegistryEntry } from '../models/content-section.model'
 import { API_REGISTRY } from '../registry/api-registry'
@@ -10,6 +10,12 @@ import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 export class ContentApiService {
   private http = inject(HttpClient);
   private configSvc = inject(ConfigurationsService);
+  private readonly cardClickDetailsSubject = new Subject<any>()
+  readonly cardClickDetails$ = this.cardClickDetailsSubject.asObservable()
+
+  publishCardClickDetails(details: any): void {
+    this.cardClickDetailsSubject.next(details)
+  }
 
   loadContent(apiDetailsKey: string): Observable<unknown> {
     const config: ApiRegistryEntry | undefined = API_REGISTRY[apiDetailsKey]

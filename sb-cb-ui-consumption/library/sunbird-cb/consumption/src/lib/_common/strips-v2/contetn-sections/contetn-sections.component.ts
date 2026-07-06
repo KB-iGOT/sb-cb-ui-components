@@ -1,5 +1,6 @@
-import { Component, input, ChangeDetectionStrategy, computed } from '@angular/core'
+import { Component, input, ChangeDetectionStrategy, computed, Output, EventEmitter, inject, DestroyRef, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ContentSectionConfig, DisplayType } from '../models/content-section.model'
 import { filterVisibleSections } from '../utils/visibility.util'
 import { AccordionComponent } from '../accordion/accordion.component'
@@ -7,6 +8,7 @@ import { ContentStripWithTabsPillsV2Component } from '../content-strip-with-tabs
 import { ContentStripWithPillsComponent } from '../content-strip-with-pills/content-strip-with-pills.component'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
 import { SbUicSpotlightCardsV2Component } from '../../spotlight-cards-v2/spotlight-cards-v2.component'
+import { ContentApiService } from '../services/content-api.service'
 
 @Component({
   selector: 'sb-uic-contetn-sections',
@@ -23,12 +25,27 @@ import { SbUicSpotlightCardsV2Component } from '../../spotlight-cards-v2/spotlig
   styleUrls: ['./contetn-sections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ContetnSectionsComponent {
+export class ContetnSectionsComponent implements OnDestroy {
+  @Output() cardClicked = new EventEmitter<{ cardClickDetails: any }>();
   sections = input.required<ContentSectionConfig[]>();
+
+  private readonly contentApiService = inject(ContentApiService)
+  private readonly destroyRef = inject(DestroyRef)
 
   visibleSections = computed(() => filterVisibleSections(this.sections()));
 
   readonly DisplayType = DisplayType;
+
+  constructor() {
+    this.contentApiService.cardClickDetails$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((details) => {
+        if (details) {
+          console.log('ContetnSectionsComponent cardClicked details: ', details)
+          this.cardClicked.emit({ cardClickDetails: details })
+        }
+      })
+  }
 
   isTabsSection(section: ContentSectionConfig): boolean {
     return section?.displayType === DisplayType.Tabs
@@ -40,5 +57,9 @@ export class ContetnSectionsComponent {
 
   isCardsSection(section: ContentSectionConfig): boolean {
     return section?.displayType === DisplayType.Cards
+  }
+
+  ngOnDestroy() {
+    this.destroyRef.destroyed
   }
 }

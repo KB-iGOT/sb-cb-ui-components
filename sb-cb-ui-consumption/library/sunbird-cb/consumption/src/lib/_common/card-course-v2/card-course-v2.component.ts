@@ -20,6 +20,7 @@ import { NsContent } from '../../_models/widget-content.model'
 import { ContentLanguageService } from '../../_services/content-language.service'
 import { CommonMethodsService } from '../../_services/common-methods.service'
 import { WidgetContentLibService } from '../../_services/widget-content-lib.service'
+import { ContentApiService } from '../strips-v2/services/content-api.service'
 import { DefaultThumbnailModule } from '../../_directives/default-thumbnail/default-thumbnail.module'
 import { PipeDurationTransformModule } from '../../_pipes/pipe-duration-transform/pipe-duration-transform.module'
 import { DisplayContentTypeLibModule } from '../display-content-type-lib/display-content-type-lib.module'
@@ -50,6 +51,7 @@ export class CardCourseV2Component {
   isiGOTSpecialization = input<boolean>(false)
   isLoading = input<boolean>(false)
   isLiveOrMarkForDeletion = input<boolean>(true)
+  config = input<any | null>(null)
 
   // ── Output ─────────────────────────────────────────────────────────────────
   contentData = output<NsContent.IContent>()
@@ -65,6 +67,7 @@ export class CardCourseV2Component {
   private readonly contentLangSvc = inject(ContentLanguageService)
   private readonly commonSvc = inject(CommonMethodsService)
   private readonly contSvc = inject(WidgetContentLibService)
+  private readonly contentApiService = inject(ContentApiService)
 
   // ── Internal mutable state ─────────────────────────────────────────────────
   readonly defaultThumbnail = signal('')
@@ -146,6 +149,7 @@ export class CardCourseV2Component {
 
   // ── Event handlers ─────────────────────────────────────────────────────────
   async onCardClick(): Promise<void> {
+    this.emitDetails()
     if (this.content()) {
       if (this.content()?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE && this.content() && this.content()?.mimeType) {
         let url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(this.content().mimeType)}/${this.content()?.identifier}`
@@ -168,6 +172,16 @@ export class CardCourseV2Component {
         )
       }
 
+    }
+  }
+
+  emitDetails(): void {
+    if (this.content() && this.config() && this.config()?.cardClickDetails) {
+      const cardClickDetails = {
+        ...this.config()?.cardClickDetails,
+        identifier: this.content()?.identifier,
+      }
+      this.contentApiService.publishCardClickDetails(cardClickDetails)
     }
   }
 
