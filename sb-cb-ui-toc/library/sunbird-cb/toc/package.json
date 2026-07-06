@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/toc",
-  "version": "0.0.3-ang-17-20-role-based",
+  "version": "0.0.4-ang-17-20-role-based",
   "dependencies": {
     "tslib": "^2.0.0"
   },

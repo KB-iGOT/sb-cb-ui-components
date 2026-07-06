@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/discussion-v2",
-  "version": "0.0.3-ang-17-20-bharat-kalp",
+  "version": "0.0.1-ang-17-20-role-based",
   "main": "src/public-api.ts",
   "dependencies": {
     "tslib": "^2.0.0"
@@ -22,7 +22,6 @@
     "@sunbird-cb/design-system": "0.0.2",
     "@sunbird-cb/utils-v2": "0.0.1-ang-17-20",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
-    "@sunbird-cb/consumption": "0.0.25-ang-17-20",
     "ngx-image-cropper": "^6.3.4",
     "moment": "^2.29.1"
   }
