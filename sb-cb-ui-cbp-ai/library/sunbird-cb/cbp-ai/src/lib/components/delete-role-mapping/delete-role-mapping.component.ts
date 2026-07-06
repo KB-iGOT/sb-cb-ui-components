@@ -20,9 +20,6 @@ export class DeleteRoleMappingComponent {
     }
 
   deleteRoleMapping() {
-    // this.sharedService.deleteRoleMapping(this.planData.id).subscribe(()=>{
-    //   this.dialogRef.close('saved')
-    // })
     this.sharedService.deleteRoleMapping(this.planData.id).subscribe({
       next: () => {
         this.dialogRef.close('saved')
