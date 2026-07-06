@@ -90,7 +90,7 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
   // Derived full name for template convenience
   readonly displayName = computed(() => this.givenName())
-  profileCompletionPercentage = 100
+  profileCompletionPercentage = 0
 
   constructor() {
     super()
