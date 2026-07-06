@@ -1822,8 +1822,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     // the MatDialog overlay opens, preventing the backdrop conflict
     setTimeout(() => {
       const dialogRef = this.dialog.open(UnenrollConfirmDialogComponent, {
-        width: '520px',
-        disableClose: false,
+        width: '700px',
+        disableClose: true,
         panelClass: 'unenroll-dialog-panel',
         data: {
           content: this.contentReadData,

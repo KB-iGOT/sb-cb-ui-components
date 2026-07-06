@@ -11,23 +11,10 @@
   <mat-dialog-content class="unenroll-dialog-body">
     <ng-container *ngIf="!showFeedbackForm; else feedbackFormTemplate">
       <p class="unenroll-question">
-        Are you sure you want to un-enroll from <strong>{{ data?.content?.name }}</strong>?
+        Are you sure you want to un-enroll from this course <strong>{{ data?.content?.name }}</strong>?
       </p>
 
-      <p class="unenroll-subheading">Un-enrolling from this course will:</p>
-
-      <ul class="unenroll-impact-list">
-        <li>
-          Remove the course from <strong>My Learning</strong>
-        </li>
-        <li>
-          Deduct associated <strong>Learning Hours</strong> and <strong>Karma Points</strong>
-        </li>
-        <li>
-          Update your <strong>Reports</strong>, <strong>Weekly Claps</strong>, <strong>Organization Rankings</strong>, and
-          <strong>Organization Dashboards</strong>
-        </li>
-      </ul>
+      <p class="unenroll-subheading">Unenrolling will remove the course from <strong>My Learning</strong>, deduct <strong>Karma Points</strong> (if applicable), and update your <strong>Reports</strong> and <strong>Organization Dashboard</strong>.</p>
 
       <!-- Acknowledgement checkbox -->
       <div class="unenroll-acknowledge">
