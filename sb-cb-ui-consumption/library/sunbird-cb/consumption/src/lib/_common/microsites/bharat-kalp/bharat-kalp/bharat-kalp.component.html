@@ -167,7 +167,7 @@
 </ng-template>
 
 <!-- CONTENT STRIPS -->
-<ng-template #contentStrips let-data="data">
+<ng-template #contentStripsv2 let-data="data">
   <ng-container *ngFor="let stripData of data">
     <ng-container *ngIf="stripData?.active">
       <div class="bk-week-strip">
@@ -230,6 +230,23 @@
   </ng-container>
 </ng-template>
 
+<ng-template #contentStrips let-data="data">
+    <ng-container *ngFor="let stripData of data">
+        <ng-container *ngIf="stripData?.active">
+            <sb-uic-content-strip-with-tabs
+                [emitViewAll]="false"
+                (viewAllResponse)="''"
+                (telemtryResponse)="raiseTelemetryInteractEvent($event)"
+                (emptyResponse)="''"
+                [providerId]="'123456789'"
+                [widgetData]="{strips: [stripData]}"
+                [channnelName]="'channnelName'">
+            </sb-uic-content-strip-with-tabs>
+        </ng-container>
+    </ng-container>
+
+</ng-template>
+
 <!-- RECOMMENDED SECTION -->
 <ng-template #recommended let-data="data">
   <div class="{{ data?.containerClass }}" *ngIf="data?.enabled !== false">
@@ -281,7 +298,9 @@
           <h2 class="bk-mentorship__title" *ngIf="data?.title">{{ data.title }}</h2>
           <p class="bk-mentorship__desc" *ngIf="data?.subtitle">{{ data.subtitle }}</p>
         </div>
-        <a class="bk-mentorship__view-all" *ngIf="data?.showAllButton !== false && data?.viewAllUrl"
+        <!-- Show all only makes sense when there are more communities than one view (4 cards) -->
+        <a class="bk-mentorship__view-all"
+          *ngIf="data?.showAllButton !== false && data?.viewAllUrl && communities?.length > 4"
           [routerLink]="data.viewAllUrl">
           Show all <mat-icon>chevron_right</mat-icon>
         </a>

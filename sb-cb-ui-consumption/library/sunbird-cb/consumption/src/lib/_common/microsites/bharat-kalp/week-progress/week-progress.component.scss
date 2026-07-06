@@ -49,6 +49,7 @@ $border: #E2E8F0;
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    margin-left: auto;
     font-size: 12px;
     font-weight: 600;
     color: $blue;
@@ -957,6 +958,19 @@ $border: #E2E8F0;
     font-size: 18px;
     font-weight: 700;
     color: $text-dark;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Pulsing "live" indicator for the current active week */
+  &__live-dot {
+    flex: 0 0 auto;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #E53935;
+    animation: wp-live-pulse 1.2s ease-in-out infinite;
   }
 
   &__badge {
@@ -1117,6 +1131,21 @@ $border: #E2E8F0;
   margin: 0;
 }
 
+/* ─── Tablet: the left column is narrow between 769–1280, so show fewer
+       cards per view — 4.1 cards would squeeze each card below a readable
+       width (week label wraps, badge overlaps) ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .wp-week-card {
+    flex: 0 0 calc((100% - 16px) / 2.1);
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .wp-week-card {
+    flex: 0 0 calc((100% - 32px) / 3.1);
+  }
+}
+
 /* ─── Mobile responsive for week cards ─── */
 @media (max-width: 768px) {
   .wp-card-slider {
@@ -1208,5 +1237,25 @@ $border: #E2E8F0;
 
   .wp-strip__title {
     font-size: 14px;
+  }
+}
+
+/* Large phones / small tablets: 1.15 cards over-stretches a single card,
+   show ~2 per view instead (placed after the 768 block so it wins) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .wp-week-card {
+    flex: 0 0 calc((100% - 12px) / 2.1);
+  }
+}
+
+/* Live-indicator pulse for the current week's dot */
+@keyframes wp-live-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.55;
   }
 }
