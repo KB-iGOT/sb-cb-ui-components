@@ -388,10 +388,12 @@ export class GenerateCourseRecommendationComponent {
   filterData(searchText: string): any[] {
     const filter = searchText.trim().toLowerCase();
 
-    return this.originalData.filter(item => {
+    const filtered = this.originalData.filter(item => {
       const stringified = this.flattenObjectToString(item).toLowerCase();
       return stringified.includes(filter);
     });
+
+    return this.sortCoursesByCategoryAndRelevancy(filtered);
   }
 
   flattenObjectToString(obj: any): string {
@@ -621,15 +623,15 @@ export class GenerateCourseRecommendationComponent {
         this.filterdCourses = allAvailableCourses;
         break;
       case 1: // Behavioral
-        this.filterdCourses = this.behavioralFilter(allAvailableCourses);
+        this.filterdCourses = this.sortCoursesByRelevancy(this.behavioralFilter(allAvailableCourses));
         this.competencyMatchedByCategory = this.behavioralCompetencyFilter(this.planData.competencies);
         break;
       case 2: // Functional
-        this.filterdCourses = this.functionalFilter(allAvailableCourses);
+        this.filterdCourses = this.sortCoursesByRelevancy(this.functionalFilter(allAvailableCourses));
         this.competencyMatchedByCategory = this.functionalCompetencyFilter(this.planData.competencies);
         break;
       case 3: // Domain
-        this.filterdCourses = this.domainFilter(allAvailableCourses);
+        this.filterdCourses = this.sortCoursesByRelevancy(this.domainFilter(allAvailableCourses));
         this.competencyMatchedByCategory = this.domainCompetencyFilter(this.planData.competencies);
         break;
     }
@@ -689,9 +691,10 @@ export class GenerateCourseRecommendationComponent {
 
       }
     })
-    this.fullCourseList = allCourses
+    const sortedCourses = this.sortCoursesByCategoryAndRelevancy(allCourses)
+    this.fullCourseList = sortedCourses
     let identifiersArr = []
-    this.fullCourseList.map((item) => {
+    sortedCourses.map((item) => {
       identifiersArr.push(item?.identifier)
     })
     this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response) => {
@@ -710,7 +713,7 @@ export class GenerateCourseRecommendationComponent {
       }
 
     })
-    return allCourses;
+    return sortedCourses;
   }
 
 
@@ -719,7 +722,7 @@ export class GenerateCourseRecommendationComponent {
    * This ensures consistency across the application
    */
   rebuildFilteredCourses() {
-    this.filterdCourses = this.getAllAvailableCourses();
+    this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(this.getAllAvailableCourses());
 
     console.log('Rebuilt filterdCourses with all course types:', {
       total: this.filterdCourses.length,
@@ -729,6 +732,60 @@ export class GenerateCourseRecommendationComponent {
         userAdded: this.userAddedCourses.length
       }
     });
+  }
+
+  sortCoursesByRelevancy(courses: any[] = []): any[] {
+    return [...courses].sort((a, b) => {
+      const aScore = this.normalizeRelevancy(a?.relevancy)
+      const bScore = this.normalizeRelevancy(b?.relevancy)
+      return bScore - aScore
+    })
+  }
+
+  sortCoursesByCategoryAndRelevancy(courses: any[] = []): any[] {
+    return [...courses].sort((a, b) => {
+      const categoryPriority = { domain: 1, functional: 2, behavioral: 3, other: 4 };
+      const aPriority = categoryPriority[this.getCourseCategory(a)] || 4;
+      const bPriority = categoryPriority[this.getCourseCategory(b)] || 4;
+
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+
+      return this.normalizeRelevancy(b?.relevancy) - this.normalizeRelevancy(a?.relevancy);
+    })
+  }
+
+  getCourseCategory(course: any): string {
+    const competencies = [
+      ...(course?.competencies || []),
+      ...(course?.competencies_v6 || [])
+    ];
+
+    const categories = new Set(
+      competencies
+        .map((c: any) => this.normalizeCompetency(c?.competencyAreaName))
+        .filter((c: string) => c)
+    );
+
+    if (categories.has('domain')) return 'domain';
+    if (categories.has('functional')) return 'functional';
+    if (categories.has('behavioral')) return 'behavioral';
+
+    return 'other';
+  }
+
+  normalizeRelevancy(value: any): number {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value.trim())
+      return Number.isFinite(parsed) ? parsed : -Infinity
+    }
+
+    return -Infinity
   }
 
   behavioralFilter(data: any[]): any[] {
@@ -1871,8 +1928,8 @@ export class GenerateCourseRecommendationComponent {
             allCoures.push(item)
           }
         })
-        this.originalData = allCoures
-        this.filterdCourses = allCoures
+        this.originalData = this.sortCoursesByRelevancy(allCoures)
+        this.filterdCourses = this.sortCoursesByRelevancy(allCoures)
       }
 
       console.log('this.filterdCourses', this.filterdCourses)
@@ -2239,6 +2296,8 @@ export class GenerateCourseRecommendationComponent {
         providerMatch
       );
     });
+
+    this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(this.filterdCourses);
   }
 
   matchRating(course: any, selectedRatings: string[]): boolean {

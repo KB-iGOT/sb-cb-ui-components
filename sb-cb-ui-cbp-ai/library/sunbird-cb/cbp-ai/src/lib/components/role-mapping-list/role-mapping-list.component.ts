@@ -43,6 +43,9 @@ export class RoleMappingListComponent {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   expandedResponsibilityRows: { [id: string]: boolean } = {};
   expandedActivityRows: { [id: string]: boolean } = {};
+  expandedDomainRows: { [id: string]: boolean } = {};
+  expandedBehavioralRows: { [id: string]: boolean } = {};
+  expandedFunctionalRows: { [id: string]: boolean } = {};
   activeRowElement: any
   cbpFinalObj: any = {}
   loading = false
@@ -439,6 +442,30 @@ export class RoleMappingListComponent {
     return this.expandedActivityRows[id];
   }
 
+  toggleDomainExpand(id: string): void {
+    this.expandedDomainRows[id] = !this.expandedDomainRows[id];
+  }
+
+  isDomainExpanded(id: string): boolean {
+    return this.expandedDomainRows[id];
+  }
+
+  toggleBehavioralExpand(id: string): void {
+    this.expandedBehavioralRows[id] = !this.expandedBehavioralRows[id];
+  }
+
+  isBehavioralExpanded(id: string): boolean {
+    return this.expandedBehavioralRows[id];
+  }
+
+  toggleFunctionalExpand(id: string): void {
+    this.expandedFunctionalRows[id] = !this.expandedFunctionalRows[id];
+  }
+
+  isFunctionalExpanded(id: string): boolean {
+    return this.expandedFunctionalRows[id];
+  }
+
 
 
   addMoreDesignation() {
@@ -515,7 +542,11 @@ export class RoleMappingListComponent {
 
   openFullList(element: any, type: any) {
     const listToShow: string[] = element[type] || [];
-    const title = type === 'role_responsibilities' ? 'Role & Responsibilities' : 'Activities';
+    const title = type === 'role_responsibilities' ? 'Role & Responsibilities'
+      : type === 'activity' ? 'Activities'
+      : type === 'behavioral' ? 'Behavioral Competencies'
+      : type === 'functional' ? 'Functional Competencies'
+      : 'Domain Competencies';
 
     const dialogRef = this.dialog.open(ListPopupComponent, {
       width: '600px',

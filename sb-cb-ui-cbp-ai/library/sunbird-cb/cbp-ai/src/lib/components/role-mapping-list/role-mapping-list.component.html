@@ -322,9 +322,16 @@
                                         <td mat-cell *matCellDef="let element">
                                             <ul class="competency-list">
                                                 <li class="behavioural-pill"
-                                                    *ngFor="let comp of getCompetenciesByType(element.competencies, 'Behavioral')">
+                                                    *ngFor="let comp of (isBehavioralExpanded(element.id) ? getCompetenciesByType(element.competencies, 'Behavioral') : getCompetenciesByType(element.competencies, 'Behavioral').slice(0, 4))">
                                                     <span class="competency-text-behavioral"> {{ comp.theme }} - {{
                                                         comp.sub_theme }} </span>
+                                                </li>
+                                                <li *ngIf="getCompetenciesByType(element.competencies, 'Behavioral').length > 4"
+                                                    class="view-more-less cursor-pointer"
+                                                    (click)="openFullList(element, 'behavioral')">
+                                                    <span style="color: #1B4CA1;font-size: 16px;">
+                                                        View More
+                                                    </span>
                                                 </li>
                                             </ul>
                                         </td>
@@ -338,9 +345,16 @@
                                         <td mat-cell *matCellDef="let element">
                                             <ul class="competency-list">
                                                 <li class="functional-pill"
-                                                    *ngFor="let comp of getCompetenciesByType(element.competencies, 'Functional')">
+                                                    *ngFor="let comp of (isFunctionalExpanded(element.id) ? getCompetenciesByType(element.competencies, 'Functional') : getCompetenciesByType(element.competencies, 'Functional').slice(0, 4))">
                                                     <span class="competency-text-functional"> {{ comp.theme }} - {{
                                                         comp.sub_theme }}</span>
+                                                </li>
+                                                <li *ngIf="getCompetenciesByType(element.competencies, 'Functional').length > 4"
+                                                    class="view-more-less cursor-pointer"
+                                                    (click)="openFullList(element, 'functional')">
+                                                    <span style="color: #1B4CA1;font-size: 16px;">
+                                                        View More
+                                                    </span>
                                                 </li>
                                             </ul>
                                         </td>
@@ -354,9 +368,16 @@
                                         <td mat-cell *matCellDef="let element">
                                             <ul class="competency-list">
                                                 <li class="domain-pill"
-                                                    *ngFor="let comp of getCompetenciesByType(element.competencies, 'Domain')">
+                                                    *ngFor="let comp of (isDomainExpanded(element.id) ? getCompetenciesByType(element.competencies, 'Domain') : getCompetenciesByType(element.competencies, 'Domain').slice(0, 4))">
                                                     <span class="competency-text-domain"> {{ comp.theme }} - {{
                                                         comp.sub_theme }}</span>
+                                                </li>
+                                                <li *ngIf="getCompetenciesByType(element.competencies, 'Domain').length > 4"
+                                                    class="view-more-less cursor-pointer"
+                                                    (click)="openFullList(element, 'domain')">
+                                                    <span style="color: #1B4CA1;font-size: 16px;">
+                                                        View More
+                                                    </span>
                                                 </li>
                                             </ul>
                                         </td>
