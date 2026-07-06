@@ -2,12 +2,13 @@ import { ConfigurationsService, DomainConfService } from '@sunbird-cb/utils-v2'
 import { NsContent } from '../_services/widget-content.model'
 import { Inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { EMPTY, noop, Observable, Subject, of } from 'rxjs'
-import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators'
+import { EMPTY, noop, Observable, Subject } from 'rxjs'
+import { map, switchMap, take } from 'rxjs/operators'
 import dayjs from 'dayjs'
 import { AppTocService } from './app-toc.service'
 import { CommonMethodsService, ContentLanguageService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
 import { WidgetContentService } from '../_collection-api'
+import { TocConfigService } from '../_services/toc-config.service'
 
 @Injectable({
   providedIn: 'root',
@@ -41,12 +42,11 @@ export class ViewerUtilService {
     private contentLangSvc: ContentLanguageService,
     private domainConfSvc: DomainConfService,
     private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
     @Inject('environment') private environment: any
   ) { }
 
-  private playerConfig$: Observable<any> = this.http
-    .get<any>(`${this.configservice.sitePath}/feature/toc.json`)
-    .pipe(catchError(() => of({})), shareReplay(1))
+  private playerConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
 
   private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string, callback: (url: string) => void): void {
     this.playerConfig$.pipe(

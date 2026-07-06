@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core'
-import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { Observable, of } from 'rxjs'
-import { catchError, map, shareReplay, switchMap, take } from 'rxjs/operators'
+import { map, switchMap, take } from 'rxjs/operators'
 import { HttpClient } from '@angular/common/http'
 import { NsAppRating } from '../models/rating.model'
+import { TocConfigService } from './toc-config.service'
 
 const PROXY_SLAG_V8 = '/apis/proxies/v8'
 const API_END_POINTS = {
@@ -26,13 +26,11 @@ export class RatingService {
 
   constructor(
     private http: HttpClient,
-    private configSvc: ConfigurationsService,
     private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
   ) { }
 
-  private playerConfig$: Observable<any> = this.http
-    .get<any>(`${this.configSvc.sitePath}/feature/toc.json`)
-    .pipe(catchError(() => of({})), shareReplay(1))
+  private playerConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
 
   private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
     return this.playerConfig$.pipe(

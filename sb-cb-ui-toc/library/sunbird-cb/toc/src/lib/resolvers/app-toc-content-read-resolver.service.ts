@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core'
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router'
-import { HttpClient } from '@angular/common/http'
 import { NsContent } from '../_services/widget-content.model'
 import { WidgetContentService } from '../_services/widget-content.service'
 import { PipeContentRoutePipe } from '../_collection/_common/pipe-content-route/pipe-content-route.pipe'
-import { ConfigurationsService, IResolveResponse } from '@sunbird-cb/utils-v2'
+import { IResolveResponse } from '@sunbird-cb/utils-v2'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { Observable, of } from 'rxjs'
-import { catchError, map, shareReplay, switchMap, take, tap } from 'rxjs/operators'
+import { catchError, map, switchMap, take, tap } from 'rxjs/operators'
+import { TocConfigService } from '../_services/toc-config.service'
 
 
 @Injectable({
@@ -15,17 +15,14 @@ import { catchError, map, shareReplay, switchMap, take, tap } from 'rxjs/operato
 })
 export class AppTocContentReadResolverService
    {
-  private tocConfig$: Observable<any> = this.http
-    .get<any>(`${this.configSvc.sitePath}/feature/toc.json`)
-    .pipe(catchError(() => of({})), shareReplay(1))
+  private tocConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
 
   constructor(
     private contentSvc: WidgetContentService,
     private routePipe: PipeContentRoutePipe,
     private router: Router,
-    private http: HttpClient,
-    private configSvc: ConfigurationsService,
     private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
   ) { }
 
   resolve(
