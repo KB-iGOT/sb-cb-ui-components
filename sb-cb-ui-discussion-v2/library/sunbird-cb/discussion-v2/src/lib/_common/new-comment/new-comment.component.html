@@ -1,14 +1,14 @@
 <div class="flex flex-1 flex-col start-comment-container" [ngStyle]="config?.styles" *ngIf="canShowSection">
     <div class="flex flex-1 flex-col mb-6" *ngIf="config?.showTopInfo">
-        <div class=" w-full text-center">
+        <div class=" w-full text-center" *ngIf="uiConfig?.promptIcon !== false">
             <mat-icon class="icon new-post-icon nodtranslate" aria-hidden="false" i18n-aria-label
                 aria-label="Fail">{{config?.topInfo?.icon}}</mat-icon>
         </div>
-        <div class="flex items-center justify-center" [innerHTML]="config?.topInfo?.text">
+        <div class="flex items-center justify-center" *ngIf="uiConfig?.promptText !== false" [innerHTML]="config?.topInfo?.text">
 
         </div>
     </div>
-    <div class="flex gap-2 items-center" id="start-comment" *ngIf="config?.show">
+    <div class="flex gap-2 items-center" id="start-comment" *ngIf="config?.show && uiConfig?.inputBox !== false">
         <div class="" *ngIf="config?.avatarPhoto?.show">
             <d-v2-avatar-photo [size]="config?.avatarPhoto?.size"
                 [name]="loogedInUserProfile?.firstName || config?.avatarPhoto?.name"

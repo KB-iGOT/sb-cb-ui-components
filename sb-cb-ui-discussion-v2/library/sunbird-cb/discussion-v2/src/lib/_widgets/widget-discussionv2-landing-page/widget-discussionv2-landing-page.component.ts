@@ -69,7 +69,8 @@ export class WidgetDiscussionv2LandingPageComponent implements OnInit {
     this.topicDataLoading = true
     let request: any = {
       "filterCriteriaMap": {
-          "status": "active"
+          "status": "active",
+          "communityAccessLevel": "public"
       },
       "requestedFields": [],
       "pageNumber": 0,

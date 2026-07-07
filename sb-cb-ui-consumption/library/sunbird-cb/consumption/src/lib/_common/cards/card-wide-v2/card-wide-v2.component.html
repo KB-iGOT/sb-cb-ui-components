@@ -9,7 +9,7 @@
           [wsUtilsDefaultThumbnail]="defaultSLogo"
           [alt]="(widgetData?.content?.sourceName + '_' + widgetData?.content?.identifier)" />
       </div>
-      <div class="duration-box right-corner" *ngIf="widgetData?.content?.duration > 0">
+      <div class="duration-box right-corner" *ngIf="isCardElementEnabled('duration') && widgetData?.content?.duration > 0">
         <mat-icon class="mat-icon main_icon mr-1">access_time</mat-icon>
         <span class=" ws-mat-white-text duration"> {{ (widgetData?.content?.duration || 120)| pipeDurationTransform:
           'hms' }}</span>
@@ -21,7 +21,7 @@
       </ng-container>
     </div>
     <mat-card-content class="mat-text-box mb-0">
-      <div class="course_widget flex flex-between margin-remove">
+      <div class="course_widget flex flex-between margin-remove" *ngIf="isCardElementEnabled('contentType')">
         <div class="flex flex-end course_v2">
           <ng-container
             *ngIf="widgetData?.content?.contentType === 'Resource' || widgetData?.content?.contentType === 'Course' || widgetData?.content?.contentType === 'Module'">
@@ -44,17 +44,17 @@
       </div>
 
       <div class="bottomsection">
-        <div class="flex w-full flex-wrap flex-middle provider">
-          <div class="course_logo_box">
+        <div class="flex w-full flex-wrap flex-middle provider" *ngIf="isCardElementEnabled('organisation') || isCardElementEnabled('creatorLogo')">
+          <div class="course_logo_box" *ngIf="isCardElementEnabled('creatorLogo')">
             <img [src]="widgetData?.content?.creatorLogo | pipePublicURL " class="source-icon"
               [wsUtilsDefaultThumbnail]="defaultSLogo"
               [alt]="(widgetData?.content?.sourceName + '_' + widgetData?.content?.identifier)" />
           </div>
-          <span class="org-text">By&nbsp;
+          <span class="org-text" *ngIf="isCardElementEnabled('organisation')">By&nbsp;
             <!-- {{'cardcontentv2.by' | translate}}  -->
             {{widgetData?.content?.organisation[0] }}</span>
         </div>
-        <div class="flex flex-middle rating-session margin-top-xs">
+        <div class="flex flex-middle rating-session margin-top-xs" *ngIf="isCardElementEnabled('rating')">
           <div class="flex flex-middle" *ngIf="widgetData?.content?.avgRating">
             <mat-icon>star</mat-icon>
             <span class="rating-number">{{widgetData?.content?.avgRating}}</span>
@@ -78,7 +78,7 @@
         date: 'd MMM, y'}}</p>
       <p *ngIf="data?.cbpData?.planDuration === acbpConstants?.SUCCESS" class="cbp-success">{{data?.cbpData?.endDate |
         date: 'd MMM, y'}}</p>
-      <p *ngIf="data?.cbpData?.planDuration === acbpConstants?.OVERDUE" class="cbp-danger">{{'OverDue' }}</p>
+      <p *ngIf="isCardElementEnabled('overdue') && data?.cbpData?.planDuration === acbpConstants?.OVERDUE" class="cbp-danger">{{'OverDue' }}</p>
     </div>
   </ng-template>
 </ng-container>

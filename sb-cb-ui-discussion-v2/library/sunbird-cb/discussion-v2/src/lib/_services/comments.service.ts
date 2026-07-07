@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { Observable } from 'rxjs'
-
+import { EMPTY, Observable } from 'rxjs'
+import { map, switchMap, take } from 'rxjs/operators'
+import { TocConfigService } from './toc-config.service'
+import * as _ from 'lodash' 
 const API_END_POINTS = {
   FETCH_ALL_COMMENTS: (entityType: string, entityId: string, workflow: string) =>
     `/apis/proxies/v8/comment/v1/getAll?entityType=${entityType}&entityId=${entityId}&workflow=${workflow}`,
@@ -38,15 +40,48 @@ export class CommentsService {
   courseDetails: any = {}
   constructor(
     private http: HttpClient,
-    private configSvc: ConfigurationsService
+    private configSvc: ConfigurationsService,
+    private tocConfigSvc: TocConfigService,
   ) { }
+
+  private apiConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
+    .pipe(map((tocConfig: any) => tocConfig?.apiConfig || null))
+
+  private isApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
+    return this.apiConfig$.pipe(
+      map((apiConfig: any) => !!this.getEnabledUrl({
+        apiConfig,
+        urlConfigPath,
+        defaultUrl,
+      })),
+      take(1),
+    )
+  }
+
+  getEnabledUrl(config: any): string {
+    const { apiConfig, urlConfigPath, defaultUrl } = config
+    if (apiConfig && urlConfigPath) {
+      const config = _.get(apiConfig, urlConfigPath)
+      if (config && config.enabled) {
+        return config.url || defaultUrl
+      } else {
+        return ''
+      }
+    }
+    return defaultUrl
+  }
 
   fetchAllComment(entityType: string, entityId: string, workflow: string): Observable<any> {
     return this.http.get<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS(entityType, entityId, workflow)}`)
   }
 
   getCommentTree(requestBody: any): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.GET_COMMENT_TREE}`, requestBody)
+    return this.isApiEnabled('commentTreeGet', API_END_POINTS.GET_COMMENT_TREE).pipe(
+      switchMap((enabled: boolean) => enabled
+        ? this.http.post<any>(`${API_END_POINTS.GET_COMMENT_TREE}`, requestBody)
+        : EMPTY
+      ),
+    )
   }
 
   fetchAllFlags(): Observable<any> {
@@ -58,20 +93,40 @@ export class CommentsService {
   }
 
   fetchAllComment_V3(payload: any): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+    return this.isApiEnabled('commentSearch', API_END_POINTS.FETCH_ALL_COMMENTS_V3).pipe(
+      switchMap((enabled: boolean) => enabled
+        ? this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+        : EMPTY
+      ),
+    )
   }
 
   commentList(payload: any): Observable<any> {
-    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+    return this.isApiEnabled('commentSearch', API_END_POINTS.FETCH_ALL_COMMENTS_V3).pipe(
+      switchMap((enabled: boolean) => enabled
+        ? this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+        : EMPTY
+      ),
+    )
   }
 
 
   addFirstComment(req: any): Observable<any> {
-    return this.http.post<any>(API_END_POINTS.ADD_FIRST_COMMENT, req)
+    return this.isApiEnabled('addFirstComment', API_END_POINTS.ADD_FIRST_COMMENT).pipe(
+      switchMap((enabled: boolean) => enabled
+        ? this.http.post<any>(API_END_POINTS.ADD_FIRST_COMMENT, req)
+        : EMPTY
+      ),
+    )
   }
 
   addNewComment(req: any) {
-    return this.http.post(API_END_POINTS.ADD_NEW_COMMENT, req)
+    return this.isApiEnabled('addNewComment', API_END_POINTS.ADD_NEW_COMMENT).pipe(
+      switchMap((enabled: boolean) => enabled
+        ? this.http.post(API_END_POINTS.ADD_NEW_COMMENT, req)
+        : EMPTY
+      ),
+    )
   }
 
   reportComment(requestData: any) {
@@ -104,7 +159,12 @@ export class CommentsService {
     return this.http.put(API_END_POINTS.UPDATE_COMMENT, request)
   }
   getAllLikedCommentIds(entityId: any): Observable<any> {
-    return this.http.get<any>(`${API_END_POINTS.LIKED_COMMENTS(entityId)}`)
+    return this.isApiEnabled('likedComments', API_END_POINTS.LIKED_COMMENTS(entityId)).pipe(
+      switchMap((enabled: boolean) => enabled
+        ? this.http.get<any>(`${API_END_POINTS.LIKED_COMMENTS(entityId)}`)
+        : EMPTY
+      ),
+    )
   }
 
 
@@ -116,8 +176,13 @@ export class CommentsService {
       entityId: this.entityId,
       overrideCache: true,
     }
-    // return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
-    return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+    return this.isApiEnabled('commentSearch', API_END_POINTS.FETCH_ALL_COMMENTS_V3).pipe(
+      switchMap((enabled: boolean) => enabled
+        // return this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V2}`, payload)
+        ? this.http.post<any>(`${API_END_POINTS.FETCH_ALL_COMMENTS_V3}`, payload)
+        : EMPTY
+      ),
+    )
   }
 
 

@@ -33,6 +33,7 @@ export namespace NsPage {
     actionBtn?: NsAppsConfig.IFeature
     actionBtnName?: string
     className?: string
+    showProgress?: boolean
   }
 
   export interface INavLinkConfig<T> {

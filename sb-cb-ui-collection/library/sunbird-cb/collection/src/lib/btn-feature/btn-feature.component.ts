@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core'
+import { Component, HostBinding, HostListener, Input, OnDestroy, OnInit } from '@angular/core'
 import { Event, NavigationEnd, Router } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { take } from 'rxjs/operators'
@@ -43,8 +43,18 @@ export class BtnFeatureComponent extends WidgetBaseComponent
   isPinned = false
   instanceVal = ''
   isPinFeatureAvailable = true
+  showDashboardOptions = false
   private pinnedAppsChangeSubs?: Subscription
   private navigationSubs?: Subscription
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: MouseEvent) {
+    const target = event?.target as HTMLElement
+    if (!target?.closest('.dashboard-wrapper')) {
+      this.showDashboardOptions = false
+    }
+  }
+
   constructor(
     private events: EventService,
     private configurationsSvc: ConfigurationsService,
@@ -164,5 +174,19 @@ export class BtnFeatureComponent extends WidgetBaseComponent
 
   startTour() {
     this.tour.startTour()
+  }
+
+  toggleDashboardDropdown(event: MouseEvent) {
+    event?.stopPropagation()
+    this.showDashboardOptions = !this.showDashboardOptions
+  }
+
+  onDashboardSelect(value: string) {
+    this.showDashboardOptions = false
+    if (value === 'igot') {
+      window.open('/app/my-dashboard/dashboard-view', '_blank')
+    } else if (value === 'mdo') {
+      window.open('/app/my-dashboard', '_blank')
+    }
   }
 }

@@ -1,7 +1,7 @@
 <a href="javascript:void(0)" mat-icon-button i18n-aria-label class="new-margin" #rootTrigger="matMenuTrigger"
   [matMenuTriggerFor]="settingsMenu" role="link" (click)="raiseTelemetry('profile icon')">
   <span class="flex flex-column flex-middle progress-wrapper">
-    @if (showProfileProgress() && profileCompletionPercentage) {
+    @if (showProgressBar && profileCompletionPercentage ) {
     <svg class="progress-content" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 100 100" width="100"
       height="100" role="img" aria-hidden="true">
       <!-- background circle -->

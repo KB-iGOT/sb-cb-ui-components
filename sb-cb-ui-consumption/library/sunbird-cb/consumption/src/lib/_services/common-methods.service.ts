@@ -1,7 +1,14 @@
-import { Injectable } from '@angular/core';
-import { NsContent } from '../_models/widget-content.model';
-import { NsContentStripWithTabs } from '../_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model';
+import { Injectable } from '@angular/core'
+import { NsContent } from '../_models/widget-content.model'
+import { NsContentStripWithTabs } from '../_common/content-strip-with-tabs-lib/content-strip-with-tabs-lib.model'
 import { NsCommonStrip } from '../_common/common-strip/common-strip.model'
+import * as _ from 'lodash'
+
+export interface ConfigDetails {
+  apiConfig: any,
+  urlConfigPath: string,
+  defaultUrl: string,
+}
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +42,7 @@ export class CommonMethodsService {
         widgetHostClass: 'mb-2',
         widgetData: {},
       }
-    ));
+    ))
   }
   transformSkeletonToWidgets(
     strip: any
@@ -48,7 +55,7 @@ export class CommonMethodsService {
         cardSubType: strip.loaderConfig && strip.loaderConfig.cardSubType || 'card-standard-skeleton',
         cardCustomeClass: strip.customeClass ? strip.customeClass : '',
       },
-    }));
+    }))
   }
 
   handleCapitalize(str: string, type?: string): string {
@@ -85,10 +92,23 @@ export class CommonMethodsService {
         widgetHostClass: 'mb-2',
         widgetData: {},
       }
-    ));
+    ))
   }
 
   getCourseUnitIds() {
     return localStorage.getItem('comprehensiveAssessmentCourseUnits')
+  }
+
+  getEnabledUrl(config: ConfigDetails): string {
+    const { apiConfig, urlConfigPath, defaultUrl } = config
+    if (apiConfig && urlConfigPath) {
+      const config = _.get(apiConfig, urlConfigPath)
+      if (config && config.enabled) {
+        return config.url || defaultUrl
+      } else {
+        return ''
+      }
+    }
+    return defaultUrl
   }
 }

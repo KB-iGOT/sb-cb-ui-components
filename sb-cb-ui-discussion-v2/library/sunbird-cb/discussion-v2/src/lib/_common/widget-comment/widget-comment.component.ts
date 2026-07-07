@@ -20,6 +20,7 @@ export class WidgetCommentComponent implements OnInit, OnDestroy {
   entityId = ''
   @Input() widgetData!: NsDiscussionV2.ICommentWidgetData | any
   @Input() commentId!: any
+  @Input() uiConfig: any
   commentTreeId = ''
   loogedInUserProfile: any = {}
   commentListLimit = 20
