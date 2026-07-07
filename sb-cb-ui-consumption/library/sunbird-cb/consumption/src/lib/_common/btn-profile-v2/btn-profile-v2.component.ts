@@ -62,15 +62,6 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
   @Input() widgetData!: NsPage.INavLink
 
-  private _showProfileProgress: () => boolean = () => true
-  @Input()
-  set showProfileProgress(value: (() => boolean) | boolean | null | undefined) {
-    this._showProfileProgress = typeof value === 'function' ? value : () => !!value
-  }
-  get showProfileProgress(): () => boolean {
-    return this._showProfileProgress
-  }
-
   // ── Injected services ──────────────────────────────────────────────────────
   private readonly configSvc = inject(ConfigurationsService)
   private readonly dialog = inject(MatDialog)
@@ -102,9 +93,6 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
     }
 
     this.updateUserInfo()
-    console.log('BtnProfileV2Component', this.configSvc.unMappedUser?.profileDetails)
-    console.log('BtnProfileV2Component', this.configSvc.userProfile)
-
     // Set up language
     if (localStorage.getItem('websiteLanguage')) {
       this.translate.setDefaultLang('en')
