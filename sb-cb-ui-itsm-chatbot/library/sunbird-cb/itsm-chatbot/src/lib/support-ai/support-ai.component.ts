@@ -108,7 +108,14 @@ export class SupportAIComponent implements OnInit, OnChanges, AfterViewInit, Aft
   loadingSupportAI = false;
 
   conversationEnded = false;
-  isInputEnabled = false;
+@Output() inputEnabledChange = new EventEmitter<boolean>();
+
+isInputEnabled = false;
+
+setInputEnabled(value: boolean) {
+  this.isInputEnabled = value;
+  this.inputEnabledChange.emit(value);
+}
   showRetry = false;
 retryCallback: (() => void) | null = null;
 
@@ -227,6 +234,7 @@ renderActivities(activities: any[]) {
 
     if (activity.disable_input !== undefined) {
       this.isInputEnabled = !activity.disable_input;
+      this.inputEnabledChange.emit(this.isInputEnabled);
     }
 
     if (activity.type === 'picker') {
@@ -281,7 +289,18 @@ selectPickerItem(item: any) {
 
 }
 
+  private lockPastOptions() {
+    this.chatActivities.forEach((act: any) => {
+      if (act.sender === 'bot' && act.activity &&
+        ['quick_replies', 'picker', 'nested_picker'].includes(act.activity.type)) {
+        act.optionsDisabled = true
+      }
+    })
+  }
+
   sendTurn(payload: any) {
+
+    this.lockPastOptions()
 
     this.loadingSupportAI = true
 
@@ -356,6 +375,7 @@ selectPickerItem(item: any) {
 
                   if (activity.disable_input !== undefined) {
   this.isInputEnabled = !activity.disable_input;
+  this.inputEnabledChange.emit(this.isInputEnabled);
 }
 
 if (activity.type === 'picker') {
