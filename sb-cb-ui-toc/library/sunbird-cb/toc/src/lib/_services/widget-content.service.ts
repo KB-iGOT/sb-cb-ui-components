@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { Observable, of, EMPTY, BehaviorSubject } from 'rxjs'
-import { catchError, retry, map, shareReplay } from 'rxjs/operators'
+import { catchError, retry, map, shareReplay, switchMap, take } from 'rxjs/operators'
 import { NsContent } from './widget-content.model'
+import { TocConfigService } from './toc-config.service'
 // tslint:disable
 import _ from 'lodash'
 import {  viewerRouteGenerator } from './viewer-route-util'
@@ -70,7 +72,22 @@ export class WidgetContentService {
     private http: HttpClient,
     private configSvc: ConfigurationsService,
     private activatedRoute: ActivatedRoute,
+    private commonMethodsSvc: CommonMethodsService,
+    private tocConfigSvc: TocConfigService,
   ) {
+  }
+
+  private playerConfig$: Observable<any> = this.tocConfigSvc.getTocConfig()
+
+  private isPlayerApiEnabled(urlConfigPath: string, defaultUrl: string): Observable<boolean> {
+    return this.playerConfig$.pipe(
+      map((tocConfig: any) => !!this.commonMethodsSvc.getEnabledUrl({
+        apiConfig: tocConfig?.playerApiConfig,
+        urlConfigPath,
+        defaultUrl,
+      })),
+      take(1),
+    )
   }
 
   tocConfigData: any = new BehaviorSubject<any>({})
@@ -111,40 +128,47 @@ export class WidgetContentService {
     _additionalFields: string[] = [],
     primaryCategory?: string | null,
   ): Observable<NsContent.IContent> {
-    // const url = `${API_END_POINTS.CONTENT}/${contentId}?hierarchyType=${hierarchyType}`
-    let url = ''
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-    if (primaryCategory && this.isResource(primaryCategory)) {
-      if (!forPreview) {
-        url = `/apis/proxies/v8/content/v2/read/${contentId}`
-      } else {
-        if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
-          url = `/apis/proxies/v8/content/v2/read/${contentId}`
+    const isResource = !!(primaryCategory && this.isResource(primaryCategory))
+    return this.isPlayerApiEnabled(
+      isResource ? 'resourceRead' : 'hierarchyRead',
+      isResource ? '/apis/proxies/v8/content/v2/read' : '/apis/proxies/v8/course/v1/hierarchy',
+    ).pipe(
+      switchMap((enabled: boolean) => {
+        if (!enabled) { return EMPTY }
+        // const url = `${API_END_POINTS.CONTENT}/${contentId}?hierarchyType=${hierarchyType}`
+        let url = ''
+        const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+        if (isResource) {
+          if (!forPreview) {
+            url = `/apis/proxies/v8/content/v2/read/${contentId}`
+          } else {
+            if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
+              url = `/apis/proxies/v8/content/v2/read/${contentId}`
+            } else {
+              url = `/api/content/v1/read/${contentId}`
+            }
+          }
         } else {
-            url = `/api/content/v1/read/${contentId}`
+          if (!forPreview) {
+            url = `/apis/proxies/v8/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
+          } else {
+            const forcreator = window.location.href.includes('editMode=true')
+            if (forcreator) {
+              url = `apis/proxies/v8/course/v1/hierarchy/${contentId}?mode=edit`
+            } else {
+              url = `/api/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
+            }
+          }
         }
-      }
-    } else {
-      if (!forPreview) {
-        url = `/apis/proxies/v8/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
-      } else {
-        const forcreator = window.location.href.includes('editMode=true')
-        if (forcreator) {
-          url = `apis/proxies/v8/course/v1/hierarchy/${contentId}?mode=edit`
-        } else {
-          url = `/api/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
-        }
-      }
-    }
-    // return this.http
-    //   .post<NsContent.IContent>(url, { additionalFields })
-    //   .pipe(retry(1))
-    return this.http
-      .get<NsContent.IContent>(url)
-      .pipe(shareReplay(1))
-    // if (apiData && apiData.result) {
-    //   return apiData.result.content
-    // }
+        // return this.http
+        //   .post<NsContent.IContent>(url, { additionalFields })
+        //   .pipe(retry(1))
+        return this.http.get<NsContent.IContent>(url).pipe(shareReplay(1))
+        // if (apiData && apiData.result) {
+        //   return apiData.result.content
+        // }
+      }),
+    )
   }
   fetchAuthoringContent(contentId: string, apiType?: string): Observable<any> {
     const forcreator = window.location.href.includes('editMode=true')
@@ -273,23 +297,27 @@ export class WidgetContentService {
   }
 
   fetchContentHistoryV2(req: NsContent.IContinueLearningDataReq): Observable<any> {
-    const isPreAssessment = this.activatedRoute.snapshot.queryParams.preAssessment
-    req.request.fields = ['progressdetails']
-    if(req.request.courseId && !isPreAssessment) {
-    const data = this.http.post<NsContent.IContinueLearningData>(
-      `${API_END_POINTS.CONTENT_HISTORYV2}/${req.request.courseId}`, req
-    ).pipe(
-      map((rData: any) => {
-        this.languageMapProgress = rData?.result?.languageProgress || {}
-        return rData
-      }), //  (rData.responseData || []).map((p: any) => p.name)
+    return this.isPlayerApiEnabled('contentProgressRead', '/apis/proxies/v8/read/content-progres').pipe(
+      switchMap((enabled: boolean) => {
+        if (!enabled) { return EMPTY }
+        const isPreAssessment = this.activatedRoute.snapshot.queryParams.preAssessment
+        req.request.fields = ['progressdetails']
+        if (req.request.courseId && !isPreAssessment) {
+          return this.http.post<NsContent.IContinueLearningData>(
+            `${API_END_POINTS.CONTENT_HISTORYV2}/${req.request.courseId}`, req
+          ).pipe(
+            map((rData: any) => {
+              this.languageMapProgress = rData?.result?.languageProgress || {}
+              return rData
+            }), //  (rData.responseData || []).map((p: any) => p.name)
+          )
+          // data.subscribe((subscribeData: any) => {
+          //       this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId })
+          //     })
+        }
+        return of()
+      }),
     )
-    // data.subscribe((subscribeData: any) => {
-    //       this.programChildCourseResumeData.next({ resumeData: subscribeData.result.contentList, courseId: req.request.courseId })
-    //     })
-    return data
-  }
-  return of()
   }
 
   setProgramChildResumeData(contentList: any, courseId: any) {
@@ -660,36 +688,44 @@ export class WidgetContentService {
     return resultContent
   }
 
-  fetchHierarchyContent(contentId:string, hierarchyType: 'all' | 'minimal' | 'detail' = 'detail') {
-    let url = ''
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-    if (!forPreview) {
-      url = `/apis/proxies/v8/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
-    } else {
-      const forcreator = window.location.href.includes('editMode=true')
-      if (forcreator) {
-        url = `apis/proxies/v8/course/v1/hierarchy/${contentId}?mode=edit`
-      } else {
-        url = `/api/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
-      }
-    }
-    return this.http.get<NsContent.IContent>(url).pipe(shareReplay(1))
+  fetchHierarchyContent(contentId: string, hierarchyType: 'all' | 'minimal' | 'detail' = 'detail') {
+    return this.isPlayerApiEnabled('hierarchyRead', '/apis/proxies/v8/course/v1/hierarchy').pipe(
+      switchMap((enabled: boolean) => {
+        if (!enabled) { return EMPTY }
+        let url = ''
+        const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+        if (!forPreview) {
+          url = `/apis/proxies/v8/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
+        } else {
+          const forcreator = window.location.href.includes('editMode=true')
+          if (forcreator) {
+            url = `apis/proxies/v8/course/v1/hierarchy/${contentId}?mode=edit`
+          } else {
+            url = `/api/course/v1/hierarchy/${contentId}?hierarchyType=${hierarchyType}`
+          }
+        }
+        return this.http.get<NsContent.IContent>(url).pipe(shareReplay(1))
+      }),
+    )
   }
 
   fetchContentData(contentId: string): Observable<NsContent.IContent> {
-    let url = ''
-    const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
-    if (!forPreview) {
-      return this.http.get<NsContent.IContent>(
-        API_END_POINTS.CONTENT_READ(contentId),
-      )
-    }
-    if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
-      url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
-    } else {
-        url = `/api/content/v1/read/${contentId}`
-    }
-      return this.http.get<NsContent.IContent>(url)
+    return this.isPlayerApiEnabled('extendedContentRead', '/apis/proxies/v8/extended/content/v1/read').pipe(
+      switchMap((enabled: boolean) => {
+        if (!enabled) { return EMPTY }
+        const forPreview = window.location.href.includes('/public/') || window.location.href.includes('&preview=true')
+        if (!forPreview) {
+          return this.http.get<NsContent.IContent>(API_END_POINTS.CONTENT_READ(contentId))
+        }
+        let url = ''
+        if (window.location.href.includes('editMode=true') && window.location.href.includes('_rc')) {
+          url = `/apis/proxies/v8/extended/content/v1/read/${contentId}`
+        } else {
+          url = `/api/content/v1/read/${contentId}`
+        }
+        return this.http.get<NsContent.IContent>(url)
+      }),
+    )
   }
 
   getUserEnrollmentData(userId: string, request: any): Observable<{ data: any; error: any }> {

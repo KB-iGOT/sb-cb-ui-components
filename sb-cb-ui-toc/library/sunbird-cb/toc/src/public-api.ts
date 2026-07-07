@@ -78,6 +78,7 @@ export * from './lib/_collection/_common/content-toc/app-toc-content/app-toc-con
 export * from './lib/_collection/_common/content-toc/app-toc-teachers-notes/app-toc-teachers-notes.component'
 export * from './lib/_collection/_common/content-toc/app-toc-batch-assignments/app-toc-batch-assignments.component'
 export * from './lib/_services/widget-content.service'
+export * from './lib/_services/toc-config.service'
 export * from './lib/models/discussion-forum.model'
 
 // Karma Points module

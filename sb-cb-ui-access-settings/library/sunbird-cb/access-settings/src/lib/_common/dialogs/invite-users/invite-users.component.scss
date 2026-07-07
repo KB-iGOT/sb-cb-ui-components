@@ -56,3 +56,11 @@
 :host ::ng-deep .mat-mdc-dialog-content {
   max-height: 75vh !important;
 }
+
+
+  @media (min-resolution: 1.5dppx) {
+  :host  ::ng-deep .mat-mdc-dialog-content {
+    min-height: 72vh !important;
+    max-height: 72vh !important;
+    }
+   }

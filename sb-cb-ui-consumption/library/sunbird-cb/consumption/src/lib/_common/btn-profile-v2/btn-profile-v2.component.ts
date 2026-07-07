@@ -82,6 +82,7 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
   // Derived full name for template convenience
   readonly displayName = computed(() => this.givenName())
   profileCompletionPercentage = 0
+  showProgressBar = false
 
   constructor() {
     super()
@@ -108,6 +109,10 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
     if (this.widgetData?.actionBtnId) {
       this.id = this.widgetData.actionBtnId
+    }
+
+    if (this.widgetData?.showProgress) {
+      this.showProgressBar = this.widgetData.showProgress
     }
 
     const profileDetails = this.configSvc.unMappedUser?.profileDetails

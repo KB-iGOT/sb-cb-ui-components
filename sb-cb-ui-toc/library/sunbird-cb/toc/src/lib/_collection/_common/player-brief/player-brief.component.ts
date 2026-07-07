@@ -3,6 +3,7 @@ import { NsContent } from '../../../_services/widget-content.model'
 import { ConfigurationsService, MultilingualTranslationsService, UtilityService } from '@sunbird-cb/utils-v2'
 import { Router } from '@angular/router'
 import { WidgetContentService } from '../../../_services/widget-content.service'
+import { TocConfigService } from '../../../_services/toc-config.service'
 
 @Component({
     selector: 'ws-widget-player-brief',
@@ -32,6 +33,7 @@ export class PlayerBriefComponent implements OnInit {
     private router: Router,
     private widgetContentSvc: WidgetContentService,
     private langtranslations: MultilingualTranslationsService,
+    private tocConfigSvc: TocConfigService,
   ) { }
   isDownloadableDesktop = false
   isDownloadableIos = false
@@ -106,8 +108,7 @@ export class PlayerBriefComponent implements OnInit {
     return 0
   }
   getTocConfig() {
-    const url = `${this.configSvc.sitePath}/feature/toc.json`
-    this.widgetContentSvc.fetchConfig(url).subscribe(data => {
+    this.tocConfigSvc.getTocConfig().subscribe(data => {
       this.tocConfig = data
       this.widgetContentSvc.updateTocConfig(data)
     })

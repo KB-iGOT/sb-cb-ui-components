@@ -109,7 +109,7 @@ export class UserEnrollCommunityService {
 
   async similarCommuninties(){
     let emptyData = {
-      "filterCriteriaMap":{"status":"active"},
+      "filterCriteriaMap":{"status":"active","communityAccessLevel":"public"},
       "requestedFields":[],
       "pageNumber":0,
       "pageSize":500,

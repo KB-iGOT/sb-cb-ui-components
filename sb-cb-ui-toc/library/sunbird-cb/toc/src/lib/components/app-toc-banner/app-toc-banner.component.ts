@@ -32,6 +32,7 @@ import { TranslateService } from '@ngx-translate/core'
 import { ENTER } from '@angular/cdk/keycodes'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 import { TimerService } from '../../services/timer.service'
+import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { MatAutocomplete as MatAutocomplete, MatAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
 import { MatChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
 import { MatDialog as MatDialog } from '@angular/material/dialog'
@@ -42,11 +43,11 @@ dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 
 @Component({
-    selector: 'ws-app-toc-banner',
-    templateUrl: './app-toc-banner.component.html',
-    styleUrls: ['./app-toc-banner.component.scss'],
-    providers: [AccessControlService, DatePipe],
-    standalone: false
+  selector: 'ws-app-toc-banner',
+  templateUrl: './app-toc-banner.component.html',
+  styleUrls: ['./app-toc-banner.component.scss'],
+  providers: [AccessControlService, DatePipe],
+  standalone: false
 })
 
 export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
@@ -61,6 +62,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() userEnrollmentList: NsContent.ICourse[] | null = null
   @Output() withdrawOrEnroll = new EventEmitter<string>()
   @Input() contentReadData: NsContent.IContent | null = null
+  @Input() fullBatcheIds: any = []
   @Input() clickToShare = false
   @Output() programEnrollCall = new EventEmitter<any>()
   timer: any
@@ -162,6 +164,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
     private events: EventService,
     private langtranslations: MultilingualTranslationsService,
     private timerService: TimerService,
+    private commonMethodsSvc: CommonMethodsService,
     @Inject('environment') private environment: any,
   ) {
     this.langtranslations.languageSelectedObservable.subscribe(() => {
@@ -298,6 +301,17 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
         // this.getUsersToShare('')
       }
     }
+    this.setBatchControl()
+  }
+
+  findIsBatchFull(batch: any): boolean {
+    return this.contentReadData && this.contentReadData.batches.find((b: any) => b.batchId === batch.batchId && Number(batch.batchAttributes.currentBatchSize || 0) === b.batchAttributes.totalApprovedCount)
+  }
+
+  get isBatchFull(): boolean {
+    const enrolled = this.selectedBatchData?.userCount?.enrolled
+    const currentBatchSize = this.selectedBatchData?.content?.[0]?.batchAttributes?.currentBatchSize
+    return (enrolled !== undefined && currentBatchSize !== undefined && enrolled >= currentBatchSize)
   }
 
   getUsersToShare(queryStr: string) {
@@ -375,11 +389,11 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getDoptEligibleServicesList() {
-    if (this.selectedBatch && this.selectedBatch.batchAttributes 
+    if (this.selectedBatch && this.selectedBatch.batchAttributes
       && this.selectedBatch.batchAttributes.cadreList
       && this.selectedBatch.batchAttributes.cadreList.length > 0) {
-        this.doptEligibleServicesList = this.selectedBatch.batchAttributes.cadreList
-      } else{
+      this.doptEligibleServicesList = this.selectedBatch.batchAttributes.cadreList
+    } else {
       this.doptEligibleServicesList = []
     }
   }
@@ -528,8 +542,8 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       const isDoptContent = _.get(this.content, 'createdFor', []).includes(doptorgID)
       // const isDptUser = _.get(this.userProfileObject, 'rootOrgId') === doptorgID
 
-    this.getDoptEligibleServicesList()
-    const userProfileObject = this.configSvc?.unMappedUser || {}
+      this.getDoptEligibleServicesList()
+      const userProfileObject = this.configSvc?.unMappedUser || {}
       const civilServiceName = _.get(userProfileObject, 'profileDetails.cadreDetails.civilServiceName', '')
       if (this.doptEligibleServicesList && this.doptEligibleServicesList.length > 0) {
         if (!civilServiceName) {
@@ -545,13 +559,14 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       const profileForm = this.dialog.open(EnrollProfileFormComponent, {
         width: '920px',
         maxHeight: '85vh',
+        height: 'auto',
         data: {
           courseName,
           batchData,
           showDoptChanges: isDoptContent,
         },
         disableClose: false,
-        panelClass: ['animate__animated', 'animate__slideInLeft'],
+        panelClass: ['animate__animated', 'animate__slideInLeft', 'enrol-profile-form-component'],
       })
       profileForm.afterClosed().subscribe(result => {
         if (result) {
@@ -696,7 +711,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
 
   public handleEnrollmentEndDate(batch: any) {
     const enrollmentEndDate = dayjs(lodash.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
-    const systemDate = dayjs(this.serverDate).format('YYYY-MM-DD')
+    const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
     return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
       (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
@@ -1034,6 +1049,19 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
         totalApplied: 0,
         rejected: 0,
       }
+      // let matchedBatch = this.contentReadData?.batches.find(
+      //   (batch: any) => batch.batchId === batchData?.batchId
+      // )
+      // if (matchedBatch && this.selectedBatchData) {
+      //   usercount.enrolled = matchedBatch?.batchAttributes?.totalApprovedCount || 0
+      //   usercount.rejected = matchedBatch?.batchAttributes?.totalRejectedCount || 0
+      //   usercount.totalApplied = (matchedBatch?.batchAttributes?.totalApprovedCount || 0) + (matchedBatch?.batchAttributes?.totalRejectedCount || 0)
+      //   this.selectedBatchData = {
+      //     ...this.selectedBatchData,
+      //     userCount: usercount,
+      //   }
+      //   this.tocSvc.getSelectedBatchData(this.selectedBatchData)
+      // }
       this.contentSvc.fetchBlendedUserCOUNT(req).then((res: any) => {
         if (res.result && res.result.data) {
           res.result.data.forEach((ele: any) => {
@@ -1499,7 +1527,11 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       }
 
     })
-    if (recipients.length) {
+    if (recipients.length && !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.tocConfig?.apiConfig,
+      urlConfigPath: 'shareContent',
+      defaultUrl: '/apis/proxies/v8/user/v1/content/recommend',
+    })) {
       obj.request.recipients = recipients
       this.tocSvc.shareContent(obj).subscribe(result => {
         if (result.responseCode === 'OK') {

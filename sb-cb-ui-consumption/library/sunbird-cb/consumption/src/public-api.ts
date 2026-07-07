@@ -11,6 +11,7 @@ export * from './lib/consumption.config'
 export * from './lib/_services/widget-content-lib.service'
 export * from './lib/_services/widget-user-lib.service'
 
+export * from './lib/_services/content-dictionary.service'
 
 export * from './lib/_services/content-language.service'
 
@@ -33,6 +34,8 @@ export * from './lib/_common/content-progress/content-progress.module'
 export * from './lib/_common/microsites/mdo-channels/mdo-channel.module'
 export * from './lib/_common/microsites/providers/providers.module'
 export * from './lib/_common/microsites/national-learning-week/national-learning.module'
+export * from './lib/_common/microsites/bharat-kalp/bharat-kalp.module'
+export * from './lib/_common/microsites/bharat-kalp/bharat-kalp/bharat-kalp.component'
 
 
 export * from './lib/_services/common-methods.service'

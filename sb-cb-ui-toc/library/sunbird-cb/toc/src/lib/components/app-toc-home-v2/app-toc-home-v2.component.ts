@@ -1,7 +1,7 @@
 import {
   Component, OnDestroy, OnInit, AfterViewInit, AfterViewChecked,
   HostListener, ElementRef, ViewChild, ViewEncapsulation, Input,
-  Inject,
+  Inject, ChangeDetectorRef,
 } from '@angular/core'
 import { Location } from '@angular/common'
 import { SafeHtml, DomSanitizer, SafeStyle } from '@angular/platform-browser'
@@ -29,7 +29,7 @@ import {
   UtilityService, WidgetEnrollService, WsEvents,
 } from '@sunbird-cb/utils-v2'
 
-import { ConfirmationDialogComponent, ContentLanguageService, TOCMultiLingualDialogComponent, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
+import { CommonMethodsService, ConfirmationDialogComponent, ContentLanguageService, TOCMultiLingualDialogComponent, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
 import { NsAppToc } from '../../models/app-toc.model'
 import { AppTocService } from '../../services/app-toc.service'
 import { MobileAppsService } from '../../services/mobile-apps.service'
@@ -73,12 +73,12 @@ const flattenItems = (items: any[], key: string | number) => {
 }
 const SNACKBAR_DURATION = 3000
 @Component({
-    selector: 'ws-app-app-toc-home-v2',
-    templateUrl: './app-toc-home-v2.component.html',
-    styleUrls: ['./app-toc-home-v2.component.scss'],
-    // tslint:disable-next-line: use-component-view-encapsulation
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: 'ws-app-app-toc-home-v2',
+  templateUrl: './app-toc-home-v2.component.html',
+  styleUrls: ['./app-toc-home-v2.component.scss'],
+  // tslint:disable-next-line: use-component-view-encapsulation
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   queryParamsData: { [key: string]: string } = {}; // Initialize queryParamsData
@@ -225,6 +225,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   // randomlearnAdvisoryObj: any
   // learnAdvisoryDataLength: any
 
+  allBatchesAreFull = false
+  activeBatchIds: any = []
+  fullBatcheIds: any = []
+
   private destroySubject$ = new Subject<any>()
   timerUnsubscribe: any
   timer: any
@@ -304,7 +308,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
-    @Inject('environment') public environment: any
+    private commonMethodsSvc: CommonMethodsService,
+    @Inject('environment') public environment: any,
+    private cdr: ChangeDetectorRef
   ) {
     this.historyData = history.state
     this.handleBreadcrumbs()
@@ -339,8 +345,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     })
   }
 
+  private isApiEnabled(urlConfigPath: string, defaultUrl: string): boolean {
+    return !!this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.tocConfig?.apiConfig,
+      urlConfigPath,
+      defaultUrl,
+    })
+  }
+
   getKarmapointsLimit() {
-    if (!this.forPreview) {
+    if (!this.forPreview && this.isApiEnabled('totalKarmaPoints', '/apis/proxies/v8/user/totalkarmapoints')) {
       this.contentSvc.userKarmaPoints().subscribe((res: any) => {
         if (res && res.kpList) {
           const info = res.kpList.addinfo
@@ -643,7 +657,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
 
   getUserRating(fireUpdate: boolean) {
-    if (!this.forPreview) {
+    if (!this.forPreview && this.isApiEnabled('ratingRead', '/apis/proxies/v8/ratings/v1/read')) {
       if (this.configSvc.userProfile) {
         this.userId = this.configSvc.userProfile.userId || ''
       }
@@ -836,7 +850,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
    * If the user is not enrolled in the course, auto-assigns a batch and navigates to the player page.
    * If the user is already enrolled, does nothing.
    */
-/*******  6d94c646-254c-44d6-a7c3-90bdb9507318  *******/    if (this.baseContentReadData && this.baseContentReadData.identifier) {
+/*******  6d94c646-254c-44d6-a7c3-90bdb9507318  *******/    if (this.baseContentReadData && this.baseContentReadData.identifier && this.isApiEnabled('contentEnroll', '/apis/protected/v8/cohorts/user/autoenrollment')) {
       this.contentSvc.autoAssignBatchApi(this.baseContentReadData.identifier, this.selectedLanguage).subscribe(
         (data: NsContent.IBatchListResponse) => {
           this.batchData = {
@@ -895,14 +909,36 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         (data: NsContent.IBatchListResponse) => {
           this.batchData = data
           this.batchData.enrolled = false
+          if (this.contentReadData?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+            if (this.batchData.content && this.batchData.content.length > 0) {
+              this.batchData.allBatchesExpired = this.batchData.content.every(
+                (batch: any) => !this.handleEnrollmentEndDate(batch)
+              )
+            }
+          }
           this.tocSvc.setBatchData(this.batchData)
           this.routerChangeHandler(false)
         },
         (error: any) => {
-          this.loggerSvc.error('CONTENT HISTORY FETCH ERROR >', error)
+          this.loggerSvc.error('CONTENT HISTORY FETCH ERROR > ', error)
         },
       )
     }
+  }
+
+  get isBatchFull(): boolean {
+    const enrolled = this.selectedBatchData?.userCount?.enrolled
+    const currentBatchSize = this.selectedBatchData?.content?.[0]?.batchAttributes?.currentBatchSize
+    return (enrolled !== undefined && currentBatchSize !== undefined && enrolled >= currentBatchSize)
+  }
+
+  get showLimitedSeatsMsg(): boolean {
+    const enrolled = this.selectedBatchData?.userCount?.enrolled
+    const currentBatchSize = this.selectedBatchData?.content?.[0]?.batchAttributes?.currentBatchSize
+    if (enrolled === undefined || currentBatchSize === undefined || currentBatchSize === 0) {
+      return false
+    }
+    return !this.isBatchFull && (enrolled >= (currentBatchSize * 0.8))
   }
 
 
@@ -961,10 +997,19 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return this.tocSvc.subtitleOnBanners
   }
 
+  getActiveBatches(batch: any) {
+    const enrollmentEndDate = dayjs(_.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
+    const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
+    return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
+      !(dayjs(enrollmentEndDate).isBefore(systemDate, 'day')) : false
+  }
+
+
   public handleEnrollmentEndDate(batch: any) {
     const enrollmentEndDate = dayjs(_.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
-    const systemDate = dayjs()
-    return enrollmentEndDate ? dayjs(enrollmentEndDate).isBefore(systemDate) : false
+    const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
+    return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
+      (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
 
   private openSnackbar(primaryMsg: string, duration: number = 5000) {
@@ -1875,7 +1920,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  getPreAssessmentRequired() {
+  private async getPreAssessmentRequired() {
     this.preAssessmentRequiredFlag = false
     if (this.contentReadData?.preEnrolmentResources?.length) {
       this.contentReadData?.preEnrolmentResources?.forEach((item: any) => {
@@ -1886,7 +1931,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  getPreAssessmentCompletionStatus() {
+  private async getPreAssessmentCompletionStatus() {
     this.preAssessmentCompletionStatus = false
     let preEnrollmentResourcesArr: any = []
     let preEnrollmentMandatoryResourcesArr: any = []
@@ -1946,7 +1991,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setupRouterEventSubscription()
     this.getContentCreatorData()
     this.setupHashmapUpdateSubscription()
-
     this.userId = this.configSvc?.userProfile?.userId || ''
   }
 
@@ -1955,6 +1999,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.setErrorCode(initData.errorCode)
     this.setupBatchControlSubscription()
     this.tocSvc.contentLoader.next(false)
+
   }
 
   private setErrorCode(errorCode: NsAppToc.EWsTocErrorCode) {
@@ -2108,10 +2153,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     if (queryParamsDataTemp.MLId) {
       // Store the original content data for reference
       this.baseContentReadData = initData.content
-
       // Fetch the multilingual content
       try {
-        if (this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
+        if (this.baseContentReadData && this.baseContentReadData.identifier === queryParamsDataTemp.MLId) {
           this.contentReadData = initData.content
         } else {
           const success = await this.fetchContentRead(queryParamsDataTemp.MLId)
@@ -2139,8 +2183,20 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
     // Continue with the rest of the processing
     this.loadLanguageData()
-    this.getPreAssessmentCompletionStatus()
-    this.getPreAssessmentRequired()
+    await this.getPreAssessmentCompletionStatus()
+    await this.getPreAssessmentRequired()
+    if (this.preAssessmentRequiredFlag) {
+      if (this.preAssessmentCompletionStatus) {
+        if (this.baseContentReadData && this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+          this.areAllActiveBatchesFull()
+        }
+      }
+    } else {
+      if (this.baseContentReadData && this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+        this.areAllActiveBatchesFull()
+      }
+    }
+
 
     await this.handleContentPreviewOrEnrollment()
 
@@ -2168,7 +2224,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         courseName: this.contentReadData?.name || '',
         courseID: this.contentReadData?.identifier || '',
         contextOrgId: this.contentReadData?.createdFor && this.contentReadData?.createdFor.length > 0 ?
-          this.contentReadData?.createdFor[0] : ''
+          this.contentReadData?.createdFor[0] : '',
+        apiConfig: this.tocConfig?.apiConfig,
       }
       const dialogRef = this.dialog.open(CompletionSurveyFormComponent, {
         disableClose: true,
@@ -2382,6 +2439,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.checkIfUserEnrolled()
       return
     }
+    if (!this.isApiEnabled('enrollmentData', '/apis/proxies/v8/learner/course/v4/user/enrollment/details')) {
+      this.userEnrollmentList = []
+      this.checkIfUserEnrolled()
+      return
+    }
 
     const request = {
       request: {
@@ -2546,6 +2608,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     } else {
       return new Promise<boolean>((resolve, reject) => {
         if (!identifier) {
+          resolve(false)
+          return
+        }
+        if (!this.isApiEnabled('hierarchy', '/apis/proxies/v8/course/v1/hierarchy')) {
           resolve(false)
           return
         }
@@ -2801,6 +2867,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         resolve(false)
         return
       }
+      if (!this.isApiEnabled('extendedContentRead', '/apis/proxies/v8/extended/content/v1/read')) {
+        resolve(false)
+        return
+      }
 
       const observable = this.contentSvc.fetchContentData(identifier)
 
@@ -2901,7 +2971,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         ...(lang ? { language: lang } : null),
       },
     }
-    if (this.content && this.content.primaryCategory !== NsContent.EPrimaryCategory.RESOURCE) {
+    if (this.content && this.content.primaryCategory !== NsContent.EPrimaryCategory.RESOURCE && this.isApiEnabled('contentProgress', '/apis/proxies/v8/read/content-progres')) {
       this.contentSvc.fetchContentHistoryV2(req).subscribe(
         data => {
           if (data && data.result && data.result.contentList && data.result.contentList.length) {
@@ -3111,6 +3181,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   getServerDateTime() {
+    if (!this.isApiEnabled('getServerDate', '/apis/public/v8/systemDate')) {
+      const clientTime = new Date().getTime()
+      this.tocSvc.changeServerDate(clientTime)
+      this.serverDate = clientTime
+      return
+    }
     // Fetch the server date time and process the response
     this.tocSvc.getServerDate().subscribe(
       (response: any) => {
@@ -3345,5 +3421,53 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       return badge.badgeEarningDateTime > Date.now()
     }
     return false
+  }
+
+  async areAllActiveBatchesFull(): Promise<void> {
+    if (!this.baseContentReadData?.batches || this.baseContentReadData?.batches.length === 0) {
+      return
+    }
+    this.activeBatchIds = []
+    this.fullBatcheIds = []
+    let activeBatches = []
+    activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.getActiveBatches(batch))
+    this.activeBatchIds = activeBatches.map((batch: any) => batch.batchId)
+    if (this.activeBatchIds.length === 0) {
+      return
+    }
+    await Promise.all(
+      activeBatches.map(async (batch: any) => {
+        const currentBatchSize = Number(_.get(batch, 'batchAttributes.currentBatchSize', 0))
+        const totalApprovedCount = await this.getBatchUserCount(batch)
+        if (currentBatchSize === totalApprovedCount) {
+          this.fullBatcheIds.push(batch.batchId)
+        }
+      })
+    )
+    this.allBatchesAreFull = this.fullBatcheIds.length === this.activeBatchIds.length
+    this.cdr.detectChanges()
+  }
+
+  async getBatchUserCount(batch: any): Promise<number> {
+    const req = {
+      serviceName: 'blendedprogram',
+      applicationStatus: '',
+      applicationIds: [
+        batch.batchId,
+      ],
+      limit: 100,
+      offset: 0,
+    }
+    try {
+      const res: any = await this.contentSvc.fetchBlendedUserCOUNT(req)
+      if (res && res.result && res.result.data) {
+        const approvedEntry = res.result.data.find((ele: any) => ele.currentStatus === 'APPROVED')
+        return approvedEntry ? Number(approvedEntry.statusCount) : 0
+      }
+      return 0
+    } catch (err: any) {
+      console.error('Error fetching batch user count', err)
+      return 0
+    }
   }
 }

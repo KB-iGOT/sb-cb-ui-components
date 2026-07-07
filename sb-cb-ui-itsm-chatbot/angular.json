@@ -1,0 +1,65 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "cli": {
+    "analytics": false
+  },
+  "version": 1,
+  "newProjectRoot": "project",
+  "projects": {
+    "@sunbird-cb/itsm-chatbot": {
+      "projectType": "library",
+      "root": "library/sunbird-cb/itsm-chatbot",
+      "sourceRoot": "library/sunbird-cb/itsm-chatbot/src",
+      "prefix": "ws-itsm-chatbot",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "tsConfig": "library/sunbird-cb/itsm-chatbot/tsconfig.lib.json",
+            "project": "library/sunbird-cb/itsm-chatbot/ng-package.json"
+          }
+        ,          "configurations": {
+            "production": {
+              "tsConfig": "library/sunbird-cb/itsm-chatbot/tsconfig.lib.prod.json"
+            }
+          }
+},
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "main": "library/sunbird-cb/itsm-chatbot/src/test.ts",
+            "tsConfig": "library/sunbird-cb/itsm-chatbot/tsconfig.spec.json",
+            "karmaConfig": "library/sunbird-cb/itsm-chatbot/karma.conf.js"
+          }
+        }
+      }
+    }
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "style": "scss",
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:itsm-chatbot": {
+      "typeSeparator": "."
+    }
+  }
+}
