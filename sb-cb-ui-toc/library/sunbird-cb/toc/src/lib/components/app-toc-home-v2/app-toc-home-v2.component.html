@@ -966,7 +966,7 @@
   </ng-container>
 
   <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
-    <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0 "
+    <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0"
       [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
       <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
         <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
@@ -974,10 +974,9 @@
           [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
         </ws-app-toc-banner>
       </div>
+      <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
     </div>
   </ng-container>
-  
-  
 
   <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content" (resetEnableShare)="resetEnableShare()"
     [baseContentReadData]="baseContentReadData"></ws-app-share-toc>
