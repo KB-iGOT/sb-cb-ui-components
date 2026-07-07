@@ -1,7 +1,7 @@
 <div class="igot-ai-container" id="igot-ai-container">
   <div class="message-container" id="message-container">
-
-    <div [ngClass]="fullScreenChatFlag ? 'message-container-full' : 'message-container'" id="message-container">
+    <div class="wholewrapper">
+ <div [ngClass]="fullScreenChatFlag ? 'message-container-full' : 'message-container'" id="message-container">
       <!-- <ng-container *ngIf="aiSearchResultArr?.length === 0"> -->
       <!-- <div [ngClass]="fullScreenChatFlag ? 'start-chat-full':'start-chat'"> -->
       <!-- <h2 class="hey">Hey<span *ngIf="userInfo?.firstName">, {{userInfo?.firstName}}</span> </h2>
@@ -42,9 +42,9 @@
                     </div>
 
                   </div>
-                  <div *ngIf="item.timestamp" class="user-msg-timestamp">
+                  <!-- <div *ngIf="item.timestamp" class="user-msg-timestamp">
                     Sarthi {{item.timestamp | date:'h:mm a'}}
-                  </div>
+                  </div> -->
                   <div *ngIf="loadingSupportAI">
                     Please Wait...
                   </div>
@@ -68,7 +68,7 @@
                     Sarthi {{item.timestamp | date:'h:mm a'}}
                   </div>
                 </div>
-                <div *ngIf="item.activity?.type === 'picker'" class="picker-container">
+                <div *ngIf="item.activity?.type === 'picker' && !item.optionsDisabled" class="picker-container">
 
                   <!-- Dropdown Header -->
 
@@ -100,7 +100,7 @@
                 </div>
 
                 <!-- nested picker (training plans with expandable courses) -->
-                <div *ngIf="item.activity?.type === 'nested_picker'" class="nested-picker-wrapper">
+                <div *ngIf="item.activity?.type === 'nested_picker' && !item.optionsDisabled" class="nested-picker-wrapper">
                   <div *ngFor="
     let plan of (
       showAllPlans
@@ -190,7 +190,7 @@
 
                 <!-- quick replies -->
 
-                <div *ngIf="item.activity?.type === 'quick_replies'">
+                <div *ngIf="item.activity?.type === 'quick_replies' && !item.optionsDisabled">
 
                   <div class="quick-replies-container">
 
@@ -250,13 +250,12 @@
 
 
     </div>
-    <div [ngClass]="fullScreenChatFlag ? 'control-container-full':'control-container'">
+    <div *ngIf="isInputEnabled" [ngClass]="fullScreenChatFlag ? 'control-container-full':'control-container'">
       <div [class]="isInputEnabled ? 'border-gradient-rounded' : 'disabledinputcl border-gradient-rounded'"
         [style.height.px]="containerHeight">
         <div class="flex flex-row ml-5 mr-1 justify-between">
 
           <div class="query-box">
-            <!-- <input class="width-500" type="text" placeholder="Ask anything..." [(ngModel)]="searchQuery" (keydown.enter)="submitSearchQuery()"/> -->
             <textarea #autoResizeTextarea class="width-500" [disabled]="!isInputEnabled" placeholder="Ask Anything..."
               (input)="resizeTextarea(autoResizeTextarea, 'fromInput')" [(ngModel)]="searchQuery"
               (keydown.enter)="submitSearchQuery(autoResizeTextarea, $event)" rows="1">
@@ -276,4 +275,6 @@
 
 
     </div>
+    </div>
+   
   </div>
