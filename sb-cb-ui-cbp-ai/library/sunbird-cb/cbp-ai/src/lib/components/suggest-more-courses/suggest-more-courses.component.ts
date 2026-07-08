@@ -578,9 +578,7 @@ export class SuggestMoreCoursesComponent implements OnInit {
       primaryCategory: ['Course'],
       status: ['Live'],
       contentType: ['Course'],
-      courseCategory: {
-        '!=': ['pre enrolment assessment']
-      }
+      courseCategory: ['Course']
     };
 
     /* Competency */

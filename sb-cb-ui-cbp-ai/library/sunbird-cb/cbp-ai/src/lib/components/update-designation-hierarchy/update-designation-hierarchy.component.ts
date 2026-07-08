@@ -191,7 +191,8 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
       this.state_center_id = cbpPlanFinalObj?.ministry.identifier
     }
 
-    this.role_mapping_generation = cbpPlanFinalObj?.role_mapping_generation || '[]';
+    // this.role_mapping_generation = cbpPlanFinalObj?.role_mapping_generation || '[]';
+    this.role_mapping_generation = this.sharedService.roleMappingGenerationData || this.role_mapping_generation || '[]';
     // Map role_mapping_generation to internal designations array
     this.numbers = Array.from({ length: this.role_mapping_generation.length }, (_, i) => i + 1);
     this.designations = this.role_mapping_generation.map((r: any, index: number) => ({

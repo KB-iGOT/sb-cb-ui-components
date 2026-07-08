@@ -215,6 +215,7 @@ export class RoleMappingListComponent {
 
   private updateDataSource(res: any[]) {
     this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res;
+    this.sharedService.roleMappingGenerationData = res;
     this.dataSource = new MatTableDataSource(res);
     this.originalData = res;
     this.searchResults = []; // Clear search results when data is updated
@@ -595,6 +596,7 @@ export class RoleMappingListComponent {
             next: (res) => {
               this.loading = false
               this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res
+              this.sharedService.roleMappingGenerationData = res
               localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
               let obj = {
                 state_center_id: this.formData.value.ministry
@@ -645,6 +647,7 @@ export class RoleMappingListComponent {
           this.loading = false
           console.log('res', res)
           this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res
+          this.sharedService.roleMappingGenerationData = res
           localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
           let obj = {
             state_center_id: this.formData.value.ministry
@@ -691,6 +694,7 @@ export class RoleMappingListComponent {
         next: (res) => {
           this.loading = false
           this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res
+          this.sharedService.roleMappingGenerationData = res
           localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
           let obj = {
             state_center_id: this.formData.value.ministry

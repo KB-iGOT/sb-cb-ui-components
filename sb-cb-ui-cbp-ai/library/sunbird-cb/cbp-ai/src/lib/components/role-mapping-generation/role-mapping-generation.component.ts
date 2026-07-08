@@ -146,7 +146,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
           departments: [],
           additionalDetails: '',
           additional_document: []
-        });
+        }, { emitEvent: false }); // avoid re-emitting ministryType's own valueChanges and recursing infinitely
         if (type === 'state') {
           this.roleMappingForm.get('departments')?.setValidators([Validators.required]);
         } else {
@@ -518,6 +518,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
     this.sharedService.cbpPlanFinalObj['ministryType'] = event.value
     this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = []
+    this.sharedService.roleMappingGenerationData = []
     this.selectedMinistryType = event.value
     this.ministryData = []
 
@@ -561,6 +562,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     console.log('Selected Ministry:', selectedMinistry); ``
     this.sharedService.cbpPlanFinalObj['ministry'] = selectedMinistry
     this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = []
+    this.sharedService.roleMappingGenerationData = []
     localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
     if (selectedMinistryId && this.selectedMinistryType === 'state') {
       this.sharedService.getDepartmentList(selectedMinistryId).subscribe((res) => {
@@ -857,7 +859,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
               // });
               this.sharedService.cbpPlanFinalObj['role_mapping_generation'] =
                 data?.role_mappings;
-
+              this.sharedService.roleMappingGenerationData = data?.role_mappings;
               localStorage.setItem(
                 'cbpPlanFinalObj',
                 JSON.stringify(this.sharedService.cbpPlanFinalObj)
@@ -886,7 +888,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
           this.sharedService.cbpPlanFinalObj['role_mapping_generation'] =
             data?.role_mappings;
-
+          this.sharedService.roleMappingGenerationData = data?.role_mappings;
           localStorage.setItem(
             'cbpPlanFinalObj',
             JSON.stringify(this.sharedService.cbpPlanFinalObj)
@@ -1057,6 +1059,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         // Handle successful completion
         this.loading = false;
         this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = this.parsedData;
+        this.sharedService.roleMappingGenerationData = this.parsedData;
+
         this.successRoleMapping.emit(this.roleMappingForm);
 
         this.snackBar.open('CBP Plan generated successfully!', 'X', {
@@ -1102,6 +1106,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
             console.log('Existing role mapping loaded:', res);
             this.loading = false;
             this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res;
+            this.sharedService.roleMappingGenerationData = res;
             this.snackBar.open('Existing role mapping loaded successfully!', 'X', {
               duration: 3000,
               panelClass: ['snackbar-success']
@@ -1124,6 +1129,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
             console.log('Existing role mapping loaded:', res);
             this.loading = false;
             this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res;
+            this.sharedService.roleMappingGenerationData = res;
             this.snackBar.open('Existing role mapping loaded successfully!', 'X', {
               duration: 3000,
               panelClass: ['snackbar-success']
