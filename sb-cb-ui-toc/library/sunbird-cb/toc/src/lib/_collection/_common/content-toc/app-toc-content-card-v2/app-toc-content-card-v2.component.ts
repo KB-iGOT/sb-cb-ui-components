@@ -769,6 +769,13 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   updateChildParentMap(identifier: string) {
     if (this.hierarchyMapData && this.hierarchyMapData[identifier]) {
       let localContentData = this.hierarchyMapData[identifier]
+      // Pre-enrolment rows (blended program pre-assessment list) get their progress
+      // written directly on the row id by the pre-enrollment state-read and realtime
+      // updates; their leafNodes are not tracked in the hashmap, so recomputing from
+      // leafNodes would reset a completed row (e.g. the pre-enrolment assessment) to 0
+      if (this.isPreAssessment) {
+        return this.hierarchyMapData[identifier]
+      }
       if (
         !(localContentData.primaryCategory === NsContent.EPrimaryCategory.RESOURCE
           || localContentData.primaryCategory === NsContent.EPrimaryCategory.PRACTICE_RESOURCE
