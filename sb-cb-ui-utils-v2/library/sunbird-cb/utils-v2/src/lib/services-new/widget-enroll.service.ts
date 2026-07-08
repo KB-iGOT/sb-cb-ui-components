@@ -27,15 +27,15 @@ export class WidgetEnrollService {
   ) { }
 
   fetchEnrollContentData(payload: any): Observable<NsContent.IContent[]> {
-    const userId = this.configSvc.userProfile && this.configSvc.userProfile.userId
+    // const userId = this.configSvc.userProfile && this.configSvc.userProfile.userId
     const enrollmentDetailsConfig = this.configSvc.globalConfig?.apis?.user?.enrollmentDetails
     const baseUrl = (enrollmentDetailsConfig?.enabled && enrollmentDetailsConfig?.url) ? enrollmentDetailsConfig.url : API_END_POINTS.ENROLL_CONTENT_DATA
-    return this.http.post<NsContent.IContent[]>(`${baseUrl}/${userId}`, payload)
+    return this.http.post<NsContent.IContent[]>(`${baseUrl}`, payload)
   }
-  fetchInternalEnrollmentData(userId: string, payload: any) {
+  fetchInternalEnrollmentData(_userId: string, payload: any) {
     const enrollmentConfig = this.configSvc.globalConfig?.apis?.user?.enrollment
     const baseUrl = (enrollmentConfig?.enabled && enrollmentConfig?.url) ? enrollmentConfig.url : API_END_POINTS.ENROLL_LIST_DATA
-    return this.http.post(`${baseUrl}/${userId}`, payload)
+    return this.http.post(`${baseUrl}`, payload)
   }
 
 fetchExternalEnrollmentData(payload: any) {
@@ -76,7 +76,7 @@ fetchExternalEnrollmentData(payload: any) {
   }
 
   fetchEnrollStats(userId: any, url?: string): Observable<NsContent.IContent[]> {
-    const endpoint = url ? `${url}/${userId}` : `apis/proxies/v8/learner/course/v4/user/enrollment/summary/${userId}`
+    const endpoint = url ? `${url}` : `apis/proxies/v8/learner/course/v4/user/enrollment/summary/${userId}`
     return this.http.get<NsContent.IContent[]>(endpoint)
   }
 
