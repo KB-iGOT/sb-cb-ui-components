@@ -178,9 +178,9 @@
         <div class="progress-btn" *ngIf="!widgetData?.content?.active">
           <button class="resume-btn flex flex-middle flex-between" [routerLink]="['/app/toc/',widgetData?.content?.identifier,'overview']"
             [queryParams]="{primaryCategory: widgetData?.content?.primaryCategory}" [state]="widgetData?.stateData" [matTooltipPosition]="'below'"
-            matTooltip="{{translateLabels('reenrol', 'cardcontentv2')}}">
+            matTooltip="{{translateLabels('reEnroll', 'cardcontentv2')}}">
             <span class="textwrap margin-right-xs">
-              {{translateLabels('re-enrol', 'cardcontentv2')}}</span>
+              {{translateLabels('reEnroll', 'cardcontentv2')}}</span>
             <mat-icon class="mat-icon main_icon margin-right-xs">refresh</mat-icon>
           </button>
         </div>
