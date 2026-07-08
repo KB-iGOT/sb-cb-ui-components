@@ -162,6 +162,7 @@ export namespace NsContent {
   }
 
   export interface IBatch {
+    active?: boolean,
     batchId: string,
     createdBy: string,
     endDate: string | null,
