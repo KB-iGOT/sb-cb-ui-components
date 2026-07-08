@@ -861,6 +861,7 @@ export class ViewFinalCbpPlanComponent {
 
   generateExcel(jsonArray: any[], filename: string = "final.xlsx") {
     console.log('jsonArray', jsonArray)
+    this.loading = true
 
     if (!jsonArray || jsonArray.length === 0) return;
 
@@ -895,12 +896,16 @@ export class ViewFinalCbpPlanComponent {
           .join(" | ");
 
         return (
-          `${i + 1}. Course Name: ${c.course}\n` +
-          `   Identifier: ${c.identifier}\n` +
+          `${i + 1}. Course Name: ${c?.course}\n` +
+          `   Identifier: ${c?.identifier}\n` +
           `   Duration (mins): ${Math.round(+c.duration / 60)}\n` +
-          `   Relevancy: ${c.relevancy}%\n` +
-          `   Rationale: ${c.rationale}\n` +
-          `   Organisation: ${(c.organisation || []).join(", ")}\n` +
+          `   Relevancy: ${c?.relevancy}%\n` +
+          `   Rationale: ${c?.rationale}\n` +
+          `     Organisation: ${
+  Array.isArray(c?.organisation)
+    ? c.organisation.join(", ")
+    : c?.organisation ?? ""
+}\n` +
           `   Competencies: ${competencies}`
         );
       }).join("\n\n");
@@ -986,6 +991,9 @@ export class ViewFinalCbpPlanComponent {
 
     // Export Excel
     XLSX.writeFile(wb, filename);
+    setTimeout(() => {
+      this.loading = false
+    }, 5000)
   }
 
 

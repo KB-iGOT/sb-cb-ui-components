@@ -662,11 +662,18 @@ export class SuggestMoreCoursesComponent implements OnInit {
         query: this.searchText?.trim() || '',
         limit: this.pageSize,
         offset: this.currentPage * this.pageSize,
-        sort_by: {
-          createdOn: 'desc'
-        }
+        
       }
     };
+
+    if(!this.searchText) {
+      reqBody['request']['sort_by'] ={
+          createdOn: 'desc'
+        }
+    } else {
+      reqBody['request']['sort_by'] ={
+        }
+    }
 
     console.log(
       'API FILTER PAYLOAD',
