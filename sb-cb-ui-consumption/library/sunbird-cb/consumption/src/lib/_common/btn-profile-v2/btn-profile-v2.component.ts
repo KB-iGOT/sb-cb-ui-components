@@ -134,7 +134,7 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
   // ── User info ──────────────────────────────────────────────────────────────
   private updateUserInfo(): void {
-    this.profileCompletionPercentage = this.configSvc?.userProfileV2?.profileCompletionPercentage || 0
+    this.profileCompletionPercentage = this.configSvc?.userProfileV2?.profileUpdateCompletion || this.configSvc?.userProfileV2?.profileCompletionPercentage || 0
     const profile = this.configSvc.userProfile
     if (profile) {
       const fullName =
