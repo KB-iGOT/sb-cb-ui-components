@@ -56,7 +56,7 @@
                       <div class="bot-avatar-circle">
                         <!-- <mat-icon>smart_toy</mat-icon>
                           -->
-                        <img src="/assets/ai-tutor/roboicon.svg" alt="" srcset="">
+                        <img src="/assets/icons/support-bot.svg" alt="" srcset="">
                       </div>
                     </div>
                     <div class="system-msg padding-xs">
@@ -64,9 +64,9 @@
                       </markdown>
                     </div>
                   </div>
-                  <div *ngIf="item.showTimestamp" class="msg-timestamp bot-msg-timestamp">
+                  <!-- <div *ngIf="item.showTimestamp" class="msg-timestamp bot-msg-timestamp">
                     Sarthi {{item.timestamp | date:'h:mm a'}}
-                  </div>
+                  </div> -->
                 </div>
                 <div *ngIf="item.activity?.type === 'picker' && !item.optionsDisabled" class="picker-container">
 
@@ -74,7 +74,7 @@
 
                   <div class="picker-header" (click)="pickerOpened = !pickerOpened">
                     <img class="vectorIcon" src="/assets/ai-tutor/Vector.svg" alt=""> <span
-                      class="selectcoursetext startconv">Select the course</span>
+                      class="selectcoursetext startconv">{{item?.activity?.title || 'Select an option'}}</span>
 
 
                     <mat-icon>
@@ -201,7 +201,7 @@
         : (item.activity.choices | slice:0:3)
     )
   " (click)="selectChoice(choice)" class="quick-reply-btn">
-                      <mat-icon class="quick-reply-icon">{{choice.icon || 'help_outline'}}</mat-icon>
+                      <!-- <mat-icon class="quick-reply-icon">{{choice.icon || 'help_outline'}}</mat-icon> -->
                       <span class="quick-reply-label">{{choice.label}}</span>
                       <mat-icon class="quick-reply-chevron">navigate_next</mat-icon>
                     </button>
