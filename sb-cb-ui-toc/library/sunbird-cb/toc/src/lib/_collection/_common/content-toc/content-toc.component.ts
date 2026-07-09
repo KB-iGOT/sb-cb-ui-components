@@ -60,6 +60,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() isBatchFull = false
   @Input() showLimitedSeatsMsg = false
   @Input() areAllActiveBatchesFull = false
+  @Input() userEnrollmentList: any = false
   @Output() playResumeForAI = new EventEmitter()
   @Output() enrollUserToAI = new EventEmitter()
   @Output() trigerCompletionSurveyForm = new EventEmitter<boolean>()

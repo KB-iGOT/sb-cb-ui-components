@@ -1876,6 +1876,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         contentTemp.content = c.content || c.event || {}
         contentTemp.content.primaryCategory = c.content && c.content.primaryCategory || c.event && c.event.resourceType || ''
         contentTemp.cType = c.event ? 'event' : ''
+        contentTemp.active = c.active || false
         return contentTemp
       })
     }

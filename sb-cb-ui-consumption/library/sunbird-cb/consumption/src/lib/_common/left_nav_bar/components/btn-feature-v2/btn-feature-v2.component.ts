@@ -111,7 +111,6 @@ export class BtnFeatureV2Component extends WidgetBaseComponent
   }
 
   ngOnInit() {
-    console.log('BtnFeatureV2Component initialized with widgetData:', this.widgetData)
     this.instanceVal.set(this.configSvc.rootOrg || '')
 
     if (this.configSvc.restrictedFeatures) {
