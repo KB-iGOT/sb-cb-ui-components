@@ -64,7 +64,7 @@
         <!-- Render Info Cards Section -->
         @if (section.cardType === SidebarCardType.INFO_CARDS) {
         <sb-uic-sidebar-info-cards-section [section]="section" [isOpen]="isOpen()" [showContent]="showContent()"
-          [detailsChanged]="detailsChanged" class="block mb-4" [attr.aria-label]="section.sectionTitle"
+          [detailsChanged]="otherDetailsChanged" class="block mb-4" [attr.aria-label]="section.sectionTitle"
           (itemClicked)="onNavItemClicked($event)" />
         }
 
