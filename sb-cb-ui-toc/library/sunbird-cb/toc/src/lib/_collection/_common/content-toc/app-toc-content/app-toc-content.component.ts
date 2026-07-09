@@ -28,6 +28,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isPreAssessment = false
   @Input() baseContentReadData!: any
   @Input() contentReadData!: any
+  @Input() userEnrollmentList: any = false
   isPlayable = false
   contentPlayWidgetConfig: NsWidgetResolver.IRenderConfigWithTypedData<any> | null = null
   defaultThumbnail = ''
@@ -46,6 +47,7 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   selectedTabType: any = 'content'
   nsContent: any =  NsContent
   otherResourse = 0
+  isUserunEnrolled = false
 
   constructor(
     private route: ActivatedRoute,
@@ -60,6 +62,9 @@ export class AppTocContentComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit() {
+    if (this.userEnrollmentList && this.userEnrollmentList?.length > 0) {
+      this.isUserunEnrolled = !this.userEnrollmentList[0]?.active
+    }
     // this.forPreview = window.location.href.includes('/author/')
     this.routeQuerySubscription = this.route.queryParamMap.subscribe(qParamsMap => {
       // console.log('qParamsMap--', qParamsMap)

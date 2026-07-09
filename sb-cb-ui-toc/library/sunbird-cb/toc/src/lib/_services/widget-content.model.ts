@@ -162,6 +162,7 @@ export namespace NsContent {
   }
 
   export interface IBatch {
+    active?: boolean,
     batchId: string,
     createdBy: string,
     endDate: string | null,
@@ -200,7 +201,7 @@ export namespace NsContent {
   }
 
   export interface ICourse {
-    active: true
+    active: boolean
     addedBy: string
     batch: IBatch
     batchId: string

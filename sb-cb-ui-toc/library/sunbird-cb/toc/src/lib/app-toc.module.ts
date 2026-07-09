@@ -147,6 +147,7 @@ import { PublicSurveyFormComponent } from './components/public-survey-form/publi
 import { ConsentDialogComponent } from './components/app-toc-cios-home/consent-dialog.component'
 import { WidgetCommentModule } from '@sunbird-cb/discussion-v2'
 import { NonReleventFeedbackDialogComponent } from './components/non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
+import { UnenrollConfirmDialogComponent } from './components/unenroll-confirm-dialog/unenroll-confirm-dialog.component'
 import { SlidersDynamicModule } from './_collection/sliders-dynamic/sliders-dynamic.module'
 import { UserProfileService } from './services/user-profile.service'
 
@@ -184,6 +185,7 @@ import { UserProfileService } from './services/user-profile.service'
     CompletionSurveyFormComponent,
     PublicSurveyFormComponent,
     NonReleventFeedbackDialogComponent,
+    UnenrollConfirmDialogComponent,
   ],
   imports: [
     CommonModule,

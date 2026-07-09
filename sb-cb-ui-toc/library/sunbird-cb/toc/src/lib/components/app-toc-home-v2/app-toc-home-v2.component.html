@@ -13,19 +13,29 @@
                       !(contentReadData?.primaryCategory === primaryCategory.RESOURCE && !content?.artifactUrl) &&
                       !(contentReadData?.primaryCategory === primaryCategory.MANDATORY_COURSE_GOAL)) &&
                       !(contentReadData?.primaryCategory === primaryCategory.PROGRAM && currentCourseBatchId)">
-          <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
+          <ng-container *ngIf="!isUnEnrolled && !enrollBtnLoading">
+            <a *ngIf="showStart.show && !isPostAssessment && !forPreview" (click)="raiseTelemetryForPublic($event)"
             [routerLink]="(resumeData && !certData) ? resumeDataLink?.url : firstResourceLink?.url"
             [queryParams]="(resumeData && !certData) ? generateQuery('RESUME') : generateQuery('START')" class="flex action-button justify-center">
             <ng-container *ngIf="(!content?.completionPercentage || content?.completionPercentage < 100) && !certData">
               <ng-container *ngIf="!forPreview || isInIFrame; else authView">
                 {{ translateLabels('resume', 'apptochome') }}
+                  </ng-container>
+                </ng-container>
+                <ng-container *ngIf="content?.completionPercentage === 100 || certData">
+                  {{ content?.completionPercentage >= 100 ? translateLabels('Start again', 'apptochome') :
+                  translateLabels('resume', 'apptochome') }}
+                </ng-container>
+            </a>
+          </ng-container>
+          <ng-container *ngIf="isUnEnrolled && !enrollBtnLoading">
+            <a class="flex action-button justify-center resume" *ngIf="!forPreview || isInIFrame" (click)="handleReEnrollment($event)"
+              [ngClass]="{'disable-start-btn': !canEnroll()}">
+              <ng-container>
+                {{ 'apptochome.reEnroll' | translate }}
               </ng-container>
-            </ng-container>
-            <ng-container *ngIf="content?.completionPercentage === 100 || certData">
-              {{ content?.completionPercentage >= 100 ? translateLabels('Start again', 'apptochome') :
-              translateLabels('resume', 'apptochome') }}
-            </ng-container>
-          </a>
+            </a>
+          </ng-container>
 
           <button *ngIf="isPostAssessment && showTakeAssessment?.post_assessment"
             (click)="raiseTelemetryForPublic($event)" [routerLink]="firstResourceLink?.url"
@@ -453,9 +463,26 @@
                 <span class="new-version-text nodtranslate">{{ 'apptoc.newVersion' | translate }}</span>
               </div>
             </ng-container>
-            <div class="flex items-center text-white mob-share"
-              *ngIf="canShare && tocConfig?.uiVisibility?.banner?.shareButton !== false">
-              <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
+            <div class="flex items-center gap-4">
+              <div class="flex items-center text-white mob-share"
+                *ngIf="canShare && tocConfig?.uiVisibility?.banner?.shareButton !== false">
+                <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
+              </div>
+              <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') && !forPreview">
+                <ng-container *ngIf="canUnenroll">
+                  <div class="hideAbove1200">
+                    <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
+                      aria-label="More options">
+                      <mat-icon class="nodtranslate text-white">more_vert</mat-icon>
+                    </button>
+                    <mat-menu #moreOptionsMenu="matMenu" xPosition="before" class="toc-kebab-menu">
+                      <button mat-menu-item (click)="openUnenrollDialog()">
+                        <span class="text-red font-bold">Un-enroll</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </ng-container>
+              </ng-container>
             </div>
           </div>
           <div class="flex flex-col gap-2">
@@ -614,7 +641,7 @@
           [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"
           [kparray]="kparray" (playResumeForAI)="playResumeForAI()" (enrollUserToAI)="enrollUserToAI()" [contentReadData]="contentReadData"
           [baseContentReadData]="baseContentReadData" [languageList]="languageList" [lockCertificate]="lockCertificate"
-          (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg"
+          (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg" [userEnrollmentList]="userEnrollmentList"
           [areAllActiveBatchesFull]="allBatchesAreFull" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
         <div class="mob-tip-for-learner" *ngIf="tocConfig?.uiVisibility?.mobileFooter?.learnerAdvisory !== false">
           <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
@@ -652,10 +679,25 @@
                         translateLabel(contentReadData?.primaryCategory, 'searchfilters') }}</div>
                     </ng-container>
                   </div>
-                  <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag"
-                    *ngIf="canShare && !forPreview && tocConfig?.uiVisibility?.rightPanel?.shareButton !== false">
-                    <mat-icon class="nodtranslate">share</mat-icon>
-                    <div>{{ 'apptocsinglepage.share' | translate }}</div>
+                  <div class="flex flex-row items-center gap-2">
+                    <div (click)="onClickOfShare()" class="flex flex-row items-center justify-end gap-2 share-tag"
+                      *ngIf="canShare && !forPreview && tocConfig?.uiVisibility?.rightPanel?.shareButton !== false">
+                      <mat-icon class="nodtranslate">share</mat-icon>
+                      <div>{{ 'apptocsinglepage.share' | translate }}</div>
+                    </div>
+                    <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') && !forPreview">
+                      <ng-container *ngIf="canUnenroll">
+                        <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
+                          aria-label="More options">
+                          <mat-icon class="nodtranslate text-white">more_vert</mat-icon>
+                        </button>
+                        <mat-menu #moreOptionsMenu="matMenu" xPosition="before" class="toc-kebab-menu">
+                          <button mat-menu-item (click)="openUnenrollDialog()">
+                            <span class="text-red font-bold">Un-enroll</span>
+                          </button>
+                        </mat-menu>
+                      </ng-container>
+                    </ng-container>
                   </div>
                 </div>
                 <div class="flex flex-col gap-1" *ngIf="scrolled">
@@ -672,8 +714,7 @@
           </ng-container>
 
           <div class="flex flex-col gap-4 p-5 border-bottom">
-            <div class="flex flex-col gap-1  cursor-pointer switch-version"
-              *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier"
+            <div class="flex flex-col gap-1  cursor-pointer switch-version" *ngIf="!skeletonLoader && contentReadData?.contentVersionInfo?.identifier"
               (click)="navigateToNewVersion()" (keydown)="navigateToNewVersion()">
               <span class="btn-switch">{{ 'apptoc.switchToNewVersion' | translate }}</span>
             </div>
@@ -990,19 +1031,24 @@
       </div>
     </div>
   </ng-container>
-  <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0 "
-    [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
-    <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
+  <ng-container *ngIf="contentReadData?.primaryCategory !== primaryCategory.BLENDED_PROGRAM">
+    <div class="mobile-enroll-div">    
+    <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
+  </div>
+  </ng-container>
+
+  <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
+    <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0"
+      [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
       <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
         <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
           (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
           [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
         </ws-app-toc-banner>
       </div>
-    </ng-container>
-    <ng-container *ngIf="tocConfig?.uiVisibility?.mobileFooter?.enrollButton !== false"
-      [ngTemplateOutlet]="enrollFunctionality"></ng-container>
-  </div>
+      <ng-container [ngTemplateOutlet]="enrollFunctionality"></ng-container>
+    </div>
+  </ng-container>
 
   <ws-app-share-toc *ngIf="enableShare" [rootOrgId]="rootOrgId" [content]="content" (resetEnableShare)="resetEnableShare()"
     [baseContentReadData]="baseContentReadData"></ws-app-share-toc>

@@ -1,0 +1,86 @@
+<div class="unenroll-dialog-container">
+  <!-- Header -->
+  <div class="unenroll-dialog-header">
+    <h2 class="unenroll-dialog-title">{{ showFeedbackForm ? 'Help us improve' : 'Confirm Un-enrollment' }}</h2>
+    <button mat-icon-button class="close-btn" (click)="onCancel()" aria-label="Close dialog">
+      <mat-icon class="nodtranslate">close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <mat-dialog-content class="unenroll-dialog-body">
+    <ng-container *ngIf="!showFeedbackForm; else feedbackFormTemplate">
+      <p class="unenroll-question">
+        Are you sure you want to un-enroll from this course <strong>{{ data?.content?.name }}</strong>?
+      </p>
+
+      <p class="unenroll-subheading">Unenrolling will remove the course from <strong>My Learning</strong>, deduct <strong>Karma Points</strong> (if applicable), and update your <strong>Reports</strong> and <strong>Organization Dashboard</strong>.</p>
+
+      <!-- Acknowledgement checkbox -->
+      <div class="unenroll-acknowledge">
+        <mat-checkbox
+          id="unenroll-acknowledge-checkbox"
+          [(ngModel)]="understood"
+          color="primary">
+          I understand the impact of un-enrolling and wish to continue.
+        </mat-checkbox>
+      </div>
+    </ng-container>
+
+    <ng-template #feedbackFormTemplate>
+      <div class="unenroll-feedback" [formGroup]="feedbackForm">
+        <p class="unenroll-feedback-copy">
+          Please tell us why you are un-enrolling. Your feedback helps us recommend better content.
+          (Select all that apply)
+        </p>
+
+        <div class="unenroll-reason-list" formArrayName="reasons">
+          <div
+            class="unenroll-reason-option"
+            *ngFor="let reason of feedbackReasons; let reasonIndex = index">
+            <mat-checkbox
+              [id]="'unenroll-feedback-reason-' + reasonIndex"
+              [formControlName]="reasonIndex"
+              [aria-label]="reason"
+              color="primary"
+              class="unenroll-reason-label">
+              {{ reason }}
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <label class="unenroll-comments-label" for="unenroll-feedback-comments">Additional comments</label>
+        <div class="unenroll-comments-field">
+          <textarea
+            id="unenroll-feedback-comments"
+            formControlName="comments"
+            maxlength="500"
+            rows="4"
+            placeholder="Share any specific feedback (optional)"></textarea>
+          <span class="unenroll-comments-count">{{ feedbackForm.get('comments')?.value?.length || 0 }}/500</span>
+        </div>
+      </div>
+    </ng-template>
+  </mat-dialog-content>
+
+  <!-- Footer Actions -->
+  <mat-dialog-actions class="unenroll-dialog-actions">
+    <button
+      mat-stroked-button
+      id="unenroll-cancel-btn"
+      class="unenroll-cancel-btn"
+      (click)="showFeedbackForm ? onBack() : onCancel()">
+      {{ showFeedbackForm ? 'Back' : 'Cancel' }}
+    </button>
+    <button
+      mat-flat-button
+      id="unenroll-continue-btn"
+      color="primary"
+      class="unenroll-continue-btn"
+      [class.unenroll-confirm-btn]="showFeedbackForm"
+      [disabled]="showFeedbackForm ? !hasSelectedReason : !understood"
+      (click)="showFeedbackForm ? onConfirmUnenroll() : onContinue()">
+      {{ showFeedbackForm ? 'Yes, un-enroll' : 'Continue' }}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -164,7 +164,7 @@
             </ng-container>
           </div>
         </div>
-        <div class="progress-btn">
+        <div class="progress-btn" *ngIf="widgetData?.content?.active">
           <button class="resume-btn flex flex-middle flex-between" [routerLink]="['/app/toc/',widgetData?.content?.identifier,'overview']"
             [queryParams]="{primaryCategory: widgetData?.content?.primaryCategory}" [state]="widgetData?.stateData" [matTooltipPosition]="'below'"
             [matTooltipDisabled]="(!widgetData?.content?.completionPercentage ? translateLabels('start', 'cardcontentv2') : translateLabels('resume', 'cardcontentv2')).length < 11"
@@ -173,6 +173,15 @@
               {{!widgetData?.content?.completionPercentage ? translateLabels('start', 'cardcontentv2') :
               translateLabels('resume', 'cardcontentv2')}}</span>
             <img class="stats-icon" height="20" width="20" src="/assets/icons/home/play.svg">
+          </button>
+        </div>
+        <div class="progress-btn" *ngIf="!widgetData?.content?.active">
+          <button class="resume-btn flex flex-middle flex-between" [routerLink]="['/app/toc/',widgetData?.content?.identifier,'overview']"
+            [queryParams]="{primaryCategory: widgetData?.content?.primaryCategory}" [state]="widgetData?.stateData" [matTooltipPosition]="'below'"
+            matTooltip="{{translateLabels('reEnroll', 'cardcontentv2')}}">
+            <span class="textwrap margin-right-xs">
+              {{translateLabels('reEnroll', 'cardcontentv2')}}</span>
+            <mat-icon class="mat-icon main_icon margin-right-xs">refresh</mat-icon>
           </button>
         </div>
       </div>
