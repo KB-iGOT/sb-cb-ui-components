@@ -598,64 +598,59 @@ export class RoleMappingListComponent {
       if (this.formData.value.departments?.length) {
         let department_id = this.formData.value.departments
         if (typeof department_id === 'string') {
-          this.sharedService.getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id, this.searchText, this.pageSize, this.offset, this.activeTab).subscribe({
-            next: (res:any) => {
-              this.loading = false
-              this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
-              this.sharedService.roleMappingGenerationData = res?.data
-              localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-              let obj = {
-                state_center_id: this.formData.value.ministry
-              }
-              if (this.formData.value.departments) {
-                if (typeof this.formData.value.departments === 'string') {
-                  obj['department_id'] = this.formData.value.departments
-                }
-              }
-              this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
+          let obj = {
+            state_center_id: this.formData.value.ministry
+          }
+          if (this.formData.value.departments) {
+            if (typeof this.formData.value.departments === 'string') {
+              obj['department_id'] = this.formData.value.departments
+            }
+          }
+          this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
+            console.log('matchedRoleMapping', matchedRoleMapping)
+            this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
+            const matchedRoleMappingIds =
+              matchedRoleMapping?.matched_details?.map(
+                x => x.role_mapping_id
+              ) || [];
+            this.matchedDesignationSet = new Set(matchedRoleMappingIds);
+
+            // this.matchedRoleMapping = matchedRoleMappingIds.length;
+
+            this.sharedService.getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id, this.searchText, this.pageSize, this.offset, this.activeTab).subscribe({
+              next: (res:any) => {
+                this.loading = false
                 console.log('res', res)
-
-                console.log('matchedRoleMapping', matchedRoleMapping)
-                this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
+                this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
+                this.sharedService.roleMappingGenerationData = res?.data
+                localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
                 this.matchedRoleMapping =res?.total_matched
-                const matchedRoleMappingIds =
-                  matchedRoleMapping?.matched_details?.map(
-                    x => x.role_mapping_id
-                  ) || [];
-                this.matchedDesignationSet = new Set(matchedRoleMappingIds);
-
-               // this.matchedRoleMapping = matchedRoleMappingIds.length;
-
+                console.log('this.matchedRoleMapping', this.activeTab, this.matchedRoleMapping, this.unMatchedRoleMapping)
                 this.unMatchedRoleMapping = res?.total_unmatched
+                // add a condition if unmatched tab then send unmatched value in role mapping
                 // this.applyAllFilters();
-              })
 
-              this.dataSource = new MatTableDataSource(res?.data)
-              this.originalDataSource = new MatTableDataSource(res?.data)
-              // setTimeout(() => {
-              //   this.dataSource.paginator = this.paginator;
-              // }, 1000)
-              this.originalData = res?.data ;
-              this.masterData = res?.data;
-              this.totalRoleMappingListCount = res?.total || 0
+                this.dataSource = new MatTableDataSource(res?.data)
+                this.originalDataSource = new MatTableDataSource(res?.data)
+                // setTimeout(() => {
+                //   this.dataSource.paginator = this.paginator;
+                // }, 1000)
+                this.originalData = res?.data ;
+                this.masterData = res?.data;
+                this.setTotalRoleMappingListCount(res)
 
               console.log('this.dataSource', this.dataSource)
             },
             error: () => {
               this.loading = false
             }
+            })
           })
         } else {
           this.loading = false
         }
 
       } else {
-        this.sharedService.getRoleMappingByStateCenterBySearch(state_center_id, this.searchText, this.pageSize, this.offset,this.activeTab).subscribe((res:any) => {
-          this.loading = false
-          console.log('res', res)
-          this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
-          this.sharedService.roleMappingGenerationData = res?.data  
-          localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
           let obj = {
             state_center_id: this.formData.value.ministry
           }
@@ -664,10 +659,8 @@ export class RoleMappingListComponent {
             obj['department_id'] = this.formData.value.departments
           }
           this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
-            console.log('res', res)
             console.log('matchedRoleMapping', matchedRoleMapping)
             this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
-            this.matchedRoleMapping =res?.total_matched
             const matchedRoleMappingIds =
               matchedRoleMapping?.matched_details?.map(
                 x => x.role_mapping_id
@@ -676,10 +669,16 @@ export class RoleMappingListComponent {
 
            // this.matchedRoleMapping = matchedRoleMappingIds.length;
 
+          this.sharedService.getRoleMappingByStateCenterBySearch(state_center_id, this.searchText, this.pageSize, this.offset,this.activeTab).subscribe((res:any) => {
+            this.loading = false
+            console.log('res', res)
+            this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
+            this.sharedService.roleMappingGenerationData = res?.data
+            localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
+            this.matchedRoleMapping =res?.total_matched
             this.unMatchedRoleMapping = res?.total_unmatched;
             // this.applyAllFilters();
-          })
-          this.totalRoleMappingListCount = res?.total || 0
+          this.setTotalRoleMappingListCount(res)
           this.dataSource = new MatTableDataSource(res?.data)
           this.originalDataSource = new MatTableDataSource(res?.data)
           // setTimeout(() => {
@@ -689,6 +688,7 @@ export class RoleMappingListComponent {
           this.originalData = res?.data;
           this.masterData = res?.data;
           console.log('this.dataSource', this.dataSource)
+          })
         })
       }
 
@@ -698,53 +698,58 @@ export class RoleMappingListComponent {
       console.log('this.formData', this.formData)
       let state_center_id = this.formData.value.ministry
       let department_id = this.formData.value.departments
-      this.sharedService.getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id, this.searchText, this.pageSize, this.offset,this.activeTab).subscribe({
-        next: (res:any) => {
-          this.loading = false
-          this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
-          this.sharedService.roleMappingGenerationData = res?.data
-          localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-          let obj = {
-            state_center_id: this.formData.value.ministry
-          }
-          if (typeof this.formData.value.departments === 'string') {
-            obj['department_id'] = this.formData.value.departments
-          }
-          this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
+      let obj = {
+        state_center_id: this.formData.value.ministry
+      }
+      if (typeof this.formData.value.departments === 'string') {
+        obj['department_id'] = this.formData.value.departments
+      }
+      this.sharedService.getMatchedRoleMapping(obj).subscribe((matchedRoleMapping) => {
+        console.log('matchedRoleMapping', matchedRoleMapping)
+        this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
+        const matchedRoleMappingIds =
+          matchedRoleMapping?.matched_details?.map(
+            x => x.role_mapping_id
+          ) || [];
+        this.matchedDesignationSet = new Set(matchedRoleMappingIds);
+
+      //  this.matchedRoleMapping = matchedRoleMappingIds.length;
+
+        this.sharedService.getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id, this.searchText, this.pageSize, this.offset,this.activeTab).subscribe({
+          next: (res:any) => {
+            this.loading = false
             console.log('res', res)
-            console.log('matchedRoleMapping', matchedRoleMapping)
-            this.matchedRoleMappingData = matchedRoleMapping?.matched_details || []
+            this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
+            this.sharedService.roleMappingGenerationData = res?.data
+            localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
             this.matchedRoleMapping =res?.total_matched
-            const matchedRoleMappingIds =
-              matchedRoleMapping?.matched_details?.map(
-                x => x.role_mapping_id
-              ) || [];
-            this.matchedDesignationSet = new Set(matchedRoleMappingIds);
-
-          //  this.matchedRoleMapping = matchedRoleMappingIds.length;
-
             this.unMatchedRoleMapping = res?.total_unmatched;
             // this.applyAllFilters();
-          })
-          this.dataSource = new MatTableDataSource(res?.data)
-          this.originalDataSource = new MatTableDataSource(res?.data)
-          // setTimeout(() => {
-          //   this.dataSource.paginator = this.paginator;
-          // }, 1000)
-          this.originalData = res?.data;
-          this.masterData = res?.data;
-          this.totalRoleMappingListCount = res?.total || 0
-          console.log('this.dataSource', this.dataSource)
-        },
-        error: () => {
-          this.loading = false
-        }
+            this.dataSource = new MatTableDataSource(res?.data)
+            this.originalDataSource = new MatTableDataSource(res?.data)
+            // setTimeout(() => {
+            //   this.dataSource.paginator = this.paginator;
+            // }, 1000)
+            this.originalData = res?.data;
+            this.masterData = res?.data;
+            this.setTotalRoleMappingListCount(res)
+            console.log('this.dataSource', this.dataSource)
+          },
+          error: () => {
+            this.loading = false
+          }
+        })
       })
 
 
 
     }
 
+  }
+
+  private setTotalRoleMappingListCount(res: any) {
+    const tabCount = this.activeTab === 'unmatched' ? res?.total_unmatched : res?.total_matched
+    this.totalRoleMappingListCount = tabCount ?? res?.total ?? 0
   }
 
   toggleRow(row: any) {
@@ -817,18 +822,12 @@ export class RoleMappingListComponent {
 
 //     }
 
-    if (this.searchText.trim()) {
-
-      // const terms = this.searchText.toLowerCase().split(/\s+/);
-
-      // data = data.filter(item => {
-      //   const name = (item.designation_name || '').toLowerCase();
-      //   return terms.every(term => name.includes(term));
-      // });
-      this.loadRoleMappingList()
-
-    }
-
+   this.pageIndex = 0;
+   this.offset = 0;
+   if (this.paginator) {
+     this.paginator.pageIndex = 0;
+   }
+   this.loadRoleMappingList()
   //  this.dataSource = new MatTableDataSource(data);
 
     // setTimeout(() => {
