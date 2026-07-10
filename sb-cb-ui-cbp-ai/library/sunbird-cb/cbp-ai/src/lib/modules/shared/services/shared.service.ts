@@ -442,19 +442,21 @@ export class SharedService {
 
   getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id,query, limit, offset,match_status) {
     const headers = this.headers
-     let reqBody = {
+     let reqBody: any = {
       "query": query || "",
       "limit": limit,
       "offset": offset,
       "load_cbp_plans": true,
       "filters": {
         "state_center_id": state_center_id,
-        "match_status":match_status
+        "match_status":match_status,
+        "department_id": department_id
       },
       "sort_by": null
-    }
-    if (typeof department_id === 'string'){
-      reqBody['department_id'] = department_id  
+    };
+  if (typeof department_id === 'string') {
+    reqBody.filters.department_id = department_id;
+  
       return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_ROLE_MAPPING}`, reqBody,{ headers })
         .pipe(map((response: any) => {
           return response
