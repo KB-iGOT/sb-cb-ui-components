@@ -803,16 +803,31 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
           if (!this.firstApiResponse) {
             this.firstApiResponse = data; // 👈 store first response
             console.log('First API response:', this.firstApiResponse);
+            if(data && data?.status === 'FAILED') {
+               this.apiLoading = false;
+               this.loading = false
+                this.destroy$.next();   // 🛑 stop polling
+                this.regenerateRoleMappingAfterFailedAndDelete()
+                return;
+            } 
           } else {
+            
             this.loading = true
           }
         }),
-        takeWhile((data: any) => data?.status !== 'COMPLETED', true)
+        takeWhile(
+  (data: any) =>
+    data?.status !== 'COMPLETED' &&
+    data?.status !== 'FAILED',
+  true // emit the final COMPLETED/FAILED response
+)
       )
       .subscribe(data => {
         console.log('role mapping data--', data)
         if (this.firstApiResponse?.is_existing) {
-          this.showWorkAllocationOrderDocumentMissing = false
+          
+            
+              this.showWorkAllocationOrderDocumentMissing = false
           this.apiLoading = false;
           this.destroy$.next();   // 🛑 stop polling
           this.destroy$.complete();
@@ -875,6 +890,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
               this.loading = false
             }
           });
+            
+          
         } else if (this.workAllocationOrderDocumentMissing) {
           this.destroy$.next();
           this.loading = false
@@ -885,7 +902,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         else if (data?.status === 'COMPLETED') {
           this.showWorkAllocationOrderDocumentMissing = false
           this.loading = false;
-
+          this.apiLoading = false
+          this.destroy$.next();
           this.sharedService.cbpPlanFinalObj['role_mapping_generation'] =
             data?.role_mappings;
           this.sharedService.roleMappingGenerationData = data?.role_mappings;
@@ -902,98 +920,15 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
           });
 
           this.router.navigate(['/ai/list']);
-        }
+        } else if(data && data?.status === 'FAILED') {
+              this.loading = false
+               this.apiLoading = false;
+                this.destroy$.next();   // 🛑 stop polling
+                this.showRoleMappingFailedPopup()
+                return;
+            }
+          
       });
-  }
-
-
-  generateFinalRoleMappingWithStream() {
-    this.loading = true;
-    console.log('roleMappingForm', this.roleMappingForm)
-    if (this.roleMappingForm.valid) {
-      const formData = this.roleMappingForm.value;
-      const currentFormValues = this.roleMappingForm.getRawValue();
-      let formUploadData: any = new FormData();
-
-      // formUploadData.append('ministryType', currentFormValues.ministryType);
-      // formUploadData.append('ministry', currentFormValues.ministry);
-      // formUploadData.append('sectors', JSON.stringify(currentFormValues.sectors));
-      // formUploadData.append('departments', JSON.stringify(currentFormValues.departments));
-      formUploadData.append('state_center_id', currentFormValues.ministry || '');
-      formUploadData.append('state_center_name', currentFormValues.ministry || '');
-
-      if (currentFormValues.departments) {
-        formUploadData.append('department_id', currentFormValues.departments || '');
-      }
-      if (currentFormValues.additionalDetails) {
-        formUploadData.append('instruction', currentFormValues.additionalDetails || '');
-      }
-      const file: File = this.uploadedFile || this.roleMappingForm.get('additional_document')?.value;
-      console.log('file', file)
-      if (file) {
-        formUploadData.append('additional_document', file);
-      }
-      console.log('this.roleMappingForm', this.roleMappingForm)
-      console.log('formUploadData--', formUploadData)
-      for (const pair of formUploadData.entries()) {
-        console.log(`${pair[0]}:`, pair[1]);
-      }
-      console.log('Form submitted:', formData);
-      let sectors = Array.isArray(formData.sectors) ? formData.sectors.join(', ') : ''
-      this.sharedService.cbpPlanFinalObj['sectors'] = formData.sectors
-      // Submit logic here
-      let req = {
-        "state_center_id": formData.ministry,
-        "instruction": formData.additionalDetails
-      }
-      if (this.selectedMinistryType === 'state' || formData.departments) {
-        req['department_id'] = formData.departments ? formData.departments : ''
-        this.sharedService.cbpPlanFinalObj['departments'] = formData.departments ? formData.departments : ''
-
-
-        const departmentName = this.departmentData.find(u => u.identifier === formData.departments);
-        this.sharedService.cbpPlanFinalObj['department_name'] = departmentName
-        this.sharedService.cbpPlanFinalObj['additionalDetails'] = formData.additionalDetails
-        console.log(departmentName);
-
-      }
-      this.sharedService.cbpPlanFinalObj['ministryType'] = this.selectedMinistryType
-
-      if (req) {
-        this.chunks = [];
-        this.fullJson = '';
-        this.parsedData = null;
-        this.currentProcessingStage = this.processingStages[0];
-        this.roleMappingService.generateRoleMapping(
-          req,
-          this.uploadedFile || null,
-          (chunk) => {
-            this.chunks.push(chunk)
-            console.log('Received chunk:', chunk, 'Total chunks:', this.chunks.length)
-
-            // Update processing stage based on chunk count
-            this.updateProcessingStage();
-
-            // Trigger change detection to update the UI
-            setTimeout(() => { }, 0);
-          },
-          () => {
-            console.log('Stream started')
-            this.currentProcessingStage = this.processingStages[0];
-          },
-          () => this.onStreamEnd(),
-          (err) => {
-            console.error('Stream failed:', err)
-            this.handleStreamError(err);
-          }
-        );
-      }
-
-      localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-
-    } else {
-      this.roleMappingForm.markAllAsTouched();
-    }
   }
 
   updateProcessingStage() {
@@ -1086,76 +1021,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     return this.getProgressPercentage();
   }
 
-  // Handle streaming errors, especially "Role mapping already exists"
-  handleStreamError(err: any) {
-    console.log('Error details:', err);
-
-    // Check if this is the "Role mapping already exists" error
-    if (err?.isExistingRoleMapping || (err?.detail && err.detail.includes('Role mapping already exists'))) {
-      this.currentProcessingStage = 'Loading existing role mapping...';
-
-      // Call the appropriate Get role mapping API based on ministry type
-      const formData = this.roleMappingForm.value;
-      const stateCenter = formData.ministry;
-      const departmentId = formData.departments;
-
-      if (this.selectedMinistryType === 'state' && departmentId) {
-        // Call Get role mapping by state center and department
-        this.sharedService.getRoleMappingByStateCenterAndDepartment(stateCenter, departmentId).subscribe({
-          next: (res) => {
-            console.log('Existing role mapping loaded:', res);
-            this.loading = false;
-            this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res;
-            this.sharedService.roleMappingGenerationData = res;
-            this.snackBar.open('Existing role mapping loaded successfully!', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-success']
-            });
-            this.alreadyAvailableRoleMapping.emit(this.roleMappingForm);
-          },
-          error: (error) => {
-            console.error('Failed to load existing role mapping:', error);
-            this.loading = false;
-            this.snackBar.open('Failed to load existing role mapping. Please try again.', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-error']
-            });
-          }
-        });
-      } else {
-        // Call Get role mapping by state center only
-        this.sharedService.getRoleMappingByStateCenter(stateCenter).subscribe({
-          next: (res) => {
-            console.log('Existing role mapping loaded:', res);
-            this.loading = false;
-            this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res;
-            this.sharedService.roleMappingGenerationData = res;
-            this.snackBar.open('Existing role mapping loaded successfully!', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-success']
-            });
-            this.alreadyAvailableRoleMapping.emit(this.roleMappingForm);
-          },
-          error: (error) => {
-            console.error('Failed to load existing role mapping:', error);
-            this.loading = false;
-            this.snackBar.open('Failed to load existing role mapping. Please try again.', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-error']
-            });
-          }
-        });
-      }
-    } else {
-      // Handle other streaming errors
-      this.loading = false;
-      const errorMessage = err?.detail || 'Stream failed. Please try again.';
-      this.snackBar.open(errorMessage, 'X', {
-        duration: 3000,
-        panelClass: ['snackbar-error']
-      });
-    }
-  }
+ 
   removeFile(index: number): void {
     if (!this.uploadedFile || this.uploadedFile.length === 0) return;
 
@@ -1262,6 +1128,50 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
    
     this.router.navigate(['/ai/upload-documents']);
     
+  }
+
+  showRoleMappingFailedPopup() {
+    console.log('role mapping failed, try to regenerate role mapping?')
+   // alert('role mapping failed, try to regenerate role mapping?')
+    const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
+          width: '400px',
+          data: {documents: this.documents, from: 'roleMappingFailed',},
+          panelClass: 'view-cbp-plan-popup',          
+          minHeight: '300px',          // Set minimum height
+          maxHeight: '80vh',           // Prevent it from going beyond viewport
+          disableClose: true // Optional: prevent closing with outside click
+        });
+    
+          dialogRef.afterClosed().subscribe(result => {
+            if (result === 'saved') {
+              console.log('Changes saved!');
+              this.regenerateRoleMappingAfterFailedAndDelete()
+              this.loading = true
+            } else {
+              this.loading = false
+            }
+          })
+  }
+
+  regenerateRoleMappingAfterFailedAndDelete() {
+     this.sharedService.deleteRoleMappingByStateAndDepartment(this.roleMappingForm.value.ministry, this.roleMappingForm.value.departments).subscribe({
+                next: (res) => {
+                  // Success handling
+                  console.log('Success:', res);
+                  this.loading = false
+                  this.firstApiResponse = []
+                  this.generateFinalRoleMapping()
+                },
+                error: (error) => {
+                  this.snackBar.open(error?.error?.detail, 'X', {
+                    duration: 3000,
+                    panelClass: ['snackbar-error']
+                  });
+                  this.firstApiResponse = []
+                  this.loading = false
+                  // this.generateFinalRoleMapping()
+                }
+              });
   }
 
 

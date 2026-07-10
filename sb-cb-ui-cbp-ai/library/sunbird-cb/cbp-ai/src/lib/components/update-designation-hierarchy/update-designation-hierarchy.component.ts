@@ -4,7 +4,8 @@ import {
   Input,
   Output,
   OnInit,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
@@ -36,7 +37,7 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
 
   numbers: number[] = [];
 
-  constructor(private http: HttpClient, public sharedService: SharedService, private snackBar: MatSnackBar,) { }
+  constructor(private http: HttpClient, public sharedService: SharedService, private snackBar: MatSnackBar, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 
@@ -145,10 +146,12 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
       if (ministryType === 'ministry') {
         if (this.sharedService.cbpPlanFinalObj.departments) {
           const departmentId = this.sharedService.cbpPlanFinalObj.departments;
-          this.sharedService.getRoleMappingByStateCenterAndDepartment(ministryId, departmentId).subscribe({
+          this.sharedService.getRoleMappingReOrderList(ministryId, departmentId).subscribe({
             next: (res) => {
+              this.role_mapping_generation = res || '[]';
               this.loading = false;
               console.log('State role mapping data refreshed:', res);
+              this.updateDesignationHierarchyResponse(); // Update designations after fetching new data
             },
             error: (error) => {
               this.loading = false;
@@ -156,10 +159,12 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
             }
           });
         } else {
-          this.sharedService.getRoleMappingByStateCenter(ministryId).subscribe({
+          this.sharedService.getRoleMappingReOrderList(ministryId,null).subscribe({
             next: (res) => {
               this.loading = false;
+              this.role_mapping_generation = res || '[]';
               console.log('Center role mapping data refreshed:', res);
+              this.updateDesignationHierarchyResponse(); // Update designations after fetching new data
             },
             error: (error) => {
               this.loading = false;
@@ -170,10 +175,13 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
 
       } else if (ministryType === 'state') {
         const departmentId = this.sharedService.cbpPlanFinalObj.departments;
-        this.sharedService.getRoleMappingByStateCenterAndDepartment(ministryId, departmentId).subscribe({
+        this.sharedService.getRoleMappingReOrderList(ministryId, departmentId).subscribe({
           next: (res) => {
             this.loading = false;
+            this.role_mapping_generation = res || '[]';
+            
             console.log('State role mapping data refreshed:', res);
+            this.updateDesignationHierarchyResponse(); // Update designations after fetching new data
           },
           error: (error) => {
             this.loading = false;
@@ -182,7 +190,11 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
         });
       }
     }
-    let cbpPlanFinalObj = this.sharedService.cbpPlanFinalObj
+   
+  }
+
+  updateDesignationHierarchyResponse() { 
+     let cbpPlanFinalObj = this.sharedService.cbpPlanFinalObj
     console.log('cbpPlanFinalObj--', cbpPlanFinalObj)
     if (cbpPlanFinalObj?.departments) {
       this.department_id = cbpPlanFinalObj?.departments
@@ -192,7 +204,7 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
     }
 
     // this.role_mapping_generation = cbpPlanFinalObj?.role_mapping_generation || '[]';
-    this.role_mapping_generation = this.sharedService.roleMappingGenerationData || this.role_mapping_generation || '[]';
+    
     // Map role_mapping_generation to internal designations array
     this.numbers = Array.from({ length: this.role_mapping_generation.length }, (_, i) => i + 1);
     this.designations = this.role_mapping_generation.map((r: any, index: number) => ({
@@ -203,13 +215,14 @@ export class UpdateDesignationHierarchyComponent implements OnInit {
       filteredNumbers: [...this.numbers], // Numbers to display in select
       wing_division_section: r.wing_division_section
     }));
-
+    console.log('this.designations--', this.designations)
 
     this.loading = false
     this.numbers = Array.from({ length: this.designations.length }, (_, i) => i + 1);
     // Sort by sort_order
     this.designations.sort((a, b) => a.sort_order - b.sort_order);
     this.updateSortOrderByIndex();
+    this.cdr.detectChanges();
   }
 
 toggleDropdown(item: any, event: Event) {

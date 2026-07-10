@@ -84,6 +84,7 @@ export class SuggestMoreCoursesComponent implements OnInit {
   }
 
   loadAllCourses() {
+    
     this.loading = true;
     let reqBody = {
       "request": {

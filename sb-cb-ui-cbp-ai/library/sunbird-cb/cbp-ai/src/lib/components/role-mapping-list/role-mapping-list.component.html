@@ -426,7 +426,7 @@
                                 </table>
 
                                 <!-- Pagination -->
-                                <mat-paginator [length]="dataSource?.data?.length || 0" [pageSize]="5"
+                                <mat-paginator [length]="totalRoleMappingListCount" [pageSize]="5" (page)="pageChangeEvent($event)"
                                     [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
                                 </mat-paginator>
                             </div>

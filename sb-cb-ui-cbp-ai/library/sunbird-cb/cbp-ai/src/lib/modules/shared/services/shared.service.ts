@@ -70,8 +70,9 @@ const API_END_POINTS = {
   MDO_ROLE_MAPPING_UPDATE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/items/update',
   REPUBLISH_REQUEST: 'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/publish/retry',
   MDO_ADD_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/add',
-  MDO_DELETE_APPROVE_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/remove'
-
+  MDO_DELETE_APPROVE_COURSE:'apis/proxies/v8/ai/cbp/v1/mdo/approval-requests/course/remove',
+  SEARCH_ROLE_MAPPING: 'cbp-tpc-ai/api/v1/role-mapping/search',
+  GET_ROLE_MAPPING_REORDER_LIST:'cbp-tpc-ai/api/v1/role-mapping/reorder/list'
 }
 
 
@@ -395,6 +396,7 @@ export class SharedService {
 
   getRoleMappingByStateCenter(state_center_id) {
     const headers = this.headers
+
     return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_BY_STATE_CENTER}/${state_center_id}?load_cbp_plans=true`, { headers })
       .pipe(map((response: any) => {
         return response
@@ -410,6 +412,55 @@ export class SharedService {
         }))
     } else {
       return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_BY_STATE_CENTER}/${state_center_id}?load_cbp_plans=true`, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
+  }
+
+
+  getRoleMappingByStateCenterBySearch(state_center_id,query, limit, offset,match_status) {
+    const headers = this.headers
+    let reqBody = {
+      "query": query || "",
+      "limit": limit,
+      "offset": offset,
+      "load_cbp_plans": true,
+      "filters": {
+        "state_center_id": state_center_id,
+        "match_status":match_status
+      },
+      "sort_by": null
+    }
+    
+    return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_ROLE_MAPPING}`, reqBody, { headers })
+      .pipe(map((response: any) => {
+        return response
+      }))
+  }
+
+  getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id,query, limit, offset,match_status) {
+    const headers = this.headers
+     let reqBody = {
+      "query": query || "",
+      "limit": limit,
+      "offset": offset,
+      "load_cbp_plans": true,
+      "filters": {
+        "state_center_id": state_center_id,
+        "match_status":match_status
+      },
+      "sort_by": null
+    }
+    if (typeof department_id === 'string'){
+      reqBody['department_id'] = department_id  
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_ROLE_MAPPING}`, reqBody,{ headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      return this.http.post<any>(`${this.baseUrl}${API_END_POINTS.SEARCH_ROLE_MAPPING}`, reqBody, { headers })
         .pipe(map((response: any) => {
           return response
         }))
@@ -1174,6 +1225,22 @@ getApprovalRequests(reqBody: any) {
       .pipe(map((response: any) => {
         return response
       }))
+  }
+
+   getRoleMappingReOrderList(state_center_id, _department_id) {
+    const headers = this.headers
+    if (typeof _department_id === 'string'){
+      return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_REORDER_LIST}?state_center_id=${state_center_id}&department_id=${_department_id}`, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    } else {
+      return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_ROLE_MAPPING_REORDER_LIST}?state_center_id=${state_center_id}`, { headers })
+        .pipe(map((response: any) => {
+          return response
+        }))
+    }
+
   }
 
 }

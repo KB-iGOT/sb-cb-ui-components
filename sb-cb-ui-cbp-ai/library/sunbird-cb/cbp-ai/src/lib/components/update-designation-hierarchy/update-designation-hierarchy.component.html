@@ -10,7 +10,6 @@
 
     <!-- BODY -->
     <div class="drawer-body" cdkDropList (cdkDropListDropped)="drop($event)">
-
         <div class="designation-item" *ngFor="let item of designations; trackBy: trackById; let i = index" cdkDrag>
             <div class="drag-handle" cdkDragHandle>
                 <mat-icon>drag_indicator</mat-icon>
