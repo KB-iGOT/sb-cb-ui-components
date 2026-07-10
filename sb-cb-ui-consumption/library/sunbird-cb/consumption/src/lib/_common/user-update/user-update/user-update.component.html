@@ -275,6 +275,12 @@
               <div class="other-details-label">Office Pin Code</div>
               <div class="detail-value">{{ otherDetails?.pincode }}</div>
             </div>
+            <ng-container *ngIf="isNgo">
+              <div class="detail-item">
+                <div class="other-details-label">External ID</div>
+                <div class="detail-value">{{ otherDetails?.ehrmsID }}</div>
+              </div>
+            </ng-container>
             <ng-container *ngIf="!isNgo">
               <div class="detail-item">
                 <div class="other-details-label">eHRMS ID/External System ID</div>
@@ -413,6 +419,14 @@
                     (keypress)="numericOnly($event)" maxlength="6">
                 </mat-form-field>
               </div>
+              <ng-container *ngIf="isNgo">
+                <div class="detail-item">
+                  <div class="other-details-label">External ID</div>
+                  <mat-form-field appearance="outline" class="w-full">
+                    <input matInput formControlName="ehrmsID" placeholder="Enter External ID" maxlength="100">
+                  </mat-form-field>
+                </div>
+              </ng-container>
               <ng-container *ngIf="!isNgo">
                 <div class="detail-item">
                   <div class="other-details-label">eHRMS ID/External System ID</div>

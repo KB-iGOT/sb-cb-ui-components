@@ -137,8 +137,10 @@ export class UserUpdateComponent implements OnInit, OnChanges {
     if (changes['isNgo'] && changes['isNgo'].currentValue === true) {
       const listOfControlsToRemove = ['designation', 'searchDesignation', 'group', 'assignMentor', 'isMyUser']
       listOfControlsToRemove.forEach(control => this.removeControl(this.userForm, control))
-      const listOfControlsToRemoveFromOtherDetails = ['employeeId', 'ehrmsID', 'civilServiceType', 'civilServiceName', 'cadreName', 'cadreBatch', 'cadreControllingAuthorityName']
+      const listOfControlsToRemoveFromOtherDetails = ['employeeId', 'civilServiceType', 'civilServiceName', 'cadreName', 'cadreBatch', 'cadreControllingAuthorityName']
       listOfControlsToRemoveFromOtherDetails.forEach(control => this.removeControl(this.otherDetailsForm, control))
+      // external id (externalSystemId) is editable for volunteer organisation users
+      this.otherDetailsForm.get('ehrmsID')?.enable()
       if (this.designationSearchSubscription) {
         this.designationSearchSubscription.unsubscribe()
       }
@@ -834,6 +836,10 @@ export class UserUpdateComponent implements OnInit, OnChanges {
           ],
           additionalProperties: {
             tag: this.selectedtagsList,
+            ...(this.isNgo ? {
+              externalSystemId: (_.get(otherDetailsValues, 'ehrmsID', '') || '').trim(),
+              externalSystem: 'eHRMS ID',
+            } : null),
           },
           employmentDetails: {
             pinCode: _.get(otherDetailsValues, 'pincode', ''),
