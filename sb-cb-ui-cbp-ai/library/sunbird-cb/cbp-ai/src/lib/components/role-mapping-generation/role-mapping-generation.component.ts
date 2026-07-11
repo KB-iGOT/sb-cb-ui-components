@@ -7,7 +7,8 @@ import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/de
 import { MatDialog } from '@angular/material/dialog';
 import { interval, of, concat, ReplaySubject, Subject } from 'rxjs';
 import { switchMap, takeWhile, tap } from 'rxjs/operators';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatSelect } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { RoleMappingService } from '../../modules/shared/services/role-mapping.service';
@@ -92,6 +93,15 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   departmentPanelOpen = false
   filteredList = [];
   filteredDepartmentList = [];
+  @ViewChild('departmentSelect', { static: false }) departmentSelect!: MatSelect;
+  departmentPageSize = 50
+  departmentOffset = 0
+  departmentHasMore = true
+  departmentLoading = false
+  departmentSearchQuery = ''
+  departmentMinistryId = ''
+  private departmentSearchSubject = new Subject<string>()
+  private departmentRequestId = 0
   originalMinistryData = []
   apiLoading = false
   firstApiResponse: any = null
@@ -116,6 +126,15 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   }
 
   ngOnInit() {
+
+    this.departmentSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe((query: string) => {
+      this.departmentSearchQuery = query
+      this.loadDepartments(true)
+    })
 
     this.login = this.sharedService.checkIfLogin()
 
@@ -304,11 +323,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     } else if (this.cbpFinalObj?.ministry?.sbOrgType === 'state') {
       this.selectedMinistryType = this.cbpFinalObj?.ministry?.sbOrgType
       await this.getMinistryData()
-      await this.sharedService.getDepartmentList(this.cbpFinalObj?.ministry?.identifier).subscribe((res) => {
-        this.departmentData = res
-        this.filteredDepartmentList = res
-        console.log('this.filteredDepartmentList --', this.filteredDepartmentList)
-      })
+      this.departmentMinistryId = this.cbpFinalObj?.ministry?.identifier
+      this.loadDepartments(true)
       if (this.ministryData && this.ministryData.length) {
         this.selectedMinistryId = this.cbpFinalObj?.ministry?.identifier
       }
@@ -564,28 +580,11 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = []
     this.sharedService.roleMappingGenerationData = []
     localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-    if (selectedMinistryId && this.selectedMinistryType === 'state') {
-      this.sharedService.getDepartmentList(selectedMinistryId).subscribe((res) => {
-        this.departmentData = res
-        this.filteredDepartmentList = res
-      })
-    }
-    if (selectedMinistryId && this.selectedMinistryType === 'ministry') {
-      this.sharedService.getCenterBasedDepartment(selectedMinistryId).subscribe((res) => {
-        if (res?.length) {
-          this.departmentData = res
-          this.filteredDepartmentList = res
-        } else {
-          this.snackBar.open('No Department Found for Selected Ministry', 'X', {
-            duration: 3000,
-            panelClass: ['snackbar-error']
-          });
-          this.sharedService.cbpPlanFinalObj['department_name'] = ''
-          this.sharedService.cbpPlanFinalObj['departments'] = ''
-          localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-        }
-
-      })
+    if (selectedMinistryId && (this.selectedMinistryType === 'state' || this.selectedMinistryType === 'ministry')) {
+      this.departmentMinistryId = selectedMinistryId
+      this.departmentSearchQuery = ''
+      this.filteredDepartmentList = []
+      this.loadDepartments(true)
     }
 
     this.getUploadedDocuments()
@@ -1071,7 +1070,97 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
   onOpenedDepartment(opened: boolean) {
     this.departmentPanelOpen = opened
+    if (opened) {
+      setTimeout(() => {
+        if (this.departmentSelect && this.departmentSelect.panel && this.departmentSelect.panel.nativeElement) {
+          this.departmentSelect.panel.nativeElement.addEventListener('scroll', this.onDepartmentScroll)
+        }
+      })
+    } else if (this.departmentSearchQuery) {
+      // panel closed with an active search: reset so the list matches the cleared search box on reopen
+      this.departmentSearchSubject.next('')
+    }
   }
+
+  onDepartmentScroll = (event: any) => {
+    const panel = event.target
+    if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 60) {
+      this.loadDepartments()
+    }
+  }
+
+  loadDepartments(reset = false) {
+    if (!this.departmentMinistryId) {
+      return
+    }
+    if (!reset && (this.departmentLoading || !this.departmentHasMore)) {
+      return
+    }
+    if (reset) {
+      this.departmentOffset = 0
+      this.departmentHasMore = true
+    }
+    const requestId = ++this.departmentRequestId
+    this.departmentLoading = true
+    const options = {
+      limit: this.departmentPageSize,
+      offset: this.departmentOffset,
+      query: this.departmentSearchQuery
+    }
+    const request = this.selectedMinistryType === 'ministry'
+      ? this.sharedService.getCenterBasedDepartment(this.departmentMinistryId, options)
+      : this.sharedService.getDepartmentList(this.departmentMinistryId, options)
+    request.subscribe({
+      next: (res) => {
+        if (requestId !== this.departmentRequestId) {
+          return
+        }
+        this.departmentLoading = false
+        const items = Array.isArray(res) ? res : (res?.items || res?.data || [])
+        this.departmentHasMore = items.length === this.departmentPageSize
+        this.departmentOffset += items.length
+        items.forEach((item) => {
+          if (!this.departmentData.some(d => d?.identifier === item?.identifier)) {
+            this.departmentData.push(item)
+          }
+        })
+        this.filteredDepartmentList = reset ? items : [...this.filteredDepartmentList, ...items]
+        // this.ensureSelectedDepartmentOption()
+        if (reset && !items.length && !this.departmentSearchQuery && this.selectedMinistryType === 'ministry') {
+          this.snackBar.open('No Department Found for Selected Ministry', 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-error']
+          });
+          this.sharedService.cbpPlanFinalObj['department_name'] = ''
+          this.sharedService.cbpPlanFinalObj['departments'] = ''
+          localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
+        }
+      },
+      error: () => {
+        if (requestId !== this.departmentRequestId) {
+          return
+        }
+        this.departmentLoading = false
+      }
+    })
+  }
+
+  // keeps the selected department visible in the panel even when the current
+  // search/page from the server does not include it
+  // ensureSelectedDepartmentOption() {
+  //   const selectedId = this.roleMappingForm?.get('departments')?.value
+  //   if (!selectedId || Array.isArray(selectedId)) {
+  //     return
+  //   }
+  //   if (this.filteredDepartmentList.some(d => d?.identifier === selectedId)) {
+  //     return
+  //   }
+  //   const selected = this.departmentData.find(d => d?.identifier === selectedId)
+  //     || (this.cbpFinalObj?.department_name ? { identifier: selectedId, orgName: this.cbpFinalObj.department_name } : null)
+  //   if (selected) {
+  //     this.filteredDepartmentList = [selected, ...this.filteredDepartmentList]
+  //   }
+  // }
 
   filterData(event) {
     if (event && event.target && event.target.value) {
@@ -1087,21 +1176,15 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   }
 
   filterDepartmentData(event) {
-    if (event && event.target && event.target.value) {
-      const s = event.target.value.toLowerCase();
-
-      this.filteredDepartmentList = this.departmentData.filter(x =>
-        x.orgName.toLowerCase().includes(s)
-      );
-    } else {
-      this.filteredDepartmentList = this.departmentData
-    }
-
+    const value = event && event.target && event.target.value ? event.target.value : ''
+    this.departmentSearchSubject.next(value.trim())
   }
 
   ngOnDestroy() {
     this.selectedMinistryId = ''
     this.roleMappingForm.reset()
+    this.destroy$.next()
+    this.destroy$.complete()
   }
 
   onDepartmentChange() {

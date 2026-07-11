@@ -382,13 +382,23 @@ export class SharedService {
 
 
 
-  getDepartmentList(ministryId) {
+  getDepartmentList(ministryId, options?: { limit?: number, offset?: number, query?: string }) {
     const storageData: any = JSON.parse(localStorage.getItem('loginData'))
     this.headers = new HttpHeaders({
       'Authorization': `Bearer ${storageData?.access_token}`
     });
     const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_DEPARTMENT}/${ministryId}`, { headers })
+    let params = new HttpParams()
+    if (options?.limit !== undefined) {
+      params = params.set('limit', String(options.limit))
+    }
+    if (options?.offset !== undefined) {
+      params = params.set('offset', String(options.offset))
+    }
+    if (options?.query) {
+      params = params.set('query', options.query)
+    }
+    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.GET_DEPARTMENT}/${ministryId}`, { headers, params })
       .pipe(map((response: any) => {
         return response
       }))
@@ -826,10 +836,16 @@ export class SharedService {
     });
   }
 
-  getCenterBasedDepartment(state_center_id) {
-    // let reqBody = { "request": { "filters": { "status": 1, "ministryOrStateType": "ministry", "ministryOrStateId": state_center_id}, "sort_by": { "createdDate": "desc" }, "limit": 9999, "offset": 0, "fields": ["identifier", "orgName", "description", "parentOrgName", "ministryOrStateId", "ministryOrStateType", "ministryOrStateName", "sbOrgSubType"] } }
+  getCenterBasedDepartment(state_center_id, options?: { limit?: number, offset?: number, query?: string }) {
     const headers = this.headers
-    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.CENTER_BASED_MINISTRY}/${state_center_id}?limit=9999&offset=0&sub_org_type=ministry`, { headers })
+    let params = new HttpParams()
+      .set('limit', String(options?.limit !== undefined ? options.limit : 9999))
+      .set('offset', String(options?.offset !== undefined ? options.offset : 0))
+      .set('sub_org_type', 'ministry')
+    if (options?.query) {
+      params = params.set('query', options.query)
+    }
+    return this.http.get<any>(`${this.baseUrl}${API_END_POINTS.CENTER_BASED_MINISTRY}/${state_center_id}`, { headers, params })
       .pipe(map((response: any) => {
         return response
       }))
