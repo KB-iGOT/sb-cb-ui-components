@@ -104,6 +104,7 @@ export class GenerateCourseRecommendationComponent {
   selectedProvider: string | null = null;
   firstApiResponse: any = null
   existingRecommendationFound = false;
+  private lastEnrichedIdentifiersKey = ''; // Guards duplicate calls to the course suggestions API
   selectCategory(category: string) {
     this.selectedCategory = category;
     this.gapAnalysisStats()
@@ -697,6 +698,9 @@ export class GenerateCourseRecommendationComponent {
     sortedCourses.map((item) => {
       identifiersArr.push(item?.identifier)
     })
+  const identifiersKey = [...identifiersArr].sort().join(',')
+    if (identifiersArr.length && identifiersKey !== this.lastEnrichedIdentifiersKey) {
+      this.lastEnrichedIdentifiersKey = identifiersKey
     this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response) => {
       if (response && response.result && response.result.content && response.result.content.length) {
         for (let i = 0; i < response.result.content.length; i++) {
@@ -713,6 +717,7 @@ export class GenerateCourseRecommendationComponent {
       }
 
     })
+    }
     return sortedCourses;
   }
 
@@ -1905,6 +1910,7 @@ export class GenerateCourseRecommendationComponent {
     this.originalFilteredCourses = [];
     this.suggestedCourses = [];
     this.userAddedCourses = [];
+    this.lastEnrichedIdentifiersKey = '';
 
     // Reset tab states
     this.innerTabActiveIndex = 0;

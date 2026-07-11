@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SharedService } from '../../modules/shared/services/shared.service';
 import dayjs from 'dayjs';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSelect } from '@angular/material/select';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import moment from 'moment';
 @Component({
   selector: 'app-dashboard',
@@ -45,8 +48,24 @@ export class DashboardComponent implements OnInit {
   gapAnalysisData: any
   dashboardResponseObj = {}
   cbpFinalObj: any = {}
+  @ViewChild('departmentSelect', { static: false }) departmentSelect!: MatSelect;
+  departmentPageSize = 50
+  departmentOffset = 0
+  departmentHasMore = true
+  departmentLoading = false
+  departmentSearchQuery = ''
+  departmentMinistryId: any = ''
+  private departmentSearchSubject = new Subject<string>()
+  private departmentRequestId = 0
   constructor(private fb: FormBuilder, private sharedService: SharedService, private snackBar: MatSnackBar, public router: Router) { }
   ngOnInit() {
+    this.departmentSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe((query: string) => {
+      this.departmentSearchQuery = query
+      this.loadDepartments(true)
+    })
     this.userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
     this.isSuperAdmin = this.userProfile?.role_info?.role_name === 'Super Admin'
       && this.userProfile?.role_info?.is_active;
@@ -151,7 +170,95 @@ export class DashboardComponent implements OnInit {
 
   onOpenedDepartment(opened: boolean) {
     this.departmentPanelOpen = opened
+    if (opened) {
+      setTimeout(() => {
+        if (this.departmentSelect && this.departmentSelect.panel && this.departmentSelect.panel.nativeElement) {
+          this.departmentSelect.panel.nativeElement.addEventListener('scroll', this.onDepartmentScroll)
+        }
+      })
+    } else if (this.departmentSearchQuery) {
+      // panel closed with an active search: reset so the list matches the cleared search box on reopen
+      this.departmentSearchSubject.next('')
+    }
   }
+
+  onDepartmentScroll = (event: any) => {
+    const panel = event.target
+    if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 60) {
+      this.loadDepartments()
+    }
+  }
+
+  loadDepartments(reset = false) {
+    if (!this.departmentMinistryId) {
+      return
+    }
+    if (!reset && (this.departmentLoading || !this.departmentHasMore)) {
+      return
+    }
+    if (reset) {
+      this.departmentOffset = 0
+      this.departmentHasMore = true
+    }
+    const requestId = ++this.departmentRequestId
+    this.departmentLoading = true
+    const options = {
+      limit: this.departmentPageSize,
+      offset: this.departmentOffset,
+      query: this.departmentSearchQuery
+    }
+    const request = this.selectedMinistryType === 'ministry'
+      ? this.sharedService.getCenterBasedDepartment(this.departmentMinistryId, options)
+      : this.sharedService.getDepartmentList(this.departmentMinistryId, options)
+    request.subscribe({
+      next: (res) => {
+        if (requestId !== this.departmentRequestId) {
+          return
+        }
+        this.departmentLoading = false
+        const items = Array.isArray(res) ? res : (res?.items || res?.data || [])
+        this.departmentHasMore = items.length === this.departmentPageSize
+        this.departmentOffset += items.length
+        items.forEach((item) => {
+          if (!this.departmentData.some(d => d?.identifier === item?.identifier)) {
+            this.departmentData.push(item)
+          }
+        })
+        this.filteredDepartmentList = reset ? items : [...this.filteredDepartmentList, ...items]
+        // this.ensureSelectedDepartmentOptions()
+        if (reset && !items.length && !this.departmentSearchQuery && this.selectedMinistryType === 'ministry') {
+          this.snackBar.open('No Department Found for Selected Ministry', 'X', {
+            duration: 3000,
+            panelClass: ['snackbar-error']
+          });
+        }
+      },
+      error: () => {
+        if (requestId !== this.departmentRequestId) {
+          return
+        }
+        this.departmentLoading = false
+      }
+    })
+  }
+
+  // keeps the selected departments visible in the panel even when the current
+  // search/page from the server does not include them
+  // ensureSelectedDepartmentOptions() {
+  //   const value = this.filtersForm?.get('departments')?.value
+  //   const selectedIds = Array.isArray(value) ? value : (value ? [value] : [])
+  //   selectedIds.forEach((id) => {
+  //     if (!id || this.filteredDepartmentList.some(d => d?.identifier === id)) {
+  //       return
+  //     }
+  //     const selected = this.departmentData.find(d => d?.identifier === id)
+  //       || (this.cbpFinalObj?.departments === id && this.cbpFinalObj?.department_name
+  //         ? { identifier: id, orgName: this.cbpFinalObj.department_name } : null)
+  //     if (selected) {
+  //       this.filteredDepartmentList = [selected, ...this.filteredDepartmentList]
+  //     }
+  //   })
+  // }
 
   filterData(event) {
     if (event && event.target && event.target.value) {
@@ -167,16 +274,8 @@ export class DashboardComponent implements OnInit {
   }
 
   filterDepartmentData(event) {
-    if (event && event.target && event.target.value) {
-      const s = event.target.value.toLowerCase();
-
-      this.filteredDepartmentList = this.departmentData.filter(x =>
-        x.orgName.toLowerCase().includes(s)
-      );
-    } else {
-      this.filteredDepartmentList = this.departmentData
-    }
-
+    const value = event && event.target && event.target.value ? event.target.value : ''
+    this.departmentSearchSubject.next(value.trim())
   }
 
   onMinistryChange(event: any) {
@@ -186,25 +285,11 @@ export class DashboardComponent implements OnInit {
     // You can access the selected object if needed
     const selectedMinistry = this.ministryData.find(item => item.identifier === selectedMinistryId);
     this.selectedMinistryObj = selectedMinistry
-    if (selectedMinistryId && this.selectedMinistryType === 'state') {
-      this.sharedService.getDepartmentList(selectedMinistryId).subscribe((res) => {
-        this.departmentData = res
-        this.filteredDepartmentList = res
-      })
-    }
-    if (selectedMinistryId && this.selectedMinistryType === 'ministry') {
-      this.sharedService.getCenterBasedDepartment(selectedMinistryId).subscribe((res) => {
-        if (res?.length) {
-          this.departmentData = res
-          this.filteredDepartmentList = res
-        } else {
-          this.snackBar.open('No Department Found for Selected Ministry', 'X', {
-            duration: 3000,
-            panelClass: ['snackbar-error']
-          });
-        }
-
-      })
+    if (selectedMinistryId && (this.selectedMinistryType === 'state' || this.selectedMinistryType === 'ministry')) {
+      this.departmentMinistryId = selectedMinistryId
+      this.departmentSearchQuery = ''
+      this.filteredDepartmentList = []
+      this.loadDepartments(true)
     }
   }
 
