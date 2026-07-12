@@ -55,7 +55,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     }
 
   ]
-  departmentData = []
+  departmentData: any[] = []
   loading = false
   maxFileSizeMB = 25;
   allowedTypes = [
@@ -92,7 +92,9 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   panelOpen = false;
   departmentPanelOpen = false
   filteredList = [];
-  filteredDepartmentList = [];
+  filteredDepartmentList: any[] = [];
+  selectedDepartmentObj: any = null
+  pinnedDepartmentOptions: any[] = []
   @ViewChild('departmentSelect', { static: false }) departmentSelect!: MatSelect;
   departmentPageSize = 50
   departmentOffset = 0
@@ -252,20 +254,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       this.selectedMinistryType = this.cbpFinalObj?.ministry.sbOrgType
       await this.getMinistryData()
       if (this.cbpFinalObj?.ministry?.sbOrgType) {
-        await this.sharedService.getCenterBasedDepartment(this.cbpFinalObj?.ministry?.identifier).subscribe((res) => {
-          if (res?.length) {
-            this.departmentData = res
-            this.filteredDepartmentList = res
-          } else {
-            this.snackBar.open('No Department Found for Selected Ministry', 'X', {
-              duration: 3000,
-              panelClass: ['snackbar-error']
-            });
-            this.sharedService.cbpPlanFinalObj['department_name'] = ''
-            this.sharedService.cbpPlanFinalObj['departments'] = ''
-            localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
-          }
-        })
+        this.departmentMinistryId = this.cbpFinalObj?.ministry?.identifier
+        this.loadDepartments(true)
       }
 
       this.roleMappingForm = this.fb.group({
@@ -1125,7 +1115,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
           }
         })
         this.filteredDepartmentList = reset ? items : [...this.filteredDepartmentList, ...items]
-        // this.ensureSelectedDepartmentOption()
+        this.ensureSelectedDepartmentOption()
         if (reset && !items.length && !this.departmentSearchQuery && this.selectedMinistryType === 'ministry') {
           this.snackBar.open('No Department Found for Selected Ministry', 'X', {
             duration: 3000,
@@ -1145,22 +1135,21 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     })
   }
 
-  // keeps the selected department visible in the panel even when the current
-  // search/page from the server does not include it
-  // ensureSelectedDepartmentOption() {
-  //   const selectedId = this.roleMappingForm?.get('departments')?.value
-  //   if (!selectedId || Array.isArray(selectedId)) {
-  //     return
-  //   }
-  //   if (this.filteredDepartmentList.some(d => d?.identifier === selectedId)) {
-  //     return
-  //   }
-  //   const selected = this.departmentData.find(d => d?.identifier === selectedId)
-  //     || (this.cbpFinalObj?.department_name ? { identifier: selectedId, orgName: this.cbpFinalObj.department_name } : null)
-  //   if (selected) {
-  //     this.filteredDepartmentList = [selected, ...this.filteredDepartmentList]
-  //   }
-  // }
+  // mat-select only displays a selection while a mat-option with that value is
+  // rendered; when the current search/page from the server does not include the
+  // selected department, it is rendered as a hidden option instead of in the list
+  ensureSelectedDepartmentOption() {
+    const selectedId = this.roleMappingForm?.get('departments')?.value
+    if (!selectedId || Array.isArray(selectedId)
+      || this.filteredDepartmentList.some(d => d?.identifier === selectedId)) {
+      this.pinnedDepartmentOptions = []
+      return
+    }
+    const selected = this.departmentData.find(d => d?.identifier === selectedId)
+      || (this.selectedDepartmentObj?.identifier === selectedId ? this.selectedDepartmentObj : null)
+      || (this.cbpFinalObj?.department_name ? { identifier: selectedId, orgName: this.cbpFinalObj.department_name } : null)
+    this.pinnedDepartmentOptions = selected ? [selected] : []
+  }
 
   filterData(event) {
     if (event && event.target && event.target.value) {
@@ -1202,6 +1191,9 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     this.sharedService.cbpPlanFinalObj['ministry'] = selectedMinistry
 
     const departmentName = this.departmentData.find(u => u.identifier === formData.departments);
+    if (departmentName) {
+      this.selectedDepartmentObj = departmentName
+    }
     this.sharedService.cbpPlanFinalObj['department_name'] = departmentName?.orgName
     localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
     this.getUploadedDocuments()

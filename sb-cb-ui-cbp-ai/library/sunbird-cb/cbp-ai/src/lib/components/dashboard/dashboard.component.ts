@@ -37,10 +37,11 @@ export class DashboardComponent implements OnInit {
   panelOpen = false;
   departmentPanelOpen = false
   filteredList = [];
-  filteredDepartmentList = [];
+  filteredDepartmentList: any[] = [];
+  pinnedDepartmentOptions: any[] = []
   ministryData: any = []
   ministryFullData: any = []
-  departmentData = []
+  departmentData: any[] = []
   selectedMinistryObj = {}
   apiLoading = false
   loginUserOrgIds = []
@@ -225,7 +226,7 @@ export class DashboardComponent implements OnInit {
           }
         })
         this.filteredDepartmentList = reset ? items : [...this.filteredDepartmentList, ...items]
-        // this.ensureSelectedDepartmentOptions()
+        this.ensureSelectedDepartmentOptions()
         if (reset && !items.length && !this.departmentSearchQuery && this.selectedMinistryType === 'ministry') {
           this.snackBar.open('No Department Found for Selected Ministry', 'X', {
             duration: 3000,
@@ -242,23 +243,26 @@ export class DashboardComponent implements OnInit {
     })
   }
 
-  // keeps the selected departments visible in the panel even when the current
-  // search/page from the server does not include them
-  // ensureSelectedDepartmentOptions() {
-  //   const value = this.filtersForm?.get('departments')?.value
-  //   const selectedIds = Array.isArray(value) ? value : (value ? [value] : [])
-  //   selectedIds.forEach((id) => {
-  //     if (!id || this.filteredDepartmentList.some(d => d?.identifier === id)) {
-  //       return
-  //     }
-  //     const selected = this.departmentData.find(d => d?.identifier === id)
-  //       || (this.cbpFinalObj?.departments === id && this.cbpFinalObj?.department_name
-  //         ? { identifier: id, orgName: this.cbpFinalObj.department_name } : null)
-  //     if (selected) {
-  //       this.filteredDepartmentList = [selected, ...this.filteredDepartmentList]
-  //     }
-  //   })
-  // }
+  // mat-select only displays selections while a mat-option with that value is
+  // rendered; selected departments missing from the current search/page from
+  // the server are rendered as hidden options instead of in the list
+  ensureSelectedDepartmentOptions() {
+    const value = this.filtersForm?.get('departments')?.value
+    const selectedIds = Array.isArray(value) ? value : (value ? [value] : [])
+    const pinned: any[] = []
+    selectedIds.forEach((id) => {
+      if (!id || this.filteredDepartmentList.some(d => d?.identifier === id)) {
+        return
+      }
+      const selected = this.departmentData.find(d => d?.identifier === id)
+        || (this.cbpFinalObj?.departments === id && this.cbpFinalObj?.department_name
+          ? { identifier: id, orgName: this.cbpFinalObj.department_name } : null)
+      if (selected) {
+        pinned.push(selected)
+      }
+    })
+    this.pinnedDepartmentOptions = pinned
+  }
 
   filterData(event) {
     if (event && event.target && event.target.value) {
