@@ -1405,7 +1405,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  raiseEnrollmentTelemetry(action: 'enroll' | 're-enroll') {
+  raiseEnrollmentTelemetry(action: 'enroll' | 'reenroll') {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
@@ -1418,7 +1418,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       },
       {
         pageIdExt: `btn-${action}`,
-        module: WsEvents.EnumTelemetrymodules.CONTENT,
+        module: WsEvents.EnumTelemetrymodules.LEARN,
       }
     )
   }
@@ -3310,7 +3310,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   handleReEnrollment(event: any) {
       this.enrollBtnLoading = true
       this.changeTab = !this.changeTab
-      this.raiseEnrollmentTelemetry('re-enroll')
+      this.raiseEnrollmentTelemetry('reenroll')
       console.log('this.enrolledCourseData', this.enrolledCourseData)
       // API logic and redirection
       if (this.enrolledCourseData) {
