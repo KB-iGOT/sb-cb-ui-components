@@ -85,6 +85,10 @@
                             </div>
                             <mat-option [value]="item?.identifier"
                                 *ngFor="let item of filteredDepartmentList">{{item?.orgName}}</mat-option>
+                            <!-- selected department not present in the current search/page:
+                                 kept rendered (hidden) so mat-select does not clear the selection -->
+                            <mat-option [value]="item?.identifier" style="display: none"
+                                *ngFor="let item of pinnedDepartmentOptions">{{item?.orgName}}</mat-option>
                             <mat-option disabled *ngIf="departmentLoading">Loading...</mat-option>
                             <mat-option disabled
                                 *ngIf="!departmentLoading && !filteredDepartmentList?.length">No department found</mat-option>
