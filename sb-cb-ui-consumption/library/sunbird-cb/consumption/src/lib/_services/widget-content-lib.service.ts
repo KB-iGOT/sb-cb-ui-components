@@ -545,7 +545,7 @@ export class WidgetContentLibService {
         // const enrolledCourse: any = await this.getEnrolledData(content.identifier);
         const enrolledCourse: any = enrollmentList
         if (enrolledCourse && enrolledCourse.length) {
-          const enrolledCourseData = enrolledCourse && enrolledCourse?.length && enrolledCourse.find((el: any) => el?.collectionId === baseContentRead || content?.identifier)
+          const enrolledCourseData = enrolledCourse && enrolledCourse?.length && enrolledCourse.find((el: any) => el?.collectionId === baseContentRead?.identifier || content?.identifier)
           if (enrolledCourseData && enrolledCourseData.content && (enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.BLENDED_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.INVITE_ONLY_PROGRAM ||
             enrolledCourseData.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM ||
@@ -556,7 +556,7 @@ export class WidgetContentLibService {
             }
             const data = await this.checkForDataToFormUrl(content, enrolledCourseData)
             return data
-          } {
+          } else {
             const data = await this.checkForDataToFormUrl(content, enrolledCourseData, baseContentRead, multilingualId)
             return data
           }
@@ -573,7 +573,7 @@ export class WidgetContentLibService {
     if (enrollData?.completionPercentage === 100) {
       return this.gotoTocPage(enrollData)
     }
-    if (enrollData?.lrcProgressDetails && enrollData.lrcProgressDetails.mimeType) {
+    if (enrollData?.lrcProgressDetails && enrollData?.lrcProgressDetails?.mimeType) {
       const modifyEnrollData = {
         ...enrollData,
         identifier: enrollData.collectionId,
@@ -590,7 +590,7 @@ export class WidgetContentLibService {
           enrollData.lrcProgressDetails.mimeType, content, baseContentRead, multilingualId)
       }
     }
-    if (enrollData.firstChildId || enrollData.lastReadContentId) {
+    if (enrollData && enrollData?.firstChildId || enrollData?.lastReadContentId) {
       const doId = enrollData.firstChildId || enrollData.lastReadContentId
       const responseData = await this.fetchProgramContent(doId).toPromise().then(async (res: any) => {
         if (res && res.result && res.result.content) {
@@ -607,9 +607,9 @@ export class WidgetContentLibService {
           }
         }
       })
-      return responseData ? responseData : this.gotoTocPage(content)
+      return responseData ? responseData : this.gotoTocPage(content || baseContentRead)
     }
-    return this.gotoTocPage(content)
+    return this.gotoTocPage(content || baseContentRead)
 
   }
 
