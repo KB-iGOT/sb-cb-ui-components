@@ -1275,6 +1275,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   openFeedbackDialog(content: any): void {
+    if (this.tocConfig?.uiVisibility?.rightPanel?.starRating === false) {
+      return
+    }
     const dialogRef = this.dialog.open(ContentRatingV2DialogComponent, {
       width: '768px',
       data: { content, userId: this.userId, userRating: this.userRating },
@@ -2320,6 +2323,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.tocSvc.subtitleOnBanners = data?.pageData?.data?.subtitleOnBanners || false
     this.tocSvc.showDescription = data?.pageData?.data?.showDescription || false
     this.tocConfig = data?.pageData?.data || {}
+    // stash the role-based toc form so the viewer (e.g. course-completion
+    // dialog) can read uiVisibility flags — viewer routes don't resolve it
+    this.tocSvc.tocPageConfig = this.tocConfig
     if (this.contentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
       this.kparray = this.tocConfig.karmaPointsLP || [
         {

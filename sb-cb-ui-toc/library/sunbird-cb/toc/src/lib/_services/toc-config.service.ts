@@ -32,7 +32,6 @@ export class TocConfigService {
               && this.configSvc.globalConfig.formClentVersion['toc']) || 1.0,
           },
         }
-        debugger
         return this.http.post<any>(API_END_POINTS.FORM_CONFIG_READ, request)
       }).pipe(
         map((response: any) => (response && response.result
