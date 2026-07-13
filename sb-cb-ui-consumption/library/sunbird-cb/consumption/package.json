@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/consumption",
-  "version": "0.0.6-ang-17-20-role-based",
+  "version": "0.0.10-ang-17-20-role-based",
   "dependencies": {
     "tslib": "^2.0.0"
   },
