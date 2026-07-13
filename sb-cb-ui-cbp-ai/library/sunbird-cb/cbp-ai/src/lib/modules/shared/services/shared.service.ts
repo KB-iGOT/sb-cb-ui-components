@@ -839,7 +839,7 @@ export class SharedService {
   getCenterBasedDepartment(state_center_id, options?: { limit?: number, offset?: number, query?: string }) {
     const headers = this.headers
     let params = new HttpParams()
-      .set('limit', String(options?.limit !== undefined ? options.limit : 9999))
+      .set('limit', String(options?.limit !== undefined ? options.limit : 50))
       .set('offset', String(options?.offset !== undefined ? options.offset : 0))
       .set('sub_org_type', 'ministry')
     if (options?.query) {
