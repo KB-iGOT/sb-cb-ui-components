@@ -1,8 +1,3 @@
-<ckeditor #editor [name]="name" [config]="getConfig()" [readonly]="false" (change)="onChange($event)" [(ngModel)]="html"
-  *ngIf="specificToolBar !== 'FTB'"></ckeditor>
-<ckeditor #editor [name]="name" [config]="getConfig()" [readonly]="false" (change)="onChange($event)" [(ngModel)]="html"
-  *ngIf="specificToolBar === 'FTB'">
-  <ckbutton [name]="'Blank'" [command]="'Blank'" (click)="addBlankBtn()" [label]="blankName" [toolbar]="'insert'">
-  </ckbutton>
-</ckeditor>
-<span [hidden]="true" #addBlank i18n>Add Blank</span>
+<ckeditor [editor]="Editor" [config]="editorConfig" [disabled]="readOnly" [(ngModel)]="html"
+  [style.--rte-min-height.px]="effectiveHeight" (ready)="onReady($event)" (change)="onChange($event)"
+  (blur)="onTouched.emit()"></ckeditor>

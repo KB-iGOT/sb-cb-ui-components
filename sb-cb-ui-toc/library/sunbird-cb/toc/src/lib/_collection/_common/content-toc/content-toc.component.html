@@ -18,8 +18,8 @@
     </div>
 </div>
 <div class="tab-group-container">
-    <mat-tab-group (selectedTabChange)="handleTabChange($event)" #stickyMenu [class.sticky-mat-tabs]="sticky" [selectedIndex]="selectedTabIndex"
-        [ngClass]="{'content-tabs':!fromViewer,'contentSticky': forPreview}">
+    <mat-tab-group (selectedTabChange)="handleTabChange($event)" #stickyMenu [class.sticky-mat-tabs]="sticky" mat-stretch-tabs="false" mat-align-tabs="start"
+        [selectedIndex]="selectedTabIndex" [ngClass]="{'content-tabs':!fromViewer,'contentSticky': forPreview}">
 
         <!-- Transcription Tab -->
         <mat-tab label="Transcription" *ngIf="viewerPage && enableTranscriptionFlag && vttLangArr?.length && subTitles?.length">
