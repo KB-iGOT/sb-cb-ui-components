@@ -125,7 +125,7 @@
                           </ng-container>
                           <!-- viewAll start-->
                           <div
-                            *ngIf="checkCondition(widgetData , stripsResultDataMap[key]) && tab?.value !== sakshamAIEnum.SakshamAI"
+                            *ngIf="checkCondition(widgetData , stripsResultDataMap[key]) && tab?.value !== sakshamAIEnum.SakshamAI && widgetData.strips[0]?.viewMoreUrl?.viewMoreText"
                             class=" hidden md:block">
                             <div class="ml-4 pl-2 view-more ws-mat-default-text">
                               <a class="flex ws-mat-default-text items-center justify-center mat-body-1 cursor-pointer"

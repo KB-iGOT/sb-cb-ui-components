@@ -86,6 +86,11 @@ export class AppTocService {
   resumeData: Subject<NsContent.IContinueLearningData | null> = new Subject<any>()
   private showSubtitleOnBanners = false
   private canShowDescription = false
+  // role-based toc page form config (route pageData.data) stashed by the TOC
+  // page so non-TOC surfaces (e.g. the viewer's course-completion dialog) can
+  // read flags like uiVisibility.rightPanel.starRating — the viewer routes do
+  // not resolve this form and TocConfigService's global form is not role-aware
+  public tocPageConfig: any = null
   resumeDataSubscription: Subscription | null = null
   primaryCategory = NsContent.EPrimaryCategory
   private updateReviews = new BehaviorSubject(false)
