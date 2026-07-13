@@ -16,8 +16,7 @@
   </div>
 
   <!-- Expanded Editor View -->
-  <div class="question-editor-section" *ngIf="isExpanded">
-
+  <div class="question-editor-section" *ngIf="isExpanded && questionDataLoaded">
     <div class="question-content-expanded">
       <sb-uic-assessment-rich-text
         [specificToolBar]="questionData.qType === 'FTB' ? 'FTB' : (questionData.qType === 'MTF' ? 'mtf' : '')"
@@ -127,7 +126,6 @@
         Options are automatically managed based on blanks ({{ fitbCount }} blank{{ fitbCount > 1 ? 's' : '' }})
       </div>
     </div>
-
 
   </div>
 </div>

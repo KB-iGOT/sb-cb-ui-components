@@ -10,7 +10,7 @@
     <ng-container *ngFor="let item of selectedFilterChips">
       <div class="filter-pill flex items-center">
         <span class="font-normal text-xs" [matTooltip]="formatFilterChips(item?.value, item?.type)">{{ formatFilterChips(item?.value, item?.type) }}</span>
-        <button mat-icon-button color="primary" (click)="clearFilterChip(item)">
+        <button matIconButton color="primary" (click)="clearFilterChip(item)">
           <mat-icon>close</mat-icon>
         </button>
       </div>
