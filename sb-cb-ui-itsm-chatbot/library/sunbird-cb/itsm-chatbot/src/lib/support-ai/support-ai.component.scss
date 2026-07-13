@@ -1213,6 +1213,25 @@
 }
 
 
+
+.action-button-container {
+  margin-left: 43px;
+    text-align: left;
+    margin-top: 0px;
+}
+
+.action-button-link {
+  color: #1B4CA1;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.action-button-link:hover {
+  color: #14397a;
+}
+
 /* ===========================
    Quick Reply Buttons
 =========================== */
