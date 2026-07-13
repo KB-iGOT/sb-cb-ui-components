@@ -188,6 +188,13 @@
                   </button>
                 </div>
 
+                <!-- action button (rendered as hyperlink) -->
+                <div *ngIf="item.activity?.type === 'action_button'" class="action-button-container">
+                  <a [href]="item.activity.url" target="_blank" rel="noopener noreferrer" class="action-button-link">
+                    {{ item.activity.label }}
+                  </a>
+                </div>
+
                 <!-- quick replies -->
 
                 <div *ngIf="item.activity?.type === 'quick_replies' && !item.optionsDisabled">
