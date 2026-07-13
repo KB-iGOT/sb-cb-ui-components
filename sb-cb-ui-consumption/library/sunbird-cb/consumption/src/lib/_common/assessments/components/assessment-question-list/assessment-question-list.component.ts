@@ -7,10 +7,10 @@ import { MatDialog } from '@angular/material/dialog'
 import { ConfirmationDialogComponent } from '../../../dialog-components/confirmation-dialog/confirmation-dialog.component'
 
 @Component({
-    selector: 'sb-uic-assessment-question-list',
-    templateUrl: './assessment-question-list.component.html',
-    styleUrls: ['./assessment-question-list.component.scss'],
-    standalone: false
+  selector: 'sb-uic-assessment-question-list',
+  templateUrl: './assessment-question-list.component.html',
+  styleUrls: ['./assessment-question-list.component.scss'],
+  standalone: false
 })
 export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   @Input() questionData: any = { qType: '', identifier: '' }
@@ -43,6 +43,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
     maxOptions: 7,
   }
   questionOptions: any[] = []
+  questionDataLoaded: boolean = false
 
   constructor(
     public assessemntService: AssessmentService,
@@ -60,6 +61,10 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
   }
 
   initializeQuestionData(): void {
+    // Existing questions (do_ identifier) fetch their full data on expand, so gate the
+    // editor view until that completes. New questions have nothing to fetch — mark them
+    // loaded up front so they expand immediately regardless of how they're opened.
+    this.questionDataLoaded = !this.questionData?.identifier?.startsWith('do_')
     // For initial load, just use whatever data we have
     // Complete data will be fetched when question is expanded
     this.populateQuestionForm()
@@ -342,7 +347,6 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
   onExpandQuestion(): void {
     this.questionExpanded.emit(this.questionIndex - 1)
-
     // If this is an existing question (has do_ identifier), fetch complete data on expand
     // Only fetch if we're expanding (not collapsing)
     if (!this.isExpanded && this.questionData.identifier && this.questionData.identifier.startsWith('do_')) {
@@ -356,6 +360,7 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
 
       this.assessemntService.getQuestionReadDetailsModeEdit(reqBody).subscribe({
         next: (response: any) => {
+          this.questionDataLoaded = true
           if (response?.result?.questions && response.result.questions.length > 0) {
             const completeQuestionData = response.result.questions[0]
             // Merge complete data with existing questionData
@@ -365,9 +370,12 @@ export class AssessmentQuestionListComponent implements OnInit, OnChanges {
           }
         },
         error: (error: any) => {
+          this.questionDataLoaded = true
           console.error('Error fetching question details:', error)
         }
       })
+    } else {
+      this.questionDataLoaded = true
     }
   }
 

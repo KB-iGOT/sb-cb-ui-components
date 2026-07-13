@@ -304,7 +304,7 @@ mat-list-item {
 
 .search-close-icon {
   position: absolute;
-  right: 66px;
+  right: 75px;
   top: 8px;
   &.mat-icon {
     font-size: 18px;
@@ -362,10 +362,17 @@ mat-list-item {
 
   // MDC list item content (replaces .mat-list-item-content)
   .mdc-list-item__content {
-    padding: 0 16px !important;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
+    // padding: 0 16px !important;
+    // display: flex;
+    // align-items: center;
+    // flex-direction: row;
+  }
+
+  .mdc-list-item__primary-text {
+    --mat-list-list-item-label-text-font: Lato;
+    --mat-list-list-item-label-text-line-height:1rem;
+    --mat-list-list-item-label-text-size: 0.75rem;
+
   }
 
   .mat-mdc-list-item-unscoped-content {

@@ -18,7 +18,7 @@
         <mat-radio-group [(ngModel)]="accessTypeDup" (change)="onAccessTypeChange($event)">
           <div class="radio-container flex gap-5 mb-4">
             <ng-container *ngFor="let item of accessControlCriteriaSelection?.accessTypes">
-              <mat-radio-button [value]="item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
+              <mat-radio-button [value]="item.value" [checked]="accessTypeDup === item.value" [disabled]="item?.disabled || accessControlCriteriaSelection?.readOnly">
                 <div class="flex gap-2 items-center">
                   <span>{{ item?.name }}</span>
                   <mat-icon svgIcon="info-outline" [matTooltip]="item?.tooltip"></mat-icon>
@@ -140,17 +140,17 @@
                               </div>
                               <div class="action-manage-selection">
                                 <button
-                                  mat-flat-button
+                                  mat-button
                                   (click)="manageSelections(condition, rule, i)"
                                   [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly"
-                                  class="rounded-full new-bg-color text-white mt-2 flex items-center gap-2"
+                                  class="rounded-full new-bg-color text-white flex items-center gap-2"
                                 >
-                                  <mat-icon svgIcon="svg_search" class="mr-2"></mat-icon>
+                                  <mat-icon svgIcon="svg_search" class="margin-remove"></mat-icon>
                                   <span class="font-bold text-sm">Manage Selection</span>
                                 </button>
                               </div>
                               <div class="action-options-selected">
-                                <button [disabled]="!condition.get('entity').value" mat-button class="new-secondary-button-no-border button-with-corners mt-2" type="button" (click)="manageSelections(condition, rule, i, 1)">
+                                <button [disabled]="!condition.get('entity').value" mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="manageSelections(condition, rule, i, 1)">
                                   <div class="flex gap-2 flex-middle mt-2">
                                     <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
                                   </div>
@@ -251,7 +251,7 @@
           <div class="action-save flex justify-center items-center gap-4" [ngClass]="{ 'mt-4': userGroup?.length === 1 && config?.application === MDO_APPLICATION }">
             <!-- Save Filter Button -->
             <button
-              mat-flat-button
+              mat-button
               class="flex rounded-full px-4 py-2 mat-btn-outline font-bold text-sm items-center gap-2"
               [disabled]="isSaveFltrBtnDisabled || isSaving || hasUserGroupBeenAdded"
               (click)="saveAccessSettings()"
