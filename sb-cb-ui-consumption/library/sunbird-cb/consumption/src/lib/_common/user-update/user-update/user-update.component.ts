@@ -388,8 +388,26 @@ export class UserUpdateComponent implements OnInit, OnChanges {
         }
       }
       const usrRoles = _.get(user, 'organisations[0].roles', [])
+      const hasUserRole = (roleName: string) =>
+        usrRoles.some((usrRole: any) => (usrRole || '').toLowerCase() === (roleName || '').toLowerCase())
 
-      if (this.isMdoLeader) {
+      if (this.isNgo) {
+        // For NGO orgs, show all NGO roles and pre-select the user's existing roles
+        this.uniqueRoles.forEach((role: any) => {
+          if (!this.rolesList.some((item: any) => item.roleName === role.roleName) && role.roleName !== 'MENTOR') {
+            this.rolesList.push({
+              roleName: role.roleName,
+              isSelected: hasUserRole(role.roleName),
+            })
+          }
+        })
+        // Keep the user's existing roles (e.g. VOLUNTEER) visible even if missing from the org type list
+        usrRoles.forEach((usrRole: any) => {
+          if (usrRole && !this.rolesList.some((item: any) => (item.roleName || '').toLowerCase() === usrRole.toLowerCase())) {
+            this.rolesList.push({ roleName: usrRole, isSelected: true })
+          }
+        })
+      } else if (this.isMdoLeader) {
         // For MDO leaders, add all unique roles except MENTOR
         this.uniqueRoles.forEach((role: any) => {
           if (!this.rolesList.some((item: any) => item.roleName === role.roleName) && role.roleName !== 'MENTOR') {
@@ -412,8 +430,15 @@ export class UserUpdateComponent implements OnInit, OnChanges {
         }
       }
       if (usrRoles.length > 0) {
+        // For NGO orgs, match the option values of the selection list (case-insensitive) so existing roles stay selected
+        const rolesValue = this.isNgo
+          ? usrRoles.map((usrRole: any) => {
+            const matched = this.rolesList.find((item: any) => (item.roleName || '').toLowerCase() === (usrRole || '').toLowerCase())
+            return matched ? matched.roleName : usrRole
+          })
+          : usrRoles
         setTimeout(() => {
-          this.userForm.controls['roles'].setValue(usrRoles)
+          this.userForm.controls['roles'].setValue(rolesValue)
         }, 0)
 
         usrRoles.forEach((role: any) => {
