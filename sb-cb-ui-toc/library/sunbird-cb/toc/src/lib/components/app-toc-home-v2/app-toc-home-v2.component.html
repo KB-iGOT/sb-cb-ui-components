@@ -477,7 +477,8 @@
                     </button>
                     <mat-menu #moreOptionsMenu="matMenu" xPosition="before" class="toc-kebab-menu">
                       <button mat-menu-item (click)="openUnenrollDialog()">
-                        <span class="text-red font-bold">Un-enroll</span>
+                        <span class="text-red font-bold">{{ 'cardcontentv2.unenroll'
+                          | translate }} </span>
                       </button>
                     </mat-menu>
                   </div>

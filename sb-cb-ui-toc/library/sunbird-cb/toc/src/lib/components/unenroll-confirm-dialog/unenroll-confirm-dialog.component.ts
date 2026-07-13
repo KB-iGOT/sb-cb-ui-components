@@ -77,7 +77,7 @@ export class UnenrollConfirmDialogComponent implements OnInit {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
-        id: 'unenroll',
+        id: this.data?.content?.identifier,
         subType: 'unenroll'
       },
       {
@@ -85,8 +85,8 @@ export class UnenrollConfirmDialogComponent implements OnInit {
         type: this.data?.content?.primaryCategory || ''
       },
       {
-        pageIdExt: 'btn-un-enroll',
-        module: WsEvents.EnumTelemetrymodules.CONTENT,
+        pageIdExt: 'btn-unenroll',
+        module: WsEvents.EnumTelemetrymodules.LEARN,
       })
 
   }
