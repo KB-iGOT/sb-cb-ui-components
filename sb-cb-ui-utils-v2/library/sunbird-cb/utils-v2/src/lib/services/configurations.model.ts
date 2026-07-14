@@ -72,8 +72,9 @@ export namespace NsInstanceConfig {
     compentency?: any  // This is a temporary fix, need to remove this after the competency is implemented in the app
     competency?: ICompetencyKeys,
     devnagiriMultiLangEnabled?: any,
-    completionSurvey: any
-    globalConfig: any
+    completionSurvey: any,
+    globalConfig: any,
+    leftNavBar?: any,
   }
 
   export interface ICompetencyKeys {

@@ -24,6 +24,8 @@ export enum ApiMethod {
 
 export interface ContentConfig {
   apiDetailsKey: string
+  showNoData?: boolean
+  noDataMessage?: string
   cardType: CardType
   maxCardsToShow: number
   cardClickDetails: {
@@ -66,6 +68,9 @@ export interface TabConfig {
 
 export interface ContentSectionConfig {
   sectionKey: string
+  headersubLableTeme?: string
+  headerSubLabel?: string
+  showHeaderSubLabel?: boolean
   header: string
   translateHeader: boolean
   visibilityMode: VisibilityMode

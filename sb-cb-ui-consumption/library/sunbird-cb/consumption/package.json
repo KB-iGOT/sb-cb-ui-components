@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/consumption",
-  "version": "0.0.28-ang-17-20-ui-ux",
+  "version": "0.0.29-ang-17-20-ui-ux",
   "dependencies": {
     "tslib": "^2.0.0"
   },
@@ -8,7 +8,9 @@
     "@angular/common": "^20.3.16",
     "@angular/core": "^20.3.16",
     "@sunbird-cb/design-system": "0.0.3",
-    "@sunbird-cb/utils-v2": "0.0.3-ang-17-20-ui-ux",
-    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20"
+    "@sunbird-cb/utils-v2": "0.0.4-ang-17-20-ui-ux",
+    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
+    "@ckeditor/ckeditor5-angular": "^9.1.0",
+    "ckeditor5": "^43.1.0"
   }
 }

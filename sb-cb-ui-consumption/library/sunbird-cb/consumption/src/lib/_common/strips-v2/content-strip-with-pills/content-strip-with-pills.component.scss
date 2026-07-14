@@ -31,12 +31,10 @@
   color: var(--text-bandw-black-sub-heading);
   background-color: transparent;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
   transition: colors 200ms;
   cursor: pointer;
+  font-family: 'Noto Sans';
 }
 
 // Active Pill - Expanded Card
@@ -71,10 +69,12 @@
   &__label {
     font-size: var(--font-size-sub-heading-2);
     color: #ffffff;
-    font-weight: 600;
+    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-family: 'Noto Sans';
+
   }
 
   &__descriptions {
@@ -90,6 +90,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-family: 'Noto Sans';
   }
 
   &__image {

@@ -5,7 +5,9 @@
   <sb-uic-spotlight-cards-v2 [heading]="section.header" [cards]="section.spotlightConfig"
     [showToggle]="true"></sb-uic-spotlight-cards-v2>
   } @else if (section.displayType !== 'spotlight') {
-  <sb-uic-accordion [header]="section.header" [translateHeader]="section.translateHeader" [expanded]="true">
+  <sb-uic-accordion [header]="section.header" [showHeaderSubLabel]="section.showHeaderSubLabel"
+    [headerSubLabel]="section.headerSubLabel" [headersubLableTeme]="section.headersubLableTeme"
+    [translateHeader]="section.translateHeader" [expanded]="true">
     @switch (section.displayType) {
     @case ('tabs') {
     @if (section.tabs?.length) {

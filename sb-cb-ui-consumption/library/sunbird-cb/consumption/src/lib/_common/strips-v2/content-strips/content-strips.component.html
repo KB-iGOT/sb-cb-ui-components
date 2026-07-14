@@ -31,13 +31,9 @@
   </div>
   }
   }
-
-  <!-- No Data -->
-  @if (!loading() && !cards()?.length) {
-  <sb-uic-carousel [items]="dummyCards()" [cardWidth]="280" [gap]="16">
-    <ng-template #carouselCard let-item let-index="index">
-      <!-- <sb-uic-card-course-strip [card]="item" /> -->
-    </ng-template>
-  </sb-uic-carousel>
+  @if (!loading() && cards()?.length === 0 && contentConfig()?.showNoData) {
+  <div class="flex justify-center items-center errorMessage">
+    <span>{{contentConfig()?.noDataMessage || 'No Data found'}} </span>
+  </div>
   }
 </div>

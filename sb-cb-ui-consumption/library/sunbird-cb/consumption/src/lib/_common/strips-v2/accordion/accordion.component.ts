@@ -12,6 +12,9 @@ import { MatIconModule } from '@angular/material/icon'
 })
 export class AccordionComponent {
   header = input.required<string>();
+  showHeaderSubLabel = input<boolean>(false);
+  headerSubLabel = input<string | null>(null)
+  headersubLableTeme = input<string | null>(null)
   translateHeader = input<boolean>(false);
   expanded = input<boolean>(true);
   contentTemplate = input<TemplateRef<unknown> | null>(null);

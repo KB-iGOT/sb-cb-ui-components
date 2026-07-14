@@ -74,6 +74,9 @@ export interface BaseSectionConfig {
   cardType: SidebarCardType
   sectionTitle: string
   sectionKey: string
+  headersubLableTeme?: string
+  headerSubLabel?: string
+  showHeaderSubLabel?: boolean
   sectionLoading?: boolean
   disableTranslate?: boolean
   viewAllKey?: string

@@ -37,7 +37,11 @@
           (click)="toggleSidebar()"
           [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
           [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
-          <mat-icon class="menu-icon" [attr.aria-hidden]="true">{{ isOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+          @if (isOpen()) {
+          <mat-icon class="menu-icon" [attr.aria-hidden]="true">menu_open</mat-icon>
+          } @else {
+          <img src="assets/icons/home-v2/MenuCollapse.svg" alt="Expand" class="menu-icon" aria-hidden="true" />
+          }
         </button>
       </div>
 

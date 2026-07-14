@@ -44,13 +44,13 @@
   </section> -->
 
   <section class="padding-s border-bottom min-heig">
-    <a role="link" [routerLink]="disableViewProfile ? null: '/app/person-profile/me'" class="all-features"
+    <a role="link" [routerLink]="disableViewProfile ? null: '/app/person-profile/me'" class="all-features flex items-center"
       id="viewprofile">
       <div class="float-left">
         <ws-widget-avatar-photo [name]="givenName" [size]="'m'" class="appIcon-igot"
           [photoUrl]="profileImage"></ws-widget-avatar-photo>
       </div>
-      <div class="inline-block margin-left-s pfname margin-eight">
+      <div class="inline-block margin-left-s pfname">
         <p class="mat-subtitle-1">{{ givenName }}</p>
         <p i18n role="link" class="ws-mat-default-text mat-body-1 font-medium"></p>
       </div>

@@ -1278,6 +1278,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   openFeedbackDialog(content: any): void {
+    if (this.tocConfig?.uiVisibility?.rightPanel?.starRating === false) {
+      return
+    }
     const dialogRef = this.dialog.open(ContentRatingV2DialogComponent, {
       width: '768px',
       data: { content, userId: this.userId, userRating: this.userRating },
@@ -1405,7 +1408,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  raiseEnrollmentTelemetry(action: 'enroll' | 're-enroll') {
+  raiseEnrollmentTelemetry(action: 'enroll' | 'reenroll') {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
@@ -1418,7 +1421,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       },
       {
         pageIdExt: `btn-${action}`,
-        module: WsEvents.EnumTelemetrymodules.CONTENT,
+        module: WsEvents.EnumTelemetrymodules.LEARN,
       }
     )
   }
@@ -2369,6 +2372,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.tocSvc.subtitleOnBanners = data?.pageData?.data?.subtitleOnBanners || false
     this.tocSvc.showDescription = data?.pageData?.data?.showDescription || false
     this.tocConfig = data?.pageData?.data || {}
+    // stash the role-based toc form so the viewer (e.g. course-completion
+    // dialog) can read uiVisibility flags — viewer routes don't resolve it
+    this.tocSvc.tocPageConfig = this.tocConfig
     if (this.contentReadData?.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
       this.kparray = this.tocConfig.karmaPointsLP || [
         {
@@ -3310,7 +3316,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   handleReEnrollment(event: any) {
       this.enrollBtnLoading = true
       this.changeTab = !this.changeTab
-      this.raiseEnrollmentTelemetry('re-enroll')
+      this.raiseEnrollmentTelemetry('reenroll')
       console.log('this.enrolledCourseData', this.enrolledCourseData)
       // API logic and redirection
       if (this.enrolledCourseData) {
