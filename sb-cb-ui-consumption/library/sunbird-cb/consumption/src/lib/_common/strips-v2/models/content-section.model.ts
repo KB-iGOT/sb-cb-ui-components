@@ -24,6 +24,8 @@ export enum ApiMethod {
 
 export interface ContentConfig {
   apiDetailsKey: string
+  showNoData?: boolean
+  noDataMessage?: string
   cardType: CardType
   maxCardsToShow: number
   cardClickDetails: {
