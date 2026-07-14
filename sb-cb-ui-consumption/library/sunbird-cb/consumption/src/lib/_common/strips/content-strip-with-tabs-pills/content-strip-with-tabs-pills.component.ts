@@ -1094,6 +1094,15 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
     })
   }
 
+  tabChanged(tabIndex: number, stripMap: IStripUnitContentData, stripKey: string) {
+    const actualTabIndex = stripMap?.tabs
+      ?.map((tab, index) => ({ tab, index }))
+      .filter(({ tab }) => !tab?.hideTab)[tabIndex]?.index
+    if (actualTabIndex !== undefined) {
+      this.tabClicked(actualTabIndex, 0, stripMap, stripKey)
+    }
+  }
+
   public tabClicked(tabEvent: any, pillIndex: any, stripMap: IStripUnitContentData, stripKey: string) {
     let tabEventIndex = tabEvent
     this.activeTabIndex = tabEventIndex
@@ -1104,6 +1113,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].tabLoading = true
       stripMap.showOnLoader = true
       this.resetSelectedPill(stripMap.tabs[tabEventIndex].pillsData)
+      stripMap.tabs[tabEventIndex].pillsData[pillIndex].selected = true
     }
     // const data: WsEvents.ITelemetryTabData = {
     //   label: `${stripMap.tabs[tabEvent].label}`,
@@ -1929,6 +1939,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
   ) {
     if (strip.tabs[tabIndex]?.request?.courseRecommendation) {
       this.sakshamLoader = true
+      const recommendationTabValue = strip?.tabs[tabIndex]?.value || SakshamAI?.SakshamAI
       let payload = {
         "user_id": this.configSvc.userProfile.userId,
         "department": this.configSvc.userProfile.departmentName,
@@ -1954,7 +1965,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         this.recommendedCoursesId = response?.id || ''
         this.contentSvc.setRecommendedIds(this.recommendedCoursesId, this.configSvc.userProfile.userId)
 
-        if (response.feedbacks.length) {
+        if (response.feedbacks?.length) {
           this.contentSvc.setFeedbackData(response.feedbacks)
         }
 
@@ -2011,11 +2022,11 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
                 let courses = this.contentSvc.filterCoursesWithNoRating(response, results.result.content)
                 let tabResults: any
                 if (strip?.tabs && strip?.tabs?.length) {
-                  tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, SakshamAI.SakshamAI)
+                  tabResults = this.splitDesignationsTabData(courses, strip, enollData, coursesIds, recommendationTabValue)
                   let countOfWidget = true
                   if (strip && strip?.tabs && strip?.tabs?.length) {
                     strip.tabs.forEach((tab: any) => {
-                      if (tab?.value === SakshamAI.SakshamAI && tab?.pillsData && tab?.pillsData.length) {
+                      if (tab?.value === recommendationTabValue && tab?.pillsData && tab?.pillsData.length) {
                         tab.pillsData.forEach((pill: any) => {
                           if (pill && pill.widgets && pill.widgets.length) {
                             if (countOfWidget) {

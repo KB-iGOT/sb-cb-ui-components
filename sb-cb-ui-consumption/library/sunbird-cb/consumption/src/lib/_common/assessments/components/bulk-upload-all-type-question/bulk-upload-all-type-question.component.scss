@@ -4,12 +4,16 @@
   width: 100%;
   height: 100%;
 
+  .bulk-upload-header-section {
+    padding: 16px;
+  }
+
   .dialog-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin: 0;
-    padding: 16px 24px;
+    padding: 0px;
     font-size: 20px;
     font-weight: 600;
 
@@ -20,12 +24,12 @@
 
   .dialog-content {
     flex: 1;
-    padding: 0 24px !important;
+    padding: 0 16px !important;
     margin: 0 !important;
   }
 
   .dialog-actions {
-    padding: 16px 0px !important;
+    padding: 16px 16px !important;
     margin: 0 !important;
     border-top: 1px solid #e0e0e0;
     gap: 12px;
@@ -293,7 +297,7 @@
 .questions-list {
   background: white;
   border-radius: 8px;
-  padding: 16px;
+  padding: 16px 0px;
 
   .question-panel {
     margin-bottom: 12px;

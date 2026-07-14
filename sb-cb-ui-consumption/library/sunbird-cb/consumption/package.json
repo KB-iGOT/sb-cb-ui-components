@@ -9,6 +9,8 @@
     "@angular/core": "^20.3.16",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/utils-v2": "0.0.1-ang-17-20-role-based",
-    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20"
+    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
+    "@ckeditor/ckeditor5-angular": "^9.1.0",
+    "ckeditor5": "^43.1.0"
   }
 }

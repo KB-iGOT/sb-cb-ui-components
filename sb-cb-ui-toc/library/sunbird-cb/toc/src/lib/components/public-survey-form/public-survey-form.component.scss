@@ -4,11 +4,22 @@
 
 
 
+:host {
+  display: block;
+  height: 100%;
+}
+
 .preview-container {
   max-height: 700px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .form-content {
     background: #F4F8FF;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .form-header {
