@@ -117,7 +117,7 @@
 }
 
 :host ::ng-deep .mat-mdc-dialog-content {
-  max-height: 79vh !important;
+  max-height: calc(95vh - 180px) !important;
 }
 
 .apply-button-container {

@@ -81,11 +81,11 @@
             <ng-container *ngIf="!stripsResultDataMap[key]?.showOnNoData && !stripsResultDataMap[key]?.showOnError">
               <ng-container *ngIf="stripsResultDataMap[key].tabs && stripsResultDataMap[key].tabs.length">
                 <mat-tab-group animationDuration="0ms" class="mat-tab-labels w-full strips-tabgroup padding-bottom-tabs"
-                  dynamicHeight>
+                  dynamicHeight (selectedIndexChange)="tabChanged($event, stripsResultDataMap[key], key)">
                   <ng-container *ngFor="let tab of stripsResultDataMap[key].tabs; let last = last;let tabIndex = index">
                     <mat-tab *ngIf="!tab?.hideTab">
                       <ng-template mat-tab-label>
-                        <div (click)="tabClicked(tabIndex, 0, stripsResultDataMap[key], key)">
+                        <div>
                           <ng-container *ngIf="tab?.value !== sakshamAIEnum.SakshamAI">
                             <span>
                               <span *ngIf="tab?.disableTranslate">{{tab?.label}}</span>
@@ -125,7 +125,7 @@
                           </ng-container>
                           <!-- viewAll start-->
                           <div
-                            *ngIf="checkCondition(widgetData , stripsResultDataMap[key]) && tab?.value !== sakshamAIEnum.SakshamAI"
+                            *ngIf="checkCondition(widgetData , stripsResultDataMap[key]) && tab?.value !== sakshamAIEnum.SakshamAI && widgetData.strips[0]?.viewMoreUrl?.viewMoreText"
                             class=" hidden md:block">
                             <div class="ml-4 pl-2 view-more ws-mat-default-text">
                               <a class="flex ws-mat-default-text items-center justify-center mat-body-1 cursor-pointer"
