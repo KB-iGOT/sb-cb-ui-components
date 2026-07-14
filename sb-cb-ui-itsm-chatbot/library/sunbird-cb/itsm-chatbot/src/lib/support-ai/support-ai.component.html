@@ -148,7 +148,7 @@
                         View More ({{ plan.children.length - 3 }})
 
                       </button>
-<div class="course-status-legend">
+<div class="course-status-legend" *ngIf="item.activity?.show_status !== false">
   <div class="legend-item">
     <span class="nested-course-status status-completed"></span>
     <span>Completed</span>
@@ -241,17 +241,21 @@
             </div>
           </div>
         </div>
+        <div *ngIf="errorMessage" class="error-message-container">
+       <div class="error-message">{{ errorMessage }}</div>
+     </div>
         <div class="start-new-conv-container">
           <button class="start-new-conv-btn" (click)="startNewConversation()">
             <mat-icon class="start-new-conv-icon">chevron_left</mat-icon>
             <span class="startconv">Start new conversation...</span>
           </button>
         </div>
-          <div *ngIf="showRetry" class="retry-container">
+       
+          <!-- <div *ngIf="showRetry" class="retry-container">
           <button class="retry-btn start-new-conv-btn" (click)="retryApi()">
             Retry
           </button>
-        </div>
+        </div> -->
 
       </ng-container>
 

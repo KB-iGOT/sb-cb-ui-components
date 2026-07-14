@@ -118,6 +118,7 @@ setInputEnabled(value: boolean) {
 }
   showRetry = false;
 retryCallback: (() => void) | null = null;
+errorMessage: string = '';
 
   // course picker var
   currentPicker: any = null;
@@ -183,8 +184,10 @@ expandedCourseLists: { [planId: string]: boolean } = {};
           this.createSession()
         }
       },
-    error: () => {
+    error: (error: any) => {
   this.loadingSupportAI = false;
+  this.errorMessage = error?.error?.params?.errmsg || error?.message || 'Failed to initialize Support AI. Please try again.';
+  console.log('error', error)
   this.setRetry(() => this.initializeSupportAI());
 }
     })
@@ -194,9 +197,13 @@ expandedCourseLists: { [planId: string]: boolean } = {};
   this.retryCallback = callback;
 }
 
+  clearError() {
+  this.errorMessage = '';
+}
+
 retryApi() {
   this.showRetry = false;
-
+  this.errorMessage = '';
   if (this.retryCallback) {
     this.retryCallback();
   }
@@ -210,9 +217,11 @@ retryApi() {
     this.renderActivities(res.activities);
     this.loadingSupportAI = false;
     this.showRetry = false;
+    this.errorMessage = '';
   },
-  error: () => {
+  error: (error: any) => {
     this.loadingSupportAI = false;
+    this.errorMessage = error?.error?.params?.errmsg || error?.message || 'Failed to create session. Please try again.';
     this.setRetry(() => this.createSession());
   }
 });
@@ -316,9 +325,12 @@ selectPickerItem(item: any) {
 
           this.loadingSupportAI = false
           this.showRetry = false;
+          this.errorMessage = '';
         },
-        error: () => {
+        error: (error: any) => {
+          console.log('error', error)
     this.loadingSupportAI = false;
+    this.errorMessage = error?.error?.params?.errmsg || error?.message || 'Failed to send message. Please try again.';
     this.setRetry(() => this.sendTurn(payload));
 }
       })
@@ -342,6 +354,8 @@ selectPickerItem(item: any) {
     this.chatActivities = []
     this.sessionId = ''
     this.isInputEnabled = false
+    this.errorMessage = ''
+    this.showRetry = false
     this.createSession()
   }
   loadHistory() {
