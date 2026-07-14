@@ -23,7 +23,7 @@ import { AssessmentSessionsComponent } from './components/assessment-sessions/as
 import { SelectQuestionModalComponent } from './components/select-question-modal/select-question-modal.component'
 import { AssessmentQuestionListComponent } from './components/assessment-question-list/assessment-question-list.component'
 import { AssessmentRichTextComponent } from './components/assessment-rich-text/assessment-rich-text.component'
-import { CKEditorModule } from 'ng2-ckeditor'
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
 import { MultipleChoiceQuestionComponent } from './components/multiple-choice-question/multiple-choice-question.component'
 import { MatchTheFollowingComponent } from './components/match-the-following/match-the-following.component'
 import { FillUpTheBlanksComponent } from './components/fill-up-the-blanks/fill-up-the-blanks.component'
