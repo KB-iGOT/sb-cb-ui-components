@@ -41,6 +41,7 @@
     }
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-angular": "^9.1.0",
     "@angular/animations": "^20.3.16",
     "@angular/cdk": "^20.2.14",
     "@angular/common": "^20.3.16",
@@ -56,11 +57,11 @@
     "@sunbird-cb/design-system": "0.0.4",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
     "@sunbird-cb/utils-v2": "0.0.1-ang-17-20-role-based",
+    "ckeditor5": "^43.1.0",
     "dayjs": "^1.10.7",
     "jspdf": "^2.5.1",
     "keycloak-angular": "^6.1.0",
     "moment": "^2.29.1",
-    "ng2-ckeditor": "^1.2.6",
     "ngx-image-cropper": "^3.3.4",
     "rxjs": "^6.6.6",
     "rxjs-compat": "^6.6.6",
@@ -72,7 +73,6 @@
     "@angular/cli": "^20.3.15",
     "@angular/compiler-cli": "^20.3.16",
     "@angular/language-service": "^20.3.16",
-    "@types/ckeditor": "^4.9.10",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.6",
     "@types/jest": "^29.5.14",
