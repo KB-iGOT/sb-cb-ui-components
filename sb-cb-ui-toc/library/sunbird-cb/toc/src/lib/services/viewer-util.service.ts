@@ -216,6 +216,13 @@ export class ViewerUtilService {
     const tempContentData = this.contentSvc.currentMetaData
     const tempContentReadData = this.contentSvc.currentContentReadMetaData
     const enrollmentList = this.contentSvc.currentBatchEnrollmentList
+    // preview/deep-link flows may never load the collection metadata. This
+    // method runs inside player ngOnDestroy during route deactivation — an
+    // exception here aborts the in-flight navigation (the page appears to
+    // bounce back), so bail out safely instead of dereferencing undefined.
+    if (!tempContentData) {
+      return tempData
+    }
     if (!this.forPreview) {
       if (tempContentData.courseCategory === 'Learning Pathway') {
         // Find the course that contains the given resource ID
@@ -226,7 +233,7 @@ export class ViewerUtilService {
           tempData.courseId = foundCourse.identifier
 
           // Try to find batch ID from enrollment data for the found course
-          if (foundCourse.identifier) {
+          if (foundCourse.identifier && enrollmentList) {
             const enrollment = enrollmentList.find(
               (course: any) => course.collectionId === foundCourse.identifier
             )
@@ -236,7 +243,7 @@ export class ViewerUtilService {
             }
           }
         }
-      } else if (tempContentData && tempContentReadData.cumulativeTracking &&
+      } else if (tempContentData && tempContentReadData && tempContentReadData.cumulativeTracking &&
         (tempContentData.primaryCategory === NsContent.EPrimaryCategory.PROGRAM ||
           tempContentData.primaryCategory === NsContent.EPrimaryCategory.CURATED_PROGRAM
           || tempContentData.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM
@@ -257,7 +264,7 @@ export class ViewerUtilService {
               }
             }
           } else if (tempContentData.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM) {
-            if (tempData.courseId === courseId) {
+            if (tempData.courseId === courseId && enrollmentList) {
               const bPEnrollmentList = enrollmentList.filter((v: NsContent.ICourse) => v.contentId === tempContentData.identifier)
               if (tempContentData.childNodes && tempContentData.childNodes.indexOf(resourceId) !== -1) {
                 if (bPEnrollmentList.length > 0) {
