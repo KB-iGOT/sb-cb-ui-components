@@ -446,6 +446,18 @@ export class UserUpdateComponent implements OnInit, OnChanges {
           this.userRoles.add(role)
         })
       }
+
+      // When only one role is available, it stays selected by default and cannot be unchecked
+      if (this.rolesList.length === 1) {
+        const onlyRole = this.rolesList[0].roleName
+        this.rolesList[0].isSelected = true
+        this.userRoles.add(onlyRole)
+        if (!usrRoles.includes(onlyRole)) {
+          setTimeout(() => {
+            this.userForm.controls['roles'].setValue([...usrRoles, onlyRole])
+          }, 0)
+        }
+      }
     }
   }
   //#endregion (get user details)
@@ -689,6 +701,15 @@ export class UserUpdateComponent implements OnInit, OnChanges {
 
   //#region (UI interactions)
   modifyUserRoles(role: string) {
+    if (this.rolesList.length === 1 && this.rolesList[0].roleName === role) {
+      // single available role cannot be unchecked; re-assert the selection after the click toggles it
+      this.userRoles.add(role)
+      this.rolesList[0].isSelected = true
+      setTimeout(() => {
+        this.userForm.controls['roles'].setValue([role])
+      }, 0)
+      return
+    }
     if (this.userRoles.has(role)) {
       this.userRoles.delete(role)
     } else {
