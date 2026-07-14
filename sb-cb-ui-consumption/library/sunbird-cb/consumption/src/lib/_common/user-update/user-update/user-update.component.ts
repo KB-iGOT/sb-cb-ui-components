@@ -496,7 +496,14 @@ export class UserUpdateComponent implements OnInit, OnChanges {
           distinctUntilChanged(),
           startWith(''),
           map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
-          map((name: any) => name ? this.filterLanguage(name) : (this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])),
+          map((name: any) => {
+            const entries = this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : []
+            if (!name) {
+              return entries
+            }
+            const exactMatch = entries.some((option: any) => (option.name || '').toLowerCase() === name.toLowerCase())
+            return exactMatch ? entries : this.filterLanguage(name)
+          }),
         )
         .subscribe(res => {
           this.masterLanguages = of(res)
@@ -719,6 +726,16 @@ export class UserUpdateComponent implements OnInit, OnChanges {
 
   editOtherDetails() {
     this.otherDetailsEditable = true
+    const domicileMediumValue = _.get(this.userDetails, 'profileDetails.personalDetails.domicileMedium', '') ||
+      _.get(this.otherDetails, 'domicileMedium', '')
+    this.masterLanguages = of(this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])
+    // Set the value after the edit view is rendered, so the autocomplete input picks it up
+    setTimeout(() => {
+      const domicileMediumControl = this.otherDetailsForm.get('domicileMedium')
+      if (domicileMediumControl) {
+        domicileMediumControl.setValue(domicileMediumValue)
+      }
+    })
   }
 
   addActivity(event: any) {
