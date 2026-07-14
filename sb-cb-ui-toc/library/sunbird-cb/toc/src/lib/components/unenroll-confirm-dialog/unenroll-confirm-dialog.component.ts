@@ -81,7 +81,7 @@ export class UnenrollConfirmDialogComponent implements OnInit {
         subType: 'unenroll'
       },
       {
-        id: this.data?.content?.name || 'unknown-content',
+        id: this.data?.content?.identifier || 'unknown-content',
         type: this.data?.content?.primaryCategory || ''
       },
       {
