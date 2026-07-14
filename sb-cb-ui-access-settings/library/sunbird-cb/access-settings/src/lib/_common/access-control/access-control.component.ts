@@ -853,6 +853,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const dialogRef = this.dialog.open(EntitySelectionsComponent, {
       width: "1032px",
+      maxHeight: "95vh",
       data: { rule: rule, condition: condition, selected: condition.selections, activeTabSelected: activeTabSelected, disabled: isDisabled }
     });
 

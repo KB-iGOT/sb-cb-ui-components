@@ -9,8 +9,7 @@ import { LoggerService } from './logger.service'
 import { NsContent } from './widget-content.model'
 import { Router, NavigationStart } from '@angular/router'
 import { NPSGridService } from './nps-grid.service'
-
-declare var $t: any
+import { $t } from '@project-sunbird/telemetry-sdk';
 
 @Injectable({
   providedIn: 'root',
@@ -125,7 +124,7 @@ export class TelemetryService {
     try {
       if (this.telemetryConfig) {
         $t.start(
-          this.telemetryConfig,
+          this.telemetryConfig as any,
           (pageContext && pageContext.pageId) ?
             pageContext.pageId
             : '',
