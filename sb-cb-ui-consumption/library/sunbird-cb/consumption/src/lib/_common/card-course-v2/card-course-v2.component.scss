@@ -34,9 +34,9 @@ $white-80 : rgba(255, 255, 255, 0.88);
   overflow: hidden;
   // background: var(--environment-application-backgrounds-card-background-1);
   cursor: pointer;
-  font-family: inherit;
   box-sizing: border-box;
   border: 1px solid var(--border-default);
+  font-family: 'Noto Sans';
 
   &--expired {
     opacity: 0.55;

@@ -8,6 +8,7 @@
 
 .section-title {
   user-select: none;
+  font: 600 12px 'Noto Sans';
 }
 
 .nav-list {
@@ -148,6 +149,7 @@
 .nav-label {
   line-height: 1.4;
   word-break: break-word;
+  font: 400 14px 'Noto Sans';
 }
 
 .active-indicator {
@@ -156,6 +158,8 @@
 
 .view-all-link {
   cursor: pointer;
+  font: 400 14px 'Noto Sans';
+  color: var(--environment-button-primary-filled-primary);
 
   .view-all-icon {
     font-size: 20px;
