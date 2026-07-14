@@ -146,15 +146,28 @@
   background: no-repeat padding-box #0074b6 !important;
   border-radius: 4px;
   box-sizing: border-box;
-  padding-right: 23px;
+  padding: 0 23px;
   line-height: 28px;
   height: 36px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 4px;
 }
 
 .oppDisable {
   opacity: 0.6;
   pointer-events: none;
 
+}
+
+.single-role-lock {
+  cursor: not-allowed;
+}
+
+::ng-deep .single-role-lock.mdc-list-item--disabled .mdc-list-item__primary-text {
+  color: rgba(0, 0, 0, 0.87) !important;
+  opacity: 1 !important;
 }
 
 .appr-text-field {
