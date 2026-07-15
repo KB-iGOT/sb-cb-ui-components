@@ -230,6 +230,10 @@
   color: var(--text-bandw-black-body);
   background: transparent !important;
 
+  .child-icon {
+    background-color: var(--environment-application-backgrounds-card-background);
+  }
+
   .child-icon mat-icon {
     color: var(--text-bandw-black-body);
   }
@@ -244,13 +248,13 @@
     color: var(--text-button-text-primary-white);
     font-size: var(--font-size-sub-heading-2);
 
-    .child-icon mat-icon {
-      color: var(--text-button-text-primary-white);
-    }
+    // .child-icon mat-icon {
+    //   color: var(--text-button-text-primary-white);
+    // }
 
-    .child-icon img {
-      filter: brightness(0) invert(1);
-    }
+    // .child-icon img {
+    //   filter: brightness(0) invert(1);
+    // }
 
     .child-title {
       font: 600 14px 'Noto Sans';

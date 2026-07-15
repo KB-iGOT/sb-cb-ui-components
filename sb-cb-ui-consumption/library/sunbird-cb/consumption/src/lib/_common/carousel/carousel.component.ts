@@ -39,7 +39,7 @@ export class CarouselComponent implements AfterViewInit, OnDestroy {
   items = input.required<any[]>();
 
   /** Fixed width of each card in pixels */
-  cardWidth = input<number>(280);
+  cardWidth = input<number>(230);
 
   /** Gap between cards in pixels */
   gap = input<number>(16);

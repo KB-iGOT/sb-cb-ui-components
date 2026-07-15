@@ -1,6 +1,6 @@
 <div class="w-full">
   <!-- Header -->
-  <div class="flex items-center justify-between cursor-pointer px-4 py-3 accordian-header" (click)="toggleExpanded()"
+  <div class="flex items-center justify-between cursor-pointer py-3 accordian-header" (click)="toggleExpanded()"
     (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()" tabindex="0" role="button"
     [attr.aria-expanded]="isExpanded()">
     <div class="section-header flex items-center gap-2">{{ header() }}
@@ -18,7 +18,7 @@
 
   <!-- Content -->
   @if (isExpanded()) {
-  <div class="px-4 py-2">
+  <div class="">
     @if (contentTemplate()) {
     <ng-container [ngTemplateOutlet]="contentTemplate()!"></ng-container>
     } @else {
