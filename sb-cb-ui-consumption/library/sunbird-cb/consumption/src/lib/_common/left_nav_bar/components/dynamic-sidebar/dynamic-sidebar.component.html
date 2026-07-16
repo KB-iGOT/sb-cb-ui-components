@@ -32,17 +32,31 @@
         }
 
         <!-- Menu Toggle Button -->
-        <button mat-icon-button
+        <div class="sidebar-toggle-btn hover:bg-gray-100 flex items-center justify-center ml-1 md:ml-0"
+          (click)="toggleSidebar()"
+          [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
+          [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
+          @if (isOpen()) {
+          <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'"
+            [style.-webkit-mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'" role="presentation"></span>
+          } @else {
+          <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuOpen.svg)'"
+            [style.-webkit-mask-image]="'url(/assets/icons/home-v2/MenuOpen.svg)'" role="presentation"></span>
+          }
+        </div>
+        <!-- <button mat-icon-button
           class="sidebar-toggle-btn bg-white rounded-lg hover:bg-gray-100 flex items-center justify-center p-2 ml-1 md:ml-0"
           (click)="toggleSidebar()"
           [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
           [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
           @if (isOpen()) {
-          <mat-icon class="menu-icon" [attr.aria-hidden]="true">menu_open</mat-icon>
+          <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'"
+            [style.-webkit-mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'" role="presentation"></span>
           } @else {
-          <img src="assets/icons/home-v2/MenuCollapse.svg" alt="Expand" class="menu-icon" aria-hidden="true" />
+          <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuOpen.svg)'"
+            [style.-webkit-mask-image]="'url(/assets/icons/home-v2/MenuOpen.svg)'" role="presentation"></span>
           }
-        </button>
+        </button> -->
       </div>
 
       <!-- Scrollable Navigation Sections -->
