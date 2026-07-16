@@ -80,6 +80,16 @@ export const API_REGISTRY: ApiRegistryConfig = {
     method: ApiMethod.Post,
     body: {
       "courseCategory": "Comprehensive Assessment Program"
+    },
+    chainedApi: {
+      endpoint: '/apis/proxies/v8/learner/course/v4/user/enrollment/details/',
+      method: ApiMethod.Post,
+      addUserId: true,
+      sourceListPath: 'result.content',
+      identifierField: 'identifier',
+      buildBody: (ids: string[]) => ({ request: { courseId: ids } }),
+      enrolledListPath: 'result.courses',
+      enrolledMatchField: 'courseId'
     }
   },
   aparModeratedApi: {

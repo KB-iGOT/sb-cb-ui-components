@@ -95,3 +95,19 @@
     background-color: var(--environment-icon-overall-primary-bandw);
   }
 }
+
+@media (max-width: 768px) {
+  .carousel-dots {
+    gap: 3px;
+  }
+
+  .carousel-dot {
+    width: 6px;
+    height: 6px;
+
+    &.active {
+    width: 12px;
+    }
+  }
+
+}

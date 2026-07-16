@@ -50,63 +50,55 @@ export class CardTransformerService {
         const todayDate = dayjs().format('YYYY-MM-DD')
         const filteredData = data.filter((item: any) => item?.isApar === true)
         filteredData.forEach((item: any) => {
-          item.contentList.forEach((childData: any) => {
-            const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-            const daysCount = dayjs(endDate).diff(todayDate, 'day')
-            childData['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-              ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-            childData['endDate'] = item.endDate
-            childData['parentId'] = item.id
-            childData['planType'] = 'cbPlan'
-            childData['contentStatus'] = 0
-            childData['isApar'] = item.isApar
-            const card: CardViewModel = {
-              id: (item?.['id'] as string) ?? '',
-              title: (childData?.['name'] as string) ?? '',
-              image: (childData?.['posterImage'] as string) ?? (childData?.['posterImage'] as string) ?? '',
-              tags: (childData?.['tags'] as string[]) ?? [],
-              duration: (childData?.['duration'] as string) ?? '',
-              status: (childData?.['status'] as string) ?? '',
-              rating: (childData?.['averageRating'] as number) ?? 0,
-              provider: (childData?.['sourceName'] as string) ?? (childData?.['source'] as string) ?? '',
-              level: (childData?.['complexityLevel'] as string) ?? '',
-              metadata: childData ?? {}
-            }
-            mapedData.push(card)
-            // contentIds.push(childData.identifier)
-            // if (childData.status !== NsCardContent.IGOTConst.RETIRED) {
-            //   cbpContentData.push(childData)
-            // }
-          })
+          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
+          const daysCount = dayjs(endDate).diff(todayDate, 'day')
+          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
+            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
+          item['parentId'] = item.identifier
+          item['planType'] = 'cbPlan'
+          item['contentStatus'] = 0
+          const card: CardViewModel = {
+            id: (item?.['identifier'] as string) ?? '',
+            title: (item?.['name'] as string) ?? '',
+            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
+            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
+            duration: (item?.['duration'] as string) ?? '',
+            status: (item?.['status'] as string) ?? '',
+            rating: (item?.['averageRating'] as number) ?? 0, // not found
+            provider: (item?.['sourceName'] as string),
+            level: (item?.['complexityLevel'] as string) ?? '',
+            planDuration: item['planDuration'],
+            contentStatus: item['contentStatus'],
+            metadata: item ?? {}
+          }
+          mapedData.push(card)
         })
         break
       case 'trainingPlanApi':
         const todaysDate = dayjs().format('YYYY-MM-DD')
         data.forEach((item: any) => {
-          item.contentList.forEach((childData: any) => {
-            const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-            const daysCount = dayjs(endDate).diff(todaysDate, 'day')
-            childData['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-              ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-            childData['endDate'] = item.endDate
-            childData['parentId'] = item.id
-            childData['planType'] = 'cbPlan'
-            childData['contentStatus'] = 0
-            childData['isApar'] = item.isApar
-            const card: CardViewModel = {
-              id: (item?.['id'] as string) ?? '',
-              title: (childData?.['name'] as string) ?? '',
-              image: (childData?.['posterImage'] as string) ?? (childData?.['posterImage'] as string) ?? '',
-              tags: (childData?.['tags'] as string[]) ?? [],
-              duration: (childData?.['duration'] as string) ?? '',
-              status: (childData?.['status'] as string) ?? '',
-              rating: (childData?.['averageRating'] as number) ?? 0,
-              provider: (childData?.['sourceName'] as string) ?? (childData?.['source'] as string) ?? '',
-              level: (childData?.['complexityLevel'] as string) ?? '',
-              metadata: childData ?? {}
-            }
-            mapedData.push(card)
-          })
+          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
+          const daysCount = dayjs(endDate).diff(todaysDate, 'day')
+          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
+            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
+          item['parentId'] = item.identifier
+          item['planType'] = 'cbPlan'
+          item['contentStatus'] = 0
+          const card: CardViewModel = {
+            id: (item?.['identifier'] as string) ?? '',
+            title: (item?.['name'] as string) ?? '',
+            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
+            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
+            duration: (item?.['duration'] as string) ?? '',
+            status: (item?.['status'] as string) ?? '',
+            rating: (item?.['averageRating'] as number) ?? 0, // not found
+            provider: (item?.['sourceName'] as string),
+            level: (item?.['complexityLevel'] as string) ?? '',
+            planDuration: item['planDuration'],
+            contentStatus: item['contentStatus'],
+            metadata: item ?? {}
+          }
+          mapedData.push(card)
         })
         break
       case 'trendingOnIGOTApi':
@@ -115,12 +107,14 @@ export class CardTransformerService {
             id: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['appIcon'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            tags: (item?.['additionalTags'] as string[]) ?? [],
+            additionalTags: (item?.['additionalTags'] as string[]) ?? [],
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['avgRating'] as number) ?? (item?.['averageRating'] as number) ?? 0,
             provider: (item?.['source'] as string) ?? (item?.['sourceName'] as string) ?? '',
             level: (item?.['difficultyLevel'] as string) ?? '',
+            planDuration: item['planDuration'],
+            contentStatus: item['contentStatus'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -132,12 +126,14 @@ export class CardTransformerService {
             id: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            tags: (item?.['tags'] as string[]) ?? [],
+            additionalTags: (item?.['tags'] as string[]) ?? [],
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['averageRating'] as number) ?? 0,
             provider: (item?.['sourceName'] as string) ?? (item?.['sourceName'] as string) ?? '',
             level: (item?.['difficultyLevel'] as string) ?? '',
+            planDuration: item['planDuration'],
+            contentStatus: item['contentStatus'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -149,12 +145,14 @@ export class CardTransformerService {
             id: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            tags: (item?.['tags'] as string[]) ?? [],
+            additionalTags: (item?.['tags'] as string[]) ?? [],
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['averageRating'] as number) ?? 0,
             provider: (item?.['sourceName'] as string) ?? (item?.['source'] as string) ?? '',
             level: (item?.['complexityLevel'] as string) ?? '',
+            planDuration: item['planDuration'],
+            contentStatus: item['contentStatus'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -170,12 +168,14 @@ export class CardTransformerService {
       id: (item?.['identifier'] as string) ?? '',
       title: (item?.['name'] as string) ?? '',
       image: (item?.['appIcon'] as string) ?? '',
-      tags: (item?.['tags'] as string[]) ?? [],
+      additionalTags: (item?.['tags'] as string[]) ?? [],
       duration: (item?.['expectedDuration'] as string) ?? '',
       status: (item?.['assessmentStatus'] as string) ?? '',
       rating: 0,
       provider: (item?.['sourceName'] as string) ?? '',
       level: (item?.['difficultyLevel'] as string) ?? '',
+      planDuration: (item?.['planDuration'] as string) ?? '',
+      contentStatus: (item?.['contentStatus'] as number) ?? 0,
       metadata: item ?? {}
     }))
   }
@@ -186,12 +186,14 @@ export class CardTransformerService {
       id: (item?.['identifier'] as string) ?? '',
       title: (item?.['name'] as string) ?? '',
       image: (item?.['appIcon'] as string) ?? '',
-      tags: (item?.['tags'] as string[]) ?? [],
+      additionalTags: (item?.['tags'] as string[]) ?? [],
       duration: (item?.['duration'] as string) ?? '',
       status: (item?.['programStatus'] as string) ?? '',
       rating: (item?.['averageRating'] as number) ?? 0,
       provider: (item?.['sourceName'] as string) ?? '',
       level: '',
+      planDuration: (item?.['planDuration'] as string) ?? '',
+      contentStatus: (item?.['contentStatus'] as number) ?? 0,
       metadata: item ?? {}
     }))
   }

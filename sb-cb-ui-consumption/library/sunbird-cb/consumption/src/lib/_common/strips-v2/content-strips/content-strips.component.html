@@ -1,7 +1,7 @@
 <div class="w-full">
   <!-- Loading Skeletons -->
   @if (loading()) {
-  <sb-uic-carousel [items]="skeletonArray()" [cardWidth]="280" [gap]="16" [showNavigation]="false" [showDots]="false">
+  <sb-uic-carousel [items]="skeletonArray()" [cardWidth]="230" [gap]="16" [showNavigation]="false" [showDots]="false">
     <ng-template #carouselCard let-item let-index="index">
       <div class="animate-pulse bg-gray-200 rounded-lg h-64 w-full"></div>
     </ng-template>
@@ -10,7 +10,7 @@
 
   <!-- Cards -->
   @if (!loading() && cards()?.length) {
-  <sb-uic-carousel [items]="cards()" [cardWidth]="280" [gap]="16">
+  <sb-uic-carousel [items]="cards()" [cardWidth]="230" [gap]="16">
     <ng-template #carouselCard let-item let-index="index">
       @switch (getCardType()) {
       @case (CardType.CourseCard) {

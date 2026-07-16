@@ -1,5 +1,5 @@
 /* ── Dimensions ─────────────────────────────────────────── */
-$cc-width : 255px;
+$cc-width : 230px;
 $cc-height : 322px;
 $cc-img-h : 140px;
 $cc-body-h : $cc-height - $cc-img-h;
@@ -141,10 +141,14 @@ $white-80 : rgba(255, 255, 255, 0.88);
     align-items: center;
     gap: 4px;
     border-radius: 14px;
-    padding: 2px 10px;
-    background: $amber;
+    padding: 1px 10px;
+    background: var(--color-accents-yellow);
     max-width: 70%;
     overflow: hidden;
+
+    ::ng-deep .content-type-class {
+      font: 500 var(--font-size-label-1) 'Noto Sans';
+    }
   }
 
   &__type-text {
@@ -191,8 +195,7 @@ $white-80 : rgba(255, 255, 255, 0.88);
     white-space: normal;
     word-break: break-word;
     overflow-wrap: break-word;
-    font-size: 14px;
-    font-weight: 600;
+    font: 600 var(--font-size-body-1) 'Noto Sans';
     line-height: 23px;
     color: var(--text-bandw-black-sub-heading);
     /* 2-line clamp – works in all modern browsers (Chrome, Firefox, Safari, Edge) */
@@ -288,8 +291,8 @@ $white-80 : rgba(255, 255, 255, 0.88);
   }
 
   &__org-name {
-    font-size: 11px;
-    color:var(--text-bandw-black-sub-heading);
+    font: 400 12px 'Noto Sans';
+    color:var(--text-bandw-black-captions);
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;

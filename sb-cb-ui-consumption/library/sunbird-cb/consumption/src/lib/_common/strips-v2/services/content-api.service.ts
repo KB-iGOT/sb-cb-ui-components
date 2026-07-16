@@ -4,12 +4,15 @@ import { Observable, of, Subject } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
 import { ApiMethod, ApiRegistryEntry } from '../models/content-section.model'
 import { API_REGISTRY } from '../registry/api-registry'
-import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, WidgetEnrollService } from '@sunbird-cb/utils-v2'
+import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service'
 
 @Injectable({ providedIn: 'root' })
 export class ContentApiService {
   private http = inject(HttpClient);
   private configSvc = inject(ConfigurationsService);
+  private userService = inject(WidgetUserServiceLib);
+  private userServiceLib = inject(WidgetEnrollService);
   private readonly cardClickDetailsSubject = new Subject<any>()
   readonly cardClickDetails$ = this.cardClickDetailsSubject.asObservable()
 
@@ -18,16 +21,23 @@ export class ContentApiService {
   }
 
   loadContent(apiDetailsKey: string): Observable<unknown> {
-    const config: ApiRegistryEntry | undefined = API_REGISTRY[apiDetailsKey]
-    if (!config) {
-      console.warn(`[ContentApiService] No API config found for key: ${apiDetailsKey}`)
-      return of(null)
-    }
+    switch (apiDetailsKey) {
+      case 'aparApi':
+      case 'trainingPlanApi':
+        let userId = this.configSvc?.userProfile?.userId as string
+        return this.userService.fetchCbpPlanList(userId)
+      default:
+        const config: ApiRegistryEntry | undefined = API_REGISTRY[apiDetailsKey]
+        if (!config) {
+          console.warn(`[ContentApiService] No API config found for key: ${apiDetailsKey}`)
+          return of(null)
+        }
 
-    return this.executeRequest(config)
+        return this.executeRequest(config, apiDetailsKey)
+    }
   }
 
-  private executeRequest(config: ApiRegistryEntry): Observable<unknown> {
+  private executeRequest(config: ApiRegistryEntry, apiDetailsKey: string): Observable<unknown> {
     const firstResponse$ = this.makeHttpRequest(config)
 
     if (!config.chainedApi) {
@@ -50,6 +60,16 @@ export class ContentApiService {
 
         if (identifiers.length === 0) {
           return of([])
+        }
+
+        if (apiDetailsKey === 'caProgramApi') {
+          // debugger
+          let request = {
+            request: {
+              courseId: identifiers
+            }
+          }
+          return this.userServiceLib.fetchEnrollContentData(request)
         }
 
         return this.makeHttpRequest({
