@@ -212,9 +212,10 @@
           <div>
             <mat-selection-list id="roles" formControlName="roles" #roles class="roles-list">
               <ng-container *ngFor="let role of rolesList">
-                <mat-list-option [ngClass]="{'oppDisable': role.roleName === 'PUBLIC'}"
-                  (click)="modifyUserRoles(role.roleName)" [selected]="role.isSelected" [value]="role?.roleName"
-                  [disabled]="role.roleName === 'PUBLIC'">
+                <mat-list-option
+                  [ngClass]="{'oppDisable': role.roleName === 'PUBLIC', 'single-role-lock': rolesList.length === 1 && role.roleName !== 'PUBLIC'}"
+                  (click)="rolesList.length !== 1 && modifyUserRoles(role.roleName)" [selected]="role.isSelected"
+                  [value]="role?.roleName" [disabled]="role.roleName === 'PUBLIC' || rolesList.length === 1">
                   {{role.roleName}}
                 </mat-list-option>
               </ng-container>

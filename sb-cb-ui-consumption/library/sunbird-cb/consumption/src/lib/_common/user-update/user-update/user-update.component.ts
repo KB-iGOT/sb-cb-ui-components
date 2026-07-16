@@ -446,6 +446,18 @@ export class UserUpdateComponent implements OnInit, OnChanges {
           this.userRoles.add(role)
         })
       }
+
+      // When only one role is available, it stays selected by default and cannot be unchecked
+      if (this.rolesList.length === 1) {
+        const onlyRole = this.rolesList[0].roleName
+        this.rolesList[0].isSelected = true
+        this.userRoles.add(onlyRole)
+        if (!usrRoles.includes(onlyRole)) {
+          setTimeout(() => {
+            this.userForm.controls['roles'].setValue([...usrRoles, onlyRole])
+          }, 0)
+        }
+      }
     }
   }
   //#endregion (get user details)
@@ -484,7 +496,14 @@ export class UserUpdateComponent implements OnInit, OnChanges {
           distinctUntilChanged(),
           startWith(''),
           map((value: any) => typeof (value) === 'string' ? value : (value && value.name ? value.name : '')),
-          map((name: any) => name ? this.filterLanguage(name) : (this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])),
+          map((name: any) => {
+            const entries = this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : []
+            if (!name) {
+              return entries
+            }
+            const exactMatch = entries.some((option: any) => (option.name || '').toLowerCase() === name.toLowerCase())
+            return exactMatch ? entries : this.filterLanguage(name)
+          }),
         )
         .subscribe(res => {
           this.masterLanguages = of(res)
@@ -689,6 +708,15 @@ export class UserUpdateComponent implements OnInit, OnChanges {
 
   //#region (UI interactions)
   modifyUserRoles(role: string) {
+    if (this.rolesList.length === 1 && this.rolesList[0].roleName === role) {
+      // single available role cannot be unchecked; re-assert the selection after the click toggles it
+      this.userRoles.add(role)
+      this.rolesList[0].isSelected = true
+      setTimeout(() => {
+        this.userForm.controls['roles'].setValue([role])
+      }, 0)
+      return
+    }
     if (this.userRoles.has(role)) {
       this.userRoles.delete(role)
     } else {
@@ -698,6 +726,16 @@ export class UserUpdateComponent implements OnInit, OnChanges {
 
   editOtherDetails() {
     this.otherDetailsEditable = true
+    const domicileMediumValue = _.get(this.userDetails, 'profileDetails.personalDetails.domicileMedium', '') ||
+      _.get(this.otherDetails, 'domicileMedium', '')
+    this.masterLanguages = of(this.masterLanguagesEntries ? this.masterLanguagesEntries.slice() : [])
+    // Set the value after the edit view is rendered, so the autocomplete input picks it up
+    setTimeout(() => {
+      const domicileMediumControl = this.otherDetailsForm.get('domicileMedium')
+      if (domicileMediumControl) {
+        domicileMediumControl.setValue(domicileMediumValue)
+      }
+    })
   }
 
   addActivity(event: any) {
