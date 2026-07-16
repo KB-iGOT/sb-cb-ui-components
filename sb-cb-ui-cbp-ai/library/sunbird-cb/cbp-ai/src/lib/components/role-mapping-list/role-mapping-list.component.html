@@ -10,10 +10,9 @@
                     <div class="select-map-flex-container">
                         <div class="select-map-flex">
                             <div class="selected-mapping-route">
-                                <p>{{sharedService?.cbpPlanFinalObj?.ministry?.orgName}} <span
-                                        *ngIf="sharedService?.cbpPlanFinalObj?.department_name">
-                                        / {{sharedService?.cbpPlanFinalObj?.department_name}}</span>
-                                </p>
+                                <p>{{sharedService?.cbpPlanFinalObj?.ministry?.orgName}}  <span *ngIf="sharedService?.cbpPlanFinalObj?.department_name || originalData?.[0]?.department_name">
+    / {{ sharedService?.cbpPlanFinalObj?.department_name || originalData?.[0]?.department_name }}
+  </span>
                             </div>
                             <div class="edit-plan cursor-pointer" (click)="moveToInitialScreenLayout('edit')">
                                 <mat-icon>edit</mat-icon>Edit

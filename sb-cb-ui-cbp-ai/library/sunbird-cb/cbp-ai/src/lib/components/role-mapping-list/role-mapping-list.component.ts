@@ -223,6 +223,18 @@ export class RoleMappingListComponent {
     this.sharedService.roleMappingGenerationData = res?.data;
     this.dataSource = new MatTableDataSource(res?.data);
     this.originalData = res?.data;
+    if (
+  !this.sharedService.cbpPlanFinalObj?.department_name &&
+  this.originalData?.length
+) {
+  this.sharedService.cbpPlanFinalObj.department_name =
+    this.originalData[0].department_name;
+
+  localStorage.setItem(
+    'cbpPlanFinalObj',
+    JSON.stringify(this.sharedService.cbpPlanFinalObj)
+  );
+}
     this.searchResults = []; // Clear search results when data is updated
 
     // setTimeout(() => {
@@ -620,7 +632,7 @@ export class RoleMappingListComponent {
             this.sharedService.getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id, this.searchText, this.pageSize, this.offset, this.activeTab).subscribe({
               next: (res:any) => {
                 this.loading = false
-                console.log('res', res)
+            
                 this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
                 this.sharedService.roleMappingGenerationData = res?.data
                 localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
@@ -637,6 +649,18 @@ export class RoleMappingListComponent {
                 // }, 1000)
                 this.originalData = res?.data ;
                 this.masterData = res?.data;
+                if (
+  !this.sharedService.cbpPlanFinalObj?.department_name &&
+  this.originalData?.length
+) {
+  this.sharedService.cbpPlanFinalObj.department_name =
+    this.originalData[0].department_name;
+
+  localStorage.setItem(
+    'cbpPlanFinalObj',
+    JSON.stringify(this.sharedService.cbpPlanFinalObj)
+  );
+}
                 this.setTotalRoleMappingListCount(res)
 
               console.log('this.dataSource', this.dataSource)
@@ -671,7 +695,7 @@ export class RoleMappingListComponent {
 
           this.sharedService.getRoleMappingByStateCenterBySearch(state_center_id, this.searchText, this.pageSize, this.offset,this.activeTab).subscribe((res:any) => {
             this.loading = false
-            console.log('res', res)
+         
             this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
             this.sharedService.roleMappingGenerationData = res?.data
             localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
@@ -687,6 +711,18 @@ export class RoleMappingListComponent {
 
           this.originalData = res?.data;
           this.masterData = res?.data;
+          if (
+  !this.sharedService.cbpPlanFinalObj?.department_name &&
+  this.originalData?.length
+) {
+  this.sharedService.cbpPlanFinalObj.department_name =
+    this.originalData[0].department_name;
+
+  localStorage.setItem(
+    'cbpPlanFinalObj',
+    JSON.stringify(this.sharedService.cbpPlanFinalObj)
+  );
+}
           console.log('this.dataSource', this.dataSource)
           })
         })
@@ -718,7 +754,7 @@ export class RoleMappingListComponent {
         this.sharedService.getRoleMappingByStateCenterAndDepartmentBySearch(state_center_id, department_id, this.searchText, this.pageSize, this.offset,this.activeTab).subscribe({
           next: (res:any) => {
             this.loading = false
-            console.log('res', res)
+         
             this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = res?.data
             this.sharedService.roleMappingGenerationData = res?.data
             localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
@@ -732,6 +768,18 @@ export class RoleMappingListComponent {
             // }, 1000)
             this.originalData = res?.data;
             this.masterData = res?.data;
+            if (
+  !this.sharedService.cbpPlanFinalObj?.department_name &&
+  this.originalData?.length
+) {
+  this.sharedService.cbpPlanFinalObj.department_name =
+    this.originalData[0].department_name;
+
+  localStorage.setItem(
+    'cbpPlanFinalObj',
+    JSON.stringify(this.sharedService.cbpPlanFinalObj)
+  );
+}
             this.setTotalRoleMappingListCount(res)
             console.log('this.dataSource', this.dataSource)
           },
