@@ -30,7 +30,6 @@ export class SlidersDynamicComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('widgetData', this.widgetData,this?.baseContentReadData)
     this.reInitiateSlideInterval()
   }
 

@@ -153,7 +153,7 @@
             <!-- Clickable content template (when NOT locked) -->
             <ng-template #clickableContent>
                 <a class="width-expand"
-                    [class.disabled]="(forPreview || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked) ? true : null"
+                    [class.disabled]="(forPreview || isUserunEnrolled || !isEnabled || !isEnrolled || !isBatchInProgess || !isContentUnlocked || isParentMilestoneLocked) ? true : null"
                     [ngClass]="{'ml-3': isEnrolled}"
                     [routerLink]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked) ? resourceLink.url : null"
                     [queryParams]="(isAllowed && !forPreview && isEnabled && !isParentMilestoneLocked)  ? resourceLink.queryParams : null"
@@ -538,7 +538,7 @@
                     [pathSet]="pathSet" [hierarchyMapData]="hierarchyMapData" [batchData]="batchData"
                     [mlCourse]="mlCourse" [parentMilestoneLocked]="isMilestoneLocked || isParentMilestoneLocked"
                     *ngFor="let child of content?.children; trackBy: contentTrackBy; let j= index;let isFirst = first"
-                    [ngClass]="{'moduleCard': checkIsModule(child), 'resourceCard': !checkIsModule(child), 'first': isFirst}">
+                    [ngClass]="{'moduleCard': checkIsModule(child), 'resourceCard': !checkIsModule(child), 'first': isFirst}" [isUserunEnrolled]="isUserunEnrolled">
                 </ws-widget-app-toc-content-card-v2>
             </div>
         </div>

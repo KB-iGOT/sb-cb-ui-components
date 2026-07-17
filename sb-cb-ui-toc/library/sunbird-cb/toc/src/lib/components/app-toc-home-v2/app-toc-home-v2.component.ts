@@ -53,6 +53,7 @@ import { PublicSurveyFormComponent } from '../public-survey-form/public-survey-f
 import { NsCardContent } from '../../models/card-content.model'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
+import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -216,6 +217,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   pathSet = new Set()
   canShare = false
   enableShare = false
+  canUnenroll = false
   rootOrgId: any
   certId: any
   mobile1200: any
@@ -246,6 +248,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   lockCertificate = false
   private lastProgressRefreshTime: number = 0
   private isRefreshingProgress: boolean = false
+  isUnEnrolled: boolean = false
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
     const windowScroll = window.pageYOffset
@@ -747,7 +750,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     } else {
       this.enrollBtnLoading = true
       this.changeTab = !this.changeTab
-      this.raiseEnrollTelemetry()
+      this.raiseEnrollmentTelemetry('enroll')
       if (this.recommendedCoursesId) {
         this.raiseEnrollTelementryForSakshamAIGenerated()
       }
@@ -765,7 +768,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           moderatedBatchData = this.batchData && this.batchData.content && this.batchData.content[0]
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
-      } else if (this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
+      } else if (this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
         this.autoEnrollLearningPathway(batchData)
       } else {
         this.autoAssignEnroll()
@@ -1405,11 +1408,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  raiseEnrollTelemetry() {
+  raiseEnrollmentTelemetry(action: 'enroll' | 'reenroll') {
     this.events.raiseInteractTelemetry(
       {
         type: 'click',
-        subType: 'enroll',
+        subType: action,
         id: this.content ? this.content.identifier : '',
       },
       {
@@ -1417,8 +1420,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         type: this.content ? this.content.primaryCategory : '',
       },
       {
-        pageIdExt: `btn-enroll`,
-        module: WsEvents.EnumTelemetrymodules.CONTENT,
+        pageIdExt: `btn-${action}`,
+        module: WsEvents.EnumTelemetrymodules.LEARN,
       }
     )
   }
@@ -1582,6 +1585,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         })
       }
 
+      if(enrolledCourse && !enrolledCourse.active){
+        this.isUnEnrolled = true
+      }
+
       // If current course is present in the list of user enrolled course
       if (enrolledCourse && enrolledCourse.batchId) {
         this.resumeDataSubscription = this.tocSvc.resumeData.subscribe((res: any) => {
@@ -1610,7 +1617,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           }
         }
         // if enrolled course is completed then to make all languages courses as well as all content as completed
-        if (this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY && enrolledCourse.status === 2) {
+        if (this.contentReadData && this.contentReadData.courseCategory !== NsContent.ECourseCategory.LEARNING_PATHWAY && enrolledCourse.status === 2) {
           this.content['completionPercentage'] = 100
           this.content['completionStatus'] = 2
           await this.tocSvc.mapCompletionChildPercentageProgram(this.content)
@@ -1838,6 +1845,48 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   enrollUserToAI() {
     this.fromAITutor = true
     this.handleAutoBatchAssign()
+  }
+
+  openUnenrollDialog(): void {
+    // setTimeout allows mat-menu close animation to finish before
+    // the MatDialog overlay opens, preventing the backdrop conflict
+    setTimeout(() => {
+      const dialogRef = this.dialog.open(UnenrollConfirmDialogComponent, {
+        width: '700px',
+        disableClose: true,
+        panelClass: 'unenroll-dialog-panel',
+        data: {
+          content: this.contentReadData,
+          tocConfig: this.tocConfig,
+        },
+      })
+
+      dialogRef.afterClosed().subscribe((response: any) => {
+        if (response) {
+          const requestBody: any = {
+            request: {
+              courseId: this.contentReadData ? this.contentReadData.identifier : '',
+              batchId: this.currentCourseBatchId,
+              ...response,
+            }
+          }
+          this.contentSvc.unenrollToCourse(requestBody).subscribe((result: any) => {
+            if(result?.responseCode === 'OK') {
+              this.userEnrollmentList[0].active = false
+              this.enrolledCourseData.active = false
+              this.canUnenroll = false
+              this.isUnEnrolled = true
+              this.openSnackbar('You have been successfully un-enrolled from the course.')
+            } else {
+              this.openSnackbar('Un-enrollment failed. Please try again later.')
+            }
+          }, (error: any) => {
+            console.error('Un-enrollment error:', error)
+            this.openSnackbar('An error occurred while trying to un-enroll. Please try again later.')
+          })
+        }
+      })
+    }, 100)
   }
 
   openSurveyFormPopup(event: boolean) {
@@ -2435,6 +2484,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     })
   }
 
+  canBeUnenroll() {
+    if (this.userEnrollmentList?.length > 0) {
+      this.canUnenroll = this.baseContentReadData?.identifier === this.userEnrollmentList[0]?.contentId &&
+        this.userEnrollmentList[0]?.active && this.userEnrollmentList[0]?.status !== 2
+    }
+  }
+
 
   fetchUserEnrollmentDataV2() {
 
@@ -2471,6 +2527,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           if (completedContentData) {
             this.contentViewEventForNetCore('complete')
           }
+          this.canBeUnenroll()
           this.dataTransferSvc.setEnrollData(this.userEnrollmentList)
           if (this.isMultilingual) {
             // in case of back from player we need to check recent language and load
@@ -2546,6 +2603,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       if (!foundContent) {
         this.loggerSvc.warn('No matching enrolled content found for one-step resume')
 
+      }
+
+      // If the found content is inactive(un-enrolled), we should not proceed with resume
+      if(foundContent && !foundContent?.active){
+        return 
       }
 
       const urlData = await this.contentLibSvc.getResourseLink(
@@ -3248,6 +3310,42 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.openLangDialog(event)
     } else {
       this.handleAutoBatchAssign()
+    }
+  }
+
+  handleReEnrollment(event: any) {
+      this.enrollBtnLoading = true
+      this.changeTab = !this.changeTab
+      this.raiseEnrollmentTelemetry('reenroll')
+      console.log('this.enrolledCourseData', this.enrolledCourseData)
+      // API logic and redirection
+      if (this.enrolledCourseData) {
+        const req = {
+            "request": {
+                "courseId": this.enrolledCourseData.courseId,
+                "batchId": this.enrolledCourseData.batchId,
+                "recent_language": this.enrolledCourseData.recent_language || this.selectedLanguage?.langId || '',
+            }
+        }
+      this.contentSvc.reEnroll(req).subscribe(
+        (res: any) => {
+          if(res === 'SUCCESS') {
+            const batchId = this.getBatchId()
+            if (batchId) {
+              this.navigateToPlayerPage(batchId)
+            }
+            this.isUnEnrolled = false
+            this.enrollBtnLoading = false
+          } else {
+            this.snackBar.open('Please try again later')
+            this.enrollBtnLoading = false
+          }
+        },
+        (_error: any) => {
+          this.snackBar.open(_.get(_error, 'error.params.errmsg') || 'Please try again later')
+          this.enrollBtnLoading = false
+        }
+      )
     }
   }
 

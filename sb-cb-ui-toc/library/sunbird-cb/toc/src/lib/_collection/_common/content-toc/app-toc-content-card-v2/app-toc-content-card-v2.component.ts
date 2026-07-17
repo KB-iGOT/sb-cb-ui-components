@@ -49,6 +49,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   @Input() isPreAssessment = false
   @Input() baseContentReadData: NsContent.IContent | null = null
   @Input() mlCourse: NsContent.IContent | null = null
+  @Input() isUserunEnrolled = false
   @Input() parentMilestoneLocked = false // Passed from parent when inside a locked milestone
   hasContentStructure = false
   downloadCertificateLoading = false
