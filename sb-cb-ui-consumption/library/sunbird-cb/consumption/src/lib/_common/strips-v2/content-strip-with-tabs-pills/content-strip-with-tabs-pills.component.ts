@@ -11,7 +11,7 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
   standalone: true,
   imports: [CommonModule, DynamicTabsComponent, ContentStripWithPillsComponent, ContentStripsComponent],
   templateUrl: './content-strip-with-tabs-pills.component.html',
-  styleUrl: './content-strip-with-tabs-pills.component.scss',
+  styleUrls: ['./content-strip-with-tabs-pills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContentStripWithTabsPillsV2Component {

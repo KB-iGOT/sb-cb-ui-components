@@ -12,7 +12,7 @@ import { Router } from '@angular/router'
 import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsSpotlightCardsV2 } from './spotlight-cards-v2.model'
 import { TranslateModule } from '@ngx-translate/core'
-import { ContentApiService } from '../../../public-api'
+import { ContentApiService } from '../strips-v2/services/content-api.service'
 
 @Component({
   selector: 'sb-uic-spotlight-cards-v2',
