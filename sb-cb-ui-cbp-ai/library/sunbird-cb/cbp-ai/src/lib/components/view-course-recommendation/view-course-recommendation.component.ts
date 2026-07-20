@@ -646,17 +646,29 @@ export class ViewCourseRecommendationComponent {
   }
 
   callCourseForMDO() {
-     const requestId = this.route.snapshot.paramMap.get('request_id');
-          let res: any
-          if (this.planData?.cbp_plan_data && this.planData?.cbp_plan_data.length) {
-            res = this.planData?.cbp_plan_data[0]
+    const requestId = this.requestId || this.route.snapshot.paramMap.get('request_id');
+    if (!requestId) {
+      return;
+    }
+
+    this.loading = true
+    this.sharedService.viewMDOApprovalRequests(requestId).subscribe({
+      next: (response: any) => {
+        const matchedItem = (response?.items || []).find((item: any) => item?.id === this.planData?.id)
+        const cbpPlanData = matchedItem?.cbp_plan_data || this.planData?.cbp_plan_data
+        this.planData.cbp_plan_data = cbpPlanData
+
+        if (!cbpPlanData || !cbpPlanData.length) {
+          this.loading = false
+          return
+        }
+
+            const res = cbpPlanData[0]
             this.recommended_course_id = res.id
             let allCourses = []
             if (res && res.selected_courses && res.selected_courses.length) {
               res.selected_courses.forEach((item) => {
-                // if(item?.relevancy >= 85) {
                 allCourses.push(item)
-                // }
               })
             }
             this.filterdCourses = allCourses
@@ -668,13 +680,13 @@ export class ViewCourseRecommendationComponent {
             this.loading = false
             this.sharedService
               .getAdditionalParameterforSuggestedCourses(identifiersArr)
-              .subscribe((response) => {
+              .subscribe((enrichResponse) => {
 
-                if (response?.result?.content?.length) {
+                if (enrichResponse?.result?.content?.length) {
 
                   const updatedCourses = this.filterdCourses.map(course => {
 
-                    const matched = response.result.content.find(
+                    const matched = enrichResponse.result.content.find(
                       item => item.identifier === course.identifier
                     )
 
@@ -700,6 +712,10 @@ export class ViewCourseRecommendationComponent {
             console.log('this.filterdCourses from mdo', this.filterdCourses)
             this.updateCompetencyCounts()
             this.cdr.detectChanges()
+          },
+          error: () => {
+            this.loading = false
           }
+        })
   }
 }

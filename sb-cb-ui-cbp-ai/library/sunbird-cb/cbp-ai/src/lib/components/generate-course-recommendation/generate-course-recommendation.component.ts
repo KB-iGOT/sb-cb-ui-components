@@ -389,7 +389,7 @@ export class GenerateCourseRecommendationComponent {
   filterData(searchText: string): any[] {
     const filter = searchText.trim().toLowerCase();
 
-    const filtered = this.originalData.filter(item => {
+    const filtered = this.getAllAvailableCourses().filter(item => {
       const stringified = this.flattenObjectToString(item).toLowerCase();
       return stringified.includes(filter);
     });
@@ -699,7 +699,12 @@ export class GenerateCourseRecommendationComponent {
       identifiersArr.push(item?.identifier)
     })
   const identifiersKey = [...identifiersArr].sort().join(',')
-    if (identifiersArr.length && identifiersKey !== this.lastEnrichedIdentifiersKey) {
+    // Re-fetch whenever the identifier set changes, or when any course object is missing
+    // the enriched fields (eg. after getUserCourse/getSuggestedCourse replace items with
+    // fresh objects from the server that haven't been enriched yet, even if the identifiers
+    // are unchanged from the last enrichment call).
+    const needsEnrichment = sortedCourses.some((item) => item?.identifier && item.course === undefined)
+    if (identifiersArr.length && (identifiersKey !== this.lastEnrichedIdentifiersKey || needsEnrichment)) {
       this.lastEnrichedIdentifiersKey = identifiersKey
     this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response) => {
       if (response && response.result && response.result.content && response.result.content.length) {
