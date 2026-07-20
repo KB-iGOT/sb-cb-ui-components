@@ -9,7 +9,7 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
   standalone: true,
   imports: [CommonModule, ContentStripsComponent],
   templateUrl: './content-strip-with-pills.component.html',
-  styleUrl: './content-strip-with-pills.component.scss',
+  styleUrls: ['./content-strip-with-pills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContentStripWithPillsComponent {

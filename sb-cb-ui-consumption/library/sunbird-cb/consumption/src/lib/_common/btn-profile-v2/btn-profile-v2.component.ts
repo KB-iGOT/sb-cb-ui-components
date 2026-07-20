@@ -54,7 +54,7 @@ import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.modul
     AvatarPhotoLibModule,
   ],
   templateUrl: './btn-profile-v2.component.html',
-  styleUrl: './btn-profile-v2.component.scss',
+  styleUrls: ['./btn-profile-v2.component.scss'],
 })
 export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit {
   @HostBinding('id') public id = 'Profile_link'

@@ -8,7 +8,7 @@ import { DynamicTab } from '../models/content-section.model'
   standalone: true,
   imports: [CommonModule, MatTabsModule],
   templateUrl: './dynamic-tabs.component.html',
-  styleUrl: './dynamic-tabs.component.scss',
+  styleUrls: ['./dynamic-tabs.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DynamicTabsComponent {

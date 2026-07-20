@@ -47,7 +47,7 @@ export const typeMap = {
     WidgetUrlResolverV2Directive,
   ],
   templateUrl: './btn-feature-v2.component.html',
-  styleUrl: './btn-feature-v2.component.scss',
+  styleUrls: ['./btn-feature-v2.component.scss'],
 })
 export class BtnFeatureV2Component extends WidgetBaseComponent
   implements OnInit, OnDestroy {

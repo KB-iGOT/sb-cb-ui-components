@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
 
 @Component({
   selector: 'sb-uic-sidebar-footer',
+  standalone: true,
   imports: [
     MatIconModule,
     TranslateModule,
@@ -14,7 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
     MatTooltipModule
   ],
   templateUrl: './sidebar-footer.component.html',
-  styleUrl: './sidebar-footer.component.scss'
+  styleUrls: ['./sidebar-footer.component.scss']
 })
 export class SidebarFooterComponent implements OnChanges {
 

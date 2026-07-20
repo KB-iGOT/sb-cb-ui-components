@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon'
   standalone: true,
   imports: [CommonModule, MatIconModule],
   templateUrl: './accordion.component.html',
-  styleUrl: './accordion.component.scss',
+  styleUrls: ['./accordion.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccordionComponent {
