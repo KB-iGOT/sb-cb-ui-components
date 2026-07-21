@@ -8,7 +8,7 @@
   border: 0;
   align-content: center;
   background: white !important;
-  padding: 5px 16px;
+  padding: 10px 16px;
 
   @include breakpoint-lt-s {
     margin-left: $size-xs;
@@ -81,4 +81,8 @@ button {
   line-height: 16.8px !important;
   border: none !important;
 
+}
+
+.batch-author-name {
+  margin-bottom: 0px !important;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/consumption",
-  "version": "0.0.12-ang-17-20-bharat-kalp",
+  "version": "0.0.14-ang-17-20-bharat-kalp",
   "dependencies": {
     "tslib": "^2.0.0"
   },
@@ -9,6 +9,8 @@
     "@angular/core": "^20.3.16",
     "@sunbird-cb/design-system": "0.0.3",
     "@sunbird-cb/utils-v2": "0.0.1-ang-17-20",
-    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20"
+    "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
+    "@ckeditor/ckeditor5-angular": "^9.1.0",
+    "ckeditor5": "^43.1.0"
   }
 }

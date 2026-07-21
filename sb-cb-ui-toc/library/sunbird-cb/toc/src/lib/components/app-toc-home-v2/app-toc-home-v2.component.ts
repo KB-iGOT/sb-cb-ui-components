@@ -988,6 +988,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return this.tocSvc.subtitleOnBanners
   }
 
+  getActiveBatches(batch: any) {
+    const enrollmentEndDate = dayjs(_.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
+    const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
+    return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
+      !(dayjs(enrollmentEndDate).isBefore(systemDate, 'day')) : false
+  }
 
 
   public handleEnrollmentEndDate(batch: any) {
@@ -2172,12 +2178,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     await this.getPreAssessmentRequired()
     if (this.preAssessmentRequiredFlag) {
       if (this.preAssessmentCompletionStatus) {
-        if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+        if (this.baseContentReadData && this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
           this.areAllActiveBatchesFull()
         }
       }
     } else {
-      if (this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+      if (this.baseContentReadData && this.baseContentReadData.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
         this.areAllActiveBatchesFull()
       }
     }
@@ -3395,7 +3401,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.activeBatchIds = []
     this.fullBatcheIds = []
     let activeBatches = []
-    activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.handleEnrollmentEndDate(batch))
+    activeBatches = this.baseContentReadData.batches.filter((batch: any) => this.getActiveBatches(batch))
     this.activeBatchIds = activeBatches.map((batch: any) => batch.batchId)
     if (this.activeBatchIds.length === 0) {
       return

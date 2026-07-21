@@ -63,14 +63,12 @@
 
 .action-manage-selection {
   mat-icon {
-    font-size: 0px;
-    height: 19px;
-    width: 19px;
     color: #fff !important;
   }
 
   button {
     padding: 4px 16px;
+    height: 44px;
   }
 
   button:disabled {
@@ -98,6 +96,9 @@
         border: none !important;
       }
     }
+  }
+  ::ng-deep .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mat-mdc-notch-piece {
+    border: none !important;
   }
 
   ::ng-deep .mat-select-value {
@@ -128,6 +129,7 @@
   .mat-expansion-panel-header {
     background: #e8edf6;
     padding: 0 16px 0 0 !important;
+    --mat-expansion-header-text-font: Montserrat;
   }
 
   .mat-expansion-panel:not([class*="mat-elevation-z"]) {
