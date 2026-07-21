@@ -75,6 +75,7 @@ export interface ContentSectionConfig {
   translateHeader: boolean
   visibilityMode: VisibilityMode
   displayType: DisplayType
+  hideAccordianToggel?: boolean
   defaultTabKey?: string
   tabs?: TabConfig[]
   defaultPillKey?: string

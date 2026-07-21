@@ -7,7 +7,8 @@
   } @else if (section.displayType !== 'spotlight') {
   <sb-uic-accordion [header]="section.header" [showHeaderSubLabel]="section.showHeaderSubLabel"
     [headerSubLabel]="section.headerSubLabel" [headersubLableTeme]="section.headersubLableTeme"
-    [translateHeader]="section.translateHeader" [expanded]="true">
+    [translateHeader]="section.translateHeader" [expanded]="true"
+    [hideAccordianToggel]="section.hideAccordianToggel ?? false">
     @switch (section.displayType) {
     @case ('tabs') {
     @if (section.tabs?.length) {
