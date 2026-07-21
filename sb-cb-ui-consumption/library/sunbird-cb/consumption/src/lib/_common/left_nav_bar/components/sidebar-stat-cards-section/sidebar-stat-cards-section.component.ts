@@ -76,7 +76,7 @@ export class SidebarStatCardsSectionComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     // Manually detect changes when detailsChanged flag is toggled
-    if (changes['detailsChanged'] && !changes['detailsChanged'].firstChange) {
+    if ((changes['detailsChanged'] && !changes['detailsChanged'].firstChange) || changes['section']) {
       this.cdr.markForCheck()
       this.sectionSignal.set(this.section)
     }

@@ -126,6 +126,7 @@ export type SidebarSection =
  */
 export interface SidebarConfig {
   logoUrl?: string
+  navUrl?: string
   headerText?: string
   defaultOpen: boolean
   activeItemCode?: string
