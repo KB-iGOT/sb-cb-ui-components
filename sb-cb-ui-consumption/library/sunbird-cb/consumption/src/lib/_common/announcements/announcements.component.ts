@@ -109,7 +109,8 @@ export class AnnouncementsComponent implements OnInit {
   }
 
   viewMoreOrLess(item: any) {
-    if (item?.description?.length > 152) {
+    const text = item?.description ? item?.description : item?.value ? item?.value : ''
+    if (text?.length > 152) {
       item.expanded = !item.expanded
     }
   }
