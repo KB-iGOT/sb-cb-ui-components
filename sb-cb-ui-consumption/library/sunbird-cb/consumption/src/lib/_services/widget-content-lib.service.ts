@@ -682,8 +682,6 @@ export class WidgetContentLibService {
       urlData.queryParams = {}
     }
 
-    console.log('urlData', urlData)
-
     return urlData
   }
 
