@@ -17,6 +17,7 @@ export class AccordionComponent {
   headersubLableTeme = input<string | null>(null)
   translateHeader = input<boolean>(false);
   expanded = input<boolean>(true);
+  hideAccordianToggel = input<boolean>(false);
   contentTemplate = input<TemplateRef<unknown> | null>(null);
 
   expandedChange = output<boolean>();
@@ -24,13 +25,16 @@ export class AccordionComponent {
   isExpanded = signal(true);
 
   constructor() {
-    // Sync expanded input with isExpanded signal
+    // Sync expanded input with isExpanded signal; force expanded when toggle is hidden
     effect(() => {
-      this.isExpanded.set(this.expanded())
+      this.isExpanded.set(this.hideAccordianToggel() ? true : this.expanded())
     })
   }
 
   toggleExpanded(): void {
+    if (this.hideAccordianToggel()) {
+      return
+    }
     this.isExpanded.update(val => !val)
     this.expandedChange.emit(this.isExpanded())
   }
