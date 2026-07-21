@@ -35,6 +35,7 @@ export interface BaseNavItem {
 export interface NavListItem extends BaseNavItem {
   label: string
   navUrl: string
+  queryParams?: any
   code?: string
   isActive?: boolean
 }

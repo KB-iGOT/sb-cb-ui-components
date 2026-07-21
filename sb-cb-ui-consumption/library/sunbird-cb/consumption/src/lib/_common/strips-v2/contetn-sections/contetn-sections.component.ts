@@ -41,7 +41,6 @@ export class ContetnSectionsComponent implements OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((details) => {
         if (details) {
-          console.log('ContetnSectionsComponent cardClicked details: ', details)
           this.cardClicked.emit({ cardClickDetails: details })
         }
       })

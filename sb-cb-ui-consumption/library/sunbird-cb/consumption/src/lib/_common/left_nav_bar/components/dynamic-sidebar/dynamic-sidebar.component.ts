@@ -65,6 +65,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   @Input({ required: true }) menuBarDetails!: SidebarConfig
   @Input({ required: true }) detailsChanged!: boolean
   @Input({ required: true }) otherDetailsChanged!: boolean
+  @Input() navBarOpenStatus: boolean = true
 
   /**
    * Event emitted when sidebar state changes (open/closed)
@@ -152,6 +153,10 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
       if (this.menuBarDetails.footerSections) {
         this.footerSections = this.menuBarDetails.footerSections.filter(section => section.enabled !== false)
       }
+    }
+
+    if ((changes['navBarOpenStatus'])) {
+      this.isOpen.set(this.navBarOpenStatus)
     }
   }
 
