@@ -20,6 +20,7 @@ export class TopLearnersComponent implements OnInit {
   loading: boolean = false
   month: string = ''
   results: any = []
+  defaultKpIcon = 'https://portal.igotkarmayogi.gov.in/content-store/orgStore/0133783095823810560/1728035311295_karma-badge.svg'
 
   colors: any = [
     '#EB7181', // red
@@ -115,6 +116,20 @@ export class TopLearnersComponent implements OnInit {
     const randomIndex = Math.floor(Math.random() * Math.floor(this.colors.length))
     circleColor = this.colors[randomIndex]
     return circleColor
+  }
+
+  getKpIcon() {
+    return this.objectData?.data?.kpIcon ||
+      this.objectData?.kpIcon ||
+      this.objectData?.data?.data?.kpIcon ||
+      this.defaultKpIcon
+  }
+
+  onKpIconError(event: Event) {
+    const imageElement = event.target as HTMLImageElement
+    if (imageElement && imageElement.src !== this.defaultKpIcon) {
+      imageElement.src = this.defaultKpIcon
+    }
   }
 
   createInititals(name: string) {
