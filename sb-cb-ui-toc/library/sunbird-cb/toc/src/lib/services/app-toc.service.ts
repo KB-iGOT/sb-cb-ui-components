@@ -1715,8 +1715,8 @@ export class AppTocService {
 
 
 
-  aiGetResourceVttFile(resourceID: any) {
-    return this.http.get<any>(`${API_END_POINTS.AI_RESOURCE_VTT_FILE}?resource_id=${resourceID}`)
+  aiGetResourceVttFile(resourceID: any, url: string = API_END_POINTS.AI_RESOURCE_VTT_FILE) {
+    return this.http.get<any>(`${url}?resource_id=${resourceID}`)
   }
 
   readPreEnrollmentResourcesState(req: any) {
