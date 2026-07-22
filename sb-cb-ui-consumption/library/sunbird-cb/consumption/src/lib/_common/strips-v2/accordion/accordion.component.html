@@ -1,19 +1,23 @@
 <div class="w-full">
   <!-- Header -->
-  <div class="flex items-center justify-between cursor-pointer py-3 accordian-header" (click)="toggleExpanded()"
-    (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()" tabindex="0" role="button"
-    [attr.aria-expanded]="isExpanded()">
+  <div class="flex items-center justify-between py-3 accordian-header"
+    [class.cursor-pointer]="!hideAccordianToggel()" (click)="toggleExpanded()"
+    (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()"
+    [attr.tabindex]="hideAccordianToggel() ? null : 0" [attr.role]="hideAccordianToggel() ? null : 'button'"
+    [attr.aria-expanded]="hideAccordianToggel() ? null : isExpanded()">
     <div class="section-header flex items-center gap-2">{{ header() }}
       @if (showHeaderSubLabel()) {
       <span [ngClass]="headersubLableTeme()" class="flex items-center justify-center" *ngIf="showHeaderSubLabel()">{{
         headerSubLabel() }}</span>
       }
     </div>
+    @if (!hideAccordianToggel()) {
     <div class="flex items-center justify-center arrow-icon-container">
       <mat-icon class="transition-transform duration-300" [class.rotate-180]="isExpanded()">
         expand_more
       </mat-icon>
     </div>
+    }
   </div>
 
   <!-- Content -->

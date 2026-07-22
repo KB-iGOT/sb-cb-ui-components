@@ -38,32 +38,32 @@
 
   &:hover {
     background-color: var(--environment-button-primary-filled-primary);
-    color: var(--text-button-text-primary-white);
+    color: var(--surface-primary);
     font-size: var(--font-size-sub-heading-2);
 
     .nav-icon mat-icon {
-      color: var(--text-button-text-primary-white);
+      color: var(--surface-primary);
     }
 
     .nav-icon .icon-svg {
-      background-color: var(--text-button-text-primary-white);
+      background-color: var(--surface-primary);
     }
   }
 
   &.active {
     background-color: var(--environment-button-primary-filled-primary);
-    color: var(--text-button-text-primary-white);
+    color: var(--surface-primary);
     font-size: var(--font-size-sub-heading-2);
     font-weight: 600;
     border-left: 3px solid var(--environment-button-primary-filled-primary);
     padding-left: 0.625rem;
 
     .nav-icon mat-icon {
-      color: var(--text-button-text-primary-white);
+      color: var(--surface-primary);
     }
 
     .nav-icon { .icon-svg {
-      background-color: var(--text-button-text-primary-white);
+      background-color: var(--surface-primary);
     }
     }
   }
