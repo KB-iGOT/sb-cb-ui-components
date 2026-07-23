@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, signal, effect, ChangeDetectionStrategy, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { Router, RouterModule } from '@angular/router'
 import { trigger, state, style, transition, animate } from '@angular/animations'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
@@ -33,6 +34,7 @@ import { SidebarFooterComponent } from '../sidebar-footer/sidebar-footer.compone
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatIconModule,
     MatButtonModule,
     TranslateModule,
@@ -86,6 +88,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
 
   constructor(
     private cdr: ChangeDetectorRef,
+    private router: Router,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService
   ) {
@@ -98,11 +101,11 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
     })
 
     // Set initial state based on config when component initializes
-    effect(() => {
-      if (this.menuBarDetails?.defaultOpen !== undefined) {
-        this.isOpen.set(this.menuBarDetails.defaultOpen)
-      }
-    }, { allowSignalWrites: true })
+    // effect(() => {
+    //   if (this.menuBarDetails?.defaultOpen !== undefined) {
+    //     this.isOpen.set(this.menuBarDetails.defaultOpen)
+    //   }
+    // }, { allowSignalWrites: true })
 
     // Handle delayed content visibility
     effect(() => {
@@ -188,6 +191,15 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
 
   onNavItemClicked(evnet: { code: string; subType: string }) {
     this.navItemClicked.emit(evnet)
+  }
+
+  /**
+   * Navigate to the configured navUrl when the sidebar logo is clicked
+   */
+  onLogoClick(): void {
+    if (this.menuBarDetails?.navUrl) {
+      this.router.navigate([this.menuBarDetails.navUrl])
+    }
   }
 
   /**

@@ -65,9 +65,14 @@
 
   <section>
 
-    <a mat-menu-item role="link" routerLink="/app/profile/settings" class="all-features flex items-center"
+    <a mat-menu-item role="link" routerLink="/app/person-profile/me" class="all-features flex items-center"
       (click)="raiseTelemetry('Settings')">
       <span>{{ 'profileDropdown.viewProfile' | translate }}</span>
+    </a>
+
+    <a href="javascript:void(0)" mat-menu-item role="link" (click)="openAccessibilityMenu()"
+      class="log-o flex items-center">
+      <span>Accessability</span>
     </a>
 
     <a mat-menu-item role="link" routerLink="/app/profile/settings" class="all-features flex items-center"

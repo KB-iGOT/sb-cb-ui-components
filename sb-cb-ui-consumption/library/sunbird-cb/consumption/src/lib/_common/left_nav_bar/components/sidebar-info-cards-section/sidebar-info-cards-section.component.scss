@@ -67,6 +67,8 @@
   transition: all 0.2s ease;
   color: var(--text-bandw-black-body);
   background-color: var(--environment-cards-overall-cards-primary) !important;
+    // background-color: var(--environment-application-backgrounds-card-background) !important;
+
 
   .info-icon mat-icon {
     color: var(--text-bandw-black-body);
@@ -86,9 +88,9 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .info-icon img {
-      filter: brightness(0) invert(1);
-    }
+    // .info-icon img {
+    //   filter: brightness(0) invert(1);
+    // }
 
     .info-title {
       font: 600 14px 'Noto Sans';
@@ -177,6 +179,8 @@
 .info-card-with-children {
   transition: all 0.2s ease;
   background-color: var(--environment-cards-overall-cards-primary) !important;
+    // background-color: var(--environment-application-backgrounds-card-background) !important;
+
 
 
 
