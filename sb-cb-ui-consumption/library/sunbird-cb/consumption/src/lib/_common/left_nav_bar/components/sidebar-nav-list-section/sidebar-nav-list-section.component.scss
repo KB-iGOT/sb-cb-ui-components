@@ -23,6 +23,7 @@
 
 .nav-link {
   text-decoration: none;
+  font: 400 14px 'Noto Sans';
   color: var(--text-bandw-black-body);
   cursor: pointer;
   position: relative;
@@ -159,7 +160,7 @@
 .view-all-link {
   cursor: pointer;
   font: 400 14px 'Noto Sans';
-  color: var(--environment-button-primary-filled-primary);
+  color: var(--text-bandw-black-body);
 
   .view-all-icon {
     font-size: 20px;

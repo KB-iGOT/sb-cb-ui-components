@@ -20,12 +20,12 @@ export class ContentApiService {
     this.cardClickDetailsSubject.next(details)
   }
 
-  loadContent(apiDetailsKey: string): Observable<unknown> {
+  async loadContent(apiDetailsKey: string): Promise<Observable<unknown>> {
     switch (apiDetailsKey) {
       case 'aparApi':
       case 'trainingPlanApi':
         let userId = this.configSvc?.userProfile?.userId as string
-        return this.userService.fetchCbpPlanList(userId)
+        return of(await this.userService.fetchCbpPlanList(userId).toPromise())
       default:
         const config: ApiRegistryEntry | undefined = API_REGISTRY[apiDetailsKey]
         if (!config) {

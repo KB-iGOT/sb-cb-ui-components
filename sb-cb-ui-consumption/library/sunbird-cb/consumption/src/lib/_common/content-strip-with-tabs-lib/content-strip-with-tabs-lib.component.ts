@@ -15,7 +15,7 @@ import {
   WsEvents,
   WidgetEnrollService,
 } from '@sunbird-cb/utils-v2'
-import { Subscription } from 'rxjs'
+import { of, Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
 import { WidgetUserServiceLib } from '../../_services/widget-user-lib.service'
 // import { environment } from 'src/environments/environment'
@@ -1390,7 +1390,10 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
 
       let courses: NsContent.IContent[]
       let tabResults: any[] = []
-      let userId = this.configSvc.userProfile.userId
+      let userId = this.configSvc.userProfile?.userId
+      if (!userId) {
+        return of()
+      }
       const response = await this.userSvc.fetchCbpPlanList(userId).toPromise()
       if (response) {
         courses = response

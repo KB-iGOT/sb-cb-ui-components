@@ -101,11 +101,11 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
     })
 
     // Set initial state based on config when component initializes
-    effect(() => {
-      if (this.menuBarDetails?.defaultOpen !== undefined) {
-        this.isOpen.set(this.menuBarDetails.defaultOpen)
-      }
-    }, { allowSignalWrites: true })
+    // effect(() => {
+    //   if (this.menuBarDetails?.defaultOpen !== undefined) {
+    //     this.isOpen.set(this.menuBarDetails.defaultOpen)
+    //   }
+    // }, { allowSignalWrites: true })
 
     // Handle delayed content visibility
     effect(() => {

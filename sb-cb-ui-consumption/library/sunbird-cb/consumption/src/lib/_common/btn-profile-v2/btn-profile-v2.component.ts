@@ -197,6 +197,16 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
     }
   }
 
+  openAccessibilityMenu(): void {
+    const userWay = (window as any).UserWay
+    if (userWay && typeof userWay.widgetOpen === 'function') {
+      userWay.widgetOpen()
+      return
+    }
+    // Fallback if the UserWay JS API isn't ready yet: trigger its own (hidden) icon
+    document.getElementById('userwayAccessibilityIcon')?.click()
+  }
+
   logout(): void {
     this.raiseTelemetry('signout')
     this.dialog.open(LogoutComponent, {

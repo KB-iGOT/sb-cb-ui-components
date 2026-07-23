@@ -62,7 +62,9 @@
   <a (click)="viewAllItems.set(!viewAllItems())"
     class="view-all-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all">
     <mat-icon class="view-all-icon" aria-hidden="true">more_horiz</mat-icon>
-    {{ viewAllItems() ? 'View Less' : 'View All' }}
+    @if (showContent) {
+    {{ viewAllItems() ? 'View Less' : 'View More' }}
+    }
   </a>
   }
 

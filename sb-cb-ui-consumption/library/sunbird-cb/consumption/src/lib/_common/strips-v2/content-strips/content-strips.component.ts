@@ -1,6 +1,5 @@
 import { Component, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ContentConfig, CardType } from '../models/content-section.model'
 import { CardViewModel } from '../models/card.model'
 import { ContentApiService } from '../services/content-api.service'
@@ -61,7 +60,7 @@ export class ContentStripsComponent implements OnInit {
     this.skeletonArray.set(new Array(max).fill(0).map((_, i) => i))
   }
 
-  fetchContent(): void {
+  async fetchContent(): Promise<void> {
     const config = this.contentConfig()
     if (!config?.apiDetailsKey) {
       this.loading.set(false)
@@ -69,20 +68,19 @@ export class ContentStripsComponent implements OnInit {
     }
 
     this.loading.set(true)
-    this.apiService.loadContent(config.apiDetailsKey)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          const transformed = this.cardTransformer.transformCards(response, config.cardType, config.apiDetailsKey)
-          const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
-          this.cards.set(limited)
-          this.loading.set(false)
-        },
-        error: () => {
-          this.cards.set([])
-          this.loading.set(false)
-        }
-      })
+      ; (await this.apiService.loadContent(config.apiDetailsKey))
+        .subscribe({
+          next: (response) => {
+            const transformed = this.cardTransformer.transformCards(response, config.cardType, config.apiDetailsKey)
+            const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
+            this.cards.set(limited)
+            this.loading.set(false)
+          },
+          error: () => {
+            this.cards.set([])
+            this.loading.set(false)
+          }
+        })
   }
 
 
@@ -106,7 +104,7 @@ export class ContentStripsComponent implements OnInit {
   }
 
   shouldShowViewAll(): boolean {
-    return this.contentConfig()?.showViewAll ?? false
+    return (this.contentConfig()?.showViewAll && this.cards().length > 4) ?? false
   }
 
   getCardType(): CardType {
