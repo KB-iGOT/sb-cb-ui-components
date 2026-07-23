@@ -3,12 +3,15 @@
 @use '@sunbird-cb/design-system/src/styles/_ws-mixins.scss' as *;
 
 :host {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .progress-wrapper {
   position: relative;
-  margin-top: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   .progress-content {
     position: absolute;
@@ -71,6 +74,9 @@
 
 .new-margin {
   box-sizing: border-box;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 @media screen and (max-width: 768px) {
