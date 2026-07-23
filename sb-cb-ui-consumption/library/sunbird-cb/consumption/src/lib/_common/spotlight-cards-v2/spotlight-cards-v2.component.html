@@ -49,7 +49,7 @@
   @if (!isCollapsed()) {
   <div class="ws-spotlight__grid" role="list">
     @for (card of resolvedCards(); track card.label) {
-    <div class="ws-spotlight__card" role="listitem">
+    <div class="ws-spotlight__card cursor-pointer" role="listitem" (click)="navigate(card)">
 
       <!-- Arrow chip – the ONLY clickable area that redirects -->
       <div class="ws-spotlight__card-top">
