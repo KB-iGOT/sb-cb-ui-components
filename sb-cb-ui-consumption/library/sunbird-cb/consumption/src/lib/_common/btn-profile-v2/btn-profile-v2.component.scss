@@ -8,7 +8,7 @@
 
 .progress-wrapper {
   position: relative;
-  margin-top: -7px;
+  // margin-top: -7px;
 
   .progress-content {
     position: absolute;
@@ -71,6 +71,7 @@
 
 .new-margin {
   box-sizing: border-box;
+  height: 48px !important;
 }
 
 @media screen and (max-width: 768px) {

@@ -1,8 +1,8 @@
-<div class="footer-content flex items-center px-6 py-1">
+<div class="footer-content flex items-center py-1" [ngClass]="isOpen ? 'px-6' : 'justify-center'">
   @for (item of itemsList; track item.code) {
   <a class="footer-item w-full" (click)="onItemClick(item)" [attr.aria-label]="item.iconName">
-    <div class="flex items-center justify-between">
-      @if (isOpen) {
+    <div class="flex items-center" [ngClass]="isOpen ? 'justify-between' : 'justify-center'">
+      <!-- @if (isOpen) { -->
       <div class="flex gap-1 items-center">
         @if (item.iconName || item.iconUrl) {
         <div class="footer-icon-content flex items-center justify-center">
@@ -14,15 +14,17 @@
           }
         </div>
         }
+        @if (isOpen) {
         <div class="item-text">{{ translateLabels(item.label, 'leftNavBar', item.disableTranslate) }}</div>
+        }
       </div>
-      }
-      @if (item.infoIcon) {
+      <!-- } -->
+      <!-- @if (item.infoIcon) {
       <mat-icon class="info-icon"
         [attr.title]="item.infoText ? translateLabels(item.infoText, 'leftNavBar', item.disableTranslate) : ''">
         {{ item.infoIcon }}
       </mat-icon>
-      }
+      } -->
     </div>
   </a>
   }
