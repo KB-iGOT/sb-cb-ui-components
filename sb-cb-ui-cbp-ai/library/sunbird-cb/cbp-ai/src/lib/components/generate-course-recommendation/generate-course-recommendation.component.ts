@@ -1,5 +1,5 @@
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SuggestMoreCoursesComponent } from '../suggest-more-courses/suggest-more-courses.component';
@@ -15,7 +15,7 @@ import { SharedService } from '../../modules/shared/services/shared.service';
   templateUrl: './generate-course-recommendation.component.html',
   styleUrls: ['./generate-course-recommendation.component.scss']
 })
-export class GenerateCourseRecommendationComponent {
+export class GenerateCourseRecommendationComponent implements OnDestroy {
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
   planData: any
   loading = false
@@ -35,6 +35,13 @@ export class GenerateCourseRecommendationComponent {
     'Finalizing course recommendation plan...'
   ];
   stageStartTime: number = 0;
+  // Tracks the single active fake-progress ticker (normal generate or regenerate).
+  // Must be explicitly cleared wherever the display is finalized/reset instead of
+  // letting the interval infer completion from `loading`/`isRegeneratingWithProgress`
+  // (those flags flip for reasons other than real completion, e.g. the
+  // "recommendations already exist" pause, which previously caused the progress
+  // display to jump to 100% and then reset back to 0%).
+  private progressTimerId: ReturnType<typeof setInterval> | null = null;
   constructor(public dialogRef: MatDialogRef<GenerateCourseRecommendationComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any, public sharedService: SharedService,
     private snackBar: MatSnackBar, public dialog: MatDialog,
@@ -150,7 +157,24 @@ export class GenerateCourseRecommendationComponent {
   }
 
   closeDialog() {
+    this.stopProgressiveLoading();
     this.dialogRef.close()
+  }
+
+  ngOnDestroy() {
+    this.stopProgressiveLoading();
+  }
+
+  /**
+   * Stop the fake-progress ticker (shared by generate and regenerate flows).
+   * Callers decide what progressPercentage/currentProcessingStage should be
+   * afterwards - this only stops it from continuing to tick and overwrite them.
+   */
+  private stopProgressiveLoading() {
+    if (this.progressTimerId) {
+      clearInterval(this.progressTimerId);
+      this.progressTimerId = null;
+    }
   }
 
   saveCourses() {
@@ -686,8 +710,8 @@ export class GenerateCourseRecommendationComponent {
     console.log('allCourses--', allCourses)
     allCourses.forEach((item) => {
       if (item && item.organisation && item.organisation.length) {
-        if (this.filteredProviders.indexOf(item.organisation[0]) < 0) {
-          this.filteredProviders.push(item.organisation[0])
+        if (this.filteredProviders.indexOf(item.organisation) < 0) {
+          this.filteredProviders.push(item.organisation)
         }
 
       }
@@ -1647,6 +1671,7 @@ export class GenerateCourseRecommendationComponent {
         panelClass: ['error-snackbar']
       });
     } finally {
+      this.stopProgressiveLoading();
       this.isRegenerating = false;
       this.isRegeneratingWithProgress = false;
       this.dataLoaded = true; // Ensure main content is shown after regeneration
@@ -1803,6 +1828,7 @@ export class GenerateCourseRecommendationComponent {
              *  SUCCESS CASE (status COMPLETED)
              -------------------------------- */
             if (res?.status === 'COMPLETED') {
+              this.stopProgressiveLoading();
               this.isRegeneratingWithProgress = false;
               this.progressPercentage = 100;
               this.currentProcessingStage = 'Course recommendations regenerated successfully!';
@@ -1828,6 +1854,7 @@ export class GenerateCourseRecommendationComponent {
 
                 this.sharedService.getRecommendedCourse(role_mapping_id).subscribe({
                   next: (existingData) => {
+                    this.stopProgressiveLoading();
                     this.progressPercentage = 100;
                     this.currentProcessingStage = 'Loaded existing course recommendations successfully!';
 
@@ -1844,6 +1871,7 @@ export class GenerateCourseRecommendationComponent {
               }
 
               /** Any other error → stop & reject */
+              this.stopProgressiveLoading();
               this.isRegeneratingWithProgress = false;
               this.currentProcessingStage = '';
               this.progressPercentage = 0;
@@ -1853,12 +1881,17 @@ export class GenerateCourseRecommendationComponent {
 
             /** ------------------------------
              *  STILL PROCESSING (keep polling)
+             *  Progress/stage text is driven solely by
+             *  simulateRegenerativeProgressiveStages() (time-based);
+             *  do not also set it here or the display flickers
+             *  back and forth between the two sources.
              ------------------------------- */
-            this.progressPercentage = Math.min(this.progressPercentage + 10, 95);
-            this.currentProcessingStage = 'Still processing course recommendations...';
           },
 
-          error: err => reject(err)
+          error: err => {
+            this.stopProgressiveLoading();
+            reject(err);
+          }
         });
     });
   }
@@ -1867,6 +1900,7 @@ export class GenerateCourseRecommendationComponent {
 
   // Progressive loading methods for regeneration
   startRegenerativeProgressiveLoading() {
+    this.stopProgressiveLoading();
     this.currentProcessingStage = this.processingStages[0];
     this.progressPercentage = 0;
     this.stageStartTime = Date.now();
@@ -1878,13 +1912,10 @@ export class GenerateCourseRecommendationComponent {
     const totalDuration = 60000; // 60 seconds estimated duration
     const stageInterval = totalDuration / this.processingStages.length;
 
-    const progressInterval = setInterval(() => {
-      // Stop if regeneration is complete
-      if (!this.isRegeneratingWithProgress) {
-        clearInterval(progressInterval);
-        return;
-      }
-
+    // Completion/error/reset are all set explicitly by the caller (via
+    // stopProgressiveLoading()); this ticker only ever ramps the display
+    // up while active, it never infers completion on its own.
+    this.progressTimerId = setInterval(() => {
       const elapsed = Date.now() - this.stageStartTime;
       const currentStageProgress = (elapsed % stageInterval) / stageInterval;
       const stageIndex = Math.min(Math.floor(elapsed / stageInterval), this.processingStages.length - 1);
@@ -1898,7 +1929,13 @@ export class GenerateCourseRecommendationComponent {
       // Calculate overall progress (each stage is worth ~16.67%)
       const baseProgress = (stageIndex / this.processingStages.length) * 100;
       const stageProgress = (currentStageProgress / this.processingStages.length) * 100;
-      this.progressPercentage = Math.min(Math.round(baseProgress + stageProgress), 95);
+      const computedProgress = Math.min(Math.round(baseProgress + stageProgress), 95);
+      // Once the last stage is reached, `elapsed % stageInterval` keeps cycling
+      // every `stageInterval` ms even though `stageIndex` is clamped - without
+      // this guard the display would climb to 95% then drop back down and
+      // repeat for as long as generation runs past the assumed 60s duration
+      // (real generation commonly takes 1-2 minutes). Never let it regress.
+      this.progressPercentage = Math.max(this.progressPercentage, computedProgress);
     }, 1000);
   }
 
@@ -1968,6 +2005,7 @@ export class GenerateCourseRecommendationComponent {
 
   // Progressive loading methods for course generation
   startProgressiveLoading() {
+    this.stopProgressiveLoading();
     this.currentProcessingStage = this.processingStages[0];
     this.progressPercentage = 0;
     this.stageStartTime = Date.now();
@@ -1979,7 +2017,10 @@ export class GenerateCourseRecommendationComponent {
     const totalDuration = 60000; // 60 seconds estimated duration
     const stageInterval = totalDuration / this.processingStages.length;
 
-    const progressInterval = setInterval(() => {
+    // Completion/error/reset are all set explicitly by the caller (via
+    // stopProgressiveLoading()); this ticker only ever ramps the display
+    // up while active, it never infers completion on its own.
+    this.progressTimerId = setInterval(() => {
       const elapsed = Date.now() - this.stageStartTime;
       const currentStageProgress = (elapsed % stageInterval) / stageInterval;
       const stageIndex = Math.min(Math.floor(elapsed / stageInterval), this.processingStages.length - 1);
@@ -1993,14 +2034,13 @@ export class GenerateCourseRecommendationComponent {
       // Calculate overall progress (each stage is worth ~16.67%)
       const baseProgress = (stageIndex / this.processingStages.length) * 100;
       const stageProgress = (currentStageProgress / this.processingStages.length) * 100;
-      this.progressPercentage = Math.min(Math.round(baseProgress + stageProgress), 95);
-
-      // Clear interval when loading stops
-      if (!this.loading) {
-        clearInterval(progressInterval);
-        this.progressPercentage = 100;
-        this.currentProcessingStage = 'Course recommendations generated successfully!';
-      }
+      const computedProgress = Math.min(Math.round(baseProgress + stageProgress), 95);
+      // Once the last stage is reached, `elapsed % stageInterval` keeps cycling
+      // every `stageInterval` ms even though `stageIndex` is clamped - without
+      // this guard the display would climb to 95% then drop back down and
+      // repeat for as long as generation runs past the assumed 60s duration
+      // (real generation commonly takes 1-2 minutes). Never let it regress.
+      this.progressPercentage = Math.max(this.progressPercentage, computedProgress);
     }, 1000);
   }
 
@@ -2063,6 +2103,11 @@ export class GenerateCourseRecommendationComponent {
             // EXISTING RECOMMENDATIONS
             // ===========================
             if (this.firstApiResponse?.is_existing && this.existingRecommendationFound) {
+
+              // Not a real completion - just pausing for user input. Stop the
+              // fake-progress ticker now so it can't wake up a second later,
+              // see `loading` is false, and flash the display to 100%/"success".
+              this.stopProgressiveLoading();
 
               const dialogRef = this.dialog.open(
                 DeleteRoleMappingPopupComponent,
@@ -2131,6 +2176,7 @@ export class GenerateCourseRecommendationComponent {
             // ===========================
             if (response?.status === 'COMPLETED') {
 
+              this.stopProgressiveLoading();
               this.progressPercentage = 100;
               this.dataLoaded = true;
 
@@ -2157,6 +2203,7 @@ export class GenerateCourseRecommendationComponent {
 
           error: (error) => {
 
+            this.stopProgressiveLoading();
             this.loading = false;
             this.currentProcessingStage = '';
             this.progressPercentage = 0;
