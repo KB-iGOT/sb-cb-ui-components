@@ -3,7 +3,8 @@
 @use '@sunbird-cb/design-system/src/styles/_ws-mixins.scss' as *;
 
 :host {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .progress-wrapper {
