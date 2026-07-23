@@ -1,8 +1,7 @@
 <div class="footer-content flex items-center px-6 py-1">
   @for (item of itemsList; track item.code) {
   <a class="footer-item w-full" (click)="onItemClick(item)" [attr.aria-label]="item.iconName">
-    <div class="flex items-center justify-between">
-      @if (isOpen) {
+    <div class="flex items-center" [class.justify-between]="isOpen" [class.justify-center]="!isOpen">
       <div class="flex gap-1 items-center">
         @if (item.iconName || item.iconUrl) {
         <div class="footer-icon-content flex items-center justify-center">
@@ -14,9 +13,10 @@
           }
         </div>
         }
+        @if (isOpen) {
         <div class="item-text">{{ translateLabels(item.label, 'leftNavBar', item.disableTranslate) }}</div>
+        }
       </div>
-      }
       @if (item.infoIcon) {
       <mat-icon class="info-icon"
         [attr.title]="item.infoText ? translateLabels(item.infoText, 'leftNavBar', item.disableTranslate) : ''">
