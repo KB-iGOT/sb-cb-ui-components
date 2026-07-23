@@ -20,7 +20,7 @@ export class TopLearnersComponent implements OnInit {
   loading: boolean = false
   month: string = ''
   results: any = []
-  defaultKpIcon = 'https://portal.igotkarmayogi.gov.in/content-store/orgStore/0133783095823810560/1728035311295_karma-badge.svg'
+  defaultKpIcon = 'assets/icons/home/karma-badge.svg'
 
   colors: any = [
     '#EB7181', // red
