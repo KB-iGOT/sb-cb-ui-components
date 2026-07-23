@@ -174,6 +174,7 @@ export class ViewFinalCbpPlanComponent {
         this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe({
           next: (res) => {
             this.loading = false
+            this.jsonData = res;
             this.totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
             this.designationData = [];
 
@@ -275,6 +276,7 @@ export class ViewFinalCbpPlanComponent {
         this.sharedService.getRoleMappingByStateCenter(state_center_id).subscribe({
           next: (res) => {
             this.loading = false
+            this.jsonData = res;
             console.log('res', res)
             this.totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
             this.designationData = [];
@@ -456,6 +458,7 @@ export class ViewFinalCbpPlanComponent {
       this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe({
         next: (res) => {
           this.loading = false
+          this.jsonData = res;
           console.log('res', res)
           this.totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
           this.designationData = [];
