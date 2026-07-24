@@ -4,10 +4,18 @@ $secondary-color: #EF951E;
     border: 1px solid rgba(0,0,0, 0.08);
     opacity: 1;
     width: 322px;
+    max-width: 100%;
+    box-sizing: border-box;
     min-height: 174px;
     padding: 16px;
     .img-block-portrait {
       line-height: 10px;
+    }
+    .margin-right-s {
+      flex-shrink: 0;
+    }
+    .width-1-1 {
+      min-width: 0;
     }
     .card-image {
       border-radius: 8px;
