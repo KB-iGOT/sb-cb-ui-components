@@ -612,8 +612,19 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
   async parseVTT() {
     let identifier = this.resourceIdentifier
+    // resolve the transcoder-stats api from toc config; empty url => disabled (e.g. public / preview)
+    const vttUrl = this.commonMethodsSvc.getEnabledUrl({
+      apiConfig: this.config?.apiConfig,
+      urlConfigPath: 'aiResourceTranscoderStats',
+      defaultUrl: '/apis/proxies/v8/chatbot/v3/transcoder/stats',
+    })
+    if (!vttUrl) {
+      this.vttLangArr = []
+      this.enableTranscriptionFlag = false
+      return
+    }
     // console.log('identifier--', identifier)
-    await this.tocSvc.aiGetResourceVttFile(identifier).subscribe(async (datas: any) => {
+    await this.tocSvc.aiGetResourceVttFile(identifier, vttUrl).subscribe(async (datas: any) => {
       let data: any = datas?.data
       if (data && data.length && data[0]['transcription_urls'] && data[0]['transcription_urls'].length) {
         this.vttLangArr = data[0]['transcription_urls']

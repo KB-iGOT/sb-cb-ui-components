@@ -561,16 +561,19 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
   // }
 
   getKarmapointsLimit() {
-    if (!this.forPreview) {
-      this.contentSvc.userKarmaPoints().subscribe((res: any) => {
-        if (res && res.kpList) {
-          const info = res.kpList.addinfo
-          if (info) {
-            this.monthlyCapExceed = JSON.parse(info).claimedNonACBPCourseKarmaQuota >= 4
-          }
-        }
-      })
+    // honor toc config apiConfig.totalKarmaPoints.enabled (skip when explicitly disabled)
+    const kpCfg = this.tocConfig?.apiConfig?.totalKarmaPoints
+    if (this.forPreview || (kpCfg && !kpCfg.enabled)) {
+      return
     }
+    this.contentSvc.userKarmaPoints().subscribe((res: any) => {
+      if (res && res.kpList) {
+        const info = res.kpList.addinfo
+        if (info) {
+          this.monthlyCapExceed = JSON.parse(info).claimedNonACBPCourseKarmaQuota >= 4
+        }
+      }
+    })
   }
 
   isCourseCompletedOnThisMonth() {

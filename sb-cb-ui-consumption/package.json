@@ -1,6 +1,6 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.0.7-ang-17-20-unenroll",
+  "version": "0.0.11-ang-17-20-unenroll",
   "scripts": {
     "ng": "ng",
     "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
@@ -56,7 +56,7 @@
     "@ngx-translate/http-loader": "4.0.0",
     "@sunbird-cb/design-system": "0.0.4",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
-    "@sunbird-cb/utils-v2": "0.0.1-ang-17-20-role-based",
+    "@sunbird-cb/utils-v2": "0.0.2-ang-17-20-unenroll",
     "ckeditor5": "^43.1.0",
     "dayjs": "^1.10.7",
     "jspdf": "^2.5.1",
