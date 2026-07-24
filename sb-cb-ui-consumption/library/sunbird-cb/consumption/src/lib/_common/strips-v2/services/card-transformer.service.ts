@@ -30,7 +30,7 @@ export class CardTransformerService {
       return this.mapTheData(data, apiDetailsKey)
     }
     return data.map((item: Record<string, unknown>) => ({
-      id: (item?.['identifier'] as string) ?? '',
+      identifier: (item?.['identifier'] as string) ?? '',
       title: (item?.['name'] as string) ?? '',
       image: (item?.['appIcon'] as string) ?? (item?.['posterImage'] as string) ?? '',
       tags: (item?.['tags'] as string[]) ?? [],
@@ -38,7 +38,7 @@ export class CardTransformerService {
       status: (item?.['status'] as string) ?? '',
       rating: (item?.['averageRating'] as number) ?? 0,
       provider: (item?.['sourceName'] as string) ?? (item?.['source'] as string) ?? '',
-      level: (item?.['complexityLevel'] as string) ?? '',
+      difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
       metadata: item ?? {}
     }))
   }
@@ -58,7 +58,7 @@ export class CardTransformerService {
           item['planType'] = 'cbPlan'
           item['contentStatus'] = 0
           const card: CardViewModel = {
-            id: (item?.['identifier'] as string) ?? '',
+            identifier: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
             additionalTags: (item?.['tags'] as string[]) ?? [], // not found
@@ -66,9 +66,11 @@ export class CardTransformerService {
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['averageRating'] as number) ?? 0, // not found
             provider: (item?.['sourceName'] as string),
-            level: (item?.['complexityLevel'] as string) ?? '',
+            difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
+            courseCategory: item['courseCategory'] as string,
+            primaryCategory: item['primaryCategory'] as string,
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -85,7 +87,7 @@ export class CardTransformerService {
           item['planType'] = 'cbPlan'
           item['contentStatus'] = 0
           const card: CardViewModel = {
-            id: (item?.['identifier'] as string) ?? '',
+            identifier: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
             additionalTags: (item?.['tags'] as string[]) ?? [], // not found
@@ -93,9 +95,11 @@ export class CardTransformerService {
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['averageRating'] as number) ?? 0, // not found
             provider: (item?.['sourceName'] as string),
-            level: (item?.['complexityLevel'] as string) ?? '',
+            difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
+            courseCategory: item['courseCategory'],
+            primaryCategory: item['primaryCategory'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -104,7 +108,7 @@ export class CardTransformerService {
       case 'trendingOnIGOTApi':
         data.forEach((item: any) => {
           const card: CardViewModel = {
-            id: (item?.['identifier'] as string) ?? '',
+            identifier: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['appIcon'] as string) ?? (item?.['posterImage'] as string) ?? '',
             additionalTags: (item?.['additionalTags'] as string[]) ?? [],
@@ -112,9 +116,11 @@ export class CardTransformerService {
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['avgRating'] as number) ?? (item?.['averageRating'] as number) ?? 0,
             provider: (item?.['source'] as string) ?? (item?.['sourceName'] as string) ?? '',
-            level: (item?.['difficultyLevel'] as string) ?? '',
+            difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
+            courseCategory: item['courseCategory'],
+            primaryCategory: item['primaryCategory'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -123,7 +129,7 @@ export class CardTransformerService {
       case 'featuredAiCoursesApi':
         data.forEach((item: any) => {
           const card: CardViewModel = {
-            id: (item?.['identifier'] as string) ?? '',
+            identifier: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
             additionalTags: (item?.['tags'] as string[]) ?? [],
@@ -131,9 +137,11 @@ export class CardTransformerService {
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['averageRating'] as number) ?? 0,
             provider: (item?.['sourceName'] as string) ?? (item?.['sourceName'] as string) ?? '',
-            level: (item?.['difficultyLevel'] as string) ?? '',
+            difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
+            courseCategory: item['courseCategory'],
+            primaryCategory: item['primaryCategory'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -142,7 +150,7 @@ export class CardTransformerService {
       default:
         data.forEach((item: any) => {
           const card: CardViewModel = {
-            id: (item?.['identifier'] as string) ?? '',
+            identifier: (item?.['identifier'] as string) ?? '',
             title: (item?.['name'] as string) ?? '',
             image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
             additionalTags: (item?.['tags'] as string[]) ?? [],
@@ -150,9 +158,11 @@ export class CardTransformerService {
             status: (item?.['status'] as string) ?? '',
             rating: (item?.['averageRating'] as number) ?? 0,
             provider: (item?.['sourceName'] as string) ?? (item?.['source'] as string) ?? '',
-            level: (item?.['complexityLevel'] as string) ?? '',
+            difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
+            courseCategory: item['courseCategory'],
+            primaryCategory: item['primaryCategory'],
             metadata: item ?? {}
           }
           mapedData.push(card)
@@ -165,7 +175,7 @@ export class CardTransformerService {
   processAssessmentCards(response: unknown): CardViewModel[] {
     const data = this.extractResultArray(response)
     return data.map((item: Record<string, unknown>) => ({
-      id: (item?.['identifier'] as string) ?? '',
+      identifier: (item?.['identifier'] as string) ?? '',
       title: (item?.['name'] as string) ?? '',
       image: (item?.['appIcon'] as string) ?? '',
       additionalTags: (item?.['tags'] as string[]) ?? [],
@@ -173,9 +183,11 @@ export class CardTransformerService {
       status: (item?.['assessmentStatus'] as string) ?? '',
       rating: 0,
       provider: (item?.['sourceName'] as string) ?? '',
-      level: (item?.['difficultyLevel'] as string) ?? '',
+      difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
       planDuration: (item?.['planDuration'] as string) ?? '',
       contentStatus: (item?.['contentStatus'] as number) ?? 0,
+      courseCategory: item['courseCategory'] as string,
+      primaryCategory: item['primaryCategory'] as string,
       metadata: item ?? {}
     }))
   }
@@ -183,7 +195,7 @@ export class CardTransformerService {
   processProgramCards(response: unknown): CardViewModel[] {
     const data = this.extractResultArray(response)
     return data.map((item: Record<string, unknown>) => ({
-      id: (item?.['identifier'] as string) ?? '',
+      identifier: (item?.['identifier'] as string) ?? '',
       title: (item?.['name'] as string) ?? '',
       image: (item?.['appIcon'] as string) ?? '',
       additionalTags: (item?.['tags'] as string[]) ?? [],
@@ -191,9 +203,11 @@ export class CardTransformerService {
       status: (item?.['programStatus'] as string) ?? '',
       rating: (item?.['averageRating'] as number) ?? 0,
       provider: (item?.['sourceName'] as string) ?? '',
-      level: '',
+      difficultyLevel: '',
       planDuration: (item?.['planDuration'] as string) ?? '',
       contentStatus: (item?.['contentStatus'] as number) ?? 0,
+      courseCategory: item['courseCategory'] as string,
+      primaryCategory: item['primaryCategory'] as string,
       metadata: item ?? {}
     }))
   }

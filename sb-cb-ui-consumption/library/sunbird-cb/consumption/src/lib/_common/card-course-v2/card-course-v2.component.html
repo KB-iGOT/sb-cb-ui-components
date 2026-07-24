@@ -50,7 +50,7 @@
       loading="lazy" />
 
     <div class="cc-card__badges">
-      @if (isIgotSpecialization()) {
+      @if (isIgotSpecialization() && isCardElementEnabled('igotSpecialization')) {
       <span class="cc-card__left-badge cc-card__left-badge--igot"
         [attr.aria-label]="'cardcontentv2.iGOTSpecializationProgram' | translate">
         {{ 'cardcontentv2.iGOTSpecializationProgram' | translate }}
@@ -78,6 +78,7 @@
     }
 
     <!-- Duration overlay (bottom-right) -->
+    @if (isCardElementEnabled('duration')) {
     @if (durationSeconds() > 0) {
     <span class="cc-card__duration"
       [attr.aria-label]="(durationSeconds() | pipeDurationTransform: 'hms') + ' duration'">
@@ -93,6 +94,7 @@
       {{ programDurationDays() }} {{ programDurationDays() === 1 ? 'day' : 'days' }}
     </span>
     }
+    }
   </div>
   <!-- └──────────────────────────────────────────────────────────┘ -->
 
@@ -101,13 +103,15 @@
 
     <!-- Row 1 – content type chip + star rating -->
     <div class="cc-card__type-row">
+      @if (isCardElementEnabled('contentType')) {
       <span class="cc-card__type-chip">
         <sb-uic-display-content-type class="cc-card__type-text" [title]="displayType()"
           [displayContentType]="displayType()">
         </sb-uic-display-content-type>
       </span>
+      }
 
-      @if (c.avgRating) {
+      @if (c.avgRating && isCardElementEnabled('rating')) {
       <span class="cc-card__rating" [attr.aria-label]="'Rating: ' + c.avgRating">
         <mat-icon class="cc-card__star-icon" aria-hidden="true">star_border</mat-icon>
         <span aria-hidden="true">{{ c.avgRating }}</span>
@@ -130,12 +134,12 @@
           aria-hidden="true" />APAR
       </span>
       }
-      @if (isCa()) {
+      @if (isCa() && isCardElementEnabled('ca')) {
       <span class="cc-card__chip cc-card__chip--ca">
         <img class="cc-chip-icon cc-chip-icon--ca" src="assets/icons/content/ca.svg" alt="" aria-hidden="true" />CA
       </span>
       }
-      @if (c.difficultyLevel) {
+      @if (c.difficultyLevel && isCardElementEnabled('difficultyLevel')) {
       <span class="cc-card__chip cc-card__chip--level"
         [ngClass]="'cc-card__chip--level-' + (c.difficultyLevel | lowercase)">
         <img class="cc-chip-icon" src="assets/icons/content/level.svg" alt="" aria-hidden="true" />
@@ -149,13 +153,17 @@
       <div class="cc-card__divider"></div>
 
       <div class="cc-card__org-row">
+        @if (isCardElementEnabled('creatorLogo')) {
         <img class="cc-card__org-logo" [src]="c.creatorLogo || defaultSLogo()"
           [wsUtilsDefaultThumbnail]="defaultSLogo()" [alt]="orgName()" loading="lazy" />
+        }
 
+        @if (isCardElementEnabled('organisation')) {
         <span #orgEl class="cc-card__org-name" [matTooltip]="orgName()" [matTooltipDisabled]="!isOrgTruncated()"
           [matTooltipShowDelay]="400" matTooltipClass="cc-title-tooltip">{{ orgName() }}</span>
+        }
 
-        @if (cbpStatus()) {
+        @if (cbpStatus() ) {
         <span class="cc-card__status" [class.cc-card__status--overdue]="cbpStatus() === 'Overdue'"
           [class.cc-card__status--done]="cbpStatus() === 'Completed'"
           [attr.aria-label]="(cbpStatus() === 'Overdue' ? 'cardcontentv2.overDue' : 'cardcontentv2.completed') | translate">
