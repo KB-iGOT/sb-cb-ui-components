@@ -68,7 +68,7 @@
                             </div>
                             <div class="flex gap-2 kp-section" *ngIf="!objectData?.hideEle?.includes('karma-points')">
                                 <div class="kp-icon">
-                                    <img [src]="objectData?.data?.kpIcon" class="kp-image" />
+                                    <img [src]="getKpIcon()" class="kp-image" (error)="onKpIconError($event)" />
                                 </div>
                                 <div class="points">{{obj?.total_points || 0}}</div>
                             </div>
