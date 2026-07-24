@@ -1,5 +1,5 @@
 export interface CardViewModel {
-  id: string
+  identifier: string
   title: string
   image: string
   additionalTags: string[]
@@ -7,8 +7,10 @@ export interface CardViewModel {
   status: string
   rating: number
   provider: string
-  level: string
+  difficultyLevel: string
   planDuration: string
   contentStatus: number
   metadata: Record<string, unknown>
+  courseCategory: string
+  primaryCategory: string
 }

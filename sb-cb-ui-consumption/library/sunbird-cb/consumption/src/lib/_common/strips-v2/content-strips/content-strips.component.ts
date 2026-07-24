@@ -24,6 +24,7 @@ export class ContentStripsComponent implements OnInit {
 
   // Expose CardType enum so the template can use it in @switch
   CardType = CardType;
+  cbPlanMapData: any
 
   private apiService = inject(ContentApiService);
   private cardTransformer = inject(CardTransformerService);
@@ -53,6 +54,7 @@ export class ContentStripsComponent implements OnInit {
   ngOnInit(): void {
     this.initializeSkeletons()
     this.fetchContent()
+    this.getCbPlanData()
   }
 
   initializeSkeletons(): void {
@@ -83,6 +85,18 @@ export class ContentStripsComponent implements OnInit {
         })
   }
 
+  getCbPlanData() {
+    let cbpList: any = {}
+    if (localStorage.getItem('cbpData')) {
+      let cbpListArr = JSON.parse(localStorage.getItem('cbpData') || '')
+      if (cbpListArr && cbpListArr.length) {
+        cbpListArr.forEach((data: any) => {
+          cbpList[data.identifier] = data
+        })
+      }
+      this.cbPlanMapData = cbpList
+    }
+  }
 
   getViewAllUrl(): { path: string, queryParams?: Record<string, any>, f?: any } | null {
     return this.contentConfig()?.viewMoreUrl ?? null
