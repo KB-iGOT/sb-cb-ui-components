@@ -81,11 +81,12 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
     private handleClaimService: HandleClaimService,
     private resetRatingsService: ResetRatingsService,
     private contentSvc: WidgetContentService,
-    @Inject('environment') private environment: any
+    // @Inject('environment') private environment: any
   ) {
     this.resetRatingsService.resetRatings$.subscribe((_res: any) => {
       this.fetchRatingSummary()
     })
+    this.compentencyKey = this.configService.compentency['competencies_v6']
   }
 
   @Input() condition: any
@@ -185,11 +186,12 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   compentencyKey!: any
 
   ngOnInit() {
+    
     if (this.content) {
-      this.compentencyKey = {
-        vKey: this.environment.compentencyVersionKey, vCompetencyArea: 'competencyAreaName', vCompetencyTheme: 'competencyThemeName',
-        vCompetencySubTheme: 'competencySubThemeName',
-      }
+      // this.compentencyKey = {
+      //   vKey: this.environment.compentencyVersionKey, vCompetencyArea: 'competencyAreaName', vCompetencyTheme: 'competencyThemeName',
+      //   vCompetencySubTheme: 'competencySubThemeName',
+      // }
     }
     // if (window.innerWidth <= 1200) {
     //   this.isMobile = true
@@ -252,10 +254,10 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       window.location.href.includes('&status=Draft')
     if (this.content && this.content.identifier) {
       // this.fetchRatingSummary()
-      this.compentencyKey = {
-        vKey: this.environment.compentencyVersionKey, vCompetencyArea: 'competencyAreaName', vCompetencyTheme: 'competencyThemeName',
-        vCompetencySubTheme: 'competencySubThemeName',
-      }
+      // this.compentencyKey = {
+      //   vKey: this.environment.compentencyVersionKey, vCompetencyArea: 'competencyAreaName', vCompetencyTheme: 'competencyThemeName',
+      //   vCompetencySubTheme: 'competencySubThemeName',
+      // }
       // this.loadCompetencies()
     }
     if (this.content) {
