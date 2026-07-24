@@ -1,4 +1,4 @@
-@media (min-width: 1200px) {
+@media (min-width: 1024px) {
   .sidebar-container {
     border-right: 1px solid #ccc;
   }
@@ -84,7 +84,7 @@
 
 // Tablet (768px - 1199.98px): sidebar becomes a fixed overlay drawer instead of pushing content.
 // The container reserves no layout width; the aside slides in/out via transform above a backdrop.
-@media (min-width: 768px) and (max-width: 1199.98px) {
+@media (min-width: 768px) and (max-width: 1024px) {
   .sidebar-container {
     width: 45px !important;
     height: 63px;

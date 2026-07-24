@@ -2,23 +2,14 @@
 $cc-width : 230px;
 $cc-height : 322px;
 $cc-img-h : 140px;
-$cc-body-h : $cc-height - $cc-img-h;
 /* 182px */
 $cc-radius : 10px;
 $cc-body-pad : 10px 12px;
 
-/* ── Colour tokens ──────────────────────────────────────── */
-$cyan-primary : #00bcd4;
 $amber : #f5a623;
 $chip-bg : #f1f1f1;
 $chip-text : #333;
-$apar-bg : #e8f5e9;
-$apar-text : #388e3c;
-$ca-bg : #e3f2fd;
-$ca-text : #1565c0;
-$overdue-red : #d32f2f;
 $done-green : #388e3c;
-$white-80 : rgba(255, 255, 255, 0.88);
 
 /* ═══════════════════════════════════════════════════════════
    Base card
@@ -306,7 +297,7 @@ $white-80 : rgba(255, 255, 255, 0.88);
     flex-shrink: 0;
 
     &--overdue {
-      color: $overdue-red;
+      color: var(--color-accents-red)
     }
 
     &--done {

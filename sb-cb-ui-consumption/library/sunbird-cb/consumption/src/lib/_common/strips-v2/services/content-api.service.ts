@@ -63,7 +63,6 @@ export class ContentApiService {
         }
 
         if (apiDetailsKey === 'caProgramApi') {
-          // debugger
           let request = {
             request: {
               courseId: identifiers

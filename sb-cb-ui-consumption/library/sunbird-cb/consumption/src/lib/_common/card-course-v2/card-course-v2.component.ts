@@ -15,7 +15,7 @@ import { Router } from '@angular/router'
 import { TranslateModule } from '@ngx-translate/core'
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
-import { ConfigurationsService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, DomainConfService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsContent } from '../../_models/widget-content.model'
 import { ContentLanguageService } from '../../_services/content-language.service'
 import { CommonMethodsService } from '../../_services/common-methods.service'
@@ -68,6 +68,7 @@ export class CardCourseV2Component {
   private readonly commonSvc = inject(CommonMethodsService)
   private readonly contSvc = inject(WidgetContentLibService)
   private readonly contentApiService = inject(ContentApiService)
+  private readonly domainConfSvc = inject(DomainConfService)
 
   // ── Internal mutable state ─────────────────────────────────────────────────
   readonly defaultThumbnail = signal('')
@@ -96,7 +97,10 @@ export class CardCourseV2Component {
   readonly orgName = computed(() => {
     const orgs = this.content()?.organisation
     if (orgs?.length) { return orgs[0] }
-    return this.content()?.sourceName || 'Karmayogi Bharat'
+    if (this.content()?.resourceType === 'Samuhik Charcha') {
+      return this.content()?.sourceName || 'Karmayogi Bharat'
+    }
+    return 'Karmayogi Bharat'
   })
 
   readonly isPopular = computed(() => (this.content()?.additionalTags ?? []).includes('Most popular'))
@@ -183,6 +187,10 @@ export class CardCourseV2Component {
       }
       this.contentApiService.publishCardClickDetails(cardClickDetails)
     }
+  }
+
+  isCardElementEnabled(key: string): boolean {
+    return this.domainConfSvc.isConfigEnabled('components.cards', key)
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
