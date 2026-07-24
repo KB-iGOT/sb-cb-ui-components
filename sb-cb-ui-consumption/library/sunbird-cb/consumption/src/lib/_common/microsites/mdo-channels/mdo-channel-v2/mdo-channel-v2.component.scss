@@ -194,7 +194,7 @@
 }
 
 .logo-img {
-    display: block;
+     object-fit: fill;
     // object-fit: contain;
     min-height: 52px;
     min-width: 52px;
@@ -204,7 +204,6 @@
     width: 100%;
     max-height: 52px;
     background: #7a7a7a85;
-    margin: auto;
 }
 
 .logo-img-mb{
@@ -220,5 +219,4 @@
 .logo-container-multiple {
     display: flex;
     align-items: center;
-    justify-content: center;
 }
