@@ -25,6 +25,7 @@
 }
 
 .sidebar-toggle-btn {
+  cursor: pointer;
   border: 1px solid var(--environment-border-and-divider-default-1);
   transition: all 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
   width: var(--font-size-heading-1) !important;
