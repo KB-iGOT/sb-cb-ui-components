@@ -9,9 +9,7 @@
 
 .progress-wrapper {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  // margin-top: -7px;
 
   .progress-content {
     position: absolute;
@@ -74,9 +72,7 @@
 
 .new-margin {
   box-sizing: border-box;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
+  height: 48px !important;
 }
 
 @media screen and (max-width: 768px) {

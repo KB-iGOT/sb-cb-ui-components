@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core'
+import { CommonModule } from '@angular/common'
 import { MatIconModule } from '@angular/material/icon'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-loader-lib.module'
@@ -9,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'
   selector: 'sb-uic-sidebar-footer',
   standalone: true,
   imports: [
+    CommonModule,
     MatIconModule,
     TranslateModule,
     SkeletonLoaderLibModule,

@@ -1,23 +1,34 @@
 <div class="sidebar-container" [class.sidebar-open]="isOpen()" [class.sidebar-closed]="!isOpen()" role="complementary"
   [attr.aria-label]="'Application sidebar' + (isOpen() ? ' expanded' : ' collapsed')">
-  <!-- Sidebar -->
-  <aside class="sidebar fixed top-0 left-0 h-screen bg-white shadow-xl overflow-hidden z-40"
-    [@sidebarAnimation]="isOpen() ? 'open' : 'closed'" role="navigation" aria-label="Main navigation sidebar">
 
-    <!-- Screen reader live region for state changes -->
-    <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
-      {{ isOpen() ? 'Sidebar expanded' : 'Sidebar collapsed' }}
-    </div>
+  <!-- Tablet-only floating toggle: stays visible above the sidebar even when it is translated off-screen -->
+  @if (isTablet()) {
+  <div class="sidebar-toggle-btn hover:bg-gray-100 flex items-center justify-center ml-1 md:ml-0"
+    (click)="toggleSidebar()" [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
+    [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
+    @if (isOpen()) {
+    <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'"
+      [style.-webkit-mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'" role="presentation"></span>
+    } @else {
+    <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuOpen.svg)'"
+      [style.-webkit-mask-image]="'url(/assets/icons/home-v2/MenuOpen.svg)'" role="presentation"></span>
+    }
+  </div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="sidebar fixed top-0 left-0 h-screen bg-white shadow-xl overflow-hidden z-[1050]"
+    [@sidebarAnimation]="isOpen() ? 'open' : 'closed'" role="navigation" aria-label="Main navigation sidebar">
 
     <!-- Sidebar Content -->
     <div class="sidebar-content h-full flex flex-col">
 
       <!-- Header Section -->
-      <div class="sidebar-header p-4 border-b border-gray-200 bg-primary text-white flex items-center justify-between"
+      <div class="sidebar-header px-4 border-b border-gray-200 bg-primary text-white flex items-center justify-between"
         role="banner" aria-label="Sidebar header">
         @if (showContent()) {
         @if (menuBarDetails?.logoUrl) {
-        <div class="logo-container mb-2" [class.cursor-pointer]="menuBarDetails?.navUrl"
+        <div class="logo-container" [class.cursor-pointer]="menuBarDetails?.navUrl"
           [attr.role]="menuBarDetails?.navUrl ? 'button' : null" [attr.tabindex]="menuBarDetails?.navUrl ? 0 : null"
           (click)="onLogoClick()" (keydown.enter)="onLogoClick()" (keydown.space)="onLogoClick()">
           <img [src]="menuBarDetails.logoUrl" [alt]="menuBarDetails?.headerText || 'Application logo'" class="logo"
@@ -106,10 +117,10 @@
     </div>
   </aside>
 
-  <!-- Overlay for mobile -->
-  @if (isOpen()) {
-  <div class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" (click)="toggleSidebar()"
-    role="button" tabindex="0" (keydown.enter)="toggleSidebar()" (keydown.space)="toggleSidebar()"
-    aria-label="Close sidebar overlay"></div>
+  <!-- Backdrop for tablet + mobile overlay modes only; never shown on desktop -->
+  @if (isOpen() && isOverlayMode()) {
+  <div class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-[1040]" (click)="toggleSidebar()" role="button"
+    tabindex="0" (keydown.enter)="toggleSidebar()" (keydown.space)="toggleSidebar()" aria-label="Close sidebar overlay">
+  </div>
   }
 </div>

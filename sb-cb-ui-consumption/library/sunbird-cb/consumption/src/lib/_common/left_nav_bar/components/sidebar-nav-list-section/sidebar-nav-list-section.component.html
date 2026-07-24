@@ -59,7 +59,7 @@
   </ul>
 
   @if (showViewAll()) {
-  <a (click)="viewAllItems.set(!viewAllItems())"
+  <a (click)="viewAllItems.set(!viewAllItems())" [ngClass]="{'justify-center': !showContent}"
     class="view-all-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all">
     <mat-icon class="view-all-icon" aria-hidden="true">more_horiz</mat-icon>
     @if (showContent) {

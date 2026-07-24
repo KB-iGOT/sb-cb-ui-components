@@ -1,12 +1,14 @@
-import { Component, Input, Output, EventEmitter, signal, effect, ChangeDetectionStrategy, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core'
+import { Component, Input, Output, EventEmitter, signal, computed, effect, HostListener, Signal, ChangeDetectionStrategy, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router, RouterModule } from '@angular/router'
 import { trigger, state, style, transition, animate } from '@angular/animations'
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout'
+import { toSignal } from '@angular/core/rxjs-interop'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { SidebarConfig, SidebarCardType, SidebarStateChange, SidebarSection, InfoCardItem, StatCardItem, NavListItem } from '../../models/sidebar.models'
-import { SIDEBAR_ANIMATION } from '../../constants/sidebar.constants'
+import { SIDEBAR_ANIMATION, BREAKPOINT_QUERIES } from '../../constants/sidebar.constants'
 import { MultilingualTranslationsService } from '../../../../_services/multilingual-translations.service'
 import { SidebarNavListSectionComponent } from '../sidebar-nav-list-section/sidebar-nav-list-section.component'
 import { SidebarStatCardsSectionComponent } from '../sidebar-stat-cards-section/sidebar-stat-cards-section.component'
@@ -86,12 +88,42 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   navSections: SidebarSection[] = [];
   footerSections: any[] = [];
 
+  // Responsive breakpoint signals, kept in sync with viewport resize via BreakpointObserver
+  private breakpointMatches!: Signal<BreakpointState | undefined>
+  isMobile = computed(() => !!this.breakpointMatches()?.breakpoints[BREAKPOINT_QUERIES.MOBILE])
+  isTablet = computed(() => !!this.breakpointMatches()?.breakpoints[BREAKPOINT_QUERIES.TABLET])
+  isDesktop = computed(() => this.breakpointMatches() === undefined ? true : !!this.breakpointMatches()!.breakpoints[BREAKPOINT_QUERIES.DESKTOP])
+  // Tablet and mobile both render the sidebar as a fixed overlay drawer instead of pushing content
+  isOverlayMode = computed(() => this.isTablet() || this.isMobile())
+  private previousMode: 'mobile' | 'tablet' | 'desktop' | null = null
+
   constructor(
     private cdr: ChangeDetectorRef,
     private router: Router,
     private translate: TranslateService,
-    private langtranslations: MultilingualTranslationsService
+    private langtranslations: MultilingualTranslationsService,
+    private breakpointObserver: BreakpointObserver
   ) {
+    this.breakpointMatches = toSignal(
+      this.breakpointObserver.observe([BREAKPOINT_QUERIES.MOBILE, BREAKPOINT_QUERIES.TABLET, BREAKPOINT_QUERIES.DESKTOP]),
+      { initialValue: undefined }
+    )
+
+    // Tablet should start (and re-enter) fully collapsed since it is an overlay drawer;
+    // desktop restores the last known open/closed state when returning from tablet/mobile
+    effect(() => {
+      const mode: 'mobile' | 'tablet' | 'desktop' = this.isMobile() ? 'mobile' : this.isTablet() ? 'tablet' : 'desktop'
+
+      if (mode !== this.previousMode) {
+        if (mode === 'tablet') {
+          this.isOpen.set(false)
+        } else if (mode === 'desktop') {
+          this.isOpen.set(this.navBarOpenStatus)
+        }
+        this.previousMode = mode
+      }
+    }, { allowSignalWrites: true })
+
     this.langtranslations.languageSelectedObservable.subscribe(() => {
       if (localStorage.getItem('websiteLanguage')) {
         this.translate.setDefaultLang('en')
@@ -124,7 +156,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
         // Hide content with 300ms delay when closing
         this.hideContentTimer = setTimeout(() => {
           this.showContent.set(false)
-        }, 300)
+        }, 50)
       }
     }, { allowSignalWrites: true })
   }
@@ -180,6 +212,17 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
     this.isOpen.update(state => !state)
     // Emit state change only when user clicks toggle button
     this.emitStateChange()
+  }
+
+  /**
+   * ESC closes the sidebar when it is rendered as an overlay drawer (tablet/mobile)
+   */
+  @HostListener('document:keydown.escape')
+  onEscapeKeydown(): void {
+    if (this.isOverlayMode() && this.isOpen()) {
+      this.isOpen.set(false)
+      this.emitStateChange()
+    }
   }
 
   /**
