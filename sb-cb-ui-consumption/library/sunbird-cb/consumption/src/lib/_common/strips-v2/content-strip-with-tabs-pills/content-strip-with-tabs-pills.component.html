@@ -4,9 +4,10 @@
 <ng-template #tabBody let-tab>
   @if (tab?.context; as currentTab) {
   @if (currentTab.hasPills && currentTab.pills?.length) {
-  <sb-uic-content-strip-with-pills [pills]="currentTab.pills!" [defaultPillKey]="currentTab.defaultPillKey ?? ''" />
+  <sb-uic-content-strip-with-pills [pills]="currentTab.pills!" [defaultPillKey]="currentTab.defaultPillKey ?? ''"
+    [sectionKey]="sectionKey()" />
   } @else if (currentTab.contentConfig) {
-  <sb-uic-content-strips [contentConfig]="currentTab.contentConfig!" />
+  <sb-uic-content-strips [contentConfig]="currentTab.contentConfig!" [sectionKey]="sectionKey()" />
   }
   }
 </ng-template>

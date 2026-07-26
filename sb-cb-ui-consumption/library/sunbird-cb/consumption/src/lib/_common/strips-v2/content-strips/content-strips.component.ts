@@ -21,6 +21,7 @@ import { Router } from '@angular/router'
 })
 export class ContentStripsComponent implements OnInit {
   contentConfig = input.required<ContentConfig>();
+  sectionKey = input<string>('');
 
   // Expose CardType enum so the template can use it in @switch
   CardType = CardType;
@@ -69,20 +70,24 @@ export class ContentStripsComponent implements OnInit {
       return
     }
 
-    this.loading.set(true)
-      ; (await this.apiService.loadContent(config.apiDetailsKey))
-        .subscribe({
-          next: (response) => {
-            const transformed = this.cardTransformer.transformCards(response, config.cardType, config.apiDetailsKey)
-            const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
-            this.cards.set(limited)
-            this.loading.set(false)
-          },
-          error: () => {
-            this.cards.set([])
-            this.loading.set(false)
+    this.loading.set(true);
+    (await this.apiService.loadContent(config.apiDetailsKey))
+      .subscribe({
+        next: (response) => {
+          const transformed = this.cardTransformer.transformCards(response, config.cardType, config.apiDetailsKey)
+          const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
+          this.cards.set(limited)
+          this.loading.set(false)
+          if (!limited.length) {
+            this.apiService.reportEmptySection(this.sectionKey())
           }
-        })
+        },
+        error: () => {
+          this.cards.set([])
+          this.loading.set(false)
+          this.apiService.reportEmptySection(this.sectionKey())
+        }
+      })
   }
 
   getCbPlanData() {
@@ -118,7 +123,7 @@ export class ContentStripsComponent implements OnInit {
   }
 
   shouldShowViewAll(): boolean {
-    return (this.contentConfig()?.showViewAll && this.cards().length > 4) ?? false
+    return (this.contentConfig()?.showViewAll) ?? false
   }
 
   getCardType(): CardType {
