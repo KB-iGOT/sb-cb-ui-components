@@ -69,6 +69,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   @Input({ required: true }) menuBarDetails!: SidebarConfig
   @Input({ required: true }) detailsChanged!: boolean
   @Input({ required: true }) otherDetailsChanged!: boolean
+  @Input({ required: true }) isNotHome!: boolean
   @Input() navBarOpenStatus: boolean = true
 
   /**
@@ -93,8 +94,9 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   isMobile = computed(() => !!this.breakpointMatches()?.breakpoints[BREAKPOINT_QUERIES.MOBILE])
   isTablet = computed(() => !!this.breakpointMatches()?.breakpoints[BREAKPOINT_QUERIES.TABLET])
   isDesktop = computed(() => this.breakpointMatches() === undefined ? true : !!this.breakpointMatches()!.breakpoints[BREAKPOINT_QUERIES.DESKTOP])
+  private isNotHomeSignal = signal<boolean>(false)
   // Tablet and mobile both render the sidebar as a fixed overlay drawer instead of pushing content
-  isOverlayMode = computed(() => this.isTablet() || this.isMobile())
+  isOverlayMode = computed(() => this.isTablet() || this.isMobile() || this.isNotHomeSignal())
   private previousMode: 'mobile' | 'tablet' | 'desktop' | null = null
 
   constructor(
@@ -162,6 +164,10 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isNotHome']) {
+      this.isNotHomeSignal.set(this.isNotHome)
+    }
+
     // Manually detect changes when detailsChanged flag is toggled
     if (changes['detailsChanged'] && !changes['detailsChanged'].firstChange) {
       this.cdr.markForCheck()
