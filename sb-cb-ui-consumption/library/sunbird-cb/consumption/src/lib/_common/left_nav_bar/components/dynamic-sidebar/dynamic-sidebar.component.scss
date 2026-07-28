@@ -66,7 +66,10 @@
 .sidebar {
   transition: width 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
 
-  @media (max-width: 767.98px) {
+  // Must stay in step with BREAKPOINT_QUERIES.MOBILE in sidebar.constants.ts. The width is
+  // forced regardless of open/closed, so if this range overlaps the tablet or desktop range
+  // the drawer gets stuck at 320px and only the container behind it responds to the toggle.
+  @media (max-width: 599.98px) {
     width: 100vw !important;
     max-width: 320px;
   }
@@ -77,14 +80,29 @@
   overflow-x: hidden;
   background-color: var(--surface-primary);
 
-  @media (max-width: 767.98px) {
+  @media (max-width: 599.98px) {
     width: 100%;
   }
 }
 
-// Tablet (768px - 1199.98px): sidebar becomes a fixed overlay drawer instead of pushing content.
+// Desktop overlay mode (non-home pages): the drawer floats above the page rather than pushing it.
+// The container keeps the collapsed rail width whatever the open state, so expanding the drawer
+// never changes the space reserved in the flex row and the content behind it stays put.
+// The <aside> is already position: fixed, so it animates its width over the content.
+@media (min-width: 1024.1px) {
+  .sidebar-container.overlay-mode {
+
+    &.sidebar-open,
+    &.sidebar-closed {
+      width: 72px;
+    }
+  }
+}
+
+// Tablet (600px - 1024px): sidebar becomes a fixed overlay drawer instead of pushing content.
 // The container reserves no layout width; the aside slides in/out via transform above a backdrop.
-@media (min-width: 768px) and (max-width: 1024px) {
+// Range must match BREAKPOINT_QUERIES.TABLET in sidebar.constants.ts.
+@media (min-width: 600px) and (max-width: 1024px) {
   .sidebar-container {
     width: 45px !important;
     height: 63px;
