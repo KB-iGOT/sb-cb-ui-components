@@ -94,6 +94,16 @@ export class CardCourseV2Component {
       'Course') as NsContent.EDisplayContentTypes
   )
 
+  readonly ratingValue = computed(() => {
+    const c = this.content() as any
+    // First rated value wins: a CardViewModel always carries `rating`, defaulted to 0,
+    // so unrated placeholders must fall through to the raw item instead of stopping here.
+    const rating = [c?.avgRating, c?.rating, c?.metadata?.avgRating, c?.metadata?.averageRating]
+      .map(Number)
+      .find((value: number) => Number.isFinite(value) && value > 0)
+    return rating ? rating.toFixed(1) : ''
+  })
+
   readonly orgName = computed(() => {
     const orgs = this.content()?.organisation
     if (orgs?.length) { return orgs[0] }
