@@ -111,10 +111,10 @@
       </span>
       }
 
-      @if (c.avgRating && isCardElementEnabled('rating')) {
-      <span class="cc-card__rating" [attr.aria-label]="'Rating: ' + c.avgRating">
+      @if (ratingValue() && isCardElementEnabled('rating')) {
+      <span class="cc-card__rating" [attr.aria-label]="'Rating: ' + ratingValue()">
         <mat-icon class="cc-card__star-icon" aria-hidden="true">star_border</mat-icon>
-        <span aria-hidden="true">{{ c.avgRating }}</span>
+        <span aria-hidden="true">{{ ratingValue() }}</span>
       </span>
       }
     </div>
