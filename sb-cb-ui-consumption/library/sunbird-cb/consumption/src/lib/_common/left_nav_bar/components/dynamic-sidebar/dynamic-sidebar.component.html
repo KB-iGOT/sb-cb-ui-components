@@ -1,4 +1,5 @@
-<div class="sidebar-container" [class.sidebar-open]="isOpen()" [class.sidebar-closed]="!isOpen()" role="complementary"
+<div class="sidebar-container" [class.sidebar-open]="isOpen()" [class.sidebar-closed]="!isOpen()"
+  [class.overlay-mode]="isOverlayMode()" role="complementary"
   [attr.aria-label]="'Application sidebar' + (isOpen() ? ' expanded' : ' collapsed')">
 
   <!-- Tablet-only floating toggle: stays visible above the sidebar even when it is translated off-screen -->

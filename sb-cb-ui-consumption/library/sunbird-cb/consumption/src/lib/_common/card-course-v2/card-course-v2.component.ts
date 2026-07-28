@@ -47,7 +47,11 @@ export class CardCourseV2Component {
 
   // ── Signal inputs ──────────────────────────────────────────────────────────
   content = input<NsContent.IContent | null>(null)
-  cbPlanMapData = input<Record<string, any>>({})
+  // A parent binding an as-yet-unloaded value passes `undefined`, which overrides
+  // the default, so normalise it here rather than relying on the default alone.
+  cbPlanMapData = input<Record<string, any>, Record<string, any> | null | undefined>(
+    {}, { transform: (value) => value ?? {} }
+  )
   isiGOTSpecialization = input<boolean>(false)
   isLoading = input<boolean>(false)
   isLiveOrMarkForDeletion = input<boolean>(true)
@@ -132,7 +136,7 @@ export class CardCourseV2Component {
   readonly cbpStatus = computed<string | null>(() => {
     const id = this.content()?.identifier
     if (!id) { return null }
-    const plan = this.cbPlanMapData()[id]
+    const plan = this.cbPlanMapData()?.[id]
     if (!plan) { return null }
     if (plan.contentStatus === 2) { return 'Completed' }
     if (plan.planDuration === 'overdue') { return 'Overdue' }
