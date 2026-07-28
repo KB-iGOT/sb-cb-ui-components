@@ -78,14 +78,16 @@ export class ContentStripsComponent implements OnInit {
           const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
           this.cards.set(limited)
           this.loading.set(false)
-          if (!limited.length) {
+          if (!limited.length && this.sectionKey()) {
             this.apiService.reportEmptySection(this.sectionKey())
           }
         },
         error: () => {
           this.cards.set([])
           this.loading.set(false)
-          this.apiService.reportEmptySection(this.sectionKey())
+          if (this.sectionKey()) {
+            this.apiService.reportEmptySection(this.sectionKey())
+          }
         }
       })
   }

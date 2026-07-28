@@ -6,6 +6,7 @@ import { ApiMethod, ApiRegistryEntry } from '../models/content-section.model'
 import { API_REGISTRY } from '../registry/api-registry'
 import { ConfigurationsService, WidgetEnrollService } from '@sunbird-cb/utils-v2'
 import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service'
+import * as _ from 'lodash'
 
 @Injectable({ providedIn: 'root' })
 export class ContentApiService {
@@ -40,7 +41,29 @@ export class ContentApiService {
         let userId = this.configSvc?.userProfile?.userId as string
         return of(await this.userService.fetchCbpPlanList(userId).toPromise())
       default:
-        const config: ApiRegistryEntry | undefined = API_REGISTRY[apiDetailsKey]
+        let config: ApiRegistryEntry | undefined
+        const globalApiConfig = _.get(this.configSvc, 'globalConfig.apis.apiRegistryConfig')
+        console.log('globalApiConfig', globalApiConfig)
+        if (globalApiConfig && globalApiConfig[apiDetailsKey]) {
+          const apiConfig = globalApiConfig[apiDetailsKey]
+          const methodKey = String(apiConfig.method).split('.').pop() as keyof typeof ApiMethod
+          config = { ...apiConfig, method: ApiMethod[methodKey] }
+
+          if (config && config.chainedApi) {
+            const chainedMethodKey = String(config.chainedApi.method).split('.').pop() as keyof typeof ApiMethod
+            const buildBody = config.chainedApi.buildBody
+            config.chainedApi = {
+              ...config.chainedApi,
+              method: ApiMethod[chainedMethodKey],
+              buildBody: buildBody && typeof buildBody === 'string'
+                ? new Function(`return ${this.stripParamTypes(buildBody)}`)()
+                : buildBody
+            }
+          }
+        } else {
+          config = API_REGISTRY[apiDetailsKey]
+        }
+
         if (!config) {
           console.warn(`[ContentApiService] No API config found for key: ${apiDetailsKey}`)
           return of(null)
@@ -51,7 +74,10 @@ export class ContentApiService {
   }
 
   private executeRequest(config: ApiRegistryEntry, apiDetailsKey: string): Observable<unknown> {
-    const firstResponse$ = this.makeHttpRequest(config)
+    const firstResponse$ = this.makeHttpRequest({
+      ...config,
+      body: this.applyUserContextFilters(config.body)
+    })
 
     if (!config.chainedApi) {
       return firstResponse$
@@ -113,6 +139,46 @@ export class ContentApiService {
     )
   }
 
+  private applyUserContextFilters(body: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+    if (!body) {
+      return body
+    }
+
+    const request = (body as Record<string, any>).request
+    if (!request || !request.filters) {
+      return body
+    }
+
+    const filters = { ...request.filters }
+
+    if (Object.prototype.hasOwnProperty.call(filters, 'secureSettings.organisation')) {
+      let orgId
+      if (this.configSvc && this.configSvc.userProfile && this.configSvc.userProfile.rootOrgId) {
+        orgId = this.configSvc.userProfile.rootOrgId
+      }
+      if (orgId) {
+        filters['secureSettings.organisation'] = orgId
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(filters, 'secureSettings.isVerifiedKarmayogi')) {
+      delete filters['secureSettings.isVerifiedKarmayogi']
+      if (this.configSvc && this.configSvc.unMappedUser &&
+        this.configSvc.unMappedUser.profileDetails &&
+        !this.configSvc.unMappedUser.profileDetails.verifiedKarmayogi) {
+        filters['secureSettings.isVerifiedKarmayogi'] = 'No'
+      }
+    }
+
+    return {
+      ...body,
+      request: {
+        ...request,
+        filters
+      }
+    }
+  }
+
   private makeHttpRequest(config: {
     endpoint: string
     method: ApiMethod
@@ -148,6 +214,16 @@ export class ContentApiService {
       default:
         return of(null)
     }
+  }
+
+  private stripParamTypes(fnString: string): string {
+    return fnString.replace(/\(([^)]*)\)(\s*=>)/, (_match, params: string, arrow: string) => {
+      const cleanedParams = params
+        .split(',')
+        .map(param => param.split(':')[0].trim())
+        .join(', ')
+      return `(${cleanedParams})${arrow}`
+    })
   }
 
   getUserId(): string | null {
