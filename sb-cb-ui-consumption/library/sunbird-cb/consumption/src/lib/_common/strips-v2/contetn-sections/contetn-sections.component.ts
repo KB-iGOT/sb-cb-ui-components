@@ -1,4 +1,4 @@
-import { Component, input, ChangeDetectionStrategy, computed, Output, EventEmitter, inject, DestroyRef, OnDestroy } from '@angular/core'
+import { Component, input, ChangeDetectionStrategy, computed, signal, Output, EventEmitter, inject, DestroyRef, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ContentSectionConfig, DisplayType } from '../models/content-section.model'
@@ -32,7 +32,13 @@ export class ContetnSectionsComponent implements OnDestroy {
   private readonly contentApiService = inject(ContentApiService)
   private readonly destroyRef = inject(DestroyRef)
 
-  visibleSections = computed(() => filterVisibleSections(this.sections()));
+  private emptySectionKeys = signal<string[]>([]);
+
+  visibleSections = computed(() => {
+    const sections = filterVisibleSections(this.sections())
+    const emptyKeys = this.emptySectionKeys()
+    return sections.filter(section => !emptyKeys.includes(section.sectionKey))
+  });
 
   readonly DisplayType = DisplayType;
 
@@ -43,6 +49,12 @@ export class ContetnSectionsComponent implements OnDestroy {
         if (details) {
           this.cardClicked.emit({ cardClickDetails: details })
         }
+      })
+
+    this.contentApiService.emptySectionKeys$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((keys) => {
+        this.emptySectionKeys.set(keys)
       })
   }
 

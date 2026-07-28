@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { Observable, of, Subject } from 'rxjs'
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
 import { ApiMethod, ApiRegistryEntry } from '../models/content-section.model'
 import { API_REGISTRY } from '../registry/api-registry'
@@ -16,8 +16,21 @@ export class ContentApiService {
   private readonly cardClickDetailsSubject = new Subject<any>()
   readonly cardClickDetails$ = this.cardClickDetailsSubject.asObservable()
 
+  private readonly emptySectionKeysSubject = new BehaviorSubject<string[]>([])
+  readonly emptySectionKeys$ = this.emptySectionKeysSubject.asObservable()
+
   publishCardClickDetails(details: any): void {
     this.cardClickDetailsSubject.next(details)
+  }
+
+  reportEmptySection(sectionKey: string): void {
+    if (!sectionKey) {
+      return
+    }
+    const current = this.emptySectionKeysSubject.value
+    if (!current.includes(sectionKey)) {
+      this.emptySectionKeysSubject.next([...current, sectionKey])
+    }
   }
 
   async loadContent(apiDetailsKey: string): Promise<Observable<unknown>> {
