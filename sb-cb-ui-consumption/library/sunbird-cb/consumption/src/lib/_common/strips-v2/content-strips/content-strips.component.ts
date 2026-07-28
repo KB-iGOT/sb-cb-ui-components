@@ -25,7 +25,7 @@ export class ContentStripsComponent implements OnInit {
 
   // Expose CardType enum so the template can use it in @switch
   CardType = CardType;
-  cbPlanMapData: any
+  cbPlanMapData: Record<string, any> = {}
 
   private apiService = inject(ContentApiService);
   private cardTransformer = inject(CardTransformerService);
@@ -93,16 +93,21 @@ export class ContentStripsComponent implements OnInit {
   }
 
   getCbPlanData() {
-    let cbpList: any = {}
-    if (localStorage.getItem('cbpData')) {
-      let cbpListArr = JSON.parse(localStorage.getItem('cbpData') || '')
-      if (cbpListArr && cbpListArr.length) {
-        cbpListArr.forEach((data: any) => {
-          cbpList[data.identifier] = data
-        })
+    const cbpList: Record<string, any> = {}
+    const raw = localStorage.getItem('cbpData')
+    if (raw) {
+      try {
+        const cbpListArr = JSON.parse(raw)
+        if (cbpListArr && cbpListArr.length) {
+          cbpListArr.forEach((data: any) => {
+            cbpList[data.identifier] = data
+          })
+        }
+      } catch {
+        // cbpData is not valid JSON — fall back to an empty plan map
       }
-      this.cbPlanMapData = cbpList
     }
+    this.cbPlanMapData = cbpList
   }
 
   getViewAllUrl(): { path: string, queryParams?: Record<string, any>, f?: any } | null {
