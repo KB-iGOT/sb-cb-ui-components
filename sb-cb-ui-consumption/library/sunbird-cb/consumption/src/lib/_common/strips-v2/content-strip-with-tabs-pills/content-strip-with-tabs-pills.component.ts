@@ -17,7 +17,6 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
 export class ContentStripWithTabsPillsV2Component {
   tabs = input.required<TabConfig[]>();
   defaultTabKey = input<string>('');
-  sectionKey = input<string>('');
 
   private filteredTabs = computed<TabConfig[]>(() => filterVisibleTabs(this.tabs()));
 

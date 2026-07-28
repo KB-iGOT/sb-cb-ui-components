@@ -13,13 +13,19 @@ export const SIDEBAR_ANIMATION = {
 /**
  * Breakpoint constants
  *
- * Mobile:  < 768px            (existing overlay behavior, unchanged)
- * Tablet:  768px - 1199.98px  (new overlay-drawer behavior)
- * Desktop: >= 1200px          (existing push/shift behavior, unchanged)
+ * Mobile:  < 600px            (no sidebar; the host renders a bottom nav instead)
+ * Tablet:  600px - 1024px     (overlay-drawer behavior)
+ * Desktop: > 1024px           (push/shift behavior)
+ *
+ * The 600px boundary is Angular Material's Breakpoints.XSmall edge (599.98px), which is what
+ * the host app's isXSmall$ / isTabView$ use to pick which sidebar to render. Tablet used to
+ * start at 768px, which left 600px-767.98px unclaimed: the host rendered the desktop sidebar
+ * there while this component still reported isMobile(), so the drawer was pinned to 320px by
+ * the mobile CSS and the open/closed toggle only resized the container behind it.
  */
 export const BREAKPOINTS = {
-  MOBILE: 768,
-  TABLET_MIN: 768.1,
+  MOBILE: 599.98,
+  TABLET_MIN: 600,
   TABLET: 1024,
   DESKTOP_MIN: 1024.1
 } as const

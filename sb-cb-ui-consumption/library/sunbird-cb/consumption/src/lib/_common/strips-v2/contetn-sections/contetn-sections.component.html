@@ -12,14 +12,12 @@
     @switch (section.displayType) {
     @case ('tabs') {
     @if (section.tabs?.length) {
-    <sb-uic-content-strip-with-tabs-pills [tabs]="section.tabs!" [defaultTabKey]="section.defaultTabKey ?? ''"
-      [sectionKey]="section.sectionKey" />
+    <sb-uic-content-strip-with-tabs-pills [tabs]="section.tabs!" [defaultTabKey]="section.defaultTabKey ?? ''" />
     }
     }
     @case ('pills') {
     @if (section.pills?.length) {
-    <sb-uic-content-strip-with-pills [pills]="section.pills!" [defaultPillKey]="section.defaultPillKey ?? ''"
-      [sectionKey]="section.sectionKey" />
+    <sb-uic-content-strip-with-pills [pills]="section.pills!" [defaultPillKey]="section.defaultPillKey ?? ''" />
     }
     }
     @case ('cards') {

@@ -1,8 +1,7 @@
 <div class="w-full">
   <!-- Header -->
-  <div class="flex items-center justify-between py-3 accordian-header"
-    [class.cursor-pointer]="!hideAccordianToggel()" (click)="toggleExpanded()"
-    (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()"
+  <div class="flex items-center justify-between py-3 accordian-header" [class.cursor-pointer]="!hideAccordianToggel()"
+    (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()"
     [attr.tabindex]="hideAccordianToggel() ? null : 0" [attr.role]="hideAccordianToggel() ? null : 'button'"
     [attr.aria-expanded]="hideAccordianToggel() ? null : isExpanded()">
     <div class="section-header flex items-center gap-2">{{ header() }}
@@ -13,7 +12,7 @@
     </div>
     @if (!hideAccordianToggel()) {
     <div class="flex items-center justify-center arrow-icon-container">
-      <mat-icon class="transition-transform duration-300" [class.rotate-180]="isExpanded()">
+      <mat-icon class="transition-transform duration-300" [class.rotate-180]="!isExpanded()">
         expand_more
       </mat-icon>
     </div>
