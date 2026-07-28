@@ -15,7 +15,6 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
 export class ContentStripWithPillsComponent {
   pills = input.required<PillConfig[]>();
   defaultPillKey = input<string>('');
-  sectionKey = input<string>('');
 
   activePillKey = signal<string>('');
   showContent = signal<boolean>(false);

@@ -36,7 +36,7 @@ export class CardTransformerService {
       tags: (item?.['tags'] as string[]) ?? [],
       duration: (item?.['duration'] as string) ?? '',
       status: (item?.['status'] as string) ?? '',
-      rating: (item?.['averageRating'] as number) ?? 0,
+      rating: this.resolveRating(item),
       provider: (item?.['sourceName'] as string) ?? (item?.['source'] as string) ?? '',
       difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
       metadata: item ?? {}
@@ -64,7 +64,7 @@ export class CardTransformerService {
             additionalTags: (item?.['tags'] as string[]) ?? [], // not found
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
-            rating: (item?.['averageRating'] as number) ?? 0, // not found
+            rating: this.resolveRating(item),
             provider: (item?.['sourceName'] as string),
             difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
             planDuration: item['planDuration'],
@@ -93,7 +93,7 @@ export class CardTransformerService {
             additionalTags: (item?.['tags'] as string[]) ?? [], // not found
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
-            rating: (item?.['averageRating'] as number) ?? 0, // not found
+            rating: this.resolveRating(item),
             provider: (item?.['sourceName'] as string),
             difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
             planDuration: item['planDuration'],
@@ -114,7 +114,7 @@ export class CardTransformerService {
             additionalTags: (item?.['additionalTags'] as string[]) ?? [],
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
-            rating: (item?.['avgRating'] as number) ?? (item?.['averageRating'] as number) ?? 0,
+            rating: this.resolveRating(item),
             provider: (item?.['source'] as string) ?? (item?.['sourceName'] as string) ?? '',
             difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
             planDuration: item['planDuration'],
@@ -135,7 +135,7 @@ export class CardTransformerService {
             additionalTags: (item?.['tags'] as string[]) ?? [],
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
-            rating: (item?.['averageRating'] as number) ?? 0,
+            rating: this.resolveRating(item),
             provider: (item?.['sourceName'] as string) ?? (item?.['sourceName'] as string) ?? '',
             difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
             planDuration: item['planDuration'],
@@ -156,7 +156,7 @@ export class CardTransformerService {
             additionalTags: (item?.['tags'] as string[]) ?? [],
             duration: (item?.['duration'] as string) ?? '',
             status: (item?.['status'] as string) ?? '',
-            rating: (item?.['averageRating'] as number) ?? 0,
+            rating: this.resolveRating(item),
             provider: (item?.['sourceName'] as string) ?? (item?.['source'] as string) ?? '',
             difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
             planDuration: item['planDuration'],
@@ -181,7 +181,7 @@ export class CardTransformerService {
       additionalTags: (item?.['tags'] as string[]) ?? [],
       duration: (item?.['expectedDuration'] as string) ?? '',
       status: (item?.['assessmentStatus'] as string) ?? '',
-      rating: 0,
+      rating: this.resolveRating(item),
       provider: (item?.['sourceName'] as string) ?? '',
       difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
       planDuration: (item?.['planDuration'] as string) ?? '',
@@ -201,7 +201,7 @@ export class CardTransformerService {
       additionalTags: (item?.['tags'] as string[]) ?? [],
       duration: (item?.['duration'] as string) ?? '',
       status: (item?.['programStatus'] as string) ?? '',
-      rating: (item?.['averageRating'] as number) ?? 0,
+      rating: this.resolveRating(item),
       provider: (item?.['sourceName'] as string) ?? '',
       difficultyLevel: '',
       planDuration: (item?.['planDuration'] as string) ?? '',
@@ -210,6 +210,12 @@ export class CardTransformerService {
       primaryCategory: item['primaryCategory'] as string,
       metadata: item ?? {}
     }))
+  }
+
+  private resolveRating(item: Record<string, unknown>): number {
+    const raw = item?.['avgRating'] ?? item?.['averageRating']
+    const rating = Number(raw)
+    return Number.isFinite(rating) ? rating : 0
   }
 
   private extractResultArray(response: unknown): Record<string, unknown>[] {

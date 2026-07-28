@@ -55,7 +55,7 @@ export const API_REGISTRY: ApiRegistryConfig = {
     }
   },
   featuredAiCoursesApi: {
-    endpoint: '/apis/proxies/v8/playList/read/0133783095823810560program9e8b5fb0-0b87-11f0-8b90-4f196756cc33/0133783095823810560',
+    endpoint: '/apis/proxies/v8/playList/read/013633005407862784180MDO_test_1_b2157aab-cc34-4a85-8500-10a5ed189d3b_ALLCONTENT_TRUE/013633005407862784180',
     method: ApiMethod.Get
   },
   thirtyMinutesOrLessApi: {
