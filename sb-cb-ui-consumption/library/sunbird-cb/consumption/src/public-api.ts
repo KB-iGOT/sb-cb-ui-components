@@ -166,6 +166,7 @@ export * from './lib/_common/welcome-greeting-v2/welcome-greeting-v2.component'
 export * from './lib/_common/continue-learning-v2/continue-learning-v2.component'
 export * from './lib/_common/continue-learning-v2/in-progress-card-v2/in-progress-card-v2.component'
 export * from './lib/_common/continue-learning-v2/weekly-claps-card-v2/weekly-claps-card-v2.component'
+export * from './lib/_common/continue-learning-v2/weekly-claps-card-v2/weekly-claps-data.util'
 
 export * from './lib/_common/card-course-v2/card-course-v2.component'
 // Left Navigation Bar - Dynamic Sidebar
