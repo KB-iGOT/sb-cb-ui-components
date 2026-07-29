@@ -162,11 +162,6 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
     )
   }
 
-  /** Reproduces the original per-item styling: navigations vs. in-place actions */
-  menuItemClass(item: IProfileMenuItem): string {
-    return item.action === 'route' || item.action === 'newTab' ? 'all-features' : 'log-o'
-  }
-
   /** Handles the actions that are not plain links (`logout`, `accessibility`) */
   onMenuAction(item: IProfileMenuItem): void {
     switch (item.action) {
