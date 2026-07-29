@@ -73,7 +73,7 @@
 
     <!-- In-app navigation -->
     @case ('route') {
-    <a mat-menu-item role="link" [routerLink]="item.target" [class]="menuItemClass(item) + ' flex items-center'"
+    <a mat-menu-item role="link" [routerLink]="item.target" class="all-features flex items-center"
       (click)="raiseTelemetry(item.key)">
       <span>{{ item.disableTranslation ? item.label : (item.label | translate) }}</span>
     </a>
@@ -82,7 +82,7 @@
     <!-- Opens in a new tab: a real href so middle-click and "open in new tab" behave normally -->
     @case ('newTab') {
     <a mat-menu-item role="link" [href]="item.target" target="_blank" rel="noopener noreferrer"
-      [class]="menuItemClass(item) + ' flex items-center'" (click)="raiseTelemetry(item.key)">
+      class="all-features flex items-center" (click)="raiseTelemetry(item.key)">
       <span>{{ item.disableTranslation ? item.label : (item.label | translate) }}</span>
     </a>
     }
@@ -90,7 +90,7 @@
     <!-- logout / accessibility: in-place actions, no navigation -->
     @default {
     <a href="javascript:void(0)" mat-menu-item role="link" (click)="onMenuAction(item)"
-      [class]="menuItemClass(item) + ' flex items-center'">
+      class="all-features flex items-center">
       <span>{{ item.disableTranslation ? item.label : (item.label | translate) }}</span>
     </a>
     }

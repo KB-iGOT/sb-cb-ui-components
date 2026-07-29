@@ -14,6 +14,7 @@ const API_END_POINTS = {
   ENROLL_LIST_DATA: `${PROXIES_V8}/learner/course/v4/user/enrollment/list`,
   ENROLL_EXTERNAL_DATA: `${PROXIES_V8}/cios-enroll/v1/courselist/byuserid`,
   ENROLL_EVENTS_DATA: `${PROXIES_V8}/user/events/list`,
+  ENROLL_EVENTS_SUMMARY: `${PROXIES_V8}/user/events/enroll/summary`,
 };
 
 @Injectable({
@@ -78,6 +79,13 @@ fetchExternalEnrollmentData(payload: any) {
   fetchEnrollStats(userId: any, url?: string): Observable<NsContent.IContent[]> {
     const endpoint = url ? `${url}` : `apis/proxies/v8/learner/course/v4/user/enrollment/summary/${userId}`
     return this.http.get<NsContent.IContent[]>(endpoint)
+  }
+
+  fetchEventEnrollStats(url?: string): Observable<any> {
+    const eventEnrollConfig = this.configSvc.globalConfig?.apis?.user?.eventEnroll
+    const endpoint = url
+      || ((eventEnrollConfig?.enabled && eventEnrollConfig?.url) ? eventEnrollConfig.url : API_END_POINTS.ENROLL_EVENTS_SUMMARY)
+    return this.http.get<any>(endpoint)
   }
 
 }
