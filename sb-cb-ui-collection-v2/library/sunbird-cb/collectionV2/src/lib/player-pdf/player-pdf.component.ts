@@ -92,11 +92,9 @@ export class PlayerPdfComponent extends WidgetBaseComponent
   }
 
   ngOnInit() {
-    // SimpleLinkService does not support handling of relative link switching PDFLinkService
-    PDFJS.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.mjs',
-      import.meta.url,
-    ).toString()
+   // In pdfjs-dist v4, SimpleLinkService extends PDFLinkService so no prototype patching needed.
+    // Serve the worker as an Angular asset so production deploys can fetch it reliably.
+    PDFJS.GlobalWorkerOptions.workerSrc = '/assets/pdfjs/pdf.worker.min.mjs'
 
     this.zoom.disable()
     this.currentPage.disable()
