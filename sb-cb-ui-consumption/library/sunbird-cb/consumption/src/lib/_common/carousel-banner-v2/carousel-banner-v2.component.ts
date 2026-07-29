@@ -2,17 +2,24 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  Signal,
   computed,
   effect,
   input,
   signal,
   untracked,
 } from '@angular/core'
+import { toSignal } from '@angular/core/rxjs-interop'
 import { NgClass } from '@angular/common'
+import { BreakpointObserver } from '@angular/cdk/layout'
+import { map } from 'rxjs/operators'
 import { Router } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
 import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsCarouselBannerV2 } from './carousel-banner-v2.model'
+
+/** Mobile width at which peek is dropped — same query the dynamic sidebar treats as mobile. */
+const MOBILE_QUERY = '(max-width: 599.98px)'
 
 @Component({
   selector: 'sb-uic-carousel-banner-v2',
@@ -46,6 +53,9 @@ export class SbUicCarouselBannerV2Component implements OnDestroy {
   currentIndex = signal(0)
   skipTransition = signal(false)
 
+  // Kept in sync with viewport resize via BreakpointObserver
+  private isMobile!: Signal<boolean>
+
   private autoPlayTimer: ReturnType<typeof setTimeout> | undefined
   private touchStartX = 0
   private touchStartY = 0
@@ -53,6 +63,14 @@ export class SbUicCarouselBannerV2Component implements OnDestroy {
 
   // Computed signals
   resolvedBanners = computed(() => this.banners() ?? [])
+
+  /**
+   * Peek falls back to 0 on mobile: a narrow viewport has no room to spare for a sliver of the
+   * next banner, and the sliver also pulls the arrows and the active banner off-centre. Every
+   * other width keeps whatever the consumer passed in. Templates often bind the input as a
+   * string ('25'), so coerce before the arithmetic below relies on it being a number.
+   */
+  resolvedPeekPercent = computed(() => this.isMobile() ? 0 : Number(this.peekPercent()) || 0)
 
   isOutside = computed(() => this.navButtonPosition() === 'middle-outside')
 
@@ -77,14 +95,14 @@ export class SbUicCarouselBannerV2Component implements OnDestroy {
     [`ws-carousel--size-${this.size()}`]: true,
     [`ws-carousel--nav-${this.navButtonPosition()}`]: true,
     [`ws-carousel--fx-${this.transitionEffect()}`]: true,
-    'ws-carousel--peek': this.peekPercent() > 0 && this.resolvedBanners().length > 1,
+    'ws-carousel--peek': this.resolvedPeekPercent() > 0 && this.resolvedBanners().length > 1,
   }))
 
   trackTransform = computed(() => {
     if (this.transitionEffect() === 'fade') { return 'none' }
     const banners = this.resolvedBanners()
     const idx = this.currentIndex()
-    const peek = this.peekPercent()
+    const peek = this.resolvedPeekPercent()
     if (peek > 0 && banners.length > 1) {
       if (idx === banners.length - 1 && banners.length > 1) {
         const n = banners.length
@@ -97,7 +115,7 @@ export class SbUicCarouselBannerV2Component implements OnDestroy {
   })
 
   slideFlexBasis = computed(() => {
-    const peek = this.peekPercent()
+    const peek = this.resolvedPeekPercent()
     if (peek <= 0 || this.resolvedBanners().length <= 1) { return null }
     return `0 0 calc(${100 - peek}% - 12px)`
   })
@@ -129,7 +147,13 @@ export class SbUicCarouselBannerV2Component implements OnDestroy {
   constructor(
     private readonly router: Router,
     private readonly events: EventService,
+    private readonly breakpointObserver: BreakpointObserver,
   ) {
+    this.isMobile = toSignal(
+      this.breakpointObserver.observe(MOBILE_QUERY).pipe(map(state => state.matches)),
+      { initialValue: false },
+    )
+
     // Reactively restart autoplay whenever banners, autoPlay, or interval changes
     effect(() => {
       const _banners = this.resolvedBanners()
