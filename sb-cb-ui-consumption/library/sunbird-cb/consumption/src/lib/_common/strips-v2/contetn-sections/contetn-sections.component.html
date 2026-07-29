@@ -1,10 +1,7 @@
 @if (visibleSections()?.length) {
 <div class="flex flex-col gap-6 w-full">
   @for (section of visibleSections(); track section.sectionKey) {
-  @if (section.displayType === 'spotlight' && section.spotlightConfig && section.spotlightConfig.length) {
-  <sb-uic-spotlight-cards-v2 [heading]="section.header" [cards]="section.spotlightConfig"
-    [showToggle]="true"></sb-uic-spotlight-cards-v2>
-  } @else if (section.displayType !== 'spotlight') {
+  @if (section.addToAccordian) {
   <sb-uic-accordion [header]="section.header" [showHeaderSubLabel]="section.showHeaderSubLabel"
     [headerSubLabel]="section.headerSubLabel" [headersubLableTeme]="section.headersubLableTeme"
     [translateHeader]="section.translateHeader" [expanded]="true"
@@ -27,6 +24,27 @@
     }
     }
   </sb-uic-accordion>
+  } @else {
+  @switch (section.displayType) {
+  @case (DisplayType.Banner) {
+  <sb-uic-carousel-banner-v2 [banners]="banners()" [size]="'xs'" [navButtonPosition]="'middle-inside'"
+    [autoPlay]="true" [autoPlayInterval]="4000" [showDots]="true" [showArrows]="true" [scrollNavigation]="true"
+    [transitionEffect]="'slide'" [peekPercent]="'25'">
+  </sb-uic-carousel-banner-v2>
+  }
+  @case (DisplayType.WelcomeGreeting) {
+  <sb-uic-welcome-greeting-v2></sb-uic-welcome-greeting-v2>
+  }
+  @case (DisplayType.LearningProgress) {
+  <sb-uic-continue-learning-v2></sb-uic-continue-learning-v2>
+  }
+  @case (DisplayType.Spotlight) {
+  @if (section.spotlightConfig && section.spotlightConfig.length) {
+  <sb-uic-spotlight-cards-v2 [heading]="section.header" [cards]="section.spotlightConfig"
+    [showToggle]="true"></sb-uic-spotlight-cards-v2>
+  }
+  }
+  }
   }
   }
 </div>

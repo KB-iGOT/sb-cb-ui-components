@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 import { ContetnSectionsComponent } from './contetn-sections.component';
 
@@ -8,7 +9,10 @@ describe('ContetnSectionsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ContetnSectionsComponent]
+      imports: [ContetnSectionsComponent],
+      providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: { data: {} } } }
+      ]
     })
     .compileComponents();
 

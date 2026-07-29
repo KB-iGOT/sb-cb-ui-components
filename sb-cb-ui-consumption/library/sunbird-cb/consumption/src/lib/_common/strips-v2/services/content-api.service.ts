@@ -43,7 +43,6 @@ export class ContentApiService {
       default:
         let config: ApiRegistryEntry | undefined
         const globalApiConfig = _.get(this.configSvc, 'globalConfig.apis.apiRegistryConfig')
-        console.log('globalApiConfig', globalApiConfig)
         if (globalApiConfig && globalApiConfig[apiDetailsKey]) {
           const apiConfig = globalApiConfig[apiDetailsKey]
           const methodKey = String(apiConfig.method).split('.').pop() as keyof typeof ApiMethod
