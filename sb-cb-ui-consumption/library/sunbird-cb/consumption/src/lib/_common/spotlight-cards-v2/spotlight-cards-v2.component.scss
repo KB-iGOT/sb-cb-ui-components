@@ -105,6 +105,8 @@
     border-radius: 14px;
     background-color:var(--color-accents-cyan);
     text-align: left;
+    /* Keeps the padding inside the widths below, so the cards-per-view maths is exact. */
+    box-sizing: border-box;
   }
 
   /* ── Card top row: arrow chip pinned top-right (absolute) ── */
@@ -195,11 +197,19 @@
   }
 
   .ws-spotlight__card {
-    flex: 0 0 auto;
+    flex: 0 0 100%;
     width: 100%;
     max-width: 100%;
     min-width: 0;
     scroll-snap-align: start;
+  }
+}
+
+@media (min-width: 400px) and (max-width: 768px) {
+  .ws-spotlight__card {
+    flex-basis: calc((100% - 16px) / 2);
+    width: calc((100% - 16px) / 2);
+    max-width: calc((100% - 16px) / 2);
   }
 }
 
