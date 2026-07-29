@@ -12,7 +12,6 @@ import { UntypedFormControl } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { NsWidgetResolver, WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { EventService, LoggerService, WsEvents, ValueService } from '@sunbird-cb/utils-v2'
-import * as PDFJS from 'pdfjs-dist'
 import { fromEvent, interval, merge, Subject, Subscription } from 'rxjs'
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
 // import { ViewerUtilService } from '../../../../../../project/ws/viewer/src/lib/viewer-util.service'
@@ -22,7 +21,8 @@ import { WidgetContentService } from '../_services/widget-content.service'
 import { IWidgetsPlayerPdfData } from './player-pdf.model'
 
 // const pdfjsViewer = require('pdfjs-dist/web/pdf_viewer')
-import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer'
+import * as PDFJS from 'pdfjs-dist'
+import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.mjs'
 @Component({
     selector: 'ws-widget-player-pdf',
     templateUrl: './player-pdf.component.html',
@@ -36,7 +36,7 @@ export class PlayerPdfComponent extends WidgetBaseComponent
   containerSection!: ElementRef<HTMLElement>
 
   @ViewChild('pdfContainer', { static: true })
-  pdfContainer!: ElementRef<HTMLCanvasElement> | any
+  pdfContainer!: ElementRef<HTMLDivElement> | any
   DEFAULT_SCALE = 1.0
   MAX_SCALE = 3
   MIN_SCALE = 0.2
@@ -93,10 +93,10 @@ export class PlayerPdfComponent extends WidgetBaseComponent
 
   ngOnInit() {
     // SimpleLinkService does not support handling of relative link switching PDFLinkService
-    pdfjsViewer.SimpleLinkService.prototype.getDestinationHash =
-      pdfjsViewer.PDFLinkService.prototype.getDestinationHash
-    pdfjsViewer.SimpleLinkService.prototype.getAnchorUrl =
-      pdfjsViewer.PDFLinkService.prototype.getAnchorUrl
+    PDFJS.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url,
+    ).toString()
 
     this.zoom.disable()
     this.currentPage.disable()
@@ -300,17 +300,13 @@ export class PlayerPdfComponent extends WidgetBaseComponent
       this.current.push(pageNumStr)
     }
     const viewport = page.getViewport({ scale: this.zoom.value })
-    this.pdfContainer.nativeElement.width = viewport.width
-    this.pdfContainer.nativeElement.height = viewport.height
-    let eventBus = new pdfjsViewer.EventBus()
     this.lastRenderTask = new pdfjsViewer.PDFPageView({
-      scale: viewport.scale,
       container: this.pdfContainer.nativeElement,
       id: this.currentPage.value,
+       scale: viewport.scale,
       defaultViewport: viewport,
-      textLayerFactory: new pdfjsViewer.DefaultTextLayerFactory(),
-      annotationLayerFactory: new pdfjsViewer.DefaultAnnotationLayerFactory(),
-      eventBus: eventBus
+      eventBus: new pdfjsViewer.EventBus(),
+      textLayerMode: 1, // TextLayerMode.ENABLE
     })
     if (this.lastRenderTask) {
       this.lastRenderTask.setPdfPage(page)
@@ -324,22 +320,27 @@ export class PlayerPdfComponent extends WidgetBaseComponent
   }
 
   private async loadDocument(url: string) {
-    const pdf = await PDFJS.getDocument(url).promise
-    this.pdfInstance = pdf
-    this.totalPages = this.pdfInstance.numPages
-    this.zoom.enable()
-    this.currentPage.enable()
-    this.currentPage.setValue(
-      typeof this.widgetData.resumePage === 'number' &&
-        this.widgetData.resumePage >= 1 &&
-        this.widgetData.resumePage <= this.totalPages
-        ? this.widgetData.resumePage
-        : 1,
-    )
-    this.renderSubject.next()
-    this.activityStartedAt = new Date()
-    if (!this.widgetData.disableTelemetry) {
-      this.eventDispatcher(WsEvents.EnumTelemetrySubType.Loaded)
+    try {
+      const pdf = await PDFJS.getDocument(url).promise
+      this.pdfInstance = pdf
+      this.totalPages = this.pdfInstance.numPages
+      this.zoom.enable()
+      this.currentPage.enable()
+      this.currentPage.setValue(
+        typeof this.widgetData.resumePage === 'number' &&
+          this.widgetData.resumePage >= 1 &&
+          this.widgetData.resumePage <= this.totalPages
+          ? this.widgetData.resumePage
+          : 1,
+      )
+      this.renderSubject.next({})
+      this.activityStartedAt = new Date()
+      if (!this.widgetData.disableTelemetry) {
+        this.eventDispatcher(WsEvents.EnumTelemetrySubType.Loaded)
+      }
+    } catch (err) {
+      console.error('PDF load failed for URL:', url, err)
+      this.logger.error('PDF load failed for URL:', url, err)
     }
   }
 
