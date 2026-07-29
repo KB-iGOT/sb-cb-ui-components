@@ -11,7 +11,10 @@
 .sidebar-container {
   position: relative;
   z-index: 1000;
-  transition: width 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+  // Must match SIDEBAR_ANIMATION.DURATION/EASING in sidebar.constants.ts. This reserves the
+  // layout space the drawer sits in; at 0.1s it finished 200ms before the drawer itself, so the
+  // page content snapped to its new position while the drawer was still sliding.
+  transition: width 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
   flex-shrink: 0;
   background-color: var(--surface-primary);
 
@@ -64,7 +67,9 @@
 }
 
 .sidebar {
-  transition: width 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+  // No `transition: width` here on purpose. The @sidebarAnimation trigger already drives this
+  // element's width (72px <-> 328px over SIDEBAR_ANIMATION.DURATION); a second CSS transition on
+  // the same property fights the animation's own inline styles and makes the slide stutter.
 
   // Must stay in step with BREAKPOINT_QUERIES.MOBILE in sidebar.constants.ts. The width is
   // forced regardless of open/closed, so if this range overlaps the tablet or desktop range

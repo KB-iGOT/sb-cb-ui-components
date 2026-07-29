@@ -151,6 +151,19 @@
   line-height: 1.4;
   word-break: break-word;
   font: 400 14px 'Noto Sans';
+  opacity: 1;
+  transition: opacity 150ms ease-in-out;
+}
+
+// Collapsed state for the rail. The label stays in the DOM and is taken out of the flex flow
+// with zero width, so the icon still centres in the 72px rail but there is no insert/remove
+// for the browser to snap through while the drawer width is animating.
+.nav-label-collapsed {
+  opacity: 0;
+  flex: 0 0 0;
+  width: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .active-indicator {

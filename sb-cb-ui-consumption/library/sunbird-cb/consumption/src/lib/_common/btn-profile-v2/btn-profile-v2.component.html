@@ -63,26 +63,41 @@
     </a>
   </section> -->
 
+  <!-- Menu items come from globalConfig.components.profileMenu (see btn-profile-v2.model.ts for
+       the shape and the fallback list). Each item declares how it navigates. -->
   <section>
 
-    <a mat-menu-item role="link" routerLink="/app/person-profile/me" class="all-features flex items-center"
-      (click)="raiseTelemetry('Settings')">
-      <span>{{ 'profileDropdown.viewProfile' | translate }}</span>
-    </a>
+    @for (item of menuItems(); track item.key) {
 
-    <a href="javascript:void(0)" mat-menu-item role="link" (click)="openAccessibilityMenu()"
-      class="log-o flex items-center">
-      <span>Accessability</span>
-    </a>
+    @switch (item.action) {
 
-    <a mat-menu-item role="link" routerLink="/app/profile/settings" class="all-features flex items-center"
-      (click)="raiseTelemetry('Settings')">
-      <span>{{ 'profileDropdown.settings' | translate }}</span>
+    <!-- In-app navigation -->
+    @case ('route') {
+    <a mat-menu-item role="link" [routerLink]="item.target" [class]="menuItemClass(item) + ' flex items-center'"
+      (click)="raiseTelemetry(item.key)">
+      <span>{{ item.disableTranslation ? item.label : (item.label | translate) }}</span>
     </a>
+    }
 
-    <a href="javascript:void(0)" mat-menu-item role="link" (click)="logout()" class="log-o flex items-center">
-      <span>{{ 'profileDropdown.signOut' | translate }}</span>
+    <!-- Opens in a new tab: a real href so middle-click and "open in new tab" behave normally -->
+    @case ('newTab') {
+    <a mat-menu-item role="link" [href]="item.target" target="_blank" rel="noopener noreferrer"
+      [class]="menuItemClass(item) + ' flex items-center'" (click)="raiseTelemetry(item.key)">
+      <span>{{ item.disableTranslation ? item.label : (item.label | translate) }}</span>
     </a>
+    }
+
+    <!-- logout / accessibility: in-place actions, no navigation -->
+    @default {
+    <a href="javascript:void(0)" mat-menu-item role="link" (click)="onMenuAction(item)"
+      [class]="menuItemClass(item) + ' flex items-center'">
+      <span>{{ item.disableTranslation ? item.label : (item.label | translate) }}</span>
+    </a>
+    }
+
+    }
+
+    }
 
   </section>
 
