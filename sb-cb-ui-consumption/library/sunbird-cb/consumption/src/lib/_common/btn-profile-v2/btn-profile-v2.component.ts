@@ -28,6 +28,10 @@ import {
 } from '@sunbird-cb/utils-v2'
 import { WidgetBaseComponent } from '@sunbird-cb/resolver-v2'
 import { AvatarPhotoLibModule } from '../avatar-photo-lib/avatar-photo-lib.module'
+import {
+  DEFAULT_PROFILE_MENU_ITEMS,
+  IProfileMenuItem,
+} from './btn-profile-v2.model'
 
 // ---------------------------------------------------------------------------
 // Fallback stubs for services not available in this library package
@@ -78,6 +82,8 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
   readonly verifiedBadge = signal(false)
   readonly hideMenu = signal(false)
   readonly isKbPortal = signal(true)
+  /** Dropdown entries, resolved from globalConfig.components.profileMenu (see ngOnInit) */
+  readonly menuItems = signal<IProfileMenuItem[]>(DEFAULT_PROFILE_MENU_ITEMS)
 
   // Derived full name for template convenience
   readonly displayName = computed(() => this.givenName())
@@ -106,6 +112,7 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
   ngOnInit(): void {
     this.setPinnedAppsSubscription()
+    this.setMenuItems()
 
     if (this.widgetData?.actionBtnId) {
       this.id = this.widgetData.actionBtnId
@@ -125,6 +132,55 @@ export class BtnProfileV2Component extends WidgetBaseComponent implements OnInit
 
     this.hideMenu.set(isNotMyUser && isIgotOrg)
     this.setProfileCompletionGraph()
+  }
+
+  // ── Dropdown menu ──────────────────────────────────────────────────────────
+
+  /**
+   * Resolves the dropdown entries from globalConfig.components.profileMenu.
+   *
+   * No `items` array configured -> keep DEFAULT_PROFILE_MENU_ITEMS, so a tenant that has not
+   * adopted this config still gets the standard menu. Section explicitly disabled, or every
+   * item disabled -> render nothing.
+   *
+   * Read straight off getGlobalConfig() rather than through a DomainConfService helper: the
+   * config lives in the host app's assets, while this library resolves @sunbird-cb/utils-v2
+   * from its published build, so a new service method would not be visible until that package
+   * is rebuilt and re-released.
+   */
+  private setMenuItems(): void {
+    const config = this.domainConfSvc.getGlobalConfig()?.components?.profileMenu
+    if (!config || !Array.isArray(config.items)) { return }
+
+    if (config.enabled === false) {
+      this.menuItems.set([])
+      return
+    }
+
+    this.menuItems.set(
+      config.items.filter((item: IProfileMenuItem) => item && item.enabled !== false)
+    )
+  }
+
+  /** Reproduces the original per-item styling: navigations vs. in-place actions */
+  menuItemClass(item: IProfileMenuItem): string {
+    return item.action === 'route' || item.action === 'newTab' ? 'all-features' : 'log-o'
+  }
+
+  /** Handles the actions that are not plain links (`logout`, `accessibility`) */
+  onMenuAction(item: IProfileMenuItem): void {
+    switch (item.action) {
+      case 'logout':
+        this.logout()
+        break
+      case 'accessibility':
+        this.raiseTelemetry(item.key)
+        this.openAccessibilityMenu()
+        break
+      default:
+        // `route` and `newTab` are handled by routerLink / href in the template
+        break
+    }
   }
 
   setProfileCompletionGraph() {

@@ -82,7 +82,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   isOpen = signal<boolean>(true);// Signal to track sidebar open/close state
 
   // Signal to control content visibility with delayed hiding
-  // Shows immediately when opening, hides with 300ms delay when closing
+  // Shows immediately when opening, hides with a 50ms delay when closing
   showContent = signal<boolean>(true);
   private hideContentTimer?: ReturnType<typeof setTimeout> // Timer reference for delayed content hiding
   readonly SidebarCardType = SidebarCardType; // Expose SidebarCardType enum to template
@@ -155,7 +155,8 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
         // Show content immediately when opening
         this.showContent.set(true)
       } else {
-        // Hide content with 300ms delay when closing
+        // Hide content with a short delay when closing, so the label fade-out overlaps the
+        // width collapse instead of starting after it
         this.hideContentTimer = setTimeout(() => {
           this.showContent.set(false)
         }, 50)
