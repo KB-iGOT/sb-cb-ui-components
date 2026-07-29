@@ -8,7 +8,10 @@ export enum DisplayType {
   Tabs = 'tabs',
   Pills = 'pills',
   Cards = 'cards',
-  Spotlight = 'spotlight'
+  Spotlight = 'spotlight',
+  Banner = 'banner',
+  WelcomeGreeting = 'welcomeGreeting',
+  LearningProgress = 'learningProgress'
 }
 
 export enum CardType {
@@ -75,6 +78,7 @@ export interface ContentSectionConfig {
   translateHeader: boolean
   visibilityMode: VisibilityMode
   displayType: DisplayType
+  addToAccordian?: boolean
   hideAccordianToggel?: boolean
   defaultTabKey?: string
   tabs?: TabConfig[]
