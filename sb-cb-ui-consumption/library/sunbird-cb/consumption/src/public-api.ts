@@ -162,6 +162,11 @@ export * from './lib/_common/carousel-banner-v2/carousel-banner-v2.model'
 export * from './lib/_common/spotlight-cards-v2/spotlight-cards-v2.component'
 export * from './lib/_common/spotlight-cards-v2/spotlight-cards-v2.model'
 
+export * from './lib/_common/welcome-greeting-v2/welcome-greeting-v2.component'
+export * from './lib/_common/continue-learning-v2/continue-learning-v2.component'
+export * from './lib/_common/continue-learning-v2/in-progress-card-v2/in-progress-card-v2.component'
+export * from './lib/_common/continue-learning-v2/weekly-claps-card-v2/weekly-claps-card-v2.component'
+
 export * from './lib/_common/card-course-v2/card-course-v2.component'
 // Left Navigation Bar - Dynamic Sidebar
 export * from './lib/_common/left_nav_bar/models/sidebar.models'

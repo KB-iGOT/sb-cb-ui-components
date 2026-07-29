@@ -23,7 +23,7 @@ $cb-overlay-gradient: linear-gradient(
 
 // ─── Size map ─────────────────────────────────────────────────────────────────
 $banner-sizes: (
-  'xs': 140px,
+  'xs': 153px,
   'sm': 200px,
   'md': 320px,
   'lg': 480px,
@@ -122,6 +122,12 @@ $banner-sizes: (
     border-radius: 12px;
 
     &--clickable { cursor: pointer; }
+  }
+
+  @media (min-widt: 1200px) {
+    &__slide {
+      flex: 0 0 794px !important;
+    }
   }
 
   // ── Transition effect variants ─────────────────────────────────────────
