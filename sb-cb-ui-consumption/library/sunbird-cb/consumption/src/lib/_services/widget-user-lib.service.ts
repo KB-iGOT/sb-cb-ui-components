@@ -415,8 +415,9 @@ export class WidgetUserServiceLib {
         if (download) {
           cbpObj.downloaUrl = download
         }
-        // scheduling / plan fields
-        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'contentStatus', 'status', 'isApar'].forEach((k: string) => {
+        // scheduling / plan fields + the provider fields cards need for the org name and logo
+        // + the multilingual fields the "available in N languages" pill is derived from
+        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'contentStatus', 'status', 'isApar', 'organisation', 'creatorLogo', 'sourceName', 'resourceType', 'languageMapV1', 'language'].forEach((k: string) => {
           if (cbp[k] !== undefined) {
             cbpObj[k] = cbp[k]
           }
