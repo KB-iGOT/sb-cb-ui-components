@@ -20,9 +20,13 @@ export interface ITenantConfig {
   karmayogiBharatLink?: string
 }
 
-export interface ITenantConfigFile {
-  defaultTenant: string
-  tenants: { [tenantId: string]: ITenantConfig }
+/** Per-domain data as stored in application.config.json → domainList[subdomain] */
+export interface IDomainData {
+  logo?: string
+  redirectPath?: string
+  cdnContentHost?: string
+  sitePath?: string
+  karmayogiBharatLink?: string
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -35,13 +39,14 @@ export interface ITenantConfigFile {
  *  1. Tenant resolution  – resolves the tenant key from the current hostname
  *
  *  2. Tenant config      – holds the per-tenant feature flags / layout / type
- *     loaded from globalConfig.applicationConfig.tenants
+ *     (defaults; extend getTenantConfig() to source these per tenant)
  *
  *  3. Domain data        – convenience accessors for CDN host, logo, redirect
- *     path, site path etc. keyed by the resolved tenant
+ *     path, site path etc. read from application.config.json → domainList
+ *     keyed by the resolved subdomain, falling back to environment values
  *
  * Inject this service directly anywhere you need tenant or domain information.
- * Interfaces ITenantConfig, ITenantConfigFile, ITenantFeatures are exported
+ * Interfaces ITenantConfig, IDomainData, ITenantFeatures are exported
  * from this file and re-exported from the package public-api.
  */
 @Injectable({
@@ -71,9 +76,6 @@ export class DomainConfService {
 
   // ── tenant config state ────────────────────────────────────────────────────
 
-  private _tenantConfigFile: ITenantConfigFile | null = null
-  private _currentTenantConfig: ITenantConfig | null = null
-  public loaded = false
   defaultLogo = '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo_Horizontal.svg'
   defaultRedirectPath = '/page/home'
   constructor(
@@ -126,36 +128,9 @@ export class DomainConfService {
 
   // ── 2. Tenant config ───────────────────────────────────────────────────────
 
-  /**
-   * Initializes tenant configuration from globalConfig.applicationConfig.
-   * Called by InitService once the globalConfig API resolves.
-   */
-  initFromConfig(applicationConfig: ITenantConfigFile): void {
-    if (!applicationConfig) {
-      console.warn('DomainConfService: applicationConfig is empty, using defaults')
-      return
-    }
-    this._tenantConfigFile = applicationConfig
-    this._currentTenantConfig = this._tenantConfigFile.tenants[this.subdomain] || null
-
-    // Fallback: ?tenant= query param → defaultTenant in config
-    if (!this._currentTenantConfig) {
-      const debugTenant = new URLSearchParams(window.location.search).get('tenant')
-      if (debugTenant && this._tenantConfigFile.tenants[debugTenant]) {
-        this._currentTenantConfig = this._tenantConfigFile.tenants[debugTenant]
-      } else if (
-        this._tenantConfigFile.defaultTenant &&
-        this._tenantConfigFile.tenants[this._tenantConfigFile.defaultTenant]
-      ) {
-        this._currentTenantConfig = this._tenantConfigFile.tenants[this._tenantConfigFile.defaultTenant]
-      }
-    }
-    this.loaded = true
-  }
-
   /** Returns the full tenant configuration for the current tenant */
   getTenantConfig(): ITenantConfig {
-    return this._currentTenantConfig || this.defaultConfig
+    return this.defaultConfig
   }
 
   /** Returns the layout identifier ('default', 'tenant-layout-v1', …) */
@@ -215,28 +190,34 @@ export class DomainConfService {
 
   // ── 3. Domain data accessors ───────────────────────────────────────────────
   //
-  // All accessors use getTenantConfig() which returns _currentTenantConfig —
-  // the fully-resolved config that already accounts for hostname, ?tenant= param,
-  // and defaultTenant fallback. This ensures consistency: if you land on localhost
-  // with ?tenant=iiidem-portal, both feature flags AND domain data return iiidem
-  // values, not localhost/environment fallbacks.
+  // Domain data is read from application.config.json → domainList, keyed by the
+  // resolved subdomain. When the subdomain has no entry, every accessor falls
+  // back to the corresponding environment value (see defaults in each getter).
+
+  /**
+   * The domainList entry for the current subdomain, or an empty object when the
+   * subdomain has no configured entry (accessors then fall back to environment).
+   */
+  private get domainEntry(): IDomainData {
+    return this.configSvc?.instanceConfig?.domainList?.[this.subdomain] || {}
+  }
 
   getDomainCDNHost(): string {
-    return this.getTenantConfig().cdnContentHost || this.environment?.cdnContentHost
+    return this.domainEntry.cdnContentHost || this.environment?.cdnContentHost
   }
 
   getDomainAppLogo(): string {
-    const tenantLogo = this.getTenantConfig().logo
-    if (tenantLogo) { return tenantLogo }
-    return this.configSvc?.instanceConfig?.logos?.app || this.defaultLogo
+    return this.domainEntry.logo
+      || this.configSvc?.instanceConfig?.logos?.app
+      || this.defaultLogo
   }
 
   getDomainRedirectPath(): string {
-    return this.getTenantConfig().redirectPath || this.environment?.redirectPath|| this.defaultRedirectPath
+    return this.domainEntry.redirectPath || this.environment?.redirectPath || this.defaultRedirectPath
   }
 
   getDomainSitePath(): string {
-    return this.getTenantConfig().sitePath || this.environment?.sitePath 
+    return this.domainEntry.sitePath || this.environment?.sitePath
   }
 
   /** True when the current domain is the main KB portal (not a tenant portal) */
@@ -245,7 +226,7 @@ export class DomainConfService {
   }
 
   getNonLoggedInPageUrl(): string {
-    return this.getTenantConfig().karmayogiBharatLink
+    return this.domainEntry.karmayogiBharatLink
       || this.environment?.karmayogiBharatLink
       || 'https://igotkarmayogi.gov.in/'
   }
