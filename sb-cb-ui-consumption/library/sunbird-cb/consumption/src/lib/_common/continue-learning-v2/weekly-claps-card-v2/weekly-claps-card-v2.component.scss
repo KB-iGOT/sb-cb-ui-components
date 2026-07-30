@@ -159,6 +159,10 @@
   color: var(--environment-button-primary-filled-primary);
 }
 
+:host-context([data-theme="dark"]) .wc-week-icon--missed {
+  filter: invert(1);
+}
+
 /* ---- Skeleton ---- */
 .wc-skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);

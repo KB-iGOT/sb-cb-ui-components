@@ -9,7 +9,7 @@ import dayjs from 'dayjs'
 // import { environment } from 'src/environments/environment'
 import { NsCardContent } from '../_models/card-content-v2.model'
 import * as lodash from 'lodash'
-import { WidgetEnrollService } from '@sunbird-cb/utils-v2'
+import { WidgetEnrollService, ConfigurationsService } from '@sunbird-cb/utils-v2'
 
 
 const PROTECTED_SLAG_V8 = '/apis/protected/v8'
@@ -43,6 +43,7 @@ export class WidgetUserServiceLib {
   constructor(
     @Inject('environment') environment: any,
     private enrollSvc: WidgetEnrollService,
+    private configSvc: ConfigurationsService,
     private http: HttpClient) {
     this.environment = environment
   }
@@ -414,8 +415,9 @@ export class WidgetUserServiceLib {
         if (download) {
           cbpObj.downloaUrl = download
         }
-        // scheduling / plan fields
-        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'contentStatus', 'status', 'isApar'].forEach((k: string) => {
+        // scheduling / plan fields + the provider fields cards need for the org name and logo
+        // + the multilingual fields the "available in N languages" pill is derived from
+        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'contentStatus', 'status', 'isApar', 'organisation', 'creatorLogo', 'sourceName', 'resourceType', 'languageMapV1', 'language'].forEach((k: string) => {
           if (cbp[k] !== undefined) {
             cbpObj[k] = cbp[k]
           }
@@ -444,7 +446,13 @@ export class WidgetUserServiceLib {
   }
 
   fetchExtEnrollData() {
-    return this.http.get(API_END_POINTS.FETCH_EXTERNAL_ENROLLMENT_LIST).pipe(map((extRes: any) => {
+    const cfg = this.configSvc.globalConfig?.apis?.user?.externalEnrollment
+    // explicitly disabled via global-config => skip the call (absent entry stays backward-compatible)
+    if (cfg && !cfg.enabled) {
+      return of(null)
+    }
+    const extUrl = (cfg?.enabled && cfg?.url) ? cfg.url : API_END_POINTS.FETCH_EXTERNAL_ENROLLMENT_LIST
+    return this.http.get(extUrl).pipe(map((extRes: any) => {
       if (extRes && extRes.result && extRes.result.courses) {
         extRes.result.courses.forEach((ele: any) => {
           ele['completionPercentage'] = ele['completionpercentage']

@@ -154,7 +154,7 @@
 
       <div class="cc-card__org-row">
         @if (isCardElementEnabled('creatorLogo')) {
-        <img class="cc-card__org-logo" [src]="c.creatorLogo || defaultSLogo()"
+        <img class="cc-card__org-logo" [src]="(orgLogo() | pipePublicURL) || defaultSLogo()"
           [wsUtilsDefaultThumbnail]="defaultSLogo()" [alt]="orgName()" loading="lazy" />
         }
 

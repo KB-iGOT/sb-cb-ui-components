@@ -12,7 +12,7 @@ const API_END_POINTS = {
   GET_SEARCH_DESIGNATIONS: '/apis/proxies/v8/designation/search',
   PROFILEAPPROVALSLIST: '/apis/protected/v8/workflowhandler/profileApprovalSearch',
   UPDATE_USER_DETAILS: '/apis/proxies/v8/user/v1/admin/extPatch',
-  ADD_USER_ROLE: '/apis/proxies/v8/user/private/v1/assign/role',
+  ADD_USER_ROLE: '/apis/proxies/v8/user/v1/role/assign',
   GET_MASTER_LANGUAGES: '/apis/protected/v8/user/profileRegistry/getMasterLanguages',
   WORKFLOW_HANDLER_V2: '/apis/protected/v8/workflowhandler/v2/transition'
 }

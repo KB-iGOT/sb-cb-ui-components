@@ -71,7 +71,6 @@
     align-items: center;
     justify-content: center;
     padding: 16px;
-    padding-left: 0;
     box-sizing: border-box;
 }
 
@@ -195,7 +194,8 @@
 }
 
 .logo-img {
-    object-fit: fill;
+     object-fit: fill;
+    // object-fit: contain;
     min-height: 52px;
     min-width: 52px;
     max-width: 52px;

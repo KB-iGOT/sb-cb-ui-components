@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core'
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { HttpClient } from '@angular/common/http'
 import { ConfigurationsService, EventService, WsEvents, WidgetEnrollService, DomainConfService } from '@sunbird-cb/utils-v2'
@@ -14,6 +14,7 @@ const IN_PROGRESS_PAYLOAD = {
   request: {
     retiredCoursesEnabled: false,
     status: 'In-Progress',
+    limit: 1
   },
 }
 
@@ -33,7 +34,7 @@ const IN_PROGRESS_EXTERNAL_PAYLOAD = {
 })
 export class ContinueLearningV2Component implements OnInit, OnDestroy {
   inProgressCourse: any = null
-  isInProgressLoading = true
+  isInProgressLoading = signal(true)
 
   insightsData: any = null
   weeklyData: any = null
@@ -56,7 +57,7 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
   loadInProgressCourse() {
     const userId = this.configSvc.userProfile?.userId
     if (!userId) {
-      this.isInProgressLoading = false
+      this.isInProgressLoading.set(false)
       return
     }
 
@@ -74,10 +75,10 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
               courses = [...courses, ...extRes.result.courses]
             }
             this.inProgressCourse = this.formatAndPickFirst(courses)
-            this.isInProgressLoading = false
+            this.isInProgressLoading.set(false)
           }, () => {
             this.inProgressCourse = this.formatAndPickFirst(courses)
-            this.isInProgressLoading = false
+            this.isInProgressLoading.set(false)
           })
       }, () => {
         this.enrollSvc.fetchExternalEnrollmentData(IN_PROGRESS_EXTERNAL_PAYLOAD)
@@ -85,8 +86,8 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
           .subscribe((extRes: any) => {
             const courses = extRes?.result?.courses ?? []
             this.inProgressCourse = this.formatAndPickFirst(courses)
-            this.isInProgressLoading = false
-          }, () => { this.isInProgressLoading = false })
+            this.isInProgressLoading.set(false)
+          }, () => { this.isInProgressLoading.set(false) })
       })
   }
 
