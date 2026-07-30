@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ConfigurationsService } from '../services/configurations.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { NsContent } from '../services/widget-content.model';
 import { map } from 'rxjs/operators';
 
@@ -41,6 +41,10 @@ export class WidgetEnrollService {
 
 fetchExternalEnrollmentData(payload: any) {
   const externalEnrollConfig = this.configSvc.globalConfig?.apis?.user?.externalEnrollment
+  // explicitly disabled via global-config => skip the call (absent entry stays backward-compatible)
+  if (externalEnrollConfig && !externalEnrollConfig.enabled) {
+    return of(null)
+  }
   const url = (externalEnrollConfig?.enabled && externalEnrollConfig?.url) ? externalEnrollConfig.url : API_END_POINTS.ENROLL_EXTERNAL_DATA
   return this.http.post(url, payload).pipe(map((extRes: any) => {
     if (extRes && extRes?.result && extRes?.result?.courses) {

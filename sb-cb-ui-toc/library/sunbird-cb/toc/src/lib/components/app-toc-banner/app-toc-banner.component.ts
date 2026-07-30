@@ -600,7 +600,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
 
       // conflicts check end
       if (userList && userList.length === 0) {
-        if (this.content && batchData.batchAttributes && batchData.batchAttributes.userProfileFileds) {
+        if (this.content && batchData.batchAttributes && batchData.batchAttributes.userProfileFileds && batchData.batchAttributes.userProfileFileds !== "Available user filled iGOT profile") {
           this.callBPProfileSurevy(batchData)
         } else if (this.content && this.content.wfSurveyLink) {
           this.callBPSurevy(batchData)
