@@ -175,7 +175,7 @@
             <img class="stats-icon" height="20" width="20" src="/assets/icons/home/play.svg">
           </button>
         </div>
-        <div class="progress-btn" *ngIf="!widgetData?.content?.active">
+        <div class="progress-btn" *ngIf="widgetData?.content?.active === false">
           <button class="resume-btn flex flex-middle flex-between" [routerLink]="['/app/toc/',widgetData?.content?.identifier,'overview']"
             [queryParams]="{primaryCategory: widgetData?.content?.primaryCategory}" [state]="widgetData?.stateData" [matTooltipPosition]="'below'"
             matTooltip="{{translateLabels('reEnroll', 'cardcontentv2')}}">
@@ -186,7 +186,8 @@
         </div>
       </div>
     </ng-container>
-    <ng-container *ngIf="isCardElementEnabled('downloadCertificate') && widgetData?.content?.completionPercentage === 100 && widgetData?.content?.courseCategory !== 'Case Study'">
+    <ng-container
+      *ngIf="isCardElementEnabled('downloadCertificate') && widgetData?.content?.completionPercentage === 100 && widgetData?.content?.courseCategory !== 'Case Study'">
       <div class="flex flex-align-end progress-wrapper flex-end mt-1 position-relative">
         <div class="progress-btn">
           <ng-container *ngIf="checkSurveyCompletion(); else viewCertificateBtn">
