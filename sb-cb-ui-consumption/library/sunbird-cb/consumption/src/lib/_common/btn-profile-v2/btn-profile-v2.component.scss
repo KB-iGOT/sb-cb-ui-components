@@ -73,13 +73,21 @@
 // The app theme paints every new-tab link in the accent colour:
 //
 //   .theme-igot.day-mode a[target="_blank"] { color: $colorAccent; }   (portal/src/themes/_theme-mixins.scss)
-//
-// which rendered the Privacy Policy entry as a blue inline link rather than menu text. That
-// selector carries two theme classes, so it outranks anything this component can express through
-// emulated encapsulation alone - !important is what makes the opt-out deterministic rather than
-// dependent on stylesheet order. Menu entries should read as menu text whatever they link to.
-a.all-features {
-  color: inherit !important;
+a.all-features,
+a.all-features .mat-icon {
+  color: var(--text-bandw-black-display) !important;
+}
+
+a.all-features.mat-mdc-menu-item[target="_blank"] {
+  color: var(--text-bandw-black-display) !important;
+  background-color: transparent !important;
+}
+
+a.all-features.mat-mdc-menu-item[target="_blank"]:hover,
+a.all-features.mat-mdc-menu-item[target="_blank"].cdk-program-focused,
+a.all-features.mat-mdc-menu-item[target="_blank"].cdk-keyboard-focused {
+  background-color: var(--mat-menu-item-hover-state-layer-color,
+      color-mix(in srgb, var(--mat-sys-on-surface) calc(var(--mat-sys-hover-state-layer-opacity) * 100%), transparent)) !important;
 }
 
 .new-margin {

@@ -305,7 +305,9 @@ export class UserUpdateComponent implements OnInit, OnChanges {
       domicileMedium: _.get(user, 'profileDetails.personalDetails.domicileMedium', ''),
       gender: genderValue ? genderMap[genderValue.toLowerCase()] : '',
       category: _.get(user, 'profileDetails.personalDetails.category', ''),
-      pincode: _.get(user, 'profileDetails.employmentDetails.pinCode', ''),
+      pincode: this.isNgo
+        ? (_.get(user, 'profileDetails.personalDetails.pinCode', '') || _.get(user, 'profileDetails.employmentDetails.pinCode', ''))
+        : _.get(user, 'profileDetails.employmentDetails.pinCode', ''),
       externalSystemDor: _.get(user, 'additionalProperties.externalSystemDor', 'NA'),
       civilServiceType: _.get(user, 'profileDetails?.cadreDetails?.civilServiceType', ''),
       civilServiceName: _.get(user, 'profileDetails?.cadreDetails?.civilServiceName', '-'),
@@ -322,7 +324,9 @@ export class UserUpdateComponent implements OnInit, OnChanges {
       domicileMedium: _.get(user, 'profileDetails.personalDetails.domicileMedium', ''),
       gender: genderValue ? genderMap[genderValue.toLowerCase()] : '',
       category: _.get(user, 'profileDetails.personalDetails.category', ''),
-      pincode: _.get(user, 'profileDetails.employmentDetails.pinCode', ''),
+      pincode: this.isNgo
+        ? (_.get(user, 'profileDetails.personalDetails.pinCode', '') || _.get(user, 'profileDetails.employmentDetails.pinCode', ''))
+        : _.get(user, 'profileDetails.employmentDetails.pinCode', ''),
       civilServiceType: _.get(user, 'profileDetails?.cadreDetails?.civilServiceType', ''),
       civilServiceName: _.get(user, 'profileDetails?.cadreDetails?.civilServiceName', '-'),
       cadreName: _.get(user, 'profileDetails?.cadreDetails?.cadreName', '-'),
@@ -890,13 +894,18 @@ export class UserUpdateComponent implements OnInit, OnChanges {
             category: _.get(otherDetailsValues, 'category', ''),
             mobile: _.get(otherDetailsValues, 'mobile', ''),
             primaryEmail: _.get(otherDetailsValues, 'primaryEmail', ''),
+            // NGO (volunteer org) users carry pin code inside personalDetails
+            ...(this.isNgo ? { pinCode: _.get(otherDetailsValues, 'pincode', '') } : null),
           },
-          professionalDetails: [
-            {
-              designation: _.get(userFormValues, 'designation', ''),
-              group: _.get(userFormValues, 'group', ''),
-            },
-          ],
+          // NGO (volunteer org) users have no professionalDetails
+          ...(this.isNgo ? null : {
+            professionalDetails: [
+              {
+                designation: _.get(userFormValues, 'designation', ''),
+                group: _.get(userFormValues, 'group', ''),
+              },
+            ],
+          }),
           additionalProperties: {
             tag: this.selectedtagsList,
             ...(this.isNgo ? {
@@ -904,10 +913,10 @@ export class UserUpdateComponent implements OnInit, OnChanges {
               externalSystem: 'eHRMS ID',
             } : null),
           },
-          employmentDetails: {
-            pinCode: _.get(otherDetailsValues, 'pincode', ''),
-            employeeCode: _.get(otherDetailsValues, 'employeeId', ''),
-          },
+            employmentDetails: {
+              pinCode: _.get(otherDetailsValues, 'pincode', ''),
+              employeeCode: _.get(otherDetailsValues, 'employeeId', ''),
+            },
         },
       },
     }

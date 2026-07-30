@@ -10,17 +10,19 @@
       <div class=" flex flex-col">
         <div class="flex gap-2">
           <div class="slot-header">{{userName}} </div>
-          <ng-container
-            *ngIf="designationStatus === 'VERIFIED' && groupStatus === 'VERIFIED'; else verificationPending">
-            <div class="flex items-center justify-center gap-2 px-2 statusApproved">
-              Approved <mat-icon class="status-info-icon">check_circle</mat-icon>
-            </div>
+          <ng-container *ngIf="!isNgo">
+            <ng-container
+              *ngIf="designationStatus === 'VERIFIED' && groupStatus === 'VERIFIED'; else verificationPending">
+              <div class="flex items-center justify-center gap-2 px-2 statusApproved">
+                Approved <mat-icon class="status-info-icon">check_circle</mat-icon>
+              </div>
+            </ng-container>
+            <ng-template #verificationPending>
+              <div class="flex items-center justify-center gap-2 px-2 statusPending">
+                Pending <mat-icon class="status-info-icon">info_outline</mat-icon>
+              </div>
+            </ng-template>
           </ng-container>
-          <ng-template #verificationPending>
-            <div class="flex items-center justify-center gap-2 px-2 statusPending">
-              Pending <mat-icon class="status-info-icon">info_outline</mat-icon>
-            </div>
-          </ng-template>
         </div>
         <div class="userDesignation">{{currentDesignation}}</div>
       </div>

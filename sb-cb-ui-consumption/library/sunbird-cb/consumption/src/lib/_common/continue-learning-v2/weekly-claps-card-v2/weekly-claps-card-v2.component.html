@@ -81,7 +81,7 @@
         <div class="wc-week-col" role="listitem">
           <span class="wc-week-label" [class.wc-week-label--active]="week.activeWeek" aria-hidden="true">{{ week.label
             }}</span>
-          <img class="wc-week-icon"
+          <img class="wc-week-icon" [class.wc-week-icon--missed]="!week.activeWeek && !isWeekDone(week)"
             [src]="week.activeWeek
                     ? (insightsData.weeklyClaps[week.key]?.timespent > 60 ? 'assets/icons/home-v2/approved.svg' : 'assets/icons/home-v2/highlight.svg')
                     : (insightsData.weeklyClaps[week.key]?.timespent > 60 ? 'assets/icons/home-v2/approved.svg' : 'assets/icons/home-v2/decline_icon.svg')"

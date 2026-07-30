@@ -91,6 +91,7 @@ export namespace NsInstanceConfig {
       redirectPath: string
       cdnContentHost: string
       sitePath: string
+      karmayogiBharatLink?: string
     }
   }
 
