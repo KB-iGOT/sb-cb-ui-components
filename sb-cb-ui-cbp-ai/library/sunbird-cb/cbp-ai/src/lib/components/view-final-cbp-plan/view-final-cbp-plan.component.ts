@@ -890,16 +890,15 @@ export class ViewFinalCbpPlanComponent {
         json?.cbp_plans?.length
           ? json.cbp_plans[json.cbp_plans.length - 1]?.selected_courses || []
           : [];
-
       const courseDetails = courses.map((c: any, i: number) => {
-        const competencies = (c.competencies || [])
+        const competencies = (c.competencies || c.competencies_v6 || [])
           .map((cc: any) =>
             `${cc.competencyAreaName} → ${cc.competencyThemeName} → ${cc.competencySubThemeName}`
           )
           .join(" | ");
 
         return (
-          `${i + 1}. Course Name: ${c?.course}\n` +
+          `${i + 1}. Course Name: ${c?.course || c?.name}\n` +
           `   Identifier: ${c?.identifier}\n` +
           `   Duration (mins): ${Math.round(+c.duration / 60)}\n` +
           `   Relevancy: ${c?.relevancy}%\n` +

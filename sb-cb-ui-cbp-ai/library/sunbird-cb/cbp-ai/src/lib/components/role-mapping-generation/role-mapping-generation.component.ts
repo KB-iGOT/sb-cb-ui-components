@@ -569,6 +569,12 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     this.sharedService.cbpPlanFinalObj['ministry'] = selectedMinistry
     this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = []
     this.sharedService.roleMappingGenerationData = []
+    // Selecting a different ministry/state invalidates any previously selected department
+    this.roleMappingForm.get('departments')?.setValue(null);
+    this.selectedDepartmentObj = null
+    this.pinnedDepartmentOptions = []
+    this.sharedService.cbpPlanFinalObj['department_name'] = ''
+    this.sharedService.cbpPlanFinalObj['departments'] = ''
     localStorage.setItem('cbpPlanFinalObj', JSON.stringify(this.sharedService.cbpPlanFinalObj))
     if (selectedMinistryId && (this.selectedMinistryType === 'state' || this.selectedMinistryType === 'ministry')) {
       this.departmentMinistryId = selectedMinistryId
