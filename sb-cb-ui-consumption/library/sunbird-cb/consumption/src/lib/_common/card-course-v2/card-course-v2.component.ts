@@ -15,7 +15,7 @@ import { Router } from '@angular/router'
 import { TranslateModule } from '@ngx-translate/core'
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltipModule } from '@angular/material/tooltip'
-import { ConfigurationsService, DomainConfService, EventService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, DomainConfService, EventService, PipePublicURLModule, WsEvents } from '@sunbird-cb/utils-v2'
 import { NsContent } from '../../_models/widget-content.model'
 import { ContentLanguageService } from '../../_services/content-language.service'
 import { CommonMethodsService } from '../../_services/common-methods.service'
@@ -40,6 +40,7 @@ import { VIEWER_ROUTE_FROM_MIME } from '../../_services/viewer-route-util'
     TranslateModule,
     DefaultThumbnailModule,
     PipeDurationTransformModule,
+    PipePublicURLModule,
     DisplayContentTypeLibModule,
   ],
 })
@@ -83,8 +84,14 @@ export class CardCourseV2Component {
 
   // ── Computed values ────────────────────────────────────────────────────────
   readonly languageCount = computed(() => {
-    const c = this.content()
-    return c ? this.contentLangSvc.getAllContentLanguages(c).length : 0
+    const c = this.content() as any
+    if (!c) { return 0 }
+    // The language service reads `languageMapV1` / `language`. A strip view model keeps the raw
+    // API item on `metadata`, so fall back to it when the wrapper was built without those fields.
+    const hasLangData = (source: any) =>
+      !!source && (Object.keys(source.languageMapV1 ?? {}).length > 0 || (source.language?.length ?? 0) > 0)
+    const source = hasLangData(c) ? c : (c.metadata ?? c)
+    return this.contentLangSvc.getAllContentLanguages(source).length
   })
 
   readonly thumbnailUrl = computed(() => {
@@ -108,13 +115,28 @@ export class CardCourseV2Component {
     return rating ? rating.toFixed(1) : ''
   })
 
+  // `organisation` is the platform-wide "Content Provider" field; `provider`/`sourceName` are the
+  // single-name shapes. `metadata` holds the raw API item, so it still has the org fields when the
+  // view model that wrapped it was built without them.
   readonly orgName = computed(() => {
-    const orgs = this.content()?.organisation
-    if (orgs?.length) { return orgs[0] }
-    if (this.content()?.resourceType === 'Samuhik Charcha') {
-      return this.content()?.sourceName || 'Karmayogi Bharat'
-    }
-    return 'Karmayogi Bharat'
+    const c = this.content() as any
+    return this.firstString([
+      this.firstOrg(c?.organisation),
+      this.firstOrg(c?.metadata?.organisation),
+      c?.provider,
+      c?.sourceName,
+      c?.metadata?.sourceName,
+    ]) || 'Karmayogi Bharat'
+  })
+
+  readonly orgLogo = computed(() => {
+    const c = this.content() as any
+    return this.firstString([
+      c?.creatorLogo,
+      c?.metadata?.creatorLogo,
+      c?.metadata?.contentPartner?.link,
+      c?.metadata?.sourceIconUrl,
+    ])
   })
 
   readonly isPopular = computed(() => (this.content()?.additionalTags ?? []).includes('Most popular'))
@@ -208,6 +230,16 @@ export class CardCourseV2Component {
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
+  private firstString(values: unknown[]): string {
+    const match = values.find((value): value is string => typeof value === 'string' && !!value.trim())
+    return match ?? ''
+  }
+
+  /** `organisation` is normally an array of names, but some responses send a bare string. */
+  private firstOrg(orgs: unknown): string {
+    return Array.isArray(orgs) ? this.firstString(orgs) : this.firstString([orgs])
+  }
+
   private checkTruncation(): void {
     const t = this.titleElRef()?.nativeElement
     const o = this.orgElRef()?.nativeElement

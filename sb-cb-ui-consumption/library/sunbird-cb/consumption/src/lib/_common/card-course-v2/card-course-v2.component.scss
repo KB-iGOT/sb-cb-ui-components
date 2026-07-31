@@ -325,10 +325,10 @@ $done-green : #388e3c;
   /* ── Language ribbon – premium diagonal corner ribbon, top-right ───── */
   &__lang-pill {
     position: absolute;
-    top: 31px;
-    right: -47px;
+    top: 39px;
+    right: -51px;
     left: auto;
-    width: 182px;
+    width: 200px;
     transform: rotate(45deg);
     transform-origin: center;
     display: flex;
@@ -357,11 +357,20 @@ $done-green : #388e3c;
   }
 
   &__lang-pill-text {
-    font-size: 9.5px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
+    font-size: 9px;
+    font-weight: 800;
+    /* 0.5px of tracking added ~7px across the label — more than the chord had
+       to spare, so it stays tight here. */
+    letter-spacing: 0.2px;
+    /* Fixes the band thickness regardless of which font actually loads. */
+    line-height: 12px;
     color: #fff;
     white-space: nowrap;
+    /* Backstop for a translation longer than any current one: ellipsis rather
+       than a glyph sliced by the media box edge. */
+    max-width: 132px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-shadow:
       0 0 4px rgba(0, 0, 0, 0.9),
       0 1px 2px rgba(0, 0, 0, 0.8);
