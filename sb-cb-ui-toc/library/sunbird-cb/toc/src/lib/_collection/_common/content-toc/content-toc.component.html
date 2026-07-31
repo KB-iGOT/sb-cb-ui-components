@@ -16,17 +16,6 @@
             </div>
         </div>
     </div>
-    <div class="flex flex-row align-items-center">
-      <div class="py-2">
-        <p class="font-weight-600">Get Started with AI Tutor</p>
-        <span>Get instant explanations, step-by-step learning guidance, and customised learning tailored just
-          for you.</span>
-      </div>
-      <div class="ai-tutor-btn px-2 py-1" [ngClass]="isMobile ? 'w-160' : ''">
-        <a href="javascript:void(0)" (click)="showAiTutorConfirmPopup()"><img src="assets/ai-tutor/ai-icon.svg">&nbsp;
-          &nbsp; <span class="ai-tutor-label">AI Tutor</span></a>
-      </div>
-    </div>
 </div>
 <div class="tab-group-container" *ngIf="config?.uiVisibility?.tabs?.visible !== false">
   <mat-tab-group (selectedTabChange)="handleTabChange($event)" #stickyMenu [class.sticky-mat-tabs]="sticky" mat-stretch-tabs="false" mat-align-tabs="start"
