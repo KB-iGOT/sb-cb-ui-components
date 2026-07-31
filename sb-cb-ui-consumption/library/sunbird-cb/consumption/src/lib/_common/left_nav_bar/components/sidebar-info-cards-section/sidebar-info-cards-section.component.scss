@@ -8,7 +8,7 @@
 
 // Override theme night-mode anchor background
 .sidebar-link-override {
-  background-color: transparent !important;
+  background-color: var(--environment-cards-overall-cards-primary) !important;
 }
 
 .custom-expansion-panel {
@@ -214,6 +214,9 @@
 
 .children-cards {
   animation: slideDown 0.2s ease-out;
+  a {
+    background-color: var(--environment-cards-overall-cards-primary) !important;
+  }
 }
 
 @keyframes slideDown {
