@@ -38,6 +38,15 @@
     margin: 0;
     color: var(--text-bandw-black-fine-print);
   }
+
+  // Reverse default Material arrow direction: down = expanded, up = collapsed
+  ::ng-deep .mat-expansion-indicator {
+    transform: rotate(180deg);
+  }
+
+  ::ng-deep .mat-expansion-panel-header.mat-expanded .mat-expansion-indicator {
+    transform: rotate(0deg);
+  }
 }
 
 .section-header {
