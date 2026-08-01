@@ -341,6 +341,23 @@
   width: 18%;
 }
 
+.action-button {
+  opacity: 1;
+  color: #fff !important;
+  font-family: Lato-Bold, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: .5px;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 64px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  background-color: #1b4ca1 !important;
+}
+
 a.action-button {
   color: #FFF !important;
   width: auto;
