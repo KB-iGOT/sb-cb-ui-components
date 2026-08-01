@@ -1,6 +1,6 @@
 /* ── Dimensions ─────────────────────────────────────────── */
-$cc-width : 230px;
-$cc-height : 322px;
+$cc-width : 254px;
+$cc-height : 325px;
 $cc-img-h : 140px;
 /* 182px */
 $cc-radius : 10px;
@@ -212,15 +212,15 @@ $done-green : #388e3c;
   &__chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
+    gap: 2px;
+    padding: 3px 6px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
     background: $chip-bg;
     color: $chip-text;
     white-space: nowrap;
-    max-width: 90px;
+    max-width: 110px;
     overflow: hidden;
     text-overflow: ellipsis;
 

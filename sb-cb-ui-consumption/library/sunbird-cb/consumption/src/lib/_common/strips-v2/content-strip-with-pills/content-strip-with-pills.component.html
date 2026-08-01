@@ -12,7 +12,8 @@
         <!-- Text Content -->
         <div class="pill-active__text">
           <!-- Label -->
-          <div class="pill-active__label">
+          <div #labelEl class="pill-active__label" [matTooltip]="pill.pillLabel"
+            [matTooltipDisabled]="!isTextTruncated(labelEl)" [matTooltipShowDelay]="400">
             {{ pill.pillLabel }}
           </div>
 
@@ -20,7 +21,8 @@
           @if (pill.pillDescription && pill.pillDescription.length > 0) {
           <div class="pill-active__descriptions">
             @for (desc of pill.pillDescription; track $index) {
-            <div class="pill-active__desc">
+            <div #descEl class="pill-active__desc" [matTooltip]="desc" [matTooltipDisabled]="!isTextTruncated(descEl)"
+              [matTooltipShowDelay]="400">
               {{ desc }}
             </div>
             }
