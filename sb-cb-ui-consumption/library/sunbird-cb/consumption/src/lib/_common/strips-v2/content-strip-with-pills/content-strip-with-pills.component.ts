@@ -1,5 +1,6 @@
 import { Component, input, signal, ChangeDetectionStrategy, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { PillConfig, ContentConfig } from '../models/content-section.model'
 import { filterVisiblePills } from '../utils/visibility.util'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
@@ -7,7 +8,7 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
 @Component({
   selector: 'sb-uic-content-strip-with-pills',
   standalone: true,
-  imports: [CommonModule, ContentStripsComponent],
+  imports: [CommonModule, MatTooltipModule, ContentStripsComponent],
   templateUrl: './content-strip-with-pills.component.html',
   styleUrls: ['./content-strip-with-pills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,6 +54,15 @@ export class ContentStripWithPillsComponent {
   isPillActive(pillKey: string): boolean {
     const active = this.activePillKey() || this.defaultPillKey()
     return active === pillKey
+  }
+
+  /**
+   * The pill card is a fixed 254px, so its label and description lines are clipped with an
+   * ellipsis. Used to enable the tooltip only for the lines that are actually cut off, so hovering
+   * fully visible text stays quiet.
+   */
+  isTextTruncated(element: HTMLElement): boolean {
+    return element.scrollWidth > element.clientWidth
   }
 
   getActivePill(): PillConfig | undefined {
