@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core'
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
-import { ApiMethod, ApiRegistryEntry } from '../models/content-section.model'
+import { ApiMethod, ApiRegistryEntry, ChainedApiConfig } from '../models/content-section.model'
 import { API_REGISTRY } from '../registry/api-registry'
 import { ConfigurationsService, WidgetEnrollService } from '@sunbird-cb/utils-v2'
 import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service'
@@ -84,6 +84,10 @@ export class ContentApiService {
 
     const chainedConfig = config.chainedApi
 
+    if (chainedConfig.mode === 'mergeIndependent') {
+      return this.executeMergeIndependentChain(firstResponse$, chainedConfig, apiDetailsKey)
+    }
+
     return firstResponse$.pipe(
       switchMap(firstResponse => {
         const sourceList = this.getNestedValue(firstResponse, chainedConfig.sourceListPath)
@@ -92,8 +96,9 @@ export class ContentApiService {
           return of([])
         }
 
+        const identifierField = chainedConfig.identifierField as string
         const identifiers = sourceList
-          .map(item => (item as Record<string, unknown>)[chainedConfig.identifierField])
+          .map(item => (item as Record<string, unknown>)[identifierField])
           .filter((id): id is string => typeof id === 'string' && !!id)
 
         if (identifiers.length === 0) {
@@ -123,15 +128,51 @@ export class ContentApiService {
               return []
             }
 
+            const enrolledMatchField = chainedConfig.enrolledMatchField as string
             const enrolledIds = new Set(
-              enrolledList.map(item => (item as Record<string, unknown>)[chainedConfig.enrolledMatchField])
+              enrolledList.map(item => (item as Record<string, unknown>)[enrolledMatchField])
             )
 
             const filteredContent = sourceList.filter(item =>
-              enrolledIds.has((item as Record<string, unknown>)[chainedConfig.identifierField])
+              enrolledIds.has((item as Record<string, unknown>)[identifierField])
             )
 
             return this.setNestedValue(firstResponse, chainedConfig.sourceListPath, filteredContent)
+          })
+        )
+      })
+    )
+  }
+
+  // Calls the second endpoint unconditionally (independent of the first response, and even if
+  // the first request errored — makeHttpRequest already swallows errors into `of(null)`), then
+  // concatenates both lists rather than filtering the first by the second.
+  private executeMergeIndependentChain(
+    firstResponse$: Observable<unknown>,
+    chainedConfig: ChainedApiConfig,
+    apiDetailsKey: string
+  ): Observable<unknown> {
+    return firstResponse$.pipe(
+      switchMap(firstResponse => {
+        const sourceList = this.getNestedValue(firstResponse, chainedConfig.sourceListPath)
+        const firstList = Array.isArray(sourceList) ? sourceList : []
+
+        const secondResponse$ = apiDetailsKey === 'continueLearningApi'
+          ? this.userServiceLib.fetchExternalEnrollmentData(chainedConfig.buildBody([]))
+          : this.makeHttpRequest({
+            endpoint: chainedConfig.endpoint,
+            method: chainedConfig.method,
+            body: chainedConfig.buildBody([]),
+            queryParams: chainedConfig.queryParams,
+            addUserId: chainedConfig.addUserId
+          })
+
+        return secondResponse$.pipe(
+          map(secondResponse => {
+            const secondListRaw = this.getNestedValue(secondResponse, chainedConfig.enrolledListPath)
+            const secondList = Array.isArray(secondListRaw) ? secondListRaw : []
+            const merged = [...firstList, ...secondList]
+            return this.setNestedValue(firstResponse ?? {}, chainedConfig.sourceListPath, merged)
           })
         )
       })

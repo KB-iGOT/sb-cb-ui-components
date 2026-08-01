@@ -1,5 +1,6 @@
 import { Component, input, signal, ChangeDetectionStrategy, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { PillConfig, ContentConfig } from '../models/content-section.model'
 import { filterVisiblePills } from '../utils/visibility.util'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
@@ -7,7 +8,7 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
 @Component({
   selector: 'sb-uic-content-strip-with-pills',
   standalone: true,
-  imports: [CommonModule, ContentStripsComponent],
+  imports: [CommonModule, MatTooltipModule, ContentStripsComponent],
   templateUrl: './content-strip-with-pills.component.html',
   styleUrls: ['./content-strip-with-pills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,8 +22,17 @@ export class ContentStripWithPillsComponent {
 
   visiblePills = computed(() => filterVisiblePills(this.pills()));
 
+  resolvedDefaultPillKey = computed<string>(() => {
+    const key = this.defaultPillKey()
+    const visible = this.visiblePills()
+    if (key && visible?.some(p => p?.pillKey === key)) {
+      return key
+    }
+    return visible?.[0]?.pillKey ?? ''
+  });
+
   activeContentConfig = computed<ContentConfig | null>(() => {
-    const key = this.activePillKey() || this.defaultPillKey()
+    const key = this.activePillKey() || this.resolvedDefaultPillKey()
     const pill = this.visiblePills()?.find(p => p?.pillKey === key)
     return pill?.contentConfig ?? this.visiblePills()?.[0]?.contentConfig ?? null
   });
@@ -30,15 +40,7 @@ export class ContentStripWithPillsComponent {
   constructor() {
     setTimeout(() => {
       if (!this.activePillKey()) {
-        const defaultKey = this.defaultPillKey()
-        if (defaultKey) {
-          this.activePillKey.set(defaultKey)
-        } else {
-          const visible = this.visiblePills()
-          if (visible?.length) {
-            this.activePillKey.set(visible[0]?.pillKey ?? '')
-          }
-        }
+        this.activePillKey.set(this.resolvedDefaultPillKey())
       }
       this.showContent.set(true)
     })
@@ -51,12 +53,21 @@ export class ContentStripWithPillsComponent {
   }
 
   isPillActive(pillKey: string): boolean {
-    const active = this.activePillKey() || this.defaultPillKey()
+    const active = this.activePillKey() || this.resolvedDefaultPillKey()
     return active === pillKey
   }
 
+  /**
+   * The pill card is a fixed 254px, so its label and description lines are clipped with an
+   * ellipsis. Used to enable the tooltip only for the lines that are actually cut off, so hovering
+   * fully visible text stays quiet.
+   */
+  isTextTruncated(element: HTMLElement): boolean {
+    return element.scrollWidth > element.clientWidth
+  }
+
   getActivePill(): PillConfig | undefined {
-    const active = this.activePillKey() || this.defaultPillKey()
+    const active = this.activePillKey() || this.resolvedDefaultPillKey()
     return this.visiblePills()?.find(p => p?.pillKey === active)
   }
 }
