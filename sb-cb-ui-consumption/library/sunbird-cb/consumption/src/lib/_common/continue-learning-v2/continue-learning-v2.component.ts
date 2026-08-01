@@ -8,22 +8,24 @@ import { TranslateModule } from '@ngx-translate/core'
 import { InProgressCardV2Component } from './in-progress-card-v2/in-progress-card-v2.component'
 import { WeeklyClapsCardV2Component } from './weekly-claps-card-v2/weekly-claps-card-v2.component'
 import { buildWeeklyClapsData } from './weekly-claps-card-v2/weekly-claps-data.util'
+import { ContentApiService } from '../strips-v2/services/content-api.service'
 
-// In-progress enrollment payload — same as ContentStripWithTabsPills uses for the "In Progress" pill
-const IN_PROGRESS_PAYLOAD = {
-  request: {
-    retiredCoursesEnabled: false,
-    status: 'In-Progress',
-    limit: 1
-  },
-}
-
-// External enrollment payload for in-progress courses
-const IN_PROGRESS_EXTERNAL_PAYLOAD = {
-  request: {
-    status: 'In-Progress',
-  },
-}
+// -- Old direct-call payloads, kept for reference — see loadInProgressCourse() below --
+// // In-progress enrollment payload — same as ContentStripWithTabsPills uses for the "In Progress" pill
+// const IN_PROGRESS_PAYLOAD = {
+//   request: {
+//     retiredCoursesEnabled: false,
+//     status: 'In-Progress',
+//     limit: 1
+//   },
+// }
+//
+// // External enrollment payload for in-progress courses
+// const IN_PROGRESS_EXTERNAL_PAYLOAD = {
+//   request: {
+//     status: 'In-Progress',
+//   },
+// }
 
 @Component({
   selector: 'sb-uic-continue-learning-v2',
@@ -46,6 +48,7 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient)
   private readonly router = inject(Router)
   private readonly eventSvc = inject(EventService)
+  private readonly contentApiSvc = inject(ContentApiService)
   private readonly destroy$ = new Subject<void>()
 
   ngOnInit() {
@@ -53,7 +56,9 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
     this.loadWeeklyClaps()
   }
 
-  // Calls enrollment APIs directly — same as ContentStripWithTabsPillsComponent.fetchFromInternalEnrollmentList
+  // Routed through ContentApiService/API_REGISTRY — same call pattern as
+  // ContentStripsComponent.fetchContent(). apiDetailsKey is hardcoded for now;
+  // passing it in via config will follow later.
   loadInProgressCourse() {
     const userId = this.configSvc.userProfile?.userId
     if (!userId) {
@@ -61,35 +66,60 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
       return
     }
 
-    this.enrollSvc.fetchInternalEnrollmentData(userId, IN_PROGRESS_PAYLOAD)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((res: any) => {
-        let courses: any[] = []
-        if (res?.result?.courses?.length) {
-          courses = [...courses, ...res.result.courses]
+    const apiDetailsKey = 'continueLearningApi'
+    this.isInProgressLoading.set(true)
+    this.contentApiSvc.loadContent(apiDetailsKey).then(obs$ => {
+      obs$.pipe(takeUntil(this.destroy$)).subscribe({
+        next: (res: any) => {
+          const courses = res?.result?.courses ?? []
+          this.inProgressCourse = this.formatAndPickFirst(courses)
+          this.isInProgressLoading.set(false)
+        },
+        error: () => {
+          this.isInProgressLoading.set(false)
         }
-        this.enrollSvc.fetchExternalEnrollmentData(IN_PROGRESS_EXTERNAL_PAYLOAD)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe((extRes: any) => {
-            if (extRes?.result?.courses?.length) {
-              courses = [...courses, ...extRes.result.courses]
-            }
-            this.inProgressCourse = this.formatAndPickFirst(courses)
-            this.isInProgressLoading.set(false)
-          }, () => {
-            this.inProgressCourse = this.formatAndPickFirst(courses)
-            this.isInProgressLoading.set(false)
-          })
-      }, () => {
-        this.enrollSvc.fetchExternalEnrollmentData(IN_PROGRESS_EXTERNAL_PAYLOAD)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe((extRes: any) => {
-            const courses = extRes?.result?.courses ?? []
-            this.inProgressCourse = this.formatAndPickFirst(courses)
-            this.isInProgressLoading.set(false)
-          }, () => { this.isInProgressLoading.set(false) })
       })
+    })
   }
+
+  // -- Old direct-call implementation, kept for reference --
+  // // Calls enrollment APIs directly — same as ContentStripWithTabsPillsComponent.fetchFromInternalEnrollmentList
+  // loadInProgressCourseOld() {
+  //   const userId = this.configSvc.userProfile?.userId
+  //   if (!userId) {
+  //     this.isInProgressLoading.set(false)
+  //     return
+  //   }
+  //
+  //   this.enrollSvc.fetchInternalEnrollmentData(userId, IN_PROGRESS_PAYLOAD)
+  //     .pipe(takeUntil(this.destroy$))
+  //     .subscribe((res: any) => {
+  //       let courses: any[] = []
+  //       if (res?.result?.courses?.length) {
+  //         courses = [...courses, ...res.result.courses]
+  //       }
+  //       this.enrollSvc.fetchExternalEnrollmentData(IN_PROGRESS_EXTERNAL_PAYLOAD)
+  //         .pipe(takeUntil(this.destroy$))
+  //         .subscribe((extRes: any) => {
+  //           if (extRes?.result?.courses?.length) {
+  //             courses = [...courses, ...extRes.result.courses]
+  //           }
+  //           this.inProgressCourse = this.formatAndPickFirst(courses)
+  //           this.isInProgressLoading.set(false)
+  //         }, () => {
+  //           this.inProgressCourse = this.formatAndPickFirst(courses)
+  //           this.isInProgressLoading.set(false)
+  //         })
+  //     }, () => {
+  //       this.enrollSvc.fetchExternalEnrollmentData(IN_PROGRESS_EXTERNAL_PAYLOAD)
+  //         .pipe(takeUntil(this.destroy$))
+  //         .subscribe((extRes: any) => {
+  //           const courses = extRes?.result?.courses ?? []
+  //           this.inProgressCourse = this.formatAndPickFirst(courses)
+  //           this.isInProgressLoading.set(false)
+  //         }, () => { this.isInProgressLoading.set(false) })
+  //     })
+  // }
 
   private formatAndPickFirst(courses: any[]): any {
     if (!courses?.length) { return null }

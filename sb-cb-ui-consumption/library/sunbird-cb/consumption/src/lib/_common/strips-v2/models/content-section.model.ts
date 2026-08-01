@@ -101,16 +101,20 @@ export interface ChainedApiConfig {
   queryParams?: Record<string, string>
   headers?: Record<string, string>
   addUserId?: boolean
+  // 'filterEnrolled' (default): filter the first response's source list down to items the
+  // second call reports as enrolled. 'mergeIndependent': always call the second endpoint
+  // (independent of the first response) and concatenate both lists.
+  mode?: 'filterEnrolled' | 'mergeIndependent'
   // Dot-notation path in first response to extract the source list (e.g., 'result.content')
   sourceListPath: string
-  // Field in each source item to collect as identifiers (e.g., 'identifier')
-  identifierField: string
+  // Field in each source item to collect as identifiers (e.g., 'identifier') — filterEnrolled mode only
+  identifierField?: string
   // Builds the request body for the second API using collected identifiers
   buildBody: (ids: string[]) => Record<string, unknown>
-  // Dot-notation path in second response to get the enrolled list (e.g., 'result.courses')
+  // Dot-notation path in second response to get the enrolled/second list (e.g., 'result.courses')
   enrolledListPath: string
-  // Field in each enrolled item to match against source identifiers (e.g., 'courseId')
-  enrolledMatchField: string
+  // Field in each enrolled item to match against source identifiers (e.g., 'courseId') — filterEnrolled mode only
+  enrolledMatchField?: string
 }
 
 export interface ApiRegistryEntry {
