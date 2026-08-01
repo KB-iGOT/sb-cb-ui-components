@@ -90,10 +90,6 @@
   }
 }
 
-// Desktop overlay mode (non-home pages): the drawer floats above the page rather than pushing it.
-// The container keeps the collapsed rail width whatever the open state, so expanding the drawer
-// never changes the space reserved in the flex row and the content behind it stays put.
-// The <aside> is already position: fixed, so it animates its width over the content.
 @media (min-width: 1024.1px) {
   .sidebar-container.overlay-mode {
 
@@ -101,6 +97,19 @@
     &.sidebar-closed {
       width: 72px;
     }
+  }
+
+  .sidebarOverlay {
+    animation: overlaySlideIn 3000ms;
+  }
+}
+
+@keyframes overlaySlideIn {
+  from {
+    left: 72px;
+  }
+  to {
+    left: 329px;
   }
 }
 
@@ -128,7 +137,7 @@
     transform: translateX(0);
   }
 
-  .sidebar-overlay {
+  .sidebarOverlay {
     background-color: rgba(0, 0, 0, 0.45);
     left: 320px !important;
   }
@@ -209,12 +218,14 @@
   }
 }
 
-.sidebar-overlay {
-  animation: fadeIn 0.3s ease-in-out;
-  left: 329px;
-}
+// @media (max-width: 599.98px) {
+  .sidebarOverlay {
+    animation: overlayFadeIn 300ms cubic-bezier(0.4, 0.0, 0.2, 1) both;
+    left: 329px;
+  }
+// }
 
-@keyframes fadeIn {
+@keyframes overlayFadeIn {
   from {
     opacity: 0;
   }
