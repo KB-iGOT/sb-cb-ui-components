@@ -21,8 +21,17 @@ export class ContentStripWithPillsComponent {
 
   visiblePills = computed(() => filterVisiblePills(this.pills()));
 
+  resolvedDefaultPillKey = computed<string>(() => {
+    const key = this.defaultPillKey()
+    const visible = this.visiblePills()
+    if (key && visible?.some(p => p?.pillKey === key)) {
+      return key
+    }
+    return visible?.[0]?.pillKey ?? ''
+  });
+
   activeContentConfig = computed<ContentConfig | null>(() => {
-    const key = this.activePillKey() || this.defaultPillKey()
+    const key = this.activePillKey() || this.resolvedDefaultPillKey()
     const pill = this.visiblePills()?.find(p => p?.pillKey === key)
     return pill?.contentConfig ?? this.visiblePills()?.[0]?.contentConfig ?? null
   });
@@ -30,15 +39,7 @@ export class ContentStripWithPillsComponent {
   constructor() {
     setTimeout(() => {
       if (!this.activePillKey()) {
-        const defaultKey = this.defaultPillKey()
-        if (defaultKey) {
-          this.activePillKey.set(defaultKey)
-        } else {
-          const visible = this.visiblePills()
-          if (visible?.length) {
-            this.activePillKey.set(visible[0]?.pillKey ?? '')
-          }
-        }
+        this.activePillKey.set(this.resolvedDefaultPillKey())
       }
       this.showContent.set(true)
     })
@@ -51,12 +52,12 @@ export class ContentStripWithPillsComponent {
   }
 
   isPillActive(pillKey: string): boolean {
-    const active = this.activePillKey() || this.defaultPillKey()
+    const active = this.activePillKey() || this.resolvedDefaultPillKey()
     return active === pillKey
   }
 
   getActivePill(): PillConfig | undefined {
-    const active = this.activePillKey() || this.defaultPillKey()
+    const active = this.activePillKey() || this.resolvedDefaultPillKey()
     return this.visiblePills()?.find(p => p?.pillKey === active)
   }
 }
