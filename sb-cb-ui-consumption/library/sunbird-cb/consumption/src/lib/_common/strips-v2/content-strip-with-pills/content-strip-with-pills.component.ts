@@ -57,15 +57,6 @@ export class ContentStripWithPillsComponent {
     return active === pillKey
   }
 
-  /**
-   * The pill card is a fixed 254px, so its label and description lines are clipped with an
-   * ellipsis. Used to enable the tooltip only for the lines that are actually cut off, so hovering
-   * fully visible text stays quiet.
-   */
-  isTextTruncated(element: HTMLElement): boolean {
-    return element.scrollWidth > element.clientWidth
-  }
-
   getActivePill(): PillConfig | undefined {
     const active = this.activePillKey() || this.resolvedDefaultPillKey()
     return this.visiblePills()?.find(p => p?.pillKey === active)
