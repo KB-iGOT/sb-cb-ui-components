@@ -1,13 +1,14 @@
 import { Component, input, signal, ChangeDetectionStrategy, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { PillConfig, ContentConfig, ContentSectionConfig } from '../models/content-section.model'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { filterVisiblePills } from '../utils/visibility.util'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
 
 @Component({
   selector: 'sb-uic-content-strip-with-pills',
   standalone: true,
-  imports: [CommonModule, ContentStripsComponent],
+  imports: [CommonModule, MatTooltipModule, ContentStripsComponent],
   templateUrl: './content-strip-with-pills.component.html',
   styleUrls: ['./content-strip-with-pills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,25 +23,25 @@ export class ContentStripWithPillsComponent {
 
   visiblePills = computed(() => filterVisiblePills(this.pills()));
 
+  resolvedDefaultPillKey = computed<string>(() => {
+    const key = this.defaultPillKey()
+    const visible = this.visiblePills()
+    if (key && visible?.some(p => p?.pillKey === key)) {
+      return key
+    }
+    return visible?.[0]?.pillKey ?? ''
+  });
+
   activeContentConfig = computed<ContentConfig | null>(() => {
-    const key = this.activePillKey() || this.defaultPillKey()
-    const pill = this.findPill(key)
+    const key = this.activePillKey() || this.resolvedDefaultPillKey()
+    const pill = this.visiblePills()?.find(p => p?.pillKey === key)
     return pill?.contentConfig ?? this.visiblePills()?.[0]?.contentConfig ?? null
   });
 
   constructor() {
     setTimeout(() => {
       if (!this.activePillKey()) {
-        const defaultKey = this.defaultPillKey()
-        if (defaultKey) {
-          const pill = this.findPill(defaultKey)
-          this.activePillKey.set(pill?.pillKey ?? defaultKey)
-        } else {
-          const visible = this.visiblePills()
-          if (visible?.length) {
-            this.activePillKey.set(visible[0]?.pillKey ?? '')
-          }
-        }
+        this.activePillKey.set(this.resolvedDefaultPillKey())
       }
       this.showContent.set(true)
     })
@@ -54,20 +55,12 @@ export class ContentStripWithPillsComponent {
   }
 
   isPillActive(pillKey: string): boolean {
-    const active = this.activePillKey() || this.defaultPillKey()
-    const pill = this.visiblePills()?.find(p => p?.pillKey === pillKey)
-    return active === pillKey || (!!pill && pill.pillLabel === active)
+    const active = this.activePillKey() || this.resolvedDefaultPillKey()
+    return active === pillKey
   }
 
   getActivePill(): PillConfig | undefined {
-    const active = this.activePillKey() || this.defaultPillKey()
-    return this.findPill(active)
-  }
-
-  private findPill(keyOrLabel: string): PillConfig | undefined {
-    if (!keyOrLabel) {
-      return undefined
-    }
-    return this.visiblePills()?.find(p => p?.pillKey === keyOrLabel || p?.pillLabel === keyOrLabel)
+    const active = this.activePillKey() || this.resolvedDefaultPillKey()
+    return this.visiblePills()?.find(p => p?.pillKey === active)
   }
 }

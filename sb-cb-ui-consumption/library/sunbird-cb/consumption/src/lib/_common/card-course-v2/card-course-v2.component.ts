@@ -139,6 +139,18 @@ export class CardCourseV2Component {
     ])
   })
 
+  readonly difficultyLevel = computed(() => {
+    const c = this.content() as any
+    return this.firstString([
+      c?.difficultyLevel,
+      c?.complexityLevel,
+      c?.knowledgeLevel,
+      c?.metadata?.difficultyLevel,
+      c?.metadata?.complexityLevel,
+      c?.metadata?.knowledgeLevel,
+    ])
+  })
+
   readonly isPopular = computed(() => (this.content()?.additionalTags ?? []).includes('Most popular'))
   readonly isMostEnrolled = computed(() => (this.content()?.additionalTags ?? []).includes('mostEnrolled'))
   readonly isMostTrending = computed(() => (this.content()?.additionalTags ?? []).includes('mostTrending'))

@@ -120,7 +120,7 @@
 
   <!-- Backdrop for tablet + mobile overlay modes only; never shown on desktop -->
   @if (isOpen() && isOverlayMode()) {
-  <div class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-[1040]" (click)="toggleSidebar()" role="button"
+  <div class="sidebarOverlay fixed inset-0 bg-black bg-opacity-50 z-[1040]" (click)="toggleSidebar()" role="button"
     tabindex="0" (keydown.enter)="toggleSidebar()" (keydown.space)="toggleSidebar()" aria-label="Close sidebar overlay">
   </div>
   }

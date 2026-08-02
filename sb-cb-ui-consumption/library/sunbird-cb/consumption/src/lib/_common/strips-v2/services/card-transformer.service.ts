@@ -44,7 +44,7 @@ export class CardTransformerService {
       resourceType: this.resolveResourceType(item),
       languageMapV1: this.resolveLanguageMap(item),
       language: this.resolveLanguage(item),
-      difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
+      difficultyLevel: this.resolveDifficultyLevel(item),
       metadata: item ?? {}
     }))
   }
@@ -78,7 +78,7 @@ export class CardTransformerService {
             resourceType: this.resolveResourceType(item),
             languageMapV1: this.resolveLanguageMap(item),
             language: this.resolveLanguage(item),
-            difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
+            difficultyLevel: this.resolveDifficultyLevel(item),
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
             courseCategory: item['courseCategory'] as string,
@@ -113,7 +113,7 @@ export class CardTransformerService {
             resourceType: this.resolveResourceType(item),
             languageMapV1: this.resolveLanguageMap(item),
             language: this.resolveLanguage(item),
-            difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
+            difficultyLevel: this.resolveDifficultyLevel(item),
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
             courseCategory: item['courseCategory'],
@@ -140,7 +140,7 @@ export class CardTransformerService {
             resourceType: this.resolveResourceType(item),
             languageMapV1: this.resolveLanguageMap(item),
             language: this.resolveLanguage(item),
-            difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
+            difficultyLevel: this.resolveDifficultyLevel(item),
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
             courseCategory: item['courseCategory'],
@@ -167,7 +167,7 @@ export class CardTransformerService {
             resourceType: this.resolveResourceType(item),
             languageMapV1: this.resolveLanguageMap(item),
             language: this.resolveLanguage(item),
-            difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
+            difficultyLevel: this.resolveDifficultyLevel(item),
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
             courseCategory: item['courseCategory'],
@@ -194,7 +194,7 @@ export class CardTransformerService {
             resourceType: this.resolveResourceType(item),
             languageMapV1: this.resolveLanguageMap(item),
             language: this.resolveLanguage(item),
-            difficultyLevel: (item?.['complexityLevel'] as string) ?? '',
+            difficultyLevel: this.resolveDifficultyLevel(item),
             planDuration: item['planDuration'],
             contentStatus: item['contentStatus'],
             courseCategory: item['courseCategory'],
@@ -225,7 +225,7 @@ export class CardTransformerService {
       resourceType: this.resolveResourceType(item),
       languageMapV1: this.resolveLanguageMap(item),
       language: this.resolveLanguage(item),
-      difficultyLevel: (item?.['difficultyLevel'] as string) ?? '',
+      difficultyLevel: this.resolveDifficultyLevel(item),
       planDuration: (item?.['planDuration'] as string) ?? '',
       contentStatus: (item?.['contentStatus'] as number) ?? 0,
       courseCategory: item['courseCategory'] as string,
@@ -251,13 +251,28 @@ export class CardTransformerService {
       resourceType: this.resolveResourceType(item),
       languageMapV1: this.resolveLanguageMap(item),
       language: this.resolveLanguage(item),
-      difficultyLevel: '',
+      difficultyLevel: this.resolveDifficultyLevel(item),
       planDuration: (item?.['planDuration'] as string) ?? '',
       contentStatus: (item?.['contentStatus'] as number) ?? 0,
       courseCategory: item['courseCategory'] as string,
       primaryCategory: item['primaryCategory'] as string,
       metadata: item ?? {}
     }))
+  }
+
+  /**
+   * Level shown on the card chip. Content publishes it as `difficultyLevel`; `complexityLevel` is
+   * the authoring-side name and `knowledgeLevel` the legacy one, so accept whichever is present.
+   * Reading only `complexityLevel` left the chip blank on every cbplan / search-backed section.
+   */
+  private resolveDifficultyLevel(item: Record<string, unknown>): string {
+    const level = [
+      item?.['difficultyLevel'],
+      item?.['complexityLevel'],
+      item?.['knowledgeLevel'],
+    ].find((value): value is string => typeof value === 'string' && !!value.trim())
+
+    return level ?? ''
   }
 
   private resolveRating(item: Record<string, unknown>): number {

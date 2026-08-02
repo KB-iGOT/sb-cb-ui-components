@@ -139,11 +139,11 @@
         <img class="cc-chip-icon cc-chip-icon--ca" src="assets/icons/content/ca.svg" alt="" aria-hidden="true" />CA
       </span>
       }
-      @if (c.difficultyLevel && isCardElementEnabled('difficultyLevel')) {
+      @if (difficultyLevel() && isCardElementEnabled('difficultyLevel')) {
       <span class="cc-card__chip cc-card__chip--level"
-        [ngClass]="'cc-card__chip--level-' + (c.difficultyLevel | lowercase)">
+        [ngClass]="'cc-card__chip--level-' + (difficultyLevel() | lowercase)">
         <img class="cc-chip-icon" src="assets/icons/content/level.svg" alt="" aria-hidden="true" />
-        {{ c.difficultyLevel }}
+        {{ difficultyLevel() }}
       </span>
       }
     </div>

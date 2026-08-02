@@ -177,6 +177,32 @@ export const API_REGISTRY: ApiRegistryConfig = {
       enrolledListPath: 'result.courses',
       enrolledMatchField: 'courseId'
     }
+  },
+  // Mirrors ContinueLearningV2Component.loadInProgressCourse(): internal enrollment list
+  // (In-Progress, limit 1), merged with the external (CIOS) In-Progress enrollment list —
+  // the external call always fires and results are concatenated, not filtered.
+  continueLearningApi: {
+    endpoint: '/apis/proxies/v8/learner/course/v5/user/enrollment/list',
+    method: ApiMethod.Post,
+    body: {
+      request: {
+        retiredCoursesEnabled: false,
+        status: 'In-Progress',
+        limit: 1
+      }
+    },
+    chainedApi: {
+      endpoint: '/apis/proxies/v8/cios-enroll/v1/courselist/byuserid',
+      method: ApiMethod.Post,
+      mode: 'mergeIndependent',
+      sourceListPath: 'result.courses',
+      buildBody: () => ({
+        request: {
+          status: 'In-Progress'
+        }
+      }),
+      enrolledListPath: 'result.courses'
+    }
   }
 
 }

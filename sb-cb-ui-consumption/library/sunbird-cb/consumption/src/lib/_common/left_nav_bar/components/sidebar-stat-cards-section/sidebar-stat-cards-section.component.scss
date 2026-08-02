@@ -38,6 +38,15 @@
     margin: 0;
     color: var(--text-bandw-black-fine-print);
   }
+
+  // Reverse default Material arrow direction: down = expanded, up = collapsed
+  ::ng-deep .mat-expansion-indicator {
+    transform: rotate(180deg);
+  }
+
+  ::ng-deep .mat-expansion-panel-header.mat-expanded .mat-expansion-indicator {
+    transform: rotate(0deg);
+  }
 }
 
 .section-header {
@@ -127,8 +136,13 @@
 
 // Responsive adjustments
 @media (max-width: 768px) {
+  // Horizontal only. The card carries no vertical padding above 768px — the rhythm comes from
+  // the `space-y-3` gap on .stat-cards-content — so a full `padding` shorthand here added 14px
+  // top and bottom to every card and made the section grow taller below 769px instead of
+  // matching the desktop spacing.
   .stat-card {
-    padding: 0.875rem;
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
   }
 
   .stat-icon {
@@ -142,9 +156,8 @@
     }
   }
 
-  .stat-value {
-    font-size: 1rem;
-  }
+  // .stat-value keeps its base 14px here: bumping it to 1rem made the value text larger below
+  // 769px than on desktop, which is the same mismatch as the padding above.
 }
 
 // Accessibility
