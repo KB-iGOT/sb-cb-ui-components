@@ -33,7 +33,9 @@ export class InProgressCardV2Component implements OnChanges {
       this.progressPercent = Math.round(this.course.completionPercentage || this.course.progress || 0)
       this.courseName = content.name || content.courseName || ''
       this.courseOrg = (content.organisation && content.organisation[0]) || ''
-      this.courseId = content.identifier || this.course.courseId || ''
+      // External (CIOS) enrolments carry contentId ('ext_...') and no identifier, so identifier
+      // alone leaves courseId empty and Resume silently no-ops
+      this.courseId = content.identifier || content.contentId || this.course.courseId || ''
       this.isRetired = (content.status || '').toLowerCase() === 'retired'
     }
   }

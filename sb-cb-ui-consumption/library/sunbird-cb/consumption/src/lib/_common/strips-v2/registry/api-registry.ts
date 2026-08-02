@@ -182,7 +182,7 @@ export const API_REGISTRY: ApiRegistryConfig = {
   // (In-Progress, limit 1), merged with the external (CIOS) In-Progress enrollment list —
   // the external call always fires and results are concatenated, not filtered.
   continueLearningApi: {
-    endpoint: '/apis/proxies/v8/learner/course/v4/user/enrollment/list',
+    endpoint: '/apis/proxies/v8/learner/course/v5/user/enrollment/list',
     method: ApiMethod.Post,
     body: {
       request: {
