@@ -14,7 +14,7 @@
     }
     @case ('pills') {
     @if (section.pills?.length) {
-    <sb-uic-content-strip-with-pills [pills]="section.pills!" [defaultPillKey]="section.defaultPillKey ?? ''" />
+    <sb-uic-content-strip-with-pills [pills]="section.pills!" [defaultPillKey]="section.defaultPillKey ?? ''" [section]="section"/>
     }
     }
     @case ('cards') {

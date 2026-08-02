@@ -1,7 +1,7 @@
 import { Component, input, signal, ChangeDetectionStrategy, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { PillConfig, ContentConfig, ContentSectionConfig } from '../models/content-section.model'
 import { MatTooltipModule } from '@angular/material/tooltip'
-import { PillConfig, ContentConfig } from '../models/content-section.model'
 import { filterVisiblePills } from '../utils/visibility.util'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
 
@@ -16,6 +16,7 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
 export class ContentStripWithPillsComponent {
   pills = input.required<PillConfig[]>();
   defaultPillKey = input<string>('');
+  section = input<ContentSectionConfig>();
 
   activePillKey = signal<string>('');
   showContent = signal<boolean>(false);
@@ -44,6 +45,7 @@ export class ContentStripWithPillsComponent {
       }
       this.showContent.set(true)
     })
+
   }
 
   selectPill(pillKey: string): void {

@@ -1,0 +1,33 @@
+<nav class="breadcrumb" aria-label="breadcrumb">
+  <ol class="breadcrumb-list">
+    @for (item of items(); track $index) {
+      <li class="breadcrumb-item?" [class.is-active]="isLast($index)">
+        @if (!isLast($index)) {
+          @if (item?.url) {
+            <a class="breadcrumb-link" [routerLink]="[item?.url]">
+              @if (item?.icon) {
+                <mat-icon class="breadcrumb-icon" [attr.aria-label]="item?.title">{{ item?.icon }}</mat-icon>
+              }
+              <span>{{ item?.title }}</span>
+            </a>
+          } @else {
+            <span class="breadcrumb-link">
+              @if (item?.icon) {
+                <mat-icon class="breadcrumb-icon" [attr.aria-label]="item?.title">{{ item?.icon }}</mat-icon>
+              }
+              <span>{{ item?.title }}</span>
+            </span>
+          }
+          <mat-icon class="breadcrumb-separator" aria-hidden="true">chevron_right</mat-icon>
+        } @else {
+          <span class="breadcrumb-current" aria-current="page">
+            @if (item?.icon) {
+              <mat-icon class="breadcrumb-icon" [attr.aria-label]="item?.title">{{ item?.icon }}</mat-icon>
+            }
+            <span>{{ item?.title }}</span>
+          </span>
+        }
+      </li>
+    }
+  </ol>
+</nav>

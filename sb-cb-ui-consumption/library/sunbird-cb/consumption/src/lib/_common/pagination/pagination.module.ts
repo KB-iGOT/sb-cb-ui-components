@@ -5,8 +5,6 @@ import { MatIconModule } from "@angular/material/icon"
 import { MatFormFieldModule } from "@angular/material/form-field"
 import { MatSelectModule } from "@angular/material/select"
 
-
-
 @NgModule({
   declarations: [PaginationComponent],
   imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatIconModule],

@@ -74,7 +74,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: 'Noto Sans';
-
   }
 
   &__descriptions {
@@ -122,4 +121,12 @@
     border-right: 8px solid transparent;
     border-top: 8px solid var(--color-secondary-500);
   }
+}
+
+.pill-active__label__sp {
+  @extend .pill-inactive;
+  background-color: var(--color-primary-500);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
 }

@@ -1,11 +1,13 @@
 import { Component, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { forkJoin, of } from 'rxjs'
+import { catchError } from 'rxjs/operators'
 import { ContentConfig, CardType } from '../models/content-section.model'
 import { CardViewModel } from '../models/card.model'
 import { ContentApiService } from '../services/content-api.service'
 import { CardTransformerService } from '../services/card-transformer.service'
 import { CarouselComponent } from '../../carousel/carousel.component'
-import { CardCourseV2Component } from '../../../../public-api'
+import { CardCourseV2Component, ContentDictionaryService } from '../../../../public-api'
 import { Router } from '@angular/router'
 
 @Component({
@@ -29,6 +31,7 @@ export class ContentStripsComponent implements OnInit {
 
   private apiService = inject(ContentApiService);
   private cardTransformer = inject(CardTransformerService);
+  private dictionarySvc = inject(ContentDictionaryService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
 
@@ -65,6 +68,10 @@ export class ContentStripsComponent implements OnInit {
 
   async fetchContent(): Promise<void> {
     const config = this.contentConfig()
+    if (config?.contentIds?.length) {
+      this.loadFromDictionary(config)
+      return
+    }
     if (!config?.apiDetailsKey) {
       this.loading.set(false)
       return
@@ -89,6 +96,33 @@ export class ContentStripsComponent implements OnInit {
             this.apiService.reportEmptySection(this.sectionKey())
           }
         }
+      })
+  }
+
+  private loadFromDictionary(config: ContentConfig): void {
+    this.loading.set(true)
+    const ids = (config.contentIds ?? []).filter(Boolean)
+    if (!ids.length) {
+      this.cards.set([])
+      this.loading.set(false)
+      if (this.sectionKey()) {
+        this.apiService.reportEmptySection(this.sectionKey())
+      }
+      return
+    }
+    forkJoin(ids.map(id => this.dictionarySvc.getContent(id)))
+      .pipe(catchError(() => of([])))
+      .subscribe({
+        next: (contents) => {
+          const enriched = (contents ?? []).filter(Boolean)
+          const transformed = this.cardTransformer.transformCards(enriched, config.cardType)
+          const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
+          this.cards.set(limited)
+          this.loading.set(false)
+          if (!limited.length && this.sectionKey()) {
+            this.apiService.reportEmptySection(this.sectionKey())
+          }
+        },
       })
   }
 

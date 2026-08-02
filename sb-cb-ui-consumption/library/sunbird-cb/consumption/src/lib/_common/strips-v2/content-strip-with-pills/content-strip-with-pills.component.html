@@ -3,7 +3,9 @@
   @if (visiblePills()?.length) {
   <div class="pills-container scrollbar-hide">
     @for (pill of visiblePills(); track pill.pillKey) {
-    @if (isPillActive(pill.pillKey)) {
+     @if (isPillActive(pill.pillKey) && section()?.pillEnlarge === false) {
+        <div class="pill-active__label__sp">{{ pill.pillLabel }}</div>
+    } @else if (isPillActive(pill.pillKey)) {
     <!-- Active Pill - Expanded Card -->
     <div class="pill-active" (click)="selectPill(pill.pillKey)">
 
@@ -48,6 +50,6 @@
 
   <!-- Active Pill Content -->
   @if (activeContentConfig() && showContent()) {
-  <sb-uic-content-strips [contentConfig]="activeContentConfig()!" />
+    <sb-uic-content-strips [contentConfig]="activeContentConfig()!" />
   }
 </div>

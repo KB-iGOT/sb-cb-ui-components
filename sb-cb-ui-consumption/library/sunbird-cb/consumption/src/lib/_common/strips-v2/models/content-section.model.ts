@@ -26,7 +26,8 @@ export enum ApiMethod {
 }
 
 export interface ContentConfig {
-  apiDetailsKey: string
+  apiDetailsKey?: string
+  contentIds?: string[]
   showNoData?: boolean
   noDataMessage?: string
   cardType: CardType
@@ -86,6 +87,7 @@ export interface ContentSectionConfig {
   pills?: PillConfig[]
   contentConfig?: ContentConfig
   spotlightConfig?: SpotlightConfig[]
+  pillEnlarged?: boolean
 }
 
 export interface DynamicTab {
