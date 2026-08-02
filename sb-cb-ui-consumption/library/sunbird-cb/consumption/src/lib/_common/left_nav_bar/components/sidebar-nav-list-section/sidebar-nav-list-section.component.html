@@ -30,11 +30,12 @@
     <li class="nav-item" role="none">
       <a [routerLink]="item?.navUrl ? [item.navUrl] : null" [queryParams]="item?.queryParams || null"
         routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-        [class]="isOpen ? 'nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 group'"
-        [class.active]="isActiveRoute(item?.navUrl) || item?.code === activeItemCode" matRipple
+        [class]="isOpen ? 'nav-link flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 group'"
+        [class.gap-3]="showContent"
+        [class.active]="isActiveRoute(item) || item?.code === activeItemCode" matRipple
         [matRippleColor]="'rgba(59, 130, 246, 0.1)'" (click)="onItemClick(item)" role="menuitem"
         [attr.aria-label]="item?.label"
-        [attr.aria-current]="(isActiveRoute(item?.navUrl) || item?.code === activeItemCode) ? 'page' : null"
+        [attr.aria-current]="(isActiveRoute(item) || item?.code === activeItemCode) ? 'page' : null"
         [attr.title]="item?.label">
         <!-- Icon (Material Icon or Custom Image) -->
         <span class="nav-icon flex-shrink-0 w-5 h-5 flex items-center justify-center" aria-hidden="true">

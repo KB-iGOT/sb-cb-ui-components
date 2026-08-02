@@ -99,9 +99,6 @@
     }
   }
 
-  .sidebarOverlay {
-    animation: overlaySlideIn 3000ms;
-  }
 }
 
 @keyframes overlaySlideIn {
@@ -218,21 +215,20 @@
   }
 }
 
-// @media (max-width: 599.98px) {
-  .sidebarOverlay {
-    animation: overlayFadeIn 300ms cubic-bezier(0.4, 0.0, 0.2, 1) both;
-    left: 329px;
-  }
-// }
-
-@keyframes overlayFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.sidebarOverlay {
+  // animation: overlayFadeIn 300ms cubic-bezier(0.4, 0.0, 0.2, 1) both;
+  left: 329px;
+  animation: overlaySlideIn 300ms;
 }
+
+// @keyframes overlayFadeIn {
+//   from {
+//     opacity: 0;
+//   }
+//   to {
+//     opacity: 1;
+//   }
+// }
 
 // Responsive adjustments
 @media (max-width: 768px) {
