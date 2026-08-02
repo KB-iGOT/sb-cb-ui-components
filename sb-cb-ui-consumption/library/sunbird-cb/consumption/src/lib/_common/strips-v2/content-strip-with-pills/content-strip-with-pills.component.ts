@@ -1,6 +1,6 @@
 import { Component, input, signal, ChangeDetectionStrategy, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { PillConfig, ContentConfig } from '../models/content-section.model'
+import { PillConfig, ContentConfig, ContentSectionConfig } from '../models/content-section.model'
 import { filterVisiblePills } from '../utils/visibility.util'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
 
@@ -15,6 +15,7 @@ import { ContentStripsComponent } from '../content-strips/content-strips.compone
 export class ContentStripWithPillsComponent {
   pills = input.required<PillConfig[]>();
   defaultPillKey = input<string>('');
+  section = input<ContentSectionConfig>();
 
   activePillKey = signal<string>('');
   showContent = signal<boolean>(false);
@@ -23,7 +24,7 @@ export class ContentStripWithPillsComponent {
 
   activeContentConfig = computed<ContentConfig | null>(() => {
     const key = this.activePillKey() || this.defaultPillKey()
-    const pill = this.visiblePills()?.find(p => p?.pillKey === key)
+    const pill = this.findPill(key)
     return pill?.contentConfig ?? this.visiblePills()?.[0]?.contentConfig ?? null
   });
 
@@ -32,7 +33,8 @@ export class ContentStripWithPillsComponent {
       if (!this.activePillKey()) {
         const defaultKey = this.defaultPillKey()
         if (defaultKey) {
-          this.activePillKey.set(defaultKey)
+          const pill = this.findPill(defaultKey)
+          this.activePillKey.set(pill?.pillKey ?? defaultKey)
         } else {
           const visible = this.visiblePills()
           if (visible?.length) {
@@ -42,6 +44,7 @@ export class ContentStripWithPillsComponent {
       }
       this.showContent.set(true)
     })
+
   }
 
   selectPill(pillKey: string): void {
@@ -52,11 +55,19 @@ export class ContentStripWithPillsComponent {
 
   isPillActive(pillKey: string): boolean {
     const active = this.activePillKey() || this.defaultPillKey()
-    return active === pillKey
+    const pill = this.visiblePills()?.find(p => p?.pillKey === pillKey)
+    return active === pillKey || (!!pill && pill.pillLabel === active)
   }
 
   getActivePill(): PillConfig | undefined {
     const active = this.activePillKey() || this.defaultPillKey()
-    return this.visiblePills()?.find(p => p?.pillKey === active)
+    return this.findPill(active)
+  }
+
+  private findPill(keyOrLabel: string): PillConfig | undefined {
+    if (!keyOrLabel) {
+      return undefined
+    }
+    return this.visiblePills()?.find(p => p?.pillKey === keyOrLabel || p?.pillLabel === keyOrLabel)
   }
 }

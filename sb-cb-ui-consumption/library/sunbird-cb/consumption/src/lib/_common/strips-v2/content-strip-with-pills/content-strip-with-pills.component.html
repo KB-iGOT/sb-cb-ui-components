@@ -1,20 +1,21 @@
 <div class="w-full">
   <!-- Pills Navigation -->
   @if (visiblePills()?.length) {
-  <div class="pills-container scrollbar-hide">
-    @for (pill of visiblePills(); track pill.pillKey) {
-    @if (isPillActive(pill.pillKey)) {
-    <!-- Active Pill - Expanded Card -->
-    <div class="pill-active" (click)="selectPill(pill.pillKey)">
-
-      <!-- Card Content -->
-      <div class="pill-active__content">
-        <!-- Text Content -->
-        <div class="pill-active__text">
-          <!-- Label -->
-          <div class="pill-active__label">
-            {{ pill.pillLabel }}
-          </div>
+    <div class="pills-container scrollbar-hide">
+      @for (pill of visiblePills(); track pill.pillKey) {
+        @if (isPillActive(pill.pillKey) && section()?.pillEnlarge === false) {
+          <div class="pill-active__label__sp">{{ pill.pillLabel }}</div>
+        } @else if (isPillActive(pill.pillKey)) {
+          <!-- Active Pill - Expanded Card -->
+          <div class="pill-active" (click)="selectPill(pill.pillKey)">
+            <!-- Card Content -->
+            <div class="pill-active__content">
+              <!-- Text Content -->
+              <div class="pill-active__text">
+                <!-- Label -->
+                <div class="pill-active__label">
+                  {{ pill.pillLabel }}
+                </div>
 
           <!-- Descriptions -->
           @if (pill.pillDescription && pill.pillDescription.length > 0) {
@@ -47,6 +48,6 @@
 
   <!-- Active Pill Content -->
   @if (activeContentConfig() && showContent()) {
-  <sb-uic-content-strips [contentConfig]="activeContentConfig()!" />
+    <sb-uic-content-strips [contentConfig]="activeContentConfig()!" />
   }
 </div>

@@ -84,6 +84,7 @@ export * from './lib/_common/microsites/mdo-channels/mdo-channel-v3/mdo-channel-
 export * from './lib/_common/microsites/providers/providers-v2/providers-v2.component'
 export * from './lib/_common/key-highlights/key-highlights.module'
 export * from './lib/_common/events/events.module'
+export * from './lib/_common/breadcrumb/breadcrumb.component'
 
 export * from './lib/_common/strips/content-strip-facet-filter/content-strip-facet-filter.component'
 export * from './lib/_common/microsites/national-learning-week/karmayogi-saptah/karmayogi-saptah.component'
