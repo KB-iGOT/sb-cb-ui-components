@@ -36,7 +36,7 @@
   <sb-uic-welcome-greeting-v2></sb-uic-welcome-greeting-v2>
   }
   @case (DisplayType.LearningProgress) {
-  <sb-uic-continue-learning-v2></sb-uic-continue-learning-v2>
+  <sb-uic-continue-learning-v2 [config]="section.learningProgressConfig"></sb-uic-continue-learning-v2>
   }
   @case (DisplayType.Spotlight) {
   @if (section.spotlightConfig && section.spotlightConfig.length) {

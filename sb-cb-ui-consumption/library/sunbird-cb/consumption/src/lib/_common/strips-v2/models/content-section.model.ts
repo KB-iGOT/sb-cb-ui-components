@@ -48,6 +48,16 @@ export interface SpotlightConfig {
   redirectionUrl: string
 }
 
+export interface ToggleableElement {
+  enabled: boolean
+}
+
+export interface LearningProgressConfig {
+  viewAll?: ToggleableElement
+  inProgress?: ToggleableElement
+  weeklyClaps?: ToggleableElement
+}
+
 export interface PillConfig {
   pillKey: string
   pillLabel: string
@@ -86,6 +96,7 @@ export interface ContentSectionConfig {
   pills?: PillConfig[]
   contentConfig?: ContentConfig
   spotlightConfig?: SpotlightConfig[]
+  learningProgressConfig?: LearningProgressConfig
 }
 
 export interface DynamicTab {
