@@ -187,6 +187,24 @@
   }
 }
 
+@media (min-width: 1420px) {
+  .ws-spotlight__grid--over-4 .ws-spotlight__card {
+    /* 4 cards + 3 gaps of 16px */
+    flex: 0 0 calc((100% - 48px) / 4);
+    max-width: calc((100% - 48px) / 4);
+    scroll-snap-align: start;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1419px) {
+  .ws-spotlight__grid--over-3 .ws-spotlight__card {
+    /* 3 cards + 2 gaps of 16px */
+    flex: 0 0 calc((100% - 32px) / 3);
+    max-width: calc((100% - 32px) / 3);
+    scroll-snap-align: start;
+  }
+}
+
 /* ── Responsive: horizontal scroll on small screens ─────── */
 @media (max-width: 768px) {
   .ws-spotlight__grid {
