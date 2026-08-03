@@ -54,6 +54,9 @@ export class SbUicSpotlightCardsV2Component {
   resolvedShowToggle = computed(() => this.config()?.showToggle ?? this.showToggle())
   resolvedIsLoading = computed(() => this.config()?.isLoading ?? this.isLoading())
 
+  /** Card count — drives the "cards per view" caps on wide screens. */
+  cardCount = computed(() => this.resolvedCards().length)
+
   /** Array used to render skeleton card placeholders with @for. */
   skeletonItems = computed(() =>
     Array.from({ length: this.skeletonCount() }, (_, i) => i)
