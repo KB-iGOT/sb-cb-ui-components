@@ -103,7 +103,8 @@
     min-height: 130px;
     padding: 12px 12px 12px 20px;
     border-radius: 14px;
-    background-color:var(--color-accents-cyan);
+    /* Per-card override set from cardBackgroundColor; falls back to the original token. */
+    background-color: var(--ws-spotlight-card-bg, var(--color-accents-cyan));
     text-align: left;
     /* Keeps the padding inside the widths below, so the cards-per-view maths is exact. */
     box-sizing: border-box;
@@ -292,6 +293,13 @@
     height: 14px;
     margin-top: 14px;
   }
+}
+
+/* Dark theme: ThemeService puts data-theme on <html>, so the swap is pure CSS — no theme
+   subscription in the component. Falls back to the light value, which is what "by default
+   keep the same colour" means for a single-colour config. Skeletons keep their grey. */
+:host-context([data-theme='dark']) .ws-spotlight__card:not(.ws-spotlight__card--skeleton) {
+  background-color: var(--ws-spotlight-card-bg-dark, var(--ws-spotlight-card-bg, var(--color-accents-cyan)));
 }
 
 /* Skeleton card: neutral grey instead of cyan */
