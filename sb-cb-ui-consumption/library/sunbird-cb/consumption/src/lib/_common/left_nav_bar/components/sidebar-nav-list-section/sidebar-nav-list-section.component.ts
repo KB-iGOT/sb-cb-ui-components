@@ -109,10 +109,22 @@ export class SidebarNavListSectionComponent implements OnChanges {
 
   /**
    * Check if a route is currently active
+   *
+   * "my-learning" shares its navUrl with other sidebar items that point to the
+   * same seeAll page, so it's only active when the continueLearning
+   * queryParams also match - path alone isn't enough to disambiguate it.
    */
-  isActiveRoute(navUrl?: string): boolean {
-    if (!navUrl) return false
-    return this.router.isActive(navUrl, {
+  isActiveRoute(item?: NavListItem): boolean {
+    if (!item?.navUrl) return false
+
+    if (item.code === 'my-learning') {
+      return this.router.isActive(
+        this.router.createUrlTree([item.navUrl], { queryParams: item.queryParams || {} }),
+        { paths: 'exact', queryParams: 'subset', fragment: 'ignored', matrixParams: 'ignored' }
+      )
+    }
+
+    return this.router.isActive(item.navUrl, {
       paths: 'exact',
       queryParams: 'ignored',
       fragment: 'ignored',

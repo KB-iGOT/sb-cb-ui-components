@@ -152,14 +152,15 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
       }
 
       if (isOpenState) {
-        // Show content immediately when opening
-        this.showContent.set(true)
+        setTimeout(() => {
+          this.showContent.set(true)
+        }, 50)
       } else {
         // Hide content with a short delay when closing, so the label fade-out overlaps the
         // width collapse instead of starting after it
         this.hideContentTimer = setTimeout(() => {
           this.showContent.set(false)
-        }, 50)
+        }, 200)
       }
     }, { allowSignalWrites: true })
   }

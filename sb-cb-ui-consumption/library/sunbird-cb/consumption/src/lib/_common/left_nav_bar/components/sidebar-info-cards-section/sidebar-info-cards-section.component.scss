@@ -340,11 +340,8 @@
 }
 
 .child-description {
-  line-height: 1.3;
   word-break: break-word;
   color: var(--text-bandw-black-body);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
   overflow: hidden;
   font: 500 12px 'Noto Sans';
   margin-bottom: 1px;

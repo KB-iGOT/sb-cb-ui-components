@@ -134,6 +134,9 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
       contentTemp.lrcProgressDetails = c.lrcProgressDetails || ''
       contentTemp.issuedCertificates = c.issuedCertificates || c.issued_certificates || []
       contentTemp.batchId = c.batchId || ''
+      // contentTemp is c.content itself, so courseId - which lives on the enrolment wrapper, not on
+      // the content - has to be carried across or the card has no id to fall back on
+      contentTemp.courseId = c.courseId || c.contentId || ''
       contentTemp.content = c.content || c.event || {}
       contentTemp.content.primaryCategory = (c.content?.primaryCategory) || (c.event?.resourceType) || ''
       contentTemp.cType = c.event ? 'event' : ''
