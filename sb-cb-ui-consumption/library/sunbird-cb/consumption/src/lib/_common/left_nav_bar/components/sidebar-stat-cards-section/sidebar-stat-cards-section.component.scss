@@ -60,6 +60,7 @@
 
 .stat-cards-content {
   width: 100%;
+  gap: 20px;
   background-color: var(--environment-cards-overall-cards-primary) !important;
 }
 
@@ -84,6 +85,8 @@
 
 .stat-icon {
   transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
 
   mat-icon {
     font-size: 24px;
@@ -95,6 +98,10 @@
 
 .stat-content {
   overflow: hidden;
+
+  p {
+    margin-bottom: 0px
+  }
 }
 
 .stat-header {

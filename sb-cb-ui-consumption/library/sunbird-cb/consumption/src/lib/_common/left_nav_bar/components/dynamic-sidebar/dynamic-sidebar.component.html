@@ -74,8 +74,8 @@
       </div>
 
       <!-- Scrollable Navigation Sections -->
-      <nav id="sidebar-nav" class="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden" [class.p-4]="isOpen()"
-        [class.p-2]="!isOpen()" role="navigation" aria-label="Sidebar navigation sections">
+      <nav id="sidebar-nav" class="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden py-4" [class.px-4]="isOpen()"
+        [class.px-3]="!isOpen()" role="navigation" aria-label="Sidebar navigation sections">
         @if (navSections && navSections.length > 0) {
         @for (section of navSections; track trackByCardType($index, section)) {
 
