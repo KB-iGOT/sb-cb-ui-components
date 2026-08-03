@@ -21,6 +21,11 @@
   position: relative;
 }
 
+// .nav-item-close {
+//   display: flex;
+//   justify-content: center;
+// }
+
 .nav-link {
   text-decoration: none;
   font: 400 14px 'Noto Sans';
@@ -30,11 +35,11 @@
   overflow: hidden;
 
   .nav-icon mat-icon {
-    color: var(--text-bandw-black-body);
+    color: var(--text-bandw-black-display);
   }
 
   .nav-icon span {
-    background-color: var(--text-bandw-black-body);
+    background-color: var(--text-bandw-black-display);
   }
 
   &:hover {
@@ -81,6 +86,8 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  // padding: 5px;
+  // width: 24px;
 
   .nav-icon mat-icon {
     color: var(--text-bandw-black-body);

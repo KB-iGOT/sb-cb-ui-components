@@ -32,7 +32,7 @@
     </mat-expansion-panel-header>
 
     <!-- Panel Content -->
-    <div class="stat-cards-content space-y-3 py-3 bg-gradient-to-br border border-blue-100 rounded-lg" role="list"
+    <div class="stat-cards-content flex flex-col py-3 bg-gradient-to-br border border-blue-100 rounded-lg" role="list"
       [attr.aria-label]="section?.sectionTitle + ' statistics'">
       @for (item of visibleItems(); track trackByIndex($index, item)) {
       <div class="stat-card block px-4 transition-all duration-200 hover:border-blue-300 group" role="listitem"
@@ -41,7 +41,7 @@
         <div class="flex items-start gap-3">
           <!-- Icon -->
           <!-- @if (item?.iconName || item?.iconUrl) { -->
-          <div class="stat-icon flex-shrink-0 w-10 h-10 flex items-center justify-center" aria-hidden="true">
+          <div class="stat-icon flex-shrink-0 flex items-center justify-center" aria-hidden="true">
             @if (item?.iconName) {
             <mat-icon class="text-indigo-600" aria-hidden="true">{{ item?.iconName }}</mat-icon>
             } @else if (item?.iconUrl) {
@@ -84,7 +84,7 @@
     </h3>
     }
 
-    <div class="stat-cards-content space-y-3" role="list" [attr.aria-label]="section?.sectionTitle + ' statistics'">
+    <div class="stat-cards-content" role="list" [attr.aria-label]="section?.sectionTitle + ' statistics'">
       @for (item of visibleItems(); track trackByIndex($index, item)) {
       <div
         class="stat-card block bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 transition-all duration-200 border border-blue-100 group"
@@ -94,7 +94,7 @@
           <!-- Icon -->
           @if (item?.iconName || item?.iconUrl) {
           <div
-            class="stat-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow"
+            class="stat-icon flex-shrink-0 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow"
             aria-hidden="true">
             @if (item?.iconName) {
             <mat-icon class="text-indigo-600" aria-hidden="true">{{ item?.iconName }}</mat-icon>
