@@ -27,12 +27,11 @@
   <!-- Navigation Items List -->
   <ul class="nav-list space-y-1" role="menu" [attr.aria-label]="section?.sectionTitle">
     @for (item of visibleItems(); track trackByNavUrl($index, item)) {
-    <li class="nav-item" role="none">
+    <li class="nav-item" [class.nav-item-close]="!showContent" role="none">
       <a [routerLink]="item?.navUrl ? [item.navUrl] : null" [queryParams]="item?.queryParams || null"
         routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         [class]="isOpen ? 'nav-link flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 group'"
-        [class.gap-3]="showContent"
-        [class.active]="isActiveRoute(item) || item?.code === activeItemCode" matRipple
+        [class.gap-3]="showContent" [class.active]="isActiveRoute(item) || item?.code === activeItemCode" matRipple
         [matRippleColor]="'rgba(59, 130, 246, 0.1)'" (click)="onItemClick(item)" role="menuitem"
         [attr.aria-label]="item?.label"
         [attr.aria-current]="(isActiveRoute(item) || item?.code === activeItemCode) ? 'page' : null"
