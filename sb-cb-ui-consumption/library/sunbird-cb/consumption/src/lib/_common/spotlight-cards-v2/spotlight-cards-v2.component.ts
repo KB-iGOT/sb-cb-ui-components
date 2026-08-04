@@ -67,9 +67,6 @@ export class SbUicSpotlightCardsV2Component {
     return { ...card, bgLight: background.light, bgDark: background.dark }
   }))
 
-  /** Card count — drives the "cards per view" caps on wide screens. */
-  cardCount = computed(() => this.resolvedCards().length)
-
   /** Array used to render skeleton card placeholders with @for. */
   skeletonItems = computed(() =>
     Array.from({ length: this.skeletonCount() }, (_, i) => i)
