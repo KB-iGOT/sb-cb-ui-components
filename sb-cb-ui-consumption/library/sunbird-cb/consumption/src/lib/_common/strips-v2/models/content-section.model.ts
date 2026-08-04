@@ -46,6 +46,9 @@ export interface SpotlightConfig {
   iconUrl: string
   label: string
   redirectionUrl: string
+  // CSS variable (`--x` / `var(--x)`) used for both themes, or plain colours as `light,dark`.
+  // See NsSpotlightCardsV2.ISpotlightCard.cardBackgroundColor for the full contract.
+  cardBackgroundColor?: string
 }
 
 export interface ToggleableElement {

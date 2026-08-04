@@ -11,6 +11,15 @@ export namespace NsSpotlightCardsV2 {
     redirectionUrl: string
     /** When true the URL is treated as external and opened in a new tab. */
     externalUrl?: boolean
+    /**
+     * Card background. Accepts either:
+     *  - a CSS variable — `--color-accents-cyan` or `var(--color-accents-cyan, #00bcd4)` —
+     *    used as-is in both themes, since the variable resolves per theme itself; or
+     *  - plain colours, comma separated as `light,dark` (`#E6F7FF,#0B3A4A`). A single colour
+     *    is used for both themes.
+     * Omitted → the default cyan.
+     */
+    cardBackgroundColor?: string
     cardClickDetails: cardClickDetails
   }
 
