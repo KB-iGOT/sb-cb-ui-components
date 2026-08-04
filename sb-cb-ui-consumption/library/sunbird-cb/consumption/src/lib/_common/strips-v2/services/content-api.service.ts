@@ -128,9 +128,17 @@ export class ContentApiService {
               return []
             }
 
+            const filteredEnrolledList = apiDetailsKey === 'standaloneApi'
+              ? enrolledList.filter(item => this.hasActiveBatch(item))
+              : enrolledList
+
+            if (filteredEnrolledList.length === 0) {
+              return []
+            }
+
             const enrolledMatchField = chainedConfig.enrolledMatchField as string
             const enrolledIds = new Set(
-              enrolledList.map(item => (item as Record<string, unknown>)[enrolledMatchField])
+              filteredEnrolledList.map(item => (item as Record<string, unknown>)[enrolledMatchField])
             )
 
             const filteredContent = sourceList.filter(item =>
@@ -278,6 +286,27 @@ export class ContentApiService {
       })
     }
     return params
+  }
+
+  private hasActiveBatch(item: unknown): boolean {
+    const batches = _.get(item, 'content.batches')
+
+    if (!Array.isArray(batches) || batches.length === 0) {
+      return false
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    return batches.some((batch: any) => {
+      const endDate = batch && batch.endDate
+      if (!endDate) {
+        return false
+      }
+      const batchEndDate = new Date(endDate)
+      batchEndDate.setHours(0, 0, 0, 0)
+      return batchEndDate.getTime() > today.getTime()
+    })
   }
 
   private getNestedValue(obj: unknown, path: string): unknown {
