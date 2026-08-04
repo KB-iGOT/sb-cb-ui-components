@@ -11,6 +11,7 @@ export namespace NsSpotlightCardsV2 {
     redirectionUrl: string
     /** When true the URL is treated as external and opened in a new tab. */
     externalUrl?: boolean
+    enabled?: boolean
     /**
      * Card background. Accepts either:
      *  - a CSS variable — `--color-accents-cyan` or `var(--color-accents-cyan, #00bcd4)` —
