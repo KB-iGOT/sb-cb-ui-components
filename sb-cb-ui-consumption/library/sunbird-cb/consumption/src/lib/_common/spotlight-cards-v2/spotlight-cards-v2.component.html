@@ -47,8 +47,7 @@
 
   <!-- ── Cards grid ─────────────────────────────────── -->
   @if (!isCollapsed()) {
-  <div class="ws-spotlight__grid" role="list" [class.ws-spotlight__grid--over-3]="cardCount() > 3"
-    [class.ws-spotlight__grid--over-4]="cardCount() > 4">
+  <div class="ws-spotlight__grid" role="list">
     @for (card of styledCards(); track card.label) {
     <div class="ws-spotlight__card cursor-pointer" role="listitem" (click)="navigate(card)"
       [style.--ws-spotlight-card-bg]="card.bgLight" [style.--ws-spotlight-card-bg-dark]="card.bgDark">
