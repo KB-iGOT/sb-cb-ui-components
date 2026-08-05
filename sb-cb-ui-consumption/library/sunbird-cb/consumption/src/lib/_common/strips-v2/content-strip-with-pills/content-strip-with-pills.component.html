@@ -12,7 +12,7 @@
         <!-- Text Content -->
         <div class="pill-active__text">
           <!-- Label -->
-          <div class="pill-active__label" [matTooltip]="pill.pillLabel" [matTooltipShowDelay]="400">
+          <div class="pill-active__label">
             {{ pill.pillLabel }}
           </div>
 
@@ -20,8 +20,7 @@
           @if (pill.pillDescription && pill.pillDescription.length > 0) {
           <div class="pill-active__descriptions">
             @for (desc of pill.pillDescription; track $index) {
-            <div class="pill-active__desc" [matTooltip]="desc" [matTooltipShowDelay]="400"
-              matTooltipPosition="above">
+            <div class="pill-active__desc" [matTooltip]="desc" [matTooltipShowDelay]="400" matTooltipPosition="above">
               {{ desc }}
             </div>
             }

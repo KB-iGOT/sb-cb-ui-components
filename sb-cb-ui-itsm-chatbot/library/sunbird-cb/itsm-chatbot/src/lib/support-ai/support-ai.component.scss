@@ -809,7 +809,17 @@
     margin-left: 5px;
   }
 }
-
+@media only screen and (max-width: 767px) and (orientation: portrait) {
+  .control-container {
+     position: fixed;
+    bottom: 100px;
+    width: 100%;
+    z-index: 2;
+    // background-color: red;
+            top: auto !important;
+        bottom: 100px !important;
+  }
+}
 @media  (min-width: 768px) and (max-width:1023px) {
   .igot-ai-container {
     width: 100vw;
