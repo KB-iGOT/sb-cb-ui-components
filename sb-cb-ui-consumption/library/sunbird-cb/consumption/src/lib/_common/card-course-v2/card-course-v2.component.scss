@@ -26,7 +26,7 @@ $done-green : #388e3c;
   // background: var(--environment-application-backgrounds-card-background-1);
   cursor: pointer;
   box-sizing: border-box;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   font-family: 'Noto Sans';
 
   &--expired {
@@ -317,7 +317,7 @@ $done-green : #388e3c;
   /* Divider between chips row and org row */
   &__divider {
     height: 1px;
-    background: var(--surface-secondary);
+    background: var(--border-strong);
     margin: 4px 0;
     flex-shrink: 0;
   }
