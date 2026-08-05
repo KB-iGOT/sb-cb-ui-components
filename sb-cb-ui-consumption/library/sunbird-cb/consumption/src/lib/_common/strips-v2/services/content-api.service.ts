@@ -97,21 +97,17 @@ export class ContentApiService {
         }
 
         const identifierField = chainedConfig.identifierField as string
+
+        if (apiDetailsKey === 'caProgramApi') {
+          return this.executeCaProgramChain(firstResponse, sourceList, identifierField, chainedConfig)
+        }
+
         const identifiers = sourceList
           .map(item => (item as Record<string, unknown>)[identifierField])
           .filter((id): id is string => typeof id === 'string' && !!id)
 
         if (identifiers.length === 0) {
           return of([])
-        }
-
-        if (apiDetailsKey === 'caProgramApi') {
-          let request = {
-            request: {
-              courseId: identifiers
-            }
-          }
-          return this.userServiceLib.fetchEnrollContentData(request)
         }
 
         return this.makeHttpRequest({
@@ -148,6 +144,76 @@ export class ContentApiService {
             return this.setNestedValue(firstResponse, chainedConfig.sourceListPath, filteredContent)
           })
         )
+      })
+    )
+  }
+
+  // caProgramApi: drop programs whose endDate has already passed, then hide any of the
+  // remaining ones that the user has already enrolled in AND fully completed (100%).
+  private executeCaProgramChain(
+    firstResponse: unknown,
+    sourceList: unknown[],
+    identifierField: string,
+    chainedConfig: ChainedApiConfig
+  ): Observable<unknown> {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const activeList = sourceList.filter(item => {
+      const endDate = (item as Record<string, unknown>)['endDate'] as string | undefined
+      if (!endDate) {
+        return true
+      }
+      const itemEndDate = new Date(endDate)
+      itemEndDate.setHours(0, 0, 0, 0)
+      return itemEndDate.getTime() >= today.getTime()
+    })
+
+    if (activeList.length === 0) {
+      return of(this.setNestedValue(firstResponse, chainedConfig.sourceListPath, activeList))
+    }
+
+    const identifiers = activeList
+      .map(item => (item as Record<string, unknown>)[identifierField])
+      .filter((id): id is string => typeof id === 'string' && !!id)
+
+    if (identifiers.length === 0) {
+      return of(this.setNestedValue(firstResponse, chainedConfig.sourceListPath, activeList))
+    }
+
+    const request = {
+      request: {
+        courseId: identifiers
+      }
+    }
+
+    return this.userServiceLib.fetchEnrollContentData(request).pipe(
+      map(enrollResponse => {
+        const enrolledList = this.getNestedValue(enrollResponse, chainedConfig.enrolledListPath)
+
+        if (!Array.isArray(enrolledList) || enrolledList.length === 0) {
+          return this.setNestedValue(firstResponse, chainedConfig.sourceListPath, activeList)
+        }
+
+        const enrolledMatchField = chainedConfig.enrolledMatchField as string
+        const completedIds = new Set(
+          enrolledList
+            .filter(item => {
+              const record = item as Record<string, unknown>
+              const completion = record['completionPercentage'] ?? record['progress']
+              return completion === 100
+            })
+            .map(item => {
+              const record = item as Record<string, unknown>
+              return record[enrolledMatchField] ?? record['collectionId']
+            })
+        )
+
+        const filteredList = activeList.filter(item =>
+          !completedIds.has((item as Record<string, unknown>)[identifierField])
+        )
+
+        return this.setNestedValue(firstResponse, chainedConfig.sourceListPath, filteredList)
       })
     )
   }
