@@ -4,8 +4,8 @@ import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { of } from 'rxjs'
-import { catchError } from 'rxjs/operators'
+import { Observable, forkJoin, of } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
 import moment from 'moment'
 import { NsContent } from '@sunbird-cb/utils-v2'
 import { VIEWER_ROUTE_FROM_MIME } from '../../../../_services/viewer-route-util'
@@ -187,6 +187,8 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     }
 
     const enrollUrl = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
+    /* External (CIOS) courses — ids prefixed 'ext_' — carry only a completion %, no duration */
+    const extEnrollUrl = (courseId: string) => `/apis/proxies/v8/cios-enroll/v1/readby/useridcourseid/${courseId}`
 
     /* Count how many weeks actually have IDs to call (all weeks with content) */
     this._weekCallsTotal = 0
@@ -211,53 +213,84 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
       this.weekCardLoading[week] = true
 
-      this.http.post<any>(enrollUrl, { request: { courseId: weekIds } })
-        .pipe(catchError(() => of(null)))
-        .subscribe(res => {
-          const completionMap: { [id: string]: number } = {}
-          weekIds.forEach(id => { completionMap[id] = 0 })
+      /* 'do_' ids -> existing internal enrollment API (unchanged); 'ext_' ids -> external
+         CIOS enrollment lookup, one call per id, completion % only (no duration) */
+      const doIds = weekIds.filter(id => id.startsWith('do_'))
+      const extIds = weekIds.filter(id => id.startsWith('ext_'))
 
-          const allEnrolled: any[] = [
-            ...(res?.result?.courses || []),
-            ...(res?.result?.programs || []),
-            ...(res?.result?.events || []),
-            ...(res?.result?.assessments || []),
-          ]
-          allEnrolled.forEach((c: any) => {
-            const id = c.courseId || c.identifier || c.contentId
-            /* Only count IDs that belong to this BK week — ignore unrelated enrolled content */
-            if (id && completionMap.hasOwnProperty(id)) {
-              completionMap[id] = c.completionPercentage ?? 0
-              this._enrolledMap[id] = {
-                pct: c.completionPercentage ?? 0,
-                durSec: Number(c.duration || c.content?.duration || 0),
-              }
-            }
+      const completionMap: { [id: string]: number } = {}
+      weekIds.forEach(id => { completionMap[id] = 0 })
+
+      const calls: Observable<void>[] = []
+
+      if (doIds.length) {
+        calls.push(
+          this.http.post<any>(enrollUrl, { request: { courseId: doIds } })
+            .pipe(
+              catchError(() => of(null)),
+              map(res => {
+                const allEnrolled: any[] = [
+                  ...(res?.result?.courses || []),
+                  ...(res?.result?.programs || []),
+                  ...(res?.result?.events || []),
+                  ...(res?.result?.assessments || []),
+                ]
+                allEnrolled.forEach((c: any) => {
+                  const id = c.courseId || c.identifier || c.contentId
+                  /* Only count IDs that belong to this BK week — ignore unrelated enrolled content */
+                  if (id && completionMap.hasOwnProperty(id)) {
+                    completionMap[id] = c.completionPercentage ?? 0
+                    this._enrolledMap[id] = {
+                      pct: c.completionPercentage ?? 0,
+                      durSec: Number(c.duration || c.content?.duration || 0),
+                    }
+                  }
+                })
+              }),
+            ),
+        )
+      }
+
+      extIds.forEach(id => {
+        calls.push(
+          this.http.get<any>(extEnrollUrl(id))
+            .pipe(
+              catchError(() => of(null)),
+              map(res => {
+                /* CIOS enrollment record for this id — only completion % is available, no duration */
+                const pct = res?.result?.completionPercentage ?? res?.result?.completionpercentage
+                  ?? res?.completionPercentage ?? res?.completionpercentage ?? 0
+                completionMap[id] = pct
+                this._enrolledMap[id] = { pct, durSec: 0 }
+              }),
+            ),
+        )
+      })
+
+      forkJoin(calls.length ? calls : [of(null)]).subscribe(() => {
+        const sum = weekIds.reduce((acc, id) => acc + (completionMap[id] ?? 0), 0)
+        wd.progress = Math.round(sum / weekIds.length)
+
+        this.weekCardLoading[week] = false
+        this.cdr.detectChanges()
+
+        /* Card widths change as skeletons swap for real cards — refresh arrow state */
+        setTimeout(() => this._updateCardNav(), 100)
+
+        if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
+
+        /* Emit overall stats once all week calls are done */
+        this._weekCallsDone++
+        if (this._weekCallsDone >= this._weekCallsTotal) {
+          const entries = Object.values(this._enrolledMap)
+          const completedCount = entries.filter(e => e.pct >= 100).length
+          const totalSeconds = entries.reduce((acc, e) => acc + (e.durSec * e.pct / 100), 0)
+          this.progressStats.emit({
+            completedCount,
+            learningHoursFormatted: this._formatHours(totalSeconds / 3600),
           })
-
-          const sum = weekIds.reduce((acc, id) => acc + (completionMap[id] ?? 0), 0)
-          wd.progress = Math.round(sum / weekIds.length)
-
-          this.weekCardLoading[week] = false
-          this.cdr.detectChanges()
-
-          /* Card widths change as skeletons swap for real cards — refresh arrow state */
-          setTimeout(() => this._updateCardNav(), 100)
-
-          if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
-
-          /* Emit overall stats once all week calls are done */
-          this._weekCallsDone++
-          if (this._weekCallsDone >= this._weekCallsTotal) {
-            const entries = Object.values(this._enrolledMap)
-            const completedCount = entries.filter(e => e.pct >= 100).length
-            const totalSeconds = entries.reduce((acc, e) => acc + (e.durSec * e.pct / 100), 0)
-            this.progressStats.emit({
-              completedCount,
-              learningHoursFormatted: this._formatHours(totalSeconds / 3600),
-            })
-          }
-        })
+        }
+      })
     }
   }
 
