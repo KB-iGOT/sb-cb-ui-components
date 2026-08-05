@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/consumption",
-  "version": "0.0.55-ang-17-20-ui-ux",
+  "version": "0.0.56-ang-17-20-ui-ux",
   "dependencies": {
     "tslib": "^2.0.0"
   },
