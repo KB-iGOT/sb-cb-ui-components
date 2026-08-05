@@ -268,10 +268,9 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     const wd = this.getWeekData(weekNum)
     if (!wd?.content_ids) return
     let idMap = wd.content_ids
-    console.log('idMap', idMap)
-    let exIdMap: boolean = false
-    if (wd?.content_ids?.extCourses) {
-      exIdMap = true
+    let exIdMap: any = {}
+    if (wd.content_ids && wd.content_ids.extCourses) {
+      exIdMap["extCourses"] = wd.content_ids.extCourses
     }
     /* Collect all unique IDs for a single API call */
     const allIds = this._allContentIds(wd, ['extCourses'])
@@ -308,8 +307,8 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
             }))
         })
 
-        if (exIdMap) {
-          this.loadExternalCourses(wd, idMap)
+        if (Object.keys(exIdMap).length) {
+          this.loadExternalCourses(wd, exIdMap)
         } else {
           this.weekContentLoading = false
           this.cdr.detectChanges()
@@ -318,7 +317,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
       })
   }
 
-  loadExternalCourses(wd: any, idMap: any): void {
+  loadExternalCourses(wd: any, exIdMap: any): void {
     const allIds = this._allContentIds(wd, ['course', 'program', 'event', 'resources'])
     this.http.post<any>('/apis/proxies/v8/cios/v1/search/content', {
       filterCriteriaMap: {
@@ -345,8 +344,8 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
           content.forEach(c => { byId[c.contentId] = c })
 
           /* Distribute as NsCardContent.ICard for sb-uic-card-portrait, keyed by content-type */
-          Object.keys(idMap).forEach((key) => {
-            const ids = idMap[key] || []
+          Object.keys(exIdMap).forEach((key) => {
+            const ids = exIdMap[key] || []
             this.weekContentCards[key] = ids
               .filter((id: any) => byId[id])
               .map((id: any, pos: any) => ({
