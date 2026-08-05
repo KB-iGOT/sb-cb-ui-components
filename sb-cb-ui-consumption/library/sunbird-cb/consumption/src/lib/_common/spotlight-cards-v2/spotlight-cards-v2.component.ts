@@ -16,11 +16,16 @@ import { NsSpotlightCardsV2 } from './spotlight-cards-v2.model'
 const DEFAULT_CARD_BACKGROUND = 'var(--surface-secondary)'
 import { TranslateModule } from '@ngx-translate/core'
 import { ContentApiService } from '../strips-v2/services/content-api.service'
+import { CarouselComponent } from '../carousel/carousel.component'
+
+/** Card box from the mockup — kept in sync with .ws-spotlight__card in the SCSS. */
+const CARD_WIDTH = 248
+const CARD_GAP = 24
 
 @Component({
   selector: 'sb-uic-spotlight-cards-v2',
   standalone: true,
-  imports: [MatIconModule, TranslateModule],
+  imports: [MatIconModule, TranslateModule, CarouselComponent],
   templateUrl: './spotlight-cards-v2.component.html',
   styleUrls: ['./spotlight-cards-v2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +55,10 @@ export class SbUicSpotlightCardsV2Component {
 
   // Internal collapsed state (toggled by user, seeded from inputs)
   isCollapsed = signal(false)
+
+  /** Carousel geometry, exposed for the template. */
+  readonly cardWidth = CARD_WIDTH
+  readonly cardGap = CARD_GAP
 
   // Resolved values — config input overrides individual inputs when provided
   resolvedHeading = computed(() => this.config()?.heading ?? this.heading())

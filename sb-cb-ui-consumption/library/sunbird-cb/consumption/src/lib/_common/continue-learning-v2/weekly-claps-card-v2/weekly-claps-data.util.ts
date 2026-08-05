@@ -1,6 +1,12 @@
 export function buildWeeklyClapsData(weeklyClaps: any): any {
-  const weekKeys = ['week1', 'week2', 'week3', 'week4']
   const weekLabels = ['W1', 'W2', 'W3', 'W4']
+  const weekKeys = weekLabels.map((_label, i) => {
+    const shortKey = `w${i + 1}`
+    const longKey = `week${i + 1}`
+    return weeklyClaps && weeklyClaps[longKey] !== undefined && weeklyClaps[shortKey] === undefined
+      ? longKey
+      : shortKey
+  })
   const now = new Date()
   const startDate = weeklyClaps && weeklyClaps.startDate ? new Date(weeklyClaps.startDate) : null
   const endDate = weeklyClaps && weeklyClaps.endDate ? new Date(weeklyClaps.endDate) : null
