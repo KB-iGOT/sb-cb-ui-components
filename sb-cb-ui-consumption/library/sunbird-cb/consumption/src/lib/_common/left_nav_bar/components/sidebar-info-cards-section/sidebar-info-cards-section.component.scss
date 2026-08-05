@@ -37,6 +37,7 @@
 
   ::ng-deep .mat-expansion-panel-header-title {
     margin: 0;
+    color: var(--text-bandw-black-fine-print);
   }
 
   // Reverse default Material arrow direction: down = expanded, up = collapsed
@@ -83,10 +84,6 @@
     color: var(--text-bandw-black-body);
   }
 
-  .info-icon img {
-    filter: none;
-  }
-
   &:hover {
     transform: translateY(-1px);
     background-color: var(--environment-button-primary-filled-primary) !important;
@@ -97,8 +94,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    // .info-icon img {
-    //   filter: brightness(0) invert(1);
+    // .info-icon .icon-svg {
+    //   background-color: var(--text-button-text-primary-white);
     // }
 
     .info-title {
@@ -122,8 +119,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .info-icon img {
-      filter: brightness(0) invert(1);
+    .info-icon .icon-svg {
+      background-color: var(--text-button-text-primary-white);
     }
 
     .info-title {
@@ -143,8 +140,20 @@
   }
 }
 
+.icon-svg {
+  display: inline-block;
+  background-color: var(--environment-icon-overall-primary-bandw);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
 .info-icon {
   transition: all 0.2s ease;
+  background-color: var(--environment-application-backgrounds-system-background-1) !important;
 
   mat-icon {
     font-size: 20px;
@@ -251,16 +260,8 @@
   color: var(--text-bandw-black-body);
   background: transparent !important;
 
-  .child-icon {
-    background-color: var(--environment-application-backgrounds-card-background);
-  }
-
   .child-icon mat-icon {
     color: var(--text-bandw-black-body);
-  }
-
-  .child-icon img {
-    filter: none;
   }
 
   &:hover {
@@ -273,8 +274,8 @@
     //   color: var(--text-button-text-primary-white);
     // }
 
-    // .child-icon img {
-    //   filter: brightness(0) invert(1);
+    // .child-icon .icon-svg {
+    //   background-color: var(--text-button-text-primary-white);
     // }
 
     .child-title {
@@ -297,8 +298,8 @@
       color: var(--text-button-text-primary-white);
     }
 
-    .child-icon img {
-      filter: brightness(0) invert(1);
+    .child-icon .icon-svg {
+      background-color: var(--text-button-text-primary-white);
     }
 
     .child-title {
@@ -319,6 +320,7 @@
 
 .child-icon {
   transition: all 0.15s ease;
+  background-color: var(--environment-application-backgrounds-system-background-1) !important;
 
   mat-icon {
     font-size: 16px;

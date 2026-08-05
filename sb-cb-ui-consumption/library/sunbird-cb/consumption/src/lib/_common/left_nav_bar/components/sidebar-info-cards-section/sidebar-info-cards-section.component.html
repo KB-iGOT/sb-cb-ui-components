@@ -47,13 +47,13 @@
           <!-- Icon -->
           @if (item.iconName || item.iconUrl) {
           <div
-            class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors"
+            class="info-icon flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
             aria-hidden="true">
             @if (item.iconName) {
             <mat-icon class="text-blue-600 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
             } @else if (item.iconUrl) {
-            <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="w-6 h-6 object-contain"
-              loading="lazy" role="presentation" />
+            <span class="icon-svg w-6 h-6" [style.mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'"
+              [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'" role="presentation"></span>
             }
           </div>
           }
@@ -84,13 +84,13 @@
           <div class="flex items-start gap-3">
             <!-- Icon -->
             @if (item.iconName || item.iconUrl) {
-            <div class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center"
+            <div class="info-icon flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
               aria-hidden="true">
               @if (item.iconName) {
               <mat-icon class="text-gray-700 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
               } @else if (item.iconUrl) {
-              <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="w-6 h-6 object-contain"
-                loading="lazy" role="presentation" />
+              <span class="icon-svg w-6 h-6" [style.mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'"
+                [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'" role="presentation"></span>
               }
             </div>
             }
@@ -120,13 +120,13 @@
             <div class="flex items-start gap-2.5">
               <!-- Child Icon -->
               @if (child.iconName || child.iconUrl) {
-              <div class="child-icon flex-shrink-0 w-8 h-8 bg-blue-50 rounded flex items-center justify-center"
+              <div class="child-icon flex-shrink-0 w-8 h-8 rounded flex items-center justify-center"
                 aria-hidden="true">
                 @if (child.iconName) {
                 <mat-icon class="text-blue-600 text-base" aria-hidden="true">{{ child.iconName }}</mat-icon>
                 } @else if (child.iconUrl) {
-                <img src="/assets/icons/hubs-v2/{{child?.iconUrl}}.svg" [alt]="''" class="w-5 h-5 object-contain"
-                  loading="lazy" role="presentation" />
+                <span class="icon-svg w-5 h-5" [style.mask-image]="'url(/assets/icons/hubs-v2/' + child?.iconUrl + '.svg)'"
+                  [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + child?.iconUrl + '.svg)'" role="presentation"></span>
                 }
               </div>
               }
@@ -176,13 +176,13 @@
           <!-- Icon -->
           @if (item.iconName || item.iconUrl) {
           <div
-            class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors"
+            class="info-icon flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
             aria-hidden="true">
             @if (item.iconName) {
             <mat-icon class="text-blue-600 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
             } @else if (item.iconUrl) {
-            <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="w-6 h-6 object-contain"
-              loading="lazy" role="presentation" />
+            <span class="icon-svg w-6 h-6" [style.mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'"
+              [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'" role="presentation"></span>
             }
           </div>
           }
@@ -213,13 +213,13 @@
           <div class="flex items-start gap-3">
             <!-- Icon -->
             @if (item.iconName || item.iconUrl) {
-            <div class="info-icon flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center"
+            <div class="info-icon flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
               aria-hidden="true">
               @if (item.iconName) {
               <mat-icon class="text-gray-700 text-xl" aria-hidden="true">{{ item.iconName }}</mat-icon>
               } @else if (item.iconUrl) {
-              <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="w-6 h-6 object-contain"
-                loading="lazy" role="presentation" />
+              <span class="icon-svg w-6 h-6" [style.mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'"
+                [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + item?.iconUrl + '.svg)'" role="presentation"></span>
               }
             </div>
             }
@@ -249,13 +249,13 @@
             <div class="flex items-start gap-2.5">
               <!-- Child Icon -->
               @if (child.iconName || child.iconUrl) {
-              <div class="child-icon flex-shrink-0 w-8 h-8 bg-blue-50 rounded flex items-center justify-center"
+              <div class="child-icon flex-shrink-0 w-8 h-8 rounded flex items-center justify-center"
                 aria-hidden="true">
                 @if (child.iconName) {
                 <mat-icon class="text-blue-600 text-base" aria-hidden="true">{{ child.iconName }}</mat-icon>
                 } @else if (child.iconUrl) {
-                <img src="/assets/icons/hubs-v2/{{child?.iconUrl}}.svg" [alt]="''" class="w-5 h-5 object-contain"
-                  loading="lazy" role="presentation" />
+                <span class="icon-svg w-5 h-5" [style.mask-image]="'url(/assets/icons/hubs-v2/' + child?.iconUrl + '.svg)'"
+                  [style.-webkit-mask-image]="'url(/assets/icons/hubs-v2/' + child?.iconUrl + '.svg)'" role="presentation"></span>
                 }
               </div>
               }
