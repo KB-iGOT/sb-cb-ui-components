@@ -6,6 +6,7 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { SidebarConfig, SidebarCardType, SidebarStateChange, SidebarSection, InfoCardItem, StatCardItem, NavListItem } from '../../models/sidebar.models'
 import { SIDEBAR_ANIMATION, BREAKPOINT_QUERIES } from '../../constants/sidebar.constants'
@@ -39,6 +40,7 @@ import { SidebarFooterComponent } from '../sidebar-footer/sidebar-footer.compone
     RouterModule,
     MatIconModule,
     MatButtonModule,
+    MatTooltipModule,
     TranslateModule,
     SidebarNavListSectionComponent,
     SidebarStatCardsSectionComponent,
@@ -86,6 +88,13 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   showContent = signal<boolean>(true);
   private hideContentTimer?: ReturnType<typeof setTimeout> // Timer reference for delayed content hiding
   readonly SidebarCardType = SidebarCardType; // Expose SidebarCardType enum to template
+
+  /**
+   * Tooltip for the menu toggle. Plain strings rather than translate keys, matching the
+   * aria-labels alongside it — ngx-translate renders the raw key when one is missing, which
+   * would surface as "leftNavBar.expandMenu" in the tooltip.
+   */
+  toggleTooltip = computed(() => this.isOpen() ? 'Collapse menu' : 'Expand menu')
   navSections: SidebarSection[] = [];
   footerSections: any[] = [];
 
