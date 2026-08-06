@@ -13,7 +13,11 @@ import { TranslateModule } from '@ngx-translate/core'
 export class InProgressCardV2Component implements OnChanges {
   @Input() course: any = null
   @Input() isLoading = true
+  @Input() showHeader = true
+  @Input() showViewAll = true
   @Output() resumed = new EventEmitter<void>()
+  /** Navigation + telemetry for "View All" stay with the parent, which owns the section */
+  @Output() viewAllClicked = new EventEmitter<void>()
 
   private readonly router = inject(Router)
   private readonly eventSvc = inject(EventService)
@@ -38,6 +42,10 @@ export class InProgressCardV2Component implements OnChanges {
       this.courseId = content.identifier || content.contentId || this.course.courseId || ''
       this.isRetired = (content.status || '').toLowerCase() === 'retired'
     }
+  }
+
+  onViewAll() {
+    this.viewAllClicked.emit()
   }
 
   get strokeDashoffset(): number {

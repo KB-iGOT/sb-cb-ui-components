@@ -2,6 +2,7 @@
 @if (isLoading) {
 <div class="wc-card" aria-hidden="true">
   <div class="wc-skeleton wc-sk-badge"></div>
+  <div class="wc-skeleton wc-sk-period"></div>
   <div class="wc-skeleton wc-sk-desc"></div>
   <div class="wc-skeleton wc-sk-desc wc-sk-desc-short"></div>
   <div class="wc-clap-main">
@@ -50,6 +51,14 @@
 
   <!-- Header badge -->
   <div class="wc-badge" id="wc-section-heading">{{ 'continueLearning.weeklyClaps' | translate }}</div>
+
+  <!-- Claps period pill — startDate/endDate from the insights response -->
+  @if (hasPeriod) {
+  <span class="wc-period-pill"
+    [attr.aria-label]="'Claps period ' + (periodStart | date: 'EE, d MMM') + ' to ' + (periodEnd | date: 'EE, d MMM')">
+    {{ periodStart | date: 'EE, d MMM' }} - {{ periodEnd | date: 'EE, d MMM' }}
+  </span>
+  }
 
   <!-- Description -->
   <p class="wc-desc">
