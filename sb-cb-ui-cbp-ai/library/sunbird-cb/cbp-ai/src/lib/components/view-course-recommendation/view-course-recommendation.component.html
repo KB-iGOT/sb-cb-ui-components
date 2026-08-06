@@ -152,8 +152,8 @@
                     <div class="course-title mt-4">
                         <div class="cursor-pointer">
                             <div *ngIf="item?.course && (!sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">{{item?.course}}</div>
-                            <div *ngIf="item?.name && (sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">
-                                {{item?.name}}</div>
+                            <div *ngIf="(item?.name || item?.course) && (sharedService?.fromMdoPortal)" (click)="redirectToCoure(item)">
+                                {{item?.name || item?.course}}</div>
                         </div>
                     </div>
                     <div class="course-desc mt-2">
