@@ -125,7 +125,7 @@ export class ContentApiService {
             }
 
             const filteredEnrolledList = apiDetailsKey === 'standaloneApi'
-              ? enrolledList.filter(item => this.hasActiveBatch(item))
+              ? enrolledList.filter(item => this.hasActiveBatch(item) && !this.isFullyCompleted(item))
               : enrolledList
 
             if (filteredEnrolledList.length === 0) {
@@ -373,6 +373,10 @@ export class ContentApiService {
       batchEndDate.setHours(0, 0, 0, 0)
       return batchEndDate.getTime() > today.getTime()
     })
+  }
+
+  private isFullyCompleted(item: unknown): boolean {
+    return _.get(item, 'completionPercentage') === 100
   }
 
   private getNestedValue(obj: unknown, path: string): unknown {
