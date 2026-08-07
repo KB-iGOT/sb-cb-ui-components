@@ -1,4 +1,5 @@
 import { Component, HostListener, Input, inject } from '@angular/core'
+import { DatePipe } from '@angular/common'
 import { EventService, WsEvents } from '@sunbird-cb/utils-v2'
 import { TranslateModule } from '@ngx-translate/core'
 
@@ -7,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core'
   templateUrl: './weekly-claps-card-v2.component.html',
   styleUrls: ['./weekly-claps-card-v2.component.scss'],
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslateModule, DatePipe],
 })
 export class WeeklyClapsCardV2Component {
   @Input() insightsData: any = null
@@ -27,6 +28,26 @@ export class WeeklyClapsCardV2Component {
 
   get totalClaps(): number {
     return (this.weeklyClaps && this.weeklyClaps.total_claps) || 0
+  }
+
+  get periodStart(): any {
+    return (this.weeklyClaps && this.weeklyClaps.startDate) || null
+  }
+
+  get periodEnd(): any {
+    return (this.weeklyClaps && this.weeklyClaps.endDate) || null
+  }
+
+  // The date pipe throws on anything it cannot parse, so the pill is only rendered
+  // once both ends are known-good dates — a partial or malformed range just hides it
+  get hasPeriod(): boolean {
+    return this.isValidDate(this.periodStart) && this.isValidDate(this.periodEnd)
+  }
+
+  private isValidDate(value: any): boolean {
+    if (!value) { return false }
+    const parsed = new Date(value)
+    return !isNaN(parsed.getTime())
   }
 
   isWeekDone(week: { key: string; activeWeek: boolean }): boolean {

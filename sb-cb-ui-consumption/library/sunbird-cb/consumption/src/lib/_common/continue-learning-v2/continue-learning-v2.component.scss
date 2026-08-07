@@ -6,50 +6,12 @@
   padding: 0 0 16px 0;
 }
 
-/* ---- Heading row ---- */
-.cl-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.cl-heading {
-  font-size: var(--font-size-title-2);
-  font-weight: 700;
-  color: var(--text-bandw-black-heading);
-  margin: 0;
-  letter-spacing: 0.01em;
-  /* stylelint-disable */
-  font-family: 'Noto Sans';
-  /* stylelint-enable */
-}
-
-/* "View All" pill button */
-.cl-view-all-btn {
-  background: transparent;
-  border: 1.5px solid var(--environment-button-primary-filled-primary);
-  color: var(--environment-button-primary-filled-primary);
-  border-radius: 20px;
-  padding: 4px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  /* stylelint-disable */
-  font-family: 'Noto Sans';
-  /* stylelint-enable */
-
-  &:hover {
-    color: var(--text-button-text-primary-white);
-    background: var(--environment-button-primary-filled-primary);
-  }
-}
+/* Heading row + "View All" moved into in-progress-card-v2 (.ip-header) */
 
 /* ---- Two cards row — CSS Grid ---- */
 .cl-cards-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
   gap: 16px;
   align-items: stretch;
 }
