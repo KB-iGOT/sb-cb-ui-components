@@ -27,9 +27,9 @@
         <div class="notification-item cursor-pointer {{notification?.read ? 'read' : 'unread'}}"
           *ngFor="let notification of notifications">
           <ng-container>
-            <div class="flex gap-3 {{showIcon ? '' : 'justify-between'}}"
+            <div class="flex gap-3 notification-row {{showIcon ? '' : 'justify-between'}}"
               (click)="redirectToNotification(notification, $event)">
-              <div class="flex gap-3 item-center">
+              <div class="flex gap-3 item-center notification-content">
                 <div class="image" *ngIf="showIcon">
                   <img [src]="getIconPath(notification?.category)" alt="notification" />
                 </div>
