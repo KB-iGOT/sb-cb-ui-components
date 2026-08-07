@@ -91,6 +91,9 @@ export class CardTransformerService {
       case 'trainingPlanApi':
         const todaysDate = dayjs().format('YYYY-MM-DD')
         data.forEach((item: any) => {
+          if (item?.isApar === true) {
+            return
+          }
           const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
           const daysCount = dayjs(endDate).diff(todaysDate, 'day')
           item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
