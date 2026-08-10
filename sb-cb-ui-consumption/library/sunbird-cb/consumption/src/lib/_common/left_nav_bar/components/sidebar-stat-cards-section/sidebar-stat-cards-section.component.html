@@ -45,7 +45,7 @@
             @if (item?.iconName) {
             <mat-icon class="text-indigo-600" aria-hidden="true">{{ item?.iconName }}</mat-icon>
             } @else if (item?.iconUrl) {
-            <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="stat-card-logo object-contain"
+            <img [src]="item?.iconUrl" [alt]="''" class="stat-card-logo object-contain"
               loading="lazy" role="presentation" />
             }
           </div>
@@ -99,7 +99,7 @@
             @if (item?.iconName) {
             <mat-icon class="text-indigo-600" aria-hidden="true">{{ item?.iconName }}</mat-icon>
             } @else if (item?.iconUrl) {
-            <img src="/assets/icons/hubs-v2/{{item?.iconUrl}}.svg" [alt]="''" class="stat-card-logo object-contain"
+            <img [src]="item?.iconUrl" [alt]="''" class="stat-card-logo object-contain"
               loading="lazy" role="presentation" />
             }
           </div>
