@@ -47,6 +47,20 @@ export interface SpotlightConfig {
   iconUrl: string
   label: string
   redirectionUrl: string
+  enabled?: boolean
+  // CSS variable (`--x` / `var(--x)`) used for both themes, or plain colours as `light,dark`.
+  // See NsSpotlightCardsV2.ISpotlightCard.cardBackgroundColor for the full contract.
+  cardBackgroundColor?: string
+}
+
+export interface ToggleableElement {
+  enabled: boolean
+}
+
+export interface LearningProgressConfig {
+  viewAll?: ToggleableElement
+  inProgress?: ToggleableElement
+  weeklyClaps?: ToggleableElement
 }
 
 export interface PillConfig {
@@ -88,6 +102,7 @@ export interface ContentSectionConfig {
   contentConfig?: ContentConfig
   spotlightConfig?: SpotlightConfig[]
   pillEnlarged?: boolean
+  learningProgressConfig?: LearningProgressConfig
 }
 
 export interface DynamicTab {

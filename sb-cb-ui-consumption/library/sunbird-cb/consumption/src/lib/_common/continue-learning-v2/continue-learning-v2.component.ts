@@ -1,14 +1,14 @@
-import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core'
+import { Component, OnInit, OnDestroy, signal, computed, input, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { HttpClient } from '@angular/common/http'
 import { ConfigurationsService, EventService, WsEvents, WidgetEnrollService, DomainConfService } from '@sunbird-cb/utils-v2'
 import { Observable, Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
-import { TranslateModule } from '@ngx-translate/core'
 import { InProgressCardV2Component } from './in-progress-card-v2/in-progress-card-v2.component'
 import { WeeklyClapsCardV2Component } from './weekly-claps-card-v2/weekly-claps-card-v2.component'
 import { buildWeeklyClapsData } from './weekly-claps-card-v2/weekly-claps-data.util'
 import { ContentApiService } from '../strips-v2/services/content-api.service'
+import { LearningProgressConfig } from '../strips-v2/models/content-section.model'
 
 // -- Old direct-call payloads, kept for reference — see loadInProgressCourse() below --
 // // In-progress enrollment payload — same as ContentStripWithTabsPills uses for the "In Progress" pill
@@ -32,9 +32,21 @@ import { ContentApiService } from '../strips-v2/services/content-api.service'
   templateUrl: './continue-learning-v2.component.html',
   styleUrls: ['./continue-learning-v2.component.scss'],
   standalone: true,
-  imports: [TranslateModule, InProgressCardV2Component, WeeklyClapsCardV2Component],
+  imports: [InProgressCardV2Component, WeeklyClapsCardV2Component],
 })
 export class ContinueLearningV2Component implements OnInit, OnDestroy {
+  /**
+   * Per-element switches from the learningProgress section of the home form config.
+   * Absent config (or an absent key) means shown, so this stays backward compatible with
+   * configs authored before the keys existed. Hiding the whole section is a separate
+   * concern — set the section's own visibilityMode to 'hidden'.
+   */
+  config = input<LearningProgressConfig | null | undefined>(null)
+
+  showViewAll = computed(() => this.config()?.viewAll?.enabled !== false)
+  showInProgress = computed(() => this.config()?.inProgress?.enabled !== false)
+  showWeeklyClaps = computed(() => this.config()?.weeklyClaps?.enabled !== false)
+
   inProgressCourse: any = null
   isInProgressLoading = signal(true)
 
@@ -52,8 +64,17 @@ export class ContinueLearningV2Component implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>()
 
   ngOnInit() {
-    this.loadInProgressCourse()
-    this.loadWeeklyClaps()
+    // a disabled card is never rendered, so its API call is pure waste
+    if (this.showInProgress()) {
+      this.loadInProgressCourse()
+    } else {
+      this.isInProgressLoading.set(false)
+    }
+    if (this.showWeeklyClaps()) {
+      this.loadWeeklyClaps()
+    } else {
+      this.isWeeklyLoading = false
+    }
   }
 
   // Routed through ContentApiService/API_REGISTRY — same call pattern as

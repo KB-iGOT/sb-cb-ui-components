@@ -67,13 +67,6 @@
 }
 
 .sidebar {
-  // No `transition: width` here on purpose. The @sidebarAnimation trigger already drives this
-  // element's width (72px <-> 328px over SIDEBAR_ANIMATION.DURATION); a second CSS transition on
-  // the same property fights the animation's own inline styles and makes the slide stutter.
-
-  // Must stay in step with BREAKPOINT_QUERIES.MOBILE in sidebar.constants.ts. The width is
-  // forced regardless of open/closed, so if this range overlaps the tablet or desktop range
-  // the drawer gets stuck at 320px and only the container behind it responds to the toggle.
   @media (max-width: 599.98px) {
     width: 100vw !important;
     max-width: 320px;
@@ -110,9 +103,6 @@
   }
 }
 
-// Tablet (600px - 1024px): sidebar becomes a fixed overlay drawer instead of pushing content.
-// The container reserves no layout width; the aside slides in/out via transform above a backdrop.
-// Range must match BREAKPOINT_QUERIES.TABLET in sidebar.constants.ts.
 @media (min-width: 600px) and (max-width: 1024px) {
   .sidebar-container {
     width: 45px !important;

@@ -13,15 +13,16 @@
     <div class="ws-sk ws-sk--toggle" role="presentation"></div>
   </div>
 
-  <div class="ws-spotlight__grid" aria-hidden="true">
-    @for (item of skeletonItems(); track item) {
-    <div class="ws-spotlight__card ws-spotlight__card--skeleton">
-      <div class="ws-sk ws-sk--arrow"></div>
-      <div class="ws-sk ws-sk--icon"></div>
-      <div class="ws-sk ws-sk--label"></div>
-    </div>
-    }
-  </div>
+  <sb-uic-carousel [items]="skeletonItems()" [cardWidth]="cardWidth" [gap]="cardGap" [showNavigation]="false"
+    [showDots]="false">
+    <ng-template #carouselCard let-item let-index="index">
+      <div class="ws-spotlight__card ws-spotlight__card--skeleton">
+        <div class="ws-sk ws-sk--arrow"></div>
+        <div class="ws-sk ws-sk--icon"></div>
+        <div class="ws-sk ws-sk--label"></div>
+      </div>
+    </ng-template>
+  </sb-uic-carousel>
 
 </section>
 }
@@ -47,33 +48,36 @@
 
   <!-- ── Cards grid ─────────────────────────────────── -->
   @if (!isCollapsed()) {
-  <div class="ws-spotlight__grid" role="list">
-    @for (card of resolvedCards(); track card.label) {
-    <div class="ws-spotlight__card cursor-pointer" role="listitem" (click)="navigate(card)">
+  <!-- Same carousel the content strips use, so the prev/dots/next controls match them -->
+  <sb-uic-carousel [items]="styledCards()" [cardWidth]="cardWidth" [gap]="cardGap">
+    <ng-template #carouselCard let-card let-index="index">
+      <div class="ws-spotlight__card cursor-pointer" (click)="navigate(card)"
+        [style.--ws-spotlight-card-bg]="card.bgLight" [style.--ws-spotlight-card-bg-dark]="card.bgDark">
 
-      <!-- Arrow chip – the ONLY clickable area that redirects -->
-      <div class="ws-spotlight__card-top">
-        <button type="button" class="ws-spotlight__card-arrow" [attr.aria-label]="'Open ' + card.label"
-          (click)="navigate(card)">
-          <mat-icon aria-hidden="true">chevron_right</mat-icon>
-        </button>
-      </div>
-
-      <!-- Icon / illustration (wrapped so space is always reserved) -->
-      <div class="ws-spotlight__card-body">
-        @if (card.iconUrl) {
-        <div class="ws-spotlight__card-icon">
-          <img [src]="card.iconUrl" [alt]="card.iconAlt || card.label" class="ws-spotlight__card-img" loading="lazy" />
+        <!-- Arrow chip – the ONLY clickable area that redirects -->
+        <div class="ws-spotlight__card-top">
+          <button type="button" class="ws-spotlight__card-arrow" [attr.aria-label]="'Open ' + card.label"
+            (click)="navigate(card)">
+            <mat-icon aria-hidden="true">chevron_right</mat-icon>
+          </button>
         </div>
-        }
+
+        <!-- Icon / illustration (wrapped so space is always reserved) -->
+        <div class="ws-spotlight__card-body">
+          @if (card.iconUrl) {
+          <div class="ws-spotlight__card-icon">
+            <img [src]="card.iconUrl" [alt]="card.iconAlt || card.label" class="ws-spotlight__card-img"
+              loading="lazy" />
+          </div>
+          }
+        </div>
+
+        <!-- Label -->
+        <span class="ws-spotlight__card-label">{{ card.label }}</span>
+
       </div>
-
-      <!-- Label -->
-      <span class="ws-spotlight__card-label">{{ card.label }}</span>
-
-    </div>
-    }
-  </div>
+    </ng-template>
+  </sb-uic-carousel>
   }
 
 </section>

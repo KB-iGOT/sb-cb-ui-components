@@ -15,12 +15,11 @@
   }
 
   &__title {
-    font-size: 1.125rem;
-    /* 18px */
-    font-weight: 700;
-    color: var(--text-bandw-black-display);
+    /* Matches .section-header in sb-uic-accordion, which renders the headings for
+       "Trending on iGOT" and every other accordion-wrapped section. */
+    font: 600 var(--font-size-title-2) var(--font-family-heading);
+    color: var(--text-bandw-black-heading);
     margin: 0;
-    line-height: 1.4;
   }
 
   /* ── Accordion toggle button — matches sb-uic-accordion .arrow-icon-container ── */
@@ -59,61 +58,39 @@
     }
   }
 
-  /* ── Cards grid: fills full width, equal columns ── */
-  &__grid {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 16px;
-    width: 100%;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
-
-    /* Hide scrollbar in webkit browsers */
-    &::-webkit-scrollbar {
-      height: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 2px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.3);
-      }
-    }
-  }
+  /* No cards-row rule here: sb-uic-carousel owns the track, the 24px gap (passed as [gap])
+     and the paging, so the raw horizontal scrollbar this used to show is gone. */
 
   /* ── Individual card (div – not clickable itself) ─────── */
   &__card {
-    flex: 1 1 0;
-    /* equal share of full row width on desktop */
-    min-width: 0;
+    /* Fixed 248x147 at every breakpoint. The carousel item is sized to the same 248 via
+       [cardWidth], so width:100% keeps the two in step if that constant ever changes. */
+    width: 100%;
+    height: 147px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     position: relative;
     /* anchor for the absolute arrow chip */
-    min-height: 130px;
-    padding: 12px 12px 12px 20px;
-    border-radius: 14px;
-    background-color:var(--color-accents-cyan);
+    padding: 24px;
+    /* icon-to-label spacing; the absolute arrow chip is out of flow so gap does not affect it */
+    gap: 16px;
+    border-radius: 16px;
+    /* Per-card override set from cardBackgroundColor; falls back to the original token. */
+    background-color: var(--ws-spotlight-card-bg, var(--color-accents-cyan));
     text-align: left;
-    /* Keeps the padding inside the widths below, so the cards-per-view maths is exact. */
+    /* Keeps the padding inside the fixed 248x147 box. */
     box-sizing: border-box;
+    /* Nothing spills past the rounded corners if a label runs long. */
+    overflow: hidden;
   }
 
   /* ── Card top row: arrow chip pinned top-right (absolute) ── */
   &__card-top {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    /* matches the card padding so the chip sits on the same top line as the icon */
+    top: 24px;
+    right: 24px;
   }
 
   /* Rounded-square arrow chip – the only interactive element on the card */
@@ -153,18 +130,22 @@
   /* card-body: always reserves vertical space so card
      stays the same size even when iconUrl is absent.  */
   &__card-body {
-    flex: 1;
-    /* fill all space between arrow and label */
+    flex: 1 1 auto;
+    /* fill all space between arrow and label; min-height:0 lets the icon give way
+       inside the fixed 147px card if a label wraps to a second line */
+    min-height: 0;
     display: flex;
     align-items: flex-start;
-    /* icon top-aligns with the arrow chip (both at padding top: 12px) */
+    /* icon top-aligns with the arrow chip (both at padding top: 24px) */
     margin-top: 0;
     /* no extra offset – icon starts at same height as the arrow */
   }
 
   &__card-icon {
     width: 80px;
-    height: 80px;
+    /* caps at 80px but shrinks with the body rather than overflowing the fixed height */
+    height: 100%;
+    max-height: 80px;
     flex-shrink: 0;
   }
 
@@ -182,36 +163,12 @@
     color: var(--text-bandw-black-display);
     line-height: 1.3;
     word-break: break-word;
-    margin-top: 14px;
-    /* clear gap between icon body and label */
+    /* spacing comes from the card's gap */
   }
 }
 
-/* ── Responsive: horizontal scroll on small screens ─────── */
-@media (max-width: 768px) {
-  .ws-spotlight__grid {
-    /* Keep nowrap for horizontal scrolling */
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .ws-spotlight__card {
-    flex: 0 0 100%;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    scroll-snap-align: start;
-  }
-}
-
-@media (min-width: 400px) and (max-width: 768px) {
-  .ws-spotlight__card {
-    flex-basis: calc((100% - 16px) / 2);
-    width: calc((100% - 16px) / 2);
-    max-width: calc((100% - 16px) / 2);
-  }
-}
+/* No per-breakpoint card sizing: the card is a fixed 248x147 everywhere and the carousel
+   pages through them, so there is no cards-per-view maths. */
 
 /* ══════════════════════════════════════════════════
    Skeleton / shimmer styles
@@ -250,10 +207,12 @@
   }
 
   /* Card placeholders */
+  /* The skeleton shares .ws-spotlight__card, so it inherits its 24px padding and 16px gap.
+     Offsets below therefore mirror the real card instead of adding their own margins. */
   &--arrow {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 24px;
+    right: 24px;
     width: 24px;
     height: 24px;
     border-radius: 6px;
@@ -264,16 +223,25 @@
 
   &--icon {
     width: 80px;
-    height: 80px;
+    /* takes the space the label leaves, capped at 80px, so it cannot overflow the fixed height */
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 80px;
     border-radius: 10px;
-    margin-top: 8px;
   }
 
   &--label {
     width: 68%;
     height: 14px;
-    margin-top: 14px;
+    flex-shrink: 0;
   }
+}
+
+/* Dark theme: ThemeService puts data-theme on <html>, so the swap is pure CSS — no theme
+   subscription in the component. Falls back to the light value, which is what "by default
+   keep the same colour" means for a single-colour config. Skeletons keep their grey. */
+:host-context([data-theme='dark']) .ws-spotlight__card:not(.ws-spotlight__card--skeleton) {
+  background-color: var(--ws-spotlight-card-bg-dark, var(--ws-spotlight-card-bg, var(--color-accents-cyan)));
 }
 
 /* Skeleton card: neutral grey instead of cyan */

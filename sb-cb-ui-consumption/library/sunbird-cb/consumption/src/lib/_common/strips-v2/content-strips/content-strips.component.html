@@ -3,7 +3,16 @@
   @if (loading()) {
   <sb-uic-carousel [items]="skeletonArray()" [cardWidth]="254" [gap]="16" [showNavigation]="false" [showDots]="false">
     <ng-template #carouselCard let-item let-index="index">
+      @switch (getCardType()) {
+      @case (CardType.CourseCard) {
+      <!-- the card renders its own skeleton, so the placeholder matches the real card's shape -->
+      <sb-uic-card-course-v2 [isLoading]="true"></sb-uic-card-course-v2>
+      }
+      @default {
+      <!-- card types without a skeleton state keep the plain block -->
       <div class="animate-pulse bg-gray-200 rounded-lg h-64 w-full"></div>
+      }
+      }
     </ng-template>
   </sb-uic-carousel>
   }

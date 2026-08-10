@@ -5,7 +5,8 @@
   <!-- Tablet-only floating toggle: stays visible above the sidebar even when it is translated off-screen -->
   @if (isTablet()) {
   <div class="sidebar-toggle-btn hover:bg-gray-100 flex items-center justify-center ml-1 md:ml-0"
-    (click)="toggleSidebar()" [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
+    (click)="toggleSidebar()" [matTooltip]="toggleTooltip()" matTooltipPosition="right"
+    [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
     [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
     @if (isOpen()) {
     <span class="side-menu-icon w-5 h-5" [style.mask-image]="'url(/assets/icons/home-v2/MenuCollapse.svg)'"
@@ -47,7 +48,7 @@
 
         <!-- Menu Toggle Button -->
         <div class="sidebar-toggle-btn hover:bg-gray-100 flex items-center justify-center ml-1 md:ml-0"
-          (click)="toggleSidebar()"
+          (click)="toggleSidebar()" [matTooltip]="toggleTooltip()" matTooltipPosition="right"
           [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
           [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
           @if (isOpen()) {
@@ -74,8 +75,8 @@
       </div>
 
       <!-- Scrollable Navigation Sections -->
-      <nav id="sidebar-nav" class="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden" [class.p-4]="isOpen()"
-        [class.p-2]="!isOpen()" role="navigation" aria-label="Sidebar navigation sections">
+      <nav id="sidebar-nav" class="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden py-4" [class.px-4]="isOpen()"
+        [class.px-3]="!isOpen()" role="navigation" aria-label="Sidebar navigation sections">
         @if (navSections && navSections.length > 0) {
         @for (section of navSections; track trackByCardType($index, section)) {
 

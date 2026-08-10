@@ -1,6 +1,10 @@
 <div class="footer-content flex items-center py-1" [ngClass]="isOpen ? 'px-6' : 'justify-center'">
   @for (item of itemsList; track item.code) {
-  <a class="footer-item w-full" (click)="onItemClick(item)" [attr.aria-label]="item.iconName">
+  <!-- Collapsed sidebar hides .item-text, so the tooltip is the only thing naming the icon.
+       Suppressed when open, where the label is already visible next to it. -->
+  <a class="footer-item w-full" (click)="onItemClick(item)"
+    [matTooltip]="translateLabels(item.label, 'leftNavBar', item.disableTranslate)" matTooltipPosition="right"
+    [matTooltipDisabled]="isOpen" [attr.aria-label]="translateLabels(item.label, 'leftNavBar', item.disableTranslate)">
     <div class="flex items-center" [ngClass]="isOpen ? 'justify-between' : 'justify-center'">
       <!-- @if (isOpen) { -->
       <div class="flex gap-1 items-center">
