@@ -94,7 +94,7 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
    * aria-labels alongside it — ngx-translate renders the raw key when one is missing, which
    * would surface as "leftNavBar.expandMenu" in the tooltip.
    */
-  toggleTooltip = computed(() => this.isOpen() ? 'Collapse menu' : 'Expand menu')
+  toggleTooltip = computed(() => this.isOpen() ? 'Collapse Menu' : 'Expand Menu')
   navSections: SidebarSection[] = [];
   footerSections: any[] = [];
 

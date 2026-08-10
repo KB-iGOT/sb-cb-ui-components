@@ -33,9 +33,9 @@
         [class]="isOpen ? 'nav-link flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 group'"
         [class.gap-3]="showContent" [class.active]="isActiveRoute(item) || item?.code === activeItemCode" matRipple
         [matRippleColor]="'rgba(59, 130, 246, 0.1)'" (click)="onItemClick(item)" role="menuitem"
+        matTooltipClass="right-nav-tooltip" [matTooltip]="item?.label"
         [attr.aria-label]="item?.label"
-        [attr.aria-current]="(isActiveRoute(item) || item?.code === activeItemCode) ? 'page' : null"
-        [attr.title]="item?.label">
+        [attr.aria-current]="(isActiveRoute(item) || item?.code === activeItemCode) ? 'page' : null">
         <!-- Icon (Material Icon or Custom Image) -->
         <span class="nav-icon flex-shrink-0 w-5 h-5 flex items-center justify-center" aria-hidden="true">
           @if (item?.iconName) {

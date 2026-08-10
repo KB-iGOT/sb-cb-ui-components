@@ -87,6 +87,12 @@
     </a>
     }
 
+    @case ('startTour') {
+    <a mat-menu-item role="link" (click)="redirectToTourPage()" class="app-tour flex items-center">
+      <span>{{ 'profileDropdown.getStarted' | translate }}</span>
+    </a>
+    }
+
     <!-- logout / accessibility: in-place actions, no navigation -->
     @default {
     <a href="javascript:void(0)" mat-menu-item role="link" (click)="onMenuAction(item)"

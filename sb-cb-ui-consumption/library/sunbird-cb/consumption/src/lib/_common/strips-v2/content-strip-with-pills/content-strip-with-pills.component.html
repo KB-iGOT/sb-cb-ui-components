@@ -20,7 +20,8 @@
           @if (pill.pillDescription && pill.pillDescription.length > 0) {
           <div class="pill-active__descriptions">
             @for (desc of pill.pillDescription; track $index) {
-            <div class="pill-active__desc" [matTooltip]="desc" [matTooltipShowDelay]="400" matTooltipPosition="above">
+            <div class="pill-active__desc" matTooltipClass="right-nav-tooltip" [matTooltip]="desc"
+              [matTooltipShowDelay]="400" matTooltipPosition="above">
               {{ desc }}
             </div>
             }

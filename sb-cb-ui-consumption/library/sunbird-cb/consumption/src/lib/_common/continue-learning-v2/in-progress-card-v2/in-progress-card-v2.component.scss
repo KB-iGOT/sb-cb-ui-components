@@ -9,18 +9,77 @@
 .ip-card {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 18px;
+  flex-direction: column;
+  /* 24px between the heading row and the body, per the design spec */
+  gap: 24px;
   background: var(--surface-primary);
   border: 1px solid #FFFFFF3D;
   border-radius: 12px;
-  padding: 18px 20px;
+  padding: 16px;
   height: 100%;
   box-sizing: border-box;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   cursor: default;
   user-select: none;
+}
+
+/* ---- Header row (moved in from the section wrapper) ---- */
+.ip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ip-heading {
+  font-size: var(--font-size-body-1);
+  font-weight: 600;
+  color: var(--text-bandw-black-heading);
+  margin: 0;
+  letter-spacing: 0.01em;
+  /* stylelint-disable */
+  font-family: 'Noto Sans';
+  /* stylelint-enable */
+}
+
+/* "View All" pill button */
+.ip-view-all-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1.5px solid var(--environment-button-primary-filled-primary);
+  color: var(--environment-button-primary-filled-primary);
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  /* stylelint-disable */
+  font-family: 'Noto Sans';
+  /* stylelint-enable */
+
+  &:hover {
+    color: var(--text-button-text-primary-white);
+    background: var(--environment-button-primary-filled-primary);
+  }
+}
+
+/* ---- Body row: ring + details (the old .ip-card layout) ----
+   Bleeds out to the card edges via negative margins and re-applies the padding
+   itself, so it owns the clipping box the retired ribbon needs while the ring
+   and details stay inset exactly as before. */
+.ip-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 0;
+  /* mirrors .ip-card's 16px padding — keep these in step if the padding changes */
+  margin: 0 -16px -16px;
+  padding: 0 16px 16px;
+  overflow: hidden;
 }
 
 /* ---- Circular progress ring ---- */
@@ -46,10 +105,11 @@
   stroke: #e8edf5;
 }
 
-/* Retired ribbon overlay on card */
+/* Retired ribbon overlay — anchored to .ip-body, which bleeds to the card edges
+   and clips it into the same corner ribbon as before, now below the heading */
 .ip-retired-ribbon {
   position: absolute;
-  top: 18px;
+  top: 0;
   left: -32px;
   width: 130px;
   background: #d32f2f;
@@ -96,16 +156,18 @@
   gap: 6px;
 }
 
-/* "In Progress" badge — matches Weekly Claps badge style */
+/* "In Progress" badge — same pill treatment as the Weekly Claps period pill
+   (.wc-period-pill in weekly-claps-card-v2); keep the two in step */
 .ip-in-progress-badge {
   display: inline-block;
-  background: var(--environment-all-fills-primary-primary-50-900);
-  color: var(--environment-border-and-divider-focused);
+  background: var(--surface-secondary);
+  color: var(--text-bandw-black-title);
   border-radius: 20px;
-  padding: 3px 12px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 4px 12px;
+  font-size: var(--font-size-label-1);
+  font-weight: 600;
   width: fit-content;
+  white-space: nowrap;
   letter-spacing: 0.01em;
   /* stylelint-disable */
   font-family: 'Noto Sans';
