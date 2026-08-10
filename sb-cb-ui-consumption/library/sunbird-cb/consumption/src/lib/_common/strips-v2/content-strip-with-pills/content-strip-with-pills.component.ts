@@ -1,25 +1,30 @@
-import { Component, input, signal, ChangeDetectionStrategy, computed } from '@angular/core'
+import { Component, input, signal, ChangeDetectionStrategy, computed, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { PillConfig, ContentConfig, ContentSectionConfig } from '../models/content-section.model'
 import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatIconModule } from '@angular/material/icon'
 import { filterVisiblePills } from '../utils/visibility.util'
 import { ContentStripsComponent } from '../content-strips/content-strips.component'
 
 @Component({
   selector: 'sb-uic-content-strip-with-pills',
   standalone: true,
-  imports: [CommonModule, MatTooltipModule, ContentStripsComponent],
+  imports: [CommonModule, MatTooltipModule, MatIconModule, ContentStripsComponent],
   templateUrl: './content-strip-with-pills.component.html',
   styleUrls: ['./content-strip-with-pills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ContentStripWithPillsComponent {
+export class ContentStripWithPillsComponent implements AfterViewInit {
+  @ViewChild('pillsContainer') pillsContainerRef?: ElementRef<HTMLDivElement>;
+
   pills = input.required<PillConfig[]>();
   defaultPillKey = input<string>('');
   section = input<ContentSectionConfig>();
 
   activePillKey = signal<string>('');
   showContent = signal<boolean>(false);
+  canScrollLeft = signal<boolean>(false);
+  canScrollRight = signal<boolean>(false);
 
   visiblePills = computed(() => filterVisiblePills(this.pills()));
 
@@ -46,6 +51,24 @@ export class ContentStripWithPillsComponent {
       this.showContent.set(true)
     })
 
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.updateScrollFade())
+  }
+
+  @HostListener('window:resize')
+  updateScrollFade(): void {
+    const el = this.pillsContainerRef?.nativeElement
+    if (!el) {
+      return
+    }
+    this.canScrollLeft.set(el.scrollLeft > 0)
+    this.canScrollRight.set(Math.ceil(el.scrollLeft + el.clientWidth) < el.scrollWidth)
+  }
+
+  scrollByAmount(amount: number): void {
+    this.pillsContainerRef?.nativeElement.scrollBy({ left: amount, behavior: 'smooth' })
   }
 
   selectPill(pillKey: string): void {
