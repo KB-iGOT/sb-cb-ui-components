@@ -13,8 +13,8 @@
           @if (item?.iconName) {
           <mat-icon class="footer-icon" aria-hidden="true">{{ item?.iconName }}</mat-icon>
           } @else if (item?.iconUrl) {
-          <span class="icon-svg w-5 h-5" [style.mask-image]="'url(/assets/icons/' + item?.iconUrl + '.svg)'"
-            [style.-webkit-mask-image]="'url(/assets/icons/' + item?.iconUrl + '.svg)'" role="presentation"></span>
+          <span class="icon-svg w-5 h-5" [style.mask-image]="'url(' + item?.iconUrl + ')'"
+            [style.-webkit-mask-image]="'url(' + item?.iconUrl + ')'" role="presentation"></span>
           }
         </div>
         }
