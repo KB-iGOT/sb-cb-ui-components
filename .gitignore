@@ -11,8 +11,8 @@
 # Only exists if Bazel was run
 /bazel-out
 
-# dependencies
-/node_modules
+# dependencies (any depth: root, per-project, and nested library/project folders)
+node_modules/
 
 .angular/
 
@@ -54,7 +54,11 @@ Thumbs.db
 
 /src/assets
 package-lock.json
-/sb-cb-ui-components/node_modules
+yarn.lock
 */*/dist
-/sb-cb-ui-components/*/node_modules
-sb-cb-ui-search-listing/.package.json.swp
+
+# vim swap files
+*.swp
+*.swo
+*.swn
+*~
