@@ -100,8 +100,7 @@ export class CardCourseV2Component {
   })
 
   readonly displayType = computed<NsContent.EDisplayContentTypes>(() =>
-    (this.content()?.courseCategory ||
-      this.content()?.primaryCategory ||
+    (this.content()?.courseCategory || this.content()?.metadata?.courseCategory || this.content()?.primaryCategory || this.content()?.metadata?.primaryCategory || 
       'Course') as NsContent.EDisplayContentTypes
   )
 

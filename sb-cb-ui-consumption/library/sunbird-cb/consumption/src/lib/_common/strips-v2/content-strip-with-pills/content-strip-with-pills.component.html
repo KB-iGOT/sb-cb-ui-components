@@ -1,7 +1,14 @@
 <div class="w-full">
   <!-- Pills Navigation -->
   @if (visiblePills()?.length) {
-  <div class="pills-container scrollbar-hide">
+  <div class="pills-wrapper">
+    <div class="pills-fade pills-fade--left" [class.is-visible]="canScrollLeft()"></div>
+    @if (canScrollLeft()) {
+    <button type="button" class="pills-nav pills-nav--left" aria-label="Scroll pills left" (click)="scrollByAmount(-240)">
+      <mat-icon aria-hidden="true">chevron_left</mat-icon>
+    </button>
+    }
+    <div class="pills-container scrollbar-hide" #pillsContainer (scroll)="updateScrollFade()">
     @for (pill of visiblePills(); track pill.pillKey) {
      @if (isPillActive(pill.pillKey) && section()?.pillEnlarge === false) {
         <div class="pill-active__label__sp">{{ pill.pillLabel }}</div>
@@ -44,6 +51,13 @@
       {{ pill.pillLabel }}
     </button>
     }
+    }
+    </div>
+    <div class="pills-fade pills-fade--right" [class.is-visible]="canScrollRight()"></div>
+    @if (canScrollRight()) {
+    <button type="button" class="pills-nav pills-nav--right" aria-label="Scroll pills right" (click)="scrollByAmount(240)">
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
     }
   </div>
   }
