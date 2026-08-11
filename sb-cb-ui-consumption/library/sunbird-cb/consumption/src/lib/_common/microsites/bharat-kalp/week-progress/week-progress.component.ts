@@ -4,8 +4,8 @@ import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { of } from 'rxjs'
-import { catchError } from 'rxjs/operators'
+import { Observable, forkJoin, of } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
 import moment from 'moment'
 import { NsContent } from '@sunbird-cb/utils-v2'
 import { VIEWER_ROUTE_FROM_MIME } from '../../../../_services/viewer-route-util'
@@ -104,8 +104,8 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   /* Accumulated enrollment data from per-week API calls */
   private _enrolledMap: { [id: string]: { pct: number; durSec: number } } = {}
-  private _weekCallsTotal  = 0
-  private _weekCallsDone   = 0
+  private _weekCallsTotal = 0
+  private _weekCallsDone = 0
 
   /** Flattened, deduped list of every id across all content_ids keys (course, program, event, resources, ...) */
   private _allContentIds(wd: WeekData | null | undefined, excludeKeys: string[] = []): string[] {
@@ -114,7 +114,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     const all: string[] = []
     Object.keys(ids).forEach(key => {
       if (excludeKeys.includes(key)) return
-      ;(ids[key] || []).forEach(id => { if (id && !all.includes(id)) all.push(id) })
+        ; (ids[key] || []).forEach(id => { if (id && !all.includes(id)) all.push(id) })
     })
     return all
   }
@@ -144,7 +144,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   /* ── Week card slider ── */
   @ViewChild('cardTrack') cardTrackRef!: ElementRef<HTMLElement>
-  @ViewChild('wpStrip')   wpStripRef!: ElementRef<HTMLElement>
+  @ViewChild('wpStrip') wpStripRef!: ElementRef<HTMLElement>
   _canCardsPrev = false
   _canCardsNext = true
 
@@ -187,11 +187,13 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     }
 
     const enrollUrl = `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`
+    /* External (CIOS) courses — ids prefixed 'ext_' — carry only a completion %, no duration */
+    const extEnrollUrl = (courseId: string) => `/apis/proxies/v8/cios-enroll/v1/readby/useridcourseid/${courseId}`
 
     /* Count how many weeks actually have IDs to call (all weeks with content) */
     this._weekCallsTotal = 0
-    this._weekCallsDone  = 0
-    this._enrolledMap    = {}
+    this._weekCallsDone = 0
+    this._enrolledMap = {}
 
     const totalWeeks = this.totalWeeks
     for (let week = 1; week <= totalWeeks; week++) {
@@ -211,53 +213,84 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
       this.weekCardLoading[week] = true
 
-      this.http.post<any>(enrollUrl, { request: { courseId: weekIds } })
-        .pipe(catchError(() => of(null)))
-        .subscribe(res => {
-          const completionMap: { [id: string]: number } = {}
-          weekIds.forEach(id => { completionMap[id] = 0 })
+      /* 'do_' ids -> existing internal enrollment API (unchanged); 'ext_' ids -> external
+         CIOS enrollment lookup, one call per id, completion % only (no duration) */
+      const doIds = weekIds.filter(id => id.startsWith('do_'))
+      const extIds = weekIds.filter(id => id.startsWith('ext_'))
 
-          const allEnrolled: any[] = [
-            ...(res?.result?.courses     || []),
-            ...(res?.result?.programs    || []),
-            ...(res?.result?.events      || []),
-            ...(res?.result?.assessments || []),
-          ]
-          allEnrolled.forEach((c: any) => {
-            const id = c.courseId || c.identifier || c.contentId
-            /* Only count IDs that belong to this BK week — ignore unrelated enrolled content */
-            if (id && completionMap.hasOwnProperty(id)) {
-              completionMap[id] = c.completionPercentage ?? 0
-              this._enrolledMap[id] = {
-                pct:    c.completionPercentage ?? 0,
-                durSec: Number(c.duration || c.content?.duration || 0),
-              }
-            }
+      const completionMap: { [id: string]: number } = {}
+      weekIds.forEach(id => { completionMap[id] = 0 })
+
+      const calls: Observable<void>[] = []
+
+      if (doIds.length) {
+        calls.push(
+          this.http.post<any>(enrollUrl, { request: { courseId: doIds } })
+            .pipe(
+              catchError(() => of(null)),
+              map(res => {
+                const allEnrolled: any[] = [
+                  ...(res?.result?.courses || []),
+                  ...(res?.result?.programs || []),
+                  ...(res?.result?.events || []),
+                  ...(res?.result?.assessments || []),
+                ]
+                allEnrolled.forEach((c: any) => {
+                  const id = c.courseId || c.identifier || c.contentId
+                  /* Only count IDs that belong to this BK week — ignore unrelated enrolled content */
+                  if (id && completionMap.hasOwnProperty(id)) {
+                    completionMap[id] = c.completionPercentage ?? 0
+                    this._enrolledMap[id] = {
+                      pct: c.completionPercentage ?? 0,
+                      durSec: Number(c.duration || c.content?.duration || 0),
+                    }
+                  }
+                })
+              }),
+            ),
+        )
+      }
+
+      extIds.forEach(id => {
+        calls.push(
+          this.http.get<any>(extEnrollUrl(id))
+            .pipe(
+              catchError(() => of(null)),
+              map(res => {
+                /* CIOS enrollment record for this id — only completion % is available, no duration */
+                const pct = res?.result?.completionPercentage ?? res?.result?.completionpercentage
+                  ?? res?.completionPercentage ?? res?.completionpercentage ?? 0
+                completionMap[id] = pct
+                this._enrolledMap[id] = { pct, durSec: 0 }
+              }),
+            ),
+        )
+      })
+
+      forkJoin(calls.length ? calls : [of(null)]).subscribe(() => {
+        const sum = weekIds.reduce((acc, id) => acc + (completionMap[id] ?? 0), 0)
+        wd.progress = Math.round(sum / weekIds.length)
+
+        this.weekCardLoading[week] = false
+        this.cdr.detectChanges()
+
+        /* Card widths change as skeletons swap for real cards — refresh arrow state */
+        setTimeout(() => this._updateCardNav(), 100)
+
+        if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
+
+        /* Emit overall stats once all week calls are done */
+        this._weekCallsDone++
+        if (this._weekCallsDone >= this._weekCallsTotal) {
+          const entries = Object.values(this._enrolledMap)
+          const completedCount = entries.filter(e => e.pct >= 100).length
+          const totalSeconds = entries.reduce((acc, e) => acc + (e.durSec * e.pct / 100), 0)
+          this.progressStats.emit({
+            completedCount,
+            learningHoursFormatted: this._formatHours(totalSeconds / 3600),
           })
-
-          const sum = weekIds.reduce((acc, id) => acc + (completionMap[id] ?? 0), 0)
-          wd.progress = Math.round(sum / weekIds.length)
-
-          this.weekCardLoading[week] = false
-          this.cdr.detectChanges()
-
-          /* Card widths change as skeletons swap for real cards — refresh arrow state */
-          setTimeout(() => this._updateCardNav(), 100)
-
-          if (week === this.currentWeek) setTimeout(() => this._scrollToCurrentWeek(), 100)
-
-          /* Emit overall stats once all week calls are done */
-          this._weekCallsDone++
-          if (this._weekCallsDone >= this._weekCallsTotal) {
-            const entries = Object.values(this._enrolledMap)
-            const completedCount = entries.filter(e => e.pct >= 100).length
-            const totalSeconds   = entries.reduce((acc, e) => acc + (e.durSec * e.pct / 100), 0)
-            this.progressStats.emit({
-              completedCount,
-              learningHoursFormatted: this._formatHours(totalSeconds / 3600),
-            })
-          }
-        })
+        }
+      })
     }
   }
 
@@ -267,11 +300,13 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
     const wd = this.getWeekData(weekNum)
     if (!wd?.content_ids) return
-
-    const idMap = wd.content_ids
-
+    let idMap = wd.content_ids
+    let exIdMap: any = {}
+    if (wd.content_ids && wd.content_ids.extCourses) {
+      exIdMap["extCourses"] = wd.content_ids.extCourses
+    }
     /* Collect all unique IDs for a single API call */
-    const allIds = this._allContentIds(wd)
+    const allIds = this._allContentIds(wd, ['extCourses'])
     if (!allIds.length) return
 
     this.weekContentLoading = true
@@ -305,9 +340,59 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
             }))
         })
 
+        if (Object.keys(exIdMap).length) {
+          this.loadExternalCourses(wd, exIdMap)
+        } else {
+          this.weekContentLoading = false
+          this.cdr.detectChanges()
+        }
+
+      })
+  }
+
+  loadExternalCourses(wd: any, exIdMap: any): void {
+    const allIds = this._allContentIds(wd, ['course', 'program', 'event', 'resources'])
+    this.http.post<any>('/apis/proxies/v8/cios/v1/search/content', {
+      filterCriteriaMap: {
+        "contentPartner.isActive": true,
+        contentId: allIds,
+      },
+      requestedFields: [],
+      pageNumber: 0,
+      pageSize: allIds.length + 10,
+      orderBy: "createdOn",
+      searchString: "",
+      facets: [
+        "topic",
+        "contentPartner.contentPartnerName",
+        "competencies_v6.competencyAreaName",
+        "competencies_v6.competencyThemeName",
+        "competencies_v6.competencySubThemeName"
+      ],
+    }).pipe(catchError(() => of(null)))
+      .subscribe(res => {
+        const content: any[] = res?.data || []
+        if (content.length) {
+          const byId: { [id: string]: any } = {}
+          content.forEach(c => { byId[c.contentId] = c })
+
+          /* Distribute as NsCardContent.ICard for sb-uic-card-portrait, keyed by content-type */
+          Object.keys(exIdMap).forEach((key) => {
+            const ids = exIdMap[key] || []
+            this.weekContentCards[key] = ids
+              .filter((id: any) => byId[id])
+              .map((id: any, pos: any) => ({
+                content: byId[id],
+                cardSubType: 'standard' as NsCardContent.TCardSubType,
+                context: { pageSection: 'bharat-kalp-week-strip', position: pos },
+                stateData: {},
+              }))
+          })
+        }
         this.weekContentLoading = false
         this.cdr.detectChanges()
       })
+
   }
 
   ngAfterViewInit(): void {
@@ -375,7 +460,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     if (week > this.currentWeek && !this._weekHasContent(week)) return 'upcoming'
     const progress = this.getWeekData(week)?.progress ?? 0
     if (progress >= 100) return 'completed'
-    if (progress > 0)   return 'in-progress'
+    if (progress > 0) return 'in-progress'
     return 'not-started'
   }
 
@@ -428,7 +513,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   getRingColor(week: number): string {
     const s = this.getWeekStatus(week)
-    if (s === 'completed')   return '#1E8A44'
+    if (s === 'completed') return '#1E8A44'
     if (s === 'in-progress') return '#F37400'
     if (s === 'not-started') return '#1B4CA1'
     return '#D0D5DD'
@@ -436,7 +521,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
 
   getRingBgColor(week: number): string {
     const s = this.getWeekStatus(week)
-    if (s === 'completed')   return '#E8F5E9'
+    if (s === 'completed') return '#E8F5E9'
     if (s === 'in-progress') return '#1B4CA1'
     return '#E2E8F0'
   }
@@ -543,18 +628,24 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     return []
   }
 
-  onTabChange(index: number): void { this.activeTabIndex = index }
+  onTabChange(index: number): void {
+    this.activeTabIndex = index
+  }
+
+  onCardContentDataExt(content: any): void {
+    this.router.navigate(['/app/toc/ext/', content?.contentId], {})
+  }
 
   /** Handles (contentData) emitted by sb-uic-card-portrait */
   onCardContentData(content: any): void {
-if (content?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE) {
+    if (content?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE) {
       const url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(content?.mimeType)}/${content?.identifier}`
       const queryParams = {
         primaryCategory: content?.primaryCategory
       }
       history.pushState(history.state, '', this.router.url)
       this.router.navigate([url], { queryParams, state: { sourceUrl: this.router.url } })
-    }else{
+    } else {
       if (!content?.identifier) return
       const queryParams: { [k: string]: string } = {}
       if (content.batchId) queryParams['batchId'] = content.batchId
@@ -608,7 +699,7 @@ if (content?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE) {
 
   getCardRingBg(week: number): string {
     const s = this.getWeekStatus(week)
-    if (s === 'completed')   return '#C8E6C9'
+    if (s === 'completed') return '#C8E6C9'
     if (s === 'in-progress') return '#E0E0E0'
     if (s === 'not-started') return '#E3EAF6'
     return '#EEEEEE'

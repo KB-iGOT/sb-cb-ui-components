@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http'
 import { ConfigurationsService, EventService, WsEvents, WidgetEnrollService, DomainConfService } from '@sunbird-cb/utils-v2'
 import { Observable, Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
-import { TranslateModule } from '@ngx-translate/core'
 import { InProgressCardV2Component } from './in-progress-card-v2/in-progress-card-v2.component'
 import { WeeklyClapsCardV2Component } from './weekly-claps-card-v2/weekly-claps-card-v2.component'
 import { buildWeeklyClapsData } from './weekly-claps-card-v2/weekly-claps-data.util'
@@ -33,7 +32,7 @@ import { LearningProgressConfig } from '../strips-v2/models/content-section.mode
   templateUrl: './continue-learning-v2.component.html',
   styleUrls: ['./continue-learning-v2.component.scss'],
   standalone: true,
-  imports: [TranslateModule, InProgressCardV2Component, WeeklyClapsCardV2Component],
+  imports: [InProgressCardV2Component, WeeklyClapsCardV2Component],
 })
 export class ContinueLearningV2Component implements OnInit, OnDestroy {
   /**

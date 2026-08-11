@@ -15,7 +15,7 @@
  * - `logout`        opens the logout confirmation dialog
  * - `accessibility` opens the UserWay accessibility widget
  */
-export type ProfileMenuAction = 'route' | 'newTab' | 'logout' | 'accessibility'
+export type ProfileMenuAction = 'route' | 'newTab' | 'logout' | 'accessibility' | 'startTour'
 
 export interface IProfileMenuItem {
   /** Stable identifier, also used as the telemetry id */
@@ -48,6 +48,11 @@ export const DEFAULT_PROFILE_MENU_ITEMS: IProfileMenuItem[] = [
     label: 'profileDropdown.viewProfile',
     action: 'route',
     target: '/app/person-profile/me',
+  },
+  {
+    key: 'start-tour',
+    label: 'profileDropdown.getStarted',
+    action: 'startTour',
   },
   {
     key: 'privacyPolicy',

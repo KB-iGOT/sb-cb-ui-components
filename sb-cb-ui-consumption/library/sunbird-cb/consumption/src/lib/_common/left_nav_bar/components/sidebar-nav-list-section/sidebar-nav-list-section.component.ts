@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { RouterModule, Router } from '@angular/router'
 import { MatIconModule } from '@angular/material/icon'
 import { MatRippleModule } from '@angular/material/core'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import { NavListSectionConfig, NavListItem } from '../../models/sidebar.models'
 import { MultilingualTranslationsService } from '../../../../_services/multilingual-translations.service'
@@ -31,6 +32,7 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
     RouterModule,
     MatIconModule,
     MatRippleModule,
+    MatTooltipModule,
     TranslateModule,
     SkeletonLoaderLibModule
   ],
@@ -99,6 +101,10 @@ export class SidebarNavListSectionComponent implements OnChanges {
 
   translateLabels(label: string, type: string): string {
     return this.langtranslations.translateActualLabel(label, type, '')
+  }
+
+  itemTooltip(item?: NavListItem): string {
+    return item?.tooltipText || item?.label || ''
   }
 
   onItemClick(item: NavListItem): void {

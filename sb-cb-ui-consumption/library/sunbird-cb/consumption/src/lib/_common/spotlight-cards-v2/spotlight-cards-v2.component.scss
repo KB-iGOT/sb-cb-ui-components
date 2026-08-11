@@ -15,12 +15,11 @@
   }
 
   &__title {
-    font-size: 1.125rem;
-    /* 18px */
-    font-weight: 700;
-    color: var(--text-bandw-black-display);
+    /* Matches .section-header in sb-uic-accordion, which renders the headings for
+       "Trending on iGOT" and every other accordion-wrapped section. */
+    font: 600 var(--font-size-title-2) var(--font-family-heading);
+    color: var(--text-bandw-black-heading);
     margin: 0;
-    line-height: 1.4;
   }
 
   /* ── Accordion toggle button — matches sb-uic-accordion .arrow-icon-container ── */
@@ -59,46 +58,15 @@
     }
   }
 
-  /* ── Cards grid: fills full width, equal columns ── */
-  &__grid {
-    display: flex;
-    flex-wrap: nowrap;
-    /* gap between cards */
-    gap: 24px;
-    width: 100%;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
-
-    /* Hide scrollbar in webkit browsers */
-    &::-webkit-scrollbar {
-      height: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 2px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.3);
-      }
-    }
-  }
+  /* No cards-row rule here: sb-uic-carousel owns the track, the 24px gap (passed as [gap])
+     and the paging, so the raw horizontal scrollbar this used to show is gone. */
 
   /* ── Individual card (div – not clickable itself) ─────── */
   &__card {
-    /* Fixed 248x147 at every breakpoint — the row scrolls horizontally rather than fitting
-       N cards per view, so no per-count width maths anywhere. */
-    flex: 0 0 248px;
-    width: 248px;
+    /* Fixed 248x147 at every breakpoint. The carousel item is sized to the same 248 via
+       [cardWidth], so width:100% keeps the two in step if that constant ever changes. */
+    width: 100%;
     height: 147px;
-    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -199,8 +167,8 @@
   }
 }
 
-/* No per-breakpoint card sizing: the card is a fixed 248x147 everywhere and the row
-   scrolls horizontally, which the base .ws-spotlight__grid rule already handles. */
+/* No per-breakpoint card sizing: the card is a fixed 248x147 everywhere and the carousel
+   pages through them, so there is no cards-per-view maths. */
 
 /* ══════════════════════════════════════════════════
    Skeleton / shimmer styles

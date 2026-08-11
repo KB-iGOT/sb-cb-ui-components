@@ -1,6 +1,11 @@
 <div class="footer-content flex items-center py-1" [ngClass]="isOpen ? 'px-6' : 'justify-center'">
   @for (item of itemsList; track item.code) {
-  <a class="footer-item w-full" (click)="onItemClick(item)" [attr.aria-label]="item.iconName">
+  <!-- Collapsed sidebar hides .item-text, so the tooltip is the only thing naming the icon.
+       Suppressed when open, where the label is already visible next to it. -->
+  <a class="footer-item w-full" (click)="onItemClick(item)"
+    [matTooltip]="translateLabels(item.label, 'leftNavBar', item.disableTranslate)" matTooltipPosition="right"
+    matTooltipClass="right-nav-tooltip"
+    [matTooltipDisabled]="isOpen" [attr.aria-label]="translateLabels(item.label, 'leftNavBar', item.disableTranslate)">
     <div class="flex items-center" [ngClass]="isOpen ? 'justify-between' : 'justify-center'">
       <!-- @if (isOpen) { -->
       <div class="flex gap-1 items-center">
@@ -9,8 +14,8 @@
           @if (item?.iconName) {
           <mat-icon class="footer-icon" aria-hidden="true">{{ item?.iconName }}</mat-icon>
           } @else if (item?.iconUrl) {
-          <span class="icon-svg w-5 h-5" [style.mask-image]="'url(/assets/icons/' + item?.iconUrl + '.svg)'"
-            [style.-webkit-mask-image]="'url(/assets/icons/' + item?.iconUrl + '.svg)'" role="presentation"></span>
+          <span class="icon-svg w-5 h-5" [style.mask-image]="'url(' + item?.iconUrl + ')'"
+            [style.-webkit-mask-image]="'url(' + item?.iconUrl + ')'" role="presentation"></span>
           }
         </div>
         }
