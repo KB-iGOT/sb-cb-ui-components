@@ -3039,9 +3039,21 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         ...(lang ? { language: lang } : null),
       },
     }
-    if (this.content && this.content.primaryCategory !== NsContent.EPrimaryCategory.RESOURCE && this.isApiEnabled('contentProgress', '/apis/proxies/v8/read/content-progres')) {
+    if (!this.content) {
+      // Hierarchy content failed to load (e.g. hierarchy API error) - nothing to continue learning from
+      this.loggerSvc.error('Cannot fetch continue learning data: content is missing')
+      this.tocSvc.contentLoader.next(false)
+      this.skeletonLoader = false
+      this.enrollBtnLoading = false
+      this.snackBar.open('Unable to load the content. Please try again.', 'X', {
+        duration: 6000,
+      });
+      return
+    }
+    if (this.content.primaryCategory !== NsContent.EPrimaryCategory.RESOURCE && this.isApiEnabled('contentProgress', '/apis/proxies/v8/read/content-progres')) {
       this.contentSvc.fetchContentHistoryV2(req).subscribe(
         data => {
+          this.enrollBtnLoading = false
           if (data && data.result && data.result.contentList && data.result.contentList.length) {
             const tempResumeData = _.get(data, 'result.contentList')
             this.languageMapProgress = _.get(data, 'result.languageProgress') || {}
@@ -3103,8 +3115,15 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         },
         (error: any) => {
           this.loggerSvc.error('CONTENT HISTORY FETCH ERROR >', error)
+          this.tocSvc.contentLoader.next(false)
+          this.skeletonLoader = false
+          this.enrollBtnLoading = false
         },
       )
+    } else {
+      this.tocSvc.contentLoader.next(false)
+      this.skeletonLoader = false
+      this.enrollBtnLoading = false
     }
   }
 
