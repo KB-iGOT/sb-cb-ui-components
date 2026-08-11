@@ -6,6 +6,7 @@
   @if (isTablet()) {
   <div class="sidebar-toggle-btn hover:bg-gray-100 flex items-center justify-center ml-1 md:ml-0"
     (click)="toggleSidebar()" [matTooltip]="toggleTooltip()" matTooltipPosition="right"
+    matTooltipClass="right-nav-tooltip"
     [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
     [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
     @if (isOpen()) {
@@ -49,6 +50,7 @@
         <!-- Menu Toggle Button -->
         <div class="sidebar-toggle-btn hover:bg-gray-100 flex items-center justify-center ml-1 md:ml-0"
           (click)="toggleSidebar()" [matTooltip]="toggleTooltip()" matTooltipPosition="right"
+          matTooltipClass="right-nav-tooltip"
           [attr.aria-label]="isOpen() ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'"
           [attr.aria-expanded]="isOpen()" [attr.aria-controls]="'sidebar-nav'">
           @if (isOpen()) {
