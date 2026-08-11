@@ -277,9 +277,10 @@ export class ContentApiService {
 
     if (Object.prototype.hasOwnProperty.call(filters, 'secureSettings.isVerifiedKarmayogi')) {
       delete filters['secureSettings.isVerifiedKarmayogi']
-      if (this.configSvc && this.configSvc.unMappedUser &&
-        this.configSvc.unMappedUser.profileDetails &&
-        !this.configSvc.unMappedUser.profileDetails.verifiedKarmayogi) {
+      const profileDetails = this.configSvc && this.configSvc.unMappedUser &&
+        this.configSvc.unMappedUser.profileDetails
+      const profileStatus = profileDetails && profileDetails.profileStatus
+      if (!profileStatus || profileStatus.toLowerCase() !== 'verified') {
         filters['secureSettings.isVerifiedKarmayogi'] = 'No'
       }
     }
