@@ -4,6 +4,7 @@
        Suppressed when open, where the label is already visible next to it. -->
   <a class="footer-item w-full" (click)="onItemClick(item)"
     [matTooltip]="translateLabels(item.label, 'leftNavBar', item.disableTranslate)" matTooltipPosition="right"
+    matTooltipClass="right-nav-tooltip"
     [matTooltipDisabled]="isOpen" [attr.aria-label]="translateLabels(item.label, 'leftNavBar', item.disableTranslate)">
     <div class="flex items-center" [ngClass]="isOpen ? 'justify-between' : 'justify-center'">
       <!-- @if (isOpen) { -->
