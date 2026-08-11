@@ -42,12 +42,11 @@
 <!-- ── Shared stepper template ── -->
 <ng-template #stepperTpl let-weeks="weeks" let-sm="sm">
   <ng-container *ngFor="let w of weeks; let last = last">
-    <div class="wp-tl-step" [class.wp-tl-step--sm]="sm" [class.wp-tl-step--selected]="w === selectedWeek"
-      (click)="onWeekClick(w)" role="button" [attr.tabindex]="0" [attr.aria-label]="weekLabel(w)">
+    <div class="wp-tl-step" [class.wp-tl-step--sm]="sm" [class.wp-tl-step--selected]="w === selectedWeek" (click)="onWeekClick(w)" role="button"
+      [attr.tabindex]="0" [attr.aria-label]="weekLabel(w)">
       <div class="wp-tl-node" [class.wp-tl-node--sm]="sm">
         <div class="wp-tl-dot" [class.wp-tl-dot--sm]="sm" [class.wp-tl-dot--done]="getWeekStatus(w) === 'completed'"
-          [class.wp-tl-dot--current]="getWeekStatus(w) === 'in-progress'"
-          [class.wp-tl-dot--upcoming]="getWeekStatus(w) === 'upcoming'">
+          [class.wp-tl-dot--current]="getWeekStatus(w) === 'in-progress'" [class.wp-tl-dot--upcoming]="getWeekStatus(w) === 'upcoming'">
         </div>
       </div>
       <span class="wp-tl-label" [class.wp-tl-label--sm]="sm" [class.wp-tl-label--selected]="w === selectedWeek">
@@ -67,8 +66,8 @@
     <div class="wp-header">
       <span class="wp-header__label" *ngIf="programData?.enableTitlePill">
         {{ isProgramEnded && programData?.endedEventPillText
-           ? programData?.endedEventPillText
-           : weekLabel(currentWeek) + ' In Progress' }}
+        ? programData?.endedEventPillText
+        : weekLabel(currentWeek) + ' In Progress' }}
       </span>
       <button class="wp-header__btn" (click)="viewAllWeeks()">
         View All Weeks <span class="wp-header__arrow">›</span>
@@ -103,14 +102,10 @@
           </div>
 
           <!-- Actual card when not loading — full card is clickable for non-locked weeks -->
-          <div class="wp-week-card" *ngIf="!isWeekLoading(w)"
-            [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
-            [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'"
-            [class.wp-week-card--not-started]="getWeekStatus(w) === 'not-started'"
-            [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'"
-            [class.wp-week-card--current]="w === currentWeek"
-            [class.wp-week-card--clickable]="getWeekStatus(w) !== 'upcoming'"
-            (click)="getWeekStatus(w) !== 'upcoming' && viewWeek(w)">
+          <div class="wp-week-card" *ngIf="!isWeekLoading(w)" [class.wp-week-card--completed]="getWeekStatus(w) === 'completed'"
+            [class.wp-week-card--progress]="getWeekStatus(w) === 'in-progress'" [class.wp-week-card--not-started]="getWeekStatus(w) === 'not-started'"
+            [class.wp-week-card--upcoming]="getWeekStatus(w) === 'upcoming'" [class.wp-week-card--current]="w === currentWeek"
+            [class.wp-week-card--clickable]="getWeekStatus(w) !== 'upcoming'" (click)="getWeekStatus(w) !== 'upcoming' && viewWeek(w)">
 
             <!-- Card top: week label + status badge (hidden for upcoming) -->
             <div class="wp-week-card__top">
@@ -118,14 +113,13 @@
                 <span class="wp-week-card__live-dot" *ngIf="w === currentWeek && !isProgramEnded"></span>
                 {{ weekLabel(w) }}
               </span>
-              <span class="wp-week-card__badge"
-                *ngIf="getWeekStatus(w) !== 'upcoming'"
+              <span class="wp-week-card__badge" *ngIf="getWeekStatus(w) !== 'upcoming'"
                 [class.wp-week-card__badge--done]="getWeekStatus(w) === 'completed'"
                 [class.wp-week-card__badge--progress]="getWeekStatus(w) === 'in-progress'"
                 [class.wp-week-card__badge--not-started]="getWeekStatus(w) === 'not-started'">
                 {{ getWeekStatus(w) === 'completed' ? 'Completed'
-                   : getWeekStatus(w) === 'in-progress' ? 'In Progress'
-                   : 'Not Started' }}
+                : getWeekStatus(w) === 'in-progress' ? 'In Progress'
+                : 'Not Started' }}
               </span>
             </div>
 
@@ -135,11 +129,8 @@
                 <svg viewBox="0 0 36 36" class="wp-ring wp-ring--card">
                   <circle class="wp-ring__bg" cx="18" cy="18" r="15.9"
                     [style.stroke]="getWeekStatus(w) === 'upcoming' ? '#E0E0E0' : getCardRingBg(w)" />
-                  <circle *ngIf="(getWeekData(w)?.progress || 0) > 0"
-                    class="wp-ring__fill" cx="18" cy="18" r="15.9"
-                    [style.stroke]="getRingColor(w)"
-                    [attr.stroke-dasharray]="getRingDash(getWeekData(w)?.progress)"
-                    transform="rotate(-90 18 18)" />
+                  <circle *ngIf="(getWeekData(w)?.progress || 0) > 0" class="wp-ring__fill" cx="18" cy="18" r="15.9" [style.stroke]="getRingColor(w)"
+                    [attr.stroke-dasharray]="getRingDash(getWeekData(w)?.progress)" transform="rotate(-90 18 18)" />
                 </svg>
                 <div class="wp-ring__text">
                   <span class="wp-ring__pct wp-ring__pct--card">{{ getWeekData(w)?.progress || 0 }}%</span>
@@ -180,34 +171,39 @@
       <div class="wp-strip__header" #wpStrip>
         <div class="wp-strip__title-row">
           <h3 class="wp-strip__title">{{ activeStripTitle }}</h3>
-          <span *ngIf="activeStripBadge" class="wp-strip__badge"
-            [style.background]="activeStripBadge!.background || '#E53935'"
+          <span *ngIf="activeStripBadge" class="wp-strip__badge" [style.background]="activeStripBadge!.background || '#E53935'"
             [style.color]="activeStripBadge!.textColor || '#ffffff'">
             {{ activeStripBadge!.text }}
           </span>
         </div>
       </div>
       <p class="wp-strip__desc">{{ activeStripDesc }}</p>
-      <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex"
-        [mat-stretch-tabs]="false" (selectedIndexChange)="onTabChange($event)">
+      <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex" [mat-stretch-tabs]="false"
+        (selectedIndexChange)="onTabChange($event)">
         <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>
       </mat-tab-group>
 
       <!-- Skeleton while week content loads -->
-      <sb-uic-horizontal-scroller-v2 *ngIf="weekContentLoading" [id]="'week-strip-skeleton'" [loadStatus]="'fetching'"
-        [widgetsLength]="4" [sliderConfig]="{ showNavs: false, showDots: false }">
+      <sb-uic-horizontal-scroller-v2 *ngIf="weekContentLoading" [id]="'week-strip-skeleton'" [loadStatus]="'fetching'" [widgetsLength]="4"
+        [sliderConfig]="{ showNavs: false, showDots: false }">
         <sb-uic-card-portrait *ngFor="let s of [1,2,3,4]" [isCardLoading]="true">
         </sb-uic-card-portrait>
       </sb-uic-horizontal-scroller-v2>
 
       <!-- Cards via sb-uic-horizontal-scroller-v2 + sb-uic-card-portrait -->
-      <sb-uic-horizontal-scroller-v2 *ngIf="!weekContentLoading && activeTabCards.length"
-        [id]="'week-strip-' + activeTabIndex" [loadStatus]="'done'" [widgetsLength]="activeTabCards.length"
-        [defaultMaxWidgets]="activeTabCards.length"
+      <sb-uic-horizontal-scroller-v2 *ngIf="!weekContentLoading && activeTabCards.length" [id]="'week-strip-' + activeTabIndex" [loadStatus]="'done'"
+        [widgetsLength]="activeTabCards.length" [defaultMaxWidgets]="activeTabCards.length"
         [sliderConfig]="{ showNavs: true, showDots: true, dotsAlign: 'center' }">
-        <sb-uic-card-portrait *ngFor="let card of activeTabCards" [widgetData]="card"
-          (contentData)="onCardContentData($event)">
-        </sb-uic-card-portrait>
+        <ng-container *ngFor="let card of activeTabCards">
+          <ng-container *ngIf="card?.content?.externalId">
+            <sb-uic-card-portrait-ext [widgetData]="card" (contentData)="onCardContentDataExt($event)">
+            </sb-uic-card-portrait-ext>
+          </ng-container>
+          <ng-container *ngIf="!card?.content?.externalId">
+            <sb-uic-card-portrait [widgetData]="card" (contentData)="onCardContentData($event)">
+            </sb-uic-card-portrait>
+          </ng-container>
+        </ng-container>
       </sb-uic-horizontal-scroller-v2>
 
       <!-- Empty state — same height as card area, centered, correct image -->
