@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges, signal, computed } from '@angular/core'
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, OnDestroy, SimpleChanges, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { RouterModule, Router } from '@angular/router'
+import { RouterModule, Router, NavigationEnd } from '@angular/router'
+import { Subscription } from 'rxjs'
+import { filter } from 'rxjs/operators'
 import { MatIconModule } from '@angular/material/icon'
 import { MatRippleModule } from '@angular/material/core'
 import { MatTooltipModule } from '@angular/material/tooltip'
@@ -40,7 +42,7 @@ import { SkeletonLoaderLibModule } from '../../../skeleton-loader-lib/skeleton-l
   styleUrls: ['./sidebar-nav-list-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SidebarNavListSectionComponent implements OnChanges {
+export class SidebarNavListSectionComponent implements OnChanges, OnDestroy {
   /**
    * Navigation list section configuration
    */
@@ -66,18 +68,40 @@ export class SidebarNavListSectionComponent implements OnChanges {
     this.viewAllItems() ? this.itemsList : this.limitedItemsList
   );
 
+  /**
+   * isActiveRoute() reads the router rather than any component input, so on an
+   * OnPush view nothing marks it dirty when the URL changes. Bumping this signal
+   * on NavigationEnd is what re-runs the active-state bindings. RouterLinkActive
+   * used to provide that as a side effect of its own markForCheck(), which is why
+   * the highlight kept working while two competing sources set the same class.
+   */
+  private navigationTick = signal(0)
+  private subs: Subscription[] = []
+
   constructor(
     private router: Router,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService
   ) {
-    this.langtranslations.languageSelectedObservable.subscribe(() => {
-      if (localStorage.getItem('websiteLanguage')) {
-        this.translate.setDefaultLang('en')
-        const lang = localStorage.getItem('websiteLanguage')!
-        this.translate.use(lang)
-      }
-    })
+    this.subs.push(
+      this.langtranslations.languageSelectedObservable.subscribe(() => {
+        if (localStorage.getItem('websiteLanguage')) {
+          this.translate.setDefaultLang('en')
+          const lang = localStorage.getItem('websiteLanguage')!
+          this.translate.use(lang)
+        }
+      })
+    )
+
+    this.subs.push(
+      this.router.events
+        .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+        .subscribe(() => this.navigationTick.update(v => v + 1))
+    )
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe())
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -116,26 +140,34 @@ export class SidebarNavListSectionComponent implements OnChanges {
   /**
    * Check if a route is currently active
    *
-   * "my-learning" shares its navUrl with other sidebar items that point to the
-   * same seeAll page, so it's only active when the continueLearning
-   * queryParams also match - path alone isn't enough to disambiguate it.
+   * Sidebar items routinely share a navUrl and are told apart only by their query
+   * string - marketplace and my-learning both sit under seeAll, and the
+   * globalsearch presets differ only by their filter params. So any item that
+   * declares queryParams is active only when the current URL carries them, rather
+   * than just "my-learning" being special-cased.
+   *
+   * 'subset' rather than 'exact' because the page adds params of its own (pill and
+   * tab state the config does not spell out) and those must not break the match.
+   * Items with no queryParams keep ignoring the query string entirely, so
+   * something like /page/home stays active whatever is appended to it.
    */
   isActiveRoute(item?: NavListItem): boolean {
+    // Read the tick so the binding re-runs after a navigation - see navigationTick.
+    this.navigationTick()
+
     if (!item?.navUrl) return false
 
-    if (item.code === 'my-learning') {
-      return this.router.isActive(
-        this.router.createUrlTree([item.navUrl], { queryParams: item.queryParams || {} }),
-        { paths: 'exact', queryParams: 'subset', fragment: 'ignored', matrixParams: 'ignored' }
-      )
-    }
+    const hasQueryParams = !!item.queryParams && Object.keys(item.queryParams).length > 0
 
-    return this.router.isActive(item.navUrl, {
-      paths: 'exact',
-      queryParams: 'ignored',
-      fragment: 'ignored',
-      matrixParams: 'ignored'
-    })
+    return this.router.isActive(
+      this.router.createUrlTree([item.navUrl], hasQueryParams ? { queryParams: item.queryParams } : {}),
+      {
+        paths: 'exact',
+        queryParams: hasQueryParams ? 'subset' : 'ignored',
+        fragment: 'ignored',
+        matrixParams: 'ignored',
+      }
+    )
   }
 
   /**

@@ -28,14 +28,20 @@
   <ul class="nav-list space-y-1" role="menu" [attr.aria-label]="section?.sectionTitle">
     @for (item of visibleItems(); track trackByNavUrl($index, item)) {
     <li class="nav-item" [class.nav-item-close]="!showContent" role="none">
+      <!-- No routerLinkActive: it set the same "active" class as the [class.active] binding below
+           from a second, conflicting rule (its exact:true also demands an exact queryParams match),
+           so the two disagreed on items that share a navUrl. isActiveRoute() is the single source.
+           activeItemCode is only consulted for items with no navUrl (explore), whose destination the
+           config cannot describe; letting it apply to routed items left the last clicked one lit on
+           every later page. -->
       <a [routerLink]="item?.navUrl ? [item.navUrl] : null" [queryParams]="item?.queryParams || null"
-        routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         [class]="isOpen ? 'nav-link flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group' : 'nav-link-mini flex items-center justify-center p-2.5 rounded-lg transition-all duration-200 group'"
-        [class.gap-3]="showContent" [class.active]="isActiveRoute(item) || item?.code === activeItemCode" matRipple
+        [class.gap-3]="showContent"
+        [class.active]="isActiveRoute(item) || (!item?.navUrl && item?.code === activeItemCode)" matRipple
         [matRippleColor]="'rgba(59, 130, 246, 0.1)'" (click)="onItemClick(item)" role="menuitem"
         matTooltipClass="right-nav-tooltip" [matTooltip]="itemTooltip(item)" matTooltipPosition="right"
         [attr.aria-label]="item?.label"
-        [attr.aria-current]="(isActiveRoute(item) || item?.code === activeItemCode) ? 'page' : null">
+        [attr.aria-current]="(isActiveRoute(item) || (!item?.navUrl && item?.code === activeItemCode)) ? 'page' : null">
         <!-- Icon (Material Icon or Custom Image) -->
         <span class="nav-icon flex-shrink-0 w-5 h-5 flex items-center justify-center" aria-hidden="true">
           @if (item?.iconName) {
