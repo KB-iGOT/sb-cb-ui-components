@@ -103,6 +103,10 @@ export class SidebarNavListSectionComponent implements OnChanges {
     return this.langtranslations.translateActualLabel(label, type, '')
   }
 
+  itemTooltip(item?: NavListItem): string {
+    return item?.tooltipText || item?.label || ''
+  }
+
   onItemClick(item: NavListItem): void {
     if (item?.code) {
       this.itemClicked.emit({ code: item.code, subType: item.subtype ?? '' })
