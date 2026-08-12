@@ -178,10 +178,18 @@
         </div>
       </div>
       <p class="wp-strip__desc">{{ activeStripDesc }}</p>
-      <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex" [mat-stretch-tabs]="false"
-        (selectedIndexChange)="onTabChange($event)">
-        <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>
-      </mat-tab-group>
+      <!-- Rebuilt whenever the displayed week changes. viewWeek() already resets activeTabIndex
+           to 0, but it was 0 before too, so the [selectedIndex] binding never changes value and
+           Angular pushes nothing to mat-tab-group - which then keeps its own _selectedIndex from
+           the previous week's tab list. That left the highlight on External Course while the
+           component was on tab 0 and rendered Courses. Recreating the group makes it read
+           selectedIndex afresh; the single-item ngFor is just a way to key it by week. -->
+      <ng-container *ngFor="let wk of [selectedDisplayWeek]; trackBy: trackTabGroup">
+        <mat-tab-group class="wp-tabs" animationDuration="0ms" [selectedIndex]="activeTabIndex" [mat-stretch-tabs]="false"
+          (selectedIndexChange)="onTabChange($event)">
+          <mat-tab *ngFor="let tab of activeTabs; trackBy: trackTab" [label]="tab.label"></mat-tab>
+        </mat-tab-group>
+      </ng-container>
 
       <!-- Skeleton while week content loads -->
       <sb-uic-horizontal-scroller-v2 *ngIf="weekContentLoading" [id]="'week-strip-skeleton'" [loadStatus]="'fetching'" [widgetsLength]="4"
@@ -194,12 +202,15 @@
       <sb-uic-horizontal-scroller-v2 *ngIf="!weekContentLoading && activeTabCards.length" [id]="'week-strip-' + activeTabIndex" [loadStatus]="'done'"
         [widgetsLength]="activeTabCards.length" [defaultMaxWidgets]="activeTabCards.length"
         [sliderConfig]="{ showNavs: true, showDots: true, dotsAlign: 'center' }">
+        <!-- Chosen by tab, not by a field on the item: cios content has no externalId (that
+             belongs to the internal search), so a per-card check sent every external
+             card down the internal branch and they rendered as ordinary course cards. -->
         <ng-container *ngFor="let card of activeTabCards">
-          <ng-container *ngIf="card?.content?.externalId">
+          <ng-container *ngIf="isActiveTabExternal">
             <sb-uic-card-portrait-ext [widgetData]="card" (contentData)="onCardContentDataExt($event)">
             </sb-uic-card-portrait-ext>
           </ng-container>
-          <ng-container *ngIf="!card?.content?.externalId">
+          <ng-container *ngIf="!isActiveTabExternal">
             <sb-uic-card-portrait [widgetData]="card" (contentData)="onCardContentData($event)">
             </sb-uic-card-portrait>
           </ng-container>
