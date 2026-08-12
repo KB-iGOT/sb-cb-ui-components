@@ -102,7 +102,8 @@ export interface ContentSectionConfig {
   contentConfig?: ContentConfig
   spotlightConfig?: SpotlightConfig[]
   pillEnlarged?: boolean
-  learningProgressConfig?: LearningProgressConfig
+  learningProgressConfig?: LearningProgressConfig,
+  canShowScrollArrow?: boolean
 }
 
 export interface DynamicTab {
