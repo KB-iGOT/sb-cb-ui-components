@@ -628,7 +628,7 @@ export class ViewerUtilService {
       // console.log('req', req)
 
        const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
-       // Aded Enroll button Issue in case of Pre-Enrollment Requisites (Blended Program)
+       // Fixed Enroll button Issue in case of Pre-Enrollment Requisites (Blended Program)
       if (resourceStatus < 2 || req?.request?.contents[0]?.status === 2) {
         this.isPlayerApiEnabled('preAssessmentStateUpdate', '/apis/proxies/v8/content/v2/state/update', (url: string) => {
           if (url) {
@@ -682,7 +682,7 @@ export class ViewerUtilService {
         },
       }
       const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
-       // Aded Enroll button Issue in case of Pre-Enrollment Requisites (Blended Program)
+       // Fixed Enroll button Issue in case of Pre-Enrollment Requisites (Blended Program)
       if (resourceStatus < 2 || req?.request?.contents[0]?.status === 2) {
         this.isPlayerApiEnabled('preAssessmentStateUpdate', '/apis/proxies/v8/content/v2/state/update', (url: string) => {
           if (url) {
