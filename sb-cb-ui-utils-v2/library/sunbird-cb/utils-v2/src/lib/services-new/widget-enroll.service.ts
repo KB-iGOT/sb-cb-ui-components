@@ -15,6 +15,7 @@ const API_END_POINTS = {
   ENROLL_EXTERNAL_DATA: `${PROXIES_V8}/cios-enroll/v1/courselist/byuserid`,
   ENROLL_EVENTS_DATA: `${PROXIES_V8}/user/events/list`,
   ENROLL_EVENTS_SUMMARY: `${PROXIES_V8}/user/events/enroll/summary`,
+  ENROLL_EXTERNAL_SEARCH: `${PROXIES_V8}/cios-enroll/v1/search`,
 };
 
 @Injectable({
@@ -73,6 +74,13 @@ fetchExternalEnrollmentData(payload: any) {
     return extRes
   }))
 }
+  fetchExternalEnrollmentSearch(payload: any): Observable<any> {
+    const externalEnrollSearchConfig = this.configSvc.globalConfig?.apis?.user?.externalEnrollmentSearch
+    const url = (externalEnrollSearchConfig?.enabled && externalEnrollSearchConfig?.url)
+      ? externalEnrollSearchConfig.url
+      : API_END_POINTS.ENROLL_EXTERNAL_SEARCH
+    return this.http.post(url, payload)
+  }
 
   fetchEventsEnrollmentData(userId: string, payload: any) {
     const eventsEnrollConfig = this.configSvc.globalConfig?.apis?.user?.eventsEnrollmentList
