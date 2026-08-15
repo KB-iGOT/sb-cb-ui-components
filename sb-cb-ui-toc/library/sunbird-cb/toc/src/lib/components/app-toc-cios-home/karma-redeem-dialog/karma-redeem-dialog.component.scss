@@ -1,0 +1,95 @@
+// Same shade MatDialog painted through .cdk-overlay-dark-backdrop, so the popup looks unchanged
+// now that it no longer goes through the CDK overlay.
+.karma-redeem-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+// Matches the surface MatDialog gave this popup: 530px wide capped at 90vw, 24px inner padding,
+// 4px radius and the elevation-24 shadow, centred in the viewport.
+.karma-redeem-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10002;
+  box-sizing: border-box;
+  width: 530px;
+  max-width: 90vw;
+  padding: 24px;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow:
+    0 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0 24px 38px 3px rgba(0, 0, 0, 0.14),
+    0 9px 46px 8px rgba(0, 0, 0, 0.12);
+}
+
+.karma-redeem-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 8px 8px 0;
+
+  .karma-redeem-icon {
+    height: 48px;
+    width: 48px;
+    object-fit: contain;
+    margin-bottom: 16px;
+  }
+
+  .karma-redeem-header {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.15px;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .karma-redeem-message {
+    margin: 2px 0 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.15px;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .karma-redeem-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .karma-redeem-btn {
+    min-width: 124px;
+    height: 36px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  .karma-redeem-continue {
+    color: #fff;
+    background-color: #1b4ca1;
+    border: 1px solid #1b4ca1;
+  }
+
+  .karma-redeem-cancel {
+    color: #1b4ca1;
+    background-color: #fff;
+    border: 1px solid #1b4ca1;
+  }
+}
