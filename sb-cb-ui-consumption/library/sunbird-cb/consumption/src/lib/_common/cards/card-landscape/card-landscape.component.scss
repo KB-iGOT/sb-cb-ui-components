@@ -110,6 +110,28 @@ span.portrait-org-name {
     align-items: center;
     margin-top: 0;
 
+    // Enrolment status pill. Sits at the far right of the top row, opposite the content type and
+    // difficulty level, so it does not collide with either when both are enabled.
+    .enrolment-status-pill {
+    margin-left: auto;
+    padding: 2px 12px;
+    border-radius: 16px;
+    font-family: "Lato-Regular";
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+    white-space: nowrap;
+    }
+    .enrolment-status-in-progress {
+    background-color: #fdf0e1;
+    color: #b35309;
+    }
+    .enrolment-status-completed {
+    background-color: #e4f4ea;
+    color: #1b7a44;
+    }
+
     .course_port {
     border: 1px solid $secondary-color;
     padding: 4px 8px;
@@ -227,7 +249,8 @@ span.portrait-org-name {
 }
 
 .card-portrait-clickable {
-min-height: 146px !important;
+min-height: 185px !important;
+justify-content: center;
 .right-corner-portrait {
     right: 8px;
     bottom: 8px;
@@ -240,19 +263,19 @@ transform: scale(1.02);
 
 .course_widget {
     margin-top: 10px;
-  
+
     .mat-icon {
       vertical-align: middle;
       color: $secondary-color !important;
     }
-  
+
     .course_v2{
       border: 1px solid $secondary-color;
       padding: 4px 8px;
       align-items: end;
       border-radius: 16px;
     }
-  
+
     .main_icon {
       font-size: 16px;
       width: 16px;
@@ -287,7 +310,7 @@ transform: scale(1.02);
     align-items: center;
     padding: 4px;
     border-radius: 4px;
-  
+
     &.right-corner {
       right: 4px;
       bottom: 4px;
@@ -312,14 +335,14 @@ transform: scale(1.02);
     }
     .card-wide-v2 {
       min-height: 356px;
-  
+
       .imageholder {
         img {
           border-radius: 12px 12px 0 0 !important;
         }
       }
     }
-  
+
     .cbpwidth {
       width: calc(100vw - 100px);
     }
@@ -350,7 +373,7 @@ transform: scale(1.02);
       margin-bottom: 0;
     }
   }
-  
+
   .cbpwidth {
     width: 340px;
   }
@@ -391,7 +414,7 @@ transform: scale(1.02);
     background-color: #d13924 !important;
     color: rgba(255,255,255,1) !important;
     opacity: 1;
-  
+
   }
   .cbp-success {
     border-radius: 2px;
@@ -406,4 +429,9 @@ transform: scale(1.02);
     background-color: #ef951e !important;
     color: rgba(255,255,255,1) !important;
     opacity: 1;
+  }
+@media only screen and (max-width:400px) {
+    .card-portrait {
+      width: calc(100vw - 35px) !important;
+    }
   }
