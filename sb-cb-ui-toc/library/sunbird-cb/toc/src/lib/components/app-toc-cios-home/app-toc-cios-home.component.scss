@@ -925,6 +925,17 @@ ul {
   white-space: nowrap;
 }
 
+.restricted-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  img {
+    height: 24px;
+    object-fit: contain;
+  }
+}
+
 .level-badge.beginner {
   border: 1px solid #49C951;
   background: linear-gradient(0deg, rgba(73, 201, 81, 0.20) 0%, rgba(73, 201, 81, 0.20) 100%), #FFF;

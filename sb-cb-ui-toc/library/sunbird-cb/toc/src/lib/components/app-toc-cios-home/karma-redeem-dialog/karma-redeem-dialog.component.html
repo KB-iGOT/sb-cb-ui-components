@@ -1,0 +1,19 @@
+<div class="karma-redeem-backdrop" (click)="onCancel()" aria-hidden="true"></div>
+
+<div class="karma-redeem-panel" role="dialog" aria-modal="true" [attr.aria-label]="header">
+  <div class="karma-redeem-dialog">
+    <img class="karma-redeem-icon" [src]="icon" alt="" />
+
+    <p class="karma-redeem-header">{{ header }}</p>
+    <p class="karma-redeem-message">{{ message }}</p>
+
+    <div class="karma-redeem-actions">
+      <button type="button" class="karma-redeem-btn karma-redeem-continue" (click)="onContinue()">
+        {{ acceptButton }}
+      </button>
+      <button type="button" class="karma-redeem-btn karma-redeem-cancel" (click)="onCancel()">
+        {{ cancelButton }}
+      </button>
+    </div>
+  </div>
+</div>

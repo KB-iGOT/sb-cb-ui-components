@@ -145,6 +145,7 @@ import { EnrollLanguageDialogueComponent } from './components/enroll-language-di
 import { CompletionSurveyFormComponent } from './components/completion-survey-form/completion-survey-form.component';
 import { PublicSurveyFormComponent } from './components/public-survey-form/public-survey-form.component'
 import { ConsentDialogComponent } from './components/app-toc-cios-home/consent-dialog.component'
+import { KarmaRedeemDialogComponent } from './components/app-toc-cios-home/karma-redeem-dialog/karma-redeem-dialog.component'
 import { WidgetCommentModule } from '@sunbird-cb/discussion-v2'
 import { NonReleventFeedbackDialogComponent } from './components/non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { UnenrollConfirmDialogComponent } from './components/unenroll-confirm-dialog/unenroll-confirm-dialog.component'
@@ -181,6 +182,7 @@ import { UserProfileService } from './services/user-profile.service'
     EnrollProfileFormComponent,
     AppTocCiosHomeComponent,
     ConsentDialogComponent,
+    KarmaRedeemDialogComponent,
     EnrollLanguageDialogueComponent,
     CompletionSurveyFormComponent,
     PublicSurveyFormComponent,

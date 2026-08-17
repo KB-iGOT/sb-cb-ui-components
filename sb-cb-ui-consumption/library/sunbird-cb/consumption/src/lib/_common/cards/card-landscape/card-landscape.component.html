@@ -1,17 +1,18 @@
 <ng-container *ngIf="!isCardLoading">
-    <a class="cursor-pointer" (click)="raiseTelemetry(widgetData?.content);getRedirectUrlData(widgetData?.content); $event.stopPropagation()" 
+    <a class="cursor-pointer" (click)="raiseTelemetry(widgetData?.content);getRedirectUrlData(widgetData?.content); $event.stopPropagation()"
   role="link" i18n-aria-label>
   <mat-card class="card-portrait mr-2 card-portrait-clickable min-height-remove" [ngClass]="widgetData.cardCustomeClass ? widgetData.cardCustomeClass : ''">
      <div class="course_widget portrait_widget flex  margin-bottom-xs">
         <div class="flex flex-end flex-middle course_port margin-right-xs" *ngIf="isCardElementEnabled('contentType') && widgetData.content?.primaryCategory">
            <mat-icon class="mat-icon main_icon  ws-mat-default-text margin-right-xs">video_library</mat-icon>
-           <sb-uic-display-content-type i18n-title title="Content Type" 
+           <sb-uic-display-content-type i18n-title title="Content Type"
            class="ws-mat-black60-text font-normal mat-caption " [useTranslation]="false" [displayContentType]="widgetData.content?.primaryCategory==='Course Unit'
            ?'Module'
            :widgetData.content?.primaryCategory">
            </sb-uic-display-content-type>
         </div>
         <sb-uic-knowledge-level *ngIf="isCardElementEnabled('difficultyLevel')" [content]="widgetData?.content"></sb-uic-knowledge-level>
+        <span *ngIf="enrolmentStatusPill as pill" class="enrolment-status-pill" [ngClass]="pill.cssClass">{{ pill.label }}</span>
      </div>
      <div class="flex">
         <div class="margin-right-s">
@@ -75,7 +76,7 @@
               <span class="portrait-org-name font-normal mat-caption">By {{ (widgetData.content.organisation && widgetData.content.organisation[0]) ? widgetData.content.organisation[0] : widgetData?.content?.contentPartner?.contentPartnerName || 'Karmayogi Bharat' }}</span>
               <!-- <span class="portrait-org-name font-normal mat-caption">{{'cardcontentv2.by' | translate}} {{ (widgetData.content.organisation && widgetData.content.organisation[0]) ? widgetData.content.organisation[0] : 'Karmayogi Bharat' }}</span> -->
            </div>
-           
+
             <div class="flex w-full flex-middle provider-wrapper" *ngIf="widgetData?.content?.courseProvider?.length && widgetData.content?.courseProvider[0]?.name">
               <div class="portrait_course_logo_box margin-right-xs">
                  <img [src]="widgetData?.content?.courseProvider[0]?.logoUrl" class="source-icon"  loading="lazy" [wsUtilsDefaultThumbnail]="defaultSLogo"
@@ -83,7 +84,7 @@
               </div>
               <span class="font-normal mat-caption">By&nbsp;</span>
               <span class="provider-name font-normal mat-caption">{{ widgetData.content?.courseProvider[0]?.name }}</span>
-              <span *ngIf="widgetData.content?.courseProvider?.length > 1" 
+              <span *ngIf="widgetData.content?.courseProvider?.length > 1"
                     class="provider-count font-normal mat-caption cursor-pointer"
                     [matTooltip]="getProviderNames(widgetData.content?.courseProvider)"
                     matTooltipPosition="above">
@@ -101,6 +102,9 @@
             <ng-container *ngIf="widgetData?.content?.additionalTags && widgetData?.content?.additionalTags.includes('mostTrending')">
               <span class="most-enrolled-text margin-left-xs">{{ 'cardcontentv2.mostTrending' | translate }}</span>
             </ng-container> -->
+          </div>
+          <div>
+            <img *ngIf="widgetData?.content?.courseType === 'paid'" src="/assets/icons/hubs-v2/restricted_v2.svg" class="most-enrolled-img" />
           </div>
         </div>
      </div>

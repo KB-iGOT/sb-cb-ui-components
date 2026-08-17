@@ -47,6 +47,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   discussWidgetData!: NsDiscussionV2.ICommentWidgetData
   showProviderTips = false
   fromMDO = false
+  karmaRedeemData: any = null
+  private karmaRedeemContent: any = null
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 
@@ -219,6 +221,43 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   async enRollToExtCourse(content: any) {
+    const points = content?.requiredKarmaPoints ?? 0
+    const popupConfig = _.get(this.config, 'karmaRedeemPopup', {}) || {}
+    this.karmaRedeemContent = content
+    this.karmaRedeemData = {
+      requiredKarmaPoints: points,
+      header: _.get(popupConfig, 'popupHeader', ''),
+      message: this.buildKarmaRedeemMessage(popupConfig, points),
+      acceptButton: _.get(popupConfig, 'acceptButton', ''),
+      cancelButton: _.get(popupConfig, 'cancelButton', ''),
+    }
+  }
+
+  private buildKarmaRedeemMessage(popupConfig: any, points: number): string {
+    const template = _.get(popupConfig, 'message', '')
+    if (template) {
+      return `${template}`.replace(/\{points\}/g, `${points}`)
+    }
+
+    const before = _.get(popupConfig, 'pointsBeforeText', '')
+    const after = _.get(popupConfig, 'pointsAfterText', '')
+    if (!before && !after) {
+      return ''
+    }
+
+    return [before, `${points}`, after].filter((part: string) => part).join(' ')
+  }
+
+  onKarmaRedeemClosed(confirmed: boolean) {
+    const content = this.karmaRedeemContent
+    this.karmaRedeemData = null
+    this.karmaRedeemContent = null
+    if (confirmed && content) {
+      this.openConsentDialog(content)
+    }
+  }
+
+  private async openConsentDialog(content: any) {
     const consentUrl: string = `${this.environment?.missionKarmayogiPath}${this.config?.contentConsent?.consentDocUrl}` || ''
     const assetsDocUrl: string = `${this.config?.contentConsent?.assetsDocUrl}` || ''
     const dialogRef = this.matDialog.open(ConsentDialogComponent, {
