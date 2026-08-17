@@ -91,7 +91,7 @@ export class CardTransformerService {
       case 'trainingPlanApi':
         const todaysDate = dayjs().format('YYYY-MM-DD')
         data.forEach((item: any) => {
-          if (item?.isApar === true) {
+          if (item?.isApar === true || item?.planTypeV2 === 'AICBP') {
             return
           }
           const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
@@ -121,6 +121,42 @@ export class CardTransformerService {
             contentStatus: item['contentStatus'],
             courseCategory: item['courseCategory'],
             primaryCategory: item['primaryCategory'],
+            metadata: item ?? {}
+          }
+          mapedData.push(card)
+        })
+        break
+      case 'draftCBPplanApi':
+        const draftCBPTodayDate = dayjs().format('YYYY-MM-DD')
+        const draftCBPFilteredData = data.filter((item: any) => item?.isApar !== true && item?.planTypeV2 === 'AICBP')
+        draftCBPFilteredData.forEach((item: any) => {
+          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
+          const daysCount = dayjs(endDate).diff(draftCBPTodayDate, 'day')
+          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
+            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
+          item['parentId'] = item.identifier
+          item['planTypeV2'] = 'AICBP'
+          item['contentStatus'] = 0
+          const card: CardViewModel = {
+            identifier: (item?.['identifier'] as string) ?? '',
+            title: (item?.['name'] as string) ?? '',
+            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
+            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
+            duration: (item?.['duration'] as string) ?? '',
+            status: (item?.['status'] as string) ?? '',
+            rating: this.resolveRating(item),
+            provider: this.resolveProvider(item),
+            organisation: this.resolveOrganisation(item),
+            creatorLogo: this.resolveCreatorLogo(item),
+            sourceName: this.resolveSourceName(item),
+            resourceType: this.resolveResourceType(item),
+            languageMapV1: this.resolveLanguageMap(item),
+            language: this.resolveLanguage(item),
+            difficultyLevel: this.resolveDifficultyLevel(item),
+            planDuration: item['planDuration'],
+            contentStatus: item['contentStatus'],
+            courseCategory: item['courseCategory'] as string,
+            primaryCategory: item['primaryCategory'] as string,
             metadata: item ?? {}
           }
           mapedData.push(card)
