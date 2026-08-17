@@ -627,8 +627,9 @@ export class ViewerUtilService {
       // console.log('req', JSON.stringify(req))
       // console.log('req', req)
 
-      const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
-      if (resourceStatus < 2) {
+       const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
+       // Fixed Enroll button Issue in case of Pre-Enrollment Requisites (Blended Program)
+      if (resourceStatus < 2 || req?.request?.contents[0]?.status === 2) {
         this.isPlayerApiEnabled('preAssessmentStateUpdate', '/apis/proxies/v8/content/v2/state/update', (url: string) => {
           if (url) {
             this.http
@@ -681,7 +682,8 @@ export class ViewerUtilService {
         },
       }
       const resourceStatus = this.getPreAssessmentResourceStatus(contentId)
-      if (resourceStatus < 2) {
+       // Fixed Enroll button Issue in case of Pre-Enrollment Requisites (Blended Program)
+      if (resourceStatus < 2 || req?.request?.contents[0]?.status === 2) {
         this.isPlayerApiEnabled('preAssessmentStateUpdate', '/apis/proxies/v8/content/v2/state/update', (url: string) => {
           if (url) {
             this.http

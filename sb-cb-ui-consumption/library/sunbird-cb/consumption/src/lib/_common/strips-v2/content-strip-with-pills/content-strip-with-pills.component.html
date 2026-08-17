@@ -3,7 +3,7 @@
   @if (visiblePills()?.length) {
   <div class="pills-wrapper">
     <div class="pills-fade pills-fade--left" [class.is-visible]="canScrollLeft()"></div>
-    @if (canScrollLeft()) {
+    @if (canScrollLeft() && section()?.canShowScrollArrow) {
     <button type="button" class="pills-nav pills-nav--left" aria-label="Scroll pills left" (click)="scrollByAmount(-240)">
       <mat-icon aria-hidden="true">chevron_left</mat-icon>
     </button>
@@ -54,7 +54,7 @@
     }
     </div>
     <div class="pills-fade pills-fade--right" [class.is-visible]="canScrollRight()"></div>
-    @if (canScrollRight()) {
+    @if (canScrollRight() && section()?.canShowScrollArrow) {
     <button type="button" class="pills-nav pills-nav--right" aria-label="Scroll pills right" (click)="scrollByAmount(240)">
       <mat-icon aria-hidden="true">chevron_right</mat-icon>
     </button>
