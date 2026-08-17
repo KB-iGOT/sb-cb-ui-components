@@ -161,6 +161,7 @@ export class CardCourseV2Component {
   )
 
   readonly isApar = computed(() => !!(this.content() as any)?.isApar || (this.content()?.metadata?.isApar as boolean) || false)
+  readonly isAiCBP = computed(() => (this.content() as any)?.metadata?.planTypeV2 === 'AICBP')
 
   readonly isCa = computed(() =>
     this.caCourseUnitIds().includes(this.content()?.identifier ?? '') ||
