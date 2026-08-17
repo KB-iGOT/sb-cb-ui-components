@@ -49,10 +49,18 @@ export class CardPortraitExtComponent implements OnInit {
     return this.domainConfSvc.isConfigEnabled('components.cards', key)
   }
 
-  ngOnInit() {
-    if (this.widgetData && this.widgetData.content) {
-      this.widgetData.content.duration = this.widgetData.content.duration * 60
+  /* CIOS content — ids prefixed 'ext_' — already reports duration in seconds, so the x60
+     rendered 4500 as '75h' instead of '1h 15m'. Anything else routed through this card
+     still reports minutes. Resolved here rather than in ngOnInit so the shared content
+     object is left alone and a re-init cannot multiply the same value twice. */
+  checkForCiosDuration(content: any): number {
+    if (content && content.contentId && `${content.contentId}`.includes('ext_')) {
+      return Number(content.duration)
     }
+    return content?.duration * 60
+  }
+
+  ngOnInit() {
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || ''

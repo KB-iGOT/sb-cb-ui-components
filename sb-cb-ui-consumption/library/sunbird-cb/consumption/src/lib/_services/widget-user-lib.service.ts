@@ -300,6 +300,7 @@ export class WidgetUserServiceLib {
         childData['endDate'] = c.endDate
         childData['parentId'] = c.id
         childData['planType'] = 'cbPlan'
+        childData['planTypeV2'] = c['planType'] || ''
         childData['contentStatus'] = 0
         childData['isApar'] = c.isApar
         childData['sourceName'] = c.organisation ? c.organisation[0] : ''
@@ -417,7 +418,7 @@ export class WidgetUserServiceLib {
         }
         // scheduling / plan fields + the provider fields cards need for the org name and logo
         // + the multilingual fields the "available in N languages" pill is derived from
-        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'contentStatus', 'status', 'isApar', 'organisation', 'creatorLogo', 'sourceName', 'resourceType', 'languageMapV1', 'language'].forEach((k: string) => {
+        ;['endDate', 'planDuration', 'appIcon', 'difficultyLevel', 'avgRating', 'posterImage', 'duration', 'primaryCategory', 'courseCategory', 'planType', 'planTypeV2', 'contentStatus', 'status', 'isApar', 'organisation', 'creatorLogo', 'sourceName', 'resourceType', 'languageMapV1', 'language'].forEach((k: string) => {
           if (cbp[k] !== undefined) {
             cbpObj[k] = cbp[k]
           }

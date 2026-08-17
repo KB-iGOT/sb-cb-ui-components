@@ -1,9 +1,9 @@
 {
   "name": "sb-cb-ui-consumption",
-  "version": "0.1.1-cbrelease-4.8.40",
+  "version": "0.1.2-cbrelease-4.8.40",
   "scripts": {
     "ng": "ng",
-    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build",
+    "build": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --configuration production",
     "build-watch": "node --max_old_space_size=8000 ./node_modules/@angular/cli/bin/ng build --watch",
     "test": "jest",
     "test:watch": "jest --watch",

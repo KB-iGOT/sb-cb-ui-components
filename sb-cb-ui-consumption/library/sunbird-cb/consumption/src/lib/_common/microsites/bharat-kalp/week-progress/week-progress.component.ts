@@ -68,6 +68,18 @@ export interface WeekProgressData {
     viewMoreUrl?: { path?: string }
     tabs?: WeekData[]                        /* week metadata objects */
   } | { [key: string]: WeekData }
+  /* Authored labels for the content-type tabs, matched to a content_ids key by `id`.
+     Text is held per language as `<lang>Text` (enText, hiText, ...) keyed by the
+     websiteLanguage code. */
+  exploreContent?: {
+    displayContentCategories?: string[]
+    tabs?: ExploreContentTab[]
+  }
+}
+
+export interface ExploreContentTab {
+  id: string
+  [langText: string]: string               /* enText, hiText, ... */
 }
 
 type WeekStatus = 'completed' | 'in-progress' | 'not-started' | 'upcoming'
@@ -119,16 +131,39 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     return all
   }
 
-  /** Stable WeekProgressTab reference for a content-type key — same object across change detection cycles */
-  private _getTab(key: string): WeekProgressTab {
-    if (!this._tabCache[key]) {
-      this._tabCache[key] = { key, label: this._tabLabel(key), cards: [] }
+  /**
+   * Stable WeekProgressTab reference for a content-type key — same object across change
+   * detection cycles, so the tab list does not churn on every pass.
+   *
+   * Scoped per week on purpose. Caching by key alone handed the same object to every week,
+   * so mat-tab-group reused the tab instance when the week changed and kept its selection
+   * on it: switching from a week with only External Course to one with Courses + External
+   * Course left the highlight on External Course while activeTabIndex had been reset to 0,
+   * showing course cards under the external tab.
+   */
+  private _getTab(key: string, week: number): WeekProgressTab {
+    const cacheKey = `${week}:${key}`
+    if (!this._tabCache[cacheKey]) {
+      this._tabCache[cacheKey] = { key, label: this._tabLabel(key), cards: [] }
     }
-    return this._tabCache[key]
+    return this._tabCache[cacheKey]
   }
 
-  /** Derives a display label straight from the content_ids key — e.g. "course" -> "Courses" */
+  /**
+   * Display label for a content-type tab.
+   *
+   * Prefers the authored exploreContent.tabs entry matched on `id`, so the label reads
+   * as configured per language — "extCourses" is meant to show "External Course", not
+   * the key-derived "ExtCourses". Falls back to deriving from the key so a content type
+   * that has no entry yet still gets a usable tab instead of a blank one.
+   */
   private _tabLabel(key: string): string {
+    const configured = (this.programData?.exploreContent?.tabs || []).find(t => t?.id === key)
+    if (configured) {
+      const lang = localStorage.getItem('websiteLanguage') || 'en'
+      const label = configured[`${lang}Text`] || configured['enText']
+      if (label) return label
+    }
     const capitalized = key.charAt(0).toUpperCase() + key.slice(1)
     return capitalized.endsWith('s') ? capitalized : `${capitalized}s`
   }
@@ -307,7 +342,19 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     }
     /* Collect all unique IDs for a single API call */
     const allIds = this._allContentIds(wd, ['extCourses'])
-    if (!allIds.length) return
+    const hasExternal = Object.keys(exIdMap).length > 0
+
+    /* A week can be made up purely of external courses - course/program empty with
+       extCourses populated. allIds excludes extCourses, so returning outright here
+       skipped loadExternalCourses entirely and the content-partner search never
+       fired, leaving the strip empty. Go straight to the external call instead. */
+    if (!allIds.length) {
+      if (hasExternal) {
+        this.weekContentLoading = true
+        this.loadExternalCourses(wd, exIdMap)
+      }
+      return
+    }
 
     this.weekContentLoading = true
 
@@ -340,7 +387,7 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
             }))
         })
 
-        if (Object.keys(exIdMap).length) {
+        if (hasExternal) {
           this.loadExternalCourses(wd, exIdMap)
         } else {
           this.weekContentLoading = false
@@ -372,23 +419,25 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
     }).pipe(catchError(() => of(null)))
       .subscribe(res => {
         const content: any[] = res?.data || []
-        if (content.length) {
-          const byId: { [id: string]: any } = {}
-          content.forEach(c => { byId[c.contentId] = c })
+        const byId: { [id: string]: any } = {}
+        content.forEach(c => { byId[c.contentId] = c })
 
-          /* Distribute as NsCardContent.ICard for sb-uic-card-portrait, keyed by content-type */
-          Object.keys(exIdMap).forEach((key) => {
-            const ids = exIdMap[key] || []
-            this.weekContentCards[key] = ids
-              .filter((id: any) => byId[id])
-              .map((id: any, pos: any) => ({
-                content: byId[id],
-                cardSubType: 'standard' as NsCardContent.TCardSubType,
-                context: { pageSection: 'bharat-kalp-week-strip', position: pos },
-                stateData: {},
-              }))
-          })
-        }
+        /* Assigned unconditionally: on an empty or failed response this writes [] and
+           clears the previous week's cards. Skipping the write when nothing came back
+           left the last week's external cards on screen - only reachable now that a
+           week with no internal ids goes straight here without the internal search
+           pass, which used to blank these keys on its way through. */
+        Object.keys(exIdMap).forEach((key) => {
+          const ids = exIdMap[key] || []
+          this.weekContentCards[key] = ids
+            .filter((id: any) => byId[id])
+            .map((id: any, pos: any) => ({
+              content: byId[id],
+              cardSubType: 'standard' as NsCardContent.TCardSubType,
+              context: { pageSection: 'bharat-kalp-week-strip', position: pos },
+              stateData: {},
+            }))
+        })
         this.weekContentLoading = false
         this.cdr.detectChanges()
       })
@@ -613,15 +662,36 @@ export class WeekProgressComponent implements OnInit, AfterViewInit {
       if (!ids) return []
       return Object.keys(ids)
         .filter(key => (ids[key]?.length || 0) > 0)
-        .map(key => this._getTab(key))
+        .map(key => this._getTab(key, this.selectedDisplayWeek))
     }
     return this.activeStrip?.tabs || []
   }
 
-  trackTab(_: number, tab: WeekProgressTab): string { return tab.key }
+  /* Week-scoped so the mat-tab views are rebuilt when the displayed week changes. Tracking
+     by key alone kept the reused tab (and mat-tab-group's selection with it) across weeks. */
+  trackTab(_: number, tab: WeekProgressTab): string { return `${this.selectedDisplayWeek}:${tab.key}` }
+
+  /* Identity of the mat-tab-group wrapper — changing week destroys and recreates the group so
+     it re-reads [selectedIndex] instead of holding the previous week's internal selection. */
+  trackTabGroup(_: number, week: number): number { return week }
+
+  /** content_ids key behind the selected tab — decides which card component renders it */
+  get activeTabKey(): string {
+    return this.activeTabs[this.activeTabIndex]?.key || ''
+  }
+
+  /**
+   * Cards under the selected tab come from the content-partner (cios) search, whose items
+   * are shaped around contentId/contentPartner and carry no externalId - that field belongs
+   * to the internal search. Keying the card component off the tab is what the see-all page
+   * does, and it cannot drift the way a per-item field check did.
+   */
+  get isActiveTabExternal(): boolean {
+    return this.activeTabKey === 'extCourses'
+  }
 
   get activeTabCards(): NsCardContent.ICard[] {
-    const key = this.activeTabs[this.activeTabIndex]?.key
+    const key = this.activeTabKey
     if (key && this.weekContentCards[key]?.length) {
       return this.weekContentCards[key]
     }
