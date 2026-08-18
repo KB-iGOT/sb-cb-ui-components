@@ -168,12 +168,14 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
           additionalDetails: '',
           additional_document: []
         }, { emitEvent: false }); // avoid re-emitting ministryType's own valueChanges and recursing infinitely
-        if (type === 'state') {
-          this.roleMappingForm.get('departments')?.setValidators([Validators.required]);
-        } else {
-          this.roleMappingForm.get('departments')?.clearValidators();
-          this.roleMappingForm.get('departments')?.setValue([]);
-        }
+    if (type === 'state') {
+  this.roleMappingForm.get('departments')?.clearValidators();
+  this.roleMappingForm.get('departments')?.updateValueAndValidity();
+} else {
+  this.roleMappingForm.get('departments')?.clearValidators();
+  this.roleMappingForm.get('departments')?.setValue([]);
+  this.roleMappingForm.get('departments')?.updateValueAndValidity();
+}
         this.roleMappingForm.get('departments')?.updateValueAndValidity();
       });
       this.roleMappingForm.statusChanges.subscribe((status: any) => {
@@ -225,6 +227,8 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         let wAOCount = 0
         this.apiLoading = false
         this.documents = res?.items
+
+        console.log('this.documents', this.documents)
         this.disableUploadDocument = false
         this.disableUploadDocumentOriginal = false
         this.documents.forEach((item)=>{
@@ -584,6 +588,17 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     }
 
     this.getUploadedDocuments()
+    console.log('Generate CBP validation:', {
+  formValid: this.roleMappingForm?.valid,
+  formInvalid: this.roleMappingForm?.invalid,
+  loading: this.loading,
+  documents: this.documents,
+  documentsLength: this.documents?.length,
+  disabled:
+    this.roleMappingForm?.invalid ||
+    this.loading ||
+    this.documents?.length < 1
+});
   }
 
   searchData() {
