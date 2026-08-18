@@ -1,5 +1,12 @@
 ::ng-deep {
   .assessment-basic-info {
+    /* The host portal hides subscript wrappers globally for .mat-full-radius
+       containers, which suppresses every mat-error / mat-hint in this form.
+       Three classes so this wins on specificity regardless of stylesheet order. */
+    .mat-mdc-form-field .mat-mdc-form-field-subscript-wrapper {
+      display: block;
+    }
+
     .mat-form-field {
       .mat-form-field-wrapper {
         padding-bottom: 0;
@@ -127,13 +134,6 @@
       width: 65px;
       position: relative;
 
-      .mat-form-field-subscript-wrapper {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-      }
-
       input {
         text-align: center;
 
@@ -174,7 +174,14 @@
     display: block;
     color: #f44336;
     font-size: 12px;
-    margin-top: -10px;
+    line-height: 1.4;
+    margin-top: 4px;
+
+    /* mat-error carries mat-mdc-form-field-bottom-align, whose ::before
+       reserves a 16px inline spacer meant for use inside a mat-form-field. */
+    &::before {
+      content: none;
+    }
   }
 
   .section-detail-container{

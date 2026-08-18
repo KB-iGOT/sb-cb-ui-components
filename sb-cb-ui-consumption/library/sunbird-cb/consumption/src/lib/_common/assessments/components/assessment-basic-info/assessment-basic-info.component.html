@@ -255,25 +255,24 @@
         *ngIf="isFinalAssessment || (isPracticeAssessment && assessmentForm.get('showTimer')?.value)">
         <label class="field-label required">Duration <span class="duration-format">(hh:mm:ss)</span></label>
         <div class="duration-inputs">
-          <mat-form-field appearance="outline" class="duration-field"
-            [class.mat-form-field-invalid]="isDurationInvalid">
+          <mat-form-field appearance="outline" class="duration-field" subscriptSizing="dynamic">
             <input matInput type="number" formControlName="durationHours" min="0" max="23" (blur)="onDurationBlur()">
-            <mat-error *ngIf="controls['durationHours'].hasError('max')">Max 23</mat-error>
           </mat-form-field>
           <span class="duration-separator">:</span>
-          <mat-form-field appearance="outline" class="duration-field"
-            [class.mat-form-field-invalid]="isDurationInvalid">
+          <mat-form-field appearance="outline" class="duration-field" subscriptSizing="dynamic">
             <input matInput type="number" formControlName="durationMinutes" min="0" max="59" (blur)="onDurationBlur()">
-            <mat-error *ngIf="controls['durationMinutes'].hasError('max')">Max 59</mat-error>
           </mat-form-field>
           <span class="duration-separator">:</span>
-          <mat-form-field appearance="outline" class="duration-field"
-            [class.mat-form-field-invalid]="isDurationInvalid">
+          <mat-form-field appearance="outline" class="duration-field" subscriptSizing="dynamic">
             <input matInput type="number" formControlName="durationSeconds" min="0" max="59" (blur)="onDurationBlur()">
-            <mat-error *ngIf="controls['durationSeconds'].hasError('max')">Max 59</mat-error>
           </mat-form-field>
         </div>
+        <!-- Range messages live here rather than in the 65px fields, which are too
+             narrow to render subscript text. -->
         <mat-error *ngIf="isDurationInvalid" class="duration-error">Duration is required</mat-error>
+        <mat-error *ngIf="controls['durationHours'].hasError('max')" class="duration-error">Hours cannot exceed 23</mat-error>
+        <mat-error *ngIf="controls['durationMinutes'].hasError('max')" class="duration-error">Minutes cannot exceed 59</mat-error>
+        <mat-error *ngIf="controls['durationSeconds'].hasError('max')" class="duration-error">Seconds cannot exceed 59</mat-error>
       </div>
     </div>
 
