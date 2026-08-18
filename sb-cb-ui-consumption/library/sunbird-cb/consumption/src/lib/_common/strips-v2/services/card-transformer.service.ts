@@ -128,7 +128,7 @@ export class CardTransformerService {
         break
       case 'draftCBPplanApi':
         const draftCBPTodayDate = dayjs().format('YYYY-MM-DD')
-        const draftCBPFilteredData = data.filter((item: any) => item?.isApar !== true && item?.planTypeV2 === 'AICBP')
+        const draftCBPFilteredData = data.filter((item: any) => item?.isApar !== true && (item?.planTypeV2 === 'AICBP'))
         draftCBPFilteredData.forEach((item: any) => {
           const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
           const daysCount = dayjs(endDate).diff(draftCBPTodayDate, 'day')

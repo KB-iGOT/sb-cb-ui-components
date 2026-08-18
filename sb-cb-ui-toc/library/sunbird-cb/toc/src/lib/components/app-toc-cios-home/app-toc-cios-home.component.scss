@@ -936,6 +936,14 @@ ul {
   }
 }
 
+::ng-deep .mat-mdc-tooltip.restricted-badge-tooltip {
+  .mdc-tooltip__surface {
+    background-color: #575757 !important;
+    color: #fff !important;
+    border-radius: 4px !important;
+  }
+}
+
 .level-badge.beginner {
   border: 1px solid #49C951;
   background: linear-gradient(0deg, rgba(73, 201, 81, 0.20) 0%, rgba(73, 201, 81, 0.20) 100%), #FFF;

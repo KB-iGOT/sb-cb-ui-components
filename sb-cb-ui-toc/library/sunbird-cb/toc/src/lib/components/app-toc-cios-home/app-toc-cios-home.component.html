@@ -87,7 +87,12 @@
                           <span *ngIf="showBadgeIcon()" class="custom-badge">
                               <img class="w-5 h-5" src="{{ extContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt="" srcset="">
                           </span>
-                          <span *ngIf="extContentReadData?.courseType === 'paid'" class="restricted-badge">
+                          <span *ngIf="extContentReadData?.courseType === 'paid' && showEnroll===!false" class="restricted-badge">
+                              <img src="/assets/icons/hubs-v2/paid_text.svg" alt="Paid" />
+                          </span>
+                           <span *ngIf="extContentReadData?.courseType === 'paid' && showEnroll===false" class="restricted-badge"
+                              [matTooltip]="enrollRestrictionMessage" matTooltipPosition="below"
+                              matTooltipClass="restricted-badge-tooltip">
                               <img src="/assets/icons/hubs-v2/restricted_v2.svg" alt="Restricted" />
                           </span>
                         </div>

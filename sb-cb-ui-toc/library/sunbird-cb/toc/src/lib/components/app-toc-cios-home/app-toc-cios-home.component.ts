@@ -48,6 +48,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   showProviderTips = false
   fromMDO = false
   karmaRedeemData: any = null
+  enrollRestrictionMessage = ''
   private karmaRedeemContent: any = null
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
@@ -223,6 +224,13 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   async enRollToExtCourse(content: any) {
     const points = content?.requiredKarmaPoints ?? 0
     const popupConfig = _.get(this.config, 'karmaRedeemPopup', {}) || {}
+
+    // Nothing to redeem (0 points) or the user's group is exempt — go straight to consent.
+    if (points <= 0 || this.isKarmaRedeemExemptGroup(popupConfig)) {
+      this.openConsentDialog(content)
+      return
+    }
+
     this.karmaRedeemContent = content
     this.karmaRedeemData = {
       requiredKarmaPoints: points,
@@ -231,6 +239,17 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       acceptButton: _.get(popupConfig, 'acceptButton', ''),
       cancelButton: _.get(popupConfig, 'cancelButton', ''),
     }
+  }
+
+  /** Groups that unlock marketplace courses without redeeming karma points. */
+  private isKarmaRedeemExemptGroup(popupConfig: any): boolean {
+    const group = _.get(this.configSvc, 'unMappedUser.profileDetails.professionalDetails[0].group', '')
+    if (!group) {
+      return false
+    }
+    const exemptGroups: string[] = _.get(popupConfig, 'exemptGroups', ['Group A', 'Group B'])
+    return (exemptGroups || []).some((exempt: string) =>
+      `${exempt}`.trim().toLowerCase() === `${group}`.trim().toLowerCase())
   }
 
   private buildKarmaRedeemMessage(popupConfig: any, points: number): string {
@@ -540,9 +559,13 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         (_response: any) => {
           this.enrollValidationLoading = false
           this.canEnroll = true
+          this.enrollRestrictionMessage = ''
         },
         (error: any) => {
-          this.snackBar.open(error?.error?.params?.msg || 'Unable to validate enrollment eligibility', 'X', {
+          const message = error?.error?.params?.msg || 'Unable to validate enrollment eligibility'
+          // Kept on the component so the "Restricted" badge can surface it on hover.
+          this.enrollRestrictionMessage = message
+          this.snackBar.open(message, 'X', {
             duration: 10000,
           })
           this.enrollValidationLoading = false
