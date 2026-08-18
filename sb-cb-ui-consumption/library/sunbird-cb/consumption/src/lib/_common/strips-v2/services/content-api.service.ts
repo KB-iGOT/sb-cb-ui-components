@@ -38,6 +38,7 @@ export class ContentApiService {
     switch (apiDetailsKey) {
       case 'aparApi':
       case 'trainingPlanApi':
+      case 'draftCBPplanApi':
         let userId = this.configSvc?.userProfile?.userId as string
         return of(await this.userService.fetchCbpPlanList(userId).toPromise())
       default:

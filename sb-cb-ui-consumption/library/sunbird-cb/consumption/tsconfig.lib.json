@@ -17,7 +17,16 @@
     "skipTemplateCodegen": true,
     "strictMetadataEmit": true,
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    // Local `ng build --watch` output is consumed straight from dist by the portal's dev
+    // server, which excludes this package from Vite's dependency optimizer so that library
+    // rebuilds are picked up live. That optimizer pass is also where the Angular linker runs,
+    // so partial output (the inherited default) would reach the browser as unlinked
+    // ɵɵngDeclareComponent calls and fail with "needs to be compiled using the JIT compiler".
+    // Full mode emits real definitions and needs no linker.
+    // Publishing is unaffected: tsconfig.lib.prod.json extends this and sets partial back,
+    // which is what keeps the released package compatible across Angular versions.
+    "compilationMode": "full"
   },
   "exclude": [
     "src/test.ts",
