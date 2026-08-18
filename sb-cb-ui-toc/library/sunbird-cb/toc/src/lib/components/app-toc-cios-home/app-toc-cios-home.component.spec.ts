@@ -597,6 +597,19 @@ describe('AppTocCiosHomeComponent', () => {
   })
 
   describe('enRollToExtCourse', () => {
+    /** Sets the logged in user's group; the component reads it off the shared config mock. */
+    const setUserGroup = (group: string) => {
+      configSvcMock.unMappedUser = {
+        identifier: 'USER-1',
+        profileDetails: { professionalDetails: [{ group }] },
+      }
+    }
+
+    beforeEach(() => {
+      // The skip paths open the consent dialog straight away - stop there.
+      jest.spyOn(component, 'callConsentApi').mockImplementation(() => { })
+    })
+
     it('should build the karma redeem data from the popup config', async () => {
       component.config = {
         karmaRedeemPopup: {
@@ -616,12 +629,56 @@ describe('AppTocCiosHomeComponent', () => {
       })
     })
 
-    it('should default the karma points to zero when the content has none', async () => {
+    it('should skip the popup and open consent when the content has no karma points', async () => {
       component.config = {}
       await component.enRollToExtCourse({ contentId: 'c1' })
-      expect(component.karmaRedeemData.requiredKarmaPoints).toBe(0)
-      expect(component.karmaRedeemData.header).toBe('')
-      expect(component.karmaRedeemData.message).toBe('')
+      expect(component.karmaRedeemData).toBeNull()
+      expect(matDialogMock.open).toHaveBeenCalled()
+    })
+
+    it('should skip the popup and open consent when the karma points are zero', async () => {
+      component.config = {}
+      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 0 })
+      expect(component.karmaRedeemData).toBeNull()
+      expect(matDialogMock.open).toHaveBeenCalled()
+    })
+
+    it('should skip the popup for a Group A user', async () => {
+      setUserGroup('Group A')
+      component.config = {}
+      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      expect(component.karmaRedeemData).toBeNull()
+      expect(matDialogMock.open).toHaveBeenCalled()
+    })
+
+    it('should skip the popup for a Group B user regardless of case and spacing', async () => {
+      setUserGroup(' group b ')
+      component.config = {}
+      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      expect(component.karmaRedeemData).toBeNull()
+      expect(matDialogMock.open).toHaveBeenCalled()
+    })
+
+    it('should show the popup for a group that is not exempt', async () => {
+      setUserGroup('Group C')
+      component.config = {}
+      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      expect(component.karmaRedeemData.requiredKarmaPoints).toBe(25)
+      expect(matDialogMock.open).not.toHaveBeenCalled()
+    })
+
+    it('should show the popup when the user has no group', async () => {
+      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      expect(component.karmaRedeemData.requiredKarmaPoints).toBe(25)
+      expect(matDialogMock.open).not.toHaveBeenCalled()
+    })
+
+    it('should honour the exempt groups from the popup config', async () => {
+      setUserGroup('Group C')
+      component.config = { karmaRedeemPopup: { exemptGroups: ['Group C'] } }
+      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      expect(component.karmaRedeemData).toBeNull()
+      expect(matDialogMock.open).toHaveBeenCalled()
     })
 
     it('should tolerate a null karma popup config', async () => {
@@ -667,7 +724,7 @@ describe('AppTocCiosHomeComponent', () => {
     beforeEach(async () => {
       component.config = { contentConsent: { consentDocUrl: '/consent.html', assetsDocUrl: '/assets.html' } }
       jest.spyOn(component, 'callConsentApi').mockImplementation(() => { })
-      await component.enRollToExtCourse({ contentId: 'c1', contentPartner: { id: 'p1' } })
+      await component.enRollToExtCourse({ contentId: 'c1', contentPartner: { id: 'p1' }, requiredKarmaPoints: 5 })
     })
 
     it('should clear the dialog state and open the consent dialog on confirm', () => {
@@ -1115,6 +1172,12 @@ describe('AppTocCiosHomeComponent', () => {
       expect(component.enrollValidationLoading).toBe(false)
     })
 
+    it('should clear a previous restriction message when the validation succeeds', () => {
+      component.enrollRestrictionMessage = 'stale message'
+      callValidate()
+      expect(component.enrollRestrictionMessage).toBe('')
+    })
+
     it('should block enrolling and surface the error message when the validation fails', () => {
       certSvcMock.validateEnrollmentEligibility.mockReturnValue(
         throwError({ error: { params: { msg: 'not eligible' } } })
@@ -1125,6 +1188,15 @@ describe('AppTocCiosHomeComponent', () => {
       expect(snackBarMock.open).toHaveBeenCalledWith('not eligible', 'X', { duration: 10000 })
     })
 
+    it('should keep the error message for the restricted badge tooltip', () => {
+      certSvcMock.validateEnrollmentEligibility.mockReturnValue(
+        throwError({ error: { params: { msg: 'Access settings are enabled but no access rule found for the course' } } })
+      )
+      callValidate()
+      expect(component.enrollRestrictionMessage)
+        .toBe('Access settings are enabled but no access rule found for the course')
+    })
+
     it('should fall back to a default message when the validation fails without one', () => {
       certSvcMock.validateEnrollmentEligibility.mockReturnValue(throwError({}))
       callValidate()
@@ -1133,6 +1205,7 @@ describe('AppTocCiosHomeComponent', () => {
         'X',
         { duration: 10000 }
       )
+      expect(component.enrollRestrictionMessage).toBe('Unable to validate enrollment eligibility')
     })
 
     it('should skip the validation for an already enrolled user', () => {
