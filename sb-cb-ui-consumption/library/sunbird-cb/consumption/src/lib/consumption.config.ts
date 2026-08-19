@@ -8,7 +8,7 @@ export const ROOT_WIDGET_CONFIG = {
   actionButton: {
     _type: 'actionButton',
     feature: 'buttonFeature',
-    newProfile: 'actionButtonProfile',
+    newProfile: 'actionButtonProfileV2',
   },
 }
 
