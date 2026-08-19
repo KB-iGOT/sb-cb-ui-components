@@ -329,7 +329,7 @@
 <ng-template #events let-data="data">
   <div class="{{ data?.containerClass }}">
     <sb-uic-events [object]="data.column[0]" [nwlEventsConfig]="bkConfiguration"
-      [eventsApiConfig]="data?.eventsApiConfig" [mode]="'mobile'">
+      [eventsApiConfig]="data?.eventsApiConfig" [viewAllConfig]="data?.viewAllConfig" [mode]="'mobile'">
     </sb-uic-events>
   </div>
 </ng-template>
