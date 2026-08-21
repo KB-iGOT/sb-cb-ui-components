@@ -32,10 +32,15 @@
             </span>
           </ng-container>
         </div>
+        <sb-uic-knowledge-level
+          *ngIf="isSmallScreen && isCardElementEnabled('difficultyLevel')"
+          [content]="widgetData?.content">
+        </sb-uic-knowledge-level>
       </div>
 
       <div class="flex main_title_box">
-        <p class="mat-subheading-1 title-text font-bold-imp cursor-pointer content-title">
+        <p class="mat-subheading-1 title-text font-bold-imp cursor-pointer content-title"
+          [matTooltip]="widgetData?.content?.name" [matTooltipDisabled]="!isSmallScreen" matTooltipPosition="above">
           <a
             (click)="raiseTelemetry(widgetData?.content);getRedirectUrlData(widgetData?.content); $event.stopPropagation()">
             {{widgetData?.content?.name}}
@@ -50,7 +55,9 @@
               [wsUtilsDefaultThumbnail]="defaultSLogo"
               [alt]="(widgetData?.content?.sourceName + '_' + widgetData?.content?.identifier)" />
           </div>
-          <span class="org-text" *ngIf="isCardElementEnabled('organisation')">By&nbsp;
+          <span class="org-text" *ngIf="isCardElementEnabled('organisation')"
+            [matTooltip]="'By ' + widgetData?.content?.organisation[0]"
+            [matTooltipDisabled]="!isSmallScreen" matTooltipPosition="above">By&nbsp;
             <!-- {{'cardcontentv2.by' | translate}}  -->
             {{widgetData?.content?.organisation[0] }}</span>
         </div>
@@ -84,8 +91,8 @@
 </ng-container>
 <ng-container *ngIf="isCardLoading">
   <mat-card class="card-wide-v2 padding-remove position-relative flex">
-    <div class="">
-      <sb-uic-skeleton-loader [width]="'300px'" [height]="'100%'" class="h-full"
+    <div class="imageholder">
+      <sb-uic-skeleton-loader [width]="'100%'" [height]="'100%'" class="w-full h-full"
         [bindingClass]="'flex rounded h-full min-height-width'"></sb-uic-skeleton-loader>
     </div>
     <mat-card-content class="mat-text-box">

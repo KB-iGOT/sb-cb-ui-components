@@ -74,12 +74,14 @@ $secondary-color: #EF951E;
   }
 
 .card-wide-v2 {
-    border-radius: 12px 12px;
-    display: flex;
-        border-radius: 12px;
+    border-radius: 12px;
     width: 784px;
     max-width: 100%;
     display: flex;
+    flex-direction: row;
+    gap: 4px;
+    box-sizing: border-box;
+    overflow: hidden;
     background-color: #fff;
     /* min-width: 100%; */
     margin-right: 0 !important;
@@ -106,6 +108,7 @@ $secondary-color: #EF951E;
       -webkit-line-clamp: $title-line-count;
       -webkit-box-orient: vertical;
       min-height: $title-line-count * $title-line-height;
+      width: 100%;
     }
 
     .course_logo_box {
@@ -132,16 +135,12 @@ $secondary-color: #EF951E;
      .org-text {
       font-size: 14px;
       font-weight: normal;
-      // width: 75%;
+      flex: 1 1 auto;
+      min-width: 0;
       padding-left: 10px;
       overflow: hidden;
-      word-break: break-all;
-      white-space: initial;
-      overflow: hidden;
       text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
+      white-space: nowrap;
     }
 
     .rating-session {
@@ -190,6 +189,8 @@ $secondary-color: #EF951E;
        padding: 12px;
        padding-bottom: 11px;
        box-sizing: border-box;
+       flex: 1 1 auto;
+       min-width: 0;
        width: calc(100% - 315px);
 
        @media (max-width:992px) {
@@ -218,18 +219,23 @@ $secondary-color: #EF951E;
 
        .imageholder {
            width: 310px;
+           flex: 0 0 310px;
+           min-width: 0;
+           align-self: center;
 
            @media (max-width:992px) {
              width: 34%;
-             height: auto;
+             flex-basis: 34%;
+             align-self: center;
            }
        }
      .imageholder {
          overflow: hidden;
          position: relative;
          display: flex;
-          align-items: center;
-          justify-content: center;
+         align-items: center;
+         justify-content: center;
+         box-sizing: border-box;
 
          img {
              width: 100%;
@@ -237,14 +243,10 @@ $secondary-color: #EF951E;
              border-radius: 10px 0 0 10px;
              // object-fit: cover;
              // object-position: center;
-             height: 100%;
+             height: auto;
              max-height: 172px;
-             object-fit: cover;
+             object-fit: contain;
              vertical-align: middle;
-
-             @media (max-width:992px) {
-               height: auto;
-             }
 
          }
          .source-div {
@@ -276,7 +278,133 @@ $secondary-color: #EF951E;
      }
      .main_title_box {
          height: 60px;
+         min-width: 0;
      }
+
+     .course_widget,
+     .course_v2,
+     .provider {
+       min-width: 0;
+     }
+
+     .course_widget {
+       padding-top: 4px;
+       box-sizing: border-box;
+     }
+
+     @media only screen and (max-width: 425px) {
+       display: grid !important;
+       grid-template-columns: 147px minmax(0, 1fr);
+       grid-template-rows: auto auto auto;
+       gap: 8px 12px;
+       padding: 16px !important;
+
+       .mat-text-box {
+         display: contents;
+       }
+
+       .course_widget {
+         grid-column: 1 / -1;
+         grid-row: 1;
+         gap: 8px;
+         padding-top: 0;
+         justify-content: flex-start;
+         align-items: center;
+       }
+
+       .course_v2 {
+         align-items: center;
+
+         span {
+           font-size: 12px;
+           line-height: 16px;
+         }
+       }
+
+       .imageholder {
+         grid-column: 1;
+         grid-row: 2 / 4;
+         width: 147px;
+         height: auto;
+         flex-basis: auto;
+         align-self: start;
+
+         img {
+           width: 100%;
+           height: auto;
+           max-height: none;
+           border-radius: 8px;
+         }
+       }
+
+       .main_title_box {
+         grid-column: 2;
+         grid-row: 2;
+         height: auto;
+
+         .title-text {
+           min-height: 40px;
+           margin: 0 0 8px;
+           font-size: 14px;
+           line-height: 20px;
+         }
+       }
+
+       .bottomsection {
+         grid-column: 2;
+         grid-row: 3;
+         min-width: 0;
+       }
+
+       .course_logo_box {
+         width: 28px;
+         height: 28px;
+         flex: 0 0 28px;
+
+         img {
+           width: 24px;
+           height: 24px;
+           padding: 2px;
+         }
+       }
+
+       .org-text {
+         padding-left: 8px;
+         font-size: 12px;
+         line-height: 16px;
+       }
+
+       .rating-session {
+         margin-top: 6px !important;
+
+         .rating-number {
+           font-size: 14px;
+         }
+       }
+
+       .duration-box.right-corner {
+         right: 4px;
+         bottom: 4px;
+         max-width: calc(100% - 8px);
+         box-sizing: border-box;
+       }
+     }
+
+     .course_v2 {
+       max-width: 100%;
+       box-sizing: border-box;
+
+       span {
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+       }
+     }
+
+     .provider {
+       flex-wrap: nowrap;
+     }
+
      p.actionbtns {
          margin-bottom: 0;
      }
@@ -287,36 +415,6 @@ $secondary-color: #EF951E;
        max-height: 16px;
    }
 
-   @include breakpoint-s {
-      min-width: auto;
-      display: flex;
-      flex-direction: column;
-      min-width: calc(100vw - 64px);
-      .imageholder{
-        width: 100%;
-      }
-      .mat-text-box{
-        width: 100%;
-      }
-      .provider{
-        flex-wrap: nowrap;
-      }
-    }
-    @include breakpoint-xs {
-      min-width: auto;
-      display: flex;
-      flex-direction: column;
-      min-width: calc(100vw - 64px);
-      .imageholder{
-        width: 100%;
-      }
-      .mat-text-box{
-        width: 100%;
-      }
-      .provider{
-        flex-wrap: nowrap;
-      }
-    }
   }
 
   .cbp-mark {
