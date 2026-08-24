@@ -49,7 +49,9 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   fromMDO = false
   karmaRedeemData: any = null
   enrollRestrictionMessage = ''
+  requiredKarmaPoints = 0
   private karmaRedeemContent: any = null
+  private karmaPointsRequest: Promise<number> | null = null
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 
@@ -108,6 +110,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         }
       } else {
         this.validateEnrollmentEligibility()
+        this.loadRequiredKarmaPoints(this.extContentReadData)
       }
 
     })
@@ -222,11 +225,12 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   async enRollToExtCourse(content: any) {
-    const points = content?.requiredKarmaPoints ?? 0
+    // Awaits the call the page load started, so a quick click cannot enrol before the rule is in.
+    const points = await this.loadRequiredKarmaPoints(content)
     const popupConfig = _.get(this.config, 'karmaRedeemPopup', {}) || {}
 
-    // Nothing to redeem (0 points) or the user's group is exempt — go straight to consent.
-    if (points <= 0 || this.isKarmaRedeemExemptGroup(popupConfig)) {
+    // Nothing to redeem (0 points) - go straight to consent, no popup.
+    if (points <= 0) {
       this.openConsentDialog(content)
       return
     }
@@ -241,15 +245,26 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
   }
 
-  /** Groups that unlock marketplace courses without redeeming karma points. */
-  private isKarmaRedeemExemptGroup(popupConfig: any): boolean {
-    const group = _.get(this.configSvc, 'unMappedUser.profileDetails.professionalDetails[0].group', '')
-    if (!group) {
-      return false
+  private loadRequiredKarmaPoints(content: any): Promise<number> {
+    const courseId = _.get(content, 'contentId', '')
+    const partnerId = _.get(content, 'contentPartner.id', '')
+    if (!courseId || !partnerId) {
+      return Promise.resolve(this.requiredKarmaPoints)
     }
-    const exemptGroups: string[] = _.get(popupConfig, 'exemptGroups', ['Group A', 'Group B'])
-    return (exemptGroups || []).some((exempt: string) =>
-      `${exempt}`.trim().toLowerCase() === `${group}`.trim().toLowerCase())
+    if (!this.karmaPointsRequest) {
+      this.karmaPointsRequest = this.certSvc.getKarmaPointsDeductionRule(courseId, partnerId)
+        .toPromise()
+        .then((res: any) => {
+          this.requiredKarmaPoints = Number(_.get(res, 'result.requiredKarmaPoints', 0)) || 0
+          return this.requiredKarmaPoints
+        })
+        .catch(() => {
+          // No rule to apply - treated as nothing to redeem rather than blocking the enrolment.
+          this.requiredKarmaPoints = 0
+          return 0
+        })
+    }
+    return this.karmaPointsRequest
   }
 
   private buildKarmaRedeemMessage(popupConfig: any, points: number): string {
@@ -265,6 +280,15 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
 
     return [before, `${points}`, after].filter((part: string) => part).join(' ')
+  }
+
+  /**
+   * There is nothing to redeem at zero coins, so the popup never paints - the enrol path already
+   * skips it, and this keeps a stray or stale karmaRedeemData from putting a '0 Karma Coins' popup
+   * on screen.
+   */
+  get showKarmaRedeemDialog(): boolean {
+    return Number(_.get(this.karmaRedeemData, 'requiredKarmaPoints', 0)) > 0
   }
 
   onKarmaRedeemClosed(confirmed: boolean) {
@@ -602,6 +626,16 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return Object.keys(this.userExtCourseEnroll).length > 0 &&
       _.get(this.extContentReadData, 'redirectUrl') &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
+  }
+
+  get showPaidBadge(): boolean {
+    return _.get(this.extContentReadData, 'courseType') === 'paid' &&
+      (this.showEnroll || Boolean(this.showRedirect))
+  }
+  get showRestrictedBadge(): boolean {
+    return _.get(this.extContentReadData, 'courseType') === 'paid' &&
+      !this.enrollValidationLoading &&
+      !this.showPaidBadge
   }
 
 }

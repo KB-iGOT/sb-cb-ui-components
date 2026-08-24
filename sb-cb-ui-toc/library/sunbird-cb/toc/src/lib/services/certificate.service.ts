@@ -16,6 +16,7 @@ const urls = {
   DOWNLOAD_CERTIFICATE_v2: (id: string) => `apis/protected/v8/cohorts/course/batch/cert/download/${id}`,
   SEARCH_CERTIFICATE: 'certreg/v1/certs/search',
   VALIDATE_ENROLLMENT: 'cios-enroll/v1/validation',
+  KARMA_POINTS_DEDUCTION_RULE: 'cios-enroll/v1/karmapoints/deductionrule',
   CONSENT_API: 'consent/v1/acknowledge',
 }
 @Injectable({
@@ -69,6 +70,17 @@ export class CertificateService {
   validateEnrollmentEligibility(courseId: string, partnerId: string): Observable<any> {
     const option = {
       url: `${urls.PROXIES_PREFIX}${urls.VALIDATE_ENROLLMENT}`,
+      data: {
+        courseId,
+        partnerId,
+      },
+    }
+    return this.http.post<any>(option.url, option.data)
+  }
+
+  getKarmaPointsDeductionRule(courseId: string, partnerId: string): Observable<any> {
+    const option = {
+      url: `${urls.PROXIES_PREFIX}${urls.KARMA_POINTS_DEDUCTION_RULE}`,
       data: {
         courseId,
         partnerId,
