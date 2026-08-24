@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core'
 import { NsCardContent } from '../../../_models/card-content.model'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { ConfigurationsService, DomainConfService, EventService } from '@sunbird-cb/utils-v2'
@@ -30,6 +30,7 @@ export class CardWideV2Component implements OnInit {
   showFlip = false
   widgetType: any = 'df'
   widgetSubType: any = 'sdf'
+  isSmallScreen = false
   constructor(
     private snackBar: MatSnackBar,
     private events: EventService,
@@ -51,6 +52,7 @@ export class CardWideV2Component implements OnInit {
   }
 
   ngOnInit() {
+    this.updateScreenSize()
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {
       this.defaultThumbnail = instanceConfig.logos.defaultContent || ''
@@ -60,6 +62,11 @@ export class CardWideV2Component implements OnInit {
       this.defaultThumbnail = '/assets/instances/eagle/app_logos/default.png'
       this.defaultSLogo = '/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg'
     }
+  }
+
+  @HostListener('window:resize')
+  updateScreenSize() {
+    this.isSmallScreen = typeof window !== 'undefined' && window.innerWidth <= 425
   }
 
   showSnackbar() {

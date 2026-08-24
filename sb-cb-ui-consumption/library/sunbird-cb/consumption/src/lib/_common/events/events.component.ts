@@ -14,6 +14,8 @@ export class EventsComponent implements OnInit {
   @Input() object: any
   @Input() nwlEventsConfig: any
   @Input() eventsApiConfig: any
+  /* Opt-in "View all" link: { path, enabled?, label?, queryParams? } — no path, no link */
+  @Input() viewAllConfig: any
   @Input() isEdit: boolean = false;
   @Input() isEditable: boolean = false;
   @Output() editClicked = new EventEmitter<any>();
@@ -25,6 +27,26 @@ export class EventsComponent implements OnInit {
   showAllEvents = false
 
   toggleShowAll(): void { this.showAllEvents = !this.showAllEvents }
+
+  get showViewAll(): boolean {
+    const config = this.viewAllConfig
+    if (!config || !config.path) {
+      return false
+    }
+    if (config.enabled === undefined || config.enabled === null) {
+      return true
+    }
+    /* Form config can carry the flag as a boolean or as a string */
+    return config.enabled !== false && `${config.enabled}`.toLowerCase() !== 'false'
+  }
+
+  get viewAllLabel(): string {
+    return this.viewAllConfig?.label || 'View all'
+  }
+
+  get viewAllQueryParams(): any {
+    return this.viewAllConfig?.queryParams || {}
+  }
 
   // Will store the event callback function from the parent
   private eventCallback: Function | undefined
