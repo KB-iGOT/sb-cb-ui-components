@@ -67,6 +67,29 @@
     padding: 16px 14px;
   }
 
+  .events-view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1B4CA1;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+  }
+
 .edit-icon {
   display: inline-flex;
   align-items: center;
