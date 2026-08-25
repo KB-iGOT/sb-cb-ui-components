@@ -765,7 +765,7 @@ export class SharedService {
       context === 'acbp'
         ? API_END_POINTS.DOWNLOAD_PDF_ACBP
         : API_END_POINTS.DOWNLOAD_PDF;
-    const url = `${this.baseUrl}${endpoint}?state_center_id=${state_center_id}*&language=${language}`;
+    const url = `${this.baseUrl}${endpoint}?state_center_id=${state_center_id}&language=${language}`;
     const headers = this.headers
 
     return this.http.get(url, {
@@ -1262,4 +1262,3 @@ getApprovalRequests(reqBody: any) {
   }
 
 }
-

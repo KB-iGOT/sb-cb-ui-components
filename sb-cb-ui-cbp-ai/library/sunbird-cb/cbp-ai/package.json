@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/cbp-ai",
-  "version": "0.1.108",
+  "version": "0.1.109",
   "dependencies": {
     "tslib": "^2.0.0"
   },
