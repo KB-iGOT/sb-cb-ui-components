@@ -30,12 +30,12 @@
       <div class="sidebar-header px-4 border-b border-gray-200 bg-primary text-white flex items-center justify-between"
         role="banner" aria-label="Sidebar header">
         @if (showContent()) {
-        @if (menuBarDetails?.logoUrl) {
+        @if (logoUrl()) {
         <div class="logo-container" [class.cursor-pointer]="menuBarDetails?.navUrl"
           [attr.role]="menuBarDetails?.navUrl ? 'button' : null" [attr.tabindex]="menuBarDetails?.navUrl ? 0 : null"
           (click)="onLogoClick()" (keydown.enter)="onLogoClick()" (keydown.space)="onLogoClick()">
-          <img [src]="menuBarDetails.logoUrl" [alt]="menuBarDetails?.headerText || 'Application logo'" class="logo"
-            loading="lazy" aria-label="Organization logo" />
+          <img [src]="logoUrl()" [alt]="menuBarDetails?.headerText || 'Application logo'" class="logo" loading="lazy"
+            aria-label="Organization logo" />
         </div>
         }
 
