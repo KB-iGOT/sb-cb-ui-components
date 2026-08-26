@@ -16,6 +16,10 @@ import { DomainConfService } from './domain-conf.service'
 
 const storage = localStorage
 const storageKey = 'kc'
+/* Partners the user actually opened this session — written by app-toc-cios-home when the
+   user follows a partner's redirect link (see rememberPartnerSession there). */
+const extPartnerSessionsKey = 'extPartnerSessions'
+const ecornellLogoutUrl = 'https://admin-test.ecornell.com/saml/logout.do'
 // const logoutRedirectUrl = ''
 
 @Injectable({
@@ -180,7 +184,41 @@ export class AuthKeycloakService {
     // this.keycloakSvc.logout(redirectUrl)
     // }
   }
+  /**
+   * True only when the user actually opened eCornell content this session.
+   *
+   * The partner list is written when the user follows a partner redirect link
+   * (app-toc-cios-home → rememberPartnerSession). Without this the eCornell SAML logout
+   * was fired on every single logout, for every user, whether or not they had ever
+   * touched eCornell — a cross-origin request to a third party on an unrelated action.
+   *
+   * Must be read before storage is cleared, which is why callers capture it up front.
+   */
+  private hasEcornellSession(): boolean {
+    try {
+      const raw = storage.getItem(extPartnerSessionsKey)
+      if (!raw) {
+        return false
+      }
+      const partners: string[] = JSON.parse(raw)
+      return Array.isArray(partners)
+        && partners.some(p => (p || '').toLowerCase().includes('ecornell'))
+    } catch {
+      return false
+    }
+  }
+
+  /** Ends the eCornell session, but only if one was started. Never blocks logout. */
+  private async logoutEcornellIfNeeded(hadSession: boolean): Promise<void> {
+    if (!hadSession) {
+      return
+    }
+    await this.http.get(ecornellLogoutUrl).toPromise().catch(() => undefined)
+  }
+
   async force_logout() {
+    // Captured before the storage clears below wipe the partner list.
+    const hadEcornellSession = this.hasEcornellSession()
     if (storage.getItem('telemetrySessionId')) {
       storage.removeItem('telemetrySessionId')
     } else {
@@ -189,10 +227,8 @@ export class AuthKeycloakService {
       // window.location.href = `${this.environment.staticHomePageUrl}`
       // await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
       // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
-      window.location.href = `https://${this.domainConf.getDomainSitePath()}/apis/reset`
-      await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()
-
-
+      window.location.href = `${this.domainConf.getSessionOrigin()}/apis/reset`
+      await this.logoutEcornellIfNeeded(hadEcornellSession)
     }
     try {
       sessionStorage.clear()
@@ -203,12 +239,10 @@ export class AuthKeycloakService {
     storage.removeItem(storageKey)
     // window.location.href = `${this.environment.staticHomePageUrl}`
     //await this.http.get(`https://${this.environment.sitePath}/apis/reset`).toPromise()
-    window.location.href = `https://${this.domainConf.getDomainSitePath()}/apis/reset`
+    window.location.href = `${this.domainConf.getSessionOrigin()}/apis/reset`
     // this.openInvisibleIframe(`https://${this.environment.sitePath}/apis/reset`)
     // window.location.href = `${this.environment.staticHomePageUrl}`
-    await this.http.get('https://admin-test.ecornell.com/saml/logout.do').toPromise()
-
-
+    await this.logoutEcornellIfNeeded(hadEcornellSession)
   }
 
   openInvisibleIframe(url: string): void {
