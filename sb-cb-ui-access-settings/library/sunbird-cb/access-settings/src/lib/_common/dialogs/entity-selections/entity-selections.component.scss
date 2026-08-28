@@ -260,3 +260,27 @@
     max-height: 72vh !important;
     }
    }
+
+/* State picker shown above the State Service list */
+.state-selection {
+  .state-selection-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .state-required {
+    color: #e53935;
+  }
+
+  .state-selection-hint {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.6);
+    margin-left: 4px;
+  }
+
+  .state-selection-field {
+    max-width: 280px;
+  }
+}

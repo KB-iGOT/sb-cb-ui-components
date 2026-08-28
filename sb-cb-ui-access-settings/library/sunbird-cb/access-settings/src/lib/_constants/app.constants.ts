@@ -8,3 +8,7 @@ export const CHECKBOX_OPTIONS = [
   { label: "Select All", value: "selectAll" },
   // { label: "Cadre Controlling Authority", value: "isCCA" },
 ];
+
+// Criteria key used when a L0 MDO (ministry / state) selects every organisation of its hierarchy.
+// The whole ministry / state is then stored as a single criteria instead of the expanded org list.
+export const MINISTRY_OR_STATE_CRITERIA_KEY = "ministryOrStateId";
