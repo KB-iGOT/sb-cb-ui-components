@@ -117,6 +117,30 @@
                       </div>
                     </ng-container>
 
+                    <!-- State picker, the State Service type publishes its services per state -->
+                    <ng-container *ngIf="showStateSelection">
+                      <div class="state-selection px-2 my-3">
+                        <div class="state-selection-label mb-2">
+                          States <span class="state-required">*</span>
+                          <span class="state-selection-hint">(Requires for state services)</span>
+                        </div>
+                        <div class="mat-full-radius state-selection-field">
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-select
+                              placeholder="Select state"
+                              [(ngModel)]="selectedStateKey"
+                              (selectionChange)="onChangeState($event)"
+                              [disabled]="!canChooseState || accessControlCriteriaSelection?.readOnly || data?.disabled"
+                            >
+                              <ng-container *ngFor="let state of availableStates">
+                                <mat-option [value]="state?.id">{{ state?.displayName || state?.name }}</mat-option>
+                              </ng-container>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                      </div>
+                    </ng-container>
+
                     <ng-container *ngIf="checkIfData; else noData">
                       <ng-container *ngTemplateOutlet="entityListTemplate"></ng-container>
                     </ng-container>
