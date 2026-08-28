@@ -388,9 +388,39 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   captureRedirectTelemetry(content: any) {
+    this.rememberPartnerSession(content)
     this.raiseTelemtryStartEvent()
     this.telemetryToCaptureInteract(content.contentId, 'redirect', 'redirect-content')
     this.raiseTelemtryEndEvent()
+  }
+
+  /**
+   * Records which content partners the user has actually opened.
+   *
+   * This is the only place a partner session gets created - the link this fires on is the
+   * one that carries the user out to the partner's SSO. Logout reads the list back so it
+   * can hit a partner's logout endpoint only when there is a session to end, instead of
+   * calling every partner on every logout.
+   *
+   * Kept in localStorage rather than sessionStorage because the partner session lives in
+   * browser cookies and outlives the tab that opened it. Logout clears it along with the
+   * rest of storage.
+   */
+  private rememberPartnerSession(content: any): void {
+    const partner = _.get(content, 'contentPartner.contentPartnerName', '')
+    if (!partner) {
+      return
+    }
+    try {
+      const raw = localStorage.getItem('extPartnerSessions')
+      const partners: string[] = raw ? JSON.parse(raw) : []
+      if (!partners.includes(partner)) {
+        partners.push(partner)
+        localStorage.setItem('extPartnerSessions', JSON.stringify(partners))
+      }
+    } catch {
+      /* storage unavailable - the partner logout call is simply skipped, never breaks logout */
+    }
   }
 
   raiseTelemtryStartEvent() {
