@@ -24,6 +24,9 @@ import { Router } from '@angular/router'
 export class ContentStripsComponent implements OnInit {
   contentConfig = input.required<ContentConfig>();
   sectionKey = input<string>('');
+  // When true, skips fetching and stays on the skeleton state — used for the pills section's
+  // upfront skeleton before a pill (and its real contentConfig) has actually been selected.
+  forceLoading = input<boolean>(false);
 
   // Expose CardType enum so the template can use it in @switch
   CardType = CardType;
@@ -57,6 +60,10 @@ export class ContentStripsComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeSkeletons()
+    if (this.forceLoading()) {
+      this.loading.set(true)
+      return
+    }
     this.fetchContent()
     this.getCbPlanData()
   }
