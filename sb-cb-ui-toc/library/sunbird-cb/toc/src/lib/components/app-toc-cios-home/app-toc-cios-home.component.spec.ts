@@ -160,6 +160,7 @@ describe('AppTocCiosHomeComponent', () => {
       downloadCertificate_v2: jest.fn().mockReturnValue(of({ result: { printUri: 'print-uri' } })),
       consentSubmit: jest.fn().mockReturnValue(of({ result: 'ok' })),
       validateEnrollmentEligibility: jest.fn().mockReturnValue(of({ result: 'eligible' })),
+      getKarmaPointsDeductionRule: jest.fn().mockReturnValue(of({ result: { requiredKarmaPoints: 0 } })),
     }
 
     loaderMock = {
@@ -258,6 +259,26 @@ describe('AppTocCiosHomeComponent', () => {
       })
       createComponent()
       expect(certSvcMock.validateEnrollmentEligibility).toHaveBeenCalled()
+    })
+
+    it('should load the karma points to enrol with when the user is not enrolled', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 30 } }))
+      routeMock.data = of({
+        extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' } } } },
+      })
+      const created = createComponent()
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledWith('c1', 'p1')
+      await (created as any).karmaPointsRequest
+      expect(created.requiredKarmaPoints).toBe(30)
+    })
+
+    it('should not load the karma points for an already enrolled user', () => {
+      routeMock.data = of({
+        extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' } } } },
+        userEnrollContent: { data: { result: { progress: 40 } } },
+      })
+      createComponent()
+      expect(certSvcMock.getKarmaPointsDeductionRule).not.toHaveBeenCalled()
     })
   })
 
@@ -597,20 +618,29 @@ describe('AppTocCiosHomeComponent', () => {
   })
 
   describe('enRollToExtCourse', () => {
-    /** Sets the logged in user's group; the component reads it off the shared config mock. */
-    const setUserGroup = (group: string) => {
-      configSvcMock.unMappedUser = {
-        identifier: 'USER-1',
-        profileDetails: { professionalDetails: [{ group }] },
-      }
+    /** The course on screen; both ids are needed for the deduction rule call. */
+    const extContent = { contentId: 'c1', contentPartner: { id: 'p1' } }
+
+    /** Points the deduction rule API answers with for this user and course. */
+    const setRequiredKarmaPoints = (requiredKarmaPoints: any) => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints } }))
     }
 
     beforeEach(() => {
       // The skip paths open the consent dialog straight away - stop there.
       jest.spyOn(component, 'callConsentApi').mockImplementation(() => { })
+      component.extContentReadData = { ...extContent }
+    })
+
+    it('should ask the deduction rule api for the points of this course', async () => {
+      setRequiredKarmaPoints(25)
+      await component.enRollToExtCourse(extContent)
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledWith('c1', 'p1')
+      expect(component.requiredKarmaPoints).toBe(25)
     })
 
     it('should build the karma redeem data from the popup config', async () => {
+      setRequiredKarmaPoints(25)
       component.config = {
         karmaRedeemPopup: {
           popupHeader: 'Redeem?',
@@ -619,7 +649,7 @@ describe('AppTocCiosHomeComponent', () => {
           cancelButton: 'No',
         },
       }
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData).toEqual({
         requiredKarmaPoints: 25,
         header: 'Redeem?',
@@ -629,93 +659,108 @@ describe('AppTocCiosHomeComponent', () => {
       })
     })
 
-    it('should skip the popup and open consent when the content has no karma points', async () => {
+    it('should skip the popup and open consent when the rule returns no karma points', async () => {
       component.config = {}
-      await component.enRollToExtCourse({ contentId: 'c1' })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData).toBeNull()
       expect(matDialogMock.open).toHaveBeenCalled()
     })
 
     it('should skip the popup and open consent when the karma points are zero', async () => {
+      setRequiredKarmaPoints(0)
       component.config = {}
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 0 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData).toBeNull()
       expect(matDialogMock.open).toHaveBeenCalled()
     })
 
-    it('should skip the popup for a Group A user', async () => {
-      setUserGroup('Group A')
+    it('should ignore the content own required karma points', async () => {
+      setRequiredKarmaPoints(0)
       component.config = {}
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      await component.enRollToExtCourse({ ...extContent, requiredKarmaPoints: 25 })
       expect(component.karmaRedeemData).toBeNull()
       expect(matDialogMock.open).toHaveBeenCalled()
     })
 
-    it('should skip the popup for a Group B user regardless of case and spacing', async () => {
-      setUserGroup(' group b ')
+    it('should show the popup whatever group the user belongs to', async () => {
+      setRequiredKarmaPoints(25)
+      configSvcMock.unMappedUser = {
+        identifier: 'USER-1',
+        profileDetails: { professionalDetails: [{ group: 'Group A' }] },
+      }
       component.config = {}
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
-      expect(component.karmaRedeemData).toBeNull()
-      expect(matDialogMock.open).toHaveBeenCalled()
-    })
-
-    it('should show the popup for a group that is not exempt', async () => {
-      setUserGroup('Group C')
-      component.config = {}
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData.requiredKarmaPoints).toBe(25)
       expect(matDialogMock.open).not.toHaveBeenCalled()
     })
 
-    it('should show the popup when the user has no group', async () => {
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
-      expect(component.karmaRedeemData.requiredKarmaPoints).toBe(25)
-      expect(matDialogMock.open).not.toHaveBeenCalled()
-    })
-
-    it('should honour the exempt groups from the popup config', async () => {
-      setUserGroup('Group C')
-      component.config = { karmaRedeemPopup: { exemptGroups: ['Group C'] } }
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 25 })
+    it('should skip the popup when the rule call fails', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({ error: 'boom' }))
+      component.config = {}
+      await component.enRollToExtCourse(extContent)
+      expect(component.requiredKarmaPoints).toBe(0)
       expect(component.karmaRedeemData).toBeNull()
       expect(matDialogMock.open).toHaveBeenCalled()
+    })
+
+    it('should not call the rule without a course and partner id', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockClear()
+      await component.enRollToExtCourse({ contentId: 'c1' })
+      expect(certSvcMock.getKarmaPointsDeductionRule).not.toHaveBeenCalled()
+      expect(matDialogMock.open).toHaveBeenCalled()
+    })
+
+    it('should ask the rule only once per page', async () => {
+      setRequiredKarmaPoints(25)
+      certSvcMock.getKarmaPointsDeductionRule.mockClear()
+      await component.enRollToExtCourse(extContent)
+      component.onKarmaRedeemClosed(false)
+      await component.enRollToExtCourse(extContent)
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledTimes(1)
+      expect(component.karmaRedeemData.requiredKarmaPoints).toBe(25)
     })
 
     it('should tolerate a null karma popup config', async () => {
+      setRequiredKarmaPoints(5)
       component.config = { karmaRedeemPopup: null }
-      await component.enRollToExtCourse({ contentId: 'c1', requiredKarmaPoints: 5 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData.requiredKarmaPoints).toBe(5)
     })
 
     it('should remember the content being redeemed', async () => {
-      const content = { contentId: 'c1', requiredKarmaPoints: 5 }
+      setRequiredKarmaPoints(5)
+      const content = { ...extContent }
       await component.enRollToExtCourse(content)
       expect((component as any).karmaRedeemContent).toBe(content)
     })
 
     it('should replace every points placeholder in the message template', async () => {
+      setRequiredKarmaPoints(7)
       component.config = { karmaRedeemPopup: { message: '{points} coins now, {points} coins total' } }
-      await component.enRollToExtCourse({ requiredKarmaPoints: 7 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData.message).toBe('7 coins now, 7 coins total')
     })
 
     it('should assemble the message from the before and after text', async () => {
+      setRequiredKarmaPoints(12)
       component.config = {
         karmaRedeemPopup: { pointsBeforeText: 'Redeem', pointsAfterText: 'Karma Coins to unlock' },
       }
-      await component.enRollToExtCourse({ requiredKarmaPoints: 12 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData.message).toBe('Redeem 12 Karma Coins to unlock')
     })
 
     it('should assemble the message from the before text alone', async () => {
+      setRequiredKarmaPoints(12)
       component.config = { karmaRedeemPopup: { pointsBeforeText: 'Redeem' } }
-      await component.enRollToExtCourse({ requiredKarmaPoints: 12 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData.message).toBe('Redeem 12')
     })
 
     it('should assemble the message from the after text alone', async () => {
+      setRequiredKarmaPoints(12)
       component.config = { karmaRedeemPopup: { pointsAfterText: 'Karma Coins' } }
-      await component.enRollToExtCourse({ requiredKarmaPoints: 12 })
+      await component.enRollToExtCourse(extContent)
       expect(component.karmaRedeemData.message).toBe('12 Karma Coins')
     })
   })
@@ -724,7 +769,8 @@ describe('AppTocCiosHomeComponent', () => {
     beforeEach(async () => {
       component.config = { contentConsent: { consentDocUrl: '/consent.html', assetsDocUrl: '/assets.html' } }
       jest.spyOn(component, 'callConsentApi').mockImplementation(() => { })
-      await component.enRollToExtCourse({ contentId: 'c1', contentPartner: { id: 'p1' }, requiredKarmaPoints: 5 })
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 5 } }))
+      await component.enRollToExtCourse({ contentId: 'c1', contentPartner: { id: 'p1' } })
     })
 
     it('should clear the dialog state and open the consent dialog on confirm', () => {
@@ -744,6 +790,27 @@ describe('AppTocCiosHomeComponent', () => {
       component.onKarmaRedeemClosed(false)
       component.onKarmaRedeemClosed(true)
       expect(matDialogMock.open).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('showKarmaRedeemDialog', () => {
+    it('should stay hidden with no redeem data at all', () => {
+      expect(component.showKarmaRedeemDialog).toBe(false)
+    })
+
+    it('should stay hidden when the rule asked for zero coins', () => {
+      component.karmaRedeemData = { requiredKarmaPoints: 0 }
+      expect(component.showKarmaRedeemDialog).toBe(false)
+    })
+
+    it('should stay hidden when the rule gave no number at all', () => {
+      component.karmaRedeemData = { header: 'Redeem?' }
+      expect(component.showKarmaRedeemDialog).toBe(false)
+    })
+
+    it('should show once there are coins to redeem', () => {
+      component.karmaRedeemData = { requiredKarmaPoints: 25 }
+      expect(component.showKarmaRedeemDialog).toBe(true)
     })
   })
 
@@ -1325,6 +1392,53 @@ describe('AppTocCiosHomeComponent', () => {
         contentPartner: { isActive: false },
       }
       expect(component.showRedirect).toBeFalsy()
+    })
+  })
+
+  describe('paid and restricted badges', () => {
+    beforeEach(() => {
+      component.userExtCourseEnroll = {}
+      component.enrollValidationLoading = false
+      component.canEnroll = true
+      component.extContentReadData = { courseType: 'paid', contentPartner: { isActive: true } }
+    })
+
+    it('should tag an enrollable paid course as paid', () => {
+      expect(component.showPaidBadge).toBe(true)
+      expect(component.showRestrictedBadge).toBe(false)
+    })
+
+    it('should keep the paid tag for an enrolled user who can redirect', () => {
+      component.userExtCourseEnroll = { progress: 10 }
+      component.extContentReadData = {
+        courseType: 'paid',
+        redirectUrl: 'https://partner.com',
+        contentPartner: { isActive: true },
+      }
+
+      expect(component.showPaidBadge).toBe(true)
+      expect(component.showRestrictedBadge).toBe(false)
+    })
+
+    it('should mark a paid course the user cannot enroll in as restricted', () => {
+      component.canEnroll = false
+
+      expect(component.showPaidBadge).toBe(false)
+      expect(component.showRestrictedBadge).toBe(true)
+    })
+
+    it('should show neither badge while eligibility is being validated', () => {
+      component.enrollValidationLoading = true
+
+      expect(component.showPaidBadge).toBe(false)
+      expect(component.showRestrictedBadge).toBe(false)
+    })
+
+    it('should show neither badge for a free course', () => {
+      component.extContentReadData = { courseType: 'free', contentPartner: { isActive: true } }
+
+      expect(component.showPaidBadge).toBe(false)
+      expect(component.showRestrictedBadge).toBe(false)
     })
   })
 })

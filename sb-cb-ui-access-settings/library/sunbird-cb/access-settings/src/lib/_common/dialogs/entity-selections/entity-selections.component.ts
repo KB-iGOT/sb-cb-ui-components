@@ -62,11 +62,19 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   serviceSelectionTypes = ["All Services"];
   selectedServiceType = "All Services";
+  // State Service selection: the states the user may pick from and the one currently picked.
+  // A CCA may switch between states, every other org is locked to its own state.
+  availableStates: any[] = [];
+  selectedStateKey = "";
+  canChooseState = false;
+  stateServiceTypeNames: string[] = [];
   customeFieldValues: any;
   isEntityCustomField: boolean;
 
   entityFilterOptions = CHECKBOX_OPTIONS;
   isCCA = false;
+  // Non CCA L0 MDO picks organisations from its own org hierarchy (loaded once, filtered locally)
+  isOrgHierarchyMode = false;
   environment: any
   ODCSMasterFramework: any
   applyNewServiceSelections = true
@@ -92,6 +100,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.content = this.accessControlConfig?.content;
     this.application = this.accessControlConfig?.application || "";
     this.isCCA = this.accessControlConfig?.userConfig?.org?.isCCA ?? false;
+    this.isOrgHierarchyMode =
+      !this.isCCA &&
+      this.application === NsAccessControlConfig.Application.MDO &&
+      this.accessControlService.orgHierarchyOrganisations()?.length > 0;
     
     // if(this.content && this.content?.externalId) {
     //   this.applyNewServiceSelections = true
@@ -153,7 +165,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   initializeDisplay(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
-        if (this.activeTab === 0) {
+        if (this.isOrgHierarchyMode) {
+          this.getOrgHierarchyList("");
+        } else if (this.activeTab === 0) {
           this.selectedCharacterRange = "A";
           this.getOrganisationsList("", [], this.selectedCharacterRange);
         } else {
@@ -166,7 +180,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         
         // For isCCA = false , fetch designations within their orgs only
         if (!this.isCCA && this.application === NsAccessControlConfig.Application.MDO) {
-          this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
+          // A L0 MDO can have picked organisations from its hierarchy, honour them when present
+          const hierarchyOrgSelections = this.data?.rule?.conditions?.find(
+            (c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations
+          )?.selections;
+          if (this.isOrgHierarchyMode && hierarchyOrgSelections?.length) {
+            this.orgSelectionIds = hierarchyOrgSelections;
+          } else {
+            this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
+          }
         } else {
           this.orgSelectionIds = this.data?.rule?.conditions?.find(
             (c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations
@@ -189,6 +211,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         break;
       case NsAccessControlConfig.SelectionType.Service:
         this.radioSelections = this.accessControlCriteriaSelection?.servicesRadioSelection;
+        this.resolveSelectableStates();
         this.getServicesList(this.searchControl.value);
         break;
       case NsAccessControlConfig.SelectionType.Cadre:
@@ -278,7 +301,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.filterValue = "all";
     }
     if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations) {
-      if (this.activeTab === 0) {
+      if (this.isOrgHierarchyMode) {
+        this.getOrgHierarchyList("");
+      } else if (this.activeTab === 0) {
         this.selectedCharacterRange = "A";
         this.getOrganisationsList("", [], this.selectedCharacterRange);
       } else {
@@ -324,6 +349,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         }
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
+        if (this.isOrgHierarchyMode) {
+          this.getOrgHierarchyList(this.searchControl.value);
+          break;
+        }
         this.selectedCharacterRange = "A";
         if (this.filterValue === "all" && !this.searchControl.value) this.updateAlphabet();
         this.getOrganisationsList(this.searchControl.value, []);
@@ -452,7 +481,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   scrollToSection(letter: string) {
     this.paginationOffset = 0;
-    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && this.filterValue === "all" && !this.searchedOrganisationFlagWithQuery) {
+    if (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && !this.isOrgHierarchyMode && this.filterValue === "all" && !this.searchedOrganisationFlagWithQuery) {
       this.selectedCharacterRange = letter;
       this.getOrganisationsList("", [], letter);
       return;
@@ -494,9 +523,14 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       .sort();
     if (chars.has("#")) sorted.push("#");
 
-    // Show all characters for Organizations
+    // Show all characters for Organizations, except for the locally held org hierarchy list
+    // where only the letters actually present are shown
+    const showsAllCharacters =
+      this.selectionType === NsAccessControlConfig.SelectionType.Designation ||
+      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations && !this.isOrgHierarchyMode);
+
     if (
-      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations || this.selectionType === NsAccessControlConfig.SelectionType.Designation) &&
+      showsAllCharacters &&
       this.filterValue === "all" &&
       !this.searchControl.value
     ) {
@@ -530,6 +564,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   loadMore(): void {
+    // The org hierarchy list is held locally, there is nothing more to fetch
+    if (this.isOrgHierarchyMode && this.selectionType === this.selectionTypeEnum.Organizations) return;
     if (this.dataList.length >= this.totalItemsCount || this.isFetchingMore) return;
     this.isFetchingMore = true;
     this.paginationOffset += this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
@@ -544,6 +580,35 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         this.getOrganisationsList(this.searchControl.value, [], this.selectedCharacterRange, true);
         break;
     }
+  }
+
+  /**
+   * Organisation list for a non CCA L0 MDO. The whole hierarchy (L0 -> L10) is already read from the
+   * org hierarchy framework, so searching and the A-Z filtering are done locally without any API call.
+   */
+  getOrgHierarchyList(query: string): void {
+    const baseList = this.accessControlService.orgHierarchyOrganisations() || [];
+    let filtered = [...baseList];
+
+    if (this.filterValue === "selected") {
+      filtered = filtered.filter((org: any) => this.isSelected(org));
+    }
+
+    const searchQuery = (query || "").trim().toLowerCase();
+    if (searchQuery) {
+      filtered = filtered.filter((org: any) => (org?.channel || "").toLowerCase().includes(searchQuery));
+    }
+
+    this.dataList = filtered;
+    this.dataListDup = _.uniqWith([...this.dataListDup, ...baseList], _.isEqual);
+    this.totalItemsCount = filtered.length;
+    this.searchedOrganisationFlagWithQuery = !!searchQuery;
+
+    this.updateAlphabet();
+    this.selectedCharacterRange = this.alphabet?.[0] || "";
+    this.getFilteredEntityGrouped();
+    this.isLoading = false;
+    this.isFetchingMore = false;
   }
 
   getOrganisationsList(query: string, selectedData?: string[], character?: string, append: boolean = false): void {
@@ -676,6 +741,72 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Works out which states the user may select services from.
+   * A CCA picks any state, an L0 state organisation is its own state and an L1 -> L10 organisation
+   * inherits the state it sits under. When the organisation is not part of a state that is present
+   * in the config, no state is selectable and the State Service option is hidden.
+   */
+  private resolveSelectableStates(): void {
+    this.stateServiceTypeNames = this.cadreMappingService.getStateServiceTypeNames();
+
+    if (!this.stateServiceTypeNames.length) {
+      this.availableStates = [];
+      this.canChooseState = false;
+      this.selectedStateKey = "";
+      return;
+    }
+
+    if (this.isCCA) {
+      this.availableStates = this.cadreMappingService.getAllStates();
+      this.canChooseState = true;
+    } else {
+      const org = this.accessControlConfig?.userConfig?.org;
+      // A L0 state organisation is the state itself, an L1 -> L10 organisation carries the
+      // state it belongs to on ministryOrStateName
+      const orgStateName =
+        (org?.sbOrgType || "").toLowerCase() === "state"
+          ? org?.orgName || org?.channel
+          : (org?.ministryOrStateType || "").toLowerCase() === "state"
+            ? org?.ministryOrStateName
+            : "";
+
+      const matchedState = this.cadreMappingService.findStateByName(orgStateName);
+      this.availableStates = matchedState ? [matchedState] : [];
+      this.canChooseState = false;
+    }
+
+    const isStillSelectable = this.availableStates.some((state: any) => state.id === this.selectedStateKey);
+    if (!isStillSelectable) {
+      this.selectedStateKey = this.availableStates[0]?.id || "";
+    }
+  }
+
+  get showStateSelection(): boolean {
+    return (
+      this.selectionType === this.selectionTypeEnum.Service &&
+      this.filterValue === "all" &&
+      this.stateServiceTypeNames.includes(this.selectedServiceType) &&
+      this.availableStates.length > 0
+    );
+  }
+
+  /** Services of the states the user may see, scoped to the picked state when browsing that type. */
+  private getSelectableStateServices(): Array<{ id: string; name: string }> {
+    if (!this.availableStates.length) return [];
+
+    const stateKeys = this.stateServiceTypeNames.includes(this.selectedServiceType)
+      ? [this.selectedStateKey].filter(Boolean)
+      : this.availableStates.map((state: any) => state.id);
+
+    return this.cadreMappingService.getServicesByStateKeys(stateKeys);
+  }
+
+  onChangeState(event: any): void {
+    this.selectedStateKey = event?.value ?? event;
+    this.getServicesList(this.searchControl.value);
+  }
+
   getServicesList(query: string): void {
     if (this.application === NsAccessControlConfig.Application.MDO || this.applyNewServiceSelections) {
       const baseList = this.accessControlService.holdServiceCadrebatch().service;
@@ -683,20 +814,36 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       
       const cadreDataRaw = this.cadreMappingService.getCadreConfigData()?.civilServiceType?.civilServiceTypeList || [];
       
-      // Update service types only once when first loading
+      // Update service types only once when first loading. The State Service type is only offered
+      // when the organisation actually has a state to select services from.
       if (this.serviceSelectionTypes.length === 1) {
-        this.serviceSelectionTypes = ["All Services", ...cadreDataRaw.map((element: any) => element.name)];
+        const selectableTypes = cadreDataRaw
+          .filter((element: any) => !this.cadreMappingService.isStateServiceType(element?.name) || this.availableStates.length > 0)
+          .map((element: any) => element.name);
+        this.serviceSelectionTypes = ["All Services", ...selectableTypes];
       }
 
       let selectedTypes: string[];
       if (this.selectedServiceType === "All Services") {
-        selectedTypes = cadreDataRaw.map((element: any) => element.name);
+        selectedTypes = this.serviceSelectionTypes.filter((type: string) => type !== "All Services");
       } else {
         selectedTypes = [this.selectedServiceType];
       }
       let allServices: any[] = [];
       cadreDataRaw.forEach((item: any) => {
-        if (selectedTypes.includes(item.name) && Array.isArray(item.serviceList)) {
+        if (!selectedTypes.includes(item.name)) return;
+
+        // The State Service type keeps its services per state, scoped to what the user may see
+        if (this.cadreMappingService.isStateServiceType(item.name)) {
+          allServices = allServices.concat(
+            this.getSelectableStateServices().filter((service: any) =>
+              baseServiceNames.has(service.name?.trim().toLowerCase())
+            )
+          );
+          return;
+        }
+
+        if (Array.isArray(item.serviceList)) {
           // Filter services that exist in baseList
           const filteredServices = item.serviceList.filter((service: any) => 
             baseServiceNames.has(service.name?.trim().toLowerCase())
@@ -720,7 +867,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   getCadreList(query: string): void {
-    const baseList = this.accessControlService.holdServiceCadrebatch().cadre;
+    // State services publish the same cadre names under different ids (eg. "Joint Secretary to
+    // Special Secretary Level" exists for every state), and a selection is stored by name, so the
+    // list is collapsed by name to avoid rendering the same cadre several times.
+    const baseList = _.uniqBy(this.accessControlService.holdServiceCadrebatch().cadre, (cadre: any) => cadre?.name?.trim().toLowerCase());
     this.dataList = query ? baseList.filter((cadre) => cadre.name?.toLowerCase().includes(query.toLowerCase())) : baseList;
     this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
 
@@ -909,6 +1059,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   onChangeServiceSelectionType(event: MatRadioChange): void {
   const wasSelectAllChecked = this.areAllSelected();
   this.selectedServiceType = event.value;
+  if (this.stateServiceTypeNames.includes(this.selectedServiceType) && !this.selectedStateKey) {
+    this.selectedStateKey = this.availableStates[0]?.id || "";
+  }
   this.getServicesList(this.searchControl.value);
   
   // If selectAll was checked before, auto-select all items in the new filtered list

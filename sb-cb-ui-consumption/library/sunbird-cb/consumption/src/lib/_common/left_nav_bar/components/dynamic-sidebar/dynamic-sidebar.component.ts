@@ -15,6 +15,8 @@ import { SidebarNavListSectionComponent } from '../sidebar-nav-list-section/side
 import { SidebarStatCardsSectionComponent } from '../sidebar-stat-cards-section/sidebar-stat-cards-section.component'
 import { SidebarInfoCardsSectionComponent } from '../sidebar-info-cards-section/sidebar-info-cards-section.component'
 import { SidebarFooterComponent } from '../sidebar-footer/sidebar-footer.component'
+import { DomSanitizer } from '@angular/platform-browser'
+import { DomainConfService } from '@sunbird-cb/utils-v2'
 
 /**
  * Dynamic Sidebar Component
@@ -108,12 +110,18 @@ export class DynamicSidebarComponent implements OnDestroy, OnChanges {
   isOverlayMode = computed(() => this.isTablet() || this.isMobile() || this.isNotHomeSignal())
   private previousMode: 'mobile' | 'tablet' | 'desktop' | null = null
 
+  logoUrl = computed(() => this.domSanitizer.bypassSecurityTrustResourceUrl(
+    this.domainConfSvc.getDomainAppLogo()
+  ))
+
   constructor(
     private cdr: ChangeDetectorRef,
     private router: Router,
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private domSanitizer: DomSanitizer,
+    private domainConfSvc: DomainConfService,
   ) {
     this.breakpointMatches = toSignal(
       this.breakpointObserver.observe([BREAKPOINT_QUERIES.MOBILE, BREAKPOINT_QUERIES.TABLET, BREAKPOINT_QUERIES.DESKTOP]),

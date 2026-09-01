@@ -87,10 +87,10 @@
                           <span *ngIf="showBadgeIcon()" class="custom-badge">
                               <img class="w-5 h-5" src="{{ extContentReadData?.badgeDetails_v1?.[0]?.badgeTemplate | pipePublicURL }}" alt="" srcset="">
                           </span>
-                          <span *ngIf="extContentReadData?.courseType === 'paid' && showEnroll===!false" class="restricted-badge">
+                          <span *ngIf="showPaidBadge" class="restricted-badge">
                               <img src="/assets/icons/hubs-v2/paid_text.svg" alt="Paid" />
                           </span>
-                           <span *ngIf="extContentReadData?.courseType === 'paid' && showEnroll===false" class="restricted-badge"
+                           <span *ngIf="showRestrictedBadge" class="restricted-badge"
                               [matTooltip]="enrollRestrictionMessage" matTooltipPosition="below"
                               matTooltipClass="restricted-badge-tooltip">
                               <img src="/assets/icons/hubs-v2/restricted_v2.svg" alt="Restricted" />
@@ -392,5 +392,5 @@
     </ng-container>
 </ng-template>
 
-<ws-app-karma-redeem-dialog *ngIf="karmaRedeemData" [data]="karmaRedeemData"
+<ws-app-karma-redeem-dialog *ngIf="showKarmaRedeemDialog" [data]="karmaRedeemData"
     (closed)="onKarmaRedeemClosed($event)"></ws-app-karma-redeem-dialog>

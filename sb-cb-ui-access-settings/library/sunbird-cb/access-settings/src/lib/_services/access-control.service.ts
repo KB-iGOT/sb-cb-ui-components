@@ -20,7 +20,11 @@ const ENDPOINTS = {
   PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`,
 
   CUSTOMES_FIELD_SEARCH: "apis/proxies/v8/customFields/v1/search",
+  ORG_HIERARCHY_FRAMEWORK: (frameworkId: string) => `/apis/proxies/v8/framework/v1/read/${frameworkId}`,
 };
+
+const L0_ORG_TYPES = ["ministry", "state"];
+const L0_ORG_ROLES = ["mdo_admin", "mdo_leader"];
 
 @Injectable({
   providedIn: "root",
@@ -33,6 +37,8 @@ export class AccessControlService {
     cadre: { id: string; name: string }[];
   }>;
   customesFieldData: WritableSignal<any[]> = signal([]);
+  // Organisations of the logged in L0 MDO hierarchy (L0 -> L10), read from the org hierarchy framework
+  orgHierarchyOrganisations: WritableSignal<any[]> = signal([]);
   constructor(private readonly http: HttpClient) {
     this.accessControlConfig = signal<NsAccessControlConfig.IAccessControlConfig>(null);
     this.holdServiceCadrebatch = signal({
@@ -94,6 +100,134 @@ export class AccessControlService {
       request.request.filters.channel = { startsWith: characterSearch };
     }
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
+  }
+
+  fetchOrgHierarchyFramework(frameworkId: string): Observable<any> {
+    return this.http.get<any>(ENDPOINTS.ORG_HIERARCHY_FRAMEWORK(frameworkId));
+  }
+
+  /**
+   * A L0 MDO is a mdo_admin / mdo_leader of a ministry or a state organisation,
+   * i.e the organisation sitting at the top (L0) of its own org hierarchy.
+   */
+  isL0MdoUser(config?: NsAccessControlConfig.IAccessControlConfig): boolean {
+    const userConfig = (config || this.accessControlConfig())?.userConfig;
+    const orgType = (userConfig?.org?.sbOrgType || "").toLowerCase();
+    const userRoles = userConfig?.userRoles;
+    const hasL0Role = L0_ORG_ROLES.some((role: string) =>
+      typeof userRoles?.has === "function" ? userRoles.has(role) : (userRoles || []).includes?.(role)
+    );
+    return L0_ORG_TYPES.includes(orgType) && !!hasL0Role;
+  }
+
+  getOrgHierarchyFrameworkId(config?: NsAccessControlConfig.IAccessControlConfig): string {
+    return (config || this.accessControlConfig())?.userConfig?.org?.orgHierarchyFrameworkId || "";
+  }
+
+  /**
+   * Reads the org hierarchy framework of the logged in L0 MDO and flattens the terms of
+   * every category (L1 -> L10) into a single organisation list. The organisation of the logged in
+   * user is always part of that list, the L0 is never mapped as a term of its own framework.
+   * Returns an empty list when the framework is not created, in which case the organisation
+   * condition should not be offered at all.
+   */
+  async fetchOrgHierarchyOrganisations(config?: NsAccessControlConfig.IAccessControlConfig): Promise<any[]> {
+    const frameworkId = this.getOrgHierarchyFrameworkId(config);
+
+    if (!frameworkId) {
+      this.orgHierarchyOrganisations.set([]);
+      return [];
+    }
+
+    const response = await this.fetchOrgHierarchyFramework(frameworkId)
+      .toPromise()
+      .catch(() => null);
+
+    const categories = response?.result?.framework?.categories || [];
+    const organisations: any[] = [];
+    const addedOrgIds = new Set<string>();
+
+    categories.forEach((category: any) => {
+      (category?.terms || []).forEach((term: any) => {
+        const identifier = term?.additionalProperties?.orgId;
+        const channel = term?.name;
+        if (identifier && channel && !addedOrgIds.has(identifier)) {
+          addedOrgIds.add(identifier);
+          organisations.push({ identifier, channel, category: term?.category || category?.name, iscca: false });
+        }
+      });
+    });
+
+    organisations.sort((orgA: any, orgB: any) => (orgA.channel || "").localeCompare(orgB.channel || ""));
+
+    // The L0 is not a term of its own hierarchy framework, so the organisation of the logged in
+    // user is put on top of the mapped ones. It stays selectable even when nothing is mapped yet.
+    const loggedInOrganisation = await this.getLoggedInOrganisation(config);
+    if (loggedInOrganisation && !addedOrgIds.has(loggedInOrganisation.identifier)) {
+      addedOrgIds.add(loggedInOrganisation.identifier);
+      organisations.unshift(loggedInOrganisation);
+    }
+
+    this.orgHierarchyOrganisations.set(organisations);
+    return organisations;
+  }
+
+  /**
+   * Organisation of the logged in user as an entry of the organisation selection list. The name is
+   * read from the org details held on the config, when it is not there it is resolved with a search
+   * on the organisation id so the entry is never dropped for a missing name.
+   */
+  private async getLoggedInOrganisation(config?: NsAccessControlConfig.IAccessControlConfig): Promise<any> {
+    const userConfig = (config || this.accessControlConfig())?.userConfig;
+    const orgId = this.getLoggedInOrgId(config);
+
+    if (!orgId) {
+      return null;
+    }
+
+    let orgName = userConfig?.org?.orgName || userConfig?.org?.channel || userConfig?.rootOrgName || "";
+    if (!orgName) {
+      const response = await this.fetchOrgList("", { limit: 1, offset: 0 }, [orgId])
+        .toPromise()
+        .catch(() => null);
+      orgName = response?.result?.response?.content?.[0]?.channel || "";
+    }
+
+    return {
+      identifier: orgId,
+      channel: orgName || orgId,
+      category: "L0",
+      iscca: userConfig?.org?.isCCA ?? false,
+    };
+  }
+
+  /**
+   * Organisation of the logged in MDO. For a L0 MDO this is the ministry / state itself and is used
+   * as the ministryOrStateId when every organisation of its hierarchy gets selected.
+   */
+  getLoggedInOrgId(config?: NsAccessControlConfig.IAccessControlConfig): string {
+    const userConfig = (config || this.accessControlConfig())?.userConfig;
+    return userConfig?.org?.rootOrgId || userConfig?.org?.id || userConfig?.rootOrgId || "";
+  }
+
+  /**
+   * Every organisation id of the logged in L0 MDO hierarchy (its own organisation included).
+   */
+  getOrgHierarchyOrgIds(): string[] {
+    return (this.orgHierarchyOrganisations() || []).map((org: any) => org?.identifier).filter(Boolean);
+  }
+
+  /**
+   * True when the given selections cover every organisation of the logged in L0 MDO hierarchy,
+   * i.e the user has selected all the organisations available to it.
+   */
+  areAllOrgHierarchyOrgsSelected(selections: any[]): boolean {
+    const hierarchyOrgIds = this.getOrgHierarchyOrgIds();
+    if (!hierarchyOrgIds.length || !selections?.length) {
+      return false;
+    }
+    const selectedOrgIds = new Set(selections.map((selection: any) => String(selection)));
+    return hierarchyOrgIds.every((orgId: string) => selectedOrgIds.has(String(orgId)));
   }
 
   validateUser(request: any): Observable<any> {
