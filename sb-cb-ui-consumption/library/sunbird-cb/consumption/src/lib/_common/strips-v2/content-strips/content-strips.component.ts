@@ -1,4 +1,5 @@
 import { Component, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { forkJoin, of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
@@ -8,6 +9,7 @@ import { ContentApiService } from '../services/content-api.service'
 import { CardTransformerService } from '../services/card-transformer.service'
 import { CarouselComponent } from '../../carousel/carousel.component'
 import { CardCourseV2Component, ContentDictionaryService } from '../../../../public-api'
+import { CbpPlanCacheService } from '../../../_services/cbp-plan-cache.service'
 import { Router } from '@angular/router'
 
 @Component({
@@ -32,6 +34,7 @@ export class ContentStripsComponent implements OnInit {
   private apiService = inject(ContentApiService);
   private cardTransformer = inject(CardTransformerService);
   private dictionarySvc = inject(ContentDictionaryService);
+  private cbpCacheSvc = inject(CbpPlanCacheService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
 
@@ -126,22 +129,15 @@ export class ContentStripsComponent implements OnInit {
       })
   }
 
+  /**
+   * CBP plan data comes from the IndexedDB cache (iGotCbpDB/cbpPlans), not
+   * localStorage['cbpData']. watchPlanMap() emits the cached map immediately and again
+   * whenever the plan cache for the year is rewritten.
+   */
   getCbPlanData() {
-    const cbpList: Record<string, any> = {}
-    const raw = localStorage.getItem('cbpData')
-    if (raw) {
-      try {
-        const cbpListArr = JSON.parse(raw)
-        if (cbpListArr && cbpListArr.length) {
-          cbpListArr.forEach((data: any) => {
-            cbpList[data.identifier] = data
-          })
-        }
-      } catch {
-        // cbpData is not valid JSON — fall back to an empty plan map
-      }
-    }
-    this.cbPlanMapData = cbpList
+    this.cbpCacheSvc.watchPlanMap()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((planMap: Record<string, any>) => this.cbPlanMapData = planMap)
   }
 
   getViewAllUrl(): { path: string, queryParams?: Record<string, any>, f?: any } | null {
