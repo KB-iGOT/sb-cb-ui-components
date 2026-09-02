@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/toc",
-  "version": "0.0.15-ang-17-20-unenroll",
+  "version": "0.1.1-cbrelease-4.8.39.4",
   "dependencies": {
     "tslib": "^2.0.0"
   },

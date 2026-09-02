@@ -60,7 +60,7 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
             this.getKPData('Resume')
           } else if ( this.content.courseCategory === 'Learning Pathway' ) {
             this.getKPData('Resume')
-          
+
           }
         }
       }
@@ -208,6 +208,7 @@ addBadgeSlide() {
       points: '',
       textAfterPoints: '',
       toolTipText: 'quickLearnerBadgeTip',
+      badgeSvg: badge?.badgeTemplate || '/assets/icons/badges/Medal.svg'
     }
     const badgeExists = this.kpArray.find(
       (item: any) => item.displayButton === 'Quick Learner Badge'
@@ -226,6 +227,7 @@ addBadgeSlide() {
       points: '',
       textAfterPoints: '',
       toolTipText: 'quickLearnerBadgeTip',
+      badgeSvg: badge?.badgeTemplate || '/assets/icons/badges/Medal.svg'
     }
     const badgeExists = this.kpArray.find(
       (item: any) => item.displayButton === 'Quick Learner Badge'
@@ -291,6 +293,9 @@ addBadgeSlide() {
         return `Earn the AI Daksh badge by completing any ${badge?.requiredCourseCompletions} courses of this program.`
       }
       return `By completing this ${courseCategory} earn Quick Learner Badge`
+    }
+    if (this.content?.courseCategory === 'Learning Pathway') {
+      return `By completing this ${this.content?.courseCategory} earn ${badge.badgeTitle} Badge`
     }
     return `By completing this ${courseCategory} earn Quick Learner Badge`
   }
