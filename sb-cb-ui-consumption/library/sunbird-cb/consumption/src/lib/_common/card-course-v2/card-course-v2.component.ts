@@ -100,7 +100,7 @@ export class CardCourseV2Component {
   })
 
   readonly displayType = computed<NsContent.EDisplayContentTypes>(() =>
-    (this.content()?.courseCategory || this.content()?.metadata?.courseCategory || this.content()?.primaryCategory || this.content()?.metadata?.primaryCategory || 
+    (this.content()?.courseCategory || this.content()?.metadata?.courseCategory || this.content()?.primaryCategory || this.content()?.metadata?.primaryCategory ||
       'Course') as NsContent.EDisplayContentTypes
   )
 
@@ -232,6 +232,7 @@ export class CardCourseV2Component {
       const cardClickDetails = {
         ...this.config()?.cardClickDetails,
         identifier: this.content()?.identifier,
+        primaryCategory: this.content()?.primaryCategory,
       }
       this.contentApiService.publishCardClickDetails(cardClickDetails)
     }
