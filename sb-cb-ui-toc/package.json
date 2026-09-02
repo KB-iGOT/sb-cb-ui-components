@@ -21,7 +21,7 @@
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
       "<rootDir>/dist/"
-    ]
+    ],
     "globals": {
       "ts-jest": {
         "tsConfig": "<rootDir>/library/sunbird-cb/toc/tsconfig.spec.json",
