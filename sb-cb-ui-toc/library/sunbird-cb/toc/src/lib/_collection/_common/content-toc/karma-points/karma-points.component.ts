@@ -292,11 +292,8 @@ addBadgeSlide() {
       if (badge?.criteria === 'partialRandomCompletion') {
         return `Earn the AI Daksh badge by completing any ${badge?.requiredCourseCompletions} courses of this program.`
       }
-      return `By completing this ${courseCategory} earn Quick Learner Badge`
+      return `By completing this ${courseCategory} earn ${badge.badgeTitle} Badge`
     }
-    if (this.content?.courseCategory === 'Learning Pathway') {
-      return `By completing this ${this.content?.courseCategory} earn ${badge.badgeTitle} Badge`
-    }
-    return `By completing this ${courseCategory} earn Quick Learner Badge`
+    return `By completing this ${courseCategory} earn ${badge.badgeTitle} Badge`
   }
 }
