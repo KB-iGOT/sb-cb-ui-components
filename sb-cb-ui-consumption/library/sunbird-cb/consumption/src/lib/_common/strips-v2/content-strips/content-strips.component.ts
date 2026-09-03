@@ -141,7 +141,15 @@ export class ContentStripsComponent implements OnInit {
   }
 
   getViewAllUrl(): { path: string, queryParams?: Record<string, any>, f?: any } | null {
-    return this.contentConfig()?.viewMoreUrl ?? null
+    const config = this.contentConfig()
+    const viewMoreUrl = config?.viewMoreUrl ?? null
+    if (!viewMoreUrl || config?.apiDetailsKey !== 'aparApi') {
+      return viewMoreUrl
+    }
+    return {
+      ...viewMoreUrl,
+      queryParams: { ...(viewMoreUrl.queryParams || {}), isApar: 'true' },
+    }
   }
 
   redirectViewAll(path: string, queryParamsData: any, filters?: any) {
