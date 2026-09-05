@@ -1,22 +1,52 @@
 import { Injectable } from "@angular/core";
+export interface ICadre {
+  id: string;
+  name: string;
+  startBatchYear: number;
+  endBatchYear: number;
+}
+
+export interface ICivilService {
+  id: string;
+  name: string;
+  displayName?: string;
+  commonBatchStartYear: number;
+  commonBatchEndYear: number;
+  cadreList?: ICadre[];
+}
+
+/** A State Service type groups its services one level deeper, per state. */
+export interface ICivilServiceState {
+  id: string;
+  name: string;
+  displayName?: string;
+  serviceList?: ICivilService[];
+}
+
+export interface ICivilServiceType {
+  id: string;
+  name: string;
+  displayName?: string;
+  /** Present on the central / all india types */
+  serviceList?: ICivilService[];
+  /** Present on the State Service type instead of serviceList */
+  states?: ICivilServiceState[];
+}
+
+export interface IStateOption {
+  /** Key scoped with the civil service type, used to look the state services up */
+  id: string;
+  /** Raw id as published in the config */
+  stateId: string;
+  name: string;
+  displayName: string;
+  typeId: string;
+  typeName: string;
+}
+
 interface CivilServiceData {
   civilServiceType: {
-    civilServiceTypeList: Array<{
-      id: string;
-      name: string;
-      serviceList: Array<{
-        id: string;
-        name: string;
-        commonBatchStartYear: number;
-        commonBatchEndYear: number;
-        cadreList?: Array<{
-          id: string;
-          name: string;
-          startBatchYear: number;
-          endBatchYear: number;
-        }>;
-      }>;
-    }>;
+    civilServiceTypeList: ICivilServiceType[];
   };
 }
 
@@ -30,6 +60,8 @@ export class CadreMappingService {
   private serviceToCadresMap = new Map<string, Set<string>>();
   private batchYearToCadresMap = new Map<number, Set<string>>();
   private batchYearToServicesMap = new Map<number, Set<string>>();
+  private allStates = new Map<string, IStateOption>();
+  private stateToServicesMap = new Map<string, Set<string>>();
 
   private cadreConfigData: CivilServiceData | null = null;
 
@@ -40,6 +72,62 @@ export class CadreMappingService {
     map.get(key)?.add(value);
   }
 
+  private buildTypeKey(cst: ICivilServiceType): string {
+    return `${cst?.id || cst?.name}`;
+  }
+
+  private buildStateKey(cst: ICivilServiceType, state: ICivilServiceState): string {
+    return `${this.buildTypeKey(cst)}_${state?.id || state?.name}`;
+  }
+
+  /**
+   * Indexes one service list. Service ids are only unique within their own branch of the config:
+   * the same id is reused across civil service types (eg. "cs-004" is both a state secretariat
+   * service and a central railway service) and could be reused across states. The key is therefore
+   * scoped with the civil service type and, for state services, with the state.
+   */
+  private registerServices(cst: ICivilServiceType, state: ICivilServiceState | null, serviceList?: ICivilService[]) {
+    (serviceList || []).forEach(service => {
+      if (!service) return;
+      const { commonBatchStartYear, commonBatchEndYear } = service;
+      const scope = state ? this.buildStateKey(cst, state) : this.buildTypeKey(cst);
+      const serviceId = `${scope}_${service.id}`;
+
+      this.allServices.set(serviceId, {
+        ...service,
+        id: serviceId,
+        civilServiceTypeId: cst?.id,
+        civilServiceTypeName: cst?.name,
+        stateKey: state ? this.buildStateKey(cst, state) : null,
+        stateName: state ? state.name : null,
+      });
+
+      if (state) {
+        this.addToMapSet(this.stateToServicesMap, this.buildStateKey(cst, state), serviceId);
+      }
+
+      // Add years to service-batch map
+      for (let y = commonBatchStartYear; y <= commonBatchEndYear; y++) {
+        this.addToMapSet(this.batchYearToServicesMap, y, serviceId);
+      }
+
+      (service.cadreList || []).forEach(cadre => {
+        if (!cadre) return;
+        const { id: cadreId, startBatchYear, endBatchYear } = cadre;
+        this.allCadres.set(cadreId, cadre);
+
+        // Map cadre <-> service
+        this.addToMapSet(this.cadreToServiceMap, cadreId, serviceId);
+        this.addToMapSet(this.serviceToCadresMap, serviceId, cadreId);
+
+        // Add years to cadre-batch map
+        for (let y = startBatchYear; y <= endBatchYear; y++) {
+          this.addToMapSet(this.batchYearToCadresMap, y, cadreId);
+        }
+      });
+    });
+  }
+
   initialize(data: CivilServiceData) {
     // Clear existing data
     this.allCadres.clear();
@@ -48,35 +136,67 @@ export class CadreMappingService {
     this.serviceToCadresMap.clear();
     this.batchYearToCadresMap.clear();
     this.batchYearToServicesMap.clear();
+    this.allStates.clear();
+    this.stateToServicesMap.clear();
 
-    // Build lookups
-    data?.civilServiceType?.civilServiceTypeList.forEach(cst => {
-      if (cst) {
-        cst.serviceList.forEach(service => {
-          const { id: serviceId, commonBatchStartYear, commonBatchEndYear } = service;
-          this.allServices.set(serviceId, service);
+    // Build lookups. A civil service type carries its services either directly on serviceList or,
+    // for the State Service type, grouped per state under states[].serviceList. Both are optional.
+    (data?.civilServiceType?.civilServiceTypeList || []).forEach(cst => {
+      if (!cst) return;
 
-          // Add years to service-batch map
-          for (let y = commonBatchStartYear; y <= commonBatchEndYear; y++) {
-            this.addToMapSet(this.batchYearToServicesMap, y, serviceId);
-          }
+      this.registerServices(cst, null, cst.serviceList);
 
-          service.cadreList?.forEach(cadre => {
-            const { id: cadreId, startBatchYear, endBatchYear } = cadre;
-            this.allCadres.set(cadreId, cadre);
-
-            // Map cadre <-> service
-            this.addToMapSet(this.cadreToServiceMap, cadreId, serviceId);
-            this.addToMapSet(this.serviceToCadresMap, serviceId, cadreId);
-
-            // Add years to cadre-batch map
-            for (let y = startBatchYear; y <= endBatchYear; y++) {
-              this.addToMapSet(this.batchYearToCadresMap, y, cadreId);
-            }
-          });
+      (cst.states || []).forEach(state => {
+        if (!state) return;
+        const stateKey = this.buildStateKey(cst, state);
+        this.allStates.set(stateKey, {
+          id: stateKey,
+          stateId: state.id,
+          name: state.name,
+          displayName: state.displayName || state.name,
+          typeId: cst.id,
+          typeName: cst.name,
         });
-      }
+        this.registerServices(cst, state, state.serviceList);
+      });
     });
+  }
+
+  /** Civil service types that publish their services per state (eg. "State Service"). */
+  getStateServiceTypeNames(): string[] {
+    return Array.from(new Set(Array.from(this.allStates.values()).map(state => state.typeName)));
+  }
+
+  isStateServiceType(typeName: string): boolean {
+    if (!typeName) return false;
+    return Array.from(this.allStates.values()).some(state => state.typeName === typeName);
+  }
+
+  getAllStates(): IStateOption[] {
+    return Array.from(this.allStates.values()).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }
+
+  getStatesByType(typeName: string): IStateOption[] {
+    return this.getAllStates().filter(state => state.typeName === typeName);
+  }
+
+  /** Case insensitive, the org name is upper cased while the config uses title case. */
+  findStateByName(name: string): IStateOption | null {
+    if (!name) return null;
+    const lowerName = name.trim().toLowerCase();
+    return this.getAllStates().find(state => (state.name || "").trim().toLowerCase() === lowerName) || null;
+  }
+
+  getServicesByStateKeys(stateKeys: string[]): Array<{ id: string; name: string }> {
+    const serviceIdsSet = new Set<string>();
+    (stateKeys || []).forEach(stateKey => {
+      (this.stateToServicesMap.get(stateKey) || new Set()).forEach(serviceId => serviceIdsSet.add(serviceId));
+    });
+
+    return Array.from(serviceIdsSet)
+      .map(id => this.allServices.get(id))
+      .filter(s => !!s)
+      .map(s => ({ id: s.id, name: s.name }));
   }
 
   getAllBatchYears(): number[] {
@@ -97,6 +217,13 @@ export class CadreMappingService {
     }));
   }
 
+  /** Services that are not tied to a state, ie. everything the user may always see. */
+  getNonStateServices(): Array<{ id: string; name: string }> {
+    return Array.from(this.allServices.values())
+      .filter(s => !s.stateKey)
+      .map(s => ({ id: s.id, name: s.name }));
+  }
+
   getServicesByCadres(cadreIds: string[]): Array<{ id: string; name: string }> {
     const serviceIdsSet = new Set<string>();
     cadreIds.forEach(cadreId => {
@@ -104,10 +231,10 @@ export class CadreMappingService {
       services.forEach(serviceId => serviceIdsSet.add(serviceId));
     });
 
-    return Array.from(serviceIdsSet).map(id => {
-      const s = this.allServices.get(id);
-      return { id: s.id, name: s.name };
-    });
+    return Array.from(serviceIdsSet)
+      .map(id => this.allServices.get(id))
+      .filter(s => !!s)
+      .map(s => ({ id: s.id, name: s.name }));
   }
 
   getCadresByServices(serviceIds: string[]): Array<{ id: string; name: string }> {
@@ -117,10 +244,10 @@ export class CadreMappingService {
       cadres.forEach(cadreId => cadreIdsSet.add(cadreId));
     });
 
-    return Array.from(cadreIdsSet).map(id => {
-      const c = this.allCadres.get(id);
-      return { id: c.id, name: c.name };
-    });
+    return Array.from(cadreIdsSet)
+      .map(id => this.allCadres.get(id))
+      .filter(c => !!c)
+      .map(c => ({ id: c.id, name: c.name }));
   }
 
   getCadresByBatchYears(years: number[]): Array<{ id: string; name: string }> {
@@ -130,10 +257,10 @@ export class CadreMappingService {
       cadres.forEach(cadreId => cadreIdsSet.add(cadreId));
     });
 
-    return Array.from(cadreIdsSet).map(id => {
-      const c = this.allCadres.get(id);
-      return { id: c.id, name: c.name };
-    });
+    return Array.from(cadreIdsSet)
+      .map(id => this.allCadres.get(id))
+      .filter(c => !!c)
+      .map(c => ({ id: c.id, name: c.name }));
   }
 
   getServicesByBatchYears(years: number[]): Array<{ id: string; name: string }> {
@@ -143,10 +270,10 @@ export class CadreMappingService {
       services.forEach(serviceId => serviceIdsSet.add(serviceId));
     });
 
-    return Array.from(serviceIdsSet).map(id => {
-      const s = this.allServices.get(id);
-      return { id: s.id, name: s.name };
-    });
+    return Array.from(serviceIdsSet)
+      .map(id => this.allServices.get(id))
+      .filter(s => !!s)
+      .map(s => ({ id: s.id, name: s.name }));
   }
 
   getServicesByCadresAndBatch(cadreIds: string[], years: number[]): Array<{ id: string; name: string }> {
@@ -156,6 +283,7 @@ export class CadreMappingService {
   }
   return services.filter(service => {
     const fullService = this.allServices.get(service.id);
+    if (!fullService) return false;
     // Return true if any year is within the service's batch year range
     return years.some(year => year >= fullService.commonBatchStartYear && year <= fullService.commonBatchEndYear);
   });
@@ -168,6 +296,7 @@ export class CadreMappingService {
     }
     return cadres.filter(cadre => {
       const fullCadre = this.allCadres.get(cadre.id);
+      if (!fullCadre) return false;
       // Return true if any year is within the cadre's batch year range
       return years.some(year => year >= fullCadre.startBatchYear && year <= fullCadre.endBatchYear);
     });
@@ -210,17 +339,17 @@ export class CadreMappingService {
 
   getCadreIdsByName(names: string[]) {
     if (!Array.isArray(names)) names = [names];
-    const lowerNames = names.map(n => n.toLowerCase());
+    const lowerNames = names.map(n => n?.toLowerCase());
     return Array.from(this.allCadres.values())
-      .filter(cadre => lowerNames.includes(cadre.name.toLowerCase()))
+      .filter(cadre => lowerNames.includes(cadre?.name?.toLowerCase()))
       .map(cadre => cadre.id);
   }
 
   getServiceIdsByName(names: string[]) {
     if (!Array.isArray(names)) names = [names];
-    const lowerNames = names.map((n) => n.toLowerCase());
+    const lowerNames = names.map((n) => n?.toLowerCase());
     return Array.from(this.allServices.values())
-      .filter((service) => lowerNames.includes(service.name.toLowerCase()))
+      .filter((service) => lowerNames.includes(service?.name?.toLowerCase()))
       .map((service) => service.id);
   }
 
@@ -234,13 +363,13 @@ export class CadreMappingService {
 
   getServicesByNames(names: string[]): Array<{ id: string; name: string }> {
     if (!Array.isArray(names)) names = [names];
-    const lowerNames = names.map((n) => n.toLowerCase());
+    const lowerNames = names.map((n) => n?.toLowerCase());
     const uniqueMap = new Map<string, { id: string; name: string }>();
     const cadreConfig = this.getCadreConfigData();
     if (cadreConfig) {
-      cadreConfig.civilServiceType.civilServiceTypeList.forEach((cst) => {
-        cst.serviceList.forEach((service) => {
-          if (lowerNames.includes(service.name.toLowerCase())) {
+      (cadreConfig.civilServiceType?.civilServiceTypeList || []).forEach((cst) => {
+        (cst?.serviceList || []).forEach((service) => {
+          if (lowerNames.includes(service?.name?.toLowerCase())) {
             if (!uniqueMap.has(cst.id)) {
               uniqueMap.set(cst.id, { id: cst.id, name: cst.name });
             }

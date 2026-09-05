@@ -129,8 +129,8 @@ export interface IUserGroupRequest {
       userGroupId: string;
       userGroupName: string;
       userGroupCriteriaList: {
-        userGroupKey: string;
-        userGroupValue: string[];
+        criteriaKey: string;
+        criteriaValue: string[];
       }[];
     }[];
   };

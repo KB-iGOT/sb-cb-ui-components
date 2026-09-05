@@ -16,6 +16,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
+import { MINISTRY_OR_STATE_CRITERIA_KEY } from "../../_constants/app.constants";
 
 @Component({
     selector: "sb-uic-access-control",
@@ -65,6 +66,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   canShowAccessControlTypeRadio = true;
   shouldShowVisibilityToggle = true;
   isCCA = false;
+  // Non CCA L0 MDO (mdo_admin / mdo_leader of a ministry / state) can select organisations
+  // from its own org hierarchy framework. Stays false when the framework is not created.
+  canSelectOrgHierarchy = false;
   mdoContent: any;
 
   constructor(
@@ -83,10 +87,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isLoading = true
       this.isCCA = this.config?.userConfig?.org?.isCCA ?? false;
       if (!this.isCCA) {
-        this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
-          this.config.accessControlCriteriaSelection.optionsEntity,
-          (entity) => entity.value !== NsAccessControlConfig.SelectionType.Organizations
-        );
+        await this.loadOrgHierarchyOrganisations();
+        // Organisation condition is only available for a L0 MDO having an org hierarchy framework,
+        // every other non CCA MDO (L1 and onwards) keeps working within its own organisation
+        if (!this.canSelectOrgHierarchy) {
+          this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
+            this.config.accessControlCriteriaSelection.optionsEntity,
+            (entity) => entity.value !== NsAccessControlConfig.SelectionType.Organizations
+          );
+        }
       }
 
       this.mdoContent = this.config?.mdoContent
@@ -194,6 +203,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.shouldShowVisibilityToggle = false;
    }
 
+  }
+
+  /**
+   * For a non CCA L0 MDO, reads the org hierarchy framework of the logged in organisation and keeps
+   * the flattened organisation list (L0 -> L10) ready for the organisation selection dialog.
+   */
+  private async loadOrgHierarchyOrganisations(): Promise<void> {
+    this.canSelectOrgHierarchy = false;
+    this.accessControlService.orgHierarchyOrganisations.set([]);
+
+    if (!this.accessControlService.isL0MdoUser(this.config) || !this.accessControlService.getOrgHierarchyFrameworkId(this.config)) {
+      return;
+    }
+
+    const organisations = await this.accessControlService.fetchOrgHierarchyOrganisations(this.config);
+    this.canSelectOrgHierarchy = organisations?.length > 0;
   }
 
   ngAfterViewInit(): void {
@@ -1146,6 +1171,34 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       });
   }
 
+  /**
+   * Selections shown for a saved ministryOrStateId criteria, i.e every organisation of the logged in
+   * L0 MDO hierarchy. Falls back to the stored ministry / state id when the hierarchy is not
+   * available for the logged in user (a non L0 MDO opening the content).
+   */
+  private getMinistryOrStateSelections(criteriaValue: any): string[] {
+    const hierarchyOrgIds = this.accessControlService.getOrgHierarchyOrgIds();
+    if (hierarchyOrgIds.length) {
+      return hierarchyOrgIds;
+    }
+    return Array.isArray(criteriaValue) ? criteriaValue : [criteriaValue];
+  }
+
+  /**
+   * Organisation criteria of a user group. A L0 MDO (ministry / state) selecting every organisation
+   * of its hierarchy is stored as the ministry / state itself, any other selection keeps the
+   * explicit rootOrgId list.
+   */
+  private createOrganisationCriteria(selections: string[]): { criteriaKey: string; criteriaValue: string[] } {
+    if (this.canSelectOrgHierarchy && this.accessControlService.areAllOrgHierarchyOrgsSelected(selections)) {
+      const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
+      if (ministryOrStateId) {
+        return { criteriaKey: MINISTRY_OR_STATE_CRITERIA_KEY, criteriaValue: [ministryOrStateId] };
+      }
+    }
+    return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: selections };
+  }
+
   processRequestCreation(): Promise<IUserGroupRequest> {
     return new Promise((resolve, reject) => {
       try {
@@ -1154,6 +1207,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         // Filter out user groups with empty userGroupCriteriaList
         const userGroups = data.userGroup
           .map((group: any) => ({
+            // Keep the id of an already saved user group, a brand new one gets its generated uuid
+            userGroupId: group.id || uuidv4(),
             userGroupName: group.name,
             userGroupCriteriaList: group.conditions.map((condition: any) => {
               let criteriaValue: string[];
@@ -1177,6 +1232,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
               }
 
               if (condition.entity && criteriaValue && criteriaValue.length > 0) {
+                if (condition.entity === NsAccessControlConfig.SelectionType.Organizations) {
+                  return this.createOrganisationCriteria(criteriaValue);
+                }
                 return {
                   criteriaKey: condition.entity,
                   criteriaValue,
@@ -1367,14 +1425,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           Cadre: NsAccessControlConfig.SelectionType.Cadre,
           service: NsAccessControlConfig.SelectionType.Service,
           batch: NsAccessControlConfig.SelectionType.Batch,
-          isOnCentralDeputation: NsAccessControlConfig.SelectionType.CentralDeputation
+          isOnCentralDeputation: NsAccessControlConfig.SelectionType.CentralDeputation,
+          [MINISTRY_OR_STATE_CRITERIA_KEY]: NsAccessControlConfig.SelectionType.Organizations
         };
 
         // Set the form values
         condition.patchValue({
           entity: entityMap[criteria.criteriaKey] || criteria.criteriaKey,
           selections:
-              criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
+            criteria.criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY
+              ? this.getMinistryOrStateSelections(criteria.criteriaValue)
+              : criteria.criteriaKey === NsAccessControlConfig.SelectionType.Batch
                 ? Array.isArray(criteria.criteriaValue)
                   ? criteria.criteriaValue.map((b: any) => Number(b))
                   : []
@@ -1670,7 +1731,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     
     if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
       if (!this.isCCA && Object.keys(request)?.length > 0) {
-        request.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+        // A L0 MDO can scope the count to the organisations picked from its hierarchy,
+        // for every other non CCA MDO the count is always restricted to its own organisation
+        const hasOrgSelections = this.canSelectOrgHierarchy && request.rootOrgId?.length > 0;
+        if (!hasOrgSelections) {
+          request.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+        }
       }
     }
 
@@ -1978,12 +2044,26 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       group.userGroupCriteriaList.forEach(async (criteria: any) => {
 
-        if(!this.isCCA && criteria.criteriaKey === NsAccessControlConfig.SelectionType.Organizations) {
+        const isOrganisationCriteria =
+          criteria.criteriaKey === NsAccessControlConfig.SelectionType.Organizations ||
+          criteria.criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY;
+
+        if(!this.isCCA && !this.canSelectOrgHierarchy && isOrganisationCriteria) {
           return; // Skip this iteration to not add the organization condition
         }
 
         let isCustomFieldCrieteriaKeyPresent = false
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
+
+        // Whole ministry / state was saved, show every organisation of the hierarchy as selected
+        if (criteria.criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
+          condition.patchValue({
+            entity: NsAccessControlConfig.SelectionType.Organizations,
+            selections: this.getMinistryOrStateSelections(criteria.criteriaValue),
+          });
+          conditions.push(condition);
+          return;
+        }
 
         // Set the form values
           const { criteriaKey, criteriaValue } = criteria;

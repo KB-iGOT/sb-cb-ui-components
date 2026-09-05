@@ -99,6 +99,12 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       }, { ...reducedData });
     }
 
+    // A non CCA MDO always stays within its own organisation unless organisations
+    // have been explicitly picked from its hierarchy
+    if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO && !this.isCCA && !reducedData.rootOrgId?.length) {
+      reducedData.rootOrgId = this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId ? [this.accessControlService.accessControlConfig().userConfig.org?.rootOrgId] : [];
+    }
+
     if (Object.keys(reducedData)?.length) {
       this.filters = {
         rootOrgId: reducedData?.rootOrgId,
