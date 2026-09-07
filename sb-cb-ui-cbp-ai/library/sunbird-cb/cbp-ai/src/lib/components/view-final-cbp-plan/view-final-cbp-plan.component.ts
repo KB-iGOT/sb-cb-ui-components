@@ -863,7 +863,6 @@ export class ViewFinalCbpPlanComponent {
 
 
   generateExcel(jsonArray: any[], filename: string = "final.xlsx") {
-    console.log('jsonArray', jsonArray)
     this.loading = true
 
     if (!jsonArray || jsonArray.length === 0) return;
@@ -886,7 +885,7 @@ export class ViewFinalCbpPlanComponent {
     ];
 
     // -------- DATA ROWS ---------
-    const dataRows: Array<Record<string, any>> = jsonArray.map((json, rowIndex) => {
+    const dataRows: Array<Record<string, any>> = jsonArray.map(json => {
       const courses =
         json?.cbp_plans?.length
           ? json.cbp_plans[json.cbp_plans.length - 1]?.selected_courses || []
@@ -898,21 +897,22 @@ export class ViewFinalCbpPlanComponent {
           )
           .join(" | ");
 
-        return (
-            `${i + 1}. Course Name: ${c?.course || c?.name}\n` +
-            `   Identifier: ${c?.identifier}\n` +
-            `   Duration (mins): ${Math.round(+c.duration / 60)}\n` +
-            `   Relevancy: ${c?.relevancy}%\n` +
-            `   Rationale: ${c?.rationale}\n` +
-            `   Organisation: ${Array.isArray(c?.organisation) ? c.organisation.join(", ") : (c?.organisation ?? "")}\n` +
-            `   Competencies: ${competencies}`
-          );
-        })
-        ;
+        return `${i + 1}. Course Name: ${c?.course || c?.name}\n` +
+          `   Identifier: ${c?.identifier}\n` +
+          `   Duration (mins): ${Math.round(+c.duration / 60)}\n` +
+          `   Relevancy: ${c?.relevancy}%\n` +
+          `   Rationale: ${c?.rationale}\n` +
+          `   Organisation: ${Array.isArray(c?.organisation) ? c.organisation.join(", ") : (c?.organisation ?? "")}\n` +
+          `   Competencies: ${competencies}`;
+      });
+      const truncationNotice = "\n[course details truncated]";
       const courseDetailParts: string[] = [];
       let currentPart = "";
 
-      courseDetailBlocks.forEach((courseDetail: string, courseIndex: number) => {
+      courseDetailBlocks.forEach((courseDetail: string) => {
+        if (courseDetail.length > excelCellTextLimit) {
+          courseDetail = courseDetail.slice(0, excelCellTextLimit - truncationNotice.length) + truncationNotice;
+        }
         const separator = currentPart ? "\n\n" : "";
         if (currentPart && currentPart.length + separator.length + courseDetail.length > excelCellTextLimit) {
           courseDetailParts.push(currentPart);
@@ -939,14 +939,11 @@ export class ViewFinalCbpPlanComponent {
         "Domain Competencies": (json.competencies || [])
           .filter((c: any) => c.type === "Domain")
           .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
-        "Course Details": courseDetailParts[0] || ""
+        "Course Details 1": courseDetailParts[0] || ""
       };
 
       for (let part = 1; part < courseDetailParts.length; part++) {
-        const columnName = part === 1
-          ? "Additional Course Details"
-          : `Additional Course Details ${part}`;
-        row[columnName] = courseDetailParts[part];
+        row[`Course Details ${part + 1}`] = courseDetailParts[part];
       }
 
       return row;
@@ -955,12 +952,11 @@ export class ViewFinalCbpPlanComponent {
     const maxCourseDetailParts = Math.max(
       1,
       ...dataRows.map(row => Object.keys(row).filter(key =>
-        key === "Course Details" || key.indexOf("Additional Course Details") === 0
+        key.indexOf("Course Details ") === 0
       ).length)
     );
-    headers.push("Course Details");
-    for (let part = 2; part <= maxCourseDetailParts; part++) {
-      headers.push(part === 2 ? "Additional Course Details" : `Additional Course Details ${part - 1}`);
+    for (let part = 1; part <= maxCourseDetailParts; part++) {
+      headers.push(`Course Details ${part}`);
     }
     dataRows.forEach(row => {
       headers.forEach(header => {
@@ -998,10 +994,12 @@ export class ViewFinalCbpPlanComponent {
     XLSX.utils.sheet_add_json(ws, dataRows, { origin: "A3", skipHeader: true });
 
     // Auto column widths based on longest line in each column
-    const colWidths = headers.map((header, idx) => {
+    const colWidths = headers.map(header => {
       const maxLen = Math.max(
         header.length,
-        ...dataRows.map(row => String(row[header] || "").split("\n").reduce((maxLength: number, line: string) => Math.max(maxLength, line.length), 0))
+        ...dataRows.map(row => String(row[header] || "")
+          .split("\n")
+          .reduce((maxLength: number, line: string) => Math.max(maxLength, line.length), 0))
       );
       return { wch: Math.min(Math.max(maxLen + 5, 20), 80) }; // min 20, max 80
     });
