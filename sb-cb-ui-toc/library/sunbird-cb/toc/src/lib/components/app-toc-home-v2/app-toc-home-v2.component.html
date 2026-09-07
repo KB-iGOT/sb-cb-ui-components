@@ -754,6 +754,15 @@
                 </div>
               </ng-container>
             </ng-conatiner>
+
+            <ng-container *ngIf="forPreview && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
+              <a class="flex action-button enroll-btn justify-center resume" *ngIf="contentReadData?.preEnrolmentResources?.length"
+                (click)="routeToPreAssessent()">
+                <ng-container>
+                  {{ 'apptochome.preEnroll' | translate }}
+                </ng-container>
+              </a>
+            </ng-container>
             <div class="flex flex-col gap-4" *ngIf="contentReadData && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM &&
               !(!batchData?.enrolled && (!batchData?.content?.length || batchData?.allBatchesExpired || allBatchesAreFull))">
               <!-- <div class="flex flex-row gap-2">
@@ -775,7 +784,7 @@
                   <div class="batch-label">{{ 'apptoc.totalEnrolled' | translate }}</div>
                 </div>
               </div>
-              <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && !preAssessmentCompletionStatus">
+              <ng-container *ngIf="!forPreview && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM && !preAssessmentCompletionStatus">
                 <a class="flex action-button enroll-btn justify-center resume" *ngIf="contentReadData?.preEnrolmentResources?.length"
                   (click)="routeToPreAssessent()">
                   <ng-container>
