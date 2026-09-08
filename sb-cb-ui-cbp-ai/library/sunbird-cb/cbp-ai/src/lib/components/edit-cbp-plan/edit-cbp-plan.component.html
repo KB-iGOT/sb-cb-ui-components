@@ -262,9 +262,27 @@
                     <div class="competency-grid mt-2">
                         <div class="competency-item behavioural-pill"
                             *ngFor="let comp of getCompetenciesByType('Behavioral')">
-                            <span class="competency-text-behavioral">
-                                {{ comp.theme }} - {{ comp.sub_theme }}
-                            </span>
+                            <div class="flex-col-theme">
+                                                    <div>
+                                                    <span class="competency-text-behavioral"> {{ comp.theme }} - {{
+                                                        comp.sub_theme }} </span>
+                                                    </div>
+                                                      <div class="competency-tags">
+                                                        <span *ngIf="comp.proficiency_level"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        >
+                                                        {{ comp.proficiency_level }}
+                                                        </span>
+
+                                                        <span *ngIf="comp.delivery_mode"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        >
+                                                        {{ comp.delivery_mode }}
+                                                        </span>
+                                                    </div>
+                                                    </div>
                             <span class="cursor-pointer close" (click)="deleteCompetency(comp)">
                                 <mat-icon>close</mat-icon>
                             </span>
@@ -277,9 +295,27 @@
                     <div class="competency-grid mt-2">
                         <div class="competency-item functional-pill"
                             *ngFor="let comp of getCompetenciesByType('Functional')">
-                            <span class="competency-text-functional">
-                                {{ comp.theme }} - {{ comp.sub_theme }}
-                            </span>
+                            <div class="flex-col-theme">
+                                                    <div>
+                                                    <span class="competency-text-functional"> {{ comp.theme }} - {{
+                                                        comp.sub_theme }} </span>
+                                                    </div>
+                                                      <div class="competency-tags">
+                                                        <span *ngIf="comp.proficiency_level"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        >
+                                                        {{ comp.proficiency_level }}
+                                                        </span>
+
+                                                        <span *ngIf="comp.delivery_mode"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        >
+                                                        {{ comp.delivery_mode }}
+                                                        </span>
+                                                    </div>
+                                                    </div>
                             <span class="cursor-pointer close" (click)="deleteCompetency(comp)">
                                 <mat-icon>close</mat-icon>
                             </span>
@@ -290,9 +326,27 @@
                     <div class="competency-sub-heading mt-2">Domain Competencies</div>
                     <div class="competency-grid mt-2">
                         <div class="competency-item domain-pill" *ngFor="let comp of getCompetenciesByType('Domain')">
-                            <span class="competency-text-domain">
-                                {{ comp.theme }} - {{ comp.sub_theme }}
-                            </span>
+                           <div class="flex-col-theme">
+                                                    <div>
+                                                    <span class="competency-text-domain"> {{ comp.theme }} - {{
+                                                        comp.sub_theme }} </span>
+                                                    </div>
+                                                      <div class="competency-tags">
+                                                        <span *ngIf="comp.proficiency_level"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        >
+                                                        {{ comp.proficiency_level }}
+                                                        </span>
+
+                                                        <span *ngIf="comp.delivery_mode"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        >
+                                                        {{ comp.delivery_mode }}
+                                                        </span>
+                                                    </div>
+                                                    </div>
                             <span class="cursor-pointer edit" (click)="editCompetency(comp)">
                                 <mat-icon>edit</mat-icon>
                             </span>

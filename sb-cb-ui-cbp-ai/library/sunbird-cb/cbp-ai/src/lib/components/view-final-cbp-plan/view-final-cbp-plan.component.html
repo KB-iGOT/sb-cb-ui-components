@@ -332,8 +332,34 @@
                                                 <div *ngFor="let comp of designation.behavioralCompetencies; let i = index"
                                                     class="bg-white p-1.5 rounded text-sm text-gray-700 border-l-2 border-blue-400">
                                                     {{comp}}
+                                                    <div class="flex-col-theme">
+                                                    
+                                                    <span class="competency-tags">
+                                                        <span *ngIf="designation.behavioralSetForProficiencyLevel[i]"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="designation.behavioralSetForProficiencyLevel[i]?.toLowerCase()"
+                                                        >
+                                                        {{ designation.behavioralSetForProficiencyLevel[i] }}
+                                                        </span>
+
+                                                        
+                                                    </span>
+                                                    
+                                                    <span class="competency-tags">
+                                                        <span *ngIf="designation.behavioralSetForDeliveryMode[i]"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="designation.behavioralSetForDeliveryMode[i]?.toLowerCase()"
+                                                        >
+                                                        {{ designation.behavioralSetForDeliveryMode[i] }}
+                                                        </span>
+
+                                                       
+                                                    </span>
+                                                    </div>
                                                 </div>
+                                              
                                             </div>
+                                            
                                             <div class="mt-2 text-sm text-blue-600 font-medium">
                                                 {{designation.behavioralCompetencies.length}} total
                                             </div>
@@ -346,6 +372,30 @@
                                                 <div *ngFor="let comp of designation.functionalCompetencies; let i = index"
                                                     class="bg-white p-1.5 rounded text-sm text-gray-700 border-l-2 border-green-400">
                                                     {{comp}}
+                                                    <div class="flex-col-theme">
+                                                    
+                                                    <span class="competency-tags">
+                                                        <span *ngIf="designation.functionalSetForProficiencyLevel[i]"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="designation.functionalSetForProficiencyLevel[i]?.toLowerCase()"
+                                                        >
+                                                        {{ designation.functionalSetForProficiencyLevel[i] }}
+                                                        </span>
+
+                                                        
+                                                    </span>
+                                                    
+                                                    <span class="competency-tags">
+                                                        <span *ngIf="designation.functionalSetForDeliveryMode[i]"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="designation.functionalSetForDeliveryMode[i]?.toLowerCase()"
+                                                        >
+                                                        {{ designation.functionalSetForDeliveryMode[i] }}
+                                                        </span>
+
+                                                       
+                                                    </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="mt-2 text-sm text-green-600 font-medium">
@@ -360,6 +410,30 @@
                                                 <div *ngFor="let comp of designation.domainCompetencies; let i = index"
                                                     class="bg-white p-1.5 rounded text-sm text-gray-700 border-l-2 border-purple-400">
                                                     {{comp}}
+                                                    <div class="flex-col-theme">
+                                                    
+                                                    <span class="competency-tags">
+                                                        <span *ngIf="designation.domainSetForProficiencyLevel[i]"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="designation.domainSetForProficiencyLevel[i]?.toLowerCase()"
+                                                        >
+                                                        {{ designation.domainSetForProficiencyLevel[i] }}
+                                                        </span>
+
+                                                        
+                                                    </span>
+                                                    
+                                                    <span class="competency-tags">
+                                                        <span *ngIf="designation.domainSetForDeliveryMode[i]"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="designation.domainSetForDeliveryMode[i]?.toLowerCase()"
+                                                        >
+                                                        {{ designation.domainSetForDeliveryMode[i] }}
+                                                        </span>
+
+                                                       
+                                                    </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="mt-2 text-sm text-purple-600 font-medium">
