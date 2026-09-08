@@ -995,10 +995,10 @@ export class ViewFinalCbpPlanComponent {
           .map((v: string, i: number) => `${i + 1}. ${v}`).join("\n\n"),
         "Behavioral Competencies": (json.competencies || [])
           .filter((c: any) => c.type === "Behavioral")
-          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
+          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme} (${c?.proficiency_level}, ${c?.delivery_mode})`).join("\n\n"),
         "Functional Competencies": (json.competencies || [])
           .filter((c: any) => c.type === "Functional")
-          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
+          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme} (${c?.proficiency_level}, ${c?.delivery_mode})`).join("\n\n"),
         "Domain Competencies": (json.competencies || [])
           .filter((c: any) => c.type === "Domain")
           .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
