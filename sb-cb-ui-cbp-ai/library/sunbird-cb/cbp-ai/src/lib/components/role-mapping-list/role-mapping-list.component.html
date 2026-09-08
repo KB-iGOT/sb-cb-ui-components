@@ -317,13 +317,32 @@
                                     <ng-container matColumnDef="behavioral">
                                         <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
                                             mat-header-cell *matHeaderCellDef> Behavioral
-                                            Competencies </th>
+                                            Competencies <mat-icon class="icon-cursor" (click)="openCompetencyInfo()">info_outline</mat-icon> </th>
                                         <td mat-cell *matCellDef="let element">
                                             <ul class="competency-list">
                                                 <li class="behavioural-pill"
                                                     *ngFor="let comp of (isBehavioralExpanded(element.id) ? getCompetenciesByType(element.competencies, 'Behavioral') : getCompetenciesByType(element.competencies, 'Behavioral').slice(0, 4))">
+                                                    <div class="flex-col-theme">
+                                                    <div>
                                                     <span class="competency-text-behavioral"> {{ comp.theme }} - {{
                                                         comp.sub_theme }} </span>
+                                                    </div>
+                                                      <div class="competency-tags">
+                                                        <span *ngIf="comp.proficiency_level"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        >
+                                                        {{ comp.proficiency_level }}
+                                                        </span>
+
+                                                        <span *ngIf="comp.delivery_mode"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        >
+                                                        {{ comp.delivery_mode }}
+                                                        </span>
+                                                    </div>
+                                                    </div>
                                                 </li>
                                                 <li *ngIf="getCompetenciesByType(element.competencies, 'Behavioral').length > 4"
                                                     class="view-more-less cursor-pointer"
@@ -340,13 +359,32 @@
                                     <ng-container matColumnDef="functional">
                                         <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
                                             mat-header-cell *matHeaderCellDef> Functional
-                                            Competencies </th>
+                                            Competencies <mat-icon class="icon-cursor" (click)="openCompetencyInfo()">info_outline</mat-icon></th>
                                         <td mat-cell *matCellDef="let element">
                                             <ul class="competency-list">
                                                 <li class="functional-pill"
                                                     *ngFor="let comp of (isFunctionalExpanded(element.id) ? getCompetenciesByType(element.competencies, 'Functional') : getCompetenciesByType(element.competencies, 'Functional').slice(0, 4))">
+                                                    <div class="flex-col-theme">
+                                                    <div>
                                                     <span class="competency-text-functional"> {{ comp.theme }} - {{
                                                         comp.sub_theme }}</span>
+                                                        </div>
+                                                     <div class="competency-tags">
+                                                        <span *ngIf="comp.proficiency_level"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        >
+                                                        {{ comp.proficiency_level }}
+                                                        </span>
+
+                                                        <span *ngIf="comp.delivery_mode"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        >
+                                                        {{ comp.delivery_mode }}
+                                                        </span>
+                                                    </div>
+                                                    </div>
                                                 </li>
                                                 <li *ngIf="getCompetenciesByType(element.competencies, 'Functional').length > 4"
                                                     class="view-more-less cursor-pointer"
@@ -363,13 +401,32 @@
                                     <ng-container matColumnDef="domain">
                                         <th [ngClass]="activeTab === 'matched'? 'table-header': 'table-header-unmatched'"
                                             mat-header-cell *matHeaderCellDef> Domain
-                                            Competencies </th>
+                                            Competencies <mat-icon class="icon-cursor" (click)="openCompetencyInfo()">info_outline</mat-icon> </th>
                                         <td mat-cell *matCellDef="let element">
                                             <ul class="competency-list">
                                                 <li class="domain-pill"
                                                     *ngFor="let comp of (isDomainExpanded(element.id) ? getCompetenciesByType(element.competencies, 'Domain') : getCompetenciesByType(element.competencies, 'Domain').slice(0, 4))">
+                                                    <div class="flex-col-theme">
+                                                    <div>
                                                     <span class="competency-text-domain"> {{ comp.theme }} - {{
                                                         comp.sub_theme }}</span>
+                                                        </div>
+                                                     <div class="competency-tags">
+                                                        <span *ngIf="comp.proficiency_level"
+                                                        class="proficiency-tag"
+                                                        [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        >
+                                                        {{ comp.proficiency_level }}
+                                                        </span>
+
+                                                        <span *ngIf="comp.delivery_mode"
+                                                        class="delivery-mode-tag"
+                                                        [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        >
+                                                        {{ comp.delivery_mode }}
+                                                        </span>
+                                                    </div>
+                                                    </div>
                                                 </li>
                                                 <li *ngIf="getCompetenciesByType(element.competencies, 'Domain').length > 4"
                                                     class="view-more-less cursor-pointer"
@@ -463,4 +520,114 @@
 
 <div class="overlay-loader" *ngIf="loading">
     <mat-spinner diameter="50"></mat-spinner>
+</div>
+
+<div
+  class="competency-modal-backdrop"
+  *ngIf="isCompetencyInfoOpen"
+  (click)="closeCompetencyInfo()"
+>
+  <div
+    class="competency-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="competency-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Close Button -->
+    <button
+      type="button"
+      class="modal-close-btn"
+      (click)="closeCompetencyInfo()"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+    <!-- Title -->
+    <h2 id="competency-modal-title">
+      What do the competency tags mean?
+    </h2>
+
+    <!-- Description -->
+    <p class="modal-description">
+      Every competency carries two tags: how deeply this designation needs it,
+      and how the training for it is delivered.
+    </p>
+
+    <!-- Proficiency -->
+    <div class="competency-section">
+      <h3>
+        PROFICIENCY LEVEL — THE DEPTH THIS DESIGNATION NEEDS
+      </h3>
+
+      <div class="tag-info-row">
+        <span class="proficiency-tag-modal strategic">
+          Strategic
+        </span>
+
+        <span class="tag-description">
+          Shapes policy, direction and outcomes
+        </span>
+      </div>
+
+      <div class="tag-info-row">
+        <span class="proficiency-tag-modal tactical">
+          Tactical
+        </span>
+
+        <span class="tag-description">
+          Plans, coordinates and turns direction into programmes
+        </span>
+      </div>
+
+      <div class="tag-info-row">
+        <span class="proficiency-tag-modal operational">
+          Operational
+        </span>
+
+        <span class="tag-description">
+          Executes and delivers the work on the ground
+        </span>
+      </div>
+    </div>
+
+    <!-- Delivery Mode -->
+    <div class="competency-section delivery-section">
+      <h3>
+        DELIVERY MODE — HOW THE TRAINING IS DELIVERED
+      </h3>
+
+      <div class="tag-info-row">
+        <span class="delivery-mode-tag-modal online">
+          Online
+        </span>
+
+        <span class="tag-description">
+          Self-paced, knowledge-based content
+        </span>
+      </div>
+
+      <div class="tag-info-row">
+        <span class="delivery-mode-tag-modal offline">
+          Offline
+        </span>
+
+        <span class="tag-description">
+          Needs physical presence or supervised practice
+        </span>
+      </div>
+
+      <div class="tag-info-row">
+        <span class="delivery-mode-tag-modal blended">
+          Blended
+        </span>
+
+        <span class="tag-description">
+          Concept combined with applied practice or coaching
+        </span>
+      </div>
+    </div>
+
+  </div>
 </div>

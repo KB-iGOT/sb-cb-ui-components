@@ -189,7 +189,15 @@ export class ViewFinalCbpPlanComponent {
               // ✅ LOCAL UNIQUE SETS (per designation)
               const totalSet = new Set<string>();
               const behavioralSet = new Set<string>();
+              const behavioralSetForProficiencyLevel = [];
+              const behavioralSetForDeliveryMode = [];
+              const functionalSetForProficiencyLevel = [];
+              const functionalSetForDeliveryMode = [];
+              const domainSetForProficiencyLevel = [];
+              const domainSetForDeliveryMode = [];
+
               const functionalSet = new Set<string>();
+
               const domainSet = new Set<string>();
 
               let competenciesObj = { total: 0, behavioral: 0, functional: 0, domain: 0 };
@@ -212,16 +220,24 @@ export class ViewFinalCbpPlanComponent {
 
                 if (type === 'behavioral' && !behavioralSet.has(key)) {
                   behavioralSet.add(key);
+                  behavioralSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  behavioralSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                   competenciesObj.behavioral++;
+                  
                 }
+                
 
                 if (type === 'functional' && !functionalSet.has(key)) {
                   functionalSet.add(key);
+                  functionalSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  functionalSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                   competenciesObj.functional++;
                 }
 
                 if (type === 'domain' && !domainSet.has(key)) {
                   domainSet.add(key);
+                  domainSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  domainSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                   competenciesObj.domain++;
                 }
 
@@ -242,6 +258,12 @@ export class ViewFinalCbpPlanComponent {
                 activities: res[i].activities,
                 competenciesObj,
                 behavioralCompetencies: [...behavioralSet],
+                behavioralSetForProficiencyLevel: [...behavioralSetForProficiencyLevel],
+                behavioralSetForDeliveryMode: [...behavioralSetForDeliveryMode],
+                functionalSetForProficiencyLevel: [...functionalSetForProficiencyLevel],
+                functionalSetForDeliveryMode: [...functionalSetForDeliveryMode],
+                domainSetForProficiencyLevel: [...domainSetForProficiencyLevel],
+                domainSetForDeliveryMode: [...domainSetForDeliveryMode],
                 functionalCompetencies: [...functionalSet],
                 domainCompetencies: [...domainSet],
                 selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
@@ -292,6 +314,12 @@ export class ViewFinalCbpPlanComponent {
               // ✅ LOCAL UNIQUE SETS (per designation)
               const totalSet = new Set<string>();
               const behavioralSet = new Set<string>();
+              const behavioralSetForProficiencyLevel = [];
+              const behavioralSetForDeliveryMode = [];
+              const domainSetForProficiencyLevel = [];
+              const domainSetForDeliveryMode = [];
+              const functionalSetForProficiencyLevel = [];
+              const functionalSetForDeliveryMode = [];
               const functionalSet = new Set<string>();
               const domainSet = new Set<string>();
 
@@ -315,16 +343,22 @@ export class ViewFinalCbpPlanComponent {
 
                 if (type === 'behavioral' && !behavioralSet.has(key)) {
                   behavioralSet.add(key);
+                  behavioralSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  behavioralSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                   competenciesObj.behavioral++;
                 }
 
                 if (type === 'functional' && !functionalSet.has(key)) {
                   functionalSet.add(key);
+                  functionalSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  functionalSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                   competenciesObj.functional++;
                 }
 
                 if (type === 'domain' && !domainSet.has(key)) {
                   domainSet.add(key);
+                  domainSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  domainSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                   competenciesObj.domain++;
                 }
 
@@ -345,12 +379,20 @@ export class ViewFinalCbpPlanComponent {
                 activities: res[i].activities,
                 competenciesObj,
                 behavioralCompetencies: [...behavioralSet],
+                behavioralSetForProficiencyLevel: [...behavioralSetForProficiencyLevel],
+                behavioralSetForDeliveryMode: [...behavioralSetForDeliveryMode],
+                functionalSetForProficiencyLevel: [...functionalSetForProficiencyLevel],
+                functionalSetForDeliveryMode: [...functionalSetForDeliveryMode],
+                domainSetForProficiencyLevel: [...domainSetForProficiencyLevel],
+                domainSetForDeliveryMode: [...domainSetForDeliveryMode],
                 functionalCompetencies: [...functionalSet],
                 domainCompetencies: [...domainSet],
                 selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
               });
 
             }
+
+            console.log('this.designationData', this.designationData)
 
             // ✅ SET GLOBAL COUNTS AFTER LOOP
             this.totalCompetencieObj.total = globalTotalSet.size;
@@ -474,6 +516,13 @@ export class ViewFinalCbpPlanComponent {
             // ✅ LOCAL UNIQUE SETS (per designation)
             const totalSet = new Set<string>();
             const behavioralSet = new Set<string>();
+            const behavioralSetForProficiencyLevel = [];
+            const behavioralSetForDeliveryMode = [];
+            const functionalSetForProficiencyLevel = [];
+            const functionalSetForDeliveryMode = [];
+            const domainSetForProficiencyLevel = [];
+            const domainSetForDeliveryMode = [];
+
             const functionalSet = new Set<string>();
             const domainSet = new Set<string>();
 
@@ -497,16 +546,24 @@ export class ViewFinalCbpPlanComponent {
 
               if (type === 'behavioral' && !behavioralSet.has(key)) {
                 behavioralSet.add(key);
+                behavioralSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                behavioralSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                
                 competenciesObj.behavioral++;
               }
 
+
               if (type === 'functional' && !functionalSet.has(key)) {
                 functionalSet.add(key);
+                functionalSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                functionalSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                 competenciesObj.functional++;
               }
 
               if (type === 'domain' && !domainSet.has(key)) {
                 domainSet.add(key);
+                domainSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                domainSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
                 competenciesObj.domain++;
               }
 
@@ -528,11 +585,17 @@ export class ViewFinalCbpPlanComponent {
               competenciesObj,
               behavioralCompetencies: [...behavioralSet],
               functionalCompetencies: [...functionalSet],
+              behavioralSetForProficiencyLevel: [...behavioralSetForProficiencyLevel],
+              behavioralSetForDeliveryMode: [...behavioralSetForDeliveryMode],
+              functionalSetForProficiencyLevel: [...functionalSetForProficiencyLevel],
+              functionalSetForDeliveryMode: [...functionalSetForDeliveryMode],
+              domainSetForProficiencyLevel: [...domainSetForProficiencyLevel],
+              domainSetForDeliveryMode: [...domainSetForDeliveryMode],
               domainCompetencies: [...domainSet],
               selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
             });
 
-          }
+          } 
 
           // ✅ SET GLOBAL COUNTS AFTER LOOP
           this.totalCompetencieObj.total = globalTotalSet.size;

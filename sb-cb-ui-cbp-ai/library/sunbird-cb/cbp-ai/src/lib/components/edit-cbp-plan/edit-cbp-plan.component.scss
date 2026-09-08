@@ -1321,3 +1321,68 @@ border: none;
 :host ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-flex {
  // border-color: #1B4CA1;
 }
+
+
+.competency-tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.proficiency-tag,
+.delivery-mode-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2px 8px;
+  border-radius: 16px;
+
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.delivery-mode-tag.online {
+  background: #E6F4EA;
+  color: #1A7F45;
+  border: 1px solid #9BD3B0;
+}
+
+.delivery-mode-tag.offline {
+  background: #FDF0E3;
+  color: #A2590A;
+  border: 1px solid #F0C48A;
+}
+
+.delivery-mode-tag.offline {
+  background: #FDF0E3;
+  color: #A2590A;
+  border: 1px solid #F0C48A;
+}
+
+.proficiency-tag.strategic {
+  background: #1B4CA1;
+  color: #FFFFFF;
+  border: none;
+}
+
+.proficiency-tag.tactical {
+  background: #5B8DEF;
+  color: #FFFFFF;
+  border: none;
+}
+
+.proficiency-tag.operational {
+  background: #DBE6F7;
+  color: #1B4CA1;
+  border: none;
+}
+
+.flex-col-theme {
+    display: flex;
+    flex-direction: column;
+}

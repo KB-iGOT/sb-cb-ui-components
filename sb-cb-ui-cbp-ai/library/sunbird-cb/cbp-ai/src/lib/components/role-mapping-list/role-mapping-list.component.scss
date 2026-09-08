@@ -921,3 +921,429 @@ cursor: not-allowed;
 .grayd-disable {
     color: lightgray !important;
 }
+
+.competency-tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.proficiency-tag,
+.delivery-mode-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2px 8px;
+  border-radius: 16px;
+
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.delivery-mode-tag.online {
+  background: #E6F4EA;
+  color: #1A7F45;
+  border: 1px solid #9BD3B0;
+}
+
+.delivery-mode-tag.offline {
+  background: #FDF0E3;
+  color: #A2590A;
+  border: 1px solid #F0C48A;
+}
+
+.delivery-mode-tag.offline {
+  background: #FDF0E3;
+  color: #A2590A;
+  border: 1px solid #F0C48A;
+}
+
+.proficiency-tag.strategic {
+  background: #1B4CA1;
+  color: #FFFFFF;
+  border: none;
+}
+
+.proficiency-tag.tactical {
+  background: #5B8DEF;
+  color: #FFFFFF;
+  border: none;
+}
+
+.proficiency-tag.operational {
+  background: #DBE6F7;
+  color: #1B4CA1;
+  border: none;
+}
+
+.flex-col-theme {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================
+   INFO ICON
+========================================= */
+
+.competency-info-btn {
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  padding: 0;
+}
+
+.info-icon {
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #1b4ca1;
+  border-radius: 50%;
+
+  color: #1b4ca1;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   MODAL BACKDROP
+========================================= */
+
+.competency-modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(25, 35, 50, 0.55);
+
+  animation: fadeIn 0.2s ease;
+}
+
+
+/* =========================================
+   MODAL
+========================================= */
+
+.competency-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 900px;
+
+  max-height: calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border-radius: 16px;
+
+  padding: 40px 42px 38px;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.25);
+
+  animation: modalSlideIn 0.25s ease;
+}
+
+
+/* =========================================
+   CLOSE BUTTON
+========================================= */
+
+.modal-close-btn {
+  position: absolute;
+
+  top: 26px;
+  right: 36px;
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  background: transparent;
+
+  color: #5b6778;
+
+  font-size: 44px;
+  font-weight: 300;
+
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.modal-close-btn:hover {
+  color: #1b4ca1;
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.competency-modal h2 {
+  margin: 0 0 16px;
+
+  color: #293548;
+
+  font-size: 34px;
+  font-weight: 700;
+
+  line-height: 1.25;
+}
+
+
+/* =========================================
+   DESCRIPTION
+========================================= */
+
+.modal-description {
+  max-width: 800px;
+
+  margin: 0 0 28px;
+
+  color: #59687b;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================
+   SECTIONS
+========================================= */
+
+.competency-section {
+  margin-top: 26px;
+}
+
+.delivery-section {
+  margin-top: 28px;
+}
+
+.competency-section h3 {
+  margin: 0 0 18px;
+
+  color: #354154;
+
+  font-size: 21px;
+  font-weight: 700;
+
+  letter-spacing: 0.5px;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================
+   ROW
+========================================= */
+
+.tag-info-row {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  margin-bottom: 10px;
+}
+
+
+/* =========================================
+   TAG COMMON
+========================================= */
+
+.proficiency-tag-modal,
+.delivery-mode-tag-modal {
+  width: 140px;
+  min-width: 140px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 14px;
+
+  border-radius: 20px;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  line-height: 1.2;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   PROFICIENCY
+========================================= */
+
+.proficiency-tag-modal.strategic {
+  background: #1B4CA1;
+  color: #FFFFFF;
+}
+
+.proficiency-tag-modal.tactical {
+  background: #5B8DEF;
+  color: #FFFFFF;
+}
+
+.proficiency-tag-modal.operational {
+  background: #DBE6F7;
+  color: #1B4CA1;
+}
+
+
+/* =========================================
+   DELIVERY MODE
+========================================= */
+
+.delivery-mode-tag-modal.online {
+  background: #E6F4EA;
+  color: #1A7F45;
+  border: 1px solid #9BD3B0;
+}
+
+.delivery-mode-tag-modal.offline {
+  background: #FDF0E3;
+  color: #A2590A;
+  border: 1px solid #F0C48A;
+}
+
+.delivery-mode-tag-modal.blended {
+  background: #EFE9FB;
+  color: #5B21B6;
+  border: 1px solid #C9B6F0;
+}
+
+
+/* =========================================
+   DESCRIPTION TEXT
+========================================= */
+
+.tag-description {
+  color: #526174;
+  font-weight: bold;
+
+  font-size: 16px;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .competency-modal {
+    padding: 28px 22px;
+  }
+
+  .competency-modal h2 {
+    padding-right: 35px;
+    font-size: 26px;
+  }
+
+  .modal-description {
+    font-size: 16px;
+  }
+
+  .competency-section h3 {
+    font-size: 16px;
+  }
+
+  .tag-info-row {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 8px;
+  }
+
+  .proficiency-tag-modal,
+  .delivery-mode-tag-modal {
+    width: 140px;
+  }
+
+  .tag-description {
+    font-size: 16px;
+  }
+
+  .modal-close-btn {
+    top: 18px;
+    right: 18px;
+  }
+
+}
+
+.icon-cursor {
+    cursor: pointer;
+    vertical-align: middle  ;
+}

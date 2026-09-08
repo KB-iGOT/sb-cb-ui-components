@@ -67,6 +67,7 @@ export class RoleMappingListComponent {
   pageSize = 5;
   offset = 0;
   totalRoleMappingListCount = 0
+  isCompetencyInfoOpen = false;
   constructor(
     public sharedService: SharedService,
     private dialog: MatDialog,
@@ -959,6 +960,14 @@ export class RoleMappingListComponent {
 
   // Call your API if needed
   // this.getData(this.offset, this.pageSize);
-}
+  }
+
+  openCompetencyInfo(): void {
+    this.isCompetencyInfoOpen = true;
+  }
+
+  closeCompetencyInfo(): void {
+    this.isCompetencyInfoOpen = false;
+  }
 
 }
