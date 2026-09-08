@@ -106,9 +106,14 @@
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     padding-left: 1.5rem !important;
+    padding-right: 120px !important;
     max-width: 80%;
     line-height: 36px;
     height: 36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin:0;
   }
 }
 
