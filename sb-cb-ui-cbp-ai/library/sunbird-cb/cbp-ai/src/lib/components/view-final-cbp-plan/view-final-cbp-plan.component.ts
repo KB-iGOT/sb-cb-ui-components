@@ -926,10 +926,11 @@ export class ViewFinalCbpPlanComponent {
 
 
   generateExcel(jsonArray: any[], filename: string = "final.xlsx") {
-    console.log('jsonArray', jsonArray)
     this.loading = true
 
     if (!jsonArray || jsonArray.length === 0) return;
+
+    const excelCellTextLimit = 32000;
 
     // -------- MAIN HEADER FROM FIRST OBJECT ---------
     const firstObj = jsonArray[0];
@@ -943,38 +944,50 @@ export class ViewFinalCbpPlanComponent {
       "Activities",
       "Behavioral Competencies",
       "Functional Competencies",
-      "Domain Competencies",
-      'courseDetails'
+      "Domain Competencies"
     ];
 
     // -------- DATA ROWS ---------
-    const dataRows = jsonArray.map(json => {
+    const dataRows: Array<Record<string, any>> = jsonArray.map(json => {
       const courses =
         json?.cbp_plans?.length
           ? json.cbp_plans[json.cbp_plans.length - 1]?.selected_courses || []
           : [];
-      const courseDetails = courses.map((c: any, i: number) => {
+      const courseDetailBlocks = courses.map((c: any, i: number) => {
         const competencies = (c.competencies || c.competencies_v6 || [])
           .map((cc: any) =>
             `${cc.competencyAreaName} → ${cc.competencyThemeName} → ${cc.competencySubThemeName}`
           )
           .join(" | ");
 
-        return (
-          `${i + 1}. Course Name: ${c?.course || c?.name}\n` +
+        return `${i + 1}. Course Name: ${c?.course || c?.name}\n` +
           `   Identifier: ${c?.identifier}\n` +
           `   Duration (mins): ${Math.round(+c.duration / 60)}\n` +
           `   Relevancy: ${c?.relevancy}%\n` +
           `   Rationale: ${c?.rationale}\n` +
-          `     Organisation: ${
-  Array.isArray(c?.organisation)
-    ? c.organisation.join(", ")
-    : c?.organisation ?? ""
-}\n` +
-          `   Competencies: ${competencies}`
-        );
-      }).join("\n\n");
-      return {
+          `   Organisation: ${Array.isArray(c?.organisation) ? c.organisation.join(", ") : (c?.organisation ?? "")}\n` +
+          `   Competencies: ${competencies}`;
+      });
+      const truncationNotice = "\n[course details truncated]";
+      const courseDetailParts: string[] = [];
+      let currentPart = "";
+
+      courseDetailBlocks.forEach((courseDetail: string) => {
+        if (courseDetail.length > excelCellTextLimit) {
+          courseDetail = courseDetail.slice(0, excelCellTextLimit - truncationNotice.length) + truncationNotice;
+        }
+        const separator = currentPart ? "\n\n" : "";
+        if (currentPart && currentPart.length + separator.length + courseDetail.length > excelCellTextLimit) {
+          courseDetailParts.push(currentPart);
+          currentPart = courseDetail;
+        } else {
+          currentPart += separator + courseDetail;
+        }
+      });
+
+      if (currentPart) courseDetailParts.push(currentPart);
+
+      const row: Record<string, any> = {
         "Designation": `${json.designation_name} : Wing/Division - ${json.wing_division_section}`,
         "Role & Responsibilities": (json.role_responsibilities || [])
           .map((v: string, i: number) => `${i + 1}. ${v}`).join("\n\n"),
@@ -988,9 +1001,30 @@ export class ViewFinalCbpPlanComponent {
           .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme} (${c?.proficiency_level}, ${c?.delivery_mode})`).join("\n\n"),
         "Domain Competencies": (json.competencies || [])
           .filter((c: any) => c.type === "Domain")
-          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme} (${c?.proficiency_level}, ${c?.delivery_mode})`).join("\n\n"),
-        "Course Details": courseDetails
+          .map((c: any, i: number) => `${i + 1}. ${c.theme} - ${c.sub_theme}`).join("\n\n"),
+        "Course Details 1": courseDetailParts[0] || ""
       };
+
+      for (let part = 1; part < courseDetailParts.length; part++) {
+        row[`Course Details ${part + 1}`] = courseDetailParts[part];
+      }
+
+      return row;
+    });
+
+    const maxCourseDetailParts = Math.max(
+      1,
+      ...dataRows.map(row => Object.keys(row).filter(key =>
+        key.indexOf("Course Details ") === 0
+      ).length)
+    );
+    for (let part = 1; part <= maxCourseDetailParts; part++) {
+      headers.push(`Course Details ${part}`);
+    }
+    dataRows.forEach(row => {
+      headers.forEach(header => {
+        if (!(header in row)) row[header] = "";
+      });
     });
 
 
@@ -1023,10 +1057,12 @@ export class ViewFinalCbpPlanComponent {
     XLSX.utils.sheet_add_json(ws, dataRows, { origin: "A3", skipHeader: true });
 
     // Auto column widths based on longest line in each column
-    const colWidths = headers.map((header, idx) => {
+    const colWidths = headers.map(header => {
       const maxLen = Math.max(
         header.length,
-        ...dataRows.map(row => (row[header] || "").split("\n").reduce((a, b) => Math.max(a, b.length), 0))
+        ...dataRows.map(row => String(row[header] || "")
+          .split("\n")
+          .reduce((maxLength: number, line: string) => Math.max(maxLength, line.length), 0))
       );
       return { wch: Math.min(Math.max(maxLen + 5, 20), 80) }; // min 20, max 80
     });
