@@ -101,6 +101,7 @@
                                                         <span *ngIf="comp.proficiency_level"
                                                         class="proficiency-tag"
                                                         [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        [matTooltip]="comp?.proficiency_rationale"
                                                         >
                                                         {{ comp.proficiency_level }}
                                                         </span>
@@ -108,6 +109,7 @@
                                                         <span *ngIf="comp.delivery_mode"
                                                         class="delivery-mode-tag"
                                                         [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        [matTooltip]="comp?.delivery_mode_rationale"
                                                         >
                                                         {{ comp.delivery_mode }}
                                                         </span>
@@ -138,6 +140,7 @@
                                                         <span *ngIf="comp.proficiency_level"
                                                         class="proficiency-tag"
                                                         [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        [matTooltip]="comp?.proficiency_rationale"
                                                         >
                                                         {{ comp.proficiency_level }}
                                                         </span>
@@ -145,6 +148,7 @@
                                                         <span *ngIf="comp.delivery_mode"
                                                         class="delivery-mode-tag"
                                                         [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        [matTooltip]="comp?.delivery_mode_rationale"
                                                         >
                                                         {{ comp.delivery_mode }}
                                                         </span>
@@ -171,10 +175,11 @@
                                                     <span class="competency-text-domain"> {{ comp.theme }} - {{
                                                         comp.sub_theme }} </span>
                                                     </div>
-                                                      <div class="competency-tags">
+                                                       <div class="competency-tags">
                                                         <span *ngIf="comp.proficiency_level"
                                                         class="proficiency-tag"
                                                         [ngClass]="comp.proficiency_level?.toLowerCase()"
+                                                        [matTooltip]="comp?.proficiency_rationale"
                                                         >
                                                         {{ comp.proficiency_level }}
                                                         </span>
@@ -182,6 +187,7 @@
                                                         <span *ngIf="comp.delivery_mode"
                                                         class="delivery-mode-tag"
                                                         [ngClass]="comp.delivery_mode?.toLowerCase()"
+                                                        [matTooltip]="comp?.delivery_mode_rationale"
                                                         >
                                                         {{ comp.delivery_mode }}
                                                         </span>

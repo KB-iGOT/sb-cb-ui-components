@@ -338,6 +338,7 @@
                                                         <span *ngIf="designation.behavioralSetForProficiencyLevel[i]"
                                                         class="proficiency-tag"
                                                         [ngClass]="designation.behavioralSetForProficiencyLevel[i]?.toLowerCase()"
+                                                        [matTooltip]="designation.behavioralSetForProficiencyLevelRationale[i]"
                                                         >
                                                         {{ designation.behavioralSetForProficiencyLevel[i] }}
                                                         </span>
@@ -349,6 +350,7 @@
                                                         <span *ngIf="designation.behavioralSetForDeliveryMode[i]"
                                                         class="delivery-mode-tag"
                                                         [ngClass]="designation.behavioralSetForDeliveryMode[i]?.toLowerCase()"
+                                                        [matTooltip]="designation.behavioralSetForDeliveryModeRationale[i]"
                                                         >
                                                         {{ designation.behavioralSetForDeliveryMode[i] }}
                                                         </span>
@@ -378,6 +380,7 @@
                                                         <span *ngIf="designation.functionalSetForProficiencyLevel[i]"
                                                         class="proficiency-tag"
                                                         [ngClass]="designation.functionalSetForProficiencyLevel[i]?.toLowerCase()"
+                                                        [matTooltip]="designation.functionalSetForProficiencyLevelRationale[i]"
                                                         >
                                                         {{ designation.functionalSetForProficiencyLevel[i] }}
                                                         </span>
@@ -389,6 +392,7 @@
                                                         <span *ngIf="designation.functionalSetForDeliveryMode[i]"
                                                         class="delivery-mode-tag"
                                                         [ngClass]="designation.functionalSetForDeliveryMode[i]?.toLowerCase()"
+                                                        [matTooltip]="designation.functionalSetForDeliveryModeRationale[i]"
                                                         >
                                                         {{ designation.functionalSetForDeliveryMode[i] }}
                                                         </span>
@@ -416,6 +420,7 @@
                                                         <span *ngIf="designation.domainSetForProficiencyLevel[i]"
                                                         class="proficiency-tag"
                                                         [ngClass]="designation.domainSetForProficiencyLevel[i]?.toLowerCase()"
+                                                        [matTooltip]="designation.domainSetForProficiencyLevelRationale[i]"
                                                         >
                                                         {{ designation.domainSetForProficiencyLevel[i] }}
                                                         </span>
@@ -427,6 +432,7 @@
                                                         <span *ngIf="designation.domainSetForDeliveryMode[i]"
                                                         class="delivery-mode-tag"
                                                         [ngClass]="designation.domainSetForDeliveryMode[i]?.toLowerCase()"
+                                                        [matTooltip]="designation.domainSetForDeliveryModeRationale[i]"
                                                         >
                                                         {{ designation.domainSetForDeliveryMode[i] }}
                                                         </span>

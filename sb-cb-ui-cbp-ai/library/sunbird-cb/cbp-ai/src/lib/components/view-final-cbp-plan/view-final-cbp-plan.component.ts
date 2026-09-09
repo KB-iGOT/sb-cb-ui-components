@@ -191,10 +191,16 @@ export class ViewFinalCbpPlanComponent {
               const behavioralSet = new Set<string>();
               const behavioralSetForProficiencyLevel = [];
               const behavioralSetForDeliveryMode = [];
+              const behavioralSetForProficiencyLevelRationale = [];
+              const behavioralSetForDeliveryModeRationale = [];
               const functionalSetForProficiencyLevel = [];
+              const functionalSetForDeliveryModeRationale = [];
               const functionalSetForDeliveryMode = [];
+              const functionalSetForProficiencyLevelRationale = [];
               const domainSetForProficiencyLevel = [];
+              const domainSetForDeliveryModeRationale = [];
               const domainSetForDeliveryMode = [];
+              const domainSetForProficiencyLevelRationale = [];
 
               const functionalSet = new Set<string>();
 
@@ -222,6 +228,8 @@ export class ViewFinalCbpPlanComponent {
                   behavioralSet.add(key);
                   behavioralSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                   behavioralSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                  behavioralSetForProficiencyLevelRationale.push(`${c?.proficiency_rationale || ''}`);
+                  behavioralSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                   competenciesObj.behavioral++;
                   
                 }
@@ -231,6 +239,8 @@ export class ViewFinalCbpPlanComponent {
                   functionalSet.add(key);
                   functionalSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                   functionalSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                  functionalSetForProficiencyLevelRationale.push(`${c?.proficiency_rationale || ''}`);
+                  functionalSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                   competenciesObj.functional++;
                 }
 
@@ -238,6 +248,8 @@ export class ViewFinalCbpPlanComponent {
                   domainSet.add(key);
                   domainSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                   domainSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                  domainSetForProficiencyLevelRationale.push(`${c?.proficiency_rationale || ''}`);
+                  domainSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                   competenciesObj.domain++;
                 }
 
@@ -260,10 +272,16 @@ export class ViewFinalCbpPlanComponent {
                 behavioralCompetencies: [...behavioralSet],
                 behavioralSetForProficiencyLevel: [...behavioralSetForProficiencyLevel],
                 behavioralSetForDeliveryMode: [...behavioralSetForDeliveryMode],
+                behavioralSetForProficiencyLevelRationale: [...behavioralSetForProficiencyLevelRationale],
+                behavioralSetForDeliveryModeRationale: [...behavioralSetForDeliveryModeRationale],
                 functionalSetForProficiencyLevel: [...functionalSetForProficiencyLevel],
                 functionalSetForDeliveryMode: [...functionalSetForDeliveryMode],
+                functionalSetForProficiencyLevelRationale: [...functionalSetForProficiencyLevelRationale],
+                functionalSetForDeliveryModeRationale: [...functionalSetForDeliveryModeRationale],
                 domainSetForProficiencyLevel: [...domainSetForProficiencyLevel],
                 domainSetForDeliveryMode: [...domainSetForDeliveryMode],
+                domainSetForProficiencyLevelRationale: [...domainSetForProficiencyLevelRationale],
+                domainSetForDeliveryModeRationale: [...domainSetForDeliveryModeRationale],
                 functionalCompetencies: [...functionalSet],
                 domainCompetencies: [...domainSet],
                 selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
@@ -316,10 +334,16 @@ export class ViewFinalCbpPlanComponent {
               const behavioralSet = new Set<string>();
               const behavioralSetForProficiencyLevel = [];
               const behavioralSetForDeliveryMode = [];
+              const behavioralSetForProficiencyLevelRationale = [];
+              const behavioralSetForDeliveryModeRationale = [];
               const domainSetForProficiencyLevel = [];
               const domainSetForDeliveryMode = [];
+              const domainSetForProficiencyLevelRationale = [];
+              const domainSetForDeliveryModeRationale = [];
               const functionalSetForProficiencyLevel = [];
               const functionalSetForDeliveryMode = [];
+              const functionalSetForProficiencyLevelRationale = [];
+              const functionalSetForDeliveryModeRationale = [];
               const functionalSet = new Set<string>();
               const domainSet = new Set<string>();
 
@@ -345,13 +369,17 @@ export class ViewFinalCbpPlanComponent {
                   behavioralSet.add(key);
                   behavioralSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                   behavioralSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                  behavioralSetForProficiencyLevelRationale.push(`${c?.proficiency_rationale || ''}`);
+                  behavioralSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                   competenciesObj.behavioral++;
                 }
 
                 if (type === 'functional' && !functionalSet.has(key)) {
                   functionalSet.add(key);
                   functionalSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
+                  functionalSetForProficiencyLevelRationale.push(`${c?.proficiency_rationale || ''}`);
                   functionalSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                  functionalSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                   competenciesObj.functional++;
                 }
 
@@ -359,6 +387,8 @@ export class ViewFinalCbpPlanComponent {
                   domainSet.add(key);
                   domainSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                   domainSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                  domainSetForProficiencyLevelRationale.push(`${c?.proficiency_rationale || ''}`);
+                  domainSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                   competenciesObj.domain++;
                 }
 
@@ -381,10 +411,16 @@ export class ViewFinalCbpPlanComponent {
                 behavioralCompetencies: [...behavioralSet],
                 behavioralSetForProficiencyLevel: [...behavioralSetForProficiencyLevel],
                 behavioralSetForDeliveryMode: [...behavioralSetForDeliveryMode],
+                behavioralSetForProficiencyLevelRationale: [...behavioralSetForProficiencyLevelRationale],
+                behavioralSetForDeliveryModeRationale: [...behavioralSetForDeliveryModeRationale],
                 functionalSetForProficiencyLevel: [...functionalSetForProficiencyLevel],
                 functionalSetForDeliveryMode: [...functionalSetForDeliveryMode],
+                functionalSetForProficiencyLevelRationale: [...functionalSetForProficiencyLevelRationale],
+                functionalSetForDeliveryModeRationale: [...functionalSetForDeliveryModeRationale],
                 domainSetForProficiencyLevel: [...domainSetForProficiencyLevel],
                 domainSetForDeliveryMode: [...domainSetForDeliveryMode],
+                domainSetForProficiencyLevelRationale: [...domainSetForProficiencyLevelRationale],
+                domainSetForDeliveryModeRationale: [...domainSetForDeliveryModeRationale],
                 functionalCompetencies: [...functionalSet],
                 domainCompetencies: [...domainSet],
                 selectedCourses: res[i]?.cbp_plans?.at(-1)?.selected_courses || []
@@ -517,11 +553,17 @@ export class ViewFinalCbpPlanComponent {
             const totalSet = new Set<string>();
             const behavioralSet = new Set<string>();
             const behavioralSetForProficiencyLevel = [];
+            const behavioralSetForProficiencyLevelRationale = [];
             const behavioralSetForDeliveryMode = [];
+            const behavioralSetForDeliveryModeRationale = [];
             const functionalSetForProficiencyLevel = [];
+            const functionalSetForProficiencyLevelRationale = [];
             const functionalSetForDeliveryMode = [];
+            const functionalSetForDeliveryModeRationale = [];
             const domainSetForProficiencyLevel = [];
+            const domainSetForProficiencyLevelRationale = [];
             const domainSetForDeliveryMode = [];
+            const domainSetForDeliveryModeRationale = [];
 
             const functionalSet = new Set<string>();
             const domainSet = new Set<string>();
@@ -548,7 +590,9 @@ export class ViewFinalCbpPlanComponent {
                 behavioralSet.add(key);
                 behavioralSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                 behavioralSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
-                
+                behavioralSetForProficiencyLevelRationale.push(`${c?.proficiency_level_rationale || ''}`);
+                behavioralSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
+
                 competenciesObj.behavioral++;
               }
 
@@ -557,6 +601,8 @@ export class ViewFinalCbpPlanComponent {
                 functionalSet.add(key);
                 functionalSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                 functionalSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                functionalSetForProficiencyLevelRationale.push(`${c?.proficiency_level_rationale || ''}`);
+                functionalSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                 competenciesObj.functional++;
               }
 
@@ -564,6 +610,8 @@ export class ViewFinalCbpPlanComponent {
                 domainSet.add(key);
                 domainSetForProficiencyLevel.push(`${c?.proficiency_level || ''}`);
                 domainSetForDeliveryMode.push(`${c?.delivery_mode || ''}`);
+                domainSetForProficiencyLevelRationale.push(`${c?.proficiency_level_rationale || ''}`);
+                domainSetForDeliveryModeRationale.push(`${c?.delivery_mode_rationale || ''}`);
                 competenciesObj.domain++;
               }
 
@@ -587,6 +635,12 @@ export class ViewFinalCbpPlanComponent {
               functionalCompetencies: [...functionalSet],
               behavioralSetForProficiencyLevel: [...behavioralSetForProficiencyLevel],
               behavioralSetForDeliveryMode: [...behavioralSetForDeliveryMode],
+              behavioralSetForProficiencyLevelRationale: [...behavioralSetForProficiencyLevelRationale],
+              behavioralSetForDeliveryModeRationale: [...behavioralSetForDeliveryModeRationale],
+              functionalSetForProficiencyLevelRationale: [...functionalSetForProficiencyLevelRationale],
+              functionalSetForDeliveryModeRationale: [...functionalSetForDeliveryModeRationale],
+              domainSetForProficiencyLevelRationale: [...domainSetForProficiencyLevelRationale],
+              domainSetForDeliveryModeRationale: [...domainSetForDeliveryModeRationale],
               functionalSetForProficiencyLevel: [...functionalSetForProficiencyLevel],
               functionalSetForDeliveryMode: [...functionalSetForDeliveryMode],
               domainSetForProficiencyLevel: [...domainSetForProficiencyLevel],
