@@ -201,7 +201,7 @@
 }
 
 .toc-content {
-  max-width: 792px;
+  max-width: 55%;
   width: 100%;
 }
 
@@ -272,9 +272,9 @@
 
   .right-content {
 
-    position: absolute;
+    position: relative !important;
     z-index: 10;
-    top: 132px;
+    top: -140px;
     padding-bottom: 1rem;
   }
 
