@@ -1,7 +1,14 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, signal, WritableSignal } from "@angular/core";
 import { Observable } from "rxjs";
-import { IUserGroupRequest, NsAccessControlConfig } from "../_models/access-control.model";
+import {
+  IReusableUserGroupReadResponse,
+  IReusableUserGroupRequest,
+  IReusableUserGroupSearchRequest,
+  IReusableUserGroupSearchResponse,
+  IUserGroupRequest,
+  NsAccessControlConfig
+} from "../_models/access-control.model";
 import { toNumber } from "lodash";
 
 const PAGINATION_LIMIT = 100;
@@ -15,6 +22,10 @@ const ENDPOINTS = {
   DESIGNATION_LIST: "/apis/proxies/v8/designation/search",
   SEARCH_V4: "/apis/proxies/v8/sunbirdigot/v4/search",
   CREATE_USERGROUPS_CONTROL: "/apis/proxies/v8/accessSettings/v1/upsert",
+  CREATE_REUSABLE_USER_GROUP: "/apis/proxies/v8/usergroup/v1/create",
+  UPDATE_REUSABLE_USER_GROUP: "/apis/proxies/v8/usergroup/v1/update",
+  SEARCH_REUSABLE_USER_GROUPS: "/apis/proxies/v8/usergroup/v1/search",
+  READ_REUSABLE_USER_GROUP: (id: string) => `/apis/proxies/v8/usergroup/v1/read/${id}`,
   GET_ACCESS_CONTROL: (id: string) => `/apis/proxies/v8/accessSettings/read/${id}`,
   ACTION_CONTENT_V3: `apis/proxies/v8/action/content/v3/`,
   PRIVATE_CONTENT_V4: `apis/proxies/v8/private/content/v4/`,
@@ -34,7 +45,7 @@ export class AccessControlService {
   holdServiceCadrebatch: WritableSignal<{
     service: { id: string; name: string }[];
     batch: number[];
-    cadre: { id: string; name: string }[];
+    cadre: { id: string; name: string }[];  
   }>;
   customesFieldData: WritableSignal<any[]> = signal([]);
   // Organisations of the logged in L0 MDO hierarchy (L0 -> L10), read from the org hierarchy framework
@@ -299,6 +310,22 @@ export class AccessControlService {
 
   applyUserGroupAccessControl(request: IUserGroupRequest): Observable<any> {
     return this.http.put<any>(ENDPOINTS.CREATE_USERGROUPS_CONTROL, request);
+  }
+
+  createReusableUserGroup(request: IReusableUserGroupRequest): Observable<any> {
+    return this.http.post<any>(ENDPOINTS.CREATE_REUSABLE_USER_GROUP, request);
+  }
+
+  updateReusableUserGroup(request: IReusableUserGroupRequest): Observable<any> {
+    return this.http.patch<any>(ENDPOINTS.UPDATE_REUSABLE_USER_GROUP, request);
+  }
+
+  searchReusableUserGroups(request: IReusableUserGroupSearchRequest): Observable<IReusableUserGroupSearchResponse> {
+    return this.http.post<IReusableUserGroupSearchResponse>(ENDPOINTS.SEARCH_REUSABLE_USER_GROUPS, { request });
+  }
+
+  fetchReusableUserGroup(userGroupId: string): Observable<IReusableUserGroupReadResponse> {
+    return this.http.get<IReusableUserGroupReadResponse>(ENDPOINTS.READ_REUSABLE_USER_GROUP(userGroupId));
   }
 
   fetchUserGroupAccessControl(id: string): Observable<any> {

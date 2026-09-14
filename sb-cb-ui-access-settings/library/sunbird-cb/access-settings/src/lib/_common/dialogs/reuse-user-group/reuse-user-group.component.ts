@@ -1,0 +1,166 @@
+import { Component, DestroyRef, OnInit, computed, inject, signal } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { Subject } from "rxjs";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { AccessControlService } from "../../../_services/access-control.service";
+import { IReusableUserGroupResult, NsAccessControlConfig } from "../../../_models/access-control.model";
+import { MINISTRY_OR_STATE_CRITERIA_KEY } from "../../../_constants/app.constants";
+
+const PAGE_SIZE = 5;
+const LOAD_LIMIT = 100;
+const SEARCH_DEBOUNCE_MS = 300;
+const SORT_BY = "updateddate";
+const SORT_ORDER = "desc";
+
+const CRITERIA_LABELS: { [key: string]: string } = {
+  [NsAccessControlConfig.SelectionType.Organizations]: "Organisation",
+  [MINISTRY_OR_STATE_CRITERIA_KEY]: "Organisation",
+  [NsAccessControlConfig.SelectionType.Users]: "User",
+  [NsAccessControlConfig.SelectionType.Group]: "Group",
+  [NsAccessControlConfig.SelectionType.Designation]: "Designation",
+  [NsAccessControlConfig.SelectionType.VerificationStatus]: "Verification status",
+  [NsAccessControlConfig.SelectionType.Cadre]: "Cadre",
+  [NsAccessControlConfig.SelectionType.Service]: "Service",
+  [NsAccessControlConfig.SelectionType.Batch]: "Batch",
+  [NsAccessControlConfig.SelectionType.CentralDeputation]: "Deputation flag"
+};
+
+export interface IReuseUserGroupRow {
+  id: string;
+  name: string;
+  owner: string;
+  updatedOn: string;
+  conditions: string[];
+  searchText: string;
+}
+
+@Component({
+  selector: "sb-uic-reuse-user-group",
+  templateUrl: "./reuse-user-group.component.html",
+  styleUrls: ["./reuse-user-group.component.scss"],
+  standalone: false
+})
+export class ReuseUserGroupComponent implements OnInit {
+  private readonly dialogRef = inject<MatDialogRef<ReuseUserGroupComponent>>(MatDialogRef);
+  private readonly accessControlService = inject(AccessControlService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly searchInput = new Subject<string>();
+
+  readonly data = inject<{ optionsEntity?: NsAccessControlConfig.IOptionsEntity[] }>(MAT_DIALOG_DATA);
+
+  readonly displayedColumns = ["select", "name", "conditions", "owner"];
+
+  readonly isLoading = signal(false);
+  readonly hasLoadFailed = signal(false);
+  readonly groups = signal<IReuseUserGroupRow[]>([]);
+  readonly totalCount = signal(0);
+  readonly searchKey = signal("");
+  readonly currentPage = signal(1);
+  readonly pageSize = signal(PAGE_SIZE);
+  readonly selectedGroupId = signal("");
+
+  readonly filteredGroups = computed(() => {
+    const query = this.searchKey();
+    const groups = this.groups();
+    return query ? groups.filter(group => group.searchText.includes(query)) : groups;
+  });
+
+  readonly lastPage = computed(() => Math.max(1, Math.ceil(this.filteredGroups().length / this.pageSize())));
+
+  readonly pagedGroups = computed(() => {
+    const page = Math.min(this.currentPage(), this.lastPage());
+    const start = (page - 1) * this.pageSize();
+    return this.filteredGroups().slice(start, start + this.pageSize());
+  });
+
+  readonly hasMoreThanLoaded = computed(() => this.totalCount() > this.groups().length);
+  readonly isPaginationVisible = computed(() => this.filteredGroups().length > this.pageSize());
+
+  ngOnInit(): void {
+    this.searchInput.pipe(debounceTime(SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(value => {
+      this.searchKey.set(value);
+      this.currentPage.set(1);
+    });
+
+    this.fetchUserGroups();
+  }
+
+  fetchUserGroups(): void {
+    this.isLoading.set(true);
+    this.hasLoadFailed.set(false);
+    this.accessControlService
+      .searchReusableUserGroups({ filters: {}, pageSize: LOAD_LIMIT, pageNumber: 0, sortBy: SORT_BY, sortOrder: SORT_ORDER })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: response => {
+          this.groups.set((response?.result?.content || []).map((group: IReusableUserGroupResult) => this.toRow(group)));
+          this.totalCount.set(response?.result?.count || this.groups().length);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.groups.set([]);
+          this.totalCount.set(0);
+          this.hasLoadFailed.set(true);
+          this.isLoading.set(false);
+        }
+      });
+  }
+
+  onSearch(value: string): void {
+    this.searchInput.next((value || "").trim().toLowerCase());
+  }
+
+  onPageChange(event: { currentPage: number; limit: number }): void {
+    this.currentPage.set(event?.currentPage || 1);
+    this.pageSize.set(event?.limit || PAGE_SIZE);
+  }
+
+  selectGroup(group: IReuseUserGroupRow): void {
+    this.selectedGroupId.set(group?.id);
+  }
+
+  cancel(): void {
+    this.dialogRef.close({ action: NsAccessControlConfig.IActions.Reject });
+  }
+
+  apply(): void {
+    const group = this.groups().find(item => item.id === this.selectedGroupId());
+    if (!group) {
+      return;
+    }
+    this.dialogRef.close({ action: NsAccessControlConfig.IActions.Confirm, userGroup: group });
+  }
+
+  private toRow(group: IReusableUserGroupResult): IReuseUserGroupRow {
+    const conditions = (group?.criteria || []).map(entry => this.toConditionLabel(entry)).filter(Boolean) as string[];
+    return {
+      id: group?.usergroupid,
+      name: group?.usergroupname,
+      owner: group?.createdby || "",
+      updatedOn: group?.updateddate || group?.createddate || "",
+      conditions,
+      searchText: [group?.usergroupname, ...conditions].join(" ").toLowerCase()
+    };
+  }
+
+  private toConditionLabel(entry: any): string {
+    const criteriaKey = entry?.criteriaKey || Object.keys(entry || {})[0];
+    if (!criteriaKey) {
+      return "";
+    }
+    const criteriaValue = entry?.criteriaKey ? entry?.criteriaValue : entry[criteriaKey];
+    const count = Array.isArray(criteriaValue) ? criteriaValue.length : criteriaValue ? 1 : 0;
+    if (!count) {
+      return "";
+    }
+    const label = this.entityLabel(criteriaKey);
+    return count > 1 ? `${label} is any of ${count}` : `${label} is 1`;
+  }
+
+  private entityLabel(criteriaKey: string): string {
+    const option = (this.data?.optionsEntity || []).find(item => item?.value === criteriaKey);
+    return option?.label || CRITERIA_LABELS[criteriaKey] || criteriaKey;
+  }
+}

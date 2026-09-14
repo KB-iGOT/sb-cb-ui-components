@@ -1,8 +1,8 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, signal } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 // import { Router } from "@angular/router";
 import { InviteUsersComponent } from "../dialogs/invite-users/invite-users.component";
-import { IUserGroupRequest, NsAccessControlConfig } from "../../_models/access-control.model";
+import { IReusableUserGroupRequest, IUserGroupRequest, NsAccessControlConfig } from "../../_models/access-control.model";
 import { FormBuilder, FormGroup, FormArray, Validators } from "@angular/forms";
 import { AccessControlService } from "../../_services/access-control.service";
 import { EntitySelectionsComponent } from "../dialogs/entity-selections/entity-selections.component";
@@ -12,6 +12,8 @@ import { SnackbarComponent } from "../../components/snackbar/snackbar.component"
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ConfirmDialogComponent } from "../dialogs/confirm-dialog/confirm-dialog.component";
 import { AccessControlGuideComponent } from "../dialogs/access-control-guide/access-control-guide.component";
+import { SaveUserGroupComponent } from "../dialogs/save-user-group/save-user-group.component";
+import { ReuseUserGroupComponent } from "../dialogs/reuse-user-group/reuse-user-group.component";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatRadioChange } from "@angular/material/radio";
@@ -30,7 +32,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   @Input() content: any;
   @Input() tempAccessControl: any;
 
-  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string }> = new EventEmitter();
+  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string; action?: string }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
   @Output() sendForCQF: EventEmitter<boolean> = new EventEmitter();
 
@@ -59,9 +61,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   isSaveFltrBtnDisabled = true;
   isAddUserGroupBtnDisabled = false;
   isSaving = false;
+  isSavingReusableUserGroup = false;
+  isApplyingSavedUserGroup = false;
   userCount: any = {};
 
   initialUserGroupValue: any;
+
+  REUSABLE_USER_GROUP = "reusable-user-groups";
 
   canShowAccessControlTypeRadio = true;
   shouldShowVisibilityToggle = true;
@@ -2235,5 +2241,194 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     } else {
       this.applyAccessControlValue(true, true);
     }
+  }
+
+  saveReusableUserGroups(): void {
+    const dialogRef = this.dialog.open(SaveUserGroupComponent, {
+      width: "480px",
+      data: { userGroupName: this.userGroup?.value[0]?.name },
+      panelClass: "save-user-group-dialog"
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: any) => {
+      if (result?.action !== NsAccessControlConfig.IActions.Confirm) {
+        return;
+      }
+      this.userGroup?.at(0)?.get("name")?.setValue(result?.userGroupName);
+
+      const requestPayload = await this.processRequestCreation();
+      const criteria = requestPayload?.accessControl?.userGroups?.[0]?.userGroupCriteriaList;
+
+      if (!criteria?.length) {
+        this.callSnackbar("Please add at least one condition with a selection.", "error");
+        return;
+      }
+
+      const payload: IReusableUserGroupRequest = {
+        request: {
+          userGroupName: result?.userGroupName,
+          criteria: criteria
+        }
+      };
+      if(this.config?.context?.userGroupId) {
+        payload.request.userGroupId = this.config?.context?.userGroupId;
+        this.updateUserGroup(payload, );
+      } else {
+        this.createUserGroup(payload);
+      }
+    });
+  }
+
+  createUserGroup(payload: IReusableUserGroupRequest): void {
+    this.isSavingReusableUserGroup = true;
+    this.accessControlService
+      .createReusableUserGroup(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          if (response?.result) {
+            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "CREATED" });
+            this.callSnackbar("User group saved successfully", "success");
+          } else {
+            this.callSnackbar("Could not save the user group, Please try again.", "error");
+          }
+          this.isSavingReusableUserGroup = false;
+        },
+        error: () => {
+          this.callSnackbar("Could not save the user group, Please try again.", "error");
+          this.isSavingReusableUserGroup = false;
+        }
+      });
+  }
+
+  updateUserGroup(payload: IReusableUserGroupRequest): void {
+    this.isSavingReusableUserGroup = true;
+    this.accessControlService
+      .updateReusableUserGroup(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          if (response?.result) {
+            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "UPDATED" });
+            this.callSnackbar("User group updated successfully", "success");
+          } else {
+            this.callSnackbar("Could not update the user group, Please try again.", "error");
+          }
+          this.isSavingReusableUserGroup = false;
+        },
+        error: () => {
+          this.callSnackbar("Could not update the user group, Please try again.", "error");
+          this.isSavingReusableUserGroup = false;
+        }
+      });
+  }
+
+  get mdoContentHasValue(): boolean {
+    return !!(this.mdoContent && Object.keys(this.mdoContent).length > 0);
+  }
+
+  /**
+   * Lists the saved (reusable) user groups and applies the selected one as a new OR group.
+   * The saved group itself is never changed by this.
+   */
+  reuseSavedUserGroup(): void {
+    const dialogRef = this.dialog.open(ReuseUserGroupComponent, {
+      width: "860px",
+      maxWidth: "95vw",
+      autoFocus: false,
+      data: { optionsEntity: this.accessControlCriteriaSelection?.optionsEntity },
+      panelClass: "reuse-user-group-dialog"
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result?.action !== NsAccessControlConfig.IActions.Confirm || !result?.userGroup?.id) {
+        return;
+      }
+      this.applySavedUserGroup(result.userGroup);
+    });
+  }
+
+  private applySavedUserGroup(savedUserGroup: { id: string; name: string }): void {
+    this.isApplyingSavedUserGroup = true;
+    this.accessControlService
+      .fetchReusableUserGroup(savedUserGroup.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          const groupName = response?.result?.usergroupname || savedUserGroup.name;
+          const isAdded = this.addUserGroupFromCriteria(groupName, response?.result?.criteria || []);
+          if (isAdded) {
+            // Sends the updated user groups out the same way every other change does
+            this.applyAccessControlValue(true, false);
+            this.callSnackbar(`"${groupName}" added as a new user group`, "success");
+          } else {
+            this.callSnackbar("This saved user group has no condition that can be applied here.", "error");
+          }
+          this.isApplyingSavedUserGroup = false;
+        },
+        error: () => {
+          this.callSnackbar("Could not apply the saved user group, Please try again.", "error");
+          this.isApplyingSavedUserGroup = false;
+        }
+      });
+  }
+
+  private addUserGroupFromCriteria(groupName: string, criteria: any[]): boolean {
+    const conditions = this.fb.array([]) as FormArray;
+
+    criteria.forEach((entry: any) => {
+      const { criteriaKey, criteriaValue } = this.toCriteriaPair(entry);
+      if (!criteriaKey || !criteriaValue?.length) {
+        return;
+      }
+
+      const isOrganisationCriteria =
+        criteriaKey === NsAccessControlConfig.SelectionType.Organizations || criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY;
+      // The organisation condition is not offered to a MDO working within its own organisation
+      if (isOrganisationCriteria && !this.isCCA && !this.canSelectOrgHierarchy) {
+        return;
+      }
+
+      const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
+
+      if (criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
+        condition.patchValue({
+          entity: NsAccessControlConfig.SelectionType.Organizations,
+          selections: this.getMinistryOrStateSelections(criteriaValue)
+        });
+      } else if (criteriaKey === NsAccessControlConfig.SelectionType.Batch) {
+        condition.patchValue({ entity: criteriaKey, selections: criteriaValue.map((batch: any) => Number(batch)) });
+      } else {
+        condition.patchValue({ entity: criteriaKey, selections: criteriaValue });
+      }
+
+      conditions.push(condition);
+    });
+
+    if (!conditions.length) {
+      return false;
+    }
+
+    this.userGroup.push(
+      this.fb.group({
+        id: [uuidv4()],
+        name: [groupName],
+        description: [`Description for ${groupName}`],
+        conditions: conditions,
+        isUserGroupDisabled: [false],
+        isAddConditionDisabled: [false]
+      })
+    );
+
+    const userGroupIndex = this.userGroup.length - 1;
+    this.processDisableAddConditionOnClose(userGroupIndex);
+    this.calculateUserCountForUserGroup(userGroupIndex);
+    return true;
+  }
+
+  private toCriteriaPair(entry: any): { criteriaKey: string; criteriaValue: any[] } {
+    const criteriaKey = entry?.criteriaKey || Object.keys(entry || {})[0] || "";
+    const criteriaValue = entry?.criteriaKey ? entry?.criteriaValue : entry?.[criteriaKey];
+    return { criteriaKey, criteriaValue: Array.isArray(criteriaValue) ? criteriaValue : criteriaValue ? [criteriaValue] : [] };
   }
 }
