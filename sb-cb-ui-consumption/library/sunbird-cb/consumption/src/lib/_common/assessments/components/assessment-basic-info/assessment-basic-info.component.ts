@@ -21,8 +21,7 @@ const COMPREHENSIVE_MAX_RETAKE_DIGITS = 3
  * both are here so the switch needs no change on this side when the backend takes it.
  */
 const COMPREHENSIVE_COURSE_CATEGORIES: string[] = [
-  NsAssessment.EAssessmentCourseCategory.STANDALONE_ASSESSMENT,
-  NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT,
+  NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT
 ]
 
 @Component({
