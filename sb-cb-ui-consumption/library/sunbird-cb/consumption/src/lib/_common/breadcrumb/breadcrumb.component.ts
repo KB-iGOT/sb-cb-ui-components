@@ -4,6 +4,8 @@ import { MatIconModule } from '@angular/material/icon';
 
 export interface IBreadcrumbItem {
   url?: string;
+  /** Query params for `url`, for trails whose ancestors are one route filtered several ways. */
+  queryParams?: Record<string, any>;
   title: string;
   icon?: string;
 }
