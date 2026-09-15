@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatRadioModule } from '@angular/material/radio'
 import { MatInputModule } from '@angular/material/input'
 import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatSelectModule } from '@angular/material/select'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { MatCheckboxModule } from '@angular/material/checkbox'
@@ -55,6 +56,7 @@ import { BulkUploadAllTypeQuestionComponent } from './components/bulk-upload-all
     MatRadioModule,
     MatInputModule,
     MatFormFieldModule,
+    MatAutocompleteModule,
     MatSelectModule,
     MatTooltipModule,
     MatCheckboxModule,

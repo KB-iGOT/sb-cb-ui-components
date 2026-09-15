@@ -12,6 +12,18 @@ const CQF_MAX_SECTIONS = 15
 const CQF_SECTION_TOTAL_QUESTIONS = 200
 const CQF_MINIMUM_PASS_PERCENTAGE = 70
 const CQF_NEGATIVE_MARKING_PERCENTAGE = '0%'
+/** A comprehensive assessment takes the re-attempt count typed in, up to three digits. */
+const COMPREHENSIVE_MAX_RETAKE_ATTEMPTS = 999
+const COMPREHENSIVE_MAX_RETAKE_DIGITS = 3
+/**
+ * Course categories authored as a comprehensive assessment. The content platform has no
+ * `Comprehensive Assessment` category yet, so they are created as `Standalone Assessment`;
+ * both are here so the switch needs no change on this side when the backend takes it.
+ */
+const COMPREHENSIVE_COURSE_CATEGORIES: string[] = [
+  NsAssessment.EAssessmentCourseCategory.STANDALONE_ASSESSMENT,
+  NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT,
+]
 
 @Component({
     selector: 'sb-uic-assessment-basic-info',
@@ -47,7 +59,11 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   isFinalAssessment: boolean = false
   isPracticeAssessment: boolean = false
   isCqfAssessment: boolean = false
+  /** A comprehensive assessment: several settings are fixed by the preset, not authored. */
+  isComprehensiveAssessment: boolean = false
   showCoolOffPeriod: boolean = false
+  maxRetakeAttempts = COMPREHENSIVE_MAX_RETAKE_ATTEMPTS
+  maxRetakeDigits = COMPREHENSIVE_MAX_RETAKE_DIGITS
   // Seeds the CQF rich text editor - the authored markup lives in the description control.
   instructionsHtml = ''
   private showTimerSubscription?: Subscription
@@ -90,9 +106,19 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     if (this.config && this.config?.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.CQF_ASSESSMENT) {
       this.isCqfAssessment = true
     }
+    // The primary category of a comprehensive assessment is `Course Assessment` like any
+    // other, so only the course category tells it apart. Only a caller that sets one is
+    // affected, which is why every other authoring screen is untouched by this.
+    if (this.config && COMPREHENSIVE_COURSE_CATEGORIES.includes(this.config?.courseCategory)) {
+      this.isComprehensiveAssessment = true
+    }
 
     if (this.isCqfAssessment) {
       this.applyCqfDefaults()
+    }
+
+    if (this.isComprehensiveAssessment) {
+      this.applyComprehensiveDefaults()
     }
 
     if (this.config && this.config.identifier) {
@@ -137,6 +163,56 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       minimumPassPercentage: CQF_MINIMUM_PASS_PERCENTAGE,
       negativeMarkingPercentage: CQF_NEGATIVE_MARKING_PERCENTAGE
     }, { emitEvent: false })
+  }
+
+  /**
+   * A comprehensive assessment is always a basic assessment scored on an overall cutoff, so
+   * neither is offered to the author and both are pinned here. The title is the one the
+   * assessment was created with, seeded so it does not have to be typed twice — a saved
+   * name overrides it, the same way the CQF passing percentage is only seeded.
+   */
+  applyComprehensiveDefaults(): void {
+    const defaults: any = {
+      assessmentType: 'basic',
+      scoreCutoffType: 'AssessmentLevel',
+    }
+    const name = this.config && this.config.name
+    if (name && !this.assessmentForm.get('name')?.value) {
+      defaults.name = name
+    }
+    this.assessmentForm.patchValue(defaults, { emitEvent: false })
+  }
+
+  /**
+   * The re-attempt count is typed into a text field, because a number field cannot carry the
+   * autocomplete and still lets `e`, `+` and `.` through in most browsers. So the three ways
+   * a character can arrive are each turned away: the keypress, a paste, and anything that
+   * reaches the field by some other route — a drag and drop, or an autofill.
+   */
+  onRetakeAttemptsKeypress(event: KeyboardEvent): void {
+    // Only the keys that would put a character in the field are turned away. Enter, Tab and
+    // the rest carry longer names, and a shortcut like Ctrl+V is left to the paste handler.
+    const isCharacter = !!event.key && event.key.length === 1
+    if (isCharacter && !event.ctrlKey && !event.metaKey && !/^\d$/.test(event.key)) {
+      event.preventDefault()
+    }
+  }
+
+  onRetakeAttemptsPaste(event: ClipboardEvent): void {
+    const pasted = event.clipboardData ? event.clipboardData.getData('text') : ''
+    if (!/^\d+$/.test(pasted)) {
+      event.preventDefault()
+    }
+  }
+
+  /** The last word on what the field holds, whatever route the text arrived by. */
+  onRetakeAttemptsInput(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const digits = (input.value || '').replace(/\D/g, '').slice(0, COMPREHENSIVE_MAX_RETAKE_DIGITS)
+    if (input.value !== digits) {
+      input.value = digits
+    }
+    this.assessmentForm.get('maxAssessmentRetakeAttempts')?.setValue(digits === '' ? null : Number(digits))
   }
 
   get maxSections(): number {
@@ -443,7 +519,16 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
     // maxAssessmentRetakeAttempts validator - only required for Final Assessment
     if (this.isFinalAssessment) {
-      maxAssessmentRetakeAttempts?.setValidators([Validators.required])
+      // A comprehensive assessment takes the count typed in rather than picked from a list,
+      // so it is bounded here instead of by the options offered.
+      maxAssessmentRetakeAttempts?.setValidators(this.isComprehensiveAssessment
+        ? [
+          Validators.required,
+          Validators.pattern(/^\d{1,3}$/),
+          Validators.min(0),
+          Validators.max(COMPREHENSIVE_MAX_RETAKE_ATTEMPTS),
+        ]
+        : [Validators.required])
     } else {
       maxAssessmentRetakeAttempts?.clearValidators()
     }
