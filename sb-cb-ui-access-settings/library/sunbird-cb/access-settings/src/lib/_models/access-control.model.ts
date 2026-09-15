@@ -8,7 +8,11 @@ export namespace NsAccessControlConfig {
     userConfig: { [key: string]: any; userRoles: any; org?: any };
     content: any;
     application: string;
-    mdoContent: any
+    mdoContent: any;
+    context: {
+      type: string;
+      userGroupId?: string;
+    };
   }
   export interface IAccessControlCriteriaSelection {
     optionsEntity: IOptionsEntity[];
@@ -134,6 +138,47 @@ export interface IUserGroupRequest {
       }[];
     }[];
   };
+}
+
+export interface IReusableUserGroupRequest {
+  request: {
+    userGroupName: string;
+    criteria: {
+      criteriaKey: string;
+      criteriaValue: string[];
+    }[];
+    userGroupId?: string;
+  };
+}
+
+export interface IReusableUserGroupSearchRequest {
+  filters: { [key: string]: any };
+  pageSize: number;
+  pageNumber: number;
+  sortBy: string;
+  sortOrder: string;
+}
+
+export interface IReusableUserGroupResult {
+  usergroupid: string;
+  usergroupname: string;
+  criteria?: ({ criteriaKey: string; criteriaValue: string[] } | { [key: string]: string[] })[];
+  orgid?: string;
+  status?: string;
+  createdby?: string;
+  updatedby?: string;
+  createddate?: string;
+  updateddate?: string;
+}
+
+export interface IReusableUserGroupSearchResponse {
+  responseCode?: string;
+  result?: { count?: number; content?: IReusableUserGroupResult[] };
+}
+
+export interface IReusableUserGroupReadResponse {
+  responseCode?: string;
+  result?: IReusableUserGroupResult;
 }
 
 export interface IVisiblilityOnOff {
