@@ -215,6 +215,17 @@
         <label class="field-label required">What is the number of questions to be displayed for the assessment?</label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput type="number" formControlName="maxQuestions" min="1" placeholder="0">
+          <mat-error *ngIf="currentBasicSectionGroup?.get('maxQuestions')?.hasError('required')">
+            This field is required
+          </mat-error>
+          <mat-error *ngIf="currentBasicSectionGroup?.get('maxQuestions')?.hasError('min')">
+            Value must be 1 or greater
+          </mat-error>
+          <mat-error *ngIf="currentBasicSectionGroup?.get('maxQuestions')?.hasError('displayedExceedsTotal')">
+            Cannot display more than the
+            {{ currentBasicSectionGroup?.get('maxQuestions')?.getError('displayedExceedsTotal')?.total }}
+            questions being added
+          </mat-error>
         </mat-form-field>
       </div>
 
@@ -314,6 +325,11 @@
           </mat-error>
           <mat-error *ngIf="basicAssessmentForm?.get('maxQuestions')?.hasError('min')">
             Value must be 1 or greater
+          </mat-error>
+          <mat-error *ngIf="basicAssessmentForm?.get('maxQuestions')?.hasError('displayedExceedsTotal')">
+            Cannot display more than the
+            {{ basicAssessmentForm?.get('maxQuestions')?.getError('displayedExceedsTotal')?.total }}
+            questions being added
           </mat-error>
         </mat-form-field>
       </div>

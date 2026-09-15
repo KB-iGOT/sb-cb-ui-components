@@ -1,7 +1,7 @@
 <div class="assessment-basic-info" *ngIf="assessmentForm">
   <form [formGroup]="assessmentForm">
-    <!-- Assessment Type -->
-    <div class="form-section" *ngIf="!isCqfAssessment">
+    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered. -->
+    <div class="form-section" *ngIf="!isCqfAssessment && !isComprehensiveAssessment">
       <mat-radio-group formControlName="assessmentType" class="assessment-type-group flex flex-middle gap-4">
         <mat-radio-button value="basic">Basic Assessment</mat-radio-button>
         <mat-radio-button value="advanced">Advanced Assessment</mat-radio-button>
@@ -56,8 +56,10 @@
       </ng-container>
     </ng-container>
 
-    <!-- Type of Score Cutoffs -->
-    <ng-container *ngIf="isFinalAssessment && assessmentForm.get('assessmentType')?.value === 'basic'">
+    <!-- Type of Score Cutoffs. A comprehensive assessment is always scored on the overall
+         cutoff, so it is not offered. -->
+    <ng-container
+      *ngIf="isFinalAssessment && !isComprehensiveAssessment && assessmentForm.get('assessmentType')?.value === 'basic'">
       <div class="form-section">
         <label class="field-label required">Type of score cutoffs</label>
         <mat-radio-group formControlName="scoreCutoffType" class="score-cutoff-group">
@@ -236,13 +238,35 @@
                     if count is one or more than 1 up to 5 then learner can re-attempt the same test as per entered
                     count by clicking on ‘Re-attempt test’ button given on result page.">info_outline</mat-icon>
           </label>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-select formControlName="maxAssessmentRetakeAttempts" placeholder="Select">
+          <!-- A comprehensive assessment takes the count typed in, the usual ones stay on
+               hand as suggestions. Every other assessment picks from the list. -->
+          <mat-form-field appearance="outline" class="full-width" *ngIf="isComprehensiveAssessment; else reAttemptSelect">
+            <input matInput type="text" inputmode="numeric" [maxlength]="maxRetakeDigits"
+              placeholder="Enter or select" formControlName="maxAssessmentRetakeAttempts"
+              [matAutocomplete]="reAttemptAuto" (keypress)="onRetakeAttemptsKeypress($event)"
+              (input)="onRetakeAttemptsInput($event)" (paste)="onRetakeAttemptsPaste($event)">
+            <mat-autocomplete #reAttemptAuto="matAutocomplete">
               <mat-option *ngFor="let option of reAttemptOptions" [value]="option">{{ option }}</mat-option>
-            </mat-select>
+            </mat-autocomplete>
             <mat-error *ngIf="controls['maxAssessmentRetakeAttempts'].hasError('required')">Number of re-attempts is
               required</mat-error>
+            <mat-error
+              *ngIf="!controls['maxAssessmentRetakeAttempts'].hasError('required') &&
+                (controls['maxAssessmentRetakeAttempts'].hasError('pattern') ||
+                 controls['maxAssessmentRetakeAttempts'].hasError('min') ||
+                 controls['maxAssessmentRetakeAttempts'].hasError('max'))">
+              Enter a number up to {{ maxRetakeAttempts }}</mat-error>
           </mat-form-field>
+
+          <ng-template #reAttemptSelect>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-select formControlName="maxAssessmentRetakeAttempts" placeholder="Select">
+                <mat-option *ngFor="let option of reAttemptOptions" [value]="option">{{ option }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="controls['maxAssessmentRetakeAttempts'].hasError('required')">Number of re-attempts is
+                required</mat-error>
+            </mat-form-field>
+          </ng-template>
         </div>
       </ng-container>
       <ng-container *ngIf="isPracticeAssessment && assessmentForm.get('assessmentType')?.value !== 'advanced'">
