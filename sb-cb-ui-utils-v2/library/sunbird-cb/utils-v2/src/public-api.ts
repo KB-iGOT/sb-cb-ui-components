@@ -130,6 +130,7 @@ export * from './lib/services-new/widget-enroll.service'
 export * from './lib/services-new/data-transfer.service'
 
 export * from './lib/services/domain-conf.service'
+export * from './lib/services/indexed-db.service'
 export * from './lib/services/notifications.service'
 
 // additional pipes

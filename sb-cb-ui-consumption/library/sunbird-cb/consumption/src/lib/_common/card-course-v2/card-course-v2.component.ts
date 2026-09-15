@@ -176,10 +176,8 @@ export class CardCourseV2Component {
 
   readonly cbpStatus = computed<'Completed' | 'Overdue' | 'Upcoming' | null>(() => {
     const plan = this.cbPlan()
-    console.log('cbpStatus plan', plan)
     if (!plan) { return null }
     if (plan.contentStatus === 2) { return 'Completed' }
-    console.log('plan.planDuration', plan.planDuration)
     if (plan.planDuration === 'overdue') { return 'Overdue' }
     if (plan.planDuration === 'upcoming') { return 'Upcoming' }
     return null
