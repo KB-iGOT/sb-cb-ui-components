@@ -151,7 +151,7 @@ export class ContentStripsComponent implements OnInit {
   }
 
   /**
-   * CBP plan data comes from the IndexedDB cache (iGotCbpDB/cbpPlans), not
+   * CBP plan data comes from the IndexedDB cache (iGotAppDB/cbpPlans), not
    * localStorage['cbpData']. watchPlanMap() emits the cached map immediately and again
    * whenever the plan cache for the year is rewritten.
    */
