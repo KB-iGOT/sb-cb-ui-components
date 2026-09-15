@@ -13,6 +13,8 @@
   margin: 0;
   padding: 8px 16px;
   list-style: none;
+  /* A tint against the page ground, which is --surface-primary (white in light mode) on every
+     route. This is the separation the original #e8edf6-on-white design had. */
   background: var(--surface-secondary);
   border-radius: 999px;
 }

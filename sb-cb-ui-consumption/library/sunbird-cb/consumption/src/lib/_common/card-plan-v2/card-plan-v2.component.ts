@@ -104,10 +104,13 @@ export class CardPlanV2Component {
 
   // ── Event handlers ─────────────────────────────────────────────────────────
   /**
-   * Same destination the Training Plans search results use: whoever can edit the plan lands
-   * on the editor, everyone else on the read-only dashboard preview. Kept in step with
-   * TrainingPlansCardComponent.routeTrainingPlanDetails in @sunbird-cb/search-listing so a
-   * plan opens the same way from the home strip as it does from search.
+   * Always the plan detail page (/app/plans/:id), which lists the plan's courses and its
+   * progress — wherever the card is rendered, the home strip included.
+   *
+   * This deliberately does NOT branch to the MDO editor for users who could edit the plan, the
+   * way TrainingPlansCardComponent.routeTrainingPlanDetails does in @sunbird-cb/search-listing:
+   * an editor opening a plan from a learning surface wants to read it, not edit it. The editor
+   * is still reachable from the MDO portal and from search.
    */
   onCardClick(): void {
     const plan = this.plan()
@@ -115,16 +118,7 @@ export class CardPlanV2Component {
       return
     }
     this.emitDetails()
-
-    const canEdit = (this.configSvc.userProfile?.firstName === plan.metadata?.['createdByName']
-      || this.configSvc.userRoles?.has('mdo_leader'))
-      && plan.status?.toLowerCase() !== 'retire'
-
-    const url = canEdit
-      ? `/app/training-plan/update-plan/${plan.identifier}`
-      : `/app/training-plan/preview-plan-for-dashboard/${plan.identifier}`
-
-    this.router.navigate([url])
+    this.router.navigate([`/app/plans/${plan.identifier}`])
   }
 
   emitDetails(): void {
