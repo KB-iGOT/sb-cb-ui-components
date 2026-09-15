@@ -1,0 +1,25 @@
+<div class="dialog-save-user-group p-4">
+  <div class="save-user-group-title mb-4">Save as reusable group</div>
+
+  <div class="mat-full-radius">
+    <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+      <mat-label>User group name</mat-label>
+      <input
+        matInput
+        placeholder="Enter user group name"
+        [value]="userGroupName()"
+        (input)="onNameChange($any($event.target).value)"
+        (keyup.enter)="apply()"
+      />
+    </mat-form-field>
+  </div>
+
+  @if (isErrorVisible()) {
+    <div class="save-user-group-error mt-1">User group name is required</div>
+  }
+
+  <div class="save-user-group-actions flex items-center justify-center gap-4 mt-4">
+    <button mat-flat-button class="mat-btn-outline gap-2 border-radius-4" (click)="cancel()">Cancel</button>
+    <button mat-flat-button class="new-bg-color text-white" [disabled]="isApplyDisabled()" (click)="apply()">Apply</button>
+  </div>
+</div>
