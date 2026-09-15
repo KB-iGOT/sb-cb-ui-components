@@ -157,6 +157,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   routePath = 'overview'
   validPaths = new Set(['overview', 'contents', 'analytics'])
   routerParamSubscription: Subscription | null = null
+  isPublic = false
   initialrouteData: any
   actionBtnStatus = 'wait'
   isRegistrationSupported = false
@@ -2458,9 +2459,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private setupRouterEventSubscription() {
+    this.isPublic = this.router.url.includes('/public/toc')
     this.routerParamSubscription = this.router.events.subscribe((routerEvent: Event) => {
       if (routerEvent instanceof NavigationEnd) {
         this.assignPathAndUpdateBanner(routerEvent.url)
+
+        this.isPublic = routerEvent.url.includes('/public/toc/')
 
         // Check if we're on the TOC/overview page for a Learning Pathway
         const isTocPage = routerEvent.url.includes('/app/toc') ||
