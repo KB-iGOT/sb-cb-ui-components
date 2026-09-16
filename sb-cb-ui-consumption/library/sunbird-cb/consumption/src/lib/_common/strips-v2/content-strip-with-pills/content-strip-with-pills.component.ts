@@ -94,7 +94,7 @@ export class ContentStripWithPillsComponent implements AfterViewInit {
 
   isPillActive(pillKey: string): boolean {
     const active = this.activePillKey() || this.resolvedDefaultPillKey()
-    return active === pillKey
+    return active === pillKey || this.visiblePills()?.length === 1
   }
 
   getActivePill(): PillConfig | undefined {
