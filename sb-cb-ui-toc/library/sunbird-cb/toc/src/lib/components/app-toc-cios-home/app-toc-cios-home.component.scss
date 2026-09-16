@@ -1217,12 +1217,23 @@ ul {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* the pair stacks rather than squeezing the labels when the panel gets narrow */
+    flex-wrap: wrap;
     gap: 16px;
+    width: 100%;
   }
 
   &__btn {
+    /* min-height, not height: a label that wraps on a narrow screen was clipped by the box */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    /* nowrap keeps 'Visit Karma Wallet' on one line - it was breaking and being clipped */
+    white-space: nowrap;
     min-width: 124px;
-    height: 36px;
+    min-height: 36px;
+    height: auto;
     padding: 8px 16px;
     box-sizing: border-box;
     border-radius: 4px;
@@ -1243,5 +1254,33 @@ ul {
     border: 1px solid var(--color-primary-500, #4c1d95);
     background: var(--color-primary-500, #4c1d95);
     color: #fff;
+  }
+
+  /* side by side leaves no room for 'Visit Karma Wallet' on a phone */
+  @media screen and (max-width: 480px) {
+    &__panel {
+      padding: 24px 16px 20px;
+    }
+
+    &__actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      width: 100%;
+    }
+
+    &__btn {
+      width: 100%;
+      min-height: 44px;
+    }
+  }
+
+  /* smallest phones: a taller box, and the label may wrap inside it rather than be clipped */
+  @media screen and (max-width: 400px) {
+    &__btn {
+      white-space: normal;
+      min-height: 48px;
+      padding: 10px 12px;
+    }
   }
 }
