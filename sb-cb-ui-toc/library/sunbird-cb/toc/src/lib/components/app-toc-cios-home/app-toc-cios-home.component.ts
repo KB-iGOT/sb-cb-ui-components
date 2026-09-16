@@ -727,9 +727,13 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return this.enrolStatus === ENROL_STATUS_PENDING
   }
 
-  /* A record with status 0 is not an enrolment - it leaves the course open to enrol again */
+  private get hasEnrolmentRecord(): boolean {
+    return Object.keys(this.userExtCourseEnroll).length > 0
+  }
+
+  /* A record with status 0 is not a confirmed enrolment - only the notice keys off this */
   get isEnrolled(): boolean {
-    return Object.keys(this.userExtCourseEnroll).length > 0 &&
+    return this.hasEnrolmentRecord &&
       this.enrolStatus !== ENROL_STATUS_NONE &&
       !this.isEnrolPending
   }
@@ -769,15 +773,18 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   get showEnroll(): boolean {
-    return !this.isEnrolled &&
+    return !this.hasEnrolmentRecord &&
       !this.isEnrolPending &&
       !this.enrollValidationLoading &&
       this.canEnroll &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }
 
+  /* An in-progress course is already enrolled whatever its status reads, so Redirect keys off
+     the record itself - as it did before - and only a pending enrolment holds it back. */
   get showRedirect(): boolean {
-    return this.isEnrolled &&
+    return this.hasEnrolmentRecord &&
+      !this.isEnrolPending &&
       _.get(this.extContentReadData, 'redirectUrl') &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }
