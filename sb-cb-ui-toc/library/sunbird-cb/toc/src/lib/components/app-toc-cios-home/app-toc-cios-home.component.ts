@@ -70,7 +70,6 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   requiredKarmaCoins = 0
   enrolPending = false
   insufficientCoins = false
-  private coinShortfall = false
   private karmaRedeemContent: any = null
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
@@ -246,10 +245,6 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   enRollToExtCourse(content: any) {
-    if (this.coinShortfall) {
-      this.insufficientCoins = true
-      return
-    }
     const coins = this.readRequiredKarmaCoins(content)
     const popupConfig = _.get(this.config, 'karmaRedeemPopup', {}) || {}
 
@@ -683,19 +678,18 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         (error: any) => {
           const message = error?.error?.params?.msg || 'Unable to validate enrollment eligibility'
           this.enrollValidationLoading = false
-          if (this.isInsufficientCoinsError(error)) {
-            this.coinShortfall = true
-            this.enrollRestrictionMessage = ''
-            this.canEnroll = true
-            return
-          }
-          this.coinShortfall = false
           // Kept on the component so the "Restricted" badge can surface it on hover.
           this.enrollRestrictionMessage = message
+          this.canEnroll = false
+          /* A coin shortfall is spelled out in the popup, which carries the wallet link;
+             the rest keep the snackbar. */
+          if (this.isInsufficientCoinsError(error)) {
+            this.insufficientCoins = true
+            return
+          }
           this.snackBar.open(message, 'X', {
             duration: 10000,
           })
-          this.canEnroll = false
         }
       )
     }
