@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnInit, Optional, ViewChild } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { TranslateService } from '@ngx-translate/core'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { ConfigurationsService, EventService, MultilingualTranslationsService, WidgetContentService, WsEvents } from '@sunbird-cb/utils-v2'
@@ -16,6 +16,19 @@ const KARMA_REDEEM_PAGE_ID = 'app/toc/ext'
 const KARMA_REDEEM_ENV = 'Marketplace'
 const KARMA_REDEEM_CONTINUE = 'redeem-karma-coins-continue'
 const KARMA_REDEEM_CANCEL = 'redeem-karma-coins-cancel'
+
+const KARMA_WALLET_ROUTE = '/app/person-profile/karma-wallet'
+/* what both cios-enroll calls answer with when the balance is short */
+const PAYMENT_REQUIRED = 'PAYMENT_REQUIRED'
+const INSUFFICIENT_COINS = [
+  /insufficient[^.]*karma\s*coins?/i,
+  /enough\s+karma\s*coins?/i,
+  /minimum\s+karma\s*coins?\s+required/i,
+  /not\s+that\s+much\s+karma\s*coins?/i,
+]
+const ENROL_STATUS_PENDING = 3
+const ENROL_STATUS_NONE = 0
+const ENROLLED_NOTICE_WINDOW_MS = 60 * 60 * 1000
 
 @Component({
     selector: 'ws-app-app-toc-cios-home',
@@ -54,9 +67,11 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   fromMDO = false
   karmaRedeemData: any = null
   enrollRestrictionMessage = ''
-  requiredKarmaPoints = 0
+  requiredKarmaCoins = 0
+  enrolPending = false
+  insufficientCoins = false
+  private coinShortfall = false
   private karmaRedeemContent: any = null
-  private karmaPointsRequest: Promise<number> | null = null
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 
@@ -76,6 +91,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
   }
   constructor(private route: ActivatedRoute,
+    private router: Router,
     private commonSvc: CommonMethodsService,
     private translate: TranslateService,
     private configSvc: ConfigurationsService,
@@ -115,8 +131,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         }
       } else {
         this.validateEnrollmentEligibility()
-        this.loadRequiredKarmaPoints(this.extContentReadData)
       }
+      this.requiredKarmaCoins = this.readRequiredKarmaCoins(this.extContentReadData)
 
     })
 
@@ -229,53 +245,38 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return providers.map((provider: any) => provider.name).join(', ')
   }
 
-  async enRollToExtCourse(content: any) {
-    // Awaits the call the page load started, so a quick click cannot enrol before the rule is in.
-    const points = await this.loadRequiredKarmaPoints(content)
+  enRollToExtCourse(content: any) {
+    if (this.coinShortfall) {
+      this.insufficientCoins = true
+      return
+    }
+    const coins = this.readRequiredKarmaCoins(content)
     const popupConfig = _.get(this.config, 'karmaRedeemPopup', {}) || {}
 
-    // Nothing to redeem (0 points) - go straight to consent, no popup.
-    if (points <= 0) {
+    // Nothing to deduct (0 coins) - go straight to consent, no popup.
+    if (coins <= 0) {
       this.openConsentDialog(content)
       return
     }
 
     this.karmaRedeemContent = content
     this.karmaRedeemData = {
-      requiredKarmaPoints: points,
+      requiredKarmaCoins: coins,
       header: _.get(popupConfig, 'popupHeader', ''),
-      message: this.buildKarmaRedeemMessage(popupConfig, points),
+      message: this.buildKarmaRedeemMessage(popupConfig, coins),
       acceptButton: _.get(popupConfig, 'acceptButton', ''),
       cancelButton: _.get(popupConfig, 'cancelButton', ''),
     }
   }
 
-  private loadRequiredKarmaPoints(content: any): Promise<number> {
-    const courseId = _.get(content, 'contentId', '')
-    const partnerId = _.get(content, 'contentPartner.id', '')
-    if (!courseId || !partnerId) {
-      return Promise.resolve(this.requiredKarmaPoints)
-    }
-    if (!this.karmaPointsRequest) {
-      this.karmaPointsRequest = this.certSvc.getKarmaPointsDeductionRule(courseId, partnerId)
-        .toPromise()
-        .then((res: any) => {
-          this.requiredKarmaPoints = Number(_.get(res, 'result.requiredKarmaPoints', 0)) || 0
-          return this.requiredKarmaPoints
-        })
-        .catch(() => {
-          // No rule to apply - treated as nothing to redeem rather than blocking the enrolment.
-          this.requiredKarmaPoints = 0
-          return 0
-        })
-    }
-    return this.karmaPointsRequest
+  private readRequiredKarmaCoins(content: any): number {
+    return Number(_.get(content, 'requiredKarmaCoins', 0)) || 0
   }
 
-  private buildKarmaRedeemMessage(popupConfig: any, points: number): string {
+  private buildKarmaRedeemMessage(popupConfig: any, coins: number): string {
     const template = _.get(popupConfig, 'message', '')
     if (template) {
-      return `${template}`.replace(/\{points\}/g, `${points}`)
+      return `${template}`.replace(/\{coins\}/g, `${coins}`).replace(/\{points\}/g, `${coins}`)
     }
 
     const before = _.get(popupConfig, 'pointsBeforeText', '')
@@ -284,16 +285,11 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       return ''
     }
 
-    return [before, `${points}`, after].filter((part: string) => part).join(' ')
+    return [before, `${coins}`, after].filter((part: string) => part).join(' ')
   }
 
-  /**
-   * There is nothing to redeem at zero coins, so the popup never paints - the enrol path already
-   * skips it, and this keeps a stray or stale karmaRedeemData from putting a '0 Karma Coins' popup
-   * on screen.
-   */
   get showKarmaRedeemDialog(): boolean {
-    return Number(_.get(this.karmaRedeemData, 'requiredKarmaPoints', 0)) > 0
+    return Number(_.get(this.karmaRedeemData, 'requiredKarmaCoins', 0)) > 0
   }
 
   onKarmaRedeemClosed(confirmed: boolean) {
@@ -399,10 +395,39 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       this.contentViewEventForNetCore('enroll')
     } else {
       this.loader.changeLoad.next(false)
-      this.snackBar.open(enrollRes?.error?.params?.msg || 'Unable to enroll to the content', 'X', {
+      const message = enrollRes?.error?.params?.msg
+      if (this.isInsufficientCoinsError(enrollRes)) {
+        this.insufficientCoins = true
+        return
+      }
+      this.snackBar.open(message || 'Unable to enroll to the content', 'X', {
         duration: 10000,
       })
     }
+  }
+
+  /* responseCode first - the wording is only a fallback for a body that carries no code */
+  private isInsufficientCoinsError(err: any): boolean {
+    const body = (err && err.error) || err || {}
+    const code = `${body.responseCode || ''}`.trim().toUpperCase()
+    if (code === PAYMENT_REQUIRED) {
+      return true
+    }
+    return this.isInsufficientCoins(body?.params?.msg)
+  }
+
+  private isInsufficientCoins(message: any): boolean {
+    const text = `${message || ''}`
+    return INSUFFICIENT_COINS.some(pattern => pattern.test(text))
+  }
+
+  closeInsufficientCoins() {
+    this.insufficientCoins = false
+  }
+
+  goToKarmaWallet() {
+    this.insufficientCoins = false
+    this.router.navigate([KARMA_WALLET_ROUTE])
   }
 
   async getUserContentEnroll(contentId: any) {
@@ -411,11 +436,20 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       this.userExtCourseEnroll = enrollRes.result
       this.loader.changeLoad.next(false)
       this.telemetryToCaptureInteract(contentId, 'enroll', 'enrol-content')
+      /* Still being confirmed - say so in the popup instead of claiming it is done */
+      if (Number(enrollRes.result.status) === ENROL_STATUS_PENDING) {
+        this.enrolPending = true
+        return
+      }
       this.snackBar.open('Successfully enrolled in the course.')
     } else {
       this.loader.changeLoad.next(false)
       this.snackBar.open('Unable to get the enrolled details')
     }
+  }
+
+  closeEnrolPending() {
+    this.enrolPending = false
   }
 
   captureRedirectTelemetry(content: any) {
@@ -648,12 +682,19 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         },
         (error: any) => {
           const message = error?.error?.params?.msg || 'Unable to validate enrollment eligibility'
+          this.enrollValidationLoading = false
+          if (this.isInsufficientCoinsError(error)) {
+            this.coinShortfall = true
+            this.enrollRestrictionMessage = ''
+            this.canEnroll = true
+            return
+          }
+          this.coinShortfall = false
           // Kept on the component so the "Restricted" badge can surface it on hover.
           this.enrollRestrictionMessage = message
           this.snackBar.open(message, 'X', {
             duration: 10000,
           })
-          this.enrollValidationLoading = false
           this.canEnroll = false
         }
       )
@@ -676,15 +717,73 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
     return false
   }
+  /* the cost strip above Enroll - nothing to show when the course costs no coins */
+  /* the cost of the course, shown whenever there is one - enrolled or not */
+  get showKarmaCost(): boolean {
+    return this.requiredKarmaCoins > 0
+  }
+
+  private get enrolStatus(): number | null {
+    const status = _.get(this.userExtCourseEnroll, 'status')
+    return status === undefined || status === null ? null : Number(status)
+  }
+
+  /* The provider has taken the request but not confirmed it yet */
+  get isEnrolPending(): boolean {
+    return this.enrolStatus === ENROL_STATUS_PENDING
+  }
+
+  /* A record with status 0 is not an enrolment - it leaves the course open to enrol again */
+  get isEnrolled(): boolean {
+    return Object.keys(this.userExtCourseEnroll).length > 0 &&
+      this.enrolStatus !== ENROL_STATUS_NONE &&
+      !this.isEnrolPending
+  }
+
+  /* Only for the first hour after enrolling; after that the card is just the Redirect button */
+  get showEnrolledNotice(): boolean {
+    if (!this.isEnrolled) {
+      return false
+    }
+    const enrolledAt = this.enrolledAtMs()
+    return enrolledAt > 0 && (Date.now() - enrolledAt) <= ENROLLED_NOTICE_WINDOW_MS
+  }
+
+  private enrolledAtMs(): number {
+    const raw = _.get(this.userExtCourseEnroll, 'enrolled_date')
+    if (!raw) {
+      return 0
+    }
+    if (typeof raw === 'number') {
+      return raw
+    }
+    const text = `${raw}`.trim()
+    if (/^\d+$/.test(text)) {
+      return Number(text)
+    }
+    const direct = Date.parse(text)
+    if (!isNaN(direct)) {
+      return direct
+    }
+    /* 'YYYY-MM-DD HH:mm:ss:SSS+0000' - millis behind a colon is not something Date.parse reads */
+    const normalised = text
+      .replace(' ', 'T')
+      .replace(/:(\d{3})(?=[+\-Z]|$)/, '.$1')
+      .replace(/([+\-]\d{2})(\d{2})$/, '$1:$2')
+    const parsed = Date.parse(normalised)
+    return isNaN(parsed) ? 0 : parsed
+  }
+
   get showEnroll(): boolean {
-    return Object.keys(this.userExtCourseEnroll).length === 0 &&
+    return !this.isEnrolled &&
+      !this.isEnrolPending &&
       !this.enrollValidationLoading &&
       this.canEnroll &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }
 
   get showRedirect(): boolean {
-    return Object.keys(this.userExtCourseEnroll).length > 0 &&
+    return this.isEnrolled &&
       _.get(this.extContentReadData, 'redirectUrl') &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }

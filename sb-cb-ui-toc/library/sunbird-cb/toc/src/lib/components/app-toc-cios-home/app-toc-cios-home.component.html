@@ -165,7 +165,30 @@
     <ng-container *ngIf="!forPreview">
 
         <div *ngIf="isMobile">
+            <div class="ext-toc-cost" *ngIf="showKarmaCost">
+              <span class="ext-toc-cost__label">Available for</span>
+              <span class="ext-toc-cost__value">
+                <img class="ext-toc-cost__icon" src="/assets/icons/karmawallet-v2/RedemKarmaCoin.svg" alt="" aria-hidden="true" />
+                {{ requiredKarmaCoins | number }}
+              </span>
+            </div>
             <div class="flex flex-col gap-4 p-5 border-bottom position-bottom">
+                <div class="ext-enrol-note ext-enrol-note--progress" *ngIf="isEnrolPending">
+                  <div class="ext-enrol-note__head">
+                    <span class="ext-enrol-note__spinner" aria-hidden="true"></span>
+                    <p class="ext-enrol-note__title">Your enrolment is in progress</p>
+                  </div>
+                  <p class="ext-enrol-note__text">Please refresh this page to check the latest status</p>
+                </div>
+                <div class="ext-enrol-note ext-enrol-note--done" *ngIf="showEnrolledNotice">
+                  <div class="ext-enrol-note__head">
+                    <mat-icon class="ext-enrol-note__icon">check_circle</mat-icon>
+                    <p class="ext-enrol-note__title">You&rsquo;re enrolled</p>
+                  </div>
+                  <p class="ext-enrol-note__text">Your enrolment is confirmed. {{ requiredKarmaCoins | number }} KC has been
+                    deducted from your balance.</p>
+                </div>
+
                 <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}'">
                     <div class="flex flex-row justify-end w-full ws-mat-black-text">
                         <span class="mat-body-2  ws-mat-black-text">
@@ -311,7 +334,30 @@
                 </ng-container>
 
                 <ng-container *ngIf="!forPreview">
+                    <div class="ext-toc-cost" *ngIf="showKarmaCost">
+                      <span class="ext-toc-cost__label">Available for</span>
+                      <span class="ext-toc-cost__value">
+                        <img class="ext-toc-cost__icon" src="/assets/icons/karmawallet-v2/RedemKarmaCoin.svg" alt="" aria-hidden="true" />
+                        {{ requiredKarmaCoins | number }}
+                      </span>
+                    </div>
                     <div class="flex flex-col gap-3 p-3 border-bottom">
+                        <div class="ext-enrol-note ext-enrol-note--progress" *ngIf="isEnrolPending">
+                          <div class="ext-enrol-note__head">
+                            <span class="ext-enrol-note__spinner" aria-hidden="true"></span>
+                            <p class="ext-enrol-note__title">Your enrolment is in progress</p>
+                          </div>
+                          <p class="ext-enrol-note__text">Please refresh this page to check the latest status</p>
+                        </div>
+                        <div class="ext-enrol-note ext-enrol-note--done" *ngIf="showEnrolledNotice">
+                          <div class="ext-enrol-note__head">
+                            <mat-icon class="ext-enrol-note__icon">check_circle</mat-icon>
+                            <p class="ext-enrol-note__title">You&rsquo;re enrolled</p>
+                          </div>
+                          <p class="ext-enrol-note__text">Your enrolment is confirmed. {{ requiredKarmaCoins | number }} KC has been
+                            deducted from your balance.</p>
+                        </div>
+
                         <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}'">
                         <div class="flex flex-row justify-end w-full ws-mat-black-text">
                             <span class="mat-body-2  ws-mat-black-text">
@@ -391,6 +437,32 @@
         </div>
     </ng-container>
 </ng-template>
+
+<div class="insufficient-coins" *ngIf="insufficientCoins">
+  <div class="insufficient-coins__backdrop" aria-hidden="true"></div>
+  <div class="insufficient-coins__panel" role="dialog" aria-modal="true" aria-label="Insufficient Karma Coins">
+    <p class="insufficient-coins__title">Insufficient Karma Coins</p>
+    <p class="insufficient-coins__message">You don&rsquo;t have enough Karma Coins to enrol in this course.
+      Visit your Karma Wallet to check your balance</p>
+    <div class="insufficient-coins__actions">
+      <button type="button" class="insufficient-coins__btn insufficient-coins__btn--ghost"
+        (click)="closeInsufficientCoins()">Cancel</button>
+      <button type="button" class="insufficient-coins__btn insufficient-coins__btn--primary"
+        (click)="goToKarmaWallet()">Visit Karma Wallet</button>
+    </div>
+  </div>
+</div>
+
+<div class="enrol-pending" *ngIf="enrolPending">
+  <div class="enrol-pending__backdrop" aria-hidden="true"></div>
+  <div class="enrol-pending__panel" role="dialog" aria-modal="true" aria-label="Enrolment in progress">
+    <span class="enrol-pending__spinner" aria-hidden="true"></span>
+    <p class="enrol-pending__title">Enrolment in progress</p>
+    <p class="enrol-pending__message">We&rsquo;re confirming your enrolment in the course. This might take some time you
+      can close this window and come back to check the status later.</p>
+    <button type="button" class="enrol-pending__btn" (click)="closeEnrolPending()">Close</button>
+  </div>
+</div>
 
 <ws-app-karma-redeem-dialog *ngIf="showKarmaRedeemDialog" [data]="karmaRedeemData"
     (closed)="onKarmaRedeemClosed($event)"></ws-app-karma-redeem-dialog>
