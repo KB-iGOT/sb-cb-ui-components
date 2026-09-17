@@ -27,7 +27,6 @@ const INSUFFICIENT_COINS = [
   /not\s+that\s+much\s+karma\s*coins?/i,
 ]
 const ENROL_STATUS_PENDING = 3
-const ENROL_STATUS_NONE = 0
 const ENROLLED_NOTICE_WINDOW_MS = 60 * 60 * 1000
 
 @Component({
@@ -422,7 +421,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
 
   goToKarmaWallet() {
     this.insufficientCoins = false
-    this.router.navigate([KARMA_WALLET_ROUTE])
+    /* the wallet page opens its convert dialog on this, as long as converting is available */
+    this.router.navigate([KARMA_WALLET_ROUTE], { queryParams: { convert: 'true' } })
   }
 
   async getUserContentEnroll(contentId: any) {
@@ -711,10 +711,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
     return false
   }
-  /* the cost strip above Enroll - nothing to show when the course costs no coins */
-  /* the cost of the course, shown whenever there is one - enrolled or not */
   get showKarmaCost(): boolean {
-    return this.requiredKarmaCoins > 0
+    return this.requiredKarmaCoins > 0 && !this.showRedirect
   }
 
   private get enrolStatus(): number | null {
@@ -731,16 +729,14 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return Object.keys(this.userExtCourseEnroll).length > 0
   }
 
-  /* A record with status 0 is not a confirmed enrolment - only the notice keys off this */
-  get isEnrolled(): boolean {
-    return this.hasEnrolmentRecord &&
-      this.enrolStatus !== ENROL_STATUS_NONE &&
-      !this.isEnrolPending
+  /* Only for the first hour after enrolling; after that the card is just the Redirect button */
+  /* Paid by either signal: the content's own flag, or a price in coins */
+  get isPaidCourse(): boolean {
+    return _.get(this.extContentReadData, 'courseType') === 'paid' || this.requiredKarmaCoins > 0
   }
 
-  /* Only for the first hour after enrolling; after that the card is just the Redirect button */
   get showEnrolledNotice(): boolean {
-    if (!this.isEnrolled) {
+    if (!this.isPaidCourse || !this.hasEnrolmentRecord || this.isEnrolPending) {
       return false
     }
     const enrolledAt = this.enrolledAtMs()
