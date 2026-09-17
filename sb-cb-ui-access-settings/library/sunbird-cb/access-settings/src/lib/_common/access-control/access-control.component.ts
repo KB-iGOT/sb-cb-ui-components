@@ -32,7 +32,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   @Input() content: any;
   @Input() tempAccessControl: any;
 
-  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string; action?: string }> = new EventEmitter();
+  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string; action?: string; userGroupId?: string }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
   @Output() sendForCQF: EventEmitter<boolean> = new EventEmitter();
 
@@ -1213,8 +1213,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         // Filter out user groups with empty userGroupCriteriaList
         const userGroups = data.userGroup
           .map((group: any) => ({
-            // Keep the id of an already saved user group, a brand new one gets its generated uuid
-            userGroupId: group.id || uuidv4(),
+            // MDO reports only an id the api issued, so a group that has never been saved reports
+            // none rather than a uuid minted here that would read as a saved group. Every other
+            // application keeps the id it has always sent
+            userGroupId: this.config?.application === NsAccessControlConfig.Application.MDO
+              ? (group.savedUserGroupId || "")
+              : (group.id || uuidv4()),
             userGroupName: group.name,
             userGroupCriteriaList: group.conditions.map((condition: any) => {
               let criteriaValue: string[];
@@ -1259,6 +1263,16 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           userGroups,
         },
       };
+
+      if (!this.isCCA) {
+        requestPayload.accessControl.userGroups.forEach((group: any) => {
+          const rootOrgCrieteria = {
+            criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
+            criteriaValue: [this.config?.userConfig?.rootOrgId || ""],
+          }
+          group.userGroupCriteriaList.push(rootOrgCrieteria);
+        });
+      }
 
       resolve(requestPayload);
     } catch (error) {
@@ -2128,6 +2142,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
         const ruleGroup = this.fb.group({
           id: [group.userGroupId || uuidv4()],
+          // The id the api issued for this group, empty for one that has never been saved. Kept
+          // apart from `id`, which is only what this component tracks groups by
+          savedUserGroupId: [group.userGroupId || ""],
           name: [group.userGroupName],
           description: [`Description for ${group.userGroupName}`],
           conditions: conditions,
@@ -2287,7 +2304,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: response => {
           if (response?.result) {
-            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "CREATED" });
+            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "CREATED", userGroupId: response.result?.usergroupid });
             this.callSnackbar("User group saved successfully", "success");
           } else {
             this.callSnackbar("Could not save the user group, Please try again.", "error");
@@ -2309,7 +2326,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: response => {
           if (response?.result) {
-            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "UPDATED" });
+            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "UPDATED", userGroupId: response.result?.usergroupid });
             this.callSnackbar("User group updated successfully", "success");
           } else {
             this.callSnackbar("Could not update the user group, Please try again.", "error");
