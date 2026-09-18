@@ -93,9 +93,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isLoading = true
       this.isCCA = this.config?.userConfig?.org?.isCCA ?? false;
       if (!this.isCCA) {
+        // the L0 above this organisation answers both for its hierarchy and for the state whose
+        // services it may select from, so it is read once here for the two of them
+        await this.accessControlService.readParentOrganisation(this.config);
         await this.loadOrgHierarchyOrganisations();
-        // Organisation condition is only available for a L0 MDO having an org hierarchy framework,
-        // every other non CCA MDO (L1 and onwards) keeps working within its own organisation
+        // Organisation condition is only available to a non CCA MDO whose organisation is part of
+        // an org hierarchy framework, at any level of it. One that is in no hierarchy, or whose
+        // L0 has no framework created yet, keeps working within its own organisation
         if (!this.canSelectOrgHierarchy) {
           this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
             this.config.accessControlCriteriaSelection.optionsEntity,
@@ -212,14 +216,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * For a non CCA L0 MDO, reads the org hierarchy framework of the logged in organisation and keeps
-   * the flattened organisation list (L0 -> L10) ready for the organisation selection dialog.
+   * Reads the org hierarchy framework that applies to the logged in organisation and keeps the
+   * flattened organisation list (L0 -> L10) ready for the organisation selection dialog.
+   *
+   * It is not the L0 alone any more: an organisation at any level of the hierarchy is offered
+   * the condition, and one below the L0 answers from the framework of the L0 it is mapped to -
+   * the framework itself only ever exists on the L0. An organisation outside a hierarchy, or
+   * one whose L0 has no framework created yet, resolves to nothing and is offered nothing.
+   *
+   * The whole of it belongs to the MDO portal. The library is shared with the creation portal,
+   * which has no org hierarchy behind it, so the application is checked here as well as at the
+   * one place this is called from - neither the org read nor the framework read is worth making
+   * anywhere else, and the condition is not worth offering there.
    */
   private async loadOrgHierarchyOrganisations(): Promise<void> {
     this.canSelectOrgHierarchy = false;
     this.accessControlService.orgHierarchyOrganisations.set([]);
 
-    if (!this.accessControlService.isL0MdoUser(this.config) || !this.accessControlService.getOrgHierarchyFrameworkId(this.config)) {
+    if (this.config?.application !== NsAccessControlConfig.Application.MDO) {
+      return;
+    }
+
+    if (!this.accessControlService.hasOrgHierarchyRole(this.config)) {
       return;
     }
 

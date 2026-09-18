@@ -15,6 +15,8 @@ const CQF_NEGATIVE_MARKING_PERCENTAGE = '0%'
 /** A comprehensive assessment takes the re-attempt count typed in, up to three digits. */
 const COMPREHENSIVE_MAX_RETAKE_ATTEMPTS = 999
 const COMPREHENSIVE_MAX_RETAKE_DIGITS = 3
+/** What every other assessment allows, and the count its tooltip has always quoted. */
+const DEFAULT_MAX_RETAKE_ATTEMPTS = 5
 /**
  * Course categories authored as a comprehensive assessment. The content platform has no
  * `Comprehensive Assessment` category yet, so they are created as `Standalone Assessment`;
@@ -61,7 +63,6 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   /** A comprehensive assessment: several settings are fixed by the preset, not authored. */
   isComprehensiveAssessment: boolean = false
   showCoolOffPeriod: boolean = false
-  maxRetakeAttempts = COMPREHENSIVE_MAX_RETAKE_ATTEMPTS
   maxRetakeDigits = COMPREHENSIVE_MAX_RETAKE_DIGITS
   // Seeds the CQF rich text editor - the authored markup lives in the description control.
   instructionsHtml = ''
@@ -216,6 +217,15 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
 
   get maxSections(): number {
     return this.isCqfAssessment ? CQF_MAX_SECTIONS : DEFAULT_MAX_SECTIONS
+  }
+
+  /**
+   * The re-attempt ceiling the assessment is actually under: a comprehensive assessment takes
+   * any count typed in up to this, every other one picks from the options offered. It is what
+   * the field's error quotes, and what the tooltip beside the label has to quote with it.
+   */
+  get maxRetakeAttempts(): number {
+    return this.isComprehensiveAssessment ? COMPREHENSIVE_MAX_RETAKE_ATTEMPTS : DEFAULT_MAX_RETAKE_ATTEMPTS
   }
 
   setupShowTimerSubscription(): void {
