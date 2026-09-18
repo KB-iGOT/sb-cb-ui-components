@@ -51,7 +51,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   defaultUserGroupRelationship: string = "OR";
 
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
-  usersTableConfig: NsAccessControlConfig.ITableConfig;
+  usersTableConfig!: NsAccessControlConfig.ITableConfig;
   accessControlForm!: FormGroup;
   MDO_SPECIFIC = NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
   MDO_APPLICATION = NsAccessControlConfig.Application.MDO;
@@ -807,7 +807,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   checkIfAnyConditionContainsDisabledMessage(userGroupIndex: number): boolean {
-    return this.userGroup.at(userGroupIndex).get("conditions").value.some((condition: any) => condition.disabledMessage);
+    return this.userGroup.at(userGroupIndex).get("conditions")?.value.some((condition: any) => condition.disabledMessage);
   }
 
   manageSelections(conditionForm: any, ruleForm: any, userGroupIndex: number, activeTabSelected = 0): void {
@@ -961,7 +961,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   processCadreConfigMapping(userGroupIndex: number): void {
     const ruleGroup = this.userGroup.at(userGroupIndex);
-    const conditionValue = ruleGroup.get("conditions").value;
+    const conditionValue = ruleGroup.get("conditions")?.value;
     if (conditionValue && conditionValue.length) {
       const services = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Service);
       const cadre = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Cadre);
@@ -1850,7 +1850,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (onlyOneCondition) {
         flag = false;
       } else {
-        activeManageSelection?.conditions?.map(item => {
+        activeManageSelection?.conditions?.map((item: any) => {
           if (item?.entity == condition?.entity && item?.selections.length > 0) {
             flag = true;
           }
@@ -1858,7 +1858,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
       if (activeManageSelection?.conditions?.length > 1) {
         let checkLastIndexHaveSelections = -1;
-        activeManageSelection?.conditions?.forEach((item, index) => {
+        activeManageSelection?.conditions?.forEach((item: any, index: number) => {
           if (item?.selections.length > 0) {
             checkLastIndexHaveSelections = index;
           }
@@ -1872,7 +1872,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return flag;
   }
 
-  hasOnlyOneArrayWithLength(data, key) {
+  hasOnlyOneArrayWithLength(data: any, key: any) {
     let count = 0;
     for (const obj of data) {
       if (Array.isArray(obj[key]) && obj[key].length > 0) {
@@ -1885,7 +1885,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   resetActiveUserGroupFields(condition: any, rule: any, userGroupIndex: any) {
     let accessControlFormData = this.accessControlForm.getRawValue();
     let activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
-    let activeConditionIndex = activeManageSelection?.conditions?.findIndex(item => {
+    let activeConditionIndex = activeManageSelection?.conditions?.findIndex((item: any) => {
       return item?.entity === condition?.entity && item?.selections?.length > 0;
     });
     let activeManageSelectionArrLength = activeManageSelection?.conditions.length;
@@ -2306,8 +2306,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private savedUserGroupIdAt(userGroupIndex: number): string {
-    const savedUserGroupId = this.userGroup?.at(userGroupIndex)?.get("savedUserGroupId")?.value;
-    return savedUserGroupId || (userGroupIndex === 0 ? this.config?.context?.userGroupId : "") || "";
+    return this.userGroup?.at(userGroupIndex)?.get("savedUserGroupId")?.value || "";
   }
 
   saveReusableUserGroups(userGroupIndex: number = 0): void {
