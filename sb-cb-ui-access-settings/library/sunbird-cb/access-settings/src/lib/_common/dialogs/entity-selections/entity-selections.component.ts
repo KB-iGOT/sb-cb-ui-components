@@ -761,15 +761,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.availableStates = this.cadreMappingService.getAllStates();
       this.canChooseState = true;
     } else {
-      const org = this.accessControlConfig?.userConfig?.org;
-      // A L0 state organisation is the state itself, an L1 -> L10 organisation carries the
-      // state it belongs to on ministryOrStateName
-      const orgStateName =
-        (org?.sbOrgType || "").toLowerCase() === "state"
-          ? org?.orgName || org?.channel
-          : (org?.ministryOrStateType || "").toLowerCase() === "state"
-            ? org?.ministryOrStateName
-            : "";
+      // A L0 state organisation is the state itself; an L1 -> L10 organisation is told its state
+      // by the L0 it sits under, which the service has already read
+      const orgStateName = this.accessControlService.getOrgStateName(this.accessControlConfig);
 
       const matchedState = this.cadreMappingService.findStateByName(orgStateName);
       this.availableStates = matchedState ? [matchedState] : [];
