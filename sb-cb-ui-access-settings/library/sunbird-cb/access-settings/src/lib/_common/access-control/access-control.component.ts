@@ -2138,7 +2138,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             selections = Array.isArray(criteriaValue) ? criteriaValue : [criteriaValue];
           } 
           else {
-           debugger
             const configOptions = this.accessControlCriteriaSelection.optionsEntity;
             const isPresent = configOptions.some((field: any) => field.value === criteriaKey);
 
