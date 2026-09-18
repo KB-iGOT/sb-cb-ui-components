@@ -48,7 +48,9 @@ export class ReuseUserGroupComponent implements OnInit {
 
   private readonly searchInput = new Subject<string>();
 
-  readonly data = inject<{ optionsEntity?: NsAccessControlConfig.IOptionsEntity[] }>(MAT_DIALOG_DATA);
+  readonly data = inject<{ optionsEntity?: NsAccessControlConfig.IOptionsEntity[]; usedUserGroupIds?: string[] }>(MAT_DIALOG_DATA);
+
+  private readonly usedGroupIds = new Set<string>(this.data?.usedUserGroupIds || []);
 
   readonly displayedColumns = ["select", "name", "conditions", "owner"];
 
@@ -77,6 +79,7 @@ export class ReuseUserGroupComponent implements OnInit {
 
   readonly hasMoreThanLoaded = computed(() => this.totalCount() > this.groups().length);
   readonly isPaginationVisible = computed(() => this.filteredGroups().length > this.pageSize());
+  readonly isCCA = computed(() => this.accessControlService.accessControlConfig()?.userConfig.org?.isCCA || false);
 
   ngOnInit(): void {
     this.searchInput.pipe(debounceTime(SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(value => {
@@ -117,7 +120,14 @@ export class ReuseUserGroupComponent implements OnInit {
     this.pageSize.set(event?.limit || PAGE_SIZE);
   }
 
+  isAlreadyUsed(group: IReuseUserGroupRow): boolean {
+    return this.usedGroupIds.has(group?.id);
+  }
+
   selectGroup(group: IReuseUserGroupRow): void {
+    if (this.isAlreadyUsed(group)) {
+      return;
+    }
     this.selectedGroupId.set(group?.id);
   }
 
@@ -127,7 +137,7 @@ export class ReuseUserGroupComponent implements OnInit {
 
   apply(): void {
     const group = this.groups().find(item => item.id === this.selectedGroupId());
-    if (!group) {
+    if (!group || this.isAlreadyUsed(group)) {
       return;
     }
     this.dialogRef.close({ action: NsAccessControlConfig.IActions.Confirm, userGroup: group });
@@ -148,6 +158,11 @@ export class ReuseUserGroupComponent implements OnInit {
   private toConditionLabel(entry: any): string {
     const criteriaKey = entry?.criteriaKey || Object.keys(entry || {})[0];
     if (!criteriaKey) {
+      return "";
+    }
+    const isOrganisationCriteria =
+      criteriaKey === NsAccessControlConfig.SelectionType.Organizations || criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY;
+    if (isOrganisationCriteria && !this.isCCA()) {
       return "";
     }
     const criteriaValue = entry?.criteriaKey ? entry?.criteriaValue : entry[criteriaKey];

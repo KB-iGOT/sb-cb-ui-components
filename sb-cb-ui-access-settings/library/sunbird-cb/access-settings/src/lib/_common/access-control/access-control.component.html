@@ -74,7 +74,7 @@
               <div class="text-dark">Total Count : {{ getTotalUserCount }}</div>
             </div>
           }
-          @if (userGroup?.length > 0 && config?.application === MDO_APPLICATION && mdoContentHasValue) {
+          @if (config?.application === MDO_APPLICATION && mdoContentHasValue) {
             <div class="ml-auto mb-4">
               <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isApplyingSavedUserGroup" (click)="reuseSavedUserGroup()">
                 @if (isApplyingSavedUserGroup) {
@@ -105,16 +105,18 @@
                           </div>
                         </mat-panel-title>
                         <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
-                          @if (content?.accessSetting !== MDO_SPECIFIC && (config?.application !== MDO_APPLICATION || (config?.application === MDO_APPLICATION && config?.mdoContent?.status === 'Live' && userGroup?.length > 1))) {
+                          @if (content?.accessSetting !== MDO_SPECIFIC) {
                             <button
                               [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                               mat-icon-button
                               aria-label="delete user group"
                               (click)="removeUserGroup(i)"
                               title="Delete"
-                            >
+                              >
                               <mat-icon>delete</mat-icon>
                             </button>
+                           }
+                          @if (content?.accessSetting !== MDO_SPECIFIC && (config?.application !== MDO_APPLICATION || (config?.application === MDO_APPLICATION && config?.mdoContent?.status === 'Live' && userGroup?.length > 1))) {
                             <button
                               [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
                               mat-icon-button
@@ -235,6 +237,13 @@
                           </div>
                         </button>
                       </div>
+                      @if (config?.application === MDO_APPLICATION && !isLoading) {
+                        <div class="action-buttons-mdo flex gap-4 items-center justify-center mt-4">
+                          <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup" (click)="saveReusableUserGroups(i)">
+                            <span>{{ isUserGroupSaved(i) ? 'Update as reusable group' : 'Save as reusable group' }}</span>
+                          </button>
+                        </div>
+                      }
                     </mat-expansion-panel>
                     @if (userGroup?.length > 1 && !ruleLast) {
                       <div class="and-or mat-full-radius">
@@ -300,12 +309,5 @@
       }
     </div>
 
-    @if (config?.application === MDO_APPLICATION && !isLoading && userGroup?.length > 0) {
-      <div class="action-buttons-mdo flex gap-4 items-center justify-center mt-4">
-        <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup" (click)="saveReusableUserGroups()">
-          <span>Save as reusable groups</span>
-        </button>
-      </div>
-    }
   </div>
 </div>
