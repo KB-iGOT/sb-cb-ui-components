@@ -99,3 +99,8 @@
 .border-radius-4 {
   border-radius: 4px !important;
 }
+
+.group-row.already-used {
+  cursor: default;
+  opacity: 0.6;
+}
