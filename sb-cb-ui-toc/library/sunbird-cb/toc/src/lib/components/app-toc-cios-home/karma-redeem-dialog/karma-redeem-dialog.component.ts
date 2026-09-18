@@ -21,19 +21,19 @@ export class KarmaRedeemDialogComponent {
   @Output() closed = new EventEmitter<boolean>()
 
   get icon(): string {
-    return this.data?.icon || '/assets/icons/home-v2/karma-badge.svg'
+    return this.data?.icon || '/assets/icons/karmawallet-v2/RedemKarmaCoin.svg'
   }
 
   get header(): string {
-    return this.data?.header || `You're all set! 🎉`
+    return this.data?.header || ''
   }
 
   get message(): string {
     if (this.data?.message) {
       return this.data.message
     }
-    const karmaCoins = this.data?.requiredKarmaPoints ?? 0
-    return `Redeem ${karmaCoins} Karma Coins to unlock this course and start learning.`
+    const karmaCoins = this.data?.requiredKarmaCoins ?? 0
+    return `${karmaCoins} Karma Coins will be deducted from your Karma Wallet if you proceed with enrolment.`
   }
 
   get acceptButton(): string {
