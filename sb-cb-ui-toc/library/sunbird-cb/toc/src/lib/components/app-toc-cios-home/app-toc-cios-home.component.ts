@@ -18,14 +18,8 @@ const KARMA_REDEEM_CONTINUE = 'redeem-karma-coins-continue'
 const KARMA_REDEEM_CANCEL = 'redeem-karma-coins-cancel'
 
 const KARMA_WALLET_ROUTE = '/app/person-profile/karma-wallet'
-/* what both cios-enroll calls answer with when the balance is short */
 const PAYMENT_REQUIRED = 'PAYMENT_REQUIRED'
-const INSUFFICIENT_COINS = [
-  /insufficient[^.]*karma\s*coins?/i,
-  /enough\s+karma\s*coins?/i,
-  /minimum\s+karma\s*coins?\s+required/i,
-  /not\s+that\s+much\s+karma\s*coins?/i,
-]
+const PAYMENT_REQUIRED_STATUS = 402
 const ENROL_STATUS_PENDING = 3
 const ENROLLED_NOTICE_WINDOW_MS = 60 * 60 * 1000
 
@@ -70,6 +64,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   enrolPending = false
   insufficientCoins = false
   private karmaRedeemContent: any = null
+  private karmaCoinsRequest: Promise<number> | null = null
+  private coinShortfall = false
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 
@@ -243,8 +239,13 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return providers.map((provider: any) => provider.name).join(', ')
   }
 
-  enRollToExtCourse(content: any) {
-    const coins = this.readRequiredKarmaCoins(content)
+  async enRollToExtCourse(content: any) {
+    // Awaits the call the page load started, so a quick click cannot enrol before the rule is in
+    const coins = await this.loadRequiredKarmaCoins(content)
+    if (this.coinShortfall) {
+      this.insufficientCoins = true
+      return
+    }
     const popupConfig = _.get(this.config, 'karmaRedeemPopup', {}) || {}
 
     // Nothing to deduct (0 coins) - go straight to consent, no popup.
@@ -261,6 +262,23 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       acceptButton: _.get(popupConfig, 'acceptButton', ''),
       cancelButton: _.get(popupConfig, 'cancelButton', ''),
     }
+  }
+  private loadRequiredKarmaCoins(content: any): Promise<number> {
+    const courseId = _.get(content, 'contentId', '')
+    const partnerId = _.get(content, 'contentPartner.id', '')
+    if (!courseId || !partnerId) {
+      return Promise.resolve(0)
+    }
+    if (!this.karmaCoinsRequest) {
+      this.karmaCoinsRequest = this.certSvc.getKarmaPointsDeductionRule(courseId, partnerId)
+        .toPromise()
+        .then((res: any) => Number(_.get(res, 'result.requiredKarmaPoints')) || 0)
+        .catch((err: any) => {
+          this.coinShortfall = this.isInsufficientCoinsError(err)
+          return 0
+        })
+    }
+    return this.karmaCoinsRequest
   }
 
   private readRequiredKarmaCoins(content: any): number {
@@ -390,29 +408,19 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     } else {
       this.loader.changeLoad.next(false)
       const message = enrollRes?.error?.params?.msg
-      if (this.isInsufficientCoinsError(enrollRes)) {
-        this.insufficientCoins = true
-        return
-      }
       this.snackBar.open(message || 'Unable to enroll to the content', 'X', {
         duration: 10000,
       })
     }
   }
 
-  /* responseCode first - the wording is only a fallback for a body that carries no code */
   private isInsufficientCoinsError(err: any): boolean {
-    const body = (err && err.error) || err || {}
-    const code = `${body.responseCode || ''}`.trim().toUpperCase()
-    if (code === PAYMENT_REQUIRED) {
+    if (Number(_.get(err, 'status')) === PAYMENT_REQUIRED_STATUS) {
       return true
     }
-    return this.isInsufficientCoins(body?.params?.msg)
-  }
-
-  private isInsufficientCoins(message: any): boolean {
-    const text = `${message || ''}`
-    return INSUFFICIENT_COINS.some(pattern => pattern.test(text))
+    const body = (err && err.error) || err || {}
+    const codes = [body.statusCode, body.responseCode, body.errorCode]
+    return codes.some(code => `${code || ''}`.trim().toUpperCase() === PAYMENT_REQUIRED)
   }
 
   closeInsufficientCoins() {
@@ -681,12 +689,6 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
           // Kept on the component so the "Restricted" badge can surface it on hover.
           this.enrollRestrictionMessage = message
           this.canEnroll = false
-          /* A coin shortfall is spelled out in the popup, which carries the wallet link;
-             the rest keep the snackbar. */
-          if (this.isInsufficientCoinsError(error)) {
-            this.insufficientCoins = true
-            return
-          }
           this.snackBar.open(message, 'X', {
             duration: 10000,
           })
@@ -711,10 +713,6 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
     return false
   }
-  get showKarmaCost(): boolean {
-    return this.requiredKarmaCoins > 0 && !this.showRedirect
-  }
-
   private get enrolStatus(): number | null {
     const status = _.get(this.userExtCourseEnroll, 'status')
     return status === undefined || status === null ? null : Number(status)
