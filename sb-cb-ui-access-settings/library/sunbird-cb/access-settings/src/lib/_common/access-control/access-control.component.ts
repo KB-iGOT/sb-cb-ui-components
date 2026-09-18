@@ -1209,18 +1209,62 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Organisation criteria of a user group. A L0 MDO (ministry / state) selecting every organisation
-   * of its hierarchy is stored as the ministry / state itself, any other selection keeps the
-   * explicit rootOrgId list.
+   * Organisation criteria of a user group. A L0 MDO selecting every organisation of its hierarchy
+   * is stored as the ministry / state itself, one id standing for all of them.
+   *
+   * Only the L0 is stored that way. An organisation below it selecting everything it can see has
+   * selected its own branch, and no single id names a branch - collapsing it would store the one
+   * organisation the user is in, which is the opposite of what was selected. It keeps the explicit
+   * rootOrgId list, as every partial selection does.
    */
   private createOrganisationCriteria(selections: string[]): { criteriaKey: string; criteriaValue: string[] } {
-    if (this.canSelectOrgHierarchy && this.accessControlService.areAllOrgHierarchyOrgsSelected(selections)) {
+    const isL0 = this.accessControlService.isL0MdoUser(this.config);
+    if (isL0 && this.canSelectOrgHierarchy && this.accessControlService.areAllOrgHierarchyOrgsSelected(selections)) {
       const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
       if (ministryOrStateId) {
         return { criteriaKey: MINISTRY_OR_STATE_CRITERIA_KEY, criteriaValue: [ministryOrStateId] };
       }
     }
     return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: selections };
+  }
+
+  /**
+   * The own organisation is appended to every group of a non CCA MDO, which is what scopes a group
+   * that names no organisation of its own to the organisation the user works in.
+   *
+   * A group that already names one is left as it was selected. It is one organisation criteria or
+   * the other, never both: `ministryOrStateId` and `rootOrgId` sent together are two organisation
+   * scopes for the same group, and the narrower of the two throws the wider one away.
+   */
+  private appendOwnOrganisationCriteria(criteriaList: any[]): void {
+    if (this.isCCA) {
+      return;
+    }
+
+    const criteria = criteriaList || [];
+
+    // The whole ministry / state is the widest organisation scope there is, and nothing is added
+    // beside it. This holds whoever is saving, not only while the hierarchy could be read.
+    const namesMinistryOrState = criteria.some(
+      (entry: any) => entry?.criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY
+    );
+    if (namesMinistryOrState) {
+      return;
+    }
+
+    // Organisations picked out of the org hierarchy scope the group on their own. Everywhere else
+    // an organisation criteria is not the user's hierarchy, so the own organisation still scopes it
+    const namesHierarchyOrganisations =
+      this.canSelectOrgHierarchy &&
+      criteria.some((entry: any) => entry?.criteriaKey === NsAccessControlConfig.SelectionType.Organizations);
+    if (namesHierarchyOrganisations) {
+      return;
+    }
+
+    criteria.push({
+      criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
+      criteriaValue: [this.config?.userConfig?.rootOrgId || ""]
+    });
   }
 
   private processRequestCreationV2(group: any): any {
@@ -1324,15 +1368,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         },
       };
 
-      if (!this.isCCA) {
-        requestPayload.accessControl.userGroups.forEach((group: any) => {
-          const rootOrgCrieteria = {
-            criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
-            criteriaValue: [this.config?.userConfig?.rootOrgId || ""],
-          }
-          group.userGroupCriteriaList.push(rootOrgCrieteria);
-        });
-      }
+      requestPayload.accessControl.userGroups.forEach((group: any) => {
+        this.appendOwnOrganisationCriteria(group.userGroupCriteriaList);
+      });
 
       resolve(requestPayload);
     } catch (error) {
@@ -2352,12 +2390,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.callSnackbar("Please add at least one condition with a selection.", "error");
         return;
       }
-      if (!this.isCCA) {
-        criteria.push({
-          criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
-          criteriaValue: [this.config?.userConfig?.rootOrgId || ""]
-        });
-      }
+      this.appendOwnOrganisationCriteria(criteria);
 
       const payload: IReusableUserGroupRequest = {
         request: {
