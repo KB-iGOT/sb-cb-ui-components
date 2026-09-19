@@ -32,10 +32,12 @@ const ENDPOINTS = {
 
   CUSTOMES_FIELD_SEARCH: "apis/proxies/v8/customFields/v1/search",
   ORG_HIERARCHY_FRAMEWORK: (frameworkId: string) => `/apis/proxies/v8/framework/v1/read/${frameworkId}`,
+  ORG_READ: "/apis/proxies/v8/org/v1/read",
 };
 
 const L0_ORG_TYPES = ["ministry", "state"];
-const L0_ORG_ROLES = ["mdo_admin", "mdo_leader"];
+// The roles that administer an organisation, at whatever level of the hierarchy it sits.
+const ORG_HIERARCHY_ROLES = ["mdo_admin", "mdo_leader"];
 
 @Injectable({
   providedIn: "root",
@@ -50,6 +52,9 @@ export class AccessControlService {
   customesFieldData: WritableSignal<any[]> = signal([]);
   // Organisations of the logged in L0 MDO hierarchy (L0 -> L10), read from the org hierarchy framework
   orgHierarchyOrganisations: WritableSignal<any[]> = signal([]);
+  // The L0 the logged in organisation sits under, read once and kept: it answers both for the
+  // hierarchy framework and for the state whose services the organisation may select from.
+  parentOrganisation: WritableSignal<any> = signal(null);
   constructor(private readonly http: HttpClient) {
     this.accessControlConfig = signal<NsAccessControlConfig.IAccessControlConfig>(null);
     this.holdServiceCadrebatch = signal({
@@ -117,33 +122,121 @@ export class AccessControlService {
     return this.http.get<any>(ENDPOINTS.ORG_HIERARCHY_FRAMEWORK(frameworkId));
   }
 
+  fetchOrgRead(organisationId: string): Observable<any> {
+    return this.http.post<any>(ENDPOINTS.ORG_READ, { request: { organisationId } });
+  }
+
+  /** Whether the user administers their organisation, which is what the condition is offered on. */
+  hasOrgHierarchyRole(config?: NsAccessControlConfig.IAccessControlConfig): boolean {
+    const userRoles = (config || this.accessControlConfig())?.userConfig?.userRoles;
+    return ORG_HIERARCHY_ROLES.some((role: string) =>
+      typeof userRoles?.has === "function" ? userRoles.has(role) : (userRoles || []).includes?.(role)
+    );
+  }
+
   /**
    * A L0 MDO is a mdo_admin / mdo_leader of a ministry or a state organisation,
    * i.e the organisation sitting at the top (L0) of its own org hierarchy.
    */
   isL0MdoUser(config?: NsAccessControlConfig.IAccessControlConfig): boolean {
-    const userConfig = (config || this.accessControlConfig())?.userConfig;
-    const orgType = (userConfig?.org?.sbOrgType || "").toLowerCase();
-    const userRoles = userConfig?.userRoles;
-    const hasL0Role = L0_ORG_ROLES.some((role: string) =>
-      typeof userRoles?.has === "function" ? userRoles.has(role) : (userRoles || []).includes?.(role)
-    );
-    return L0_ORG_TYPES.includes(orgType) && !!hasL0Role;
+    const orgType = ((config || this.accessControlConfig())?.userConfig?.org?.sbOrgType || "").toLowerCase();
+    return L0_ORG_TYPES.includes(orgType) && this.hasOrgHierarchyRole(config);
   }
 
   getOrgHierarchyFrameworkId(config?: NsAccessControlConfig.IAccessControlConfig): string {
     return (config || this.accessControlConfig())?.userConfig?.org?.orgHierarchyFrameworkId || "";
   }
 
+  /** The L0 the logged in organisation is mapped to, read off its own organisation. */
+  getParentOrgId(config?: NsAccessControlConfig.IAccessControlConfig): string {
+    return (config || this.accessControlConfig())?.userConfig?.org?.ministryOrStateId || "";
+  }
+
   /**
-   * Reads the org hierarchy framework of the logged in L0 MDO and flattens the terms of
-   * every category (L1 -> L10) into a single organisation list. The organisation of the logged in
-   * user is always part of that list, the L0 is never mapped as a term of its own framework.
+   * The org hierarchy framework that applies to the logged in user. Only the L0 - the ministry
+   * or the state at the top - carries one on its own organisation. Every organisation under it,
+   * L1 to Ln, has none of its own and answers from the L0 it is mapped to, which is why the
+   * parent is read rather than the condition being offered to the L0 alone.
+   */
+  async resolveOrgHierarchyFrameworkId(config?: NsAccessControlConfig.IAccessControlConfig): Promise<string> {
+    const ownFrameworkId = this.getOrgHierarchyFrameworkId(config);
+    if (ownFrameworkId) {
+      return ownFrameworkId;
+    }
+
+    const parentOrganisation = await this.readParentOrganisation(config);
+    return parentOrganisation?.orgHierarchyFrameworkId || "";
+  }
+
+  /**
+   * Reads the L0 the logged in organisation is mapped to, once. Both the hierarchy framework and
+   * the state the organisation belongs to are read off it, so the two do not read it twice, and
+   * an organisation that sits under no L0 keeps it null.
+   */
+  async readParentOrganisation(config?: NsAccessControlConfig.IAccessControlConfig): Promise<any> {
+    const parentOrgId = this.getParentOrgId(config);
+    if (!parentOrgId) {
+      this.parentOrganisation.set(null);
+      return null;
+    }
+
+    const alreadyRead = this.parentOrganisation();
+    if (alreadyRead && (alreadyRead.id === parentOrgId || alreadyRead.identifier === parentOrgId)) {
+      return alreadyRead;
+    }
+
+    const response = await this.fetchOrgRead(parentOrgId)
+      .toPromise()
+      .catch(() => null);
+
+    const organisation = response?.result?.response || null;
+    this.parentOrganisation.set(organisation);
+    return organisation;
+  }
+
+  /**
+   * The state the logged in organisation belongs to, "" when it belongs to none. A L0 state
+   * organisation is the state itself. Anything under it - L1 to Ln - carries only a pointer up,
+   * and the name is read off the L0 that was read for the hierarchy: the org apis spell the name
+   * on the organisation itself inconsistently, and where they leave it out the state services
+   * were offered to the L0 alone.
+   */
+  getOrgStateName(config?: NsAccessControlConfig.IAccessControlConfig): string {
+    const org = (config || this.accessControlConfig())?.userConfig?.org;
+
+    if ((org?.sbOrgType || "").toLowerCase() === "state") {
+      return org?.orgName || org?.channel || "";
+    }
+
+    if ((org?.ministryOrStateType || "").toLowerCase() !== "state") {
+      return "";
+    }
+
+    const parentOrganisation = this.parentOrganisation();
+    return (
+      org?.ministryOrStateName ||
+      org?.ministryorstatename ||
+      parentOrganisation?.orgName ||
+      parentOrganisation?.channel ||
+      ""
+    );
+  }
+
+  /**
+   * Reads the org hierarchy framework that applies to the logged in user - their own when they
+   * are the L0, the one of the L0 they are mapped to otherwise - and flattens it into a single
+   * organisation list.
+   *
+   * What is flattened is the branch the logged in organisation sits at the top of, not the whole
+   * framework: an organisation administers itself and what is under it, never what sits beside
+   * it. The L0 is the exception, and only because it is not a term of its own framework at all -
+   * nothing roots the walk for it, and the whole hierarchy is its own branch.
+   *
    * Returns an empty list when the framework is not created, in which case the organisation
    * condition should not be offered at all.
    */
   async fetchOrgHierarchyOrganisations(config?: NsAccessControlConfig.IAccessControlConfig): Promise<any[]> {
-    const frameworkId = this.getOrgHierarchyFrameworkId(config);
+    const frameworkId = await this.resolveOrgHierarchyFrameworkId(config);
 
     if (!frameworkId) {
       this.orgHierarchyOrganisations.set([]);
@@ -155,24 +248,28 @@ export class AccessControlService {
       .catch(() => null);
 
     const categories = response?.result?.framework?.categories || [];
+    const termsById = this.indexFrameworkTerms(categories);
+    // The same organisation can be mapped more than once, so every term of it roots the walk
+    const ownTerms = this.findTermsByOrgId(termsById, this.getLoggedInOrgId(config));
+    const terms = ownTerms.length ? this.collectBranchTerms(termsById, ownTerms) : Array.from(termsById.values());
+
     const organisations: any[] = [];
     const addedOrgIds = new Set<string>();
 
-    categories.forEach((category: any) => {
-      (category?.terms || []).forEach((term: any) => {
-        const identifier = term?.additionalProperties?.orgId;
-        const channel = term?.name;
-        if (identifier && channel && !addedOrgIds.has(identifier)) {
-          addedOrgIds.add(identifier);
-          organisations.push({ identifier, channel, category: term?.category || category?.name, iscca: false });
-        }
-      });
+    terms.forEach((term: any) => {
+      const identifier = term?.additionalProperties?.orgId;
+      const channel = term?.name;
+      if (identifier && channel && !addedOrgIds.has(identifier)) {
+        addedOrgIds.add(identifier);
+        organisations.push({ identifier, channel, category: term?.category, iscca: false });
+      }
     });
 
     organisations.sort((orgA: any, orgB: any) => (orgA.channel || "").localeCompare(orgB.channel || ""));
 
     // The L0 is not a term of its own hierarchy framework, so the organisation of the logged in
     // user is put on top of the mapped ones. It stays selectable even when nothing is mapped yet.
+    // An organisation below the L0 is a term of the framework already, and is left where it is.
     const loggedInOrganisation = await this.getLoggedInOrganisation(config);
     if (loggedInOrganisation && !addedOrgIds.has(loggedInOrganisation.identifier)) {
       addedOrgIds.add(loggedInOrganisation.identifier);
@@ -181,6 +278,63 @@ export class AccessControlService {
 
     this.orgHierarchyOrganisations.set(organisations);
     return organisations;
+  }
+
+  /**
+   * Every term of the framework by its identifier. A term is listed twice - once under its own
+   * category, and once as an association of the term above it - and only the copy under its own
+   * category carries the associations below it. This index is that copy.
+   */
+  private indexFrameworkTerms(categories: any[]): Map<string, any> {
+    const termsById = new Map<string, any>();
+    (categories || []).forEach((category: any) => {
+      (category?.terms || []).forEach((term: any) => {
+        if (term?.identifier) {
+          termsById.set(term.identifier, { ...term, category: term?.category || category?.name });
+        }
+      });
+    });
+    return termsById;
+  }
+
+  /** The terms an organisation is mapped as, which is where its branch of the hierarchy starts. */
+  private findTermsByOrgId(termsById: Map<string, any>, orgId: string): any[] {
+    if (!orgId) {
+      return [];
+    }
+    return Array.from(termsById.values()).filter(
+      (term: any) => term?.additionalProperties?.orgId === orgId
+    );
+  }
+
+  /**
+   * An organisation and everything under it. Each association is read back off the index rather
+   * than walked as it is embedded: the embedded copy carries no associations of its own, so
+   * following it would stop the walk one level down and lose L3 and below.
+   */
+  private collectBranchTerms(termsById: Map<string, any>, rootTerms: any[]): any[] {
+    const branch: any[] = [];
+    const visited = new Set<string>();
+    const queue = [...rootTerms];
+
+    while (queue.length) {
+      const term = queue.shift();
+      const identifier = term?.identifier;
+      if (!identifier || visited.has(identifier)) {
+        continue;
+      }
+      visited.add(identifier);
+      branch.push(term);
+
+      (term?.associations || []).forEach((association: any) => {
+        const child = termsById.get(association?.identifier) || association;
+        if (child?.identifier && !visited.has(child.identifier)) {
+          queue.push(child);
+        }
+      });
+    }
+
+    return branch;
   }
 
   /**

@@ -4,15 +4,15 @@
   <div class="karma-redeem-dialog">
     <img class="karma-redeem-icon" [src]="icon" alt="" />
 
-    <p class="karma-redeem-header">{{ header }}</p>
+    <p class="karma-redeem-header" *ngIf="header">{{ header }}</p>
     <p class="karma-redeem-message">{{ message }}</p>
 
     <div class="karma-redeem-actions">
-      <button type="button" class="karma-redeem-btn karma-redeem-continue" (click)="onContinue()">
-        {{ acceptButton }}
-      </button>
       <button type="button" class="karma-redeem-btn karma-redeem-cancel" (click)="onCancel()">
         {{ cancelButton }}
+      </button>
+      <button type="button" class="karma-redeem-btn karma-redeem-continue" (click)="onContinue()">
+        {{ acceptButton }}
       </button>
     </div>
   </div>

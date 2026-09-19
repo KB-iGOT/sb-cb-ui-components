@@ -32,7 +32,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   @Input() content: any;
   @Input() tempAccessControl: any;
 
-  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string; action?: string }> = new EventEmitter();
+  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string; action?: string; userGroupId?: string }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
   @Output() sendForCQF: EventEmitter<boolean> = new EventEmitter();
 
@@ -51,7 +51,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   defaultUserGroupRelationship: string = "OR";
 
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
-  usersTableConfig: NsAccessControlConfig.ITableConfig;
+  usersTableConfig!: NsAccessControlConfig.ITableConfig;
   accessControlForm!: FormGroup;
   MDO_SPECIFIC = NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC;
   MDO_APPLICATION = NsAccessControlConfig.Application.MDO;
@@ -93,9 +93,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isLoading = true
       this.isCCA = this.config?.userConfig?.org?.isCCA ?? false;
       if (!this.isCCA) {
+        // the L0 above this organisation answers both for its hierarchy and for the state whose
+        // services it may select from, so it is read once here for the two of them
+        await this.accessControlService.readParentOrganisation(this.config);
         await this.loadOrgHierarchyOrganisations();
-        // Organisation condition is only available for a L0 MDO having an org hierarchy framework,
-        // every other non CCA MDO (L1 and onwards) keeps working within its own organisation
+        // Organisation condition is only available to a non CCA MDO whose organisation is part of
+        // an org hierarchy framework, at any level of it. One that is in no hierarchy, or whose
+        // L0 has no framework created yet, keeps working within its own organisation
         if (!this.canSelectOrgHierarchy) {
           this.config.accessControlCriteriaSelection.optionsEntity = _.filter(
             this.config.accessControlCriteriaSelection.optionsEntity,
@@ -212,14 +216,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * For a non CCA L0 MDO, reads the org hierarchy framework of the logged in organisation and keeps
-   * the flattened organisation list (L0 -> L10) ready for the organisation selection dialog.
+   * Reads the org hierarchy framework that applies to the logged in organisation and keeps the
+   * flattened organisation list (L0 -> L10) ready for the organisation selection dialog.
+   *
+   * It is not the L0 alone any more: an organisation at any level of the hierarchy is offered
+   * the condition, and one below the L0 answers from the framework of the L0 it is mapped to -
+   * the framework itself only ever exists on the L0. An organisation outside a hierarchy, or
+   * one whose L0 has no framework created yet, resolves to nothing and is offered nothing.
+   *
+   * The whole of it belongs to the MDO portal. The library is shared with the creation portal,
+   * which has no org hierarchy behind it, so the application is checked here as well as at the
+   * one place this is called from - neither the org read nor the framework read is worth making
+   * anywhere else, and the condition is not worth offering there.
    */
   private async loadOrgHierarchyOrganisations(): Promise<void> {
     this.canSelectOrgHierarchy = false;
     this.accessControlService.orgHierarchyOrganisations.set([]);
 
-    if (!this.accessControlService.isL0MdoUser(this.config) || !this.accessControlService.getOrgHierarchyFrameworkId(this.config)) {
+    if (this.config?.application !== NsAccessControlConfig.Application.MDO) {
+      return;
+    }
+
+    if (!this.accessControlService.hasOrgHierarchyRole(this.config)) {
       return;
     }
 
@@ -807,7 +825,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   checkIfAnyConditionContainsDisabledMessage(userGroupIndex: number): boolean {
-    return this.userGroup.at(userGroupIndex).get("conditions").value.some((condition: any) => condition.disabledMessage);
+    return this.userGroup.at(userGroupIndex).get("conditions")?.value.some((condition: any) => condition.disabledMessage);
   }
 
   manageSelections(conditionForm: any, ruleForm: any, userGroupIndex: number, activeTabSelected = 0): void {
@@ -961,7 +979,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   processCadreConfigMapping(userGroupIndex: number): void {
     const ruleGroup = this.userGroup.at(userGroupIndex);
-    const conditionValue = ruleGroup.get("conditions").value;
+    const conditionValue = ruleGroup.get("conditions")?.value;
     if (conditionValue && conditionValue.length) {
       const services = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Service);
       const cadre = conditionValue.find((ele: any) => ele.entity === NsAccessControlConfig.SelectionType.Cadre);
@@ -1205,6 +1223,48 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: selections };
   }
 
+  private processRequestCreationV2(group: any): any {
+    return {
+      userGroupId: this.config?.application === NsAccessControlConfig.Application.MDO
+        ? (group.savedUserGroupId || "")
+        : (group.id || uuidv4()),
+      userGroupName: group.name,
+      userGroupCriteriaList: group.conditions.map((condition: any) => {
+        let criteriaValue: string[];
+        if (
+          condition?.entity === NsAccessControlConfig.SelectionType.Users &&
+          condition?.selections?.length &&
+          condition?.selections[0]?.userId
+        ) {
+          const userIds = condition.selections?.map((user: any) => user?.userId) || [];
+          criteriaValue = userIds;
+        } else if (condition?.entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
+          criteriaValue = condition.selections[0];
+          return { criteriaKey: condition.entity, criteriaValue };
+
+        } else {
+          if (condition.selections.length && typeof condition.selections[0] === "object") {
+            criteriaValue = condition.selections?.map((sel: any) => sel?.fieldValue) || [];
+          } else {
+            criteriaValue = condition.selections?.map(String) || [];
+          }
+        }
+
+        if (condition.entity && criteriaValue && criteriaValue.length > 0) {
+          if (condition.entity === NsAccessControlConfig.SelectionType.Organizations) {
+            return this.createOrganisationCriteria(criteriaValue);
+          }
+          return {
+            criteriaKey: condition.entity,
+            criteriaValue,
+          };
+        }
+        return null;
+      })
+      .filter((criteria: any) => !!criteria), // Remove nulls
+    };
+  }
+
   processRequestCreation(): Promise<IUserGroupRequest> {
     return new Promise((resolve, reject) => {
       try {
@@ -1213,8 +1273,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         // Filter out user groups with empty userGroupCriteriaList
         const userGroups = data.userGroup
           .map((group: any) => ({
-            // Keep the id of an already saved user group, a brand new one gets its generated uuid
-            userGroupId: group.id || uuidv4(),
+            // MDO reports only an id the api issued, so a group that has never been saved reports
+            // none rather than a uuid minted here that would read as a saved group. Every other
+            // application keeps the id it has always sent
+            userGroupId: this.config?.application === NsAccessControlConfig.Application.MDO
+              ? (group.savedUserGroupId || "")
+              : (group.id || uuidv4()),
             userGroupName: group.name,
             userGroupCriteriaList: group.conditions.map((condition: any) => {
               let criteriaValue: string[];
@@ -1260,6 +1324,16 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         },
       };
 
+      if (!this.isCCA) {
+        requestPayload.accessControl.userGroups.forEach((group: any) => {
+          const rootOrgCrieteria = {
+            criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
+            criteriaValue: [this.config?.userConfig?.rootOrgId || ""],
+          }
+          group.userGroupCriteriaList.push(rootOrgCrieteria);
+        });
+      }
+
       resolve(requestPayload);
     } catch (error) {
       reject(error);
@@ -1286,7 +1360,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           // Create Organization condition
           const orgCondition = this.createConditionGroup(uuidv4(), 0);
           orgCondition.get("entity")?.setValue(NsAccessControlConfig.SelectionType.Organizations);
-          orgCondition.get("selections").setValue([this.config?.userConfig?.rootOrgId]);
+          orgCondition.get("selections")?.setValue([this.config?.userConfig?.rootOrgId]);
           
           // For Comprehensive Assessment Program, disable the organization field
       if (isComprehensiveCategory) {
@@ -1794,7 +1868,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       if (onlyOneCondition) {
         flag = false;
       } else {
-        activeManageSelection?.conditions?.map(item => {
+        activeManageSelection?.conditions?.map((item: any) => {
           if (item?.entity == condition?.entity && item?.selections.length > 0) {
             flag = true;
           }
@@ -1802,7 +1876,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
       if (activeManageSelection?.conditions?.length > 1) {
         let checkLastIndexHaveSelections = -1;
-        activeManageSelection?.conditions?.forEach((item, index) => {
+        activeManageSelection?.conditions?.forEach((item: any, index: number) => {
           if (item?.selections.length > 0) {
             checkLastIndexHaveSelections = index;
           }
@@ -1816,7 +1890,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return flag;
   }
 
-  hasOnlyOneArrayWithLength(data, key) {
+  hasOnlyOneArrayWithLength(data: any, key: any) {
     let count = 0;
     for (const obj of data) {
       if (Array.isArray(obj[key]) && obj[key].length > 0) {
@@ -1829,7 +1903,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   resetActiveUserGroupFields(condition: any, rule: any, userGroupIndex: any) {
     let accessControlFormData = this.accessControlForm.getRawValue();
     let activeManageSelection = accessControlFormData && accessControlFormData?.userGroup?.[userGroupIndex];
-    let activeConditionIndex = activeManageSelection?.conditions?.findIndex(item => {
+    let activeConditionIndex = activeManageSelection?.conditions?.findIndex((item: any) => {
       return item?.entity === condition?.entity && item?.selections?.length > 0;
     });
     let activeManageSelectionArrLength = activeManageSelection?.conditions.length;
@@ -2082,7 +2156,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             selections = Array.isArray(criteriaValue) ? criteriaValue : [criteriaValue];
           } 
           else {
-           
             const configOptions = this.accessControlCriteriaSelection.optionsEntity;
             const isPresent = configOptions.some((field: any) => field.value === criteriaKey);
 
@@ -2128,6 +2201,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
         const ruleGroup = this.fb.group({
           id: [group.userGroupId || uuidv4()],
+          // The id the api issued for this group, empty for one that has never been saved. Kept
+          // apart from `id`, which is only what this component tracks groups by
+          savedUserGroupId: [group.userGroupId || ""],
           name: [group.userGroupName],
           description: [`Description for ${group.userGroupName}`],
           conditions: conditions,
@@ -2243,25 +2319,44 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  saveReusableUserGroups(): void {
+  isUserGroupSaved(userGroupIndex: number): boolean {
+    return !!this.savedUserGroupIdAt(userGroupIndex);
+  }
+
+  private savedUserGroupIdAt(userGroupIndex: number): string {
+    return this.userGroup?.at(userGroupIndex)?.get("savedUserGroupId")?.value || "";
+  }
+
+  saveReusableUserGroups(userGroupIndex: number = 0): void {
+    const rawGroup = this.accessControlForm.getRawValue()?.userGroup?.[userGroupIndex];
+    if (!rawGroup) {
+      return;
+    }
+    const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
+
     const dialogRef = this.dialog.open(SaveUserGroupComponent, {
       width: "480px",
-      data: { userGroupName: this.userGroup?.value[0]?.name },
+      data: { userGroupName: rawGroup.name },
       panelClass: "save-user-group-dialog"
     });
 
-    dialogRef.afterClosed().subscribe(async (result: any) => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result?.action !== NsAccessControlConfig.IActions.Confirm) {
         return;
       }
-      this.userGroup?.at(0)?.get("name")?.setValue(result?.userGroupName);
+      this.userGroup?.at(userGroupIndex)?.get("name")?.setValue(result?.userGroupName);
 
-      const requestPayload = await this.processRequestCreation();
-      const criteria = requestPayload?.accessControl?.userGroups?.[0]?.userGroupCriteriaList;
-
+      const mapped = this.processRequestCreationV2({ ...rawGroup, name: result?.userGroupName });
+      const criteria = mapped?.userGroupCriteriaList;
       if (!criteria?.length) {
         this.callSnackbar("Please add at least one condition with a selection.", "error");
         return;
+      }
+      if (!this.isCCA) {
+        criteria.push({
+          criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
+          criteriaValue: [this.config?.userConfig?.rootOrgId || ""]
+        });
       }
 
       const payload: IReusableUserGroupRequest = {
@@ -2270,16 +2365,30 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           criteria: criteria
         }
       };
-      if(this.config?.context?.userGroupId) {
-        payload.request.userGroupId = this.config?.context?.userGroupId;
-        this.updateUserGroup(payload, );
+      if (savedUserGroupId) {
+        payload.request.userGroupId = savedUserGroupId;
+        this.updateUserGroup(payload, userGroupIndex);
       } else {
-        this.createUserGroup(payload);
+        this.createUserGroup(payload, userGroupIndex);
       }
     });
   }
 
-  createUserGroup(payload: IReusableUserGroupRequest): void {
+  /** Puts a saved id onto the first group, without it the next save would copy it instead. */
+  private keepSavedUserGroupId(userGroupId: string, userGroupIndex: number = 0): void {
+    const group = this.userGroup?.at(userGroupIndex) as FormGroup;
+    if (!userGroupId || !group) {
+      return;
+    }
+    const control = group.get("savedUserGroupId");
+    if (control) {
+      control.setValue(userGroupId, { emitEvent: false });
+    } else {
+      group.addControl("savedUserGroupId", this.fb.control(userGroupId), { emitEvent: false });
+    }
+  }
+
+   createUserGroup(payload: IReusableUserGroupRequest, userGroupIndex: number = 0): void {
     this.isSavingReusableUserGroup = true;
     this.accessControlService
       .createReusableUserGroup(payload)
@@ -2287,7 +2396,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: response => {
           if (response?.result) {
-            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "CREATED" });
+            this.keepSavedUserGroupId(response.result?.usergroupid, userGroupIndex);
+            this.accessControlData.emit({
+              userGroup: response.result.accessControl?.userGroups,
+              accessType: this.accessType,
+              action: "CREATED",
+              userGroupId: response.result?.usergroupid
+            });
             this.callSnackbar("User group saved successfully", "success");
           } else {
             this.callSnackbar("Could not save the user group, Please try again.", "error");
@@ -2301,7 +2416,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       });
   }
 
-  updateUserGroup(payload: IReusableUserGroupRequest): void {
+  updateUserGroup(payload: IReusableUserGroupRequest, userGroupIndex: number = 0): void {
     this.isSavingReusableUserGroup = true;
     this.accessControlService
       .updateReusableUserGroup(payload)
@@ -2309,7 +2424,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: response => {
           if (response?.result) {
-            this.accessControlData.emit({ userGroup: response.result.accessControl?.userGroups, accessType: this.accessType, action: "UPDATED" });
+            this.keepSavedUserGroupId(response.result?.usergroupid, userGroupIndex);
+            this.accessControlData.emit({
+              userGroup: response.result.accessControl?.userGroups,
+              accessType: this.accessType,
+              action: "UPDATED",
+              userGroupId: response.result?.usergroupid
+            });
             this.callSnackbar("User group updated successfully", "success");
           } else {
             this.callSnackbar("Could not update the user group, Please try again.", "error");
@@ -2331,12 +2452,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
    * Lists the saved (reusable) user groups and applies the selected one as a new OR group.
    * The saved group itself is never changed by this.
    */
+  /** Ids of the saved groups already on this step, they cannot be taken a second time. */
+  private usedUserGroupIds(): string[] {
+    return (this.userGroup?.getRawValue() || [])
+      .map((group: any) => group?.savedUserGroupId)
+      .filter((userGroupId: any) => !!userGroupId);
+  }
+
   reuseSavedUserGroup(): void {
     const dialogRef = this.dialog.open(ReuseUserGroupComponent, {
       width: "860px",
       maxWidth: "95vw",
       autoFocus: false,
-      data: { optionsEntity: this.accessControlCriteriaSelection?.optionsEntity },
+      data: {
+        optionsEntity: this.accessControlCriteriaSelection?.optionsEntity,
+        usedUserGroupIds: this.usedUserGroupIds()
+      },
       panelClass: "reuse-user-group-dialog"
     });
 
@@ -2356,7 +2487,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe({
         next: response => {
           const groupName = response?.result?.usergroupname || savedUserGroup.name;
-          const isAdded = this.addUserGroupFromCriteria(groupName, response?.result?.criteria || []);
+          const isAdded = this.addUserGroupFromCriteria(
+            groupName,
+            response?.result?.criteria || [],
+            response?.result?.usergroupid || savedUserGroup.id
+          );
           if (isAdded) {
             // Sends the updated user groups out the same way every other change does
             this.applyAccessControlValue(true, false);
@@ -2373,7 +2508,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       });
   }
 
-  private addUserGroupFromCriteria(groupName: string, criteria: any[]): boolean {
+  private addUserGroupFromCriteria(groupName: string, criteria: any[], savedUserGroupId: string = ""): boolean {
     const conditions = this.fb.array([]) as FormArray;
 
     criteria.forEach((entry: any) => {
@@ -2412,6 +2547,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     this.userGroup.push(
       this.fb.group({
         id: [uuidv4()],
+        savedUserGroupId: [savedUserGroupId],
         name: [groupName],
         description: [`Description for ${groupName}`],
         conditions: conditions,

@@ -36,10 +36,10 @@
   padding: 8px 8px 0;
 
   .karma-redeem-icon {
-    height: 48px;
-    width: 48px;
+    height: 64px;
+    width: 64px;
     object-fit: contain;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   .karma-redeem-header {
@@ -52,7 +52,8 @@
   }
 
   .karma-redeem-message {
-    margin: 2px 0 0;
+    margin: 0;
+    max-width: 420px;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
@@ -83,13 +84,13 @@
 
   .karma-redeem-continue {
     color: #fff;
-    background-color: #1b4ca1;
-    border: 1px solid #1b4ca1;
+    background-color: var(--color-primary-500, #4c1d95);
+    border: 1px solid var(--color-primary-500, #4c1d95);
   }
 
   .karma-redeem-cancel {
-    color: #1b4ca1;
+    color: var(--color-primary-500, #4c1d95);
     background-color: #fff;
-    border: 1px solid #1b4ca1;
+    border: 1px solid var(--color-primary-500, #4c1d95);
   }
 }
