@@ -1252,12 +1252,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    // Organisations picked out of the org hierarchy scope the group on their own. Everywhere else
-    // an organisation criteria is not the user's hierarchy, so the own organisation still scopes it
-    const namesHierarchyOrganisations =
-      this.canSelectOrgHierarchy &&
-      criteria.some((entry: any) => entry?.criteriaKey === NsAccessControlConfig.SelectionType.Organizations);
-    if (namesHierarchyOrganisations) {
+    // A group that already names organisations is scoped by them, wherever they came from - picked
+    // out of the org hierarchy, or set on the content itself. The own organisation on top of them
+    // is the same id twice, or an organisation the selected ones do not contain, matching nobody.
+    const namesOrganisations = criteria.some(
+      (entry: any) => entry?.criteriaKey === NsAccessControlConfig.SelectionType.Organizations
+    );
+    if (namesOrganisations) {
       return;
     }
 
