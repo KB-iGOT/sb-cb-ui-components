@@ -1306,16 +1306,6 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         },
       };
 
-      if (!this.isCCA) {
-        requestPayload.accessControl.userGroups.forEach((group: any) => {
-          const rootOrgCrieteria = {
-            criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
-            criteriaValue: [this.config?.userConfig?.rootOrgId || ""],
-          }
-          group.userGroupCriteriaList.push(rootOrgCrieteria);
-        });
-      }
-
       resolve(requestPayload);
     } catch (error) {
       reject(error);
@@ -2334,7 +2324,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         this.callSnackbar("Please add at least one condition with a selection.", "error");
         return;
       }
-      if (!this.isCCA) {
+      if (!this.isCCA && criteria.every((c: any) => c.criteriaKey !== NsAccessControlConfig.SelectionType.Organizations)) {
         criteria.push({
           criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
           criteriaValue: [this.config?.userConfig?.rootOrgId || ""]
