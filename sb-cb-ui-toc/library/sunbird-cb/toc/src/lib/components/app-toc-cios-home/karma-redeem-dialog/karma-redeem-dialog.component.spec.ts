@@ -3,6 +3,8 @@
 
 import { KarmaRedeemDialogComponent } from './karma-redeem-dialog.component'
 
+const DEDUCTION_COPY = 'Karma Coins will be deducted from your Karma Wallet if you proceed with enrolment.'
+
 describe('KarmaRedeemDialogComponent', () => {
   let component: KarmaRedeemDialogComponent
 
@@ -56,56 +58,56 @@ describe('KarmaRedeemDialogComponent', () => {
       expect(component.header).toBe('Custom header')
     })
 
-    it('should return the default header when data has no header', () => {
+    it('should return an empty header when data has no header', () => {
       component.data = {}
-      expect(component.header).toBe(`You're all set! 🎉`)
+      expect(component.header).toBe('')
     })
 
-    it('should return the default header when header is an empty string', () => {
+    it('should return an empty header when header is an empty string', () => {
       component.data = { header: '' }
-      expect(component.header).toBe(`You're all set! 🎉`)
+      expect(component.header).toBe('')
     })
 
-    it('should return the default header when data is null', () => {
+    it('should return an empty header when data is null', () => {
       component.data = null
-      expect(component.header).toBe(`You're all set! 🎉`)
+      expect(component.header).toBe('')
     })
   })
 
   describe('message', () => {
     it('should return the message from data when provided', () => {
-      component.data = { message: 'Custom message', requiredKarmaPoints: 50 }
+      component.data = { message: 'Custom message', requiredKarmaCoins: 50 }
       expect(component.message).toBe('Custom message')
     })
 
-    it('should build the message from requiredKarmaPoints when message is absent', () => {
-      component.data = { requiredKarmaPoints: 120 }
-      expect(component.message).toBe('Redeem 120 Karma Coins to unlock this course and start learning.')
+    it('should build the message from requiredKarmaCoins when message is absent', () => {
+      component.data = { requiredKarmaCoins: 120 }
+      expect(component.message).toBe(`120 ${DEDUCTION_COPY}`)
     })
 
-    it('should treat zero required karma points as a valid value', () => {
-      component.data = { requiredKarmaPoints: 0 }
-      expect(component.message).toBe('Redeem 0 Karma Coins to unlock this course and start learning.')
+    it('should treat zero required karma coins as a valid value', () => {
+      component.data = { requiredKarmaCoins: 0 }
+      expect(component.message).toBe(`0 ${DEDUCTION_COPY}`)
     })
 
-    it('should fall back to zero karma coins when requiredKarmaPoints is missing', () => {
+    it('should fall back to zero karma coins when requiredKarmaCoins is missing', () => {
       component.data = {}
-      expect(component.message).toBe('Redeem 0 Karma Coins to unlock this course and start learning.')
+      expect(component.message).toBe(`0 ${DEDUCTION_COPY}`)
     })
 
-    it('should fall back to zero karma coins when requiredKarmaPoints is null', () => {
-      component.data = { requiredKarmaPoints: null }
-      expect(component.message).toBe('Redeem 0 Karma Coins to unlock this course and start learning.')
+    it('should fall back to zero karma coins when requiredKarmaCoins is null', () => {
+      component.data = { requiredKarmaCoins: null }
+      expect(component.message).toBe(`0 ${DEDUCTION_COPY}`)
     })
 
     it('should fall back to zero karma coins when data is null', () => {
       component.data = null
-      expect(component.message).toBe('Redeem 0 Karma Coins to unlock this course and start learning.')
+      expect(component.message).toBe(`0 ${DEDUCTION_COPY}`)
     })
 
-    it('should build the message from requiredKarmaPoints when message is an empty string', () => {
-      component.data = { message: '', requiredKarmaPoints: 5 }
-      expect(component.message).toBe('Redeem 5 Karma Coins to unlock this course and start learning.')
+    it('should build the message from requiredKarmaCoins when message is an empty string', () => {
+      component.data = { message: '', requiredKarmaCoins: 5 }
+      expect(component.message).toBe(`5 ${DEDUCTION_COPY}`)
     })
   })
 

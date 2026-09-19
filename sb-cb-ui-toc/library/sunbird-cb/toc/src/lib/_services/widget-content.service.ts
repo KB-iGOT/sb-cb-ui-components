@@ -57,7 +57,7 @@ const API_END_POINTS = {
   CLAIM_KARMAPOINTS: '/apis/proxies/v8/claimkarmapoints',
   USER_KARMA_POINTS: '/apis/proxies/v8/user/totalkarmapoints',
   EXT_CONTENT_READ: (contentId: any) => `/apis/proxies/v8/cios/v1/content/read/${contentId}`,
-  EXT_USER_COURSE_ENROLL : (contentId: any) => `/apis/proxies/v8/cios-enroll/v1/readby/useridcourseid/${contentId}`,
+  EXT_USER_COURSE_ENROLL : (contentId: any) => `/apis/proxies/v8/cios-enroll/v2/readby/useridcourseid/${contentId}`,
   EXT_CONTENT_EROLL: `/apis/proxies/v8/cios-enroll/v1/create`,
   EXT_PUBLIC_CONTENT: (partent: any, contentId: any) => `/apis/proxies/v8/ciosIntegration/v1/read/content/${partent}/${contentId}`,
   ENROLL_CONTENT_DATA: (userId: string,) => `/apis/proxies/v8/learner/course/v4/user/enrollment/details/${userId}`,

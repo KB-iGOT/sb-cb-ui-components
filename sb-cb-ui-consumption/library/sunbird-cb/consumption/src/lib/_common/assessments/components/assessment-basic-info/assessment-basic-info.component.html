@@ -235,7 +235,7 @@
           <label class="field-label required">
             Number of Re-attempts
             <mat-icon class="info-icon" matTooltip="If count is zero then learner will not have option to re-attempt the test and
-                    if count is one or more than 1 up to 5 then learner can re-attempt the same test as per entered
+                    if count is one or more than 1 up to {{ maxRetakeAttempts }} then learner can re-attempt the same test as per entered
                     count by clicking on ‘Re-attempt test’ button given on result page.">info_outline</mat-icon>
           </label>
           <!-- A comprehensive assessment takes the count typed in, the usual ones stay on
