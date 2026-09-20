@@ -1,7 +1,7 @@
 <div class="filter-sidebar padding-m">
   <!-- Header with Filter By and Clear All -->
   <div class="flex items-center justify-between" *ngIf="showHeader">
-    <p class="mat-subheading-1 margin-bottom-s font-bold-imp text-dark">
+    <p class="mat-subheading-1 margin-bottom-s font-bold-imp filter-heading">
       {{'searchfilters.filterBy' | translate}}
     </p>
     <button *ngIf="showClearAllGlobal && filtersAppliedCount > 0" mat-flat-button (click)="clearAllFilters()"
@@ -27,7 +27,7 @@
     <div class="filter-section-container" *ngIf="config.options && config.options.length > 0">
       <!-- Section Header -->
       <div class="flex items-center justify-between">
-        <p class="mat-subheading-1 mt-4 font-bold-imp text-dark mb-2">{{ config.heading }}</p>
+        <p class="mat-subheading-1 mt-4 font-bold-imp filter-heading mb-2">{{ config.heading }}</p>
         <button *ngIf="config.showClearAll && selectedFilters[config.key]?.length > 0" mat-flat-button
           (click)="clearSectionFilters(config.key)" class="section-clear-btn text-xs">
           {{ 'gyaanKarmayogi.clearAll' | translate }}
@@ -61,7 +61,7 @@
           </section>
         </mat-selection-list>
         <!-- No results message -->
-        <div *ngIf="hasNoSearchResults(config)" class="no-results-message mat-body-2 text-muted py-2">
+        <div *ngIf="hasNoSearchResults(config)" class="no-results-message mat-body-2 py-2">
           No results found
         </div>
       </ng-container>
@@ -85,7 +85,7 @@
           </section>
         </mat-radio-group>
         <!-- No results message -->
-        <div *ngIf="hasNoSearchResults(config)" class="no-results-message mat-body-2 text-muted py-2">
+        <div *ngIf="hasNoSearchResults(config)" class="no-results-message mat-body-2 py-2">
           No results found
         </div>
       </ng-container>

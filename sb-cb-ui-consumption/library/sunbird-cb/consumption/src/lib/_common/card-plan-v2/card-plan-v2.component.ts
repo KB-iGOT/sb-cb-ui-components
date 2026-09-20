@@ -19,6 +19,17 @@ import { PlanCardViewModel } from '../strips-v2/models/card.model'
 import { ContentApiService } from '../strips-v2/services/content-api.service'
 
 /**
+ * A plan type as the card holds it, mapped to the key `/app/plans` speaks. The two
+ * vocabularies differ — the card carries the API's 'APAR' / 'AICBP' / 'CBP', the listing
+ * reads lowercase keys off the URL — so the translation happens once, here.
+ */
+const LISTING_PLAN_TYPE: Record<string, string> = {
+  APAR: 'apar',
+  AICBP: 'aicbp',
+  CBP: 'cbp',
+}
+
+/**
  * Card for a single CBP / APAR / AI-CBP training plan (CardType.PlanCard).
  *
  * A plan is not content, so this is a sibling of CardCourseV2Component rather than a mode of
@@ -126,7 +137,22 @@ export class CardPlanV2Component {
       return
     }
     this.emitDetails()
-    this.router.navigate([`/app/plans/${plan.identifier}`])
+    // The detail page resolves the plan out of the CBPlan V4 cache in IndexedDB, which is
+    // keyed by plan year — so it is handed the year THIS card was built from rather than left
+    // to guess at one. `planType` comes along so the page's back link points at the right
+    // listing before the plan itself has resolved.
+    //
+    // Either is omitted when the card does not carry it. Both are hints: the page falls back
+    // to the read API, and to the plan's own type, without them.
+    const queryParams: Record<string, string> = {}
+    if (plan.planYear) {
+      queryParams['planYear'] = plan.planYear
+    }
+    const listingType = LISTING_PLAN_TYPE[plan.planType ?? '']
+    if (listingType) {
+      queryParams['planType'] = listingType
+    }
+    this.router.navigate([`/app/plans/${plan.identifier}`], { queryParams })
   }
 
   emitDetails(): void {
