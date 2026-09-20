@@ -13,8 +13,10 @@
     </mat-form-field>
   </div>
 
-  @if (isErrorVisible()) {
+  @if (isRequiredErrorVisible()) {
     <div class="save-user-group-error mt-1">User group name is required</div>
+  } @else if (isMaxLengthErrorVisible()) {
+    <div class="save-user-group-error mt-1">User group name cannot exceed {{ maxNameLength }} characters</div>
   }
 
   <div class="save-user-group-actions flex items-center justify-center gap-4 mt-4">

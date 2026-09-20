@@ -95,6 +95,6 @@
 
   <div class="reuse-actions flex items-center justify-end gap-4 mt-4">
     <button mat-flat-button class="mat-btn-outline gap-2 border-radius-4" (click)="cancel()">Cancel</button>
-    <button mat-flat-button class="new-bg-color text-white" [disabled]="!selectedGroupId()" (click)="apply()">Apply group</button>
+    <button mat-flat-button class="new-bg-color text-white" [disabled]="isApplyDisabled()" (click)="apply()">Apply group</button>
   </div>
 </div>

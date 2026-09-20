@@ -77,6 +77,16 @@ export class ReuseUserGroupComponent implements OnInit {
     return this.filteredGroups().slice(start, start + this.pageSize());
   });
 
+  readonly selectedGroup = computed(() => {
+    const selectedId = this.selectedGroupId();
+    return selectedId ? this.groups().find(group => group.id === selectedId) : undefined;
+  });
+
+  readonly isApplyDisabled = computed(() => {
+    const group = this.selectedGroup();
+    return !group || this.isAlreadyUsed(group);
+  });
+
   readonly hasMoreThanLoaded = computed(() => this.totalCount() > this.groups().length);
   readonly isPaginationVisible = computed(() => this.filteredGroups().length > this.pageSize());
   readonly isCCA = computed(() => this.accessControlService.accessControlConfig()?.userConfig.org?.isCCA || false);
@@ -128,7 +138,7 @@ export class ReuseUserGroupComponent implements OnInit {
     if (this.isAlreadyUsed(group)) {
       return;
     }
-    this.selectedGroupId.set(group?.id);
+    this.selectedGroupId.set(group?.id || "");
   }
 
   cancel(): void {
@@ -136,7 +146,7 @@ export class ReuseUserGroupComponent implements OnInit {
   }
 
   apply(): void {
-    const group = this.groups().find(item => item.id === this.selectedGroupId());
+    const group = this.selectedGroup();
     if (!group || this.isAlreadyUsed(group)) {
       return;
     }
