@@ -30,16 +30,21 @@ export const API_REGISTRY: ApiRegistryConfig = {
     method: ApiMethod.Get,
     queryParams: { category: 'cyber' }
   },
-  // ContentApiService.loadContent() short-circuits these keys to
-  // WidgetUserServiceLib.fetchCbpPlanListV3(), which owns the plan year, the MAX(endDate)
-  // resolution and the IndexedDB cache. These entries are kept only so the registry stays
-  // an accurate description of the endpoint each key represents.
+  // ContentApiService.loadContent() short-circuits these keys to UserCbpPlansService, which
+  // owns the plan year, the APAR/CBP/AI-CBP split and the IndexedDB cache. All three are
+  // slices of ONE V4 response, so they cost a single request between them. These entries are
+  // kept only so the registry stays an accurate description of the endpoint each key
+  // represents.
   aparApi: {
-    endpoint: '/apis/proxies/v8/cbplan/v3/user/dictionary',
+    endpoint: '/apis/proxies/v8/cbplan/v4/user/dictionary',
     method: ApiMethod.Post
   },
   trainingPlanApi: {
-    endpoint: '/apis/proxies/v8/cbplan/v3/user/dictionary',
+    endpoint: '/apis/proxies/v8/cbplan/v4/user/dictionary',
+    method: ApiMethod.Post
+  },
+  draftCBPplanApi: {
+    endpoint: '/apis/proxies/v8/cbplan/v4/user/dictionary',
     method: ApiMethod.Post
   },
   // ── Plan-level lists (CardType.PlanCard) ───────────────────────────────────────

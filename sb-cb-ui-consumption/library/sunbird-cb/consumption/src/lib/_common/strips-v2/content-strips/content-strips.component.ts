@@ -1,4 +1,4 @@
-import { Component, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
+import { Component, computed, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { forkJoin, of } from 'rxjs'
@@ -12,15 +12,21 @@ import { CardCourseV2Component, CardPlanV2Component, ContentDictionaryService } 
 import { CbpPlanCacheService } from '../../../_services/cbp-plan-cache.service'
 import { Router } from '@angular/router'
 
-// Mirrors SearchCategory.TrainingPlans in @sunbird-cb/search-listing. Duplicated rather
-// than imported: consumption does not depend on the search-listing package.
-const TRAINING_PLANS_SEARCH_CATEGORY = 'training-plans'
-
-// The plan type the CBP plan page offers for AI-drafted plans — the same bucket
-// `draftCBPplanApi` is built from (`planTypeV2` of AICBP). CbpPlanComponent maps this hint
-// onto whichever plan type cbp.json configures for that bucket, so the id here need only
-// name the bucket, not match the configured label.
-const AI_DRAFTED_PLAN_TYPE = 'aicbp'
+/**
+ * The plan listing's `planType` key for each plan strip, by the strip's own API key.
+ *
+ * Covers both plan sources: the CBPlan V4 dictionary trio (aparApi / trainingPlanApi /
+ * draftCBPplanApi) and the V2 plan-search trio (*PlanListApi). A key that is absent here
+ * is not a plan strip, and its View All is left exactly as configured.
+ */
+const PLAN_TYPE_BY_API_KEY: Record<string, string> = {
+  aparApi: 'apar',
+  aparPlanListApi: 'apar',
+  trainingPlanApi: 'cbp',
+  trainingPlanListApi: 'cbp',
+  draftCBPplanApi: 'aicbp',
+  draftCBPplanListApi: 'aicbp',
+}
 
 @Component({
   selector: 'sb-uic-content-strips',
@@ -58,6 +64,21 @@ export class ContentStripsComponent implements OnInit {
   cards = signal<(CardViewModel | PlanCardViewModel)[]>([]);
   skeletonArray = signal<number[]>([]);
   loading = signal<boolean>(true);
+
+  /**
+   * The financial year the plans on screen actually belong to, read off the cards rather
+   * than asked of the config or recomputed from today's date.
+   *
+   * Both plan sources stamp it on — UserCbpPlansService from the year slice the V4 response
+   * came back under, the V2 plan search from the plan itself — and it is the only place the
+   * answer is reliable: CBPlan falls back to an earlier year when the user has no plans for
+   * the year that was requested (ask for 2026-27, receive 2025-26). Scanning for the first
+   * card that carries one keeps a card mapped without it from blanking the year.
+   */
+  private readonly loadedPlanYear = computed<string>(() => {
+    const dated = this.cards().find(card => !!(card as PlanCardViewModel).planYear)
+    return (dated as PlanCardViewModel | undefined)?.planYear ?? ''
+  });
 
   // Dummy cards for carousel testing
   dummyCards = signal([
@@ -167,45 +188,31 @@ export class ContentStripsComponent implements OnInit {
     if (!viewMoreUrl) {
       return null
     }
-    switch (config?.apiDetailsKey) {
-      case 'aparApi':
-        return {
-          ...viewMoreUrl,
-          queryParams: { ...(viewMoreUrl.queryParams || {}), isApar: 'true' },
-        }
-      // The *PlanListApi keys are deliberately absent from this switch: plan cards link to the
-      // plan listing (/app/plans), which carries its own params, so their configured
-      // viewMoreUrl is passed through untouched by the default branch below.
-      case 'draftCBPplanApi':
-        // Same contract as the APAR strip above: the plan page opens on the plan type the
-        // strip was showing rather than on all of them. `planType` and not `category` —
-        // CbpPlanComponent reads its plan type filter off that param, where `category` is
-        // how the search listing names the same idea.
-        return {
-          ...viewMoreUrl,
-          queryParams: { ...(viewMoreUrl.queryParams || {}), planType: AI_DRAFTED_PLAN_TYPE },
-        }
-      case 'trainingPlanApi':
-        // The listing page drives BOTH the visible result set (LearnSearchComponent
-        // .seeAllResults) and the pre-checked category checkbox (SearchFiltersComponent
-        // .setCategoryType) off the `category` query param, so it is the only thing that
-        // pins the page to Training Plans.
-        //
-        // `f` is deliberately dropped: GlobalSearchComponent turns it into `paramFilters`,
-        // and LearnSearchComponent handles that branch first — it forces seeAllResult back
-        // to Courses and returns before `searchCategory` is ever read. `q` is defaulted to
-        // an empty string because GlobalSearchComponent only builds `searchParam` (and so
-        // only runs a search) when the URL actually carries a `q`.
-        return {
-          path: viewMoreUrl.path,
-          queryParams: {
-            q: '',
-            ...(viewMoreUrl.queryParams || {}),
-            category: TRAINING_PLANS_SEARCH_CATEGORY,
-          },
-        }
-      default:
-        return viewMoreUrl
+
+    const planType = PLAN_TYPE_BY_API_KEY[config?.apiDetailsKey ?? '']
+    if (!planType) {
+      return viewMoreUrl
+    }
+
+    // A plan strip's View All opens the plan listing (/app/plans) on the pill the user is
+    // looking at, and the listing takes both of those off the URL.
+    //
+    // `planType` is derived from the strip's own API key rather than trusted from the
+    // config. The two have to agree — a pill fetching CBP plans and linking to planType=apar
+    // lands the user on somebody else's list — and the API key is the half that also decides
+    // which plans the strip shows, so it is the half that cannot be wrong.
+    //
+    // `planYear` is the year the plans on screen ARE, not the year that was asked for; see
+    // loadedPlanYear. It is omitted when no card carries one, which leaves the listing on
+    // its own default rather than sending it an empty param to fall back from.
+    const planYear = this.loadedPlanYear()
+    return {
+      ...viewMoreUrl,
+      queryParams: {
+        ...(viewMoreUrl.queryParams ?? {}),
+        planType,
+        ...(planYear ? { planYear } : {}),
+      },
     }
   }
 

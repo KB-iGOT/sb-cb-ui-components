@@ -324,10 +324,16 @@ export class CardTransformerService {
     const planType = this.resolvePlanType(item)
     switch (apiDetailsKey) {
       case 'aparPlanListApi':
+      // CBPlan V4 hands each section its own pre-split list, so this is a guard rather
+      // than the filter that does the work — it keeps a list that reached the wrong
+      // section from rendering there.
+      case 'aparApi':
         return planType === 'APAR'
       case 'draftCBPplanListApi':
+      case 'draftCBPplanApi':
         return planType === 'AICBP'
       case 'trainingPlanListApi':
+      case 'trainingPlanApi':
         return planType === 'CBP'
       // An unrecognised key must not silently empty the strip — show every plan.
       default:
@@ -337,10 +343,15 @@ export class CardTransformerService {
 
   private toPlanCard(item: Record<string, unknown>): PlanCardViewModel {
     const contentList = item?.['contentList']
+    // Resolved once: the CA tag is gated on the plan being APAR, so the two must agree.
+    const planType = this.resolvePlanType(item)
+    const comprehensiveAssessment = this.firstString([item?.['comprehensiveAssessment']])
 
     return {
-      // The plan list sends the plan id as `id`; `identifier` is only present on content.
-      identifier: this.firstString([item?.['id'], item?.['identifier']]),
+      // Each source names the plan id differently: the plan search sends `id`, CBPlan V4
+      // sends `planId`, and `identifier` is only ever present on content. Missing it leaves
+      // the card unclickable, so all three are accepted.
+      identifier: this.firstString([item?.['id'], item?.['planId'], item?.['identifier']]),
       title: this.firstString([item?.['name'], item?.['planName']]),
       planYear: this.firstString([item?.['planYear']]),
       endDate: this.firstString([item?.['endDate']]),
@@ -351,16 +362,30 @@ export class CardTransformerService {
       createdByName: this.firstString([
         item?.['orgName'],
         item?.['organisationName'],
+        // CBPlan V4 names the owning org outright, so it does not need the fallback below.
+        item?.['createdByOrgName'],
         this.resolveOrganisation(item)[0],
         item?.['createdByName'],
       ]),
+      // Left empty when the source has no logo; CardPlanV2Component substitutes the
+      // instance logo, which is a display decision and not the transformer's to make.
+      createdByLogo: this.firstString([
+        item?.['createdByOrgLogo'],
+        item?.['orgLogo'],
+        item?.['createdByLogo'],
+      ]),
       status: this.firstString([item?.['status']]),
-      planType: this.resolvePlanType(item),
+      planType,
+      // An APAR plan can carry a comprehensive assessment the learner has to clear on top
+      // of its courses, which the card flags. `comprehensiveAssessment` is a content id, so
+      // presence is the whole signal — the id itself is only needed on the detail page.
+      hasComprehensiveAssessment: planType === 'APAR' && !!comprehensiveAssessment,
       planStatus: this.resolvePlanStatus(item),
       metadata: item ?? {},
     }
   }
 
+  
   /** APAR wins over AI-CBP, matching the MAX(endDate) tie-break used for content cards. */
   private resolvePlanType(item: Record<string, unknown>): PlanCardViewModel['planType'] {
     if (item?.['isApar'] === true) {

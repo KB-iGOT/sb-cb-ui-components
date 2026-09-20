@@ -48,6 +48,7 @@
           <section class="mat-body-2 text-capitalize"
             *ngFor="let option of getFilteredOptions(config); trackBy: trackByFn">
             <mat-checkbox [checked]="option.isChecked || getSelectedFilter(option, config.key)"
+              [disabled]="!!option.disabled"
               (change)="onSelectionFilter($event, option, config.key)">
               <span class="min-width-adjust" [matTooltip]="option.displayName || capitalizeFirstLetter(option.name)"
                 [matTooltipPosition]="'right'">
@@ -71,6 +72,7 @@
           <section class="mat-body-2 text-capitalize"
             *ngFor="let option of getFilteredOptions(config); trackBy: trackByFn">
             <mat-radio-button [value]="option" [checked]="option.isChecked || getSelectedFilter(option, config.key)"
+              [disabled]="!!option.disabled"
               (change)="onRadioChange(option, config.key)">
               <span class="min-width-adjust" [matTooltip]="option.displayName || capitalizeFirstLetter(option.name)"
                 [matTooltipPosition]="'right'">
