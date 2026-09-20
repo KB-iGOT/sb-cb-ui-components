@@ -1,6 +1,71 @@
 /* Colours here are design-system custom properties, which the tokens redefine under
-   [data-theme="dark"] — so this panel follows the app's light/dark mode with no separate
-   dark ruleset. Every light-mode value below is the same colour the hardcoded hex was. */
+   [data-theme="dark"] — so this panel follows the app's light/dark mode. Every light-mode
+   value below is the same colour the hardcoded hex was.
+
+   The single :host-context([data-theme='dark']) block below is the file's only dark-specific
+   rule. It exists because two things the tokens hand over — caption-weight label text and the
+   primary-500 control fill — are correct for light mode but too weak on the dark card. */
+
+:host {
+  /* Option labels, their counts, and the applied-filter chips: everything the user reads to
+     make a choice. Captions weight in light mode, which is what the hardcoded hex was. */
+  --filter-option-text: var(--text-bandw-black-captions);
+
+  /* Fill of a selected radio / checked checkbox. Primary 500 is the brand blue the rest of
+     the app uses for a chosen control in light mode. */
+  --filter-control-accent: var(--color-primary-500);
+
+  /* Material reads these off the nearest ancestor that sets them, so pointing them at one
+     local property themes every radio and checkbox in the panel — including the hover, focus
+     and pressed variants, which otherwise fall back to Material's own palette and flash the
+     untinted blue mid-interaction. Only the SELECTED states are redirected: the unselected
+     ring and the checkmark already resolve to sensible values in both themes. */
+  --mat-radio-selected-icon-color: var(--filter-control-accent);
+  --mat-radio-selected-hover-icon-color: var(--filter-control-accent);
+  --mat-radio-selected-focus-icon-color: var(--filter-control-accent);
+  --mat-radio-selected-pressed-icon-color: var(--filter-control-accent);
+  --mat-checkbox-selected-icon-color: var(--filter-control-accent);
+  --mat-checkbox-selected-hover-icon-color: var(--filter-control-accent);
+  --mat-checkbox-selected-focus-icon-color: var(--filter-control-accent);
+  --mat-checkbox-selected-pressed-icon-color: var(--filter-control-accent);
+}
+
+:host-context([data-theme='dark']) {
+  /* The captions token flips to rgba(255,255,255,.72). That is legible — about 6.9:1 on the
+     card ground — but it renders as grey next to section headings sitting at 96%, and in this
+     panel the option labels ARE the content, not supporting text. So they get full-strength
+     white instead of the captions weight.
+
+     `--text-bandw-white-display` rather than a `-black-` token: the white scale is 96% white
+     in BOTH theme blocks, so it cannot flip back to black if this rule is ever inherited by
+     something rendered in light mode. */
+  --filter-option-text: var(--text-bandw-white-display);
+
+  /* Primary 500 (#1B4CA1) against the dark card ground (#1F3470) measures 1.45:1 — a
+     selected radio was all but invisible, and a checked box only read because of the white
+     tick sitting on it. Primary 300 takes it to 3.25:1, clearing the 3:1 that WCAG 1.4.11
+     asks of a non-text control, while staying dark enough for that white tick to hold up.
+
+     500 -> 300 is the same step the design system already makes for `--border-focus` between
+     its light and dark blocks, so this is that established pairing rather than a new one. */
+  --filter-control-accent: var(--color-primary-300);
+}
+
+/* The panel's headings — "Filter By" and each section's own. These carried `text-dark`, a
+   class no stylesheet the app loads actually defines, so they had no colour rule at all and
+   fell through to the UA default: pure black, which does not follow the theme and left them
+   near-invisible on the dark card. The heading token is rgba(0,0,0,.96) in light mode, so
+   this keeps what light mode already showed. */
+.filter-heading {
+  color: var(--text-bandw-black-heading);
+}
+
+/* Same story as .filter-heading: `text-muted` is undefined here. Captions weight, because
+   this one really is secondary text. */
+.no-results-message {
+  color: var(--text-bandw-black-captions);
+}
+
 .filter-sidebar {
   background: var(--environment-application-backgrounds-card-background);
   border-radius: 8px;
@@ -106,7 +171,7 @@
       /* stylelint-disable */
       font-family: Lato;
       /* stylelint-enable */
-      color: var(--text-bandw-black-captions);
+      color: var(--filter-option-text);
       display: inline-block;
       max-width: 14em;
       overflow: hidden;
@@ -160,7 +225,7 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 16.8px;
-  color: var(--text-bandw-black-captions);
+  color: var(--filter-option-text);
   display: inline-block;
   max-width: 11em;
   overflow: hidden;

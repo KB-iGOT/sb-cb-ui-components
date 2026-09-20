@@ -4,6 +4,7 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -58,6 +59,14 @@ export class CardCourseV2Component {
   isLoading = input<boolean>(false)
   isLiveOrMarkForDeletion = input<boolean>(true)
   config = input<any | null>(null)
+  /**
+   * Lock state of a comprehensive assessment, when the host knows it.
+   *
+   * It cannot be derived here: whether an assessment has opened up depends on every course in
+   * the plan around it, which this card has no sight of. So the page that does know passes it
+   * in, and the card renders it in the footer where a plan status would otherwise sit.
+   */
+  assessmentState = input<'locked' | 'available' | 'completed' | null>(null)
 
   // ── Output ─────────────────────────────────────────────────────────────────
   contentData = output<NsContent.IContent>()
@@ -100,10 +109,51 @@ export class CardCourseV2Component {
     return c?.metadata?.posterImage || c?.metadata?.appIcon || this.defaultThumbnail()
   })
 
+  /** Set when the thumbnail request itself fails; reset below whenever the content changes. */
+  private readonly thumbnailFailed = signal(false)
+
+  /**
+   * Show the content's category in place of the picture.
+   *
+   * Comprehensive assessments are authored without a poster, so thumbnailUrl() falls through
+   * to the generic instance default — a picture that says nothing, on a card whose whole job
+   * is to say "this is the assessment". Naming the category is more use than that.
+   *
+   * "No thumbnail" covers both an assessment that carries no image and one whose image does
+   * not load: the second is what a broken or missing poster URL actually looks like, and the
+   * default it falls back to is the same empty grey either way.
+   *
+   * Deliberately narrow — assessments only. Every other content type keeps the default
+   * picture, and an assessment that does have a working poster still shows it.
+   */
+  readonly showAssessmentMedia = computed(() => {
+    const c = this.content()
+    const hasOwnImage = !!(c?.metadata?.posterImage || c?.metadata?.appIcon)
+    return this.isComprehensiveAssessment() && (!hasOwnImage || this.thumbnailFailed())
+  })
+
+  onThumbnailError(): void {
+    this.thumbnailFailed.set(true)
+  }
+
   readonly displayType = computed<NsContent.EDisplayContentTypes>(() =>
     (this.content()?.courseCategory || this.content()?.metadata?.courseCategory || this.content()?.primaryCategory || this.content()?.metadata?.primaryCategory ||
       'Course') as NsContent.EDisplayContentTypes
   )
+
+  /**
+   * A comprehensive assessment, read off `displayType()` — the very category the chip prints.
+   *
+   * Reading the raw fields again in some order of my own is what broke this the first time:
+   * `displayType()` takes `courseCategory` before `primaryCategory`, and on this content the
+   * first non-empty one is not the assessment. Deriving from the same resolved value means
+   * the media area and the chip can never disagree about what the content is.
+   *
+   * Matched loosely because the payloads spell it both 'Comprehensive Assessment' and
+   * 'Comprehensive Assessment Program'.
+   */
+  readonly isComprehensiveAssessment = computed(() =>
+    /comprehensive\s+assessment/i.test(String(this.displayType() || '')))
 
   readonly ratingValue = computed(() => {
     const c = this.content() as any
@@ -168,6 +218,15 @@ export class CardCourseV2Component {
     !!(this.content() as any)?.isCA
   )
 
+  readonly assessmentStateKey = computed(() => {
+    switch (this.assessmentState()) {
+      case 'completed': return 'cardcontentv2.completed'
+      case 'available': return 'cardcontentv2.available'
+      case 'locked': return 'cardcontentv2.locked'
+      default: return ''
+    }
+  })
+
   /** The CB plan entry for this content, if the parent supplied one. */
   private readonly cbPlan = computed<any | null>(() => {
     const id = this.content()?.identifier
@@ -207,6 +266,14 @@ export class CardCourseV2Component {
       this.defaultSLogo.set('/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg')
     }
     this.caCourseUnitIds.set(JSON.parse(this.commonSvc.getCourseUnitIds() || '[]'))
+
+    // A failed thumbnail belongs to the content that failed, not to the card. Lists reuse
+    // these instances as their data changes, so without this a single broken image would
+    // leave every later assessment shown in this slot stuck on the category.
+    effect(() => {
+      this.content()?.identifier
+      this.thumbnailFailed.set(false)
+    })
 
     // Truncation detection — runs once after the first render pass
     afterNextRender(() => this.checkTruncation())

@@ -101,7 +101,9 @@
       </span>
       @if (p.hasComprehensiveAssessment) {
       <span class="pc-card__chip pc-card__chip--ca" [matTooltip]="'cardplanv2.comprehensiveAssessment' | translate"
-        [matTooltipShowDelay]="400" matTooltipClass="pc-title-tooltip">CA</span>
+        [matTooltipShowDelay]="400" matTooltipClass="pc-title-tooltip">
+        <img class="pc-card__chip-img" src="assets/icons/content/ca.svg" alt="" aria-hidden="true" />CA
+      </span>
       }
     </div>
 
@@ -156,7 +158,9 @@
         </span>
         @if (p.hasComprehensiveAssessment) {
         <span class="pc-card__chip pc-card__chip--ca" [matTooltip]="'cardplanv2.comprehensiveAssessment' | translate"
-          [matTooltipShowDelay]="400" matTooltipClass="pc-title-tooltip">CA</span>
+          [matTooltipShowDelay]="400" matTooltipClass="pc-title-tooltip">
+          <img class="pc-card__chip-img" src="assets/icons/content/ca.svg" alt="" aria-hidden="true" />CA
+        </span>
         }
       </div>
     </div>

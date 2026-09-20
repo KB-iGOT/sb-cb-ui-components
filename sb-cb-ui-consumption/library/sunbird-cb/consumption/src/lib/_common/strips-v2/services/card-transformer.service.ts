@@ -241,7 +241,13 @@ export class CardTransformerService {
     const contentList = item?.['contentList']
     // Resolved once: the CA tag is gated on the plan being APAR, so the two must agree.
     const planType = this.resolvePlanType(item)
-    const comprehensiveAssessment = this.firstString([item?.['comprehensiveAssessment']])
+    // Either name: the CBPlan user dictionary (and the plan search) send
+    // `comprehensiveAssessment`, /cbplan/v4/read/:id sends `caLinkedId`. PlansService
+    // normalises the read response, but this transformer is also handed raw payloads.
+    const comprehensiveAssessment = this.firstString([
+      item?.['comprehensiveAssessment'],
+      item?.['caLinkedId'],
+    ])
 
     return {
       // Each source names the plan id differently: the plan search sends `id`, CBPlan V4

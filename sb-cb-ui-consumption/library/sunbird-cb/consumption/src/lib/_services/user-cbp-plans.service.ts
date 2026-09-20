@@ -73,6 +73,13 @@ export interface IUserCbpPlan {
   isApar: boolean
   planType: string | null
   contentList: IUserCbpPlanContent[]
+  /**
+   * Content id of the plan's comprehensive assessment.
+   *
+   * This is the name the dictionary uses and the one every consumer reads. The read endpoint
+   * (/cbplan/v4/read/:id) calls the same id `caLinkedId` and is normalised to this on the way
+   * out of PlansService.readPlan, so a plan is the same shape whichever endpoint produced it.
+   */
   comprehensiveAssessment: string | null
   createdByOrgId: string
   createdByOrgName: string

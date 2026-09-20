@@ -51,7 +51,6 @@ export class ContentApiService {
       case 'aparApi':
       case 'trainingPlanApi':
       case 'draftCBPplanApi':
-        debugger
         // CBPlan V4. These three keys are the three slices of ONE response, and
         // UserCbpPlansService already splits them — so each section takes its own list off
         // a single call rather than fetching and re-filtering the whole dataset.
