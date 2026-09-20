@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core'
 import { CardType } from '../models/content-section.model'
 import { CardViewModel, PlanCardViewModel, PlanStatus } from '../models/card.model'
 import dayjs from 'dayjs'
-import { NsCardContent } from '../../../_models/card-content-v2.model'
 
 @Injectable({ providedIn: 'root' })
 export class CardTransformerService {
@@ -54,116 +53,13 @@ export class CardTransformerService {
   mapTheData(data: any, apiDetailsKey?: string): CardViewModel[] {
     const mapedData: CardViewModel[] = []
     switch (apiDetailsKey) {
-      case 'aparApi':
-        const todayDate = dayjs().format('YYYY-MM-DD')
-        const filteredData = data.filter((item: any) => item?.isApar === true)
-        filteredData.forEach((item: any) => {
-          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-          const daysCount = dayjs(endDate).diff(todayDate, 'day')
-          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-          item['parentId'] = item.identifier
-          item['planType'] = 'cbPlan'
-          item['contentStatus'] = 0
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'] as string,
-            primaryCategory: item['primaryCategory'] as string,
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
-      case 'trainingPlanApi':
-        const todaysDate = dayjs().format('YYYY-MM-DD')
-        data.forEach((item: any) => {
-          if (item?.isApar === true || item?.planTypeV2 === 'AICBP') {
-            return
-          }
-          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-          const daysCount = dayjs(endDate).diff(todaysDate, 'day')
-          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-          item['parentId'] = item.identifier
-          item['planType'] = 'cbPlan'
-          item['contentStatus'] = 0
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'],
-            primaryCategory: item['primaryCategory'],
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
-      case 'draftCBPplanApi':
-        const draftCBPTodayDate = dayjs().format('YYYY-MM-DD')
-        const draftCBPFilteredData = data.filter((item: any) => item?.isApar !== true && (item?.planTypeV2 === 'AICBP'))
-        draftCBPFilteredData.forEach((item: any) => {
-          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-          const daysCount = dayjs(endDate).diff(draftCBPTodayDate, 'day')
-          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-          item['parentId'] = item.identifier
-          item['planTypeV2'] = 'AICBP'
-          item['contentStatus'] = 0
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'] as string,
-            primaryCategory: item['primaryCategory'] as string,
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
+      // aparApi / trainingPlanApi / draftCBPplanApi are deliberately absent.
+      //
+      // They each used to map their slice of the CBPlan response into a CardViewModel here,
+      // re-deriving the APAR / CBP / AI-CBP split with `isApar` and `planTypeV2` as it went.
+      // All three now render CardType.PlanCard, so they go through processPlanCards, and the
+      // split is already done upstream by UserCbpPlansService. A key that still arrives here
+      // is a config asking for content cards off a plan list, which `default` maps plainly.
       case 'trendingOnIGOTApi':
         data.forEach((item: any) => {
           const card: CardViewModel = {

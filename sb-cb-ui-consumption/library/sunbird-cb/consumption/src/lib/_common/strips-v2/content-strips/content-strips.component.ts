@@ -1,4 +1,4 @@
-import { Component, computed, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
+import { Component, computed, effect, input, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { forkJoin, of } from 'rxjs'
@@ -96,28 +96,43 @@ export class ContentStripsComponent implements OnInit {
     { id: 12, title: 'Leadership and Governance', image: 'https://picsum.photos/seed/12/400/240', rating: 4.6, provider: 'Karmayogi Bharat', duration: '58m', level: 'Advanced', tags: ['APAR', 'CA'], badge: '', overdue: false },
   ]);
 
+  constructor() {
+    // Keyed on the input, not run once on init: the pills section swaps `contentConfig` in
+    // place when the active pill changes, and it only gets away with re-creating this
+    // component because it toggles an @if off and on again around it in two separate
+    // change-detection passes. Whenever that re-create does not happen — the host reuses the
+    // instance, or the two signal writes land in one pass — an init-only fetch leaves the
+    // previous pill's cards on screen, or none at all. Following the input removes the
+    // dependency on that timing entirely.
+    effect(() => {
+      const config = this.contentConfig()
+      this.initializeSkeletons(config)
+      if (this.forceLoading()) {
+        this.loading.set(true)
+        return
+      }
+      this.fetchContent(config)
+    })
+  }
+
   ngOnInit(): void {
-    this.initializeSkeletons()
-    if (this.forceLoading()) {
-      this.loading.set(true)
-      return
-    }
-    this.fetchContent()
     this.getCbPlanData()
   }
 
-  initializeSkeletons(): void {
-    const max = this.contentConfig()?.maxCardsToShow ?? 4
+  initializeSkeletons(config: ContentConfig | undefined = this.contentConfig()): void {
+    const max = config?.maxCardsToShow ?? 4
     this.skeletonArray.set(new Array(max).fill(0).map((_, i) => i))
   }
 
-  async fetchContent(): Promise<void> {
-    const config = this.contentConfig()
+  async fetchContent(config: ContentConfig | undefined = this.contentConfig()): Promise<void> {
     if (config?.contentIds?.length) {
       this.loadFromDictionary(config)
       return
     }
     if (!config?.apiDetailsKey) {
+      // Cleared, not left as-is: this runs on a config swap too, and keeping the previous
+      // pill's cards under a pill that has no source is worse than an empty strip.
+      this.cards.set([])
       this.loading.set(false)
       return
     }
