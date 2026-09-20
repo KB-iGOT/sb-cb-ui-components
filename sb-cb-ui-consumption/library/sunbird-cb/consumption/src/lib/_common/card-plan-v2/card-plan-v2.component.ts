@@ -60,7 +60,7 @@ export class CardPlanV2Component {
   // ── Internal mutable state ─────────────────────────────────────────────────
   readonly isTitleTruncated = signal(false)
   readonly isOwnerTruncated = signal(false)
-  /** Instance logo — stands in for the owning org, which the plan payload has no image for. */
+  /** Instance logo, used wherever the owning org has none of its own. */
   readonly defaultSLogo = signal('')
 
   // ── Computed values ────────────────────────────────────────────────────────
@@ -85,6 +85,14 @@ export class CardPlanV2Component {
       default: return 'CBP'
     }
   })
+
+  /**
+   * The owning org's logo, or the instance logo when it has none.
+   *
+   * CBPlan V4 sends `createdByOrgLogo: null` for most orgs, so the fallback is the usual
+   * path rather than the exception — an empty `src` would render a broken-image glyph.
+   */
+  readonly ownerLogo = computed(() => this.plan()?.createdByLogo || this.defaultSLogo())
 
   readonly planTypeIcon = computed(() => {
     switch (this.plan()?.planType) {
@@ -130,6 +138,21 @@ export class CardPlanV2Component {
       ...cardClickDetails,
       identifier: this.plan()?.identifier,
     })
+  }
+
+  /**
+   * Falls back to the instance logo when the org's own URL fails to load.
+   *
+   * `ownerLogo()` only covers a logo the payload omits; one that is present but dead — a
+   * moved asset, a host that 404s — still reaches the browser and would leave a broken
+   * image on the card. Guarded against re-entering if the default itself fails.
+   */
+  onLogoError(event: Event): void {
+    const img = event.target as HTMLImageElement | null
+    const fallback = this.defaultSLogo()
+    if (img && fallback && img.src !== fallback) {
+      img.src = fallback
+    }
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────

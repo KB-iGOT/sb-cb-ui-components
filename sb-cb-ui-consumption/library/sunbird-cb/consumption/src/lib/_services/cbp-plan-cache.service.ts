@@ -77,7 +77,15 @@ export class CbpPlanCacheService {
     if (!planYear) {
       return undefined
     }
-    return this.appDb.withTimeout(this.appDb.get<ICbpCacheEntry>(STORE_NAME, planYear), `cbp read for ${planYear}`)
+    const entry = await this.appDb.withTimeout(
+      this.appDb.get<ICbpCacheEntry>(STORE_NAME, planYear), `cbp read for ${planYear}`,
+    )
+    // UserCbpPlansService (CBPlan V4) keys its entries by the same bare plan year in this
+    // store, and sets `cachedAt` too — so only the shape tells the two apart. Without this
+    // check a V4 entry would pass isEntryValid(), and `entry.data` being undefined would
+    // reach toPlanMap() as an empty plan map: every card silently loses its plan badge and
+    // due date, with nothing logged. Reading it as a miss refetches instead.
+    return entry && Array.isArray(entry.data) ? entry : undefined
   }
 
   async setEntry(planYear: string, data: any[]): Promise<void> {

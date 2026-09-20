@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core'
 import { CardType } from '../models/content-section.model'
 import { CardViewModel, PlanCardViewModel, PlanStatus } from '../models/card.model'
 import dayjs from 'dayjs'
-import { NsCardContent } from '../../../_models/card-content-v2.model'
 
 @Injectable({ providedIn: 'root' })
 export class CardTransformerService {
@@ -54,116 +53,13 @@ export class CardTransformerService {
   mapTheData(data: any, apiDetailsKey?: string): CardViewModel[] {
     const mapedData: CardViewModel[] = []
     switch (apiDetailsKey) {
-      case 'aparApi':
-        const todayDate = dayjs().format('YYYY-MM-DD')
-        const filteredData = data.filter((item: any) => item?.isApar === true)
-        filteredData.forEach((item: any) => {
-          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-          const daysCount = dayjs(endDate).diff(todayDate, 'day')
-          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-          item['parentId'] = item.identifier
-          item['planType'] = 'cbPlan'
-          item['contentStatus'] = 0
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'] as string,
-            primaryCategory: item['primaryCategory'] as string,
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
-      case 'trainingPlanApi':
-        const todaysDate = dayjs().format('YYYY-MM-DD')
-        data.forEach((item: any) => {
-          if (item?.isApar === true || item?.planTypeV2 === 'AICBP') {
-            return
-          }
-          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-          const daysCount = dayjs(endDate).diff(todaysDate, 'day')
-          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-          item['parentId'] = item.identifier
-          item['planType'] = 'cbPlan'
-          item['contentStatus'] = 0
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'],
-            primaryCategory: item['primaryCategory'],
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
-      case 'draftCBPplanApi':
-        const draftCBPTodayDate = dayjs().format('YYYY-MM-DD')
-        const draftCBPFilteredData = data.filter((item: any) => item?.isApar !== true && (item?.planTypeV2 === 'AICBP'))
-        draftCBPFilteredData.forEach((item: any) => {
-          const endDate = dayjs(item.endDate).format('YYYY-MM-DD')
-          const daysCount = dayjs(endDate).diff(draftCBPTodayDate, 'day')
-          item['planDuration'] = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-            ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-          item['parentId'] = item.identifier
-          item['planTypeV2'] = 'AICBP'
-          item['contentStatus'] = 0
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [], // not found
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'] as string,
-            primaryCategory: item['primaryCategory'] as string,
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
+      // aparApi / trainingPlanApi / draftCBPplanApi are deliberately absent.
+      //
+      // They each used to map their slice of the CBPlan response into a CardViewModel here,
+      // re-deriving the APAR / CBP / AI-CBP split with `isApar` and `planTypeV2` as it went.
+      // All three now render CardType.PlanCard, so they go through processPlanCards, and the
+      // split is already done upstream by UserCbpPlansService. A key that still arrives here
+      // is a config asking for content cards off a plan list, which `default` maps plainly.
       case 'trendingOnIGOTApi':
         data.forEach((item: any) => {
           const card: CardViewModel = {
@@ -324,10 +220,16 @@ export class CardTransformerService {
     const planType = this.resolvePlanType(item)
     switch (apiDetailsKey) {
       case 'aparPlanListApi':
+      // CBPlan V4 hands each section its own pre-split list, so this is a guard rather
+      // than the filter that does the work — it keeps a list that reached the wrong
+      // section from rendering there.
+      case 'aparApi':
         return planType === 'APAR'
       case 'draftCBPplanListApi':
+      case 'draftCBPplanApi':
         return planType === 'AICBP'
       case 'trainingPlanListApi':
+      case 'trainingPlanApi':
         return planType === 'CBP'
       // An unrecognised key must not silently empty the strip — show every plan.
       default:
@@ -337,10 +239,15 @@ export class CardTransformerService {
 
   private toPlanCard(item: Record<string, unknown>): PlanCardViewModel {
     const contentList = item?.['contentList']
+    // Resolved once: the CA tag is gated on the plan being APAR, so the two must agree.
+    const planType = this.resolvePlanType(item)
+    const comprehensiveAssessment = this.firstString([item?.['comprehensiveAssessment']])
 
     return {
-      // The plan list sends the plan id as `id`; `identifier` is only present on content.
-      identifier: this.firstString([item?.['id'], item?.['identifier']]),
+      // Each source names the plan id differently: the plan search sends `id`, CBPlan V4
+      // sends `planId`, and `identifier` is only ever present on content. Missing it leaves
+      // the card unclickable, so all three are accepted.
+      identifier: this.firstString([item?.['id'], item?.['planId'], item?.['identifier']]),
       title: this.firstString([item?.['name'], item?.['planName']]),
       planYear: this.firstString([item?.['planYear']]),
       endDate: this.firstString([item?.['endDate']]),
@@ -351,16 +258,30 @@ export class CardTransformerService {
       createdByName: this.firstString([
         item?.['orgName'],
         item?.['organisationName'],
+        // CBPlan V4 names the owning org outright, so it does not need the fallback below.
+        item?.['createdByOrgName'],
         this.resolveOrganisation(item)[0],
         item?.['createdByName'],
       ]),
+      // Left empty when the source has no logo; CardPlanV2Component substitutes the
+      // instance logo, which is a display decision and not the transformer's to make.
+      createdByLogo: this.firstString([
+        item?.['createdByOrgLogo'],
+        item?.['orgLogo'],
+        item?.['createdByLogo'],
+      ]),
       status: this.firstString([item?.['status']]),
-      planType: this.resolvePlanType(item),
+      planType,
+      // An APAR plan can carry a comprehensive assessment the learner has to clear on top
+      // of its courses, which the card flags. `comprehensiveAssessment` is a content id, so
+      // presence is the whole signal — the id itself is only needed on the detail page.
+      hasComprehensiveAssessment: planType === 'APAR' && !!comprehensiveAssessment,
       planStatus: this.resolvePlanStatus(item),
       metadata: item ?? {},
     }
   }
 
+  
   /** APAR wins over AI-CBP, matching the MAX(endDate) tie-break used for content cards. */
   private resolvePlanType(item: Record<string, unknown>): PlanCardViewModel['planType'] {
     if (item?.['isApar'] === true) {

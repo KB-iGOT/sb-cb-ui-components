@@ -1,6 +1,6 @@
 <!-- ── SKELETON STATE ──────────────────────────────────────── -->
 @if (isLoading()) {
-<div class="pc-card pc-card--skeleton" aria-busy="true" aria-label="Loading plan card">
+<div class="pc-card pc-card--skeleton" aria-busy="true" [attr.aria-label]="'cardplanv2.loadingPlanCard' | translate">
 
   <div class="pc-card__media pc-card__media--skeleton" aria-hidden="true"></div>
 
@@ -38,12 +38,12 @@
     <span class="pc-card__media-arc" aria-hidden="true"></span>
 
     <!-- Status badge (top-left) -->
-    <span class="pc-card__status" [class.pc-card__status--overdue]="p.planStatus === 'overdue'"
+    <!-- <span class="pc-card__status" [class.pc-card__status--overdue]="p.planStatus === 'overdue'"
       [class.pc-card__status--in-progress]="p.planStatus === 'inProgress'"
       [class.pc-card__status--completed]="p.planStatus === 'completed'">
       <span class="pc-card__status-dot" aria-hidden="true"></span>
       {{ statusLabelKey() | translate }}
-    </span>
+    </span> -->
 
     <!-- Content count (bottom-right) -->
     @if (p.contentCount > 0) {
@@ -64,7 +64,7 @@
       <span class="pc-card__chip">{{ p.planYear }}</span>
       }
       @if (p.endDate) {
-      <span class="pc-card__chip" [attr.aria-label]="'Due on ' + (p.endDate | date: 'dd/MM/yyyy')">
+      <span class="pc-card__chip" [attr.aria-label]="('cardplanv2.dueOn' | translate) + ' ' + (p.endDate | date: 'dd/MM/yyyy')">
         <mat-icon class="pc-card__chip-icon" aria-hidden="true">calendar_today</mat-icon>
         {{ p.endDate | date: 'dd/MM/yyyy' }}
       </span>
@@ -80,10 +80,14 @@
     <!-- Row 3 – who owns the plan -->
     @if (p.createdByName) {
     <div class="pc-card__owner">
-      <span class="pc-card__owner-label">{{ 'cardplanv2.createdBy' | translate }}</span>
-      <span #ownerEl class="pc-card__owner-name" [matTooltip]="p.createdByName"
-        [matTooltipDisabled]="!isOwnerTruncated()" [matTooltipShowDelay]="400"
-        matTooltipClass="pc-title-tooltip">{{ p.createdByName }}</span>
+      <img class="pc-card__owner-logo" [src]="ownerLogo()" (error)="onLogoError($event)" alt=""
+        aria-hidden="true" loading="lazy" />
+      <div class="pc-card__owner-text">
+        <span class="pc-card__owner-label">{{ 'cardplanv2.createdBy' | translate }}</span>
+        <span #ownerEl class="pc-card__owner-name" [matTooltip]="p.createdByName"
+          [matTooltipDisabled]="!isOwnerTruncated()" [matTooltipShowDelay]="400"
+          matTooltipClass="pc-title-tooltip">{{ p.createdByName }}</span>
+      </div>
     </div>
     }
 
@@ -95,6 +99,10 @@
         }
         {{ planTypeLabel() }}
       </span>
+      @if (p.hasComprehensiveAssessment) {
+      <span class="pc-card__chip pc-card__chip--ca" [matTooltip]="'cardplanv2.comprehensiveAssessment' | translate"
+        [matTooltipShowDelay]="400" matTooltipClass="pc-title-tooltip">CA</span>
+      }
     </div>
 
   </div>
@@ -127,7 +135,7 @@
         <span class="pc-card__chip">{{ p.planYear }}</span>
         }
         @if (p.endDate) {
-        <span class="pc-card__chip" [attr.aria-label]="'Due on ' + (p.endDate | date: 'dd/MM/yyyy')">
+        <span class="pc-card__chip" [attr.aria-label]="('cardplanv2.dueOn' | translate) + ' ' + (p.endDate | date: 'dd/MM/yyyy')">
           <mat-icon class="pc-card__chip-icon" aria-hidden="true">calendar_today</mat-icon>
           {{ p.endDate | date: 'dd/MM/yyyy' }}
         </span>
@@ -146,6 +154,10 @@
           }
           {{ planTypeLabel() }}
         </span>
+        @if (p.hasComprehensiveAssessment) {
+        <span class="pc-card__chip pc-card__chip--ca" [matTooltip]="'cardplanv2.comprehensiveAssessment' | translate"
+          [matTooltipShowDelay]="400" matTooltipClass="pc-title-tooltip">CA</span>
+        }
       </div>
     </div>
   </div>
@@ -154,16 +166,17 @@
 
   <!-- Owner on the left, status on the right — the media area carries no badge here. -->
   <div class="pc-row__footer">
-    <img class="pc-row__org-logo" [src]="defaultSLogo()" alt="" aria-hidden="true" loading="lazy" />
+    <img class="pc-row__org-logo" [src]="ownerLogo()" (error)="onLogoError($event)" alt=""
+      aria-hidden="true" loading="lazy" />
     <span #ownerEl class="pc-row__org-name" [matTooltip]="p.createdByName"
       [matTooltipDisabled]="!isOwnerTruncated()" [matTooltipShowDelay]="400"
       matTooltipClass="pc-title-tooltip">{{ p.createdByName }}</span>
-    <span class="pc-row__status" [class.pc-card__status--overdue]="p.planStatus === 'overdue'"
+    <!-- <span class="pc-row__status" [class.pc-card__status--overdue]="p.planStatus === 'overdue'"
       [class.pc-card__status--in-progress]="p.planStatus === 'inProgress'"
       [class.pc-card__status--completed]="p.planStatus === 'completed'">
       <span class="pc-card__status-dot" aria-hidden="true"></span>
       {{ statusLabelKey() | translate }}
-    </span>
+    </span> -->
   </div>
 </div>
 }

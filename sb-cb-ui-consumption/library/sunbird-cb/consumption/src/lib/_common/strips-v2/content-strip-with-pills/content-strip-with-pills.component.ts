@@ -54,8 +54,20 @@ export class ContentStripWithPillsComponent implements AfterViewInit {
 
   activeContentConfig = computed<ContentConfig | null>(() => {
     const key = this.activePillKey() || this.resolvedDefaultPillKey()
-    const pill = this.visiblePills()?.find(p => p?.pillKey === key)
-    return pill?.contentConfig ?? this.visiblePills()?.[0]?.contentConfig ?? null
+    const pill = this.visiblePills()?.find(p => p?.pillKey === key) ?? this.visiblePills()?.[0]
+    const config = pill?.contentConfig
+    if (!config) {
+      return null
+    }
+    // `showNoData` and `noDataMessage` are configured one level up, on the pill, but the
+    // strip only ever receives a contentConfig — so without this a pill that resolves to
+    // zero cards renders nothing at all: no cards, and no "No data found" either. Anything
+    // set inside contentConfig still wins, so a config that states it there keeps working.
+    return {
+      ...config,
+      showNoData: config.showNoData ?? pill?.showNoData,
+      noDataMessage: config.noDataMessage ?? pill?.noDataMessage,
+    }
   });
 
   constructor() {

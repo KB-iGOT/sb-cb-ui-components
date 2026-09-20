@@ -75,6 +75,11 @@ export interface PillConfig {
   contentConfig: ContentConfig
   pillDescription?: string[]
   pillImageUrl?: string
+  // Empty-state copy. Configured on the pill, NOT inside its contentConfig, even though
+  // ContentStripsComponent reads it off contentConfig — ContentStripWithPillsComponent
+  // folds these two down (see activeContentConfig).
+  showNoData?: boolean
+  noDataMessage?: string
 }
 
 export interface TabConfig {
