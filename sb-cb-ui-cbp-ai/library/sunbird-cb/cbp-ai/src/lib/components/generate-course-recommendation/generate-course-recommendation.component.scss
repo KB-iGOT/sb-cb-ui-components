@@ -2059,3 +2059,36 @@ background: #f8f9fa;
     color:#fff !important
   }
 }
+
+.proficiency-tag.strategic {
+  background: #1B4CA1;
+  color: #FFFFFF !important;
+  border: none;
+  .course-pill-text {
+    color: #FFFFFF !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+}
+
+.proficiency-tag.tactical {
+  background: #5B8DEF;
+  color: #FFFFFF !important;
+  border: none;
+   .course-pill-text {
+    color: #FFFFFF !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+}
+
+.proficiency-tag.operational {
+  background: #DBE6F7;
+  color: #1B4CA1 !important;
+  border: none;
+   .course-pill-text {
+    color: #1B4CA1 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+}

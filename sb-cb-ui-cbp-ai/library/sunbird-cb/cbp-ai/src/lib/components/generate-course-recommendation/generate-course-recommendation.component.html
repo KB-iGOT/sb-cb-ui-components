@@ -402,6 +402,11 @@
                                                                             src="assets/icons/course.svg"></span>&nbsp;<span>Course</span>
                                                                 </div>
                                                             </div>
+                                                             <div class="course-pill proficiency-tag" [ngClass]="item.course_level?.toLowerCase()" *ngIf="item?.course_level">
+                                                                <div class="course-pill-text">
+                                                                    <span>{{item?.course_level}}</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
 
