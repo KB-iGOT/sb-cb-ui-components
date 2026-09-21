@@ -391,7 +391,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   async findACPB() {
-    // CBP plan data now lives in IndexedDB (iGotCbpDB/cbpPlans); getCBPData() reads the
+    // CBP plan data now lives in IndexedDB (iGotAppDB/cbpPlans); getCBPData() reads the
     // current plan year from that cache instead of localStorage['cbpData'].
     const localCbp = await this.userServiceLib.getCBPData().toPromise()
     if (localCbp && localCbp.length) {

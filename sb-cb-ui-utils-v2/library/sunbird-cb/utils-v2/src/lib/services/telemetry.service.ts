@@ -9,7 +9,7 @@ import { LoggerService } from './logger.service'
 import { NsContent } from './widget-content.model'
 import { Router, NavigationStart } from '@angular/router'
 import { NPSGridService } from './nps-grid.service'
-import { $t } from '@project-sunbird/telemetry-sdk';
+import { $t } from '@project-sunbird/telemetry-sdk'
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +25,8 @@ export class TelemetryService {
     RBCP: 'rbcp-web-ui',
   }
   environment: any
+  private shouldSendEmptyInteractObject = false
+  private globalObjectBackup: any = null
   constructor(
     private configSvc: ConfigurationsService,
     private eventsSvc: EventService,
@@ -89,7 +91,7 @@ export class TelemetryService {
           id: `${this.environment.name}.${this.telemetryConfig.pdata.id}`,
         },
         uid: (this.configSvc.userProfile && this.configSvc.userProfile.userId) ?
-              this.configSvc.userProfile.userId : '',
+          this.configSvc.userProfile.userId : '',
         // authtoken: this.authSvc.token,
         // tslint:disable-next-line: no-non-null-assertion
         channel: this.rootOrgId || this.telemetryConfig.channel,
@@ -120,9 +122,42 @@ export class TelemetryService {
     }
   }
 
+  // Call this right before triggering the next interact event when that
+  // specific event must not carry the SDK's persistent _globalObject.
+  // It self-resets after being consumed once, so it never affects unrelated interacts.
+  sendEmptyObjectForNextInteract() {
+    this.shouldSendEmptyInteractObject = true
+  }
+
+  // Call before $t.interact(). If sendEmptyObjectForNextInteract() was requested and
+  // the object being sent for this call is empty, backs up the SDK's persistent
+  // _globalObject and blanks it out so it doesn't leak into this one event.
+  resetGlobalObjectIfNeeded(object: any) {
+    const isObjectEmpty = !object || Object.keys(object).length === 0
+    if (this.shouldSendEmptyInteractObject && isObjectEmpty) {
+      const telemetrySdk = $t as any
+      this.globalObjectBackup = telemetrySdk._globalObject
+      telemetrySdk._globalObject = {}
+    }
+  }
+
+  // Call in the finally block after $t.interact(). Mirrors the same condition
+  // resetGlobalObjectIfNeeded() used, so it only restores when a reset actually
+  // happened, then clears the flag so it doesn't affect the next interact call.
+  restoreGlobalObjectIfNeeded(object: any) {
+    const isObjectEmpty = !object || Object.keys(object).length === 0
+    if (this.shouldSendEmptyInteractObject && isObjectEmpty) {
+      const telemetrySdk = $t as any
+      telemetrySdk._globalObject = this.globalObjectBackup
+      this.shouldSendEmptyInteractObject = false
+    }
+  }
+
   start(edata: any, data: any, pageContext?: WsEvents.ITelemetryPageContext) {
     try {
       if (this.telemetryConfig) {
+        const isStartDataEmpty = !data || Object.keys(data).length === 0
+        const shouldClearStartObject = this.shouldSendEmptyInteractObject && isStartDataEmpty
         $t.start(
           this.telemetryConfig as any,
           (pageContext && pageContext.pageId) ?
@@ -147,12 +182,16 @@ export class TelemetryService {
               ...(pageContext && pageContext.module ? { env: pageContext.module } : null),
             },
             object: {
+              ...(shouldClearStartObject ? { id: undefined, ver: undefined } : null),
               ...(data) && data,
             },
             ...(this.configSvc.userProfile && this.configSvc.userProfile.userId ?
-               null : { actor: { id: '', type: 'AnonymousUser' } }),
+              null : { actor: { id: '', type: 'AnonymousUser' } }),
           }
         )
+        if (shouldClearStartObject) {
+          this.shouldSendEmptyInteractObject = false
+        }
       } else {
         this.logger.error('Error Initializing Telemetry. Config missing.')
       }
@@ -346,8 +385,8 @@ export class TelemetryService {
             type: event.data.type || WsEvents.WsTimeSpentType.Player,
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
-                   event.data.object,
-                   event.pageContext
+            event.data.object,
+            event.pageContext
           )
         }
         if (
@@ -409,8 +448,8 @@ export class TelemetryService {
             type: event.data.type || WsEvents.WsTimeSpentType.Player,
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
-                   event.data.object,
-                   event.pageContext
+            event.data.object,
+            event.pageContext
           )
         }
         if (
@@ -472,8 +511,8 @@ export class TelemetryService {
             type: event.data.type || WsEvents.WsTimeSpentType.Player,
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
-                   {},
-                   event.pageContext
+            {},
+            event.pageContext
           )
         }
         if (
@@ -555,8 +594,8 @@ export class TelemetryService {
             type: event.data.type || WsEvents.WsTimeSpentType.Player,
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
-                   {},
-                   event.pageContext
+            {},
+            event.pageContext
           )
         }
       })
@@ -687,29 +726,34 @@ export class TelemetryService {
           //   interactid = page.pageUrlParts[4]
           // }
           try {
-            $t.interact(
-              {
-                type: event.data.edata.type,
-                subtype: event.data.edata.subType,
-                // object: event.data.object,
-                id: (event.data.edata && event.data.edata.id) ?
-                  event.data.edata.id
-                  : '',
-                pageid: event.data.pageContext && event.data.pageContext.pageId || page.pageid,
-                ...(event.data.edata.target && { target: event.data.edata.target })
-              },
-              {
-                context: {
-                  pdata: {
-                    ...this.pData,
-                    id: this.pData.id,
+            this.resetGlobalObjectIfNeeded(event.data.object)
+            try {
+              $t.interact(
+                {
+                  type: event.data.edata.type,
+                  subtype: event.data.edata.subType,
+                  // object: event.data.object,
+                  id: (event.data.edata && event.data.edata.id) ?
+                    event.data.edata.id
+                    : '',
+                  pageid: event.data.pageContext && event.data.pageContext.pageId || page.pageid,
+                  ...(event.data.edata.target && { target: event.data.edata.target })
+                },
+                {
+                  context: {
+                    pdata: {
+                      ...this.pData,
+                      id: this.pData.id,
+                    },
+                    ...(event.pageContext && event.pageContext.module ? { env: event.pageContext.module } : null),
                   },
-                  ...(event.pageContext && event.pageContext.module ? { env: event.pageContext.module } : null),
-                },
-                object: {
-                  ...event.data.object,
-                },
-              })
+                  object: {
+                    ...event.data.object,
+                  },
+                })
+            } finally {
+              this.restoreGlobalObjectIfNeeded(event.data.object)
+            }
           } catch (e) {
             // tslint:disable-next-line: no-console
             console.log('Error in telemetry interact', e)

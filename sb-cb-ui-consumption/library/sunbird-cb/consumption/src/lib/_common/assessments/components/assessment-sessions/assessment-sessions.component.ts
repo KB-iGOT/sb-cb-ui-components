@@ -69,10 +69,11 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
 
     this.basicAssessmentForm = this.fb.group({
       totalQuestions: [0, [Validators.required, Validators.min(1)]],
-      maxQuestions: [0, [Validators.required, Validators.min(1)]],
+      maxQuestions: [0, [Validators.required, Validators.min(1), this.displayedWithinTotalValidator()]],
       minPassPercentage: [50, [Validators.required, Validators.min(50), Validators.max(100)]],
       additionalInstructions: ['', [Validators.maxLength(this.instructionsMaxLength)]]
     })
+    this.watchQuestionCounts(this.basicAssessmentForm)
 
     this.optionWeightageForm = this.fb.group({
       additionalInstructions: ['', [Validators.maxLength(this.instructionsMaxLength)]]
@@ -181,14 +182,44 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
       this.assessmentData.children[0]?.identifier?.startsWith('do_')
   }
 
+  /**
+   * The questions shown to a learner are drawn from the ones authored, so asking for more
+   * than are being added cannot be satisfied. It sits on the displayed field rather than on
+   * the group so the field itself reports it, the way every other error here does.
+   */
+  private displayedWithinTotalValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const total = Number(control.parent?.get('totalQuestions')?.value)
+      const displayed = Number(control.value)
+      if (!total || !displayed || Number.isNaN(total) || Number.isNaN(displayed)) {
+        return null
+      }
+      return displayed > total ? { displayedExceedsTotal: { total } } : null
+    }
+  }
+
+  /** The pair is only wrong together, so the displayed field is re-checked when either moves. */
+  private watchQuestionCounts(group: FormGroup): void {
+    const total = group.get('totalQuestions')
+    const displayed = group.get('maxQuestions')
+    if (!total || !displayed) {
+      return
+    }
+    this.subscriptions.push(
+      total.valueChanges.subscribe(() => displayed.updateValueAndValidity({ emitEvent: false }))
+    )
+  }
+
   createBasicSectionGroup(): FormGroup {
-    return this.fb.group({
+    const group = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(this.nameMaxLength)]],
       additionalInstructions: ['', [Validators.maxLength(this.instructionsMaxLength)]],
       totalQuestions: [0, [Validators.required, Validators.min(1)]],
-      maxQuestions: [0, [Validators.required, Validators.min(1)]],
+      maxQuestions: [0, [Validators.required, Validators.min(1), this.displayedWithinTotalValidator()]],
       minPassPercentage: [50, [Validators.required, Validators.min(50), Validators.max(100)]]
     })
+    this.watchQuestionCounts(group)
+    return group
   }
 
   /**

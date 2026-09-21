@@ -33,6 +33,8 @@ import { InviteUsersComponent } from "../dialogs/invite-users/invite-users.compo
 import { EntitySelectionsComponent } from "../dialogs/entity-selections/entity-selections.component";
 import { ConfirmDialogComponent } from "../dialogs/confirm-dialog/confirm-dialog.component";
 import { AccessControlGuideComponent } from "../dialogs/access-control-guide/access-control-guide.component";
+import { SaveUserGroupComponent } from "../dialogs/save-user-group/save-user-group.component";
+import { ReuseUserGroupComponent } from "../dialogs/reuse-user-group/reuse-user-group.component";
 
 @NgModule({
   declarations: [
@@ -44,7 +46,9 @@ import { AccessControlGuideComponent } from "../dialogs/access-control-guide/acc
     DragDropDirective,
     EntitySelectionsComponent,
     ConfirmDialogComponent,
-    AccessControlGuideComponent
+    AccessControlGuideComponent,
+    SaveUserGroupComponent,
+    ReuseUserGroupComponent
   ],
   imports: [
     CommonModule,

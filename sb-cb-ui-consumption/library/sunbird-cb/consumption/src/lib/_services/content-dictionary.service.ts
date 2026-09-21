@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { APP_DB_STORES, ConfigurationsService, IndexedDbService } from '@sunbird-cb/utils-v2'
 import { Observable, from } from 'rxjs'
 
 const API_ENDPOINTS = {
@@ -8,9 +8,7 @@ const API_ENDPOINTS = {
   CONTENT_READ: (doId: string) => `/apis/proxies/v8/content/v2/read/${doId}`,
 }
 
-const DB_NAME = 'iGotAppDB'
-const DB_VERSION = 1
-const STORE_NAME = 'dictionary'
+const STORE_NAME = APP_DB_STORES.DICTIONARY
 const TIME_CHECK_KEY = 'timeCheck'
 const SERVICE_KEY = 'dictionaryService'
 const DICT_DB_KEY = 'all'
@@ -19,51 +17,23 @@ const DICT_DB_KEY = 'all'
   providedIn: 'root',
 })
 export class ContentDictionaryService {
-  private dbPromise: Promise<IDBDatabase> | null = null
 
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
+    private appDb: IndexedDbService,
   ) {}
 
   // ── IndexedDB helpers ──────────────────────────────────────────────────────
+  //
+  // The database itself is owned by IndexedDbService; this service only owns its store.
 
-  private openDB(): Promise<IDBDatabase> {
-    if (this.dbPromise) {
-      return this.dbPromise
-    }
-    this.dbPromise = new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VERSION)
-      req.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME)
-        }
-      }
-      req.onsuccess = () => resolve(req.result)
-      req.onerror = () => reject(req.error)
-    })
-    return this.dbPromise
+  private dbGet<T>(key: string): Promise<T | undefined> {
+    return this.appDb.get<T>(STORE_NAME, key)
   }
 
-  private async dbGet<T>(key: string): Promise<T | undefined> {
-    const db = await this.openDB()
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly')
-      const req = tx.objectStore(STORE_NAME).get(key)
-      req.onsuccess = () => resolve(req.result as T)
-      req.onerror = () => reject(req.error)
-    })
-  }
-
-  private async dbPut(key: string, value: any): Promise<void> {
-    const db = await this.openDB()
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      const req = tx.objectStore(STORE_NAME).put(value, key)
-      req.onsuccess = () => resolve()
-      req.onerror = () => reject(req.error)
-    })
+  private dbPut(key: string, value: any): Promise<void> {
+    return this.appDb.put(STORE_NAME, key, value)
   }
 
   // ── Cache validity ─────────────────────────────────────────────────────────
@@ -228,13 +198,7 @@ export class ContentDictionaryService {
   }
 
   private async clearCacheAsync(): Promise<void> {
-    const db = await this.openDB()
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      const req = tx.objectStore(STORE_NAME).clear()
-      req.onsuccess = () => resolve()
-      req.onerror = () => reject(req.error)
-    })
+    await this.appDb.clear(STORE_NAME)
     try {
       const raw = localStorage.getItem(TIME_CHECK_KEY)
       if (raw) {

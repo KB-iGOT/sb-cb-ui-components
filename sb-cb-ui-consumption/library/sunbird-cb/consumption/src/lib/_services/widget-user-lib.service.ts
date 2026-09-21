@@ -156,7 +156,7 @@ export class WidgetUserServiceLib {
   }
 
   /**
-   * CBP plan data for a plan year, read from IndexedDB (iGotCbpDB/cbpPlans).
+   * CBP plan data for a plan year, read from IndexedDB (iGotAppDB/cbpPlans).
    *
    * Previously read localStorage['cbpData'], which no longer holds CBP plan data.
    * The legacy 'cbpData' argument is tolerated and treated as "current plan year"
@@ -619,7 +619,7 @@ export class WidgetUserServiceLib {
 
   /**
    * CBP plan data is no longer mirrored to localStorage['cbpData'] — IndexedDB
-   * (CbpPlanCacheService, iGotCbpDB/cbpPlans) is the only CBP cache.
+   * (CbpPlanCacheService, iGotAppDB/cbpPlans) is the only CBP cache.
    */
   requiredCBPData(cbpData: any) {
     return this.toReducedCbpData(cbpData)

@@ -117,7 +117,7 @@
   max-width: 100px;
 }
 
-.access-usergroup-panel {
+::ng-deep .access-usergroup-panel {
   .mat-expansion-panel-header-title {
     padding-left: 1rem;
   }
@@ -132,7 +132,8 @@
     --mat-expansion-header-text-font: Montserrat;
   }
 
-  .mat-expansion-panel:not([class*="mat-elevation-z"]) {
+  .mat-expansion-panel:not([class*="mat-elevation-z"]),
+  .mat-expansion-panel:not([class*=mat-elevation-z]) {
     box-shadow: none !important;
     border: 1px solid #00000014;
   }
@@ -292,4 +293,9 @@
       pointer-events: none;
     }
   }
+}
+
+
+.reuse-group-select {
+  width: 220px;
 }

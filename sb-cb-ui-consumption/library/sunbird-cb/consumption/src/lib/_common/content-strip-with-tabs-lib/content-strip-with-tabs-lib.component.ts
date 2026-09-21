@@ -14,6 +14,8 @@ import {
   UtilityService,
   WsEvents,
   WidgetEnrollService,
+  APP_DB_STORES,
+  IndexedDbService,
 } from '@sunbird-cb/utils-v2'
 import { of, Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
@@ -27,9 +29,14 @@ import { ITodayEvents } from '../../_models/event'
 import { TranslateService } from '@ngx-translate/core'
 import { Router } from '@angular/router'
 
-const IDB_NAME = 'zoho-form'
-const IDB_STORE = 'enrollment'
-const IDB_HIERARCHY_STORE = 'hierarchy'
+/**
+ * Comprehensive-assessment identifiers, previously written to a `zoho-form` database of
+ * their own (store `enrollment`, key `comprehensiveAssessmentIdentifiers`; that database
+ * also declared an unused `hierarchy` store). They are one more cached list, so they live
+ * in the shared application database now — see IndexedDbService.
+ */
+const CA_STORE = APP_DB_STORES.COMPREHENSIVE_ASSESSMENT
+const CA_IDENTIFIERS_KEY = 'identifiers'
 
 interface IStripUnitContentData {
   key: string
@@ -138,7 +145,8 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     private translate: TranslateService,
     private langtranslations: MultilingualTranslationsService,
     private enrollSvc: WidgetEnrollService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private appDb: IndexedDbService
   ) {
     super()
     if (localStorage.getItem('websiteLanguage')) {
@@ -2648,37 +2656,9 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
     })
   }
 
-  private openEnrollmentCache(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(IDB_NAME, 2)
-
-      req.onupgradeneeded = (e: any) => {
-        const db: IDBDatabase = e.target.result
-
-        if (!db.objectStoreNames.contains(IDB_STORE)) {
-          db.createObjectStore(IDB_STORE)
-        }
-
-        if (!db.objectStoreNames.contains(IDB_HIERARCHY_STORE)) {
-          db.createObjectStore(IDB_HIERARCHY_STORE)
-        }
-      }
-
-      req.onsuccess = (e: any) => resolve(e.target.result)
-      req.onerror = () => reject(req.error)
-    })
-  }
-
   private setCaIdentifiers(data: any): void {
-    this.openEnrollmentCache()
-      .then(db => {
-        db.transaction(IDB_STORE, 'readwrite')
-          .objectStore(IDB_STORE)
-          .put(
-            { data, timestamp: Date.now() },
-            'comprehensiveAssessmentIdentifiers'
-          )
-      })
+    this.appDb
+      .put(CA_STORE, CA_IDENTIFIERS_KEY, { data, timestamp: Date.now() })
       .catch(() => {
         /* silently ignore cache write failures */
       })

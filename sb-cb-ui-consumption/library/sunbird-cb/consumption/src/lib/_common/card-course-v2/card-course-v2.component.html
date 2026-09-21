@@ -45,9 +45,13 @@
   (keydown.space)="$event.preventDefault(); onCardClick()">
 
   <!-- ┌─── MEDIA (image + overlays) ──────────────────────────┐ -->
-  <div class="cc-card__media">
+  <div class="cc-card__media" [class.cc-card__media--ca]="showAssessmentMedia()">
+    @if (showAssessmentMedia()) {
+    <span class="cc-card__media-category">{{ displayType() }}</span>
+    } @else {
     <img class="cc-card__img" [src]="thumbnailUrl()" [wsUtilsDefaultThumbnail]="defaultThumbnail()" [alt]="c.name"
-      loading="lazy" />
+      loading="lazy" (error)="onThumbnailError()" />
+    }
 
     <div class="cc-card__badges">
       @if (isIgotSpecialization() && isCardElementEnabled('igotSpecialization')) {
@@ -169,7 +173,15 @@
           [matTooltipShowDelay]="400" matTooltipClass="cc-title-tooltip">{{ orgName() }}</span>
         }
 
-        @if (cbpStatus()) {
+        <!-- An assessment's lock state takes the slot: it describes the content itself, where
+             a CBP status only describes the plan the content sits in. -->
+        @if (assessmentState()) {
+        <span class="cc-card__status" [class.cc-card__status--overdue]="assessmentState() === 'locked'"
+          [class.cc-card__status--upcoming]="assessmentState() === 'available'"
+          [class.cc-card__status--done]="assessmentState() === 'completed'">
+          <span aria-hidden="true">&#9679;&nbsp;</span>{{ assessmentStateKey() | translate }}
+        </span>
+        } @else if (cbpStatus()) {
         <span class="cc-card__status" [class.cc-card__status--overdue]="cbpStatus() === 'Overdue'"
           [class.cc-card__status--done]="cbpStatus() === 'Completed'"
           [class.cc-card__status--upcoming]="cbpStatus() === 'Upcoming'">

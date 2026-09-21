@@ -5,23 +5,17 @@ import { catchError, map, switchMap } from 'rxjs/operators'
 import { ApiMethod, ApiRegistryEntry, ChainedApiConfig, ContentSectionConfig } from '../models/content-section.model'
 import { API_REGISTRY } from '../registry/api-registry'
 import { ConfigurationsService, WidgetEnrollService } from '@sunbird-cb/utils-v2'
-import { WidgetUserServiceLib } from '../../../_services/widget-user-lib.service'
+import { IUserCbpPlan, UserCbpPlansService } from '../../../_services/user-cbp-plans.service'
 import * as _ from 'lodash'
 
 @Injectable({ providedIn: 'root' })
 export class ContentApiService {
   private http = inject(HttpClient);
   private configSvc = inject(ConfigurationsService);
-  private userService = inject(WidgetUserServiceLib);
+  private userCbpPlansSvc = inject(UserCbpPlansService);
   private userServiceLib = inject(WidgetEnrollService);
   private readonly cardClickDetailsSubject = new Subject<any>()
   readonly cardClickDetails$ = this.cardClickDetailsSubject.asObservable()
-
-  /**
-   * In-flight CBP plan request per plan year, so the CBP sections on one page share a single
-   * POST. This service is a root singleton, so the map spans every section on the page.
-   */
-  private readonly cbpPlanInFlight = new Map<string, Promise<any[]>>()
 
   private readonly emptySectionKeysSubject = new BehaviorSubject<string[]>([])
   readonly emptySectionKeys$ = this.emptySectionKeysSubject.asObservable()
@@ -57,11 +51,10 @@ export class ContentApiService {
       case 'aparApi':
       case 'trainingPlanApi':
       case 'draftCBPplanApi':
-        // CBPlan V3; the service resolves the current plan year and caches per year.
-        // All three keys are slices of the SAME year's dataset (CardTransformerService filters
-        // on isApar / planTypeV2), and each section calls loadContent separately, so they are
-        // deduped onto one request here.
-        return of(await this.loadCbpPlanOnce())
+        // CBPlan V4. These three keys are the three slices of ONE response, and
+        // UserCbpPlansService already splits them — so each section takes its own list off
+        // a single call rather than fetching and re-filtering the whole dataset.
+        return of(await this.loadCbpPlansV4(apiDetailsKey))
       default:
         let config: ApiRegistryEntry | undefined
         const globalApiConfig = _.get(this.configSvc, 'globalConfig.apis.apiRegistryConfig')
@@ -95,25 +88,25 @@ export class ContentApiService {
   }
 
   /**
-   * One CBP plan request per plan year, shared by every CBP section on the page.
+   * The plans for one CBP section, off a single CBPlan V4 call.
    *
-   * The year-scoped IndexedDB cache cannot collapse these on its own: it is only written
-   * once a response lands, so sections that start together all miss it and each POSTs
-   * /cbplan/v3/user/dictionary. The entry is dropped as soon as the request settles, so a
-   * later navigation still re-reads (and re-validates) the cache normally.
+   * No dedupe map here: UserCbpPlansService keeps one request per plan year in flight, so
+   * the three sections starting together share that one POST and then each take their own
+   * pre-split list. The V3 path needed a map at this level because its response was one
+   * flat content list that every section re-filtered.
    */
-  private loadCbpPlanOnce(): Promise<any[]> {
-    const planYear = this.userService.getCurrentFinancialYear()
-    const inFlight = this.cbpPlanInFlight.get(planYear)
-    if (inFlight) {
-      return inFlight
+  private async loadCbpPlansV4(apiDetailsKey: string): Promise<IUserCbpPlan[]> {
+    const plans = await this.userCbpPlansSvc.getUserCbpPlansAsync()
+    switch (apiDetailsKey) {
+      case 'aparApi':
+        return plans.aparPlanList
+      case 'draftCBPplanApi':
+        return plans.aiCbpPlanList
+      case 'trainingPlanApi':
+        return plans.cbpPlanList
+      default:
+        return []
     }
-    const request = this.userService.fetchCbpPlanListV3(planYear)
-      .toPromise()
-      .then((data: any) => data || [])
-      .finally(() => this.cbpPlanInFlight.delete(planYear))
-    this.cbpPlanInFlight.set(planYear, request)
-    return request
   }
 
   private executeRequest(config: ApiRegistryEntry, apiDetailsKey: string): Observable<unknown> {
@@ -300,6 +293,22 @@ export class ContentApiService {
   private applyUserContextFilters(body: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
     if (!body) {
       return body
+    }
+
+    // Plan search (/cbplan/v2/search) takes a FLAT body — { filter, pageNumber, pageSize, … } —
+    // rather than the { request: { filters } } envelope every content search uses. Its
+    // `orgIdList` placeholder still has to be resolved to the signed-in user's org, or the
+    // plan strips would ask for every org's plans.
+    const flatFilter = (body as Record<string, any>).filter
+    if (flatFilter && Object.prototype.hasOwnProperty.call(flatFilter, 'orgIdList')) {
+      const rootOrgId = this.configSvc?.userProfile?.rootOrgId
+      return {
+        ...body,
+        filter: {
+          ...flatFilter,
+          orgIdList: rootOrgId ? [rootOrgId] : [],
+        },
+      }
     }
 
     const request = (body as Record<string, any>).request
