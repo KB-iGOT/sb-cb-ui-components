@@ -19,6 +19,17 @@ import { PlanCardViewModel } from '../strips-v2/models/card.model'
 import { ContentApiService } from '../strips-v2/services/content-api.service'
 
 /**
+ * A plan type as the card holds it, mapped to the key `/app/plans` speaks. The two
+ * vocabularies differ — the card carries the API's 'APAR' / 'AICBP' / 'CBP', the listing
+ * reads lowercase keys off the URL — so the translation happens once, here.
+ */
+const LISTING_PLAN_TYPE: Record<string, string> = {
+  APAR: 'apar',
+  AICBP: 'aicbp',
+  CBP: 'cbp',
+}
+
+/**
  * Card for a single CBP / APAR / AI-CBP training plan (CardType.PlanCard).
  *
  * A plan is not content, so this is a sibling of CardCourseV2Component rather than a mode of
@@ -60,7 +71,7 @@ export class CardPlanV2Component {
   // ── Internal mutable state ─────────────────────────────────────────────────
   readonly isTitleTruncated = signal(false)
   readonly isOwnerTruncated = signal(false)
-  /** Instance logo — stands in for the owning org, which the plan payload has no image for. */
+  /** Instance logo, used wherever the owning org has none of its own. */
   readonly defaultSLogo = signal('')
 
   // ── Computed values ────────────────────────────────────────────────────────
@@ -85,6 +96,14 @@ export class CardPlanV2Component {
       default: return 'CBP'
     }
   })
+
+  /**
+   * The owning org's logo, or the instance logo when it has none.
+   *
+   * CBPlan V4 sends `createdByOrgLogo: null` for most orgs, so the fallback is the usual
+   * path rather than the exception — an empty `src` would render a broken-image glyph.
+   */
+  readonly ownerLogo = computed(() => this.plan()?.createdByLogo || this.defaultSLogo())
 
   readonly planTypeIcon = computed(() => {
     switch (this.plan()?.planType) {
@@ -118,7 +137,22 @@ export class CardPlanV2Component {
       return
     }
     this.emitDetails()
-    this.router.navigate([`/app/plans/${plan.identifier}`])
+    // The detail page resolves the plan out of the CBPlan V4 cache in IndexedDB, which is
+    // keyed by plan year — so it is handed the year THIS card was built from rather than left
+    // to guess at one. `planType` comes along so the page's back link points at the right
+    // listing before the plan itself has resolved.
+    //
+    // Either is omitted when the card does not carry it. Both are hints: the page falls back
+    // to the read API, and to the plan's own type, without them.
+    const queryParams: Record<string, string> = {}
+    if (plan.planYear) {
+      queryParams['planYear'] = plan.planYear
+    }
+    const listingType = LISTING_PLAN_TYPE[plan.planType ?? '']
+    if (listingType) {
+      queryParams['planType'] = listingType
+    }
+    this.router.navigate([`/app/plans/${plan.identifier}`], { queryParams })
   }
 
   emitDetails(): void {
@@ -130,6 +164,21 @@ export class CardPlanV2Component {
       ...cardClickDetails,
       identifier: this.plan()?.identifier,
     })
+  }
+
+  /**
+   * Falls back to the instance logo when the org's own URL fails to load.
+   *
+   * `ownerLogo()` only covers a logo the payload omits; one that is present but dead — a
+   * moved asset, a host that 404s — still reaches the browser and would leave a broken
+   * image on the card. Guarded against re-entering if the default itself fails.
+   */
+  onLogoError(event: Event): void {
+    const img = event.target as HTMLImageElement | null
+    const fallback = this.defaultSLogo()
+    if (img && fallback && img.src !== fallback) {
+      img.src = fallback
+    }
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────

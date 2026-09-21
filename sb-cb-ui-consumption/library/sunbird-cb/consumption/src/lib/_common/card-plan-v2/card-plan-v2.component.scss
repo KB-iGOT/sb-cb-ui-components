@@ -16,6 +16,10 @@ $pc-body-pad : 10px 12px;
    area, which is the brand purple in BOTH themes, so flipping them would put dark text on a
    dark ground. The skeleton greys have no token, so they are local custom properties swapped
    for the dark theme just below.
+
+   One trap worth naming: `--surface-primary` is the CARD SURFACE (#ffffff in light), not a
+   brand colour. Using it as a chip background with white text renders invisible in the
+   default theme while looking correct in dark.
    ────────────────────────────────────────────────────────── */
 $permanent-badge-bg : #101010;
 $permanent-badge-fg : #ffffff;
@@ -194,7 +198,17 @@ $permanent-badge-fg : #ffffff;
     overflow: hidden;
     text-overflow: ellipsis;
 
-    &--type {
+    /*
+     * The plan-type chip and the Comprehensive Assessment tag look identical — the footer
+     * reads as one row of tags rather than a label plus a callout. Colour, background and
+     * the absence of a border all come from the base chip above; these two only add weight
+     * and tighten the padding.
+     *
+     * Two modifiers rather than one so either can diverge later without touching the
+     * other's markup.
+     */
+    &--type,
+    &--ca {
       font-weight: 600;
       padding: 3px 6px;
     }
@@ -241,11 +255,32 @@ $permanent-badge-fg : #ffffff;
   /* Row 3 – "Created By" + the name (fixed 40px) */
   &__owner {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 8px;
     height: 40px;
     flex-shrink: 0;
     margin-top: 8px;
+    overflow: hidden;
+  }
+
+  &__owner-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    /* Org logo art is drawn for a light plate, so the backing stays white in both themes. */
+    background: #ffffff;
+  }
+
+  /* The label/name column that used to be `&__owner` itself, now beside the logo. */
+  &__owner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* Without this the name cannot shrink below its content width, so its ellipsis
+       never engages and the row overflows the card instead. */
+    min-width: 0;
     overflow: hidden;
   }
 
@@ -268,6 +303,7 @@ $permanent-badge-fg : #ffffff;
     flex-shrink: 0;
     display: flex;
     align-items: center;
+    gap: 6px;
     height: 30px;
   }
 }
@@ -339,6 +375,7 @@ $permanent-badge-fg : #ffffff;
   &__type {
     display: flex;
     align-items: center;
+    gap: 6px;
     margin-top: 8px;
   }
 

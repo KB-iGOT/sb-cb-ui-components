@@ -10,6 +10,13 @@ export interface FilterOption {
   displayName?: string
   count?: number
   isChecked?: boolean
+  /**
+   * Renders the control greyed and unselectable. Left undefined the option is enabled, so
+   * existing callers are unaffected. Use it for a choice that exists but would return
+   * nothing — an empty bucket is more informative shown and disabled than hidden, because
+   * hiding it makes the list of choices shift around as the data changes.
+   */
+  disabled?: boolean
 }
 
 export interface FilterConfig {
@@ -301,6 +308,34 @@ export class FilterByComponent implements OnInit, OnDestroy, OnChanges {
       this.searchQueries[config.key] = ''
       this.showAllMap[config.key] = false
     })
+    this.seedSelectionFromConfig()
+  }
+
+  /**
+   * Adopts the selection the parent already declared through each option's `isChecked`.
+   *
+   * `selectedFilters` used to start empty and fill only when someone clicked INSIDE this
+   * panel, so a selection that arrived from anywhere else — a URL query param, a toolbar
+   * control, a restored session — rendered its radio or checkbox as checked while the panel
+   * still believed nothing was applied. That is what drives `filtersAppliedCount`, so the
+   * applied-filter chips and the Clear All button stayed hidden on a page that plainly was
+   * filtered.
+   *
+   * Only runs where `filterConfig` is an input (it is called from `initializeState`), so a
+   * parent that feeds `apiFacets` instead and manages selection by clicking is unaffected:
+   * its options carry no `isChecked`, and this seeds nothing.
+   */
+  private seedSelectionFromConfig(): void {
+    const seeded: SelectedFilters = {}
+    this.filterConfig.forEach(config => {
+      const checked = (config.options || [])
+        .filter((option: FilterOption) => option.isChecked)
+        .map((option: FilterOption) => option.name)
+      if (checked.length) {
+        seeded[config.key] = checked
+      }
+    })
+    this.selectedFilters = seeded
   }
 
   getSelectedFilter(option: FilterOption, key: string): boolean {

@@ -51,6 +51,25 @@ $done-green : #388e3c;
     display: block;
   }
 
+  /* Drawn, not loaded: a comprehensive assessment has no poster worth showing, so the media
+     area names the category instead. Same idea as CardPlanV2Component's drawn media. */
+  &__media--ca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+  }
+
+  &__media-category {
+    /* Permanent white: it sits on the brand blue, which stays blue in both themes. */
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+  }
+
   /* Badge container – bottom-left of image, stacks multiple badges vertically */
   &__badges {
     position: absolute;

@@ -46,9 +46,21 @@ export interface PlanCardViewModel {
   contentType: string
   /** Display name for the "Created By" row. */
   createdByName: string
+  /**
+   * Logo of the owning org. Empty when the payload carries none — CBPlan V4 sends
+   * `createdByOrgLogo: null` for most orgs — and the card falls back to the instance logo
+   * from `instanceConfig.logos.defaultSourceLogo` rather than rendering a gap.
+   */
+  createdByLogo: string
   /** Plan lifecycle status as the API reports it: draft / live / retire. */
   status: string
   planType: 'APAR' | 'AICBP' | 'CBP'
+  /**
+   * Whether the card shows the CA tag: an APAR plan that actually carries a comprehensive
+   * assessment. Both halves matter — a non-APAR plan is not tagged even if the field is
+   * populated, and an APAR plan with `comprehensiveAssessment: null` is not either.
+   */
+  hasComprehensiveAssessment: boolean
   planStatus: PlanStatus
   metadata: Record<string, unknown>
 }
