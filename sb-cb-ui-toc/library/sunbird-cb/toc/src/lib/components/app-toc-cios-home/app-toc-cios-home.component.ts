@@ -63,6 +63,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   requiredKarmaCoins = 0
   enrolPending = false
   insufficientCoins = false
+  insufficientCoinsContent: any = null
   private karmaRedeemContent: any = null
   private karmaCoinsRequest: Promise<number> | null = null
   private coinShortfall = false
@@ -243,6 +244,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     // Awaits the call the page load started, so a quick click cannot enrol before the rule is in
     const coins = await this.loadRequiredKarmaCoins(content)
     if (this.coinShortfall) {
+      this.insufficientCoinsContent = content
       this.insufficientCoins = true
       return
     }
@@ -424,13 +426,27 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   closeInsufficientCoins() {
+    this.raiseInsufficientCoinsTelemetry('cancel')
     this.insufficientCoins = false
+    this.insufficientCoinsContent = null
   }
 
   goToKarmaWallet() {
+    this.raiseInsufficientCoinsTelemetry('visit-karma-wallet')
     this.insufficientCoins = false
+    this.insufficientCoinsContent = null
     /* the wallet page opens its convert dialog on this, as long as converting is available */
     this.router.navigate([KARMA_WALLET_ROUTE], { queryParams: { convert: 'true' } })
+  }
+
+  private raiseInsufficientCoinsTelemetry(id: string) {
+    const contentId = _.get(this.insufficientCoinsContent, 'contentId', '') ||
+      _.get(this.extContentReadData, 'contentId', '')
+    this.events.raiseInteractTelemetry(
+      { id, type: WsEvents.EnumInteractTypes.CLICK, subType: 'insufficient-karma-coins' },
+      { id: contentId, type: 'external content' },
+      { pageId: 'app/toc/ext', module: 'Learn' }
+    )
   }
 
   async getUserContentEnroll(contentId: any) {
