@@ -12,9 +12,9 @@ const CQF_MAX_SECTIONS = 15
 const CQF_SECTION_TOTAL_QUESTIONS = 200
 const CQF_MINIMUM_PASS_PERCENTAGE = 70
 const CQF_NEGATIVE_MARKING_PERCENTAGE = '0%'
-/** A comprehensive assessment takes the re-attempt count typed in, up to three digits. */
-const COMPREHENSIVE_MAX_RETAKE_ATTEMPTS = 999
-const COMPREHENSIVE_MAX_RETAKE_DIGITS = 3
+/** A comprehensive assessment takes the re-attempt count typed in, up to two digits. */
+const COMPREHENSIVE_MAX_RETAKE_ATTEMPTS = 99
+const COMPREHENSIVE_MAX_RETAKE_DIGITS = 2
 /** What every other assessment allows, and the count its tooltip has always quoted. */
 const DEFAULT_MAX_RETAKE_ATTEMPTS = 5
 /**
@@ -533,7 +533,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       maxAssessmentRetakeAttempts?.setValidators(this.isComprehensiveAssessment
         ? [
           Validators.required,
-          Validators.pattern(/^\d{1,3}$/),
+          Validators.pattern(/^\d{1,2}$/),
           Validators.min(0),
           Validators.max(COMPREHENSIVE_MAX_RETAKE_ATTEMPTS),
         ]

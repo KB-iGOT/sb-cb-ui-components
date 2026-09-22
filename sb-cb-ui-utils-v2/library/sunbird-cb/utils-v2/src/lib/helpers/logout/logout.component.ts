@@ -3,6 +3,7 @@ import { MatDialogRef } from '@angular/material/dialog'
 import { AuthKeycloakService } from '../../services/auth-keycloak.service'
 import { ConfigurationsService } from '../../services/configurations.service'
 import { UtilityService } from '../../services/utility.service'
+import { IndexedDbService } from '../../services/indexed-db.service'
 import { TranslateService } from '@ngx-translate/core'
 
 @Component({
@@ -21,6 +22,7 @@ export class LogoutComponent implements OnInit {
     private authSvc: AuthKeycloakService,
     private configSvc: ConfigurationsService,
     private utilitySvc: UtilityService,
+    private indexedDbSvc: IndexedDbService,
     private translate: TranslateService
   ) {
     if (localStorage.getItem('websiteLanguage')) {
@@ -39,7 +41,7 @@ export class LogoutComponent implements OnInit {
     }
   }
 
-  confirmed() {
+  async confirmed() {
     this.disabled = true
     this.dialogRef.close()
     if (localStorage.getItem('ratingformID')) {
@@ -56,6 +58,10 @@ export class LogoutComponent implements OnInit {
     }
     // this.authSvc.logout()
     this.clearCookies()
+    // The cached data is dropped before the redirect rather than after it: `force_logout`
+    // sends the browser away, and anything started after that may never finish. Awaited for
+    // the same reason, and the wait is bounded inside the service.
+    await this.indexedDbSvc.clearAppDatabase()
     this.authSvc.force_logout()
     if (localStorage.getItem('faq')) {
       localStorage.removeItem('faq')

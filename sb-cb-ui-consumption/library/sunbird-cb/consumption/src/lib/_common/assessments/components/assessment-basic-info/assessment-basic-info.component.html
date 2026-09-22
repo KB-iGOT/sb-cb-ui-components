@@ -238,16 +238,14 @@
                     if count is one or more than 1 up to {{ maxRetakeAttempts }} then learner can re-attempt the same test as per entered
                     count by clicking on ‘Re-attempt test’ button given on result page.">info_outline</mat-icon>
           </label>
-          <!-- A comprehensive assessment takes the count typed in, the usual ones stay on
-               hand as suggestions. Every other assessment picks from the list. -->
+          <!-- A comprehensive assessment takes the count typed in and nothing else: the range is
+               narrow enough to say in the placeholder, so there is no list to pick from. Every
+               other assessment still picks from the options offered. -->
           <mat-form-field appearance="outline" class="full-width" *ngIf="isComprehensiveAssessment; else reAttemptSelect">
             <input matInput type="text" inputmode="numeric" [maxlength]="maxRetakeDigits"
-              placeholder="Enter or select" formControlName="maxAssessmentRetakeAttempts"
-              [matAutocomplete]="reAttemptAuto" (keypress)="onRetakeAttemptsKeypress($event)"
+              placeholder="Enter a number from 0 to {{ maxRetakeAttempts }}"
+              formControlName="maxAssessmentRetakeAttempts" (keypress)="onRetakeAttemptsKeypress($event)"
               (input)="onRetakeAttemptsInput($event)" (paste)="onRetakeAttemptsPaste($event)">
-            <mat-autocomplete #reAttemptAuto="matAutocomplete">
-              <mat-option *ngFor="let option of reAttemptOptions" [value]="option">{{ option }}</mat-option>
-            </mat-autocomplete>
             <mat-error *ngIf="controls['maxAssessmentRetakeAttempts'].hasError('required')">Number of re-attempts is
               required</mat-error>
             <mat-error

@@ -4,10 +4,18 @@
       <!-- Question (Left Side) -->
       <div class="mtf-question">
         <label class="mtf-label">Question {{ i + 1 }}</label>
+        <!-- The editor is built when the side is opened for editing: a question holds up to
+             seven pairs, and fourteen editors at once is what kept it from loading. -->
         <div class="editor-wrapper">
-          <sb-uic-assessment-rich-text [textToBeShown]="pair.question" (getContent)="onQuestionTextChange(pair, $event)"
-            [showAudioVideoToolBar]="false" [readOnly]="isReadOnly">
+          <sb-uic-assessment-rich-text *ngIf="isEditorActive(pair, 'question'); else questionPreview"
+            [textToBeShown]="pair.question" (getContent)="onQuestionTextChange(pair, $event)"
+            [showAudioVideoToolBar]="false" [readOnly]="isReadOnly" [autoFocus]="true">
           </sb-uic-assessment-rich-text>
+          <ng-template #questionPreview>
+            <div class="mtf-preview" [class.read-only]="isReadOnly" [attr.tabindex]="isReadOnly ? null : 0"
+              (click)="activateEditor(pair, 'question')" (focus)="activateEditor(pair, 'question')"
+              [innerHTML]="pair.question"></div>
+          </ng-template>
         </div>
       </div>
 
@@ -15,9 +23,15 @@
       <div class="mtf-answer">
         <label class="mtf-label">Answer {{ i + 1 }}</label>
         <div class="editor-wrapper">
-          <sb-uic-assessment-rich-text [textToBeShown]="pair.answer" (getContent)="onAnswerTextChange(pair, $event)"
-            [showAudioVideoToolBar]="false" [readOnly]="isReadOnly">
+          <sb-uic-assessment-rich-text *ngIf="isEditorActive(pair, 'answer'); else answerPreview"
+            [textToBeShown]="pair.answer" (getContent)="onAnswerTextChange(pair, $event)"
+            [showAudioVideoToolBar]="false" [readOnly]="isReadOnly" [autoFocus]="true">
           </sb-uic-assessment-rich-text>
+          <ng-template #answerPreview>
+            <div class="mtf-preview mtf-preview-answer" [class.read-only]="isReadOnly"
+              [attr.tabindex]="isReadOnly ? null : 0" (click)="activateEditor(pair, 'answer')"
+              (focus)="activateEditor(pair, 'answer')" [innerHTML]="pair.answer"></div>
+          </ng-template>
         </div>
       </div>
 
