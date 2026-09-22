@@ -270,14 +270,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.sticky = false
     }
 
-    if (this.scrollLimit) {
+    if (this.scrollLimit && this.rcElement) {
       if ((window.scrollY + this.rcElem.BottomPos) >= this.scrollLimit) {
-        this.rcElement.nativeElement.style.position = 'sticky'
+        this.rcElement.nativeElement.style.position = "sticky";
       } else {
-        if (this.rcElement) {
-          this.rcElement.nativeElement.style.position = 'fixed'
-        }
-
+        this.rcElement.nativeElement.style.position = "fixed";
       }
     }
 
