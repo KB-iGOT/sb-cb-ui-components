@@ -35,6 +35,8 @@ export class ConfigurationsService {
   sitePath = `assets/configurations`
   hostPath = (window.location.host).replace(':', '_')
 
+  userSubRole: string = ''
+
   userRoles: Set<string> | null = null
   userAllRoles: Set<string> | null = null
   userGroups: Set<string> | null = null

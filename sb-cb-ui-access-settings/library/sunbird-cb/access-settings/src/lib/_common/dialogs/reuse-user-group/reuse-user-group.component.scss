@@ -94,6 +94,9 @@
 
 .reuse-actions button {
   padding: 0 32px !important;
+  &:disabled {
+    background-color:#1b4ca163 !important;
+  }
 }
 
 .border-radius-4 {
