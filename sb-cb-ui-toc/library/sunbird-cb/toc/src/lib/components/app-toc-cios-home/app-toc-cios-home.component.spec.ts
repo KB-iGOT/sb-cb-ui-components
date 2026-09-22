@@ -57,13 +57,14 @@ jest.mock('./consent-dialog.component', () => ({
   ConsentDialogComponent: class MockConsentDialogComponent { },
 }))
 
-import { of, throwError, BehaviorSubject } from 'rxjs'
+import { of, throwError, BehaviorSubject, Subject } from 'rxjs'
 import { AppTocCiosHomeComponent } from './app-toc-cios-home.component'
 
 describe('AppTocCiosHomeComponent', () => {
   let component: AppTocCiosHomeComponent
 
   let routeMock: any
+  let routerMock: any
   let commonSvcMock: any
   let translateMock: any
   let configSvcMock: any
@@ -99,6 +100,7 @@ describe('AppTocCiosHomeComponent', () => {
   const createComponent = (): AppTocCiosHomeComponent =>
     new AppTocCiosHomeComponent(
       routeMock,
+      routerMock,
       commonSvcMock,
       translateMock,
       configSvcMock,
@@ -123,6 +125,11 @@ describe('AppTocCiosHomeComponent', () => {
         queryParams: {},
         data: {},
       },
+    }
+
+    routerMock = {
+      navigate: jest.fn(),
+      url: '/app/toc/ext/c1',
     }
 
     commonSvcMock = {
@@ -657,6 +664,40 @@ describe('AppTocCiosHomeComponent', () => {
       expect(component.karmaRedeemData.message).toBe('Spend 25 coins to unlock')
     })
 
+    /* The deduction rule api answers 402 with the shortfall spelled out in params.msg -
+       the popup shows that text, it is not written in the template */
+    it('should show the deduction rule message when the user is short of coins', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({
+        status: 402,
+        error: {
+          params: { msg: 'You don\'t have enough Karma Coins to enroll. Minimum Karma Coins required: 1000.' },
+          responseCode: 'PAYMENT_REQUIRED',
+          result: { requiredKarmaPoints: 1000 },
+        },
+      }))
+      component.config = {}
+
+      await component.enRollToExtCourse(extContent)
+
+      expect(component.insufficientCoins).toBe(true)
+      expect(component.insufficientCoinsMessage)
+        .toBe('You don\'t have enough Karma Coins to enroll. Minimum Karma Coins required: 1000.')
+      expect(component.karmaRedeemData).toBeNull()
+    })
+
+    it('should leave the message empty when the api sends none', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({
+        status: 402,
+        error: { responseCode: 'PAYMENT_REQUIRED' },
+      }))
+      component.config = {}
+
+      await component.enRollToExtCourse(extContent)
+
+      expect(component.insufficientCoins).toBe(true)
+      expect(component.insufficientCoinsMessage).toBe('')
+    })
+
     it('should skip the popup and open consent when the content carries no karma coins', () => {
       component.config = {}
       component.enRollToExtCourse(extContent)
@@ -940,29 +981,38 @@ describe('AppTocCiosHomeComponent', () => {
 
     beforeEach(() => {
       component.discussWidgetData = buildDiscussWidgetData() as any
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
     })
 
-    it('should show the loader and post the enrollment request', async () => {
-      jest.spyOn(component, 'getUserContentEnroll').mockResolvedValue(undefined)
+    /* The in-progress popup is the wait indicator on this path, so the page loader stays off */
+    it('should post the enrollment request without the page loader', async () => {
       await (component as any).proceedWithEnrollment(content)
-      expect(loaderMock.changeLoad.next).toHaveBeenCalledWith(true)
       expect(contentSvcMock.extContentEnroll).toHaveBeenCalledWith({ courseId: 'c1', partnerId: 'p1' })
+      expect(loaderMock.changeLoad.next).not.toHaveBeenCalledWith(true)
     })
 
-    it('should open the discussion box and fetch the enrollment on success', async () => {
-      const fetchSpy = jest.spyOn(component, 'getUserContentEnroll').mockResolvedValue(undefined)
+    it('should open the discussion box and leave the popup up on success', async () => {
       const netCoreSpy = jest.spyOn(component, 'contentViewEventForNetCore')
+      const telemetrySpy = jest.spyOn(component, 'telemetryToCaptureInteract')
+
       await (component as any).proceedWithEnrollment(content)
+
       expect(component.discussWidgetData.enrolledContent).toBe(true)
       expect(component.discussWidgetData.newCommentSection.commentBox.placeholder).toBe('Start a discussion')
-      expect(fetchSpy).toHaveBeenCalledWith('c1')
+      expect(telemetrySpy).toHaveBeenCalledWith('c1', 'enroll', 'enrol-content')
       expect(netCoreSpy).toHaveBeenCalledWith('enroll')
+      /* the status is only read when the user closes the popup */
+      expect(contentSvcMock.fetchExtUserContentEnroll).not.toHaveBeenCalled()
+      expect(component.enrolPending).toBe(true)
     })
 
-    it('should hide the loader and warn when the enrollment returns no result', async () => {
+    it('should close the popup and warn when the enrollment returns no result', async () => {
       contentSvcMock.extContentEnroll.mockReturnValue(of({ result: {} }))
+
       await (component as any).proceedWithEnrollment(content)
-      expect(loaderMock.changeLoad.next).toHaveBeenLastCalledWith(false)
+
+      expect(component.enrolPending).toBe(false)
       expect(snackBarMock.open).toHaveBeenCalledWith('Unable to enroll to the content', 'X', { duration: 10000 })
     })
 
@@ -970,32 +1020,197 @@ describe('AppTocCiosHomeComponent', () => {
       contentSvcMock.extContentEnroll.mockReturnValue(
         throwError({ error: { params: { msg: 'already enrolled' } } })
       )
+
       await (component as any).proceedWithEnrollment(content)
+
+      expect(component.enrolPending).toBe(false)
       expect(snackBarMock.open).toHaveBeenCalledWith('already enrolled', 'X', { duration: 10000 })
     })
   })
 
-  describe('getUserContentEnroll', () => {
-    it('should store the enrollment and confirm it to the user', async () => {
-      const telemetrySpy = jest.spyOn(component, 'telemetryToCaptureInteract')
-      await component.getUserContentEnroll('c1')
-      expect(component.userExtCourseEnroll).toEqual({ progress: 10 })
-      expect(loaderMock.changeLoad.next).toHaveBeenCalledWith(false)
-      expect(telemetrySpy).toHaveBeenCalledWith('c1', 'enroll', 'enrol-content')
-      expect(snackBarMock.open).toHaveBeenCalledWith('Successfully enrolled in the course.')
+  describe('enrolment in progress popup', () => {
+    const content = { contentId: 'c1', contentPartner: { id: 'p1' } }
+
+    /* closeEnrolPending kicks the read off without awaiting it */
+    const flush = async () => { await Promise.resolve(); await Promise.resolve(); await Promise.resolve() }
+
+    beforeEach(() => {
+      component.discussWidgetData = buildDiscussWidgetData() as any
+      component.extContentReadData = { contentId: 'c1' }
     })
 
-    it('should warn when the enrollment details come back empty', async () => {
+    /* Agreeing to the consent is the only thing that raises the popup */
+    it('should open the popup as soon as the consent is agreed', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+
+      await (component as any).openConsentDialog(content)
+
+      expect(component.enrolPending).toBe(true)
+      expect(component.enrolPendingContentId).toBe('c1')
+    })
+
+    it('should not open the popup when the consent is declined', async () => {
+      matDialogMock.open.mockReturnValue({ afterClosed: () => of(false) })
+
+      await (component as any).openConsentDialog(content)
+
+      expect(component.enrolPending).toBe(false)
+      expect(snackBarMock.open).toHaveBeenCalledWith(
+        'You must agree to the terms to enroll in this course.', 'X', { duration: 5000 })
+    })
+
+    it('should close the popup when the consent call fails', () => {
+      certSvcMock.consentSubmit.mockReturnValue(throwError({ error: { params: { msg: 'no consent' } } }))
+      component.enrolPending = true
+
+      component.callConsentApi(content)
+
+      expect(component.enrolPending).toBe(false)
+      expect(snackBarMock.open).toHaveBeenCalledWith('no consent', 'X', { duration: 5000 })
+    })
+
+    /* Close is what reads the status back; the card renders whatever it returns */
+    it('should read the enrolment status on close and store it', async () => {
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 3 } }))
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(contentSvcMock.fetchExtUserContentEnroll).toHaveBeenCalledWith('c1')
+      expect(component.userExtCourseEnroll).toEqual({ status: 3 })
+      expect(component.isEnrolPending).toBe(true)
+      expect(component.enrolPending).toBe(false)
+      expect(component.enrolStatusChecking).toBe(false)
+    })
+
+    it('should show the enrolled state when the status is no longer pending', async () => {
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 1 } }))
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(component.isEnrolPending).toBe(false)
+      expect(component.enrolPending).toBe(false)
+    })
+
+    /* The button reads "Checking..." off this flag, so it has to be observable mid-read */
+    it('should hold the popup in the checking state while the read is in flight', async () => {
+      const gate = new Subject<any>()
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(gate.asObservable())
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(component.enrolStatusChecking).toBe(true)
+      expect(component.enrolPending).toBe(true)
+
+      gate.next({ result: { status: 3 } })
+      gate.complete()
+      await flush()
+
+      expect(component.enrolPending).toBe(false)
+      expect(component.enrolStatusChecking).toBe(false)
+    })
+
+    it('should close and warn when the status read comes back empty', async () => {
       contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: {} }))
-      await component.getUserContentEnroll('c1')
-      expect(snackBarMock.open).toHaveBeenCalledWith('Unable to get the enrolled details')
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(component.enrolPending).toBe(false)
+      expect(snackBarMock.open).toHaveBeenCalledWith('Unable to get the enrolled details', 'X', { duration: 5000 })
     })
 
-    it('should warn when the enrollment request fails', async () => {
+    it('should close and warn when the status read fails', async () => {
       contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(throwError('boom'))
-      await component.getUserContentEnroll('c1')
-      expect(loaderMock.changeLoad.next).toHaveBeenCalledWith(false)
-      expect(snackBarMock.open).toHaveBeenCalledWith('Unable to get the enrolled details')
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(component.enrolPending).toBe(false)
+      expect(snackBarMock.open).toHaveBeenCalledWith('Unable to get the enrolled details', 'X', { duration: 5000 })
+    })
+
+    it('should ignore a second close while the status read is in flight', async () => {
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+      component.enrolStatusChecking = true
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(contentSvcMock.fetchExtUserContentEnroll).not.toHaveBeenCalled()
+      expect(component.enrolPending).toBe(true)
+    })
+
+    /* Closing before the enrolment lands must not read a course that is not enrolled yet */
+    it('should wait for the enrolment before reading the status', async () => {
+      component.enrolPending = true
+      component.enrolSubmitting = true
+      component.enrolPendingContentId = 'c1'
+
+      component.closeEnrolPending()
+      await flush()
+
+      expect(contentSvcMock.fetchExtUserContentEnroll).not.toHaveBeenCalled()
+      expect(component.enrolStatusChecking).toBe(true)
+      expect(component.enrolPending).toBe(true)
+    })
+
+    it('should run the waiting read as soon as the enrolment lands', async () => {
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 3 } }))
+      component.enrolPending = true
+      component.enrolSubmitting = true
+      component.enrolPendingContentId = 'c1'
+      component.closeEnrolPending()
+
+      await (component as any).proceedWithEnrollment(content)
+      await flush()
+
+      expect(contentSvcMock.fetchExtUserContentEnroll).toHaveBeenCalledWith('c1')
+      expect(component.userExtCourseEnroll).toEqual({ status: 3 })
+      expect(component.enrolPending).toBe(false)
+    })
+
+    /* A read left over from a popup that has since closed must stay silent */
+    it('should discard a status read whose popup is already gone', async () => {
+      const gate = new Subject<any>()
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(gate.asObservable())
+      component.enrolPending = true
+      component.enrolPendingContentId = 'c1'
+      component.closeEnrolPending()
+      await flush()
+
+      /* the create fails meanwhile and tears the popup down */
+      contentSvcMock.extContentEnroll.mockReturnValue(of({ result: {} }))
+      await (component as any).proceedWithEnrollment(content)
+      snackBarMock.open.mockClear()
+
+      gate.next({ result: {} })
+      gate.complete()
+      await flush()
+
+      expect(snackBarMock.open).not.toHaveBeenCalled()
+    })
+
+    it('should not offer Enroll again while the popup is up', () => {
+      component.enrolPending = true
+      component.enrollValidationLoading = false
+      component.canEnroll = true
+      component.extContentReadData = { contentId: 'c1', contentPartner: { isActive: true } }
+
+      expect(component.showEnroll).toBe(false)
     })
   })
 
