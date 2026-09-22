@@ -2678,6 +2678,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         resolve(true)
         return
       })
+    } else if (this.baseContentReadData?.primaryCategory === 'Learning Resource' &&
+      (this.baseContentReadData as any)?.resourceCategory !== 'Learning Resource') {
+      return new Promise<boolean>((resolve) => {
+        this.content = this.baseContentReadData
+        this.getOrgIdForShare()
+        this.getTocStructure()
+        resolve(true)
+      })
     } else {
       return new Promise<boolean>((resolve, reject) => {
         if (!identifier) {
