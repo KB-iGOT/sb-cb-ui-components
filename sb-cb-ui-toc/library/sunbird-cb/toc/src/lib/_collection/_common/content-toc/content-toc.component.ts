@@ -215,7 +215,8 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     } else {
       this.isMobileForAI = false
     }
-    this.menuPosition = this.tabElement._elementRef.nativeElement.offsetTop
+    this.menuPosition =
+      this.tabElement._elementRef.nativeElement.offsetTop || 0;
 
     this.route.queryParamMap.subscribe(async (params: any) => {
 
