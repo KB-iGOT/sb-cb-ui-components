@@ -61,7 +61,12 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   karmaRedeemData: any = null
   enrollRestrictionMessage = ''
   requiredKarmaCoins = 0
+  insufficientCoinsMessage = ''
   enrolPending = false
+  enrolPendingContentId: any = ''
+  enrolStatusChecking = false
+  enrolSubmitting = false
+  private enrolAttempt = 0
   insufficientCoins = false
   insufficientCoinsContent: any = null
   private karmaRedeemContent: any = null
@@ -277,6 +282,9 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         .then((res: any) => Number(_.get(res, 'result.requiredKarmaPoints')) || 0)
         .catch((err: any) => {
           this.coinShortfall = this.isInsufficientCoinsError(err)
+          if (this.coinShortfall) {
+            this.insufficientCoinsMessage = this.readApiMessage(err)
+          }
           return 0
         })
     }
@@ -361,8 +369,11 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     // Handle dialog close
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        // User agreed - proceed with enrollment
-        // need to call consent api
+        this.enrolAttempt += 1
+        this.enrolPendingContentId = _.get(content, 'contentId', '')
+        this.enrolStatusChecking = false
+        this.enrolSubmitting = true
+        this.enrolPending = true
         this.callConsentApi(content)
       } else {
         // User disagreed
@@ -390,30 +401,40 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     this.certSvc.consentSubmit(request).subscribe((_res: any) => {
       this.proceedWithEnrollment(content)
     }, (error: any) => {
+      this.closeEnrolPendingPopup()
       this.snackBar.open(error?.error?.params?.msg || 'Unable to submit consent', 'X', {
         duration: 5000,
       })
     })
   }
   private async proceedWithEnrollment(content: any) {
-    this.loader.changeLoad.next(true)
     const reqbody = {
       courseId: content.contentId,
       partnerId: content.contentPartner.id,
     }
     const enrollRes = await this.contentSvc.extContentEnroll(reqbody).toPromise().catch(_error => { return _error })
+    this.enrolSubmitting = false
     if (enrollRes && enrollRes.result && Object.keys(enrollRes.result).length > 0) {
       this.discussWidgetData.enrolledContent = true
       this.discussWidgetData.newCommentSection.commentBox.placeholder = 'Start a discussion'
-      this.getUserContentEnroll(content.contentId)
+      this.telemetryToCaptureInteract(content.contentId, 'enroll', 'enrol-content')
       this.contentViewEventForNetCore('enroll')
+      // Close was pressed while this was still running - now there is something to read
+      if (this.enrolStatusChecking && this.enrolPending) {
+        this.readEnrolStatus()
+      }
     } else {
-      this.loader.changeLoad.next(false)
+      this.closeEnrolPendingPopup()
       const message = enrollRes?.error?.params?.msg
       this.snackBar.open(message || 'Unable to enroll to the content', 'X', {
         duration: 10000,
       })
     }
+  }
+
+  private readApiMessage(err: any): string {
+    const body = (err && err.error) || err || {}
+    return `${_.get(body, 'params.msg', '') || ''}`.trim()
   }
 
   private isInsufficientCoinsError(err: any): boolean {
@@ -449,26 +470,49 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     )
   }
 
-  async getUserContentEnroll(contentId: any) {
-    const enrollRes = await this.contentSvc.fetchExtUserContentEnroll(contentId).toPromise().catch(_error => { })
-    if (enrollRes && enrollRes.result && Object.keys(enrollRes.result).length > 0) {
-      this.userExtCourseEnroll = enrollRes.result
-      this.loader.changeLoad.next(false)
-      this.telemetryToCaptureInteract(contentId, 'enroll', 'enrol-content')
-      /* Still being confirmed - say so in the popup instead of claiming it is done */
-      if (Number(enrollRes.result.status) === ENROL_STATUS_PENDING) {
-        this.enrolPending = true
-        return
-      }
-      this.snackBar.open('Successfully enrolled in the course.')
-    } else {
-      this.loader.changeLoad.next(false)
-      this.snackBar.open('Unable to get the enrolled details')
+  closeEnrolPending() {
+    if (this.enrolStatusChecking) {
+      return
     }
+    this.enrolStatusChecking = true
+    // Still enrolling - a read now could only say 'not enrolled'. The create runs it when it lands.
+    if (this.enrolSubmitting) {
+      return
+    }
+    this.readEnrolStatus()
   }
 
-  closeEnrolPending() {
+  // The one status read of this flow: it decides what the card shows, then closes the popup
+  private async readEnrolStatus() {
+    const attempt = this.enrolAttempt
+    const contentId = this.enrolPendingContentId || _.get(this.extContentReadData, 'contentId', '')
+    if (!contentId) {
+      this.closeEnrolPendingPopup()
+      return
+    }
+    const enrollRes = await this.contentSvc.fetchExtUserContentEnroll(contentId).toPromise()
+      .catch(_error => { })
+    // the popup this read belonged to is gone - touch nothing
+    if (attempt !== this.enrolAttempt) {
+      return
+    }
+    if (enrollRes && enrollRes.result && Object.keys(enrollRes.result).length > 0) {
+      this.userExtCourseEnroll = enrollRes.result
+      this.closeEnrolPendingPopup()
+      return
+    }
+    this.closeEnrolPendingPopup()
+    this.snackBar.open('Unable to get the enrolled details', 'X', {
+      duration: 5000,
+    })
+  }
+
+  private closeEnrolPendingPopup() {
+    this.enrolAttempt += 1
     this.enrolPending = false
+    this.enrolStatusChecking = false
+    this.enrolSubmitting = false
+    this.enrolPendingContentId = ''
   }
 
   captureRedirectTelemetry(content: any) {
@@ -784,6 +828,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
 
   get showEnroll(): boolean {
     return !this.hasEnrolmentRecord &&
+      !this.enrolPending &&
       !this.isEnrolPending &&
       !this.enrollValidationLoading &&
       this.canEnroll &&
