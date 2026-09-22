@@ -229,6 +229,60 @@ export class IndexedDbService {
     }
   }
 
+  // ── Sign-out ───────────────────────────────────────────────────────────────
+
+  /**
+   * Drops the whole database, for a user signing out. Every store in it was filled under
+   * their session - the enrolments they hold, the plans and assessments they were shown - so
+   * none of it may be left for whoever signs in on this browser next.
+   *
+   * Deleting a database that was never created is a no-op and creates nothing, which is what
+   * lets the shared logout call this without knowing which portal it is running in: only one
+   * of them keeps a cache here, and the rest delete nothing.
+   *
+   * Never rejects and never waits indefinitely. Signing out is the one thing that must not be
+   * held up by a database another tab is holding open - the connections this service hands
+   * out close themselves on `versionchange`, so a delete normally goes straight through, but
+   * a tab that ignores it must not strand the user on the dialog.
+   */
+  async clearAppDatabase(): Promise<void> {
+    if (typeof indexedDB === 'undefined') {
+      return
+    }
+
+    // this tab's own connection would block the delete, so it goes first
+    try {
+      const db = await this.dbPromise
+      if (db) {
+        db.close()
+      }
+    } catch {
+      // never opened, or the open failed - either way there is nothing to close
+    }
+    this.dbPromise = null
+
+    return new Promise<void>((resolve: () => void) => {
+      let settled = false
+      const finish = () => {
+        if (!settled) {
+          settled = true
+          clearTimeout(timer)
+          resolve()
+        }
+      }
+      const timer = setTimeout(finish, DB_TIMEOUT_MS)
+      try {
+        const req = indexedDB.deleteDatabase(APP_DB_NAME)
+        req.onsuccess = finish
+        req.onerror = finish
+        // held open elsewhere; the sign-out carries on rather than waiting on that tab
+        req.onblocked = finish
+      } catch {
+        finish()
+      }
+    })
+  }
+
   // ── Legacy cleanup ─────────────────────────────────────────────────────────
 
   /**
