@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, ValidationErrors } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 
-const NAME_PATTERN = /^[a-zA-Z0-9.\-_$\/:\[\] !]+$/;
+const NAME_PATTERN = /^[a-zA-Z0-9.\-_$\/:\[\] !',]+$/;
 const MAX_NAME_LENGTH = 70;
 
 @Component({
