@@ -160,7 +160,7 @@ export class AssessmentRichTextComponent implements OnInit, OnChanges, OnDestroy
     if (this.autoFocus && !this.readOnly) {
       // the editor was built hidden - reveal it first, focus does nothing on an element that isn't displayed
       this.cdr.detectChanges()
-      editor?.focus?.()
+      // editor?.focus?.()
     }
   }
 
