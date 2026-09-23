@@ -13,3 +13,63 @@ sb-uic-assessment-rich-text .ck.ck-editor {
     min-height: var(--rte-min-height, 61px);
   }
 }
+
+sb-uic-assessment-rich-text {
+  // built out of sight, shown on `ready` when the skeleton goes
+  ckeditor.rte-hidden {
+    display: none;
+  }
+
+  // The skeleton takes the box the editor renders - toolbar strip over the bordered content area -
+  // measured with CKEditor's own variables, so the swap moves nothing around it.
+  .rte-skeleton-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: content-box;
+    // a toolbar button plus its top and bottom margins, at the toolbar's font size
+    font-size: var(--ck-font-size-base);
+    height: calc(var(--ck-ui-component-min-height) + 2 * var(--ck-spacing-small));
+    padding: 0 var(--ck-spacing-small);
+    border: 1px solid var(--ck-color-base-border);
+    border-bottom: none;
+    border-top-left-radius: var(--ck-border-radius);
+    border-top-right-radius: var(--ck-border-radius);
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .rte-skeleton-btn {
+    width: 22px;
+    height: 18px;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+    animation: rte-skeleton-pulse 1.2s ease-in-out infinite;
+  }
+
+  .rte-skeleton-content {
+    padding: 0 var(--ck-spacing-standard);
+    border: 1px solid var(--ck-color-base-border);
+    border-bottom-left-radius: var(--ck-border-radius);
+    border-bottom-right-radius: var(--ck-border-radius);
+    background: var(--ck-color-base-background);
+    overflow-wrap: break-word;
+
+    > :first-child {
+      margin-top: var(--ck-spacing-large);
+    }
+
+    > :last-child {
+      margin-bottom: var(--ck-spacing-large);
+    }
+  }
+}
+
+@keyframes rte-skeleton-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

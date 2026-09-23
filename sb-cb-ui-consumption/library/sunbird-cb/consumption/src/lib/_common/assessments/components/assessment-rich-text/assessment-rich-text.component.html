@@ -1,3 +1,11 @@
-<ckeditor [editor]="Editor" [config]="editorConfig" [disabled]="readOnly" [(ngModel)]="html"
-  [style.--rte-min-height.px]="effectiveHeight" (ready)="onReady($event)" (change)="onChange($event)"
-  (blur)="onTouched.emit()"></ckeditor>
+<!-- Holds the editor's box and shows its content while CKEditor builds, so it doesn't collapse and then jump open -->
+<div class="rte-skeleton" *ngIf="!isReady" aria-hidden="true">
+  <div class="rte-skeleton-toolbar">
+    <span class="rte-skeleton-btn" *ngFor="let btn of [1, 2, 3, 4, 5]"></span>
+  </div>
+  <div class="rte-skeleton-content" [style.min-height.px]="effectiveHeight" [innerHTML]="html"></div>
+</div>
+
+<ckeditor *ngIf="showEditor" [class.rte-hidden]="!isReady" [editor]="Editor" [config]="editorConfig"
+  [disabled]="readOnly" [(ngModel)]="html" [style.--rte-min-height.px]="effectiveHeight" (ready)="onReady($event)"
+  (change)="onChange($event)" (blur)="onTouched.emit()"></ckeditor>
