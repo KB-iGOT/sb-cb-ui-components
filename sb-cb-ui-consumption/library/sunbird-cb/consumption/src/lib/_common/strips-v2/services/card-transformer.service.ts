@@ -51,98 +51,48 @@ export class CardTransformerService {
   }
 
   mapTheData(data: any, apiDetailsKey?: string): CardViewModel[] {
-    const mapedData: CardViewModel[] = []
-    switch (apiDetailsKey) {
-      // aparApi / trainingPlanApi / draftCBPplanApi are deliberately absent.
-      //
-      // They each used to map their slice of the CBPlan response into a CardViewModel here,
-      // re-deriving the APAR / CBP / AI-CBP split with `isApar` and `planTypeV2` as it went.
-      // All three now render CardType.PlanCard, so they go through processPlanCards, and the
-      // split is already done upstream by UserCbpPlansService. A key that still arrives here
-      // is a config asking for content cards off a plan list, which `default` maps plainly.
-      case 'trendingOnIGOTApi':
-        data.forEach((item: any) => {
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['appIcon'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['additionalTags'] as string[]) ?? [],
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item, true),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'],
-            primaryCategory: item['primaryCategory'],
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
-      case 'featuredAiCoursesApi':
-        data.forEach((item: any) => {
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [],
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'],
-            primaryCategory: item['primaryCategory'],
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
-        break
-      default:
-        data.forEach((item: any) => {
-          const card: CardViewModel = {
-            identifier: (item?.['identifier'] as string) ?? '',
-            title: (item?.['name'] as string) ?? '',
-            image: (item?.['posterImage'] as string) ?? (item?.['posterImage'] as string) ?? '',
-            additionalTags: (item?.['tags'] as string[]) ?? [],
-            duration: (item?.['duration'] as string) ?? '',
-            status: (item?.['status'] as string) ?? '',
-            rating: this.resolveRating(item),
-            provider: this.resolveProvider(item),
-            organisation: this.resolveOrganisation(item),
-            creatorLogo: this.resolveCreatorLogo(item),
-            sourceName: this.resolveSourceName(item),
-            resourceType: this.resolveResourceType(item),
-            languageMapV1: this.resolveLanguageMap(item),
-            language: this.resolveLanguage(item),
-            difficultyLevel: this.resolveDifficultyLevel(item),
-            planDuration: item['planDuration'],
-            contentStatus: item['contentStatus'],
-            courseCategory: item['courseCategory'],
-            primaryCategory: item['primaryCategory'],
-            metadata: item ?? {}
-          }
-          mapedData.push(card)
-        })
+    return data.map((item: any) => {
+      const card = this.buildDefaultMappedCard(item)
+      switch (apiDetailsKey) {
+        case 'trendingOnIGOTApi':
+          card.image = (item?.['appIcon'] as string) ?? (item?.['posterImage'] as string) ?? ''
+          card.additionalTags = (item?.['additionalTags'] as string[]) ?? []
+          card.provider = this.resolveProvider(item, true)
+          break
+        case 'amritGyaanKosh':
+          card.courseCategory = item['resourceCategory']
+          break
+        case 'featuredAiCoursesApi':
+        default:
+          break
+      }
+      return card
+    })
+  }
 
+  private buildDefaultMappedCard(item: any): CardViewModel {
+    return {
+      identifier: (item?.['identifier'] as string) ?? '',
+      title: (item?.['name'] as string) ?? '',
+      image: (item?.['posterImage'] as string) ?? '',
+      additionalTags: (item?.['tags'] as string[]) ?? [],
+      duration: (item?.['duration'] as string) ?? '',
+      status: (item?.['status'] as string) ?? '',
+      rating: this.resolveRating(item),
+      provider: this.resolveProvider(item),
+      organisation: this.resolveOrganisation(item),
+      creatorLogo: this.resolveCreatorLogo(item),
+      sourceName: this.resolveSourceName(item),
+      resourceType: this.resolveResourceType(item),
+      languageMapV1: this.resolveLanguageMap(item),
+      language: this.resolveLanguage(item),
+      difficultyLevel: this.resolveDifficultyLevel(item),
+      planDuration: item['planDuration'],
+      contentStatus: item['contentStatus'],
+      courseCategory: item['courseCategory'],
+      primaryCategory: item['primaryCategory'],
+      metadata: item ?? {}
     }
-    return mapedData
   }
 
   processAssessmentCards(response: unknown): CardViewModel[] {
@@ -286,7 +236,7 @@ export class CardTransformerService {
     }
   }
 
-  
+
   /** APAR wins over AI-CBP, matching the MAX(endDate) tie-break used for content cards. */
   private resolvePlanType(item: Record<string, unknown>): PlanCardViewModel['planType'] {
     if (item?.['isApar'] === true) {

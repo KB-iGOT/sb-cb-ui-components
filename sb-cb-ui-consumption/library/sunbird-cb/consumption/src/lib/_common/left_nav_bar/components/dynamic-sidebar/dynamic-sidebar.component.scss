@@ -185,22 +185,22 @@
 
 .sidebar-nav {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f7fafc;
+  scrollbar-color: var(--environment-border-and-divider-default-1) var(--surface-secondary);
 
   &::-webkit-scrollbar {
     width: 6px;
   }
 
   &::-webkit-scrollbar-track {
-    background: #f7fafc;
+    background: var(--surface-secondary);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
+    background: var(--environment-border-and-divider-default-1);
     border-radius: 3px;
 
     &:hover {
-      background: #a0aec0;
+      background: var(--surface-tertiary);
     }
   }
 }
