@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core'
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core'
+import { ProgressiveEditorMount } from '../../service/progressive-editor-mount'
 
 @Component({
     selector: 'sb-uic-multiple-choice-question',
@@ -6,7 +7,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
     styleUrls: ['./multiple-choice-question.component.scss'],
     standalone: false
 })
-export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
+export class MultipleChoiceQuestionComponent implements OnInit, OnChanges, OnDestroy {
   @Input() questionType: string = 'MCQ-SCA'; // MCQ-SCA, MCQ-MCA, MCQ-SCA-TF
   @Input() options: any[] = [];
   @Input() isReadOnly: boolean = false;
@@ -14,10 +15,14 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
   @Output() addOptionRequest = new EventEmitter<void>();
 
   optionsList: any[] = [];
-  // Options whose rich text editor has been mounted. Each editor is a full CKEditor instance,
-  // so mounting one per option up front is what made expanding a question slow; they are
-  // mounted on demand instead and the rest render as plain HTML previews.
+  // Options whose rich text editor has been built. Every option gets one as soon as the
+  // question is opened - they are what the author types into - but each is built in its own
+  // task rather than all of them together, which is what used to hold the browser long enough
+  // that the question looked as though it never opened.
   activeOptionEditors = new Set<any>();
+  private readonly editorMount = new ProgressiveEditorMount<any>((option: any) => {
+    this.activeOptionEditors.add(option)
+  });
   correctAnswer: any = null; // For single select (MCQ-SCA, MCQ-SCA-TF)
   correctAnswers: any = {}; // For multiple select (MCQ-MCA)
   maxOptions: number = 7; // Maximum options for MCQ-SCA and MCQ-MCA
@@ -30,6 +35,10 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
     if (changes['options'] && !changes['options'].firstChange && this.options && this.options.length > 0) {
       this.initializeOptions()
     }
+  }
+
+  ngOnDestroy(): void {
+    this.editorMount.cancel()
   }
 
   initializeOptions(): void {
@@ -109,6 +118,20 @@ export class MultipleChoiceQuestionComponent implements OnInit, OnChanges {
         { id: 2, text: '', isCorrect: false }
       ]
     }
+    this.queueOptionEditors()
+  }
+
+  /**
+   * Queues an editor for every option, in the order they are listed, so they appear down the
+   * list the way the author reads it. A True/False question renders no editors at all, so it
+   * queues none.
+   */
+  private queueOptionEditors(): void {
+    if (this.isMCQTrueFalse()) {
+      this.editorMount.cancel()
+      return
+    }
+    this.editorMount.restart(this.optionsList)
   }
 
   isMCQSCA(): boolean {

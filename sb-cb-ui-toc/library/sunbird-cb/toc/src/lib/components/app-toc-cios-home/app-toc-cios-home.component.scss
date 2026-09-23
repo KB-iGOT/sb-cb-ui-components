@@ -1090,6 +1090,11 @@ ul {
     line-height: 20px;
     letter-spacing: 0.5px;
     cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
   }
 }
 

@@ -424,8 +424,7 @@
   <div class="insufficient-coins__backdrop" aria-hidden="true"></div>
   <div class="insufficient-coins__panel" role="dialog" aria-modal="true" aria-label="Insufficient Karma Coins">
     <p class="insufficient-coins__title">Insufficient Karma Coins</p>
-    <p class="insufficient-coins__message">You don&rsquo;t have enough Karma Coins to enrol in this course.
-      Visit your Karma Wallet to check your balance</p>
+    <p class="insufficient-coins__message" *ngIf="insufficientCoinsMessage">{{ insufficientCoinsMessage }}</p>
     <div class="insufficient-coins__actions">
       <button type="button" class="insufficient-coins__btn insufficient-coins__btn--ghost"
         (click)="closeInsufficientCoins()">Cancel</button>
@@ -442,7 +441,8 @@
     <p class="enrol-pending__title">Enrolment in progress</p>
     <p class="enrol-pending__message">We&rsquo;re confirming your enrolment in the course. This might take some time you
       can close this window and come back to check the status later.</p>
-    <button type="button" class="enrol-pending__btn" (click)="closeEnrolPending()">Close</button>
+    <button type="button" class="enrol-pending__btn" [disabled]="enrolStatusChecking"
+      (click)="closeEnrolPending()">{{ enrolStatusChecking ? 'Closing&hellip;' : 'Close' }}</button>
   </div>
 </div>
 
