@@ -210,7 +210,7 @@ export class CardCourseV2Component {
   readonly assessmentStateKey = computed(() => {
     switch (this.assessmentState()) {
       case 'completed': return 'cardcontentv2.completed'
-      case 'available': return 'cardcontentv2.available'
+      case 'available': return 'cardcontentv2.unlocked'
       case 'locked': return 'cardcontentv2.locked'
       default: return ''
     }

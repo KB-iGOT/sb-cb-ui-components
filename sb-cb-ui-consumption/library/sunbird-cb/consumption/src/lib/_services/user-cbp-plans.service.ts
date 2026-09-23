@@ -74,13 +74,15 @@ export interface IUserCbpPlan {
   planType: string | null
   contentList: IUserCbpPlanContent[]
   /**
-   * Content id of the plan's comprehensive assessment.
-   *
-   * This is the name the dictionary uses and the one every consumer reads. The read endpoint
-   * (/cbplan/v4/read/:id) calls the same id `caLinkedId` and is normalised to this on the way
-   * out of PlansService.readPlan, so a plan is the same shape whichever endpoint produced it.
+   * Content id of the plan's comprehensive assessment, as the dictionary (and
+   * /cbplan/v4/read/:id) now name it. Plans are cached verbatim, so read this first.
    */
-  comprehensiveAssessment: string | null
+  caLinkedId?: string | null
+  /**
+   * The dictionary's former name for `caLinkedId`. Kept only because an IndexedDB entry
+   * written before the rename can still carry it — read `caLinkedId ?? comprehensiveAssessment`.
+   */
+  comprehensiveAssessment?: string | null
   createdByOrgId: string
   createdByOrgName: string
   createdByOrgLogo: string | null
