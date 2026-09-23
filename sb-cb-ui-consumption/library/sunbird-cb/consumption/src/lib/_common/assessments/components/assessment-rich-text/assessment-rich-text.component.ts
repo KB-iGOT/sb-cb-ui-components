@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Input, Output, SimpleChanges, ViewEncapsulation } from '@angular/core'
+import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewEncapsulation } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { ClassicEditor, editorConfig } from '../../ckeditor/custom-editor'
 import { UploadHelperService } from '../../ckeditor/plugins/upload-helper'
@@ -11,7 +11,7 @@ import type { ChangeEvent } from '@ckeditor/ckeditor5-angular'
   encapsulation: ViewEncapsulation.None,
   standalone: false
 })
-export class AssessmentRichTextComponent {
+export class AssessmentRichTextComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() name: any
   @Input() specificToolBar!: any
@@ -25,6 +25,9 @@ export class AssessmentRichTextComponent {
   @Output() onTouched = new EventEmitter<void>()
   @Output() ready = new EventEmitter<boolean>()
   isReady = false
+  // <ckeditor> is mounted a task after this component, so the skeleton paints before Editor.create() holds the thread
+  showEditor = false
+  private showEditorTimer: any = null
   html = ''
   @Input() set textToBeShown(value: string) {
     this.html = value
@@ -36,11 +39,26 @@ export class AssessmentRichTextComponent {
   effectiveHeight = this.height
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private configSvc: ConfigurationsService,
     private uploadService: UploadHelperService,
     @Inject('environment') private environment: any,
   ) {
     this.initiateConfig()
+  }
+
+  ngOnInit(): void {
+    this.showEditorTimer = setTimeout(() => {
+      this.showEditorTimer = null
+      this.showEditor = true
+    })
+  }
+
+  ngOnDestroy(): void {
+    if (this.showEditorTimer !== null) {
+      clearTimeout(this.showEditorTimer)
+      this.showEditorTimer = null
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -82,7 +100,10 @@ export class AssessmentRichTextComponent {
       ...editorConfig,
       customConfig: {
         editorMetaConfig,
-        uploadService: this.uploadService,
+        // Handed over as a function: CKEditor's watchdog deep-clones the config on every editor build and
+        // leaves only functions and DOM elements alone, so a service instance here gets its HttpClient and the
+        // whole root injector behind it copied each time - that copy is what made the editors slow to appear.
+        getUploadService: () => this.uploadService,
         canAddBlank: () => this.specificToolBar === 'FTB' && this.ftbCount < this.ftbMaxCount,
       },
     }
@@ -137,6 +158,8 @@ export class AssessmentRichTextComponent {
     this.isReady = true
     this.ready.emit(true)
     if (this.autoFocus && !this.readOnly) {
+      // the editor was built hidden - reveal it first, focus does nothing on an element that isn't displayed
+      this.cdr.detectChanges()
       editor?.focus?.()
     }
   }

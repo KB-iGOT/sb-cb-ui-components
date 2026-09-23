@@ -38,7 +38,7 @@ export default class SimpleImageUpload extends Plugin {
             return
           }
 
-          const uploadService = editor.config.get('customConfig')?.uploadService
+          const uploadService = editor.config.get('customConfig')?.getUploadService?.()
           const config = editor.config.get('customConfig')?.editorMetaConfig
           if (!uploadService || !config) {
             return
