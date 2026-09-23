@@ -733,8 +733,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   resetUserGroup(index: number) {
     const group = this.userGroup.at(index);
     if (group) {
-      group.get("name")?.setValue(`User Group ${index + 1}`);
-    }
+      const groupName = group?.value?.name
+      if(this.config.application === this.MDO_APPLICATION) {
+        group.get("name")?.setValue(group?.value?.name);
+      } else {
+        group.get("name")?.setValue(`User Group ${index + 1}`);
+      }
+    } 
   }
 
   resetUserGroupWithSelections(userGroupIndex: number) {
