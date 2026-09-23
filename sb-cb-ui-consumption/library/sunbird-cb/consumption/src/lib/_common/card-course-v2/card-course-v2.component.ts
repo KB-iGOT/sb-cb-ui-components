@@ -141,17 +141,6 @@ export class CardCourseV2Component {
       'Course') as NsContent.EDisplayContentTypes
   )
 
-  /**
-   * A comprehensive assessment, read off `displayType()` — the very category the chip prints.
-   *
-   * Reading the raw fields again in some order of my own is what broke this the first time:
-   * `displayType()` takes `courseCategory` before `primaryCategory`, and on this content the
-   * first non-empty one is not the assessment. Deriving from the same resolved value means
-   * the media area and the chip can never disagree about what the content is.
-   *
-   * Matched loosely because the payloads spell it both 'Comprehensive Assessment' and
-   * 'Comprehensive Assessment Program'.
-   */
   readonly isComprehensiveAssessment = computed(() =>
     /comprehensive\s+assessment/i.test(String(this.displayType() || '')))
 
@@ -283,8 +272,13 @@ export class CardCourseV2Component {
   async onCardClick(): Promise<void> {
     this.emitDetails()
     if (this.content()) {
-      if (this.content()?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE && this.content() && this.content()?.mimeType) {
-        let url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(this.content().mimeType)}/${this.content()?.identifier}`
+      const mimeType = this.content()?.mimeType || this.content()?.metadata?.mimeType
+      if (
+        this.content() &&
+        this.content()?.primaryCategory === NsContent.EPrimaryCategory.RESOURCE &&
+        mimeType
+      ) {
+        let url = `app/amrit-gyaan-kosh/player/${VIEWER_ROUTE_FROM_MIME(mimeType)}/${this.content()?.identifier}`
         let queryParams = {
           primaryCategory: this.content()?.primaryCategory
         }
