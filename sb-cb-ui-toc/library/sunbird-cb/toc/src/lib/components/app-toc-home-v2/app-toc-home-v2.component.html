@@ -670,7 +670,7 @@
           [kparray]="kparray" (playResumeForAI)="playResumeForAI()" (enrollUserToAI)="enrollUserToAI()" [contentReadData]="contentReadData"
           [baseContentReadData]="baseContentReadData" [languageList]="languageList" [lockCertificate]="lockCertificate"
           (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg" [userEnrollmentList]="userEnrollmentList"
-          [areAllActiveBatchesFull]="allBatchesAreFull" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
+          [areAllActiveBatchesFull]="allBatchesAreFull" [caBreadcrumbs]="caBreadcrumbs" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
         <div class="mob-tip-for-learner" *ngIf="tocConfig?.uiVisibility?.mobileFooter?.learnerAdvisory !== false">
           <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
             <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"

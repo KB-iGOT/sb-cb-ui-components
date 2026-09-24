@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, HostListener, Inject, Input, OnChanges, OnInit, Output, QueryList, signal, SimpleChanges, ViewChild, ViewChildren } from '@angular/core'
+import { AfterViewInit, Component, effect, EventEmitter, HostListener, Inject, input, Input, OnChanges, OnInit, Output, QueryList, signal, SimpleChanges, ViewChild, ViewChildren } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ConfigurationsService, EventService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
@@ -67,6 +67,8 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   @Output() trigerCompletionSurveyForm = new EventEmitter<boolean>()
   @Output() resumeContent = new EventEmitter<void>()
 
+  caBreadcrumbs = input<any[]>([])
+
   commentId?: string = ''
   sticky = false
   menuPosition: any
@@ -122,7 +124,16 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     private comprehensiveAssessmentSvc: ComprehensiveAssessmentService,
     @Inject('environment') private environment: any
 
-  ) { }
+  ) { 
+
+    effect(() => {
+      const breadcrumbs = this.caBreadcrumbs();
+      console.log('caBreadcrumbs:', breadcrumbs);
+      if (breadcrumbs?.length) {
+        this.setBreadcrumbData();
+      }
+    });
+  }
 
 
   isCommentApiEnabled(): boolean {
@@ -891,6 +902,10 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   }
   
   private setBreadcrumbData(): void {
+    if (this.caBreadcrumbs()?.length) {
+      this.breadcrumbData.set(this.caBreadcrumbs())
+      return
+    }
     const plan = this.contentReadData?.trainingPlan_v2
     const planTitle = plan?.orgName || this.contentReadData?.source || this.contentReadData?.organisation?.[0] || ''
     const crumbs: any[] = [
