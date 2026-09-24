@@ -15,7 +15,7 @@
       } @else if (showValidationMsg('maxlength')) {
         <mat-error>User group name cannot exceed {{ maxNameLength }} characters</mat-error>
       } @else if (showValidationMsg('pattern')) {
-        <mat-error>Only ( a-z/A-Z , 0-9 . _ - $ / : [ ]' ' !) characters are supported</mat-error>
+        <mat-error>Only ( a-z/A-Z , 0-9 . - _ $ / : [ ]' ' !) characters are supported</mat-error>
       }
     </mat-form-field>
   </div>
