@@ -2452,8 +2452,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
           this.isSavingReusableUserGroup = false;
         },
-        error: () => {
-          this.callSnackbar("Could not save the user group, Please try again.", "error");
+        error: (error) => {
+          this.callSnackbar(error?.error?.params?.err || error?.error?.params?.errMsg || "Could not save the user group, Please try again.", "error");
           this.isSavingReusableUserGroup = false;
         }
       });
@@ -2480,8 +2480,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
           this.isSavingReusableUserGroup = false;
         },
-        error: () => {
-          this.callSnackbar("Could not update the user group, Please try again.", "error");
+        error: (error) => {
+          this.callSnackbar(error?.error?.params?.err || error?.error?.params?.errMsg ||"Could not update the user group, Please try again.", "error");
           this.isSavingReusableUserGroup = false;
         }
       });
