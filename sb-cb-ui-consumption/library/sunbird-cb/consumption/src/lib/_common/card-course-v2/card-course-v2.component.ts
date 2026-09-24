@@ -67,6 +67,15 @@ export class CardCourseV2Component {
    * in, and the card renders it in the footer where a plan status would otherwise sit.
    */
   assessmentState = input<'locked' | 'available' | 'completed' | null>(null)
+  /**
+   * Take the CA chip from `content.isCA` alone, ignoring the `comprehensiveAssessmentCourseUnits`
+   * list in localStorage.
+   *
+   * That list holds the course units of every CA assigned to the user, so on a page scoped to
+   * one plan it tags courses another plan's CA covers — including on plans with no CA at all.
+   * A host that already knows which courses its own CA covers sets this and stamps `isCA`.
+   */
+  caFromContentOnly = input<boolean>(false)
 
   // ── Output ─────────────────────────────────────────────────────────────────
   contentData = output<NsContent.IContent>()
@@ -203,8 +212,8 @@ export class CardCourseV2Component {
   readonly isAiCBP = computed(() => (this.content() as any)?.metadata?.planTypeV2 === 'AICBP')
 
   readonly isCa = computed(() =>
-    this.caCourseUnitIds().includes(this.content()?.identifier ?? '') ||
-    !!(this.content() as any)?.isCA
+    !!(this.content() as any)?.isCA ||
+    (!this.caFromContentOnly() && this.caCourseUnitIds().includes(this.content()?.identifier ?? ''))
   )
 
   readonly assessmentStateKey = computed(() => {
