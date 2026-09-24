@@ -216,6 +216,14 @@ export class CardCourseV2Component {
     (!this.caFromContentOnly() && this.caCourseUnitIds().includes(this.content()?.identifier ?? ''))
   )
 
+  readonly assessmentStateIcon = computed(() => {
+    switch (this.assessmentState()) {
+      case 'completed': return 'check'
+      case 'available': return 'lock_open'
+      default: return 'lock'
+    }
+  })
+
   readonly assessmentStateKey = computed(() => {
     switch (this.assessmentState()) {
       case 'completed': return 'cardcontentv2.completed'
