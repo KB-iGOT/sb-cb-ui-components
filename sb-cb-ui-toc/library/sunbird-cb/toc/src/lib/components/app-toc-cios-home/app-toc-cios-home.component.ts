@@ -22,6 +22,7 @@ const PAYMENT_REQUIRED = 'PAYMENT_REQUIRED'
 const PAYMENT_REQUIRED_STATUS = 402
 const ENROL_STATUS_PENDING = 3
 const ENROLLED_NOTICE_WINDOW_MS = 60 * 60 * 1000
+const ENROL_SUCCESS_MESSAGE = 'Successfully enrolled in the course.'
 
 @Component({
     selector: 'ws-app-app-toc-cios-home',
@@ -63,6 +64,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   requiredKarmaCoins = 0
   insufficientCoinsMessage = ''
   enrolPending = false
+  enrolPendingHidden = false
+  private enrolSuccessMessage = ''
   enrolPendingContentId: any = ''
   enrolStatusChecking = false
   enrolSubmitting = false
@@ -257,7 +260,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
 
     // Nothing to deduct (0 coins) - go straight to consent, no popup.
     if (coins <= 0) {
-      this.openConsentDialog(content)
+      this.openConsentDialog(content, true)
       return
     }
 
@@ -349,7 +352,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     })
   }
 
-  private async openConsentDialog(content: any) {
+  private async openConsentDialog(content: any, freeCourse = false) {
     const consentUrl: string = `${this.environment?.missionKarmayogiPath}${this.config?.contentConsent?.consentDocUrl}` || ''
     const assetsDocUrl: string = `${this.config?.contentConsent?.assetsDocUrl}` || ''
     const dialogRef = this.matDialog.open(ConsentDialogComponent, {
@@ -374,6 +377,10 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
         this.enrolStatusChecking = false
         this.enrolSubmitting = true
         this.enrolPending = true
+        this.enrolPendingHidden = freeCourse
+        if (freeCourse) {
+          this.closeEnrolPending()
+        }
         this.callConsentApi(content)
       } else {
         // User disagreed
@@ -414,6 +421,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
     const enrollRes = await this.contentSvc.extContentEnroll(reqbody).toPromise().catch(_error => { return _error })
     this.enrolSubmitting = false
+    this.enrolSuccessMessage = `${_.get(enrollRes, 'params.msg', '') || ''}`.trim()
     if (enrollRes && enrollRes.result && Object.keys(enrollRes.result).length > 0) {
       this.discussWidgetData.enrolledContent = true
       this.discussWidgetData.newCommentSection.commentBox.placeholder = 'Start a discussion'
@@ -497,8 +505,14 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       return
     }
     if (enrollRes && enrollRes.result && Object.keys(enrollRes.result).length > 0) {
+      const freeEnrolment = this.enrolPendingHidden
       this.userExtCourseEnroll = enrollRes.result
       this.closeEnrolPendingPopup()
+      if (freeEnrolment && !this.isEnrolPending) {
+        this.snackBar.open(this.enrolSuccessMessage || ENROL_SUCCESS_MESSAGE, 'X', {
+          duration: 5000,
+        })
+      }
       return
     }
     this.closeEnrolPendingPopup()

@@ -434,7 +434,7 @@
   </div>
 </div>
 
-<div class="enrol-pending" *ngIf="enrolPending">
+<div class="enrol-pending" *ngIf="enrolPending && !enrolPendingHidden">
   <div class="enrol-pending__backdrop" aria-hidden="true"></div>
   <div class="enrol-pending__panel" role="dialog" aria-modal="true" aria-label="Enrolment in progress">
     <span class="enrol-pending__spinner" aria-hidden="true"></span>
