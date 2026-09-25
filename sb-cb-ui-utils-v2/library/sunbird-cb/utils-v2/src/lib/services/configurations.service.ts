@@ -35,7 +35,7 @@ export class ConfigurationsService {
   sitePath = `assets/configurations`
   hostPath = (window.location.host).replace(':', '_')
 
-  userSubRole: string = ''
+  bpCoTrainer: string = ''
 
   userRoles: Set<string> | null = null
   userAllRoles: Set<string> | null = null
