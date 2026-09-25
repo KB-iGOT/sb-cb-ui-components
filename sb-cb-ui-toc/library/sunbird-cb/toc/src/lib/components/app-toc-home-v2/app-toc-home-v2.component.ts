@@ -111,6 +111,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   @Input() forPreview: any = window.location.href.includes('/public/') || window.location.href.includes('/author/') || window.location.href.includes('/preview/')
   @Input() inputContent: any
   @Input() displayViewBtn: any = true
+  /** Handed to the content toc, it falls back to its own breadcrumbs when none are given. */
+  @Input() caBreadcrumbs: any[] = []
   // forPreview = window.location.href.includes('/author/')
   analytics = this.route.snapshot.data?.pageData?.data?.analytics
   errorWidgetData: NsWidgetResolver.IRenderConfigWithTypedData<any> = {

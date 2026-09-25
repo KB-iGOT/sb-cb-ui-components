@@ -175,6 +175,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     const defaults: any = {
       assessmentType: 'basic',
       scoreCutoffType: 'AssessmentLevel',
+      maxAssessmentRetakeAttempts: COMPREHENSIVE_MAX_RETAKE_ATTEMPTS,
     }
     const name = this.config && this.config.name
     if (name && !this.assessmentForm.get('name')?.value) {
@@ -382,7 +383,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       name: data.name || '',
       description: data.description || '',
       showTimer: data.showTimer !== undefined ? data.showTimer : true,
-      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null ? data.maxAssessmentRetakeAttempts : null,
+      maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null
+        ? data.maxAssessmentRetakeAttempts
+        : this.assessmentForm.get('maxAssessmentRetakeAttempts')?.value,
       scoreCutoffType: data.scoreCutoffType || 'AssessmentLevel',
       coolOffPeriod: data.coolOffPeriod !== undefined && data.coolOffPeriod !== null ? data.coolOffPeriod : null
     }, { emitEvent: false })
