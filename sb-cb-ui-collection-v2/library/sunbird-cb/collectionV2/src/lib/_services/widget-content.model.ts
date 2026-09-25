@@ -681,6 +681,7 @@ export namespace NsContent {
     CBP_PUBLISHER = 'cbp_publisher',
     CBP_CREATOR = 'cbp_creator',
     PROGRAM_INSTRUCTOR = 'program_instructor',
+    BP_PROGRAM_TRAINER = 'bp_program_trainer'
   }
 
   export const END_SURVEY_FIELD_TYPES = [
