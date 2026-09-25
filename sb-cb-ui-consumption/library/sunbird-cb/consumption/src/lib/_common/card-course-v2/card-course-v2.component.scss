@@ -328,6 +328,22 @@ $done-green : #388e3c;
     &--upcoming {
       color: $amber;
     }
+
+    /* Assessment lock state: an icon in the text colour replaces the dot. */
+    &--with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+  }
+
+  &__status-icon {
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
+    line-height: 12px;
+    color: currentColor;
+    flex-shrink: 0;
   }
 
   /* Footer: org+status – sticks to card bottom */

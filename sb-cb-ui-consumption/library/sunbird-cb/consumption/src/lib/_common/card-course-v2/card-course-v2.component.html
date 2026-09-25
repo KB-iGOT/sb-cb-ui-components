@@ -176,10 +176,12 @@
         <!-- An assessment's lock state takes the slot: it describes the content itself, where
              a CBP status only describes the plan the content sits in. -->
         @if (assessmentState()) {
-        <span class="cc-card__status" [class.cc-card__status--overdue]="assessmentState() === 'locked'"
+        <span class="cc-card__status cc-card__status--with-icon"
+          [class.cc-card__status--overdue]="assessmentState() === 'locked'"
           [class.cc-card__status--upcoming]="assessmentState() === 'available'"
           [class.cc-card__status--done]="assessmentState() === 'completed'">
-          <span aria-hidden="true">&#9679;&nbsp;</span>{{ assessmentStateKey() | translate }}
+          <mat-icon class="cc-card__status-icon" aria-hidden="true">{{ assessmentStateIcon() }}</mat-icon>
+          {{ assessmentStateKey() | translate }}
         </span>
         } @else if (cbpStatus()) {
         <span class="cc-card__status" [class.cc-card__status--overdue]="cbpStatus() === 'Overdue'"

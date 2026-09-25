@@ -10,16 +10,13 @@ import {
 const API_END_POINTS = {
   CAN_ATTEMPT: (assessmentId: string) => `/apis/proxies/v8/user/assessment/retake/${assessmentId}`,
   CAN_ATTEMPT_V5: (assessmentId: string) => `/apis/proxies/v8/user/assessment/v5/retake/${assessmentId}`,
+  ENROLMENT_DETAILS: '/apis/proxies/v8/learner/course/v5/user/enrollment/details',
 }
 
 const V5_COMPATIBILITY_LEVEL = 7
 const DEFAULT_COMPATIBILITY_LEVEL = 6
 const QUESTION_SET_MIME_TYPES = ['application/vnd.sunbird.questionset', 'application/quiz']
 const COMPLETED_STATUS = 2
-const APP_DB_NAME = 'iGotAppDB'
-const ENROLMENT_STORE = 'enrollmentDetails'
-const ENROLMENT_KEY = 'current'
-const DB_TIMEOUT_MS = 2000
 
 @Injectable({
   providedIn: 'root',
@@ -30,20 +27,26 @@ export class ComprehensiveAssessmentService {
     private http: HttpClient,
   ) { }
 
+  /**
+   * Only the training plan's mandatory courses hold the assessment back; the optional ones are
+   * carried in `courses` but never block the unlock, and never reach the pending list. Metadata
+   * and enrolment are both fetched for the mandatory ones alone, so an optional course costs
+   * neither a content read nor a row in the enrolment request.
+   */
   async getUnlockStatus(contentReadData: any): Promise<IComprehensiveAssessmentStatus> {
     const contentList: any[] = contentReadData?.trainingPlan_v2?.contentList || []
-    const identifiers: string[] = contentList
-      .map((item: any) => item?.identifier)
-      .filter((identifier: string) => !!identifier)
+    const mandatoryIdentifiers: string[] = contentList
+      .filter((item: any) => !!item?.identifier && item?.mandatory === true)
+      .map((item: any) => item.identifier)
 
-    if (!identifiers.length) {
-      // No linked courses, so there is nothing left to complete before the assessment opens.
+    if (!mandatoryIdentifiers.length) {
+      // Nothing mandatory to complete, so nothing holds the assessment back.
       return { courses: [], pendingCourses: [], isAllCoursesCompleted: true }
     }
 
     const [dictionary, enrolments] = await Promise.all([
-      this.readDictionary(identifiers),
-      this.readEnrolments(),
+      this.readDictionary(mandatoryIdentifiers),
+      this.readEnrolments(mandatoryIdentifiers),
     ])
 
     const courses: IComprehensiveAssessmentCourse[] = contentList
@@ -60,7 +63,9 @@ export class ComprehensiveAssessmentService {
         }
       })
 
-    const pendingCourses = courses.filter((course: IComprehensiveAssessmentCourse) => !course.completed)
+    const pendingCourses = courses.filter(
+      (course: IComprehensiveAssessmentCourse) => course.mandatory && !course.completed,
+    )
     return { courses, pendingCourses, isAllCoursesCompleted: !pendingCourses.length }
   }
 
@@ -120,47 +125,35 @@ export class ComprehensiveAssessmentService {
     }
   }
 
-  private readEnrolments(): Promise<Record<string, any>> {
-    return new Promise<Record<string, any>>((resolve: (value: Record<string, any>) => void) => {
-      let settled = false
-      const finish = (value: Record<string, any>) => {
-        if (!settled) {
-          settled = true
-          clearTimeout(timer)
-          resolve(value)
-        }
-      }
-      const timer = setTimeout(() => finish({}), DB_TIMEOUT_MS)
+  /**
+   * The learner's enrolment for the given courses, keyed by course id. The response identifies a
+   * course by `courseId`, with `contentId` and `collectionId` carrying the same value, so all
+   * three are indexed and a caller can look an enrolment up by whichever id it holds.
+   *
+   * An empty map on failure leaves every course counted as not completed, which keeps the
+   * assessment locked rather than opening it on a bad response.
+   */
+  private async readEnrolments(identifiers: string[]): Promise<Record<string, any>> {
+    const request = {
+      request: {
+        retiredCoursesEnabled: true,
+        courseId: identifiers,
+      },
+    }
 
-      try {
-        const request = indexedDB.open(APP_DB_NAME)
-        request.onerror = () => finish({})
-        request.onblocked = () => finish({})
-        request.onsuccess = () => {
-          const db = request.result
-          if (!db.objectStoreNames.contains(ENROLMENT_STORE)) {
-            db.close()
-            finish({})
-            return
-          }
-          try {
-            const tx = db.transaction(ENROLMENT_STORE, 'readonly')
-            const read = tx.objectStore(ENROLMENT_STORE).get(ENROLMENT_KEY)
-            read.onsuccess = () => finish(read.result || {})
-            read.onerror = () => finish({})
-            tx.oncomplete = () => db.close()
-            tx.onerror = () => {
-              db.close()
-              finish({})
-            }
-          } catch (_err) {
-            db.close()
-            finish({})
-          }
-        }
-      } catch (_err) {
-        finish({})
-      }
-    })
+    try {
+      const response: any = await this.http.post<any>(API_END_POINTS.ENROLMENT_DETAILS, request).toPromise()
+      const courses: any[] = response?.result?.courses || []
+      return courses.reduce((enrolments: Record<string, any>, course: any) => {
+        [course?.courseId, course?.contentId, course?.collectionId]
+          .filter((id: string) => !!id)
+          .forEach((id: string) => {
+            enrolments[id] = course
+          })
+        return enrolments
+      },                    {} as Record<string, any>)
+    } catch (_err) {
+      return {}
+    }
   }
 }

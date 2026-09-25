@@ -1049,6 +1049,96 @@ describe('AppTocCiosHomeComponent', () => {
       expect(component.enrolPendingContentId).toBe('c1')
     })
 
+    it('should enrol a free course without showing the popup and read the status on its own', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 1 } }))
+
+      await (component as any).openConsentDialog(content, true)
+      await flush()
+
+      expect(contentSvcMock.extContentEnroll).toHaveBeenCalledWith({ courseId: 'c1', partnerId: 'p1' })
+      expect(contentSvcMock.fetchExtUserContentEnroll).toHaveBeenCalledWith('c1')
+      expect(component.userExtCourseEnroll).toEqual({ status: 1 })
+      expect(component.enrolPending).toBe(false)
+    })
+
+    it('should show the enrol API\'s own success message once a free course is enrolled', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+      contentSvcMock.extContentEnroll.mockReturnValue(of({ result: { id: 'enrolled' }, params: { msg: 'Enrolled successfully' } }))
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 1 } }))
+
+      await (component as any).openConsentDialog(content, true)
+      await flush()
+
+      expect(snackBarMock.open).toHaveBeenCalledWith('Enrolled successfully', 'X', { duration: 5000 })
+    })
+
+    it('should fall back to a default success message when the enrol API sends none', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 1 } }))
+
+      await (component as any).openConsentDialog(content, true)
+      await flush()
+
+      expect(snackBarMock.open).toHaveBeenCalledWith('Successfully enrolled in the course.', 'X', { duration: 5000 })
+    })
+
+    it('should not claim success for a free enrolment that is still pending', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 3 } }))
+
+      await (component as any).openConsentDialog(content, true)
+      await flush()
+
+      expect(component.isEnrolPending).toBe(true)
+      expect(snackBarMock.open).not.toHaveBeenCalled()
+    })
+
+    it('should not show the success message for a paid enrolment', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+      contentSvcMock.fetchExtUserContentEnroll.mockReturnValue(of({ result: { status: 1 } }))
+
+      await (component as any).openConsentDialog(content)
+      await flush()
+      component.closeEnrolPending()
+      await flush()
+
+      expect(component.userExtCourseEnroll).toEqual({ status: 1 })
+      expect(snackBarMock.open).not.toHaveBeenCalled()
+    })
+
+    it('should keep the popup hidden while a free course enrols', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(new Subject<any>().asObservable())
+
+      await (component as any).openConsentDialog(content, true)
+
+      expect(component.enrolPending).toBe(true)
+      expect(component.enrolPendingHidden).toBe(true)
+    })
+
+    it('should still report a failed free enrolment in the snackbar', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+      contentSvcMock.extContentEnroll.mockReturnValue(of({ result: {} }))
+
+      await (component as any).openConsentDialog(content, true)
+      await flush()
+
+      expect(component.enrolPending).toBe(false)
+      expect(contentSvcMock.fetchExtUserContentEnroll).not.toHaveBeenCalled()
+      expect(snackBarMock.open).toHaveBeenCalledWith('Unable to enroll to the content', 'X', { duration: 10000 })
+    })
+
+    it('should still show the popup for a paid course', async () => {
+      certSvcMock.consentSubmit.mockReturnValue(of({ result: 'ok' }))
+
+      await (component as any).openConsentDialog(content)
+      await flush()
+
+      expect(component.enrolPending).toBe(true)
+      expect(component.enrolPendingHidden).toBe(false)
+      expect(contentSvcMock.fetchExtUserContentEnroll).not.toHaveBeenCalled()
+    })
+
     it('should not open the popup when the consent is declined', async () => {
       matDialogMock.open.mockReturnValue({ afterClosed: () => of(false) })
 

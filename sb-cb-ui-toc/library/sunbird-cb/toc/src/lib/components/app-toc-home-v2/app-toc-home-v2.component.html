@@ -14,7 +14,10 @@
               assessmentAttemptsRemaining, total: totalAssessmentAttempts }"></span>
           </div>
           <button type="button" class="flex action-button justify-center locked-assessment-btn" disabled>
-            {{ 'apptochome.locked' | translate }}
+            <div class="flex gap-2 items-center justify-center">
+              <span>{{ 'apptochome.locked' | translate }}</span>
+              <mat-icon class="text-white">lock</mat-icon>
+            </div>
           </button>
           <span class="locked-assessment-hint">
             {{ 'apptochome.completeCoursesToUnlockAssessment' | translate }}
