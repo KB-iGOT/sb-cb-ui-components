@@ -2,7 +2,7 @@
   <ng-template #enrollFunctionality>
     <div [hidden]="isResource && !content?.artifactUrl?.length" class="flex flex-col gap-4 text-center">
       <!-- Comprehensive assessment locked block: shown until every linked course is completed -->
-      <ng-container *ngIf="isAssessmentLocked">
+      <ng-container *ngIf="isAssessmentLocked && !forPreview">
         <div class="flex flex-col gap-2 locked-assessment-block">
           <div class="not-attempted flex items-center justify-start gap-1">
             <mat-icon class="attempts-icon nodtranslate">repeat</mat-icon>
