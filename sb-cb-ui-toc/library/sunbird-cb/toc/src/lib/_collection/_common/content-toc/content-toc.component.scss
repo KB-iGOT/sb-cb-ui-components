@@ -523,3 +523,12 @@
 ::ng-deep .about-block .toc-about {
   padding: 0 !important;
 }
+
+:host ::ng-deep .breadcrumb-list {
+  .breadcrumb-item:nth-child(3) span {
+    max-width: 275px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

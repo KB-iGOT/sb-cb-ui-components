@@ -907,10 +907,10 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       return
     }
     const plan = this.contentReadData?.trainingPlan_v2
-    const planTitle = plan?.orgName || this.contentReadData?.source || this.contentReadData?.organisation?.[0] || ''
+    const planTitle = plan?.name || plan?.orgName || this.contentReadData?.source || this.contentReadData?.organisation?.[0] || ''
     const crumbs: any[] = [
       { url: '/page/home', title: 'Home', icon: '' },
-      { url: '/page/home', title: 'APAR', icon: '' },
+      { url: '/app/plans?planType=apar', title: 'APAR', icon: '' },
     ]
 
     if (planTitle) {

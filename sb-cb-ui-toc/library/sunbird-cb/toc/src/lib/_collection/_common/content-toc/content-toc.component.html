@@ -304,7 +304,7 @@
   <div class="breadcrumbs">
       <sb-uic-breadcrumb [widgetData]="breadcrumbData()"></sb-uic-breadcrumb>
   </div>
-  <div class="courses-incomplete-block mt-4" *ngIf="caPendingCourses?.length">
+  <div class="courses-incomplete-block mt-4" *ngIf="caPendingCourses?.length && !forPreview">
     <div class="flex gap-4 items-start p-4 course-incomplete-box">
       <div class="icon-info"><mat-icon>info</mat-icon></div>
       <div class="flex flex-col">

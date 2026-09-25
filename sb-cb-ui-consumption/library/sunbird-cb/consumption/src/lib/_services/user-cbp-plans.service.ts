@@ -388,35 +388,47 @@ export class UserCbpPlansService {
   /**
    * Picks the year slice the API actually answered with, and reports which year that was.
    *
-   * `result` is keyed by plan year, but the key is not necessarily the year that was
-   * requested: when the user has no plans for that year the API answers with an earlier
-   * year's data instead (ask for 2026-27, receive 2025-26). Reading `result[planYear]`
-   * alone would miss it, and falling back to `result` itself would hand the transform the
-   * year-keyed wrapper — which has no `aparPlanList`, so it would read as "no plans" and
-   * the user would see an empty screen while their data sat one level down.
+   * `result` is keyed by plan year, and the requested year is always present — but it can
+   * come back empty (zero counts, empty maps) while an earlier year still holds the user's
+   * plans. Reading `result[planYear]` alone would then render an empty screen with the
+   * data sitting one key away, so an empty slice is treated as "not the answer" and the
+   * search moves on. Falling back to `result` itself is no good either: that is the
+   * year-keyed wrapper, which has no `aparPlanList` and would also read as "no plans".
    *
    * Order: the requested year, then an unkeyed slice (an instance that answers with the
-   * year's contents directly), then the newest year present — descending sort works
-   * because YYYY-YY orders by its start year.
+   * year's contents directly), then the nearest EARLIER year that has plans — 2026-27
+   * empty falls back to 2025-26, and on back past any year that is also empty.
+   *
+   * The candidates are the dictionary's own keys and nothing else: no year is constructed
+   * by counting back from the requested one, so a response carrying only 2026-27 and
+   * 2025-26 is never probed for a 2024-25 it did not return. The search also only ever
+   * goes backwards — a later year holding plans is not what a user looking at an empty
+   * current year is missing. Descending sort works because YYYY-YY orders by its start
+   * year, and the same comparison places a year before the requested one.
+   *
+   * When no earlier year has plans either, the requested year is returned with its own
+   * (empty) slice, so the screen reports the year that was actually asked for.
    */
   private resolveYearSlice(result: any, planYear: string): { raw: any, planYear: string } {
     if (!result || typeof result !== 'object') {
       return { raw: undefined, planYear }
     }
-    if (this.isYearSlice(result[planYear])) {
+    if (this.hasPlans(result[planYear])) {
       return { raw: result[planYear], planYear }
     }
-    if (this.isYearSlice(result)) {
+    if (this.hasPlans(result)) {
       return { raw: result, planYear }
     }
-    const years = Object.keys(result)
-      .filter((year: string) => this.isYearSlice(result[year]))
+
+    const earlier = Object.keys(result)
+      .filter((year: string) => year < planYear && this.hasPlans(result[year]))
       .sort()
-      .reverse()
-    if (years.length) {
-      return { raw: result[years[0]], planYear: years[0] }
+      .reverse()[0]
+    if (earlier) {
+      return { raw: result[earlier], planYear: earlier }
     }
-    return { raw: undefined, planYear }
+
+    return { raw: this.isYearSlice(result[planYear]) ? result[planYear] : undefined, planYear }
   }
 
   /** A year's slice of `result`, as opposed to the map that holds those slices. */
@@ -424,6 +436,22 @@ export class UserCbpPlansService {
     return !!value
       && typeof value === 'object'
       && ('aparPlanList' in value || 'nonAparPlanList' in value)
+  }
+
+  /**
+   * A year slice that actually carries plans. The counts are not trusted on their own —
+   * they are reported alongside the maps and it is the maps that get rendered, so a slice
+   * only counts as populated when one of them has an entry.
+   */
+  private hasPlans(value: any): boolean {
+    if (!this.isYearSlice(value)) {
+      return false
+    }
+    return this.planCount(value.aparPlanList) > 0 || this.planCount(value.nonAparPlanList) > 0
+  }
+
+  private planCount(plans: any): number {
+    return plans && typeof plans === 'object' ? Object.keys(plans).length : 0
   }
 
   /**
