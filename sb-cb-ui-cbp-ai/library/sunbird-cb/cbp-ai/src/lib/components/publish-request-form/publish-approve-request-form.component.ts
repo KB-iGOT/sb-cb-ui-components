@@ -16,10 +16,12 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 
 export class PublishApproveRequestFormComponent implements OnInit {
-
-  approvalRequestForm: FormGroup;
+  globalConfigData:any
+  approvalRequestForm!: FormGroup;
   loading = false;
   minDate = new Date()
+  currentAparYear = new Date()
+  selectedAparYear = ''
   constructor(
     public dialogRef: MatDialogRef<PublishApproveRequestFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -29,7 +31,10 @@ export class PublishApproveRequestFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.currentAparYear = this.sharedService.portalData?.parentAppData?.configData?.cbpPlanYear?.currentYear
+    this.globalConfigData = this.sharedService.portalData?.parentAppData?.configData?.cbpPlanYear    
     this.initializeForm();
+    
   }
 
   initializeForm(): void {
@@ -39,6 +44,7 @@ export class PublishApproveRequestFormComponent implements OnInit {
         Validators.maxLength(70),
         Validators.pattern('^[a-zA-Z0-9 -]+$')
       ]],
+      plan_year:[this.currentAparYear,[Validators.required]],
       due_date: [null, [
     Validators.required,
     futureDateValidator()
@@ -53,6 +59,11 @@ export class PublishApproveRequestFormComponent implements OnInit {
   closeDialog(): void {
     this.dialogRef.close();
   }
+
+  onAparSelectionChange(value: string) {
+    this.selectedAparYear = value
+  
+  }
 approveAndPublish() {
 
     if (this.approvalRequestForm.invalid) {
@@ -66,7 +77,8 @@ approveAndPublish() {
     const payload = {
       request_id:  this.data?.demand_id || this.data?.id,
       plan_name: formValue.request_name,
-      due_date: formValue.due_date ? new Date(formValue.due_date).toISOString().split('T')[0] : null
+      due_date: formValue.due_date ? new Date(formValue.due_date).toISOString().split('T')[0] : null,
+      plan_year: formValue.plan_year
     };
 
     console.log('payload', payload);
@@ -115,6 +127,10 @@ approveAndPublish() {
 
 get due_date() {
   return this.approvalRequestForm.get('due_date');
+}
+
+get plan_year() {
+  return this.approvalRequestForm.get('plan_year');
 }
 }
 

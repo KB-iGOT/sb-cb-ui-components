@@ -1027,3 +1027,18 @@ border: none;
   fill: #1b4ca1 !important; // your active color
 }
 }
+
+:host ::ng-deep .apar-year-select {
+  .mdc-notched-outline {
+    display: none !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    padding: 0 !important;
+  }
+}
