@@ -43,6 +43,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   assessmentForm!: FormGroup
   reAttemptOptions: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   nameMaxLength = 70
+  nameMinLength = 6
   instructionsMaxLength = 1000
   durationTouched = false
   overallScoreCutoffOptions = [
@@ -636,7 +637,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       numberOfQuestionsToDisplay: [0],
       noOfSection: [1],
       sections: this.fb.array([this.createSectionGroup()]),
-      name: ['', [Validators.required, Validators.maxLength(this.nameMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
+      name: ['', [Validators.required, Validators.minLength(this.nameMinLength), Validators.maxLength(this.nameMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
       scoreCutoffType: ['AssessmentLevel', Validators.required],
       maxAssessmentRetakeAttempts: [null, Validators.required],
       durationHours: [0, [Validators.min(0), Validators.max(23)]],
