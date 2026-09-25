@@ -17,6 +17,7 @@
         <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported</mat-hint>
         <mat-hint align="end">{{ nameLength }} / {{ nameMaxLength }}</mat-hint>
         <mat-error *ngIf="controls['name'].hasError('required')">Name is required</mat-error>
+        <mat-error *ngIf="controls['name'].hasError('minlength')">Name must be of minimum {{nameMinLength}} characters</mat-error>
         <mat-error *ngIf="controls['name'].hasError('pattern')">Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' !
           ) characters are supported</mat-error>
         <mat-error *ngIf="controls['name'].hasError('maxlength')">Name cannot exceed {{ nameMaxLength }}
