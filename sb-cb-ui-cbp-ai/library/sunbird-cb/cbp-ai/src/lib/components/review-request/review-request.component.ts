@@ -59,6 +59,7 @@ export class ReviewRequestComponent {
 
     if (source === 'mdo') {
       this.portalData?.parentAppData?.fromPortal === 'mdo'
+      this.sharedService.portalData = this.portalData
       this.sharedService.fromMdoPortal = true
 
       this.getMDORequestDetails(requestId);

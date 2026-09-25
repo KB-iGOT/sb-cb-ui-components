@@ -95,6 +95,7 @@ export class SharedService {
   updateDesignationHierarchySubject = new Subject()
   fromMdoPortal = false
   requestData:any
+  portalData:any
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.screenWidth = event.target.innerWidth;
