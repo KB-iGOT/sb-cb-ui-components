@@ -10,7 +10,7 @@ const API_END_POINTS = {
   CREARE_ASSESSMENT: 'apis/proxies/v8/questionset/v1/create',
   UPDATE_ASSESSMENT: 'apis/proxies/v8/questionset/v1/hierarchy/update',
   CREATE_CA_ASSESSMENT: 'apis/proxies/v8/ca/questionset/v1/create',
-  UPDATE_CA_ASSESSMENT: (id: string) => `apis/proxies/v8/ca/questionset/v1/update/${id}`,
+  UPDATE_CA_ASSESSMENT: 'apis/proxies/v8/ca/questionset/v1/hierarchy/update',
   QUESTIONSET_READ: (id: any) => `apis/proxies/v8/questionset/v1/read/${id}`,
   QUESTIONSET_READ_MODE_EDIT: (id: any) => `apis/proxies/v8/questionset/v1/read/${id}?mode=edit`,
   QUESTIONSET_HIERARCHY: (id: any) => `apis/proxies/v8/questionset/v1/hierarchy/${id}`,
@@ -465,11 +465,7 @@ export class AssessmentService {
       return API_END_POINTS.UPDATE_CQF_ASSESSMENT
     }
     if (this.isComprehensiveAssessment()) {
-      // read off the body: the cached hierarchy is still empty for the first update after a create
-      const rootId = this.readRootIdentifier(assessmentHierarchyReqData) || this.assessmentHierarchyData?.identifier
-      if (rootId) {
-        return API_END_POINTS.UPDATE_CA_ASSESSMENT(rootId)
-      }
+      return API_END_POINTS.UPDATE_CA_ASSESSMENT
     }
     return API_END_POINTS.UPDATE_ASSESSMENT
   }

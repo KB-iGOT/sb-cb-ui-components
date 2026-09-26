@@ -89,29 +89,13 @@ describe('AssessmentService', () => {
       req.flush({});
     });
 
-    it('should update through the CA wrapper, naming the root question set', () => {
+    it('should update through the CA hierarchy wrapper, with the payload unchanged', () => {
       service.updateAssessment(hierarchyReq).subscribe();
 
-      const req = httpMock.expectOne('apis/proxies/v8/ca/questionset/v1/update/qs-1');
+      const req = httpMock.expectOne('apis/proxies/v8/ca/questionset/v1/hierarchy/update');
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body).toEqual(hierarchyReq);
       req.flush({});
-    });
-
-    it('should name the loaded question set when the request marks no root', () => {
-      service.getAssessmentHierarchyDetailsModeEdit('qs-9').subscribe();
-      httpMock.expectOne('apis/proxies/v8/questionset/v1/hierarchy/qs-9?mode=edit')
-        .flush({ result: { questionSet: { identifier: 'qs-9' } } });
-
-      service.updateAssessment({ request: { data: { nodesModified: {}, hierarchy: {} } } }).subscribe();
-
-      httpMock.expectOne('apis/proxies/v8/ca/questionset/v1/update/qs-9').flush({});
-    });
-
-    it('should fall back to the hierarchy update when no question set can be named', () => {
-      service.updateAssessment({ request: { data: { nodesModified: {}, hierarchy: {} } } }).subscribe();
-
-      httpMock.expectOne('apis/proxies/v8/questionset/v1/hierarchy/update').flush({});
     });
   });
 
