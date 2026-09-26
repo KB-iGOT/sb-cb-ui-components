@@ -75,6 +75,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   isMobile = false
   selectedTabIndex = 0
   discussWidgetData!: NsDiscussionV2.ICommentWidgetData
+  creatorDiscussWidgetData!: NsDiscussionV2.ICommentWidgetData
   teacherNotesFlag = false
   referenceNotesFlag = false
   viewerPage = window.location.href.includes('/viewer/') ? true : false
@@ -134,6 +135,49 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     });
   }
 
+
+  // Content creator previewing the course (not the public preview)
+  get isCreatorPreview(): boolean {
+    return !!this.forPreview && !window.location.href.includes('/public/')
+  }
+
+  // Creator can reply to, like and flag existing comments, but not start a new discussion
+  getCreatorDiscussWidgetData(widgetData: NsDiscussionV2.ICommentWidgetData): NsDiscussionV2.ICommentWidgetData {
+    const creatorData: any = _.cloneDeep(widgetData)
+    creatorData.enrolledContent = true
+    creatorData.newCommentSection.show = false
+
+    const replyBox = (existing: any) => ({
+      ..._.cloneDeep(creatorData.newCommentSection),
+      ...(existing || {}),
+      show: true,
+      showTopInfo: false,
+      commentTreeData: {
+        ..._.cloneDeep(creatorData.newCommentSection.commentTreeData),
+        ...((existing && existing.commentTreeData) || {}),
+      },
+    })
+    const enableActions = (cardConfig: any) => {
+      cardConfig.showActions = true
+      _.set(cardConfig, 'actions.comments.show', true)
+      _.set(cardConfig, 'actions.like.show', true)
+      _.set(cardConfig, 'actions.like.canLike', true)
+      _.set(cardConfig, 'actions.flagComment.show', true)
+    }
+
+    const commentsList = creatorData.commentsList || {}
+    enableActions(commentsList)
+    commentsList.repliesSection = commentsList.repliesSection || {}
+    commentsList.repliesSection.show = true
+    commentsList.repliesSection.newCommentReply = replyBox(commentsList.repliesSection.newCommentReply)
+    const replyCardConfig = commentsList.repliesSection.replyCardConfig || { cardType: 'reply' }
+    enableActions(replyCardConfig)
+    replyCardConfig.newCommentReply = replyBox(replyCardConfig.newCommentReply)
+    commentsList.repliesSection.replyCardConfig = replyCardConfig
+    creatorData.commentsList = commentsList
+
+    return creatorData
+  }
 
   isCommentApiEnabled(): boolean {
     return !!this.commonMethodsSvc.getEnabledUrl({
@@ -340,6 +384,10 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
         this.discussWidgetData.newCommentSection.show = false
       }
       this.discussWidgetData = { ...this.discussWidgetData }
+
+      if (this.isCreatorPreview) {
+        this.creatorDiscussWidgetData = this.getCreatorDiscussWidgetData(this.discussWidgetData)
+      }
     }
 
     if (this.contentReadData && this.contentReadData?.eventLinked?.length) {

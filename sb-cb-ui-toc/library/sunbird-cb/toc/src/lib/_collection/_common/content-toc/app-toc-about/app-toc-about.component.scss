@@ -20,6 +20,13 @@
     font-size: 16px;
 }
 
+::ng-deep .competency-tooltip .mat-mdc-tooltip-surface {
+    max-width: min(600px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    white-space: normal;
+}
+
 .batch-details-info {
     height: 16px;
     width: 16px;
