@@ -128,7 +128,6 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
     effect(() => {
       const breadcrumbs = this.caBreadcrumbs();
-      console.log('caBreadcrumbs:', breadcrumbs);
       if (breadcrumbs?.length) {
         this.setBreadcrumbData();
       }
@@ -910,7 +909,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     const planTitle = plan?.name || plan?.orgName || this.contentReadData?.source || this.contentReadData?.organisation?.[0] || ''
     const crumbs: any[] = [
       { url: '/page/home', title: 'Home', icon: '' },
-      { url: '/app/plans?planType=apar', title: 'APAR', icon: '' },
+      { url: '/app/plans', queryParams: { planType: 'apar' }, title: 'APAR', icon: '' },
     ]
 
     if (planTitle) {
