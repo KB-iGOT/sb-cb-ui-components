@@ -14,7 +14,7 @@
   <div class="filter-list flex items-center flex-wrap gap-2" *ngIf="filtersAppliedCount > 0">
     <ng-container *ngFor="let chip of selectedFilterChips; trackBy: trackByFn">
       <div class="filter-pill flex items-center">
-        <span class="font-normal text-xs" [matTooltip]="chip.displayName">{{ chip.displayName }}</span>
+        <span class="font-normal text-xs" [matTooltip]="chip.displayName" [matTooltipPosition]="'left'">{{ chip.displayName }}</span>
         <button mat-icon-button color="primary" (click)="clearFilterChip(chip)">
           <mat-icon>close</mat-icon>
         </button>
@@ -51,7 +51,7 @@
               [disabled]="!!option.disabled"
               (change)="onSelectionFilter($event, option, config.key)">
               <span class="min-width-adjust" [matTooltip]="option.displayName || capitalizeFirstLetter(option.name)"
-                [matTooltipPosition]="'right'">
+                [matTooltipPosition]="'left'">
                 {{ option.displayName || capitalizeFirstLetter(option.name) }}
               </span>
               <span class="min-width-adjust" *ngIf="config.showCount !== false && option.count !== undefined">
@@ -75,7 +75,7 @@
               [disabled]="!!option.disabled"
               (change)="onRadioChange(option, config.key)">
               <span class="min-width-adjust" [matTooltip]="option.displayName || capitalizeFirstLetter(option.name)"
-                [matTooltipPosition]="'right'">
+                [matTooltipPosition]="'left'">
                 {{ option.displayName || capitalizeFirstLetter(option.name) }}
               </span>
               <span class="min-width-adjust" *ngIf="config.showCount !== false && option.count !== undefined">
