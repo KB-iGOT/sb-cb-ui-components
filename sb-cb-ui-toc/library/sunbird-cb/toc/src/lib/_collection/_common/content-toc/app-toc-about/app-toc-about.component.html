@@ -154,7 +154,8 @@
     <div class="pt-mweb-4 mat-subheading-1 flex items-center gap-2">
         {{ 'apptocsinglepage.competencies' | translate }}
         <mat-icon class="cursor-pointer ws-mat-black60-text info-icon mat-icon notranslate material-icons mat-icon-no-color"
-            [matTooltipPosition]="'below'" #tooltip="matTooltip" (click)="tooltip.toggle()"
+            [matTooltipPosition]="'below'" matTooltipClass="competency-tooltip" #tooltip="matTooltip"
+            (click)="tooltip.toggle()"
             matTooltip="{{ 'apptocsinglepage.competenciesTooltip' | translate }}">info_outline</mat-icon>
     </div>
 </ng-template>
