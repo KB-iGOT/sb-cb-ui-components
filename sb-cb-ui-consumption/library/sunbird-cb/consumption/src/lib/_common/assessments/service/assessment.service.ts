@@ -9,6 +9,8 @@ const API_PROXY_V8_CQF = 'apis/proxies/v8/cqfquestionset/'
 const API_END_POINTS = {
   CREARE_ASSESSMENT: 'apis/proxies/v8/questionset/v1/create',
   UPDATE_ASSESSMENT: 'apis/proxies/v8/questionset/v1/hierarchy/update',
+  CREATE_CA_ASSESSMENT: 'apis/proxies/v8/ca/questionset/v1/create',
+  UPDATE_CA_ASSESSMENT: 'apis/proxies/v8/ca/questionset/v1/hierarchy/update',
   QUESTIONSET_READ: (id: any) => `apis/proxies/v8/questionset/v1/read/${id}`,
   QUESTIONSET_READ_MODE_EDIT: (id: any) => `apis/proxies/v8/questionset/v1/read/${id}?mode=edit`,
   QUESTIONSET_HIERARCHY: (id: any) => `apis/proxies/v8/questionset/v1/hierarchy/${id}`,
@@ -27,6 +29,7 @@ export class AssessmentService {
 
   private assessmentHierarchyData: any = {}
   private primaryCategory: string = ''
+  private courseCategory: string = ''
   readOnly: boolean = false
 
   constructor(
@@ -77,8 +80,7 @@ export class AssessmentService {
     // The category the assessment is being created with drives every subsequent hierarchy
     // update too, so remember it before the create call picks its endpoint.
     this.setPrimaryCategory(assessmentReqData?.request?.questionset?.primaryCategory)
-    const createUrl = this.isCqfAssessment() ? API_END_POINTS.CREATE_CQF_ASSESSMENT : API_END_POINTS.CREARE_ASSESSMENT
-    return this.http.post<any>(createUrl, assessmentReqData).pipe(
+    return this.http.post<any>(this.getCreateUrl(), assessmentReqData).pipe(
       map((response: any) => {
         return response
       })
@@ -86,8 +88,7 @@ export class AssessmentService {
   }
 
   updateAssessment(assessmentHierarchyReqData: any) {
-    const updateUrl = this.isCqfAssessment() ? API_END_POINTS.UPDATE_CQF_ASSESSMENT : API_END_POINTS.UPDATE_ASSESSMENT
-    return this.http.patch<any>(updateUrl, assessmentHierarchyReqData).pipe(
+    return this.http.patch<any>(this.getUpdateUrl(assessmentHierarchyReqData), assessmentHierarchyReqData).pipe(
       map((response: any) => {
         return response
       })
@@ -444,6 +445,43 @@ export class AssessmentService {
 
   isCqfAssessment(): boolean {
     return this.primaryCategory === NsAssessment.EAssessmentPrimaryCategory.CQF_ASSESSMENT
+  }
+
+  /** A comprehensive assessment is a `Course Assessment` too, only the course category tells it apart. */
+  isComprehensiveAssessment(): boolean {
+    return this.courseCategory === NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT
+  }
+
+  private getCreateUrl(): string {
+    if (this.isCqfAssessment()) {
+      return API_END_POINTS.CREATE_CQF_ASSESSMENT
+    }
+    return this.isComprehensiveAssessment() ? API_END_POINTS.CREATE_CA_ASSESSMENT : API_END_POINTS.CREARE_ASSESSMENT
+  }
+
+  /** The CA wrapper takes the same hierarchy body but names the root question set in the path. */
+  private getUpdateUrl(assessmentHierarchyReqData: any): string {
+    if (this.isCqfAssessment()) {
+      return API_END_POINTS.UPDATE_CQF_ASSESSMENT
+    }
+    if (this.isComprehensiveAssessment()) {
+      return API_END_POINTS.UPDATE_CA_ASSESSMENT
+    }
+    return API_END_POINTS.UPDATE_ASSESSMENT
+  }
+
+  /** The node the hierarchy update marks as root, '' when it marks none. */
+  private readRootIdentifier(assessmentHierarchyReqData: any): string {
+    const hierarchy = assessmentHierarchyReqData?.request?.data?.hierarchy || {}
+    return Object.keys(hierarchy).find((identifier: string) => hierarchy[identifier]?.root) || ''
+  }
+
+  getCourseCategory() {
+    return this.courseCategory
+  }
+
+  setCourseCategory(courseCategory: string) {
+    this.courseCategory = courseCategory || ''
   }
 
   getPrimaryCategory() {
