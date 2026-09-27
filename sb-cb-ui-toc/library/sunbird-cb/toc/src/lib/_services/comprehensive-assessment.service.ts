@@ -78,8 +78,8 @@ export class ComprehensiveAssessmentService {
 
     const compatibilityLevel = Number(assessment.compatibilityLevel) || DEFAULT_COMPATIBILITY_LEVEL
     const url = compatibilityLevel >= V5_COMPATIBILITY_LEVEL
-      ? API_END_POINTS.CAN_ATTEMPT_V5(assessment.identifier)
-      : API_END_POINTS.CAN_ATTEMPT(assessment.identifier)
+      ? API_END_POINTS.CAN_ATTEMPT_V5(assessment?.childNodes[0])
+      : API_END_POINTS.CAN_ATTEMPT(assessment?.childNodes[0])
 
     try {
       const response: any = await this.http.get<any>(url).toPromise()
