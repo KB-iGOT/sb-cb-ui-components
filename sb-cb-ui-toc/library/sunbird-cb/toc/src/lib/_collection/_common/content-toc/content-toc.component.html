@@ -17,7 +17,7 @@
         </div>
     </div>
 </div>
-<div class="tab-group-container" *ngIf="config?.uiVisibility?.tabs?.visible !== false && content.courseCategory !== 'Comprehensive Assessment'">
+<div class="tab-group-container" *ngIf="config?.uiVisibility?.tabs?.visible !== false && (content.courseCategory !== 'Comprehensive Assessment' || forPreview)">
   <mat-tab-group (selectedTabChange)="handleTabChange($event)" #stickyMenu [class.sticky-mat-tabs]="sticky" mat-stretch-tabs="false" mat-align-tabs="start"
         [selectedIndex]="selectedTabIndex" [ngClass]="{'content-tabs':!fromViewer,'contentSticky': forPreview}">
 
@@ -320,7 +320,7 @@
   </mat-tab-group>
 </div>
 
-@if(content.courseCategory === 'Comprehensive Assessment') {
+@if(content.courseCategory === 'Comprehensive Assessment' && !forPreview) {
   <div class="breadcrumbs">
       <sb-uic-breadcrumb [widgetData]="breadcrumbData()"></sb-uic-breadcrumb>
   </div>
