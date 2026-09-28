@@ -12,8 +12,10 @@ const COURSE_B = 'do_courseB'
 const OPTIONAL_COURSE = 'do_optional'
 
 const ENROLMENT_URL = '/apis/proxies/v8/learner/course/v5/user/enrollment/details'
-const RETAKE_URL = '/apis/proxies/v8/user/assessment/retake/do_questionset'
-const RETAKE_V5_URL = '/apis/proxies/v8/user/assessment/v5/retake/do_questionset'
+const QUESTION_SET = 'do_questionset'
+const FIRST_CHILD_NODE = 'do_question_1'
+const RETAKE_URL = `/apis/proxies/v8/user/assessment/retake/${FIRST_CHILD_NODE}`
+const RETAKE_V5_URL = `/apis/proxies/v8/user/assessment/v5/retake/${FIRST_CHILD_NODE}`
 
 /** One row of /learner/course/v5/user/enrollment/details, trimmed to what the service reads. */
 function enrolment(courseId: string, status: number): any {
@@ -45,11 +47,19 @@ function contentRead(contentList: any[], extra: Record<string, any> = {}): any {
   }
 }
 
-/** An assessment carrying the question set the retake call is made for. */
+/**
+ * An assessment carrying the question set the retake call is made for. The retake API is keyed by
+ * the question set's first child node, not by the question set's own identifier.
+ */
 function assessmentWithQuestionSet(compatibilityLevel?: number, extra: Record<string, any> = {}): any {
   return {
     children: [
-      { identifier: 'do_questionset', mimeType: 'application/vnd.sunbird.questionset', compatibilityLevel },
+      {
+        identifier: QUESTION_SET,
+        mimeType: 'application/vnd.sunbird.questionset',
+        compatibilityLevel,
+        childNodes: [FIRST_CHILD_NODE, 'do_question_2'],
+      },
     ],
     ...extra,
   }
@@ -265,6 +275,15 @@ describe('ComprehensiveAssessmentService', () => {
         attemptsRemaining: 2,
         isAttempted: true,
       })
+    })
+
+    it('keys the retake call by the first child node, not the question set identifier', async () => {
+      http.get.mockReturnValue(of({ result: { attemptsMade: 0, attemptsAllowed: 2 } }))
+
+      await service.getAttemptStatus(assessmentWithQuestionSet(6))
+
+      expect(http.get).toHaveBeenCalledWith(RETAKE_URL)
+      expect(http.get).not.toHaveBeenCalledWith(expect.stringContaining(QUESTION_SET))
     })
 
     it('reports "not attempted" before the first attempt', async () => {

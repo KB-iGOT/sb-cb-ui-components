@@ -721,7 +721,7 @@
             <div class="text-base font-bold">{{ 'apptocsinglepage.provider' | translate }}</div>
             <div class="flex flex-row gap-4 items-center">
                 <div class="provider-logo-div">
-                    <img *ngIf="content?.creatorLogo" [src]="content?.creatorLogo" alt="{{ 'apptocsinglepage.provider' | translate }}" />
+                    <img *ngIf="content?.creatorLogo" [src]="content?.creatorLogo" alt="{{ 'apptocsinglepage.provider' | translate }}" class="provider-logo" />
                     <img *ngIf="!content?.creatorLogo" src="/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg"
                         alt="{{ 'apptocsinglepage.provider' | translate }}" />
                 </div>

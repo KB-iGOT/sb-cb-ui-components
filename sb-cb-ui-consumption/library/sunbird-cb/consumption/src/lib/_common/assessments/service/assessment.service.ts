@@ -29,7 +29,7 @@ export class AssessmentService {
 
   private assessmentHierarchyData: any = {}
   private primaryCategory: string = ''
-  private courseCategory: string = ''
+  private contextCategory: string = ''
   readOnly: boolean = false
 
   constructor(
@@ -449,7 +449,7 @@ export class AssessmentService {
 
   /** A comprehensive assessment is a `Course Assessment` too, only the course category tells it apart. */
   isComprehensiveAssessment(): boolean {
-    return this.courseCategory === NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT
+    return this.contextCategory === NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT
   }
 
   private getCreateUrl(): string {
@@ -476,12 +476,12 @@ export class AssessmentService {
     return Object.keys(hierarchy).find((identifier: string) => hierarchy[identifier]?.root) || ''
   }
 
-  getCourseCategory() {
-    return this.courseCategory
+  getContextCategory() {
+    return this.contextCategory
   }
 
-  setCourseCategory(courseCategory: string) {
-    this.courseCategory = courseCategory || ''
+  setContextCategory(contextCategory: string) {
+    this.contextCategory = contextCategory || ''
   }
 
   getPrimaryCategory() {
