@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, OnDestroy, ElementRef, ViewChild, inject } f
 import { AccessControlService } from "../../../_services/access-control.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
-import { BATCH_RANGES, CHECKBOX_OPTIONS } from "../../../_constants/app.constants";
+import { BATCH_RANGES, CHECKBOX_OPTIONS, MAX_ORGANISATION_SELECTION_LIMIT } from "../../../_constants/app.constants";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -288,7 +288,35 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Most organisations an MDO may pick, taken from config so it can change without a release. */
+  get orgSelectionLimit(): number {
+    const limit = Number(this.accessControlCriteriaSelection?.maxOrganisationSelectionLimit);
+    return limit > 0 ? limit : MAX_ORGANISATION_SELECTION_LIMIT;
+  }
+
+  /**
+   * Only MDO specific content is capped on the rootOrgId list it picks. A L0 MDO picking its whole
+   * hierarchy is stored as the single ministry / state id, not as that list, so it is not capped.
+   */
+  isOrgSelectionLimitExceeded(selections: any[] = this.selectedDataTemp): boolean {
+    if (
+      this.content?.accessSetting !== NsAccessControlConfig.IAccessSetting.MDO_SPECIFIC ||
+      this.selectionType !== NsAccessControlConfig.SelectionType.Organizations ||
+      (selections?.length || 0) <= this.orgSelectionLimit
+    ) {
+      return false;
+    }
+    const isWholeHierarchy =
+      this.isOrgHierarchyMode &&
+      this.accessControlService.isL0MdoUser() &&
+      this.accessControlService.areAllOrgHierarchyOrgsSelected(selections);
+    return !isWholeHierarchy;
+  }
+
   setSelected(): void {
+    if (this.isOrgSelectionLimitExceeded()) {
+      return;
+    }
     this.selectedData = [...this.selectedDataTemp];
     this.activeTab = 1;
   }
@@ -983,6 +1011,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation
     ) {
       this.selectedData = this.selectedDataTemp;
+    }
+    if (this.isOrgSelectionLimitExceeded(this.selectedData) || this.isOrgSelectionLimitExceeded(this.selectedDataTemp)) {
+      return;
     }
     this.dialogRef.close({
       rule: this.data.rule,

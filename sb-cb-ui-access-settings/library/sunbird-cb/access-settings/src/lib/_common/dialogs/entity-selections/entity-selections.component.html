@@ -232,6 +232,9 @@
 <mat-dialog-actions>
   <ng-container *ngIf="checkIfData || selectionType === selectionTypeEnum.CentralDeputation">
     <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
+      <div *ngIf="isOrgSelectionLimitExceeded()" class="text-xs org-limit-error">
+        Reached Maximum Organisation selection limit, please try adding {{ orgSelectionLimit }} or less Organisations in the manual selection.
+      </div>
       <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus && selectionType !== selectionTypeEnum.CentralDeputation">
         <div class="text-xs">{{ filterValue === "all" ? selectedDataTemp?.length : selectedData?.length }} items selected</div>
       </ng-container>
@@ -240,7 +243,7 @@
       >
         <button
           mat-flat-button
-          [disabled]="(selectedData.length === 0 && selectedDataTemp.length === 0) || accessControlCriteriaSelection?.readOnly || data?.disabled"
+          [disabled]="(selectedData.length === 0 && selectedDataTemp.length === 0) || isOrgSelectionLimitExceeded() || accessControlCriteriaSelection?.readOnly || data?.disabled"
           (click)="applySelections()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2"
         >
@@ -252,7 +255,7 @@
       >
         <button
           mat-flat-button
-          [disabled]="selectedDataTemp.length === 0 || accessControlCriteriaSelection?.readOnly || data?.disabled"
+          [disabled]="selectedDataTemp.length === 0 || isOrgSelectionLimitExceeded() || accessControlCriteriaSelection?.readOnly || data?.disabled"
           (click)="setSelected()"
           class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2"
         >

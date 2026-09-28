@@ -15,6 +15,10 @@ export const CHECKBOX_OPTIONS = [
 // The whole ministry / state is then stored as a single criteria instead of the expanded org list.
 export const MINISTRY_OR_STATE_CRITERIA_KEY = "ministryOrStateId";
 
+// Default cap on organisations an MDO can pick in the manual selection.
+// Overridable through accessControlCriteriaSelection.maxOrganisationSelectionLimit.
+export const MAX_ORGANISATION_SELECTION_LIMIT = 500;
+
 export const CRITERIA_LABELS: { [key: string]: string } = {
   [NsAccessControlConfig.SelectionType.Organizations]: "Organisation",
   [MINISTRY_OR_STATE_CRITERIA_KEY]: "Organisation",
