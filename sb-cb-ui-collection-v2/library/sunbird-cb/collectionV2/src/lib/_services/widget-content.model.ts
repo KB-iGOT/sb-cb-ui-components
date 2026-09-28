@@ -557,6 +557,8 @@ export namespace NsContent {
   export enum EContextCategory {
     FINAL_PROGRAM_ASSESSMENT = 'Final Program Assessment',
     PRE_ENROLMENT_ASSESSMENT = 'Pre Enrolment Assessment',
+    OPTIONAL_PRE_ASSESSMENT = "Optional Pre Assessment",
+    MANDATROY_PRE_ASSESSMENT = "Mandatory Pre Assessment"
   }
 
   export enum EContextLocking {
