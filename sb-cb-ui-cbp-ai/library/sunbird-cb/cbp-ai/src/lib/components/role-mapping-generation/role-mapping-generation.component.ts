@@ -5,8 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import html2pdf from 'html2pdf.js';
 import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/delete-role-mapping-popup.component';
 import { MatDialog } from '@angular/material/dialog';
-import { interval, of, concat, ReplaySubject, Subject } from 'rxjs';
-import { switchMap, takeWhile, tap } from 'rxjs/operators';
+import { interval, of, concat, forkJoin, ReplaySubject, Subject } from 'rxjs';
+import { catchError, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatSelect } from '@angular/material/select';
 import { Router } from '@angular/router';
@@ -113,6 +113,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   workAllocationOrderDocumentMissing = false
   showWorkAllocationOrderDocumentMissing = false
   private destroy$ = new Subject<void>();
+  private immediateFailureHandled = false;
   constructor(
     private eventSvc: EventService,
     public sharedService: SharedService,
@@ -727,6 +728,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
   generateFinalRoleMapping() {
     this.apiLoading = true;
+    this.immediateFailureHandled = false
 
     if (!this.roleMappingForm.valid) {
       this.roleMappingForm.markAllAsTouched();
@@ -816,10 +818,11 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
             if(data && data?.status === 'FAILED') {
                this.apiLoading = false;
                this.loading = false
+                this.immediateFailureHandled = true // takeWhile still forwards this same value to subscribe(); tell it to skip
                 this.destroy$.next();   // 🛑 stop polling
                 this.regenerateRoleMappingAfterFailedAndDelete()
                 return;
-            } 
+            }
           } else {
             
             this.loading = true
@@ -833,6 +836,10 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 )
       )
       .subscribe(data => {
+        if (this.immediateFailureHandled) {
+          this.immediateFailureHandled = false // already handled in tap() above; avoid double-handling this same emission
+          return
+        }
         console.log('role mapping data--', data)
         if (this.firstApiResponse?.is_existing) {
           
@@ -934,10 +941,13 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
               this.loading = false
                this.apiLoading = false;
                 this.destroy$.next();   // 🛑 stop polling
-                this.showRoleMappingFailedPopup()
+                this.snackBar.open('Generation failed please try again later', 'X', {
+                  duration: 3000,
+                  panelClass: ['snackbar-error']
+                });
                 return;
             }
-          
+
       });
   }
 
@@ -1226,46 +1236,50 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     
   }
 
-  showRoleMappingFailedPopup() {
-    console.log('role mapping failed, try to regenerate role mapping?')
-   // alert('role mapping failed, try to regenerate role mapping?')
-    const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
-          width: '400px',
-          data: {documents: this.documents, from: 'roleMappingFailed',},
-          panelClass: 'view-cbp-plan-popup',          
-          minHeight: '300px',          // Set minimum height
-          maxHeight: '80vh',           // Prevent it from going beyond viewport
-          disableClose: true // Optional: prevent closing with outside click
-        });
-    
-          dialogRef.afterClosed().subscribe(result => {
-            if (result === 'saved') {
-              console.log('Changes saved!');
-              this.regenerateRoleMappingAfterFailedAndDelete()
-              this.loading = true
-            } else {
-              this.loading = false
-            }
-          })
-  }
+      regenerateRoleMappingAfterFailedAndDelete() {
+        const stateCenterId = this.roleMappingForm.value.ministry
+        const departmentId = this.roleMappingForm.value.departments
 
-  regenerateRoleMappingAfterFailedAndDelete() {
-     this.sharedService.deleteRoleMappingByStateAndDepartment(this.roleMappingForm.value.ministry, this.roleMappingForm.value.departments).subscribe({
-                next: (res) => {
-                  // Success handling
-                  console.log('Success:', res);
+        this.sharedService.getRoleMappingByStateCenterAndDepartment(stateCenterId, departmentId).subscribe({
+          next: (existingRoleMappings: any) => {
+            const roleMappingIds = (Array.isArray(existingRoleMappings) ? existingRoleMappings : [])
+              .map((roleMapping: any) => roleMapping?.id)
+              .filter(Boolean)
+
+            if (!roleMappingIds.length) {
+              this.loading = false
+              this.firstApiResponse = null
+              this.generateFinalRoleMapping()
+              return
+            }
+
+            forkJoin(
+              roleMappingIds.map((id: string) =>
+                this.sharedService.deleteCourseRecommendations(id).pipe(
+                  catchError((error) => {
+                    // A 404 just means this designation had no course recommendations yet.
+                    // Either way, one designation's delete failing shouldn't block the
+                    // regenerate retry for the rest.
+                    if (error?.status !== 404) {
+                      console.error(`Failed to delete course recommendations for role mapping ${id}`, error)
+                    }
+                    return of(null)
+                  })
+                )
+              )
+            ).subscribe(() => {
                   this.loading = false
-                  this.firstApiResponse = []
+                  this.firstApiResponse = null
                   this.generateFinalRoleMapping()
+        })
                 },
                 error: (error) => {
                   this.snackBar.open(error?.error?.detail, 'X', {
                     duration: 3000,
                     panelClass: ['snackbar-error']
                   });
-                  this.firstApiResponse = []
                   this.loading = false
-                  // this.generateFinalRoleMapping()
+                  this.firstApiResponse = null
                 }
               });
   }
