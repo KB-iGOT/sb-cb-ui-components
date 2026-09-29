@@ -1,10 +1,11 @@
 <div class="assessment-basic-info" *ngIf="assessmentForm">
   <form [formGroup]="assessmentForm">
-    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered. -->
+    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered.
+         A pre assessment is offered Basic only. -->
     <div class="form-section" *ngIf="!isCqfAssessment && !isComprehensiveAssessment">
       <mat-radio-group formControlName="assessmentType" class="assessment-type-group flex flex-middle gap-4">
         <mat-radio-button value="basic">Basic Assessment</mat-radio-button>
-        <mat-radio-button value="advanced">Advanced Assessment</mat-radio-button>
+        <mat-radio-button value="advanced" *ngIf="!isPreAssessment">Advanced Assessment</mat-radio-button>
       </mat-radio-group>
       <p class="hint-text">Assessment type cannot be changed once saved.</p>
     </div>
@@ -320,6 +321,15 @@
         </mat-form-field>
       </div>
     </ng-container>
+
+    <!-- Mandatory (pre assessment only) - on saves the mandatory context category, off the optional one -->
+    <div class="form-section shuffle-toggle flex flex-middle gap-4" *ngIf="isPreAssessment">
+      <label class="field-label">Mandatory
+        <mat-icon class="info-icon"
+          matTooltip="If marked Mandatory, learner’s progress will be tracked else not.">info_outline</mat-icon>
+      </label>
+      <mat-slide-toggle formControlName="isMandatory" aria-label="Mandatory"></mat-slide-toggle>
+    </div>
 
     <!-- Shuffle answer options -->
     <div class="form-section shuffle-toggle flex flex-middle gap-4">
