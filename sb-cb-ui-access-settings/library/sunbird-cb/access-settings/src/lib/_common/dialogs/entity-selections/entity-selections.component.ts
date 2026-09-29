@@ -2,7 +2,13 @@ import { Component, Inject, OnInit, OnDestroy, ElementRef, ViewChild, inject } f
 import { AccessControlService } from "../../../_services/access-control.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
-import { BATCH_RANGES, CHECKBOX_OPTIONS } from "../../../_constants/app.constants";
+import {
+  ALL_ORGANISATIONS_SELECTION,
+  BATCH_RANGES,
+  CHECKBOX_OPTIONS,
+  MAX_ORGANISATION_SELECTIONS,
+  ORGANISATION_SELECTION_MODES
+} from "../../../_constants/app.constants";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -75,6 +81,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   isCCA = false;
   // Non CCA L0 MDO picks organisations from its own org hierarchy (loaded once, filtered locally)
   isOrgHierarchyMode = false;
+  // MDO Organisation condition: pick organisations one by one (up to the limit) or all of them
+  orgSelectionModes = ORGANISATION_SELECTION_MODES;
+  orgSelectionMode: "individual" | "all" = "individual";
+  organisationLimitError = "";
+  // Count of every organisation, read once when "Select all" is first chosen
+  allOrganisationsCount: number | null = null;
   environment: any
   ODCSMasterFramework: any
   applyNewServiceSelections = true
@@ -142,6 +154,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectedDataTemp = [this.selectedCentralDeputation];
     }
 
+    if (this.isMdoOrganisationSelection && this.selectedData.includes(ALL_ORGANISATIONS_SELECTION)) {
+      // "Select all" has no list behind it, the organisation list opens on its first tab if switched back
+      this.orgSelectionMode = "all";
+      this.activeTab = 0;
+      this.filterValue = "all";
+    }
+
     // Subscribe to search control changes
     this.searchControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((query: string) => {
       if (this.selectionType) {
@@ -165,6 +184,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   initializeDisplay(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
+        if (this.isAllOrganisationsSelected) {
+          this.loadAllOrganisationsCount();
+        }
         if (this.isOrgHierarchyMode) {
           this.getOrgHierarchyList("");
         } else if (this.activeTab === 0) {
@@ -184,7 +206,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           const hierarchyOrgSelections = this.data?.rule?.conditions?.find(
             (c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations
           )?.selections;
-          if (this.isOrgHierarchyMode && hierarchyOrgSelections?.length) {
+          if (this.isOrgHierarchyMode && hierarchyOrgSelections?.includes(ALL_ORGANISATIONS_SELECTION)) {
+            this.orgSelectionIds = this.accessControlService.getOrgHierarchyOrgIds();
+          } else if (this.isOrgHierarchyMode && hierarchyOrgSelections?.length) {
             this.orgSelectionIds = hierarchyOrgSelections;
           } else {
             this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
@@ -193,6 +217,10 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           this.orgSelectionIds = this.data?.rule?.conditions?.find(
             (c: any) => c.entity === NsAccessControlConfig.SelectionType.Organizations
           )?.selections;
+          // Every organisation selected on MDO, designations are not narrowed to any of them
+          if (this.orgSelectionIds?.includes(ALL_ORGANISATIONS_SELECTION)) {
+            this.orgSelectionIds = [];
+          }
         }
 
         if(this.orgSelectionIds?.length) {
@@ -272,6 +300,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   toggleSelection(item: any): void {
     const value = this.getSelectionValue(item);
+    if (this.isOrganisationLimitReached(value)) {
+      return;
+    }
     if (this.filterValue === "all") {
       if (this.selectedDataTemp.includes(value)) {
         this.selectedDataTemp = this.selectedDataTemp.filter((v) => v !== value);
@@ -286,6 +317,68 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       }
       this.selectedDataTemp = [...this.selectedData];
     }
+  }
+
+  /** Organisation condition on MDO, the only one offered "Select all" and the limit. */
+  get isMdoOrganisationSelection(): boolean {
+    return (
+      this.application === NsAccessControlConfig.Application.MDO &&
+      this.selectionType === NsAccessControlConfig.SelectionType.Organizations
+    );
+  }
+
+  get isAllOrganisationsSelected(): boolean {
+    return this.isMdoOrganisationSelection && this.orgSelectionMode === "all";
+  }
+
+  /**
+   * Adding one more organisation past the limit is refused on MDO, removing one is always allowed.
+   * The error stays up until a selection goes through.
+   */
+  private isOrganisationLimitReached(value: any): boolean {
+    if (!this.isMdoOrganisationSelection) {
+      return false;
+    }
+    const currentList = this.filterValue === "selected" ? this.selectedData : this.selectedDataTemp;
+    const isAdding = !currentList.includes(value);
+    if (isAdding && currentList.length >= MAX_ORGANISATION_SELECTIONS) {
+      this.organisationLimitError = `You can select up to ${MAX_ORGANISATION_SELECTIONS} organisations. Choose "Select all" to include every organisation.`;
+      return true;
+    }
+    this.organisationLimitError = "";
+    return false;
+  }
+
+  onChangeOrgSelectionMode(event: MatRadioChange): void {
+    this.orgSelectionMode = event.value;
+    this.organisationLimitError = "";
+    if (this.orgSelectionMode === "all") {
+      this.selectedData = [ALL_ORGANISATIONS_SELECTION];
+      this.selectedDataTemp = [ALL_ORGANISATIONS_SELECTION];
+      this.loadAllOrganisationsCount();
+      return;
+    }
+    // Back to picking one by one, starting from an empty selection on the list tab
+    this.selectedData = [];
+    this.selectedDataTemp = [];
+    this.activeTab = 0;
+    this.filterValue = "all";
+    this.getFilteredEntityGrouped();
+  }
+
+  /** Count of every organisation shown for "Select all", read from the api once. */
+  private loadAllOrganisationsCount(): void {
+    if (this.allOrganisationsCount !== null) {
+      return;
+    }
+    this.accessControlService
+      .fetchAllOrgCount()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.allOrganisationsCount = response?.result?.response?.count ?? null;
+        },
+      });
   }
 
   setSelected(): void {

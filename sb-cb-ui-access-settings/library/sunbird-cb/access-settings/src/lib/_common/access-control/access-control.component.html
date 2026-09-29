@@ -172,7 +172,11 @@
                                 <div class="action-options-selected">
                                   <button [disabled]="!condition.get('entity').value" mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="manageSelections(condition, rule, i, 1)">
                                     <div class="flex gap-2 flex-middle mt-2">
-                                      <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
+                                      @if (isAllOrganisationsSelection(condition?.get("selections").value)) {
+                                        <span class="text-m underline">All organisations selected</span>
+                                      } @else {
+                                        <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
+                                      }
                                     </div>
                                   </button>
                                 </div>

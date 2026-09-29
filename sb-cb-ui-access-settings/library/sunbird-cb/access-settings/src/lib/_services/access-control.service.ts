@@ -118,6 +118,23 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
 
+  fetchAllOrgCount(): Observable<any> {
+    const request = {
+      request: {
+        criteriaKey: "rootOrgId",
+        criteriaValue: [],
+        filters: {
+          status: 1,
+        },
+        fields: ["channel", "identifier", "iscca"],
+        query: "",
+        limit: 0,
+        offset: 0,
+      },
+    };
+    return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
+  }
+
   fetchOrgHierarchyFramework(frameworkId: string): Observable<any> {
     return this.http.get<any>(ENDPOINTS.ORG_HIERARCHY_FRAMEWORK(frameworkId));
   }

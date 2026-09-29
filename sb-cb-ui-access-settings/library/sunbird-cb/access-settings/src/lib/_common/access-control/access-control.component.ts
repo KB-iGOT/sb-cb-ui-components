@@ -18,7 +18,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
-import { MINISTRY_OR_STATE_CRITERIA_KEY } from "../../_constants/app.constants";
+import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_CRITERIA_KEY } from "../../_constants/app.constants";
 
 @Component({
     selector: "sb-uic-access-control",
@@ -1223,6 +1223,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
    * rootOrgId list, as every partial selection does.
    */
   private createOrganisationCriteria(selections: string[]): { criteriaKey: string; criteriaValue: string[] } {
+    // "Select all" on MDO is saved as an empty rootOrgId list
+    if (this.isAllOrganisationsSelection(selections)) {
+      return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: [] };
+    }
     const isL0 = this.accessControlService.isL0MdoUser(this.config);
     if (isL0 && this.canSelectOrgHierarchy && this.accessControlService.areAllOrgHierarchyOrgsSelected(selections)) {
       const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
@@ -1231,6 +1235,27 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }
     return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: selections };
+  }
+
+  /** Organisation condition selections holding the MDO "Select all" option. */
+  isAllOrganisationsSelection(selections: any): boolean {
+    return (
+      this.config?.application === this.MDO_APPLICATION &&
+      Array.isArray(selections) &&
+      selections.includes(ALL_ORGANISATIONS_SELECTION)
+    );
+  }
+
+  /**
+   * A saved rootOrgId criteria with no organisation in it is the MDO "Select all" option. It is saved
+   * as an empty list, a value that comes back without the list at all is read the same way.
+   */
+  private isSavedAllOrganisationsCriteria(criteriaKey: string, criteriaValue: any): boolean {
+    return (
+      this.config?.application === this.MDO_APPLICATION &&
+      criteriaKey === NsAccessControlConfig.SelectionType.Organizations &&
+      (criteriaValue === null || criteriaValue === undefined || (Array.isArray(criteriaValue) && criteriaValue.length === 0))
+    );
   }
 
   /**
@@ -1833,6 +1858,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             request[key] = selections[0];
           }
         }
+        else if (this.isAllOrganisationsSelection(selections)) {
+          // Every organisation: a CCA counts across all of them, any other MDO across the
+          // organisations of its hierarchy, which are the ones it could have picked
+          request[key] = this.isCCA ? [] : this.accessControlService.getOrgHierarchyOrgIds();
+        }
         else {
           request[key] = selections;
         }
@@ -2179,6 +2209,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         let isCustomFieldCrieteriaKeyPresent = false
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
+        if (this.isSavedAllOrganisationsCriteria(criteria.criteriaKey, criteria.criteriaValue)) {
+          condition.patchValue({
+            entity: NsAccessControlConfig.SelectionType.Organizations,
+            selections: [ALL_ORGANISATIONS_SELECTION],
+          });
+          conditions.push(condition);
+          return;
+        }
+
         // Whole ministry / state was saved, show every organisation of the hierarchy as selected
         if (criteria.criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
           condition.patchValue({
@@ -2382,6 +2421,25 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
     const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
 
+    if (!savedUserGroupId) {
+      this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+      return;
+    }
+
+    const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: "470px",
+      data: { type: "confirm-update-reusable-group" }
+    });
+
+    confirmDialogRef.afterClosed().subscribe(result => {
+      if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+        this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+      }
+    });
+  }
+
+  /** Asks for the group name, then saves the group as a new reusable group or updates the saved one. */
+  private openSaveUserGroupDialog(rawGroup: any, userGroupIndex: number, savedUserGroupId: string): void {
     const dialogRef = this.dialog.open(SaveUserGroupComponent, {
       width: "480px",
       data: { userGroupName: rawGroup.name },
@@ -2556,7 +2614,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     criteria.forEach((entry: any) => {
       const { criteriaKey, criteriaValue } = this.toCriteriaPair(entry);
-      if (!criteriaKey || !criteriaValue?.length) {
+      const isAllOrganisations = this.isSavedAllOrganisationsCriteria(criteriaKey, criteriaValue);
+      if (!criteriaKey || (!criteriaValue?.length && !isAllOrganisations)) {
         return;
       }
 
@@ -2569,7 +2628,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
-      if (criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
+      if (isAllOrganisations) {
+        condition.patchValue({
+          entity: NsAccessControlConfig.SelectionType.Organizations,
+          selections: [ALL_ORGANISATIONS_SELECTION]
+        });
+      } else if (criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
         condition.patchValue({
           entity: NsAccessControlConfig.SelectionType.Organizations,
           selections: this.getMinistryOrStateSelections(criteriaValue)
