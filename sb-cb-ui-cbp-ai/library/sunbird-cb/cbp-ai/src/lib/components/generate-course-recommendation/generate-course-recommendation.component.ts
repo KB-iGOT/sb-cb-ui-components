@@ -42,6 +42,7 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
   // "recommendations already exist" pause, which previously caused the progress
   // display to jump to 100% and then reset back to 0%).
   private progressTimerId: ReturnType<typeof setInterval> | null = null;
+  private immediateFailureHandled = false;
   constructor(public dialogRef: MatDialogRef<GenerateCourseRecommendationComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any, public sharedService: SharedService,
     private snackBar: MatSnackBar, public dialog: MatDialog,
@@ -2055,6 +2056,7 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
       this.startProgressiveLoading();
 
       this.firstApiResponse = null;
+      this.immediateFailureHandled = false;
 
       concat(
         of(null),          // immediate call
@@ -2076,6 +2078,31 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
                 'First recommendation response:',
                 this.firstApiResponse
               );
+
+              if (response?.status === 'FAILED') {
+                // takeWhile still forwards this same value to the subscriber below; tell it to skip
+                this.immediateFailureHandled = true;
+                this.stopProgressiveLoading();
+
+                this.sharedService.deleteCourseRecommendations(role_mapping_id).pipe(
+                  catchError((error) => {
+                    // A 404 just means there were no course recommendations to delete yet;
+                    // either way, don't let this block the automatic retry below.
+                    if (error?.status !== 404) {
+                      console.error(`Failed to delete course recommendations for role mapping ${role_mapping_id}`, error);
+                    }
+                    return of(null);
+                  })
+                ).subscribe(() => {
+                  this.loading = false;
+                  this.firstApiResponse = null;
+
+                  // regenerate
+                  this.getRecommendedCourseWithProgress(role_mapping_id)
+                    .then(resolve)
+                    .catch(reject);
+                });
+              }
             }
 
           }),
@@ -2087,7 +2114,7 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
               return false;
             }
 
-            return response?.status !== 'COMPLETED';
+            return response?.status !== 'COMPLETED' && response?.status !== 'FAILED';
 
           }, true),
 
@@ -2098,6 +2125,11 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
         .subscribe({
 
           next: (response: any) => {
+
+            if (this.immediateFailureHandled) {
+              this.immediateFailureHandled = false; // already handled in tap() above; avoid double-handling this same emission
+              return;
+            }
 
             // ===========================
             // EXISTING RECOMMENDATIONS
@@ -2198,6 +2230,29 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
               );
 
               resolve(response);
+            }
+
+            // ===========================
+            // FAILED (after being in progress)
+            // ===========================
+            else if (response?.status === 'FAILED') {
+
+              this.stopProgressiveLoading();
+              this.loading = false;
+              this.currentProcessingStage = '';
+              this.progressPercentage = 0;
+              this.firstApiResponse = null;
+
+              this.snackBar.open(
+                'Generation failed please try again later',
+                'X',
+                {
+                  duration: 3000,
+                  panelClass: ['snackbar-error']
+                }
+              );
+
+              reject(response);
             }
           },
 
