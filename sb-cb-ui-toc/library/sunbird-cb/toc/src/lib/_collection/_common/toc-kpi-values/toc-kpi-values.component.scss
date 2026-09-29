@@ -15,7 +15,7 @@
     display: none;
 }
 
-.kpi-values {
+.kpi-values, .kpi-values-comprehensive {
     min-width: 64px;
     padding: 8px;
     text-align: center;
@@ -24,6 +24,25 @@
         color: $darkColorText;
         height: 20px;
     }
+}
+
+.kpi-values-comprehensive {
+  min-width: 140px !important;
+  img,
+  mat-icon {
+    margin-bottom: 1rem;
+    color: $brandAccentColor !important;
+  }
+  .kpi-metadata {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $dark;
+    line-height: 1px;
+  }
+
+  .kpi-type {
+    font-size: 12px;
+  }
 }
 
 .horizontal-strip {
