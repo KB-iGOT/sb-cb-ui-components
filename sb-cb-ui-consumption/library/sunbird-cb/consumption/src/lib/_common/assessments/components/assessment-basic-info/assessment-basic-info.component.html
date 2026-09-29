@@ -1,10 +1,11 @@
 <div class="assessment-basic-info" *ngIf="assessmentForm">
   <form [formGroup]="assessmentForm">
-    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered. -->
+    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered.
+         A pre assessment is offered Basic only. -->
     <div class="form-section" *ngIf="!isCqfAssessment && !isComprehensiveAssessment">
       <mat-radio-group formControlName="assessmentType" class="assessment-type-group flex flex-middle gap-4">
         <mat-radio-button value="basic">Basic Assessment</mat-radio-button>
-        <mat-radio-button value="advanced">Advanced Assessment</mat-radio-button>
+        <mat-radio-button value="advanced" *ngIf="!isBasicOnlyAssessment">Advanced Assessment</mat-radio-button>
       </mat-radio-group>
       <p class="hint-text">Assessment type cannot be changed once saved.</p>
     </div>

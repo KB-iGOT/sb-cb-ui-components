@@ -25,6 +25,11 @@ const DEFAULT_MAX_RETAKE_ATTEMPTS = 5
 const COMPREHENSIVE_CONTEXT_CATEGORIES: string[] = [
   NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT
 ]
+/** Course Assessment categories that can only be authored as a basic assessment. */
+const BASIC_ONLY_CONTEXT_CATEGORIES: string[] = [
+  NsAssessment.EAssessmentContextCategory.OPTIONAL_PRE_ASSESSMENT,
+  NsAssessment.EAssessmentContextCategory.MANDATORY_PRE_ASSESSMENT,
+]
 
 @Component({
   selector: 'sb-uic-assessment-basic-info',
@@ -63,6 +68,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   isCqfAssessment: boolean = false
   /** A comprehensive assessment: several settings are fixed by the preset, not authored. */
   isComprehensiveAssessment: boolean = false
+  /** A pre assessment: only the Basic assessment type is offered. */
+  isBasicOnlyAssessment: boolean = false
   showCoolOffPeriod: boolean = false
   maxRetakeDigits = COMPREHENSIVE_MAX_RETAKE_DIGITS
   // Seeds the CQF rich text editor - the authored markup lives in the description control.
@@ -112,6 +119,10 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     // affected, which is why every other authoring screen is untouched by this.
     if (this.config && COMPREHENSIVE_CONTEXT_CATEGORIES.includes(this.config?.contextCategory)) {
       this.isComprehensiveAssessment = true
+    }
+    // The form already defaults to Basic, so hiding the Advanced option is enough.
+    if (this.isFinalAssessment && BASIC_ONLY_CONTEXT_CATEGORIES.includes(this.config?.contextCategory)) {
+      this.isBasicOnlyAssessment = true
     }
 
     if (this.isCqfAssessment) {
