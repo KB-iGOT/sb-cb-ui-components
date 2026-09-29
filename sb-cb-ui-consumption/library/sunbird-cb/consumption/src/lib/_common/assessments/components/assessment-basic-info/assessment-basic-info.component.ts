@@ -25,8 +25,8 @@ const DEFAULT_MAX_RETAKE_ATTEMPTS = 5
 const COMPREHENSIVE_CONTEXT_CATEGORIES: string[] = [
   NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT
 ]
-/** Course Assessment categories that can only be authored as a basic assessment. */
-const BASIC_ONLY_CONTEXT_CATEGORIES: string[] = [
+/** Course Assessment categories authored as a pre assessment - Basic only, optional or mandatory. */
+const PRE_ASSESSMENT_CONTEXT_CATEGORIES: string[] = [
   NsAssessment.EAssessmentContextCategory.OPTIONAL_PRE_ASSESSMENT,
   NsAssessment.EAssessmentContextCategory.MANDATORY_PRE_ASSESSMENT,
 ]
@@ -69,7 +69,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   /** A comprehensive assessment: several settings are fixed by the preset, not authored. */
   isComprehensiveAssessment: boolean = false
   /** A pre assessment: only the Basic assessment type is offered. */
-  isBasicOnlyAssessment: boolean = false
+  isPreAssessment: boolean = false
   showCoolOffPeriod: boolean = false
   maxRetakeDigits = COMPREHENSIVE_MAX_RETAKE_DIGITS
   // Seeds the CQF rich text editor - the authored markup lives in the description control.
@@ -120,9 +120,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     if (this.config && COMPREHENSIVE_CONTEXT_CATEGORIES.includes(this.config?.contextCategory)) {
       this.isComprehensiveAssessment = true
     }
-    // The form already defaults to Basic, so hiding the Advanced option is enough.
-    if (this.isFinalAssessment && BASIC_ONLY_CONTEXT_CATEGORIES.includes(this.config?.contextCategory)) {
-      this.isBasicOnlyAssessment = true
+    // A pre assessment is Basic only - the form already defaults to Basic, so hiding the Advanced option is enough.
+    if (this.isFinalAssessment && PRE_ASSESSMENT_CONTEXT_CATEGORIES.includes(this.config?.contextCategory)) {
+      this.isPreAssessment = true
     }
 
     if (this.isCqfAssessment) {
@@ -239,6 +239,12 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
    */
   get maxRetakeAttempts(): number {
     return this.isComprehensiveAssessment ? COMPREHENSIVE_MAX_RETAKE_ATTEMPTS : DEFAULT_MAX_RETAKE_ATTEMPTS
+  }
+
+  getPreAssessmentContextCategory(isMandatory: boolean): string {
+    return isMandatory
+      ? NsAssessment.EAssessmentContextCategory.MANDATORY_PRE_ASSESSMENT
+      : NsAssessment.EAssessmentContextCategory.OPTIONAL_PRE_ASSESSMENT
   }
 
   setupShowTimerSubscription(): void {
@@ -396,6 +402,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       description: data.description || '',
       showTimer: data.showTimer !== undefined ? data.showTimer : true,
       shuffle: data.shuffle === true,
+      isMandatory: data.contextCategory === NsAssessment.EAssessmentContextCategory.MANDATORY_PRE_ASSESSMENT,
       maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null
         ? data.maxAssessmentRetakeAttempts
         : this.assessmentForm.get('maxAssessmentRetakeAttempts')?.value,
@@ -659,6 +666,8 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       description: ['', this.instructionsLengthValidator()],
       showTimer: [true],
       shuffle: [false],
+      // Pre assessment only - decides between the mandatory and optional context category
+      isMandatory: [false],
       // Question Weightage settings
       showMarks: ['No'],
       sectionalPassPercentage: ['No'],
@@ -854,6 +863,14 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       changedData.shuffle = formValues.shuffle
     }
 
+    // Check the pre assessment Mandatory toggle, which is saved as the context category
+    if (this.isPreAssessment) {
+      const contextCategory = this.getPreAssessmentContextCategory(formValues.isMandatory)
+      if (contextCategory !== this.assessmentData.contextCategory) {
+        changedData.contextCategory = contextCategory
+      }
+    }
+
     // Check Question Weightage fields
     if (formValues.questionWeightageType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
       if (formValues.showMarks !== this.assessmentData.showMarks) {
@@ -940,7 +957,9 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       description: formValues.description,
       shuffle: formValues.shuffle,
       primaryCategory: this.config?.primaryCategory,
-      contextCategory: this.config?.contextCategory,
+      contextCategory: this.isPreAssessment
+        ? this.getPreAssessmentContextCategory(formValues.isMandatory)
+        : this.config?.contextCategory,
       compatibilityLevel: (formValues.assessmentType === 'basic') ? NsAssessment.ECompatibilityLevel.BASIC : NsAssessment.ECompatibilityLevel.ADVANCED,
       createdBy: this.configSvc.userProfile?.userId || '',
       createdFor: [this.configSvc.userProfile?.rootOrgId || ''],
