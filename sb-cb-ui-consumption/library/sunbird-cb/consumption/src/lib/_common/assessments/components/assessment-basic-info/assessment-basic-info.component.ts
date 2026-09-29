@@ -384,6 +384,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       name: data.name || '',
       description: data.description || '',
       showTimer: data.showTimer !== undefined ? data.showTimer : true,
+      shuffle: data.shuffle === true,
       maxAssessmentRetakeAttempts: data.maxAssessmentRetakeAttempts !== undefined && data.maxAssessmentRetakeAttempts !== null
         ? data.maxAssessmentRetakeAttempts
         : this.assessmentForm.get('maxAssessmentRetakeAttempts')?.value,
@@ -646,6 +647,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       coolOffPeriod: [null, [Validators.min(1), Validators.max(7)]],
       description: ['', this.instructionsLengthValidator()],
       showTimer: [true],
+      shuffle: [false],
       // Question Weightage settings
       showMarks: ['No'],
       sectionalPassPercentage: ['No'],
@@ -836,6 +838,11 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       changedData.coolOffPeriod = formValues.coolOffPeriod
     }
 
+    // Check shuffle - an assessment saved before this field existed has none, which means off
+    if (formValues.shuffle !== (this.assessmentData.shuffle === true)) {
+      changedData.shuffle = formValues.shuffle
+    }
+
     // Check Question Weightage fields
     if (formValues.questionWeightageType === NsAssessment.EAssessmentType.QUESTION_WEIGHTAGE) {
       if (formValues.showMarks !== this.assessmentData.showMarks) {
@@ -920,6 +927,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
       assessmentType: formValues.questionWeightageType || '',
       name: formValues.name?.trim() || '',
       description: formValues.description,
+      shuffle: formValues.shuffle,
       primaryCategory: this.config?.primaryCategory,
       contextCategory: this.config?.contextCategory,
       compatibilityLevel: (formValues.assessmentType === 'basic') ? NsAssessment.ECompatibilityLevel.BASIC : NsAssessment.ECompatibilityLevel.ADVANCED,
