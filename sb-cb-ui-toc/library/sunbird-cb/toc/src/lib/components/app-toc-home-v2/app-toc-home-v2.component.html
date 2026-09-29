@@ -4,7 +4,7 @@
       <!-- Comprehensive assessment locked block: shown until every linked course is completed -->
       <ng-container *ngIf="isAssessmentLocked && !forPreview">
         <div class="flex flex-col gap-2 locked-assessment-block">
-          <div class="not-attempted flex items-center justify-start gap-1">
+          <!-- <div class="not-attempted flex items-center justify-start gap-1">
             <mat-icon class="attempts-icon nodtranslate">repeat</mat-icon>
             <span class="attempts-status">
               {{ (isAssessmentAttempted ? 'apptochome.attempted' : 'apptochome.notAttempted') | translate }}
@@ -12,7 +12,7 @@
             <span class="attempts-separator">&middot;</span>
             <span class="attempts-text" [innerHTML]="'apptochome.attemptsRemaining' | translate: { remaining:
               assessmentAttemptsRemaining, total: totalAssessmentAttempts }"></span>
-          </div>
+          </div> -->
           <button type="button" class="flex action-button justify-center locked-assessment-btn" disabled>
             <div class="flex gap-2 items-center justify-center">
               <span>{{ 'apptochome.locked' | translate }}</span>
@@ -361,7 +361,7 @@
         </div>
       </div>
 
-      <ng-container *ngIf="contentCompletionPercent >= 50 && tocConfig?.uiVisibility?.rightPanel?.starRating !== false">
+      <ng-container *ngIf="contentCompletionPercent >= 50 && tocConfig?.uiVisibility?.rightPanel?.starRating !== false && !isComprehensiveAssessment">
         <button mat-stroked-button color="accent" type="button" class="rate-button"
           (click)="openFeedbackDialog(content)">
           <mat-icon class="nodtranslate">star_purple500</mat-icon>
@@ -672,10 +672,10 @@
           (trigerCompletionSurveyForm)="openSurveyFormPopup($event)" [isBatchFull]="isBatchFull" [showLimitedSeatsMsg]="showLimitedSeatsMsg" [userEnrollmentList]="userEnrollmentList"
           [areAllActiveBatchesFull]="allBatchesAreFull" [caBreadcrumbs]="caBreadcrumbs" (resumeContent)="resumeContentData()"></ws-widget-content-toc>
         <div class="mob-tip-for-learner" *ngIf="tocConfig?.uiVisibility?.mobileFooter?.learnerAdvisory !== false">
-          <div *ngIf="learnAdvisoryData && learnAdvisoryData?.length">
-            <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"
-              [config]="tocConfig"></ws-widget-tips-for-learner-card>
-          </div>
+            @if(learnAdvisoryData && learnAdvisoryData?.length && !isComprehensiveAssessment) {
+              <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"
+                [config]="tocConfig"></ws-widget-tips-for-learner-card>
+            }
         </div>
       </div>
     </div>
@@ -1025,7 +1025,7 @@
         </div>
 
         <div
-          *ngIf="learnAdvisoryData && learnAdvisoryData?.length && tocConfig?.uiVisibility?.rightPanel?.learnerAdvisory?.visible !== false">
+          *ngIf="learnAdvisoryData && learnAdvisoryData?.length && tocConfig?.uiVisibility?.rightPanel?.learnerAdvisory?.visible !== false && !isComprehensiveAssessment">
           <ws-widget-tips-for-learner-card [learnAdvisoryData]="learnAdvisoryData"
             [config]="tocConfig"></ws-widget-tips-for-learner-card>
         </div>

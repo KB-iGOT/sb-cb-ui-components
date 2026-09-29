@@ -596,13 +596,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         this.loggerSvc.warn('Unable to resolve comprehensive assessment unlock status', err)
       })
 
-    this.comprehensiveAssessmentSvc.getAttemptStatus(this.contentReadData)
-      .then((attempts: IComprehensiveAssessmentAttempts) => {
-        this.assessmentAttempts = attempts
-      })
-      .catch((err: any) => {
-        this.loggerSvc.warn('Unable to resolve comprehensive assessment attempts', err)
-      })
+    // this.comprehensiveAssessmentSvc.getAttemptStatus(this.contentReadData)
+    //   .then((attempts: IComprehensiveAssessmentAttempts) => {
+    //     this.assessmentAttempts = attempts
+    //   })
+    //   .catch((err: any) => {
+    //     this.loggerSvc.warn('Unable to resolve comprehensive assessment attempts', err)
+    //   })
   }
 
   get isResource() {
