@@ -22,15 +22,15 @@ const DEFAULT_MAX_RETAKE_ATTEMPTS = 5
  * `Comprehensive Assessment` category yet, so they are created as `Standalone Assessment`;
  * both are here so the switch needs no change on this side when the backend takes it.
  */
-const COMPREHENSIVE_COURSE_CATEGORIES: string[] = [
+const COMPREHENSIVE_CONTEXT_CATEGORIES: string[] = [
   NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT
 ]
 
 @Component({
-    selector: 'sb-uic-assessment-basic-info',
-    templateUrl: './assessment-basic-info.component.html',
-    styleUrls: ['./assessment-basic-info.component.scss'],
-    standalone: false
+  selector: 'sb-uic-assessment-basic-info',
+  templateUrl: './assessment-basic-info.component.html',
+  styleUrls: ['./assessment-basic-info.component.scss'],
+  standalone: false
 })
 
 export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
@@ -110,7 +110,7 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
     // The primary category of a comprehensive assessment is `Course Assessment` like any
     // other, so only the course category tells it apart. Only a caller that sets one is
     // affected, which is why every other authoring screen is untouched by this.
-    if (this.config && COMPREHENSIVE_COURSE_CATEGORIES.includes(this.config?.contextCategory)) {
+    if (this.config && COMPREHENSIVE_CONTEXT_CATEGORIES.includes(this.config?.contextCategory)) {
       this.isComprehensiveAssessment = true
     }
 
