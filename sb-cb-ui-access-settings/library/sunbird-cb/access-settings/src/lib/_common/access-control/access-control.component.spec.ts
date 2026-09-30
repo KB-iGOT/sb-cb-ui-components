@@ -188,6 +188,110 @@ describe('AccessControlComponent', () => {
 
       expect(isAdded).toBe(false);
     });
+
+    it('should show the whole branch of a L1 -> L10 as "Select all"', () => {
+      component.isCCA = false;
+      component.canSelectOrgHierarchy = true;
+      accessControlService.areAllOrgHierarchyOrgsSelected.mockReturnValue(true);
+
+      const isAdded = (component as any).addUserGroupFromCriteria('Group', [
+        { criteriaKey: 'rootOrgId', criteriaValue: ['l1-org', 'l2-org'] }
+      ]);
+
+      expect(isAdded).toBe(true);
+      expect(component.ruleConditions(0).at(0).get('selections')?.value).toEqual([ALL_ORGANISATIONS_SELECTION]);
+    });
+
+    it('should treat a restored saved group as unchanged', () => {
+      (component as any).addUserGroupFromCriteria('Group', [{ criteriaKey: 'rootOrgId', criteriaValue: ['org-a'] }], 'saved-group-id');
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(true);
+    });
+  });
+
+  describe('isSavedUserGroupUnchanged', () => {
+    it('should be false for a group that is not saved yet', () => {
+      addGroup('');
+      (component as any).markUserGroupConditionsSaved(0);
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(false);
+    });
+
+    it('should be false for a saved group whose conditions were never marked saved', () => {
+      addGroup('saved-group-id');
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(false);
+    });
+
+    it('should be true while the saved conditions are not edited', () => {
+      addGroup('saved-group-id');
+      (component as any).markUserGroupConditionsSaved(0);
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(true);
+    });
+
+    it('should be false once the selections are edited', () => {
+      addGroup('saved-group-id');
+      (component as any).markUserGroupConditionsSaved(0);
+
+      component.ruleConditions(0).at(0).get('selections')?.setValue(['org-a', 'org-b']);
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(false);
+    });
+
+    it('should ignore a change of the group name', () => {
+      addGroup('saved-group-id');
+      (component as any).markUserGroupConditionsSaved(0);
+
+      component.userGroup.at(0).get('name')?.setValue('Renamed group');
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(true);
+    });
+  });
+
+  describe('createUserGroup / updateUserGroup', () => {
+    const payload = { request: { userGroupName: 'Group', criteria: [{ criteriaKey: 'rootOrgId', criteriaValue: ['org-a'] }] } };
+
+    beforeEach(() => {
+      jest.spyOn(component, 'callSnackbar').mockImplementation(() => undefined);
+      jest.spyOn(component.accessControlData, 'emit');
+    });
+
+    it('should keep the new id and treat the created group as unchanged', () => {
+      accessControlService.createReusableUserGroup = jest.fn(() => of({ result: { usergroupid: 'new-group-id', accessControl: { userGroups: [] } } }));
+      addGroup('');
+
+      component.createUserGroup(payload as any, 0);
+
+      expect(component.userGroup.at(0).get('savedUserGroupId')?.value).toBe('new-group-id');
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(true);
+      expect(component.isSavingReusableUserGroup).toBe(false);
+      expect(component.accessControlData.emit).toHaveBeenCalledWith(expect.objectContaining({ action: 'CREATED', userGroupId: 'new-group-id' }));
+      expect(component.callSnackbar).toHaveBeenCalledWith('User group saved successfully', 'success');
+    });
+
+    it('should treat the updated group as unchanged', () => {
+      accessControlService.updateReusableUserGroup = jest.fn(() => of({ result: { usergroupid: 'saved-group-id', accessControl: { userGroups: [] } } }));
+      addGroup('saved-group-id');
+      component.ruleConditions(0).at(0).get('selections')?.setValue(['org-b']);
+
+      component.updateUserGroup({ request: { ...payload.request, userGroupId: 'saved-group-id' } } as any, 0);
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(true);
+      expect(component.isSavingReusableUserGroup).toBe(false);
+      expect(component.accessControlData.emit).toHaveBeenCalledWith(expect.objectContaining({ action: 'UPDATED' }));
+      expect(component.callSnackbar).toHaveBeenCalledWith('User group updated successfully', 'success');
+    });
+
+    it('should not treat the group as saved when the update fails', () => {
+      accessControlService.updateReusableUserGroup = jest.fn(() => of({}));
+      addGroup('saved-group-id');
+
+      component.updateUserGroup({ request: { ...payload.request, userGroupId: 'saved-group-id' } } as any, 0);
+
+      expect(component.isSavedUserGroupUnchanged(0)).toBe(false);
+      expect(component.callSnackbar).toHaveBeenCalledWith('Could not update the user group, Please try again.', 'error');
+    });
   });
 
   describe('calculateUserCountForUserGroup', () => {
@@ -214,7 +318,8 @@ describe('AccessControlComponent', () => {
       createUserGroup = jest.spyOn(component, 'createUserGroup').mockImplementation(() => undefined);
     });
 
-    it('should confirm first, then ask for the name, then update a saved group', () => {
+    it('should confirm first, then ask for the name, then update a saved group of live content', () => {
+      component.mdoContent = { status: 'Live' };
       addGroup('saved-group-id');
       dialog.open
         .mockReturnValueOnce(dialogResult({ action: NsAccessControlConfig.IActions.Confirm }))
@@ -239,6 +344,7 @@ describe('AccessControlComponent', () => {
     });
 
     it('should not ask for the name when the update is not confirmed', () => {
+      component.mdoContent = { status: 'Live' };
       addGroup('saved-group-id');
       dialog.open.mockReturnValueOnce(dialogResult({ action: NsAccessControlConfig.IActions.Reject }));
 
@@ -248,7 +354,29 @@ describe('AccessControlComponent', () => {
       expect(updateUserGroup).not.toHaveBeenCalled();
     });
 
+    it('should skip the confirmation and ask for the name to update a saved group of content that is not live', () => {
+      component.mdoContent = { status: 'Draft' };
+      addGroup('saved-group-id');
+      dialog.open.mockReturnValueOnce(dialogResult({ action: NsAccessControlConfig.IActions.Confirm, userGroupName: 'Renamed group' }));
+
+      component.saveReusableUserGroups(0);
+
+      expect(dialog.open).toHaveBeenCalledTimes(1);
+      expect(dialog.open.mock.calls[0][0]).toBe(SaveUserGroupComponent);
+      expect(updateUserGroup).toHaveBeenCalledWith(
+        {
+          request: {
+            userGroupId: 'saved-group-id',
+            userGroupName: 'Renamed group',
+            criteria: [{ criteriaKey: 'rootOrgId', criteriaValue: ['org-a'] }]
+          }
+        },
+        0
+      );
+    });
+
     it('should not update when the name dialog is cancelled', () => {
+      component.mdoContent = { status: 'Live' };
       addGroup('saved-group-id');
       dialog.open
         .mockReturnValueOnce(dialogResult({ action: NsAccessControlConfig.IActions.Confirm }))
