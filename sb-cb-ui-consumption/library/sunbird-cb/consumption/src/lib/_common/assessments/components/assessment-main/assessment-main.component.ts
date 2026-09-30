@@ -7,10 +7,10 @@ import { AssessmentSessionsComponent } from '../assessment-sessions/assessment-s
 import { NsAssessment } from '../../service/assessment.model'
 
 @Component({
-    selector: 'sb-uic-assessment-main',
-    templateUrl: './assessment-main.component.html',
-    styleUrls: ['./assessment-main.component.scss'],
-    standalone: false
+  selector: 'sb-uic-assessment-main',
+  templateUrl: './assessment-main.component.html',
+  styleUrls: ['./assessment-main.component.scss'],
+  standalone: false
 })
 export class AssessmentMainComponent implements OnInit {
 
@@ -34,6 +34,7 @@ export class AssessmentMainComponent implements OnInit {
     }
     this.assessmentService.setReadOnly(this.config?.isReadOnly)
     this.assessmentService.setPrimaryCategory(this.config?.primaryCategory)
+    this.assessmentService.setContextCategory(this.config?.contextCategory)
     if (this.config && this.config.identifier !== '') {
       this.callLoader(true)
       this.assessmentService.getAssessmentHierarchyDetailsModeEdit(this.config.identifier).subscribe({

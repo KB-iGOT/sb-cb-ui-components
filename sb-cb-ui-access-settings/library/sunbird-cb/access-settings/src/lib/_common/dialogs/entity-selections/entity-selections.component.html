@@ -16,8 +16,36 @@
       selectionType === selectionTypeEnum.CustomField
     "
   >
+    <!-- MDO: organisations picked one by one or all of them (CCA, or any organisation of an org hierarchy) -->
+    @if (canSelectAllOrganisations) {
+      <div class="flex gap-4 items-center px-2 mt-4 options-radio">
+        <mat-radio-group
+          [disabled]="accessControlCriteriaSelection?.readOnly || data?.disabled"
+          [(ngModel)]="orgSelectionMode"
+          (change)="onChangeOrgSelectionMode($event)"
+          class="flex flex-wrap gap-4"
+        >
+          @for (mode of orgSelectionModes; track mode.value) {
+            <mat-radio-button [value]="mode.value" class="service-radio-btn">
+              {{ mode.label }}
+            </mat-radio-button>
+          }
+        </mat-radio-group>
+      </div>
+    }
+
+    @if (isAllOrganisationsSelected) {
+      <div class="lato-normal-text-line mt-4 ml-4">
+        @if (allOrganisationsCount !== null) {
+          All organisations ({{ allOrganisationsCount }}) have been selected.
+        } @else {
+          All organisations have been selected.
+        }
+      </div>
+    }
+
     <!-- Search Box -->
-    <ng-container *ngIf="selectionType !== selectionTypeEnum.CustomField">
+    <ng-container *ngIf="selectionType !== selectionTypeEnum.CustomField && !isAllOrganisationsSelected">
       <div class="search-container access-settings-search-container flex items-center gap-4">
         <div class="mat-full-radius flex-grow mt-6">
           <mat-form-field appearance="outline" class="w-full">
@@ -29,7 +57,7 @@
       </div>
     </ng-container>
 
-    <ng-container *ngIf="selectionType === selectionTypeEnum.Organizations">
+    <ng-container *ngIf="selectionType === selectionTypeEnum.Organizations && !isAllOrganisationsSelected">
       <div class="lato-normal-text-line mt-2 ml-4">Select the Organizations only if this plan needs to be made visible to only selective organizations users.</div>
     </ng-container>
     <ng-container *ngIf="selectionType === selectionTypeEnum.Designation">
@@ -38,7 +66,7 @@
 
     <div class="p-4 pl-0 mt-2">
       <!-- Filter Options -->
-      <ng-container *ngIf="selectionType !== selectionTypeEnum.Group && selectionType !== selectionTypeEnum.VerificationStatus">
+      <ng-container *ngIf="selectionType !== selectionTypeEnum.Group && selectionType !== selectionTypeEnum.VerificationStatus && !isAllOrganisationsSelected">
         <div class="filter-options">
           <mat-tab-group #tabGroup dynamicHeight mat-stretch-tabs="false" mat-align-tabs="start" (selectedTabChange)="onFilterChange($event)" [(selectedIndex)]="activeTab" [animationDuration]="100">
             <mat-tab *ngFor="let item of radioSelections" [label]="item.label">
@@ -58,7 +86,8 @@
                         selectionType === selectionTypeEnum.Service ||
                         selectionType === selectionTypeEnum.Organizations ||
                         selectionType === selectionTypeEnum.Batch) &&
-                      filterValue === 'all'
+                      filterValue === 'all' &&
+                      !isMdoOrganisationSelection
                     "
                   >
                     <div class="px-2 py-4 options-checkbox">
@@ -230,9 +259,33 @@
 </div>
 
 <mat-dialog-actions>
-  <ng-container *ngIf="checkIfData || selectionType === selectionTypeEnum.CentralDeputation">
+  @if (isAllOrganisationsSelected) {
     <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
-      <div *ngIf="isOrgSelectionLimitExceeded()" class="text-xs org-limit-error">
+      @if (isOrgSelectionLimitExceeded()) {
+        <div class="text-xs org-limit-error">
+          Reached Maximum Organisation selection limit, please try adding {{ orgSelectionLimit }} or less Organisations in the manual selection.
+        </div>
+      }
+      <div class="text-xs">
+        @if (allOrganisationsCount !== null) {
+          {{ allOrganisationsCount }} organisations selected
+        } @else {
+          All organisations selected
+        }
+      </div>
+      <button
+        mat-flat-button
+        [disabled]="isOrgSelectionLimitExceeded() || accessControlCriteriaSelection?.readOnly || data?.disabled"
+        (click)="applySelections()"
+        class="flex items-center justify-center rounded-full new-bg-color font-bold text-sm text-white mt-2"
+      >
+        Apply
+      </button>
+    </div>
+  }
+  <ng-container *ngIf="(checkIfData || selectionType === selectionTypeEnum.CentralDeputation) && !isAllOrganisationsSelected">
+    <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
+      <div *ngIf="isOrgSelectionLimitExceeded() || organisationLimitError" class="text-xs org-limit-error">
         Reached Maximum Organisation selection limit, please try adding {{ orgSelectionLimit }} or less Organisations in the manual selection.
       </div>
       <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus && selectionType !== selectionTypeEnum.CentralDeputation">

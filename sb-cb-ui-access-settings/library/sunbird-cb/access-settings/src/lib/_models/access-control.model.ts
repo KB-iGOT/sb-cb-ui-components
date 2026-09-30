@@ -31,7 +31,7 @@ export namespace NsAccessControlConfig {
     allowCustomsField: boolean;
     centralDeputation?: ISelectionOption[];
     paginationLimit: number
-    // MDO specific content only: most organisations allowed in the manual selection, falls back to MAX_ORGANISATION_SELECTION_LIMIT
+    // MDO only: most organisations allowed in the manual selection, falls back to MAX_ORGANISATION_SELECTIONS
     maxOrganisationSelectionLimit?: number
   }
 

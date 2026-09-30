@@ -1,12 +1,11 @@
 <div class="flex gap-2" [ngClass]="isMobile ? 'horizontal-strip' : 'flex-wrap'"
     *ngIf="config?.uiVisibility?.rightPanel?.kpiValues?.visible !== false">
     <div class="flex flex-col kpi-values items-center gap-2"
-        *ngIf="content?.duration > 0 && config?.uiVisibility?.rightPanel?.kpiValues?.duration !== false">
+        *ngIf="content?.duration > 0 && config?.uiVisibility?.rightPanel?.kpiValues?.duration !== false && !isComprehensiveAssessment">
         <img src="/assets/icons/toc/timer.svg" width="20px" alt="web image" />
         <div class="text-xs">{{ content?.duration | pipeDurationTransform: 'hms' }}</div>
     </div>
-
-    <ng-container *ngIf="content?.children?.length">
+    <ng-container *ngIf="content?.children?.length && !isComprehensiveAssessment">
         <div class="flex flex-col kpi-values items-center gap-2"
             *ngIf="tocStructure?.course > 0 && config?.uiVisibility?.rightPanel?.kpiValues?.courses !== false">
             <img src="/assets/icons/toc/course.svg" width="20px" alt="pdf image" />
@@ -153,4 +152,29 @@
             <div class="text-xs">{{ languageList.length }} languages available </div>
         </div>
     </ng-container>
+    @if (isComprehensiveAssessment) {
+        <ng-container>
+            @if(content?.duration > 0 && config?.uiVisibility?.rightPanel?.kpiValues?.duration !== false) {
+                <div class="flex flex-col kpi-values kpi-values-comprehensive items-center gap-2">
+                    <mat-icon class="icon-img">schedule</mat-icon>
+                    <div class="kpi-metadata">{{ content?.duration | pipeDurationTransform: 'hms' }}</div>
+                    <div class="kpi-type">{{ 'apptochome.kpiDuration' | translate }}</div>
+                </div>
+            }
+            @if (content?.children?.length &&  content?.children?.[0]?.totalQuestions && config?.uiVisibility?.rightPanel?.kpiValues?.languages !== false) {
+                <div class="flex flex-col kpi-values kpi-values-comprehensive items-center gap-2">
+                    <img src="/assets/icons/toc/target.svg" width="20px" alt="free course image" />
+                    <div class="kpi-metadata">{{ content?.children?.[0]?.totalQuestions }} {{ (content?.children?.[0]?.totalQuestions > 1 ? 'apptochome.kpiQuestions' : 'apptochome.kpiQuestion') | translate }}</div>
+                    <div class="kpi-type">{{ 'apptochome.assessments' | translate }}</div>
+                </div>
+            }
+            @if (content?.children?.length &&  content?.children?.[0]?.maxAssessmentRetakeAttempts && config?.uiVisibility?.rightPanel?.kpiValues?.languages !== false) {
+                <div class="flex flex-col kpi-values kpi-values-comprehensive items-center gap-2">
+                    <mat-icon class="icon-img">repeat</mat-icon>
+                    <div class="kpi-metadata">{{ content?.children?.[0]?.maxAssessmentRetakeAttempts }} </div>
+                    <div class="kpi-type">{{ 'apptochome.kpiAttemptsAllowed' | translate }}</div>
+                </div>
+            }
+        </ng-container>
+    }
 </div>

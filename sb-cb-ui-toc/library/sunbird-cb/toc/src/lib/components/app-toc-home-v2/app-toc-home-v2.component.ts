@@ -567,6 +567,23 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       || this.content?.courseCategory === this.comprehensiveAssessmentCategory
   }
 
+  get caPlanEndDate(): string | null {
+    return (this.baseContentReadData as any)?.trainingPlan_v2?.endDate || null
+  }
+
+  get caPlanDuration(): string | null {
+    if (!this.caPlanEndDate) {
+      return null
+    }
+    const daysCount = dayjs(this.caPlanEndDate).diff(this.serverDate || new Date(), 'day')
+    return daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
+      ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
+  }
+
+  get isCaOverdue(): boolean {
+    return this.caPlanDuration === NsCardContent.ACBPConst.OVERDUE
+  }
+
   get isAssessmentLocked(): boolean {
     return this.isComprehensiveAssessment && !this.isAllCoursesCompleted
   }
