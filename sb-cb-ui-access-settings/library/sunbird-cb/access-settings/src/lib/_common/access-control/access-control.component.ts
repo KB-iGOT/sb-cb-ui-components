@@ -1206,6 +1206,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
    * available for the logged in user (a non L0 MDO opening the content).
    */
   private getMinistryOrStateSelections(criteriaValue: any): string[] {
+    // The L0 that saved it reopens it as its "Select all" option
+    if (!this.isCCA && this.canSelectOrgHierarchy && this.accessControlService.isL0MdoUser(this.config)) {
+      return [ALL_ORGANISATIONS_SELECTION];
+    }
     const hierarchyOrgIds = this.accessControlService.getOrgHierarchyOrgIds();
     if (hierarchyOrgIds.length) {
       return hierarchyOrgIds;
@@ -1223,11 +1227,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
    * rootOrgId list, as every partial selection does.
    */
   private createOrganisationCriteria(selections: string[]): { criteriaKey: string; criteriaValue: string[] } {
-    // "Select all" on MDO is saved as an empty rootOrgId list
+    const isL0 = this.accessControlService.isL0MdoUser(this.config);
+    // "Select all" on MDO: a L0 saves its own ministry / state, a L1 -> L10 every organisation of
+    // its branch from the org hierarchy framework, a CCA an empty rootOrgId list
     if (this.isAllOrganisationsSelection(selections)) {
+      const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
+      if (!this.isCCA && isL0 && this.canSelectOrgHierarchy && ministryOrStateId) {
+        return { criteriaKey: MINISTRY_OR_STATE_CRITERIA_KEY, criteriaValue: [ministryOrStateId] };
+      }
+      if (!this.isCCA && this.canSelectOrgHierarchy) {
+        return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: this.accessControlService.getOrgHierarchyOrgIds() };
+      }
       return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: [] };
     }
-    const isL0 = this.accessControlService.isL0MdoUser(this.config);
     if (isL0 && this.canSelectOrgHierarchy && this.accessControlService.areAllOrgHierarchyOrgsSelected(selections)) {
       const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
       if (ministryOrStateId) {
@@ -1235,6 +1247,19 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }
     return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: selections };
+  }
+
+  /** A saved rootOrgId list naming every organisation of the branch of a L1 -> L10, i.e its "Select all". */
+  private isSavedBranchSelectAll(criteriaKey: string, criteriaValue: any): boolean {
+    return (
+      !this.isCCA &&
+      this.canSelectOrgHierarchy &&
+      criteriaKey === NsAccessControlConfig.SelectionType.Organizations &&
+      Array.isArray(criteriaValue) &&
+      criteriaValue.length > 0 &&
+      !this.accessControlService.isL0MdoUser(this.config) &&
+      this.accessControlService.areAllOrgHierarchyOrgsSelected(criteriaValue)
+    );
   }
 
   /** Organisation condition selections holding the MDO "Select all" option. */
@@ -1839,6 +1864,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const conditions = group.get("conditions") as FormArray;
     const request: { [key: string]: any } = {};
+    let hasAllOrganisations = false;
 
     for (let j = 0; j < conditions.length; j++) {
       const condition = conditions.at(j);
@@ -1859,6 +1885,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           }
         }
         else if (this.isAllOrganisationsSelection(selections)) {
+          hasAllOrganisations = true;
           // Every organisation: a CCA counts across all of them, any other MDO across the
           // organisations of its hierarchy, which are the ones it could have picked
           request[key] = this.isCCA ? [] : this.accessControlService.getOrgHierarchyOrgIds();
@@ -1895,7 +1922,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const filters: any = { ...request };
-    if (Object.keys(filters).length > 0) {
+    // Every organisation picked by a CCA leaves no filter, the count is still read across all of them
+    if (Object.keys(filters).length > 0 || hasAllOrganisations) {
       filters.status = 1;
     } else {
       delete filters.status;
@@ -2209,7 +2237,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         let isCustomFieldCrieteriaKeyPresent = false
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
-        if (this.isSavedAllOrganisationsCriteria(criteria.criteriaKey, criteria.criteriaValue)) {
+        if (
+          this.isSavedAllOrganisationsCriteria(criteria.criteriaKey, criteria.criteriaValue) ||
+          this.isSavedBranchSelectAll(criteria.criteriaKey, criteria.criteriaValue)
+        ) {
           condition.patchValue({
             entity: NsAccessControlConfig.SelectionType.Organizations,
             selections: [ALL_ORGANISATIONS_SELECTION],
@@ -2614,7 +2645,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     criteria.forEach((entry: any) => {
       const { criteriaKey, criteriaValue } = this.toCriteriaPair(entry);
-      const isAllOrganisations = this.isSavedAllOrganisationsCriteria(criteriaKey, criteriaValue);
+      const isAllOrganisations =
+        this.isSavedAllOrganisationsCriteria(criteriaKey, criteriaValue) || this.isSavedBranchSelectAll(criteriaKey, criteriaValue);
       if (!criteriaKey || (!criteriaValue?.length && !isAllOrganisations)) {
         return;
       }

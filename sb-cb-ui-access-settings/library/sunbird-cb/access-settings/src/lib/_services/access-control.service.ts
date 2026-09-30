@@ -225,11 +225,16 @@ export class AccessControlService {
       return org?.orgName || org?.channel || "";
     }
 
-    if ((org?.ministryOrStateType || "").toLowerCase() !== "state") {
+    // An L1 -> Ln organisation is under a state when it says so itself, or when the L0 it is
+    // mapped to is a state - the org apis do not always carry ministryOrStateType below the L0
+    const parentOrganisation = this.parentOrganisation();
+    const isUnderState =
+      (org?.ministryOrStateType || "").toLowerCase() === "state" ||
+      (parentOrganisation?.sbOrgType || "").toLowerCase() === "state";
+    if (!isUnderState) {
       return "";
     }
 
-    const parentOrganisation = this.parentOrganisation();
     return (
       org?.ministryOrStateName ||
       org?.ministryorstatename ||

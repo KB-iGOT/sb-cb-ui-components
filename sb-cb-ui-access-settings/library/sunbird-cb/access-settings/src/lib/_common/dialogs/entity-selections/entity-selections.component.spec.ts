@@ -118,6 +118,63 @@ describe('EntitySelectionsComponent', () => {
     });
   });
 
+  describe('canSelectAllOrganisations', () => {
+    const openAsNonCca = (isL0: boolean) => {
+      config.userConfig.org.isCCA = false;
+      accessControlService.orgHierarchyOrganisations.mockReturnValue([{ identifier: 'l0-org' }, { identifier: 'l1-org' }]);
+      accessControlService.isL0MdoUser = jest.fn(() => isL0);
+      component = createComponent();
+      component.ngOnInit();
+    };
+
+    it('should be offered to a CCA', () => {
+      expect(component.canSelectAllOrganisations).toBe(true);
+    });
+
+    it('should be offered to a L0, counting its own hierarchy without reading every organisation', () => {
+      openAsNonCca(true);
+
+      component.onChangeOrgSelectionMode({ value: 'all' } as any);
+
+      expect(component.canSelectAllOrganisations).toBe(true);
+      expect(component.allOrganisationsCount).toBe(2);
+      expect(accessControlService.fetchAllOrgCount).not.toHaveBeenCalled();
+    });
+
+    it('should be offered to a L1 -> L10 organisation, across its own branch', () => {
+      openAsNonCca(false);
+
+      component.onChangeOrgSelectionMode({ value: 'all' } as any);
+
+      expect(component.canSelectAllOrganisations).toBe(true);
+      expect(component.isBranchSelectAll).toBe(true);
+      expect(component.allOrganisationsCount).toBe(2);
+      expect(component.isOrgSelectionLimitExceeded()).toBe(false);
+    });
+
+    it('should cap "Select all" of a L1 -> L10 whose branch is over the limit', () => {
+      openAsNonCca(false);
+      accessControlService.orgHierarchyOrganisations.mockReturnValue(
+        organisationIds(MAX_ORGANISATION_SELECTIONS + 1).map((identifier) => ({ identifier }))
+      );
+
+      component.onChangeOrgSelectionMode({ value: 'all' } as any);
+
+      expect(component.isOrgSelectionLimitExceeded()).toBe(true);
+    });
+
+    it('should not cap "Select all" of a L0', () => {
+      openAsNonCca(true);
+      accessControlService.orgHierarchyOrganisations.mockReturnValue(
+        organisationIds(MAX_ORGANISATION_SELECTIONS + 1).map((identifier) => ({ identifier }))
+      );
+
+      component.onChangeOrgSelectionMode({ value: 'all' } as any);
+
+      expect(component.isOrgSelectionLimitExceeded()).toBe(false);
+    });
+  });
+
   describe('onChangeOrgSelectionMode', () => {
     it('should select every organisation and read the organisation count on "Select all"', () => {
       component.selectedDataTemp = ['org-a'];
@@ -179,6 +236,20 @@ describe('EntitySelectionsComponent', () => {
       expect(component.filterValue).toBe('all');
       expect(accessControlService.fetchAllOrgCount).toHaveBeenCalledTimes(1);
       expect(component.allOrganisationsCount).toBe(3249);
+      // The organisation list is not read while "Select all" is on
+      expect(accessControlService.fetchOrgList).not.toHaveBeenCalled();
+    });
+
+    it('should read the organisation list once switched back to "Manual Selection"', () => {
+      component = createComponent({
+        condition: { entity: NsAccessControlConfig.SelectionType.Organizations },
+        selected: [ALL_ORGANISATIONS_SELECTION]
+      });
+      component.ngOnInit();
+
+      component.onChangeOrgSelectionMode({ value: 'individual' } as any);
+
+      expect(accessControlService.fetchOrgList).toHaveBeenCalledTimes(1);
     });
 
     it('should open on "Manual Selection" for picked organisations', () => {

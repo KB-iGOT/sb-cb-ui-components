@@ -83,6 +83,44 @@ describe('AccessControlComponent', () => {
       });
     });
 
+    it('should save "Select all" of a L0 as its own ministry / state', () => {
+      component.isCCA = false;
+      component.canSelectOrgHierarchy = true;
+      accessControlService.isL0MdoUser.mockReturnValue(true);
+
+      expect((component as any).createOrganisationCriteria([ALL_ORGANISATIONS_SELECTION])).toEqual({
+        criteriaKey: 'ministryOrStateId',
+        criteriaValue: ['own-org']
+      });
+    });
+
+    it('should save "Select all" of a L1 -> L10 as every organisation of its branch', () => {
+      component.isCCA = false;
+      component.canSelectOrgHierarchy = true;
+      accessControlService.getOrgHierarchyOrgIds = jest.fn(() => ['l1-org', 'l2-org']);
+
+      expect((component as any).createOrganisationCriteria([ALL_ORGANISATIONS_SELECTION])).toEqual({
+        criteriaKey: 'rootOrgId',
+        criteriaValue: ['l1-org', 'l2-org']
+      });
+    });
+
+    it('should reopen the whole branch of a L1 -> L10 as "Select all"', () => {
+      component.isCCA = false;
+      component.canSelectOrgHierarchy = true;
+      accessControlService.areAllOrgHierarchyOrgsSelected.mockReturnValue(true);
+
+      expect((component as any).isSavedBranchSelectAll('rootOrgId', ['l1-org', 'l2-org'])).toBe(true);
+    });
+
+    it('should reopen a saved ministry / state of a L0 as "Select all"', () => {
+      component.isCCA = false;
+      component.canSelectOrgHierarchy = true;
+      accessControlService.isL0MdoUser.mockReturnValue(true);
+
+      expect((component as any).getMinistryOrStateSelections(['own-org'])).toEqual([ALL_ORGANISATIONS_SELECTION]);
+    });
+
     it('should save picked organisations as they were picked', () => {
       expect((component as any).createOrganisationCriteria(['org-a', 'org-b'])).toEqual({
         criteriaKey: 'rootOrgId',
@@ -149,6 +187,21 @@ describe('AccessControlComponent', () => {
       const isAdded = (component as any).addUserGroupFromCriteria('Group', [{ criteriaKey: 'rootOrgId', criteriaValue: [] }]);
 
       expect(isAdded).toBe(false);
+    });
+  });
+
+  describe('calculateUserCountForUserGroup', () => {
+    it('should read the user count across every organisation when a CCA selected all of them', async () => {
+      accessControlService.accessControlConfig = jest.fn(() => component.config);
+      accessControlService.validateUser = jest.fn(() => of({ result: { response: { count: 12 } } }));
+      addGroup('', [ALL_ORGANISATIONS_SELECTION]);
+
+      await component.calculateUserCountForUserGroup(0);
+
+      expect(accessControlService.validateUser).toHaveBeenCalledWith({
+        request: { filters: { status: 1 }, fields: ['identifier', 'rootOrgId', 'firstName'] }
+      });
+      expect(component.userCount[0]).toBe(12);
     });
   });
 

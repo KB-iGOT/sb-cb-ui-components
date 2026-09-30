@@ -154,7 +154,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectedDataTemp = [this.selectedCentralDeputation];
     }
 
-    if (this.isMdoOrganisationSelection && this.selectedData.includes(ALL_ORGANISATIONS_SELECTION)) {
+    if (this.canSelectAllOrganisations && this.selectedData.includes(ALL_ORGANISATIONS_SELECTION)) {
       // "Select all" has no list behind it, the organisation list opens on its first tab if switched back
       this.orgSelectionMode = "all";
       this.activeTab = 0;
@@ -184,19 +184,13 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   initializeDisplay(): void {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Organizations:
+        this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
+        // "Select all" shows only the count, the list is read once switched back to the manual selection
         if (this.isAllOrganisationsSelected) {
           this.loadAllOrganisationsCount();
+          break;
         }
-        if (this.isOrgHierarchyMode) {
-          this.getOrgHierarchyList("");
-        } else if (this.activeTab === 0) {
-          this.selectedCharacterRange = "A";
-          this.getOrganisationsList("", [], this.selectedCharacterRange);
-        } else {
-          this.getOrganisationsList("", this.selectedData, undefined);
-          this.alphabet = [];
-        }
-        this.radioSelections = this.accessControlCriteriaSelection.organizationRadioSelection;
+        this.loadOrganisationList();
         break;
       case NsAccessControlConfig.SelectionType.Designation:
         
@@ -319,6 +313,61 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Most organisations an MDO may pick one by one, taken from config so it can change without a release. */
+  get orgSelectionLimit(): number {
+    const limit = Number(this.accessControlCriteriaSelection?.maxOrganisationSelectionLimit);
+    return limit > 0 ? limit : MAX_ORGANISATION_SELECTIONS;
+  }
+
+  /**
+   * A MDO is capped on the rootOrgId list it sends - CCA, L0 and L1 -> L10 alike. "Select all" of a
+   * CCA (no list) and of a L0 (its ministry / state id) is not a list and is not capped; "Select all"
+   * of a L1 -> L10 sends every organisation of its branch, and is capped like any other list.
+   */
+  isOrgSelectionLimitExceeded(selections: any[] = this.selectedDataTemp): boolean {
+    if (this.isAllOrganisationsSelected) {
+      return this.isBranchSelectAll && (this.accessControlService.orgHierarchyOrganisations()?.length || 0) > this.orgSelectionLimit;
+    }
+    if (
+      !this.isMdoOrganisationSelection ||
+      (selections?.length || 0) <= this.orgSelectionLimit
+    ) {
+      return false;
+    }
+    const isWholeHierarchy =
+      this.isOrgHierarchyMode &&
+      this.accessControlService.isL0MdoUser() &&
+      this.accessControlService.areAllOrgHierarchyOrgsSelected(selections);
+    return !isWholeHierarchy;
+  }
+
+  /** The organisation list the dialog opens with, on the tab it opens on. */
+  private loadOrganisationList(): void {
+    if (this.isOrgHierarchyMode) {
+      this.getOrgHierarchyList("");
+    } else if (this.activeTab === 0) {
+      this.selectedCharacterRange = "A";
+      this.getOrganisationsList("", [], this.selectedCharacterRange);
+    } else {
+      this.getOrganisationsList("", this.selectedData, undefined);
+      this.alphabet = [];
+    }
+  }
+
+  /**
+   * "Select all" is offered to a CCA, across every organisation, and to any organisation of an org
+   * hierarchy, across its own branch as read from the org hierarchy framework (the whole hierarchy
+   * for a L0).
+   */
+  get canSelectAllOrganisations(): boolean {
+    return this.isMdoOrganisationSelection && (this.isCCA || this.isOrgHierarchyMode);
+  }
+
+  /** "Select all" of a L1 -> L10, sent as the organisations of its branch. */
+  get isBranchSelectAll(): boolean {
+    return !this.isCCA && this.isOrgHierarchyMode && !this.accessControlService.isL0MdoUser();
+  }
+
   /** Organisation condition on MDO, the only one offered "Select all" and the limit. */
   get isMdoOrganisationSelection(): boolean {
     return (
@@ -328,7 +377,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   get isAllOrganisationsSelected(): boolean {
-    return this.isMdoOrganisationSelection && this.orgSelectionMode === "all";
+    return this.canSelectAllOrganisations && this.orgSelectionMode === "all";
   }
 
   /**
@@ -341,8 +390,8 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     const currentList = this.filterValue === "selected" ? this.selectedData : this.selectedDataTemp;
     const isAdding = !currentList.includes(value);
-    if (isAdding && currentList.length >= MAX_ORGANISATION_SELECTIONS) {
-      this.organisationLimitError = `You can select up to ${MAX_ORGANISATION_SELECTIONS} organisations. Choose "Select all" to include every organisation.`;
+    if (isAdding && currentList.length >= this.orgSelectionLimit) {
+      this.organisationLimitError = `Reached Maximum Organisation selection limit, please try adding ${this.orgSelectionLimit} or less Organisations in the manual selection.`;
       return true;
     }
     this.organisationLimitError = "";
@@ -363,12 +412,24 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.selectedDataTemp = [];
     this.activeTab = 0;
     this.filterValue = "all";
+    // The list is not read while "Select all" is on, read it the first time the manual selection is shown
+    if (!this.dataList.length) {
+      this.loadOrganisationList();
+      return;
+    }
     this.getFilteredEntityGrouped();
   }
 
-  /** Count of every organisation shown for "Select all", read from the api once. */
+  /**
+   * Count shown for "Select all". An organisation of an org hierarchy counts its own branch, already
+   * read from the org hierarchy framework; a CCA counts every organisation, read from the api once.
+   */
   private loadAllOrganisationsCount(): void {
     if (this.allOrganisationsCount !== null) {
+      return;
+    }
+    if (this.isOrgHierarchyMode) {
+      this.allOrganisationsCount = this.accessControlService.orgHierarchyOrganisations()?.length ?? 0;
       return;
     }
     this.accessControlService
@@ -382,6 +443,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   setSelected(): void {
+    if (this.isOrgSelectionLimitExceeded()) {
+      return;
+    }
     this.selectedData = [...this.selectedDataTemp];
     this.activeTab = 1;
   }
@@ -1076,6 +1140,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       this.selectionType === NsAccessControlConfig.SelectionType.CentralDeputation
     ) {
       this.selectedData = this.selectedDataTemp;
+    }
+    if (this.isOrgSelectionLimitExceeded(this.selectedData) || this.isOrgSelectionLimitExceeded(this.selectedDataTemp)) {
+      return;
     }
     this.dialogRef.close({
       rule: this.data.rule,
