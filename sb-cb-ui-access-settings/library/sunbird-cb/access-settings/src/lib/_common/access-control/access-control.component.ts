@@ -76,6 +76,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   // from its own org hierarchy framework. Stays false when the framework is not created.
   canSelectOrgHierarchy = false;
   mdoContent: any;
+  savedUserGroupConditions = new Map<string, string>();
 
   constructor(
     private dialog: MatDialog,
@@ -2326,6 +2327,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         });
 
         this.userGroup.push(ruleGroup);
+        this.markUserGroupConditionsSaved(this.userGroup.length - 1);
 
      //   if (
       //   (this.mdoContent?.status === "Live") &&
@@ -2445,6 +2447,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.userGroup?.at(userGroupIndex)?.get("savedUserGroupId")?.value || "";
   }
 
+  /** A saved group whose conditions are the same as when it was last saved, nothing to update. */
+  isSavedUserGroupUnchanged(userGroupIndex: number): boolean {
+    const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
+    return !!savedUserGroupId &&
+      this.savedUserGroupConditions.get(savedUserGroupId) === this.userGroupConditionsValue(userGroupIndex);
+  }
+
+  private userGroupConditionsValue(userGroupIndex: number): string {
+    const conditions = this.userGroup?.at(userGroupIndex)?.get("conditions")?.getRawValue() || [];
+    return JSON.stringify(conditions.map((condition: any) => ({
+      entity: condition?.entity,
+      selections: condition?.selections
+    })));
+  }
+
+  private markUserGroupConditionsSaved(userGroupIndex: number): void {
+    const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
+    if (savedUserGroupId) {
+      this.savedUserGroupConditions.set(savedUserGroupId, this.userGroupConditionsValue(userGroupIndex));
+    }
+  }
+
   saveReusableUserGroups(userGroupIndex: number = 0): void {
     const rawGroup = this.accessControlForm.getRawValue()?.userGroup?.[userGroupIndex];
     if (!rawGroup) {
@@ -2457,16 +2481,20 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: "470px",
-      data: { type: "confirm-update-reusable-group" }
-    });
-
-    confirmDialogRef.afterClosed().subscribe(result => {
-      if (result?.action === NsAccessControlConfig.IActions.Confirm) {
-        this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
-      }
-    });
+    if(this.mdoContent?.status?.toLowerCase() === 'live') {
+      const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "470px",
+        data: { type: "confirm-update-reusable-group" }
+      });
+  
+      confirmDialogRef.afterClosed().subscribe(result => {
+        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+          this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+        }
+      });
+    } else {
+      this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+    }
   }
 
   /** Asks for the group name, then saves the group as a new reusable group or updates the saved one. */
@@ -2529,6 +2557,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         next: response => {
           if (response?.result) {
             this.keepSavedUserGroupId(response.result?.usergroupid, userGroupIndex);
+            this.markUserGroupConditionsSaved(userGroupIndex);
             this.accessControlData.emit({
               userGroup: response.result.accessControl?.userGroups,
               accessType: this.accessType,
@@ -2557,6 +2586,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         next: response => {
           if (response?.result) {
             this.keepSavedUserGroupId(response.result?.usergroupid, userGroupIndex);
+            this.markUserGroupConditionsSaved(userGroupIndex);
             this.accessControlData.emit({
               userGroup: response.result.accessControl?.userGroups,
               accessType: this.accessType,
@@ -2696,6 +2726,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     );
 
     const userGroupIndex = this.userGroup.length - 1;
+    this.markUserGroupConditionsSaved(userGroupIndex);
     this.processDisableAddConditionOnClose(userGroupIndex);
     this.calculateUserCountForUserGroup(userGroupIndex);
     return true;
