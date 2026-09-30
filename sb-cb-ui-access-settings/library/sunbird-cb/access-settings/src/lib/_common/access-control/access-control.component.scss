@@ -303,3 +303,14 @@
   white-space: nowrap;
   overflow: hidden;
 }
+
+.action-buttons-mdo {
+  button:disabled {
+    opacity: 0.8 !important;
+    background: #ebebeb !important;
+    color: #666666 !important;
+    mat-icon {
+      color: #666666 !important;
+    }
+  }
+}

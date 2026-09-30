@@ -243,7 +243,7 @@
                       </div>
                       @if (config?.application === MDO_APPLICATION && !isLoading) {
                         <div class="action-buttons-mdo flex gap-4 items-center justify-center mt-4">
-                          <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup" (click)="saveReusableUserGroups(i)">
+                          <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup || isSavedUserGroupUnchanged(i)" (click)="saveReusableUserGroups(i)">
                             <span>{{ isUserGroupSaved(i) ? 'Update as reusable group' : 'Save as reusable group' }}</span>
                           </button>
                         </div>
