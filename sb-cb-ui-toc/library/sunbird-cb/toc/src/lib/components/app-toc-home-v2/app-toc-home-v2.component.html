@@ -517,7 +517,7 @@
                 *ngIf="canShare && tocConfig?.uiVisibility?.banner?.shareButton !== false">
                 <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
               </div>
-              <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') && !forPreview">
+              <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course' || isComprehensiveAssessment) && !forPreview">
                 <ng-container *ngIf="canUnenroll">
                   <div class="hideAbove1200">
                     <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
@@ -735,7 +735,7 @@
                       <mat-icon class="nodtranslate">share</mat-icon>
                       <div>{{ 'apptocsinglepage.share' | translate }}</div>
                     </div>
-                    <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') && !forPreview">
+                    <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') || isComprehensiveAssessment && !forPreview">
                       <ng-container *ngIf="canUnenroll">
                         <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
                           aria-label="More options">
@@ -936,7 +936,7 @@
                 </ng-container>
               </div>
 
-              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false">
+              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false && !isComprehensiveAssessment">
                 <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
                   [content]="content" [baseContentReadData]="baseContentReadData"
                   [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"></ws-widget-karma-points>
