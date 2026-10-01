@@ -201,8 +201,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       competencySubTheme: [''],
       manualThemeInput: [''],
       manualSubThemeInput: [''],
-      proficiency_level: [''],
-      delivery_mode: [''],
+      // proficiency_level: [''],
+      // delivery_mode: [''],
       themeSearch: [''],
       subThemeSearch: [''],
       competencies: this.fb.array(this.planData?.competencies || []), // optional customization,
@@ -478,8 +478,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     let type = this.selectedCompetencyType;
     let theme = '';
     let subTheme = '';
-    let proficiency_level = ''
-    let delivery_mode = ''
+    // let proficiency_level = ''
+    // let delivery_mode = ''
     if (type === 'Domain') {
       // For Domain, use manual input
       theme = this.cbpForm.value.manualThemeInput?.trim();
@@ -495,16 +495,16 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
         c.theme === theme && c.sub_theme === subTheme && c.type === type
       );
 
-      proficiency_level =  this.cbpForm.value.proficiency_level?.trim();
-      delivery_mode =  this.cbpForm.value.delivery_mode?.trim();
+      // proficiency_level =  this.cbpForm.value.proficiency_level?.trim();
+      // delivery_mode =  this.cbpForm.value.delivery_mode?.trim();
 
       if (!exists) {
         const newComp = this.fb.group({
           type: [type],
           theme: [theme],
           sub_theme: [subTheme],
-          proficiency_level: [proficiency_level],
-          delivery_mode: [delivery_mode]
+          // proficiency_level: [proficiency_level],
+          // delivery_mode: [delivery_mode]
 
         });
         this.competenciesArray.push(newComp);
@@ -543,8 +543,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       manualSubThemeInput: '',
       themeSearch: '',
       subThemeSearch: '',
-      proficiency_level:'',
-      delivery_mode:''
+      // proficiency_level:'',
+      // delivery_mode:''
     });
   }
 
@@ -601,8 +601,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       competencyType: 'Domain',
       manualThemeInput: comp?.theme,
       manualSubThemeInput: comp?.sub_theme,
-      proficiency_level: comp?.proficiency_level,
-      delivery_mode: comp?.delivery_mode
+      // proficiency_level: comp?.proficiency_level,
+      // delivery_mode: comp?.delivery_mode
     });
     const index = this.competenciesArray.value.findIndex(c =>
       c.theme === comp?.theme &&
@@ -634,17 +634,17 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     let type = this.selectedCompetencyType;
     let theme = '';
     let subTheme = '';
-    let proficiency_level = ''
-    let delivery_mode = ''
+    // let proficiency_level = ''
+    // let delivery_mode = ''
     if (type === 'Domain') {
       // For Domain, use manual input
       theme = this.cbpForm.value.manualThemeInput?.trim();
       subTheme = this.cbpForm.value.manualSubThemeInput?.trim();
       this.originalCompetencyValueArr = JSON.parse(JSON.stringify(this.competenciesArray.value))
     }
-    console.log('this.cbpForm.value',this.cbpForm.value)
-    proficiency_level =  this.cbpForm.value.proficiency_level?.trim();
-    delivery_mode =  this.cbpForm.value.delivery_mode?.trim();
+    // console.log('this.cbpForm.value',this.cbpForm.value)
+    // proficiency_level =  this.cbpForm.value.proficiency_level?.trim();
+    // delivery_mode =  this.cbpForm.value.delivery_mode?.trim();
 
     console.log(' this.competenciesArray', this.competenciesArray)
     if (type && theme && subTheme) {
@@ -654,8 +654,8 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
         this.competenciesArray.value[this.editCompetencyIndex]['type'] = type
         this.competenciesArray.value[this.editCompetencyIndex]['theme'] = theme
         this.competenciesArray.value[this.editCompetencyIndex]['sub_theme'] = subTheme
-        this.competenciesArray.value[this.editCompetencyIndex]['proficiency_level'] = proficiency_level
-        this.competenciesArray.value[this.editCompetencyIndex]['delivery_mode'] = delivery_mode
+        // this.competenciesArray.value[this.editCompetencyIndex]['proficiency_level'] = proficiency_level
+        // this.competenciesArray.value[this.editCompetencyIndex]['delivery_mode'] = delivery_mode
       }
       console.log('this.competenciesArray.--', this.competenciesArray.value)
 
