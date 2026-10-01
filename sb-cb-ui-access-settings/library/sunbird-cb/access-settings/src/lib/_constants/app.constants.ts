@@ -15,6 +15,18 @@ export const CHECKBOX_OPTIONS = [
 // The whole ministry / state is then stored as a single criteria instead of the expanded org list.
 export const MINISTRY_OR_STATE_CRITERIA_KEY = "ministryOrStateId";
 
+// MDO only. Every organisation picked through the "Select all" option of the Organisation condition.
+// It is saved as an empty rootOrgId list, and stands in for it in the form so the condition is filled.
+export const ALL_ORGANISATIONS_SELECTION = "ALL_ORGANISATIONS";
+
+// MDO only. The most organisations that can be picked one by one in an Organisation condition.
+export const MAX_ORGANISATION_SELECTIONS = 500;
+
+export const ORGANISATION_SELECTION_MODES = [
+  { label: "Manual Selection", value: "individual" },
+  { label: "Select all", value: "all" },
+];
+
 export const CRITERIA_LABELS: { [key: string]: string } = {
   [NsAccessControlConfig.SelectionType.Organizations]: "Organisation",
   [MINISTRY_OR_STATE_CRITERIA_KEY]: "Organisation",

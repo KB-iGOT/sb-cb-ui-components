@@ -284,3 +284,16 @@
     max-width: 280px;
   }
 }
+
+.apply-button-container {
+  div.org-limit-error {
+    color: #d13924;
+    max-width: 420px;
+  }
+  // The global new-bg-color is !important, so a disabled button would otherwise stay blue
+  button[disabled].new-bg-color {
+    background-color: #0000001f !important;
+    color: #00000061 !important;
+    cursor: not-allowed;
+  }
+}
