@@ -1,0 +1,21 @@
+:host {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+}
+
+.file-progress-dialog {
+  display: flex;
+  align-items: center;
+  min-height: 240px;
+  padding: 24px;
+}
+
+.file-progress {
+  height: 8px;
+  border-radius: 8px;
+  --mdc-linear-progress-active-indicator-color: #1D8923;
+  --mdc-linear-progress-track-color: #CCCCCC;
+  --mat-progress-bar-active-indicator-color: #1D8923;
+  --mat-progress-bar-track-color: #CCCCCC;
+}

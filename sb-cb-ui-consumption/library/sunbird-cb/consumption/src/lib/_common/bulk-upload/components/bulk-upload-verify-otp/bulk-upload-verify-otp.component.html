@@ -1,0 +1,37 @@
+<div class="verify-otp-dialog">
+  <div class="flex flex-col gap-4" *ngIf="!otpSent">
+    <label class="font-bold dialog-title" id="bulk-upload-otp-type-label">Send OTP to</label>
+    <mat-radio-group aria-labelledby="bulk-upload-otp-type-label" [(ngModel)]="otpType" class="flex flex-row gap-8">
+      <mat-radio-button value="email" color="accent" [disabled]="!data.email">Email</mat-radio-button>
+      <mat-radio-button value="phone" color="accent" [disabled]="!data.mobile">Mobile</mat-radio-button>
+    </mat-radio-group>
+    <div class="flex flex-row justify-between mt-4">
+      <button type="button" class="bu-outline-button" (click)="handleCloseModal()">Cancel</button>
+      <button type="button" class="bu-action-button" (click)="handleSendOTP()" [disabled]="!otpType || sendingOtp">
+        Send OTP
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-4" *ngIf="otpSent">
+    <div class="text-base font-semibold text-center mb-4">
+      Enter the OTP sent to your {{ otpType === 'phone' ? 'mobile number' : 'email address' }}
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-bold" for="bulk-upload-otp-input">Enter OTP</label>
+      <input id="bulk-upload-otp-input" type="text" class="otp-input" placeholder="Enter the OTP" maxlength="6"
+        autocomplete="one-time-code" [(ngModel)]="otpEntered" (keyup.enter)="handleVerifyOTP()" />
+    </div>
+    <div class="flex flex-row gap-1 items-center justify-center time-remaining text-sm" *ngIf="!showResendOTP">
+      Time remaining to resend OTP: <span>{{ timerText }}</span>
+    </div>
+    <div class="flex justify-end" *ngIf="showResendOTP">
+      <button type="button" class="resend-otp" (click)="handleResendOTP()" [disabled]="sendingOtp">Resend OTP</button>
+    </div>
+    <div class="flex flex-row justify-between">
+      <button type="button" class="bu-outline-button" (click)="handleCloseModal()">Cancel</button>
+      <button type="button" class="bu-action-button" (click)="handleVerifyOTP()"
+        [disabled]="!otpEntered || verifyingOtp">Submit</button>
+    </div>
+  </div>
+</div>
