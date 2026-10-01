@@ -172,7 +172,11 @@
                                 <div class="action-options-selected">
                                   <button [disabled]="!condition.get('entity').value" mat-button class="new-secondary-button-no-border button-with-corners" type="button" (click)="manageSelections(condition, rule, i, 1)">
                                     <div class="flex gap-2 flex-middle mt-2">
-                                      <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
+                                      @if (isAllOrganisationsSelection(condition?.get("selections").value)) {
+                                        <span class="text-m underline">All organisations selected</span>
+                                      } @else {
+                                        <span class="text-m underline">{{ condition?.get("selections").value?.length }} items selected</span>
+                                      }
                                     </div>
                                   </button>
                                 </div>
@@ -239,7 +243,7 @@
                       </div>
                       @if (config?.application === MDO_APPLICATION && !isLoading) {
                         <div class="action-buttons-mdo flex gap-4 items-center justify-center mt-4">
-                          <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup" (click)="saveReusableUserGroups(i)">
+                          <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup || isSavedUserGroupUnchanged(i)" (click)="saveReusableUserGroups(i)">
                             <span>{{ isUserGroupSaved(i) ? 'Update as reusable group' : 'Save as reusable group' }}</span>
                           </button>
                         </div>

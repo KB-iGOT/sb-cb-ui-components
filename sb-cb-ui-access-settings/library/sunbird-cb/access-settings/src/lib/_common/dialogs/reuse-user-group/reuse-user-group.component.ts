@@ -155,6 +155,10 @@ export class ReuseUserGroupComponent implements OnInit {
     }
     const criteriaValue = entry?.criteriaKey ? entry?.criteriaValue : entry[criteriaKey];
     const count = Array.isArray(criteriaValue) ? criteriaValue.length : criteriaValue ? 1 : 0;
+    // An empty rootOrgId list is the "Select all" option of the Organisation condition
+    if (!count && criteriaKey === NsAccessControlConfig.SelectionType.Organizations) {
+      return `${this.entityLabel(criteriaKey)} is all`;
+    }
     if (!count) {
       return "";
     }

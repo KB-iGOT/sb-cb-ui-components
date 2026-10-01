@@ -1,0 +1,75 @@
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-4 bulk-container">
+    <div class="flex font-bold" *ngIf="texts.title">{{ texts.title }}</div>
+    <div class="upload-cards">
+      <div class="dashed-card instructions-card">
+        <div *ngIf="texts.instructions?.title">{{ texts.instructions?.title }}</div>
+        <ol class="custom-ol" *ngIf="texts.instructions?.steps?.length">
+          <li *ngFor="let step of texts.instructions?.steps" [innerHTML]="step"></li>
+        </ol>
+        <div class="sample-actions" *ngIf="config.sampleFiles?.length">
+          <button type="button" class="bu-outline-button" *ngFor="let sample of config.sampleFiles"
+            (click)="handleDownloadSampleFile(sample)">{{ sample.label }}</button>
+        </div>
+      </div>
+
+      <div class="dashed-card picker-card">
+        <button type="button" class="file-picker-icon" [disabled]="isUploading"
+          (click)="fileInput.click()" (dblclick)="$event.preventDefault()">
+          <img [src]="fileRules.icon" alt="Choose file" />
+        </button>
+        <div *ngIf="showFileError" class="error-msg" role="alert">{{ invalidFileTypeMessage }}</div>
+        <div *ngIf="showFileSizeError" class="error-msg" role="alert">{{ fileSizeExceededMessage }}</div>
+        <button type="button" class="browse-link" [disabled]="isUploading" (click)="fileInput.click()"
+          (dblclick)="$event.preventDefault()">{{ texts.browseText }}</button>
+        <input hidden type="file" #fileInput name="file" [accept]="acceptTypes" (click)="handleFileClick($event)"
+          (change)="handleOnFileChange($event)" />
+        <div class="file-hints">
+          <div *ngIf="maxFileSizeText">{{ maxFileSizeText }}</div>
+          <div *ngIf="supportedFileTypeText">{{ supportedFileTypeText }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-row justify-between items-center gap-4" *ngIf="texts.logsTitle || canRefreshLogs">
+    <div class="text-base font-bold">{{ texts.logsTitle }}</div>
+    <button type="button" class="bu-outline-button" *ngIf="canRefreshLogs" [disabled]="isLoadingLogs"
+      (click)="handleRefreshLogs()">
+      <mat-icon>refresh</mat-icon>
+      {{ texts.refreshText }}
+    </button>
+  </div>
+
+  <div class="flex flex-col gap-6">
+    <div class="file-container" *ngFor="let log of uploadLogs | slice : pageIndex * pageSize : (pageIndex + 1) * pageSize">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-row justify-between items-center gap-4">
+          <div class="font-bold">{{ texts.logCardTitle }}</div>
+          <button type="button" class="bu-outline-button" *ngIf="canDownloadLog && !log.isPending"
+            (click)="handleDownloadLog(log)">
+            <!-- file_download, not download: older Material Icons fonts (creation portal ships 0.3.1) have no 'download' glyph -->
+            <mat-icon>file_download</mat-icon>
+            {{ log.isSuccess ? texts.downloadFileText : texts.downloadErrorLogText }}
+          </button>
+        </div>
+        <div class="log-fields">
+          <div class="flex flex-col" *ngFor="let field of logsConfig.fields; let i = index">
+            <div class="label">{{ field.label }}</div>
+            <div class="value" [ngSwitch]="field.type">
+              <ng-container *ngSwitchCase="'date'">{{ log.values[i] | date: (field.format || 'dd MMM yyyy h:mm a') }}</ng-container>
+              <ng-container *ngSwitchDefault>{{ log.values[i] }}</ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-logs" *ngIf="!uploadLogs.length && texts.emptyLogsText">{{ texts.emptyLogsText }}</div>
+  </div>
+
+  <div class="flex flex-row justify-end mt-4" *ngIf="uploadLogs.length">
+    <mat-paginator [length]="uploadLogs.length" [pageIndex]="pageIndex" [pageSize]="pageSize"
+      [pageSizeOptions]="logsConfig.pageSizeOptions || []" (page)="handleChangePage($event)"></mat-paginator>
+  </div>
+</div>

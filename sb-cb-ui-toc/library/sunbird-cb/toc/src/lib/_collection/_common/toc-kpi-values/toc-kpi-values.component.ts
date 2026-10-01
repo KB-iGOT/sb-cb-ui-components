@@ -18,6 +18,7 @@ export class TocKpiValuesComponent implements OnInit {
   @Input() baseContentReadData: NsContent.IContent | null = null
   @Input() languageList: any
   @Input() config: any
+  @Input() isComprehensiveAssessment: boolean = false
   constructor() { }
 
   ngOnInit() {
