@@ -1,0 +1,51 @@
+@use '../../bulk-upload-buttons' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.verify-otp-dialog {
+  padding: 24px;
+
+  .dialog-title {
+    font-size: 16px;
+  }
+
+  .otp-input {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+
+    &:focus {
+      border-color: #1B4CA1;
+    }
+  }
+
+  .time-remaining {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .resend-otp {
+    background: none;
+    border: none;
+    color: #1B4CA1;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: auto;
+    }
+  }
+
+  .bu-outline-button,
+  .bu-action-button {
+    min-width: 100px;
+  }
+}

@@ -1,10 +1,11 @@
 <div class="assessment-basic-info" *ngIf="assessmentForm">
   <form [formGroup]="assessmentForm">
-    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered. -->
+    <!-- Assessment Type. A comprehensive assessment is always Basic, so it is not offered.
+         A pre assessment is offered Basic only. -->
     <div class="form-section" *ngIf="!isCqfAssessment && !isComprehensiveAssessment">
       <mat-radio-group formControlName="assessmentType" class="assessment-type-group flex flex-middle gap-4">
         <mat-radio-button value="basic">Basic Assessment</mat-radio-button>
-        <mat-radio-button value="advanced">Advanced Assessment</mat-radio-button>
+        <mat-radio-button value="advanced" *ngIf="!isPreAssessment">Advanced Assessment</mat-radio-button>
       </mat-radio-group>
       <p class="hint-text">Assessment type cannot be changed once saved.</p>
     </div>
@@ -17,7 +18,8 @@
         <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported</mat-hint>
         <mat-hint align="end">{{ nameLength }} / {{ nameMaxLength }}</mat-hint>
         <mat-error *ngIf="controls['name'].hasError('required')">Name is required</mat-error>
-        <mat-error *ngIf="controls['name'].hasError('minlength')">Name must be of minimum {{nameMinLength}} characters</mat-error>
+        <mat-error *ngIf="controls['name'].hasError('minlength')">Name must be of minimum {{nameMinLength}}
+          characters</mat-error>
         <mat-error *ngIf="controls['name'].hasError('pattern')">Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' !
           ) characters are supported</mat-error>
         <mat-error *ngIf="controls['name'].hasError('maxlength')">Name cannot exceed {{ nameMaxLength }}
@@ -242,15 +244,15 @@
           <!-- A comprehensive assessment takes the count typed in and nothing else: the range is
                narrow enough to say in the placeholder, so there is no list to pick from. Every
                other assessment still picks from the options offered. -->
-          <mat-form-field appearance="outline" class="full-width" *ngIf="isComprehensiveAssessment; else reAttemptSelect">
+          <mat-form-field appearance="outline" class="full-width"
+            *ngIf="isComprehensiveAssessment; else reAttemptSelect">
             <input matInput type="text" inputmode="numeric" [maxlength]="maxRetakeDigits"
               placeholder="Enter a number from 0 to {{ maxRetakeAttempts }}"
               formControlName="maxAssessmentRetakeAttempts" (keypress)="onRetakeAttemptsKeypress($event)"
               (input)="onRetakeAttemptsInput($event)" (paste)="onRetakeAttemptsPaste($event)">
             <mat-error *ngIf="controls['maxAssessmentRetakeAttempts'].hasError('required')">Number of re-attempts is
               required</mat-error>
-            <mat-error
-              *ngIf="!controls['maxAssessmentRetakeAttempts'].hasError('required') &&
+            <mat-error *ngIf="!controls['maxAssessmentRetakeAttempts'].hasError('required') &&
                 (controls['maxAssessmentRetakeAttempts'].hasError('pattern') ||
                  controls['maxAssessmentRetakeAttempts'].hasError('min') ||
                  controls['maxAssessmentRetakeAttempts'].hasError('max'))">
@@ -294,9 +296,12 @@
         <!-- Range messages live here rather than in the 65px fields, which are too
              narrow to render subscript text. -->
         <mat-error *ngIf="isDurationInvalid" class="duration-error">Duration is required</mat-error>
-        <mat-error *ngIf="controls['durationHours'].hasError('max')" class="duration-error">Hours cannot exceed 23</mat-error>
-        <mat-error *ngIf="controls['durationMinutes'].hasError('max')" class="duration-error">Minutes cannot exceed 59</mat-error>
-        <mat-error *ngIf="controls['durationSeconds'].hasError('max')" class="duration-error">Seconds cannot exceed 59</mat-error>
+        <mat-error *ngIf="controls['durationHours'].hasError('max')" class="duration-error">Hours cannot exceed
+          23</mat-error>
+        <mat-error *ngIf="controls['durationMinutes'].hasError('max')" class="duration-error">Minutes cannot exceed
+          59</mat-error>
+        <mat-error *ngIf="controls['durationSeconds'].hasError('max')" class="duration-error">Seconds cannot exceed
+          59</mat-error>
       </div>
     </div>
 
@@ -316,6 +321,24 @@
         </mat-form-field>
       </div>
     </ng-container>
+
+    <!-- Mandatory (pre assessment only) - on saves the mandatory context category, off the optional one -->
+    <div class="form-section shuffle-toggle flex flex-middle gap-4" *ngIf="isPreAssessment">
+      <label class="field-label">Mandatory
+        <mat-icon class="info-icon"
+          matTooltip="If marked Mandatory, learner’s progress will be tracked else not.">info_outline</mat-icon>
+      </label>
+      <mat-slide-toggle formControlName="isMandatory" aria-label="Mandatory"></mat-slide-toggle>
+    </div>
+
+    <!-- Shuffle answer options -->
+    <div class="form-section shuffle-toggle flex flex-middle gap-4">
+      <label class="field-label">Shuffle answer options for learners
+        <mat-icon class="info-icon"
+          matTooltip="Options for questions will appear in random order.">info_outline</mat-icon>
+      </label>
+      <mat-slide-toggle formControlName="shuffle" aria-label="Shuffle answer options for learners"></mat-slide-toggle>
+    </div>
 
     <!-- Instructions -->
     <div class="form-section mat-full-radius">

@@ -197,3 +197,9 @@ export * from './lib/_common/strips-v2/contetn-sections/contetn-sections.compone
 export * from './lib/_common/left_nav_bar/components/btn-feature-v2/btn-feature-v2.component'
 export * from './lib/_services/mobile-apps.service'
 export * from './lib/_common/btn-profile-v2/btn-profile-v2.component'
+// Bulk Upload - config driven
+export * from './lib/_common/bulk-upload/bulk-upload.model'
+export * from './lib/_common/bulk-upload/bulk-upload.constants'
+export * from './lib/_common/bulk-upload/bulk-upload.service'
+export * from './lib/_common/bulk-upload/bulk-upload.module'
+export * from './lib/_common/bulk-upload/components/bulk-upload/bulk-upload.component'

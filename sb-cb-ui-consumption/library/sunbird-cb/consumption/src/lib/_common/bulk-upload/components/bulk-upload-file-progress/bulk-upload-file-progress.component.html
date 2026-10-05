@@ -1,0 +1,9 @@
+<div class="file-progress-dialog">
+  <div class="flex flex-col w-48 gap-4 items-center justify-center">
+    <img *ngIf="data?.icon" [src]="data.icon" alt="File icon" />
+    <div class="flex flex-col gap-2 w-full items-center">
+      <mat-progress-bar class="file-progress" mode="indeterminate"></mat-progress-bar>
+      <div class="font-semibold">{{ data?.text || 'File uploading...' }}</div>
+    </div>
+  </div>
+</div>
