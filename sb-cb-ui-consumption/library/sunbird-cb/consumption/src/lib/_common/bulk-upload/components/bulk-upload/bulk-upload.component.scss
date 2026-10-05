@@ -1,0 +1,138 @@
+@use '../../bulk-upload-buttons' as *;
+
+$border-color: rgba(0, 0, 0, 0.08);
+$primary-color: #1B4CA1;
+$error-color: #D13924;
+
+// host apps may not ship a css reset (orgportal has no tailwind preflight), keep sizing predictable
+:host {
+  display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.upload-cards {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 32px;
+}
+
+.bulk-container,
+.file-container {
+  box-shadow: 0px 1px 5px 0px #0000001F, 0px 2px 2px 0px #00000024, 0px 3px 1px -2px #00000033;
+  padding: 24px;
+  border: 1px solid $border-color;
+  background-color: #FFFFFF;
+}
+
+.file-container {
+  .label {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .value {
+    font-size: 14px;
+    line-height: 18px;
+    color: rgba(0, 0, 0, 0.88);
+    word-break: break-all;
+  }
+}
+
+.log-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 40px;
+}
+
+.dashed-card {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px dashed $border-color;
+  padding: 20px 24px;
+  font-size: 14px;
+
+  .custom-ol {
+    margin: 0px;
+    padding-left: 16px;
+    list-style: decimal;
+  }
+}
+
+.instructions-card {
+  gap: 12px;
+}
+
+.picker-card {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.sample-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.file-hints {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.file-picker-icon,
+.browse-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: auto;
+    opacity: 0.6;
+  }
+}
+
+.browse-link {
+  color: $primary-color;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.error-msg {
+  color: $error-color;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.empty-logs {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+@media screen and (max-width: 1024px) {
+  .log-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 641px) {
+  .upload-cards {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .log-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

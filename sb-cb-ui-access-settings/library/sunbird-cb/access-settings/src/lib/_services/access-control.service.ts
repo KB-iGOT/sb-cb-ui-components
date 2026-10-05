@@ -118,6 +118,23 @@ export class AccessControlService {
     return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
   }
 
+  fetchAllOrgCount(): Observable<any> {
+    const request = {
+      request: {
+        criteriaKey: "rootOrgId",
+        criteriaValue: [],
+        filters: {
+          status: 1,
+        },
+        fields: ["channel", "identifier", "iscca"],
+        query: "",
+        limit: 0,
+        offset: 0,
+      },
+    };
+    return this.http.post<any>(ENDPOINTS.SEARCH_ORG, request);
+  }
+
   fetchOrgHierarchyFramework(frameworkId: string): Observable<any> {
     return this.http.get<any>(ENDPOINTS.ORG_HIERARCHY_FRAMEWORK(frameworkId));
   }
@@ -208,11 +225,16 @@ export class AccessControlService {
       return org?.orgName || org?.channel || "";
     }
 
-    if ((org?.ministryOrStateType || "").toLowerCase() !== "state") {
+    // An L1 -> Ln organisation is under a state when it says so itself, or when the L0 it is
+    // mapped to is a state - the org apis do not always carry ministryOrStateType below the L0
+    const parentOrganisation = this.parentOrganisation();
+    const isUnderState =
+      (org?.ministryOrStateType || "").toLowerCase() === "state" ||
+      (parentOrganisation?.sbOrgType || "").toLowerCase() === "state";
+    if (!isUnderState) {
       return "";
     }
 
-    const parentOrganisation = this.parentOrganisation();
     return (
       org?.ministryOrStateName ||
       org?.ministryorstatename ||

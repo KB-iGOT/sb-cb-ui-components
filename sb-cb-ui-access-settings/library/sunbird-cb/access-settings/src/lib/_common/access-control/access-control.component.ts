@@ -18,7 +18,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
-import { MINISTRY_OR_STATE_CRITERIA_KEY } from "../../_constants/app.constants";
+import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_CRITERIA_KEY } from "../../_constants/app.constants";
 
 @Component({
     selector: "sb-uic-access-control",
@@ -76,6 +76,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   // from its own org hierarchy framework. Stays false when the framework is not created.
   canSelectOrgHierarchy = false;
   mdoContent: any;
+  savedUserGroupConditions = new Map<string, string>();
 
   constructor(
     private dialog: MatDialog,
@@ -1206,6 +1207,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
    * available for the logged in user (a non L0 MDO opening the content).
    */
   private getMinistryOrStateSelections(criteriaValue: any): string[] {
+    // The L0 that saved it reopens it as its "Select all" option
+    if (!this.isCCA && this.canSelectOrgHierarchy && this.accessControlService.isL0MdoUser(this.config)) {
+      return [ALL_ORGANISATIONS_SELECTION];
+    }
     const hierarchyOrgIds = this.accessControlService.getOrgHierarchyOrgIds();
     if (hierarchyOrgIds.length) {
       return hierarchyOrgIds;
@@ -1224,6 +1229,18 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   private createOrganisationCriteria(selections: string[]): { criteriaKey: string; criteriaValue: string[] } {
     const isL0 = this.accessControlService.isL0MdoUser(this.config);
+    // "Select all" on MDO: a L0 saves its own ministry / state, a L1 -> L10 every organisation of
+    // its branch from the org hierarchy framework, a CCA an empty rootOrgId list
+    if (this.isAllOrganisationsSelection(selections)) {
+      const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
+      if (!this.isCCA && isL0 && this.canSelectOrgHierarchy && ministryOrStateId) {
+        return { criteriaKey: MINISTRY_OR_STATE_CRITERIA_KEY, criteriaValue: [ministryOrStateId] };
+      }
+      if (!this.isCCA && this.canSelectOrgHierarchy) {
+        return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: this.accessControlService.getOrgHierarchyOrgIds() };
+      }
+      return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: [] };
+    }
     if (isL0 && this.canSelectOrgHierarchy && this.accessControlService.areAllOrgHierarchyOrgsSelected(selections)) {
       const ministryOrStateId = this.accessControlService.getLoggedInOrgId(this.config);
       if (ministryOrStateId) {
@@ -1231,6 +1248,40 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }
     return { criteriaKey: NsAccessControlConfig.SelectionType.Organizations, criteriaValue: selections };
+  }
+
+  /** A saved rootOrgId list naming every organisation of the branch of a L1 -> L10, i.e its "Select all". */
+  private isSavedBranchSelectAll(criteriaKey: string, criteriaValue: any): boolean {
+    return (
+      !this.isCCA &&
+      this.canSelectOrgHierarchy &&
+      criteriaKey === NsAccessControlConfig.SelectionType.Organizations &&
+      Array.isArray(criteriaValue) &&
+      criteriaValue.length > 0 &&
+      !this.accessControlService.isL0MdoUser(this.config) &&
+      this.accessControlService.areAllOrgHierarchyOrgsSelected(criteriaValue)
+    );
+  }
+
+  /** Organisation condition selections holding the MDO "Select all" option. */
+  isAllOrganisationsSelection(selections: any): boolean {
+    return (
+      this.config?.application === this.MDO_APPLICATION &&
+      Array.isArray(selections) &&
+      selections.includes(ALL_ORGANISATIONS_SELECTION)
+    );
+  }
+
+  /**
+   * A saved rootOrgId criteria with no organisation in it is the MDO "Select all" option. It is saved
+   * as an empty list, a value that comes back without the list at all is read the same way.
+   */
+  private isSavedAllOrganisationsCriteria(criteriaKey: string, criteriaValue: any): boolean {
+    return (
+      this.config?.application === this.MDO_APPLICATION &&
+      criteriaKey === NsAccessControlConfig.SelectionType.Organizations &&
+      (criteriaValue === null || criteriaValue === undefined || (Array.isArray(criteriaValue) && criteriaValue.length === 0))
+    );
   }
 
   /**
@@ -1814,6 +1865,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const conditions = group.get("conditions") as FormArray;
     const request: { [key: string]: any } = {};
+    let hasAllOrganisations = false;
 
     for (let j = 0; j < conditions.length; j++) {
       const condition = conditions.at(j);
@@ -1832,6 +1884,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           if (selections.length && typeof selections[0] === "boolean") {
             request[key] = selections[0];
           }
+        }
+        else if (this.isAllOrganisationsSelection(selections)) {
+          hasAllOrganisations = true;
+          // Every organisation: a CCA counts across all of them, any other MDO across the
+          // organisations of its hierarchy, which are the ones it could have picked
+          request[key] = this.isCCA ? [] : this.accessControlService.getOrgHierarchyOrgIds();
         }
         else {
           request[key] = selections;
@@ -1865,7 +1923,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const filters: any = { ...request };
-    if (Object.keys(filters).length > 0) {
+    // Every organisation picked by a CCA leaves no filter, the count is still read across all of them
+    if (Object.keys(filters).length > 0 || hasAllOrganisations) {
       filters.status = 1;
     } else {
       delete filters.status;
@@ -2179,6 +2238,18 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         let isCustomFieldCrieteriaKeyPresent = false
         const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
+        if (
+          this.isSavedAllOrganisationsCriteria(criteria.criteriaKey, criteria.criteriaValue) ||
+          this.isSavedBranchSelectAll(criteria.criteriaKey, criteria.criteriaValue)
+        ) {
+          condition.patchValue({
+            entity: NsAccessControlConfig.SelectionType.Organizations,
+            selections: [ALL_ORGANISATIONS_SELECTION],
+          });
+          conditions.push(condition);
+          return;
+        }
+
         // Whole ministry / state was saved, show every organisation of the hierarchy as selected
         if (criteria.criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
           condition.patchValue({
@@ -2256,6 +2327,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         });
 
         this.userGroup.push(ruleGroup);
+        this.markUserGroupConditionsSaved(this.userGroup.length - 1);
 
      //   if (
       //   (this.mdoContent?.status === "Live") &&
@@ -2375,6 +2447,28 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.userGroup?.at(userGroupIndex)?.get("savedUserGroupId")?.value || "";
   }
 
+  /** A saved group whose conditions are the same as when it was last saved, nothing to update. */
+  isSavedUserGroupUnchanged(userGroupIndex: number): boolean {
+    const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
+    return !!savedUserGroupId &&
+      this.savedUserGroupConditions.get(savedUserGroupId) === this.userGroupConditionsValue(userGroupIndex);
+  }
+
+  private userGroupConditionsValue(userGroupIndex: number): string {
+    const conditions = this.userGroup?.at(userGroupIndex)?.get("conditions")?.getRawValue() || [];
+    return JSON.stringify(conditions.map((condition: any) => ({
+      entity: condition?.entity,
+      selections: condition?.selections
+    })));
+  }
+
+  private markUserGroupConditionsSaved(userGroupIndex: number): void {
+    const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
+    if (savedUserGroupId) {
+      this.savedUserGroupConditions.set(savedUserGroupId, this.userGroupConditionsValue(userGroupIndex));
+    }
+  }
+
   saveReusableUserGroups(userGroupIndex: number = 0): void {
     const rawGroup = this.accessControlForm.getRawValue()?.userGroup?.[userGroupIndex];
     if (!rawGroup) {
@@ -2382,6 +2476,29 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     }
     const savedUserGroupId = this.savedUserGroupIdAt(userGroupIndex);
 
+    if (!savedUserGroupId) {
+      this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+      return;
+    }
+
+    if(this.mdoContent?.status?.toLowerCase() === 'live') {
+      const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: "470px",
+        data: { type: "confirm-update-reusable-group" }
+      });
+  
+      confirmDialogRef.afterClosed().subscribe(result => {
+        if (result?.action === NsAccessControlConfig.IActions.Confirm) {
+          this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+        }
+      });
+    } else {
+      this.openSaveUserGroupDialog(rawGroup, userGroupIndex, savedUserGroupId);
+    }
+  }
+
+  /** Asks for the group name, then saves the group as a new reusable group or updates the saved one. */
+  private openSaveUserGroupDialog(rawGroup: any, userGroupIndex: number, savedUserGroupId: string): void {
     const dialogRef = this.dialog.open(SaveUserGroupComponent, {
       width: "480px",
       data: { userGroupName: rawGroup.name },
@@ -2440,6 +2557,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         next: response => {
           if (response?.result) {
             this.keepSavedUserGroupId(response.result?.usergroupid, userGroupIndex);
+            this.markUserGroupConditionsSaved(userGroupIndex);
             this.accessControlData.emit({
               userGroup: response.result.accessControl?.userGroups,
               accessType: this.accessType,
@@ -2468,6 +2586,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
         next: response => {
           if (response?.result) {
             this.keepSavedUserGroupId(response.result?.usergroupid, userGroupIndex);
+            this.markUserGroupConditionsSaved(userGroupIndex);
             this.accessControlData.emit({
               userGroup: response.result.accessControl?.userGroups,
               accessType: this.accessType,
@@ -2556,7 +2675,9 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     criteria.forEach((entry: any) => {
       const { criteriaKey, criteriaValue } = this.toCriteriaPair(entry);
-      if (!criteriaKey || !criteriaValue?.length) {
+      const isAllOrganisations =
+        this.isSavedAllOrganisationsCriteria(criteriaKey, criteriaValue) || this.isSavedBranchSelectAll(criteriaKey, criteriaValue);
+      if (!criteriaKey || (!criteriaValue?.length && !isAllOrganisations)) {
         return;
       }
 
@@ -2569,7 +2690,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
       const condition = this.createConditionGroup(uuidv4(), this.userGroup.length);
 
-      if (criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
+      if (isAllOrganisations) {
+        condition.patchValue({
+          entity: NsAccessControlConfig.SelectionType.Organizations,
+          selections: [ALL_ORGANISATIONS_SELECTION]
+        });
+      } else if (criteriaKey === MINISTRY_OR_STATE_CRITERIA_KEY) {
         condition.patchValue({
           entity: NsAccessControlConfig.SelectionType.Organizations,
           selections: this.getMinistryOrStateSelections(criteriaValue)
@@ -2600,6 +2726,7 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     );
 
     const userGroupIndex = this.userGroup.length - 1;
+    this.markUserGroupConditionsSaved(userGroupIndex);
     this.processDisableAddConditionOnClose(userGroupIndex);
     this.calculateUserCountForUserGroup(userGroupIndex);
     return true;

@@ -473,14 +473,36 @@
                       srcset="">
                   </span>
                 </div>
-                <div class="flex items-center"
-                  *ngIf="cbPlanEndDate && tocConfig?.uiVisibility?.banner?.dueDate !== false">
-                  <div class="flex items-center due-tag text-xs leading-3"
-                    [ngClass]="{'due-warning': cbPlanDuration === nsCardContentData.UPCOMING, 'due-overdue': cbPlanDuration === nsCardContentData.OVERDUE, 'due-success': cbPlanDuration === nsCardContentData.SUCCESS}">
-                    {{ 'common.dueBy' | translate }} - &nbsp;<span class="font-bold">
-                      {{ cbPlanEndDate | date: 'dMMM,y'}}</span>
+                @if (isComprehensiveAssessment && caPlanEndDate && tocConfig?.uiVisibility?.banner?.dueDate !== false) {
+                  <div class="flex items-center">
+                    <div
+                      class="flex items-center due-tag text-xs leading-3"
+                      [ngClass]="{
+                        'due-warning': caPlanDuration === nsCardContentData.UPCOMING,
+                        'due-overdue': caPlanDuration === nsCardContentData.OVERDUE,
+                        'due-success': caPlanDuration === nsCardContentData.SUCCESS,
+                      }"
+                    >
+                      @if (isCaOverdue) {
+                        <span class="font-bold">Overdue</span>&nbsp;-&nbsp;
+                      }
+                      {{ "common.dueBy" | translate }} - &nbsp;<span class="font-bold"> {{ caPlanEndDate | date: "d MMM, y" }}</span>
+                    </div>
                   </div>
-                </div>
+                } @else if (!isComprehensiveAssessment && cbPlanEndDate && tocConfig?.uiVisibility?.banner?.dueDate !== false) {
+                  <div class="flex items-center">
+                    <div
+                      class="flex items-center due-tag text-xs leading-3"
+                      [ngClass]="{
+                        'due-warning': cbPlanDuration === nsCardContentData.UPCOMING,
+                        'due-overdue': cbPlanDuration === nsCardContentData.OVERDUE,
+                        'due-success': cbPlanDuration === nsCardContentData.SUCCESS,
+                      }"
+                    >
+                      {{ "common.dueBy" | translate }} - &nbsp;<span class="font-bold"> {{ cbPlanEndDate | date: "d MMM, y" }}</span>
+                    </div>
+                  </div>
+                }
               </div>
             </ng-container>
             <ng-container
@@ -495,7 +517,7 @@
                 *ngIf="canShare && tocConfig?.uiVisibility?.banner?.shareButton !== false">
                 <mat-icon class="nodtranslate" (click)="onClickOfShare()">share</mat-icon>
               </div>
-              <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') && !forPreview">
+              <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course' || isComprehensiveAssessment) && !forPreview">
                 <ng-container *ngIf="canUnenroll">
                   <div class="hideAbove1200">
                     <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
@@ -713,7 +735,7 @@
                       <mat-icon class="nodtranslate">share</mat-icon>
                       <div>{{ 'apptocsinglepage.share' | translate }}</div>
                     </div>
-                    <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') && !forPreview">
+                    <ng-container *ngIf="(contentReadData?.courseCategory === 'Course' || contentReadData?.courseCategory === 'Multilingual Course') || isComprehensiveAssessment && !forPreview">
                       <ng-container *ngIf="canUnenroll">
                         <button *ngIf="!forPreview" mat-icon-button [matMenuTriggerFor]="moreOptionsMenu" class="toc-more-menu-btn"
                           aria-label="More options">
@@ -914,7 +936,7 @@
                 </ng-container>
               </div>
 
-              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false">
+              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false && !isComprehensiveAssessment">
                 <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
                   [content]="content" [baseContentReadData]="baseContentReadData"
                   [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"></ws-widget-karma-points>
@@ -948,7 +970,7 @@
             </ng-container>
 
             <ng-container *ngIf="!skeletonLoader && tocConfig?.uiVisibility?.rightPanel?.kpiValues?.visible !== false">
-              <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure"
+              <ws-widget-toc-kpi-values [content]="content" [tocStructure]="tocStructure" [isComprehensiveAssessment]="isComprehensiveAssessment"
                 [showInstructorLedMsg]="showInstructorLedMsg" [contentReadData]="contentReadData"
                 [languageList]="languageList" [config]="tocConfig"></ws-widget-toc-kpi-values>
             </ng-container>
