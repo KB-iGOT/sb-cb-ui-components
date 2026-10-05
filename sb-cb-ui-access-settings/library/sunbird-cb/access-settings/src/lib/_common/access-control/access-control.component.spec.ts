@@ -425,6 +425,58 @@ describe('AccessControlComponent', () => {
         });
       });
 
+      describe('org custom fields', () => {
+        const addGroupWithConditions = (conditions: { entity: string; selections: any }[]) => {
+          component.userGroup.push(
+            fb.group({
+              id: ['group-1'],
+              savedUserGroupId: [''],
+              name: ['User Group 1'],
+              conditions: fb.array(
+                conditions.map((condition, index) =>
+                  fb.group({ id: [`c-${index}`], entity: [condition.entity], conditionType: ['is'], selections: [condition.selections] })
+                )
+              )
+            })
+          );
+        };
+
+        const countFilters = async (conditions: { entity: string; selections: any }[]) => {
+          accessControlService.isL0MdoUser.mockReturnValue(true);
+          addGroupWithConditions(conditions);
+          await component.calculateUserCountForUserGroup(0);
+          return accessControlService.validateUser.mock.calls[0][0].request.filters;
+        };
+
+        it('should not send orgCustomFields for a condition without an entity', async () => {
+          const filters = await countFilters([
+            { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+            { entity: '', selections: [] }
+          ]);
+
+          expect(filters).toEqual({ [MINISTRY_OR_STATE_FILTER_KEY]: ['own-org'], status: 1 });
+        });
+
+        it('should not send orgCustomFields for a custom field without selections', async () => {
+          const filters = await countFilters([
+            { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+            { entity: 'customFieldA', selections: [] }
+          ]);
+
+          expect(filters).not.toHaveProperty('orgCustomFields');
+        });
+
+        it('should send the filled custom fields only', async () => {
+          const filters = await countFilters([
+            { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+            { entity: 'customFieldA', selections: [{ fieldValue: 'value-1' }, 'value-2'] },
+            { entity: '', selections: [] }
+          ]);
+
+          expect(filters.orgCustomFields).toEqual({ customFieldA: ['value-1', 'value-2'] });
+        });
+      });
+
       it('should restrict the count to the own organisation when the hierarchy cannot be selected', async () => {
         component.canSelectOrgHierarchy = false;
         addGroup('', ['org-a']);

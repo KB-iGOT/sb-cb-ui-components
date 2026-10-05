@@ -1908,7 +1908,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           request[key] = selections;
         }
       } 
-      else {
+      // A condition with no entity picked yet, or nothing selected, is not a custom field filter
+      else if (entity && Array.isArray(selections) && selections.length) {
         if (!request.orgCustomFields) {
           request.orgCustomFields = {};
         }
