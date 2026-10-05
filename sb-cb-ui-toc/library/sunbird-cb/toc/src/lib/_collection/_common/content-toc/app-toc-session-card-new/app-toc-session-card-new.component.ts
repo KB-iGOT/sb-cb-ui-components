@@ -4,6 +4,7 @@ import { NsContent } from '@sunbird-cb/utils-v2'
 import { viewerRouteGenerator } from '../../../../_services/viewer-route-util'
 import { Router } from '@angular/router'
 import moment from 'moment'
+import { WidgetContentService } from '../../../../_services/widget-content.service'
 @Component({
     selector: 'ws-widget-app-toc-session-card-new',
     templateUrl: './app-toc-session-card-new.component.html',
@@ -38,9 +39,11 @@ export class AppTocSessionCardNewComponent implements OnInit {
   isAllowed = true
   viewChildren = true
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, public widgetContentService: WidgetContentService) { }
 
   ngOnInit() {
+    console.log('=====> session card data <========', this.session)
+    
   }
 
   redirectToPage() {
@@ -51,6 +54,14 @@ export class AppTocSessionCardNewComponent implements OnInit {
     // [routerLink]="(isAllowed && !forPreview && isEnabled) ? resourceLink.url : null"
     //       [queryParams]="(isAllowed && !forPreview && isEnabled)  ? resourceLink.queryParams : null"
 
+  }
+  redirectToSessionPageWithHtml(sessionContentDetail) {
+    if(sessionContentDetail) {
+      this.widgetContentService.sessionContentData.next({sessionContentDetail:sessionContentDetail})
+    } else {
+      this.widgetContentService.sessionContentData.next({})
+    }
+    
   }
   raiseTelemetry() { }
   public progressColor(): string {
@@ -66,6 +77,7 @@ export class AppTocSessionCardNewComponent implements OnInit {
     return false
   }
   get isResource(): boolean {
+    console.log(this.content, '=====> content card isResource <========')
     if (this.content) {
       return (
         this.content.primaryCategory === NsContent.EPrimaryCategory.OFFLINE_SESSION
