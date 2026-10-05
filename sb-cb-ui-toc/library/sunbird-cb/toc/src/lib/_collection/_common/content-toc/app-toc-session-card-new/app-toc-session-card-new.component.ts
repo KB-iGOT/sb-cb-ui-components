@@ -42,7 +42,6 @@ export class AppTocSessionCardNewComponent implements OnInit {
   constructor(private router: Router, public widgetContentService: WidgetContentService) { }
 
   ngOnInit() {
-    console.log('=====> session card data <========', this.session)
     
   }
 
@@ -77,7 +76,6 @@ export class AppTocSessionCardNewComponent implements OnInit {
     return false
   }
   get isResource(): boolean {
-    console.log(this.content, '=====> content card isResource <========')
     if (this.content) {
       return (
         this.content.primaryCategory === NsContent.EPrimaryCategory.OFFLINE_SESSION
