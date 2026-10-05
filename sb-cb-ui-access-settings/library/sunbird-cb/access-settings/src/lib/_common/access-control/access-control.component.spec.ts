@@ -365,6 +365,66 @@ describe('AccessControlComponent', () => {
         expect(filters).toEqual({ rootOrgId: ['l1-org'], status: 1 });
       });
 
+      describe('with service and central deputation', () => {
+        const addGroupWithDeputation = (deputation: any) => {
+          component.userGroup.push(
+            fb.group({
+              id: ['group-1'],
+              savedUserGroupId: [''],
+              name: ['User Group 1'],
+              conditions: fb.array([
+                fb.group({ id: ['c-1'], entity: [NsAccessControlConfig.SelectionType.Organizations], conditionType: ['is'], selections: [[ALL_ORGANISATIONS_SELECTION]] }),
+                fb.group({ id: ['c-2'], entity: [NsAccessControlConfig.SelectionType.Service], conditionType: ['is'], selections: [['indian administrative service (ias)']] }),
+                fb.group({ id: ['c-3'], entity: [NsAccessControlConfig.SelectionType.CentralDeputation], conditionType: ['is'], selections: [deputation] })
+              ])
+            })
+          );
+        };
+
+        const countFilters = async (deputation: any) => {
+          accessControlService.isL0MdoUser.mockReturnValue(true);
+          addGroupWithDeputation(deputation);
+          await component.calculateUserCountForUserGroup(0);
+          return accessControlService.validateUser.mock.calls[0][0].request.filters;
+        };
+
+        it('should send a boolean central deputation beside the ministry / state', async () => {
+          const filters = await countFilters([true]);
+
+          expect(filters).toEqual({
+            [MINISTRY_OR_STATE_FILTER_KEY]: ['own-org'],
+            'profileDetails.cadreDetails.civilServiceName': ['indian administrative service (ias)'],
+            'profileDetails.cadreDetails.isOnCentralDeputation': true,
+            status: 1
+          });
+        });
+
+        it('should convert a "true" string from a reopened group to a boolean', async () => {
+          const filters = await countFilters(['true']);
+
+          expect(filters['profileDetails.cadreDetails.isOnCentralDeputation']).toBe(true);
+          expect(filters[MINISTRY_OR_STATE_FILTER_KEY]).toEqual(['own-org']);
+        });
+
+        it('should convert a "false" string from a reopened group to a boolean', async () => {
+          const filters = await countFilters(['false']);
+
+          expect(filters['profileDetails.cadreDetails.isOnCentralDeputation']).toBe(false);
+        });
+
+        it('should accept a central deputation value not wrapped in an array', async () => {
+          const filters = await countFilters(true);
+
+          expect(filters['profileDetails.cadreDetails.isOnCentralDeputation']).toBe(true);
+        });
+
+        it('should leave the flag out for an unrecognised value', async () => {
+          const filters = await countFilters(['yes']);
+
+          expect(filters).not.toHaveProperty('profileDetails.cadreDetails.isOnCentralDeputation');
+        });
+      });
+
       it('should restrict the count to the own organisation when the hierarchy cannot be selected', async () => {
         component.canSelectOrgHierarchy = false;
         addGroup('', ['org-a']);

@@ -1890,8 +1890,12 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
           const userIds = selections && selections.map((user: any) => user?.userId);
           request[key] = userIds;
         } else if (entity === NsAccessControlConfig.SelectionType.CentralDeputation) {
-          if (selections.length && typeof selections[0] === "boolean") {
-            request[key] = selections[0];
+          // A saved group reopened for edit can hold the flag as a string ("true"/"false")
+          const centralDeputation = Array.isArray(selections) ? selections[0] : selections;
+          if (typeof centralDeputation === "boolean") {
+            request[key] = centralDeputation;
+          } else if (centralDeputation === "true" || centralDeputation === "false") {
+            request[key] = centralDeputation === "true";
           }
         }
         else if (this.isAllOrganisationsSelection(selections)) {

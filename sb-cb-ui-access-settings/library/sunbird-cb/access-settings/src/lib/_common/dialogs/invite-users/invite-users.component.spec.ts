@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 
 import { InviteUsersComponent } from './invite-users.component';
 import { NsAccessControlConfig } from '../../../_models/access-control.model';
+import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_FILTER_KEY } from '../../../_constants/app.constants';
 
 describe('InviteUsersComponent', () => {
   let component: InviteUsersComponent;
@@ -37,7 +38,11 @@ describe('InviteUsersComponent', () => {
     };
     accessControlService = {
       accessControlConfig: jest.fn(() => config),
-      fetchUserList: jest.fn(() => of({ result: { response: { content: [], count: 0 } } }))
+      fetchUserList: jest.fn(() => of({ result: { response: { content: [], count: 0 } } })),
+      getOrgHierarchyOrgIds: jest.fn(() => []),
+      isL0MdoUser: jest.fn(() => false),
+      getLoggedInOrgId: jest.fn(() => 'own-org'),
+      areAllOrgHierarchyOrgsSelected: jest.fn(() => false)
     };
     component = createComponent();
   });
@@ -157,6 +162,93 @@ describe('InviteUsersComponent', () => {
 
       expect(filters.rootOrgId).toEqual(['own-org']);
       expect(filters.status).toBe(1);
+    });
+
+    const serviceAndDeputation = [
+      { entity: NsAccessControlConfig.SelectionType.Service, selections: ['indian administrative service (ias)'] },
+      { entity: NsAccessControlConfig.SelectionType.CentralDeputation, selections: [true] }
+    ];
+
+    it('should never send the "Select all" placeholder as an organisation id', () => {
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+        ...serviceAndDeputation
+      ]);
+
+      expect(filters.rootOrgId ?? []).not.toContain(ALL_ORGANISATIONS_SELECTION);
+    });
+
+    it('should search the whole ministry / state when a L0 selected all organisations', () => {
+      accessControlService.getOrgHierarchyOrgIds.mockReturnValue(['own-org', 'l1-org']);
+      accessControlService.isL0MdoUser.mockReturnValue(true);
+
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+        ...serviceAndDeputation
+      ]);
+
+      expect(filters[MINISTRY_OR_STATE_FILTER_KEY]).toEqual(['own-org']);
+      expect(filters.rootOrgId).toBeUndefined();
+      expect(filters[CENTRAL_DEPUTATION_KEY]).toBe(true);
+      expect(filters['profileDetails.cadreDetails.civilServiceName']).toEqual(['indian administrative service (ias)']);
+    });
+
+    it('should search the whole ministry / state when a L0 picked every organisation of its hierarchy', () => {
+      accessControlService.getOrgHierarchyOrgIds.mockReturnValue(['own-org', 'l1-org']);
+      accessControlService.isL0MdoUser.mockReturnValue(true);
+      accessControlService.areAllOrgHierarchyOrgsSelected.mockReturnValue(true);
+
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: ['own-org', 'l1-org'] }
+      ]);
+
+      expect(filters[MINISTRY_OR_STATE_FILTER_KEY]).toEqual(['own-org']);
+      expect(filters.rootOrgId).toBeUndefined();
+    });
+
+    it('should search every organisation of the branch when a L1 -> L10 selected all organisations', () => {
+      accessControlService.getOrgHierarchyOrgIds.mockReturnValue(['l1-org', 'l2-org']);
+
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+        ...serviceAndDeputation
+      ]);
+
+      expect(filters.rootOrgId).toEqual(['l1-org', 'l2-org']);
+      expect(filters).not.toHaveProperty(MINISTRY_OR_STATE_FILTER_KEY);
+    });
+
+    it('should fall back to the own organisation when "Select all" has no hierarchy to expand', () => {
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] }
+      ]);
+
+      expect(filters.rootOrgId).toEqual(['own-org']);
+    });
+
+    it('should search across every organisation when a CCA selected all of them', () => {
+      config.userConfig.org.isCCA = true;
+
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: [ALL_ORGANISATIONS_SELECTION] },
+        ...serviceAndDeputation
+      ]);
+
+      expect(filters.rootOrgId).toBeUndefined();
+      expect(filters).not.toHaveProperty(MINISTRY_OR_STATE_FILTER_KEY);
+      expect(filters[CENTRAL_DEPUTATION_KEY]).toBe(true);
+    });
+
+    it('should keep a L0 partial selection as the picked organisations', () => {
+      accessControlService.getOrgHierarchyOrgIds.mockReturnValue(['own-org', 'l1-org']);
+      accessControlService.isL0MdoUser.mockReturnValue(true);
+
+      const filters = searchWithConditions([
+        { entity: NsAccessControlConfig.SelectionType.Organizations, selections: ['l1-org'] }
+      ]);
+
+      expect(filters.rootOrgId).toEqual(['l1-org']);
+      expect(filters).not.toHaveProperty(MINISTRY_OR_STATE_FILTER_KEY);
     });
   });
 });
