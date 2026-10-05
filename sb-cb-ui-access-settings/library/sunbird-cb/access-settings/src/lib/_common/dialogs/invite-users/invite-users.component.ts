@@ -81,6 +81,7 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
       NsAccessControlConfig.SelectionType.Cadre,
       NsAccessControlConfig.SelectionType.Service,
       NsAccessControlConfig.SelectionType.Batch,
+      NsAccessControlConfig.SelectionType.CentralDeputation,
     ];
 
     if (this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.MDO) {
@@ -117,8 +118,18 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
         status: 1,
       };
 
+      const centralDeputationSelections = reducedData[NsAccessControlConfig.SelectionType.CentralDeputation];
+      const centralDeputation = Array.isArray(centralDeputationSelections) ? centralDeputationSelections[0] : centralDeputationSelections;
+      if (typeof centralDeputation === "boolean") {
+        this.filters["profileDetails.cadreDetails.isOnCentralDeputation"] = centralDeputation;
+      } else if (centralDeputation === "true" || centralDeputation === "false") {
+        this.filters["profileDetails.cadreDetails.isOnCentralDeputation"] = centralDeputation === "true";
+      }
+
       Object.keys(reducedData).forEach((key: any) => {
-        if (!pickEntity.includes(key) && key !== "user") {
+        const value = reducedData[key];
+        const hasValue = Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== "";
+        if (key && hasValue && !pickEntity.includes(key) && key !== "user") {
           if (!this.filters.orgCustomFields) {
              this.filters.orgCustomFields = {};
           }
