@@ -3,7 +3,7 @@ import { of } from 'rxjs';
 
 import { AccessControlComponent } from './access-control.component';
 import { NsAccessControlConfig } from '../../_models/access-control.model';
-import { ALL_ORGANISATIONS_SELECTION } from '../../_constants/app.constants';
+import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_FILTER_KEY } from '../../_constants/app.constants';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { SaveUserGroupComponent } from '../dialogs/save-user-group/save-user-group.component';
 
@@ -306,6 +306,74 @@ describe('AccessControlComponent', () => {
         request: { filters: { status: 1 }, fields: ['identifier', 'rootOrgId', 'firstName'] }
       });
       expect(component.userCount[0]).toBe(12);
+    });
+
+    describe('for a non CCA MDO', () => {
+      beforeEach(() => {
+        component.isCCA = false;
+        component.canSelectOrgHierarchy = true;
+        component.config.userConfig.org = { isCCA: false, rootOrgId: 'own-org' } as any;
+        accessControlService.accessControlConfig = jest.fn(() => component.config);
+        accessControlService.validateUser = jest.fn(() => of({ result: { response: { count: 7 } } }));
+        accessControlService.getOrgHierarchyOrgIds = jest.fn(() => ['l1-org', 'l2-org']);
+      });
+
+      it('should count the whole ministry / state when a L0 selected all organisations', async () => {
+        accessControlService.isL0MdoUser.mockReturnValue(true);
+        addGroup('', [ALL_ORGANISATIONS_SELECTION]);
+
+        await component.calculateUserCountForUserGroup(0);
+
+        expect(accessControlService.validateUser).toHaveBeenCalledWith({
+          request: {
+            filters: { [MINISTRY_OR_STATE_FILTER_KEY]: ['own-org'], status: 1 },
+            fields: ['identifier', 'rootOrgId', 'firstName']
+          }
+        });
+        expect(component.userCount[0]).toBe(7);
+      });
+
+      it('should count the whole ministry / state when a L0 picked every organisation of its hierarchy', async () => {
+        accessControlService.isL0MdoUser.mockReturnValue(true);
+        accessControlService.areAllOrgHierarchyOrgsSelected.mockReturnValue(true);
+        addGroup('', ['l1-org', 'l2-org']);
+
+        await component.calculateUserCountForUserGroup(0);
+
+        const filters = accessControlService.validateUser.mock.calls[0][0].request.filters;
+        expect(filters).toEqual({ [MINISTRY_OR_STATE_FILTER_KEY]: ['own-org'], status: 1 });
+        expect(filters).not.toHaveProperty('rootOrgId');
+      });
+
+      it('should count every organisation of the branch when a L1 -> L10 selected all organisations', async () => {
+        addGroup('', [ALL_ORGANISATIONS_SELECTION]);
+
+        await component.calculateUserCountForUserGroup(0);
+
+        const filters = accessControlService.validateUser.mock.calls[0][0].request.filters;
+        expect(filters).toEqual({ rootOrgId: ['l1-org', 'l2-org'], status: 1 });
+        expect(filters).not.toHaveProperty(MINISTRY_OR_STATE_FILTER_KEY);
+      });
+
+      it('should count the picked organisations of a L0 partial selection', async () => {
+        accessControlService.isL0MdoUser.mockReturnValue(true);
+        addGroup('', ['l1-org']);
+
+        await component.calculateUserCountForUserGroup(0);
+
+        const filters = accessControlService.validateUser.mock.calls[0][0].request.filters;
+        expect(filters).toEqual({ rootOrgId: ['l1-org'], status: 1 });
+      });
+
+      it('should restrict the count to the own organisation when the hierarchy cannot be selected', async () => {
+        component.canSelectOrgHierarchy = false;
+        addGroup('', ['org-a']);
+
+        await component.calculateUserCountForUserGroup(0);
+
+        const filters = accessControlService.validateUser.mock.calls[0][0].request.filters;
+        expect(filters).toEqual({ rootOrgId: ['own-org'], status: 1 });
+      });
     });
   });
 
