@@ -281,9 +281,11 @@ export class TelemetryService {
         pageid: page.pageid, // Required. Unique page id
         type: page.pageUrlParts[0], // Required. Impression type (list, detail, view, edit, workflow, search)
         uri: page.pageUrl,
+        // Optional per-call override, e.g. { type: 'page' } for a route whose default segment-derived type is wrong.
+        ...(data && data.edata),
       }
       if (page.objectId) {
-        const config = {
+        const config: any = {
           context: {
             pdata: {
               ...this.pData,
@@ -301,9 +303,12 @@ export class TelemetryService {
         if (!page.objectId || !objectType) {
           config.object = {}
         }
+        if (data && data.tags) {
+          config.tags = data.tags
+        }
         $t.impression(edata, config)
       } else {
-        $t.impression(edata, {
+        const config: any = {
           context: {
             pdata: {
               ...this.pData,
@@ -314,12 +319,53 @@ export class TelemetryService {
           object: {
             ...(data && data.object),
           },
-        })
+        }
+        if (data && data.tags) {
+          config.tags = data.tags
+        }
+        $t.impression(edata, config)
       }
       this.previousUrl = page.pageUrl
     } catch (e) {
       // tslint:disable-next-line: no-console
       console.log('Error in telemetry impression', e)
+    }
+  }
+
+  // Raises an INTERACT event with an explicit env/tags, bypassing the EventService pub/sub
+  // pipeline (addInteractListener), whose env resolution only honors route-default context and
+  // silently drops a caller-supplied pageContext override. Used where a call site needs full
+  // control over context.env without affecting raiseInteractTelemetry's existing behavior.
+  raiseInteractWithEnv(
+    edata: { type: string; subType?: string; id?: string; pageid?: string; target?: string },
+    object: any,
+    env: string,
+    tags: string[] = [],
+  ) {
+    try {
+      $t.interact(
+        {
+          type: edata.type,
+          subtype: edata.subType,
+          id: edata.id || '',
+          pageid: edata.pageid,
+          ...(edata.target && { target: edata.target }),
+        },
+        {
+          context: {
+            pdata: {
+              ...this.pData,
+              id: this.pData && this.pData.id,
+            },
+            env,
+          },
+          object: { ...object },
+          tags,
+        },
+      )
+    } catch (e) {
+      // tslint:disable-next-line: no-console
+      console.log('Error in telemetry interact', e)
     }
   }
 
