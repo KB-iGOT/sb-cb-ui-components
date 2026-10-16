@@ -2453,6 +2453,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           "toolTipText": "lpCompleteTip"
         }
       ]
+    } else if (this.contentReadData?.courseCategory === NsContent.ECourseCategory.CURATED_PROGRAM) {
+      this.kparray = this.tocConfig.karmaPointsCP || [
+        {
+          "displayButton": "Resume",
+          "textBeforeIcon": "earn",
+          "points": "10",
+          "textAfterPoints": "karmaPoints",
+          "textAfterIcon": "byCompletingCP",
+          "toolTipText": "cpCompleteTip"
+        }
+      ]
     } else {
       this.kparray = this.tocConfig.karmaPoints || []
 

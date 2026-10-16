@@ -288,10 +288,10 @@ describe('AppTocHomeV2Component', () => {
       expect(load('Learning Pathway', { karmaPoints: FORM_KARMA_POINTS, karmaPointsLP }).kparray).toEqual(karmaPointsLP)
     })
 
-    it('swaps the course completion entry for a 10 point curated program one', () => {
+    it('gives a curated program a 10 point completion entry', () => {
       const component = load('Curated Program')
 
-      expect(entries(component, 'Resume')).toEqual([{
+      expect(component.kparray).toEqual([{
         displayButton: 'Resume',
         textBeforeIcon: 'earn',
         points: '10',
@@ -299,12 +299,6 @@ describe('AppTocHomeV2Component', () => {
         textAfterIcon: 'byCompletingCP',
         toolTipText: 'cpCompleteTip',
       }])
-    })
-
-    it('keeps the other form entries for a curated program and adds the APAR one', () => {
-      const buttons = load('Curated Program').kparray.map((kp: any) => kp.displayButton)
-
-      expect(buttons).toEqual(['Enroll', 'ACBP', 'ACBP CLAIM', 'Resume', 'APAR'])
     })
 
     it('uses the curated program list from the form when there is one', () => {
